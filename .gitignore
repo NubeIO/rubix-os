@@ -1,0 +1,12 @@
+vendor/
+.idea/
+build/
+certs/
+build/
+licenses/
+coverage.txt
+*/node_modules/
+**/*-packr.go
+config.yml
+data/
+images/
