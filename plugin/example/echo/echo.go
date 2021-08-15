@@ -3,11 +3,29 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/NubeDev/plug-framework/model"
 	"github.com/NubeDev/plug-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
+	"github.com/simonvetter/modbus"
 	"log"
 	"net/url"
+	"time"
 )
+
+
+var (
+ 	client  *modbus.ModbusClient
+	err      error
+)
+
+
+
+func startServer() {
+	client, err = modbus.NewClient(&modbus.ClientConfiguration{
+		URL:      "tcp://192.168.15.202:502",
+		Timeout:  1 * time.Second,
+	})
+}
 
 // GetGotifyPluginInfo returns gotify plugin info.
 func GetGotifyPluginInfo() plugin.Info {
@@ -62,14 +80,35 @@ func (c *EchoPlugin) ValidateAndSetConfig(config interface{}) error {
 // Enable enables the plugin.
 func (c *EchoPlugin) Enable() error {
 	log.Println("echo plugin enabled")
+	aaa := c.GetNetwork("b29697f853714a54")
+	log.Println("GetNetworks within echo", aaa)
+	log.Println("GetNetworks within echo", aaa)
+	networks, err := c.GetNetworks()
+	if err != nil {
+		log.Println("GetNetworks GetNetworks ERROR", 9999999, err)
+	}
+	log.Println("GetNetworks GetNetworks GetNetworks", 9999999,networks)
+	return nil
+}
+
+
+// GetNetworks disables the plugin.
+func (c *EchoPlugin) GetNetworks() ([]*model.Network, error) {
+	log.Println("echo plugin GetNetworks")
+	fmt.Println(999999, c.userCtx.ID, c.userCtx.Name)
+	return nil, nil
+}
+
+// GetNetwork disables the plugin.
+func (c *EchoPlugin) GetNetwork(id string) error {
+	log.Println("echo plugin GetNetworks")
+	fmt.Println(888888, c.userCtx.ID, c.userCtx.Name, c.userCtx.Admin)
 	return nil
 }
 
 // Disable disables the plugin.
 func (c *EchoPlugin) Disable() error {
 	log.Println("echo plugin disbled")
-	//name := c.userCtx.Name
-	//name := c.userCtx.ID
 	fmt.Println(33333, c.userCtx.ID, c.userCtx.Name, c.userCtx.Admin)
 	return nil
 }
@@ -82,6 +121,20 @@ func (c *EchoPlugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 		storage, _ := c.storageHandler.Load()
 		//storage
 		conf := new(Storage)
+		net, err := c.storageHandler.GetNet()
+		fmt.Println(net, 10101010101)
+		fmt.Println(net, 10101010101)
+		fmt.Println(net, 10101010101)
+		fmt.Println(net, 10101010101)
+		fmt.Println(net, 10101010101)
+		s, _ := json.MarshalIndent(net, "", "\t")
+		fmt.Print(string(s))
+
+		fmt.Println(net, 10101010101)
+		if err != nil {
+			fmt.Println(err, 90909090909090)
+			//return
+		}
 
 		json.Unmarshal(storage, conf)
 		conf.CalledTimes++
@@ -101,22 +154,29 @@ func (c *EchoPlugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 
 	g.GET("/echo2", func(ctx *gin.Context) {
 
-		storage, _ := c.storageHandler.Load()
-		conf := new(Storage)
-		json.Unmarshal(storage, conf)
-		conf.CalledTimes++
-		newStorage, _ := json.Marshal(conf)
-		c.storageHandler.Save(newStorage)
 
-		c.msgHandler.SendMessage(plugin.Message{
-			Title:    "Hello received 222",
-			Message:  fmt.Sprintf("echo server received a hello 2 2 message %d times", conf.CalledTimes),
-			Priority: 2,
-			Extras: map[string]interface{}{
-				"plugin::name": "echo2222",
-			},
-		})
-		ctx.Writer.WriteString(fmt.Sprintf("Magic 2 2 2 string is: %s\r\nEcho server running at %secho", c.config.MagicString, c.basePath))
+		if err != nil {
+			// error out if we failed to connect/open the device
+			// note: multiple Open() attempts can be made on the same client until
+			// the connection succeeds (i.e. err == nil), calling the constructor again
+			// is unnecessary.
+			// likewise, a client can be opened and closed as many times as needed.
+		}
+
+		// read a single 16-bit holding register at address 100
+		var reg16   uint16
+		reg16, err  = client.ReadRegister(0, modbus.HOLDING_REGISTER)
+		if err != nil {
+			// error out
+		} else {
+			// use value
+			fmt.Println("value: %v", reg16)          // as unsigned integer
+			fmt.Println("value: %v", float64(reg16)) // as signed integer
+			ctx.JSON(202, reg16)
+		}
+
+
+
 	})
 }
 
@@ -137,6 +197,12 @@ func (c *EchoPlugin) GetDisplay(location *url.URL) string {
 
 // NewGotifyPluginInstance creates a plugin instance for a user context.
 func NewGotifyPluginInstance(ctx plugin.UserContext) plugin.Plugin {
+	if client == nil {
+		startServer()
+		err = client.Open()
+	}
+
+
 	return &EchoPlugin{}
 }
 

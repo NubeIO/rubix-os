@@ -1,6 +1,7 @@
 package compat
 
 import (
+	"github.com/NubeDev/plug-framework/model"
 	"net/url"
 
 	papiv1 "github.com/NubeDev/plug-framework/plugin/plugin-api"
@@ -157,6 +158,19 @@ func (c *PluginV1MessageHandler) SendMessage(msg papiv1.Message) error {
 	})
 }
 
+// GetNetworks implements wrapper.Plugin.
+func (c *PluginV1Instance) GetNetworks() ([]*model.Network, error) {
+	net, err := c.instance.GetNetworks()
+	return net, err
+}
+
+
+// GetNetwork implements wrapper.Plugin.
+func (c *PluginV1Instance) GetNetwork(id string) error {
+	return c.instance.GetNetwork(id)
+}
+
+
 // Enable implements wrapper.Plugin.
 func (c *PluginV1Instance) Enable() error {
 	return c.instance.Enable()
@@ -180,4 +194,11 @@ func (c *PluginV1StorageHandler) Save(b []byte) error {
 // Load implements wrapper.Storager.
 func (c *PluginV1StorageHandler) Load() ([]byte, error) {
 	return c.WrapperHandler.Load()
+}
+
+
+// GetNet implements wrapper.Storager.
+func (c *PluginV1StorageHandler) GetNet() ([]*model.Network, error){
+	net, err := c.WrapperHandler.GetNet()
+	return net, err
 }

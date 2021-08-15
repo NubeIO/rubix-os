@@ -24,6 +24,8 @@ import (
 // The Database interface for encapsulating database access.
 type Database interface {
 	GetUsers() ([]*model.User, error)
+	GetNetworks() ([]*model.Network, error)
+	GetNetwork(id string) (*model.Network, error)
 	GetPluginConfByUserAndPath(userid uint, path string) (*model.PluginConf, error)
 	CreatePluginConf(p *model.PluginConf) error
 	GetPluginConfByApplicationID(appid uint) (*model.PluginConf, error)
@@ -130,6 +132,22 @@ func (m *Manager) SetPluginEnabled(pluginID uint, enabled bool) error {
 
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
+
+	//m.db.GetNetwork
+
+	n, err := m.db.GetNetwork("b29697f853714a54") //TODO testing
+	fmt.Println(n, 444444444)
+	if err != nil {
+		fmt.Println(err, 444444444555555)
+		//return err
+	}
+
+	nn, err := m.db.GetNetworks() //TODO testing
+	fmt.Println(nn, 77777777)
+	if err != nil {
+		fmt.Println(err, 777777775888888)
+		//return err
+	}
 
 	if enabled {
 		err = instance.Enable()

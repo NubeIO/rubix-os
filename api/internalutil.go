@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"github.com/NubeDev/plug-framework/model"
 	"math/bits"
 	"strconv"
 
@@ -14,4 +15,16 @@ func withID(ctx *gin.Context, name string, f func(id uint)) {
 	} else {
 		ctx.AbortWithError(400, errors.New("invalid id"))
 	}
+}
+
+
+
+func getBODY(ctx *gin.Context) (dto *model.Network, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func resolveID(ctx *gin.Context) string {
+	id := ctx.Param("uuid")
+	return id
 }

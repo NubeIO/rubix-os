@@ -73,6 +73,7 @@ func (d *GormDatabase) GetPluginConfByID(id uint) (*model.PluginConf, error) {
 }
 
 // UpdatePluginConf updates plugin configuration.
+
 func (d *GormDatabase) UpdatePluginConf(p *model.PluginConf) error {
 	return d.DB.Save(p).Error
 }

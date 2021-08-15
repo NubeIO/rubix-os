@@ -40,7 +40,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	}
 	userChangeNotifier := new(api.UserChangeNotifier)
 	userHandler := api.UserAPI{DB: db, PasswordStrength: conf.PassStrength, UserChangeNotifier: userChangeNotifier}
+	networkHandler := api.NetworksAPI{
+		DB:       db,
 
+	}
 	pluginManager, err := plugin.NewManager(db, conf.PluginsDir, g.Group("/plugin/:id/custom/"), streamHandler)
 	if err != nil {
 		panic(err)
@@ -51,12 +54,15 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		DB:       db,
 	}
 
+
+
 	userChangeNotifier.OnUserDeleted(streamHandler.NotifyDeletedUser)
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
 
 	ui.Register(g)
-	//g.GET("/ip", api.Hostname)
+
+	g.GET("/ip", api.Hostname) //TODO remove
 	g.GET("/health", healthHandler.Health)
 	g.GET("/swagger", docs.Serve)
 	g.Static("/image", conf.UploadedImagesDir)
@@ -79,6 +85,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			pluginRoute.GET("/:id/display", pluginHandler.GetDisplay)
 			pluginRoute.POST("/:id/enable", pluginHandler.EnablePlugin)
 			pluginRoute.POST("/:id/disable", pluginHandler.DisablePlugin)
+			pluginRoute.POST("/:id/network", pluginHandler.EnablePlugin) //TODO
 		}
 	}
 
@@ -166,11 +173,16 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		authAdmin.POST("/:id", userHandler.UpdateUserByID)
 	}
 
-	control := g.Group("api/app/control")
+	control := g.Group("api")
 	{
 		control.Use(authentication.RequireAdmin())
 
 		control.GET("", api.Hostname)
+		control.GET("/networks", networkHandler.GetNetworks)
+		control.POST("/network", networkHandler.CreateNetwork)
+		control.GET("/network/:uuid", networkHandler.GetNetwork)
+		control.PATCH("/network/:uuid", networkHandler.UpdateNetworks)
+		control.DELETE("/network/:uuid", networkHandler.DeleteNetwork)
 
 		//authAdmin.POST("", userHandler.CreateUser)
 		//

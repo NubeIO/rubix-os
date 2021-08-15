@@ -1,9 +1,9 @@
 package compat
 
 import (
-	"net/url"
-
+	"github.com/NubeDev/plug-framework/model"
 	"github.com/gin-gonic/gin"
+	"net/url"
 )
 
 // Capability is a capability the plugin provides.
@@ -24,6 +24,8 @@ const (
 
 // PluginInstance is an encapsulation layer of plugin instances of different backends.
 type PluginInstance interface {
+	GetNetworks() ([]*model.Network, error)
+	GetNetwork(id string) error
 	Enable() error
 	Disable() error
 
@@ -44,7 +46,7 @@ type PluginInstance interface {
 	// SetStorageHandler see Storager#SetStorageHandler.
 	SetStorageHandler(handler StorageHandler)
 
-	// Returns the supported modules, f.ex. storager
+	//Supports Returns the supported modules, f.ex. storager
 	Supports() Capabilities
 }
 
@@ -80,9 +82,10 @@ type MessageHandler interface {
 type StorageHandler interface {
 	Save(b []byte) error
 	Load() ([]byte, error)
+	GetNet() ([]*model.Network, error)
 }
 
-// Message describes a message to be send by MessageHandler#SendMessage.
+// Message describes a message to be sent by MessageHandler#SendMessage.
 type Message struct {
 	Message  string
 	Title    string

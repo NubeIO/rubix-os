@@ -11,6 +11,7 @@ require (
 	github.com/gotify/configor v1.0.2
 	github.com/gotify/location v0.0.0-20170722210143-03bc4ad20437
 	github.com/h2non/filetype v1.1.1
+	github.com/simonvetter/modbus v1.3.0 // indirect
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
 	gopkg.in/yaml.v2 v2.4.0

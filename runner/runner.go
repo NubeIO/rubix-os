@@ -45,7 +45,7 @@ func Run(router http.Handler, conf *config.Configuration) {
 		}()
 	}
 	addr := fmt.Sprintf("%s:%d", conf.Server.ListenAddr, conf.Server.Port)
-	fmt.Println("Started Listening for plain HTTP connection on " + addr)
+	log.Println("Started Listening for plain HTTP connection on " + addr)
 	server := &http.Server{Addr: addr, Handler: httpHandler}
 
 	log.Fatal(server.Serve(startListening(addr, conf.Server.KeepAlivePeriodSeconds)))
