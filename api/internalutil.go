@@ -22,6 +22,11 @@ func getBODY(ctx *gin.Context) (dto *model.Network, err error) {
 	return dto, err
 }
 
+func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func resolveID(ctx *gin.Context) string {
 	id := ctx.Param("uuid")
 	return id

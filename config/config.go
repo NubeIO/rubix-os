@@ -53,17 +53,17 @@ type Configuration struct {
 	PluginsDir        string `default:"data/plugins"`
 }
 
-func configFiles() []string {
+func configFiles(path string) []string {
 	if mode.Get() == mode.TestDev {
-		return []string{"config.yml"}
+		return []string{path}
 	}
 	return []string{"config.yml", "/etc/flow/config.yml"}
 }
 
 // Get returns the configuration extracted from env variables or config file.
-func Get() *Configuration {
+func Get(path string) *Configuration {
 	conf := new(Configuration)
-	err := configor.New(&configor.Config{EnvironmentPrefix: "FLOW"}).Load(conf, configFiles()...)
+	err := configor.New(&configor.Config{EnvironmentPrefix: "FLOW"}).Load(conf, configFiles(path)...)
 	if err != nil {
 		panic(err)
 	}

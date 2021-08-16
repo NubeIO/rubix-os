@@ -6,7 +6,6 @@ import (
 
 var networksModel []*model.Network
 var networkModel *model.Network
-var deviceModel []model.Device
 var deviceChildTable = "Device"
 
 // GetNetworks returns all networks.
@@ -48,10 +47,13 @@ func (d *GormDatabase) GetNetwork(uuid string) (*model.Network, error) {
 
 // CreateNetwork creates a network.
 func (d *GormDatabase) CreateNetwork(network *model.Network) error {
-	aa := d.DB.Create(network).Error
-	//d.DB.Commit()
-	return aa
+	n := d.DB.Create(network).Error
+	return n
 }
+
+
+
+
 
 // UpdateNetwork returns the network for the given id or nil.
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math/rand"
 	"os"
@@ -30,7 +31,12 @@ func main() {
 
 	fmt.Println("Starting version", vInfo.Version+"@"+BuildDate)
 	rand.Seed(time.Now().UnixNano())
-	conf := config.Get()
+
+	p := flag.String("config", "./config.yml", "config file path")
+	flag.Parse()
+	path := *p
+	conf := config.Get(path)
+
 
 	if conf.PluginsDir != "" {
 		if err := os.MkdirAll(conf.PluginsDir, 0755); err != nil {
