@@ -3,9 +3,9 @@ package docs
 import (
 	"strings"
 
+	"github.com/NubeDev/location"
 	"github.com/gin-gonic/gin"
 	"github.com/gobuffalo/packr/v2"
-	"github.com/gotify/location"
 )
 
 var box = packr.New("docs", "./")

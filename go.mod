@@ -1,14 +1,14 @@
 module github.com/NubeDev/plug-framework
 
 require (
+	github.com/NubeDev/configor v0.0.2
+	github.com/NubeDev/location v0.0.2
 	github.com/gin-contrib/cors v1.3.1
-	github.com/gin-gonic/gin v1.7.2
+	github.com/gin-gonic/gin v1.7.4
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/gobuffalo/packr/v2 v2.7.1
 	github.com/gorilla/websocket v1.4.2
-	github.com/gotify/configor v1.0.2
-	github.com/gotify/location v0.0.0-20170722210143-03bc4ad20437
 	github.com/h2non/filetype v1.1.1
 	github.com/simonvetter/modbus v1.3.0
 	github.com/stretchr/testify v1.7.0

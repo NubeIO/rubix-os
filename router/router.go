@@ -3,6 +3,7 @@ package router
 import (
 	"time"
 
+	"github.com/NubeDev/location"
 	"github.com/NubeDev/plug-framework/api"
 	"github.com/NubeDev/plug-framework/api/stream"
 	"github.com/NubeDev/plug-framework/auth"
@@ -14,7 +15,6 @@ import (
 	"github.com/NubeDev/plug-framework/plugin"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/gotify/location"
 )
 
 // Create creates the gin engine with all routes.
@@ -40,8 +40,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier := new(api.UserChangeNotifier)
 	userHandler := api.UserAPI{DB: db, PasswordStrength: conf.PassStrength, UserChangeNotifier: userChangeNotifier}
 	networkHandler := api.NetworksAPI{
-		DB:       db,
-
+		DB: db,
 	}
 	pluginManager, err := plugin.NewManager(db, conf.PluginsDir, g.Group("/plugin/:id/custom/"), streamHandler)
 	if err != nil {
@@ -52,8 +51,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		Notifier: streamHandler,
 		DB:       db,
 	}
-
-
 
 	userChangeNotifier.OnUserDeleted(streamHandler.NotifyDeletedUser)
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)

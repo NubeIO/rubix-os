@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/NubeDev/location"
 	"github.com/NubeDev/plug-framework/auth"
 	"github.com/NubeDev/plug-framework/model"
 	"github.com/NubeDev/plug-framework/plugin"
 	"github.com/NubeDev/plug-framework/plugin/compat"
 	"github.com/gin-gonic/gin"
-	"github.com/gotify/location"
 	"gopkg.in/yaml.v2"
 )
 
