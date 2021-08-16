@@ -12,12 +12,12 @@
 //
 // \---
 //
-// Found a bug or have some questions? [Create an issue on GitHub](https://github.com/flow/server/issues)
+// Found a bug or have some questions? [Create an issue on GitHub](https://github.com/NubeDev/flow/server/issues)
 //
 //     Schemes: http, https
 //     Host: localhost
 //     Version: 2.0.1
-//     License: MIT https://github.com/flow/server/blob/master/LICENSE
+//     License: MIT https://github.com/NubeDev/flow/server/blob/master/LICENSE
 //
 //     Consumes:
 //     - application/json
