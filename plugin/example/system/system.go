@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
@@ -10,7 +9,6 @@ import (
 
 	"log"
 	"net/url"
-
 )
 
 
@@ -26,22 +24,12 @@ func GetFlowPluginInfo() plugin.Info {
 
 // SystemPlugin is the flow plugin instance.
 type SystemPlugin struct {
-	msgHandler     plugin.MessageHandler
-	storageHandler plugin.StorageHandler
 	userCtx        plugin.UserContext
 	config         *Config
 	basePath       string
 }
 
-// SetStorageHandler implements plugin.Storager
-func (c *SystemPlugin) SetStorageHandler(h plugin.StorageHandler) {
-	c.storageHandler = h
-}
 
-// SetMessageHandler implements plugin.Messenger.
-func (c *SystemPlugin) SetMessageHandler(h plugin.MessageHandler) {
-	c.msgHandler = h
-}
 
 // Storage defines the plugin storage scheme
 type Storage struct {
@@ -97,25 +85,6 @@ func (c *SystemPlugin) GetNetwork(id string) error {
 // RegisterWebhook implements plugin.Webhooker.
 func (c *SystemPlugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 	c.basePath = baseURL
-	g.GET("/message", func(ctx *gin.Context) {
-		storage, _ := c.storageHandler.Load()
-		//storage
-		conf := new(Storage)
-		json.Unmarshal(storage, conf)
-		conf.CalledTimes++
-		newStorage, _ := json.Marshal(conf)
-		c.storageHandler.Save(newStorage)
-		c.msgHandler.SendMessage(plugin.Message{
-			Title:    "Hello received",
-			Message:  fmt.Sprintf("echo server received a hello message %d times", conf.CalledTimes),
-			Priority: 2,
-			Extras: map[string]interface{}{
-				"plugin::name": "echo",
-			},
-		})
-		ctx.Writer.WriteString(fmt.Sprintf("Magic string is: %s\r\nEcho server running at %secho", c.config.MagicString, c.basePath))
-	})
-
 	g.GET("/time", func(ctx *gin.Context) {
 		ctx.JSON(202, time.Now().Format(time.RFC850))
 
