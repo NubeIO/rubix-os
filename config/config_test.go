@@ -11,15 +11,15 @@ import (
 
 func TestConfigEnv(t *testing.T) {
 	mode.Set(mode.TestDev)
-	os.Setenv("GOTIFY_DEFAULTUSER_NAME", "jmattheis")
-	os.Setenv("GOTIFY_SERVER_SSL_LETSENCRYPT_HOSTS", "- push.example.tld\n- push.other.tld")
-	os.Setenv("GOTIFY_SERVER_RESPONSEHEADERS",
+	os.Setenv("FLOW_DEFAULTUSER_NAME", "jmattheis")
+	os.Setenv("FLOW_SERVER_SSL_LETSENCRYPT_HOSTS", "- push.example.tld\n- push.other.tld")
+	os.Setenv("FLOW_SERVER_RESPONSEHEADERS",
 		"Access-Control-Allow-Origin: \"*\"\nAccess-Control-Allow-Methods: \"GET,POST\"",
 	)
-	os.Setenv("GOTIFY_SERVER_CORS_ALLOWORIGINS", "- \".+.example.com\"\n- \"otherdomain.com\"")
-	os.Setenv("GOTIFY_SERVER_CORS_ALLOWMETHODS", "- \"GET\"\n- \"POST\"")
-	os.Setenv("GOTIFY_SERVER_CORS_ALLOWHEADERS", "- \"Authorization\"\n- \"content-type\"")
-	os.Setenv("GOTIFY_SERVER_STREAM_ALLOWEDORIGINS", "- \".+.example.com\"\n- \"otherdomain.com\"")
+	os.Setenv("FLOW_SERVER_CORS_ALLOWORIGINS", "- \".+.example.com\"\n- \"otherdomain.com\"")
+	os.Setenv("FLOW_SERVER_CORS_ALLOWMETHODS", "- \"GET\"\n- \"POST\"")
+	os.Setenv("FLOW_SERVER_CORS_ALLOWHEADERS", "- \"Authorization\"\n- \"content-type\"")
+	os.Setenv("FLOW_SERVER_STREAM_ALLOWEDORIGINS", "- \".+.example.com\"\n- \"otherdomain.com\"")
 
 	conf := Get()
 	assert.Equal(t, 80, conf.Server.Port, "should use defaults")
@@ -32,29 +32,29 @@ func TestConfigEnv(t *testing.T) {
 	assert.Equal(t, []string{"Authorization", "content-type"}, conf.Server.Cors.AllowHeaders)
 	assert.Equal(t, []string{".+.example.com", "otherdomain.com"}, conf.Server.Stream.AllowedOrigins)
 
-	os.Unsetenv("GOTIFY_DEFAULTUSER_NAME")
-	os.Unsetenv("GOTIFY_SERVER_SSL_LETSENCRYPT_HOSTS")
-	os.Unsetenv("GOTIFY_SERVER_RESPONSEHEADERS")
-	os.Unsetenv("GOTIFY_SERVER_CORS_ALLOWORIGINS")
-	os.Unsetenv("GOTIFY_SERVER_CORS_ALLOWMETHODS")
-	os.Unsetenv("GOTIFY_SERVER_CORS_ALLOWHEADERS")
-	os.Unsetenv("GOTIFY_SERVER_STREAM_ALLOWEDORIGINS")
+	os.Unsetenv("FLOW_DEFAULTUSER_NAME")
+	os.Unsetenv("FLOW_SERVER_SSL_LETSENCRYPT_HOSTS")
+	os.Unsetenv("FLOW_SERVER_RESPONSEHEADERS")
+	os.Unsetenv("FLOW_SERVER_CORS_ALLOWORIGINS")
+	os.Unsetenv("FLOW_SERVER_CORS_ALLOWMETHODS")
+	os.Unsetenv("FLOW_SERVER_CORS_ALLOWHEADERS")
+	os.Unsetenv("FLOW_SERVER_STREAM_ALLOWEDORIGINS")
 }
 
 func TestAddSlash(t *testing.T) {
 	mode.Set(mode.TestDev)
-	os.Setenv("GOTIFY_UPLOADEDIMAGESDIR", "../data/images")
+	os.Setenv("FLOW_UPLOADEDIMAGESDIR", "../data/images")
 	conf := Get()
 	assert.Equal(t, "../data/images"+string(filepath.Separator), conf.UploadedImagesDir)
-	os.Unsetenv("GOTIFY_UPLOADEDIMAGESDIR")
+	os.Unsetenv("FLOW_UPLOADEDIMAGESDIR")
 }
 
 func TestNotAddSlash(t *testing.T) {
 	mode.Set(mode.TestDev)
-	os.Setenv("GOTIFY_UPLOADEDIMAGESDIR", "../data/")
+	os.Setenv("FLOW_UPLOADEDIMAGESDIR", "../data/")
 	conf := Get()
 	assert.Equal(t, "../data/", conf.UploadedImagesDir)
-	os.Unsetenv("GOTIFY_UPLOADEDIMAGESDIR")
+	os.Unsetenv("FLOW_UPLOADEDIMAGESDIR")
 }
 
 func TestFileWithSyntaxErrors(t *testing.T) {

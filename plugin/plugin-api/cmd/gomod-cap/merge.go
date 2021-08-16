@@ -1,12 +1,12 @@
 /*gomod-cap
 
-This command line util is used to help plugins keep their go.mod file requirements lower than the gotify-server itself in order to make sure that plugins are built with the same version of dependencies as the main gotify program does.
+This command line util is used to help plugins keep their go.mod file requirements lower than the flow-server itself in order to make sure that plugins are built with the same version of dependencies as the main flow program does.
 
 Since go.mod follow a minimal version selection(https://github.com/golang/proposal/blob/master/design/24301-versioned-go.md). Common import paths described in the plugin go.mod must have a lower or equal version than the main program itself.
 
 Sample usage:
 
-$ go run github.com/gotify/plugin-api/cmd/gomod-cap -from /path/to/gotify/server/go.mod -to /path/to/your/plugin/go.mod
+$ go run github.com/flow/plugin-api/cmd/gomod-cap -from /path/to/flow/server/go.mod -to /path/to/your/plugin/go.mod
 */
 package main
 

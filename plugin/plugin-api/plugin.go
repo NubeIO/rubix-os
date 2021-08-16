@@ -21,7 +21,7 @@ type UserContext struct {
 }
 
 // Info is returned by the exported plugin function GetPluginInfo() for identification
-// plugins are identified by their ModulePath, gotify will refuse to load plugins with empty ModulePath
+// plugins are identified by their ModulePath, flow will refuse to load plugins with empty ModulePath
 type Info struct {
 	Version     string
 	Author      string

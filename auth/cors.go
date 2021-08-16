@@ -20,7 +20,7 @@ func CorsConfig(conf *config.Configuration) cors.Config {
 		corsConf.AllowAllOrigins = true
 		corsConf.AllowMethods = []string{"GET", "POST", "DELETE", "OPTIONS", "PUT"}
 		corsConf.AllowHeaders = []string{
-			"X-Gotify-Key", "Authorization", "Content-Type", "Upgrade", "Origin",
+			"X-FLOW-Key", "Authorization", "Content-Type", "Upgrade", "Origin",
 			"Connection", "Accept-Encoding", "Accept-Language", "Host",
 		}
 	} else {

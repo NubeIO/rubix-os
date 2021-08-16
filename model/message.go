@@ -52,7 +52,7 @@ type MessageExternal struct {
 	//
 	// The keys should be in the following format: &lt;top-namespace&gt;::[&lt;sub-namespace&gt;::]&lt;action&gt;
 	//
-	// These namespaces are reserved and might be used in the official clients: gotify android ios web server client. Do not use them for other purposes.
+	// These namespaces are reserved and might be used in the official clients: flow android ios web server client. Do not use them for other purposes.
 	//
 	// example: {"home::appliances::thermostat::change_temperature":{"temperature":23},"home::appliances::lighting::on":{"brightness":15}}
 	Extras map[string]interface{} `form:"-" query:"-" json:"extras,omitempty" gorm:"type:text[]"`

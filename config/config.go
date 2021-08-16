@@ -42,7 +42,7 @@ type Configuration struct {
 	}
 	Database struct {
 		Dialect    string `default:"sqlite3"`
-		Connection string `default:"data/gotify.db"`
+		Connection string `default:"data/flow.db"`
 	}
 	DefaultUser struct {
 		Name string `default:"admin"`
@@ -57,13 +57,13 @@ func configFiles() []string {
 	if mode.Get() == mode.TestDev {
 		return []string{"config.yml"}
 	}
-	return []string{"config.yml", "/etc/gotify/config.yml"}
+	return []string{"config.yml", "/etc/flow/config.yml"}
 }
 
 // Get returns the configuration extracted from env variables or config file.
 func Get() *Configuration {
 	conf := new(Configuration)
-	err := configor.New(&configor.Config{EnvironmentPrefix: "GOTIFY"}).Load(conf, configFiles()...)
+	err := configor.New(&configor.Config{EnvironmentPrefix: "FLOW"}).Load(conf, configFiles()...)
 	if err != nil {
 		panic(err)
 	}
