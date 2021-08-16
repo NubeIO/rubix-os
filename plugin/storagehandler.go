@@ -1,6 +1,6 @@
 package plugin
 
-import "github.com/NubeDev/plug-framework/model"
+import "github.com/NubeDev/flow-framework/model"
 
 type dbStorageHandler struct {
 	pluginID uint
@@ -24,8 +24,7 @@ func (c dbStorageHandler) Load() ([]byte, error) {
 	return pluginConf.Storage, nil
 }
 
-
-func (c dbStorageHandler) GetNet() ([]*model.Network, error){
+func (c dbStorageHandler) GetNet() ([]*model.Network, error) {
 	net, err := c.db.GetNetworks()
 	if err != nil {
 		return nil, err

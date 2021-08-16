@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/NubeDev/plug-framework/auth"
+	"github.com/NubeDev/flow-framework/auth"
 )
 
 var generateApplicationToken = auth.GenerateApplicationToken

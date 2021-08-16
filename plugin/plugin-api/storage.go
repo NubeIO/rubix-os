@@ -1,6 +1,7 @@
 package plugin
 
-import "github.com/NubeDev/plug-framework/model"
+import "github.com/NubeDev/flow-framework/model"
+
 
 // StorageHandler consists callbacks used to perform read/writes to the persistent storage for plugins.
 type StorageHandler interface {

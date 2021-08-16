@@ -1,6 +1,6 @@
 package system
 
-import "github.com/NubeDev/plug-framework/system/command"
+import "github.com/NubeDev/flow-framework/system/command"
 
 // RebootNow Reboot system
 func RebootNow() (result string, err error) {

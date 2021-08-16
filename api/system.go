@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/NubeDev/plug-framework/system"
+	"github.com/NubeDev/flow-framework/system"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"github.com/NubeDev/plug-framework/model"
+	"github.com/NubeDev/flow-framework/model"
 	"gorm.io/gorm"
 )
 

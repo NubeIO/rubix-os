@@ -1,8 +1,9 @@
 package database
 
 import (
-	"github.com/NubeDev/plug-framework/model"
+	"github.com/NubeDev/flow-framework/model"
 )
+
 var networksModel []*model.Network
 var networkModel *model.Network
 var deviceModel []model.Device
@@ -26,7 +27,6 @@ func (d *GormDatabase) GetNetworks() ([]*model.Network, error) {
 	}
 
 }
-
 
 // GetNetwork returns the network for the given id or nil.
 func (d *GormDatabase) GetNetwork(uuid string) (*model.Network, error) {
@@ -53,23 +53,24 @@ func (d *GormDatabase) CreateNetwork(network *model.Network) error {
 	return aa
 }
 
-
 // UpdateNetwork returns the network for the given id or nil.
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
-	query := d.DB.Where("uuid = ?", uuid).Find(&networkModel);if query.Error != nil {
+	query := d.DB.Where("uuid = ?", uuid).Find(&networkModel)
+	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&networkModel).Updates(body);if query.Error != nil {
+	query = d.DB.Model(&networkModel).Updates(body)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return networkModel, nil
 
 }
 
-
 // DeleteNetwork delete a network.
 func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&networkModel) ;if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&networkModel)
+	if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -80,7 +81,3 @@ func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
 	}
 
 }
-
-
-
-

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/NubeDev/plug-framework/mode"
+	"github.com/NubeDev/flow-framework/mode"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/NubeDev/plug-framework/mode"
+	"github.com/NubeDev/flow-framework/mode"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

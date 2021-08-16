@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/NubeDev/plug-framework/helpers"
-	"github.com/NubeDev/plug-framework/model"
+	"github.com/NubeDev/flow-framework/helpers"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -14,10 +14,9 @@ type NetworkDatabase interface {
 	CreateNetwork(network *model.Network) error
 	UpdateNetwork(uuid string, body *model.Network) (*model.Network, error)
 	DeleteNetwork(uuid string) (bool, error)
-
 }
 type NetworksAPI struct {
-	DB       NetworkDatabase
+	DB NetworkDatabase
 }
 
 func (a *NetworksAPI) GetNetworks(ctx *gin.Context) {
@@ -38,7 +37,6 @@ func (a *NetworksAPI) GetNetwork(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, apps)
 
 }
-
 
 func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
 	body, _ := getBODY(ctx)
@@ -62,7 +60,6 @@ func (a *NetworksAPI) CreateNetwork(ctx *gin.Context) {
 	}
 }
 
-
 func (a *NetworksAPI) DeleteNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	apps, err := a.DB.DeleteNetwork(uuid)
@@ -72,4 +69,3 @@ func (a *NetworksAPI) DeleteNetwork(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, apps)
 
 }
-
