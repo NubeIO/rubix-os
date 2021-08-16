@@ -21,5 +21,5 @@ go build -buildmode=plugin -o echo.so echo.go  && cp echo.so  ../../../data/plug
 example to build and run the apps
 ```
 cd plugin/example/modbus
-go build -buildmode=plugin -o modbus.so modbus.go  && cp modbus.so  ../../../data/plugins/ && (cd /home/aidan/code/go/flow-framework  && go run app.go  -config /home/aidan/code/go/flow-framework/plugin/example/modbus/config.yml)
+go build -buildmode=plugin -o system.so system.go  && cp system.so  ../../../data/plugins/ && (cd /home/aidan/code/go/flow-framework  && go run app.go  -config /home/aidan/code/go/flow-framework/config.yml)
 ```
