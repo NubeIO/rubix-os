@@ -8,7 +8,7 @@ DOCKER_WORKDIR=/proj
 DOCKER_RUN=docker run --rm -v "$$PWD/.:${DOCKER_WORKDIR}" -v "`go env GOPATH`/pkg/mod/.:/go/pkg/mod:ro" -w ${DOCKER_WORKDIR}
 DOCKER_GO_BUILD=go build -mod=readonly -a -installsuffix cgo -ldflags "$$LD_FLAGS"
 
-test: test-coverage test-race test-js
+test: test-coverage test-race
 check: check-go check-swagger check-js
 check-ci: check-swagger check-js
 
@@ -24,11 +24,6 @@ test-coverage:
 
 format:
 	goimports -w $(shell find . -type f -name '*.go' -not -path "./vendor/*")
-
-test-js:
-	go build -ldflags="-s -w -X main.Mode=prod" -o removeme/gotify app.go
-	(cd ui && CI=true GOTIFY_EXE=../removeme/gotify yarn test)
-	rm -rf removeme
 
 check-go:
 	golangci-lint run

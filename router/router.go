@@ -12,7 +12,6 @@ import (
 	"github.com/NubeDev/plug-framework/error"
 	"github.com/NubeDev/plug-framework/model"
 	"github.com/NubeDev/plug-framework/plugin"
-	"github.com/NubeDev/plug-framework/ui"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gotify/location"
@@ -59,8 +58,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier.OnUserDeleted(streamHandler.NotifyDeletedUser)
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
-
-	ui.Register(g)
 
 	g.GET("/ip", api.Hostname) //TODO remove
 	g.GET("/health", healthHandler.Health)
