@@ -8,7 +8,6 @@ import (
 )
 
 const (
-	headerName         = "X-Gotify-Key"
 	AuthorizationToken = "Authorization"
 )
 
@@ -93,9 +92,6 @@ func (a *Auth) tokenFromQuery(ctx *gin.Context) string {
 }
 
 func (a *Auth) tokenFromHeader(ctx *gin.Context) string {
-	if ctx.Request.Header.Get(headerName) != "" {
-		return ctx.Request.Header.Get(headerName)
-	}
 	if ctx.Request.Header.Get(AuthorizationToken) != "" {
 		return ctx.Request.Header.Get(AuthorizationToken)
 	}

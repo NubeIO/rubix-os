@@ -28,7 +28,7 @@ func main() {
 	vInfo := &model.VersionInfo{Version: Version, Commit: Commit, BuildDate: BuildDate}
 	mode.Set(Mode)
 
-	fmt.Println("Starting Gotify version", vInfo.Version+"@"+BuildDate)
+	fmt.Println("Starting version", vInfo.Version+"@"+BuildDate)
 	rand.Seed(time.Now().UnixNano())
 	conf := config.Get()
 
