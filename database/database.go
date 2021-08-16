@@ -19,6 +19,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	_connection := fmt.Sprintf("%s?_foreign_keys=on", connection)
 	db, err := gorm.Open(sqlite.Open(_connection), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
+
 	})
 	if err != nil {
 		panic("failed to connect database")

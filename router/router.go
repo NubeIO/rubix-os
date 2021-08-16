@@ -179,18 +179,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 		control.GET("", api.Hostname)
 		control.GET("/networks", networkHandler.GetNetworks)
-		control.POST("/network", networkHandler.CreateNetwork)
-		control.GET("/network/:uuid", networkHandler.GetNetwork)
-		control.PATCH("/network/:uuid", networkHandler.UpdateNetworks)
-		control.DELETE("/network/:uuid", networkHandler.DeleteNetwork)
+		control.POST("/networks", networkHandler.CreateNetwork)
+		control.GET("/networks/:uuid", networkHandler.GetNetwork)
+		control.PATCH("/networks/:uuid", networkHandler.UpdateNetwork)
+		control.DELETE("/networks/:uuid", networkHandler.DeleteNetwork)
 
-		//authAdmin.POST("", userHandler.CreateUser)
-		//
-		//authAdmin.DELETE("/:id", userHandler.DeleteUserByID)
-		//
-		//authAdmin.GET("/:id", userHandler.GetUserByID)
-		//
-		//authAdmin.POST("/:id", userHandler.UpdateUserByID)
 	}
 
 	return g, streamHandler.Close

@@ -40,7 +40,7 @@ func (a *NetworksAPI) GetNetwork(ctx *gin.Context) {
 }
 
 
-func (a *NetworksAPI) UpdateNetworks(ctx *gin.Context) {
+func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
 	body, _ := getBODY(ctx)
 	uuid := resolveID(ctx)
 	apps, err := a.DB.UpdateNetwork(uuid, body)

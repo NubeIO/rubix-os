@@ -7,6 +7,7 @@ var networksModel []*model.Network
 var networkModel *model.Network
 var deviceModel []model.Device
 var deviceChildTable = "Device"
+
 // GetNetworks returns all networks.
 func (d *GormDatabase) GetNetworks() ([]*model.Network, error) {
 	withChildren := true
@@ -29,7 +30,7 @@ func (d *GormDatabase) GetNetworks() ([]*model.Network, error) {
 
 // GetNetwork returns the network for the given id or nil.
 func (d *GormDatabase) GetNetwork(uuid string) (*model.Network, error) {
-	withChildren := true
+	withChildren := false
 	if withChildren { // drop child to reduce json size
 		query := d.DB.Where("uuid = ? ", uuid).Preload(deviceChildTable).First(&networkModel)
 		if query.Error != nil {
@@ -37,7 +38,7 @@ func (d *GormDatabase) GetNetwork(uuid string) (*model.Network, error) {
 		}
 		return networkModel, nil
 	} else {
-		query := d.DB.Find(&networksModel)
+		query := d.DB.Where("uuid = ? ", uuid).Find(&networkModel)
 		if query.Error != nil {
 			return nil, query.Error
 		}
@@ -47,13 +48,15 @@ func (d *GormDatabase) GetNetwork(uuid string) (*model.Network, error) {
 
 // CreateNetwork creates a network.
 func (d *GormDatabase) CreateNetwork(network *model.Network) error {
-	return d.DB.Create(network).Error
+	aa := d.DB.Create(network).Error
+	//d.DB.Commit()
+	return aa
 }
 
 
 // UpdateNetwork returns the network for the given id or nil.
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
-	query := d.DB.Where("uuid = ?", uuid).First(&networkModel);if query.Error != nil {
+	query := d.DB.Where("uuid = ?", uuid).Find(&networkModel);if query.Error != nil {
 		return nil, query.Error
 	}
 	query = d.DB.Model(&networkModel).Updates(body);if query.Error != nil {
@@ -66,14 +69,14 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 
 // DeleteNetwork delete a network.
 func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
-	query := d.DB.Where("uuid = ? ", uuid).Unscoped().Delete(&deviceModel) ;if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&networkModel) ;if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
 	if r == 0 {
 		return false, nil
 	} else {
-		return false, nil
+		return true, nil
 	}
 
 }
