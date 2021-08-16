@@ -76,13 +76,9 @@ func (c *EchoPlugin) ValidateAndSetConfig(config interface{}) error {
 
 // Enable enables the plugin.
 func (c *EchoPlugin) Enable() error {
-	log.Println("modbus plugin enabled")
-	aaa := c.GetNetwork("b29697f853714a54")
-	log.Println("GetNetworks within echo", aaa)
-	log.Println("GetNetworks within echo", aaa)
 	networks, err := c.GetNetworks()
 	if err != nil {
-		log.Println("GetNetworks GetNetworks ERROR", 9999999, err)
+		log.Println("GetNetworks GetNetworks ERROR")
 	}
 	log.Println("GetNetworks GetNetworks GetNetworks", 9999999, networks)
 	return nil
@@ -91,21 +87,21 @@ func (c *EchoPlugin) Enable() error {
 // GetNetworks disables the plugin.
 func (c *EchoPlugin) GetNetworks() ([]*model.Network, error) {
 	log.Println("echo plugin GetNetworks")
-	fmt.Println(999999, c.userCtx.ID, c.userCtx.Name)
+	fmt.Println(c.userCtx.ID, c.userCtx.Name)
 	return nil, nil
 }
 
 // GetNetwork disables the plugin.
 func (c *EchoPlugin) GetNetwork(id string) error {
 	log.Println("echo plugin GetNetworks")
-	fmt.Println(888888, c.userCtx.ID, c.userCtx.Name, c.userCtx.Admin)
+	fmt.Println( c.userCtx.ID, c.userCtx.Name, c.userCtx.Admin)
 	return nil
 }
 
 // Disable disables the plugin.
 func (c *EchoPlugin) Disable() error {
 	log.Println("echo plugin disbled")
-	fmt.Println(33333, c.userCtx.ID, c.userCtx.Name, c.userCtx.Admin)
+	fmt.Println( c.userCtx.ID, c.userCtx.Name, c.userCtx.Admin)
 	return nil
 }
 
@@ -113,22 +109,16 @@ func (c *EchoPlugin) Disable() error {
 func (c *EchoPlugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 	c.basePath = baseURL
 	g.GET("/echo", func(ctx *gin.Context) {
-
 		storage, _ := c.storageHandler.Load()
 		//storage
 		conf := new(Storage)
 		net, err := c.storageHandler.GetNet()
-		fmt.Println(net, 10101010101)
-		fmt.Println(net, 10101010101)
-		fmt.Println(net, 10101010101)
-		fmt.Println(net, 10101010101)
-		fmt.Println(net, 10101010101)
+		fmt.Println(net)
 		s, _ := json.MarshalIndent(net, "", "\t")
 		fmt.Print(string(s))
-
-		fmt.Println(net, 10101010101)
+		fmt.Println(net)
 		if err != nil {
-			fmt.Println(err, 90909090909090)
+			fmt.Println(err)
 			//return
 		}
 
