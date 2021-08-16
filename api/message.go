@@ -7,11 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/NubeDev/location"
 	"github.com/NubeDev/plug-framework/auth"
 	"github.com/NubeDev/plug-framework/model"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/gotify/location"
 )
 
 // The MessageDatabase interface for encapsulating database access.

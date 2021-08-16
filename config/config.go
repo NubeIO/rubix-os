@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/NubeDev/configor"
 	"github.com/NubeDev/plug-framework/mode"
-	"github.com/gotify/configor"
 )
 
 // Configuration is stuff that can be configured externally per env variables or config file (config.yml).
