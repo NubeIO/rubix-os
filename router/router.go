@@ -42,6 +42,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	networkHandler := api.NetworksAPI{
 		DB: db,
 	}
+	deviceHandler := api.DeviceAPI{
+		DB: db,
+	}
 	pluginManager, err := plugin.NewManager(db, conf.PluginsDir, g.Group("/plugin/:id/custom/"), streamHandler)
 	if err != nil {
 		panic(err)
@@ -177,6 +180,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.GET("/networks/:uuid", networkHandler.GetNetwork)
 		control.PATCH("/networks/:uuid", networkHandler.UpdateNetwork)
 		control.DELETE("/networks/:uuid", networkHandler.DeleteNetwork)
+
+		control.GET("/devices", deviceHandler.GetDevices)
+		control.POST("/devices", deviceHandler.CreateDevice)
+		control.GET("/devices/:uuid", deviceHandler.GetDevice)
+		control.PATCH("/devices/:uuid", deviceHandler.UpdateDevice)
+		control.DELETE("/devices/:uuid", deviceHandler.DeleteDevice)
 
 	}
 

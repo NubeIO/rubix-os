@@ -8,15 +8,15 @@ type CommonPoint struct {
 	ObjectType		string `json:"object_type"`
 }
 
-type EquipRef struct {
-	PointUuid     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
-	Ref  			string `json:"equip_ref"`
-}
-
-type Association struct {
-	PointUuid     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
-	Association  	string `json:"equip_ref"`
-}
+//type EquipRef struct {
+//	PointUuid     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
+//	Ref  			string `json:"equip_ref"`
+//}
+//
+//type Association struct {
+//	PointUuid     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
+//	Association  	string `json:"equip_ref"`
+//}
 
 
 type Point struct {
@@ -26,9 +26,9 @@ type Point struct {
 	Created
 	DeviceUuid     				string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	CommonPoint
-	EquipRef 					[]EquipRef `json:"equip_ref" gorm:"default:null"`
-	PriorityArrayModel 			PriorityArrayModel `json:"priority_array" gorm:"constraint:OnDelete:CASCADE"`
-	PointStore 					PointStore `json:"point_store" gorm:"constraint:OnDelete:CASCADE"`
+	//EquipRef 					[]EquipRef `json:"equip_ref" gorm:"default:null"`
+	//PriorityArrayModel 			PriorityArrayModel `json:"priority_array" gorm:"constraint:OnDelete:CASCADE"`
+	//PointStore 					PointStore `json:"point_store" gorm:"constraint:OnDelete:CASCADE"`
 }
 
 
