@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/NubeDev/plug-framework/auth"
-	"github.com/NubeDev/plug-framework/model"
+	"github.com/NubeDev/flow-framework/auth"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 	"github.com/h2non/filetype"
 )

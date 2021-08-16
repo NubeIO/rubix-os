@@ -3,8 +3,8 @@ package plugin
 import (
 	"time"
 
-	"github.com/NubeDev/plug-framework/model"
-	"github.com/NubeDev/plug-framework/plugin/compat"
+	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/plugin/compat"
 )
 
 type redirectToChannel struct {

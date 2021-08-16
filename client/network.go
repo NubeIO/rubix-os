@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/plug-framework/helpers"
+	"github.com/NubeDev/flow-framework/helpers"
 	"github.com/go-resty/resty/v2"
 	"github.com/tidwall/gjson"
 	"log"
 )
 
-func main(){
+func main() {
 
 	//MAKE CLIENT
 	client := resty.New()
@@ -48,7 +48,6 @@ func main(){
 	}
 	log.Println("addNetwork:", addNetwork, "status", addNetwork.Status())
 
-
 	//ADD NETWORK
 	r = gjson.Get(string(addNetwork.Body()), "uuid")
 	getNetworkUUID := r.Str
@@ -68,7 +67,7 @@ func main(){
 	log.Println("getNetworkUUID:", getNetworkUUID)
 	editNetwork, err := client.NewRequest().
 		SetHeader("Authorization", token).
-		SetBody(map[string]interface{}{"name": "new_name_"+name}).
+		SetBody(map[string]interface{}{"name": "new_name_" + name}).
 		SetPathParams(map[string]string{
 			"uuid": getNetworkUUID,
 		}).
@@ -77,7 +76,6 @@ func main(){
 		log.Println("editNetwork err:", err, editNetwork.Status())
 	}
 	log.Println("editNetwork:", editNetwork, "status", editNetwork.Status())
-
 
 	//DELETE NETWORK
 	log.Println("getNetworkUUID:", getNetworkUUID)
@@ -94,33 +92,33 @@ func main(){
 
 	if getToken.Status() == "200 OK" {
 		fmt.Println("getToken", "PASS")
-	} else {fmt.Println("getToken", "FAIL")}
+	} else {
+		fmt.Println("getToken", "FAIL")
+	}
 	if user.Status() == "200 OK" {
 		fmt.Println("user", "PASS")
-	} else {fmt.Println("user", "FAIL")}
+	} else {
+		fmt.Println("user", "FAIL")
+	}
 	if addNetwork.Status() == "200 OK" {
 		fmt.Println("addNetwork", "PASS")
-	} else {fmt.Println("addNetwork", "FAIL")}
+	} else {
+		fmt.Println("addNetwork", "FAIL")
+	}
 	if getNetwork.Status() == "200 OK" {
 		fmt.Println("getNetwork", "PASS")
-	} else {fmt.Println("getNetwork", "FAIL")}
+	} else {
+		fmt.Println("getNetwork", "FAIL")
+	}
 	if editNetwork.Status() == "200 OK" {
 		fmt.Println("editNetwork", "PASS")
-	} else {fmt.Println("editNetwork", "FAIL")}
+	} else {
+		fmt.Println("editNetwork", "FAIL")
+	}
 	if deleteNetwork.Status() == "200 OK" {
 		fmt.Println("deleteNetwork", "PASS")
-	} else {fmt.Println("deleteNetwork", "FAIL")}
-
-
-
-
-
-
-
-
-
-
-
-
+	} else {
+		fmt.Println("deleteNetwork", "FAIL")
+	}
 
 }

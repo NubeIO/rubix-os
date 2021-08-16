@@ -2,8 +2,8 @@ package auth
 
 import (
 	"errors"
-	"github.com/NubeDev/plug-framework/auth/password"
-	"github.com/NubeDev/plug-framework/model"
+	"github.com/NubeDev/flow-framework/auth/password"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )
 

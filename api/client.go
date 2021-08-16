@@ -3,8 +3,8 @@ package api
 import (
 	"fmt"
 
-	"github.com/NubeDev/plug-framework/auth"
-	"github.com/NubeDev/plug-framework/model"
+	"github.com/NubeDev/flow-framework/auth"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )
 

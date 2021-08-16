@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/NubeDev/plug-framework/config"
-	"github.com/NubeDev/plug-framework/database"
-	"github.com/NubeDev/plug-framework/mode"
-	"github.com/NubeDev/plug-framework/model"
-	"github.com/NubeDev/plug-framework/router"
-	"github.com/NubeDev/plug-framework/runner"
+	"github.com/NubeDev/flow-framework/config"
+	"github.com/NubeDev/flow-framework/database"
+	"github.com/NubeDev/flow-framework/mode"
+	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/router"
+	"github.com/NubeDev/flow-framework/runner"
 )
 
 var (

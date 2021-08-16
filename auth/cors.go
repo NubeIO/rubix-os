@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NubeDev/plug-framework/config"
-	"github.com/NubeDev/plug-framework/mode"
+	"github.com/NubeDev/flow-framework/config"
+	"github.com/NubeDev/flow-framework/mode"
 	"github.com/gin-contrib/cors"
 )
 

@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/NubeDev/plug-framework/config"
+	"github.com/NubeDev/flow-framework/config"
 	"golang.org/x/crypto/acme/autocert"
 )
 

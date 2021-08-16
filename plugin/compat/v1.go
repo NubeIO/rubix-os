@@ -1,10 +1,10 @@
 package compat
 
 import (
-	"github.com/NubeDev/plug-framework/model"
+	"github.com/NubeDev/flow-framework/model"
 	"net/url"
 
-	papiv1 "github.com/NubeDev/plug-framework/plugin/plugin-api"
+	papiv1 "github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
 )
 
@@ -164,12 +164,10 @@ func (c *PluginV1Instance) GetNetworks() ([]*model.Network, error) {
 	return net, err
 }
 
-
 // GetNetwork implements wrapper.Plugin.
 func (c *PluginV1Instance) GetNetwork(id string) error {
 	return c.instance.GetNetwork(id)
 }
-
 
 // Enable implements wrapper.Plugin.
 func (c *PluginV1Instance) Enable() error {
@@ -196,9 +194,8 @@ func (c *PluginV1StorageHandler) Load() ([]byte, error) {
 	return c.WrapperHandler.Load()
 }
 
-
 // GetNet implements wrapper.Storager.
-func (c *PluginV1StorageHandler) GetNet() ([]*model.Network, error){
+func (c *PluginV1StorageHandler) GetNet() ([]*model.Network, error) {
 	net, err := c.WrapperHandler.GetNet()
 	return net, err
 }

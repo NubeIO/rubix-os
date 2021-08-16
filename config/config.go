@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/NubeDev/configor"
-	"github.com/NubeDev/plug-framework/mode"
+	"github.com/NubeDev/flow-framework/mode"
 )
 
 // Configuration is stuff that can be configured externally per env variables or config file (config.yml).

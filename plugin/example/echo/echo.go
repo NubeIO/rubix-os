@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NubeDev/plug-framework/model"
-	"github.com/NubeDev/plug-framework/plugin/plugin-api"
+	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
 	"github.com/simonvetter/modbus"
 	"log"

@@ -1,6 +1,6 @@
 package plugin
 
-import "github.com/NubeDev/plug-framework/model"
+import "github.com/NubeDev/flow-framework/model"
 
 // Plugin is the interface every plugin need to implement
 type Plugin interface {

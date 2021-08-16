@@ -1,7 +1,7 @@
 package compat
 
 import (
-	"github.com/NubeDev/plug-framework/model"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 	"net/url"
 )

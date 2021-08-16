@@ -2,7 +2,7 @@ package api
 
 import (
 	"errors"
-	"github.com/NubeDev/plug-framework/model"
+	"github.com/NubeDev/flow-framework/model"
 	"math/bits"
 	"strconv"
 
@@ -16,8 +16,6 @@ func withID(ctx *gin.Context, name string, f func(id uint)) {
 		ctx.AbortWithError(400, errors.New("invalid id"))
 	}
 }
-
-
 
 func getBODY(ctx *gin.Context) (dto *model.Network, err error) {
 	err = ctx.ShouldBindJSON(&dto)
