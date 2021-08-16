@@ -3,7 +3,7 @@ BUILD_DIR=./build
 DOCKER_DIR=./docker/
 SHELL := /bin/bash
 GO_VERSION=`cat GO_VERSION`
-DOCKER_BUILD_IMAGE=gotify/build
+DOCKER_BUILD_IMAGE=flow/build
 DOCKER_WORKDIR=/proj
 DOCKER_RUN=docker run --rm -v "$$PWD/.:${DOCKER_WORKDIR}" -v "`go env GOPATH`/pkg/mod/.:/go/pkg/mod:ro" -w ${DOCKER_WORKDIR}
 DOCKER_GO_BUILD=go build -mod=readonly -a -installsuffix cgo -ldflags "$$LD_FLAGS"
@@ -64,31 +64,31 @@ package-zip: extract-licenses
     done
 
 build-docker-amd64: require-version
-	cp ${BUILD_DIR}/gotify-linux-amd64 ./docker/gotify-app
+	cp ${BUILD_DIR}/flow-linux-amd64 ./docker/flow-app
 	cd ${DOCKER_DIR} && \
 		docker build \
-		-t gotify/server:latest \
-		-t gotify/server:${VERSION} \
-		-t gotify/server:$(shell echo $(VERSION) | cut -d '.' -f -2) .
-	rm ${DOCKER_DIR}gotify-app
+		-t flow/server:latest \
+		-t flow/server:${VERSION} \
+		-t flow/server:$(shell echo $(VERSION) | cut -d '.' -f -2) .
+	rm ${DOCKER_DIR}flow-app
 
 build-docker-arm-7: require-version
-	cp ${BUILD_DIR}/gotify-linux-arm-7 ./docker/gotify-app
+	cp ${BUILD_DIR}/flow-linux-arm-7 ./docker/flow-app
 	cd ${DOCKER_DIR} && \
 		docker build -f Dockerfile.armv7 \
-		-t gotify/server-arm7:latest \
-		-t gotify/server-arm7:${VERSION} \
-		-t gotify/server-arm7:$(shell echo $(VERSION) | cut -d '.' -f -2) .
-	rm ${DOCKER_DIR}gotify-app
+		-t flow/server-arm7:latest \
+		-t flow/server-arm7:${VERSION} \
+		-t flow/server-arm7:$(shell echo $(VERSION) | cut -d '.' -f -2) .
+	rm ${DOCKER_DIR}flow-app
 
 build-docker-arm64: require-version
-	cp ${BUILD_DIR}/gotify-linux-arm64 ./docker/gotify-app
+	cp ${BUILD_DIR}/flow-linux-arm64 ./docker/flow-app
 	cd ${DOCKER_DIR} && \
 		docker build -f Dockerfile.arm64 \
-		-t gotify/server-arm64:latest \
-		-t gotify/server-arm64:${VERSION} \
-		-t gotify/server-arm64:$(shell echo $(VERSION) | cut -d '.' -f -2) .
-	rm ${DOCKER_DIR}gotify-app
+		-t flow/server-arm64:latest \
+		-t flow/server-arm64:${VERSION} \
+		-t flow/server-arm64:$(shell echo $(VERSION) | cut -d '.' -f -2) .
+	rm ${DOCKER_DIR}flow-app
 
 build-docker: build-docker-amd64 build-docker-arm-7 build-docker-arm64
 
@@ -96,22 +96,22 @@ build-js:
 	(cd ui && yarn build)
 
 build-linux-amd64:
-	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-linux-amd64 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/gotify-linux-amd64 ${DOCKER_WORKDIR}
+	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-linux-amd64 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/flow-linux-amd64 ${DOCKER_WORKDIR}
 
 build-linux-386:
-	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-linux-386 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/gotify-linux-386 ${DOCKER_WORKDIR}
+	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-linux-386 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/flow-linux-386 ${DOCKER_WORKDIR}
 
 build-linux-arm-7:
-	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-linux-arm-7 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/gotify-linux-arm-7 ${DOCKER_WORKDIR}
+	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-linux-arm-7 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/flow-linux-arm-7 ${DOCKER_WORKDIR}
 
 build-linux-arm64:
-	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-linux-arm64 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/gotify-linux-arm64 ${DOCKER_WORKDIR}
+	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-linux-arm64 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/flow-linux-arm64 ${DOCKER_WORKDIR}
 
 build-windows-amd64:
-	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-windows-amd64 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/gotify-windows-amd64.exe ${DOCKER_WORKDIR}
+	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-windows-amd64 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/flow-windows-amd64.exe ${DOCKER_WORKDIR}
 
 build-windows-386:
-	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-windows-386 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/gotify-windows-386.exe ${DOCKER_WORKDIR}
+	${DOCKER_RUN} ${DOCKER_BUILD_IMAGE}:$(GO_VERSION)-windows-386 ${DOCKER_GO_BUILD} -o ${BUILD_DIR}/flow-windows-386.exe ${DOCKER_WORKDIR}
 
 build: build-linux-arm-7 build-linux-amd64 build-linux-386 build-linux-arm64 build-windows-amd64 build-windows-386
 

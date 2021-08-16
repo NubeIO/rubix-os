@@ -1,9 +1,9 @@
 PKG=./
 
 cap-version:
-	wget -O /tmp/gotify.go.mod https://github.com/gotify/server/raw/master/go.mod; \
+	wget -O /tmp/flow.go.mod https://github.com/flow/server/raw/master/go.mod; \
 	for P in ${PKG}; do \
-		go run github.com/gotify/plugin-api/cmd/gomod-cap -to `echo $$P` -from /tmp/gotify.go.mod; \
+		go run github.com/flow/plugin-api/cmd/gomod-cap -to `echo $$P` -from /tmp/flow.go.mod; \
 	done
 
 check: check-go check-symbol check-mod check-lint
@@ -19,9 +19,9 @@ check-lint:
 	done
 
 check-mod:
-	wget -O /tmp/gotify.go.mod https://github.com/gotify/server/raw/master/go.mod; \
+	wget -O /tmp/flow.go.mod https://github.com/flow/server/raw/master/go.mod; \
 	for P in ${PKG}; do \
-		go run github.com/gotify/plugin-api/cmd/gomod-cap -to `echo $$P` -from /tmp/gotify.go.mod -check=true; \
+		go run github.com/flow/plugin-api/cmd/gomod-cap -to `echo $$P` -from /tmp/flow.go.mod -check=true; \
 	done
 
 check-symbol:

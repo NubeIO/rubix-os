@@ -11,11 +11,11 @@
   ],
   "swagger": "2.0",
   "info": {
-    "description": "This is the documentation of the Gotify REST-API.\n\n# Authentication\nIn Gotify there are two token types:\n__clientToken__: a client is something that receives message and manages stuff like creating new tokens or delete messages. (f.ex this token should be used for an android app)\n__appToken__: an application is something that sends messages (f.ex. this token should be used for a shell script)\n\nThe token can be either transmitted through a header named `X-Gotify-Key` or a query parameter named `token`.\nThere is also the possibility to authenticate through basic auth, this should only be used for creating a clientToken.\n\n\\---\n\nFound a bug or have some questions? [Create an issue on GitHub](https://github.com/gotify/server/issues)",
-    "title": "Gotify REST-API.",
+    "description": "This is the documentation of the flow REST-API.\n\n# Authentication\nIn flow there are two token types:\n__clientToken__: a client is something that receives message and manages stuff like creating new tokens or delete messages. (f.ex this token should be used for an android app)\n__appToken__: an application is something that sends messages (f.ex. this token should be used for a shell script)\n\nThe token can be either transmitted through a header named `X-flow-Key` or a query parameter named `token`.\nThere is also the possibility to authenticate through basic auth, this should only be used for creating a clientToken.\n\n\\---\n\nFound a bug or have some questions? [Create an issue on GitHub](https://github.com/flow/server/issues)",
+    "title": "flow REST-API.",
     "license": {
       "name": "MIT",
-      "url": "https://github.com/gotify/server/blob/master/LICENSE"
+      "url": "https://github.com/flow/server/blob/master/LICENSE"
     },
     "version": "2.0.1"
   },
@@ -2065,7 +2065,7 @@
           "example": "2018-02-27T19:36:10.5045044+01:00"
         },
         "extras": {
-          "description": "The extra data sent along the message.\n\nThe extra fields are stored in a key-value scheme. Only accepted in CreateMessage requests with application/json content-type.\n\nThe keys should be in the following format: \u0026lt;top-namespace\u0026gt;::[\u0026lt;sub-namespace\u0026gt;::]\u0026lt;action\u0026gt;\n\nThese namespaces are reserved and might be used in the official clients: gotify android ios web server client. Do not use them for other purposes.",
+          "description": "The extra data sent along the message.\n\nThe extra fields are stored in a key-value scheme. Only accepted in CreateMessage requests with application/json content-type.\n\nThe keys should be in the following format: \u0026lt;top-namespace\u0026gt;::[\u0026lt;sub-namespace\u0026gt;::]\u0026lt;action\u0026gt;\n\nThese namespaces are reserved and might be used in the official clients: flow android ios web server client. Do not use them for other purposes.",
           "type": "object",
           "additionalProperties": {
             "type": "object"
@@ -2240,7 +2240,7 @@
           "type": "string",
           "x-go-name": "ModulePath",
           "readOnly": true,
-          "example": "github.com/gotify/server/plugin/example/echo"
+          "example": "github.com/flow/server/plugin/example/echo"
         },
         "name": {
           "description": "The plugin name.",
@@ -2260,7 +2260,7 @@
           "type": "string",
           "x-go-name": "Website",
           "readOnly": true,
-          "example": "gotify.net"
+          "example": "flow.net"
         }
       },
       "x-go-name": "PluginConfExternal",
@@ -2391,7 +2391,7 @@
   "securityDefinitions": {
     "appTokenHeader": {
       "type": "apiKey",
-      "name": "X-Gotify-Key",
+      "name": "X-flow-Key",
       "in": "header"
     },
     "appTokenQuery": {
@@ -2404,7 +2404,7 @@
     },
     "clientTokenHeader": {
       "type": "apiKey",
-      "name": "X-Gotify-Key",
+      "name": "X-flow-Key",
       "in": "header"
     },
     "clientTokenQuery": {

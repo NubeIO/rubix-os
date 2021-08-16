@@ -37,7 +37,7 @@ type PluginConfExternal struct {
 	Token string `binding:"required" json:"token" query:"token" form:"token"`
 	// The module path of the plugin.
 	//
-	// example: github.com/gotify/server/plugin/example/echo
+	// example: github.com/flow/server/plugin/example/echo
 	// read only: true
 	// required: true
 	ModulePath string `json:"modulePath" form:"modulePath" query:"modulePath"`
@@ -48,7 +48,7 @@ type PluginConfExternal struct {
 	Author string `json:"author,omitempty" form:"author" query:"author"`
 	// The website of the plugin.
 	//
-	// example: gotify.net
+	// example: flow.net
 	// read only: true
 	Website string `json:"website,omitempty" form:"website" query:"website"`
 	// The license of the plugin.

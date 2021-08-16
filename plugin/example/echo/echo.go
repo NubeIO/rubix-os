@@ -12,30 +12,27 @@ import (
 	"time"
 )
 
-
 var (
- 	client  *modbus.ModbusClient
-	err      error
+	client *modbus.ModbusClient
+	err    error
 )
-
-
 
 func startServer() {
 	client, err = modbus.NewClient(&modbus.ClientConfiguration{
-		URL:      "tcp://192.168.15.202:502",
-		Timeout:  1 * time.Second,
+		URL:     "tcp://192.168.15.202:502",
+		Timeout: 1 * time.Second,
 	})
 }
 
-// GetGotifyPluginInfo returns gotify plugin info.
-func GetGotifyPluginInfo() plugin.Info {
+// GetFlowPluginInfo returns flow plugin info.
+func GetFlowPluginInfo() plugin.Info {
 	return plugin.Info{
 		ModulePath: "test",
 		Name:       "test plugin",
 	}
 }
 
-// EchoPlugin is the gotify plugin instance.
+// EchoPlugin is the flow plugin instance.
 type EchoPlugin struct {
 	msgHandler     plugin.MessageHandler
 	storageHandler plugin.StorageHandler
@@ -87,10 +84,9 @@ func (c *EchoPlugin) Enable() error {
 	if err != nil {
 		log.Println("GetNetworks GetNetworks ERROR", 9999999, err)
 	}
-	log.Println("GetNetworks GetNetworks GetNetworks", 9999999,networks)
+	log.Println("GetNetworks GetNetworks GetNetworks", 9999999, networks)
 	return nil
 }
-
 
 // GetNetworks disables the plugin.
 func (c *EchoPlugin) GetNetworks() ([]*model.Network, error) {
@@ -154,7 +150,6 @@ func (c *EchoPlugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 
 	g.GET("/echo2", func(ctx *gin.Context) {
 
-
 		if err != nil {
 			// error out if we failed to connect/open the device
 			// note: multiple Open() attempts can be made on the same client until
@@ -164,8 +159,8 @@ func (c *EchoPlugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 		}
 
 		// read a single 16-bit holding register at address 100
-		var reg16   uint16
-		reg16, err  = client.ReadRegister(0, modbus.HOLDING_REGISTER)
+		var reg16 uint16
+		reg16, err = client.ReadRegister(0, modbus.HOLDING_REGISTER)
 		if err != nil {
 			// error out
 		} else {
@@ -174,8 +169,6 @@ func (c *EchoPlugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 			fmt.Println("value: %v", float64(reg16)) // as signed integer
 			ctx.JSON(202, reg16)
 		}
-
-
 
 	})
 }
@@ -195,13 +188,12 @@ func (c *EchoPlugin) GetDisplay(location *url.URL) string {
 	return "Echo plugin running at: " + loc.String()
 }
 
-// NewGotifyPluginInstance creates a plugin instance for a user context.
-func NewGotifyPluginInstance(ctx plugin.UserContext) plugin.Plugin {
+// NewFlowPluginInstance creates a plugin instance for a user context.
+func NewFlowPluginInstance(ctx plugin.UserContext) plugin.Plugin {
 	if client == nil {
 		startServer()
 		err = client.Open()
 	}
-
 
 	return &EchoPlugin{}
 }
