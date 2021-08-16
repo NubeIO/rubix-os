@@ -17,7 +17,7 @@ func main() {
 		SetHeader("Content-Type", "application/json").
 		SetBody(`{"name":"admin"}`).
 		SetBasicAuth("admin", "admin").
-		Post("http://0.0.0.0:8888/client")
+		Post("http://0.0.0.0:1660/client")
 	if err != nil {
 		log.Println("getToken err:", err, getToken.Status())
 	}
@@ -29,7 +29,7 @@ func main() {
 	//GET TOKEN
 	user, err := client.NewRequest().
 		SetHeader("Authorization", token).
-		Get("http://0.0.0.0:8888/user")
+		Get("http://0.0.0.0:1660/user")
 	if err != nil {
 		log.Println("user err:", err, user.Status())
 	}
@@ -42,7 +42,7 @@ func main() {
 	addNetwork, err := client.NewRequest().
 		SetHeader("Authorization", token).
 		SetBody(map[string]interface{}{"name": name, "description": "description"}).
-		Post("http://0.0.0.0:8888/api/networks")
+		Post("http://0.0.0.0:1660/api/networks")
 	if err != nil {
 		log.Println("addNetwork err:", err, addNetwork.Status())
 	}
@@ -57,7 +57,7 @@ func main() {
 		SetPathParams(map[string]string{
 			"uuid": getNetworkUUID,
 		}).
-		Get("http://0.0.0.0:8888/api/networks/{uuid}")
+		Get("http://0.0.0.0:1660/api/networks/{uuid}")
 	if err != nil {
 		log.Println("addNetwork err:", err, getNetwork.Status())
 	}
@@ -71,7 +71,7 @@ func main() {
 		SetPathParams(map[string]string{
 			"uuid": getNetworkUUID,
 		}).
-		Patch("http://0.0.0.0:8888/api/networks/{uuid}")
+		Patch("http://0.0.0.0:1660/api/networks/{uuid}")
 	if err != nil {
 		log.Println("editNetwork err:", err, editNetwork.Status())
 	}
@@ -84,7 +84,7 @@ func main() {
 		SetPathParams(map[string]string{
 			"uuid": getNetworkUUID,
 		}).
-		Delete("http://0.0.0.0:8888/api/networks/{uuid}")
+		Delete("http://0.0.0.0:1660/api/networks/{uuid}")
 	if err != nil {
 		log.Println("deleteNetwork err:", err, deleteNetwork.Status())
 	}
