@@ -9,8 +9,7 @@ var networkModel *model.Network
 var deviceChildTable = "Device"
 
 // GetNetworks returns all networks.
-func (d *GormDatabase) GetNetworks() ([]*model.Network, error) {
-	withChildren := true
+func (d *GormDatabase) GetNetworks(withChildren bool, withPoints bool) ([]*model.Network, error) {
 	if withChildren { // drop child to reduce json size
 		query := d.DB.Preload("Device").Find(&networksModel)
 		if query.Error != nil {
@@ -28,8 +27,7 @@ func (d *GormDatabase) GetNetworks() ([]*model.Network, error) {
 }
 
 // GetNetwork returns the network for the given id or nil.
-func (d *GormDatabase) GetNetwork(uuid string) (*model.Network, error) {
-	withChildren := false
+func (d *GormDatabase) GetNetwork(uuid string, withChildren bool, withPoints bool) (*model.Network, error) {
 	if withChildren { // drop child to reduce json size
 		query := d.DB.Where("uuid = ? ", uuid).Preload(deviceChildTable).First(&networkModel)
 		if query.Error != nil {
@@ -37,7 +35,7 @@ func (d *GormDatabase) GetNetwork(uuid string) (*model.Network, error) {
 		}
 		return networkModel, nil
 	} else {
-		query := d.DB.Where("uuid = ? ", uuid).Find(&networkModel)
+		query := d.DB.Where("uuid = ? ", uuid).First(&networkModel)
 		if query.Error != nil {
 			return nil, query.Error
 		}
@@ -50,10 +48,6 @@ func (d *GormDatabase) CreateNetwork(network *model.Network) error {
 	n := d.DB.Create(network).Error
 	return n
 }
-
-
-
-
 
 // UpdateNetwork returns the network for the given id or nil.
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {

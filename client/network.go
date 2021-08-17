@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/helpers"
+	"github.com/NubeDev/flow-framework/utils"
 	"github.com/go-resty/resty/v2"
 	"github.com/tidwall/gjson"
 	"log"
@@ -40,7 +41,7 @@ func main() {
 	}
 	//log.Println("user:", user, "status", user.Status())
 
-	name, _ := helpers.MakeUUID()
+	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("name_%s", name)
 
 	//ADD NETWORK

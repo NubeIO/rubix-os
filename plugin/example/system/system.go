@@ -89,6 +89,15 @@ func (c *SystemPlugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 		ctx.JSON(202, time.Now().Format(time.RFC850))
 
 	})
+	g.GET("/time2", func(ctx *gin.Context) {
+		ctx.JSON(202, time.Now().Format(time.RFC850))
+
+	})
+	g.GET("/time/new", func(ctx *gin.Context) {
+		ctx.JSON(202, time.Now().Format(time.RFC850))
+
+	})
+
 
 }
 

@@ -25,7 +25,7 @@ func (c dbStorageHandler) Load() ([]byte, error) {
 }
 
 func (c dbStorageHandler) GetNet() ([]*model.Network, error) {
-	net, err := c.db.GetNetworks()
+	net, err := c.db.GetNetworks(false, false)
 	if err != nil {
 		return nil, err
 	}

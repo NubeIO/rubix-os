@@ -27,8 +27,8 @@ type Point struct {
 	DeviceUuid     				string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	CommonPoint
 	//EquipRef 					[]EquipRef `json:"equip_ref" gorm:"default:null"`
-	//PriorityArrayModel 			PriorityArrayModel `json:"priority_array" gorm:"constraint:OnDelete:CASCADE"`
-	//PointStore 					PointStore `json:"point_store" gorm:"constraint:OnDelete:CASCADE"`
+	PriorityArrayModel 			PriorityArrayModel `json:"priority_array" gorm:"constraint:OnDelete:CASCADE"`
+	PointStore 					PointStore `json:"point_store" gorm:"constraint:OnDelete:CASCADE"`
 }
 
 
