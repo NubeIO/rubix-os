@@ -45,6 +45,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	deviceHandler := api.DeviceAPI{
 		DB: db,
 	}
+	pointHandler := api.PointAPI{
+		DB: db,
+	}
 	pluginManager, err := plugin.NewManager(db, conf.PluginsDir, g.Group("/plugin/:id/custom/"), streamHandler)
 	if err != nil {
 		panic(err)
@@ -186,6 +189,13 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.GET("/devices/:uuid", deviceHandler.GetDevice)
 		control.PATCH("/devices/:uuid", deviceHandler.UpdateDevice)
 		control.DELETE("/devices/:uuid", deviceHandler.DeleteDevice)
+
+
+		control.GET("/points", pointHandler.GetPoints)
+		control.POST("/points", pointHandler.CreatePoint)
+		control.GET("/points/:uuid", pointHandler.GetPoint)
+		control.PATCH("/points/:uuid", pointHandler.UpdatePoint)
+		control.DELETE("/points/:uuid", pointHandler.DeletePoint)
 
 	}
 

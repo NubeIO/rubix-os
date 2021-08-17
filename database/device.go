@@ -1,9 +1,8 @@
 package database
 
 import (
-	"fmt"
-	"github.com/NubeDev/flow-framework/helpers"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/utils"
 )
 
 
@@ -13,17 +12,15 @@ var pointChildTable = "Point"
 
 
 // GetDevices returns all devices.
-func (d *GormDatabase) GetDevices() ([]*model.Device, error) {
-	withChildren := false
+func (d *GormDatabase) GetDevices(withPoints bool) ([]*model.Device, error) {
+	withChildren := true
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload("Point").Find(&devicesModel)
-		if query.Error != nil {
+		query := d.DB.Preload("Point").Find(&devicesModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return devicesModel, nil
 	} else {
-		query := d.DB.Find(&devicesModel)
-		if query.Error != nil {
+		query := d.DB.Find(&devicesModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return devicesModel, nil
@@ -32,17 +29,15 @@ func (d *GormDatabase) GetDevices() ([]*model.Device, error) {
 }
 
 // GetDevice returns the device for the given id or nil.
-func (d *GormDatabase) GetDevice(uuid string) (*model.Device, error) {
-	withChildren := false
+func (d *GormDatabase) GetDevice(uuid string, withPoints bool) (*model.Device, error) {
+	withChildren := true
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Where("uuid = ? ", uuid).Preload(pointChildTable).First(&deviceModel)
-		if query.Error != nil {
+		query := d.DB.Where("uuid = ? ", uuid).Preload(pointChildTable).First(&deviceModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return deviceModel, nil
 	} else {
-		query := d.DB.Where("uuid = ? ", uuid).Find(&deviceModel)
-		if query.Error != nil {
+		query := d.DB.Where("uuid = ? ", uuid).First(&deviceModel); if query.Error != nil {
 			return nil, query.Error
 		}
 		return deviceModel, nil
@@ -51,15 +46,11 @@ func (d *GormDatabase) GetDevice(uuid string) (*model.Device, error) {
 
 // CreateDevice creates a device.
 func (d *GormDatabase) CreateDevice(device *model.Device, body *model.Device) error {
-	//c := d.DB.Create(device).Error
-	fmt.Println(22222)
-	body.Uuid, _ = helpers.MakeUUID()
+	body.Uuid, _ = utils.MakeUUID()
 	networkUUID := body.NetworkUuid
-	fmt.Println(body.Uuid, networkUUID)
 	query := d.DB.Where("uuid = ? ", networkUUID).First(&networkModel);if query.Error != nil {
 		return query.Error
 	}
-	fmt.Println(333333)
 	if err := d.DB.Create(&body).Error; err != nil {
 		return query.Error
 	}
@@ -69,12 +60,10 @@ func (d *GormDatabase) CreateDevice(device *model.Device, body *model.Device) er
 
 // UpdateDevice returns the device for the given id or nil.
 func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
-	query := d.DB.Where("uuid = ?", uuid).Find(&deviceModel)
-	if query.Error != nil {
+	query := d.DB.Where("uuid = ?", uuid).Find(&deviceModel);if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&deviceModel).Updates(body)
-	if query.Error != nil {
+	query = d.DB.Model(&deviceModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
 	return deviceModel, nil
@@ -83,8 +72,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 
 // DeleteDevice delete a Device.
 func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&deviceModel)
-	if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&deviceModel);if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected

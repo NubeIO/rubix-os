@@ -31,6 +31,8 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var Network []model.Network
 	var Device []model.Device
 	var Point []model.Point
+	var PointStore []model.PointStore
+	var priorityArrayModel []model.PriorityArrayModel
 	var models = []interface{}{
 		&User,
 		&Application,
@@ -40,6 +42,8 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&Network,
 		&Device,
 		&Point,
+		&PointStore,
+		&priorityArrayModel,
 	}
 
 	for _, v := range models {
