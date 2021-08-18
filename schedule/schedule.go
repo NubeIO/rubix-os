@@ -17,6 +17,9 @@ https://github.com/teambition/rrule-go TODO add in events
 
 TODO add in a master/global schedule feature
 
+Existing JSON
+{"events":{"2ee2a7b9-cf34-4b6d-b9d3-819c33d86040":{"name":"Back-Zone-1","dates":[{"start":"2021-08-21T13:45:00.000Z","end":"2021-08-21T17:45:00.000Z"}],"value":20,"color":"#9013fe"}},"weekly":{"33874fa3-dc9b-42de-a358-5bf83b2b1f1e":{"name":"Front-Zone-1","days":["sunday","monday","tuesday","wednesday","thursday","friday","saturday"],"start":"17:00","end":"03:00","value":20,"color":"#d0021b"}},"holiday":{}}
+
  */
 
 
@@ -27,14 +30,14 @@ const AnsiFormat = "1504"
 type IntervalJSONEncoding struct {
 	Start    string `json:"start"`
 	Duration string `json:"duration"`
-	Label    string `json:"label"`
+	name    string `json:"name"`
 }
 
 // IntervalValue Identifies unique intervals in the ScheduleDefinition
 type IntervalValue struct {
 	start time.Time
 	end   time.Time
-	label string
+	name string
 }
 
 // ByStart Declarations and functions required for IntervalValue sorting
@@ -45,7 +48,7 @@ func (a ByStart) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByStart) Less(i, j int) bool { return a[i].start.Before(a[j].start) }
 
 func (iv IntervalValue) String() string {
-	return fmt.Sprintf("%s: %s ---> %s", iv.label, iv.start, iv.end)
+	return fmt.Sprintf("%s: %s ---> %s", iv.name, iv.start, iv.end)
 }
 
 // A Definition represents intervals which comprise a weekly schedule, calculated from a prototypical definition.
@@ -112,9 +115,9 @@ func (sd *Definition) loadNew(t time.Time) (err error) {
 			}
 			duration -= 1 * time.Second
 			eventEnd := eventStart.Add(duration)
-			sd.Intervals = append(sd.Intervals, IntervalValue{eventStart, eventEnd, interval.Label})
+			sd.Intervals = append(sd.Intervals, IntervalValue{eventStart, eventEnd, interval.name})
 		}
-		epoch = epoch.Add(time.Duration(24 * time.Hour))
+		epoch = epoch.Add(24 * time.Hour)
 	}
 	sort.Sort(ByStart(sd.Intervals))
 	sd.first = sd.Intervals[0].start
@@ -150,7 +153,7 @@ func (sd *Definition) Within(t time.Time) bool {
 }
 
 // MatchingIntervals Returns all matching intervals in the weekly schedule based on the supplied time. schedule allows overlapping
-// intervals (events)–you can differentiate intervals using the "Label" attribute.
+// intervals (events)–you can differentiate intervals using the "name" attribute.
 func (sd *Definition) MatchingIntervals(t time.Time) []IntervalValue {
 	var a []IntervalValue
 	for _, v := range sd.Intervals {

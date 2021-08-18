@@ -3,43 +3,43 @@
   "schedule": {
     "mon":
     [
-      { "label": "event1", "start": "0800", "duration": "4h" },
-      { "label": "event1", "start": "1245", "duration": "4h15m" },
-      { "label": "event2", "start": "1700", "duration": "4h" },
-      { "label": "event2", "start": "2330", "duration": "4h15m" }
+      { "name": "event1", "start": "0800", "duration": "4h" },
+      { "name": "event1", "start": "1245", "duration": "4h15m" },
+      { "name": "event2", "start": "1700", "duration": "4h" },
+      { "name": "event2", "start": "2330", "duration": "4h15m" }
     ],
     "tue":
     [
-      { "label": "event1", "start": "0500", "duration": "0h15m" },
-      { "label": "event1", "start": "0500", "duration": "4h15m" },
-      { "label": "event2", "start": "1700", "duration": "4h" },
-      { "label": "event2", "start": "2330", "duration": "4h15m" }
+      { "name": "event1", "start": "0500", "duration": "0h15m" },
+      { "name": "event1", "start": "0500", "duration": "4h15m" },
+      { "name": "event2", "start": "1700", "duration": "4h" },
+      { "name": "event2", "start": "2330", "duration": "4h15m" }
     ],
     "wed":
     [
-      { "label": "event1", "start": "0800", "duration": "0h15m" },
-      { "label": "event1", "start": "1245", "duration": "4h15m" },
-      { "label": "event2", "start": "1700", "duration": "4h" },
-      { "label": "event2", "start": "2330", "duration": "4h15m" }
+      { "name": "event1", "start": "0800", "duration": "0h15m" },
+      { "name": "event1", "start": "1245", "duration": "4h15m" },
+      { "name": "event2", "start": "1700", "duration": "4h" },
+      { "name": "event2", "start": "2330", "duration": "4h15m" }
     ],
     "thu":
     [
-      { "label": "event1", "start": "0500", "duration": "0h15m" },
-      { "label": "event1", "start": "1001", "duration": "1h0m" },
-      { "label": "event2", "start": "1700", "duration": "4h" },
-      { "label": "event2", "start": "2330", "duration": "4h15m" }
+      { "name": "event1", "start": "0500", "duration": "0h15m" },
+      { "name": "event1", "start": "1001", "duration": "1h0m" },
+      { "name": "event2", "start": "1700", "duration": "4h" },
+      { "name": "event2", "start": "2330", "duration": "4h15m" }
     ],
     "fri":
     [
-      { "label": "event1", "start": "0800", "duration": "4h" },
-      { "label": "event1", "start": "1245", "duration": "4h15m" },
-      { "label": "event2", "start": "1700", "duration": "4h" },
-      { "label": "event2", "start": "2330", "duration": "4h15m" }
+      { "name": "event1", "start": "0800", "duration": "4h" },
+      { "name": "event1", "start": "1245", "duration": "4h15m" },
+      { "name": "event2", "start": "1700", "duration": "4h" },
+      { "name": "event2", "start": "2330", "duration": "4h15m" }
     ],
     "sat":
     [
-      { "label": "event1", "start": "1500", "duration": "4h" },
-      { "label": "event2", "start": "1400", "duration": "4h" }
+      { "name": "event1", "start": "1500", "duration": "4h" },
+      { "name": "event2", "start": "1400", "duration": "4h" }
     ],
     "sun":
     []

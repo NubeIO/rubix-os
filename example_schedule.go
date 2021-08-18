@@ -9,6 +9,8 @@ import (
 )
 
 
+
+
 func TestOverlappingIntervals(weekday time.Weekday) (bool, []schedule.IntervalValue)  {
 	json, err := ioutil.ReadFile("./schedule/test_overlap.json")
 	if err != nil {
@@ -64,6 +66,6 @@ func main()  {
 	o, oo := TestOverlappingIntervals(time.Monday)
 	fmt.Println(oo)
 	fmt.Println(o, "is an overlap if its true")
-	//EventCheckLoop()
+	EventCheckLoop()
 
 }
