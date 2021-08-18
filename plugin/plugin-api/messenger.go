@@ -1,11 +1,20 @@
 package plugin
 
+import "github.com/NubeDev/flow-framework/model"
+
 // Message describes a message to be send by MessageHandler#SendMessage
+
 type Message struct {
-	Message  string
-	Title    string
-	Priority int
-	Extras   map[string]interface{}
+	Message  		string
+	MessageType   		model.MessageType
+	IsProtocol    		bool
+	DriverType    		model.DriverType
+	ProtocolType    	model.ProtocolType
+	Protocol    		model.Protocol
+	WriteableNetwork 	model.WriteableNetwork
+	Title    		string
+	Priority 		int
+	Extras   		map[string]interface{}
 }
 
 // MessageHandler consists of message callbacks to be used by plugins.
