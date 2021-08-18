@@ -3,8 +3,8 @@ module github.com/NubeDev/flow-framework
 require (
 	github.com/NubeDev/configor v0.0.2
 	github.com/NubeDev/location v0.0.2
-	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.0.7 // indirect
-	github.com/eclipse/paho.mqtt.golang v1.3.5 // indirect
+	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.0.7
+	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-playground/validator/v10 v10.4.1
@@ -13,6 +13,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/h2non/filetype v1.1.1
 	github.com/simonvetter/modbus v1.3.0
+	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.8.1
 	github.com/tidwall/pretty v1.2.0 // indirect
