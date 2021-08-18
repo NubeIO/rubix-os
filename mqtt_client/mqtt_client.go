@@ -4,13 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/utils"
+	"github.com/eclipse/paho.mqtt.golang"
 	"log"
 	"os"
 	"os/signal"
 	"time"
-
-	"github.com/eclipse/paho.mqtt.golang"
-	//log "github.com/sirupsen/logrus"
 )
 
 
@@ -47,19 +45,6 @@ type Client struct {
 	subscriptions []subscription
 }
 
-//Handler function type
-//type Handler func(m *Mqtt, topic, msg string)
-
-
-//Handler function type
-type Handler func(m *Mqtt, topic, msg string)
-
-//Mqtt client
-type Mqtt struct {
-	URL    string
-	on     Handler
-}
-
 
 // ClientOptions is the list of options used to create c client
 type ClientOptions struct {
@@ -93,13 +78,9 @@ func (c *Client) Subscribe(topic string, qos QOS, handler mqtt.MessageHandler) (
 	if token.Error() != nil {
 		return token.Error()
 	}
-
-	log.Println()
-	//log.WithFields(log.Fields).Info("Subscribe")
 	c.subscriptions = append(c.subscriptions, subscription{topic, handler})
 	return nil
 }
-
 
 // Unsubscribe unsubscribes from a certain topic and errors if this fails.
 func (c *Client) Unsubscribe(topic string) error {
@@ -109,7 +90,6 @@ func (c *Client) Unsubscribe(topic string) error {
 	}
 	return token.Error()
 }
-
 
 //// SubscribeMultiple subscribes to multiple topics and errors if this fails.
 //func (c *Client) SubscribeMultiple(ctx context.Context, subscriptions map[string]QOS) error {
@@ -121,8 +101,6 @@ func (c *Client) Unsubscribe(topic string) error {
 //	err := tokenWithContext(ctx, token)
 //	return err
 //}
-
-
 
 // Publish things
 func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) (err error) {
@@ -147,7 +125,7 @@ func NewClient(options ClientOptions) (c *Client) {
 			opts.AddBroker(server)
 		}
 	} else {
-		log.Println("min one server is required")
+		topicLog{"error", "min one server is required", nil}.printLog()
 	}
 
 	if options.ClientID == "" {
@@ -170,12 +148,7 @@ func NewClient(options ClientOptions) (c *Client) {
 	opts.SetKeepAlive(options.SetKeepAlive * time.Second)
 	opts.SetPingTimeout(options.SetPingTimeout * time.Second)
 
-
-	//book.PrintLog()
-
-
 	opts.OnConnectionLost = func(c mqtt.Client, err error) {
-
 		topicLog{"error", "Lost connection", nil}.printLog()
 	}
 	opts.OnConnect = func(cc mqtt.Client) {
