@@ -57,8 +57,8 @@ type Manager struct {
 
 func messageType(t string) string{
 	switch t {
-	case model.DriverTypeEnum.Serial:
-		return model.DriverTypeEnum.Serial
+	case model.DriverTypeEnum.IP:
+		return model.DriverTypeEnum.IP
 	}
 	return "none"
 }
@@ -73,10 +73,8 @@ func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier No
 		db:        db,
 		mux:       mux,
 	}
-
 	go func() {
 		for {
-
 			message := <-manager.messages
 			internalMsg := &model.Message{
 				ApplicationID: 			message.Message.ApplicationID,
@@ -112,7 +110,6 @@ func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier No
 	if err := manager.loadPlugins(directory); err != nil {
 		return nil, err
 	}
-
 	users, err := manager.db.GetUsers()
 	if err != nil {
 		return nil, err
@@ -122,7 +119,6 @@ func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier No
 			return nil, err
 		}
 	}
-
 	return manager, nil
 }
 
