@@ -152,6 +152,12 @@ type PluginV1MessageHandler struct {
 func (c *PluginV1MessageHandler) SendMessage(msg papiv1.Message) error {
 	return c.WrapperHandler.SendMessage(Message{
 		Message:  msg.Message,
+		MessageType:   			msg.MessageType,
+		IsProtocol:    			msg.IsProtocol,
+		DriverType:    			msg.DriverType,
+		ProtocolType:    		msg.ProtocolType,
+		Protocol:    			msg.Protocol,
+		WriteableNetwork: 		msg.WriteableNetwork,
 		Priority: msg.Priority,
 		Title:    msg.Title,
 		Extras:   msg.Extras,

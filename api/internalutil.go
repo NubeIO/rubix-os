@@ -22,7 +22,7 @@ type Args struct {
 	Limit  			string
 	Search 			string
 	WithChildren 	string
-	WithPoints          string
+	WithPoints      string
 }
 
 
@@ -35,11 +35,11 @@ var ArgsType = struct {
 	WithChildren 		string
 	WithPoints          string
 }{
-	Sort:   			"Sort",
-	Order:   			"Order",
-	Offset:   			"Offset",
-	Limit:   			"Limit",
-	Search:   			"Search",
+	Sort:   			"sort",
+	Order:   			"order",
+	Offset:   			"offset",
+	Limit:   			"limit",
+	Search:   			"search",
 	WithChildren:   	"with_children",
 	WithPoints:   		"with_points",
 }

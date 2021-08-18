@@ -87,8 +87,14 @@ type StorageHandler interface {
 
 // Message describes a message to be sent by MessageHandler#SendMessage.
 type Message struct {
-	Message  string
-	Title    string
-	Priority int
-	Extras   map[string]interface{}
+	Message  			string
+	MessageType   		model.MessageType
+	IsProtocol    		bool
+	DriverType    		model.DriverType
+	ProtocolType 		model.ProtocolType
+	Protocol			model.Protocol
+	WriteableNetwork 	model.WriteableNetwork
+	Title    			string
+	Priority 			int
+	Extras   			map[string]interface{}
 }

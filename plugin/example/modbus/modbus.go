@@ -126,11 +126,14 @@ func (c *EchoPlugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 		conf.CalledTimes++
 		newStorage, _ := json.Marshal(conf)
 		c.storageHandler.Save(newStorage)
-
 		c.msgHandler.SendMessage(plugin.Message{
-			Title:    "Hello received",
-			Message:  fmt.Sprintf("echo server received a hello message %d times", conf.CalledTimes),
-			Priority: 2,
+			Title:       "Hello received",
+			MessageType: model.MessageType(model.MessageTypeEnum.General),
+			IsProtocol: true,
+			DriverType: model.DriverType(model.DriverTypeEnum.Serial),
+			WriteableNetwork: true,
+			Message:     fmt.Sprintf("echo server received a hello message %d times", conf.CalledTimes),
+			Priority:    2,
 			Extras: map[string]interface{}{
 				"plugin::name": "echo",
 			},

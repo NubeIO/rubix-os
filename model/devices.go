@@ -1,7 +1,6 @@
 package model
 
 
-
 type CommonDevice struct {
 	Manufacture 	string `json:"manufacture"` // nube
 	DeviceType		string `json:"device_type"` // droplet

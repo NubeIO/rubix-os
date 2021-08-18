@@ -19,16 +19,23 @@ type MessageWithUserID struct {
 	UserID  uint
 }
 
+
 // SendMessage sends a message to the underlying message channel.
 func (c redirectToChannel) SendMessage(msg compat.Message) error {
 	c.Messages <- MessageWithUserID{
 		Message: model.MessageExternal{
 			ApplicationID: c.ApplicationID,
-			Message:       msg.Message,
-			Title:         msg.Title,
-			Priority:      msg.Priority,
-			Date:          time.Now(),
-			Extras:        msg.Extras,
+			Message:       	msg.Message,
+			MessageType:   	msg.MessageType,
+			IsProtocol:   	msg.IsProtocol,
+			DriverType:   	msg.DriverType,
+			ProtocolType:  	msg.ProtocolType,
+			Protocol:   	msg.Protocol,
+			WriteableNetwork:   msg.WriteableNetwork,
+			Title:         		msg.Title,
+			Priority:      		msg.Priority,
+			Date:          		time.Now(),
+			Extras:       		msg.Extras,
 		},
 		UserID: c.UserID,
 	}

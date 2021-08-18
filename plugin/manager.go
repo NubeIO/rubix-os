@@ -55,6 +55,14 @@ type Manager struct {
 	mux       *gin.RouterGroup
 }
 
+func messageType(t string) string{
+	switch t {
+	case model.DriverTypeEnum.IP:
+		return model.DriverTypeEnum.IP
+	}
+	return "none"
+}
+
 // NewManager created a Manager from configurations.
 func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier Notifier) (*Manager, error) {
 	manager := &Manager{
@@ -65,21 +73,35 @@ func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier No
 		db:        db,
 		mux:       mux,
 	}
-
 	go func() {
 		for {
 			message := <-manager.messages
 			internalMsg := &model.Message{
-				ApplicationID: message.Message.ApplicationID,
-				Title:         message.Message.Title,
-				Priority:      message.Message.Priority,
-				Date:          message.Message.Date,
-				Message:       message.Message.Message,
+				ApplicationID: 			message.Message.ApplicationID,
+				MessageType:         	message.Message.MessageType,
+				IsProtocol:         	message.Message.IsProtocol,
+				DriverType:         	message.Message.DriverType,
+				ProtocolType:         	message.Message.ProtocolType,
+				Protocol:         		message.Message.Protocol,
+				WriteableNetwork:       message.Message.WriteableNetwork,
+				Title:         			message.Message.Title,
+				Priority:      			message.Message.Priority,
+				Date:          			message.Message.Date,
+				Message:       			message.Message.Message,
 			}
+
+			msg, _ := json.MarshalIndent(message, "", "\t")
+			fmt.Println(message.Message.DriverType)
+			fmt.Println(message.Message.DriverType)
+			fmt.Println(message.Message.DriverType)
+			log.Println("send message", string(msg), messageType(string(message.Message.DriverType)))
 			if message.Message.Extras != nil {
 				internalMsg.Extras, _ = json.Marshal(message.Message.Extras)
 			}
-			db.CreateMessage(internalMsg)
+			err := db.CreateMessage(internalMsg)
+			if err != nil {
+				log.Println("error on send message", internalMsg.Title)
+			}
 			message.Message.ID = internalMsg.ID
 			notifier.Notify(message.UserID, &message.Message)
 		}
@@ -88,7 +110,6 @@ func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier No
 	if err := manager.loadPlugins(directory); err != nil {
 		return nil, err
 	}
-
 	users, err := manager.db.GetUsers()
 	if err != nil {
 		return nil, err
@@ -98,7 +119,6 @@ func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier No
 			return nil, err
 		}
 	}
-
 	return manager, nil
 }
 
@@ -171,7 +191,7 @@ func (m *Manager) PluginInfo(modulePath string) compat.Info {
 	if p, ok := m.plugins[modulePath]; ok {
 		return p.PluginInfo()
 	}
-	fmt.Println("Could not get plugin info for", modulePath)
+	log.Println("Could not get plugin info for", modulePath)
 	return compat.Info{
 		Name:        "UNKNOWN",
 		ModulePath:  modulePath,
