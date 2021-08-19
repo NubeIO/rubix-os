@@ -7,6 +7,7 @@ require (
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.7.4
+	github.com/go-co-op/gocron v1.7.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/gobuffalo/packr/v2 v2.7.1

@@ -48,6 +48,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	pointHandler := api.PointAPI{
 		DB: db,
 	}
+	jobHandler := api.JobAPI{
+		DB: db,
+	}
+	jobHandler.NewJobEngine()
 	pluginManager, err := plugin.NewManager(db, conf.PluginsDir, g.Group("/plugin/:id/custom/"), streamHandler)
 	if err != nil {
 		panic(err)
@@ -190,12 +194,18 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/devices/:uuid", deviceHandler.UpdateDevice)
 		control.DELETE("/devices/:uuid", deviceHandler.DeleteDevice)
 
-
 		control.GET("/points", pointHandler.GetPoints)
 		control.POST("/points", pointHandler.CreatePoint)
 		control.GET("/points/:uuid", pointHandler.GetPoint)
 		control.PATCH("/points/:uuid", pointHandler.UpdatePoint)
 		control.DELETE("/points/:uuid", pointHandler.DeletePoint)
+
+		control.GET("/jobs", jobHandler.GetJobs)
+		control.POST("/jobs", jobHandler.CreateJob)
+		control.GET("/jobs/:uuid", jobHandler.GetJob)
+		control.PATCH("/jobs/:uuid", jobHandler.UpdateJob)
+		control.DELETE("/jobs/:uuid", jobHandler.DeleteJob)
+
 
 	}
 
