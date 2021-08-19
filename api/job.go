@@ -1,17 +1,17 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
-	"github.com/robfig/cron/v3"
+	"github.com/go-co-op/gocron"
 	"log"
 	"net/http"
-	"strconv"
 	"time"
 )
 
-var CRON  *cron.Cron
+var CRON  *gocron.Scheduler
 
 // The JobDatabase interface for encapsulating database access.
 type JobDatabase interface {
@@ -24,9 +24,7 @@ type JobDatabase interface {
 }
 type JobAPI struct {
 	DB JobDatabase
-	c   *cron.Cron
 }
-var jobModel *model.Job
 
 func (j *JobAPI) GetJobs(ctx *gin.Context) {
 	q, err := j.DB.GetJobs()
@@ -43,6 +41,11 @@ func (j *JobAPI) CreateJob(ctx *gin.Context) {
 	if success := successOrAbort(ctx, http.StatusInternalServerError, j.DB.CreateJob(body)); !success {
 		return
 	}
+	err := j.jobAdd(body.UUID, body)
+	if err != nil {
+		res := BadEntity(err.Error())
+		ctx.JSON(res.GetStatusCode(), res.GetResponse())
+	}
 	ctx.JSON(http.StatusOK, body)
 
 }
@@ -52,7 +55,7 @@ func (j *JobAPI) UpdateJob(ctx *gin.Context) {
 	body, _ := getBODYJobs(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.UpdateJob(uuid, body)
-	err = j.jobAdd(body)
+	err = j.jobAdd(uuid, body)
 	if err != nil {
 		res := BadEntity(err.Error())
 		ctx.JSON(res.GetStatusCode(), res.GetResponse())
@@ -77,7 +80,7 @@ func (j *JobAPI) GetJob(ctx *gin.Context) {
 func (j *JobAPI) DeleteJob(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteJob(uuid)
-	j.jobRemover(uuid)
+	err = j.jobRemover(uuid)
 	if err != nil {
 		res := BadEntity(err.Error())
 		ctx.JSON(res.GetStatusCode(), res.GetResponse())
@@ -86,73 +89,45 @@ func (j *JobAPI) DeleteJob(ctx *gin.Context) {
 	ctx.JSON(res.GetStatusCode(), res.GetResponse())
 }
 
-
-
-
 func (j *JobAPI) initCron() {
-	CRON = cron.New()
-	CRON.Start()
+	CRON = 	gocron.NewScheduler(time.UTC)
+	CRON.StartAsync()
 
 }
 
-
-
-func (j *JobAPI) jobAdd(body *model.Job) error {
+func (j *JobAPI) jobAdd(uuid string, body *model.Job) error {
+	if body.Frequency == "" {
+		return errors.New("invalid time frequency, example 5m")
+	}
 	if body.IsActive {
-		//create cron job
-		entryID, err := CRON.AddJob(body.Frequency, body)
+		_, err := CRON.Every(body.Frequency).Tag(uuid).Do(taskWithParams, uuid, "hello")
 		if err != nil {
 			return err
 		}
-		body.CronEntryID = int(entryID)
-
 	}
 	return nil
 
 }
 
+func taskWithParams(a string, b string) {
+	fmt.Println(time.Now().Format(time.RFC850))
+	fmt.Println(a, b)
+}
 
-func (j *JobAPI) jobRemover(id string) {
-	value, err := strconv.ParseInt(id, 0, 64)
+func (j *JobAPI) jobRemover(uuid string) error {
+	err := CRON.RemoveByTag(uuid)
 	if err != nil {
-		log.Printf("jobRemover %v error \n\n", id)
+		log.Printf("job %v was NOT removed \n\n", uuid)
+		return errors.New("error on remove job")
 	}
-	CRON.Remove(cron.EntryID(value))
-	log.Printf("entry %v is expired and removed \n\n", id)
+	log.Printf("job %v was removed \n\n", uuid)
+	return nil
+
 }
-
-
-func (j *JobAPI) jobsRemover() {
-	for id:=range model.RemoveJob {
-		CRON.Remove(cron.EntryID(id))
-		log.Printf("entry %v is expired and removed \n",id)
-	}
-}
-
 
 func (j *JobAPI) NewJobEngine() {
 	j.initCron()
-	log.Println("recovering from database if any job exists and not expired")
-	job := jobModel
-	_jobs, err := j.DB.GetJobs()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, _job := range _jobs {
-		if (_job.EndDate.Unix()<0 || _job.EndDate.UnixNano() > time.Now().UnixNano()) && _job.IsActive {
-			entryID, err := CRON.AddJob(_job.Frequency, _job)
-			if err != nil {
-				log.Println(err)
-			}
-			log.Println(entryID, job)
-		} else if _job.CronEntryID>0 {
-			fmt.Println(333333333333333333)
-			//job.CronEntryID=0
-			//_, err = j.DB.UpdateJob(string(entryID), job)
-			//if err != nil {
-			//	log.Println(err)
-			//}
-		}
-	}
+	log.Println("INIT CRON")
 }
+
 

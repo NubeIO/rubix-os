@@ -13,7 +13,6 @@ require (
 	github.com/gobuffalo/packr/v2 v2.7.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/h2non/filetype v1.1.1
-	github.com/robfig/cron/v3 v3.0.1
 	github.com/simonvetter/modbus v1.3.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tidwall/gjson v1.8.1

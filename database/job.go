@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/utils"
 )
 
 
@@ -13,7 +14,6 @@ var jobsModel []model.Job
 var jobModel *model.Job
 
 
-
 func (d *GormDatabase) GetJobs() ([]model.Job, error) {
 	query := d.DB.Find(&jobsModel);if query.Error != nil {
 		return nil, query.Error
@@ -22,6 +22,7 @@ func (d *GormDatabase) GetJobs() ([]model.Job, error) {
 }
 
 func (d *GormDatabase) CreateJob(body *model.Job)  error {
+	body.UUID, _ = utils.MakeUUID()
 	n := d.DB.Create(body).Error
 	return n
 }

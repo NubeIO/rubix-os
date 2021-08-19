@@ -13,6 +13,7 @@ func main() {
 	// defines a new scheduler that schedules and runs jobs
 	s1 := gocron.NewScheduler(time.UTC)
 
+
 	s1.Every(3).Seconds().Do(task)
 
 	// scheduler starts running jobs and current thread continues to execute
