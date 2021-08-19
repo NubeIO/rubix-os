@@ -64,7 +64,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 		return nil, query.Error
 	}
 	return pointModel, nil
-
 }
 
 // DeletePoint delete a Device.

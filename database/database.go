@@ -33,6 +33,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var Point []model.Point
 	var PointStore []model.PointStore
 	var priorityArrayModel []model.PriorityArrayModel
+	var Job []model.Job
 	var models = []interface{}{
 		&User,
 		&Application,
@@ -44,6 +45,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&Point,
 		&PointStore,
 		&priorityArrayModel,
+		&Job,
 	}
 
 	for _, v := range models {
@@ -77,6 +79,7 @@ func createDirectoryIfSqlite(dialect, connection string) {
 type GormDatabase struct {
 	DB *gorm.DB
 }
+
 
 // Close closes the gorm database connection.
 func (d *GormDatabase) Close() {

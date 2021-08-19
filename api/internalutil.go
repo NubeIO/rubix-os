@@ -83,6 +83,11 @@ func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
 	return dto, err
 }
 
+func getBODYJobs(ctx *gin.Context) (dto *model.Job, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
