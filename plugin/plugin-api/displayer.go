@@ -8,7 +8,14 @@ import "net/url"
 // Location is the current location the user is accessing the API from, nil if not recoverable.
 // Location contains the path to the display api endpoint, you may only need the base url.
 // Example: https://flow.net/plugin/5/display
+
+// Response ...
+type Response struct {
+	StatusCode int               `json:"statusCode"`
+	Headers    map[string]string `json:"headers"`
+	Body       string            `json:"body"`
+}
 type Displayer interface {
 	Plugin
-	GetDisplay(location *url.URL) string
+	GetDisplay(location *url.URL) Response
 }
