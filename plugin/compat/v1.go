@@ -2,16 +2,19 @@ package compat
 
 import (
 	"github.com/NubeDev/flow-framework/model"
-	"net/url"
+	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 
-	papiv1 "github.com/NubeDev/flow-framework/plugin/plugin-api"
+	//papiv1 "github.com/NubeDev/flow-framework/plugin/plugin-api"
+
+	"net/url"
+	//papiv1 "github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
 )
 
 // PluginV1 is an abstraction of a plugin written in the v1 plugin API. Exported for testing purposes only.
 type PluginV1 struct {
-	Info        papiv1.Info
-	Constructor func(ctx papiv1.UserContext) papiv1.Plugin
+	Info        plugin.Info
+	Constructor func(ctx plugin.UserContext) plugin.Plugin
 }
 
 // APIVersion returns the API version.
@@ -34,7 +37,7 @@ func (c PluginV1) PluginInfo() Info {
 
 // NewPluginInstance implements compat/Plugin.
 func (c PluginV1) NewPluginInstance(ctx UserContext) PluginInstance {
-	instance := c.Constructor(papiv1.UserContext{
+	instance := c.Constructor(plugin.UserContext{
 		ID:    ctx.ID,
 		Name:  ctx.Name,
 		Admin: ctx.Admin,
@@ -44,23 +47,23 @@ func (c PluginV1) NewPluginInstance(ctx UserContext) PluginInstance {
 		instance: instance,
 	}
 
-	if displayer, ok := instance.(papiv1.Displayer); ok {
+	if displayer, ok := instance.(plugin.Displayer); ok {
 		compat.displayer = displayer
 	}
 
-	if messenger, ok := instance.(papiv1.Messenger); ok {
+	if messenger, ok := instance.(plugin.Messenger); ok {
 		compat.messenger = messenger
 	}
 
-	if configurer, ok := instance.(papiv1.Configurer); ok {
+	if configurer, ok := instance.(plugin.Configurer); ok {
 		compat.configurer = configurer
 	}
 
-	if storager, ok := instance.(papiv1.Storager); ok {
+	if storager, ok := instance.(plugin.Storager); ok {
 		compat.storager = storager
 	}
 
-	if webhooker, ok := instance.(papiv1.Webhooker); ok {
+	if webhooker, ok := instance.(plugin.Webhooker); ok {
 		compat.webhooker = webhooker
 	}
 
@@ -69,12 +72,12 @@ func (c PluginV1) NewPluginInstance(ctx UserContext) PluginInstance {
 
 // PluginV1Instance is an adapter for plugin using v1 API.
 type PluginV1Instance struct {
-	instance   papiv1.Plugin
-	messenger  papiv1.Messenger
-	configurer papiv1.Configurer
-	storager   papiv1.Storager
-	webhooker  papiv1.Webhooker
-	displayer  papiv1.Displayer
+	instance   plugin.Plugin
+	messenger  plugin.Messenger
+	configurer plugin.Configurer
+	storager   plugin.Storager
+	webhooker  plugin.Webhooker
+	displayer  plugin.Displayer
 }
 
 // DefaultConfig see papiv1.Configurer.
@@ -94,11 +97,17 @@ func (c *PluginV1Instance) ValidateAndSetConfig(config interface{}) error {
 }
 
 // GetDisplay see papiv1.Displayer.
-func (c *PluginV1Instance) GetDisplay(location *url.URL) string {
+func (c *PluginV1Instance) GetDisplay(location *url.URL)  plugin.Response {
 	if c.displayer != nil {
 		return c.displayer.GetDisplay(location)
 	}
-	return ""
+
+	messageURL := plugin.Response {
+		StatusCode: 1,
+		Headers:    map[string]string{"Content-Type": "application/json"},
+		Body:       "Hello World",
+	}
+	return messageURL
 }
 
 // SetMessageHandler see papiv1.Messenger.
@@ -149,7 +158,7 @@ type PluginV1MessageHandler struct {
 }
 
 // SendMessage implements papiv1.MessageHandler.
-func (c *PluginV1MessageHandler) SendMessage(msg papiv1.Message) error {
+func (c *PluginV1MessageHandler) SendMessage(msg plugin.Message) error {
 	return c.WrapperHandler.SendMessage(Message{
 		Message:  msg.Message,
 		MessageType:   			msg.MessageType,
