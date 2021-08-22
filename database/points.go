@@ -42,9 +42,9 @@ func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, e
 }
 
 // CreatePoint creates a device.
-func (d *GormDatabase) CreatePoint(device *model.Point, body *model.Point) error {
-	body.Uuid, _ = utils.MakeUUID()
-	deviceUUID := body.DeviceUuid
+func (d *GormDatabase) CreatePoint( body *model.Point) error {
+	body.UUID, _ = utils.MakeUUID()
+	deviceUUID := body.DeviceUUID
 	query := d.DB.Where("uuid = ? ", deviceUUID).First(&deviceModel);if query.Error != nil {
 		return query.Error
 	}

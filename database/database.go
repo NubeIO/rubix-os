@@ -23,29 +23,36 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	if err != nil {
 		panic("failed to connect database")
 	}
-	var User []model.User
-	var Application []model.Application
-	var Message []model.Message
-	var Client []model.Client
-	var PluginConf []model.PluginConf
-	var Network []model.Network
-	var Device []model.Device
-	var Point []model.Point
-	var PointStore []model.PointStore
+	var user []model.User
+	var application []model.Application
+	var message []model.Message
+	var client []model.Client
+	var pluginConf []model.PluginConf
+	var network []model.Network
+	var device []model.Device
+	var point []model.Point
+	var pointStore []model.PointStore
 	var priorityArrayModel []model.PriorityArrayModel
-	var Job []model.Job
+	var job []model.Job
+	var gateway []model.Gateway
+	var subscriber []model.Subscriber
+	var subscriptions []model.Subscriptions
 	var models = []interface{}{
-		&User,
-		&Application,
-		&Message,
-		&Client,
-		&PluginConf,
-		&Network,
-		&Device,
-		&Point,
-		&PointStore,
+		&user,
+		&application,
+		&message,
+		&client,
+		&pluginConf,
+		&network,
+		&device,
+		&point,
+		&pointStore,
 		&priorityArrayModel,
-		&Job,
+		&priorityArrayModel,
+		&job,
+		&gateway,
+		&subscriber,
+		&subscriptions,
 	}
 
 	for _, v := range models {

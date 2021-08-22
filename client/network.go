@@ -44,7 +44,7 @@ func main() {
 	name = fmt.Sprintf("name_%s", name)
 
 	//ADD NETWORK
-	urlNetwork := fmt.Sprintf("%s/%s", url, "api/networks")
+	urlNetwork := fmt.Sprintf("%s/%s", url, "api/network")
 	addNetwork, err := client.NewRequest().
 		SetHeader("Authorization", token).
 		SetBody(map[string]interface{}{"name": name, "description": "description"}).
@@ -55,7 +55,7 @@ func main() {
 	//log.Println("addNetwork:", addNetwork, "status", addNetwork.Status())
 
 	//GET NETWORK
-	urlNetworkUUID := fmt.Sprintf("%s/%s", url, "api/networks/{uuid}")
+	urlNetworkUUID := fmt.Sprintf("%s/%s", url, "api/network/{uuid}")
 	r = gjson.Get(string(addNetwork.Body()), "uuid")
 	getNetworkUUID := r.Str
 	log.Println("getNetworkUUID:", getNetworkUUID)
@@ -86,7 +86,7 @@ func main() {
 
 
 	//ADD DEVICE
-	urlDevice := fmt.Sprintf("%s/%s", url, "api/devices")
+	urlDevice := fmt.Sprintf("%s/%s", url, "api/device")
 	addDevice, err := client.NewRequest().
 		SetHeader("Authorization", token).
 		SetBody(map[string]interface{}{"name": name, "description": "description", "network_uuid": getNetworkUUID}).
@@ -109,10 +109,10 @@ func main() {
 	//ADD POINT
 	r = gjson.Get(string(addDevice.Body()), "uuid")
 	getDeviceUUID := r.Str
-	urlPoints := fmt.Sprintf("%s/%s", url, "api/points")
+	urlPoints := fmt.Sprintf("%s/%s", url, "api/point")
 	addPoint, err := client.NewRequest().
 		SetHeader("Authorization", token).
-		SetBody(map[string]interface{}{"name": name, "description": "description", "device__uuid": getDeviceUUID}).
+		SetBody(map[string]interface{}{"name": name, "description": "description", "device_uuid": getDeviceUUID}).
 		Post(urlDevice)
 	if err != nil {
 		log.Println("addPoint err:", err, addPoint.Status())
@@ -131,7 +131,7 @@ func main() {
 	//GET POINT
 	r = gjson.Get(string(addPoint.Body()), "uuid")
 	getPointUUID := r.Str
-	urlPoint := fmt.Sprintf("%s/%s", url, "api/points/{uuid}")
+	urlPoint := fmt.Sprintf("%s/%s", url, "api/point/{uuid}")
 	getPoint, err := client.NewRequest().
 		SetHeader("Authorization", token).
 		SetPathParams(map[string]string{
@@ -214,23 +214,23 @@ func main() {
 	}
 
 	//DELETE NETWORK
-	log.Println("getNetworkUUID:", getNetworkUUID)
-	deleteNetwork, err := client.NewRequest().
-		SetHeader("Authorization", token).
-		SetPathParams(map[string]string{
-			"uuid": getNetworkUUID,
-		}).
-		Delete(urlNetworkUUID)
-	if err != nil {
-		log.Println("deleteNetwork err:", err, deleteNetwork.Status())
-	}
-	//log.Println("deleteNetwork:", deleteNetwork, "status", deleteNetwork.Status())
-
-	if deleteNetwork.Status() == "200 OK" {
-		fmt.Println("deleteNetwork", "PASS")
-	} else {
-		fmt.Println("deleteNetwork", "FAIL", getPoints.Status())
-	}
+	//log.Println("getNetworkUUID:", getNetworkUUID)
+	//deleteNetwork, err := client.NewRequest().
+	//	SetHeader("Authorization", token).
+	//	SetPathParams(map[string]string{
+	//		"uuid": getNetworkUUID,
+	//	}).
+	//	Delete(urlNetworkUUID)
+	//if err != nil {
+	//	log.Println("deleteNetwork err:", err, deleteNetwork.Status())
+	//}
+	////log.Println("deleteNetwork:", deleteNetwork, "status", deleteNetwork.Status())
+	//
+	//if deleteNetwork.Status() == "200 OK" {
+	//	fmt.Println("deleteNetwork", "PASS")
+	//} else {
+	//	fmt.Println("deleteNetwork", "FAIL", getPoints.Status())
+	//}
 
 
 }

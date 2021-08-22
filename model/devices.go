@@ -11,9 +11,11 @@ type CommonDevice struct {
 type Device struct {
 	CommonUUID
 	CommonName
-	Common
-	Created
-	NetworkUuid     	string  `json:"network_uuid" gorm:"TYPE:varchar(255) REFERENCES networks;not null;default:null"`
+	CommonDescription
+	CommonEnable
+	CommonFault
+	CommonCreated
+	NetworkUUID     	string  `json:"network_uuid" gorm:"TYPE:varchar(255) REFERENCES networks;not null;default:null"`
 	Point 				[]Point `json:"points" gorm:"constraint:OnDelete:CASCADE"`
 
 }

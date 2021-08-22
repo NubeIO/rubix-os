@@ -10,7 +10,7 @@ import (
 type PointDatabase interface {
 	GetPoint(uuid string, withChildren bool) (*model.Point, error)
 	GetPoints(withChildren bool) ([]*model.Point, error)
-	CreatePoint(points *model.Point, body *model.Point) error
+	CreatePoint(body *model.Point) error
 	UpdatePoint(uuid string, body *model.Point) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
 }
@@ -55,12 +55,11 @@ func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 }
 
 func (a *PointAPI) CreatePoint(ctx *gin.Context) {
-	app := model.Point{}
 	body, _ := getBODYPoint(ctx)
-	if success := successOrAbort(ctx, http.StatusInternalServerError, a.DB.CreatePoint(&app, body)); !success {
+	if success := successOrAbort(ctx, http.StatusInternalServerError, a.DB.CreatePoint(body)); !success {
 		return
 	}
-	ctx.JSON(http.StatusOK, app)
+	ctx.JSON(http.StatusOK, body)
 
 }
 

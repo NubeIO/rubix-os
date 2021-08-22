@@ -46,8 +46,8 @@ func (d *GormDatabase) GetDevice(uuid string, withPoints bool) (*model.Device, e
 
 // CreateDevice creates a device.
 func (d *GormDatabase) CreateDevice(device *model.Device, body *model.Device) error {
-	body.Uuid, _ = utils.MakeUUID()
-	networkUUID := body.NetworkUuid
+	body.UUID, _ = utils.MakeUUID()
+	networkUUID := body.NetworkUUID
 	query := d.DB.Where("uuid = ? ", networkUUID).First(&networkModel);if query.Error != nil {
 		return query.Error
 	}

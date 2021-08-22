@@ -71,7 +71,7 @@ func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
 
 func (a *NetworksAPI) CreateNetwork(ctx *gin.Context) {
 	app := model.Network{}
-	app.Uuid, _ = utils.MakeUUID()
+	app.UUID, _ = utils.MakeUUID()
 	if err := ctx.Bind(&app); err == nil {
 		if success := successOrAbort(ctx, 200, a.DB.CreateNetwork(&app)); !success {
 			return

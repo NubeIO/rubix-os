@@ -13,7 +13,7 @@ type History struct {
 //PointStore for storing the history
 type PointStore struct {
 	PointUuid     			string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
-	Created
+	CommonCreated
 	Value          			string `json:"value" sql:"DEFAULT:NULL"`
 	ValueOriginal 			string `json:"value_original"`
 	ValueRaw      			string `json:"value_raw"`

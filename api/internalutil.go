@@ -83,10 +83,32 @@ func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
 	return dto, err
 }
 
+func getBODYSubscriber(ctx *gin.Context) (dto *model.Subscriber, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBODYSubscription(ctx *gin.Context) (dto *model.Subscriptions, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+
+func getBODYGateway(ctx *gin.Context) (dto *model.Gateway, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+
 func getBODYJobs(ctx *gin.Context) (dto *model.Job, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
+
+//func getBODYJobSubscriber(ctx *gin.Context) (dto *model.JobSubscriber, err error) {
+//	err = ctx.ShouldBindJSON(&dto)
+//	return dto, err
+//}
 
 func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 	err = ctx.ShouldBindJSON(&dto)

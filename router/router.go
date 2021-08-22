@@ -51,7 +51,17 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	jobHandler := api.JobAPI{
 		DB: db,
 	}
+	gatewayHandler := api.GatewayAPI{
+		DB: db,
+	}
+	subscriberHandler := api.SubscriberAPI{
+		DB: db,
+	}
+	subscriptionHandler := api.SubscriptionsAPI{
+		DB: db,
+	}
 	jobHandler.NewJobEngine()
+
 	pluginManager, err := plugin.NewManager(db, conf.PluginsDir, g.Group("/plugin/:id/custom/"), streamHandler)
 	if err != nil {
 		panic(err)
@@ -183,28 +193,53 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 		control.GET("", api.Hostname)
 		control.GET("/networks", networkHandler.GetNetworks)
-		control.POST("/networks", networkHandler.CreateNetwork)
-		control.GET("/networks/:uuid", networkHandler.GetNetwork)
-		control.PATCH("/networks/:uuid", networkHandler.UpdateNetwork)
-		control.DELETE("/networks/:uuid", networkHandler.DeleteNetwork)
+		control.POST("/network", networkHandler.CreateNetwork)
+		control.GET("/network/:uuid", networkHandler.GetNetwork)
+		control.PATCH("/network/:uuid", networkHandler.UpdateNetwork)
+		control.DELETE("/network/:uuid", networkHandler.DeleteNetwork)
 
 		control.GET("/devices", deviceHandler.GetDevices)
-		control.POST("/devices", deviceHandler.CreateDevice)
-		control.GET("/devices/:uuid", deviceHandler.GetDevice)
-		control.PATCH("/devices/:uuid", deviceHandler.UpdateDevice)
-		control.DELETE("/devices/:uuid", deviceHandler.DeleteDevice)
+		control.POST("/device", deviceHandler.CreateDevice)
+		control.GET("/device/:uuid", deviceHandler.GetDevice)
+		control.PATCH("/device/:uuid", deviceHandler.UpdateDevice)
+		control.DELETE("/device/:uuid", deviceHandler.DeleteDevice)
 
 		control.GET("/points", pointHandler.GetPoints)
-		control.POST("/points", pointHandler.CreatePoint)
-		control.GET("/points/:uuid", pointHandler.GetPoint)
-		control.PATCH("/points/:uuid", pointHandler.UpdatePoint)
-		control.DELETE("/points/:uuid", pointHandler.DeletePoint)
+		control.POST("/point", pointHandler.CreatePoint)
+		control.GET("/point/:uuid", pointHandler.GetPoint)
+		control.PATCH("/point/:uuid", pointHandler.UpdatePoint)
+		control.DELETE("/point/:uuid", pointHandler.DeletePoint)
+
+		control.GET("/gateways", gatewayHandler.GetGateways)
+		control.POST("/gateway", gatewayHandler.CreateGateway)
+		control.GET("/gateway/:uuid", gatewayHandler.GetGateway)
+		control.PATCH("/gateway/:uuid", gatewayHandler.UpdateGateway)
+		control.DELETE("/gateway/:uuid", gatewayHandler.DeleteGateway)
+
+		control.GET("/subscribers", subscriberHandler.GetSubscribers)
+		control.POST("/subscriber", subscriberHandler.CreateSubscriber)
+		control.GET("/subscriber/:uuid", subscriberHandler.GetSubscriber)
+		control.PATCH("/subscriber/:uuid", subscriberHandler.UpdateSubscriber)
+		control.DELETE("/subscriber/:uuid", subscriberHandler.DeleteSubscriber)
+
+		control.GET("/subscriptions", subscriptionHandler.GetSubscriptions)
+		control.POST("/subscription", subscriptionHandler.CreateSubscription)
+		control.GET("/subscription/:uuid", subscriptionHandler.GetSubscription)
+		control.PATCH("/subscription/:uuid", subscriptionHandler.UpdateSubscription)
+		control.DELETE("/subscription/:uuid", subscriptionHandler.DeleteSubscription)
+
 
 		control.GET("/jobs", jobHandler.GetJobs)
-		control.POST("/jobs", jobHandler.CreateJob)
-		control.GET("/jobs/:uuid", jobHandler.GetJob)
-		control.PATCH("/jobs/:uuid", jobHandler.UpdateJob)
-		control.DELETE("/jobs/:uuid", jobHandler.DeleteJob)
+		control.POST("/job", jobHandler.CreateJob)
+		control.GET("/job/:uuid", jobHandler.GetJob)
+		control.PATCH("/job/:uuid", jobHandler.UpdateJob)
+		control.DELETE("/job/:uuid", jobHandler.DeleteJob)
+
+
+		//control.GET("/jobs/subscriber", jobHandler.GetJobSubscriber)
+		//control.POST("/jobs/subscriber", jobHandler.CreateJobSubscriber)
+		//control.DELETE("/jobs/subscriber/:uuid", jobHandler.DeleteJobSubscriber)
+		//control.PATCH("/jobs/subscriber/:uuid", jobHandler.UpdateJobSubscriber)
 
 
 	}

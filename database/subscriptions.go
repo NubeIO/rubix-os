@@ -6,42 +6,42 @@ import (
 )
 
 
-type Subscriber struct {
-	*model.Subscriber
+type Subscriptions struct {
+	*model.Subscriptions
 }
 
-var subscribersModel []model.Subscriber
-var subscriberModel *model.Subscriber
+var subscriptionsModel []model.Subscriptions
+var subscriptionModel *model.Subscriptions
 
 
 
-// GetSubscribers get all of them
-func (d *GormDatabase) GetSubscribers() ([]model.Subscriber, error) {
-	query := d.DB.Preload(subscriberChildTable).Find(&jobsModel)
+// GetSubscriptions get all of them
+func (d *GormDatabase) GetSubscriptions() ([]model.Subscriptions, error) {
+	query := d.DB.Preload(subscriberPointsChildTable).Find(&subscriptionsModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscribersModel, nil
+	return subscriptionsModel, nil
 }
 
-// CreateSubscriber make it
-func (d *GormDatabase) CreateSubscriber(body *model.Subscriber)  error {
+// CreateSubscription make it
+func (d *GormDatabase) CreateSubscription(body *model.Subscriptions)  error {
 	body.UUID, _ = utils.MakeUUID()
 	n := d.DB.Create(body).Error
 	return n
 }
 
-// GetSubscriber get it
-func (d *GormDatabase) GetSubscriber(uuid string) (*model.Subscriber, error) {
-	query := d.DB.Where("uuid = ? ", uuid).First(&subscriberModel); if query.Error != nil {
+// GetSubscription get it
+func (d *GormDatabase) GetSubscription(uuid string) (*model.Subscriptions, error) {
+	query := d.DB.Where("uuid = ? ", uuid).First(&subscriptionModel); if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriberModel, nil
+	return subscriptionModel, nil
 }
 
-// DeleteSubscriber deletes it
-func (d *GormDatabase) DeleteSubscriber(uuid string) (bool, error) {
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&subscriberModel);if query.Error != nil {
+// DeleteSubscription deletes it
+func (d *GormDatabase) DeleteSubscription(uuid string) (bool, error) {
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&subscriptionModel);if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -53,64 +53,14 @@ func (d *GormDatabase) DeleteSubscriber(uuid string) (bool, error) {
 
 }
 
-// UpdateSubscriber  update it
-func (d *GormDatabase) UpdateSubscriber(uuid string, body *model.Subscriber) (*model.Subscriber, error) {
-	query := d.DB.Where("uuid = ?", uuid).Find(&subscriberModel);if query.Error != nil {
+// UpdateSubscription  update it
+func (d *GormDatabase) UpdateSubscription(uuid string, body *model.Subscriptions) (*model.Subscriptions, error) {
+	query := d.DB.Where("uuid = ?", uuid).Find(&subscriptionModel);if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&subscriberModel).Updates(body);if query.Error != nil {
+	query = d.DB.Model(&subscriptionModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriberModel, nil
+	return subscriptionModel, nil
 
 }
-
-//func (d *GormDatabase) CreateJobSubscriber(body *model.Subscriber, jobUUID string)  error {
-//	query := d.DB.Where("uuid = ?", jobUUID).Find(&subscriberModel); if query.Error != nil {
-//		return query.Error
-//	}
-//	body.UUID, _ = utils.MakeUUID()
-//	body.UUID = jobUUID
-//	fmt.Println(body.UUID,body.UUID)
-//	n := d.DB.Create(body).Error
-//	return n
-//
-//}
-
-//
-//func (d *GormDatabase) GetJobSubscribers() ([]model.JobSubscriber, error) {
-//	query := d.DB.Find(&jobSubscribersModel)
-//	if query.Error != nil {
-//		return nil, query.Error
-//	}
-//	return jobSubscribersModel, nil
-//}
-//
-//
-//// DeleteJobSubscriber delete a job subscriber(
-//func (d *GormDatabase) DeleteJobSubscriber(uuid string) (bool, error) {
-//	query := d.DB.Where("uuid = ? ", uuid).Delete(&jobSubscriberModel);if query.Error != nil {
-//		return false, query.Error
-//	}
-//	r := query.RowsAffected
-//	if r == 0 {
-//		return false, nil
-//	} else {
-//		return true, nil
-//	}
-//
-//}
-//
-//
-//// UpdateJobSubscriber  returns the device for the given id or nil.
-//func (d *GormDatabase) UpdateJobSubscriber(uuid string, body *model.JobSubscriber) (*model.JobSubscriber, error) {
-//	query := d.DB.Where("uuid = ?", uuid).Find(&jobSubscriberModel)
-//	if query.Error != nil {
-//		return nil, query.Error
-//	}
-//	query = d.DB.Model(&jobSubscriberModel).Updates(body)
-//	if query.Error != nil {
-//		return nil, query.Error
-//	}
-//	return jobSubscriberModel, nil
-//}

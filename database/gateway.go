@@ -6,43 +6,54 @@ import (
 )
 
 
-type Subscriber struct {
-	*model.Subscriber
+
+type Gateway struct {
+	*model.Gateway
 }
 
-var subscribersModel []model.Subscriber
-var subscriberModel *model.Subscriber
-//var jobSubscribersModel []model.JobSubscriber
-//var jobSubscriberModel *model.JobSubscriber
+var gatewaysModel []model.Gateway
+var gatewayModel *model.Gateway
+var gatewaySubscriberChildTable = "Subscriber"
+var gatewaySubscriptionsChildTable = "Subscriptions"
 
 
-// GetSubscribers get all of them
-func (d *GormDatabase) GetSubscribers() ([]model.Subscriber, error) {
-	query := d.DB.Preload(subscriberChildTable).Find(&jobsModel)
+// GetGateways get all of them
+func (d *GormDatabase) GetGateways() ([]model.Gateway, error) {
+	query := d.DB.Preload(gatewaySubscriberChildTable).Preload(gatewaySubscriptionsChildTable).Find(&gatewaysModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscribersModel, nil
+	return gatewaysModel, nil
 }
 
-// CreateSubscriber make it
-func (d *GormDatabase) CreateSubscriber(body *model.Subscriber)  error {
+// CreateGateway make it
+func (d *GormDatabase) CreateGateway(body *model.Gateway)  error {
 	body.UUID, _ = utils.MakeUUID()
+	if !body.IsRemote  {
+		query := d.DB.Where("is_remote = ?", 0).First(&gatewaysModel) //if existing local network then don't create it
+		r := query.RowsAffected
+		if r != 0 {
+			return errorMsg("network", "a local gateway exists", nil)
+		}
+		body.Name = "Local rubix"
+		body.Enable = true
+		body.Description = "Local rubix gateway for sending data between jobs and points"
+	}
 	n := d.DB.Create(body).Error
 	return n
 }
 
-// GetSubscriber get it
-func (d *GormDatabase) GetSubscriber(uuid string) (*model.Subscriber, error) {
-	query := d.DB.Where("uuid = ? ", uuid).First(&subscriberModel); if query.Error != nil {
+// GetGateway get it
+func (d *GormDatabase) GetGateway(uuid string) (*model.Gateway, error) {
+	query := d.DB.Where("uuid = ? ", uuid).First(&gatewayModel); if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriberModel, nil
+	return gatewayModel, nil
 }
 
-// DeleteSubscriber deletes it
-func (d *GormDatabase) DeleteSubscriber(uuid string) (bool, error) {
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&subscriberModel);if query.Error != nil {
+// DeleteGateway deletes it
+func (d *GormDatabase) DeleteGateway(uuid string) (bool, error) {
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&gatewayModel);if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -54,64 +65,15 @@ func (d *GormDatabase) DeleteSubscriber(uuid string) (bool, error) {
 
 }
 
-// UpdateSubscriber  update it
-func (d *GormDatabase) UpdateSubscriber(uuid string, body *model.Subscriber) (*model.Subscriber, error) {
-	query := d.DB.Where("uuid = ?", uuid).Find(&subscriberModel);if query.Error != nil {
+// UpdateGateway  update it
+func (d *GormDatabase) UpdateGateway(uuid string, body *model.Gateway) (*model.Gateway, error) {
+	query := d.DB.Where("uuid = ?", uuid).Find(&gatewayModel);if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&subscriberModel).Updates(body);if query.Error != nil {
+	query = d.DB.Model(&gatewayModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriberModel, nil
+	return gatewayModel, nil
 
 }
 
-//func (d *GormDatabase) CreateJobSubscriber(body *model.Subscriber, jobUUID string)  error {
-//	query := d.DB.Where("uuid = ?", jobUUID).Find(&subscriberModel); if query.Error != nil {
-//		return query.Error
-//	}
-//	body.UUID, _ = utils.MakeUUID()
-//	body.UUID = jobUUID
-//	fmt.Println(body.UUID,body.UUID)
-//	n := d.DB.Create(body).Error
-//	return n
-//
-//}
-
-//
-//func (d *GormDatabase) GetJobSubscribers() ([]model.JobSubscriber, error) {
-//	query := d.DB.Find(&jobSubscribersModel)
-//	if query.Error != nil {
-//		return nil, query.Error
-//	}
-//	return jobSubscribersModel, nil
-//}
-//
-//
-//// DeleteJobSubscriber delete a job subscriber(
-//func (d *GormDatabase) DeleteJobSubscriber(uuid string) (bool, error) {
-//	query := d.DB.Where("uuid = ? ", uuid).Delete(&jobSubscriberModel);if query.Error != nil {
-//		return false, query.Error
-//	}
-//	r := query.RowsAffected
-//	if r == 0 {
-//		return false, nil
-//	} else {
-//		return true, nil
-//	}
-//
-//}
-//
-//
-//// UpdateJobSubscriber  returns the device for the given id or nil.
-//func (d *GormDatabase) UpdateJobSubscriber(uuid string, body *model.JobSubscriber) (*model.JobSubscriber, error) {
-//	query := d.DB.Where("uuid = ?", uuid).Find(&jobSubscriberModel)
-//	if query.Error != nil {
-//		return nil, query.Error
-//	}
-//	query = d.DB.Model(&jobSubscriberModel).Updates(body)
-//	if query.Error != nil {
-//		return nil, query.Error
-//	}
-//	return jobSubscriberModel, nil
-//}

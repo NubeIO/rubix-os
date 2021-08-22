@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"time"
@@ -25,18 +25,19 @@ var (
 	Mode = mode.Dev
 )
 
+
+
 func main() {
 	vInfo := &model.VersionInfo{Version: Version, Commit: Commit, BuildDate: BuildDate}
 	mode.Set(Mode)
 
-	fmt.Println("Starting version", vInfo.Version+"@"+BuildDate)
+	log.Println("Starting version", vInfo.Version+"@"+BuildDate)
 	rand.Seed(time.Now().UnixNano())
 
 	p := flag.String("config", "./config.yml", "config file path")
 	flag.Parse()
 	path := *p
 	conf := config.Get(path)
-
 
 	if conf.PluginsDir != "" {
 		if err := os.MkdirAll(conf.PluginsDir, 0755); err != nil {
