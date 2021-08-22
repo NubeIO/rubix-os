@@ -193,18 +193,21 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 		control.GET("", api.Hostname)
 		control.GET("/networks", networkHandler.GetNetworks)
+		control.DELETE("/networks/drop", networkHandler.DropNetworks)
 		control.POST("/network", networkHandler.CreateNetwork)
 		control.GET("/network/:uuid", networkHandler.GetNetwork)
 		control.PATCH("/network/:uuid", networkHandler.UpdateNetwork)
 		control.DELETE("/network/:uuid", networkHandler.DeleteNetwork)
 
 		control.GET("/devices", deviceHandler.GetDevices)
+		control.DELETE("/devices/drop", deviceHandler.DropDevices)
 		control.POST("/device", deviceHandler.CreateDevice)
 		control.GET("/device/:uuid", deviceHandler.GetDevice)
 		control.PATCH("/device/:uuid", deviceHandler.UpdateDevice)
 		control.DELETE("/device/:uuid", deviceHandler.DeleteDevice)
 
 		control.GET("/points", pointHandler.GetPoints)
+		control.DELETE("/points/drop", pointHandler.DropPoints)
 		control.POST("/point", pointHandler.CreatePoint)
 		control.GET("/point/:uuid", pointHandler.GetPoint)
 		control.PATCH("/point/:uuid", pointHandler.UpdatePoint)

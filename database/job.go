@@ -10,11 +10,10 @@ type Job struct {
 	*model.Job
 }
 
-var jobsModel []model.Job
-var jobModel *model.Job
 
 
 func (d *GormDatabase) GetJobs() ([]model.Job, error) {
+	var jobsModel []model.Job
 	query := d.DB.Preload(gatewaySubscriberChildTable).Find(&jobsModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -24,12 +23,13 @@ func (d *GormDatabase) GetJobs() ([]model.Job, error) {
 
 
 func (d *GormDatabase) CreateJob(body *model.Job)  error {
-	body.UUID, _ = utils.MakeUUID()
+	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Job)
 	n := d.DB.Create(body).Error
 	return n
 }
 
 func (d *GormDatabase) GetJob(uuid string) (*model.Job, error) {
+	var jobModel *model.Job
 	query := d.DB.Where("uuid = ? ", uuid).First(&jobModel); if query.Error != nil {
 		return nil, query.Error
 	}
@@ -38,6 +38,7 @@ func (d *GormDatabase) GetJob(uuid string) (*model.Job, error) {
 
 // DeleteJob delete a job
 func (d *GormDatabase) DeleteJob(uuid string) (bool, error) {
+	var jobModel *model.Job
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&jobModel);if query.Error != nil {
 		return false, query.Error
 	}
@@ -52,6 +53,7 @@ func (d *GormDatabase) DeleteJob(uuid string) (bool, error) {
 
 // UpdateJob  returns the device for the given id or nil.
 func (d *GormDatabase) UpdateJob(uuid string, body *model.Job) (*model.Job, error) {
+	var jobModel *model.Job
 	query := d.DB.Where("uuid = ?", uuid).Find(&jobModel);if query.Error != nil {
 		return nil, query.Error
 	}

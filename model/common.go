@@ -5,6 +5,29 @@ import (
 )
 
 
+var CommonNaming = struct {
+	Network   		string
+	Device   		string
+	Point   		string
+	Gateway   		string
+	Job   			string
+	Subscriber   	string
+	Subscription   	string
+	Alarm   		string
+
+}{
+	Network:   			"network",
+	Device:   			"device",
+	Point:   			"point",
+	Gateway:   			"gateway",
+	Job:   				"job",
+	Subscriber:   		"subscriber",
+	Subscription:   	"subscription",
+	Alarm:   			"alarm",
+
+}
+
+
 
 type CommonDescription struct {
 	Description string `json:"description"`

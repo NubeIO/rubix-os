@@ -2,18 +2,17 @@ package api
 
 import (
 	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/utils"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // The NetworkDatabase interface for encapsulating database access.
 type NetworkDatabase interface {
 	GetNetwork(uuid string, withChildren bool, withPoints bool) (*model.Network, error)
 	GetNetworks(withChildren bool, withPoints bool) ([]*model.Network, error)
-	CreateNetwork(network *model.Network) error
+	CreateNetwork(network *model.Network) (*model.Network, error)
 	UpdateNetwork(uuid string, body *model.Network) (*model.Network, error)
 	DeleteNetwork(uuid string) (bool, error)
+	DropNetworks() (bool, error)
 }
 type NetworksAPI struct {
 	DB NetworkDatabase
@@ -57,7 +56,7 @@ func (a *NetworksAPI) GetNetwork(ctx *gin.Context) {
 }
 
 func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
-	body, _ := getBODY(ctx)
+	body, _ := getBODYNetwork(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdateNetwork(uuid, body)
 	if err != nil {
@@ -70,14 +69,16 @@ func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
 }
 
 func (a *NetworksAPI) CreateNetwork(ctx *gin.Context) {
-	app := model.Network{}
-	app.UUID, _ = utils.MakeUUID()
-	if err := ctx.Bind(&app); err == nil {
-		if success := successOrAbort(ctx, 200, a.DB.CreateNetwork(&app)); !success {
-			return
-		}
-		ctx.JSON(http.StatusOK, app)
-	}
+	//app := model.Network{}
+	//if err := ctx.Bind(&app); err == nil {
+	//	if success := successOrAbort(ctx, 200, a.DB.CreateNetwork(&app)); !success {
+	//		return
+	//	}
+	//	ctx.JSON(http.StatusOK, app)
+	//}
+	body, _ := getBODYNetwork(ctx)
+	q, err := a.DB.CreateNetwork(body)
+	reposeHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) DeleteNetwork(ctx *gin.Context) {
@@ -91,3 +92,15 @@ func (a *NetworksAPI) DeleteNetwork(ctx *gin.Context) {
 	ctx.JSON(res.GetStatusCode(), res.GetResponse())
 
 }
+
+func (a *NetworksAPI) DropNetworks(ctx *gin.Context) {
+	q, err := a.DB.DropNetworks()
+	if err != nil {
+		res := BadEntity(err.Error())
+		ctx.JSON(res.GetStatusCode(), res.GetResponse())
+	}
+	res := Data(q)
+	ctx.JSON(res.GetStatusCode(), res.GetResponse())
+
+}
+

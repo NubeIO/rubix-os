@@ -7,18 +7,19 @@ import (
 
 
 
-type Gateway struct {
-	*model.Gateway
-}
+//type Gateway struct {
+//	*model.Gateway
+//}
 
-var gatewaysModel []model.Gateway
-var gatewayModel *model.Gateway
+
+
 var gatewaySubscriberChildTable = "Subscriber"
 var gatewaySubscriptionsChildTable = "Subscriptions"
 
 
 // GetGateways get all of them
 func (d *GormDatabase) GetGateways() ([]model.Gateway, error) {
+	var gatewaysModel []model.Gateway
 	query := d.DB.Preload(gatewaySubscriberChildTable).Preload(gatewaySubscriptionsChildTable).Find(&gatewaysModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -28,9 +29,10 @@ func (d *GormDatabase) GetGateways() ([]model.Gateway, error) {
 
 // CreateGateway make it
 func (d *GormDatabase) CreateGateway(body *model.Gateway)  error {
-	body.UUID, _ = utils.MakeUUID()
+	var gatewayModel []model.Gateway
+	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Gateway)
 	if !body.IsRemote  {
-		query := d.DB.Where("is_remote = ?", 0).First(&gatewaysModel) //if existing local network then don't create it
+		query := d.DB.Where("is_remote = ?", 0).First(&gatewayModel) //if existing local network then don't create it
 		r := query.RowsAffected
 		if r != 0 {
 			return errorMsg("network", "a local gateway exists", nil)
@@ -45,6 +47,7 @@ func (d *GormDatabase) CreateGateway(body *model.Gateway)  error {
 
 // GetGateway get it
 func (d *GormDatabase) GetGateway(uuid string) (*model.Gateway, error) {
+	var gatewayModel *model.Gateway
 	query := d.DB.Where("uuid = ? ", uuid).First(&gatewayModel); if query.Error != nil {
 		return nil, query.Error
 	}
@@ -53,6 +56,7 @@ func (d *GormDatabase) GetGateway(uuid string) (*model.Gateway, error) {
 
 // DeleteGateway deletes it
 func (d *GormDatabase) DeleteGateway(uuid string) (bool, error) {
+	var gatewayModel *model.Gateway
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&gatewayModel);if query.Error != nil {
 		return false, query.Error
 	}
@@ -67,6 +71,7 @@ func (d *GormDatabase) DeleteGateway(uuid string) (bool, error) {
 
 // UpdateGateway  update it
 func (d *GormDatabase) UpdateGateway(uuid string, body *model.Gateway) (*model.Gateway, error) {
+	var gatewayModel *model.Gateway
 	query := d.DB.Where("uuid = ?", uuid).Find(&gatewayModel);if query.Error != nil {
 		return nil, query.Error
 	}

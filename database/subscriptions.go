@@ -10,13 +10,9 @@ type Subscriptions struct {
 	*model.Subscriptions
 }
 
-var subscriptionsModel []model.Subscriptions
-var subscriptionModel *model.Subscriptions
-
-
-
 // GetSubscriptions get all of them
 func (d *GormDatabase) GetSubscriptions() ([]model.Subscriptions, error) {
+	var subscriptionsModel []model.Subscriptions
 	query := d.DB.Preload(subscriberPointsChildTable).Find(&subscriptionsModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -26,13 +22,14 @@ func (d *GormDatabase) GetSubscriptions() ([]model.Subscriptions, error) {
 
 // CreateSubscription make it
 func (d *GormDatabase) CreateSubscription(body *model.Subscriptions)  error {
-	body.UUID, _ = utils.MakeUUID()
+	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Subscription)
 	n := d.DB.Create(body).Error
 	return n
 }
 
 // GetSubscription get it
 func (d *GormDatabase) GetSubscription(uuid string) (*model.Subscriptions, error) {
+	var subscriptionModel *model.Subscriptions
 	query := d.DB.Where("uuid = ? ", uuid).First(&subscriptionModel); if query.Error != nil {
 		return nil, query.Error
 	}
@@ -41,6 +38,7 @@ func (d *GormDatabase) GetSubscription(uuid string) (*model.Subscriptions, error
 
 // DeleteSubscription deletes it
 func (d *GormDatabase) DeleteSubscription(uuid string) (bool, error) {
+	var subscriptionModel *model.Subscriptions
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&subscriptionModel);if query.Error != nil {
 		return false, query.Error
 	}
@@ -55,6 +53,7 @@ func (d *GormDatabase) DeleteSubscription(uuid string) (bool, error) {
 
 // UpdateSubscription  update it
 func (d *GormDatabase) UpdateSubscription(uuid string, body *model.Subscriptions) (*model.Subscriptions, error) {
+	var subscriptionModel *model.Subscriptions
 	query := d.DB.Where("uuid = ?", uuid).Find(&subscriptionModel);if query.Error != nil {
 		return nil, query.Error
 	}

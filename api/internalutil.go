@@ -73,7 +73,9 @@ func withID(ctx *gin.Context, name string, f func(id uint)) {
 	}
 }
 
-func getBODY(ctx *gin.Context) (dto *model.Network, err error) {
+
+
+func getBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -188,7 +190,7 @@ func (r *BaseResponse) GetStatusCode() int {
 func Success(code int, Response interface{}) Response {
 	return &BaseResponse{code: code, Response: JSON{
 		"status":   "success",
-		"Response": Response,
+		"response": Response,
 	}}
 }
 

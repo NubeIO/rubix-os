@@ -13,14 +13,15 @@ type Subscriber struct {
 
 }
 
-var subscribersModel []model.Subscriber
-var subscriberModel *model.Subscriber
+
+
 var subscriberPointsChildTable = "Point"
 var subscriberJobsChildTable = "Job"
 
 
 // GetSubscribers get all of them
 func (d *GormDatabase) GetSubscribers() ([]model.Subscriber, error) {
+	var subscribersModel []model.Subscriber
 	query := d.DB.Find(&subscribersModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -30,7 +31,7 @@ func (d *GormDatabase) GetSubscribers() ([]model.Subscriber, error) {
 
 // CreateSubscriber make it
 func (d *GormDatabase) CreateSubscriber(body *model.Subscriber)  error {
-	body.UUID, _ = utils.MakeUUID()
+	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Subscriber)
 	if body.SubscriberType == st.Point {
 		//call points and make it exists
 		query, err := d.GetPoint(body.PointUUID, false)
@@ -48,6 +49,7 @@ func (d *GormDatabase) CreateSubscriber(body *model.Subscriber)  error {
 
 // GetSubscriber get it
 func (d *GormDatabase) GetSubscriber(uuid string) (*model.Subscriber, error) {
+	var subscriberModel *model.Subscriber
 	query := d.DB.Where("uuid = ? ", uuid).First(&subscriberModel); if query.Error != nil {
 		return nil, query.Error
 	}
@@ -56,6 +58,7 @@ func (d *GormDatabase) GetSubscriber(uuid string) (*model.Subscriber, error) {
 
 // DeleteSubscriber deletes it
 func (d *GormDatabase) DeleteSubscriber(uuid string) (bool, error) {
+	var subscriberModel *model.Subscriber
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&subscriberModel);if query.Error != nil {
 		return false, query.Error
 	}
@@ -70,6 +73,7 @@ func (d *GormDatabase) DeleteSubscriber(uuid string) (bool, error) {
 
 // UpdateSubscriber  update it
 func (d *GormDatabase) UpdateSubscriber(uuid string, body *model.Subscriber) (*model.Subscriber, error) {
+	var subscriberModel *model.Subscriber
 	query := d.DB.Where("uuid = ?", uuid).Find(&subscriberModel);if query.Error != nil {
 		return nil, query.Error
 	}

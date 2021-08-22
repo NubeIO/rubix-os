@@ -78,8 +78,6 @@ type Subscriber struct {
 	SubscriberType 			string  `json:"subscriber_type"`
 	SubscriberApplication 	string `json:"subscriber_application"`
 	GatewayUUID     		string `json:"gateway_uuid" gorm:"TYPE:string REFERENCES gateways;not null;default:null"`
-	//ThingUUID				[]Point	`gorm:"many2many:points"`
-	//string	`gorm:"many2many:points;ForeignKey:uuid;many2many:jobs;ForeignKey:job_uuid"`
 	PointUUID    			string  `json:"point_uuid" binding:"required" gorm:"TYPE:varchar(255) REFERENCES points;unique;default:null"`
 	//JobUUID    				string  `json:"job_uuid" binding:"required" gorm:"TYPE:varchar(255) REFERENCES jobs;unique;default:null"`
 

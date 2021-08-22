@@ -6,14 +6,14 @@ import (
 )
 
 
-// ClientAddDevice an object
-func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) {
+// ClientAddPoint an object
+func (a *FlowClient) ClientAddPoint(deviceUUID string) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("net_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
-		SetBody(map[string]string{"name": name, "network_uuid": networkUUID}).
-		Post("/api/device")
+		SetBody(map[string]string{"name": name, "device_uuid": deviceUUID}).
+		Post("/api/point")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -24,12 +24,12 @@ func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) 
 }
 
 
-// ClientGetDevice an object
-func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
+// ClientGetPoint an object
+func (a *FlowClient) ClientGetPoint(uuid string) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/device/{uuid}")
+		Get("/api/point/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
