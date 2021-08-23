@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
 	"github.com/mustafaturan/bus/v3"
@@ -74,11 +74,11 @@ func (c *PluginTest) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			topic := fmt.Sprintf("%s:%s", "job",body.JobUUID)
 			if body.Enable{
 				// subscribe
-				api.BUS.RegisterHandler(topic, handler)
+				eventbus.BUS.RegisterHandler(topic, handler)
 				ctx.JSON(200, "subscribe")
 			} else {
 				// unsubscribe
-				api.BUS.DeregisterHandler(topic)
+				eventbus.BUS.DeregisterHandler(topic)
 				ctx.JSON(200, "unsubscribe")
 			}
 		} else {

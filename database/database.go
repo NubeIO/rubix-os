@@ -39,6 +39,8 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var gateway []model.Gateway
 	var subscriber []model.Subscriber
 	var subscription []model.Subscription
+	var pointSubscriberLedger []model.PointSubscriberLedger
+	var pointSubscriptionLedger []model.PointSubscriptionLedger
 	var models = []interface{}{
 		&user,
 		&application,
@@ -55,6 +57,8 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&gateway,
 		&subscriber,
 		&subscription,
+		&pointSubscriberLedger,
+		&pointSubscriptionLedger,
 	}
 
 	for _, v := range models {
@@ -74,7 +78,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	rp := new(model.RubixPlat)
 	db.Find(rp).Count(&platCount)
 	if createDefaultUserIfNotExist && platCount == 0 {
-		rp.GlobalUuid, _ = utils.MakeTopicUUID(model.CommonNaming.Network)
+		rp.GlobalUuid = utils.MakeTopicUUID(model.CommonNaming.Network)
 		db.Create(&rp)
 	}
 	return &GormDatabase{DB: db}, nil

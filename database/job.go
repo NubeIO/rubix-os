@@ -23,7 +23,7 @@ func (d *GormDatabase) GetJobs() ([]model.Job, error) {
 
 
 func (d *GormDatabase) CreateJob(body *model.Job)  error {
-	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Job)
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Job)
 	n := d.DB.Create(body).Error
 	return n
 }

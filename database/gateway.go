@@ -6,31 +6,30 @@ import (
 )
 
 
-
-//type Gateway struct {
-//	*model.Gateway
-//}
-
-
-
 var gatewaySubscriberChildTable = "Subscriber"
-var gatewaySubscriptionsChildTable = "Subscriptions"
-
+var gatewaySubscriptionsChildTable = "Subscription"
 
 // GetGateways get all of them
-func (d *GormDatabase) GetGateways() ([]model.Gateway, error) {
+func (d *GormDatabase) GetGateways(withChildren bool) ([]model.Gateway, error) {
 	var gatewaysModel []model.Gateway
-	query := d.DB.Find(&gatewaysModel)
-	if query.Error != nil {
-		return nil, query.Error
+	if withChildren { // drop child to reduce json size
+		query := d.DB.Preload(gatewaySubscriberChildTable).Preload(gatewaySubscriptionsChildTable).Find(&gatewaysModel);if query.Error != nil {
+			return nil, query.Error
+		}
+		return gatewaysModel, nil
+	} else {
+		query := d.DB.Find(&gatewaysModel);if query.Error != nil {
+			return nil, query.Error
+		}
+		return gatewaysModel, nil
 	}
-	return gatewaysModel, nil
+
 }
 
 // CreateGateway make it
 func (d *GormDatabase) CreateGateway(body *model.Gateway)  error {
 	var gatewayModel []model.Gateway
-	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Gateway)
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Gateway)
 	if !body.IsRemote  {
 		query := d.DB.Where("is_remote = ?", 0).First(&gatewayModel) //if existing local network then don't create it
 		r := query.RowsAffected

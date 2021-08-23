@@ -14,7 +14,7 @@ Gateway
 // The GatewayDatabase interface for encapsulating database access.
 type GatewayDatabase interface {
 	GetGateway(uuid string) (*model.Gateway, error)
-	GetGateways() ([]model.Gateway, error)
+	GetGateways(withChildren bool) ([]model.Gateway, error)
 	CreateGateway(body *model.Gateway) error
 	UpdateGateway(uuid string, body *model.Gateway) (*model.Gateway, error)
 	DeleteGateway(uuid string) (bool, error)
@@ -33,7 +33,8 @@ func (j *GatewayAPI) GetGateway(ctx *gin.Context) {
 
 
 func (j *GatewayAPI) GetGateways(ctx *gin.Context) {
-	q, err := j.DB.GetGateways()
+	withChildren, _ := withChildrenArgs(ctx)
+	q, err := j.DB.GetGateways(withChildren)
 	reposeHandler(q, err, ctx)
 
 }

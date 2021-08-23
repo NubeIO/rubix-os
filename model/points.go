@@ -9,15 +9,6 @@ type Ops struct {
 
 }
 
-// SubscriberPoints TODO add in later
-//SubscriberPoints is the list of points that this points is subscribed to. A Subscriber is a remote device that can pub/sub to a producer.
-//type SubscriberPoints struct {
-//	SubscriberConnectionUUID 				string `json:"subscriber_connection_uuid"` //this is the remote device UUID
-//	SubscriberPointUUID						string `json:"subscriber_point_uuid"` //this is the remote point UUID
-//	SubscriberWriteable 					bool `json:"subscriber_writeable"`
-//	SubscriberPointWriteValue  				string `json:"subscriber_point_write_value"`
-//	SubscriberPointWritePriority  			string `json:"subscriber_point_write_priority"`
-//}
 
 // TimeOverride TODO add in later
 //TimeOverride where a point value can be overridden for a duration of time
@@ -71,17 +62,13 @@ type CommonPoint struct {
 type Point struct {
 	CommonProducer
 	CommonPoint
-	DeviceUUID     		string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
-	//Subscriber			[]Subscriber `json:"subscribers" gorm:"constraint:OnDelete:CASCADE;"`
-	//Subscription		[]Subscription `json:"subscriptions" gorm:"constraint:OnDelete:CASCADE;"`
+	DeviceUUID     			string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
+	PointSubscriberLedger	[]PointSubscriberLedger `json:"point_subscriber_ledger" gorm:"constraint:OnDelete:CASCADE;"`
+	PointSubscriptionLedger	[]PointSubscriptionLedger `json:"point_subscription_ledger" gorm:"constraint:OnDelete:CASCADE;"`
 	//PriorityArrayModel 			PriorityArrayModel `json:"priority_array" gorm:"constraint:OnDelete:CASCADE"`
 	//PointStore 					PointStore `json:"point_store" gorm:"constraint:OnDelete:CASCADE"`
 }
 
-//type PointSubscriber struct {
-//	PointUUID    		string  `json:"point_uuid" binding:"required" gorm:"TYPE:varchar(255) REFERENCES points;not null;default:null"`
-//	Subscriber
-//}
 
 
 type PriorityArrayModel struct {

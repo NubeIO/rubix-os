@@ -1,16 +1,12 @@
 package api
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
-	"github.com/mustafaturan/bus/v3"
-	"github.com/mustafaturan/monoton/v2"
-	"github.com/mustafaturan/monoton/v2/sequencer"
 	"log"
 	"time"
 )
@@ -24,10 +20,6 @@ type JobDatabase interface {
 	CreateJob(body *model.Job) error
 	UpdateJob(uuid string, body *model.Job) (*model.Job, error)
 	DeleteJob(uuid string) (bool, error)
-	//CreateJobSubscriber(body *model.JobSubscriber, jobUUID string) error
-	//UpdateJobSubscriber(uuid string, body *model.JobSubscriber) (*model.JobSubscriber, error)
-	//GetJobSubscribers() ([]model.JobSubscriber, error)
-	//DeleteJobSubscriber(uuid string) (bool, error)
 
 }
 type JobAPI struct {
@@ -89,33 +81,6 @@ func (j *JobAPI) DeleteJob(ctx *gin.Context) {
 	q, err := j.DB.DeleteJob(uuid)
 	reposeHandler(q, err, ctx)
 }
-
-
-//func (j *JobAPI) CreateJobSubscriber(ctx *gin.Context) {
-//	body, _ := getBODYJobSubscriber(ctx)
-//	err := j.DB.CreateJobSubscriber(body, body.JobUUID)
-//	reposeHandler(body, err, ctx)
-//}
-//
-//
-//func (j *JobAPI) UpdateJobSubscriber(ctx *gin.Context) {
-//	body, _ := getBODYJobSubscriber(ctx)
-//	uuid := resolveID(ctx)
-//	q, err := j.DB.UpdateJobSubscriber(uuid, body)
-//	reposeHandler(q, err, ctx)
-//}
-//
-//func (j *JobAPI) GetJobSubscriber(ctx *gin.Context) {
-//	q, err := j.DB.GetJobSubscribers()
-//	reposeHandler(q, err, ctx)
-//}
-//
-//
-//func (j *JobAPI) DeleteJobSubscriber(ctx *gin.Context) {
-//	uuid := resolveID(ctx)
-//	q, err := j.DB.DeleteJobSubscriber(uuid)
-//	reposeHandler(q, err, ctx)
-//}
 
 
 /*
@@ -192,49 +157,22 @@ func (j *JobAPI) NewJobEngine() {
 
 
 
-func NewBus() *bus.Bus {
-	// configure id generator
-	node        := uint64(1)
-	initialTime := uint64(1577865600000)
-	m, err := monoton.New(sequencer.NewMillisecond(), node, initialTime)
-	if err != nil {
-		panic(err)
-	}
-
-	// init an id generator
-	var idGenerator bus.Next = m.Next
-	b, err := bus.NewBus(idGenerator)
-	if err != nil {
-		panic(err)
-	}
-	return b
-}
-
-type payloadBody struct {
-	UUID  			string   		`json:"uuid"`
-	Delete  		bool   			`json:"delete"`
-	MessageString  	string   		`json:"message_string"`
-	MessageTS  	string   			`json:"message_ts"`
-
-}
-var BUS = NewBus()
-var BusBackground = context.Background()
 
 func taskWithParams(uuid string, body *model.Job) {
 	fmt.Println(uuid)
-	payload := new(payloadBody)
-	payload.UUID = uuid
-	payload.Delete = false
-	payload.MessageString = "what up"
-	payload.MessageTS = time.Now().Format(time.RFC850)
-	topic := fmt.Sprintf("%s:%s", "job",uuid)
-
-	BUS.RegisterTopics(topic)
-	err := BUS.Emit(BusBackground, topic, payload)
-
-	fmt.Println("topics", BUS.Topics())
-	if err != nil {
-		fmt.Println("error", err)
-	}
+	//payload := new(payloadBody)
+	//payload.UUID = uuid
+	//payload.Delete = false
+	//payload.MessageString = "what up"
+	//payload.MessageTS = time.Now().Format(time.RFC850)
+	//topic := fmt.Sprintf("%s:%s", "job",uuid)
+	//
+	//BUS.RegisterTopics(topic)
+	//err := BUS.Emit(BusBackground, topic, payload)
+	//
+	//fmt.Println("topics", BUS.Topics())
+	//if err != nil {
+	//	fmt.Println("error", err)
+	//}
 
 }

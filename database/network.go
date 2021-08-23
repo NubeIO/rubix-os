@@ -48,7 +48,7 @@ func (d *GormDatabase) GetNetwork(uuid string, withChildren bool, withPoints boo
 
 // CreateNetwork creates a device.
 func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
-	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Network)
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Network)
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}

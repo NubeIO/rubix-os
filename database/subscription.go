@@ -21,10 +21,12 @@ func (d *GormDatabase) GetSubscriptions() ([]model.Subscription, error) {
 }
 
 // CreateSubscription make it
-func (d *GormDatabase) CreateSubscription(body *model.Subscription)  error {
-	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Subscription)
-	n := d.DB.Create(body).Error
-	return n
+func (d *GormDatabase) CreateSubscription(body *model.Subscription) (*model.Subscription, error) {
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
+	query := d.DB.Create(body);if query.Error != nil {
+		return nil, query.Error
+	}
+	return body, nil
 }
 
 // GetSubscription get it

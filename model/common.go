@@ -131,7 +131,8 @@ type CommonSubscription struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	CommonValue
-	CommonHistory
-	CommonCreated
+	SubscriberType 			string  `json:"subscriber_type"`
+	SubscriberApplication 	string `json:"subscriber_application"`
+	GatewayUUID     		string `json:"gateway_uuid" gorm:"TYPE:string REFERENCES gateways;not null;default:null"`
+
 }

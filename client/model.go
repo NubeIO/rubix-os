@@ -31,12 +31,21 @@ type Gateway struct {
 	IsRemote  	bool 	`json:"is_remote"`
 }
 type Subscriber struct {
-	Name                  string `json:"name"`
-	Enable                bool   `json:"enable"`
-	SubscriberType        string `json:"subscriber_type"`
-	SubscriberApplication string `json:"subscriber_application"`
-	GatewayUuid           string `json:"gateway_uuid"`
-	ThingUuid             string `json:"thing_uuid"`
+	Name                  	string `json:"name"`
+	Enable                	bool   `json:"enable"`
+	SubscriberType        	string `json:"subscriber_type"`
+	SubscriberApplication 	string `json:"subscriber_application"`
+	GatewayUuid           	string `json:"gateway_uuid"`
+	FromUUID 				string `json:"from_uuid"`
+	ToUUID 					string `json:"to_uuid"`
 }
 
 
+type Subscription struct {
+	Name                  	string `json:"name"`
+	Enable                	bool   `json:"enable"`
+	SubscriberType        	string `json:"subscriber_type"`
+	SubscriberApplication 	string `json:"subscriber_application"`
+	GatewayUuid           	string `json:"gateway_uuid"`
+	ToUUID 					string `json:"to_uuid"`
+}

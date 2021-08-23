@@ -14,7 +14,7 @@ import (
 type SubscriptionsDatabase interface {
 	GetSubscription(uuid string) (*model.Subscription, error)
 	GetSubscriptions() ([]model.Subscription, error)
-	CreateSubscription(body *model.Subscription) error
+	CreateSubscription(body *model.Subscription) (*model.Subscription, error)
 	UpdateSubscription(uuid string, body *model.Subscription) (*model.Subscription, error)
 	DeleteSubscription(uuid string) (bool, error)
 
@@ -44,8 +44,8 @@ func (j *SubscriptionsAPI) CreateSubscription(ctx *gin.Context) {
 	if err != nil {
 		reposeHandler(nil, err, ctx)
 	}
-	err = j.DB.CreateSubscription(body)
-	reposeHandler(body, err, ctx)
+	q, err := j.DB.CreateSubscription(body)
+	reposeHandler(q, err, ctx)
 }
 
 

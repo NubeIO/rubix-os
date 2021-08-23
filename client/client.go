@@ -13,6 +13,7 @@ const defaultBaseURL = "http://localhost:1660"
 // FlowClient is used to invoke Form3 Accounts API.
 type FlowClient struct {
 	client *resty.Client
+	ClientToken string
 }
 
 // NewFlowRestClient returns a new instance of FlowClient.
@@ -42,7 +43,7 @@ func NewFlowRestClient(name string, password string) *FlowClient {
 	}
 	fmt.Println("token:", t.Token)
 	client.SetHeader("Authorization", t.Token)
-	return &FlowClient{client: client}
+	return &FlowClient{client: client, ClientToken: t.Token}
 }
 
 

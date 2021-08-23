@@ -11,8 +11,8 @@ func MakeUUID() (string, error) {
 }
 
 
-func MakeTopicUUID(attribute string) (string, error) {
-	u, err := uuid.MakeUUID()
+func MakeTopicUUID(attribute string) string {
+	u, _ := uuid.MakeUUID()
 	divider := "_"
 	net := "id_n"
 	dev := "id_d"
@@ -24,24 +24,23 @@ func MakeTopicUUID(attribute string) (string, error) {
 	alm := "id_a"
 	switch attribute {
 	case model.CommonNaming.Network:
-		return fmt.Sprintf("%s%s%s", net, divider, u), err
+		return fmt.Sprintf("%s%s%s", net, divider, u)
 	case model.CommonNaming.Device:
-		return fmt.Sprintf("%s%s%s", dev, divider, u), err
+		return fmt.Sprintf("%s%s%s", dev, divider, u)
 	case model.CommonNaming.Point:
-		return fmt.Sprintf("%s%s%s", pnt, divider, u), err
+		return fmt.Sprintf("%s%s%s", pnt, divider, u)
 	case model.CommonNaming.Gateway:
-		return fmt.Sprintf("%s%s%s", gtw, divider, u), err
+		return fmt.Sprintf("%s%s%s", gtw, divider, u)
 	case model.CommonNaming.Job:
-		return fmt.Sprintf("%s%s%s", job, divider, u), err
+		return fmt.Sprintf("%s%s%s", job, divider, u)
 	case model.CommonNaming.Subscriber:
-		return fmt.Sprintf("%s%s%s", sub, divider, u), err
+		return fmt.Sprintf("%s%s%s", sub, divider, u)
 	case model.CommonNaming.Subscription:
-		return fmt.Sprintf("%s%s%s", rip, divider, u), err
+		return fmt.Sprintf("%s%s%s", rip, divider, u)
 	case model.CommonNaming.Alarm:
-		return fmt.Sprintf("%s%s%s", alm, divider, u), err
+		return fmt.Sprintf("%s%s%s", alm, divider, u)
 
 	}
-	fmt.Println("here")
-	return uuid.MakeUUID()
+	return u
 }
 

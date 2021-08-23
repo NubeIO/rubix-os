@@ -34,24 +34,45 @@ func (d *GormDatabase) GetSubscribers() ([]*model.Subscriber, error) {
 
 // CreateSubscriber make it
 func (d *GormDatabase) CreateSubscriber(body *model.Subscriber) (*model.Subscriber, error) {
-	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Subscriber)
-
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscriber)
 	if body.SubscriberType == model.CommonNaming.Point  {
 		//call points and make it exists
-		query, err := d.GetPoint(body.ThingUUID, false)
+		gateway, err := d.GetGateway(body.GatewayUUID)
+		if err != nil {
+			return nil, errorMsg("GetGateway", "error on trying to get", nil)
+		}
+		query, err := d.GetPoint(body.ToUUID, false)
 		if err != nil {
 			return nil, errorMsg("CreateSubscriber", "error on trying to add", nil)
 		}
 		if query != nil {
 			body.SubscriberApplication = model.CommonNaming.Mapping
 			n := d.DB.Create(&body).Error
-			fmt.Println(body.UUID)
-			fmt.Println(2222222)
-			var sm model.Subscription
-			sm.GatewayUUID = body.GatewayUUID
-			sm.ThingUUID = body.ThingUUID
-			fmt.Println(3333333, sm.ThingUUID)
-			err = d.CreateSubscription(&sm)
+
+			fmt.Println(gateway.UUID, "gateway")
+			// if its local
+			 if !gateway.IsRemote {
+				 var sm model.Subscription
+				 sm.GatewayUUID = body.GatewayUUID
+				 sm.ToUUID = body.ToUUID
+				 sm.Name = "internal point mapping"
+				 sm.Description = "internal point mapping"
+				 sm.Enable = body.Enable
+				 sm.SubscriberType = body.SubscriberType
+				 sm.SubscriberApplication = body.SubscriberApplication
+				 subscription, err := d.CreateSubscription(&sm)
+				 if err != nil {
+					return nil, errorMsg("CreateSubscription", "error on trying to add", nil)
+				 }
+				 u := utils.MakeTopicUUID("")
+				 err = 	d.DB.Create(&model.PointSubscriberLedger{UUID: u, GatewayUUID: body.GatewayUUID, SubscriberUUID: body.UUID, SubscriptionUUID: subscription.UUID, PointUUID: body.ToUUID}).Error
+				 if err != nil {
+					return nil, errorMsg("CreateSubscription PointLedger", "error on trying to add", nil)
+				 } else {
+					 u := utils.MakeTopicUUID("")
+					d.DB.Create(&model.PointSubscriptionLedger{UUID: u, GatewayUUID: body.GatewayUUID, SubscriberUUID: body.UUID, PointUUID: body.FromUUID})
+				 }
+			 }
 			if err != nil {
 				return nil, err
 			}

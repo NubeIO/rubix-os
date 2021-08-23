@@ -7,7 +7,6 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 	"log"
 	"os"
-	"os/signal"
 	"time"
 )
 
@@ -166,7 +165,6 @@ func NewClient(options ClientOptions) (c *Client) {
 	c.client = mqtt.NewClient(opts)
 	go func() {
 		done := make(chan os.Signal)
-		signal.Notify(done, os.Interrupt)
 		<-done
 		topicLog{"msg", "close down client", nil}.printLog()
 		c.Close()
