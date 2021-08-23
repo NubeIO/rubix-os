@@ -19,12 +19,12 @@ type SubscriptionsApplication struct {
 }
 
 
-//Subscriptions could be a local network, job or alarm and so on
-type Subscriptions struct {
-	CommonSubscriptions
+//Subscription could be a local network, job or alarm and so on
+type Subscription struct {
+	CommonSubscription
 	SubscriberType 			string  `json:"subscriber_type"`
 	SubscriberApplication 	string `json:"subscriber_application"`
+	ThingUUID 				string `json:"thing_uuid"`
 	GatewayUUID     		string `json:"gateway_uuid" gorm:"TYPE:string REFERENCES gateways;not null;default:null"`
-	PointUUID    			string  `json:"point_uuid" binding:"required" gorm:"TYPE:varchar(255) REFERENCES points;not null;default:null"`
-
+	//PointUUID    			string  `json:"point_uuid" binding:"required" gorm:"TYPE:varchar(255) REFERENCES points;not null;default:null"`
 }

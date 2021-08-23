@@ -90,7 +90,7 @@ func getBODYSubscriber(ctx *gin.Context) (dto *model.Subscriber, err error) {
 	return dto, err
 }
 
-func getBODYSubscription(ctx *gin.Context) (dto *model.Subscriptions, err error) {
+func getBODYSubscription(ctx *gin.Context) (dto *model.Subscription, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

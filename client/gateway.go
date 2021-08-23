@@ -6,14 +6,14 @@ import (
 )
 
 
-// ClientAddDevice an object
-func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) {
+// ClientAddGateway an object
+func (a *FlowClient) ClientAddGateway(isRemote bool) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
-	name = fmt.Sprintf("dev_name_%s", name)
+	name = fmt.Sprintf("gte_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
-		SetBody(map[string]string{"name": name, "network_uuid": networkUUID}).
-		Post("/api/device")
+		SetBody(Gateway{"name", isRemote}).
+		Post("/api/gateway")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -24,12 +24,12 @@ func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) 
 }
 
 
-// ClientGetDevice an object
-func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
+// ClientGetGateway an object
+func (a *FlowClient) ClientGetGateway(uuid string) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/device/{uuid}")
+		Get("/api/gateway/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -40,15 +40,15 @@ func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
 }
 
 
-// ClientEditDevice edit an object
-func (a *FlowClient) ClientEditDevice(uuid string) (*ResponseBody, error) {
+// ClientEditGateway edit an object
+func (a *FlowClient) ClientEditGateway(uuid string) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("dev_new_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/device/{}")
+		Post("/api/gateway/{}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}

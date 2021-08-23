@@ -1,12 +1,13 @@
 package database
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-var st = model.NewSubscriberTypeEnum()
-var sa = model.NewSubscriberApplicationEnum()
+//var st = model.NewSubscriberTypeEnum()
+//var sa = model.NewSubscriberApplicationEnum()
 
 type Subscriber struct {
 	*model.Subscriber
@@ -15,13 +16,13 @@ type Subscriber struct {
 
 
 
-var subscriberPointsChildTable = "Point"
-var subscriberJobsChildTable = "Job"
+//var subscriberPointsChildTable = "Point"
+//var subscriberJobsChildTable = "Job"
 
 
 // GetSubscribers get all of them
-func (d *GormDatabase) GetSubscribers() ([]model.Subscriber, error) {
-	var subscribersModel []model.Subscriber
+func (d *GormDatabase) GetSubscribers() ([]*model.Subscriber, error) {
+	var subscribersModel []*model.Subscriber
 	query := d.DB.Find(&subscribersModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -29,23 +30,39 @@ func (d *GormDatabase) GetSubscribers() ([]model.Subscriber, error) {
 	return subscribersModel, nil
 }
 
+
+
 // CreateSubscriber make it
-func (d *GormDatabase) CreateSubscriber(body *model.Subscriber)  error {
+func (d *GormDatabase) CreateSubscriber(body *model.Subscriber) (*model.Subscriber, error) {
 	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Subscriber)
-	if body.SubscriberType == st.Point {
+
+	if body.SubscriberType == model.CommonNaming.Point  {
 		//call points and make it exists
-		query, err := d.GetPoint(body.PointUUID, false)
+		query, err := d.GetPoint(body.ThingUUID, false)
 		if err != nil {
-			return errorMsg("CreateSubscriber", "error on trying to add", nil)
+			return nil, errorMsg("CreateSubscriber", "error on trying to add", nil)
 		}
 		if query != nil {
-			body.SubscriberApplication =sa.Mapping
-			n := d.DB.Create(body).Error
-			return n
+			body.SubscriberApplication = model.CommonNaming.Mapping
+			n := d.DB.Create(&body).Error
+			fmt.Println(body.UUID)
+			fmt.Println(2222222)
+			var sm model.Subscription
+			sm.GatewayUUID = body.GatewayUUID
+			sm.ThingUUID = body.UUID
+			fmt.Println(3333333, sm.ThingUUID)
+			err = d.CreateSubscription(&sm)
+			if err != nil {
+				return nil, err
+			}
+			return body, n
 		}
+	} else if body.SubscriberType == model.CommonNaming.Network {
+
 	}
-	return nil
+	return body, nil
 }
+
 
 // GetSubscriber get it
 func (d *GormDatabase) GetSubscriber(uuid string) (*model.Subscriber, error) {

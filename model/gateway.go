@@ -11,5 +11,5 @@ type Gateway struct {
 	CommonCreated
 	IsRemote 			bool `json:"is_remote"`
 	Subscriber			[]Subscriber `json:"subscribers" gorm:"constraint:OnDelete:CASCADE;"`
-	Subscriptions		[]Subscriptions `json:"subscriptions" gorm:"constraint:OnDelete:CASCADE;"`
+	Subscription		[]Subscription `json:"subscriptions" gorm:"constraint:OnDelete:CASCADE;"`
 }

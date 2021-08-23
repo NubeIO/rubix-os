@@ -37,6 +37,38 @@ func main()  {
 	fmt.Println(addPoint.Response.Name)
 
 
+	addGateway, err := c.ClientAddGateway(true)
+	if err != nil {
+		fmt.Println(err)
+		return
+
+	}
+	fmt.Println("Add gateway")
+	fmt.Println(addGateway.Status)
+	fmt.Println(addGateway.Response.UUID)
+	fmt.Println(addGateway.Response.Name)
+
+	tSub := new(client.Subscriber)
+	tSub.Name = "test"
+	tSub.Enable = true
+	tSub.ThingUuid = addPoint.Response.UUID
+	tSub.GatewayUuid = addGateway.Response.UUID
+	tSub.SubscriberApplication = "mapping"
+	tSub.SubscriberType = "point"
+
+	addSubscriber, err := c.ClientAddSubscriber(*tSub)
+	if err != nil {
+		fmt.Println(err)
+		return
+
+	}
+	fmt.Println("Add Subscriber")
+	fmt.Println(addSubscriber.Status)
+	fmt.Println(addSubscriber.Response.UUID)
+	fmt.Println(addSubscriber.Response.Name)
+
+
+
 
 
 

@@ -9,7 +9,7 @@ import (
 // ClientAddNetwork an object
 func (a *FlowClient) ClientAddNetwork() (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
-	name = fmt.Sprintf("net_%s", name)
+	name = fmt.Sprintf("net_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).

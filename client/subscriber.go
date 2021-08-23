@@ -6,30 +6,31 @@ import (
 )
 
 
-// ClientAddDevice an object
-func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) {
+// ClientAddSubscriber an object
+func (a *FlowClient) ClientAddSubscriber(body Subscriber) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
-	name = fmt.Sprintf("dev_name_%s", name)
+	name = fmt.Sprintf("sub_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
-		SetBody(map[string]string{"name": name, "network_uuid": networkUUID}).
-		Post("/api/device")
+		SetBody(body).
+		Post("/api/subscriber")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
+	fmt.Println(resp.String())
 	return resp.Result().(*ResponseBody), nil
 }
 
 
-// ClientGetDevice an object
-func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
+// ClientGetSubscriber an object
+func (a *FlowClient) ClientGetSubscriber(uuid string) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/device/{uuid}")
+		Get("/api/subscriber/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -40,15 +41,15 @@ func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
 }
 
 
-// ClientEditDevice edit an object
-func (a *FlowClient) ClientEditDevice(uuid string) (*ResponseBody, error) {
+// ClientEditSubscriber edit an object
+func (a *FlowClient) ClientEditSubscriber(uuid string) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
-	name = fmt.Sprintf("dev_new_name_%s", name)
+	name = fmt.Sprintf("sub_new_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/device/{}")
+		Post("/api/subscriber/{}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}

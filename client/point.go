@@ -9,7 +9,7 @@ import (
 // ClientAddPoint an object
 func (a *FlowClient) ClientAddPoint(deviceUUID string) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
-	name = fmt.Sprintf("net_%s", name)
+	name = fmt.Sprintf("pnt_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name, "device_uuid": deviceUUID}).

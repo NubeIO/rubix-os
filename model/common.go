@@ -14,6 +14,7 @@ var CommonNaming = struct {
 	Subscriber   	string
 	Subscription   	string
 	Alarm   		string
+	Mapping   		string
 
 }{
 	Network:   			"network",
@@ -24,6 +25,7 @@ var CommonNaming = struct {
 	Subscriber:   		"subscriber",
 	Subscription:   	"subscription",
 	Alarm:   			"alarm",
+	Mapping:   			"mapping",
 
 }
 
@@ -120,7 +122,7 @@ type CommonSubscriber struct {
 	GatewayUUID     		string `json:"gateway_uuid" gorm:"TYPE:string REFERENCES gateways;not null;default:null"`
 }
 
-type CommonSubscriptions struct {
+type CommonSubscription struct {
 	CommonUUID
 	CommonName
 	CommonDescription

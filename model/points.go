@@ -72,8 +72,8 @@ type Point struct {
 	CommonProducer
 	CommonPoint
 	DeviceUUID     		string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
-	Subscriber			[]Subscriber `json:"subscriber" gorm:"constraint:OnDelete:CASCADE;"`
-	Subscriptions		[]Subscriptions `json:"subscriptions" gorm:"constraint:OnDelete:CASCADE;"`
+	//Subscriber			[]Subscriber `json:"subscribers" gorm:"constraint:OnDelete:CASCADE;"`
+	//Subscription		[]Subscription `json:"subscriptions" gorm:"constraint:OnDelete:CASCADE;"`
 	//PriorityArrayModel 			PriorityArrayModel `json:"priority_array" gorm:"constraint:OnDelete:CASCADE"`
 	//PointStore 					PointStore `json:"point_store" gorm:"constraint:OnDelete:CASCADE"`
 }

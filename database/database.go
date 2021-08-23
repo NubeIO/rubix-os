@@ -31,12 +31,12 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var network []model.Network
 	var device []model.Device
 	var point []model.Point
-	var pointStore []model.PointStore
-	var priorityArrayModel []model.PriorityArrayModel
+	//var pointStore []model.PointStore
+	//var priorityArrayModel []model.PriorityArrayModel
 	var job []model.Job
 	var gateway []model.Gateway
 	var subscriber []model.Subscriber
-	var subscriptions []model.Subscriptions
+	var subscription []model.Subscription
 	var models = []interface{}{
 		&user,
 		&application,
@@ -46,13 +46,12 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&network,
 		&device,
 		&point,
-		&pointStore,
-		&priorityArrayModel,
-		&priorityArrayModel,
+		//&pointStore,
+		//&priorityArrayModel,
 		&job,
 		&gateway,
 		&subscriber,
-		&subscriptions,
+		&subscription,
 	}
 
 	for _, v := range models {

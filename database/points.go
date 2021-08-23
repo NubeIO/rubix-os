@@ -8,7 +8,7 @@ import (
 
 
 
-var pointStoreChildTable = "PointStore"
+var pointStoreChildTable = "Subscriber"
 
 // GetPoints returns all devices.
 func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {

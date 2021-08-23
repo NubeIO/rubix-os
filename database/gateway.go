@@ -20,7 +20,7 @@ var gatewaySubscriptionsChildTable = "Subscriptions"
 // GetGateways get all of them
 func (d *GormDatabase) GetGateways() ([]model.Gateway, error) {
 	var gatewaysModel []model.Gateway
-	query := d.DB.Preload(gatewaySubscriberChildTable).Preload(gatewaySubscriptionsChildTable).Find(&gatewaysModel)
+	query := d.DB.Find(&gatewaysModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

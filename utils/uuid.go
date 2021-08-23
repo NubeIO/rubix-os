@@ -14,19 +14,18 @@ func MakeUUID() (string, error) {
 func MakeTopicUUID(attribute string) (string, error) {
 	u, err := uuid.MakeUUID()
 	divider := "_"
-	net := "net"
-	dev := "dev"
-	pnt := "pnt"
-	job := "pnt"
-	gtw := "gtw"
-	sub := "sub"
-	rip := "rip"
-	alm := "alm"
+	net := "id_n"
+	dev := "id_d"
+	pnt := "id_p"
+	job := "id_j"
+	gtw := "id_g"
+	sub := "id_s"
+	rip := "id_r" //subscriptions
+	alm := "id_a"
 	switch attribute {
 	case model.CommonNaming.Network:
 		return fmt.Sprintf("%s%s%s", net, divider, u), err
 	case model.CommonNaming.Device:
-		fmt.Println("ssssssss")
 		return fmt.Sprintf("%s%s%s", dev, divider, u), err
 	case model.CommonNaming.Point:
 		return fmt.Sprintf("%s%s%s", pnt, divider, u), err

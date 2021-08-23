@@ -35,8 +35,8 @@ remote subscriber
 // The SubscriberDatabase interface for encapsulating database access.
 type SubscriberDatabase interface {
 	GetSubscriber(uuid string) (*model.Subscriber, error)
-	GetSubscribers() ([]model.Subscriber, error)
-	CreateSubscriber(body *model.Subscriber) error
+	GetSubscribers() ([]*model.Subscriber, error)
+	CreateSubscriber(body *model.Subscriber) (*model.Subscriber, error)
 	UpdateSubscriber(uuid string, body *model.Subscriber) (*model.Subscriber, error)
 	DeleteSubscriber(uuid string) (bool, error)
 	//CreateJobSubscriber(body *model.JobSubscriber, jobUUID string) error
@@ -69,7 +69,7 @@ func (j *SubscriberAPI) CreateSubscriber(ctx *gin.Context) {
 	if err != nil {
 		reposeHandler(nil, err, ctx)
 	}
-	err = j.DB.CreateSubscriber(body)
+	body, err = j.DB.CreateSubscriber(body)
 	reposeHandler(body, err, ctx)
 }
 
@@ -80,8 +80,6 @@ func (j *SubscriberAPI) UpdateSubscriber(ctx *gin.Context) {
 	q, err := j.DB.UpdateSubscriber(uuid, body)
 	reposeHandler(q, err, ctx)
 }
-
-
 
 
 func (j *SubscriberAPI) DeleteSubscriber(ctx *gin.Context) {

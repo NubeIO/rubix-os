@@ -2,6 +2,7 @@ package client
 
 
 import (
+	"fmt"
 	"github.com/go-resty/resty/v2"
 	"log"
 	"os"
@@ -39,7 +40,7 @@ func NewFlowRestClient(name string, password string) *FlowClient {
 	if err != nil {
 		log.Println("getToken err:", err, getToken.Status())
 	}
-
+	fmt.Println("token:", t.Token)
 	client.SetHeader("Authorization", t.Token)
 	return &FlowClient{client: client}
 }
