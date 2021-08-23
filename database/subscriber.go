@@ -49,7 +49,7 @@ func (d *GormDatabase) CreateSubscriber(body *model.Subscriber) (*model.Subscrib
 			fmt.Println(2222222)
 			var sm model.Subscription
 			sm.GatewayUUID = body.GatewayUUID
-			sm.ThingUUID = body.UUID
+			sm.ThingUUID = body.ThingUUID
 			fmt.Println(3333333, sm.ThingUUID)
 			err = d.CreateSubscription(&sm)
 			if err != nil {

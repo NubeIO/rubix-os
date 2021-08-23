@@ -59,6 +59,10 @@ type CommonUUID struct {
 	UUID	string 	`json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
 }
 
+type CommonRubixUUID struct {
+	RubixUUID	string 	`json:"rubix_uuid"`
+}
+
 
 type CommonCreated struct {
 	CreatedAt 	time.Time `json:"created_on"`
