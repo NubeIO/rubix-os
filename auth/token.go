@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	tokenCharacters   = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_")
+	tokenCharacters   = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")
 	randomTokenLength = 14
 	applicationPrefix = "A"
 	clientPrefix      = "C"

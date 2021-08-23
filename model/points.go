@@ -11,18 +11,18 @@ type Ops struct {
 
 // SubscriberPoints TODO add in later
 //SubscriberPoints is the list of points that this points is subscribed to. A Subscriber is a remote device that can pub/sub to a producer.
-type SubscriberPoints struct {
-	SubscriberConnectionUUID 				string `json:"subscriber_connection_uuid"` //this is the remote device UUID
-	SubscriberPointUUID						string `json:"subscriber_point_uuid"` //this is the remote point UUID
-	SubscriberWriteable 					bool `json:"subscriber_writeable"`
-	SubscriberPointWriteValue  				string `json:"subscriber_point_write_value"`
-	SubscriberPointWritePriority  			string `json:"subscriber_point_write_priority"`
-}
+//type SubscriberPoints struct {
+//	SubscriberConnectionUUID 				string `json:"subscriber_connection_uuid"` //this is the remote device UUID
+//	SubscriberPointUUID						string `json:"subscriber_point_uuid"` //this is the remote point UUID
+//	SubscriberWriteable 					bool `json:"subscriber_writeable"`
+//	SubscriberPointWriteValue  				string `json:"subscriber_point_write_value"`
+//	SubscriberPointWritePriority  			string `json:"subscriber_point_write_priority"`
+//}
 
 // TimeOverride TODO add in later
 //TimeOverride where a point value can be overridden for a duration of time
 type TimeOverride struct {
-	PointUuid     		string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
+	PointUUID     		string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
 	StartDate        	string `json:"start_date"` // START at 25:11:2021:13:00
 	EndDate        		string `json:"end_date"` // START at 25:11:2021:13:30
 	Value				string `json:"value"`
@@ -33,7 +33,7 @@ type TimeOverride struct {
 // CommandGroup TODO add in later
 //CommandGroup is for issuing global schedule writes or global point writes (as in send a value to any point associated with this group)
 type CommandGroup struct {
-	PointUuid     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
+	PointUUID     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
 	//Points  []Point //list of the points in the command group, the point must be a writable point
 }
 
@@ -69,22 +69,24 @@ type CommonPoint struct {
 
 //Point table
 type Point struct {
-	Uuid						string `json:"uuid" gorm:"type:varchar(255);unique;not null;default:null;primaryKey"`
-	CommonName
-	Common
-	Created
-	DeviceUuid     				string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
+	CommonProducer
 	CommonPoint
-	PriorityArrayModel 			PriorityArrayModel `json:"priority_array" gorm:"constraint:OnDelete:CASCADE"`
-	PointStore 					PointStore `json:"point_store" gorm:"constraint:OnDelete:CASCADE"`
-
+	DeviceUUID     		string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
+	//Subscriber			[]Subscriber `json:"subscribers" gorm:"constraint:OnDelete:CASCADE;"`
+	//Subscription		[]Subscription `json:"subscriptions" gorm:"constraint:OnDelete:CASCADE;"`
+	//PriorityArrayModel 			PriorityArrayModel `json:"priority_array" gorm:"constraint:OnDelete:CASCADE"`
+	//PointStore 					PointStore `json:"point_store" gorm:"constraint:OnDelete:CASCADE"`
 }
 
+//type PointSubscriber struct {
+//	PointUUID    		string  `json:"point_uuid" binding:"required" gorm:"TYPE:varchar(255) REFERENCES points;not null;default:null"`
+//	Subscriber
+//}
 
 
 type PriorityArrayModel struct {
-	PointUuid     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
-	Created
+	PointUUID     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
+	CommonCreated
 	P1  			string `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Subscriber
 	P2  			string `json:"_2"`
 	P3  			string `json:"_3"`
@@ -101,5 +103,4 @@ type PriorityArrayModel struct {
 	P14  			string `json:"_14"`
 	P15  			string `json:"_15"`
 	P16  			string `json:"_16"`
-	P17  			string `json:"_17"`
 }

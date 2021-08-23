@@ -154,16 +154,16 @@ func (m *Manager) SetPluginEnabled(pluginID uint, enabled bool) error {
 	defer m.mutex.Unlock()
 
 	n, err := m.db.GetNetwork("b29697f853714a54", false, false) //TODO testing
-	fmt.Println(n, 444444444)
+	fmt.Println(n)
 	if err != nil {
-		fmt.Println(err, 444444444555555)
-		//return err
+		log.Println(err)
+
 	}
 
 	nn, err := m.db.GetNetworks(false, false) //TODO testing
-	fmt.Println(nn, 77777777)
+	fmt.Println(nn)
 	if err != nil {
-		fmt.Println(err, 777777775888888)
+		log.Println(err)
 		//return err
 	}
 

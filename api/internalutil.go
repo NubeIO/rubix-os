@@ -73,7 +73,13 @@ func withID(ctx *gin.Context, name string, f func(id uint)) {
 	}
 }
 
-func getBODY(ctx *gin.Context) (dto *model.Network, err error) {
+
+func getBODYRubixPlat(ctx *gin.Context) (dto *model.RubixPlat, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -82,6 +88,23 @@ func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
+
+func getBODYSubscriber(ctx *gin.Context) (dto *model.Subscriber, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBODYSubscription(ctx *gin.Context) (dto *model.Subscription, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+
+func getBODYGateway(ctx *gin.Context) (dto *model.Gateway, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 
 func getBODYJobs(ctx *gin.Context) (dto *model.Job, err error) {
 	err = ctx.ShouldBindJSON(&dto)
@@ -164,13 +187,16 @@ func (r *BaseResponse) GetStatusCode() int {
 }
 
 func Success(code int, Response interface{}) Response {
+	fmt.Println(44444)
 	return &BaseResponse{code: code, Response: JSON{
 		"status":   "success",
-		"Response": Response,
+		"response": Response,
 	}}
 }
 
 func Failed(code int, Response interface{}) Response {
+	fmt.Println(333333333333333)
+	fmt.Println(Response)
 	return &BaseResponse{code: code, Response: JSON{
 		"status": "failed",
 		"error":  Response,

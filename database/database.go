@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/auth/password"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/utils"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -23,29 +24,37 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	if err != nil {
 		panic("failed to connect database")
 	}
-	var User []model.User
-	var Application []model.Application
-	var Message []model.Message
-	var Client []model.Client
-	var PluginConf []model.PluginConf
-	var Network []model.Network
-	var Device []model.Device
-	var Point []model.Point
-	var PointStore []model.PointStore
-	var priorityArrayModel []model.PriorityArrayModel
-	var Job []model.Job
+	var user []model.User
+	var application []model.Application
+	var message []model.Message
+	var client []model.Client
+	var pluginConf []model.PluginConf
+	var network []model.Network
+	var device []model.Device
+	var point []model.Point
+	//var pointStore []model.PointStore
+	//var priorityArrayModel []model.PriorityArrayModel
+	var rubixPlat []model.RubixPlat
+	var job []model.Job
+	var gateway []model.Gateway
+	var subscriber []model.Subscriber
+	var subscription []model.Subscription
 	var models = []interface{}{
-		&User,
-		&Application,
-		&Message,
-		&Client,
-		&PluginConf,
-		&Network,
-		&Device,
-		&Point,
-		&PointStore,
-		&priorityArrayModel,
-		&Job,
+		&user,
+		&application,
+		&message,
+		&client,
+		&pluginConf,
+		&network,
+		&device,
+		&point,
+		&rubixPlat,
+		//&pointStore,
+		//&priorityArrayModel,
+		&job,
+		&gateway,
+		&subscriber,
+		&subscription,
 	}
 
 	for _, v := range models {
@@ -61,7 +70,13 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	if createDefaultUserIfNotExist && userCount == 0 {
 		db.Create(&model.User{Name: defaultUser, Pass: password.CreatePassword(defaultPass, strength), Admin: true})
 	}
-
+	var platCount int64 = 0
+	rp := new(model.RubixPlat)
+	db.Find(rp).Count(&platCount)
+	if createDefaultUserIfNotExist && platCount == 0 {
+		rp.GlobalUuid, _ = utils.MakeTopicUUID(model.CommonNaming.Network)
+		db.Create(&rp)
+	}
 	return &GormDatabase{DB: db}, nil
 }
 
