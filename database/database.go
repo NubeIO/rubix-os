@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/auth/password"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/utils"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -69,7 +70,13 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	if createDefaultUserIfNotExist && userCount == 0 {
 		db.Create(&model.User{Name: defaultUser, Pass: password.CreatePassword(defaultPass, strength), Admin: true})
 	}
-
+	var platCount int64 = 0
+	rp := new(model.RubixPlat)
+	db.Find(rp).Count(&platCount)
+	if createDefaultUserIfNotExist && platCount == 0 {
+		rp.GlobalUuid, _ = utils.MakeTopicUUID(model.CommonNaming.Network)
+		db.Create(&rp)
+	}
 	return &GormDatabase{DB: db}, nil
 }
 

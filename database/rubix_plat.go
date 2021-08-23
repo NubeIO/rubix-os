@@ -31,13 +31,18 @@ func (d *GormDatabase) CreateRubixPlat(body *model.RubixPlat) (*model.RubixPlat,
 // UpdateRubixPlat update it.
 func (d *GormDatabase) UpdateRubixPlat(body *model.RubixPlat) (*model.RubixPlat, error) {
 	var rubixPlatModel *model.RubixPlat
-	query := d.DB.Model(&rubixPlatModel).Updates(body)
-	if query.Error != nil {
+	query := d.DB.Where("id >= ?", 0).Find(&rubixPlatModel);if query.Error != nil {
+		return nil, query.Error
+	}
+	query = d.DB.Model(&rubixPlatModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
 	return rubixPlatModel, nil
 
 }
+
+
+
 
 // DeleteRubixPlat delete a network.
 func (d *GormDatabase) DeleteRubixPlat() (bool, error) {

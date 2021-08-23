@@ -18,23 +18,12 @@ type RubixPlatAPI struct {
 
 func (a *RubixPlatAPI) GetRubixPlat(ctx *gin.Context) {
 	q, err := a.DB.GetRubixPlat()
-	if err != nil {
-		res := BadEntity(err.Error())
-		ctx.JSON(res.GetStatusCode(), res.GetResponse())
-	}
-	res := Data(q)
-	ctx.JSON(res.GetStatusCode(), res.GetResponse())
+	reposeHandler(q, err, ctx)
 }
 
 
 func (a *RubixPlatAPI) UpdateRubixPlat(ctx *gin.Context) {
 	body, _ := getBODYRubixPlat(ctx)
 	q, err := a.DB.UpdateRubixPlat(body)
-	if err != nil {
-		res := BadEntity(err.Error())
-		ctx.JSON(res.GetStatusCode(), res.GetResponse())
-	}
-	res := Data(q)
-	ctx.JSON(res.GetStatusCode(), res.GetResponse())
-
+	reposeHandler(q, err, ctx)
 }

@@ -1,6 +1,7 @@
 package model
 
 type RubixPlat struct {
+	ID		int `json:"id" sql:"id"  gorm:"type:varchar(255);unique;primaryKey"`
 	GlobalUuid  string `json:"global_uuid"`
 	CreatedOn   string `json:"created_on"`
 	UpdatedOn   string `json:"updated_on"`

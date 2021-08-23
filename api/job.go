@@ -46,9 +46,10 @@ func reposeHandler(body interface{}, err error, ctx *gin.Context) {
 	if err != nil {
 		res := BadEntity(err.Error())
 		ctx.JSON(res.GetStatusCode(), res.GetResponse())
+	} else {
+		res := Data(body)
+		ctx.JSON(res.GetStatusCode(), res.GetResponse())
 	}
-	res := Data(body)
-	ctx.JSON(res.GetStatusCode(), res.GetResponse())
 }
 
 func (j *JobAPI) GetJobs(ctx *gin.Context) {

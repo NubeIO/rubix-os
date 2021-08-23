@@ -111,11 +111,6 @@ func getBODYJobs(ctx *gin.Context) (dto *model.Job, err error) {
 	return dto, err
 }
 
-//func getBODYJobSubscriber(ctx *gin.Context) (dto *model.JobSubscriber, err error) {
-//	err = ctx.ShouldBindJSON(&dto)
-//	return dto, err
-//}
-
 func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -192,6 +187,7 @@ func (r *BaseResponse) GetStatusCode() int {
 }
 
 func Success(code int, Response interface{}) Response {
+	fmt.Println(44444)
 	return &BaseResponse{code: code, Response: JSON{
 		"status":   "success",
 		"response": Response,
@@ -199,6 +195,8 @@ func Success(code int, Response interface{}) Response {
 }
 
 func Failed(code int, Response interface{}) Response {
+	fmt.Println(333333333333333)
+	fmt.Println(Response)
 	return &BaseResponse{code: code, Response: JSON{
 		"status": "failed",
 		"error":  Response,

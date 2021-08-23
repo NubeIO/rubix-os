@@ -20,24 +20,14 @@ type PointAPI struct {
 
 func (a *PointAPI) GetPoints(ctx *gin.Context) {
 	q, err := a.DB.GetPoints(false)
-	if err != nil {
-		res := BadEntity(err.Error())
-		ctx.JSON(res.GetStatusCode(), res.GetResponse())
-	}
-	res := Data(q)
-	ctx.JSON(res.GetStatusCode(), res.GetResponse())
+	reposeHandler(q, err, ctx)
 
 }
 
 func (a *PointAPI) GetPoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.GetPoint(uuid, false)
-	if err != nil {
-		res := BadEntity(err.Error())
-		ctx.JSON(res.GetStatusCode(), res.GetResponse())
-	}
-	res := Data(q)
-	ctx.JSON(res.GetStatusCode(), res.GetResponse())
+	reposeHandler(q, err, ctx)
 
 }
 
@@ -45,12 +35,7 @@ func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdatePoint(uuid, body)
-	if err != nil {
-		res := BadEntity(err.Error())
-		ctx.JSON(res.GetStatusCode(), res.GetResponse())
-	}
-	res := Data(q)
-	ctx.JSON(res.GetStatusCode(), res.GetResponse())
+	reposeHandler(q, err, ctx)
 
 }
 
@@ -64,22 +49,11 @@ func (a *PointAPI) CreatePoint(ctx *gin.Context) {
 func (a *PointAPI) DeletePoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeletePoint(uuid)
-	if err != nil {
-		res := BadEntity(err.Error())
-		ctx.JSON(res.GetStatusCode(), res.GetResponse())
-	}
-	res := Data(q)
-	ctx.JSON(res.GetStatusCode(), res.GetResponse())
-
+	reposeHandler(q, err, ctx)
 }
 
 func (a *PointAPI) DropPoints(ctx *gin.Context) {
 	q, err := a.DB.DropPoints()
-	if err != nil {
-		res := BadEntity(err.Error())
-		ctx.JSON(res.GetStatusCode(), res.GetResponse())
-	}
-	res := Data(q)
-	ctx.JSON(res.GetStatusCode(), res.GetResponse())
+	reposeHandler(q, err, ctx)
 
 }
