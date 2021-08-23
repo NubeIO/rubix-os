@@ -22,7 +22,6 @@ var MessageTypeEnum = struct {
 }
 
 
-
 // Message holds information about a message.
 type Message struct {
 	ID            		uint `gorm:"AUTO_INCREMENT;primary_key;index"`

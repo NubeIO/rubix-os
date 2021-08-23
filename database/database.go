@@ -33,6 +33,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var point []model.Point
 	//var pointStore []model.PointStore
 	//var priorityArrayModel []model.PriorityArrayModel
+	var rubixPlat []model.RubixPlat
 	var job []model.Job
 	var gateway []model.Gateway
 	var subscriber []model.Subscriber
@@ -46,6 +47,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&network,
 		&device,
 		&point,
+		&rubixPlat,
 		//&pointStore,
 		//&priorityArrayModel,
 		&job,

@@ -60,6 +60,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	subscriptionHandler := api.SubscriptionsAPI{
 		DB: db,
 	}
+	rubixPlatHandler := api.RubixPlatAPI{
+		DB: db,
+	}
 	jobHandler.NewJobEngine()
 
 	pluginManager, err := plugin.NewManager(db, conf.PluginsDir, g.Group("/plugin/:id/custom/"), streamHandler)
@@ -192,6 +195,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.Use(authentication.RequireAdmin())
 
 		control.GET("", api.Hostname)
+
+
+		control.GET("/wires/plat", rubixPlatHandler.GetRubixPlat)
+		control.PATCH("/wires/plat", rubixPlatHandler.UpdateRubixPlat)
+
 		control.GET("/networks", networkHandler.GetNetworks)
 		control.DELETE("/networks/drop", networkHandler.DropNetworks)
 		control.POST("/network", networkHandler.CreateNetwork)

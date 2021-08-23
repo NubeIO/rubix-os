@@ -74,6 +74,10 @@ func withID(ctx *gin.Context, name string, f func(id uint)) {
 }
 
 
+func getBODYRubixPlat(ctx *gin.Context) (dto *model.RubixPlat, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
 
 func getBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
 	err = ctx.ShouldBindJSON(&dto)
