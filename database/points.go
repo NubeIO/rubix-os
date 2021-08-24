@@ -11,14 +11,14 @@ import (
 
 
 
-var subscriberChildTable = "PointSubscriberLedger"
-var SubscriptionChildTable = "PointSubscriptionLedger"
+
+
 
 // GetPoints returns all devices.
 func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
 	var pointsModel []*model.Point
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload(subscriberChildTable).Preload(SubscriptionChildTable).Find(&pointsModel);if query.Error != nil {
+		query := d.DB.Find(&pointsModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return pointsModel, nil
@@ -35,7 +35,7 @@ func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
 func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, error) {
 	var pointModel *model.Point
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Where("uuid = ? ", uuid).Preload(subscriberChildTable).First(&pointModel);if query.Error != nil {
+		query := d.DB.Where("uuid = ? ", uuid).First(&pointModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return pointModel, nil
@@ -58,6 +58,7 @@ func (d *GormDatabase) CreatePoint( body *model.Point) (*model.Point, error) {
 	if err := d.DB.Create(&body).Error; err != nil {
 		return  nil, query.Error
 	}
+	busUpdate(body.UUID, "create", body)
 	return body, query.Error
 }
 
@@ -65,17 +66,13 @@ func (d *GormDatabase) CreatePoint( body *model.Point) (*model.Point, error) {
 // UpdatePoint returns the device for the given id or nil.
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
 	var pointModel *model.Point
-	query := d.DB.Preload(subscriberChildTable).Preload(SubscriptionChildTable).Where("uuid = ?", uuid).Find(&pointModel);if query.Error != nil {
+	query := d.DB.Where("uuid = ?", uuid).Find(&pointModel);if query.Error != nil {
 		return nil, query.Error
 	}
 	query = d.DB.Model(&pointModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	gatewayUUID := pointModel.PointSubscriberLedger
-	for _, e := range gatewayUUID {
-		busUpdate(e.UUID, pointModel)
-	}
-
+	busUpdate(pointModel.UUID, "updates", pointModel)
 	return pointModel, nil
 }
 
@@ -89,6 +86,7 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	if r == 0 {
 		return false, nil
 	} else {
+		busUpdate(pointModel.UUID, "delete", pointModel)
 		return true, nil
 	}
 
@@ -111,15 +109,15 @@ func (d *GormDatabase) DropPoints() (bool, error) {
 }
 
 
-func busUpdate(UUID string, body *model.Point){
-	fmt.Println(123123123123)
+func busUpdate(UUID string, action string,body *model.Point){
 	payload := new(eventbus.BusPayload)
 	payload.GatewayUUID = UUID
 	payload.ThingName = body.Name
 	payload.MessageString = "what up"
 	payload.MessageTS = time.Now().Format(time.RFC850)
-	topic := "gateway"
-	err := eventbus.BUS.Emit(eventbus.BusBackground, topic, payload)
+	//topic := fmt.Sprintf("point_%s_%s", action, UUID)
+	//topic := fmt.Sprintf("point_%s_%s", action, UUID)
+	err := eventbus.BUS.Emit(eventbus.BusBackground, "points", payload)
 	fmt.Println("topics", eventbus.BUS.Topics())
 	if err != nil {
 		fmt.Println("error", err)

@@ -41,8 +41,6 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var commandGroup []model.CommandGroup
 	var subscriber []model.Subscriber
 	var subscription []model.Subscription
-	var pointSubscriberLedger []model.PointSubscriberLedger
-	var pointSubscriptionLedger []model.PointSubscriptionLedger
 	var models = []interface{}{
 		&alerts,
 		&user,
@@ -61,8 +59,6 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&commandGroup,
 		&subscriber,
 		&subscription,
-		&pointSubscriberLedger,
-		&pointSubscriptionLedger,
 	}
 
 	for _, v := range models {

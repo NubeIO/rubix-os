@@ -25,8 +25,8 @@ func NewBus() *bus.Bus {
 	if err != nil {
 		panic(err)
 	}
-	b.RegisterTopics("gateway")
-	b.RegisterHandler("gateway", BusHandler)
+	b.RegisterTopics("points")
+	b.RegisterHandler("points", BusHandler)
 	return b
 }
 
@@ -35,6 +35,7 @@ type BusPayload struct {
 	ThingName   	string
 	MessageString  	string   		`json:"message_string"`
 	MessageTS  		string   		`json:"message_ts"`
+	Action  		string   		`json:"action"`
 }
 
 var BUS = NewBus()
