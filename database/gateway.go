@@ -7,13 +7,12 @@ import (
 
 
 var gatewaySubscriberChildTable = "Subscriber"
-var commandGroupChildTable = "CommandGroup"
 
 // GetGateways get all of them
 func (d *GormDatabase) GetGateways(withChildren bool) ([]*model.Gateway, error) {
 	var gatewaysModel []*model.Gateway
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload(gatewaySubscriberChildTable).Preload(commandGroupChildTable).Find(&gatewaysModel);if query.Error != nil {
+		query := d.DB.Preload(gatewaySubscriberChildTable).Find(&gatewaysModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return gatewaysModel, nil
