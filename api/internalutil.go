@@ -105,6 +105,10 @@ func getBODYGateway(ctx *gin.Context) (dto *model.Gateway, err error) {
 	return dto, err
 }
 
+func getBODYCommandGroup(ctx *gin.Context) (dto *model.CommandGroup, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
 
 func getBODYJobs(ctx *gin.Context) (dto *model.Job, err error) {
 	err = ctx.ShouldBindJSON(&dto)

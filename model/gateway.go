@@ -49,4 +49,5 @@ type Gateway struct {
 	CommonRubixUUID
 	Subscriber			[]Subscriber `json:"subscribers" gorm:"constraint:OnDelete:CASCADE;"`
 	Subscription		[]Subscription `json:"subscriptions" gorm:"constraint:OnDelete:CASCADE;"`
+	CommandGroup		[]CommandGroup `json:"command_group" gorm:"constraint:OnDelete:CASCADE;"`
 }

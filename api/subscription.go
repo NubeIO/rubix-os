@@ -13,7 +13,7 @@ import (
 // The SubscriptionsDatabase interface for encapsulating database access.
 type SubscriptionsDatabase interface {
 	GetSubscription(uuid string) (*model.Subscription, error)
-	GetSubscriptions() ([]model.Subscription, error)
+	GetSubscriptions() ([]*model.Subscription, error)
 	CreateSubscription(body *model.Subscription) (*model.Subscription, error)
 	UpdateSubscription(uuid string, body *model.Subscription) (*model.Subscription, error)
 	DeleteSubscription(uuid string) (bool, error)

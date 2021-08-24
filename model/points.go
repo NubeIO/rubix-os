@@ -18,16 +18,7 @@ type TimeOverride struct {
 	EndDate        		string `json:"end_date"` // START at 25:11:2021:13:30
 	Value				string `json:"value"`
 	Priority			string `json:"priority"`
-
 }
-
-// CommandGroup TODO add in later
-//CommandGroup is for issuing global schedule writes or global point writes (as in send a value to any point associated with this group)
-type CommandGroup struct {
-	PointUUID     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
-	//Points  []Point //list of the points in the command group, the point must be a writable point
-}
-
 
 
 //MathOperation same as in lora and point-server TODO add in later

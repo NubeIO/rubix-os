@@ -16,7 +16,7 @@ var CRON  *gocron.Scheduler
 // The JobDatabase interface for encapsulating database access.
 type JobDatabase interface {
 	GetJob(uuid string) (*model.Job, error)
-	GetJobs() ([]model.Job, error)
+	GetJobs() ([]*model.Job, error)
 	CreateJob(body *model.Job) error
 	UpdateJob(uuid string, body *model.Job) (*model.Job, error)
 	DeleteJob(uuid string) (bool, error)

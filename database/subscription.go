@@ -11,8 +11,8 @@ type Subscriptions struct {
 }
 
 // GetSubscriptions get all of them
-func (d *GormDatabase) GetSubscriptions() ([]model.Subscription, error) {
-	var subscriptionsModel []model.Subscription
+func (d *GormDatabase) GetSubscriptions() ([]*model.Subscription, error) {
+	var subscriptionsModel []*model.Subscription
 	query := d.DB.Find(&subscriptionsModel)
 	if query.Error != nil {
 		return nil, query.Error

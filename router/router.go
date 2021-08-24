@@ -63,6 +63,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	rubixPlatHandler := api.RubixPlatAPI{
 		DB: db,
 	}
+	rubixCommandGroup := api.CommandGroupAPI{
+		DB: db,
+	}
 	jobHandler.NewJobEngine()
 
 	pluginManager, err := plugin.NewManager(db, conf.PluginsDir, g.Group("/plugin/:id/custom/"), streamHandler)
@@ -226,6 +229,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.GET("/gateway/:uuid", gatewayHandler.GetGateway)
 		control.PATCH("/gateway/:uuid", gatewayHandler.UpdateGateway)
 		control.DELETE("/gateway/:uuid", gatewayHandler.DeleteGateway)
+
+		control.GET("/commands", rubixCommandGroup.GetCommandGroups)
+		control.POST("/command", rubixCommandGroup.CreateCommandGroup)
+		control.GET("/command/:uuid", rubixCommandGroup.GetCommandGroup)
+		control.PATCH("/command/:uuid", rubixCommandGroup.UpdateCommandGroup)
+		control.DELETE("/command/:uuid", rubixCommandGroup.DeleteCommandGroup)
 
 		control.GET("/subscribers", subscriberHandler.GetSubscribers)
 		control.POST("/subscriber", subscriberHandler.CreateSubscriber)

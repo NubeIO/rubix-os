@@ -24,6 +24,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	if err != nil {
 		panic("failed to connect database")
 	}
+	var alerts []model.Alert
 	var user []model.User
 	var application []model.Application
 	var message []model.Message
@@ -37,11 +38,13 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var rubixPlat []model.RubixPlat
 	var job []model.Job
 	var gateway []model.Gateway
+	var commandGroup []model.CommandGroup
 	var subscriber []model.Subscriber
 	var subscription []model.Subscription
 	var pointSubscriberLedger []model.PointSubscriberLedger
 	var pointSubscriptionLedger []model.PointSubscriptionLedger
 	var models = []interface{}{
+		&alerts,
 		&user,
 		&application,
 		&message,
@@ -55,6 +58,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		//&priorityArrayModel,
 		&job,
 		&gateway,
+		&commandGroup,
 		&subscriber,
 		&subscription,
 		&pointSubscriberLedger,

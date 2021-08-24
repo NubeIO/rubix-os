@@ -15,6 +15,7 @@ var CommonNaming = struct {
 	Subscription   	string
 	Alarm   		string
 	Mapping   		string
+	CommandGroup   	string
 
 }{
 	Network:   			"network",
@@ -26,8 +27,23 @@ var CommonNaming = struct {
 	Subscription:   	"subscription",
 	Alarm:   			"alarm",
 	Mapping:   			"mapping",
+    CommandGroup:   	"command_group",
+}
+
+
+var CommonNamingCommandGroup = struct {
+	PointWrite  			string
+	MasterSchedule   		string
+	SilenceAlarm   		    string
+
+
+}{
+	PointWrite:   		"point_write",
+	MasterSchedule:   	"master_schedule",
+	SilenceAlarm:   	"silence_alarm",
 
 }
+
 
 
 
