@@ -64,6 +64,7 @@ func main()  {
 	tSub := new(client.Subscriber)
 	tSub.Name = "test"
 	tSub.Enable = true
+	tSub.IsRemote  = false
 	tSub.FromUUID = addPoint2.Response.UUID //from point 2
 	tSub.ToUUID = addPoint.Response.UUID  //to point 1
 	tSub.GatewayUuid = addGateway.Response.UUID
@@ -81,6 +82,27 @@ func main()  {
 	fmt.Println(addSubscriber.Response.UUID)
 	fmt.Println(addSubscriber.Response.Name)
 
+
+	// point 2 to make a subscriber connection to point 1
+	rSub := new(client.Subscription)
+	rSub.Name = "test"
+	rSub.Enable = true
+	rSub.IsRemote  = false
+	rSub.ToUUID = addPoint.Response.UUID  //local point
+	rSub.GatewayUuid = addGateway.Response.GatewayUUID
+	rSub.SubscriberApplication = "mapping"
+	rSub.SubscriberType = "point"
+
+
+	addSubscription, err := c.ClientAddSubscription(*rSub)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Add Subscriber")
+	fmt.Println(addSubscription.Status)
+	fmt.Println(addSubscription.Response.UUID)
+	fmt.Println(addSubscription.Response.Name)
 
 
 	fmt.Println("FLOW-FRAMEWORK-TOKEN", c.ClientToken)
