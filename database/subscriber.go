@@ -46,11 +46,11 @@ func (d *GormDatabase) CreateSubscriber(body *model.Subscriber) (*model.Subscrib
 			return nil, errorMsg("CreateSubscriber", "error on trying to add a new Subscriber", nil)
 		}
 		fmt.Println(9999999)
-		 if !body.IsRemote {
+		 if body.IsRemote {
 			 fmt.Println(8888, body.IsRemote, 888888)
 			 u := utils.MakeTopicUUID("")
 			 d.DB.Create(&model.PointSubscriptionLedger{UUID: u, GatewayUUID: body.GatewayUUID, SubscriberUUID: body.UUID, PointUUID: body.FromUUID})
-		 } else if body.IsRemote {
+		 } else if !body.IsRemote {
 			 var sm model.Subscription
 			 fmt.Println(5555555, body.IsRemote, 5555555)
 			sm.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscriber)

@@ -86,25 +86,7 @@ func main()  {
 	fmt.Println("FLOW-FRAMEWORK-TOKEN", c.ClientToken)
 
 
-	//// point 1 to have 1 subscription to point 2
-	//tSub2 := new(client.Subscription)
-	//tSub2.Name = "test"
-	//tSub2.Enable = true
-	//tSub2.ThingUuid = addPoint.Response.UUID //pass in point 1 UUID
-	//tSub2.GatewayUuid = addGateway.Response.UUID
-	//tSub2.SubscriberApplication = "mapping"
-	//tSub2.SubscriberType = "point"
-	//
-	//addSubscription, err := c.ClientAddSubscription(*tSub2)
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return
-	//
-	//}
-	//fmt.Println("Add Subscription")
-	//fmt.Println(addSubscription.Status)
-	//fmt.Println(addSubscription.Response.UUID)
-	//fmt.Println(addSubscription.Response.Name)
+
 
 
 

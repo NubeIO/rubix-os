@@ -21,9 +21,9 @@ func NewFlowRestClient(name string, password string, address string, port string
 	url := fmt.Sprintf("http://%s:%s", address, port)
 	// Try getting Accounts API base URL from env var
 	apiURL := url
-	if apiURL == "" {
-		apiURL = defaultBaseURL
-	}
+	//if apiURL == "" {
+	//	apiURL = defaultBaseURL
+	//}
 	client.SetHostURL(apiURL)
 	// Setting global error struct that maps to Form3's error response
 	client.SetError(&Error{})
