@@ -5,7 +5,6 @@ import (
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
-	"time"
 )
 
 
@@ -110,14 +109,7 @@ func (d *GormDatabase) DropPoints() (bool, error) {
 
 
 func busUpdate(UUID string, action string,body *model.Point){
-	payload := new(eventbus.BusPayload)
-	payload.GatewayUUID = UUID
-	payload.ThingName = body.Name
-	payload.MessageString = "what up"
-	payload.MessageTS = time.Now().Format(time.RFC850)
-	//topic := fmt.Sprintf("point_%s_%s", action, UUID)
-	//topic := fmt.Sprintf("point_%s_%s", action, UUID)
-	err := eventbus.BUS.Emit(eventbus.BusBackground, "points", payload)
+	err := eventbus.BUS.Emit(eventbus.BusBackground, "points", body)
 	fmt.Println("topics", eventbus.BUS.Topics())
 	if err != nil {
 		fmt.Println("error", err)

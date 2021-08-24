@@ -2,7 +2,9 @@ package eventbus
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/mqtt_client"
 	"github.com/mustafaturan/bus/v3"
 	"github.com/mustafaturan/monoton/v2"
@@ -15,8 +17,7 @@ func NewBus() *bus.Bus {
 	// configure id generator
 	node        := uint64(1)
 	initialTime := uint64(1577865600000)
-	m, err := monoton.New(sequencer.NewMillisecond(), node, initialTime)
-	if err != nil {
+	m, err := monoton.New(sequencer.NewMillisecond(), node, initialTime);if err != nil {
 		panic(err)
 	}
 	// init an id generator
@@ -26,7 +27,7 @@ func NewBus() *bus.Bus {
 		panic(err)
 	}
 	b.RegisterTopics("points")
-	b.RegisterHandler("points", BusHandler)
+	b.RegisterHandler("points", PointHandler)
 	return b
 }
 
@@ -41,7 +42,7 @@ type BusPayload struct {
 var BUS = NewBus()
 var BusBackground = context.Background()
 
-func publishMQTT(sensorStruct *BusPayload) {
+func publishMQTT(sensorStruct *model.Point) {
 	a := mqtt_client.NewClient(mqtt_client.ClientOptions{
 		Servers: []string{"tcp://0.0.0.0:1883"},
 	})
@@ -49,21 +50,27 @@ func publishMQTT(sensorStruct *BusPayload) {
 	if err != nil {
 		log.Println(err)
 	}
+	fmt.Println(sensorStruct.Name, 888888)
 	fmt.Println(a.IsConnected())
-	topic := fmt.Sprintf("rubix/%s", sensorStruct.GatewayUUID)
-	err = a.Publish(topic, mqtt_client.AtMostOnce, false, sensorStruct.ThingName)
+	topic := fmt.Sprintf("rubix/%s", sensorStruct.UUID)
+	data, err := json.Marshal(sensorStruct)
+	if err != nil {
+		log.Println(err)
+	}
+
+	err = a.Publish(topic, mqtt_client.AtMostOnce, false, string(data))
 	if err != nil {
 		fmt.Println(err)
 	}
 }
 
-var BusHandler = bus.Handler {
+var PointHandler = bus.Handler {
 	Handle: func(ctx context.Context, e bus.Event) {
 		//NewAgent
-		data, _ := e.Data.(*BusPayload)
+		data, _ := e.Data.(*model.Point)
+		fmt.Println(data, 99999)
 		publishMQTT(data)
 		fmt.Println(e.Topic)
-		fmt.Println("hey inside")
 		fmt.Println(e.Data)
 	},
 	Matcher: ".*", // matches all topics
