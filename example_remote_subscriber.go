@@ -10,7 +10,10 @@ func main()  {
 	c := client.NewFlowRestClient("admin", "admin", "0.0.0.0", "1660")
 
 
-	//token, err := c.GetToken("admin", "admin")
+	remotePointUUID := "id_p_TEST_REMOTE"
+	remoteRubixUUID := "RUBIX_REMOTE"
+	localRubixUUID := "id_n_5569693251d743c8"
+
 	addNet, err := c.ClientAddNetwork()
 	if err != nil {
 		fmt.Println(err)
@@ -38,17 +41,6 @@ func main()  {
 	fmt.Println(addPoint.Response.UUID)
 	fmt.Println(addPoint.Response.Name)
 
-
-	addPoint2, err := c.ClientAddPoint(addDev.Response.UUID)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("Add point 2")
-	fmt.Println(addPoint2.Status)
-	fmt.Println(addPoint2.Response.UUID)
-	fmt.Println(addPoint2.Response.Name)
-
-
 	addGateway, err := c.ClientAddGateway(false)
 	if err != nil {
 		fmt.Println(err)
@@ -60,13 +52,19 @@ func main()  {
 	fmt.Println(addGateway.Response.UUID)
 	fmt.Println(addGateway.Response.Name)
 
+	pointUUID := addPoint.Response.UUID
+	gatewayUUID := addGateway.Response.UUID
+
+
 	// point 2 to make a subscriber connection to point 1
 	tSub := new(client.Subscriber)
 	tSub.Name = "test"
 	tSub.Enable = true
-	tSub.FromUUID = addPoint2.Response.UUID //from point 2
-	tSub.ToUUID = addPoint.Response.UUID  //to point 1
-	tSub.GatewayUuid = addGateway.Response.UUID
+	tSub.IsRemote  = true
+	tSub.RemoteRubixUUID  = remoteRubixUUID
+	tSub.FromUUID = remotePointUUID //remote point
+	tSub.ToUUID = pointUUID  //local point
+	tSub.GatewayUuid = gatewayUUID
 	tSub.SubscriberApplication = "mapping"
 	tSub.SubscriberType = "point"
 
@@ -81,7 +79,28 @@ func main()  {
 	fmt.Println(addSubscriber.Response.UUID)
 	fmt.Println(addSubscriber.Response.Name)
 
+	remoteClient := client.NewFlowRestClient("admin", "admin", "0.0.0.0", "1661")
 
+	// point 2 to make a subscriber connection to point 1
+	rSub := new(client.Subscription)
+	rSub.Name = "test"
+	rSub.Enable = true
+	rSub.IsRemote  = true
+	rSub.RemoteRubixUUID  = localRubixUUID //local device id
+	rSub.ToUUID = pointUUID  //local point
+	rSub.GatewayUuid = gatewayUUID
+	rSub.SubscriberApplication = "mapping"
+	rSub.SubscriberType = "point"
+
+	addSubscription, err := remoteClient.ClientAddSubscription(*rSub)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Add Subscriber")
+	fmt.Println(addSubscription.Status)
+	fmt.Println(addSubscription.Response.UUID)
+	fmt.Println(addSubscription.Response.Name)
 
 	fmt.Println("FLOW-FRAMEWORK-TOKEN", c.ClientToken)
 

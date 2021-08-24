@@ -21,6 +21,7 @@ type ResponseCommon struct {
 	DeviceUUID  	string 	`json:"device_uuid"`
 	PointUUID  		string 	`json:"point_uuid"`
 	GatewayUUID  	string 	`json:"gateway_uuid"`
+	GlobalUUID  	string 	`json:"global_uuid"`
 
 
 }
@@ -38,6 +39,8 @@ type Subscriber struct {
 	GatewayUuid           	string `json:"gateway_uuid"`
 	FromUUID 				string `json:"from_uuid"`
 	ToUUID 					string `json:"to_uuid"`
+	IsRemote 				bool 	`json:"is_remote"`
+	RemoteRubixUUID			string 	`json:"remote_rubix_uuid"`
 }
 
 
@@ -48,4 +51,6 @@ type Subscription struct {
 	SubscriberApplication 	string `json:"subscriber_application"`
 	GatewayUuid           	string `json:"gateway_uuid"`
 	ToUUID 					string `json:"to_uuid"`
+	IsRemote 				bool 	`json:"is_remote"`
+	RemoteRubixUUID			string 	`json:"remote_rubix_uuid"`
 }

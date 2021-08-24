@@ -1,11 +1,9 @@
 package client
 
-
 import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"log"
-	"os"
 )
 
 const defaultBaseURL = "http://localhost:1660"
@@ -17,11 +15,12 @@ type FlowClient struct {
 }
 
 // NewFlowRestClient returns a new instance of FlowClient.
-func NewFlowRestClient(name string, password string) *FlowClient {
+func NewFlowRestClient(name string, password string, address string, port string) *FlowClient {
 	client := resty.New()
 	client.SetDebug(false)
+	url := fmt.Sprintf("http://%s:%s", address, port)
 	// Try getting Accounts API base URL from env var
-	apiURL := os.Getenv("API_ADDR")
+	apiURL := url
 	if apiURL == "" {
 		apiURL = defaultBaseURL
 	}

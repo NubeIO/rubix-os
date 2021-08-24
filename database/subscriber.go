@@ -34,51 +34,45 @@ func (d *GormDatabase) GetSubscribers() ([]*model.Subscriber, error) {
 
 // CreateSubscriber make it
 func (d *GormDatabase) CreateSubscriber(body *model.Subscriber) (*model.Subscriber, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscriber)
-	if body.SubscriberType == model.CommonNaming.Point  {
+	if body.SubscriberType == model.CommonNaming.Point {
 		//call points and make it exists
-		gateway, err := d.GetGateway(body.GatewayUUID)
-		if err != nil {
-			return nil, errorMsg("GetGateway", "error on trying to get", nil)
+		_, err := d.GetGateway(body.GatewayUUID);if err != nil {
+			return nil, errorMsg("GetGateway", "error on trying to get validate the gateway UUID", nil)
 		}
-		query, err := d.GetPoint(body.ToUUID, false)
-		if err != nil {
-			return nil, errorMsg("CreateSubscriber", "error on trying to add", nil)
+		_, err = d.GetPoint(body.ToUUID, false);if err != nil {
+			return nil, errorMsg("CreateSubscriber", "error on trying to get validate the point UUID", nil)
 		}
-		if query != nil {
-			body.SubscriberApplication = model.CommonNaming.Mapping
-			n := d.DB.Create(&body).Error
-
-			fmt.Println(gateway.UUID, "gateway")
-			// if its local
-			 if !gateway.IsRemote {
-				 var sm model.Subscription
-				 sm.GatewayUUID = body.GatewayUUID
-				 sm.ToUUID = body.ToUUID
-				 sm.Name = "internal point mapping"
-				 sm.Description = "internal point mapping"
-				 sm.Enable = body.Enable
-				 sm.SubscriberType = body.SubscriberType
-				 sm.SubscriberApplication = body.SubscriberApplication
-				 subscription, err := d.CreateSubscription(&sm)
-				 if err != nil {
-					return nil, errorMsg("CreateSubscription", "error on trying to add", nil)
-				 }
-				 u := utils.MakeTopicUUID("")
-				 err = 	d.DB.Create(&model.PointSubscriberLedger{UUID: u, GatewayUUID: body.GatewayUUID, SubscriberUUID: body.UUID, SubscriptionUUID: subscription.UUID, PointUUID: body.ToUUID}).Error
-				 if err != nil {
-					return nil, errorMsg("CreateSubscription PointLedger", "error on trying to add", nil)
-				 } else {
-					 u := utils.MakeTopicUUID("")
-					d.DB.Create(&model.PointSubscriptionLedger{UUID: u, GatewayUUID: body.GatewayUUID, SubscriberUUID: body.UUID, PointUUID: body.FromUUID})
-				 }
-			 }
-			if err != nil {
-				return nil, err
+		err = d.DB.Create(&body).Error; if err != nil {
+			return nil, errorMsg("CreateSubscriber", "error on trying to add a new Subscriber", nil)
+		}
+		fmt.Println(9999999)
+		 if !body.IsRemote {
+			 fmt.Println(8888, body.IsRemote, 888888)
+			 u := utils.MakeTopicUUID("")
+			 d.DB.Create(&model.PointSubscriptionLedger{UUID: u, GatewayUUID: body.GatewayUUID, SubscriberUUID: body.UUID, PointUUID: body.FromUUID})
+		 } else if body.IsRemote {
+			 var sm model.Subscription
+			 fmt.Println(5555555, body.IsRemote, 5555555)
+			sm.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscriber)
+			sm.GatewayUUID = body.GatewayUUID
+			sm.ToUUID = body.ToUUID
+			sm.Name = "internal point mapping"
+			sm.Description = "internal point mapping"
+			sm.Enable = body.Enable
+			sm.IsRemote = false
+			sm.SubscriberType = body.SubscriberType
+			sm.SubscriberApplication = body.SubscriberApplication
+			subscription, err := d.CreateSubscription(&sm); if err != nil {
+				 return nil, errorMsg("CreateSubscription", "error on trying to add", nil)
 			}
-			return body, n
-		}
-	} else if body.SubscriberType == model.CommonNaming.Network {
+			if err != nil {
+				 return nil, errorMsg("CreateSubscription PointLedger", "error on trying to add", nil)
+			}
+			 fmt.Println(5555555, body.IsRemote, 5555555)
+			u := utils.MakeTopicUUID("")
+			d.DB.Create(&model.PointSubscriberLedger{UUID: u, GatewayUUID: body.GatewayUUID, SubscriberUUID: body.UUID, SubscriptionUUID: subscription.UUID, PointUUID: body.ToUUID})
+		 }
+		return body, nil
 
 	}
 	return body, nil
