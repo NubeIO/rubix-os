@@ -50,7 +50,6 @@ func publishHTTP(sensorStruct *model.Point) {
 	resp, err := client.R().SetPathParams(map[string]string{
 		"name": sensorStruct.Name,
 	}).Post("http://0.0.0.0:8080/stream/{name}")
-
 	fmt.Println(sensorStruct.Name, resp.String())
 	fmt.Println(sensorStruct.Name, err)
 
@@ -64,7 +63,6 @@ func publishMQTT(sensorStruct *model.Point) {
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(sensorStruct.Name, 888888)
 	fmt.Println(a.IsConnected())
 	topic := fmt.Sprintf("rubix/%s", sensorStruct.UUID)
 	data, err := json.Marshal(sensorStruct)
@@ -82,7 +80,6 @@ var PointHandler = bus.Handler {
 	Handle: func(ctx context.Context, e bus.Event) {
 		//NewAgent
 		data, _ := e.Data.(*model.Point)
-		fmt.Println(data, 99999)
 		publishMQTT(data)
 		publishHTTP(data)
 		fmt.Println(e.Topic)

@@ -9,7 +9,6 @@ func main()  {
 
 	c := client.NewFlowRestClient("admin", "admin", "0.0.0.0", "1660")
 
-
 	remotePointUUID := "id_p_TEST_REMOTE"
 	remoteRubixUUID := "RUBIX_REMOTE"
 	localRubixUUID := "id_n_5569693251d743c8"
@@ -64,7 +63,7 @@ func main()  {
 	tSub.RemoteRubixUUID  = remoteRubixUUID
 	tSub.FromUUID = remotePointUUID //remote point
 	tSub.ToUUID = pointUUID  //local point
-	tSub.GatewayUuid = gatewayUUID
+	tSub.StreamUUID = gatewayUUID
 	tSub.SubscriberApplication = "mapping"
 	tSub.SubscriberType = "point"
 
@@ -88,7 +87,7 @@ func main()  {
 	rSub.IsRemote  = true
 	rSub.RemoteRubixUUID  = localRubixUUID //local device id
 	rSub.ToUUID = pointUUID  //local point
-	rSub.GatewayUuid = gatewayUUID
+	rSub.StreamUUID = gatewayUUID
 	rSub.SubscriberApplication = "mapping"
 	rSub.SubscriberType = "point"
 
