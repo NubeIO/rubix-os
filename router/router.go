@@ -66,6 +66,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	rubixCommandGroup := api.CommandGroupAPI{
 		DB: db,
 	}
+	flowNetwork := api.FlowNetworksAPI{
+		DB: db,
+	}
+	dbGroup := api.DatabaseAPI{
+		DB: db,
+	}
 	jobHandler.NewJobEngine()
 
 	pluginManager, err := plugin.NewManager(db, conf.PluginsDir, g.Group("/plugin/:id/custom/"), streamHandler)
@@ -199,6 +205,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 		control.GET("", api.Hostname)
 
+		//delete all networks, gateways, commandGroup, subscriptions, jobs and children.
+		control.DELETE("/database/flows/drop", dbGroup.DropAllFlow)
+
 
 		control.GET("/wires/plat", rubixPlatHandler.GetRubixPlat)
 		control.PATCH("/wires/plat", rubixPlatHandler.UpdateRubixPlat)
@@ -209,6 +218,13 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.GET("/network/:uuid", networkHandler.GetNetwork)
 		control.PATCH("/network/:uuid", networkHandler.UpdateNetwork)
 		control.DELETE("/network/:uuid", networkHandler.DeleteNetwork)
+
+		control.GET("/networks/flow", flowNetwork.GetFlowNetworks)
+		control.DELETE("/networks/flow/drop", flowNetwork.DropFlowNetworks)
+		control.POST("/network/flow", flowNetwork.CreateFlowNetwork)
+		control.GET("/network/flow/:uuid", flowNetwork.GetFlowNetwork)
+		control.PATCH("/network/flow/:uuid", flowNetwork.UpdateFlowNetwork)
+		control.DELETE("/network/flow/:uuid", flowNetwork.DeleteFlowNetwork)
 
 		control.GET("/devices", deviceHandler.GetDevices)
 		control.DELETE("/devices/drop", deviceHandler.DropDevices)
@@ -224,11 +240,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/point/:uuid", pointHandler.UpdatePoint)
 		control.DELETE("/point/:uuid", pointHandler.DeletePoint)
 
-		control.GET("/gateways", gatewayHandler.GetGateways)
-		control.POST("/gateway", gatewayHandler.CreateGateway)
-		control.GET("/gateway/:uuid", gatewayHandler.GetGateway)
-		control.PATCH("/gateway/:uuid", gatewayHandler.UpdateGateway)
-		control.DELETE("/gateway/:uuid", gatewayHandler.DeleteGateway)
+		control.GET("/streams", gatewayHandler.GetGateways)
+		control.POST("/stream", gatewayHandler.CreateGateway)
+		control.GET("/stream/:uuid", gatewayHandler.GetGateway)
+		control.PATCH("/stream/:uuid", gatewayHandler.UpdateGateway)
+		control.DELETE("/stream/:uuid", gatewayHandler.DeleteGateway)
 
 		control.GET("/commands", rubixCommandGroup.GetCommandGroups)
 		control.POST("/command", rubixCommandGroup.CreateCommandGroup)
@@ -248,18 +264,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/subscription/:uuid", subscriptionHandler.UpdateSubscription)
 		control.DELETE("/subscription/:uuid", subscriptionHandler.DeleteSubscription)
 
-
 		control.GET("/jobs", jobHandler.GetJobs)
 		control.POST("/job", jobHandler.CreateJob)
 		control.GET("/job/:uuid", jobHandler.GetJob)
 		control.PATCH("/job/:uuid", jobHandler.UpdateJob)
 		control.DELETE("/job/:uuid", jobHandler.DeleteJob)
-
-
-		//control.GET("/jobs/subscriber", jobHandler.GetJobSubscriber)
-		//control.POST("/jobs/subscriber", jobHandler.CreateJobSubscriber)
-		//control.DELETE("/jobs/subscriber/:uuid", jobHandler.DeleteJobSubscriber)
-		//control.PATCH("/jobs/subscriber/:uuid", jobHandler.UpdateJobSubscriber)
 
 
 	}

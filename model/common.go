@@ -9,25 +9,31 @@ var CommonNaming = struct {
 	Network   		string
 	Device   		string
 	Point   		string
-	Gateway   		string
+	Stream   		string
 	Job   			string
 	Subscriber   	string
 	Subscription   	string
-	Alarm   		string
+	Alert   		string
 	Mapping   		string
 	CommandGroup   	string
+	Rubix   		string
+	RubixGlobal   	string
+	FlowNetwork   	string
 
 }{
 	Network:   			"network",
 	Device:   			"device",
 	Point:   			"point",
-	Gateway:   			"gateway",
+	Stream:   			"stream",
 	Job:   				"job",
 	Subscriber:   		"subscriber",
 	Subscription:   	"subscription",
-	Alarm:   			"alarm",
+	Alert:   			"alert",
 	Mapping:   			"mapping",
     CommandGroup:   	"command_group",
+	Rubix:   			"rubix",
+	RubixGlobal:   		"rubix_global",
+	FlowNetwork:   		"flow_network",
 }
 
 
@@ -75,10 +81,17 @@ type CommonUUID struct {
 	UUID	string 	`json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
 }
 
+type CommonFlowNetworkUUID struct {
+	FlowNetworkUUID	string 	`json:"flow_network_uuid" gorm:"type:varchar(255);unique;not null"`
+}
+
+type CommonFlowNetworkName struct {
+	FlowNetworkName	string 	`json:"flow_network_name" gorm:"type:varchar(255);unique;not null"`
+}
+
 type CommonRubixUUID struct {
 	RubixUUID	string 	`json:"rubix_uuid"`
 }
-
 
 type CommonCreated struct {
 	CreatedAt 	time.Time `json:"created_on"`
@@ -139,7 +152,7 @@ type CommonSubscriber struct {
 	CommonEnable
 	SubscriberType 			string  `json:"subscriber_type"`
 	SubscriberApplication 	string `json:"subscriber_application"`
-	GatewayUUID     		string `json:"gateway_uuid" gorm:"TYPE:string REFERENCES gateways;not null;default:null"`
+
 }
 
 type CommonSubscription struct {
@@ -149,6 +162,6 @@ type CommonSubscription struct {
 	CommonEnable
 	SubscriberType 			string  `json:"subscriber_type"`
 	SubscriberApplication 	string `json:"subscriber_application"`
-	GatewayUUID     		string `json:"gateway_uuid" gorm:"TYPE:string REFERENCES gateways;not null;default:null"`
+
 
 }

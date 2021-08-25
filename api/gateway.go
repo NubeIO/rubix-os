@@ -7,16 +7,16 @@ import (
 )
 
 /*
-Gateway
+Stream
 */
 
 
 // The GatewayDatabase interface for encapsulating database access.
 type GatewayDatabase interface {
-	GetGateway(uuid string) (*model.Gateway, error)
-	GetGateways(withChildren bool) ([]*model.Gateway, error)
-	CreateGateway(body *model.Gateway) error
-	UpdateGateway(uuid string, body *model.Gateway) (*model.Gateway, error)
+	GetGateway(uuid string) (*model.Stream, error)
+	GetGateways(withChildren bool) ([]*model.Stream, error)
+	CreateGateway(body *model.Stream) error
+	UpdateGateway(uuid string, body *model.Stream) (*model.Stream, error)
 	DeleteGateway(uuid string) (bool, error)
 }
 

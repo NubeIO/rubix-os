@@ -59,9 +59,26 @@ func (d *GormDatabase) UpdateSubscription(uuid string, body *model.Subscription)
 	query := d.DB.Where("uuid = ?", uuid).Find(&subscriptionModel);if query.Error != nil {
 		return nil, query.Error
 	}
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
 	query = d.DB.Model(&subscriptionModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
 	return subscriptionModel, nil
+
+}
+
+// DropSubscriptions delete all.
+func (d *GormDatabase) DropSubscriptions() (bool, error) {
+	var subscriptionModel *model.Subscription
+	query := d.DB.Where("1 = 1").Delete(&subscriptionModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
+	r := query.RowsAffected
+	if r == 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
 
 }

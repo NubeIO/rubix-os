@@ -9,6 +9,8 @@ func main()  {
 
 	c := client.NewFlowRestClient("admin", "admin", "0.0.0.0", "1660")
 
+	remoteGateway := true
+
 
 	//token, err := c.GetToken("admin", "admin")
 	addNet, err := c.ClientAddNetwork()
@@ -49,7 +51,7 @@ func main()  {
 	fmt.Println(addPoint2.Response.Name)
 
 
-	addGateway, err := c.ClientAddGateway(false)
+	addGateway, err := c.ClientAddGateway(remoteGateway)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -64,10 +66,10 @@ func main()  {
 	tSub := new(client.Subscriber)
 	tSub.Name = "test"
 	tSub.Enable = true
-	tSub.IsRemote  = false
+	tSub.IsRemote  = remoteGateway
 	tSub.FromUUID = addPoint2.Response.UUID //from point 2
 	tSub.ToUUID = addPoint.Response.UUID  //to point 1
-	tSub.GatewayUuid = addGateway.Response.UUID
+	tSub.StreamUUID = addGateway.Response.UUID
 	tSub.SubscriberApplication = "mapping"
 	tSub.SubscriberType = "point"
 
@@ -87,11 +89,13 @@ func main()  {
 	rSub := new(client.Subscription)
 	rSub.Name = "test"
 	rSub.Enable = true
-	rSub.IsRemote  = false
+	rSub.IsRemote  = remoteGateway
 	rSub.ToUUID = addPoint.Response.UUID  //local point
-	rSub.GatewayUuid = addGateway.Response.GatewayUUID
+	rSub.StreamUUID = addGateway.Response.StreamUUID
 	rSub.SubscriberApplication = "mapping"
 	rSub.SubscriberType = "point"
+
+
 
 
 	addSubscription, err := c.ClientAddSubscription(*rSub)
@@ -99,7 +103,7 @@ func main()  {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Add Subscriber")
+	fmt.Println("Add addSubscription")
 	fmt.Println(addSubscription.Status)
 	fmt.Println(addSubscription.Response.UUID)
 	fmt.Println(addSubscription.Response.Name)

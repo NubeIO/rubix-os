@@ -95,14 +95,14 @@ var ProtocolTypeEnum = struct {
 	Client   				string
 	Server   				string
 	WirelessGateway   		string
-	Gateway   				string
+	Stream   				string
 
 
 }{
 	Client:   "client",
 	Server:   "server",
 	WirelessGateway: "wireless",
-	Gateway:  "gateway",
+	Stream:  "gateway",
 }
 
 

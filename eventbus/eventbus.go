@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/mqtt_client"
+	"github.com/go-resty/resty/v2"
 	"github.com/mustafaturan/bus/v3"
 	"github.com/mustafaturan/monoton/v2"
 	"github.com/mustafaturan/monoton/v2/sequencer"
@@ -42,6 +43,19 @@ type BusPayload struct {
 var BUS = NewBus()
 var BusBackground = context.Background()
 
+
+
+func publishHTTP(sensorStruct *model.Point) {
+	client := resty.New()
+	resp, err := client.R().SetPathParams(map[string]string{
+		"name": sensorStruct.Name,
+	}).Post("http://0.0.0.0:8080/stream/{name}")
+
+	fmt.Println(sensorStruct.Name, resp.String())
+	fmt.Println(sensorStruct.Name, err)
+
+}
+
 func publishMQTT(sensorStruct *model.Point) {
 	a := mqtt_client.NewClient(mqtt_client.ClientOptions{
 		Servers: []string{"tcp://0.0.0.0:1883"},
@@ -70,6 +84,7 @@ var PointHandler = bus.Handler {
 		data, _ := e.Data.(*model.Point)
 		fmt.Println(data, 99999)
 		publishMQTT(data)
+		publishHTTP(data)
 		fmt.Println(e.Topic)
 		fmt.Println(e.Data)
 	},

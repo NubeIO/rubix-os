@@ -39,7 +39,7 @@ ProducerNetwork
 
 
 
-type Gateway struct {
+type Stream struct {
 	CommonUUID
 	CommonName
 	CommonDescription

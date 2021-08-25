@@ -9,8 +9,8 @@ import (
 var gatewaySubscriberChildTable = "Subscriber"
 
 // GetGateways get all of them
-func (d *GormDatabase) GetGateways(withChildren bool) ([]*model.Gateway, error) {
-	var gatewaysModel []*model.Gateway
+func (d *GormDatabase) GetGateways(withChildren bool) ([]*model.Stream, error) {
+	var gatewaysModel []*model.Stream
 	if withChildren { // drop child to reduce json size
 		query := d.DB.Preload(gatewaySubscriberChildTable).Find(&gatewaysModel);if query.Error != nil {
 			return nil, query.Error
@@ -27,9 +27,9 @@ func (d *GormDatabase) GetGateways(withChildren bool) ([]*model.Gateway, error) 
 
 
 // CreateGateway make it
-func (d *GormDatabase) CreateGateway(body *model.Gateway)  error {
-	var gatewayModel []model.Gateway
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Gateway)
+func (d *GormDatabase) CreateGateway(body *model.Stream)  error {
+	var gatewayModel []model.Stream
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
 	if !body.IsRemote  {
 		query := d.DB.Where("is_remote = ?", 0).First(&gatewayModel) //if existing local network then don't create it
 		r := query.RowsAffected
@@ -45,8 +45,8 @@ func (d *GormDatabase) CreateGateway(body *model.Gateway)  error {
 }
 
 // GetGateway get it
-func (d *GormDatabase) GetGateway(uuid string) (*model.Gateway, error) {
-	var gatewayModel *model.Gateway
+func (d *GormDatabase) GetGateway(uuid string) (*model.Stream, error) {
+	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ? ", uuid).First(&gatewayModel); if query.Error != nil {
 		return nil, query.Error
 	}
@@ -55,7 +55,7 @@ func (d *GormDatabase) GetGateway(uuid string) (*model.Gateway, error) {
 
 // DeleteGateway deletes it
 func (d *GormDatabase) DeleteGateway(uuid string) (bool, error) {
-	var gatewayModel *model.Gateway
+	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&gatewayModel);if query.Error != nil {
 		return false, query.Error
 	}
@@ -69,8 +69,8 @@ func (d *GormDatabase) DeleteGateway(uuid string) (bool, error) {
 }
 
 // UpdateGateway  update it
-func (d *GormDatabase) UpdateGateway(uuid string, body *model.Gateway) (*model.Gateway, error) {
-	var gatewayModel *model.Gateway
+func (d *GormDatabase) UpdateGateway(uuid string, body *model.Stream) (*model.Stream, error) {
+	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ?", uuid).Find(&gatewayModel);if query.Error != nil {
 		return nil, query.Error
 	}
@@ -81,3 +81,18 @@ func (d *GormDatabase) UpdateGateway(uuid string, body *model.Gateway) (*model.G
 
 }
 
+// DropGateways delete all.
+func (d *GormDatabase) DropGateways() (bool, error) {
+	var gatewayModel *model.Stream
+	query := d.DB.Where("1 = 1").Delete(&gatewayModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
+	r := query.RowsAffected
+	if r == 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
+
+}
