@@ -1,11 +1,9 @@
 package client
 
-
 import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"log"
-	"os"
 )
 
 const defaultBaseURL = "http://localhost:1660"
@@ -13,17 +11,19 @@ const defaultBaseURL = "http://localhost:1660"
 // FlowClient is used to invoke Form3 Accounts API.
 type FlowClient struct {
 	client *resty.Client
+	ClientToken string
 }
 
 // NewFlowRestClient returns a new instance of FlowClient.
-func NewFlowRestClient(name string, password string) *FlowClient {
+func NewFlowRestClient(name string, password string, address string, port string) *FlowClient {
 	client := resty.New()
 	client.SetDebug(false)
+	url := fmt.Sprintf("http://%s:%s", address, port)
 	// Try getting Accounts API base URL from env var
-	apiURL := os.Getenv("API_ADDR")
-	if apiURL == "" {
-		apiURL = defaultBaseURL
-	}
+	apiURL := url
+	//if apiURL == "" {
+	//	apiURL = defaultBaseURL
+	//}
 	client.SetHostURL(apiURL)
 	// Setting global error struct that maps to Form3's error response
 	client.SetError(&Error{})
@@ -42,7 +42,7 @@ func NewFlowRestClient(name string, password string) *FlowClient {
 	}
 	fmt.Println("token:", t.Token)
 	client.SetHeader("Authorization", t.Token)
-	return &FlowClient{client: client}
+	return &FlowClient{client: client, ClientToken: t.Token}
 }
 
 

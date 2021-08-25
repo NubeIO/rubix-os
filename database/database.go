@@ -24,6 +24,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	if err != nil {
 		panic("failed to connect database")
 	}
+	var alerts []model.Alert
 	var user []model.User
 	var application []model.Application
 	var message []model.Message
@@ -34,12 +35,15 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var point []model.Point
 	//var pointStore []model.PointStore
 	//var priorityArrayModel []model.PriorityArrayModel
+	var flowNetwork []model.FlowNetwork
 	var rubixPlat []model.RubixPlat
 	var job []model.Job
-	var gateway []model.Gateway
+	var stream []model.Stream
+	var commandGroup []model.CommandGroup
 	var subscriber []model.Subscriber
 	var subscription []model.Subscription
 	var models = []interface{}{
+		&alerts,
 		&user,
 		&application,
 		&message,
@@ -49,10 +53,12 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&device,
 		&point,
 		&rubixPlat,
+		&flowNetwork,
 		//&pointStore,
 		//&priorityArrayModel,
 		&job,
-		&gateway,
+		&stream,
+		&commandGroup,
 		&subscriber,
 		&subscription,
 	}
@@ -74,7 +80,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	rp := new(model.RubixPlat)
 	db.Find(rp).Count(&platCount)
 	if createDefaultUserIfNotExist && platCount == 0 {
-		rp.GlobalUuid, _ = utils.MakeTopicUUID(model.CommonNaming.Network)
+		rp.GlobalUuid = utils.MakeTopicUUID(model.CommonNaming.Rubix)
 		db.Create(&rp)
 	}
 	return &GormDatabase{DB: db}, nil

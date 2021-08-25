@@ -12,8 +12,8 @@ func (a *FlowClient) ClientAddGateway(isRemote bool) (*ResponseBody, error) {
 	name = fmt.Sprintf("gte_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
-		SetBody(Gateway{"name", isRemote}).
-		Post("/api/gateway")
+		SetBody(Stream{"name", isRemote}).
+		Post("/api/stream")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -29,7 +29,7 @@ func (a *FlowClient) ClientGetGateway(uuid string) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/gateway/{uuid}")
+		Get("/api/stream/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -48,7 +48,7 @@ func (a *FlowClient) ClientEditGateway(uuid string) (*ResponseBody, error) {
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/gateway/{}")
+		Post("/api/stream/{}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}

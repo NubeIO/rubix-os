@@ -11,37 +11,45 @@ func MakeUUID() (string, error) {
 }
 
 
-func MakeTopicUUID(attribute string) (string, error) {
-	u, err := uuid.MakeUUID()
+func MakeTopicUUID(attribute string) string {
+	u, _ := uuid.MakeUUID()
 	divider := "_"
-	net := "id_n"
-	dev := "id_d"
-	pnt := "id_p"
-	job := "id_j"
-	gtw := "id_g"
-	sub := "id_s"
-	rip := "id_r" //subscriptions
-	alm := "id_a"
+	net := "net" //network
+	dev := "dev" //device
+	pnt := "pnt" //point
+	job := "job" //job
+	str := "str" //stream gateway
+	sub := "sub" //subscribers
+	ion := "ion" //subscriptions
+	alt := "alt" //alerts
+	cmd := "cmd" //command
+	rub := "rbx" //rubix uuid
+	rxg := "rxg" //rubix global uuid
 	switch attribute {
 	case model.CommonNaming.Network:
-		return fmt.Sprintf("%s%s%s", net, divider, u), err
+		return fmt.Sprintf("%s%s%s", net, divider, u)
 	case model.CommonNaming.Device:
-		return fmt.Sprintf("%s%s%s", dev, divider, u), err
+		return fmt.Sprintf("%s%s%s", dev, divider, u)
 	case model.CommonNaming.Point:
-		return fmt.Sprintf("%s%s%s", pnt, divider, u), err
-	case model.CommonNaming.Gateway:
-		return fmt.Sprintf("%s%s%s", gtw, divider, u), err
+		return fmt.Sprintf("%s%s%s", pnt, divider, u)
+	case model.CommonNaming.Stream:
+		return fmt.Sprintf("%s%s%s", str, divider, u)
 	case model.CommonNaming.Job:
-		return fmt.Sprintf("%s%s%s", job, divider, u), err
+		return fmt.Sprintf("%s%s%s", job, divider, u)
 	case model.CommonNaming.Subscriber:
-		return fmt.Sprintf("%s%s%s", sub, divider, u), err
+		return fmt.Sprintf("%s%s%s", sub, divider, u)
 	case model.CommonNaming.Subscription:
-		return fmt.Sprintf("%s%s%s", rip, divider, u), err
-	case model.CommonNaming.Alarm:
-		return fmt.Sprintf("%s%s%s", alm, divider, u), err
+		return fmt.Sprintf("%s%s%s", ion, divider, u)
+	case model.CommonNaming.Alert:
+		return fmt.Sprintf("%s%s%s", alt, divider, u)
+	case model.CommonNaming.CommandGroup:
+		return fmt.Sprintf("%s%s%s", cmd, divider, u)
+	case model.CommonNaming.Rubix:
+		return fmt.Sprintf("%s%s%s", rub, divider, u)
+	case model.CommonNaming.RubixGlobal:
+		return fmt.Sprintf("%s%s%s", rxg, divider, u)
 
 	}
-	fmt.Println("here")
-	return uuid.MakeUUID()
+	return u
 }
 

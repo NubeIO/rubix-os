@@ -79,6 +79,11 @@ func getBODYRubixPlat(ctx *gin.Context) (dto *model.RubixPlat, err error) {
 	return dto, err
 }
 
+func getBODYFlowNetwork(ctx *gin.Context) (dto *model.FlowNetwork, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -100,11 +105,15 @@ func getBODYSubscription(ctx *gin.Context) (dto *model.Subscription, err error) 
 }
 
 
-func getBODYGateway(ctx *gin.Context) (dto *model.Gateway, err error) {
+func getBODYGateway(ctx *gin.Context) (dto *model.Stream, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
 
+func getBODYCommandGroup(ctx *gin.Context) (dto *model.CommandGroup, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
 
 func getBODYJobs(ctx *gin.Context) (dto *model.Job, err error) {
 	err = ctx.ShouldBindJSON(&dto)

@@ -11,8 +11,8 @@ type Subscriptions struct {
 }
 
 // GetSubscriptions get all of them
-func (d *GormDatabase) GetSubscriptions() ([]model.Subscription, error) {
-	var subscriptionsModel []model.Subscription
+func (d *GormDatabase) GetSubscriptions() ([]*model.Subscription, error) {
+	var subscriptionsModel []*model.Subscription
 	query := d.DB.Find(&subscriptionsModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -21,10 +21,12 @@ func (d *GormDatabase) GetSubscriptions() ([]model.Subscription, error) {
 }
 
 // CreateSubscription make it
-func (d *GormDatabase) CreateSubscription(body *model.Subscription)  error {
-	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Subscription)
-	n := d.DB.Create(body).Error
-	return n
+func (d *GormDatabase) CreateSubscription(body *model.Subscription) (*model.Subscription, error) {
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
+	query := d.DB.Create(body);if query.Error != nil {
+		return nil, query.Error
+	}
+	return body, nil
 }
 
 // GetSubscription get it
@@ -57,9 +59,26 @@ func (d *GormDatabase) UpdateSubscription(uuid string, body *model.Subscription)
 	query := d.DB.Where("uuid = ?", uuid).Find(&subscriptionModel);if query.Error != nil {
 		return nil, query.Error
 	}
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
 	query = d.DB.Model(&subscriptionModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
 	return subscriptionModel, nil
+
+}
+
+// DropSubscriptions delete all.
+func (d *GormDatabase) DropSubscriptions() (bool, error) {
+	var subscriptionModel *model.Subscription
+	query := d.DB.Where("1 = 1").Delete(&subscriptionModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
+	r := query.RowsAffected
+	if r == 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
 
 }

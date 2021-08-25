@@ -12,8 +12,8 @@ type Job struct {
 
 
 
-func (d *GormDatabase) GetJobs() ([]model.Job, error) {
-	var jobsModel []model.Job
+func (d *GormDatabase) GetJobs() ([]*model.Job, error) {
+	var jobsModel []*model.Job
 	query := d.DB.Preload(gatewaySubscriberChildTable).Find(&jobsModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -23,7 +23,7 @@ func (d *GormDatabase) GetJobs() ([]model.Job, error) {
 
 
 func (d *GormDatabase) CreateJob(body *model.Job)  error {
-	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Job)
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Job)
 	n := d.DB.Create(body).Error
 	return n
 }
@@ -63,6 +63,25 @@ func (d *GormDatabase) UpdateJob(uuid string, body *model.Job) (*model.Job, erro
 	return jobModel, nil
 
 }
+
+// DropJobs delete all.
+func (d *GormDatabase) DropJobs() (bool, error) {
+	var jobModel *model.Job
+	query := d.DB.Where("1 = 1").Delete(&jobModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
+	r := query.RowsAffected
+	if r == 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
+
+}
+
+
+
 //
 //func (d *GormDatabase) CreateJobSubscriber(body *model.JobSubscriber, jobUUID string)  error {
 //	query := d.DB.Where("uuid = ?", jobUUID).Find(&jobModel); if query.Error != nil {

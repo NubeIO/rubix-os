@@ -9,15 +9,6 @@ type Ops struct {
 
 }
 
-// SubscriberPoints TODO add in later
-//SubscriberPoints is the list of points that this points is subscribed to. A Subscriber is a remote device that can pub/sub to a producer.
-//type SubscriberPoints struct {
-//	SubscriberConnectionUUID 				string `json:"subscriber_connection_uuid"` //this is the remote device UUID
-//	SubscriberPointUUID						string `json:"subscriber_point_uuid"` //this is the remote point UUID
-//	SubscriberWriteable 					bool `json:"subscriber_writeable"`
-//	SubscriberPointWriteValue  				string `json:"subscriber_point_write_value"`
-//	SubscriberPointWritePriority  			string `json:"subscriber_point_write_priority"`
-//}
 
 // TimeOverride TODO add in later
 //TimeOverride where a point value can be overridden for a duration of time
@@ -27,16 +18,7 @@ type TimeOverride struct {
 	EndDate        		string `json:"end_date"` // START at 25:11:2021:13:30
 	Value				string `json:"value"`
 	Priority			string `json:"priority"`
-
 }
-
-// CommandGroup TODO add in later
-//CommandGroup is for issuing global schedule writes or global point writes (as in send a value to any point associated with this group)
-type CommandGroup struct {
-	PointUUID     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
-	//Points  []Point //list of the points in the command group, the point must be a writable point
-}
-
 
 
 //MathOperation same as in lora and point-server TODO add in later
@@ -71,17 +53,9 @@ type CommonPoint struct {
 type Point struct {
 	CommonProducer
 	CommonPoint
-	DeviceUUID     		string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
-	//Subscriber			[]Subscriber `json:"subscribers" gorm:"constraint:OnDelete:CASCADE;"`
-	//Subscription		[]Subscription `json:"subscriptions" gorm:"constraint:OnDelete:CASCADE;"`
-	//PriorityArrayModel 			PriorityArrayModel `json:"priority_array" gorm:"constraint:OnDelete:CASCADE"`
-	//PointStore 					PointStore `json:"point_store" gorm:"constraint:OnDelete:CASCADE"`
+	DeviceUUID     			string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 }
 
-//type PointSubscriber struct {
-//	PointUUID    		string  `json:"point_uuid" binding:"required" gorm:"TYPE:varchar(255) REFERENCES points;not null;default:null"`
-//	Subscriber
-//}
 
 
 type PriorityArrayModel struct {

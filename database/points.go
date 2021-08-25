@@ -1,6 +1,8 @@
 package database
 
 import (
+	"fmt"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
@@ -8,13 +10,14 @@ import (
 
 
 
-var pointStoreChildTable = "Subscriber"
+
+
 
 // GetPoints returns all devices.
 func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
 	var pointsModel []*model.Point
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload(pointStoreChildTable).Find(&pointsModel);if query.Error != nil {
+		query := d.DB.Find(&pointsModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return pointsModel, nil
@@ -31,7 +34,7 @@ func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
 func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, error) {
 	var pointModel *model.Point
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Where("uuid = ? ", uuid).Preload(pointStoreChildTable).First(&pointModel);if query.Error != nil {
+		query := d.DB.Where("uuid = ? ", uuid).First(&pointModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return pointModel, nil
@@ -46,7 +49,7 @@ func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, e
 // CreatePoint creates a device.
 func (d *GormDatabase) CreatePoint( body *model.Point) (*model.Point, error) {
 	var deviceModel *model.Device
-	body.UUID, _ = utils.MakeTopicUUID(model.CommonNaming.Point)
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Point)
 	deviceUUID := body.DeviceUUID
 	query := d.DB.Where("uuid = ? ", deviceUUID).First(&deviceModel);if query.Error != nil {
 		return nil, query.Error
@@ -54,6 +57,7 @@ func (d *GormDatabase) CreatePoint( body *model.Point) (*model.Point, error) {
 	if err := d.DB.Create(&body).Error; err != nil {
 		return  nil, query.Error
 	}
+	busUpdate(body.UUID, "create", body)
 	return body, query.Error
 }
 
@@ -67,6 +71,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 	query = d.DB.Model(&pointModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
+	busUpdate(pointModel.UUID, "updates", pointModel)
 	return pointModel, nil
 }
 
@@ -80,6 +85,7 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	if r == 0 {
 		return false, nil
 	} else {
+		busUpdate(pointModel.UUID, "delete", pointModel)
 		return true, nil
 	}
 
@@ -99,4 +105,13 @@ func (d *GormDatabase) DropPoints() (bool, error) {
 		return true, nil
 	}
 
+}
+
+
+func busUpdate(UUID string, action string,body *model.Point){
+	err := eventbus.BUS.Emit(eventbus.BusBackground, "points", body)
+	fmt.Println("topics", eventbus.BUS.Topics())
+	if err != nil {
+		fmt.Println("error", err)
+	}
 }

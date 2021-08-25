@@ -19,7 +19,7 @@ func (d *GormDatabase) GetRubixPlat() (*model.RubixPlat, error) {
 
 // CreateRubixPlat creates a device.
 func (d *GormDatabase) CreateRubixPlat(body *model.RubixPlat) (*model.RubixPlat, error) {
-	body.GlobalUuid, _ = utils.MakeTopicUUID(model.CommonNaming.Network)
+	body.GlobalUuid = utils.MakeTopicUUID(model.CommonNaming.Network)
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}

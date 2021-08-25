@@ -7,7 +7,11 @@ import (
 
 func main()  {
 
-	c := client.NewFlowRestClient("admin", "admin")
+	c := client.NewFlowRestClient("admin", "admin", "0.0.0.0", "1660")
+
+	remoteGateway := true
+
+
 	//token, err := c.GetToken("admin", "admin")
 	addNet, err := c.ClientAddNetwork()
 	if err != nil {
@@ -37,7 +41,17 @@ func main()  {
 	fmt.Println(addPoint.Response.Name)
 
 
-	addGateway, err := c.ClientAddGateway(true)
+	addPoint2, err := c.ClientAddPoint(addDev.Response.UUID)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("Add point 2")
+	fmt.Println(addPoint2.Status)
+	fmt.Println(addPoint2.Response.UUID)
+	fmt.Println(addPoint2.Response.Name)
+
+
+	addGateway, err := c.ClientAddGateway(remoteGateway)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -48,11 +62,14 @@ func main()  {
 	fmt.Println(addGateway.Response.UUID)
 	fmt.Println(addGateway.Response.Name)
 
+	// point 2 to make a subscriber connection to point 1
 	tSub := new(client.Subscriber)
 	tSub.Name = "test"
 	tSub.Enable = true
-	tSub.ThingUuid = addPoint.Response.UUID
-	tSub.GatewayUuid = addGateway.Response.UUID
+	tSub.IsRemote  = remoteGateway
+	tSub.FromUUID = addPoint2.Response.UUID //from point 2
+	tSub.ToUUID = addPoint.Response.UUID  //to point 1
+	tSub.StreamUUID = addGateway.Response.UUID
 	tSub.SubscriberApplication = "mapping"
 	tSub.SubscriberType = "point"
 
@@ -66,6 +83,36 @@ func main()  {
 	fmt.Println(addSubscriber.Status)
 	fmt.Println(addSubscriber.Response.UUID)
 	fmt.Println(addSubscriber.Response.Name)
+
+
+	// point 2 to make a subscriber connection to point 1
+	rSub := new(client.Subscription)
+	rSub.Name = "test"
+	rSub.Enable = true
+	rSub.IsRemote  = remoteGateway
+	rSub.ToUUID = addPoint.Response.UUID  //local point
+	rSub.StreamUUID = addGateway.Response.StreamUUID
+	rSub.SubscriberApplication = "mapping"
+	rSub.SubscriberType = "point"
+
+
+
+
+	addSubscription, err := c.ClientAddSubscription(*rSub)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println("Add addSubscription")
+	fmt.Println(addSubscription.Status)
+	fmt.Println(addSubscription.Response.UUID)
+	fmt.Println(addSubscription.Response.Name)
+
+
+	fmt.Println("FLOW-FRAMEWORK-TOKEN", c.ClientToken)
+
+
+
 
 
 

@@ -19,14 +19,16 @@ type PointAPI struct {
 }
 
 func (a *PointAPI) GetPoints(ctx *gin.Context) {
-	q, err := a.DB.GetPoints(false)
+	withChildren, _ := withChildrenArgs(ctx)
+	q, err := a.DB.GetPoints(withChildren)
 	reposeHandler(q, err, ctx)
 
 }
 
 func (a *PointAPI) GetPoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetPoint(uuid, false)
+	withChildren, _ := withChildrenArgs(ctx)
+	q, err := a.DB.GetPoint(uuid, withChildren)
 	reposeHandler(q, err, ctx)
 
 }
