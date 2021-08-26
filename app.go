@@ -1,54 +1,36 @@
 package main
 
 import (
-	"flag"
-	"log"
-	"math/rand"
-	"os"
-	"time"
-
+	"fmt"
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/database"
-	"github.com/NubeDev/flow-framework/mode"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/router"
 	"github.com/NubeDev/flow-framework/runner"
+	"os"
+	"path"
 )
 
 var (
-	Version = "unknown"
-	// Commit the git commit hash of this version.
-	Commit = "unknown"
-	// BuildDate the date on which this binary was build.
-	BuildDate = "unknown"
-	// Mode the build mode.
-	Mode = mode.Dev
+	Version   = "<version>"
+	Commit    = "<commit>"
+	BuildDate = "<build_date>"
 )
-
-
 
 func main() {
 	vInfo := &model.VersionInfo{Version: Version, Commit: Commit, BuildDate: BuildDate}
-	mode.Set(Mode)
+	fmt.Println("Starting version:", vInfo.Version+"-"+vInfo.Commit+"@"+vInfo.BuildDate)
 
-	log.Println("Starting version", vInfo.Version+"@"+BuildDate)
-	rand.Seed(time.Now().UnixNano())
+	conf := config.CreateApp()
 
-	p := flag.String("config", "./config.yml", "config file path")
-	flag.Parse()
-	path := *p
-	conf := config.Get(path)
-
-	if conf.PluginsDir != "" {
-		if err := os.MkdirAll(conf.PluginsDir, 0755); err != nil {
-			panic(err)
-		}
-	}
-	if err := os.MkdirAll(conf.UploadedImagesDir, 0755); err != nil {
+	if err := os.MkdirAll(conf.GetAbsPluginDir(), 0755); err != nil {
 		panic(err)
 	}
-
-	db, err := database.New(conf.Database.Dialect, conf.Database.Connection, conf.DefaultUser.Name, conf.DefaultUser.Pass, conf.PassStrength, true)
+	if err := os.MkdirAll(conf.GetAbsUploadedImagesDir(), 0755); err != nil {
+		panic(err)
+	}
+	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
+	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass, conf.PassStrength, true)
 	if err != nil {
 		panic(err)
 	}

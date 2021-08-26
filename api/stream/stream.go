@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/NubeDev/flow-framework/auth"
-	"github.com/NubeDev/flow-framework/mode"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -28,12 +27,12 @@ type API struct {
 // pingPeriod: is the interval, in which is server sends the a ping to the client.
 // pongTimeout: is the duration after the connection will be terminated, when the client does not respond with the
 // pong command.
-func New(pingPeriod, pongTimeout time.Duration, allowedWebSocketOrigins []string) *API {
+func New(pingPeriod, pongTimeout time.Duration, allowedWebSocketOrigins []string, prod bool) *API {
 	return &API{
 		clients:     make(map[uint][]*client),
 		pingPeriod:  pingPeriod,
 		pongTimeout: pingPeriod + pongTimeout,
-		upgrader:    newUpgrader(allowedWebSocketOrigins),
+		upgrader:    newUpgrader(allowedWebSocketOrigins, prod),
 	}
 }
 
@@ -179,13 +178,13 @@ func isAllowedOrigin(r *http.Request, allowedOrigins []*regexp.Regexp) bool {
 	return false
 }
 
-func newUpgrader(allowedWebSocketOrigins []string) *websocket.Upgrader {
+func newUpgrader(allowedWebSocketOrigins []string, prod bool) *websocket.Upgrader {
 	compiledAllowedOrigins := compileAllowedWebSocketOrigins(allowedWebSocketOrigins)
 	return &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
-			if mode.IsDev() {
+			if !prod {
 				return true
 			}
 			return isAllowedOrigin(r, compiledAllowedOrigins)

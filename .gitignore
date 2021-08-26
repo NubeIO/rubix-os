@@ -2,7 +2,6 @@ vendor/
 .idea/
 build/
 certs/
-build/
 licenses/
 coverage.txt
 */node_modules/
@@ -11,3 +10,4 @@ config.yml
 data/
 images/
 client/ws.conf
+*.so

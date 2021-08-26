@@ -1,36 +1,18 @@
 package config
 
 import (
-	"path/filepath"
-	"strings"
-
+	"flag"
 	"github.com/NubeDev/configor"
-	"github.com/NubeDev/flow-framework/mode"
+	"path"
 )
 
-// Configuration is stuff that can be configured externally per env variables or config file (config.yml).
 type Configuration struct {
 	Server struct {
 		KeepAlivePeriodSeconds int
 		ListenAddr             string `default:""`
-		Port                   int    `default:"8888"`
-
-		SSL struct {
-			Enabled         *bool  `default:"false"`
-			RedirectToHTTPS *bool  `default:"true"`
-			ListenAddr      string `default:""`
-			Port            int    `default:"443"`
-			CertFile        string `default:""`
-			CertKey         string `default:""`
-			LetsEncrypt     struct {
-				Enabled   *bool  `default:"false"`
-				AcceptTOS *bool  `default:"false"`
-				Cache     string `default:"data/certs"`
-				Hosts     []string
-			}
-		}
-		ResponseHeaders map[string]string
-		Stream          struct {
+		Port                   int
+		ResponseHeaders        map[string]string
+		Stream                 struct {
 			PingPeriodSeconds int `default:"45"`
 			AllowedOrigins    []string
 		}
@@ -42,37 +24,72 @@ type Configuration struct {
 	}
 	Database struct {
 		Dialect    string `default:"sqlite3"`
-		Connection string `default:"data/flow.db"`
+		Connection string `default:"data.db"`
 	}
 	DefaultUser struct {
 		Name string `default:"admin"`
 		Pass string `default:"admin"`
 	}
-	PassStrength      int    `default:"10"`
-	UploadedImagesDir string `default:"data/images"`
-	PluginsDir        string `default:"data/plugins"`
-}
+	PassStrength int `default:"10"`
 
-func configFiles(path string) []string {
-	if mode.Get() == mode.TestDev {
-		return []string{path}
+	Location struct {
+		GlobalDir string `default:"./"`
+		ConfigDir string `default:"config"`
+		DataDir   string `default:"data"`
+		Data      struct {
+			PluginsDir        string `default:"plugins"`
+			UploadedImagesDir string `default:"images"`
+		}
 	}
-	return []string{"config.yml", "/etc/flow/config.yml"}
+	Logging bool `default:"false"`
+	Prod    bool `default:"false"`
 }
 
-// Get returns the configuration extracted from env variables or config file.
-func Get(path string) *Configuration {
-	conf := new(Configuration)
-	err := configor.New(&configor.Config{EnvironmentPrefix: "FLOW"}).Load(conf, configFiles(path)...)
+var config *Configuration = nil
+
+func Get() *Configuration {
+	return config
+}
+
+func CreateApp() *Configuration {
+	config = new(Configuration)
+	config = config.Parse()
+	err := configor.New(&configor.Config{EnvironmentPrefix: "FLOW"}).Load(config, config.GetAbsConfigDir())
 	if err != nil {
 		panic(err)
 	}
-	addTrailingSlashToPaths(conf)
+	return config
+}
+
+func (conf *Configuration) Parse() *Configuration {
+	port := flag.Int("p", 1660, "Port")
+	globalDir := flag.String("g", "./", "Global Directory")
+	dataDir := flag.String("d", "data", "Data Directory")
+	configDir := flag.String("c", "config", "Config Directory")
+	logging := flag.Bool("logging", false, "Logging")
+	prod := flag.Bool("prod", false, "Deployment Mode")
+	flag.Parse()
+	conf.Server.Port = *port
+	conf.Location.GlobalDir = *globalDir
+	conf.Location.DataDir = *dataDir
+	conf.Location.ConfigDir = *configDir
+	conf.Logging = *logging
+	conf.Prod = *prod
 	return conf
 }
 
-func addTrailingSlashToPaths(conf *Configuration) {
-	if !strings.HasSuffix(conf.UploadedImagesDir, "/") && !strings.HasSuffix(conf.UploadedImagesDir, "\\") {
-		conf.UploadedImagesDir += string(filepath.Separator)
-	}
+func (conf *Configuration) GetAbsDataDir() string {
+	return path.Join(conf.Location.GlobalDir, conf.Location.DataDir)
+}
+
+func (conf *Configuration) GetAbsConfigDir() string {
+	return path.Join(conf.Location.GlobalDir, conf.Location.ConfigDir)
+}
+
+func (conf *Configuration) GetAbsPluginDir() string {
+	return path.Join(conf.GetAbsDataDir(), conf.Location.Data.PluginsDir)
+}
+
+func (conf *Configuration) GetAbsUploadedImagesDir() string {
+	return path.Join(conf.GetAbsDataDir(), conf.Location.Data.UploadedImagesDir)
 }
