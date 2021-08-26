@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
+	"github.com/mustafaturan/bus/v3"
 	"time"
 
 	"log"
@@ -57,6 +60,8 @@ func (c *SystemPlugin) ValidateAndSetConfig(config interface{}) error {
 // Enable enables the plugin.
 func (c *SystemPlugin) Enable() error {
 	log.Println("plugin Enable")
+	//topic := fmt.Sprintf("%s:%s", "job")
+	eventbus.BUS.RegisterHandler("jobs", BusPluginHandler)
 	return nil
 }
 
@@ -80,6 +85,21 @@ func (c *SystemPlugin) GetNetwork(id string) error {
 	log.Println("plugin GetNetworks")
 	return nil
 }
+
+
+var BusPluginHandler = bus.Handler {
+	Handle: func(ctx context.Context, e bus.Event) {
+		//NewAgent
+		fmt.Println(99999)
+		data, _ := e.Data.(*model.Point)
+		fmt.Println(e.Topic)
+		fmt.Println(data)
+		fmt.Println(99999)
+	},
+	Matcher: ".*", // matches all topics
+}
+
+
 
 
 // RegisterWebhook implements plugin.Webhooker.

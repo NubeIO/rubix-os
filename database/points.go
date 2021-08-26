@@ -109,7 +109,7 @@ func (d *GormDatabase) DropPoints() (bool, error) {
 
 
 func busUpdate(UUID string, action string,body *model.Point){
-	err := eventbus.BUS.Emit(eventbus.BusBackground, "points", body)
+	err := eventbus.BUS.Emit(eventbus.BusBackground, "jobs", body)
 	fmt.Println("topics", eventbus.BUS.Topics())
 	if err != nil {
 		fmt.Println("error", err)

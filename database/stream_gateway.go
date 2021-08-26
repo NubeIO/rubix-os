@@ -7,12 +7,13 @@ import (
 
 
 var gatewaySubscriberChildTable = "Subscriber"
+var gatewaySubscriptionChildTable = "Subscription"
 
 // GetGateways get all of them
 func (d *GormDatabase) GetGateways(withChildren bool) ([]*model.Stream, error) {
 	var gatewaysModel []*model.Stream
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload(gatewaySubscriberChildTable).Find(&gatewaysModel);if query.Error != nil {
+		query := d.DB.Preload(gatewaySubscriberChildTable).Preload(gatewaySubscriptionChildTable).Find(&gatewaysModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return gatewaysModel, nil
@@ -25,7 +26,6 @@ func (d *GormDatabase) GetGateways(withChildren bool) ([]*model.Stream, error) {
 
 }
 
-
 // CreateGateway make it
 func (d *GormDatabase) CreateGateway(body *model.Stream)  error {
 	var gatewayModel []model.Stream
@@ -37,7 +37,7 @@ func (d *GormDatabase) CreateGateway(body *model.Stream)  error {
 			return errorMsg("network", "a local gateway exists", nil)
 		}
 		body.Name = "Local rubix"
-		body.Enable = true
+		*body.Enable = true
 		body.Description = "Local rubix gateway for sending data between jobs and points"
 	}
 	n := d.DB.Create(body).Error
