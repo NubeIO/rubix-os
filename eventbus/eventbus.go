@@ -28,7 +28,9 @@ func NewBus() *bus.Bus {
 		panic(err)
 	}
 	b.RegisterTopics("points")
+	b.RegisterTopics("jobs")
 	b.RegisterHandler("points", PointHandler)
+
 	return b
 }
 

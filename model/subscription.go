@@ -27,6 +27,6 @@ type Subscription struct {
 	ToUUID 					string `json:"to_uuid"`
 	IsRemote 				bool 	`json:"is_remote"`
 	RemoteRubixUUID			string 	`json:"remote_rubix_uuid"`
-	StreamUUID     			string `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;null;default:null"`
+	StreamUUID     			string `json:"stream_uuid"`
 }
 

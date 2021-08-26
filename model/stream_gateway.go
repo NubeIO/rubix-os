@@ -48,6 +48,6 @@ type Stream struct {
 	IsRemote 			bool 	`json:"is_remote"`
 	CommonRubixUUID
 	Subscriber			[]Subscriber `json:"subscribers" gorm:"constraint:OnDelete:CASCADE;"`
-	Subscription		[]Subscription `json:"subscription" gorm:"constraint:OnDelete:CASCADE;"`
+	Subscription		`json:"subscription"`
 	CommandGroup		[]CommandGroup `json:"command_group" gorm:"constraint:OnDelete:CASCADE;"`
 }
