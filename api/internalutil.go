@@ -14,56 +14,51 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
 type Args struct {
-	Sort   			string
-	Order  			string
-	Offset 			string
-	Limit  			string
-	Search 			string
-	WithChildren 	string
-	WithPoints      string
+	Sort         string
+	Order        string
+	Offset       string
+	Limit        string
+	Search       string
+	WithChildren string
+	WithPoints   string
 }
 
-
 var ArgsType = struct {
-	Sort   				string
-	Order   			string
-	Offset   			string
-	Limit   			string
-	Search   			string
-	WithChildren 		string
-	WithPoints          string
+	Sort         string
+	Order        string
+	Offset       string
+	Limit        string
+	Search       string
+	WithChildren string
+	WithPoints   string
 }{
-	Sort:   			"sort",
-	Order:   			"order",
-	Offset:   			"offset",
-	Limit:   			"limit",
-	Search:   			"search",
-	WithChildren:   	"with_children",
-	WithPoints:   		"with_points",
+	Sort:         "sort",
+	Order:        "order",
+	Offset:       "offset",
+	Limit:        "limit",
+	Search:       "search",
+	WithChildren: "with_children",
+	WithPoints:   "with_points",
 }
 
 var ArgsDefault = struct {
-	Sort   			string
-	Order   		string
-	Offset   		string
-	Limit   		string
-	Search   		string
-	WithChildren   	string
-	WithPoints      string
+	Sort         string
+	Order        string
+	Offset       string
+	Limit        string
+	Search       string
+	WithChildren string
+	WithPoints   string
 }{
-	Sort:   			"ID",
-	Order:   			"DESC",
-	Offset:   			"0",
-	Limit:   			"25",
-	Search:   			"",
-	WithChildren:   	"false",
-	WithPoints:   		"false",
+	Sort:         "ID",
+	Order:        "DESC",
+	Offset:       "0",
+	Limit:        "25",
+	Search:       "",
+	WithChildren: "false",
+	WithPoints:   "false",
 }
-
-
-
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {
 	if id, err := strconv.ParseUint(ctx.Param(name), 10, bits.UintSize); err == nil {
@@ -72,7 +67,6 @@ func withID(ctx *gin.Context, name string, f func(id uint)) {
 		ctx.AbortWithError(400, errors.New("invalid id"))
 	}
 }
-
 
 func getBODYRubixPlat(ctx *gin.Context) (dto *model.RubixPlat, err error) {
 	err = ctx.ShouldBindJSON(&dto)
@@ -104,7 +98,6 @@ func getBODYSubscription(ctx *gin.Context) (dto *model.Subscription, err error) 
 	return dto, err
 }
 
-
 func getBODYGateway(ctx *gin.Context) (dto *model.Stream, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -130,17 +123,14 @@ func resolveID(ctx *gin.Context) string {
 	return id
 }
 
-
-func WithChildren(value string) (bool, error)  {
+func WithChildren(value string) (bool, error) {
 	if value == "" {
 		return false, nil
-	} else  {
+	} else {
 		c, err := bools.Boolean(value)
 		return c, err
 	}
 }
-
-
 
 func OK(resp interface{}) Response {
 	return Success(http.StatusOK, resp)
@@ -150,16 +140,13 @@ func OKWithMessage(resp string) Response {
 	return Success(http.StatusOK, resp)
 }
 
-
 func BadEntity(excepted string) Response {
 	return Failed(http.StatusUnprocessableEntity, excepted)
 }
 
-
 func NotFound(err string) Response {
 	return Failed(http.StatusNotFound, err)
 }
-
 
 func Created(id string) Response {
 	return Success(http.StatusCreated, JSON{"id": id})
@@ -168,7 +155,7 @@ func Created(id string) Response {
 func Data(model interface{}) Response {
 	v := reflect.ValueOf(model)
 	if v.Kind() == reflect.Slice {
-		b,_:=json.MarshalIndent(model, "", "  ")
+		b, _ := json.MarshalIndent(model, "", "  ")
 		fmt.Print(string(b))
 		return Success(http.StatusOK, JSON{"count": v.Len(), "items": model})
 	}
@@ -184,7 +171,7 @@ type Response interface {
 
 type BaseResponse struct {
 	Response JSON
-	code int
+	code     int
 }
 
 func (r *BaseResponse) GetResponse() map[string]interface{} {
@@ -196,7 +183,6 @@ func (r *BaseResponse) GetStatusCode() int {
 }
 
 func Success(code int, Response interface{}) Response {
-	fmt.Println(44444)
 	return &BaseResponse{code: code, Response: JSON{
 		"status":   "success",
 		"response": Response,
@@ -204,11 +190,8 @@ func Success(code int, Response interface{}) Response {
 }
 
 func Failed(code int, Response interface{}) Response {
-	fmt.Println(333333333333333)
-	fmt.Println(Response)
 	return &BaseResponse{code: code, Response: JSON{
 		"status": "failed",
 		"error":  Response,
 	}}
 }
-
