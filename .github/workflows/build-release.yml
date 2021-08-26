@@ -1,0 +1,119 @@
+name: build-release
+
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened, closed ]
+    branches:
+      - main
+      - master
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+
+env:
+  APP_NAME: lora-go
+  GHCR_IMAGE: ghcr.io/nubeio/rubix-point
+  PLATFORMS: linux/amd64,linux/arm/v7
+
+jobs:
+
+  context:
+    runs-on: ubuntu-latest
+
+    outputs:
+      shouldBuild: ${{ steps.context.outputs.decision_build }}
+      shouldPublish: ${{ steps.context.outputs.decision_publish }}
+      isRelease: ${{ steps.context.outputs.isTag }}
+      afterRelease: ${{ steps.context.outputs.isAfterMergedReleasePR }}
+      sha: ${{ steps.context.outputs.commitId }}
+      version: ${{ steps.context.outputs.version }}
+      shortCommitId: ${{ steps.context.outputs.shortCommitId }}
+      fqn: ${{ env.APP_NAME }}-${{ steps.context.outputs.version }}-${{ steps.context.outputs.shortCommitId }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.NUBEIO_CI_GITHUBPROJECT_TOKEN }}
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v3
+        with:
+          git-user-signingkey: true
+          git-commit-gpgsign: true
+          git-tag-gpgsign: true
+          git-push-gpgsign: false
+          gpg-private-key: ${{ secrets.NUBEIO_CI_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.NUBEIO_CI_GPG_PASSPHARSE }}
+
+      - name: Project context
+        id: context
+        uses: zero88/gh-project-context@v1
+        with:
+          dry: false
+          defaultBranch: master
+
+  build:
+    runs-on: ubuntu-latest
+    needs: context
+    if: needs.context.outputs.shouldBuild == 'true'
+    services:
+      registry:
+        image: zero88/gh-registry:latest
+        ports:
+          - 5000:5000
+        options: >-
+          -v /home/runner:/var/lib/registry
+          --name registry
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '^1.16.6'
+
+      - name: Set current date as env variable
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%dT%H:%M:%S')"
+
+      - name: Edit app.go for environment
+        env:
+          VERSION: ${{ needs.context.outputs.version }}
+          COMMIT: ${{ needs.context.outputs.shortCommitId }}
+          BUILD_DATE: ${{ steps.date.outputs.date }}
+        run: |
+          sed -i -e 's/<version>/'"${VERSION}"'/' app.go
+          sed -i -e 's/<commit>/'"${COMMIT}"'/' app.go
+          sed -i -e 's/<build_date>/'"${BUILD_DATE}"'/' app.go
+
+      - name: Build amd64
+        run: go build -o app-amd64 app.go
+
+      - name: Build armv7
+        if: ${{ needs.context.outputs.isRelease == 'true' }}
+        run: |
+          sudo apt-get install -y gcc-arm-linux-gnueabi
+          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabi-gcc go build -o app-armv7 app.go
+
+      - name: Zip artifacts
+        if: ${{ needs.context.outputs.isRelease == 'true' }}
+        run: |
+          mkdir -p /tmp/zip
+          artifact=${{ needs.context.outputs.fqn }}.armv7
+          zip -r /tmp/zip/$artifact.zip ./app-armv7
+          artifact=${{ needs.context.outputs.fqn }}.amd64
+          zip -r /tmp/zip/$artifact.zip ./app-amd64
+
+      - name: Create Release
+        if: ${{ needs.context.outputs.isRelease == 'true' }}
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.context.outputs.version }}
+          name: Release v${{ needs.context.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            /tmp/zip/${{ needs.context.outputs.fqn }}.*.zip
