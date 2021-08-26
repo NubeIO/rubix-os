@@ -15,9 +15,9 @@ type Job struct {
 	EndDate     				time.Time `json:"end_date,omitempty" sql:"end_date"`
 	CommonEnable
 	DestroyAfterCompleted   	bool      `json:"destroy_after_completed" sql:"destroy_after_completed"`
-	Subscribable				bool      `json:"subscribable" binding:"required"`
+	PluginConfId     			string  `json:"plugin_conf_id" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;null;default:null"`
 	CommonCreated
-	//Subscriber					[]Subscriber `json:"subscriber" gorm:"constraint:OnDelete:CASCADE;"`
+
 }
 //
 //type JobSubscriber struct {

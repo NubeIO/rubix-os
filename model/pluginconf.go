@@ -10,6 +10,8 @@ type PluginConf struct {
 	Enabled       bool
 	Config        []byte
 	Storage       []byte
+	Network 		Network `json:"networks" gorm:"constraint:OnDelete:CASCADE"`
+	Job 			[]Job `json:"jobs" gorm:"constraint:OnDelete:CASCADE"`
 }
 
 // PluginConfExternal Model
@@ -66,4 +68,6 @@ type PluginConfExternal struct {
 	// example: ["webhook","display"]
 	// required: true
 	Capabilities []string `json:"capabilities"`
+	Network 		Network `json:"networks" gorm:"constraint:OnDelete:CASCADE"`
+	Job 			[]Job `json:"jobs" gorm:"constraint:OnDelete:CASCADE"`
 }

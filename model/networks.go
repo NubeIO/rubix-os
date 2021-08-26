@@ -43,6 +43,7 @@ type Network struct {
 	Manufacture 	string `json:"manufacture"`
 	Model 			string `json:"model"`
 	NetworkType		string `json:"network_type"`
+	PluginConfId     uint  `json:"plugin_conf_id" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
 	Device 			[]Device `json:"devices" gorm:"constraint:OnDelete:CASCADE;"`
 }
 

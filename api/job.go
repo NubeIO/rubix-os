@@ -17,7 +17,7 @@ var CRON  *gocron.Scheduler
 type JobDatabase interface {
 	GetJob(uuid string) (*model.Job, error)
 	GetJobs() ([]*model.Job, error)
-	CreateJob(body *model.Job) error
+	CreateJob(body *model.Job)  (*model.Job, error)
 	UpdateJob(uuid string, body *model.Job) (*model.Job, error)
 	DeleteJob(uuid string) (bool, error)
 
@@ -53,11 +53,8 @@ func (j *JobAPI) GetJobs(ctx *gin.Context) {
 func (j *JobAPI) CreateJob(ctx *gin.Context) {
 	body, _ := getBODYJobs(ctx)
 	_, err := govalidator.ValidateStruct(body)
-	if err != nil {
-		reposeHandler(nil, err, ctx)
-	}
-	err = j.DB.CreateJob(body)
-	reposeHandler(body, err, ctx)
+	q, err := j.DB.CreateJob(body)
+	reposeHandler(q, err, ctx)
 }
 
 
