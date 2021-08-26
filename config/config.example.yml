@@ -1,0 +1,37 @@
+# Example configuration file for the server.
+# Save it to `config.yml` when edited
+
+server:
+  keepaliveperiodseconds: 0 # 0 = use system default; set the interval in which keepalive packages will be sent. Only change this value if you know what you are doing.
+  listenaddr: "" # the address to bind on, leave empty to bind on all addresses
+
+  responseheaders: # response headers are added to every response (default: none)
+#    X-Custom-Header: "custom value"
+
+  stream:
+    pingperiodseconds: 45 # the interval in which websocket pings will be sent. Only change this value if you know what you are doing.
+    allowedorigins: # allowed origins for websocket connections (same origin is always allowed)
+#      - ".+.example.com"
+#      - "otherdomain.com"
+
+  cors: # Sets cors headers only when needed and provides support for multiple allowed origins. Overrides Access-Control-* Headers in response headers.
+    alloworigins:
+#      - ".+.example.com"
+#      - "otherdomain.com"
+    allowmethods:
+#      - "GET"
+#      - "POST"
+    allowheaders:
+#      - "Authorization"
+#      - "content-type"
+
+database: # for database see (configure database section)
+  dialect: sqlite3
+  connection: data.db
+
+defaultuser: # on database creation, creates an admin user
+  name: admin # the username of the default user
+  pass: admin # the password of the default user
+passstrength: 10 # the bcrypt password strength (higher = better but also slower)
+
+

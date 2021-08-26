@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/NubeDev/flow-framework/config"
-	"github.com/NubeDev/flow-framework/mode"
 	"github.com/gin-contrib/cors"
 )
 
@@ -16,7 +15,7 @@ func CorsConfig(conf *config.Configuration) cors.Config {
 		MaxAge:                 12 * time.Hour,
 		AllowBrowserExtensions: true,
 	}
-	if mode.IsDev() {
+	if !conf.Prod {
 		corsConf.AllowAllOrigins = true
 		corsConf.AllowMethods = []string{"GET", "POST", "DELETE", "OPTIONS", "PUT"}
 		corsConf.AllowHeaders = []string{

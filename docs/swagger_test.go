@@ -5,13 +5,12 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/NubeDev/flow-framework/mode"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestServe(t *testing.T) {
-	mode.Set(mode.TestDev)
+	gin.SetMode(gin.TestMode)
 	recorder := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(recorder)
 	withURL(ctx, "http", "example.com")

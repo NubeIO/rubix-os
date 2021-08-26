@@ -24,18 +24,18 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	g.Use(gin.Logger(), gin.Recovery(), error.Handler(), location.Default())
 	g.NoRoute(error.NotFound())
 
-	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins)
+	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
 	authentication := auth.Auth{DB: db}
 	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
 	healthHandler := api.HealthAPI{DB: db}
 	clientHandler := api.ClientAPI{
 		DB:            db,
-		ImageDir:      conf.UploadedImagesDir,
+		ImageDir:      conf.GetAbsUploadedImagesDir(),
 		NotifyDeleted: streamHandler.NotifyDeletedClient,
 	}
 	applicationHandler := api.ApplicationAPI{
 		DB:       db,
-		ImageDir: conf.UploadedImagesDir,
+		ImageDir: conf.GetAbsUploadedImagesDir(),
 	}
 	userChangeNotifier := new(api.UserChangeNotifier)
 	userHandler := api.UserAPI{DB: db, PasswordStrength: conf.PassStrength, UserChangeNotifier: userChangeNotifier}
@@ -73,8 +73,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		DB: db,
 	}
 	jobHandler.NewJobEngine()
-
-	pluginManager, err := plugin.NewManager(db, conf.PluginsDir, g.Group("/plugin/:id/custom/"), streamHandler)
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), g.Group("/plugin/:id/custom/"), streamHandler)
 	if err != nil {
 		panic(err)
 	}
@@ -91,7 +90,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	g.GET("/ip", api.Hostname) //TODO remove
 	g.GET("/health", healthHandler.Health)
 	g.GET("/swagger", docs.Serve)
-	g.Static("/image", conf.UploadedImagesDir)
+	g.Static("/image", conf.GetAbsUploadedImagesDir())
 	g.GET("/docs", docs.UI)
 
 	g.Use(func(ctx *gin.Context) {
@@ -208,7 +207,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		//delete all networks, gateways, commandGroup, subscriptions, jobs and children.
 		control.DELETE("/database/flows/drop", dbGroup.DropAllFlow)
 
-
 		control.GET("/wires/plat", rubixPlatHandler.GetRubixPlat)
 		control.PATCH("/wires/plat", rubixPlatHandler.UpdateRubixPlat)
 
@@ -269,7 +267,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.GET("/job/:uuid", jobHandler.GetJob)
 		control.PATCH("/job/:uuid", jobHandler.UpdateJob)
 		control.DELETE("/job/:uuid", jobHandler.DeleteJob)
-
 
 	}
 
