@@ -90,11 +90,9 @@ func (c *SystemPlugin) GetNetwork(id string) error {
 var BusPluginHandler = bus.Handler {
 	Handle: func(ctx context.Context, e bus.Event) {
 		//NewAgent
-		fmt.Println(99999)
 		data, _ := e.Data.(*model.Point)
 		fmt.Println(e.Topic)
 		fmt.Println(data)
-		fmt.Println(99999)
 	},
 	Matcher: ".*", // matches all topics
 }
