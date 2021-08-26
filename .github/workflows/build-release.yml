@@ -14,7 +14,7 @@ on:
       - 'v*'
 
 env:
-  APP_NAME: lora-go
+  APP_NAME: flow-framework
   GHCR_IMAGE: ghcr.io/nubeio/rubix-point
   PLATFORMS: linux/amd64,linux/arm/v7
 
