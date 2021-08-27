@@ -6,7 +6,6 @@ import (
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/mustafaturan/bus/v3"
 	"github.com/sirupsen/logrus"
-	"sync"
 )
 
 func (eb *notificationService) registerPointsSubscriber() {
@@ -21,12 +20,12 @@ func (eb *notificationService) registerPointsSubscriber() {
 					if !ok {
 						return
 					}
-					eb.CreateCOV(payload)
+
 				case PointUpdated:
 					payload, ok := e.Data.(*model.Point)
 					msg := fmt.Sprintf("payment %s paid", payload.Name)
 					logrus.Info(msg)
-					eb.CreateCOV(payload)
+
 					if !ok {
 						return
 					}
@@ -40,13 +39,5 @@ func (eb *notificationService) registerPointsSubscriber() {
 
 
 
-
-//CreateCOV points cov event
-func (eb *notificationService) CreateCOV(msg *model.Point) {
-	mu := sync.Mutex{}
-	mu.Lock()
-	mu.Unlock()
-	return
-}
 
 

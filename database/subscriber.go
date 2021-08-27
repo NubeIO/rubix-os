@@ -26,7 +26,7 @@ func (d *GormDatabase) GetSubscribers() ([]*model.Subscriber, error) {
 func (d *GormDatabase) CreateSubscriber(body *model.Subscriber) (*model.Subscriber, error) {
 	//call points and make it exists
 	fmt.Println(body.StreamUUID, 999999999)
-	_, err := d.GetGateway(body.StreamUUID);if err != nil {
+	_, err := d.GetStreamGateway(body.StreamUUID);if err != nil {
 		return nil, errorMsg("GetGateway", "error on trying to get validate the gateway UUID", nil)
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscriber)

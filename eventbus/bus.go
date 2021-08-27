@@ -5,6 +5,7 @@ import (
 	"github.com/mustafaturan/bus/v3"
 	"github.com/mustafaturan/monoton/v2"
 	"github.com/mustafaturan/monoton/v2/sequencer"
+	"log"
 )
 
 
@@ -21,9 +22,8 @@ func NewBus() *bus.Bus {
 	// create a new bus instance
 	b, err := bus.NewBus(idGenerator)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
 	return b
 }
 var BUS *bus.Bus

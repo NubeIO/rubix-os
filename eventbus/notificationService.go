@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/mustafaturan/bus/v3"
+	"log"
 )
+
 
 type notificationService struct {
 	eb   *bus.Bus
-}
 
+}
 
 // NewNotificationService ...
 func NewNotificationService(eb *bus.Bus) NotificationService {
@@ -27,7 +29,7 @@ func (eb *notificationService) EmitString(ctx context.Context, topicName string,
 	err := eb.eb.Emit(ctx, topicName, data)
 	fmt.Println("Emit")
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatal(err.Error())
 	}
 }
 
@@ -36,18 +38,8 @@ func (eb *notificationService) Emit(ctx context.Context, topicName string, data 
 	err := eb.eb.Emit(ctx, topicName, data)
 	fmt.Println("Emit")
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Fatal(err.Error())
 	}
-}
-
-
-
-func AddTopic(eb *bus.Bus) NotificationService {
-	ns := &notificationService{
-		eb: eb,
-	}
-	ns.registerPointsSubscriber() //add as types needed
-	return ns
 }
 
 

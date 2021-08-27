@@ -38,16 +38,36 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 	if query.Error != nil {
 		return false, query.Error
 	}
-
 	return true, nil
 }
 
-
-
 //SyncTopics sync all the topics TODO add more
 func (d *GormDatabase) SyncTopics()  {
-	q, _ :=d.GetPoints(false)
-	for _, point := range q {
-		GetDatabaseBus.RegisterTopicParent("point",	point.UUID)
+
+	g, err := d.GetStreamGateways(false)
+	for _, obj := range g {
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
+	}
+
+	//s, err := d.GetPlugins()
+	//for _, obj := range s {
+	//	//GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Network, obj.ID)
+	//}
+
+	n, err := d.GetNetworks(false, false)
+	for _, obj := range n {
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
+	}
+	de, err := d.GetDevices(false)
+	for _, obj := range de {
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
+	}
+	p, err := d.GetPoints(false)
+	for _, obj := range p {
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Point, obj.UUID)
+	}
+
+	if err != nil {
+
 	}
 }
