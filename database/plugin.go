@@ -25,6 +25,15 @@ func (d *GormDatabase) GetPlugins() ([]*model.PluginConf, error) {
 	return plugins, nil
 }
 
+// GetPlugin get object by uuid.
+func (d *GormDatabase) GetPlugin(uuid string) (*model.PluginConf, error) {
+	var plugin *model.PluginConf
+	query := d.DB.Where("uuid = ? ", uuid).First(&plugin); if query.Error != nil {
+		return nil, query.Error
+	}
+	return plugin, nil
+}
+
 
 // GetPluginConfByUserAndPath gets plugin configuration by user and file name.
 func (d *GormDatabase) GetPluginConfByUserAndPath(userid uint, path string) (*model.PluginConf, error) {

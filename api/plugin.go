@@ -19,6 +19,7 @@ type PluginDatabase interface {
 	GetPluginConfByUser(userid uint) ([]*model.PluginConf, error)
 	UpdatePluginConf(p *model.PluginConf) error
 	GetPluginConfByID(uuid string) (*model.PluginConf, error)
+	GetPlugin(uuid string) (*model.PluginConf, error)
 }
 
 // The PluginAPI provides handlers for managing plugins.
@@ -27,6 +28,14 @@ type PluginAPI struct {
 	Manager  *plugin.Manager
 	DB       PluginDatabase
 }
+
+
+func (c *PluginAPI) GetPlugin(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := c.DB.GetPlugin(uuid)
+	reposeHandler(q, err, ctx)
+}
+
 
 // GetPlugins returns all plugins a user has.
 // swagger:operation GET /plugin plugin getPlugins
@@ -83,7 +92,8 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 			})
 		}
 	}
-	ctx.JSON(200, result)
+	reposeHandler(result, err, ctx)
+
 }
 
 // EnablePlugin enables a plugin.
@@ -141,28 +151,7 @@ func (c *PluginAPI) EnablePlugin(ctx *gin.Context) {
 	} else if err != nil {
 		ctx.AbortWithError(500, err)
 	}
-	
-	
-	//withUUID(ctx, "uuid", func(uuid string) {
-	//	conf, err := c.DB.GetPluginConfByID(uuid)
-	//	if success := successOrAbort(ctx, 500, err); !success {
-	//		return
-	//	}
-	//	if conf == nil || !isPluginOwner(ctx, conf) {
-	//		ctx.AbortWithError(404, errors.New("unknown plugin"))
-	//		return
-	//	}
-	//	_, err = c.Manager.Instance(uuid)
-	//	if err != nil {
-	//		ctx.AbortWithError(404, errors.New("plugin instance not found"))
-	//		return
-	//	}
-	//	if err := c.Manager.SetPluginEnabled(uuid, true); err == plugin.ErrAlreadyEnabledOrDisabled {
-	//		ctx.AbortWithError(400, err)
-	//	} else if err != nil {
-	//		ctx.AbortWithError(500, err)
-	//	}
-	//})
+	reposeHandler("enabled", err, ctx)
 }
 
 // DisablePlugin disables a plugin.
@@ -223,7 +212,7 @@ func (c *PluginAPI) DisablePlugin(ctx *gin.Context) {
 	} else if err != nil {
 		ctx.AbortWithError(500, err)
 	}
-
+	reposeHandler("disabled", err, ctx)
 }
 
 // GetDisplay get display info for Displayer plugin.

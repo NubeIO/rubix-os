@@ -5,7 +5,6 @@ import (
 )
 
 
-
 // DropAllFlow networks, gateways, commandGroup, subscriptions, jobs and children.
 func (d *GormDatabase) DropAllFlow() (bool, error) {
 	//delete networks
@@ -41,19 +40,29 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 	return true, nil
 }
 
-//SyncTopics sync all the topics TODO add more
+//SyncTopics sync all the topics
 func (d *GormDatabase) SyncTopics()  {
 
 	g, err := d.GetStreamGateways(false)
 	for _, obj := range g {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Stream, obj.UUID)
 	}
-
-	//s, err := d.GetPlugins()
-	//for _, obj := range s {
-	//	//GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Network, obj.ID)
-	//}
-
+	s, err := d.GetPlugins()
+	for _, obj := range s {
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Plugin, obj.UUID)
+	}
+	sub, err := d.GetSubscribers()
+	for _, obj := range sub {
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Subscriber, obj.UUID)
+	}
+	rip, err := d.GetSubscriptions()
+	for _, obj := range rip {
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Subscription, obj.UUID)
+	}
+	j, err := d.GetJobs()
+	for _, obj := range j {
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Job, obj.UUID)
+	}
 	n, err := d.GetNetworks(false, false)
 	for _, obj := range n {
 		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
@@ -66,7 +75,6 @@ func (d *GormDatabase) SyncTopics()  {
 	for _, obj := range p {
 		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Point, obj.UUID)
 	}
-
 	if err != nil {
 
 	}
