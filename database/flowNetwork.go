@@ -1,6 +1,7 @@
 package database
 
 import (
+
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
@@ -9,13 +10,19 @@ import (
 
 
 // GetFlowNetworks returns all networks.
-func (d *GormDatabase) GetFlowNetworks() ([]*model.FlowNetwork, error) {
+func (d *GormDatabase) GetFlowNetworks(withChildren bool) ([]*model.FlowNetwork, error) {
 	var flowNetworksModel []*model.FlowNetwork
-		query := d.DB.Find(&flowNetworksModel)
-		if query.Error != nil {
+	if withChildren { // drop child to reduce json size
+		query := d.DB.Preload("Stream").Find(&flowNetworksModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return flowNetworksModel, nil
+	} else {
+		query := d.DB.Find(&flowNetworksModel);if query.Error != nil {
+			return nil, query.Error
+		}
+		return flowNetworksModel, nil
+	}
 }
 
 // GetFlowNetwork returns the network for the given id or nil.
@@ -32,7 +39,7 @@ func (d *GormDatabase) GetFlowNetwork(uuid string) (*model.FlowNetwork, error) {
 
 // CreateFlowNetwork creates a device.
 func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
-	body.FlowNetworkUUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}

@@ -2,8 +2,9 @@ package model
 
 //FlowNetwork flow network
 type FlowNetwork struct {
-	CommonFlowNetworkUUID
-	CommonFlowNetworkName
+	CommonUUID
+	CommonName
+	CommonDescription
 	IsRemote 	bool
 	FlowIP 		string
 	FlowPort 	string
@@ -15,6 +16,6 @@ type FlowNetwork struct {
 	MqttHTTPS 	bool
 	MqttUsername string
 	MqttPassword string
-
+	Stream		[]Stream `json:"streams" gorm:"constraint:OnDelete:CASCADE;"`
+	CommonCreated
 }
-

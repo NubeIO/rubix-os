@@ -7,6 +7,14 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
+func nameIsNil(name string) string {
+	if name == "" {
+		fmt.Println(fmt.Sprintf("name_%s", utils.MakeTopicUUID("")), 8888888888)
+		return fmt.Sprintf("name_%s", utils.MakeTopicUUID(""))
+	}
+	return name
+}
+
 // GetPoints returns all devices.
 func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
 	var pointsModel []*model.Point
@@ -27,9 +35,6 @@ func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
 // GetPoint returns the device for the given id or nil.
 func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, error) {
 	var pointModel *model.Point
-	fmt.Println(1010101)
-	fmt.Println(eventbus.BusContext.Value(uuid))
-	fmt.Println(1010101)
 	if withChildren { // drop child to reduce json size
 		query := d.DB.Where("uuid = ? ", uuid).First(&pointModel);if query.Error != nil {
 			return nil, query.Error
@@ -48,6 +53,8 @@ func (d *GormDatabase) CreatePoint( body *model.Point) (*model.Point, error) {
 	var deviceModel *model.Device
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Point)
 	deviceUUID := body.DeviceUUID
+	body.Name = nameIsNil(body.Name)
+	fmt.Println(body.Name, 9999999999)
 	query := d.DB.Where("uuid = ? ", deviceUUID).First(&deviceModel);if query.Error != nil {
 		return nil, query.Error
 	}

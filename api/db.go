@@ -8,6 +8,7 @@ import (
 type DBDatabase interface {
 	DropAllFlow() (bool, error) //delete all networks, gateways and children
 	SyncTopics() //sync all the topics into the event bus
+	WizardLocalPointMapping()  (bool, error)
 
 
 }
@@ -23,6 +24,12 @@ func (a *DatabaseAPI) DropAllFlow(ctx *gin.Context) {
 func (a *DatabaseAPI) SyncTopics() {
 	a.DB.SyncTopics()
 }
+
+func (a *DatabaseAPI) WizardLocalPointMapping(ctx *gin.Context) {
+	mapping, err := a.DB.WizardLocalPointMapping()
+	reposeHandler(mapping, err, ctx)
+}
+
 
 
 

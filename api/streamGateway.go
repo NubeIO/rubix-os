@@ -15,7 +15,7 @@ Stream
 type GatewayDatabase interface {
 	GetStreamGateway(uuid string) (*model.Stream, error)
 	GetStreamGateways(withChildren bool) ([]*model.Stream, error)
-	CreateStreamGateway(body *model.Stream) error
+	CreateStreamGateway(body *model.Stream) (*model.Stream, error)
 	UpdateStreamGateway(uuid string, body *model.Stream) (*model.Stream, error)
 	DeleteStreamGateway(uuid string) (bool, error)
 }
@@ -42,18 +42,9 @@ func (j *GatewayAPI) GetStreamGateways(ctx *gin.Context) {
 func (j *GatewayAPI) CreateStreamGateway(ctx *gin.Context) {
 	body, _ := getBODYGateway(ctx)
 	_, err := govalidator.ValidateStruct(body)
-	if err != nil {
-		reposeHandler(nil, err, ctx)
-	}
-	err = j.DB.CreateStreamGateway(body)
-	if err != nil {
-		reposeHandlerError(err, ctx)
-	} else {
-		reposeHandler(body, err, ctx)
-	}
-
+	q, err := j.DB.CreateStreamGateway(body)
+	reposeHandler(q, err, ctx)
 }
-
 
 func (j *GatewayAPI) UpdateGateway(ctx *gin.Context) {
 	body, _ := getBODYGateway(ctx)

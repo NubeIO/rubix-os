@@ -14,6 +14,7 @@ var CommonNaming = struct {
 	Job   			string
 	Subscriber   	string
 	Subscription   	string
+	SubscriptionList string
 	Alert   		string
 	Mapping   		string
 	CommandGroup   	string
@@ -30,6 +31,7 @@ var CommonNaming = struct {
 	Job:   				"job",
 	Subscriber:   		"subscriber",
 	Subscription:   	"subscription",
+	SubscriptionList:   "subscription_list",
 	Alert:   			"alert",
 	Mapping:   			"mapping",
     CommandGroup:   	"command_group",
@@ -60,7 +62,7 @@ type CommonDescription struct {
 }
 
 type CommonName struct {
-	Name string `json:"name"  valid:"required~name is required"`
+	Name string `json:"name"`
 }
 
 type CommonNameUnique struct {
@@ -81,14 +83,6 @@ type CommonIDUnique struct {
 
 type CommonUUID struct {
 	UUID	string 	`json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
-}
-
-type CommonFlowNetworkUUID struct {
-	FlowNetworkUUID	string 	`json:"flow_network_uuid" gorm:"type:varchar(255);unique;not null"`
-}
-
-type CommonFlowNetworkName struct {
-	FlowNetworkName	string 	`json:"flow_network_name" gorm:"type:varchar(255);unique;not null"`
 }
 
 type CommonRubixUUID struct {

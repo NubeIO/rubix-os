@@ -98,6 +98,11 @@ func getBODYSubscription(ctx *gin.Context) (dto *model.Subscription, err error) 
 	return dto, err
 }
 
+func getBODYSubscriptionList(ctx *gin.Context) (dto *model.SubscriptionList, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYGateway(ctx *gin.Context) (dto *model.Stream, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err

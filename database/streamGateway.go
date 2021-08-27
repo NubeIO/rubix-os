@@ -6,12 +6,13 @@ import (
 )
 
 var gatewaySubscriberChildTable = "Subscriber"
+var gatewaySubscriptionChildTable = "Subscription"
 
 // GetStreamGateways get all of them
 func (d *GormDatabase) GetStreamGateways(withChildren bool) ([]*model.Stream, error) {
 	var gatewaysModel []*model.Stream
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload(gatewaySubscriberChildTable).Find(&gatewaysModel);if query.Error != nil {
+		query := d.DB.Preload(gatewaySubscriberChildTable).Preload(gatewaySubscriptionChildTable).Find(&gatewaysModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return gatewaysModel, nil
@@ -25,21 +26,16 @@ func (d *GormDatabase) GetStreamGateways(withChildren bool) ([]*model.Stream, er
 }
 
 // CreateStreamGateway make it
-func (d *GormDatabase) CreateStreamGateway(body *model.Stream)  error {
-	var gatewayModel []model.Stream
+func (d *GormDatabase) CreateStreamGateway(body *model.Stream) (*model.Stream, error) {
+	//var gatewayModel []model.Stream
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
-	if !body.IsRemote  {
-		query := d.DB.Where("is_remote = ?", 0).First(&gatewayModel) //if existing local network then don't create it
-		r := query.RowsAffected
-		if r != 0 {
-			return errorMsg("network", "a local gateway exists", nil)
-		}
-		body.Name = "Local rubix"
-		*body.Enable = true
-		body.Description = "Local rubix gateway for sending data between jobs and points"
+	_, err := d.GetFlowNetwork(body.FlowNetworkUUID);if err != nil {
+		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the gateway UUID", nil)
 	}
-	n := d.DB.Create(body).Error
-	return n
+	err = d.DB.Create(&body).Error; if err != nil {
+		return nil, errorMsg("CreateStreamGateway", "error on trying to add a new stream gateway", nil)
+	}
+	return body, nil
 }
 
 // GetStreamGateway get it

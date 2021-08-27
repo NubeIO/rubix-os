@@ -8,7 +8,7 @@ import (
 // The FlowNetworkDatabase interface for encapsulating database access.
 type FlowNetworkDatabase interface {
 	GetFlowNetwork(uuid string) (*model.FlowNetwork, error)
-	GetFlowNetworks() ([]*model.FlowNetwork, error)
+	GetFlowNetworks(withChildren bool) ([]*model.FlowNetwork, error)
 	CreateFlowNetwork(network *model.FlowNetwork) (*model.FlowNetwork, error)
 	UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (*model.FlowNetwork, error)
 	DeleteFlowNetwork(uuid string) (bool, error)
@@ -22,7 +22,7 @@ type FlowNetworksAPI struct {
 
 
 func (a *FlowNetworksAPI) GetFlowNetworks(ctx *gin.Context) {
-	q, err := a.DB.GetFlowNetworks()
+	q, err := a.DB.GetFlowNetworks(true)
 	reposeHandler(q, err, ctx)
 }
 

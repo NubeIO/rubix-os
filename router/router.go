@@ -21,7 +21,6 @@ import (
 // Create creates the gin engine with all routes.
 func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Configuration) (*gin.Engine, func()) {
 	g := gin.New()
-
 	g.Use(gin.Logger(), gin.Recovery(), error.Handler(), location.Default())
 	g.NoRoute(error.NotFound())
 
@@ -61,6 +60,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	subscriptionHandler := api.SubscriptionsAPI{
 		DB: db,
 	}
+	subscriptionListHandler := api.SubscriptionListAPI{
+		DB: db,
+	}
 	rubixPlatHandler := api.RubixPlatAPI{
 		DB: db,
 	}
@@ -75,8 +77,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	}
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), g.Group("/plugin/:uuid/custom/"), streamHandler)
-	if err != nil {
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), g.Group("/plugin/:uuid/custom/"), streamHandler);if err != nil {
 		panic(err)
 	}
 	pluginHandler := api.PluginAPI{
@@ -143,19 +144,14 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		app := clientAuth.Group("/application")
 		{
 			app.GET("", applicationHandler.GetApplications)
-
 			app.POST("", applicationHandler.CreateApplication)
-
 			app.POST("/:id/image", applicationHandler.UploadApplicationImage)
-
 			app.PUT("/:id", applicationHandler.UpdateApplication)
-
 			app.DELETE("/:id", applicationHandler.DeleteApplication)
 
 			tokenMessage := app.Group("/:id/message")
 			{
 				tokenMessage.GET("", messageHandler.GetMessagesWithApplication)
-
 				tokenMessage.DELETE("", messageHandler.DeleteMessageWithApplication)
 			}
 		}
@@ -163,54 +159,40 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		client := clientAuth.Group("/client")
 		{
 			client.GET("", clientHandler.GetClients)
-
 			client.POST("", clientHandler.CreateClient)
-
 			client.DELETE("/:id", clientHandler.DeleteClient)
-
 			client.PUT("/:id", clientHandler.UpdateClient)
 		}
 
 		message := clientAuth.Group("/message")
 		{
 			message.GET("", messageHandler.GetMessages)
-
 			message.DELETE("", messageHandler.DeleteMessages)
-
 			message.DELETE("/:id", messageHandler.DeleteMessage)
 		}
 
 		clientAuth.GET("/stream", streamHandler.Handle)
-
 		clientAuth.GET("current/user", userHandler.GetCurrentUser)
-
 		clientAuth.POST("current/user/password", userHandler.ChangePassword)
 	}
 
 	authAdmin := g.Group("/user")
 	{
 		authAdmin.Use(authentication.RequireAdmin())
-
 		authAdmin.GET("", userHandler.GetUsers)
-
 		authAdmin.POST("", userHandler.CreateUser)
-
 		authAdmin.DELETE("/:id", userHandler.DeleteUserByID)
-
 		authAdmin.GET("/:id", userHandler.GetUserByID)
-
 		authAdmin.POST("/:id", userHandler.UpdateUserByID)
 	}
 
 	control := g.Group("api")
 	{
 		control.Use(authentication.RequireAdmin())
-
 		control.GET("", api.Hostname)
-
 		//delete all networks, gateways, commandGroup, subscriptions, jobs and children.
 		control.DELETE("/database/flows/drop", dbGroup.DropAllFlow)
-
+		control.POST("/database/wizard/mapping/point", dbGroup.WizardLocalPointMapping)
 		control.GET("/wires/plat", rubixPlatHandler.GetRubixPlat)
 		control.PATCH("/wires/plat", rubixPlatHandler.UpdateRubixPlat)
 
@@ -265,6 +247,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.GET("/subscription/:uuid", subscriptionHandler.GetSubscription)
 		control.PATCH("/subscription/:uuid", subscriptionHandler.UpdateSubscription)
 		control.DELETE("/subscription/:uuid", subscriptionHandler.DeleteSubscription)
+
+		control.GET("/subscriptions/list", subscriptionListHandler.GetSubscriptionLists)
+		control.POST("/subscription/list", subscriptionListHandler.CreateSubscriptionList)
+		control.GET("/subscription/list/:uuid", subscriptionListHandler.GetSubscriptionList)
+		control.PATCH("/subscription/list/:uuid", subscriptionListHandler.UpdateSubscriptionList)
+		control.DELETE("/subscription/list/:uuid", subscriptionListHandler.DeleteSubscriptionList)
 
 		control.GET("/jobs", jobHandler.GetJobs)
 		control.POST("/job", jobHandler.CreateJob)
