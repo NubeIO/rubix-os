@@ -26,6 +26,7 @@ func main() {
 	// Start Event Bus
 	eventbus.InitBus()
 	database.DataBus()
+	//config
 	conf := config.CreateApp()
 
 
@@ -35,6 +36,7 @@ func main() {
 	if err := os.MkdirAll(conf.GetAbsUploadedImagesDir(), 0755); err != nil {
 		panic(err)
 	}
+	//db
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass, conf.PassStrength, true)
 	if err != nil {
@@ -42,9 +44,9 @@ func main() {
 	}
 	defer db.Close()
 
+	//router
 	engine, closeable := router.Create(db, vInfo, conf)
 	defer closeable()
-
-
+	//run
 	runner.Run(engine, conf)
 }

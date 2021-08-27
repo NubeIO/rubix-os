@@ -75,7 +75,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	}
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), g.Group("/plugin/:id/custom/"), streamHandler)
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), g.Group("/plugin/:uuid/custom/"), streamHandler)
 	if err != nil {
 		panic(err)
 	}
@@ -107,12 +107,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		g.GET("/plugin", authentication.RequireClient(), pluginHandler.GetPlugins)
 		pluginRoute := g.Group("/plugin/", authentication.RequireClient())
 		{
-			pluginRoute.GET("/:id/config", pluginHandler.GetConfig)
-			pluginRoute.POST("/:id/config", pluginHandler.UpdateConfig)
-			pluginRoute.GET("/:id/display", pluginHandler.GetDisplay)
-			pluginRoute.POST("/:id/enable", pluginHandler.EnablePlugin)
-			pluginRoute.POST("/:id/disable", pluginHandler.DisablePlugin)
-			pluginRoute.POST("/:id/network", pluginHandler.EnablePlugin) //TODO
+			pluginRoute.GET("/:uuid/config", pluginHandler.GetConfig)
+			pluginRoute.POST("/:uuid/config", pluginHandler.UpdateConfig)
+			pluginRoute.GET("/:uuid/display", pluginHandler.GetDisplay)
+			pluginRoute.POST("/:uuid/enable", pluginHandler.EnablePlugin)
+			pluginRoute.POST("/:uuid/disable", pluginHandler.DisablePlugin)
+			pluginRoute.POST("/:uuid/network", pluginHandler.EnablePlugin)
 		}
 	}
 
