@@ -326,10 +326,6 @@ func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
 //         $ref: "#/definitions/Error"
 func (c *PluginAPI) GetConfig(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	fmt.Println(uuid)
-	fmt.Println(uuid)
-	fmt.Println(uuid)
-	fmt.Println(uuid)
 	conf, err := c.DB.GetPluginConfByID(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
