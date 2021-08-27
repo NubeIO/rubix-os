@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/database"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/router"
 	"github.com/NubeDev/flow-framework/runner"
@@ -17,11 +18,16 @@ var (
 	BuildDate = "<build_date>"
 )
 
+
+
 func main() {
 	vInfo := &model.VersionInfo{Version: Version, Commit: Commit, BuildDate: BuildDate}
 	fmt.Println("Starting version:", vInfo.Version+"-"+vInfo.Commit+"@"+vInfo.BuildDate)
-
+	// Start Event Bus
+	eventbus.InitBus()
+	database.DataBus()
 	conf := config.CreateApp()
+
 
 	if err := os.MkdirAll(conf.GetAbsPluginDir(), 0755); err != nil {
 		panic(err)
@@ -38,6 +44,7 @@ func main() {
 
 	engine, closeable := router.Create(db, vInfo, conf)
 	defer closeable()
+
 
 	runner.Run(engine, conf)
 }

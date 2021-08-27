@@ -57,5 +57,5 @@ func (a *PointAPI) DeletePoint(ctx *gin.Context) {
 func (a *PointAPI) DropPoints(ctx *gin.Context) {
 	q, err := a.DB.DropPoints()
 	reposeHandler(q, err, ctx)
-
 }
+

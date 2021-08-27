@@ -15,6 +15,16 @@ func (d *GormDatabase) GetPluginConfByUser(userid uint) ([]*model.PluginConf, er
 	return plugins, err
 }
 
+func (d *GormDatabase) GetPlugins() ([]*model.PluginConf, error) {
+	var plugins []*model.PluginConf
+	query := d.DB.Find(&plugins)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return plugins, nil
+}
+
+
 // GetPluginConfByUserAndPath gets plugin configuration by user and file name.
 func (d *GormDatabase) GetPluginConfByUserAndPath(userid uint, path string) (*model.PluginConf, error) {
 	plugin := new(model.PluginConf)

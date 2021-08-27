@@ -13,11 +13,11 @@ Stream
 
 // The GatewayDatabase interface for encapsulating database access.
 type GatewayDatabase interface {
-	GetGateway(uuid string) (*model.Stream, error)
-	GetGateways(withChildren bool) ([]*model.Stream, error)
-	CreateGateway(body *model.Stream) error
-	UpdateGateway(uuid string, body *model.Stream) (*model.Stream, error)
-	DeleteGateway(uuid string) (bool, error)
+	GetStreamGateway(uuid string) (*model.Stream, error)
+	GetStreamGateways(withChildren bool) ([]*model.Stream, error)
+	CreateStreamGateway(body *model.Stream) error
+	UpdateStreamGateway(uuid string, body *model.Stream) (*model.Stream, error)
+	DeleteStreamGateway(uuid string) (bool, error)
 }
 
 type GatewayAPI struct {
@@ -25,27 +25,27 @@ type GatewayAPI struct {
 }
 
 
-func (j *GatewayAPI) GetGateway(ctx *gin.Context) {
+func (j *GatewayAPI) GetStreamGateway(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.GetGateway(uuid)
+	q, err := j.DB.GetStreamGateway(uuid)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *GatewayAPI) GetGateways(ctx *gin.Context) {
+func (j *GatewayAPI) GetStreamGateways(ctx *gin.Context) {
 	withChildren, _ := withChildrenArgs(ctx)
-	q, err := j.DB.GetGateways(withChildren)
+	q, err := j.DB.GetStreamGateways(withChildren)
 	reposeHandler(q, err, ctx)
 
 }
 
-func (j *GatewayAPI) CreateGateway(ctx *gin.Context) {
+func (j *GatewayAPI) CreateStreamGateway(ctx *gin.Context) {
 	body, _ := getBODYGateway(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
 		reposeHandler(nil, err, ctx)
 	}
-	err = j.DB.CreateGateway(body)
+	err = j.DB.CreateStreamGateway(body)
 	if err != nil {
 		reposeHandlerError(err, ctx)
 	} else {
@@ -58,13 +58,13 @@ func (j *GatewayAPI) CreateGateway(ctx *gin.Context) {
 func (j *GatewayAPI) UpdateGateway(ctx *gin.Context) {
 	body, _ := getBODYGateway(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateGateway(uuid, body)
+	q, err := j.DB.UpdateStreamGateway(uuid, body)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *GatewayAPI) DeleteGateway(ctx *gin.Context) {
+func (j *GatewayAPI) DeleteStreamGateway(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.DeleteGateway(uuid)
+	q, err := j.DB.DeleteStreamGateway(uuid)
 	reposeHandler(q, err, ctx)
 }

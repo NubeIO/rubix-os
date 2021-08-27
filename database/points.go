@@ -7,12 +7,6 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-
-
-
-
-
-
 // GetPoints returns all devices.
 func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
 	var pointsModel []*model.Point
@@ -33,6 +27,9 @@ func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
 // GetPoint returns the device for the given id or nil.
 func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, error) {
 	var pointModel *model.Point
+	fmt.Println(1010101)
+	fmt.Println(eventbus.BusContext.Value(uuid))
+	fmt.Println(1010101)
 	if withChildren { // drop child to reduce json size
 		query := d.DB.Where("uuid = ? ", uuid).First(&pointModel);if query.Error != nil {
 			return nil, query.Error
@@ -58,6 +55,7 @@ func (d *GormDatabase) CreatePoint( body *model.Point) (*model.Point, error) {
 		return  nil, query.Error
 	}
 	busUpdate(body.UUID, "create", body)
+
 	return body, query.Error
 }
 
@@ -108,10 +106,30 @@ func (d *GormDatabase) DropPoints() (bool, error) {
 }
 
 
-func busUpdate(UUID string, action string,body *model.Point){
-	err := eventbus.BUS.Emit(eventbus.BusBackground, "jobs", body)
-	fmt.Println("topics", eventbus.BUS.Topics())
-	if err != nil {
-		fmt.Println("error", err)
-	}
+/*
+update a point value
+need network, device and point uuid
+need to check if point device and network are enabled
+if all are enabled then check COV
+if COV is out of range to update db and publish a message on the eventbus
+send data to gateway
+publish to MQTT if there is an external subscriber
+*/
+
+
+
+var GetDatabaseBus eventbus.NotificationService
+
+func DataBus() {
+	notificationService := eventbus.NewNotificationService(eventbus.BUS)
+	GetDatabaseBus = notificationService
+
 }
+
+
+func busUpdate(UUID string, action string, body *model.Point){
+	notificationService := eventbus.NewNotificationService(eventbus.BUS)
+	notificationService.Emit(eventbus.BusContext, eventbus.PointUpdated, body)
+	fmt.Println("topics", eventbus.BUS.Topics())
+}
+

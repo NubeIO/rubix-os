@@ -17,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
 // Create creates the gin engine with all routes.
 func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Configuration) (*gin.Engine, func()) {
 	g := gin.New()
@@ -73,6 +74,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		DB: db,
 	}
 	jobHandler.NewJobEngine()
+	dbGroup.SyncTopics()
 	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), g.Group("/plugin/:id/custom/"), streamHandler)
 	if err != nil {
 		panic(err)
@@ -238,11 +240,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/point/:uuid", pointHandler.UpdatePoint)
 		control.DELETE("/point/:uuid", pointHandler.DeletePoint)
 
-		control.GET("/streams", gatewayHandler.GetGateways)
-		control.POST("/stream", gatewayHandler.CreateGateway)
-		control.GET("/stream/:uuid", gatewayHandler.GetGateway)
+		control.GET("/streams", gatewayHandler.GetStreamGateways)
+		control.POST("/stream", gatewayHandler.CreateStreamGateway)
+		control.GET("/stream/:uuid", gatewayHandler.GetStreamGateway)
 		control.PATCH("/stream/:uuid", gatewayHandler.UpdateGateway)
-		control.DELETE("/stream/:uuid", gatewayHandler.DeleteGateway)
+		control.DELETE("/stream/:uuid", gatewayHandler.DeleteStreamGateway)
 
 		control.GET("/commands", rubixCommandGroup.GetCommandGroups)
 		control.POST("/command", rubixCommandGroup.CreateCommandGroup)

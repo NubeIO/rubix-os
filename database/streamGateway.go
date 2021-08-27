@@ -9,8 +9,8 @@ import (
 var gatewaySubscriberChildTable = "Subscriber"
 var gatewaySubscriptionChildTable = "Subscription"
 
-// GetGateways get all of them
-func (d *GormDatabase) GetGateways(withChildren bool) ([]*model.Stream, error) {
+// GetStreamGateways get all of them
+func (d *GormDatabase) GetStreamGateways(withChildren bool) ([]*model.Stream, error) {
 	var gatewaysModel []*model.Stream
 	if withChildren { // drop child to reduce json size
 		query := d.DB.Preload(gatewaySubscriberChildTable).Preload(gatewaySubscriptionChildTable).Find(&gatewaysModel);if query.Error != nil {
@@ -27,7 +27,7 @@ func (d *GormDatabase) GetGateways(withChildren bool) ([]*model.Stream, error) {
 }
 
 // CreateGateway make it
-func (d *GormDatabase) CreateGateway(body *model.Stream)  error {
+func (d *GormDatabase) CreateStreamGateway(body *model.Stream)  error {
 	var gatewayModel []model.Stream
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
 	if !body.IsRemote  {
@@ -45,7 +45,7 @@ func (d *GormDatabase) CreateGateway(body *model.Stream)  error {
 }
 
 // GetGateway get it
-func (d *GormDatabase) GetGateway(uuid string) (*model.Stream, error) {
+func (d *GormDatabase) GetStreamGateway(uuid string) (*model.Stream, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ? ", uuid).First(&gatewayModel); if query.Error != nil {
 		return nil, query.Error
@@ -54,7 +54,7 @@ func (d *GormDatabase) GetGateway(uuid string) (*model.Stream, error) {
 }
 
 // DeleteGateway deletes it
-func (d *GormDatabase) DeleteGateway(uuid string) (bool, error) {
+func (d *GormDatabase) DeleteStreamGateway(uuid string) (bool, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&gatewayModel);if query.Error != nil {
 		return false, query.Error
@@ -69,7 +69,7 @@ func (d *GormDatabase) DeleteGateway(uuid string) (bool, error) {
 }
 
 // UpdateGateway  update it
-func (d *GormDatabase) UpdateGateway(uuid string, body *model.Stream) (*model.Stream, error) {
+func (d *GormDatabase) UpdateStreamGateway(uuid string, body *model.Stream) (*model.Stream, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ?", uuid).Find(&gatewayModel);if query.Error != nil {
 		return nil, query.Error
@@ -82,7 +82,7 @@ func (d *GormDatabase) UpdateGateway(uuid string, body *model.Stream) (*model.St
 }
 
 // DropGateways delete all.
-func (d *GormDatabase) DropGateways() (bool, error) {
+func (d *GormDatabase) DropStreamGateways() (bool, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("1 = 1").Delete(&gatewayModel)
 	if query.Error != nil {
