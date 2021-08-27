@@ -1,7 +1,6 @@
 package api
 
 import (
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -9,6 +8,7 @@ import (
 type DBDatabase interface {
 	DropAllFlow() (bool, error) //delete all networks, gateways and children
 	SyncTopics() //sync all the topics into the event bus
+
 
 }
 type DatabaseAPI struct {

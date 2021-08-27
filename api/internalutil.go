@@ -122,6 +122,15 @@ func resolveID(ctx *gin.Context) string {
 	id := ctx.Param("uuid")
 	return id
 }
+func resolveName(ctx *gin.Context) string {
+	id := ctx.Param("name")
+	return id
+}
+
+func resolvePath(ctx *gin.Context) string {
+	id := ctx.Param("path")
+	return id
+}
 
 func WithChildren(value string) (bool, error) {
 	if value == "" {

@@ -20,6 +20,7 @@ type PluginDatabase interface {
 	UpdatePluginConf(p *model.PluginConf) error
 	GetPluginConfByID(uuid string) (*model.PluginConf, error)
 	GetPlugin(uuid string) (*model.PluginConf, error)
+	GetPluginByPath(name string) (*model.PluginConf, error)
 }
 
 // The PluginAPI provides handlers for managing plugins.
@@ -33,6 +34,12 @@ type PluginAPI struct {
 func (c *PluginAPI) GetPlugin(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := c.DB.GetPlugin(uuid)
+	reposeHandler(q, err, ctx)
+}
+
+func (c *PluginAPI) GetPluginByPath(ctx *gin.Context) {
+	path := resolvePath(ctx)
+	q, err := c.DB.GetPluginByPath(path)
 	reposeHandler(q, err, ctx)
 }
 
