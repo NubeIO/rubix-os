@@ -1,4 +1,4 @@
-package mqtt_client
+package mqttClient
 
 import (
 	"errors"
@@ -22,7 +22,7 @@ func (l topicLog) printLog() {
 	log.Println(msg)
 }
 
-// QOS describes the quality of service of an mqtt publish
+// QOS describes the quality of service of an mqttClient publish
 type QOS byte
 
 const (
@@ -35,13 +35,13 @@ const (
 )
 
 
-// Client runs an mqtt client
+// Client runs an mqttClient client
 type Client struct {
-	client        mqtt.Client
-	clientID      string
-	connected    bool
-	terminated    bool
-	subscriptions []subscription
+	client        	mqtt.Client
+	clientID      	string
+	connected    	bool
+	terminated    	bool
+	subscriptions 	[]subscription
 }
 
 
@@ -113,7 +113,7 @@ func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) (er
 	return nil
 }
 
-// NewClient creates an mqtt client
+// NewClient creates an mqttClient client
 func NewClient(options ClientOptions) (c *Client) {
 	c = &Client{}
 	opts := mqtt.NewClientOptions()

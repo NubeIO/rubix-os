@@ -42,7 +42,7 @@ LoRaWAN is a wireless network same as lora but for wide area
 modbus
 Register based communication protocol used with industrial devices
 
-mqtt
+mqttClient
 Message Queuing Telemetry Transport publish/subscribe protocol
 
 obix

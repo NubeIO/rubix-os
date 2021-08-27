@@ -2,17 +2,18 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
 
 // ClientAddGateway an object
-func (a *FlowClient) ClientAddGateway(isRemote bool) (*ResponseBody, error) {
+func (a *FlowClient) ClientAddGateway(body *model.Stream) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("gte_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
-		SetBody(Stream{"name", isRemote}).
+		SetBody(body).
 		Post("/api/stream")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)

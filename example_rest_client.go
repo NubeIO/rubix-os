@@ -3,7 +3,15 @@ package main
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/client"
+	"github.com/NubeDev/flow-framework/model"
 )
+
+
+func getUUID(id string) string {
+	word := id
+
+	return word
+}
 
 func main()  {
 
@@ -11,9 +19,21 @@ func main()  {
 
 	remoteGateway := true
 
+	getPlugins, err := c.ClientGetPlugins()
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	//token, err := c.GetToken("admin", "admin")
-	addNet, err := c.ClientAddNetwork()
+	pluginUUID := ""
+	for _, e := range getPlugins.Response.Items {
+		if e.ModulePath == "system"{
+			pluginUUID = e.UUID
+			break // break here
+		}
+	}
+	fmt.Println(getPlugins.Status, pluginUUID)
+
+	addNet, err := c.ClientAddNetwork(pluginUUID)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -50,8 +70,11 @@ func main()  {
 	fmt.Println(addPoint2.Response.UUID)
 	fmt.Println(addPoint2.Response.Name)
 
+	stream := new(model.Stream)
+	stream.Name = "test"
+	stream.IsRemote = remoteGateway
 
-	addGateway, err := c.ClientAddGateway(remoteGateway)
+	addGateway, err := c.ClientAddGateway(stream)
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -20,7 +20,7 @@ var (
 func GetFlowPluginInfo() plugin.Info {
 	return plugin.Info{
 		Name:       "MQTT",
-		ModulePath: "Flow-mqtt",
+		ModulePath: "Flow-mqttClient",
 		Author:     "ap",
 		Website:    "nube-io.com",
 	}
@@ -146,7 +146,7 @@ func (p *Plugin) connectClients() error {
 
 // RegisterWebhook implements plugin.Webhooker.
 func (p *Plugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
-	g.POST("/mqtt", func(ctx *gin.Context) {
+	g.POST("/mqttClient", func(ctx *gin.Context) {
 		for _, a := range p.clients {
 			log.Println("try a message")
 			if a.IsConnected(){
@@ -154,7 +154,7 @@ func (p *Plugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 				msg := fmt.Sprintf("hello from MQTT %s time", time.Now().Format(time.RFC850))
 				a.Publish("topic", 1, false, msg)
 				err := p.msgHandler.SendMessage(plugin.Message{
-					Title:            	"mqtt-message",
+					Title:            	"mqttClient-message",
 					MessageType:      	model.MessageType(model.MessageTypeEnum.Protocol),
 					IsProtocol:       	true,
 					DriverType:       	model.DriverType(model.DriverTypeEnum.IP),

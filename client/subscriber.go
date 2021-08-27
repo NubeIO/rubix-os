@@ -34,9 +34,12 @@ func (a *FlowClient) ClientGetSubscriber(uuid string) (*ResponseBody, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
+	fmt.Println(resp.Error())
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
+	fmt.Println(resp.String())
+
 	return resp.Result().(*ResponseBody), nil
 }
 
