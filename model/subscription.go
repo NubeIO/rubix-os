@@ -22,7 +22,7 @@ type SubscriptionsApplication struct {
 type SubscriptionList struct {
 	CommonUUID
 	SubscriptionUUID string `json:"subscription_uuid" gorm:"TYPE:string REFERENCES subscriptions;not null;default:null"`
-	ToUUID 			 string 	`json:"to_thing_uuid"`
+	ToThingUUID 			 string 	`json:"to_thing_uuid"`
 
 }
 
@@ -33,7 +33,7 @@ type Subscription struct {
 	CommonSubscription
 	SubscriptionType 			string  `json:"subscription_type"`
 	SubscriptionApplication 	string `json:"subscription_application"`
-	ToUUID 						string `json:"to_subscriber_uuid"`
+	ToSubscriberUUID 			string `json:"to_subscriber_uuid"`
 	StreamUUID     				string `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
 	SubscriptionList			[]SubscriptionList `json:"subscription_list" gorm:"constraint:OnDelete:CASCADE;"`
 }

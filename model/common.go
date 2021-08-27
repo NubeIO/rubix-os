@@ -13,6 +13,7 @@ var CommonNaming = struct {
 	Stream   		string
 	Job   			string
 	Subscriber   	string
+	SubscriberList  string
 	Subscription   	string
 	SubscriptionList string
 	Alert   		string
@@ -30,6 +31,7 @@ var CommonNaming = struct {
 	Stream:   			"stream",
 	Job:   				"job",
 	Subscriber:   		"subscriber",
+	SubscriberList:      "subscriber_list",
 	Subscription:   	"subscription",
 	SubscriptionList:   "subscription_list",
 	Alert:   			"alert",

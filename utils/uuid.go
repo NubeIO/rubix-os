@@ -21,9 +21,10 @@ func MakeTopicUUID(attribute string) string {
 	pnt := "pnt" //point
 	job := "job" //job
 	str := "str" //stream gateway
-	sub := "sub" //subscribers
+	srb := "srb" //subscribers
+	srl := "srl" //subscribersList
 	sus := "sus" //subscriptions
-	sul := "sul" //subscriptions
+	sul := "sul" //subscriptionsList
 	alt := "alt" //alerts
 	cmd := "cmd" //command
 	rub := "rbx" //rubix uuid
@@ -44,7 +45,9 @@ func MakeTopicUUID(attribute string) string {
 	case model.CommonNaming.Job:
 		return fmt.Sprintf("%s%s%s", job, divider, u)
 	case model.CommonNaming.Subscriber:
-		return fmt.Sprintf("%s%s%s", sub, divider, u)
+		return fmt.Sprintf("%s%s%s", srb, divider, u)
+	case model.CommonNaming.SubscriberList:
+		return fmt.Sprintf("%s%s%s", srl, divider, u)
 	case model.CommonNaming.Subscription:
 		return fmt.Sprintf("%s%s%s", sus, divider, u)
 	case model.CommonNaming.SubscriptionList:

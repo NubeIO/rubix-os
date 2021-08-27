@@ -13,12 +13,23 @@ type Subscriber struct {
 // GetSubscribers get all of them
 func (d *GormDatabase) GetSubscribers() ([]*model.Subscriber, error) {
 	var subscribersModel []*model.Subscriber
-	query := d.DB.Find(&subscribersModel)
+	query := d.DB.Preload("SubscriberList").Find(&subscribersModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	return subscribersModel, nil
 }
+
+
+//// GetSubscribers get all of them
+//func (d *GormDatabase) GetSubscribers() ([]*model.Subscriber, error) {
+//	var subscribersModel []*model.Subscriber
+//	query := d.DB.Find(&subscribersModel)
+//	if query.Error != nil {
+//		return nil, query.Error
+//	}
+//	return subscribersModel, nil
+//}
 
 
 // CreateSubscriber make it

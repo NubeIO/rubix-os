@@ -17,6 +17,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var subscriberModel model.Subscriber
 	var subscriptionModel model.Subscription
 	var subscriptionListModel model.SubscriptionList
+	var subscriberListModel model.SubscriberList
 
 	//get plugin
 	p, err := d.GetPluginByPath("system")
@@ -44,10 +45,10 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	// subscriber
 	subscriberModel.StreamUUID = stream.UUID
-	subscriberModel.FromUUID = pnt.UUID
+	subscriberModel.FromThingUUID = pnt.UUID
 	subscriberModel.Name = "subscriber stream"
-	sub, err := d.CreateSubscriber(&subscriberModel)
-	fmt.Println(sub.Name)
+	subscriber, err := d.CreateSubscriber(&subscriberModel)
+	fmt.Println(subscriber.Name)
 
 	// subscription stream
 	streamModel.IsSubscription = true
@@ -71,9 +72,15 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	// subscription
 	subscriptionListModel.SubscriptionUUID = subscriptionModel.UUID
-	subscriptionListModel.ToUUID = pnt2.UUID
+	subscriptionListModel.ToThingUUID = pnt2.UUID
 	subscriptionList, err := d.CreateSubscriptionList(&subscriptionListModel)
 	fmt.Println(subscriptionList)
+
+	// add subscription to the subscriberList
+	subscriberListModel.SubscriberUUID = subscriber.UUID
+	subscriberListModel.FromThingUUID = pnt2.UUID
+	subscriberList, err := d.CreateSubscriberList(&subscriberListModel)
+	fmt.Println(subscriberList)
 
 	if err != nil {
 		fmt.Println("Error on wizard")

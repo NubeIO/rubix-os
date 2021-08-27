@@ -57,6 +57,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	subscriberHandler := api.SubscriberAPI{
 		DB: db,
 	}
+	subscriberListHandler := api.SubscriberListAPI{
+		DB: db,
+	}
 	subscriptionHandler := api.SubscriptionsAPI{
 		DB: db,
 	}
@@ -236,11 +239,18 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/command/:uuid", rubixCommandGroup.UpdateCommandGroup)
 		control.DELETE("/command/:uuid", rubixCommandGroup.DeleteCommandGroup)
 
+
 		control.GET("/subscribers", subscriberHandler.GetSubscribers)
 		control.POST("/subscriber", subscriberHandler.CreateSubscriber)
 		control.GET("/subscriber/:uuid", subscriberHandler.GetSubscriber)
 		control.PATCH("/subscriber/:uuid", subscriberHandler.UpdateSubscriber)
 		control.DELETE("/subscriber/:uuid", subscriberHandler.DeleteSubscriber)
+
+		control.GET("/subscribers/list", subscriberListHandler.GetSubscriberLists)
+		control.POST("/subscriber/list", subscriberListHandler.CreateSubscriberList)
+		control.GET("/subscriber/list/:uuid", subscriberListHandler.GetSubscriberList)
+		control.PATCH("/subscriber/list/:uuid", subscriberListHandler.UpdateSubscriberList)
+		control.DELETE("/subscriber/list/:uuid", subscriberListHandler.DeleteSubscriberList)
 
 		control.GET("/subscriptions", subscriptionHandler.GetSubscriptions)
 		control.POST("/subscription", subscriptionHandler.CreateSubscription)

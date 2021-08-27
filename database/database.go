@@ -43,6 +43,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var subscriber []model.Subscriber
 	var subscription []model.Subscription
 	var subscriptionList []model.SubscriptionList
+	var subscriberList []model.SubscriberList
 
 	var models = []interface{}{
 		&alerts,
@@ -64,6 +65,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&subscriber,
 		&subscription,
 		&subscriptionList,
+		&subscriberList,
 	}
 
 	for _, v := range models {
