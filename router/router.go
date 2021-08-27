@@ -17,6 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
 // Create creates the gin engine with all routes.
 func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Configuration) (*gin.Engine, func()) {
 	g := gin.New()
@@ -73,6 +74,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		DB: db,
 	}
 	jobHandler.NewJobEngine()
+	dbGroup.SyncTopics()
 	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), g.Group("/plugin/:id/custom/"), streamHandler)
 	if err != nil {
 		panic(err)

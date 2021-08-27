@@ -41,3 +41,13 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 
 	return true, nil
 }
+
+
+
+//SyncTopics sync all the topics TODO add more
+func (d *GormDatabase) SyncTopics()  {
+	q, _ :=d.GetPoints(false)
+	for _, point := range q {
+		GetDatabaseBus.RegisterTopicParent("point",	point.UUID)
+	}
+}

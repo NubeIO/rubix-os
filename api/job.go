@@ -146,6 +146,24 @@ func (j *JobAPI) jobRemover(uuid string) error {
 
 }
 
+
+//syncJobs start all the jobs on start of the app
+//func (j *JobAPI) syncJobs()  {
+//	q, err := j.DB.GetJobs()
+//	for _, job := range q {
+//		if job.Enable {
+//			for _, jobSub := range job.JobSubscriber {
+//				if jobSub.Enable {
+//					err = j.jobAdd(job.UUID, &job)
+//					if err != nil {
+//						log.Println("error on read job")
+//					}
+//				}
+//			}
+//		}
+//	}
+//}
+
 func (j *JobAPI) NewJobEngine() {
 	j.initCron()
 	log.Println("INIT CRON")

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
@@ -61,7 +60,7 @@ func (c *SystemPlugin) ValidateAndSetConfig(config interface{}) error {
 func (c *SystemPlugin) Enable() error {
 	log.Println("plugin Enable")
 	//topic := fmt.Sprintf("%s:%s", "job")
-	eventbus.BUS.RegisterHandler("jobs", BusPluginHandler)
+	//eventbus.BUS.RegisterHandler("jobs", BusPluginHandler)
 	return nil
 }
 
