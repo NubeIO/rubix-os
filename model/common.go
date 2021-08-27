@@ -6,6 +6,7 @@ import (
 
 
 var CommonNaming = struct {
+	Plugin   		string
 	Network   		string
 	Device   		string
 	Point   		string
@@ -21,6 +22,7 @@ var CommonNaming = struct {
 	FlowNetwork   	string
 
 }{
+	Plugin:   			"plugin",
 	Network:   			"network",
 	Device:   			"device",
 	Point:   			"point",

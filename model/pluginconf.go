@@ -2,7 +2,7 @@ package model
 
 // PluginConf holds information about the plugin.
 type PluginConf struct {
-	ID            uint `gorm:"primary_key;AUTO_INCREMENT;index"`
+	UUID	string 	`json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
 	UserID        uint
 	ModulePath    string `gorm:"type:text"`
 	Token         string `gorm:"type:varchar(180);unique_index"`
@@ -25,7 +25,7 @@ type PluginConfExternal struct {
 	// read only: true
 	// required: true
 	// example: 25
-	ID uint `json:"id"`
+	UUID	string 	`json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
 	// The plugin name.
 	//
 	// read only: true

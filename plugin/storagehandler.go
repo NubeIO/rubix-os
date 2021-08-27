@@ -3,7 +3,7 @@ package plugin
 import "github.com/NubeDev/flow-framework/model"
 
 type dbStorageHandler struct {
-	pluginID uint
+	pluginID string
 	db       Database
 }
 

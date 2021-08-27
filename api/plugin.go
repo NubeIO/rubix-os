@@ -18,7 +18,7 @@ import (
 type PluginDatabase interface {
 	GetPluginConfByUser(userid uint) ([]*model.PluginConf, error)
 	UpdatePluginConf(p *model.PluginConf) error
-	GetPluginConfByID(id uint) (*model.PluginConf, error)
+	GetPluginConfByID(uuid string) (*model.PluginConf, error)
 }
 
 // The PluginAPI provides handlers for managing plugins.
@@ -68,10 +68,10 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 	}
 	result := make([]model.PluginConfExternal, 0)
 	for _, conf := range plugins {
-		if inst, err := c.Manager.Instance(conf.ID); err == nil {
+		if inst, err := c.Manager.Instance(conf.UUID); err == nil {
 			info := c.Manager.PluginInfo(conf.ModulePath)
 			result = append(result, model.PluginConfExternal{
-				ID:           conf.ID,
+				UUID:   	conf.UUID,
 				Name:         info.String(),
 				Token:        conf.Token,
 				ModulePath:   conf.ModulePath,
@@ -87,7 +87,7 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 }
 
 // EnablePlugin enables a plugin.
-// swagger:operation POST /plugin/{id}/enable plugin enablePlugin
+// swagger:operation POST /plugin/{uuid}/enable plugin enablePlugin
 //
 // Enable a plugin.
 //
@@ -95,9 +95,9 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 // consumes: [application/json]
 // produces: [application/json]
 // parameters:
-// - name: id
+// - name: uuid
 //   in: path
-//   description: the plugin id
+//   description: the plugin uuid
 //   required: true
 //   type: integer
 //   format: int64
@@ -122,30 +122,51 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 //     schema:
 //         $ref: "#/definitions/Error"
 func (c *PluginAPI) EnablePlugin(ctx *gin.Context) {
-	withID(ctx, "id", func(id uint) {
-		conf, err := c.DB.GetPluginConfByID(id)
-		if success := successOrAbort(ctx, 500, err); !success {
-			return
-		}
-		if conf == nil || !isPluginOwner(ctx, conf) {
-			ctx.AbortWithError(404, errors.New("unknown plugin"))
-			return
-		}
-		_, err = c.Manager.Instance(id)
-		if err != nil {
-			ctx.AbortWithError(404, errors.New("plugin instance not found"))
-			return
-		}
-		if err := c.Manager.SetPluginEnabled(id, true); err == plugin.ErrAlreadyEnabledOrDisabled {
-			ctx.AbortWithError(400, err)
-		} else if err != nil {
-			ctx.AbortWithError(500, err)
-		}
-	})
+	uuid := resolveID(ctx)
+	conf, err := c.DB.GetPluginConfByID(uuid)
+	if success := successOrAbort(ctx, 500, err); !success {
+		return
+	}
+	if conf == nil || !isPluginOwner(ctx, conf) {
+		ctx.AbortWithError(404, errors.New("unknown plugin"))
+		return
+	}
+	_, err = c.Manager.Instance(uuid)
+	if err != nil {
+		ctx.AbortWithError(404, errors.New("plugin instance not found"))
+		return
+	}
+	if err := c.Manager.SetPluginEnabled(uuid, true); err == plugin.ErrAlreadyEnabledOrDisabled {
+		ctx.AbortWithError(400, err)
+	} else if err != nil {
+		ctx.AbortWithError(500, err)
+	}
+	
+	
+	//withUUID(ctx, "uuid", func(uuid string) {
+	//	conf, err := c.DB.GetPluginConfByID(uuid)
+	//	if success := successOrAbort(ctx, 500, err); !success {
+	//		return
+	//	}
+	//	if conf == nil || !isPluginOwner(ctx, conf) {
+	//		ctx.AbortWithError(404, errors.New("unknown plugin"))
+	//		return
+	//	}
+	//	_, err = c.Manager.Instance(uuid)
+	//	if err != nil {
+	//		ctx.AbortWithError(404, errors.New("plugin instance not found"))
+	//		return
+	//	}
+	//	if err := c.Manager.SetPluginEnabled(uuid, true); err == plugin.ErrAlreadyEnabledOrDisabled {
+	//		ctx.AbortWithError(400, err)
+	//	} else if err != nil {
+	//		ctx.AbortWithError(500, err)
+	//	}
+	//})
 }
 
 // DisablePlugin disables a plugin.
-// swagger:operation POST /plugin/{id}/disable plugin disablePlugin
+// swagger:operation POST /plugin/{uuid}/disable plugin disablePlugin
 //
 // Disable a plugin.
 //
@@ -153,9 +174,9 @@ func (c *PluginAPI) EnablePlugin(ctx *gin.Context) {
 // consumes: [application/json]
 // produces: [application/json]
 // parameters:
-// - name: id
+// - name: uuid
 //   in: path
-//   description: the plugin id
+//   description: the plugin uuid
 //   required: true
 //   type: integer
 //   format: int64
@@ -179,31 +200,34 @@ func (c *PluginAPI) EnablePlugin(ctx *gin.Context) {
 //     description: Internal Server Error
 //     schema:
 //         $ref: "#/definitions/Error"
+
+
+
 func (c *PluginAPI) DisablePlugin(ctx *gin.Context) {
-	withID(ctx, "id", func(id uint) {
-		conf, err := c.DB.GetPluginConfByID(id)
-		if success := successOrAbort(ctx, 500, err); !success {
-			return
-		}
-		if conf == nil || !isPluginOwner(ctx, conf) {
-			ctx.AbortWithError(404, errors.New("unknown plugin"))
-			return
-		}
-		_, err = c.Manager.Instance(id)
-		if err != nil {
-			ctx.AbortWithError(404, errors.New("plugin instance not found"))
-			return
-		}
-		if err := c.Manager.SetPluginEnabled(id, false); err == plugin.ErrAlreadyEnabledOrDisabled {
-			ctx.AbortWithError(400, err)
-		} else if err != nil {
-			ctx.AbortWithError(500, err)
-		}
-	})
+	uuid := resolveID(ctx)
+	conf, err := c.DB.GetPluginConfByID(uuid)
+	if success := successOrAbort(ctx, 500, err); !success {
+		return
+	}
+	if conf == nil || !isPluginOwner(ctx, conf) {
+		ctx.AbortWithError(404, errors.New("unknown plugin"))
+		return
+	}
+	_, err = c.Manager.Instance(uuid)
+	if err != nil {
+		ctx.AbortWithError(404, errors.New("plugin instance not found"))
+		return
+	}
+	if err := c.Manager.SetPluginEnabled(uuid, false); err == plugin.ErrAlreadyEnabledOrDisabled {
+		ctx.AbortWithError(400, err)
+	} else if err != nil {
+		ctx.AbortWithError(500, err)
+	}
+
 }
 
 // GetDisplay get display info for Displayer plugin.
-// swagger:operation GET /plugin/{id}/display plugin getPluginDisplay
+// swagger:operation GET /plugin/{uuid}/display plugin getPluginDisplay
 //
 // Get display info for a Displayer plugin.
 //
@@ -211,9 +235,9 @@ func (c *PluginAPI) DisablePlugin(ctx *gin.Context) {
 // consumes: [application/json]
 // produces: [application/json]
 // parameters:
-// - name: id
+// - name: uuid
 //   in: path
-//   description: the plugin id
+//   description: the plugin uuid
 //   required: true
 //   type: integer
 //   format: int64
@@ -240,26 +264,26 @@ func (c *PluginAPI) DisablePlugin(ctx *gin.Context) {
 //     schema:
 //         $ref: "#/definitions/Error"
 func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
-	withID(ctx, "id", func(id uint) {
-		conf, err := c.DB.GetPluginConfByID(id)
-		if success := successOrAbort(ctx, 500, err); !success {
-			return
-		}
-		if conf == nil || !isPluginOwner(ctx, conf) {
-			ctx.AbortWithError(404, errors.New("unknown plugin"))
-			return
-		}
-		instance, err := c.Manager.Instance(id)
-		if err != nil {
-			ctx.AbortWithError(404, errors.New("plugin instance not found"))
-			return
-		}
-		ctx.JSON(200, instance.GetDisplay(location.Get(ctx)))
-	})
+	uuid := resolveID(ctx)
+	conf, err := c.DB.GetPluginConfByID(uuid)
+	if success := successOrAbort(ctx, 500, err); !success {
+		return
+	}
+	if conf == nil || !isPluginOwner(ctx, conf) {
+		ctx.AbortWithError(404, errors.New("unknown plugin"))
+		return
+	}
+	instance, err := c.Manager.Instance(uuid)
+	if err != nil {
+		ctx.AbortWithError(404, errors.New("plugin instance not found"))
+		return
+	}
+	ctx.JSON(200, instance.GetDisplay(location.Get(ctx)))
+
 }
 
 // GetConfig returns Configurer plugin configuration in YAML format.
-// swagger:operation GET /plugin/{id}/config plugin getPluginConfig
+// swagger:operation GET /plugin/{uuid}/config plugin getPluginConfig
 //
 // Get YAML configuration for Configurer plugin.
 //
@@ -267,9 +291,9 @@ func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
 // consumes: [application/json]
 // produces: [application/x-yaml]
 // parameters:
-// - name: id
+// - name: uuid
 //   in: path
-//   description: the plugin id
+//   description: the plugin uuid
 //   required: true
 //   type: integer
 //   format: int64
@@ -301,32 +325,36 @@ func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
 //     schema:
 //         $ref: "#/definitions/Error"
 func (c *PluginAPI) GetConfig(ctx *gin.Context) {
-	withID(ctx, "id", func(id uint) {
-		conf, err := c.DB.GetPluginConfByID(id)
-		if success := successOrAbort(ctx, 500, err); !success {
-			return
-		}
-		if conf == nil || !isPluginOwner(ctx, conf) {
-			ctx.AbortWithError(404, errors.New("unknown plugin"))
-			return
-		}
-		instance, err := c.Manager.Instance(id)
-		if err != nil {
-			ctx.AbortWithError(404, errors.New("plugin instance not found"))
-			return
-		}
+	uuid := resolveID(ctx)
+	fmt.Println(uuid)
+	fmt.Println(uuid)
+	fmt.Println(uuid)
+	fmt.Println(uuid)
+	conf, err := c.DB.GetPluginConfByID(uuid)
+	if success := successOrAbort(ctx, 500, err); !success {
+		return
+	}
+	if conf == nil || !isPluginOwner(ctx, conf) {
+		ctx.AbortWithError(404, errors.New("unknown plugin"))
+		return
+	}
+	instance, err := c.Manager.Instance(uuid)
+	if err != nil {
+		ctx.AbortWithError(404, errors.New("plugin instance not found"))
+		return
+	}
 
-		if aborted := supportOrAbort(ctx, instance, compat.Configurer); aborted {
-			return
-		}
+	if aborted := supportOrAbort(ctx, instance, compat.Configurer); aborted {
+		return
+	}
 
-		ctx.Header("content-type", "application/x-yaml")
-		ctx.Writer.Write(conf.Config)
-	})
+	ctx.Header("content-type", "application/x-yaml")
+	ctx.Writer.Write(conf.Config)
+
 }
 
 // UpdateConfig updates Configurer plugin configuration in YAML format.
-// swagger:operation POST /plugin/{id}/config plugin updatePluginConfig
+// swagger:operation POST /plugin/{uuid}/config plugin updatePluginConfig
 //
 // Update YAML configuration for Configurer plugin.
 //
@@ -334,9 +362,9 @@ func (c *PluginAPI) GetConfig(ctx *gin.Context) {
 // consumes: [application/x-yaml]
 // produces: [application/json]
 // parameters:
-// - name: id
+// - name: uuid
 //   in: path
-//   description: the plugin id
+//   description: the plugin uuid
 //   required: true
 //   type: integer
 //   format: int64
@@ -365,42 +393,42 @@ func (c *PluginAPI) GetConfig(ctx *gin.Context) {
 //     schema:
 //         $ref: "#/definitions/Error"
 func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
-	withID(ctx, "id", func(id uint) {
-		conf, err := c.DB.GetPluginConfByID(id)
-		if success := successOrAbort(ctx, 500, err); !success {
-			return
-		}
-		if conf == nil || !isPluginOwner(ctx, conf) {
-			ctx.AbortWithError(404, errors.New("unknown plugin"))
-			return
-		}
-		instance, err := c.Manager.Instance(id)
-		if err != nil {
-			ctx.AbortWithError(404, errors.New("plugin instance not found"))
-			return
-		}
+	uuid := resolveID(ctx)
+	conf, err := c.DB.GetPluginConfByID(uuid)
+	if success := successOrAbort(ctx, 500, err); !success {
+		return
+	}
+	if conf == nil || !isPluginOwner(ctx, conf) {
+		ctx.AbortWithError(404, errors.New("unknown plugin"))
+		return
+	}
+	instance, err := c.Manager.Instance(uuid)
+	if err != nil {
+		ctx.AbortWithError(404, errors.New("plugin instance not found"))
+		return
+	}
 
-		if aborted := supportOrAbort(ctx, instance, compat.Configurer); aborted {
-			return
-		}
+	if aborted := supportOrAbort(ctx, instance, compat.Configurer); aborted {
+		return
+	}
 
-		newConf := instance.DefaultConfig()
-		newconfBytes, err := ioutil.ReadAll(ctx.Request.Body)
-		if err != nil {
-			ctx.AbortWithError(500, err)
-			return
-		}
-		if err := yaml.Unmarshal(newconfBytes, newConf); err != nil {
-			ctx.AbortWithError(400, err)
-			return
-		}
-		if err := instance.ValidateAndSetConfig(newConf); err != nil {
-			ctx.AbortWithError(400, err)
-			return
-		}
-		conf.Config = newconfBytes
-		successOrAbort(ctx, 500, c.DB.UpdatePluginConf(conf))
-	})
+	newConf := instance.DefaultConfig()
+	newconfBytes, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		ctx.AbortWithError(500, err)
+		return
+	}
+	if err := yaml.Unmarshal(newconfBytes, newConf); err != nil {
+		ctx.AbortWithError(400, err)
+		return
+	}
+	if err := instance.ValidateAndSetConfig(newConf); err != nil {
+		ctx.AbortWithError(400, err)
+		return
+	}
+	conf.Config = newconfBytes
+	successOrAbort(ctx, 500, c.DB.UpdatePluginConf(conf))
+	
 }
 
 func isPluginOwner(ctx *gin.Context, conf *model.PluginConf) bool {

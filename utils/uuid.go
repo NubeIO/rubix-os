@@ -14,6 +14,7 @@ func MakeUUID() (string, error) {
 func MakeTopicUUID(attribute string) string {
 	u, _ := uuid.MakeUUID()
 	divider := "_"
+	plg := "plg" //network
 	net := "net" //network
 	dev := "dev" //device
 	pnt := "pnt" //point
@@ -26,6 +27,8 @@ func MakeTopicUUID(attribute string) string {
 	rub := "rbx" //rubix uuid
 	rxg := "rxg" //rubix global uuid
 	switch attribute {
+	case model.CommonNaming.Plugin:
+		return fmt.Sprintf("%s%s%s", plg, divider, u)
 	case model.CommonNaming.Network:
 		return fmt.Sprintf("%s%s%s", net, divider, u)
 	case model.CommonNaming.Device:

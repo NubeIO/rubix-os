@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func requirePluginEnabled(id uint, db Database) gin.HandlerFunc {
+func requirePluginEnabled(uuid string, db Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		conf, err := db.GetPluginConfByID(id)
+		conf, err := db.GetPluginConfByID(uuid)
 		if err != nil {
 			c.AbortWithError(500, err)
 			return

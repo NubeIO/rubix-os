@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/utils"
 	"gorm.io/gorm"
 )
 
@@ -53,6 +54,7 @@ func (d *GormDatabase) GetPluginConfByApplicationID(appid uint) (*model.PluginCo
 
 // CreatePluginConf creates a new plugin configuration.
 func (d *GormDatabase) CreatePluginConf(p *model.PluginConf) error {
+	p.UUID = utils.MakeTopicUUID(model.CommonNaming.Plugin)
 	return d.DB.Create(p).Error
 }
 
@@ -70,13 +72,13 @@ func (d *GormDatabase) GetPluginConfByToken(token string) (*model.PluginConf, er
 }
 
 // GetPluginConfByID gets plugin configuration by plugin ID.
-func (d *GormDatabase) GetPluginConfByID(id uint) (*model.PluginConf, error) {
+func (d *GormDatabase) GetPluginConfByID(id string) (*model.PluginConf, error) {
 	plugin := new(model.PluginConf)
-	err := d.DB.Where("id = ?", id).First(plugin).Error
+	err := d.DB.Where("uuid = ?", id).First(plugin).Error
 	if err == gorm.ErrRecordNotFound {
 		err = nil
 	}
-	if plugin.ID == id {
+	if plugin.UUID == id {
 		return plugin, err
 	}
 	return nil, err
@@ -89,6 +91,6 @@ func (d *GormDatabase) UpdatePluginConf(p *model.PluginConf) error {
 }
 
 // DeletePluginConfByID deletes a plugin configuration by its id.
-func (d *GormDatabase) DeletePluginConfByID(id uint) error {
-	return d.DB.Where("id = ?", id).Delete(&model.PluginConf{}).Error
+func (d *GormDatabase) DeletePluginConfByID(id string) error {
+	return d.DB.Where("uuid = ?", id).Delete(&model.PluginConf{}).Error
 }

@@ -10,7 +10,6 @@ import (
 	"log"
 	"path/filepath"
 	"plugin"
-	"strconv"
 	"strings"
 	"sync"
 
@@ -31,7 +30,7 @@ type Database interface {
 	GetPluginConfByApplicationID(appid uint) (*model.PluginConf, error)
 	UpdatePluginConf(p *model.PluginConf) error
 	CreateMessage(message *model.Message) error
-	GetPluginConfByID(id uint) (*model.PluginConf, error)
+	GetPluginConfByID(id string) (*model.PluginConf, error)
 	GetPluginConfByToken(token string) (*model.PluginConf, error)
 	GetUserByID(id uint) (*model.User, error)
 	CreateApplication(application *model.Application) error
@@ -48,7 +47,7 @@ type Notifier interface {
 // Manager is an encapsulating layer for plugins and manages all plugins and its instances.
 type Manager struct {
 	mutex     *sync.RWMutex
-	instances map[uint]compat.PluginInstance
+	instances map[string]compat.PluginInstance
 	plugins   map[string]compat.Plugin
 	messages  chan MessageWithUserID
 	db        Database
@@ -67,7 +66,7 @@ func messageType(t string) string{
 func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier Notifier) (*Manager, error) {
 	manager := &Manager{
 		mutex:     &sync.RWMutex{},
-		instances: map[uint]compat.PluginInstance{},
+		instances: map[string]compat.PluginInstance{},
 		plugins:   map[string]compat.Plugin{},
 		messages:  make(chan MessageWithUserID),
 		db:        db,
@@ -136,7 +135,7 @@ func (m *Manager) pluginConfExists(token string) bool {
 }
 
 // SetPluginEnabled sets the plugins enabled state.
-func (m *Manager) SetPluginEnabled(pluginID uint, enabled bool) error {
+func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 	instance, err := m.Instance(pluginID)
 	if err != nil {
 		return errors.New("instance not found")
@@ -200,7 +199,7 @@ func (m *Manager) PluginInfo(modulePath string) compat.Info {
 }
 
 // Instance returns an instance with the given ID.
-func (m *Manager) Instance(pluginID uint) (compat.PluginInstance, error) {
+func (m *Manager) Instance(pluginID string) (compat.PluginInstance, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
@@ -211,7 +210,7 @@ func (m *Manager) Instance(pluginID uint) (compat.PluginInstance, error) {
 }
 
 // HasInstance returns whether the given plugin ID has a corresponding instance.
-func (m *Manager) HasInstance(pluginID uint) bool {
+func (m *Manager) HasInstance(pluginID string) bool {
 	instance, err := m.Instance(pluginID)
 	return err == nil && instance != nil
 }
@@ -227,7 +226,7 @@ func (m *Manager) RemoveUser(userID uint) error {
 			continue
 		}
 		if pluginConf.Enabled {
-			inst, err := m.Instance(pluginConf.ID)
+			inst, err := m.Instance(pluginConf.UUID)
 			if err != nil {
 				continue
 			}
@@ -238,7 +237,7 @@ func (m *Manager) RemoveUser(userID uint) error {
 				return err
 			}
 		}
-		delete(m.instances, pluginConf.ID)
+		delete(m.instances, pluginConf.UUID)
 	}
 	return nil
 }
@@ -355,7 +354,7 @@ func (m *Manager) initializeSingleUserPlugin(userCtx compat.UserContext, p compa
 		}
 	}
 
-	m.instances[pluginConf.ID] = instance
+	m.instances[pluginConf.UUID] = instance
 
 	if compat.HasSupport(instance, compat.Messenger) {
 		instance.SetMessageHandler(redirectToChannel{
@@ -365,15 +364,15 @@ func (m *Manager) initializeSingleUserPlugin(userCtx compat.UserContext, p compa
 		})
 	}
 	if compat.HasSupport(instance, compat.Storager) {
-		instance.SetStorageHandler(dbStorageHandler{pluginConf.ID, m.db})
+		instance.SetStorageHandler(dbStorageHandler{pluginConf.UUID, m.db})
 	}
 	if compat.HasSupport(instance, compat.Configurer) {
 		m.initializeConfigurerForSingleUserPlugin(instance, pluginConf)
 	}
 	if compat.HasSupport(instance, compat.Webhooker) {
-		id := pluginConf.ID
-		g := m.mux.Group(pluginConf.Token+"/", requirePluginEnabled(id, m.db))
-		instance.RegisterWebhook(strings.Replace(g.BasePath(), ":id", strconv.Itoa(int(id)), 1), g)
+		uuid := pluginConf.UUID
+		g := m.mux.Group(pluginConf.Token+"/", requirePluginEnabled(uuid, m.db))
+		instance.RegisterWebhook(strings.Replace(g.BasePath(), ":id", uuid, 1), g)
 	}
 	if pluginConf.Enabled {
 		err := instance.Enable()
