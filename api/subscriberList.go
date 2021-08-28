@@ -9,58 +9,58 @@ import (
 
 
 
-// The SubscriberListDatabase interface for encapsulating database access.
-type SubscriberListDatabase interface {
-	GetSubscriberList(uuid string) (*model.SubscriberList, error)
-	GetSubscriberLists() ([]*model.SubscriberList, error)
-	CreateSubscriberList(body *model.SubscriberList) (*model.SubscriberList, error)
-	UpdateSubscriberList(uuid string, body *model.SubscriberList) (*model.SubscriberList, error)
-	DeleteSubscriberList(uuid string) (bool, error)
+// The ProducerListDatabase interface for encapsulating database access.
+type ProducerListDatabase interface {
+	GetProducerList(uuid string) (*model.ProducerList, error)
+	GetProducerLists() ([]*model.ProducerList, error)
+	CreateProducerList(body *model.ProducerList) (*model.ProducerList, error)
+	UpdateProducerList(uuid string, body *model.ProducerList) (*model.ProducerList, error)
+	DeleteProducerList(uuid string) (bool, error)
 
 
 }
-type SubscriberListAPI struct {
-	DB SubscriberListDatabase
+type ProducerListAPI struct {
+	DB ProducerListDatabase
 }
 
 
-func (j *SubscriberListAPI) GetSubscriberList(ctx *gin.Context) {
+func (j *ProducerListAPI) GetProducerList(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.GetSubscriberList(uuid)
+	q, err := j.DB.GetProducerList(uuid)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *SubscriberListAPI) GetSubscriberLists(ctx *gin.Context) {
-	q, err := j.DB.GetSubscriberLists()
+func (j *ProducerListAPI) GetProducerLists(ctx *gin.Context) {
+	q, err := j.DB.GetProducerLists()
 	reposeHandler(q, err, ctx)
 
 }
 
-func (j *SubscriberListAPI) CreateSubscriberList(ctx *gin.Context) {
-	body, _ := getBODYSubscriberList(ctx)
+func (j *ProducerListAPI) CreateProducerList(ctx *gin.Context) {
+	body, _ := getBODYProducerList(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
 		reposeHandler(nil, err, ctx)
 	}
-	q, err := j.DB.CreateSubscriberList(body)
+	q, err := j.DB.CreateProducerList(body)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *SubscriberListAPI) UpdateSubscriberList(ctx *gin.Context) {
-	body, _ := getBODYSubscriberList(ctx)
+func (j *ProducerListAPI) UpdateProducerList(ctx *gin.Context) {
+	body, _ := getBODYProducerList(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateSubscriberList(uuid, body)
+	q, err := j.DB.UpdateProducerList(uuid, body)
 	reposeHandler(q, err, ctx)
 }
 
 
 
 
-func (j *SubscriberListAPI) DeleteSubscriberList(ctx *gin.Context) {
+func (j *ProducerListAPI) DeleteProducerList(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.DeleteSubscriberList(uuid)
+	q, err := j.DB.DeleteProducerList(uuid)
 	reposeHandler(q, err, ctx)
 }
 

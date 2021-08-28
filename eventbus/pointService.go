@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (eb *notificationService) registerPointsSubscriber() {
+func (eb *notificationService) registerPointsProducer() {
 	handler := bus.Handler{
 		Handle:  func(ctx context.Context, e bus.Event){
 			go func() {

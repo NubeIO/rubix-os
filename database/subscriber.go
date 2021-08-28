@@ -5,76 +5,76 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-type Subscriber struct {
-	*model.Subscriber
+type Producer struct {
+	*model.Producer
 
 }
 
-// GetSubscribers get all of them
-func (d *GormDatabase) GetSubscribers() ([]*model.Subscriber, error) {
-	var subscribersModel []*model.Subscriber
-	query := d.DB.Preload("SubscriberList").Find(&subscribersModel)
+// GetProducers get all of them
+func (d *GormDatabase) GetProducers() ([]*model.Producer, error) {
+	var producersModel []*model.Producer
+	query := d.DB.Preload("ProducerList").Find(&producersModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscribersModel, nil
+	return producersModel, nil
 }
 
 
-//// GetSubscribers get all of them
-//func (d *GormDatabase) GetSubscribers() ([]*model.Subscriber, error) {
-//	var subscribersModel []*model.Subscriber
-//	query := d.DB.Find(&subscribersModel)
+//// GetProducers get all of them
+//func (d *GormDatabase) GetProducers() ([]*model.Producer, error) {
+//	var producersModel []*model.Producer
+//	query := d.DB.Find(&producersModel)
 //	if query.Error != nil {
 //		return nil, query.Error
 //	}
-//	return subscribersModel, nil
+//	return producersModel, nil
 //}
 
 
-// CreateSubscriber make it
-func (d *GormDatabase) CreateSubscriber(body *model.Subscriber) (*model.Subscriber, error) {
+// CreateProducer make it
+func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, error) {
 	//call points and make it exists
 	_, err := d.GetStreamGateway(body.StreamUUID);if err != nil {
 		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the gateway UUID", nil)
 	}
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscriber)
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Producer)
 	err = d.DB.Create(&body).Error; if err != nil {
-		return nil, errorMsg("CreateSubscriber", "error on trying to add a new Subscriber", nil)
+		return nil, errorMsg("CreateProducer", "error on trying to add a new Producer", nil)
 	}
 	return body, nil
 }
 
 
 
-// GetSubscriber get it
-func (d *GormDatabase) GetSubscriber(uuid string) (*model.Subscriber, error) {
-	var subscriberModel *model.Subscriber
-	query := d.DB.Where("uuid = ? ", uuid).First(&subscriberModel); if query.Error != nil {
+// GetProducer get it
+func (d *GormDatabase) GetProducer(uuid string) (*model.Producer, error) {
+	var producerModel *model.Producer
+	query := d.DB.Where("uuid = ? ", uuid).First(&producerModel); if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriberModel, nil
+	return producerModel, nil
 }
 
 
-// UpdateSubscriber  update it
-func (d *GormDatabase) UpdateSubscriber(uuid string, body *model.Subscriber) (*model.Subscriber, error) {
-	var subscriberModel *model.Subscriber
-	query := d.DB.Where("uuid = ?", uuid).Find(&subscriberModel);if query.Error != nil {
+// UpdateProducer  update it
+func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error) {
+	var producerModel *model.Producer
+	query := d.DB.Where("uuid = ?", uuid).Find(&producerModel);if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&subscriberModel).Updates(body);if query.Error != nil {
+	query = d.DB.Model(&producerModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriberModel, nil
+	return producerModel, nil
 
 }
 
 
-// DeleteSubscriber deletes it
-func (d *GormDatabase) DeleteSubscriber(uuid string) (bool, error) {
-	var subscriberModel *model.Subscriber
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&subscriberModel);if query.Error != nil {
+// DeleteProducer deletes it
+func (d *GormDatabase) DeleteProducer(uuid string) (bool, error) {
+	var producerModel *model.Producer
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&producerModel);if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -86,10 +86,10 @@ func (d *GormDatabase) DeleteSubscriber(uuid string) (bool, error) {
 
 }
 
-// DropSubscribers delete all.
-func (d *GormDatabase) DropSubscribers() (bool, error) {
-	var subscriberModel *model.Subscriber
-	query := d.DB.Where("1 = 1").Delete(&subscriberModel)
+// DropProducers delete all.
+func (d *GormDatabase) DropProducers() (bool, error) {
+	var producerModel *model.Producer
+	query := d.DB.Where("1 = 1").Delete(&producerModel)
 	if query.Error != nil {
 		return false, query.Error
 	}

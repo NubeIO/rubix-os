@@ -18,7 +18,7 @@ func NewNotificationService(eb *bus.Bus) NotificationService {
 	ns := &notificationService{
 		eb: eb,
 	}
-	ns.registerPointsSubscriber() //add as types needed
+	ns.registerPointsProducer() //add as types needed
 	return ns
 }
 

@@ -35,7 +35,7 @@ type CommandSlaves struct {
 //type WritePriorityArray struct {
 //	PointUUID     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
 //	CommonCreated
-//	P1  			string `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Subscriber
+//	P1  			string `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
 //	P2  			string `json:"_2"`
 //	P3  			string `json:"_3"`
 //	P4  			string `json:"_4"`

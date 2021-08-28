@@ -85,38 +85,38 @@ func main()  {
 	fmt.Println(addGateway.Response.UUID)
 	fmt.Println(addGateway.Response.Name)
 
-	// point 2 to make a subscriber connection to point 1
-	tSub := new(client.Subscriber)
+	// point 2 to make a producer connection to point 1
+	tSub := new(client.Producer)
 	tSub.Name = "test"
 	tSub.Enable = true
 	tSub.IsRemote  = remoteGateway
 	tSub.FromUUID = addPoint2.Response.UUID //from point 2
 	tSub.ToUUID = addPoint.Response.UUID  //to point 1
 	tSub.StreamUUID = addGateway.Response.UUID
-	tSub.SubscriberApplication = "mapping"
-	tSub.SubscriberType = "point"
+	tSub.ProducerApplication = "mapping"
+	tSub.ProducerType = "point"
 
-	addSubscriber, err := c.ClientAddSubscriber(*tSub)
+	addProducer, err := c.ClientAddProducer(*tSub)
 	if err != nil {
 		fmt.Println(err)
 		return
 
 	}
-	fmt.Println("Add Subscriber")
-	fmt.Println(addSubscriber.Status)
-	fmt.Println(addSubscriber.Response.UUID)
-	fmt.Println(addSubscriber.Response.Name)
+	fmt.Println("Add Producer")
+	fmt.Println(addProducer.Status)
+	fmt.Println(addProducer.Response.UUID)
+	fmt.Println(addProducer.Response.Name)
 
 
-	// point 2 to make a subscriber connection to point 1
+	// point 2 to make a producer connection to point 1
 	rSub := new(client.Subscription)
 	rSub.Name = "test"
 	rSub.Enable = true
 	rSub.IsRemote  = remoteGateway
 	rSub.ToUUID = addPoint.Response.UUID  //local point
 	rSub.StreamUUID = addGateway.Response.StreamUUID
-	rSub.SubscriberApplication = "mapping"
-	rSub.SubscriberType = "point"
+	rSub.ProducerApplication = "mapping"
+	rSub.ProducerType = "point"
 
 
 

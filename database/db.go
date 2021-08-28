@@ -32,9 +32,9 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 	if query.Error != nil {
 		return false, query.Error
 	}
-	////delete subscriber
-	//var subscriberModel *model.Subscriber
-	//query = d.DB.Where("1 = 1").Delete(&subscriberModel)
+	////delete producer
+	//var producerModel *model.Producer
+	//query = d.DB.Where("1 = 1").Delete(&producerModel)
 	//if query.Error != nil {
 	//	return false, query.Error
 	//}
@@ -70,9 +70,9 @@ func (d *GormDatabase) SyncTopics()  {
 	for _, obj := range s {
 		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Plugin, obj.UUID)
 	}
-	sub, err := d.GetSubscribers()
+	sub, err := d.GetProducers()
 	for _, obj := range sub {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Subscriber, obj.UUID)
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Producer, obj.UUID)
 	}
 	rip, err := d.GetSubscriptions()
 	for _, obj := range rip {

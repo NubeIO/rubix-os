@@ -5,14 +5,14 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-var gatewaySubscriberChildTable = "Subscriber"
+var gatewayProducerChildTable = "Producer"
 var gatewaySubscriptionChildTable = "Subscription"
 
 // GetStreamGateways get all of them
 func (d *GormDatabase) GetStreamGateways(withChildren bool) ([]*model.Stream, error) {
 	var gatewaysModel []*model.Stream
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload(gatewaySubscriberChildTable).Preload(gatewaySubscriptionChildTable).Find(&gatewaysModel);if query.Error != nil {
+		query := d.DB.Preload(gatewayProducerChildTable).Preload(gatewaySubscriptionChildTable).Find(&gatewaysModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return gatewaysModel, nil

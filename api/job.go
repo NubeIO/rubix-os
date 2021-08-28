@@ -82,19 +82,19 @@ func (j *JobAPI) DeleteJob(ctx *gin.Context) {
 
 /*
 add job
-- don't start job until it has one or more subscribers
+- don't start job until it has one or more producers
 
 edit job
-- if is set disable then notify all subscriber's and for enable do the same
+- if is set disable then notify all producer's and for enable do the same
 
 delete job
-- notify all subscriber's, and they will unsubscribe
+- notify all producer's, and they will unsubscribe
 
-job subscriber
+job producer
 - On add: make sure the job uuid is valid
-- On delete: update the subscriber's list and unsubscribe
+- On delete: update the producer's list and unsubscribe
 
-remote subscriber
+remote producer
 - required: rubix-uuid
 - optional: point uuid (required network_name and device_name and point_name)
 
@@ -112,7 +112,7 @@ func (j *JobAPI) initCron() {
 //	q, err := j.DB.GetJobs()
 //	for _, job := range q {
 //		if job.Enable {
-//			for _, jobSub := range job.JobSubscriber {
+//			for _, jobSub := range job.JobProducer {
 //				if jobSub.Enable {
 //					err = j.jobAdd(job.UUID, &job)
 //					if err != nil {
@@ -152,7 +152,7 @@ func (j *JobAPI) jobRemover(uuid string) error {
 //	q, err := j.DB.GetJobs()
 //	for _, job := range q {
 //		if job.Enable {
-//			for _, jobSub := range job.JobSubscriber {
+//			for _, jobSub := range job.JobProducer {
 //				if jobSub.Enable {
 //					err = j.jobAdd(job.UUID, &job)
 //					if err != nil {

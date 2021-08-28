@@ -54,10 +54,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	gatewayHandler := api.GatewayAPI{
 		DB: db,
 	}
-	subscriberHandler := api.SubscriberAPI{
+	producerHandler := api.ProducerAPI{
 		DB: db,
 	}
-	subscriberListHandler := api.SubscriberListAPI{
+	producerListHandler := api.ProducerListAPI{
 		DB: db,
 	}
 	subscriptionHandler := api.SubscriptionsAPI{
@@ -240,17 +240,17 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.DELETE("/command/:uuid", rubixCommandGroup.DeleteCommandGroup)
 
 
-		control.GET("/subscribers", subscriberHandler.GetSubscribers)
-		control.POST("/subscriber", subscriberHandler.CreateSubscriber)
-		control.GET("/subscriber/:uuid", subscriberHandler.GetSubscriber)
-		control.PATCH("/subscriber/:uuid", subscriberHandler.UpdateSubscriber)
-		control.DELETE("/subscriber/:uuid", subscriberHandler.DeleteSubscriber)
+		control.GET("/producers", producerHandler.GetProducers)
+		control.POST("/producer", producerHandler.CreateProducer)
+		control.GET("/producer/:uuid", producerHandler.GetProducer)
+		control.PATCH("/producer/:uuid", producerHandler.UpdateProducer)
+		control.DELETE("/producer/:uuid", producerHandler.DeleteProducer)
 
-		control.GET("/subscribers/list", subscriberListHandler.GetSubscriberLists)
-		control.POST("/subscriber/list", subscriberListHandler.CreateSubscriberList)
-		control.GET("/subscriber/list/:uuid", subscriberListHandler.GetSubscriberList)
-		control.PATCH("/subscriber/list/:uuid", subscriberListHandler.UpdateSubscriberList)
-		control.DELETE("/subscriber/list/:uuid", subscriberListHandler.DeleteSubscriberList)
+		control.GET("/producers/list", producerListHandler.GetProducerLists)
+		control.POST("/producer/list", producerListHandler.CreateProducerList)
+		control.GET("/producer/list/:uuid", producerListHandler.GetProducerList)
+		control.PATCH("/producer/list/:uuid", producerListHandler.UpdateProducerList)
+		control.DELETE("/producer/list/:uuid", producerListHandler.DeleteProducerList)
 
 		control.GET("/subscriptions", subscriptionHandler.GetSubscriptions)
 		control.POST("/subscription", subscriptionHandler.CreateSubscription)

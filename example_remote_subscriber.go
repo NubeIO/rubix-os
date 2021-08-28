@@ -59,8 +59,8 @@ func main()  {
 	gatewayUUID := addGateway.Response.UUID
 
 
-	// point 2 to make a subscriber connection to point 1
-	tSub := new(client.Subscriber)
+	// point 2 to make a producer connection to point 1
+	tSub := new(client.Producer)
 	tSub.Name = "test"
 	tSub.Enable = true
 	tSub.IsRemote  = true
@@ -68,23 +68,23 @@ func main()  {
 	tSub.FromUUID = remotePointUUID //remote point
 	tSub.ToUUID = pointUUID  //local point
 	tSub.StreamUUID = gatewayUUID
-	tSub.SubscriberApplication = "mapping"
-	tSub.SubscriberType = "point"
+	tSub.ProducerApplication = "mapping"
+	tSub.ProducerType = "point"
 
-	addSubscriber, err := c.ClientAddSubscriber(*tSub)
+	addProducer, err := c.ClientAddProducer(*tSub)
 	if err != nil {
 		fmt.Println(err)
 		return
 
 	}
-	fmt.Println("Add Subscriber")
-	fmt.Println(addSubscriber.Status)
-	fmt.Println(addSubscriber.Response.UUID)
-	fmt.Println(addSubscriber.Response.Name)
+	fmt.Println("Add Producer")
+	fmt.Println(addProducer.Status)
+	fmt.Println(addProducer.Response.UUID)
+	fmt.Println(addProducer.Response.Name)
 
 	remoteClient := client.NewFlowRestClient("admin", "admin", "0.0.0.0", "1661")
 
-	// point 2 to make a subscriber connection to point 1
+	// point 2 to make a producer connection to point 1
 	rSub := new(client.Subscription)
 	rSub.Name = "test"
 	rSub.Enable = true
@@ -92,15 +92,15 @@ func main()  {
 	rSub.RemoteRubixUUID  = localRubixUUID //local device id
 	rSub.ToUUID = pointUUID  //local point
 	rSub.StreamUUID = gatewayUUID
-	rSub.SubscriberApplication = "mapping"
-	rSub.SubscriberType = "point"
+	rSub.ProducerApplication = "mapping"
+	rSub.ProducerType = "point"
 
 	addSubscription, err := remoteClient.ClientAddSubscription(*rSub)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Add Subscriber")
+	fmt.Println("Add Producer")
 	fmt.Println(addSubscription.Status)
 	fmt.Println(addSubscription.Response.UUID)
 	fmt.Println(addSubscription.Response.Name)
@@ -114,8 +114,8 @@ func main()  {
 	//tSub2.Enable = true
 	//tSub2.ThingUuid = addPoint.Response.UUID //pass in point 1 UUID
 	//tSub2.GatewayUuid = addGateway.Response.UUID
-	//tSub2.SubscriberApplication = "mapping"
-	//tSub2.SubscriberType = "point"
+	//tSub2.ProducerApplication = "mapping"
+	//tSub2.ProducerType = "point"
 	//
 	//addSubscription, err := c.ClientAddSubscription(*tSub2)
 	//if err != nil {

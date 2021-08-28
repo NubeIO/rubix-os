@@ -88,7 +88,7 @@ func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
 	return dto, err
 }
 
-func getBODYSubscriber(ctx *gin.Context) (dto *model.Subscriber, err error) {
+func getBODYProducer(ctx *gin.Context) (dto *model.Producer, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -103,7 +103,7 @@ func getBODYSubscriptionList(ctx *gin.Context) (dto *model.SubscriptionList, err
 	return dto, err
 }
 
-func getBODYSubscriberList(ctx *gin.Context) (dto *model.SubscriberList, err error) {
+func getBODYProducerList(ctx *gin.Context) (dto *model.ProducerList, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

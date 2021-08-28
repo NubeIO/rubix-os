@@ -40,10 +40,10 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var job []model.Job
 	var stream []model.Stream
 	var commandGroup []model.CommandGroup
-	var subscriber []model.Subscriber
+	var producer []model.Producer
 	var subscription []model.Subscription
 	var subscriptionList []model.SubscriptionList
-	var subscriberList []model.SubscriberList
+	var producerList []model.ProducerList
 
 	var models = []interface{}{
 		&alerts,
@@ -62,10 +62,10 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&job,
 		&stream,
 		&commandGroup,
-		&subscriber,
+		&producer,
 		&subscription,
 		&subscriptionList,
-		&subscriberList,
+		&producerList,
 	}
 
 	for _, v := range models {

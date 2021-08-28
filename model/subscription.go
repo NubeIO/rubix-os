@@ -21,8 +21,8 @@ type SubscriptionsApplication struct {
 //SubscriptionList could be a local network, job or alarm and so on
 type SubscriptionList struct {
 	CommonUUID
-	SubscriptionUUID string `json:"subscription_uuid" gorm:"TYPE:string REFERENCES subscriptions;not null;default:null"`
-	ToThingUUID 			 string 	`json:"to_thing_uuid"`
+	SubscriptionUUID 		string `json:"subscription_uuid" gorm:"TYPE:string REFERENCES subscriptions;not null;default:null"`
+	ProducerThingUUID 			string `json:"producer_thing_uuid"`
 	CommonCreated
 }
 
