@@ -39,10 +39,6 @@ type ProducerDatabase interface {
 	CreateProducer(body *model.Producer) (*model.Producer, error)
 	UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error)
 	DeleteProducer(uuid string) (bool, error)
-	//CreateJobProducer(body *model.JobProducer, jobUUID string) error
-	//UpdateJobProducer(uuid string, body *model.JobProducer) (*model.JobProducer, error)
-	//GetJobProducers() ([]model.JobProducer, error)
-	//DeleteJobProducer(uuid string) (bool, error)
 
 }
 type ProducerAPI struct {

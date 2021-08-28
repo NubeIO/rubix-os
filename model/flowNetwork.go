@@ -6,7 +6,7 @@ type FlowNetwork struct {
 	CommonName
 	CommonDescription
 	IsRemote 	bool `json:"is_remote"`
-	RemoteUUID  string `json:"remote_uuid" gorm:"type:varchar(255);unique;not null"`
+	RemoteFlowUUID  string `json:"remote_flow_uuid" gorm:"type:varchar(255);unique;not null"` //if is a remote
 	FlowIP 		string `json:"flow_ip"`
 	FlowPort 	string `json:"flow_port"`
 	FlowHTTPS 	bool `json:"flow_https"`

@@ -13,7 +13,7 @@ import (
 func (d *GormDatabase) GetFlowNetworks(withChildren bool) ([]*model.FlowNetwork, error) {
 	var flowNetworksModel []*model.FlowNetwork
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload("Stream").Find(&flowNetworksModel);if query.Error != nil {
+		query := d.DB.Preload("Stream.Producer.SubscriberList").Preload("Stream.Subscription.SubscriptionList").Find(&flowNetworksModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return flowNetworksModel, nil
@@ -33,9 +33,7 @@ func (d *GormDatabase) GetFlowNetwork(uuid string) (*model.FlowNetwork, error) {
 			return nil, query.Error
 		}
 		return flowNetworkModel, nil
-
 }
-
 
 // CreateFlowNetwork creates a device.
 func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {

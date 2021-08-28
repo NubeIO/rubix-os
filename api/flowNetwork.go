@@ -18,11 +18,9 @@ type FlowNetworksAPI struct {
 	DB FlowNetworkDatabase
 }
 
-
-
-
 func (a *FlowNetworksAPI) GetFlowNetworks(ctx *gin.Context) {
-	q, err := a.DB.GetFlowNetworks(true)
+	withChildren, _ := withChildrenArgs(ctx)
+	q, err := a.DB.GetFlowNetworks(withChildren)
 	reposeHandler(q, err, ctx)
 }
 
@@ -30,7 +28,6 @@ func (a *FlowNetworksAPI) GetFlowNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.GetFlowNetwork(uuid)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *FlowNetworksAPI) UpdateFlowNetwork(ctx *gin.Context) {
@@ -38,7 +35,6 @@ func (a *FlowNetworksAPI) UpdateFlowNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdateFlowNetwork(uuid, body)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *FlowNetworksAPI) CreateFlowNetwork(ctx *gin.Context) {

@@ -53,6 +53,6 @@ type UserExternalPass struct {
 	// The user password. For login.
 	//
 	// required: true
-	// example: nrocinu
+	// example: mypass
 	Pass string `json:"pass,omitempty" form:"pass" query:"pass" binding:"required"`
 }
