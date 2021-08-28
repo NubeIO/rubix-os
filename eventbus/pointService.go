@@ -23,7 +23,8 @@ func (eb *notificationService) registerPointsSubscriber() {
 
 				case PointUpdated:
 					payload, ok := e.Data.(*model.Point)
-					msg := fmt.Sprintf("payment %s paid", payload.Name)
+					msg := fmt.Sprintf("event %s wiii", payload.Name)
+					publishMQTT(payload)
 					logrus.Info(msg)
 
 					if !ok {

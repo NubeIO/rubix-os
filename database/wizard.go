@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/utils"
 )
 
 // WizardLocalPointMapping add a local network mapping stream.
@@ -23,7 +24,8 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	p, err := d.GetPluginByPath("system")
 	fmt.Println("GetPluginByPath", p.UUID)
 
-	flowNetwork.IsRemote = false
+	flowNetwork.IsRemote = true
+	flowNetwork.RemoteUUID =  utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
 	fmt.Println("CreateFlowNetwork")

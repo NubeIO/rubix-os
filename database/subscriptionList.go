@@ -38,6 +38,16 @@ func (d *GormDatabase) GetSubscriptionList(uuid string) (*model.SubscriptionList
 	return subscriptionModel, nil
 }
 
+// GetSubscriptionListByThing get it by its thing uuid
+func (d *GormDatabase) GetSubscriptionListByThing(toThingUUID string) (*model.SubscriptionList, error) {
+	var subscriptionModel *model.SubscriptionList
+	query := d.DB.Where("to_thing_uuid = ? ", toThingUUID).First(&subscriptionModel); if query.Error != nil {
+		return nil, query.Error
+	}
+	return subscriptionModel, nil
+}
+
+
 // DeleteSubscriptionList deletes it
 func (d *GormDatabase) DeleteSubscriptionList(uuid string) (bool, error) {
 	var subscriptionModel *model.SubscriptionList

@@ -9,7 +9,6 @@ import (
 
 func nameIsNil(name string) string {
 	if name == "" {
-		fmt.Println(fmt.Sprintf("name_%s", utils.MakeTopicUUID("")), 8888888888)
 		return fmt.Sprintf("name_%s", utils.MakeTopicUUID(""))
 	}
 	return name
@@ -54,7 +53,6 @@ func (d *GormDatabase) CreatePoint( body *model.Point) (*model.Point, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Point)
 	deviceUUID := body.DeviceUUID
 	body.Name = nameIsNil(body.Name)
-	fmt.Println(body.Name, 9999999999)
 	query := d.DB.Where("uuid = ? ", deviceUUID).First(&deviceModel);if query.Error != nil {
 		return nil, query.Error
 	}
@@ -76,7 +74,12 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 	query = d.DB.Model(&pointModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	busUpdate(pointModel.UUID, "updates", pointModel)
+
+	_, err := d.DBBusEvent(uuid, pointModel)
+	if err != nil {
+		return nil, err
+	}
+
 	return pointModel, nil
 }
 

@@ -24,6 +24,7 @@ func (d *GormDatabase) GetJobs() ([]*model.Job, error) {
 
 func (d *GormDatabase) CreateJob(body *model.Job)  (*model.Job, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Job)
+	body.Name = nameIsNil(body.Name)
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}

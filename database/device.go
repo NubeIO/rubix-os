@@ -48,6 +48,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	var net *model.Network
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Device)
 	networkUUID := body.NetworkUUID
+	body.Name = nameIsNil(body.Name)
 	query := d.DB.Where("uuid = ? ", networkUUID).First(&net);if query.Error != nil {
 		return nil, query.Error
 	}
