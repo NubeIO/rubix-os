@@ -18,7 +18,7 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 	}
 
 	//TODO make a better query
-	thingProducer, err := d.GetProducerListByThing(pointModel.UUID);if errors.Is(err, gorm.ErrRecordNotFound) {
+	thingProducer, err := d.GetProducerByThingUUID(pointModel.UUID);if errors.Is(err, gorm.ErrRecordNotFound) {
 
 	}
 
@@ -27,9 +27,9 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 	}
 
 	if thingProducer  != nil {
-		fmt.Println("thingProducer", thingProducer.SubscriptionUUID, thingProducer.ProducerUUID)
+		//fmt.Println("thingProducer", thingProducer.SubscriptionUUID, thingProducer.ProducerUUID)
 		//do check's like is enabled what is the cov, is the stream enabled, is the flow-network enabled
-		producer, err := d.GetProducer(thingProducer.ProducerUUID)
+		producer, err := d.GetProducer(thingProducer.ProducerThingUUID)
 		if err != nil {
 			return nil, query.Error
 		}
@@ -54,9 +54,9 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 	}
 	if thingSubscription  != nil {
 		fmt.Println("thingSubscription", thingSubscription.ProducerThingUUID, thingSubscription.SubscriptionUUID)
-		if thingProducer.ProducerUUID != "" || thingSubscription.ProducerThingUUID != "" {
-			busUpdate(pointModel.UUID, "updates", pointModel)
-		}
+		//if thingProducer.ProducerUUID != "" || thingSubscription.ProducerThingUUID != "" {
+		//	busUpdate(pointModel.UUID, "updates", pointModel)
+		//}
 	}
 
 

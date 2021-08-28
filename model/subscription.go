@@ -22,7 +22,7 @@ type SubscriptionsApplication struct {
 type SubscriptionList struct {
 	CommonUUID
 	SubscriptionUUID 		string `json:"subscription_uuid" gorm:"TYPE:string REFERENCES subscriptions;not null;default:null"`
-	ProducerThingUUID 			string `json:"producer_thing_uuid"`
+	ProducerThingUUID 			string `json:"producer_thing_uuid"` // this is the remote point UUID
 	CommonCreated
 }
 

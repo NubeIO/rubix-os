@@ -24,7 +24,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	p, err := d.GetPluginByPath("system")
 	fmt.Println("GetPluginByPath", p.UUID)
 
-	flowNetwork.IsRemote = true
+	flowNetwork.IsRemote = false
 	flowNetwork.RemoteUUID =  utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
@@ -77,7 +77,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	// subscription
 	subscriptionListModel.SubscriptionUUID = subscriptionModel.UUID
-	subscriptionListModel.ProducerThingUUID = pnt2.UUID
+	subscriptionListModel.ProducerThingUUID = pnt.UUID
 	subscriptionList, err := d.CreateSubscriptionList(&subscriptionListModel)
 	fmt.Println(subscriptionList)
 

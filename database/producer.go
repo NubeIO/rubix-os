@@ -13,23 +13,13 @@ type Producer struct {
 // GetProducers get all of them
 func (d *GormDatabase) GetProducers() ([]*model.Producer, error) {
 	var producersModel []*model.Producer
-	query := d.DB.Preload("ProducerList").Find(&producersModel)
+	query := d.DB.Preload("SubscriberList").Find(&producersModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	return producersModel, nil
 }
 
-
-//// GetProducers get all of them
-//func (d *GormDatabase) GetProducers() ([]*model.Producer, error) {
-//	var producersModel []*model.Producer
-//	query := d.DB.Find(&producersModel)
-//	if query.Error != nil {
-//		return nil, query.Error
-//	}
-//	return producersModel, nil
-//}
 
 
 // CreateProducer make it
@@ -67,8 +57,17 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 		return nil, query.Error
 	}
 	return producerModel, nil
-
 }
+
+// GetProducerByThingUUID get it by its
+func (d *GormDatabase) GetProducerByThingUUID(thingUUID string) (*model.Producer, error) {
+	var producerModel *model.Producer
+	query := d.DB.Where("producer_thing_uuid = ? ", thingUUID).First(&producerModel); if query.Error != nil {
+		return nil, query.Error
+	}
+	return producerModel, nil
+}
+
 
 
 // DeleteProducer deletes it
