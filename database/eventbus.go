@@ -10,10 +10,7 @@ import (
 // DBBusEvent and event on the bus.
 func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point, error) {
 	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).Find(&pointModel);if query.Error != nil {
-		return nil, query.Error
-	}
-	query = d.DB.Model(&pointModel).Updates(body);if query.Error != nil {
+	query := d.DB.Where("uuid = ?", uuid).Find(&pointModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
 
@@ -49,7 +46,7 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 		fmt.Println("POINT UUID", pointModel.UUID)
 		fmt.Println("UPDATE FROM POINT", "FromThingUUID", producer.UUID)
 		fmt.Println("GATEWAY", "producer", producer.UUID, "gateway", gateway.UUID)
-		fmt.Println("FLOW-NETWORK","flow-network", flowNetwork.UUID, "flow-network-remote-uuid", flowNetwork.RemoteUUID)
+		fmt.Println("FLOW-NETWORK","flow-network", flowNetwork.UUID, "flow-network-remote-uuid", flowNetwork.RemoteFlowUUID)
 		fmt.Println("SEND DATA TO", thingSubscriptionUUID, "Description", pointModel.Description)
 	}
 	if thingSubscription  != nil {

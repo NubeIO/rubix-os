@@ -25,7 +25,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	fmt.Println("GetPluginByPath", p.UUID)
 
 	flowNetwork.IsRemote = false
-	flowNetwork.RemoteUUID =  utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
+	flowNetwork.RemoteFlowUUID =  utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
 	fmt.Println("CreateFlowNetwork")
