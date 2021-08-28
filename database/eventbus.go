@@ -29,7 +29,7 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 	if thingProducer  != nil {
 		//fmt.Println("thingProducer", thingProducer.SubscriptionUUID, thingProducer.ProducerUUID)
 		//do check's like is enabled what is the cov, is the stream enabled, is the flow-network enabled
-		producer, err := d.GetProducer(thingProducer.ProducerThingUUID)
+		producer, err := d.GetProducerByThingUUID(thingProducer.ProducerThingUUID)
 		if err != nil {
 			return nil, query.Error
 		}
