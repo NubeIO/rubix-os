@@ -2,11 +2,13 @@ package model
 
 
 
-//ProducerList list of all the subscriptions
-type ProducerList struct {
+//SubscriberList list of all the subscriptions
+//a producer_uuid is the point uuid
+// a subscription
+type SubscriberList struct {
 	CommonUUID
 	ProducerUUID 		string  `json:"producer_uuid" gorm:"TYPE:string REFERENCES producers;not null;default:null"`
-	ProducerThingUUID 	string `json:"subscription_uuid"`
+	SubscriptionUUID 	string `json:"subscription_uuid"`
 	CommonCreated
 }
 
@@ -20,7 +22,7 @@ type Producer struct {
 	//FromThingUUID 			string 	`json:"from_thing_uuid"`
 	ProducerThingUUID 		string `json:"producer_thing_uuid"`
 	StreamUUID     			string 	`json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
-	ProducerList			[]ProducerList `json:"subscribers_list" gorm:"constraint:OnDelete:CASCADE;"`
+	ProducerList			[]SubscriberList `json:"subscribers_list" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
 }
 

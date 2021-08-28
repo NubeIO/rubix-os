@@ -18,7 +18,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var producerModel model.Producer
 	var subscriptionModel model.Subscription
 	var subscriptionListModel model.SubscriptionList
-	var producerListModel model.ProducerList
+	var producerListModel model.SubscriberList
 
 	//get plugin
 	p, err := d.GetPluginByPath("system")
@@ -83,7 +83,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	// add subscription to the producerList
 	producerListModel.ProducerUUID = producer.UUID
-	producerListModel.ProducerThingUUID = pnt2.UUID
+	producerListModel.SubscriptionUUID = pnt2.UUID
 	producerList, err := d.CreateProducerList(&producerListModel)
 	fmt.Println(producerList)
 

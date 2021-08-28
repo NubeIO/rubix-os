@@ -103,7 +103,7 @@ func getBODYSubscriptionList(ctx *gin.Context) (dto *model.SubscriptionList, err
 	return dto, err
 }
 
-func getBODYProducerList(ctx *gin.Context) (dto *model.ProducerList, err error) {
+func getBODYProducerList(ctx *gin.Context) (dto *model.SubscriberList, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

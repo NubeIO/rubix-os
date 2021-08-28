@@ -43,7 +43,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var producer []model.Producer
 	var subscription []model.Subscription
 	var subscriptionList []model.SubscriptionList
-	var producerList []model.ProducerList
+	var producerList []model.SubscriberList
 
 	var models = []interface{}{
 		&alerts,
