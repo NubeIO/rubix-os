@@ -39,10 +39,11 @@ func (d *GormDatabase) GetProducerList(uuid string) (*model.SubscriberList, erro
 	return producerModel, nil
 }
 
-// GetProducerListByThing get it by its
-func (d *GormDatabase) GetProducerListByThing(fromThingUUID string) (*model.SubscriberList, error) {
+
+// GetProducerListBySubUUID get it by its
+func (d *GormDatabase) GetProducerListBySubUUID(subscriptionUUID string) (*model.SubscriberList, error) {
 	var producerModel *model.SubscriberList
-	query := d.DB.Where("from_thing_uuid = ? ", fromThingUUID).First(&producerModel); if query.Error != nil {
+	query := d.DB.Where("subscription_uuid = ? ", subscriptionUUID).First(&producerModel); if query.Error != nil {
 		return nil, query.Error
 	}
 	return producerModel, nil

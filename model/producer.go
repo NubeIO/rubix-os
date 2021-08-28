@@ -3,12 +3,11 @@ package model
 
 
 //SubscriberList list of all the subscriptions
-//a producer_uuid is the point uuid
 // a subscription
 type SubscriberList struct {
 	CommonUUID
-	ProducerUUID 		string  `json:"producer_uuid" gorm:"TYPE:string REFERENCES producers;not null;default:null"`
-	SubscriptionUUID 	string `json:"subscription_uuid"`
+	ProducerUUID 		string  `json:"producer_uuid" gorm:"TYPE:string REFERENCES producers;not null;default:null"` // is the producer UUID
+	SubscriptionUUID 	string `json:"subscription_uuid"`  // is the remote subscription UUID, ie: whatever is subscribing to this producer
 	CommonCreated
 }
 
@@ -19,10 +18,9 @@ type Producer struct {
 	ProducerType 			string  `json:"producer_type"`
 	ProducerApplication 	string 	`json:"producer_application"`
 	COV 					int 	`json:"cov"`
-	//FromThingUUID 			string 	`json:"from_thing_uuid"`
-	ProducerThingUUID 		string `json:"producer_thing_uuid"`
 	StreamUUID     			string 	`json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
-	ProducerList			[]SubscriberList `json:"subscribers_list" gorm:"constraint:OnDelete:CASCADE;"`
+	ProducerThingUUID 		string `json:"producer_thing_uuid"` //a producer_uuid is the point uuid
+	SubscriberList			[]SubscriberList `json:"subscribers_list" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
 }
 
