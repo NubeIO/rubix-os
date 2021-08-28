@@ -12,8 +12,8 @@ var CommonNaming = struct {
 	Point   		string
 	Stream   		string
 	Job   			string
-	Subscriber   	string
-	SubscriberList  string
+	Producer   	string
+	ProducerList  string
 	Subscription   	string
 	SubscriptionList string
 	Alert   		string
@@ -31,8 +31,8 @@ var CommonNaming = struct {
 	Point:   			"point",
 	Stream:   			"stream",
 	Job:   				"job",
-	Subscriber:   		"subscriber",
-	SubscriberList:      "subscriber_list",
+	Producer:   		"producer",
+	ProducerList:      "producer_list",
 	Subscription:   	"subscription",
 	SubscriptionList:   "subscription_list",
 	Alert:   			"alert",
@@ -126,32 +126,32 @@ type CommonStore struct {
 	CommonFault
 }
 
-//CommonProducer a point or job
-type CommonProducer struct {
-	CommonUUID
-	CommonNameUnique
-	CommonDescription
-	CommonEnable
-	CommonValue
-	CommonHistory
-	CommonCreated
-}
+////CommonProducer a point or job
+//type CommonProducer struct {
+//	CommonUUID
+//	CommonNameUnique
+//	CommonDescription
+//	CommonEnable
+//	CommonValue
+//	CommonHistory
+//	CommonCreated
+//}
 
 
-type CommonSubscriberPermissions struct {
+type CommonProducerPermissions struct {
 	Blacklist 		bool  	`json:"blacklist"`
 	ReadOnly  		bool 	`json:"read_only"`
-	AllowCRUD  		bool 	`json:"allow_crud"` //not sure if this will be used, but it will allow the subscriber to update the producer
+	AllowCRUD  		bool 	`json:"allow_crud"` //not sure if this will be used, but it will allow the producer to update the producer
 }
 
 
-type CommonSubscriber struct {
+type CommonProducer struct {
 	CommonUUID
 	CommonName
 	CommonDescription
 	CommonEnable
-	SubscriberType 			string  `json:"subscriber_type"`
-	SubscriberApplication 	string `json:"subscriber_application"`
+	ProducerType 			string  `json:"producer_type"`
+	ProducerApplication 	string `json:"producer_application"`
 
 }
 
@@ -160,8 +160,6 @@ type CommonSubscription struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	SubscriberType 			string  `json:"subscriber_type"`
-	SubscriberApplication 	string `json:"subscriber_application"`
 
 
 }

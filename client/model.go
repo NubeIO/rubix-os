@@ -47,11 +47,11 @@ type Stream struct {
 	Name  		string 	`json:"name"`
 	IsRemote  	bool 	`json:"is_remote"`
 }
-type Subscriber struct {
+type Producer struct {
 	Name                  	string `json:"name"`
 	Enable                	bool   `json:"enable"`
-	SubscriberType        	string `json:"subscriber_type"`
-	SubscriberApplication 	string `json:"subscriber_application"`
+	ProducerType        	string `json:"producer_type"`
+	ProducerApplication 	string `json:"producer_application"`
 	StreamUUID  	string 	`json:"stream_uuid"`
 	FromUUID 				string `json:"from_uuid"`
 	ToUUID 					string `json:"to_uuid"`
@@ -63,8 +63,8 @@ type Subscriber struct {
 type Subscription struct {
 	Name                  	string `json:"name"`
 	Enable                	bool   `json:"enable"`
-	SubscriberType        	string `json:"subscriber_type"`
-	SubscriberApplication 	string `json:"subscriber_application"`
+	ProducerType        	string `json:"producer_type"`
+	ProducerApplication 	string `json:"producer_application"`
 	StreamUUID  	string 	`json:"stream_uuid"`
 	ToUUID 					string `json:"to_uuid"`
 	IsRemote 				bool 	`json:"is_remote"`

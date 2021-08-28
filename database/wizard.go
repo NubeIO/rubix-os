@@ -15,10 +15,10 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var deviceModel model.Device
 	var pointModel model.Point
 	var streamModel model.Stream
-	var subscriberModel model.Subscriber
+	var producerModel model.Producer
 	var subscriptionModel model.Subscription
 	var subscriptionListModel model.SubscriptionList
-	var subscriberListModel model.SubscriberList
+	var producerListModel model.SubscriberList
 
 	//get plugin
 	p, err := d.GetPluginByPath("system")
@@ -39,18 +39,20 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	// point
 	pointModel.DeviceUUID = dev.UUID
+	pointModel.Name = "is the producer"
 	pnt, err := d.CreatePoint(&pointModel)
 
 	// stream
 	streamModel.FlowNetworkUUID = f.UUID
 	stream, err := d.CreateStreamGateway(&streamModel)
 
-	// subscriber
-	subscriberModel.StreamUUID = stream.UUID
-	subscriberModel.FromThingUUID = pnt.UUID
-	subscriberModel.Name = "subscriber stream"
-	subscriber, err := d.CreateSubscriber(&subscriberModel)
-	fmt.Println(subscriber.Name)
+	// producer
+	producerModel.StreamUUID = stream.UUID
+	fmt.Println(pnt.UUID)
+	producerModel.ProducerThingUUID = pnt.UUID
+	producerModel.Name = "producer stream"
+	producer, err := d.CreateProducer(&producerModel)
+	fmt.Println(producer.Name)
 
 	// subscription stream
 	streamModel.IsSubscription = true
@@ -70,19 +72,20 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	// point 2 to add to subscription list
 	var pointModel2 model.Point
 	pointModel2.DeviceUUID = dev2.UUID
+	pointModel2.Name = "is the subscription"
 	pnt2, err := d.CreatePoint(&pointModel2)
 
 	// subscription
 	subscriptionListModel.SubscriptionUUID = subscriptionModel.UUID
-	subscriptionListModel.ToThingUUID = pnt2.UUID
+	subscriptionListModel.ProducerThingUUID = pnt2.UUID
 	subscriptionList, err := d.CreateSubscriptionList(&subscriptionListModel)
 	fmt.Println(subscriptionList)
 
-	// add subscription to the subscriberList
-	subscriberListModel.SubscriberUUID = subscriber.UUID
-	subscriberListModel.FromThingUUID = pnt2.UUID
-	subscriberList, err := d.CreateSubscriberList(&subscriberListModel)
-	fmt.Println(subscriberList)
+	// add subscription to the producerList
+	producerListModel.ProducerUUID = producer.UUID
+	producerListModel.SubscriptionUUID = pnt2.UUID
+	producerList, err := d.CreateProducerList(&producerListModel)
+	fmt.Println(producerList)
 
 	if err != nil {
 		fmt.Println("Error on wizard")

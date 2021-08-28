@@ -20,7 +20,7 @@ type Job struct {
 
 }
 //
-//type JobSubscriber struct {
+//type JobProducer struct {
 //	JobUUID    		string  `json:"job_uuid" binding:"required" gorm:"TYPE:varchar(255) REFERENCES jobs;not null;default:null"`
-//	Subscriber
+//	Producer
 //}

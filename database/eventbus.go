@@ -18,7 +18,7 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 	}
 
 	//TODO make a better query
-	thingSubscriber, err := d.GetSubscriberListByThing(pointModel.UUID);if errors.Is(err, gorm.ErrRecordNotFound) {
+	thingProducer, err := d.GetProducerListByThing(pointModel.UUID);if errors.Is(err, gorm.ErrRecordNotFound) {
 
 	}
 
@@ -26,19 +26,19 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 
 	}
 
-	if thingSubscriber  != nil {
-		fmt.Println("thingSubscriber", thingSubscriber.FromThingUUID, thingSubscriber.SubscriberUUID)
+	if thingProducer  != nil {
+		fmt.Println("thingProducer", thingProducer.SubscriptionUUID, thingProducer.ProducerUUID)
 		//do check's like is enabled what is the cov, is the stream enabled, is the flow-network enabled
-		subscriber, err := d.GetSubscriber(thingSubscriber.SubscriberUUID)
+		producer, err := d.GetProducer(thingProducer.ProducerUUID)
 		if err != nil {
 			return nil, query.Error
 		}
 		thingSubscriptionUUID := ""
 		if thingSubscription != nil {
-			thingSubscriptionUUID = thingSubscription.ToThingUUID
+			thingSubscriptionUUID = thingSubscription.ProducerThingUUID
 		}
 
-		gateway, err := d.GetStreamGateway(subscriber.StreamUUID)
+		gateway, err := d.GetStreamGateway(producer.StreamUUID)
 		if err != nil {
 			return nil, query.Error
 		}
@@ -47,14 +47,14 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 			return nil, query.Error
 		}
 		fmt.Println("POINT UUID", pointModel.UUID)
-		fmt.Println("UPDATE FROM POINT", "FromThingUUID", subscriber.FromThingUUID)
-		fmt.Println("GATEWAY", "subscriber", subscriber.UUID, "gateway", gateway.UUID)
+		fmt.Println("UPDATE FROM POINT", "FromThingUUID", producer.UUID)
+		fmt.Println("GATEWAY", "producer", producer.UUID, "gateway", gateway.UUID)
 		fmt.Println("FLOW-NETWORK","flow-network", flowNetwork.UUID, "flow-network-remote-uuid", flowNetwork.RemoteUUID)
 		fmt.Println("SEND DATA TO", thingSubscriptionUUID, "Description", pointModel.Description)
 	}
 	if thingSubscription  != nil {
-		fmt.Println("thingSubscription", thingSubscription.ToThingUUID, thingSubscription.SubscriptionUUID)
-		if thingSubscriber.FromThingUUID != "" || thingSubscription.ToThingUUID != "" {
+		fmt.Println("thingSubscription", thingSubscription.ProducerThingUUID, thingSubscription.SubscriptionUUID)
+		if thingProducer.ProducerUUID != "" || thingSubscription.ProducerThingUUID != "" {
 			busUpdate(pointModel.UUID, "updates", pointModel)
 		}
 	}

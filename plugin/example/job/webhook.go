@@ -61,7 +61,7 @@ func (c *PluginTest) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			fmt.Println(err)
 		}
 		token := r.Str
-		urlJobs := fmt.Sprintf("%s/%s", url, "api/jobs/subscriber/{uuid}")
+		urlJobs := fmt.Sprintf("%s/%s", url, "api/jobs/producer/{uuid}")
 		//edit job
 		subJob, _ := client.NewRequest().
 			SetHeader("Authorization", token).

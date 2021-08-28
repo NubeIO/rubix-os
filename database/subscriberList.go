@@ -6,23 +6,23 @@ import (
 )
 
 
-type SubscriberList struct {
+type ProducerList struct {
 	*model.SubscriberList
 }
 
-// GetSubscriberLists get all of them
-func (d *GormDatabase) GetSubscriberLists() ([]*model.SubscriberList, error) {
-	var subscribersModel []*model.SubscriberList
+// GetProducerLists get all of them
+func (d *GormDatabase) GetProducerLists() ([]*model.SubscriberList, error) {
+	var producersModel []*model.SubscriberList
 
-	query := d.DB.Find(&subscribersModel)
+	query := d.DB.Find(&producersModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscribersModel, nil
+	return producersModel, nil
 }
 
-// CreateSubscriberList make it
-func (d *GormDatabase) CreateSubscriberList(body *model.SubscriberList) (*model.SubscriberList, error) {
+// CreateProducerList make it
+func (d *GormDatabase) CreateProducerList(body *model.SubscriberList) (*model.SubscriberList, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.SubscriptionList)
 	query := d.DB.Create(body);if query.Error != nil {
 		return nil, query.Error
@@ -30,29 +30,29 @@ func (d *GormDatabase) CreateSubscriberList(body *model.SubscriberList) (*model.
 	return body, nil
 }
 
-// GetSubscriberList get it
-func (d *GormDatabase) GetSubscriberList(uuid string) (*model.SubscriberList, error) {
-	var subscriberModel *model.SubscriberList
-	query := d.DB.Where("uuid = ? ", uuid).First(&subscriberModel); if query.Error != nil {
+// GetProducerList get it
+func (d *GormDatabase) GetProducerList(uuid string) (*model.SubscriberList, error) {
+	var producerModel *model.SubscriberList
+	query := d.DB.Where("uuid = ? ", uuid).First(&producerModel); if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriberModel, nil
+	return producerModel, nil
 }
 
-// GetSubscriberListByThing get it by its
-func (d *GormDatabase) GetSubscriberListByThing(fromThingUUID string) (*model.SubscriberList, error) {
-	var subscriberModel *model.SubscriberList
-	query := d.DB.Where("from_thing_uuid = ? ", fromThingUUID).First(&subscriberModel); if query.Error != nil {
+// GetProducerListByThing get it by its
+func (d *GormDatabase) GetProducerListByThing(fromThingUUID string) (*model.SubscriberList, error) {
+	var producerModel *model.SubscriberList
+	query := d.DB.Where("from_thing_uuid = ? ", fromThingUUID).First(&producerModel); if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriberModel, nil
+	return producerModel, nil
 }
 
 
-// DeleteSubscriberList deletes it
-func (d *GormDatabase) DeleteSubscriberList(uuid string) (bool, error) {
-	var subscriberModel *model.SubscriberList
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&subscriberModel);if query.Error != nil {
+// DeleteProducerList deletes it
+func (d *GormDatabase) DeleteProducerList(uuid string) (bool, error) {
+	var producerModel *model.SubscriberList
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&producerModel);if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -64,24 +64,24 @@ func (d *GormDatabase) DeleteSubscriberList(uuid string) (bool, error) {
 
 }
 
-// UpdateSubscriberList  update it
-func (d *GormDatabase) UpdateSubscriberList(uuid string, body *model.SubscriberList) (*model.SubscriberList, error) {
-	var subscriberModel *model.SubscriberList
-	query := d.DB.Where("uuid = ?", uuid).Find(&subscriberModel);if query.Error != nil {
+// UpdateProducerList  update it
+func (d *GormDatabase) UpdateProducerList(uuid string, body *model.SubscriberList) (*model.SubscriberList, error) {
+	var producerModel *model.SubscriberList
+	query := d.DB.Where("uuid = ?", uuid).Find(&producerModel);if query.Error != nil {
 		return nil, query.Error
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
-	query = d.DB.Model(&subscriberModel).Updates(body);if query.Error != nil {
+	query = d.DB.Model(&producerModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriberModel, nil
+	return producerModel, nil
 
 }
 
-// DropSubscriberList delete all.
-func (d *GormDatabase) DropSubscriberList() (bool, error) {
-	var subscriberModel *model.SubscriberList
-	query := d.DB.Where("1 = 1").Delete(&subscriberModel)
+// DropProducerList delete all.
+func (d *GormDatabase) DropProducerList() (bool, error) {
+	var producerModel *model.SubscriberList
+	query := d.DB.Where("1 = 1").Delete(&producerModel)
 	if query.Error != nil {
 		return false, query.Error
 	}

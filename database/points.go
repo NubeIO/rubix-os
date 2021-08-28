@@ -123,7 +123,7 @@ need to check if point device and network are enabled
 if all are enabled then check COV
 if COV is out of range to update db and publish a message on the eventbus
 send data to gateway
-publish to MQTT if there is an external subscriber
+publish to MQTT if there is an external producer
 */
 
 

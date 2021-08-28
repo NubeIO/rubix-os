@@ -9,128 +9,128 @@ import (
 
 /*
 
-add subscriber
-- user needs to pass a valid producer uuid (for example a point uuid) and type model.SubscriberType (Point, Job, Alarm) and  model.SubscriberApplication (Plugin, Remote, Local)
+add producer
+- user needs to pass a valid producer uuid (for example a point uuid) and type model.ProducerType (Point, Job, Alarm) and  model.ProducerApplication (Plugin, Remote, Local)
 
 example for workflow for a point (Point 1 Has a Subscription to Point 2):
 Point 1
 -- subscription table -> point 2 uuid
--- subscriber table -> nil
+-- producer table -> nil
 
 Point 2
 -- subscription table -> nil
--- subscriber table -> point 1 uuid
+-- producer table -> point 1 uuid
 
 remote point will subscribe to cov events
-- the local db will store a copy of the subscriber to know where to publish the data to
+- the local db will store a copy of the producer to know where to publish the data to
 - the remote device will store a copy of its subscription in the subscriptions table, these will be the details of the remote producer
 
-remote subscriber
+remote producer
 - required: rubix-uuid
 - optional: point uuid (required network_name and device_name and point_name)
 
 */
 
 
-// The SubscriberDatabase interface for encapsulating database access.
-type SubscriberDatabase interface {
-	GetSubscriber(uuid string) (*model.Subscriber, error)
-	GetSubscribers() ([]*model.Subscriber, error)
-	CreateSubscriber(body *model.Subscriber) (*model.Subscriber, error)
-	UpdateSubscriber(uuid string, body *model.Subscriber) (*model.Subscriber, error)
-	DeleteSubscriber(uuid string) (bool, error)
-	//CreateJobSubscriber(body *model.JobSubscriber, jobUUID string) error
-	//UpdateJobSubscriber(uuid string, body *model.JobSubscriber) (*model.JobSubscriber, error)
-	//GetJobSubscribers() ([]model.JobSubscriber, error)
-	//DeleteJobSubscriber(uuid string) (bool, error)
+// The ProducerDatabase interface for encapsulating database access.
+type ProducerDatabase interface {
+	GetProducer(uuid string) (*model.Producer, error)
+	GetProducers() ([]*model.Producer, error)
+	CreateProducer(body *model.Producer) (*model.Producer, error)
+	UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error)
+	DeleteProducer(uuid string) (bool, error)
+	//CreateJobProducer(body *model.JobProducer, jobUUID string) error
+	//UpdateJobProducer(uuid string, body *model.JobProducer) (*model.JobProducer, error)
+	//GetJobProducers() ([]model.JobProducer, error)
+	//DeleteJobProducer(uuid string) (bool, error)
 
 }
-type SubscriberAPI struct {
-	DB SubscriberDatabase
+type ProducerAPI struct {
+	DB ProducerDatabase
 }
 
 
-func (j *SubscriberAPI) GetSubscriber(ctx *gin.Context) {
+func (j *ProducerAPI) GetProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.GetSubscriber(uuid)
+	q, err := j.DB.GetProducer(uuid)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *SubscriberAPI) GetSubscribers(ctx *gin.Context) {
-	q, err := j.DB.GetSubscribers()
+func (j *ProducerAPI) GetProducers(ctx *gin.Context) {
+	q, err := j.DB.GetProducers()
 	reposeHandler(q, err, ctx)
 
 }
 
-func (j *SubscriberAPI) CreateSubscriber(ctx *gin.Context) {
-	body, _ := getBODYSubscriber(ctx)
+func (j *ProducerAPI) CreateProducer(ctx *gin.Context) {
+	body, _ := getBODYProducer(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
 		reposeHandler(nil, err, ctx)
 	}
-	body, err = j.DB.CreateSubscriber(body)
+	body, err = j.DB.CreateProducer(body)
 	reposeHandler(body, err, ctx)
 }
 
 
-func (j *SubscriberAPI) UpdateSubscriber(ctx *gin.Context) {
-	body, _ := getBODYSubscriber(ctx)
+func (j *ProducerAPI) UpdateProducer(ctx *gin.Context) {
+	body, _ := getBODYProducer(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateSubscriber(uuid, body)
+	q, err := j.DB.UpdateProducer(uuid, body)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *SubscriberAPI) DeleteSubscriber(ctx *gin.Context) {
+func (j *ProducerAPI) DeleteProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.DeleteSubscriber(uuid)
+	q, err := j.DB.DeleteProducer(uuid)
 	reposeHandler(q, err, ctx)
 }
 
 
-//func (j *SubscriberAPI) CreateJobSubscriber(ctx *gin.Context) {
-//	body, _ := getBODYJobSubscriber(ctx)
-//	err := j.DB.CreateJobSubscriber(body, body.JobUUID)
+//func (j *ProducerAPI) CreateJobProducer(ctx *gin.Context) {
+//	body, _ := getBODYJobProducer(ctx)
+//	err := j.DB.CreateJobProducer(body, body.JobUUID)
 //	reposeHandler(body, err, ctx)
 //}
 
 //
-//func (j *JobAPI) UpdateJobSubscriber(ctx *gin.Context) {
-//	body, _ := getBODYJobSubscriber(ctx)
+//func (j *JobAPI) UpdateJobProducer(ctx *gin.Context) {
+//	body, _ := getBODYJobProducer(ctx)
 //	uuid := resolveID(ctx)
-//	q, err := j.DB.UpdateJobSubscriber(uuid, body)
+//	q, err := j.DB.UpdateJobProducer(uuid, body)
 //	reposeHandler(q, err, ctx)
 //}
 //
-//func (j *JobAPI) GetJobSubscriber(ctx *gin.Context) {
-//	q, err := j.DB.GetJobSubscribers()
+//func (j *JobAPI) GetJobProducer(ctx *gin.Context) {
+//	q, err := j.DB.GetJobProducers()
 //	reposeHandler(q, err, ctx)
 //}
 //
 //
-//func (j *JobAPI) DeleteJobSubscriber(ctx *gin.Context) {
+//func (j *JobAPI) DeleteJobProducer(ctx *gin.Context) {
 //	uuid := resolveID(ctx)
-//	q, err := j.DB.DeleteJobSubscriber(uuid)
+//	q, err := j.DB.DeleteJobProducer(uuid)
 //	reposeHandler(q, err, ctx)
 //}
 //
 
 /*
 add job
-- don't start job until it has one or more subscribers
+- don't start job until it has one or more producers
 
 edit job
-- if is set disable then notify all subscriber's and for enable do the same
+- if is set disable then notify all producer's and for enable do the same
 
 delete job
-- notify all subscriber's, and they will unsubscribe
+- notify all producer's, and they will unsubscribe
 
-job subscriber
+job producer
 - On add: make sure the job uuid is valid
-- On delete: update the subscriber's list and unsubscribe
+- On delete: update the producer's list and unsubscribe
 
-remote subscriber
+remote producer
 - required: rubix-uuid
 - optional: point uuid (required network_name and device_name and point_name)
 

@@ -14,7 +14,7 @@ type Job struct {
 
 func (d *GormDatabase) GetJobs() ([]*model.Job, error) {
 	var jobsModel []*model.Job
-	query := d.DB.Preload(gatewaySubscriberChildTable).Find(&jobsModel)
+	query := d.DB.Preload(gatewayProducerChildTable).Find(&jobsModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -86,7 +86,7 @@ func (d *GormDatabase) DropJobs() (bool, error) {
 
 
 //
-//func (d *GormDatabase) CreateJobSubscriber(body *model.JobSubscriber, jobUUID string)  error {
+//func (d *GormDatabase) CreateJobProducer(body *model.JobProducer, jobUUID string)  error {
 //	query := d.DB.Where("uuid = ?", jobUUID).Find(&jobModel); if query.Error != nil {
 //		return query.Error
 //	}
@@ -99,18 +99,18 @@ func (d *GormDatabase) DropJobs() (bool, error) {
 //}
 //
 //
-//func (d *GormDatabase) GetJobSubscribers() ([]model.JobSubscriber, error) {
-//	query := d.DB.Find(&jobSubscribersModel)
+//func (d *GormDatabase) GetJobProducers() ([]model.JobProducer, error) {
+//	query := d.DB.Find(&jobProducersModel)
 //	if query.Error != nil {
 //		return nil, query.Error
 //	}
-//	return jobSubscribersModel, nil
+//	return jobProducersModel, nil
 //}
 //
 //
-//// DeleteJobSubscriber delete a job subscriber(
-//func (d *GormDatabase) DeleteJobSubscriber(uuid string) (bool, error) {
-//	query := d.DB.Where("uuid = ? ", uuid).Delete(&jobSubscriberModel);if query.Error != nil {
+//// DeleteJobProducer delete a job producer(
+//func (d *GormDatabase) DeleteJobProducer(uuid string) (bool, error) {
+//	query := d.DB.Where("uuid = ? ", uuid).Delete(&jobProducerModel);if query.Error != nil {
 //		return false, query.Error
 //	}
 //	r := query.RowsAffected
@@ -123,15 +123,15 @@ func (d *GormDatabase) DropJobs() (bool, error) {
 //}
 //
 //
-//// UpdateJobSubscriber  returns the device for the given id or nil.
-//func (d *GormDatabase) UpdateJobSubscriber(uuid string, body *model.JobSubscriber) (*model.JobSubscriber, error) {
-//	query := d.DB.Where("uuid = ?", uuid).Find(&jobSubscriberModel)
+//// UpdateJobProducer  returns the device for the given id or nil.
+//func (d *GormDatabase) UpdateJobProducer(uuid string, body *model.JobProducer) (*model.JobProducer, error) {
+//	query := d.DB.Where("uuid = ?", uuid).Find(&jobProducerModel)
 //	if query.Error != nil {
 //		return nil, query.Error
 //	}
-//	query = d.DB.Model(&jobSubscriberModel).Updates(body)
+//	query = d.DB.Model(&jobProducerModel).Updates(body)
 //	if query.Error != nil {
 //		return nil, query.Error
 //	}
-//	return jobSubscriberModel, nil
+//	return jobProducerModel, nil
 //}
