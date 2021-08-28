@@ -13,7 +13,7 @@ type Subscriptions struct {
 // GetSubscriptions get all of them
 func (d *GormDatabase) GetSubscriptions() ([]*model.Subscription, error) {
 	var subscriptionsModel []*model.Subscription
-	query := d.DB.Find(&subscriptionsModel)
+	query := d.DB.Preload("SubscriptionList").Find(&subscriptionsModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -22,6 +22,9 @@ func (d *GormDatabase) GetSubscriptions() ([]*model.Subscription, error) {
 
 // CreateSubscription make it
 func (d *GormDatabase) CreateSubscription(body *model.Subscription) (*model.Subscription, error) {
+	_, err := d.GetStreamGateway(body.StreamUUID);if err != nil {
+		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the stream UUID", nil)
+	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
 	query := d.DB.Create(body);if query.Error != nil {
 		return nil, query.Error

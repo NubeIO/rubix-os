@@ -2,17 +2,24 @@ package model
 
 
 
+//SubscriberList list of all the subscriptions
+type SubscriberList struct {
+	CommonUUID
+	SubscriberUUID 		string  `json:"subscriber_list" gorm:"TYPE:string REFERENCES subscribers;not null;default:null"`
+	FromThingUUID 		string `json:"from_thing_uuid"`
+	CommonCreated
+}
 
 
-//Subscriber could be a local network, job or alarm and so on
+//Subscriber a subscriber is a placeholder to register an object to enable subscriptions to
 type Subscriber struct {
 	CommonSubscriber
 	SubscriberType 			string  `json:"subscriber_type"`
-	SubscriberApplication 	string `json:"subscriber_application"`
-	FromUUID 				string `json:"from_uuid"`
-	ToUUID 					string 	`json:"to_uuid"`
-	IsRemote 				bool 	`json:"is_remote"`
-	RemoteRubixUUID			string 	`json:"remote_rubix_uuid"`
-	StreamUUID     			string `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
+	SubscriberApplication 	string 	`json:"subscriber_application"`
+	COV 					int 	`json:"cov"`
+	FromThingUUID 			string 	`json:"from_thing_uuid"`
+	StreamUUID     			string 	`json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
+	SubscriberList			[]SubscriberList `json:"subscriber_list" gorm:"constraint:OnDelete:CASCADE;"`
+	CommonCreated
 }
 

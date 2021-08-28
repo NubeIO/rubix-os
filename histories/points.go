@@ -4,8 +4,8 @@ import (
 	"math"
 )
 
-//cov event for the point value
-func cov(new float64, existingData float64, cov float64) (bool, float64) {
+//PointCOV event for the point value
+func PointCOV(new float64, existingData float64, cov float64) (bool, float64) {
 	c := new - existingData
 	if math.Abs(c) >= cov {
 		return false, existingData

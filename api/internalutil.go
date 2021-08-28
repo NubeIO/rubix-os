@@ -98,6 +98,16 @@ func getBODYSubscription(ctx *gin.Context) (dto *model.Subscription, err error) 
 	return dto, err
 }
 
+func getBODYSubscriptionList(ctx *gin.Context) (dto *model.SubscriptionList, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBODYSubscriberList(ctx *gin.Context) (dto *model.SubscriberList, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYGateway(ctx *gin.Context) (dto *model.Stream, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -120,6 +130,15 @@ func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 
 func resolveID(ctx *gin.Context) string {
 	id := ctx.Param("uuid")
+	return id
+}
+func resolveName(ctx *gin.Context) string {
+	id := ctx.Param("name")
+	return id
+}
+
+func resolvePath(ctx *gin.Context) string {
+	id := ctx.Param("path")
 	return id
 }
 

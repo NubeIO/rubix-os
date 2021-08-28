@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/client"
+	"github.com/NubeDev/flow-framework/model"
 )
 
 func main()  {
@@ -13,7 +14,7 @@ func main()  {
 	remoteRubixUUID := "RUBIX_REMOTE"
 	localRubixUUID := "id_n_5569693251d743c8"
 
-	addNet, err := c.ClientAddNetwork()
+	addNet, err := c.ClientAddNetwork("")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -40,7 +41,10 @@ func main()  {
 	fmt.Println(addPoint.Response.UUID)
 	fmt.Println(addPoint.Response.Name)
 
-	addGateway, err := c.ClientAddGateway(false)
+	stream := new(model.Stream)
+	stream.Name = "test"
+	stream.IsRemote = true
+	addGateway, err := c.ClientAddGateway(stream)
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -7,12 +7,12 @@ import (
 
 
 // ClientAddNetwork an object
-func (a *FlowClient) ClientAddNetwork() (*ResponseBody, error) {
+func (a *FlowClient) ClientAddNetwork(pluginUUID string) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("net_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
-		SetBody(map[string]string{"name": name}).
+		SetBody(map[string]string{"name": name, "plugin_conf_id": pluginUUID}).
 		Post("/api/network")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)

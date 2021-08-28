@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/mqtt_client"
+	"github.com/NubeDev/flow-framework/mqttClient"
 	"log"
 )
 
 func publishMQTT(sensorStruct *model.Point) {
-	a := mqtt_client.NewClient(mqtt_client.ClientOptions{
+	a := mqttClient.NewClient(mqttClient.ClientOptions{
 		Servers: []string{"tcp://0.0.0.0:1883"},
 	})
 	err := a.Connect();if err != nil {
@@ -21,7 +21,7 @@ func publishMQTT(sensorStruct *model.Point) {
 		log.Fatal(err)
 	}
 
-	err = a.Publish(topic, mqtt_client.AtMostOnce, false, string(data));if err != nil {
+	err = a.Publish(topic, mqttClient.AtMostOnce, false, string(data));if err != nil {
 		log.Fatal(err)
 	}
 

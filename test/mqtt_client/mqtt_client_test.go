@@ -2,20 +2,20 @@ package mqtt_client
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/mqtt_client"
+	"github.com/NubeDev/flow-framework/mqttClient"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"log"
 	"testing"
 	"time"
 )
 
-var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
+var handle mqttClient.MessageHandler = func(client mqttClient.Client, msg mqttClient.Message) {
 	fmt.Printf("MSG recieved pointsValue: %s\n", msg.Payload())
 }
 
 func TestMQTTClient(t *testing.T) {
 
-	a := mqtt_client.NewClient(mqtt_client.ClientOptions{
+	a := mqttClient.NewClient(mqttClient.ClientOptions{
 		Servers: []string{"tcp://192.168.15.100:1883", "tcp://192.168.15.104:1883"},
 	})
 	err := a.Connect()
@@ -25,17 +25,17 @@ func TestMQTTClient(t *testing.T) {
 
 	fmt.Println(a.IsConnected())
 
-	err = a.Publish("adsdas", mqtt_client.AtMostOnce, false, "ddd")
+	err = a.Publish("adsdas", mqttClient.AtMostOnce, false, "ddd")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	err = a.Subscribe("e", mqtt_client.AtMostOnce, handle)
+	err = a.Subscribe("e", mqttClient.AtMostOnce, handle)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	err = a.Subscribe("ee", mqtt_client.AtMostOnce, handle)
+	err = a.Subscribe("ee", mqttClient.AtMostOnce, handle)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -13,13 +13,16 @@ var CommonNaming = struct {
 	Stream   		string
 	Job   			string
 	Subscriber   	string
+	SubscriberList  string
 	Subscription   	string
+	SubscriptionList string
 	Alert   		string
 	Mapping   		string
 	CommandGroup   	string
 	Rubix   		string
 	RubixGlobal   	string
 	FlowNetwork   	string
+	RemoteFlowNetwork string
 
 }{
 	Plugin:   			"plugin",
@@ -29,13 +32,16 @@ var CommonNaming = struct {
 	Stream:   			"stream",
 	Job:   				"job",
 	Subscriber:   		"subscriber",
+	SubscriberList:      "subscriber_list",
 	Subscription:   	"subscription",
+	SubscriptionList:   "subscription_list",
 	Alert:   			"alert",
 	Mapping:   			"mapping",
     CommandGroup:   	"command_group",
 	Rubix:   			"rubix",
 	RubixGlobal:   		"rubix_global",
 	FlowNetwork:   		"flow_network",
+	RemoteFlowNetwork:   "remote_flow_network",
 }
 
 
@@ -60,7 +66,7 @@ type CommonDescription struct {
 }
 
 type CommonName struct {
-	Name string `json:"name"  valid:"required~name is required"`
+	Name string `json:"name"`
 }
 
 type CommonNameUnique struct {
@@ -81,14 +87,6 @@ type CommonIDUnique struct {
 
 type CommonUUID struct {
 	UUID	string 	`json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
-}
-
-type CommonFlowNetworkUUID struct {
-	FlowNetworkUUID	string 	`json:"flow_network_uuid" gorm:"type:varchar(255);unique;not null"`
-}
-
-type CommonFlowNetworkName struct {
-	FlowNetworkName	string 	`json:"flow_network_name" gorm:"type:varchar(255);unique;not null"`
 }
 
 type CommonRubixUUID struct {

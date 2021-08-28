@@ -45,9 +45,9 @@ type Stream struct {
 	CommonDescription
 	CommonEnable
 	CommonCreated
-	IsRemote 			bool 	`json:"is_remote"`
-	CommonRubixUUID
+	IsSubscription  	bool   `json:"is_subscription"`
+	FlowNetworkUUID 	string `json:"flow_network_uuid" gorm:"TYPE:varchar(255) REFERENCES flow_networks;not null;default:null"`
 	Subscriber			[]Subscriber `json:"subscribers" gorm:"constraint:OnDelete:CASCADE;"`
-	Subscription		`json:"subscription"`
+	Subscription		[]Subscription `json:"subscription" gorm:"constraint:OnDelete:CASCADE;"`
 	CommandGroup		[]CommandGroup `json:"command_group" gorm:"constraint:OnDelete:CASCADE;"`
 }

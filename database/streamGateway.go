@@ -5,7 +5,6 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-
 var gatewaySubscriberChildTable = "Subscriber"
 var gatewaySubscriptionChildTable = "Subscription"
 
@@ -26,25 +25,20 @@ func (d *GormDatabase) GetStreamGateways(withChildren bool) ([]*model.Stream, er
 
 }
 
-// CreateGateway make it
-func (d *GormDatabase) CreateStreamGateway(body *model.Stream)  error {
-	var gatewayModel []model.Stream
+// CreateStreamGateway make it
+func (d *GormDatabase) CreateStreamGateway(body *model.Stream) (*model.Stream, error) {
+	//var gatewayModel []model.Stream
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
-	if !body.IsRemote  {
-		query := d.DB.Where("is_remote = ?", 0).First(&gatewayModel) //if existing local network then don't create it
-		r := query.RowsAffected
-		if r != 0 {
-			return errorMsg("network", "a local gateway exists", nil)
-		}
-		body.Name = "Local rubix"
-		*body.Enable = true
-		body.Description = "Local rubix gateway for sending data between jobs and points"
+	_, err := d.GetFlowNetwork(body.FlowNetworkUUID);if err != nil {
+		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the gateway UUID", nil)
 	}
-	n := d.DB.Create(body).Error
-	return n
+	err = d.DB.Create(&body).Error; if err != nil {
+		return nil, errorMsg("CreateStreamGateway", "error on trying to add a new stream gateway", nil)
+	}
+	return body, nil
 }
 
-// GetGateway get it
+// GetStreamGateway get it
 func (d *GormDatabase) GetStreamGateway(uuid string) (*model.Stream, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ? ", uuid).First(&gatewayModel); if query.Error != nil {
@@ -53,7 +47,7 @@ func (d *GormDatabase) GetStreamGateway(uuid string) (*model.Stream, error) {
 	return gatewayModel, nil
 }
 
-// DeleteGateway deletes it
+// DeleteStreamGateway deletes it
 func (d *GormDatabase) DeleteStreamGateway(uuid string) (bool, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&gatewayModel);if query.Error != nil {
@@ -68,7 +62,7 @@ func (d *GormDatabase) DeleteStreamGateway(uuid string) (bool, error) {
 
 }
 
-// UpdateGateway  update it
+// UpdateStreamGateway  update it
 func (d *GormDatabase) UpdateStreamGateway(uuid string, body *model.Stream) (*model.Stream, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ?", uuid).Find(&gatewayModel);if query.Error != nil {
@@ -81,7 +75,7 @@ func (d *GormDatabase) UpdateStreamGateway(uuid string, body *model.Stream) (*mo
 
 }
 
-// DropGateways delete all.
+// DropStreamGateways delete all.
 func (d *GormDatabase) DropStreamGateways() (bool, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("1 = 1").Delete(&gatewayModel)

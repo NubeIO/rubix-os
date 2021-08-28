@@ -28,8 +28,7 @@ type CommandSlaves struct {
 	CommonName
 	CommonEnable
 	CommonDescription
-	CommonFlowNetworkName
-	CommonFlowNetworkUUID
+
 }
 
 

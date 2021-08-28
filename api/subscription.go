@@ -1,11 +1,9 @@
 package api
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
-
 )
 
 
@@ -40,7 +38,6 @@ func (j *SubscriptionsAPI) GetSubscriptions(ctx *gin.Context) {
 }
 
 func (j *SubscriptionsAPI) CreateSubscription(ctx *gin.Context) {
-	fmt.Println()
 	body, _ := getBODYSubscription(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
