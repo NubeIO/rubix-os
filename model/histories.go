@@ -1,26 +1,31 @@
 package model
 
+import "time"
 
-//History point history settings TODO add in later
-type History struct {
-	Type string //cov, interval, cov_interval
-	Duration int //15min
-	SizeLimit int //max amount of records to keep, the newest will override the oldest record
+//HistorySettings point history settings TODO add in later
+//type HistorySettings struct {
+//	Type string //cov, interval, cov_interval
+//	Duration int //15min
+//	SizeLimit int //max amount of records to keep, the newest will override the oldest record
+//
+//}
 
+
+//ProducerHistory for storing the history
+type ProducerHistory struct {
+	CommonUUID
+	ProducerUUID    	string  `json:"producer_uuid" gorm:"TYPE:varchar(255) REFERENCES producers;not null;default:null"`
+	SubscriptionUUID    string  `json:"subscription_uuid"` // to track which subscription wrote the current value
+	PresentValue 		float64   `json:"present_value"` //point value
+	ValueRaw     		[]byte    `json:"value_raw"`     //modbus array [0, 11]
+	CreatedAt    		time.Time `json:"created_on"`
 }
 
-
-//PointStore for storing the history
-type PointStore struct {
-	PointUuid     			string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
-	CommonCreated
-	Value          			string `json:"value" sql:"DEFAULT:NULL"`
-	ValueOriginal 			string `json:"value_original"`
-	ValueRaw      			string `json:"value_raw"`
-	Fault        			string `json:"fault"`
-	FaultMessage 			string `json:"fault_message"`
-	TsValue 				string `json:"ts_value"`
-	TsFault 				string `json:"ts_fault"`
-
+//SubscriptionHistory for storing the history
+type SubscriptionHistory struct {
+	CommonUUID
+	SubscriptionUUID    string  `json:"subscription_uuid" gorm:"TYPE:varchar(255) REFERENCES subscriptions;not null;default:null"`
+	PresentValue 		float64   `json:"present_value"` //point value
+	ValueRaw     		[]byte    `json:"value_raw"`     //modbus array [0, 11]
+	CreatedAt    		time.Time `json:"created_on"`
 }
-

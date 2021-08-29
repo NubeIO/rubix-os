@@ -29,6 +29,7 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the gateway UUID", nil)
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Producer)
+	body.Name = nameIsNil(body.Name)
 	err = d.DB.Create(&body).Error; if err != nil {
 		return nil, errorMsg("CreateProducer", "error on trying to add a new Producer", nil)
 	}

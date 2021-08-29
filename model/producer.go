@@ -1,7 +1,5 @@
 package model
 
-
-
 //ProducerSubscriptionList list of all the subscriptions
 // a subscription
 type ProducerSubscriptionList struct {

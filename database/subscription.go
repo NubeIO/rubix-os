@@ -26,6 +26,7 @@ func (d *GormDatabase) CreateSubscription(body *model.Subscription) (*model.Subs
 		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the stream UUID", nil)
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
+	body.Name = nameIsNil(body.Name)
 	query := d.DB.Create(body);if query.Error != nil {
 		return nil, query.Error
 	}

@@ -30,6 +30,7 @@ func (d *GormDatabase) GetStreamGateways(withChildren bool) ([]*model.Stream, er
 func (d *GormDatabase) CreateStreamGateway(body *model.Stream) (*model.Stream, error) {
 	//var gatewayModel []model.Stream
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
+	body.Name = nameIsNil(body.Name)
 	//_, err := d.GetStreamList(body.StreamListUUID);if err != nil {
 	//	return nil, errorMsg("GetStreamGateway", "error on trying to get validate the gateway UUID", nil)
 	//}\
