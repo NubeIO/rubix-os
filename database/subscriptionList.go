@@ -113,10 +113,7 @@ func (d *GormDatabase) SubscriptionAction(uuid string, body interface{}, askRefr
 		} else {
 			return nil, nil
 		}
-
 	}
-
-	return nil, nil
 
 }
 

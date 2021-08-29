@@ -15,7 +15,7 @@ func getUUID(id string) string {
 
 func main()  {
 
-	c := client.NewFlowRestClient("admin", "admin", "0.0.0.0", "1660")
+	c := client.NewSession("admin", "admin", "0.0.0.0", "1660")
 
 	remoteGateway := true
 

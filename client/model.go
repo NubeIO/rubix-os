@@ -17,7 +17,6 @@ type ResponsePlugins struct {
 
 type ResponsePoint struct {
 	Points 		Points 			`json:"response"`
-	//Status     	string 			`json:"status"`
 }
 
 type Points struct {
