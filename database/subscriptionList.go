@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
@@ -50,7 +51,7 @@ func (d *GormDatabase) GetSubscriptionListByThing(producerThingUUID string) (*mo
 
 
 // SubscriptionAction get its value
-func (d *GormDatabase) SubscriptionAction(uuid string, body interface{}, askRefresh bool, askResponse bool, write bool, thingType string) (interface{}, error) { //TODO add in more logic
+func (d *GormDatabase) SubscriptionAction(uuid string, body interface{}, askRefresh bool, askResponse bool, write bool, thingType string, flowNetworkUUID string) (interface{}, error) { //TODO add in more logic
 	var subscriptionListModel *model.SubscriptionList
 	subscriptionList := d.DB.Where("uuid = ? ", uuid).First(&subscriptionListModel); if subscriptionList.Error != nil {
 		return nil, subscriptionList.Error
@@ -63,25 +64,59 @@ func (d *GormDatabase) SubscriptionAction(uuid string, body interface{}, askRefr
 		return nil, subscription.Error
 	}
 	subType := subscriptionModel.SubscriptionType
-	if subType == model.CommonNaming.Point {
-		pnt := new(model.Point)
-		d.DB.Where("uuid = ? ", subscriptionModel.ProducerThingUUID).First(&pnt); if subscription.Error != nil {
+
+	if flowNetworkUUID != "" { //remote point
+		var flowModel *model.FlowNetwork
+		 d.DB.Where("uuid = ? ", flowNetworkUUID).First(&flowModel); if subscription.Error != nil {
 			return nil, subscription.Error
 		}
-		if write {
-			var pointModel *model.Point
-			query := d.DB.Where("uuid = ?", subscriptionModel.ProducerThingUUID).Find(&pointModel);if query.Error != nil {
-				return nil, query.Error
+		if subType == model.CommonNaming.Point {
+			ip := flowModel.FlowIP
+			port := flowModel.FlowPort
+			token := flowModel.FlowToken
+			pntUUID := subscriptionModel.ProducerThingUUID
+
+			if write { //write
+				point, err := eventbus.EventREST(pntUUID, body, ip, port, token, write, thingType)
+				if err != nil {
+					return nil, err
+				}
+				return point, err
+			} else { // read
+				point, err := eventbus.EventREST(pntUUID, body, ip, port, token, write, thingType)
+				if err != nil {
+					return nil, err
+				}
+				return point, err
 			}
-			query = d.DB.Model(&pointModel).Updates(body);if query.Error != nil {
-				return nil, query.Error
-			}
-			return pointModel, nil
+		} else {
+			return nil, nil
 		}
-		return pnt, nil
-	} else {
-		return nil, nil
+
+	} else { // local point
+		if subType == model.CommonNaming.Point {
+			pnt := new(model.Point)
+			d.DB.Where("uuid = ? ", subscriptionModel.ProducerThingUUID).First(&pnt); if subscription.Error != nil {
+				return nil, subscription.Error
+			}
+			if write {
+				var pointModel *model.Point
+				query := d.DB.Where("uuid = ?", subscriptionModel.ProducerThingUUID).Find(&pointModel);if query.Error != nil {
+					return nil, query.Error
+				}
+				query = d.DB.Model(&pointModel).Updates(body);if query.Error != nil {
+					return nil, query.Error
+				}
+				return pointModel, nil
+			}
+			return pnt, nil
+		} else {
+			return nil, nil
+		}
+
 	}
+
+	return nil, nil
 
 }
 
@@ -131,3 +166,10 @@ func (d *GormDatabase) DropSubscriptionsList() (bool, error) {
 
 }
 
+func readValue(){
+
+}
+
+func writeValue(){
+
+}

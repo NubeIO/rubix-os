@@ -10,16 +10,27 @@ type Token struct {
 
 
 type ResponsePlugins struct {
-	//Response 	[]Plugins 			`json:"response"`
 	Response 	Plugins 	`json:"response"`
 	Status     	string 			`json:"status"`
 	Count     	int 			`json:"count"`
 }
 
-//type PluginItems struct {
-//	Items model.PluginConf
-//}
+type ResponsePoint struct {
+	Points 		Points 			`json:"response"`
+	//Status     	string 			`json:"status"`
+}
 
+type Points struct {
+	model.CommonUUID
+	model.CommonName
+	model.CommonDescription
+	model.CommonEnable
+	DeviceUUID     	string `json:"device_uuid"`
+	Writeable 		bool   `json:"writeable"`
+	Cov  			float64 `json:"cov"`
+	ObjectType    	string `json:"object_type"`
+	FallbackValue 	float64 `json:"fallback_value"` //is nullable
+}
 type Plugins struct {
 	Items []model.PluginConf
 }

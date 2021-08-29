@@ -72,7 +72,7 @@ func main()  {
 
 	stream := new(model.Stream)
 	stream.Name = "test"
-	stream.IsRemote = remoteGateway
+
 
 	addGateway, err := c.ClientAddGateway(stream)
 	if err != nil {
