@@ -5,8 +5,10 @@ type FlowNetwork struct {
 	CommonUUID
 	CommonName
 	CommonDescription
+	GlobalFlowID  		string `json:"global_flow_id" gorm:"type:varchar(255);unique;not null"`
+	RemoteFlowUUID  	string `json:"remote_flow_uuid" gorm:"type:varchar(255);unique;not null"` //if is a remote
+	StreamListUUID 		string `json:"stream_list_uuid" gorm:"TYPE:varchar(255) REFERENCES stream_lists;not null;default:null"`
 	IsRemote 	bool `json:"is_remote"`
-	RemoteFlowUUID  string `json:"remote_flow_uuid" gorm:"type:varchar(255);unique;not null"` //if is a remote
 	FlowIP 		string `json:"flow_ip"`
 	FlowPort 	string `json:"flow_port"`
 	FlowHTTPS 	bool `json:"flow_https"`
@@ -18,6 +20,8 @@ type FlowNetwork struct {
 	MqttUsername string `json:"mqtt_username"`
 	MqttPassword string `json:"mqtt_password"`
 	CommonCreated
-	Stream		[]Stream `json:"streams" gorm:"constraint:OnDelete:CASCADE;"`
+
+	//Stream		[]Stream `json:"streams" gorm:"constraint:OnDelete:CASCADE;"`
+
 
 }

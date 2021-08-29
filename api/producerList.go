@@ -11,10 +11,10 @@ import (
 
 // The ProducerListDatabase interface for encapsulating database access.
 type ProducerListDatabase interface {
-	GetProducerList(uuid string) (*model.SubscriberList, error)
-	GetProducerLists() ([]*model.SubscriberList, error)
-	CreateProducerList(body *model.SubscriberList) (*model.SubscriberList, error)
-	UpdateProducerList(uuid string, body *model.SubscriberList) (*model.SubscriberList, error)
+	GetProducerList(uuid string) (*model.ProducerSubscriptionList, error)
+	GetProducerLists() ([]*model.ProducerSubscriptionList, error)
+	CreateProducerList(body *model.ProducerSubscriptionList) (*model.ProducerSubscriptionList, error)
+	UpdateProducerList(uuid string, body *model.ProducerSubscriptionList) (*model.ProducerSubscriptionList, error)
 	DeleteProducerList(uuid string) (bool, error)
 
 

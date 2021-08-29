@@ -22,6 +22,8 @@ type Args struct {
 	Search       string
 	WithChildren string
 	WithPoints   string
+	AskRefresh   string
+	AskResponse   string
 }
 
 var ArgsType = struct {
@@ -32,6 +34,8 @@ var ArgsType = struct {
 	Search       string
 	WithChildren string
 	WithPoints   string
+	AskRefresh string
+	AskResponse string
 }{
 	Sort:         "sort",
 	Order:        "order",
@@ -40,6 +44,10 @@ var ArgsType = struct {
 	Search:       "search",
 	WithChildren: "with_children",
 	WithPoints:   "with_points",
+	AskRefresh:   "ask_refresh",  // subscription to ask for value from the producer, And producer must resend its value, But don't wait for a response
+	AskResponse:  "ask_response", //subscription to ask for value from the producer, And wait for a response
+
+
 }
 
 var ArgsDefault = struct {
@@ -50,6 +58,8 @@ var ArgsDefault = struct {
 	Search       string
 	WithChildren string
 	WithPoints   string
+	AskRefresh 	 string
+	AskResponse  string
 }{
 	Sort:         "ID",
 	Order:        "DESC",
@@ -58,6 +68,8 @@ var ArgsDefault = struct {
 	Search:       "",
 	WithChildren: "false",
 	WithPoints:   "false",
+	AskRefresh:   "false",
+	AskResponse:   "false",
 }
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {
@@ -103,7 +115,7 @@ func getBODYSubscriptionList(ctx *gin.Context) (dto *model.SubscriptionList, err
 	return dto, err
 }
 
-func getBODYProducerList(ctx *gin.Context) (dto *model.SubscriberList, err error) {
+func getBODYProducerList(ctx *gin.Context) (dto *model.ProducerSubscriptionList, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -150,6 +162,16 @@ func WithChildren(value string) (bool, error) {
 		return c, err
 	}
 }
+
+func toBool(value string) (bool, error) {
+	if value == "" {
+		return false, nil
+	} else {
+		c, err := bools.Boolean(value)
+		return c, err
+	}
+}
+
 
 func OK(resp interface{}) Response {
 	return Success(http.StatusOK, resp)

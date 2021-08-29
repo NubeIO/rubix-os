@@ -19,7 +19,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	createDirectoryIfSqlite(dialect, connection)
 	_connection := fmt.Sprintf("%s?_foreign_keys=on", connection)
 	db, err := gorm.Open(sqlite.Open(_connection), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Warn),
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		panic("failed to connect database")
@@ -39,11 +39,12 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var rubixPlat []model.RubixPlat
 	var job []model.Job
 	var stream []model.Stream
+	var streamList []model.StreamList
 	var commandGroup []model.CommandGroup
 	var producer []model.Producer
 	var subscription []model.Subscription
 	var subscriptionList []model.SubscriptionList
-	var producerList []model.SubscriberList
+	var producerList []model.ProducerSubscriptionList
 
 	var models = []interface{}{
 		&alerts,
@@ -61,6 +62,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		//&priorityArrayModel,
 		&job,
 		&stream,
+		&streamList,
 		&commandGroup,
 		&producer,
 		&subscription,

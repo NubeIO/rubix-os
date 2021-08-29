@@ -14,7 +14,7 @@ type Job struct {
 
 func (d *GormDatabase) GetJobs() ([]*model.Job, error) {
 	var jobsModel []*model.Job
-	query := d.DB.Preload(gatewayProducerChildTable).Find(&jobsModel)
+	query := d.DB.Find(&jobsModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

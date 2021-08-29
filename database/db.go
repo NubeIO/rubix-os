@@ -7,6 +7,7 @@ import (
 
 // DropAllFlow networks, gateways, commandGroup, subscriptions, jobs and children.
 func (d *GormDatabase) DropAllFlow() (bool, error) {
+
 	//delete networks
 	var flowNetworkModel *model.FlowNetwork
 	query := d.DB.Where("1 = 1").Delete(&flowNetworkModel)
@@ -20,12 +21,13 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 	if query.Error != nil {
 		return false, query.Error
 	}
+
 	//delete streams
-	//var gatewaysModel *model.Stream
-	//query = d.DB.Where("1 = 1").Delete(&gatewaysModel)
-	//if query.Error != nil {
-	//	return false, query.Error
-	//}
+	var gatewaysModel *model.Stream
+	query = d.DB.Where("1 = 1").Delete(&gatewaysModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
 	//delete jobs
 	var jobModel *model.Job
 	query = d.DB.Where("1 = 1").Delete(&jobModel)
@@ -33,29 +35,29 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 		return false, query.Error
 	}
 	////delete producer
-	//var producerModel *model.Producer
-	//query = d.DB.Where("1 = 1").Delete(&producerModel)
-	//if query.Error != nil {
-	//	return false, query.Error
-	//}
+	var producerModel *model.Producer
+	query = d.DB.Where("1 = 1").Delete(&producerModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
 	////delete subscriptions
-	//var subscriptionModel *model.Subscription
-	//query = d.DB.Where("1 = 1").Delete(&subscriptionModel)
-	//if query.Error != nil {
-	//	return false, query.Error
-	//}
+	var subscriptionModel *model.Subscription
+	query = d.DB.Where("1 = 1").Delete(&subscriptionModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
 	////delete subscriptionsList
-	//var subscriptionsList *model.SubscriptionList
-	//query = d.DB.Where("1 = 1").Delete(&subscriptionsList)
-	//if query.Error != nil {
-	//	return false, query.Error
-	//}
+	var subscriptionsList *model.SubscriptionList
+	query = d.DB.Where("1 = 1").Delete(&subscriptionsList)
+	if query.Error != nil {
+		return false, query.Error
+	}
 	//delete commands
-	//var commandsModel *model.CommandGroup
-	//query = d.DB.Where("1 = 1").Delete(&commandsModel)
-	//if query.Error != nil {
-	//	return false, query.Error
-	//}
+	var commandsModel *model.CommandGroup
+	query = d.DB.Where("1 = 1").Delete(&commandsModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
 	return true, nil
 }
 

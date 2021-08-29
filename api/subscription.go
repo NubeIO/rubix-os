@@ -23,13 +23,11 @@ type SubscriptionsAPI struct {
 	DB SubscriptionsDatabase
 }
 
-
 func (j *SubscriptionsAPI) GetSubscription(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetSubscription(uuid)
 	reposeHandler(q, err, ctx)
 }
-
 
 func (j *SubscriptionsAPI) GetSubscriptions(ctx *gin.Context) {
 	q, err := j.DB.GetSubscriptions()
@@ -47,15 +45,12 @@ func (j *SubscriptionsAPI) CreateSubscription(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-
 func (j *SubscriptionsAPI) UpdateSubscription(ctx *gin.Context) {
 	body, _ := getBODYSubscription(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.UpdateSubscription(uuid, body)
 	reposeHandler(q, err, ctx)
 }
-
-
 
 
 func (j *SubscriptionsAPI) DeleteSubscription(ctx *gin.Context) {

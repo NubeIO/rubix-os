@@ -21,8 +21,9 @@ type SubscriptionsApplication struct {
 //SubscriptionList could be a local network, job or alarm and so on
 type SubscriptionList struct {
 	CommonUUID
-	SubscriptionUUID 		string `json:"subscription_uuid" gorm:"TYPE:string REFERENCES subscriptions;not null;default:null"`
-	ProducerThingUUID 			string `json:"producer_thing_uuid"` // this is the remote point UUID
+	SubscriptionUUID 			string `json:"subscription_uuid" gorm:"TYPE:string REFERENCES subscriptions;not null;default:null"`
+	SubscriptionThingUUID 		string `json:"subscription_thing_uuid"` // this is the subscription child point UUID
+	SubscriptionCOV 			float64 `json:"subscription_cov"`
 	CommonCreated
 }
 
@@ -31,6 +32,7 @@ type SubscriptionList struct {
 //Subscription could be a local network, job or alarm and so on
 type Subscription struct {
 	CommonSubscription
+	ProducerThingUUID 			string `json:"producer_thing_uuid"` // this is the remote point UUID
 	SubscriptionType 			string  `json:"subscription_type"`
 	SubscriptionApplication 	string `json:"subscription_application"`
 	StreamUUID     				string `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`

@@ -13,7 +13,7 @@ type Producer struct {
 // GetProducers get all of them
 func (d *GormDatabase) GetProducers() ([]*model.Producer, error) {
 	var producersModel []*model.Producer
-	query := d.DB.Preload("SubscriberList").Find(&producersModel)
+	query := d.DB.Preload("ProducerSubscriptionList").Find(&producersModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
