@@ -85,3 +85,4 @@ func (d *GormDatabase) DropSubscriptions() (bool, error) {
 	}
 
 }
+

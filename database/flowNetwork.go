@@ -13,7 +13,7 @@ import (
 func (d *GormDatabase) GetFlowNetworks(withChildren bool) ([]*model.FlowNetwork, error) {
 	var flowNetworksModel []*model.FlowNetwork
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload("Stream.Producer.SubscriberList").Preload("Stream.Subscription.SubscriptionList").Find(&flowNetworksModel);if query.Error != nil {
+		query := d.DB.Find(&flowNetworksModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return flowNetworksModel, nil

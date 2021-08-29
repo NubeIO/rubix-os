@@ -264,6 +264,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/subscription/list/:uuid", subscriptionListHandler.UpdateSubscriptionList)
 		control.DELETE("/subscription/list/:uuid", subscriptionListHandler.DeleteSubscriptionList)
 
+		//action's
+		control.GET("/subscription/action/read/:uuid", subscriptionListHandler.SubscriptionRead)
+		control.POST("/subscription/action/write/:uuid", subscriptionListHandler.SubscriptionWrite)
+
 		control.GET("/jobs", jobHandler.GetJobs)
 		control.POST("/job", jobHandler.CreateJob)
 		control.GET("/job/:uuid", jobHandler.GetJob)

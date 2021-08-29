@@ -43,6 +43,10 @@ type Units struct { // for example from temp c to temp f
 
 //CommonPoint if a point is writable or not
 type CommonPoint struct {
+	CommonUUID
+	CommonName
+	CommonDescription
+	CommonEnable
 	Writeable 		bool   `json:"writeable"`
 	Cov  			float64 `json:"cov"`
 	ObjectType    	string `json:"object_type"`
@@ -51,7 +55,6 @@ type CommonPoint struct {
 
 //Point table
 type Point struct {
-	CommonProducer
 	CommonPoint
 	DeviceUUID     			string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 }

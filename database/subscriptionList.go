@@ -48,6 +48,52 @@ func (d *GormDatabase) GetSubscriptionListByThing(producerThingUUID string) (*mo
 }
 
 
+
+// SubscriptionRead get its value
+func (d *GormDatabase) SubscriptionRead(uuid string, askRefresh bool, askResponse bool) (interface{}, error) { //TODO add in more logic
+
+	var subscriptionListModel *model.SubscriptionList
+	subscriptionList := d.DB.Where("uuid = ? ", uuid).First(&subscriptionListModel); if subscriptionList.Error != nil {
+		return nil, subscriptionList.Error
+	}
+
+	if subscriptionListModel == nil {
+		return nil, nil
+	}
+
+	var subscriptionModel *model.Subscription
+	subscription := d.DB.Where("uuid = ? ", subscriptionListModel.SubscriptionUUID).First(&subscriptionModel); if subscription.Error != nil {
+		return nil, subscription.Error
+	}
+	subType := subscriptionModel.SubscriptionType
+	if subType == model.CommonNaming.Point {
+		pnt := new(model.Point)
+		d.DB.Where("uuid = ? ", subscriptionModel.ProducerThingUUID).First(&pnt); if subscription.Error != nil {
+			return nil, subscription.Error
+		}
+
+		return pnt, nil
+	} else {
+		return nil, nil
+	}
+
+
+
+
+
+
+}
+
+// SubscriptionWrite write a value to it
+func (d *GormDatabase) SubscriptionWrite(uuid string, askRefresh bool, askResponse bool) (*model.SubscriptionList, error) { //TODO add in more logic
+	var subscriptionModel *model.SubscriptionList
+	query := d.DB.Where("uuid = ? ", uuid).First(&subscriptionModel); if query.Error != nil {
+		return nil, query.Error
+	}
+	return subscriptionModel, nil
+}
+
+
 // DeleteSubscriptionList deletes it
 func (d *GormDatabase) DeleteSubscriptionList(uuid string) (bool, error) {
 	var subscriptionModel *model.SubscriptionList
@@ -92,3 +138,4 @@ func (d *GormDatabase) DropSubscriptionsList() (bool, error) {
 	}
 
 }
+

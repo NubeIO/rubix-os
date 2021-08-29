@@ -32,14 +32,14 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 		}
 		thingSubscriptionUUID := ""
 		if thingSubscription != nil {
-			thingSubscriptionUUID = thingSubscription.ProducerThingUUID
+			thingSubscriptionUUID = thingSubscription.SubscriptionThingUUID
 		}
 
 		gateway, err := d.GetStreamGateway(producer.StreamUUID)
 		if err != nil {
 			return nil, query.Error
 		}
-		flowNetwork, err := d.GetFlowNetwork(gateway.FlowNetworkUUID)
+		flowNetwork, err := d.GetFlowNetwork(gateway.StreamListUUID)
 		if err != nil {
 			return nil, query.Error
 		}
@@ -50,7 +50,7 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 		fmt.Println("SEND DATA TO", thingSubscriptionUUID, "Description", pointModel.Description)
 	}
 	if thingSubscription  != nil {
-		fmt.Println("thingSubscription", thingSubscription.ProducerThingUUID, thingSubscription.SubscriptionUUID)
+		fmt.Println("thingSubscription", thingSubscription.SubscriptionThingUUID, thingSubscription.SubscriptionUUID)
 		//if thingProducer.ProducerUUID != "" || thingSubscription.ProducerThingUUID != "" {
 		//	busUpdate(pointModel.UUID, "updates", pointModel)
 		//}

@@ -7,12 +7,12 @@ import (
 
 
 type ProducerList struct {
-	*model.SubscriberList
+	*model.ProducerSubscriptionList
 }
 
 // GetProducerLists get all of them
-func (d *GormDatabase) GetProducerLists() ([]*model.SubscriberList, error) {
-	var producersModel []*model.SubscriberList
+func (d *GormDatabase) GetProducerLists() ([]*model.ProducerSubscriptionList, error) {
+	var producersModel []*model.ProducerSubscriptionList
 
 	query := d.DB.Find(&producersModel)
 	if query.Error != nil {
@@ -22,7 +22,7 @@ func (d *GormDatabase) GetProducerLists() ([]*model.SubscriberList, error) {
 }
 
 // CreateProducerList make it
-func (d *GormDatabase) CreateProducerList(body *model.SubscriberList) (*model.SubscriberList, error) {
+func (d *GormDatabase) CreateProducerList(body *model.ProducerSubscriptionList) (*model.ProducerSubscriptionList, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.SubscriptionList)
 	query := d.DB.Create(body);if query.Error != nil {
 		return nil, query.Error
@@ -31,8 +31,8 @@ func (d *GormDatabase) CreateProducerList(body *model.SubscriberList) (*model.Su
 }
 
 // GetProducerList get it
-func (d *GormDatabase) GetProducerList(uuid string) (*model.SubscriberList, error) {
-	var producerModel *model.SubscriberList
+func (d *GormDatabase) GetProducerList(uuid string) (*model.ProducerSubscriptionList, error) {
+	var producerModel *model.ProducerSubscriptionList
 	query := d.DB.Where("uuid = ? ", uuid).First(&producerModel); if query.Error != nil {
 		return nil, query.Error
 	}
@@ -41,8 +41,8 @@ func (d *GormDatabase) GetProducerList(uuid string) (*model.SubscriberList, erro
 
 
 // GetProducerListBySubUUID get it by its
-func (d *GormDatabase) GetProducerListBySubUUID(subscriptionUUID string) (*model.SubscriberList, error) {
-	var producerModel *model.SubscriberList
+func (d *GormDatabase) GetProducerListBySubUUID(subscriptionUUID string) (*model.ProducerSubscriptionList, error) {
+	var producerModel *model.ProducerSubscriptionList
 	query := d.DB.Where("subscription_uuid = ? ", subscriptionUUID).First(&producerModel); if query.Error != nil {
 		return nil, query.Error
 	}
@@ -52,7 +52,7 @@ func (d *GormDatabase) GetProducerListBySubUUID(subscriptionUUID string) (*model
 
 // DeleteProducerList deletes it
 func (d *GormDatabase) DeleteProducerList(uuid string) (bool, error) {
-	var producerModel *model.SubscriberList
+	var producerModel *model.ProducerSubscriptionList
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&producerModel);if query.Error != nil {
 		return false, query.Error
 	}
@@ -66,8 +66,8 @@ func (d *GormDatabase) DeleteProducerList(uuid string) (bool, error) {
 }
 
 // UpdateProducerList  update it
-func (d *GormDatabase) UpdateProducerList(uuid string, body *model.SubscriberList) (*model.SubscriberList, error) {
-	var producerModel *model.SubscriberList
+func (d *GormDatabase) UpdateProducerList(uuid string, body *model.ProducerSubscriptionList) (*model.ProducerSubscriptionList, error) {
+	var producerModel *model.ProducerSubscriptionList
 	query := d.DB.Where("uuid = ?", uuid).Find(&producerModel);if query.Error != nil {
 		return nil, query.Error
 	}
@@ -81,7 +81,7 @@ func (d *GormDatabase) UpdateProducerList(uuid string, body *model.SubscriberLis
 
 // DropProducerList delete all.
 func (d *GormDatabase) DropProducerList() (bool, error) {
-	var producerModel *model.SubscriberList
+	var producerModel *model.ProducerSubscriptionList
 	query := d.DB.Where("1 = 1").Delete(&producerModel)
 	if query.Error != nil {
 		return false, query.Error
