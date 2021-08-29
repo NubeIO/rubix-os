@@ -37,6 +37,7 @@ type Subscription struct {
 	SubscriptionApplication 	string `json:"subscription_application"`
 	StreamUUID     				string `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
 	SubscriptionList			[]SubscriptionList `json:"subscription_list" gorm:"constraint:OnDelete:CASCADE;"`
+	SubscriptionHistory			[]SubscriptionHistory `json:"subscription_histories" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
 }
 

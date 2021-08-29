@@ -16,16 +16,20 @@ type ProducerHistory struct {
 	CommonUUID
 	ProducerUUID    	string  `json:"producer_uuid" gorm:"TYPE:varchar(255) REFERENCES producers;not null;default:null"`
 	SubscriptionUUID    string  `json:"subscription_uuid"` // to track which subscription wrote the current value
-	PresentValue 		float64   `json:"present_value"` //point value
-	ValueRaw     		[]byte    `json:"value_raw"`     //modbus array [0, 11]
-	CreatedAt    		time.Time `json:"created_on"`
+	PresentValue 		float64   `json:"present_value"` //these fields are support as points is the most common use case for histories
+	WriteValue       	float64    `json:"write_value"` // for common use of points
+	ValueRaw     		[]byte    `json:"value_raw"`     //used as example modbus array [0, 11]
+	ValueStore     		[]byte    `json:"value_store"`  //used to story priority_array or any generic data
+	Timestamp    		time.Time `json:"timestamp"`
 }
 
 //SubscriptionHistory for storing the history
 type SubscriptionHistory struct {
 	CommonUUID
 	SubscriptionUUID    string  `json:"subscription_uuid" gorm:"TYPE:varchar(255) REFERENCES subscriptions;not null;default:null"`
-	PresentValue 		float64   `json:"present_value"` //point value
-	ValueRaw     		[]byte    `json:"value_raw"`     //modbus array [0, 11]
-	CreatedAt    		time.Time `json:"created_on"`
+	PresentValue 		float64   `json:"present_value"` //these fields are support as points is the most common use case for histories
+	WriteValue       	float64    `json:"write_value"` // for common use of points
+	ValueRaw     		[]byte    `json:"value_raw"`     //used as example modbus array [0, 11]
+	ValueStore     		[]byte    `json:"value_store"`  //used to story priority_array or any generic data
+	Timestamp    		time.Time `json:"timestamp"`
 }

@@ -45,6 +45,10 @@ type CommonPoint struct {
 	CommonName
 	CommonDescription
 	CommonEnable
+	PresentValue 	float64   `json:"present_value"` //point value
+	WriteValue       float64    `json:"write_value"` //TODO add in logic if user writes to below priority 16
+	ValueRaw     	[]byte    `json:"value_raw"`     //modbus array [0, 11]
+	Fallback  		float64 `json:"fallback"`
 	Writeable       bool    `json:"writeable"`
 	Cov  			float64 `json:"cov"`
 	ObjectType    	string 	`json:"object_type"` //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
@@ -81,6 +85,6 @@ type Priority struct {
 	P13  			float64 `json:"_13"`
 	P14  			float64 `json:"_14"`
 	P15  			float64 `json:"_15"`
-	P16  			float64 `json:"_16"`
+	//P16  			float64 `json:"_16"` removed and added to the point to save one DB write
 	CommonCreated
 }

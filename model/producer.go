@@ -19,6 +19,7 @@ type Producer struct {
 	StreamUUID     			string 	`json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
 	ProducerThingUUID 		string  `json:"producer_thing_uuid"` //a producer_uuid is the point uuid
 	ProducerSubscriptionList	[]ProducerSubscriptionList `json:"subscription_list" gorm:"constraint:OnDelete:CASCADE;"`
+	ProducerHistory				[]ProducerHistory `json:"producer_histories" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
 }
 
