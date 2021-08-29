@@ -4,10 +4,6 @@ package model
 
 type StreamList struct { //TODO add is in so multiple flow networks can tap into an existing stream
 	UUID			string 	`json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
-	//FlowNetworkUUID string `json:"flow_network_uuid" gorm:"TYPE:varchar(255) REFERENCES flow_networks;not null;default:null"`
-	//StreamUUID 		string `json:"stream_uuid" gorm:"TYPE:varchar(255) REFERENCES streams;not null;default:null"`
-	//FlowNetwork			[]FlowNetwork `json:"flow_network_list" gorm:"constraint:OnDelete:CASCADE;"`
-	//Stream				Stream `json:"streams" gorm:"constraint:OnDelete:CASCADE;"`
 }
 
 

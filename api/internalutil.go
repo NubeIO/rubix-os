@@ -23,7 +23,9 @@ type Args struct {
 	WithChildren string
 	WithPoints   string
 	AskRefresh   string
-	AskResponse   string
+	AskResponse  string
+	Write 		 string
+	ThingType 	 string
 }
 
 var ArgsType = struct {
@@ -34,8 +36,10 @@ var ArgsType = struct {
 	Search       string
 	WithChildren string
 	WithPoints   string
-	AskRefresh string
-	AskResponse string
+	AskRefresh 	 string
+	AskResponse  string
+	Write 		 string
+	ThingType 	 string
 }{
 	Sort:         "sort",
 	Order:        "order",
@@ -46,6 +50,8 @@ var ArgsType = struct {
 	WithPoints:   "with_points",
 	AskRefresh:   "ask_refresh",  // subscription to ask for value from the producer, And producer must resend its value, But don't wait for a response
 	AskResponse:  "ask_response", //subscription to ask for value from the producer, And wait for a response
+	Write:  	  "write", //subscription to write a value
+	ThingType:    "thing_type", //the type of thing like a point
 
 
 }
@@ -60,6 +66,8 @@ var ArgsDefault = struct {
 	WithPoints   string
 	AskRefresh 	 string
 	AskResponse  string
+	Write        string
+	ThingType 	 string
 }{
 	Sort:         "ID",
 	Order:        "DESC",
@@ -69,7 +77,9 @@ var ArgsDefault = struct {
 	WithChildren: "false",
 	WithPoints:   "false",
 	AskRefresh:   "false",
-	AskResponse:   "false",
+	AskResponse:  "false",
+	Write:        "false",
+	ThingType:    "point",
 }
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {
@@ -139,6 +149,7 @@ func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
+
 
 func resolveID(ctx *gin.Context) string {
 	id := ctx.Param("uuid")

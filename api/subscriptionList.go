@@ -16,8 +16,7 @@ type SubscriptionListDatabase interface {
 	CreateSubscriptionList(body *model.SubscriptionList) (*model.SubscriptionList, error)
 	UpdateSubscriptionList(uuid string, body *model.SubscriptionList) (*model.SubscriptionList, error)
 	DeleteSubscriptionList(uuid string) (bool, error)
-	SubscriptionRead(uuid string, askRefresh bool, askResponse bool) (interface{}, error)
-	SubscriptionWrite(uuid string, askRefresh bool, askResponse bool) (*model.SubscriptionList, error)
+	SubscriptionAction(uuid string, body interface{}, askRefresh bool, askResponse bool, write bool, thingType string) (interface{}, error)
 }
 
 type SubscriptionListAPI struct {
@@ -65,34 +64,36 @@ func (j *SubscriptionListAPI) DeleteSubscriptionList(ctx *gin.Context) {
 
 
 //withSubscriptionArgs
-func withSubscriptionArgs(ctx *gin.Context) (askResponse bool, askRefresh bool){
+func withSubscriptionArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, write bool, thingType string){
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
 	args.AskRefresh = ctx.DefaultQuery(aType.AskRefresh, aDefault.AskRefresh)
 	args.AskResponse = ctx.DefaultQuery(aType.AskResponse, aDefault.AskResponse)
+	args.Write = ctx.DefaultQuery(aType.Write, aDefault.Write)
+	args.ThingType = ctx.DefaultQuery(aType.ThingType, aDefault.ThingType)
 	askRefresh, _ = toBool(args.AskRefresh)
 	askResponse, _ = toBool(args.AskResponse)
-	return askRefresh, askResponse
+	write, _ = toBool(args.Write)
+	return askRefresh, askResponse, write, args.ThingType
 }
 
 
-//SubscriptionRead get the latest value
+//SubscriptionAction get or update a producer value by using the subscription uuid
 //Default will just read the stored value of the subscription (as in don't get the current value from the producer)
 //AskRefresh:   "ask_refresh",  // subscription to ask for value from the producer, And producer must resend its value, But don't wait for a response
 //AskResponse:  "ask_response", //subscription to ask for value from the producer, And wait for a response
-func (j *SubscriptionListAPI) SubscriptionRead(ctx *gin.Context) {
-	askRefresh, askResponse := withSubscriptionArgs(ctx) //TODO add this in
+//Write:  "write", //write a new value to the subscription
+//thingsType:  "thing_type", //write a new value to the subscription
+func (j *SubscriptionListAPI) SubscriptionAction(ctx *gin.Context) {
+	askRefresh, askResponse, write, thingType := withSubscriptionArgs(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.SubscriptionRead(uuid, askRefresh, askResponse)
-	reposeHandler(q, err, ctx)
-
-}
-
-func (j *SubscriptionListAPI) SubscriptionWrite(ctx *gin.Context) {
-	askResponse, askRefresh := withSubscriptionArgs(ctx) //TODO add this in
-	uuid := resolveID(ctx)
-	q, err := j.DB.SubscriptionWrite(uuid, askRefresh, askResponse)
-	reposeHandler(q, err, ctx)
-
+	//TODO is a remote subscriber then logic needs to be added
+	if thingType == model.CommonNaming.Point{
+		body, _ := getBODYPoint(ctx) //TODO add in support for other types
+		q, err := j.DB.SubscriptionAction(uuid, body ,askRefresh, askResponse, write, thingType)
+		reposeHandler(q, err, ctx)
+	} else {
+		reposeHandler(nil, nil, ctx)
+	}
 }

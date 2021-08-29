@@ -49,18 +49,15 @@ func (d *GormDatabase) GetSubscriptionListByThing(producerThingUUID string) (*mo
 
 
 
-// SubscriptionRead get its value
-func (d *GormDatabase) SubscriptionRead(uuid string, askRefresh bool, askResponse bool) (interface{}, error) { //TODO add in more logic
-
+// SubscriptionAction get its value
+func (d *GormDatabase) SubscriptionAction(uuid string, body interface{}, askRefresh bool, askResponse bool, write bool, thingType string) (interface{}, error) { //TODO add in more logic
 	var subscriptionListModel *model.SubscriptionList
 	subscriptionList := d.DB.Where("uuid = ? ", uuid).First(&subscriptionListModel); if subscriptionList.Error != nil {
 		return nil, subscriptionList.Error
 	}
-
 	if subscriptionListModel == nil {
 		return nil, nil
 	}
-
 	var subscriptionModel *model.Subscription
 	subscription := d.DB.Where("uuid = ? ", subscriptionListModel.SubscriptionUUID).First(&subscriptionModel); if subscription.Error != nil {
 		return nil, subscription.Error
@@ -71,26 +68,21 @@ func (d *GormDatabase) SubscriptionRead(uuid string, askRefresh bool, askRespons
 		d.DB.Where("uuid = ? ", subscriptionModel.ProducerThingUUID).First(&pnt); if subscription.Error != nil {
 			return nil, subscription.Error
 		}
-
+		if write {
+			var pointModel *model.Point
+			query := d.DB.Where("uuid = ?", subscriptionModel.ProducerThingUUID).Find(&pointModel);if query.Error != nil {
+				return nil, query.Error
+			}
+			query = d.DB.Model(&pointModel).Updates(body);if query.Error != nil {
+				return nil, query.Error
+			}
+			return pointModel, nil
+		}
 		return pnt, nil
 	} else {
 		return nil, nil
 	}
 
-
-
-
-
-
-}
-
-// SubscriptionWrite write a value to it
-func (d *GormDatabase) SubscriptionWrite(uuid string, askRefresh bool, askResponse bool) (*model.SubscriptionList, error) { //TODO add in more logic
-	var subscriptionModel *model.SubscriptionList
-	query := d.DB.Where("uuid = ? ", uuid).First(&subscriptionModel); if query.Error != nil {
-		return nil, query.Error
-	}
-	return subscriptionModel, nil
 }
 
 
