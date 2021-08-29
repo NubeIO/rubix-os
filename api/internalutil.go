@@ -26,6 +26,7 @@ type Args struct {
 	AskResponse  string
 	Write 		 string
 	ThingType 	 string
+	FlowNetworkUUID string
 }
 
 var ArgsType = struct {
@@ -40,6 +41,7 @@ var ArgsType = struct {
 	AskResponse  string
 	Write 		 string
 	ThingType 	 string
+	FlowNetworkUUID string
 }{
 	Sort:         "sort",
 	Order:        "order",
@@ -51,7 +53,8 @@ var ArgsType = struct {
 	AskRefresh:   "ask_refresh",  // subscription to ask for value from the producer, And producer must resend its value, But don't wait for a response
 	AskResponse:  "ask_response", //subscription to ask for value from the producer, And wait for a response
 	Write:  	  "write", //subscription to write a value
-	ThingType:    "thing_type", //the type of thing like a point
+	ThingType:    	"thing_type", //the type of thing like a point
+	FlowNetworkUUID:"flow_network_uuid", //the type of thing like a point
 
 
 }
@@ -68,6 +71,7 @@ var ArgsDefault = struct {
 	AskResponse  string
 	Write        string
 	ThingType 	 string
+	FlowNetworkUUID string
 }{
 	Sort:         "ID",
 	Order:        "DESC",
@@ -80,6 +84,7 @@ var ArgsDefault = struct {
 	AskResponse:  "false",
 	Write:        "false",
 	ThingType:    "point",
+	FlowNetworkUUID:    "",
 }
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {

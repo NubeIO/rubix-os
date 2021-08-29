@@ -195,7 +195,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.GET("", api.Hostname)
 		//delete all networks, gateways, commandGroup, subscriptions, jobs and children.
 		control.DELETE("/database/flows/drop", dbGroup.DropAllFlow)
-		control.POST("/database/wizard/mapping/point", dbGroup.WizardLocalPointMapping)
+		control.POST("/database/wizard/mapping/local/point", dbGroup.WizardLocalPointMapping)
+		control.POST("/database/wizard/mapping/remote/point", dbGroup.WizardRemotePointMapping)
 		control.GET("/wires/plat", rubixPlatHandler.GetRubixPlat)
 		control.PATCH("/wires/plat", rubixPlatHandler.UpdateRubixPlat)
 

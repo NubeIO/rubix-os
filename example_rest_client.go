@@ -15,7 +15,7 @@ func getUUID(id string) string {
 
 func main()  {
 
-	c := client.NewFlowRestClient("admin", "admin", "0.0.0.0", "1660")
+	c := client.NewSession("admin", "admin", "0.0.0.0", "1660")
 
 	remoteGateway := true
 
@@ -72,7 +72,7 @@ func main()  {
 
 	stream := new(model.Stream)
 	stream.Name = "test"
-	stream.IsRemote = remoteGateway
+
 
 	addGateway, err := c.ClientAddGateway(stream)
 	if err != nil {
