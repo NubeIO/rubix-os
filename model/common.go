@@ -128,17 +128,6 @@ type CommonStore struct {
 	CommonFault
 }
 
-////CommonProducer a point or job
-//type CommonProducer struct {
-//	CommonUUID
-//	CommonNameUnique
-//	CommonDescription
-//	CommonEnable
-//	CommonValue
-//	CommonHistory
-//	CommonCreated
-//}
-
 
 type CommonProducerPermissions struct {
 	Blacklist 		bool  	`json:"blacklist"`
