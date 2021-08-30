@@ -25,5 +25,4 @@ type FlowNetwork struct {
 	MqttUsername 		string `json:"mqtt_username"`
 	MqttPassword 		string `json:"mqtt_password"`
 	CommonCreated
-
 }
