@@ -11,6 +11,7 @@ import (
 func main()  {
 
 	c := client.NewSessionWithToken("CB9JiejUsQl1OG6", "0.0.0.0", "1660")
+	//pro_772748e553684000
 	var p model.Point
 	p.Name = "new 2222"
 	uuid := "pnt_a893d154d0344fa5"

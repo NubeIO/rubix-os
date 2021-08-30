@@ -2,12 +2,13 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
 
 // ClientAddProducer an object
-func (a *FlowClient) ClientAddProducer(body Producer) (*ResponseBody, error) {
+func (a *FlowClient) ClientAddProducer(body model.Producer) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("sub_name_%s", name)
 	resp, err := a.client.R().
@@ -26,9 +27,9 @@ func (a *FlowClient) ClientAddProducer(body Producer) (*ResponseBody, error) {
 
 
 // ClientGetProducer an object
-func (a *FlowClient) ClientGetProducer(uuid string) (*ResponseBody, error) {
+func (a *FlowClient) ClientGetProducer(uuid string) (*model.Producer, error) {
 	resp, err := a.client.R().
-		SetResult(&ResponseBody{}).
+		SetResult(&model.Producer{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/producer/{uuid}")
 	if err != nil {
@@ -40,25 +41,24 @@ func (a *FlowClient) ClientGetProducer(uuid string) (*ResponseBody, error) {
 	}
 	fmt.Println(resp.String())
 
-	return resp.Result().(*ResponseBody), nil
+	return resp.Result().(*model.Producer), nil
 }
 
 
 // ClientEditProducer edit an object
-func (a *FlowClient) ClientEditProducer(uuid string) (*ResponseBody, error) {
-	name, _ := utils.MakeUUID()
-	name = fmt.Sprintf("sub_new_name_%s", name)
+func (a *FlowClient) ClientEditProducer(uuid string, body model.Producer) (*model.Producer, error) {
 	resp, err := a.client.R().
-		SetResult(&ResponseBody{}).
-		SetBody(map[string]string{"name": name}).
+		SetResult(&model.Producer{}).
+		SetBody(body).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/producer/{}")
+		Patch("/api/producer/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*ResponseBody), nil
+	fmt.Println(resp.String())
+	return resp.Result().(*model.Producer), nil
 }
 

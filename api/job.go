@@ -26,23 +26,24 @@ type JobAPI struct {
 	DB JobDatabase
 }
 
-func reposeHandlerError(err error, ctx *gin.Context) {
-
-	res := BadEntity(err.Error())
-	ctx.JSON(res.GetStatusCode(), res.GetResponse())
-
-}
-
 
 func reposeHandler(body interface{}, err error, ctx *gin.Context) {
 	if err != nil {
-		res := BadEntity(err.Error())
-		ctx.JSON(res.GetStatusCode(), res.GetResponse())
+		ctx.JSON(404, body)
 	} else {
-		res := Data(body)
-		ctx.JSON(res.GetStatusCode(), res.GetResponse())
+		ctx.JSON(200, body)
 	}
 }
+
+//func reposeHandler(body interface{}, err error, ctx *gin.Context) {
+//	if err != nil {
+//		res := BadEntity(err.Error())
+//		ctx.JSON(res.GetStatusCode(), res.GetResponse())
+//	} else {
+//		res := Data(body)
+//		ctx.JSON(res.GetStatusCode(), res.GetResponse())
+//	}
+//}
 
 func (j *JobAPI) GetJobs(ctx *gin.Context) {
 	q, err := j.DB.GetJobs()
