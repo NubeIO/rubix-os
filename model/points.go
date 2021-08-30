@@ -1,8 +1,6 @@
 package model
 
 
-
-
 // Ops TODO add in later
 //Ops Means operations supported by a network, device, point and so on (example point supports point-write)
 type Ops struct {
@@ -47,37 +45,46 @@ type CommonPoint struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	Writeable 		bool   `json:"writeable"`
+	PresentValue 	float64   `json:"present_value"` //point value
+	WriteValue       float64    `json:"write_value"` //TODO add in logic if user writes to below priority 16
+	ValueRaw     	[]byte    `json:"value_raw"`     //modbus array [0, 11]
+	Fallback  		float64 `json:"fallback"`
+	Writeable       bool    `json:"writeable"`
 	Cov  			float64 `json:"cov"`
-	ObjectType    	string `json:"object_type"`
-	FallbackValue 	float64 `json:"fallback_value"` //is nullable
+	ObjectType    	string 	`json:"object_type"` //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
+	AddressId		int 	`json:"address_id"` // for example a modbus address or bacnet address
+	AddressOffset	int 	`json:"address_offset"` // for example a modbus address offset
+	AddressCode		string 	`json:"address_code"` // for example a droplet id (so a string)
+
 }
 
 //Point table
 type Point struct {
 	CommonPoint
-	DeviceUUID     			string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
+	DeviceUUID     	string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
+	CommonCreated
+	Priority 		Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
 }
 
 
 
-type PriorityArrayModel struct {
+type Priority struct {
 	PointUUID     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
+	P1  			float64 `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
+	P2  			float64 `json:"_2"`
+	P3  			float64 `json:"_3"`
+	P4  			float64 `json:"_4"`
+	P5  			float64 `json:"_5"`
+	P6  			float64 `json:"_6"`
+	P7  			float64 `json:"_7"`
+	P8  			float64 `json:"_8"`
+	P9  			float64 `json:"_9"`
+	P10  			float64 `json:"_10"`
+	P11  			float64 `json:"_11"`
+	P12  			float64 `json:"_12"`
+	P13  			float64 `json:"_13"`
+	P14  			float64 `json:"_14"`
+	P15  			float64 `json:"_15"`
+	//P16  			float64 `json:"_16"` removed and added to the point to save one DB write
 	CommonCreated
-	P1  			string `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
-	P2  			string `json:"_2"`
-	P3  			string `json:"_3"`
-	P4  			string `json:"_4"`
-	P5  			string `json:"_5"`
-	P6  			string `json:"_6"`
-	P7  			string `json:"_7"`
-	P8  			string `json:"_8"`
-	P9  			string `json:"_9"`
-	P10  			string `json:"_10"`
-	P11  			string `json:"_11"`
-	P12  			string `json:"_12"`
-	P13  			string `json:"_13"`
-	P14  			string `json:"_14"`
-	P15  			string `json:"_15"`
-	P16  			string `json:"_16"`
 }

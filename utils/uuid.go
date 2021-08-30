@@ -23,14 +23,16 @@ func MakeTopicUUID(attribute string) string {
 	job := "job" //job
 	str := "str" //stream gateway
 	stl := "stl" //list of flow network gateway
-	srb := "pro" //producers
-	srl := "prl" //producersList
+	pro := "pro" //producers
+	prl := "prl" //producersList
+	prh := "prh" //producer history
 	sus := "sub" //subscriptions
 	sul := "sul" //subscriptionsList
 	alt := "alt" //alerts
 	cmd := "cmd" //command
 	rub := "rbx" //rubix uuid
 	rxg := "rxg" //rubix global uuid
+
 	switch attribute {
 	case model.CommonNaming.Plugin:
 		return fmt.Sprintf("%s%s%s", plg, divider, u)
@@ -51,9 +53,11 @@ func MakeTopicUUID(attribute string) string {
 	case model.CommonNaming.Job:
 		return fmt.Sprintf("%s%s%s", job, divider, u)
 	case model.CommonNaming.Producer:
-		return fmt.Sprintf("%s%s%s", srb, divider, u)
+		return fmt.Sprintf("%s%s%s", pro, divider, u)
 	case model.CommonNaming.ProducerList:
-		return fmt.Sprintf("%s%s%s", srl, divider, u)
+		return fmt.Sprintf("%s%s%s", prl, divider, u)
+	case model.CommonNaming.ProducerHistory:
+		return fmt.Sprintf("%s%s%s", prh, divider, u)
 	case model.CommonNaming.Subscription:
 		return fmt.Sprintf("%s%s%s", sus, divider, u)
 	case model.CommonNaming.SubscriptionList:

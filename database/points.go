@@ -7,9 +7,21 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
+func truncateString(str string, num int) string {
+	ret := str
+	if len(str) > num {
+		if num > 3 {
+			num -= 3
+		}
+		ret = str[0:num] + ""
+	}
+	return ret
+}
+
 func nameIsNil(name string) string {
 	if name == "" {
-		return fmt.Sprintf("name_%s", utils.MakeTopicUUID(""))
+		uuid := utils.MakeTopicUUID("")
+		return fmt.Sprintf("n_%s", truncateString(uuid, 6))
 	}
 	return name
 }
@@ -60,7 +72,6 @@ func (d *GormDatabase) CreatePoint( body *model.Point) (*model.Point, error) {
 		return  nil, query.Error
 	}
 	busUpdate(body.UUID, "create", body)
-
 	return body, query.Error
 }
 
@@ -77,25 +88,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 
 	return pointModel, nil
 }
-
-
-//// UpdatePoint returns the device for the given id or nil.
-//func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
-//	var pointModel *model.Point
-//	query := d.DB.Where("uuid = ?", uuid).Find(&pointModel);if query.Error != nil {
-//		return nil, query.Error
-//	}
-//	query = d.DB.Model(&pointModel).Updates(body);if query.Error != nil {
-//		return nil, query.Error
-//	}
-//
-//	_, err := d.DBBusEvent(uuid, pointModel)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return pointModel, nil
-//}
 
 // DeletePoint delete a Device.
 func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {

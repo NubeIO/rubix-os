@@ -16,7 +16,7 @@ type SubscriptionListDatabase interface {
 	CreateSubscriptionList(body *model.SubscriptionList) (*model.SubscriptionList, error)
 	UpdateSubscriptionList(uuid string, body *model.SubscriptionList) (*model.SubscriptionList, error)
 	DeleteSubscriptionList(uuid string) (bool, error)
-	SubscriptionAction(uuid string, body interface{}, askRefresh bool, askResponse bool, write bool, thingType string, flowNetworkUUID string) (interface{}, error)
+	SubscriptionAction(uuid string, body *model.SubscriptionList, write bool) (*model.Producer, error)
 }
 
 type SubscriptionListAPI struct {
@@ -88,14 +88,9 @@ func withSubscriptionArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, 
 //Write:  "write", //write a new value to the subscription
 //thingsType:  "thing_type", //write a new value to the subscription
 func (j *SubscriptionListAPI) SubscriptionAction(ctx *gin.Context) {
-	askRefresh, askResponse, write, thingType, flowNetworkUUID := withSubscriptionArgs(ctx)
+	_, _, write, _, _ := withSubscriptionArgs(ctx)
 	uuid := resolveID(ctx)
-	//TODO is a remote subscriber then logic needs to be added
-	if thingType == model.CommonNaming.Point{
-		body, _ := getBODYPoint(ctx) //TODO add in support for other types
-		q, err := j.DB.SubscriptionAction(uuid, body ,askRefresh, askResponse, write, thingType, flowNetworkUUID)
-		reposeHandler(q, err, ctx)
-	} else {
-		reposeHandler(nil, nil, ctx)
-	}
+	body, _ := getBODYSubscriptionList(ctx)
+	q, err := j.DB.SubscriptionAction(uuid, body, write)
+	reposeHandler(q, err, ctx)
 }

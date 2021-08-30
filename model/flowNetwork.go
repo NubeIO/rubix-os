@@ -23,7 +23,4 @@ type FlowNetwork struct {
 	MqttPassword string `json:"mqtt_password"`
 	CommonCreated
 
-	//Stream		[]Stream `json:"streams" gorm:"constraint:OnDelete:CASCADE;"`
-
-
 }

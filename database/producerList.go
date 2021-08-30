@@ -94,3 +94,22 @@ func (d *GormDatabase) DropProducerList() (bool, error) {
 	}
 
 }
+
+/*
+// get
+ */
+
+//// AddHistory  add a history record
+//func (d *GormDatabase) AddHistory(uuid string, body *model.ProducerSubscriptionList) (*model.ProducerHistory, error) {
+//	var producerModel *model.ProducerSubscriptionList
+//	var producerHist *model.ProducerHistory
+//	query := d.DB.Where("uuid = ?", uuid).Find(&producerModel);if query.Error != nil {
+//		return nil, query.Error
+//	}
+//	body.UUID = utils.MakeTopicUUID(model.CommonNaming.ProducerHistory)
+//	query = d.DB.Model(&producerModel).Updates(body);if query.Error != nil {
+//		return nil, query.Error
+//	}
+//	return producerModel, nil
+//
+//}

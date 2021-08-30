@@ -48,6 +48,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	pointHandler := api.PointAPI{
 		DB: db,
 	}
+	historyHandler := api.HistoriesAPI{
+		DB: db,
+	}
 	jobHandler := api.JobAPI{
 		DB: db,
 	}
@@ -159,7 +162,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			}
 		}
 
-		client := clientAuth.Group("/client")
+		client := clientAuth.Group("/api/client")
 		{
 			client.GET("", clientHandler.GetClients)
 			client.POST("", clientHandler.CreateClient)
@@ -175,18 +178,18 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		}
 
 		clientAuth.GET("/stream", streamHandler.Handle)
-		clientAuth.GET("current/user", userHandler.GetCurrentUser)
-		clientAuth.POST("current/user/password", userHandler.ChangePassword)
-	}
 
-	authAdmin := g.Group("/user")
+	}
+	authAdmin := g.Group("/api")
 	{
 		authAdmin.Use(authentication.RequireAdmin())
-		authAdmin.GET("", userHandler.GetUsers)
-		authAdmin.POST("", userHandler.CreateUser)
-		authAdmin.DELETE("/:id", userHandler.DeleteUserByID)
-		authAdmin.GET("/:id", userHandler.GetUserByID)
-		authAdmin.POST("/:id", userHandler.UpdateUserByID)
+		authAdmin.GET("/users", userHandler.GetUsers)
+		authAdmin.POST("/user", userHandler.CreateUser)
+		authAdmin.PATCH("user/current/password", userHandler.ChangePassword)
+		authAdmin.GET("/user/current", userHandler.GetCurrentUser)
+		authAdmin.DELETE("/user/:id", userHandler.DeleteUserByID)
+		authAdmin.GET("/user/:id", userHandler.GetUserByID)
+		authAdmin.PATCH("/user/:id", userHandler.UpdateUserByID)
 	}
 
 	control := g.Group("api")
@@ -199,6 +202,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.POST("/database/wizard/mapping/remote/point", dbGroup.WizardRemotePointMapping)
 		control.GET("/wires/plat", rubixPlatHandler.GetRubixPlat)
 		control.PATCH("/wires/plat", rubixPlatHandler.UpdateRubixPlat)
+
+
+		control.GET("/history/producers", historyHandler.GetProducerHistories)
+		control.DELETE("/history/producers/drop", historyHandler.DropProducerHistories)
+		control.GET("/history/producers/:uuid", historyHandler.GetProducerHistory)
+		control.DELETE("/history/producers/:uuid", historyHandler.DeleteProducerHistory)
 
 		control.GET("/networks", networkHandler.GetNetworks)
 		control.DELETE("/networks/drop", networkHandler.DropNetworks)

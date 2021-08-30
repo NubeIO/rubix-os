@@ -24,6 +24,9 @@ var CommonNaming = struct {
 	RubixGlobal   	string
 	FlowNetwork   	string
 	RemoteFlowNetwork string
+	History   		string
+	ProducerHistory   		string
+	Histories   	string
 
 }{
 	Plugin:   			"plugin",
@@ -44,6 +47,9 @@ var CommonNaming = struct {
 	RubixGlobal:   		"rubix_global",
 	FlowNetwork:   		"flow_network",
 	RemoteFlowNetwork:   "remote_flow_network",
+	History:   			"history",
+	ProducerHistory:   	"producer_history",
+	Histories:   		"histories",
 }
 
 

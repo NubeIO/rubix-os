@@ -1,19 +1,17 @@
 package database
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-var gatewayProducerChildTable = "Producer"
-var gatewaySubscriptionChildTable = "Subscription"
+
 
 // GetStreamGateways get all of them
 func (d *GormDatabase) GetStreamGateways(withChildren bool) ([]*model.Stream, error) {
 	var gatewaysModel []*model.Stream
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload("Producer.ProducerSubscriptionList").Preload("Subscription.SubscriptionList").Find(&gatewaysModel);if query.Error != nil {
+		query := d.DB.Preload("Producer.ProducerHistory").Preload("Producer.ProducerSubscriptionList").Preload("Subscription.SubscriptionHistory").Preload("Subscription.SubscriptionList").Find(&gatewaysModel);if query.Error != nil {
 			return nil, query.Error
 		}
 		return gatewaysModel, nil
@@ -30,10 +28,7 @@ func (d *GormDatabase) GetStreamGateways(withChildren bool) ([]*model.Stream, er
 func (d *GormDatabase) CreateStreamGateway(body *model.Stream) (*model.Stream, error) {
 	//var gatewayModel []model.Stream
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
-	//_, err := d.GetStreamList(body.StreamListUUID);if err != nil {
-	//	return nil, errorMsg("GetStreamGateway", "error on trying to get validate the gateway UUID", nil)
-	//}\
-	fmt.Println(body.StreamListUUID, 888888888)
+	body.Name = nameIsNil(body.Name)
 	err := d.DB.Create(&body).Error; if err != nil {
 		return nil, errorMsg("CreateStreamGateway", "error on trying to add a new stream gateway", nil)
 	}
