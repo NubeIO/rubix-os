@@ -110,6 +110,7 @@ type GormDatabase struct {
 	DB *gorm.DB
 }
 
+
 // Close closes the gorm database connection.
 func (d *GormDatabase) Close() {
 	fmt.Println("FIX THIS CLOSE DB dont work after upgrade of gorm")

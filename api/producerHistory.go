@@ -12,6 +12,7 @@ type ProducerHistoryDatabase interface {
 	CreateProducerHistory(history *model.ProducerHistory) (*model.ProducerHistory, error)
 	DeleteProducerHistory(uuid string) (bool, error)
 	DropProducerHistories() (bool, error)
+	CreateBulkProducerHistory(history []*model.ProducerHistory) (bool, error)
 }
 type HistoriesAPI struct {
 	DB ProducerHistoryDatabase
@@ -36,11 +37,16 @@ func (a *HistoriesAPI) CreateProducerHistory(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
+func (a *HistoriesAPI) CreateBulkProducerHistory(ctx *gin.Context) {
+	body, _ := getBODYBulkHistory(ctx)
+	q, err := a.DB.CreateBulkProducerHistory(body)
+	reposeHandler(q, err, ctx)
+}
+
 func (a *HistoriesAPI) DeleteProducerHistory(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteProducerHistory(uuid)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *HistoriesAPI) DropProducerHistories(ctx *gin.Context) {

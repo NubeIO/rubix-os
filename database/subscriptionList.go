@@ -90,8 +90,7 @@ func (d *GormDatabase) SubscriptionAction(uuid string, body *model.SubscriptionL
 	flowUUID := fn.UUID
 	isRemote := fn.IsRemote
 	fmt.Println("subType", subType, "subscriptionUUID", subscriptionUUID, "streamUUID", streamUUID, "producerUUID", producerUUID,"flowUUID", flowUUID, "isRemote", isRemote, writeV, write)
-	if !isRemote {
-		//var pm *model.Producer
+	if !isRemote { // local
 		pm := new(model.Producer)
 		query := d.DB.Where("uuid = ?", producerUUID).Find(&pm);if query.Error != nil {
 			return nil, query.Error
@@ -103,6 +102,13 @@ func (d *GormDatabase) SubscriptionAction(uuid string, body *model.SubscriptionL
 			pm.WriteValue = body.WriteValue
 			pm.PresentValue = body.WriteValue
 			query = d.DB.Model(&pm).Updates(pm);if query.Error != nil {
+				return nil, query.Error
+			}
+			ph := new(model.ProducerHistory)
+			ph.UUID = utils.MakeTopicUUID(model.CommonNaming.ProducerHistory)
+			ph.ProducerUUID = producerUUID
+			ph.PresentValue = pm.PresentValue
+			query = d.DB.Model(&ph).Updates(ph);if query.Error != nil {
 				return nil, query.Error
 			}
 			return pm, nil
