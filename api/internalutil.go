@@ -115,6 +115,10 @@ func getBODYHistory(ctx *gin.Context) (dto *model.ProducerHistory, err error) {
 	return dto, err
 }
 
+func getBODYBulkHistory(ctx *gin.Context) (dto []*model.ProducerHistory, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
 
 func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
 	err = ctx.ShouldBindJSON(&dto)

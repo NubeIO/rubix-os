@@ -42,6 +42,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	//TODO add an init for the Jobs, needs to call the db and get all current jobs
 	defer db.Close()
 
 	//router

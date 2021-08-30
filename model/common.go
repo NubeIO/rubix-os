@@ -34,7 +34,7 @@ var CommonNaming = struct {
 	Device:   			"device",
 	Point:   			"point",
 	Stream:   			"stream",
-	StreamList:   			"stream_list",
+	StreamList:   		"stream_list",
 	Job:   				"job",
 	Producer:   		"producer",
 	ProducerList:      "producer_list",

@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	"time"
 )
 
 
@@ -38,6 +39,21 @@ func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*mode
 		return nil, err
 	}
 	return body, nil
+}
+
+
+func (d *GormDatabase) CreateBulkProducerHistory(history []*model.ProducerHistory) (bool, error) {
+	for _, hist := range history {
+		ph := new(model.ProducerHistory)
+		ph.ProducerUUID = hist.ProducerUUID
+		ph.PresentValue = hist.PresentValue
+		ph.Timestamp = time.Now().UTC()
+		_, err := d.CreateProducerHistory(ph)
+		if err != nil {
+			return true, err
+		}
+	}
+	return false, nil
 }
 
 

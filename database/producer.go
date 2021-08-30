@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	"time"
 )
 
 type Producer struct {
@@ -57,6 +58,17 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 	query = d.DB.Model(&producerModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
+	//TODO move this out of here as we need to also store the subscription UUID
+	if producerModel.EnableHistory {
+		ph := new(model.ProducerHistory)
+		ph.ProducerUUID = uuid
+		ph.PresentValue = body.PresentValue
+		ph.Timestamp = time.Now().UTC()
+		_, err := d.CreateProducerHistory(ph)
+		if err != nil {
+			return nil, err
+		}
+	}
 	return producerModel, nil
 }
 
@@ -68,7 +80,6 @@ func (d *GormDatabase) GetProducerByThingUUID(thingUUID string) (*model.Producer
 	}
 	return producerModel, nil
 }
-
 
 
 // DeleteProducer deletes it
