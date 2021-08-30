@@ -71,13 +71,12 @@ func (d *GormDatabase) SubscriptionAction(uuid string, body *model.SubscriptionL
 	subscription := d.DB.Where("uuid = ? ", slm.SubscriptionUUID).First(&sm); if subscription.Error != nil {
 		return nil, subscription.Error
 	}
-
 	subType := sm.SubscriptionType
 	subscriptionUUID := sm.UUID
 	streamUUID := sm.StreamUUID
 	producerUUID := sm.ProducerUUID
 	writeV := body.WriteValue
-
+ 
 	var s *model.Stream
 	stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if subscription.Error != nil {
 		return nil, stream.Error
@@ -112,8 +111,6 @@ func (d *GormDatabase) SubscriptionAction(uuid string, body *model.SubscriptionL
 			}
 			return pm, nil
 		}
-
-
 
 	} else {
 		//add me
