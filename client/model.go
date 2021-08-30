@@ -19,6 +19,20 @@ type ResponsePoint struct {
 	Points 		Points 			`json:"response"`
 }
 
+type ResponseProducer struct {
+	Producer 		model.Producer 			`json:"response"`
+}
+
+//type Producer struct {
+//	PresentValue 			float64   `json:"present_value"` //these fields are support as points is the most common use case for histories
+//	WriteValue       		float64    `json:"write_value"` // for common use of points
+//	ProducerType 			string  `json:"producer_type"`
+//	ProducerApplication 	string 	`json:"producer_application"`
+//	StreamUUID     			string 	`json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
+//	ProducerThingUUID 		string  `json:"producer_thing_uuid"` //a producer_uuid is the point uuid
+//}
+
+
 type Points struct {
 	model.CommonUUID
 	model.CommonName
@@ -56,17 +70,6 @@ type ResponseCommon struct {
 type Stream struct {
 	Name  		string 	`json:"name"`
 	IsRemote  	bool 	`json:"is_remote"`
-}
-type Producer struct {
-	Name                  	string `json:"name"`
-	Enable                	bool   `json:"enable"`
-	ProducerType        	string `json:"producer_type"`
-	ProducerApplication 	string `json:"producer_application"`
-	StreamUUID  	string 	`json:"stream_uuid"`
-	FromUUID 				string `json:"from_uuid"`
-	ToUUID 					string `json:"to_uuid"`
-	IsRemote 				bool 	`json:"is_remote"`
-	RemoteRubixUUID			string 	`json:"remote_rubix_uuid"`
 }
 
 

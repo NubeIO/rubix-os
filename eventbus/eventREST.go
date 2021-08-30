@@ -1,30 +1,33 @@
 package eventbus
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/client"
 	"github.com/NubeDev/flow-framework/model"
 )
 
-func EventREST(uuid string, body interface{}, ip string, port string, token string, write bool, thingType string) (interface{}, error) {
-	c := client.NewSession("admin", "admin", "0.0.0.0", "1660")
-	if thingType == model.CommonNaming.Point && write {
-		point, err := c.ClientEditPoint(uuid, body)
-		if err != nil {
-			return nil, err
+func EventREST(flowBody  *model.FlowNetwork, producerBody *model.Producer, write bool) (*model.Producer, error) {
+	if !flowBody.IsMQTT {
+		ip := flowBody.FlowIP
+		port := flowBody.FlowPort
+		token := flowBody.FlowToken
+		producerUUID := producerBody.UUID
+		c := client.NewSessionWithToken(token, ip, port)
+		if write {
+			point, err := c.ClientEditProducer(producerUUID, *producerBody);if err != nil {
+				return nil, err
+			}
+			return point, err
+		} else {
+			point, err := c.ClientGetProducer(producerUUID);if err != nil {
+				return nil, err
+			}
+			return point, err
 		}
-		fmt.Println(point.Points.UUID)
-		return point, err
-	} else if thingType == model.CommonNaming.Point{
-		point, err := c.ClientGetPoint(uuid)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Println(point.Points.UUID)
-		return point, err
 	}
 	return nil, nil
-
 }
+
+
+
 
 
