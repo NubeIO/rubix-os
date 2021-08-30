@@ -8,11 +8,11 @@ import (
 
 
 // ClientAddProducer an object
-func (a *FlowClient) ClientAddProducer(body model.Producer) (*ResponseBody, error) {
+func (a *FlowClient) ClientAddProducer(body model.Producer) (*model.Producer, error) {
 	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("sub_name_%s", name)
 	resp, err := a.client.R().
-		SetResult(&ResponseBody{}).
+		SetResult(&model.Producer{}).
 		SetBody(body).
 		Post("/api/producer")
 	if err != nil {
@@ -22,7 +22,7 @@ func (a *FlowClient) ClientAddProducer(body model.Producer) (*ResponseBody, erro
 		return nil, getAPIError(resp)
 	}
 	fmt.Println(resp.String())
-	return resp.Result().(*ResponseBody), nil
+	return resp.Result().(*model.Producer), nil
 }
 
 

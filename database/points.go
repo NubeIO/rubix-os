@@ -21,7 +21,7 @@ func truncateString(str string, num int) string {
 func nameIsNil(name string) string {
 	if name == "" {
 		uuid := utils.MakeTopicUUID("")
-		return fmt.Sprintf("n_%s", truncateString(uuid, 6))
+		return fmt.Sprintf("n_%s", truncateString(uuid, 8))
 	}
 	return name
 }
@@ -60,7 +60,7 @@ func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, e
 }
 
 // CreatePoint creates a device.
-func (d *GormDatabase) CreatePoint( body *model.Point) (*model.Point, error) {
+func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	var deviceModel *model.Device
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Point)
 	deviceUUID := body.DeviceUUID

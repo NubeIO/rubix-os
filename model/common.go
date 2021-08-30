@@ -11,10 +11,10 @@ var CommonNaming = struct {
 	Device   		string
 	Point   		string
 	Stream   		string
-	StreamList   		string
+	StreamList   	string
 	Job   			string
-	Producer   	string
-	ProducerList  string
+	Producer   		string
+	ProducerList  	string
 	Subscription   	string
 	SubscriptionList string
 	Alert   		string
@@ -23,10 +23,10 @@ var CommonNaming = struct {
 	Rubix   		string
 	RubixGlobal   	string
 	FlowNetwork   	string
-	RemoteFlowNetwork string
-	History   		string
-	ProducerHistory   		string
-	Histories   	string
+	RemoteFlowNetwork 	string
+	History   			string
+	ProducerHistory   	string
+	Histories   		string
 
 }{
 	Plugin:   			"plugin",
@@ -70,7 +70,7 @@ var CommonNamingCommandGroup = struct {
 
 
 type CommonDescription struct {
-	Description string `json:"description"`
+	Description string `json:"description,omitempty"`
 }
 
 type CommonName struct {

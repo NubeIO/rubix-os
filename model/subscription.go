@@ -21,10 +21,9 @@ type SubscriptionsApplication struct {
 //SubscriptionList could be a local network, job or alarm and so on
 type SubscriptionList struct {
 	CommonUUID
+	WriteValue       			float64  `json:"write_value"` // for common use of points
 	SubscriptionUUID 			string `json:"subscription_uuid" gorm:"TYPE:string REFERENCES subscriptions;not null;default:null"`
 	SubscriptionThingUUID 		string `json:"subscription_thing_uuid"` // this is the subscription child point UUID
-	PresentValue 				float64 `json:"present_value"` //these fields are support as points is the most common use case for histories
-	WriteValue       			float64  `json:"write_value"` // for common use of points
 	SubscriptionCOV 			float64 `json:"subscription_cov"`
 	CommonCreated
 }
@@ -34,11 +33,12 @@ type SubscriptionList struct {
 //Subscription could be a local network, job or alarm and so on
 type Subscription struct {
 	CommonSubscription
+	PresentValue       			float64  `json:"present_value"` // for common use of points
 	ProducerUUID  				string  `json:"producer_uuid"`
-	ProducerThingUUID 			string `json:"producer_thing_uuid"` // this is the remote point UUID
+	ProducerThingUUID 			string 	`json:"producer_thing_uuid"` // this is the remote point UUID
 	SubscriptionType 			string  `json:"subscription_type"`
-	SubscriptionApplication 	string `json:"subscription_application"`
-	StreamUUID     				string `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
+	SubscriptionApplication 	string 	`json:"subscription_application"`
+	StreamUUID     				string 	`json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
 	SubscriptionList			[]SubscriptionList `json:"subscription_list" gorm:"constraint:OnDelete:CASCADE;"`
 	SubscriptionHistory			[]SubscriptionHistory `json:"subscription_histories" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
