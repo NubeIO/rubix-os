@@ -15,13 +15,12 @@ import "time"
 type ProducerHistory struct {
 	CommonUUID
 	ProducerUUID    	string  	`json:"producer_uuid" gorm:"TYPE:varchar(255) REFERENCES producers;not null;default:null"`
-	SubscriptionUUID    string  	`json:"subscription_uuid"` // to track which subscription wrote the current value
 	PresentValue 		float64   	`json:"present_value"` //these fields are support as points is the most common use case for histories
-	WriteValue       	float64    	`json:"write_value"` // for common use of points
+	SLWriteUUID 		string 		`json:"sl_write_uuid"` //subscriptionList UUID
 	ValueRaw     		[]byte    	`json:"value_raw"`     //used as example modbus array [0, 11]
 	ValueStore     		[]byte    	`json:"value_store"`  //used to story priority_array or any generic data
 	Timestamp    		time.Time 	`json:"timestamp"`
-	FlowUUID  			string 		`json:"remote_flow_uuid"` //used for migration
+	//FlowUUID  			string 		`json:"remote_flow_uuid"` //used for migration
 }
 
 //SubscriptionHistory for storing the history

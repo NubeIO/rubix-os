@@ -277,6 +277,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 		//action's
 		control.POST("/subscription/action/:uuid", subscriptionListHandler.SubscriptionAction)
+		control.POST("/subscription/action/point/:uuid", subscriptionListHandler.SubscriptionActionPoint)
 
 
 		control.GET("/jobs", jobHandler.GetJobs)

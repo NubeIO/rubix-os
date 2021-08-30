@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,8 @@ type SubscriptionListDatabase interface {
 	UpdateSubscriptionList(uuid string, body *model.SubscriptionList) (*model.SubscriptionList, error)
 	DeleteSubscriptionList(uuid string) (bool, error)
 	SubscriptionAction(uuid string, body *model.SubscriptionList, write bool) (*model.Producer, error)
+	SubscriptionActionPoint(slUUID string, pointBody *model.Point, write bool) (*model.Producer, error)
+
 }
 
 type SubscriptionListAPI struct {
@@ -88,9 +91,26 @@ func withSubscriptionArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, 
 //Write:  "write", //write a new value to the subscription
 //thingsType:  "thing_type", //write a new value to the subscription
 func (j *SubscriptionListAPI) SubscriptionAction(ctx *gin.Context) {
-	_, _, write, _, _ := withSubscriptionArgs(ctx)
+	_, _, write, thingType, _ := withSubscriptionArgs(ctx)
 	uuid := resolveID(ctx)
+
+	if thingType == model.CommonNaming.Point {
+
+	}
 	body, _ := getBODYSubscriptionList(ctx)
 	q, err := j.DB.SubscriptionAction(uuid, body, write)
+	reposeHandler(q, err, ctx)
+}
+
+//SubscriptionActionPoint get or update a producer value by using the subscription uuid
+func (j *SubscriptionListAPI) SubscriptionActionPoint(ctx *gin.Context) {
+	_, _, write, thingType, _ := withSubscriptionArgs(ctx)
+	uuid := resolveID(ctx)
+	if thingType != model.CommonNaming.Point {
+		reposeHandler("error", errors.New("thing-type must be point"), ctx)
+	}
+	body, _ := getBODYPoint(ctx)
+	//pointUUID string, slUUID string, pointBody *model.Point, write bool
+	q, err := j.DB.SubscriptionActionPoint(uuid, body, write)
 	reposeHandler(q, err, ctx)
 }

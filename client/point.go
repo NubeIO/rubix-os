@@ -2,16 +2,17 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
 
 // ClientAddPoint an object
-func (a *FlowClient) ClientAddPoint(deviceUUID string) (*ResponseBody, error) {
+func (a *FlowClient) ClientAddPoint(deviceUUID string) (*model.Point, error) {
 	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("pnt_name_%s", name)
 	resp, err := a.client.R().
-		SetResult(&ResponseBody{}).
+		SetResult(&model.Point{}).
 		SetBody(map[string]string{"name": name, "device_uuid": deviceUUID}).
 		Post("/api/point")
 	if err != nil {
@@ -20,14 +21,14 @@ func (a *FlowClient) ClientAddPoint(deviceUUID string) (*ResponseBody, error) {
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*ResponseBody), nil
+	return resp.Result().(*model.Point), nil
 }
 
 
 // ClientGetPoint an object
-func (a *FlowClient) ClientGetPoint(uuid string) (*ResponsePoint, error) {
+func (a *FlowClient) ClientGetPoint(uuid string) (*model.Point, error) {
 	resp, err := a.client.R().
-		SetResult(&ResponsePoint{}).
+		SetResult(&model.Point{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/point/{uuid}")
 	if err != nil {
@@ -36,15 +37,15 @@ func (a *FlowClient) ClientGetPoint(uuid string) (*ResponsePoint, error) {
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*ResponsePoint), nil
+	return resp.Result().(*model.Point), nil
 }
 
 
 // ClientEditPoint an object
-func (a *FlowClient) ClientEditPoint(uuid string, body interface{}) (*ResponsePoint, error) {
+func (a *FlowClient) ClientEditPoint(uuid string, body model.Point) (*model.Point, error) {
 	resp, err := a.client.R().
 		SetBody(body).
-		SetResult(&ResponsePoint{}).
+		SetResult(&model.Point{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Patch("/api/point/{uuid}")
 	if err != nil {
@@ -53,7 +54,7 @@ func (a *FlowClient) ClientEditPoint(uuid string, body interface{}) (*ResponsePo
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*ResponsePoint), nil
+	return resp.Result().(*model.Point), nil
 }
 
 
