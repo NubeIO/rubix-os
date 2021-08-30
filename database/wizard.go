@@ -81,6 +81,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	// subscription
 	subscriptionModel.StreamUUID = streamSubscription.UUID
 	subscriptionModel.Name = "subscription stream"
+	subscriptionModel.ProducerUUID =producerModel.UUID
 	subscriptionModel.SubscriptionType = model.CommonNaming.Point
 	subscriptionModel.SubscriptionApplication = model.CommonNaming.Mapping
 	subscriptionModel.ProducerThingUUID = pnt.UUID

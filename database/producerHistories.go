@@ -6,7 +6,6 @@ import (
 )
 
 
-
 // GetProducerHistories returns all histories.
 func (d *GormDatabase) GetProducerHistories() ([]*model.ProducerHistory, error) {
 	var historiesModel []*model.ProducerHistory
