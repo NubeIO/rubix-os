@@ -17,9 +17,9 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var streamListModel model.StreamList
 	var streamModel model.Stream
 	var producerModel model.Producer
-	var subscriptionModel model.Subscription
-	var subscriptionListModel model.SubscriptionList
-	var producerListModel model.ProducerSubscriptionList
+	var consumerModel model.Consumer
+	var writerModel model.Writer
+	var writerCopyModel model.WriterClone
 
 	//get plugin
 	p, err := d.GetPluginByPath("system")
@@ -31,8 +31,8 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	// use the plugin name to add a network then add dev/pnt
 	// make a producer with pnt uuid
 	// make a 2nd point
-	// use pnt1 uuid and pnt2 uuid to make a subscription
-	// add point2 uuid to the producerList so the producer has a record of who is subscribing to it
+	// use pnt1 uuid and pnt2 uuid to make a consumer
+	// add point2 uuid to the writerCopy so the producer has a record of who is subscribing to it
 
 
 	// streamList
@@ -72,43 +72,43 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	producer, err := d.CreateProducer(&producerModel)
 	fmt.Println(producer.Name)
 
-	// subscription stream
+	// consumer stream
 	var streamModel2 model.Stream
-	streamModel2.IsSubscription = true
+	streamModel2.IsConsumer = true
 	streamModel2.StreamListUUID = streamList.UUID
-	streamSubscription, err := d.CreateStreamGateway(&streamModel2)
+	streamConsumer, err := d.CreateStreamGateway(&streamModel2)
 
-	// subscription
-	subscriptionModel.StreamUUID = streamSubscription.UUID
-	subscriptionModel.Name = "subscription stream"
-	subscriptionModel.ProducerUUID =producerModel.UUID
-	subscriptionModel.SubscriptionType = model.CommonNaming.Point
-	subscriptionModel.SubscriptionApplication = model.CommonNaming.Mapping
-	subscriptionModel.ProducerThingUUID = pnt.UUID
-	subscription, err := d.CreateSubscription(&subscriptionModel)
-	fmt.Println(subscription.Name)
+	// consumer
+	consumerModel.StreamUUID = streamConsumer.UUID
+	consumerModel.Name = "consumer stream"
+	consumerModel.ProducerUUID =producerModel.UUID
+	consumerModel.ConsumerType = model.CommonNaming.Point
+	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
+	consumerModel.ProducerThingUUID = pnt.UUID
+	consumer, err := d.CreateConsumer(&consumerModel)
+	fmt.Println(consumer.Name)
 
-	// device to be used for subscription list
+	// device to be used for consumer list
 	deviceModel.NetworkUUID = n.UUID
 	dev2, err := d.CreateDevice(&deviceModel)
 
-	// point 2 to add to subscription list
+	// point 2 to add to consumer list
 	var pointModel2 model.Point
 	pointModel2.DeviceUUID = dev2.UUID
-	pointModel2.Name = "is the subscription"
+	pointModel2.Name = "is the consumer"
 	pnt2, err := d.CreatePoint(&pointModel2)
 
-	// subscriptionList
-	subscriptionListModel.SubscriptionUUID = subscriptionModel.UUID
-	subscriptionListModel.SubscriptionThingUUID = pnt2.UUID
-	subscriptionList, err := d.CreateSubscriptionList(&subscriptionListModel)
-	fmt.Println(subscriptionList)
+	// writer
+	writerModel.ConsumerUUID = consumerModel.UUID
+	writerModel.ConsumerThingUUID = pnt2.UUID
+	writer, err := d.CreateWriter(&writerModel)
+	fmt.Println(writer)
 
-	// add subscription to the producerList
-	producerListModel.ProducerUUID = producer.UUID
-	producerListModel.SubscriptionUUID = pnt2.UUID
-	producerList, err := d.CreateProducerList(&producerListModel)
-	fmt.Println(producerList)
+	// add consumer to the writerCopy
+	writerCopyModel.ProducerUUID = producer.UUID
+	writerCopyModel.ConsumerUUID = pnt2.UUID
+	writerCopy, err := d.CreateWriterCopy(&writerCopyModel)
+	fmt.Println(writerCopy)
 
 	if err != nil {
 		fmt.Println("Error on wizard")
@@ -130,9 +130,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var streamListModel model.StreamList
 	var streamModel model.Stream
 	var producerModel model.Producer
-	var subscriptionModel model.Subscription
-	var subscriptionListModel model.SubscriptionList
-	var producerListModel model.ProducerSubscriptionList
+	var consumerModel model.Consumer
+	var writerModel model.Writer
+	var writerCopyModel model.WriterClone
 
 	//get plugin
 	p, err := d.GetPluginByPath("system")
@@ -144,8 +144,8 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// use the plugin name to add a network then add dev/pnt
 	// make a producer with pnt uuid
 	// make a 2nd point
-	// use pnt1 uuid and pnt2 uuid to make a subscription
-	// add point2 uuid to the producerList so the producer has a record of who is subscribing to it
+	// use pnt1 uuid and pnt2 uuid to make a consumer
+	// add point2 uuid to the writerCopy so the producer has a record of who is subscribing to it
 
 
 	// streamList
@@ -187,43 +187,43 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	producer, err := d.CreateProducer(&producerModel)
 	fmt.Println(producer.Name)
 
-	// subscription stream
+	// consumer stream
 	var streamModel2 model.Stream
-	streamModel2.IsSubscription = true
+	streamModel2.IsConsumer = true
 	streamModel2.StreamListUUID = streamList.UUID
-	streamSubscription, err := d.CreateStreamGateway(&streamModel2)
+	streamConsumer, err := d.CreateStreamGateway(&streamModel2)
 
-	// subscription
-	subscriptionModel.StreamUUID = streamSubscription.UUID
-	subscriptionModel.Name = "subscription stream"
-	subscriptionModel.ProducerUUID =producerModel.UUID
-	subscriptionModel.SubscriptionType = model.CommonNaming.Point
-	subscriptionModel.SubscriptionApplication = model.CommonNaming.Mapping
-	subscriptionModel.ProducerThingUUID = pnt.UUID
-	subscription, err := d.CreateSubscription(&subscriptionModel)
-	fmt.Println(subscription.Name)
+	// consumer
+	consumerModel.StreamUUID = streamConsumer.UUID
+	consumerModel.Name = "consumer stream"
+	consumerModel.ProducerUUID =producerModel.UUID
+	consumerModel.ConsumerType = model.CommonNaming.Point
+	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
+	consumerModel.ProducerThingUUID = pnt.UUID
+	consumer, err := d.CreateConsumer(&consumerModel)
+	fmt.Println(consumer.Name)
 
-	// device to be used for subscription list
+	// device to be used for consumer list
 	deviceModel.NetworkUUID = n.UUID
 	dev2, err := d.CreateDevice(&deviceModel)
 
-	// point 2 to add to subscription list
+	// point 2 to add to consumer list
 	var pointModel2 model.Point
 	pointModel2.DeviceUUID = dev2.UUID
-	pointModel2.Name = "is the subscription"
+	pointModel2.Name = "is the consumer"
 	pnt2, err := d.CreatePoint(&pointModel2)
 
-	// subscriptionList
-	subscriptionListModel.SubscriptionUUID = subscriptionModel.UUID
-	subscriptionListModel.SubscriptionThingUUID = pnt2.UUID
-	subscriptionList, err := d.CreateSubscriptionList(&subscriptionListModel)
-	fmt.Println(subscriptionList)
+	// writer
+	writerModel.ConsumerUUID = consumerModel.UUID
+	writerModel.ConsumerThingUUID = pnt2.UUID
+	writer, err := d.CreateWriter(&writerModel)
+	fmt.Println(writer)
 
-	// add subscription to the producerList
-	producerListModel.ProducerUUID = producer.UUID
-	producerListModel.SubscriptionUUID = pnt2.UUID
-	producerList, err := d.CreateProducerList(&producerListModel)
-	fmt.Println(producerList)
+	// add consumer to the writerCopy
+	writerCopyModel.ProducerUUID = producer.UUID
+	writerCopyModel.ConsumerUUID = pnt2.UUID
+	writerCopy, err := d.CreateWriterCopy(&writerCopyModel)
+	fmt.Println(writerCopy)
 
 	if err != nil {
 		fmt.Println("Error on wizard")

@@ -5,7 +5,7 @@ import (
 )
 
 
-// DropAllFlow networks, gateways, commandGroup, subscriptions, jobs and children.
+// DropAllFlow networks, gateways, commandGroup, consumers, jobs and children.
 func (d *GormDatabase) DropAllFlow() (bool, error) {
 
 	//delete networks
@@ -40,15 +40,15 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 	if query.Error != nil {
 		return false, query.Error
 	}
-	////delete subscriptions
-	var subscriptionModel *model.Subscription
-	query = d.DB.Where("1 = 1").Delete(&subscriptionModel)
+	////delete consumers
+	var consumerModel *model.Consumer
+	query = d.DB.Where("1 = 1").Delete(&consumerModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
-	////delete subscriptionsList
-	var subscriptionsList *model.SubscriptionList
-	query = d.DB.Where("1 = 1").Delete(&subscriptionsList)
+	////delete consumersList
+	var consumersList *model.Writer
+	query = d.DB.Where("1 = 1").Delete(&consumersList)
 	if query.Error != nil {
 		return false, query.Error
 	}
@@ -76,9 +76,9 @@ func (d *GormDatabase) SyncTopics()  {
 	for _, obj := range sub {
 		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Producer, obj.UUID)
 	}
-	rip, err := d.GetSubscriptions()
+	rip, err := d.GetConsumers()
 	for _, obj := range rip {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Subscription, obj.UUID)
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Consumer, obj.UUID)
 	}
 	j, err := d.GetJobs()
 	for _, obj := range j {

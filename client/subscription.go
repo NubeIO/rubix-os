@@ -6,14 +6,14 @@ import (
 )
 
 
-// ClientAddSubscription an object
-func (a *FlowClient) ClientAddSubscription(body Subscription) (*ResponseBody, error) {
+// ClientAddConsumer an object
+func (a *FlowClient) ClientAddConsumer(body Consumer) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("sub_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(body).
-		Post("/api/subscription")
+		Post("/api/consumer")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -25,12 +25,12 @@ func (a *FlowClient) ClientAddSubscription(body Subscription) (*ResponseBody, er
 }
 
 
-// ClientGetSubscription an object
-func (a *FlowClient) ClientGetSubscription(uuid string) (*ResponseBody, error) {
+// ClientGetConsumer an object
+func (a *FlowClient) ClientGetConsumer(uuid string) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/subscription/{uuid}")
+		Get("/api/consumer/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -41,15 +41,15 @@ func (a *FlowClient) ClientGetSubscription(uuid string) (*ResponseBody, error) {
 }
 
 
-// ClientEditSubscription edit an object
-func (a *FlowClient) ClientEditSubscription(uuid string) (*ResponseBody, error) {
+// ClientEditConsumer edit an object
+func (a *FlowClient) ClientEditConsumer(uuid string) (*ResponseBody, error) {
 	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("sub_new_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/subscription/{}")
+		Post("/api/consumer/{}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}

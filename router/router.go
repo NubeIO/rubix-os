@@ -60,13 +60,13 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	producerHandler := api.ProducerAPI{
 		DB: db,
 	}
-	producerListHandler := api.ProducerListAPI{
+	writerCopyHandler := api.WriterCopyAPI{
 		DB: db,
 	}
-	subscriptionHandler := api.SubscriptionsAPI{
+	consumerHandler := api.ConsumersAPI{
 		DB: db,
 	}
-	subscriptionListHandler := api.SubscriptionListAPI{
+	writerHandler := api.WriterAPI{
 		DB: db,
 	}
 	rubixPlatHandler := api.RubixPlatAPI{
@@ -196,7 +196,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	{
 		control.Use(authentication.RequireAdmin())
 		control.GET("", api.Hostname)
-		//delete all networks, gateways, commandGroup, subscriptions, jobs and children.
+		//delete all networks, gateways, commandGroup, consumers, jobs and children.
 		control.DELETE("/database/flows/drop", dbGroup.DropAllFlow)
 		control.POST("/database/wizard/mapping/local/point", dbGroup.WizardLocalPointMapping)
 		control.POST("/database/wizard/mapping/remote/point", dbGroup.WizardRemotePointMapping)
@@ -257,27 +257,27 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/producer/:uuid", producerHandler.UpdateProducer)
 		control.DELETE("/producer/:uuid", producerHandler.DeleteProducer)
 
-		control.GET("/producers/list", producerListHandler.GetProducerLists)
-		control.POST("/producer/list", producerListHandler.CreateProducerList)
-		control.GET("/producer/list/:uuid", producerListHandler.GetProducerList)
-		control.PATCH("/producer/list/:uuid", producerListHandler.UpdateProducerList)
-		control.DELETE("/producer/list/:uuid", producerListHandler.DeleteProducerList)
+		control.GET("/producers/list", writerCopyHandler.GetWriterCopys)
+		control.POST("/producer/list", writerCopyHandler.CreateWriterCopy)
+		control.GET("/producer/list/:uuid", writerCopyHandler.GetWriterCopy)
+		control.PATCH("/producer/list/:uuid", writerCopyHandler.UpdateWriterCopy)
+		control.DELETE("/producer/list/:uuid", writerCopyHandler.DeleteWriterCopy)
 
-		control.GET("/subscriptions", subscriptionHandler.GetSubscriptions)
-		control.POST("/subscription", subscriptionHandler.CreateSubscription)
-		control.GET("/subscription/:uuid", subscriptionHandler.GetSubscription)
-		control.PATCH("/subscription/:uuid", subscriptionHandler.UpdateSubscription)
-		control.DELETE("/subscription/:uuid", subscriptionHandler.DeleteSubscription)
+		control.GET("/consumers", consumerHandler.GetConsumers)
+		control.POST("/consumer", consumerHandler.CreateConsumer)
+		control.GET("/consumer/:uuid", consumerHandler.GetConsumer)
+		control.PATCH("/consumer/:uuid", consumerHandler.UpdateConsumer)
+		control.DELETE("/consumer/:uuid", consumerHandler.DeleteConsumer)
 
-		control.GET("/subscriptions/list", subscriptionListHandler.GetSubscriptionLists)
-		control.POST("/subscription/list", subscriptionListHandler.CreateSubscriptionList)
-		control.GET("/subscription/list/:uuid", subscriptionListHandler.GetSubscriptionList)
-		control.PATCH("/subscription/list/:uuid", subscriptionListHandler.UpdateSubscriptionList)
-		control.DELETE("/subscription/list/:uuid", subscriptionListHandler.DeleteSubscriptionList)
+		control.GET("/consumers/list", writerHandler.GetWriters)
+		control.POST("/consumer/list", writerHandler.CreateWriter)
+		control.GET("/consumer/list/:uuid", writerHandler.GetWriter)
+		control.PATCH("/consumer/list/:uuid", writerHandler.UpdateWriter)
+		control.DELETE("/consumer/list/:uuid", writerHandler.DeleteWriter)
 
 		//action's
-		control.POST("/subscription/action/:uuid", subscriptionListHandler.SubscriptionAction)
-		control.POST("/subscription/action/point/:uuid", subscriptionListHandler.SubscriptionActionPoint)
+		control.POST("/consumer/action/:uuid", writerHandler.ConsumerAction)
+		control.POST("/consumer/action/point/:uuid", writerHandler.ConsumerActionPoint)
 
 
 		control.GET("/jobs", jobHandler.GetJobs)

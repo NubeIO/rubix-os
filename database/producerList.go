@@ -6,13 +6,13 @@ import (
 )
 
 
-type ProducerList struct {
-	*model.ProducerSubscriptionList
+type WriterCopy struct {
+	*model.WriterClone
 }
 
-// GetProducerLists get all of them
-func (d *GormDatabase) GetProducerLists() ([]*model.ProducerSubscriptionList, error) {
-	var producersModel []*model.ProducerSubscriptionList
+// GetWriterCopys get all of them
+func (d *GormDatabase) GetWriterCopys() ([]*model.WriterClone, error) {
+	var producersModel []*model.WriterClone
 
 	query := d.DB.Find(&producersModel)
 	if query.Error != nil {
@@ -21,18 +21,18 @@ func (d *GormDatabase) GetProducerLists() ([]*model.ProducerSubscriptionList, er
 	return producersModel, nil
 }
 
-// CreateProducerList make it
-func (d *GormDatabase) CreateProducerList(body *model.ProducerSubscriptionList) (*model.ProducerSubscriptionList, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.SubscriptionList)
+// CreateWriterCopy make it
+func (d *GormDatabase) CreateWriterCopy(body *model.WriterClone) (*model.WriterClone, error) {
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Writer)
 	query := d.DB.Create(body);if query.Error != nil {
 		return nil, query.Error
 	}
 	return body, nil
 }
 
-// GetProducerList get it
-func (d *GormDatabase) GetProducerList(uuid string) (*model.ProducerSubscriptionList, error) {
-	var producerModel *model.ProducerSubscriptionList
+// GetWriterCopy get it
+func (d *GormDatabase) GetWriterCopy(uuid string) (*model.WriterClone, error) {
+	var producerModel *model.WriterClone
 	query := d.DB.Where("uuid = ? ", uuid).First(&producerModel); if query.Error != nil {
 		return nil, query.Error
 	}
@@ -40,19 +40,19 @@ func (d *GormDatabase) GetProducerList(uuid string) (*model.ProducerSubscription
 }
 
 
-// GetProducerListBySubUUID get it by its
-func (d *GormDatabase) GetProducerListBySubUUID(subscriptionUUID string) (*model.ProducerSubscriptionList, error) {
-	var producerModel *model.ProducerSubscriptionList
-	query := d.DB.Where("subscription_uuid = ? ", subscriptionUUID).First(&producerModel); if query.Error != nil {
+// GetWriterCopyBySubUUID get it by its
+func (d *GormDatabase) GetWriterCopyBySubUUID(consumerUUID string) (*model.WriterClone, error) {
+	var producerModel *model.WriterClone
+	query := d.DB.Where("consumer_uuid = ? ", consumerUUID).First(&producerModel); if query.Error != nil {
 		return nil, query.Error
 	}
 	return producerModel, nil
 }
 
 
-// DeleteProducerList deletes it
-func (d *GormDatabase) DeleteProducerList(uuid string) (bool, error) {
-	var producerModel *model.ProducerSubscriptionList
+// DeleteWriterCopy deletes it
+func (d *GormDatabase) DeleteWriterCopy(uuid string) (bool, error) {
+	var producerModel *model.WriterClone
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&producerModel);if query.Error != nil {
 		return false, query.Error
 	}
@@ -65,13 +65,13 @@ func (d *GormDatabase) DeleteProducerList(uuid string) (bool, error) {
 
 }
 
-// UpdateProducerList  update it
-func (d *GormDatabase) UpdateProducerList(uuid string, body *model.ProducerSubscriptionList) (*model.ProducerSubscriptionList, error) {
-	var producerModel *model.ProducerSubscriptionList
+// UpdateWriterCopy  update it
+func (d *GormDatabase) UpdateWriterCopy(uuid string, body *model.WriterClone) (*model.WriterClone, error) {
+	var producerModel *model.WriterClone
 	query := d.DB.Where("uuid = ?", uuid).Find(&producerModel);if query.Error != nil {
 		return nil, query.Error
 	}
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Consumer)
 	query = d.DB.Model(&producerModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
@@ -79,9 +79,9 @@ func (d *GormDatabase) UpdateProducerList(uuid string, body *model.ProducerSubsc
 
 }
 
-// DropProducerList delete all.
-func (d *GormDatabase) DropProducerList() (bool, error) {
-	var producerModel *model.ProducerSubscriptionList
+// DropWriterCopy delete all.
+func (d *GormDatabase) DropWriterCopy() (bool, error) {
+	var producerModel *model.WriterClone
 	query := d.DB.Where("1 = 1").Delete(&producerModel)
 	if query.Error != nil {
 		return false, query.Error
@@ -100,8 +100,8 @@ func (d *GormDatabase) DropProducerList() (bool, error) {
  */
 
 //// AddHistory  add a history record
-//func (d *GormDatabase) AddHistory(uuid string, body *model.ProducerSubscriptionList) (*model.ProducerHistory, error) {
-//	var producerModel *model.ProducerSubscriptionList
+//func (d *GormDatabase) AddHistory(uuid string, body *model.WriterClone) (*model.ProducerHistory, error) {
+//	var producerModel *model.WriterClone
 //	var producerHist *model.ProducerHistory
 //	query := d.DB.Where("uuid = ?", uuid).Find(&producerModel);if query.Error != nil {
 //		return nil, query.Error

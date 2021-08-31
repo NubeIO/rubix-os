@@ -8,56 +8,56 @@ import (
 )
 
 
-type SubscriptionList struct {
-	*model.SubscriptionList
+type Writer struct {
+	*model.Writer
 }
 
-// GetSubscriptionLists get all of them
-func (d *GormDatabase) GetSubscriptionLists() ([]*model.SubscriptionList, error) {
-	var subscriptionsModel []*model.SubscriptionList
-	query := d.DB.Find(&subscriptionsModel)
+// GetWriters get all of them
+func (d *GormDatabase) GetWriters() ([]*model.Writer, error) {
+	var consumersModel []*model.Writer
+	query := d.DB.Find(&consumersModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriptionsModel, nil
+	return consumersModel, nil
 }
 
-// CreateSubscriptionList make it
-func (d *GormDatabase) CreateSubscriptionList(body *model.SubscriptionList) (*model.SubscriptionList, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.SubscriptionList)
+// CreateWriter make it
+func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Writer)
 	query := d.DB.Create(body);if query.Error != nil {
 		return nil, query.Error
 	}
 	return body, nil
 }
 
-// GetSubscriptionList get it
-func (d *GormDatabase) GetSubscriptionList(uuid string) (*model.SubscriptionList, error) {
-	var subscriptionModel *model.SubscriptionList
-	query := d.DB.Where("uuid = ? ", uuid).First(&subscriptionModel); if query.Error != nil {
+// GetWriter get it
+func (d *GormDatabase) GetWriter(uuid string) (*model.Writer, error) {
+	var consumerModel *model.Writer
+	query := d.DB.Where("uuid = ? ", uuid).First(&consumerModel); if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriptionModel, nil
+	return consumerModel, nil
 }
 
-// GetSubscriptionListByThing get it by its thing uuid
-func (d *GormDatabase) GetSubscriptionListByThing(producerThingUUID string) (*model.SubscriptionList, error) {
-	var subscriptionModel *model.SubscriptionList
-	query := d.DB.Where("producer_thing_uuid = ? ", producerThingUUID).First(&subscriptionModel); if query.Error != nil {
+// GetWriterByThing get it by its thing uuid
+func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer, error) {
+	var consumerModel *model.Writer
+	query := d.DB.Where("producer_thing_uuid = ? ", producerThingUUID).First(&consumerModel); if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriptionModel, nil
+	return consumerModel, nil
 }
 
-// pass in subscriptionList UUID as what starts everything
-// get subscription uuid
+// pass in writer UUID as what starts everything
+// get consumer uuid
 // get producer uuid
 // get flow network uuid
-// get subscription uuid
-// update writeValue to subscriptionList value
-// update writeValue to producerList value
+// get consumer uuid
+// update writeValue to writer value
+// update writeValue to writerCopy value
 // producer to decide to aspect the new write value
-// producer to send a COV event to the subscription if the value was updated.
+// producer to send a COV event to the consumer if the value was updated.
 // add histories if enabled
 
 
@@ -65,54 +65,54 @@ func (d *GormDatabase) GetSubscriptionListByThing(producerThingUUID string) (*mo
 //point
 // - presentValue
 
-// subscription needs readonly of producer presentValue
+// consumer needs readonly of producer presentValue
 // - presentValue
 
-// subscriptionList needs to write to the producerList
+// writer needs to write to the writerCopy
 // - writeValue
 
 //producer
 // - presentValue
-// - SLWriteUUID //subscriptionList UUID
+// - SLWriteUUID //writer UUID
 
-//producerList (subscriptionUUID)
+//writerCopy (consumerUUID)
 // - writeValue
 
 //producerHist
 // - presentValue
-// - SLWriteUUID //subscriptionList UUID
+// - SLWriteUUID //writer UUID
 
-// SubscriptionAction get its value
-func (d *GormDatabase) SubscriptionAction(uuid string, body *model.SubscriptionList, write bool) (*model.Producer, error) {
-	var slm *model.SubscriptionList
-	subscriptionList := d.DB.Where("uuid = ? ", uuid).First(&slm); if subscriptionList.Error != nil {
-		return nil, subscriptionList.Error
+// ConsumerAction get its value
+func (d *GormDatabase) ConsumerAction(uuid string, body *model.Writer, write bool) (*model.Producer, error) {
+	var slm *model.Writer
+	writer := d.DB.Where("uuid = ? ", uuid).First(&slm); if writer.Error != nil {
+		return nil, writer.Error
 	}
 	if slm == nil {
 		return nil, nil
 	}
-	var sm *model.Subscription
-	subscription := d.DB.Where("uuid = ? ", slm.SubscriptionUUID).First(&sm); if subscription.Error != nil {
-		return nil, subscription.Error
+	var sm *model.Consumer
+	consumer := d.DB.Where("uuid = ? ", slm.ConsumerUUID).First(&sm); if consumer.Error != nil {
+		return nil, consumer.Error
 	}
-	subType := sm.SubscriptionType
-	subscriptionUUID := sm.UUID
+	subType := sm.ConsumerType
+	consumerUUID := sm.UUID
 	streamUUID := sm.StreamUUID
 	producerUUID := sm.ProducerUUID
 	writeV := body.WriteValue
  
 	var s *model.Stream
-	stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if subscription.Error != nil {
+	stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if consumer.Error != nil {
 		return nil, stream.Error
 	}
 	streamListUUID := s.StreamListUUID
 	var fn *model.FlowNetwork
-	flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if subscription.Error != nil {
+	flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if consumer.Error != nil {
 		return nil, flow.Error
 	}
 	flowUUID := fn.UUID
 	isRemote := fn.IsRemote
-	fmt.Println("subType", subType, "subscriptionUUID", subscriptionUUID, "streamUUID", streamUUID, "producerUUID", producerUUID,"flowUUID", flowUUID, "isRemote", isRemote, writeV, write)
+	fmt.Println("subType", subType, "consumerUUID", consumerUUID, "streamUUID", streamUUID, "producerUUID", producerUUID,"flowUUID", flowUUID, "isRemote", isRemote, writeV, write)
 	if !isRemote { // local
 		pm := new(model.Producer)
 		query := d.DB.Where("uuid = ?", producerUUID).Find(&pm);if query.Error != nil {
@@ -152,21 +152,21 @@ func (d *GormDatabase) SubscriptionAction(uuid string, body *model.SubscriptionL
 	}
 }
 
-// pass in subscriptionList UUID as what starts everything
-// get subscription uuid
+// pass in writer UUID as what starts everything
+// get consumer uuid
 // get producer uuid
 // get flow network uuid
-// get subscription uuid
-// get update writeValue to subscription
+// get consumer uuid
+// get update writeValue to consumer
 // send event to point to update writeValue and update the point
 // update the priory array
 // update the producer based of what the point returns
-// producer to send a COV event to the subscription.
-// subscription to update the presentValue and the history if enabled
+// producer to send a COV event to the consumer.
+// consumer to update the presentValue and the history if enabled
 
-// SubscriptionActionPoint get its value or write
-func (d *GormDatabase) SubscriptionActionPoint(slUUID string, pointBody *model.Point, write bool) (*model.Producer, error) {
-	var slm *model.SubscriptionList
+// ConsumerActionPoint get its value or write
+func (d *GormDatabase) ConsumerActionPoint(slUUID string, pointBody *model.Point, write bool) (*model.Producer, error) {
+	var slm *model.Writer
 	sl := d.DB.Where("uuid = ? ", slUUID).First(&slm); if sl.Error != nil {
 		return nil, sl.Error
 	}
@@ -174,29 +174,29 @@ func (d *GormDatabase) SubscriptionActionPoint(slUUID string, pointBody *model.P
 		return nil, nil
 	}
 
-	var sm *model.Subscription
-	subscription := d.DB.Where("uuid = ? ", slm.SubscriptionUUID).First(&sm); if subscription.Error != nil {
-		return nil, subscription.Error
+	var sm *model.Consumer
+	consumer := d.DB.Where("uuid = ? ", slm.ConsumerUUID).First(&sm); if consumer.Error != nil {
+		return nil, consumer.Error
 	}
-	subType := sm.SubscriptionType
-	subscriptionUUID := sm.UUID
+	subType := sm.ConsumerType
+	consumerUUID := sm.UUID
 	streamUUID := sm.StreamUUID
 	producerUUID := sm.ProducerUUID
 	writeV := pointBody.WriteValue
 	pointUUID := sm.ProducerThingUUID
 
 	var s *model.Stream
-	stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if subscription.Error != nil {
+	stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if consumer.Error != nil {
 		return nil, stream.Error
 	}
 	streamListUUID := s.StreamListUUID
 	var fn *model.FlowNetwork
-	flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if subscription.Error != nil {
+	flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if consumer.Error != nil {
 		return nil, flow.Error
 	}
 	flowUUID := fn.UUID
 	isRemote := fn.IsRemote
-	fmt.Println("subType", subType, "subscriptionUUID", subscriptionUUID, "streamUUID", streamUUID, "producerUUID", producerUUID,"flowUUID", flowUUID, "isRemote", isRemote, writeV, write)
+	fmt.Println("subType", subType, "consumerUUID", consumerUUID, "streamUUID", streamUUID, "producerUUID", producerUUID,"flowUUID", flowUUID, "isRemote", isRemote, writeV, write)
 	if !isRemote { // local
 		pm := new(model.Producer)
 		query := d.DB.Where("uuid = ?", producerUUID).Find(&pm);if query.Error != nil {
@@ -261,10 +261,10 @@ func (d *GormDatabase) SubscriptionActionPoint(slUUID string, pointBody *model.P
 }
 
 
-// DeleteSubscriptionList deletes it
-func (d *GormDatabase) DeleteSubscriptionList(uuid string) (bool, error) {
-	var subscriptionModel *model.SubscriptionList
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&subscriptionModel);if query.Error != nil {
+// DeleteWriter deletes it
+func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
+	var consumerModel *model.Writer
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&consumerModel);if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -276,24 +276,24 @@ func (d *GormDatabase) DeleteSubscriptionList(uuid string) (bool, error) {
 
 }
 
-// UpdateSubscriptionList  update it
-func (d *GormDatabase) UpdateSubscriptionList(uuid string, body *model.SubscriptionList) (*model.SubscriptionList, error) {
-	var subscriptionModel *model.SubscriptionList
-	query := d.DB.Where("uuid = ?", uuid).Find(&subscriptionModel);if query.Error != nil {
+// UpdateWriter  update it
+func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
+	var consumerModel *model.Writer
+	query := d.DB.Where("uuid = ?", uuid).Find(&consumerModel);if query.Error != nil {
 		return nil, query.Error
 	}
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
-	query = d.DB.Model(&subscriptionModel).Updates(body);if query.Error != nil {
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Consumer)
+	query = d.DB.Model(&consumerModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriptionModel, nil
+	return consumerModel, nil
 
 }
 
-// DropSubscriptionsList delete all.
-func (d *GormDatabase) DropSubscriptionsList() (bool, error) {
-	var subscriptionModel *model.SubscriptionList
-	query := d.DB.Where("1 = 1").Delete(&subscriptionModel)
+// DropConsumersList delete all.
+func (d *GormDatabase) DropConsumersList() (bool, error) {
+	var consumerModel *model.Writer
+	query := d.DB.Where("1 = 1").Delete(&consumerModel)
 	if query.Error != nil {
 		return false, query.Error
 	}

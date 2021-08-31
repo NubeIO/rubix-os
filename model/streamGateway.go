@@ -12,10 +12,10 @@ type Stream struct {
 	CommonName
 	CommonDescription
 	StreamListUUID 		string `json:"stream_list_uuid" gorm:"TYPE:varchar(255) REFERENCES stream_lists;not null;default:null"`
-	IsSubscription  	bool   `json:"is_subscription"`
+	IsConsumer  	bool   `json:"is_consumer"`
 	CommonEnable
 	Producer			[]Producer `json:"producers" gorm:"constraint:OnDelete:CASCADE;"`
-	Subscription		[]Subscription `json:"subscription" gorm:"constraint:OnDelete:CASCADE;"`
+	Consumer			[]Consumer `json:"consumer" gorm:"constraint:OnDelete:CASCADE;"`
 	CommandGroup		[]CommandGroup `json:"command_group" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
 }

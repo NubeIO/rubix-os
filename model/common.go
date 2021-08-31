@@ -14,9 +14,9 @@ var CommonNaming = struct {
 	StreamList   	string
 	Job   			string
 	Producer   		string
-	ProducerList  	string
-	Subscription   	string
-	SubscriptionList string
+	WriterCopy  	string
+	Consumer   	string
+	Writer string
 	Alert   		string
 	Mapping   		string
 	CommandGroup   	string
@@ -37,9 +37,9 @@ var CommonNaming = struct {
 	StreamList:   		"stream_list",
 	Job:   				"job",
 	Producer:   		"producer",
-	ProducerList:      "producer_list",
-	Subscription:   	"subscription",
-	SubscriptionList:   "subscription_list",
+	WriterCopy:      "producer_list",
+	Consumer:   	"consumer",
+	Writer:   "writer_clones",
 	Alert:   			"alert",
 	Mapping:   			"mapping",
     CommandGroup:   	"command_group",
@@ -152,7 +152,7 @@ type CommonProducer struct {
 
 }
 
-type CommonSubscription struct {
+type CommonConsumer struct {
 	CommonUUID
 	CommonName
 	CommonDescription

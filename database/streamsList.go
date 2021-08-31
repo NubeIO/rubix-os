@@ -41,9 +41,9 @@ func (d *GormDatabase) GetStreamList(uuid string) (*model.StreamList, error) {
 
 
 // GetStreamListBySubUUID get it by its
-func (d *GormDatabase) GetStreamListBySubUUID(subscriptionUUID string) (*model.StreamList, error) {
+func (d *GormDatabase) GetStreamListBySubUUID(consumerUUID string) (*model.StreamList, error) {
 	var streamListModel *model.StreamList
-	query := d.DB.Where("subscription_uuid = ? ", subscriptionUUID).First(&streamListModel); if query.Error != nil {
+	query := d.DB.Where("consumer_uuid = ? ", consumerUUID).First(&streamListModel); if query.Error != nil {
 		return nil, query.Error
 	}
 	return streamListModel, nil
@@ -71,7 +71,7 @@ func (d *GormDatabase) UpdateStreamList(uuid string, body *model.StreamList) (*m
 	query := d.DB.Where("uuid = ?", uuid).Find(&streamListModel);if query.Error != nil {
 		return nil, query.Error
 	}
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Consumer)
 	query = d.DB.Model(&streamListModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
