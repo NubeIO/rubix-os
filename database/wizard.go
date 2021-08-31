@@ -137,8 +137,11 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	flowNetwork.FlowIP = "0.0.0.0"
 	flowNetwork.FlowPort = "1660"
 	flowNetwork.StreamListUUID = streamList.UUID
-	flowNetwork.RemoteFlowUUID =  utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.GlobalFlowID =  "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
+	flowNetwork.GlobalRemoteFlowID =  "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
+	flowNetwork.RemoteFlowUUID =  "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
+
+
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
 	fmt.Println("CreateFlowNetwork", f.UUID)

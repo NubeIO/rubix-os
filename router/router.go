@@ -60,7 +60,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	producerHandler := api.ProducerAPI{
 		DB: db,
 	}
-
 	consumerHandler := api.ConsumersAPI{
 		DB: db,
 	}
@@ -92,7 +91,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		Notifier: streamHandler,
 		DB:       db,
 	}
-
 	userChangeNotifier.OnUserDeleted(streamHandler.NotifyDeletedUser)
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
@@ -110,7 +108,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		}
 	})
 	g.Use(cors.New(auth.CorsConfig(conf)))
-
 	{
 		g.GET("/plugin", authentication.RequireClient(), pluginHandler.GetPlugins)
 		pluginRoute := g.Group("/plugin/", authentication.RequireClient())
@@ -125,7 +122,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			pluginRoute.POST("/:uuid/network", pluginHandler.EnablePlugin)
 		}
 	}
-
 	g.OPTIONS("/*any")
 
 	// swagger:operation GET /version version getVersion
@@ -142,9 +138,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	g.GET("version", func(ctx *gin.Context) {
 		ctx.JSON(200, vInfo)
 	})
-
 	g.Group("/").Use(authentication.RequireApplicationToken()).POST("/message", messageHandler.CreateMessage)
-
 	clientAuth := g.Group("")
 	{
 		clientAuth.Use(authentication.RequireClient())
@@ -162,7 +156,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				tokenMessage.DELETE("", messageHandler.DeleteMessageWithApplication)
 			}
 		}
-
 		client := clientAuth.Group("/api/client")
 		{
 			client.GET("", clientHandler.GetClients)
@@ -170,14 +163,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			client.DELETE("/:id", clientHandler.DeleteClient)
 			client.PUT("/:id", clientHandler.UpdateClient)
 		}
-
 		message := clientAuth.Group("/message")
 		{
 			message.GET("", messageHandler.GetMessages)
 			message.DELETE("", messageHandler.DeleteMessages)
 			message.DELETE("/:id", messageHandler.DeleteMessage)
 		}
-
 		clientAuth.GET("/stream", streamHandler.Handle)
 
 	}
@@ -281,7 +272,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		//action's writers clones
 		control.GET("/writer/clone/:uuid", writerCloneHandler.GetWriterClone)
 		control.PATCH("/writer/clone/:uuid", writerCloneHandler.UpdateWriterClone)
-
 
 		control.GET("/jobs", jobHandler.GetJobs)
 		control.POST("/job", jobHandler.CreateJob)

@@ -18,7 +18,7 @@ type WriterClone struct {
 type Producer struct {
 	CommonProducer
 	PresentValue 			float64  `json:"present_value"` //these fields are support as points is the most common use case for histories
-	SLWriteUUID       		string  `json:"sl_write_uuid"`
+	WriterUUID       		string  `json:"writer_uuid"`
 	ProducerType 			string  `json:"producer_type"` //point, schedule, job, network
 	EnableHistory 			bool 	`json:"enable_history"`
 	ProducerApplication 	string 	`json:"producer_application"`

@@ -76,6 +76,7 @@ func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone) (
 	pro := new(model.Producer)
 	proUUID := 	wcm.ProducerUUID
 	pro.PresentValue = wcm.WriteValue
+	pro.WriterUUID = uuid
 	_, err := d.UpdateProducer(proUUID, pro);if err != nil {
 		return nil, err
 	}

@@ -156,7 +156,6 @@ func (d *GormDatabase) RemoteWriterAction(uuid string, body *model.Writer, write
 }
 
 
-
 // WriterActionPoint get its value or write
 func (d *GormDatabase) WriterActionPoint(slUUID string, pointBody *model.Point, write bool) (*model.Producer, error) {
 	var slm *model.Writer
@@ -264,7 +263,6 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	} else {
 		return true, nil
 	}
-
 }
 
 // UpdateWriter  update it
