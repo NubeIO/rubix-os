@@ -2,8 +2,6 @@ package database
 
 import (
 	"errors"
-	"fmt"
-
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/rest"
 	"github.com/NubeDev/flow-framework/utils"
@@ -133,53 +131,43 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.Writer, askRef
 	return nil, errors.New("error: fail to update the remote producer")
 }
 
-func (d *GormDatabase) RemoteWriterRead(uuid string) (*model.Writer, error) {
-	//var wm *model.Writer
-		fmt.Println("fix me")
-		return nil, nil
-	//writer := d.DB.Where("uuid = ? ", uuid).First(&wm); if writer.Error != nil {
-	//	return nil, writer.Error
-	//}
-	//if wm == nil {
-	//	return nil, errors.New("error: failed to find writer")
-	//}
-	//var cm *model.Consumer
-	//consumer := d.DB.Where("uuid = ? ", wm.ConsumerUUID).First(&cm); if consumer.Error != nil {
-	//	return nil, consumer.Error
-	//}
-	//consumerUUID := cm.UUID
-	//streamUUID := cm.StreamUUID
-	//producerUUID := cm.ProducerUUID
-	//var s *model.Stream
-	//stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if consumer.Error != nil {
-	//	return nil, stream.Error
-	//}
-	//streamListUUID := s.StreamListUUID
-	//var fn *model.FlowNetwork
-	//flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if consumer.Error != nil {
-	//	return nil, flow.Error
-	//}
-	//fmt.Println(111111)
-	//producerFeedback, err := rest.ProducerRead(fn, producerUUID);if err != nil {
-	//	return nil, errors.New("error: on get feedback from producer")
-	//}
-	//fmt.Println(111111)
-	//// update the consumer based of the response from the producer
-	//updateConsumer:= new(model.Consumer)
-	//updateConsumer.PresentValue =producerFeedback.PresentValue
-	//pro, _ := d.UpdateConsumer(consumerUUID, updateConsumer);if err != nil {
-	//	return nil, errors.New("error: on update consumer feedback")
-	//}
-	//fmt.Println(111111)
-	//newWriter:= new(model.Writer)
-	//newWriter.PresentValue = pro.PresentValue
-	//// now update the writer
-	//fmt.Println(111111)
-	//updateWriter, _ := d.UpdateWriter(uuid, newWriter);if err != nil {
-	//	return nil, errors.New("error: on update consumer feedback")
-	//}
-	//return updateWriter, err
 
+func (d *GormDatabase) RemoteWriterRead(uuid string) (*model.ProducerHistory, error) {
+	var wm *model.Writer
+	writer := d.DB.Where("uuid = ? ", uuid).First(&wm); if writer.Error != nil {
+		return nil, writer.Error
+	}
+	if wm == nil {
+		return nil, nil
+	}
+
+	var cm *model.Consumer
+	consumer := d.DB.Where("uuid = ? ", wm.ConsumerUUID).First(&cm); if consumer.Error != nil {
+		return nil, consumer.Error
+	}
+	consumerUUID := cm.UUID
+	streamUUID := cm.StreamUUID
+	producerUUID := cm.ProducerUUID
+	var s *model.Stream
+	stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if consumer.Error != nil {
+		return nil, stream.Error
+	}
+	streamListUUID := s.StreamListUUID
+	var fn *model.FlowNetwork
+	flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if consumer.Error != nil {
+		return nil, flow.Error
+	}
+	producerFeedback, err := rest.ProducerHistory(fn, producerUUID);if err != nil {
+		return nil, errors.New("error: on get feedback from producer history")
+	}
+	// update the consumer based of the response from the producer
+	updateConsumer:= new(model.Consumer)
+	updateConsumer.DataStore = producerFeedback.DataStore
+	updateConsumer.CurrentWriterCloneUUID = producerFeedback.CurrentWriterCloneUUID
+	_, _ = d.UpdateConsumer(consumerUUID, updateConsumer);if err != nil {
+		return nil, errors.New("error: on update consumer feedback")
+	}
+	return producerFeedback, err
 
 }
 
