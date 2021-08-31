@@ -29,21 +29,16 @@ type JobAPI struct {
 
 func reposeHandler(body interface{}, err error, ctx *gin.Context) {
 	if err != nil {
-		ctx.JSON(404, body)
+		if body == nil {
+			ctx.JSON(404, "unknown error")
+		} else {
+			ctx.JSON(404, err.Error())
+		}
 	} else {
 		ctx.JSON(200, body)
 	}
 }
 
-//func reposeHandler(body interface{}, err error, ctx *gin.Context) {
-//	if err != nil {
-//		res := BadEntity(err.Error())
-//		ctx.JSON(res.GetStatusCode(), res.GetResponse())
-//	} else {
-//		res := Data(body)
-//		ctx.JSON(res.GetStatusCode(), res.GetResponse())
-//	}
-//}
 
 func (j *JobAPI) GetJobs(ctx *gin.Context) {
 	q, err := j.DB.GetJobs()
@@ -79,27 +74,6 @@ func (j *JobAPI) DeleteJob(ctx *gin.Context) {
 	q, err := j.DB.DeleteJob(uuid)
 	reposeHandler(q, err, ctx)
 }
-
-
-/*
-add job
-- don't start job until it has one or more producers
-
-edit job
-- if is set disable then notify all producer's and for enable do the same
-
-delete job
-- notify all producer's, and they will unsubscribe
-
-job producer
-- On add: make sure the job uuid is valid
-- On delete: update the producer's list and unsubscribe
-
-remote producer
-- required: rubix-uuid
-- optional: point uuid (required network_name and device_name and point_name)
-
-*/
 
 func (j *JobAPI) initCron() {
 	CRON = 	gocron.NewScheduler(time.UTC)
