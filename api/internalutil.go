@@ -170,6 +170,7 @@ func resolveID(ctx *gin.Context) string {
 	id := ctx.Param("uuid")
 	return id
 }
+
 func resolveName(ctx *gin.Context) string {
 	id := ctx.Param("name")
 	return id

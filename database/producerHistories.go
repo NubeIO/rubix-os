@@ -1,8 +1,11 @@
 package database
 
 import (
+	"encoding/json"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	"reflect"
+	"strings"
 	"time"
 )
 
@@ -19,10 +22,43 @@ func (d *GormDatabase) GetProducerHistories() ([]*model.ProducerHistory, error) 
 
 }
 
+func CompareJSONToStruct(bytes []byte, empty interface{}) bool {
+	var mapped map[string]interface{}
+	if err := json.Unmarshal(bytes, &mapped); err != nil {
+		return false
+	}
+	emptyValue := reflect.ValueOf(empty).Type()
+	// check if number of fields is the same
+	if len(mapped) != emptyValue.NumField() {
+		return false
+	}
+	// check if field names are the same
+	for key := range mapped {
+		if field, found := emptyValue.FieldByName(key); found {
+			if !strings.EqualFold(key, strings.Split(field.Tag.Get("json"), ",")[0]) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // GetProducerHistory returns the history for the given id or nil.
 func (d *GormDatabase) GetProducerHistory(uuid string) (*model.ProducerHistory, error) {
 	var historyModel *model.ProducerHistory
-	query := d.DB.Where("uuid = ? ", uuid).First(&historyModel)
+	query := d.DB.Where("producer_uuid = ? ", uuid).Order("timestamp DESC").First(&historyModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return historyModel, nil
+
+}
+
+
+// HistoryByProducerUUID returns the history for the given id or nil.
+func (d *GormDatabase) HistoryByProducerUUID(uuid string) (*model.ProducerHistory, error) {
+	var historyModel *model.ProducerHistory
+	query := d.DB.Where("producer_uuid` = ? ", uuid).First(&historyModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -46,7 +82,7 @@ func (d *GormDatabase) CreateBulkProducerHistory(history []*model.ProducerHistor
 	for _, hist := range history {
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = hist.ProducerUUID
-		ph.PresentValue = hist.PresentValue
+		ph.DataStore = hist.DataStore
 		ph.Timestamp = time.Now().UTC()
 		_, err := d.CreateProducerHistory(ph)
 		if err != nil {

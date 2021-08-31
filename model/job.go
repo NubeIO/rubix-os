@@ -19,8 +19,3 @@ type Job struct {
 	CommonCreated
 
 }
-//
-//type JobProducer struct {
-//	JobUUID    		string  `json:"job_uuid" binding:"required" gorm:"TYPE:varchar(255) REFERENCES jobs;not null;default:null"`
-//	Producer
-//}

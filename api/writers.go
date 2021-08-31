@@ -16,8 +16,8 @@ type WriterDatabase interface {
 	CreateWriter(body *model.Writer) (*model.Writer, error)
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
-	RemoteWriterRead(uuid string) (*model.Writer, error)
-	RemoteWriterWrite(uuid string, body *model.Writer, askRefresh bool) (*model.Writer, error)
+	RemoteWriterRead(uuid string) (*model.ProducerHistory, error)
+	RemoteWriterWrite(uuid string, body *model.Writer, askRefresh bool) (*model.ProducerHistory, error)
 
 }
 
@@ -98,9 +98,9 @@ func (j *WriterAPI) RemoteWriterRead(ctx *gin.Context) {
 
 //RemoteWriterWrite get or update a producer value by using the consumer uuid
 func (j *WriterAPI) RemoteWriterWrite(ctx *gin.Context) {
-	_, _, write, _, _ := withConsumerArgs(ctx)
+	askRefresh, _, _, _, _ := withConsumerArgs(ctx)
 	uuid := resolveID(ctx)
 	body, _ := getBODYWriter(ctx)
-	q, err := j.DB.RemoteWriterWrite(uuid, body, write)
+	q, err := j.DB.RemoteWriterWrite(uuid, body, askRefresh)
 	reposeHandler(q, err, ctx)
 }

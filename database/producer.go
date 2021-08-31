@@ -1,8 +1,11 @@
 package database
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	"gorm.io/datatypes"
 	"time"
 )
 
@@ -58,19 +61,34 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 	query = d.DB.Model(&producerModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	//TODO move this out of here as we need to also store the consumer UUID
-	if producerModel.EnableHistory {
+	return producerModel, nil
+}
+
+type Point struct {
+	Priority model.Priority `json:"priority"`
+}
+
+// ProducerCOV  update it
+func (d *GormDatabase) ProducerCOV(uuid string, writeData datatypes.JSON) error {
 		ph := new(model.ProducerHistory)
+		ph.UUID = utils.MakeTopicUUID("")
 		ph.ProducerUUID = uuid
-		ph.PresentValue = body.PresentValue
+		ph.DataStore = writeData
 		ph.Timestamp = time.Now().UTC()
 		_, err := d.CreateProducerHistory(ph)
 		if err != nil {
-			return nil, err
+			return  err
 		}
-	}
-	return producerModel, nil
+		pnt := Point{}
+		err = json.Unmarshal(writeData, &pnt)
+		if err != nil {
+			return  err
+		}
+		fmt.Println(898989, pnt.Priority.P2, "before insert")
+	return  err
 }
+
+
 
 // GetProducerByThingUUID get it by its
 func (d *GormDatabase) GetProducerByThingUUID(thingUUID string) (*model.Producer, error) {

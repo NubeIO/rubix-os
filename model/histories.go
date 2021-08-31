@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"gorm.io/datatypes"
+	"time"
+)
 
 //HistorySettings point history settings TODO add in later
 //type HistorySettings struct {
@@ -14,22 +17,18 @@ import "time"
 //ProducerHistory for storing the history
 type ProducerHistory struct {
 	CommonUUID
-	ProducerUUID    	string  	`json:"producer_uuid" gorm:"TYPE:varchar(255) REFERENCES producers;not null;default:null"`
-	PresentValue 		float64   	`json:"present_value"` //these fields are support as points is the most common use case for histories
-	SLWriteUUID 		string 		`json:"writer_uuid"` //writer UUID
-	ValueRaw     		[]byte    	`json:"value_raw"`     //used as example modbus array [0, 11]
-	ValueStore     		[]byte    	`json:"value_store"`  //used to story priority_array or any generic data
-	Timestamp    		time.Time 	`json:"timestamp"`
+	ProducerUUID    		string  	`json:"producer_uuid" gorm:"TYPE:varchar(255) REFERENCES producers;not null;default:null"`
+	CurrentWriterCloneUUID  string  	`json:"current_writer_clone_uuid"`
+	DataStore 			datatypes.JSON  `json:"data_store"`
+	Timestamp    		time.Time 		`json:"timestamp"`
 
 }
 
 //ConsumerHistory for storing the history
 type ConsumerHistory struct {
 	CommonUUID
-	ConsumerUUID    string  	`json:"consumer_uuid" gorm:"TYPE:varchar(255) REFERENCES consumers;not null;default:null"`
-	PresentValue 		float64   	`json:"present_value"` //these fields are support as points is the most common use case for histories
-	WriteValue       	float64    	`json:"write_value"` // for common use of points
-	ValueRaw     		[]byte    	`json:"value_raw"`     //used as example modbus array [0, 11]
-	ValueStore     		[]byte    	`json:"value_store"`  //used to story priority_array or any generic data
-	Timestamp    		time.Time 	`json:"timestamp"`
+	ConsumerUUID    	string  		`json:"consumer_uuid" gorm:"TYPE:varchar(255) REFERENCES consumers;not null;default:null"`
+	ProducerUUID    	string
+	DataStore 			datatypes.JSON  `json:"data_store"`
+	Timestamp    		time.Time 		`json:"timestamp"`
 }
