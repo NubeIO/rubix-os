@@ -18,7 +18,7 @@ type WriterDatabase interface {
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
 	RemoteWriterAction(uuid string, body *model.Writer, write bool) (*model.WriterClone, error)
-	WriterActionPoint(slUUID string, pointBody *model.Point, write bool) (*model.Producer, error)
+	WriterActionPoint(uuid string, pointBody *model.Point, askRefresh bool) (*model.Producer, error)
 
 }
 
@@ -91,13 +91,14 @@ func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, writ
 //Write:  "write", //write a new value to the consumer
 //thingsType:  "thing_type", //write a new value to the consumer
 func (j *WriterAPI) RemoteWriterAction(ctx *gin.Context) {
-	_, _, write, _, _ := withConsumerArgs(ctx)
+	askRefresh, _, _, _, _ := withConsumerArgs(ctx)
 	uuid := resolveID(ctx)
 
 	body, _ := getBODYWriter(ctx)
-	q, err := j.DB.RemoteWriterAction(uuid, body, write)
+	q, err := j.DB.RemoteWriterAction(uuid, body, askRefresh)
 	reposeHandler(q, err, ctx)
 }
+
 
 //WriterActionPoint get or update a producer value by using the consumer uuid
 func (j *WriterAPI) WriterActionPoint(ctx *gin.Context) {

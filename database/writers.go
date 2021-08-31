@@ -99,7 +99,7 @@ CONSUMER-BROADCAST
 to Writers to handle as needed
 */
 
-func (d *GormDatabase) RemoteWriterAction(uuid string, body *model.Writer, write bool) (*model.WriterClone, error) {
+func (d *GormDatabase) RemoteWriterAction(uuid string, body *model.Writer, refresh bool) (*model.WriterClone, error) {
 	var wm *model.Writer
 	writer := d.DB.Where("uuid = ? ", uuid).First(&wm); if writer.Error != nil {
 		return nil, writer.Error
@@ -130,11 +130,11 @@ func (d *GormDatabase) RemoteWriterAction(uuid string, body *model.Writer, write
 	wc := new(model.WriterClone)
 	wc.WriteValue = body.WriteValue
 	// update writer clone
-	update, err := rest.WriteClone(writerCloneUUID, fn, wc, write)
+	update, err := rest.WriteClone(writerCloneUUID, fn, wc, true)
 	if err != nil {
 		return nil, errors.New("error: write new value to writerClone")
 	}
-	if write { //get feedback from producer
+	if refresh { //get feedback from producer
 		producerFeedback, err := rest.ProducerRead(fn, producerUUID);if err != nil {
 			return nil, errors.New("error: on get feedback from producer")
 		}
