@@ -16,7 +16,7 @@ type ProducerHistory struct {
 	CommonUUID
 	ProducerUUID    	string  	`json:"producer_uuid" gorm:"TYPE:varchar(255) REFERENCES producers;not null;default:null"`
 	PresentValue 		float64   	`json:"present_value"` //these fields are support as points is the most common use case for histories
-	SLWriteUUID 		string 		`json:"sl_write_uuid"` //writer UUID
+	SLWriteUUID 		string 		`json:"writer_uuid"` //writer UUID
 	ValueRaw     		[]byte    	`json:"value_raw"`     //used as example modbus array [0, 11]
 	ValueStore     		[]byte    	`json:"value_store"`  //used to story priority_array or any generic data
 	Timestamp    		time.Time 	`json:"timestamp"`

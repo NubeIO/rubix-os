@@ -19,21 +19,11 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var producerModel model.Producer
 	var consumerModel model.Consumer
 	var writerModel model.Writer
-	var writerCopyModel model.WriterClone
+	var writerCloneModel model.WriterClone
 
 	//get plugin
 	p, err := d.GetPluginByPath("system")
 	fmt.Println("GetPluginByPath", p.UUID)
-
-	// make a stream list
-	// use the stream_list UUID and add a flow network
-	// use the stream_list UUID and add a stream
-	// use the plugin name to add a network then add dev/pnt
-	// make a producer with pnt uuid
-	// make a 2nd point
-	// use pnt1 uuid and pnt2 uuid to make a consumer
-	// add point2 uuid to the writerCopy so the producer has a record of who is subscribing to it
-
 
 	// streamList
 	streamList, err := d.CreateStreamList(&streamListModel)
@@ -104,11 +94,11 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	writer, err := d.CreateWriter(&writerModel)
 	fmt.Println(writer)
 
-	// add consumer to the writerCopy
-	writerCopyModel.ProducerUUID = producer.UUID
-	writerCopyModel.ConsumerUUID = pnt2.UUID
-	writerCopy, err := d.CreateWriterCopy(&writerCopyModel)
-	fmt.Println(writerCopy)
+	// add consumer to the writerClone
+	writerCloneModel.ProducerUUID = producer.UUID
+	writerCloneModel.ConsumerUUID = pnt2.UUID
+	writerClone, err := d.CreateWriterClone(&writerCloneModel)
+	fmt.Println(writerClone)
 
 	if err != nil {
 		fmt.Println("Error on wizard")
@@ -132,21 +122,13 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var producerModel model.Producer
 	var consumerModel model.Consumer
 	var writerModel model.Writer
-	var writerCopyModel model.WriterClone
+	var writerCloneModel model.WriterClone
 
 	//get plugin
 	p, err := d.GetPluginByPath("system")
 	fmt.Println("GetPluginByPath", p.UUID)
 
-	// make a stream list
-	// use the stream_list UUID and add a flow network
-	// use the stream_list UUID and add a stream
-	// use the plugin name to add a network then add dev/pnt
-	// make a producer with pnt uuid
-	// make a 2nd point
-	// use pnt1 uuid and pnt2 uuid to make a consumer
-	// add point2 uuid to the writerCopy so the producer has a record of who is subscribing to it
-
+	//in writer add writeCloneUUID and same in writerClone
 
 	// streamList
 	streamList, err := d.CreateStreamList(&streamListModel)
@@ -155,8 +137,11 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	flowNetwork.FlowIP = "0.0.0.0"
 	flowNetwork.FlowPort = "1660"
 	flowNetwork.StreamListUUID = streamList.UUID
-	flowNetwork.RemoteFlowUUID =  utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.GlobalFlowID =  "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
+	flowNetwork.GlobalRemoteFlowID =  "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
+	flowNetwork.RemoteFlowUUID =  "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
+
+
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
 	fmt.Println("CreateFlowNetwork", f.UUID)
@@ -219,11 +204,16 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	writer, err := d.CreateWriter(&writerModel)
 	fmt.Println(writer)
 
-	// add consumer to the writerCopy
-	writerCopyModel.ProducerUUID = producer.UUID
-	writerCopyModel.ConsumerUUID = pnt2.UUID
-	writerCopy, err := d.CreateWriterCopy(&writerCopyModel)
-	fmt.Println(writerCopy)
+	// add consumer to the writerClone
+	writerCloneModel.ProducerUUID = producer.UUID
+	writerCloneModel.ConsumerUUID = pnt2.UUID
+	writerCloneModel.WriterUUID = writerModel.UUID
+	writerClone, err := d.CreateWriterClone(&writerCloneModel)
+	fmt.Println(writerClone)
+
+	writerModel.WriteCloneUUID = writerClone.UUID
+	_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
+	fmt.Println(writer)
 
 	if err != nil {
 		fmt.Println("Error on wizard")

@@ -6,8 +6,9 @@ type WriterClone struct {
 	CommonUUID
 	ProducerUUID 		string  `json:"producer_uuid" gorm:"TYPE:string REFERENCES producers;not null;default:null"` // is the producer UUID
 	WriteValue       	float64  `json:"write_value"` // for common use of points
-	ConsumerUUID 	string 	`json:"consumer_uuid"`  // is the remote consumer UUID, ie: whatever is subscribing to this producer
-	ConsumerCOV 	float64 `json:"consumer_cov"`
+	ConsumerUUID 		string 	`json:"consumer_uuid"`  // is the remote consumer UUID, ie: whatever is subscribing to this producer
+	WriterUUID 			string 	`json:"writer_uuid"`  // is the remote consumer UUID, ie: whatever is subscribing to this producer
+	ConsumerCOV 		float64 `json:"consumer_cov"`
 	CommonCreated
 }
 
@@ -17,7 +18,7 @@ type WriterClone struct {
 type Producer struct {
 	CommonProducer
 	PresentValue 			float64  `json:"present_value"` //these fields are support as points is the most common use case for histories
-	SLWriteUUID       		string  `json:"sl_write_uuid"`
+	WriterUUID       		string  `json:"writer_uuid"`
 	ProducerType 			string  `json:"producer_type"` //point, schedule, job, network
 	EnableHistory 			bool 	`json:"enable_history"`
 	ProducerApplication 	string 	`json:"producer_application"`

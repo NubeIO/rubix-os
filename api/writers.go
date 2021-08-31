@@ -17,8 +17,8 @@ type WriterDatabase interface {
 	CreateWriter(body *model.Writer) (*model.Writer, error)
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
-	ConsumerAction(uuid string, body *model.Writer, write bool) (*model.Producer, error)
-	ConsumerActionPoint(slUUID string, pointBody *model.Point, write bool) (*model.Producer, error)
+	RemoteWriterAction(uuid string, body *model.Writer, write bool) (*model.WriterClone, error)
+	WriterActionPoint(uuid string, pointBody *model.Point, askRefresh bool) (*model.Producer, error)
 
 }
 
@@ -84,26 +84,24 @@ func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, writ
 }
 
 
-//ConsumerAction get or update a producer value by using the consumer uuid
+//RemoteWriterAction get or update a producer value by using the consumer uuid
 //Default will just read the stored value of the consumer (as in don't get the current value from the producer)
 //AskRefresh:   "ask_refresh",  // consumer to ask for value from the producer, And producer must resend its value, But don't wait for a response
 //AskResponse:  "ask_response", //consumer to ask for value from the producer, And wait for a response
 //Write:  "write", //write a new value to the consumer
 //thingsType:  "thing_type", //write a new value to the consumer
-func (j *WriterAPI) ConsumerAction(ctx *gin.Context) {
-	_, _, write, thingType, _ := withConsumerArgs(ctx)
+func (j *WriterAPI) RemoteWriterAction(ctx *gin.Context) {
+	askRefresh, _, _, _, _ := withConsumerArgs(ctx)
 	uuid := resolveID(ctx)
 
-	if thingType == model.CommonNaming.Point {
-
-	}
 	body, _ := getBODYWriter(ctx)
-	q, err := j.DB.ConsumerAction(uuid, body, write)
+	q, err := j.DB.RemoteWriterAction(uuid, body, askRefresh)
 	reposeHandler(q, err, ctx)
 }
 
-//ConsumerActionPoint get or update a producer value by using the consumer uuid
-func (j *WriterAPI) ConsumerActionPoint(ctx *gin.Context) {
+
+//WriterActionPoint get or update a producer value by using the consumer uuid
+func (j *WriterAPI) WriterActionPoint(ctx *gin.Context) {
 	_, _, write, thingType, _ := withConsumerArgs(ctx)
 	uuid := resolveID(ctx)
 	if thingType != model.CommonNaming.Point {
@@ -111,6 +109,6 @@ func (j *WriterAPI) ConsumerActionPoint(ctx *gin.Context) {
 	}
 	body, _ := getBODYPoint(ctx)
 	//pointUUID string, slUUID string, pointBody *model.Point, write bool
-	q, err := j.DB.ConsumerActionPoint(uuid, body, write)
+	q, err := j.DB.WriterActionPoint(uuid, body, write)
 	reposeHandler(q, err, ctx)
 }

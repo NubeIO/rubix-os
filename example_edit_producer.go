@@ -10,12 +10,13 @@ import (
 
 func main()  {
 
-	c := client.NewSessionWithToken("CVvjlk3SwM7p4hp", "0.0.0.0", "1660")
+	c := client.NewSessionWithToken("CjtuhBWiHXPLgO1", "0.0.0.0", "1660")
 	//
-	p := new(model.Producer)
-	p.Name = "new 2222"
-	uuid := "pro_772748e553684000"
-	pnt, err := c.ClientEditProducer(uuid, *p)
+	p := new(model.WriterClone)
+	p.WriteValue = 22
+	uuid := "sul_3542ab1febc24ddf"
+	//pnt, err := c.ClientGetWriterClone(uuid, *p)
+	pnt, err := c.ClientEditWriterClone(uuid, *p)
 	if err != nil {
 		fmt.Println(err)
 	}

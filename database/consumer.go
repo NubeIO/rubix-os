@@ -63,7 +63,6 @@ func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model
 	query := d.DB.Where("uuid = ?", uuid).Find(&consumerModel);if query.Error != nil {
 		return nil, query.Error
 	}
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Consumer)
 	query = d.DB.Model(&consumerModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}

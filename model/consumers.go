@@ -20,7 +20,9 @@ type ConsumersApplication struct {
 //Writer could be a local network, job or alarm and so on
 type Writer struct {
 	CommonUUID
+	PresentValue       			float64  `json:"present_value"` // for common use of points
 	WriteValue       			float64  `json:"write_value"` // for common use of points
+	WriteCloneUUID 				string `json:"write_clone_uuid"`
 	ConsumerUUID 				string `json:"consumer_uuid" gorm:"TYPE:string REFERENCES consumers;not null;default:null"`
 	ConsumerThingUUID 			string `json:"consumer_thing_uuid"` // this is the consumer child point UUID
 	ConsumerCOV 				float64 `json:"consumer_cov"`

@@ -5,9 +5,9 @@ type FlowNetwork struct {
 	CommonUUID
 	CommonName
 	CommonDescription
-	GlobalFlowID  		string `json:"global_flow_id" gorm:"type:varchar(255);unique;not null"`
-	GlobalRemoteFlowID  string `json:"global_remote_flow_id" gorm:"type:varchar(255);unique;not null"` //if is a remote
-	RemoteFlowUUID  	string `json:"remote_flow_uuid" gorm:"type:varchar(255);unique;not null"` //if is a remote
+	GlobalFlowID  		string `json:"global_flow_id"`
+	GlobalRemoteFlowID  string `json:"global_remote_flow_id"` //if is a remote
+	RemoteFlowUUID  	string `json:"remote_flow_uuid"` //if is a remote
 	StreamListUUID 		string `json:"stream_list_uuid" gorm:"TYPE:varchar(255) REFERENCES stream_lists;not null;default:null"`
 	IsRemote       		bool `json:"is_remote"`
 	FetchHistories				bool `json:"fetch_histories"`

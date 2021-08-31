@@ -50,8 +50,8 @@ var ArgsType = struct {
 	Search:       "search",
 	WithChildren: "with_children",
 	WithPoints:   "with_points",
-	AskRefresh:   "ask_refresh",  // consumer to ask for value from the producer, And producer must resend its value, But don't wait for a response
-	AskResponse:  "ask_response", //consumer to ask for value from the producer, And wait for a response
+	AskRefresh:   "ask_refresh",
+	AskResponse:  "ask_response",
 	Write:  	  "write", //consumer to write a value
 	ThingType:    	"thing_type", //the type of thing like a point
 	FlowNetworkUUID:"flow_network_uuid", //the type of thing like a point
@@ -140,7 +140,7 @@ func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
 	return dto, err
 }
 
-func getBODYWriterCopy(ctx *gin.Context) (dto *model.WriterClone, err error) {
+func getBODYWriterClone(ctx *gin.Context) (dto *model.WriterClone, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

@@ -1,7 +1,6 @@
 package database
 
 import (
-
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
@@ -39,6 +38,7 @@ func (d *GormDatabase) GetFlowNetwork(uuid string) (*model.FlowNetwork, error) {
 func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
 	body.Name = nameIsNil(body.Name)
+	body.GlobalFlowID = nameIsNil(body.Name)
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}

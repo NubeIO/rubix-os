@@ -20,14 +20,14 @@ func main()  {
 		fmt.Println(err)
 	}
 	fmt.Println("edit point")
-	fmt.Println(pnt.Points.Name)
+	fmt.Println(pnt.Name)
 
 	pntGet, err := c.ClientGetPoint(uuid)
 	if err != nil {
 		fmt.Println(err)
 	}
 	fmt.Println("edit point")
-	fmt.Println(pntGet.Points.Name)
+	fmt.Println(pntGet.Name)
 
 }
 

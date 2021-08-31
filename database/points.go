@@ -85,7 +85,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 	query = d.DB.Model(&pointModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-
 	return pointModel, nil
 }
 
