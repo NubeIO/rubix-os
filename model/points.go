@@ -1,6 +1,5 @@
 package model
 
-
 // Ops TODO add in later
 //Ops Means operations supported by a network, device, point and so on (example point supports point-write)
 type Ops struct {
@@ -55,6 +54,7 @@ type CommonPoint struct {
 	AddressId		int 	`json:"address_id"` // for example a modbus address or bacnet address
 	AddressOffset	int 	`json:"address_offset"` // for example a modbus address offset
 	AddressCode		string 	`json:"address_code"` // for example a droplet id (so a string)
+
 
 }
 

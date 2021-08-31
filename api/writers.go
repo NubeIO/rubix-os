@@ -17,7 +17,7 @@ type WriterDatabase interface {
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
 	RemoteWriterRead(uuid string) (*model.Writer, error)
-	RemoteWriterWrite(uuid string, body *model.Writer, askRefresh bool) (*model.Writer, error)
+	RemoteWriterWrite(uuid string, body *model.Writer, askRefresh bool) (*model.Consumer, error)
 
 }
 

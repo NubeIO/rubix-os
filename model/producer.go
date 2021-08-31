@@ -1,14 +1,31 @@
 package model
 
+import "gorm.io/datatypes"
+
+
+type ProducerType struct {
+	Network   		string `json:"network"`
+	Job   			string `json:"job"`
+	Point   		string `json:"point"`
+	Alarm   		string `json:"alarm"`
+}
+
+type ProducerUse struct {
+	Local   		 string `json:"local"`
+	Remote   		string `json:"remote"`
+	Plugin   		string `json:"plugin"`
+
+}
+
 //WriterClone list of all the consumers
 // a consumer
-type WriterClone struct {
+type WriterClone struct { //TODO the WriterClone needs to publish a COV event as for example we have 2x mqtt broker then the cov for a point maybe different when not going over the internet
 	CommonUUID
+	WriterType 			string  `json:"writer_type"` //point, schedule, job, network
 	ProducerUUID 		string  `json:"producer_uuid" gorm:"TYPE:string REFERENCES producers;not null;default:null"` // is the producer UUID
-	WriteValue       	float64  `json:"write_value"` // for common use of points
-	ConsumerUUID 		string 	`json:"consumer_uuid"`  // is the remote consumer UUID, ie: whatever is subscribing to this producer
 	WriterUUID 			string 	`json:"writer_uuid"`  // is the remote consumer UUID, ie: whatever is subscribing to this producer
-	ConsumerCOV 		float64 `json:"consumer_cov"`
+	DataStore 			datatypes.JSON  `json:"data_store"`
+	WriterSettings 		datatypes.JSON  `json:"producer_settings"` //like cov for a point or whatever is needed  #TODO this is why it needs settings
 	CommonCreated
 }
 
@@ -17,8 +34,7 @@ type WriterClone struct {
 // A producer for example is a point, Something that makes data, and the subscriber would have a consumer to it, Like grafana reading and writing to it from edge to cloud or wires over rest(peer to peer)
 type Producer struct {
 	CommonProducer
-	PresentValue 			float64  `json:"present_value"` //these fields are support as points is the most common use case for histories
-	WriterUUID       		string  `json:"writer_uuid"`
+	CurrentWriterCloneUUID  string  `json:"current_writer_clone_uuid"`
 	ProducerType 			string  `json:"producer_type"` //point, schedule, job, network
 	EnableHistory 			bool 	`json:"enable_history"`
 	ProducerApplication 	string 	`json:"producer_application"`

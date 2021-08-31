@@ -198,6 +198,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.GET("/histories/producers", historyHandler.GetProducerHistories)
 		control.DELETE("/histories/producers/drop", historyHandler.DropProducerHistories)
 		control.GET("/histories/producer/:uuid", historyHandler.GetProducerHistory)
+		control.GET("/histories/by/producer/:uuid", historyHandler.HistoryByProducerUUID)
 		control.POST("/histories/producer/bulk", historyHandler.CreateBulkProducerHistory)
 		control.DELETE("/histories/producer/:uuid", historyHandler.DeleteProducerHistory)
 

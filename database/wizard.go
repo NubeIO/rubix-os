@@ -96,7 +96,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = producer.UUID
-	writerCloneModel.ConsumerUUID = pnt2.UUID
+	//writerCloneModel.ConsumerUUID = pnt2.UUID
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
 	fmt.Println(writerClone)
 
@@ -206,7 +206,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = producer.UUID
-	writerCloneModel.ConsumerUUID = pnt2.UUID
+	//writerCloneModel.ConsumerUUID = pnt2.UUID
 	writerCloneModel.WriterUUID = writerModel.UUID
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
 	fmt.Println(writerClone)

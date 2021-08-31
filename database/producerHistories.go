@@ -22,7 +22,19 @@ func (d *GormDatabase) GetProducerHistories() ([]*model.ProducerHistory, error) 
 // GetProducerHistory returns the history for the given id or nil.
 func (d *GormDatabase) GetProducerHistory(uuid string) (*model.ProducerHistory, error) {
 	var historyModel *model.ProducerHistory
-	query := d.DB.Where("uuid = ? ", uuid).First(&historyModel)
+	query := d.DB.Where("producer_uuid = ? ", uuid).Last(&historyModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return historyModel, nil
+
+}
+
+
+// HistoryByProducerUUID returns the history for the given id or nil.
+func (d *GormDatabase) HistoryByProducerUUID(uuid string) (*model.ProducerHistory, error) {
+	var historyModel *model.ProducerHistory
+	query := d.DB.Where("producer_uuid` = ? ", uuid).First(&historyModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -46,7 +58,7 @@ func (d *GormDatabase) CreateBulkProducerHistory(history []*model.ProducerHistor
 	for _, hist := range history {
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = hist.ProducerUUID
-		ph.PresentValue = hist.PresentValue
+		ph.DataStore = hist.DataStore
 		ph.Timestamp = time.Now().UTC()
 		_, err := d.CreateProducerHistory(ph)
 		if err != nil {

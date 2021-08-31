@@ -11,7 +11,6 @@ type Job struct {
 }
 
 
-
 func (d *GormDatabase) GetJobs() ([]*model.Job, error) {
 	var jobsModel []*model.Job
 	query := d.DB.Find(&jobsModel)
