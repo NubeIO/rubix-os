@@ -70,7 +70,7 @@ try to write value to writeClone
 update the writerClone history
 then try and write to the producer, the producer will decide if it will accept the value. example a point write with point cov
 if: the producer accepts then.
-- update producer with the writerCloneUUID (this is so we know who wrote the last value to the producer)
+- update producer with the writerCloneUUID (this is, so we know who wrote the last value to the producer)
 - update the consumer
 - return message to user
 
@@ -79,9 +79,8 @@ update the writerClone history
 
 */
 
-func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.Writer, askRefresh bool) (*model.Consumer, error) {
+func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.Writer, askRefresh bool) (*model.ProducerHistory, error) {
 
-	fmt.Println(body, 222222)
 	var wm *model.Writer
 	writer := d.DB.Where("uuid = ? ", uuid).First(&wm); if writer.Error != nil {
 		return nil, writer.Error
@@ -125,11 +124,11 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.Writer, askRef
 		updateConsumer:= new(model.Consumer)
 		updateConsumer.DataStore = producerFeedback.DataStore
 		updateConsumer.CurrentWriterCloneUUID = producerFeedback.CurrentWriterCloneUUID
-		pro, _ := d.UpdateConsumer(consumerUUID, updateConsumer);if err != nil {
+		_, _ = d.UpdateConsumer(consumerUUID, updateConsumer);if err != nil {
 			return nil, errors.New("error: on update consumer feedback")
 		}
 
-		return pro, err
+		return producerFeedback, err
 	}
 	return nil, errors.New("error: fail to update the remote producer")
 }
