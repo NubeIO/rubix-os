@@ -98,9 +98,9 @@ func (j *WriterAPI) RemoteWriterRead(ctx *gin.Context) {
 
 //RemoteWriterWrite get or update a producer value by using the consumer uuid
 func (j *WriterAPI) RemoteWriterWrite(ctx *gin.Context) {
-	_, _, write, _, _ := withConsumerArgs(ctx)
+	askRefresh, _, _, _, _ := withConsumerArgs(ctx)
 	uuid := resolveID(ctx)
 	body, _ := getBODYWriter(ctx)
-	q, err := j.DB.RemoteWriterWrite(uuid, body, write)
+	q, err := j.DB.RemoteWriterWrite(uuid, body, askRefresh)
 	reposeHandler(q, err, ctx)
 }

@@ -7,7 +7,6 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-
 type Writer struct {
 	*model.Writer
 }
@@ -49,8 +48,6 @@ func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer
 	return consumerModel, nil
 }
 
-
-
 /*
 
 1. update writer
@@ -78,7 +75,6 @@ update the writerClone history
 */
 
 func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.Writer, askRefresh bool) (*model.ProducerHistory, error) {
-
 	var wm *model.Writer
 	writer := d.DB.Where("uuid = ? ", uuid).First(&wm); if writer.Error != nil {
 		return nil, writer.Error
@@ -86,7 +82,6 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.Writer, askRef
 	if wm == nil {
 		return nil, nil
 	}
-
 	_, err := d.UpdateWriter(uuid, body);if err != nil {
 		return nil, errors.New("error: on update consumer feedback")
 	}
@@ -114,21 +109,22 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.Writer, askRef
 	if err != nil {
 		return nil, errors.New("error: write new value to writerClone")
 	}
-	if askRefresh { //get feedback from producer
-		producerFeedback, err := rest.ProducerHistory(fn, producerUUID);if err != nil {
-			return nil, errors.New("error: on get feedback from producer history")
-		}
-		// update the consumer based of the response from the producer
+	//get feedback from producer
+	producerFeedback, err := rest.ProducerHistory(fn, producerUUID);if err != nil {
+		return nil, errors.New("error: on get feedback from producer history")
+	}
+	// update the consumer based of the response from the producer
+	if askRefresh {
 		updateConsumer:= new(model.Consumer)
 		updateConsumer.DataStore = producerFeedback.DataStore
 		updateConsumer.CurrentWriterCloneUUID = producerFeedback.CurrentWriterCloneUUID
 		_, _ = d.UpdateConsumer(consumerUUID, updateConsumer);if err != nil {
 			return nil, errors.New("error: on update consumer feedback")
 		}
-
+		return producerFeedback, err
+	} else {
 		return producerFeedback, err
 	}
-	return nil, errors.New("error: fail to update the remote producer")
 }
 
 
@@ -140,7 +136,6 @@ func (d *GormDatabase) RemoteWriterRead(uuid string) (*model.ProducerHistory, er
 	if wm == nil {
 		return nil, nil
 	}
-
 	var cm *model.Consumer
 	consumer := d.DB.Where("uuid = ? ", wm.ConsumerUUID).First(&cm); if consumer.Error != nil {
 		return nil, consumer.Error
@@ -168,7 +163,6 @@ func (d *GormDatabase) RemoteWriterRead(uuid string) (*model.ProducerHistory, er
 		return nil, errors.New("error: on update consumer feedback")
 	}
 	return producerFeedback, err
-
 }
 
 
