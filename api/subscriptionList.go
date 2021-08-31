@@ -10,64 +10,64 @@ import (
 
 
 
-// The SubscriptionListDatabase interface for encapsulating database access.
-type SubscriptionListDatabase interface {
-	GetSubscriptionList(uuid string) (*model.SubscriptionList, error)
-	GetSubscriptionLists() ([]*model.SubscriptionList, error)
-	CreateSubscriptionList(body *model.SubscriptionList) (*model.SubscriptionList, error)
-	UpdateSubscriptionList(uuid string, body *model.SubscriptionList) (*model.SubscriptionList, error)
-	DeleteSubscriptionList(uuid string) (bool, error)
-	SubscriptionAction(uuid string, body *model.SubscriptionList, write bool) (*model.Producer, error)
-	SubscriptionActionPoint(slUUID string, pointBody *model.Point, write bool) (*model.Producer, error)
+// The WriterDatabase interface for encapsulating database access.
+type WriterDatabase interface {
+	GetWriter(uuid string) (*model.Writer, error)
+	GetWriters() ([]*model.Writer, error)
+	CreateWriter(body *model.Writer) (*model.Writer, error)
+	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
+	DeleteWriter(uuid string) (bool, error)
+	ConsumerAction(uuid string, body *model.Writer, write bool) (*model.Producer, error)
+	ConsumerActionPoint(slUUID string, pointBody *model.Point, write bool) (*model.Producer, error)
 
 }
 
-type SubscriptionListAPI struct {
-	DB SubscriptionListDatabase
+type WriterAPI struct {
+	DB WriterDatabase
 }
 
 
-func (j *SubscriptionListAPI) GetSubscriptionList(ctx *gin.Context) {
+func (j *WriterAPI) GetWriter(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.GetSubscriptionList(uuid)
+	q, err := j.DB.GetWriter(uuid)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *SubscriptionListAPI) GetSubscriptionLists(ctx *gin.Context) {
-	q, err := j.DB.GetSubscriptionLists()
+func (j *WriterAPI) GetWriters(ctx *gin.Context) {
+	q, err := j.DB.GetWriters()
 	reposeHandler(q, err, ctx)
 
 }
 
-func (j *SubscriptionListAPI) CreateSubscriptionList(ctx *gin.Context) {
-	body, _ := getBODYSubscriptionList(ctx)
+func (j *WriterAPI) CreateWriter(ctx *gin.Context) {
+	body, _ := getBODYWriter(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
 		reposeHandler(nil, err, ctx)
 	}
-	q, err := j.DB.CreateSubscriptionList(body)
+	q, err := j.DB.CreateWriter(body)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *SubscriptionListAPI) UpdateSubscriptionList(ctx *gin.Context) {
-	body, _ := getBODYSubscriptionList(ctx)
+func (j *WriterAPI) UpdateWriter(ctx *gin.Context) {
+	body, _ := getBODYWriter(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateSubscriptionList(uuid, body)
+	q, err := j.DB.UpdateWriter(uuid, body)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *SubscriptionListAPI) DeleteSubscriptionList(ctx *gin.Context) {
+func (j *WriterAPI) DeleteWriter(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.DeleteSubscriptionList(uuid)
+	q, err := j.DB.DeleteWriter(uuid)
 	reposeHandler(q, err, ctx)
 }
 
 
-//withSubscriptionArgs
-func withSubscriptionArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, write bool, thingType string, flowNetworkUUID string){
+//withConsumerArgs
+func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, write bool, thingType string, flowNetworkUUID string){
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
@@ -84,33 +84,33 @@ func withSubscriptionArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, 
 }
 
 
-//SubscriptionAction get or update a producer value by using the subscription uuid
-//Default will just read the stored value of the subscription (as in don't get the current value from the producer)
-//AskRefresh:   "ask_refresh",  // subscription to ask for value from the producer, And producer must resend its value, But don't wait for a response
-//AskResponse:  "ask_response", //subscription to ask for value from the producer, And wait for a response
-//Write:  "write", //write a new value to the subscription
-//thingsType:  "thing_type", //write a new value to the subscription
-func (j *SubscriptionListAPI) SubscriptionAction(ctx *gin.Context) {
-	_, _, write, thingType, _ := withSubscriptionArgs(ctx)
+//ConsumerAction get or update a producer value by using the consumer uuid
+//Default will just read the stored value of the consumer (as in don't get the current value from the producer)
+//AskRefresh:   "ask_refresh",  // consumer to ask for value from the producer, And producer must resend its value, But don't wait for a response
+//AskResponse:  "ask_response", //consumer to ask for value from the producer, And wait for a response
+//Write:  "write", //write a new value to the consumer
+//thingsType:  "thing_type", //write a new value to the consumer
+func (j *WriterAPI) ConsumerAction(ctx *gin.Context) {
+	_, _, write, thingType, _ := withConsumerArgs(ctx)
 	uuid := resolveID(ctx)
 
 	if thingType == model.CommonNaming.Point {
 
 	}
-	body, _ := getBODYSubscriptionList(ctx)
-	q, err := j.DB.SubscriptionAction(uuid, body, write)
+	body, _ := getBODYWriter(ctx)
+	q, err := j.DB.ConsumerAction(uuid, body, write)
 	reposeHandler(q, err, ctx)
 }
 
-//SubscriptionActionPoint get or update a producer value by using the subscription uuid
-func (j *SubscriptionListAPI) SubscriptionActionPoint(ctx *gin.Context) {
-	_, _, write, thingType, _ := withSubscriptionArgs(ctx)
+//ConsumerActionPoint get or update a producer value by using the consumer uuid
+func (j *WriterAPI) ConsumerActionPoint(ctx *gin.Context) {
+	_, _, write, thingType, _ := withConsumerArgs(ctx)
 	uuid := resolveID(ctx)
 	if thingType != model.CommonNaming.Point {
 		reposeHandler("error", errors.New("thing-type must be point"), ctx)
 	}
 	body, _ := getBODYPoint(ctx)
 	//pointUUID string, slUUID string, pointBody *model.Point, write bool
-	q, err := j.DB.SubscriptionActionPoint(uuid, body, write)
+	q, err := j.DB.ConsumerActionPoint(uuid, body, write)
 	reposeHandler(q, err, ctx)
 }

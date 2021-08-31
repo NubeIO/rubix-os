@@ -35,7 +35,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var point []model.Point
 	var priority []model.Priority
 	var producerHistory []model.ProducerHistory
-	var subscriptionHistory []model.SubscriptionHistory
+	var consumerHistory []model.ConsumerHistory
 	var flowNetwork []model.FlowNetwork
 	var rubixPlat []model.RubixPlat
 	var job []model.Job
@@ -43,9 +43,9 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var streamList []model.StreamList
 	var commandGroup []model.CommandGroup
 	var producer []model.Producer
-	var subscription []model.Subscription
-	var subscriptionList []model.SubscriptionList
-	var producerList []model.ProducerSubscriptionList
+	var consumer []model.Consumer
+	var writer []model.Writer
+	var writerCopy []model.WriterClone
 
 	var models = []interface{}{
 		&alerts,
@@ -61,15 +61,15 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&flowNetwork,
 		&priority,
 		&producerHistory,
-		&subscriptionHistory,
+		&consumerHistory,
 		&job,
 		&stream,
 		&streamList,
 		&commandGroup,
 		&producer,
-		&subscription,
-		&subscriptionList,
-		&producerList,
+		&consumer,
+		&writer,
+		&writerCopy,
 	}
 
 	for _, v := range models {

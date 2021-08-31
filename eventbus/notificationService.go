@@ -54,13 +54,13 @@ func (eb *notificationService) RegisterTopicParent(parent string, child string) 
 	eb.eb.RegisterTopics(topic)
 }
 
-// UnregisterTopic removes a topic from subscription
+// UnregisterTopic removes a topic from consumer
 func (eb *notificationService) UnregisterTopic(topic string) {
 	eb.eb.DeregisterTopics(topic)
 }
 
 
-// UnregisterTopicChild removes a topic from subscription
+// UnregisterTopicChild removes a topic from consumer
 func (eb *notificationService) UnregisterTopicChild(parent string, child string) {
 	topic := fmt.Sprintf("%s.%s", parent, child)
 	eb.eb.DeregisterTopics(topic)

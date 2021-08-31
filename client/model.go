@@ -73,7 +73,7 @@ type Stream struct {
 }
 
 
-type Subscription struct {
+type Consumer struct {
 	Name                  	string `json:"name"`
 	Enable                	bool   `json:"enable"`
 	ProducerType        	string `json:"producer_type"`

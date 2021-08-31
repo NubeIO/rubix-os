@@ -50,9 +50,9 @@ var ArgsType = struct {
 	Search:       "search",
 	WithChildren: "with_children",
 	WithPoints:   "with_points",
-	AskRefresh:   "ask_refresh",  // subscription to ask for value from the producer, And producer must resend its value, But don't wait for a response
-	AskResponse:  "ask_response", //subscription to ask for value from the producer, And wait for a response
-	Write:  	  "write", //subscription to write a value
+	AskRefresh:   "ask_refresh",  // consumer to ask for value from the producer, And producer must resend its value, But don't wait for a response
+	AskResponse:  "ask_response", //consumer to ask for value from the producer, And wait for a response
+	Write:  	  "write", //consumer to write a value
 	ThingType:    	"thing_type", //the type of thing like a point
 	FlowNetworkUUID:"flow_network_uuid", //the type of thing like a point
 
@@ -130,17 +130,17 @@ func getBODYProducer(ctx *gin.Context) (dto *model.Producer, err error) {
 	return dto, err
 }
 
-func getBODYSubscription(ctx *gin.Context) (dto *model.Subscription, err error) {
+func getBODYConsumer(ctx *gin.Context) (dto *model.Consumer, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
 
-func getBODYSubscriptionList(ctx *gin.Context) (dto *model.SubscriptionList, err error) {
+func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
 
-func getBODYProducerList(ctx *gin.Context) (dto *model.ProducerSubscriptionList, err error) {
+func getBODYWriterCopy(ctx *gin.Context) (dto *model.WriterClone, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

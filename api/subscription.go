@@ -9,53 +9,53 @@ import (
 
 
 
-// The SubscriptionsDatabase interface for encapsulating database access.
-type SubscriptionsDatabase interface {
-	GetSubscription(uuid string) (*model.Subscription, error)
-	GetSubscriptions() ([]*model.Subscription, error)
-	CreateSubscription(body *model.Subscription) (*model.Subscription, error)
-	UpdateSubscription(uuid string, body *model.Subscription) (*model.Subscription, error)
-	DeleteSubscription(uuid string) (bool, error)
+// The ConsumersDatabase interface for encapsulating database access.
+type ConsumersDatabase interface {
+	GetConsumer(uuid string) (*model.Consumer, error)
+	GetConsumers() ([]*model.Consumer, error)
+	CreateConsumer(body *model.Consumer) (*model.Consumer, error)
+	UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error)
+	DeleteConsumer(uuid string) (bool, error)
 
 
 }
-type SubscriptionsAPI struct {
-	DB SubscriptionsDatabase
+type ConsumersAPI struct {
+	DB ConsumersDatabase
 }
 
-func (j *SubscriptionsAPI) GetSubscription(ctx *gin.Context) {
+func (j *ConsumersAPI) GetConsumer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.GetSubscription(uuid)
+	q, err := j.DB.GetConsumer(uuid)
 	reposeHandler(q, err, ctx)
 }
 
-func (j *SubscriptionsAPI) GetSubscriptions(ctx *gin.Context) {
-	q, err := j.DB.GetSubscriptions()
+func (j *ConsumersAPI) GetConsumers(ctx *gin.Context) {
+	q, err := j.DB.GetConsumers()
 	reposeHandler(q, err, ctx)
 
 }
 
-func (j *SubscriptionsAPI) CreateSubscription(ctx *gin.Context) {
-	body, _ := getBODYSubscription(ctx)
+func (j *ConsumersAPI) CreateConsumer(ctx *gin.Context) {
+	body, _ := getBODYConsumer(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
 		reposeHandler(nil, err, ctx)
 	}
-	q, err := j.DB.CreateSubscription(body)
+	q, err := j.DB.CreateConsumer(body)
 	reposeHandler(q, err, ctx)
 }
 
-func (j *SubscriptionsAPI) UpdateSubscription(ctx *gin.Context) {
-	body, _ := getBODYSubscription(ctx)
+func (j *ConsumersAPI) UpdateConsumer(ctx *gin.Context) {
+	body, _ := getBODYConsumer(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateSubscription(uuid, body)
+	q, err := j.DB.UpdateConsumer(uuid, body)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *SubscriptionsAPI) DeleteSubscription(ctx *gin.Context) {
+func (j *ConsumersAPI) DeleteConsumer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.DeleteSubscription(uuid)
+	q, err := j.DB.DeleteConsumer(uuid)
 	reposeHandler(q, err, ctx)
 }
 

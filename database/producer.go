@@ -14,7 +14,7 @@ type Producer struct {
 // GetProducers get all of them
 func (d *GormDatabase) GetProducers() ([]*model.Producer, error) {
 	var producersModel []*model.Producer
-	query := d.DB.Preload("ProducerSubscriptionList").Find(&producersModel)
+	query := d.DB.Preload("WriterClone").Find(&producersModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -58,7 +58,7 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 	query = d.DB.Model(&producerModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	//TODO move this out of here as we need to also store the subscription UUID
+	//TODO move this out of here as we need to also store the consumer UUID
 	if producerModel.EnableHistory {
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = uuid

@@ -9,58 +9,58 @@ import (
 
 
 
-// The ProducerListDatabase interface for encapsulating database access.
-type ProducerListDatabase interface {
-	GetProducerList(uuid string) (*model.ProducerSubscriptionList, error)
-	GetProducerLists() ([]*model.ProducerSubscriptionList, error)
-	CreateProducerList(body *model.ProducerSubscriptionList) (*model.ProducerSubscriptionList, error)
-	UpdateProducerList(uuid string, body *model.ProducerSubscriptionList) (*model.ProducerSubscriptionList, error)
-	DeleteProducerList(uuid string) (bool, error)
+// The WriterCopyDatabase interface for encapsulating database access.
+type WriterCopyDatabase interface {
+	GetWriterCopy(uuid string) (*model.WriterClone, error)
+	GetWriterCopys() ([]*model.WriterClone, error)
+	CreateWriterCopy(body *model.WriterClone) (*model.WriterClone, error)
+	UpdateWriterCopy(uuid string, body *model.WriterClone) (*model.WriterClone, error)
+	DeleteWriterCopy(uuid string) (bool, error)
 
 
 }
-type ProducerListAPI struct {
-	DB ProducerListDatabase
+type WriterCopyAPI struct {
+	DB WriterCopyDatabase
 }
 
 
-func (j *ProducerListAPI) GetProducerList(ctx *gin.Context) {
+func (j *WriterCopyAPI) GetWriterCopy(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.GetProducerList(uuid)
+	q, err := j.DB.GetWriterCopy(uuid)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *ProducerListAPI) GetProducerLists(ctx *gin.Context) {
-	q, err := j.DB.GetProducerLists()
+func (j *WriterCopyAPI) GetWriterCopys(ctx *gin.Context) {
+	q, err := j.DB.GetWriterCopys()
 	reposeHandler(q, err, ctx)
 
 }
 
-func (j *ProducerListAPI) CreateProducerList(ctx *gin.Context) {
-	body, _ := getBODYProducerList(ctx)
+func (j *WriterCopyAPI) CreateWriterCopy(ctx *gin.Context) {
+	body, _ := getBODYWriterCopy(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
 		reposeHandler(nil, err, ctx)
 	}
-	q, err := j.DB.CreateProducerList(body)
+	q, err := j.DB.CreateWriterCopy(body)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *ProducerListAPI) UpdateProducerList(ctx *gin.Context) {
-	body, _ := getBODYProducerList(ctx)
+func (j *WriterCopyAPI) UpdateWriterCopy(ctx *gin.Context) {
+	body, _ := getBODYWriterCopy(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateProducerList(uuid, body)
+	q, err := j.DB.UpdateWriterCopy(uuid, body)
 	reposeHandler(q, err, ctx)
 }
 
 
 
 
-func (j *ProducerListAPI) DeleteProducerList(ctx *gin.Context) {
+func (j *WriterCopyAPI) DeleteWriterCopy(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.DeleteProducerList(uuid)
+	q, err := j.DB.DeleteWriterCopy(uuid)
 	reposeHandler(q, err, ctx)
 }
 

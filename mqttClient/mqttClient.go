@@ -41,7 +41,7 @@ type Client struct {
 	clientID      	string
 	connected    	bool
 	terminated    	bool
-	subscriptions 	[]subscription
+	consumers 	[]consumer
 }
 
 
@@ -56,7 +56,7 @@ type ClientOptions struct {
 	AutoReconnect bool // If the client should automatically try to reconnect when the connection is lost
 }
 
-type subscription struct {
+type consumer struct {
 	topic   string
 	handler mqtt.MessageHandler
 }
@@ -77,7 +77,7 @@ func (c *Client) Subscribe(topic string, qos QOS, handler mqtt.MessageHandler) (
 	if token.Error() != nil {
 		return token.Error()
 	}
-	c.subscriptions = append(c.subscriptions, subscription{topic, handler})
+	c.consumers = append(c.consumers, consumer{topic, handler})
 	return nil
 }
 
@@ -91,9 +91,9 @@ func (c *Client) Unsubscribe(topic string) error {
 }
 
 //// SubscribeMultiple subscribes to multiple topics and errors if this fails.
-//func (c *Client) SubscribeMultiple(ctx context.Context, subscriptions map[string]QOS) error {
-//	subs := make(map[string]byte, len(subscriptions))
-//	for topic, qos := range subscriptions {
+//func (c *Client) SubscribeMultiple(ctx context.Context, consumers map[string]QOS) error {
+//	subs := make(map[string]byte, len(consumers))
+//	for topic, qos := range consumers {
 //		subs[topic] = byte(qos)
 //	}
 //	token := c.client.SubscribeMultiple(subs, nil)
@@ -155,7 +155,7 @@ func NewClient(options ClientOptions) (c *Client) {
 		c.connected = true
 		//Subscribe here, otherwise after connection lost,
 		//you may not receive any message
-		for _, s := range c.subscriptions {
+		for _, s := range c.consumers {
 			if token := cc.Subscribe(s.topic, 2, s.handler); token.Wait() && token.Error() != nil {
 				topicLog{"error", "failed to subscribe", token.Error()}.printLog()
 			}

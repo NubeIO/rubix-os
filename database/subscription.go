@@ -6,26 +6,26 @@ import (
 )
 
 
-type Subscriptions struct {
-	*model.Subscription
+type Consumers struct {
+	*model.Consumer
 }
 
-// GetSubscriptions get all of them
-func (d *GormDatabase) GetSubscriptions() ([]*model.Subscription, error) {
-	var subscriptionsModel []*model.Subscription
-	query := d.DB.Preload("SubscriptionList").Find(&subscriptionsModel)
+// GetConsumers get all of them
+func (d *GormDatabase) GetConsumers() ([]*model.Consumer, error) {
+	var consumersModel []*model.Consumer
+	query := d.DB.Preload("Writer").Find(&consumersModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriptionsModel, nil
+	return consumersModel, nil
 }
 
-// CreateSubscription make it
-func (d *GormDatabase) CreateSubscription(body *model.Subscription) (*model.Subscription, error) {
+// CreateConsumer make it
+func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, error) {
 	_, err := d.GetStreamGateway(body.StreamUUID);if err != nil {
 		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the stream UUID", nil)
 	}
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Consumer)
 	body.Name = nameIsNil(body.Name)
 	query := d.DB.Create(body);if query.Error != nil {
 		return nil, query.Error
@@ -33,19 +33,19 @@ func (d *GormDatabase) CreateSubscription(body *model.Subscription) (*model.Subs
 	return body, nil
 }
 
-// GetSubscription get it
-func (d *GormDatabase) GetSubscription(uuid string) (*model.Subscription, error) {
-	var subscriptionModel *model.Subscription
-	query := d.DB.Where("uuid = ? ", uuid).First(&subscriptionModel); if query.Error != nil {
+// GetConsumer get it
+func (d *GormDatabase) GetConsumer(uuid string) (*model.Consumer, error) {
+	var consumerModel *model.Consumer
+	query := d.DB.Where("uuid = ? ", uuid).First(&consumerModel); if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriptionModel, nil
+	return consumerModel, nil
 }
 
-// DeleteSubscription deletes it
-func (d *GormDatabase) DeleteSubscription(uuid string) (bool, error) {
-	var subscriptionModel *model.Subscription
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&subscriptionModel);if query.Error != nil {
+// DeleteConsumer deletes it
+func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
+	var consumerModel *model.Consumer
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&consumerModel);if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -57,24 +57,24 @@ func (d *GormDatabase) DeleteSubscription(uuid string) (bool, error) {
 
 }
 
-// UpdateSubscription  update it
-func (d *GormDatabase) UpdateSubscription(uuid string, body *model.Subscription) (*model.Subscription, error) {
-	var subscriptionModel *model.Subscription
-	query := d.DB.Where("uuid = ?", uuid).Find(&subscriptionModel);if query.Error != nil {
+// UpdateConsumer  update it
+func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error) {
+	var consumerModel *model.Consumer
+	query := d.DB.Where("uuid = ?", uuid).Find(&consumerModel);if query.Error != nil {
 		return nil, query.Error
 	}
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Subscription)
-	query = d.DB.Model(&subscriptionModel).Updates(body);if query.Error != nil {
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Consumer)
+	query = d.DB.Model(&consumerModel).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	return subscriptionModel, nil
+	return consumerModel, nil
 
 }
 
-// DropSubscriptions delete all.
-func (d *GormDatabase) DropSubscriptions() (bool, error) {
-	var subscriptionModel *model.Subscription
-	query := d.DB.Where("1 = 1").Delete(&subscriptionModel)
+// DropConsumers delete all.
+func (d *GormDatabase) DropConsumers() (bool, error) {
+	var consumerModel *model.Consumer
+	query := d.DB.Where("1 = 1").Delete(&consumerModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
