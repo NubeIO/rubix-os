@@ -15,11 +15,23 @@ import (
 var mkdirAll = os.MkdirAll
 
 // New creates a new wrapper for the gorm database framework.
-func New(dialect, connection, defaultUser, defaultPass string, strength int, createDefaultUserIfNotExist bool) (*GormDatabase, error) {
+func New(dialect, connection, defaultUser, defaultPass string, strength int, logLevel string,
+	createDefaultUserIfNotExist bool) (*GormDatabase, error) {
 	createDirectoryIfSqlite(dialect, connection)
 	_connection := fmt.Sprintf("%s?_foreign_keys=on", connection)
+	var level logger.LogLevel
+	switch logLevel {
+	case "DEBUG":
+		level = logger.Info
+	case "WARN":
+		level = logger.Warn
+	case "ERROR":
+		level = logger.Error
+	default:
+		level = logger.Warn
+	}
 	db, err := gorm.Open(sqlite.Open(_connection), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(level),
 	})
 	if err != nil {
 		panic("failed to connect database")
@@ -109,7 +121,6 @@ func createDirectoryIfSqlite(dialect, connection string) {
 type GormDatabase struct {
 	DB *gorm.DB
 }
-
 
 // Close closes the gorm database connection.
 func (d *GormDatabase) Close() {

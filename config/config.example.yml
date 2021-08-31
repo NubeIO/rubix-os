@@ -28,10 +28,12 @@ server:
 database: # for database see (configure database section)
   dialect: sqlite3
   connection: data.db
+  logLevel: "WARN" # options are: INFO, WARN, ERROR
 
 defaultuser: # on database creation, creates an admin user
   name: admin # the username of the default user
   pass: admin # the password of the default user
-passstrength: 10 # the bcrypt password strength (higher = better but also slower)
 
+passstrength: 10 # the bcrypt password strength (higher = better but also slower)
+loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
 

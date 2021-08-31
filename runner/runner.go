@@ -3,7 +3,7 @@ package runner
 import (
 	"context"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"net"
 	"net/http"
 	"time"
@@ -14,9 +14,10 @@ import (
 func Run(router http.Handler, conf *config.Configuration) {
 	httpHandler := router
 	addr := fmt.Sprintf("%s:%d", conf.Server.ListenAddr, conf.Server.Port)
-	log.Println("Started Listening for plain HTTP connection on " + addr)
+	log.Info("Started Listening for plain HTTP connection on " + addr)
 	server := &http.Server{Addr: addr, Handler: httpHandler}
-	log.Fatal(server.Serve(startListening(addr, conf.Server.KeepAlivePeriodSeconds)))
+	err := server.Serve(startListening(addr, conf.Server.KeepAlivePeriodSeconds))
+	log.Fatal(err)
 }
 
 func startListening(addr string, keepAlive int) net.Listener {

@@ -25,14 +25,15 @@ type Configuration struct {
 	Database struct {
 		Dialect    string `default:"sqlite3"`
 		Connection string `default:"data.db"`
+		LogLevel   string `default:"WARN"`
 	}
 	DefaultUser struct {
 		Name string `default:"admin"`
 		Pass string `default:"admin"`
 	}
-	PassStrength int `default:"10"`
-
-	Location struct {
+	PassStrength int    `default:"10"`
+	LogLevel     string `default:"INFO"`
+	Location     struct {
 		GlobalDir string `default:"./"`
 		ConfigDir string `default:"config"`
 		DataDir   string `default:"data"`
@@ -41,8 +42,7 @@ type Configuration struct {
 			UploadedImagesDir string `default:"images"`
 		}
 	}
-	Logging bool `default:"false"`
-	Prod    bool `default:"false"`
+	Prod bool `default:"false"`
 }
 
 var config *Configuration = nil
@@ -66,14 +66,12 @@ func (conf *Configuration) Parse() *Configuration {
 	globalDir := flag.String("g", "./", "Global Directory")
 	dataDir := flag.String("d", "data", "Data Directory")
 	configDir := flag.String("c", "config", "Config Directory")
-	logging := flag.Bool("logging", false, "Logging")
 	prod := flag.Bool("prod", false, "Deployment Mode")
 	flag.Parse()
 	conf.Server.Port = *port
 	conf.Location.GlobalDir = *globalDir
 	conf.Location.DataDir = *dataDir
 	conf.Location.ConfigDir = *configDir
-	conf.Logging = *logging
 	conf.Prod = *prod
 	return conf
 }
