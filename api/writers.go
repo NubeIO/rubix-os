@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -17,8 +16,8 @@ type WriterDatabase interface {
 	CreateWriter(body *model.Writer) (*model.Writer, error)
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
-	RemoteWriterAction(uuid string, body *model.Writer, write bool) (*model.WriterClone, error)
-	WriterActionPoint(uuid string, pointBody *model.Point, askRefresh bool) (*model.Producer, error)
+	RemoteWriterRead(uuid string) (*model.Writer, error)
+	RemoteWriterWrite(uuid string, body *model.Writer, askRefresh bool) (*model.Writer, error)
 
 }
 
@@ -84,31 +83,24 @@ func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, writ
 }
 
 
-//RemoteWriterAction get or update a producer value by using the consumer uuid
+//RemoteWriterRead get or update a producer value by using the consumer uuid
 //Default will just read the stored value of the consumer (as in don't get the current value from the producer)
 //AskRefresh:   "ask_refresh",  // consumer to ask for value from the producer, And producer must resend its value, But don't wait for a response
 //AskResponse:  "ask_response", //consumer to ask for value from the producer, And wait for a response
 //Write:  "write", //write a new value to the consumer
 //thingsType:  "thing_type", //write a new value to the consumer
-func (j *WriterAPI) RemoteWriterAction(ctx *gin.Context) {
-	askRefresh, _, _, _, _ := withConsumerArgs(ctx)
+func (j *WriterAPI) RemoteWriterRead(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-
-	body, _ := getBODYWriter(ctx)
-	q, err := j.DB.RemoteWriterAction(uuid, body, askRefresh)
+	q, err := j.DB.RemoteWriterRead(uuid)
 	reposeHandler(q, err, ctx)
 }
 
 
-//WriterActionPoint get or update a producer value by using the consumer uuid
-func (j *WriterAPI) WriterActionPoint(ctx *gin.Context) {
-	_, _, write, thingType, _ := withConsumerArgs(ctx)
+//RemoteWriterWrite get or update a producer value by using the consumer uuid
+func (j *WriterAPI) RemoteWriterWrite(ctx *gin.Context) {
+	_, _, write, _, _ := withConsumerArgs(ctx)
 	uuid := resolveID(ctx)
-	if thingType != model.CommonNaming.Point {
-		reposeHandler("error", errors.New("thing-type must be point"), ctx)
-	}
-	body, _ := getBODYPoint(ctx)
-	//pointUUID string, slUUID string, pointBody *model.Point, write bool
-	q, err := j.DB.WriterActionPoint(uuid, body, write)
+	body, _ := getBODYWriter(ctx)
+	q, err := j.DB.RemoteWriterWrite(uuid, body, write)
 	reposeHandler(q, err, ctx)
 }
