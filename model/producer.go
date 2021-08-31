@@ -6,8 +6,9 @@ type WriterClone struct {
 	CommonUUID
 	ProducerUUID 		string  `json:"producer_uuid" gorm:"TYPE:string REFERENCES producers;not null;default:null"` // is the producer UUID
 	WriteValue       	float64  `json:"write_value"` // for common use of points
-	ConsumerUUID 	string 	`json:"consumer_uuid"`  // is the remote consumer UUID, ie: whatever is subscribing to this producer
-	ConsumerCOV 	float64 `json:"consumer_cov"`
+	ConsumerUUID 		string 	`json:"consumer_uuid"`  // is the remote consumer UUID, ie: whatever is subscribing to this producer
+	WriterUUID 			string 	`json:"writer_uuid"`  // is the remote consumer UUID, ie: whatever is subscribing to this producer
+	ConsumerCOV 		float64 `json:"consumer_cov"`
 	CommonCreated
 }
 

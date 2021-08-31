@@ -45,7 +45,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 	var producer []model.Producer
 	var consumer []model.Consumer
 	var writer []model.Writer
-	var writerCopy []model.WriterClone
+	var writerClone []model.WriterClone
 
 	var models = []interface{}{
 		&alerts,
@@ -69,7 +69,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, cre
 		&producer,
 		&consumer,
 		&writer,
-		&writerCopy,
+		&writerClone,
 	}
 
 	for _, v := range models {

@@ -60,13 +60,14 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	producerHandler := api.ProducerAPI{
 		DB: db,
 	}
-	writerCopyHandler := api.WriterCopyAPI{
-		DB: db,
-	}
+
 	consumerHandler := api.ConsumersAPI{
 		DB: db,
 	}
 	writerHandler := api.WriterAPI{
+		DB: db,
+	}
+	writerCloneHandler := api.WriterCloneAPI{
 		DB: db,
 	}
 	rubixPlatHandler := api.RubixPlatAPI{
@@ -203,7 +204,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.GET("/wires/plat", rubixPlatHandler.GetRubixPlat)
 		control.PATCH("/wires/plat", rubixPlatHandler.UpdateRubixPlat)
 
-
 		control.GET("/histories/producers", historyHandler.GetProducerHistories)
 		control.DELETE("/histories/producers/drop", historyHandler.DropProducerHistories)
 		control.GET("/histories/producer/:uuid", historyHandler.GetProducerHistory)
@@ -250,18 +250,17 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/command/:uuid", rubixCommandGroup.UpdateCommandGroup)
 		control.DELETE("/command/:uuid", rubixCommandGroup.DeleteCommandGroup)
 
-
 		control.GET("/producers", producerHandler.GetProducers)
 		control.POST("/producer", producerHandler.CreateProducer)
 		control.GET("/producer/:uuid", producerHandler.GetProducer)
 		control.PATCH("/producer/:uuid", producerHandler.UpdateProducer)
 		control.DELETE("/producer/:uuid", producerHandler.DeleteProducer)
 
-		control.GET("/producers/list", writerCopyHandler.GetWriterCopys)
-		control.POST("/producer/list", writerCopyHandler.CreateWriterCopy)
-		control.GET("/producer/list/:uuid", writerCopyHandler.GetWriterCopy)
-		control.PATCH("/producer/list/:uuid", writerCopyHandler.UpdateWriterCopy)
-		control.DELETE("/producer/list/:uuid", writerCopyHandler.DeleteWriterCopy)
+		control.GET("/producers/list", writerCloneHandler.GetWriterClones)
+		control.POST("/producer/list", writerCloneHandler.CreateWriterClone)
+		control.GET("/producer/list/:uuid", writerCloneHandler.GetWriterClone)
+		control.PATCH("/producer/list/:uuid", writerCloneHandler.UpdateWriterClone)
+		control.DELETE("/producer/list/:uuid", writerCloneHandler.DeleteWriterClone)
 
 		control.GET("/consumers", consumerHandler.GetConsumers)
 		control.POST("/consumer", consumerHandler.CreateConsumer)
@@ -275,9 +274,13 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/consumer/list/:uuid", writerHandler.UpdateWriter)
 		control.DELETE("/consumer/list/:uuid", writerHandler.DeleteWriter)
 
-		//action's
-		control.POST("/consumer/action/:uuid", writerHandler.ConsumerAction)
-		control.POST("/consumer/action/point/:uuid", writerHandler.ConsumerActionPoint)
+		//action's writers
+		control.POST("/writer/remote/:uuid", writerHandler.RemoteWriterAction)
+		control.POST("/writer/point/:uuid", writerHandler.WriterActionPoint)
+
+		//action's writers clones
+		control.GET("/writer/clone/:uuid", writerCloneHandler.GetWriterClone)
+		control.PATCH("/writer/clone/:uuid", writerCloneHandler.UpdateWriterClone)
 
 
 		control.GET("/jobs", jobHandler.GetJobs)

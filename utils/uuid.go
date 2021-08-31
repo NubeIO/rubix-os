@@ -14,20 +14,24 @@ func MakeUUID() (string, error) {
 func MakeTopicUUID(attribute string) string {
 	u, _ := uuid.MakeUUID()
 	divider := "_"
+
 	fln := "fln" //flow network
+	str := "str" //stream gateway
+	pro := "pro" //producers
+	wrc := "wrc" //writerClone
+	con := "con" //consumers
+	wri := "wri" //writer
+
 	rfn := "rfn" //flow network
 	plg := "plg" //plugin
 	net := "net" //network
 	dev := "dev" //device
 	pnt := "pnt" //point
 	job := "job" //job
-	str := "str" //stream gateway
+
 	stl := "stl" //list of flow network gateway
-	pro := "pro" //producers
-	prl := "prl" //producersList
+
 	prh := "prh" //producer history
-	sus := "sub" //consumers
-	sul := "sul" //consumersList
 	alt := "alt" //alerts
 	cmd := "cmd" //command
 	rub := "rbx" //rubix uuid
@@ -54,14 +58,14 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", job, divider, u)
 	case model.CommonNaming.Producer:
 		return fmt.Sprintf("%s%s%s", pro, divider, u)
-	case model.CommonNaming.WriterCopy:
-		return fmt.Sprintf("%s%s%s", prl, divider, u)
+	case model.CommonNaming.WriterClone:
+		return fmt.Sprintf("%s%s%s", wrc, divider, u)
 	case model.CommonNaming.ProducerHistory:
 		return fmt.Sprintf("%s%s%s", prh, divider, u)
 	case model.CommonNaming.Consumer:
-		return fmt.Sprintf("%s%s%s", sus, divider, u)
+		return fmt.Sprintf("%s%s%s", con, divider, u)
 	case model.CommonNaming.Writer:
-		return fmt.Sprintf("%s%s%s", sul, divider, u)
+		return fmt.Sprintf("%s%s%s", wri, divider, u)
 	case model.CommonNaming.Alert:
 		return fmt.Sprintf("%s%s%s", alt, divider, u)
 	case model.CommonNaming.CommandGroup:
