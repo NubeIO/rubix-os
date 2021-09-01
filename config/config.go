@@ -9,7 +9,7 @@ import (
 type Configuration struct {
 	Server struct {
 		KeepAlivePeriodSeconds int
-		ListenAddr             string `default:""`
+		ListenAddr             string `default:"0.0.0.0"`
 		Port                   int
 		ResponseHeaders        map[string]string
 		Stream                 struct {
