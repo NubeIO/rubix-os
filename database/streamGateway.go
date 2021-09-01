@@ -1,12 +1,11 @@
 package database
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-// GetStreamGateways get all of them
+// GetStreams get all of them
 func (d *GormDatabase) GetStreams(withChildren bool) ([]*model.Stream, error) {
 	var gatewaysModel []*model.Stream
 	if withChildren { // drop child to reduce json size
@@ -25,13 +24,12 @@ func (d *GormDatabase) GetStreams(withChildren bool) ([]*model.Stream, error) {
 
 }
 
-// CreateStreamGateway make it
+// CreateStream make it
 func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
 	//var gatewayModel []model.Stream
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
 	body.Name = nameIsNil(body.Name)
-	a := *body.FlowNetworks[0]
-	fmt.Println("body", a.UUID)
+	//a := *body.FlowNetworks[0]
 	err := d.DB.Create(&body).Error
 	if err != nil {
 		return nil, errorMsg("CreateStreamGateway", "error on trying to add a new stream gateway", nil)
@@ -39,7 +37,7 @@ func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
 	return body, nil
 }
 
-// GetStreamGateway get it
+// GetStream get it
 func (d *GormDatabase) GetStream(uuid string) (*model.Stream, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ? ", uuid).First(&gatewayModel)
