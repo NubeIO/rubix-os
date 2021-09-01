@@ -11,11 +11,10 @@ import (
 	"github.com/NubeDev/flow-framework/config"
 )
 
-func Run(router http.Handler, conf *config.Configuration) {
-	httpHandler := router
+func Run(engine http.Handler, conf *config.Configuration) {
 	addr := fmt.Sprintf("%s:%d", conf.Server.ListenAddr, conf.Server.Port)
 	log.Info("Started Listening for plain HTTP connection on " + addr)
-	server := &http.Server{Addr: addr, Handler: httpHandler}
+	server := &http.Server{Addr: addr, Handler: engine}
 	err := server.Serve(startListening(addr, conf.Server.KeepAlivePeriodSeconds))
 	log.Fatal(err)
 }

@@ -22,6 +22,7 @@ var (
 func main() {
 	conf := config.CreateApp()
 	logger.SetLogger(conf.LogLevel)
+	logger.SetGinMode(conf.LogLevel)
 
 	vInfo := &model.VersionInfo{Version: Version, Commit: Commit, BuildDate: BuildDate}
 	log.Info("Info Starting version:", vInfo.Version+"-"+vInfo.Commit+"@"+vInfo.BuildDate)

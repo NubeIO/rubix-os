@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -12,6 +13,14 @@ func SetLogger(logLevel string) {
 	//log.SetReportCaller(true)
 	log.AddHook(&MqttFieldHook{})
 	log.SetLevel(getLogLevel(logLevel))
+}
+
+func SetGinMode(logLevel string) {
+	ginMode := gin.ReleaseMode
+	if logLevel == "DEBUG" {
+		ginMode = gin.DebugMode
+	}
+	gin.SetMode(ginMode)
 }
 
 func getLogLevel(logLevel string) log.Level {
