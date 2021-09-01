@@ -21,14 +21,14 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	_connection := fmt.Sprintf("%s?_foreign_keys=on", connection)
 	var level logger.LogLevel
 	switch logLevel {
-	case "DEBUG":
+	case "INFO":
 		level = logger.Info
 	case "WARN":
 		level = logger.Warn
 	case "ERROR":
 		level = logger.Error
 	default:
-		level = logger.Warn
+		level = logger.Silent
 	}
 	db, err := gorm.Open(sqlite.Open(_connection), &gorm.Config{
 		Logger: logger.Default.LogMode(level),

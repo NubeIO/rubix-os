@@ -31,8 +31,8 @@ type Configuration struct {
 		Name string `default:"admin"`
 		Pass string `default:"admin"`
 	}
-	PassStrength int    `default:"10"`
-	LogLevel     string `default:"INFO"`
+	PassStrength int `default:"10"`
+	LogLevel     string
 	Location     struct {
 		GlobalDir string `default:"./"`
 		ConfigDir string `default:"config"`
@@ -54,7 +54,7 @@ func Get() *Configuration {
 func CreateApp() *Configuration {
 	config = new(Configuration)
 	config = config.Parse()
-	err := configor.New(&configor.Config{EnvironmentPrefix: "FLOW"}).Load(config, config.GetAbsConfigDir())
+	err := configor.New(&configor.Config{EnvironmentPrefix: "FLOW"}).Load(config, path.Join(config.GetAbsConfigDir(), "config.yml"))
 	if err != nil {
 		panic(err)
 	}

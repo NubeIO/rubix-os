@@ -28,7 +28,7 @@ server:
 database: # for database see (configure database section)
   dialect: sqlite3
   connection: data.db
-  logLevel: "WARN" # options are: INFO, WARN, ERROR
+  loglevel: "WARN" # options are: INFO, WARN, ERROR, SILENT
 
 defaultuser: # on database creation, creates an admin user
   name: admin # the username of the default user
