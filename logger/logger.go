@@ -9,7 +9,7 @@ func SetLogger(logLevel string) {
 		DisableColors: false,
 		FullTimestamp: true,
 	})
-	log.SetReportCaller(true)
+	//log.SetReportCaller(true)
 	log.AddHook(&MqttFieldHook{})
 	log.SetLevel(getLogLevel(logLevel))
 }

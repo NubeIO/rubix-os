@@ -3,11 +3,11 @@ package database
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/auth/password"
+	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"os"
 	"path/filepath"
 )
@@ -19,19 +19,8 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	createDefaultUserIfNotExist bool) (*GormDatabase, error) {
 	createDirectoryIfSqlite(dialect, connection)
 	_connection := fmt.Sprintf("%s?_foreign_keys=on", connection)
-	var level logger.LogLevel
-	switch logLevel {
-	case "INFO":
-		level = logger.Info
-	case "WARN":
-		level = logger.Warn
-	case "ERROR":
-		level = logger.Error
-	default:
-		level = logger.Silent
-	}
 	db, err := gorm.Open(sqlite.Open(_connection), &gorm.Config{
-		Logger: logger.Default.LogMode(level),
+		Logger: logger.New().SetLogMode(logLevel),
 	})
 	if err != nil {
 		panic("failed to connect database")
