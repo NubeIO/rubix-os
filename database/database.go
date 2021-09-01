@@ -41,7 +41,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var rubixPlat []model.RubixPlat
 	var job []model.Job
 	var stream []model.Stream
-	var streamList []model.StreamList
+	//var streamList []model.StreamList
 	var commandGroup []model.CommandGroup
 	var producer []model.Producer
 	var consumer []model.Consumer
@@ -65,7 +65,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&consumerHistory,
 		&job,
 		&stream,
-		&streamList,
+		//&streamList,
 		&commandGroup,
 		&producer,
 		&consumer,
