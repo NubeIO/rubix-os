@@ -1,6 +1,9 @@
 package model
 
-import "gorm.io/datatypes"
+import (
+	"gorm.io/datatypes"
+	"time"
+)
 
 type ConsumersType struct {
 	Network   		string `json:"network"`
@@ -47,3 +50,11 @@ type Consumer struct {
 	CommonCreated
 }
 
+//ConsumerHistory for storing the history
+type ConsumerHistory struct {
+	CommonUUID
+	ConsumerUUID    	string  		`json:"consumer_uuid" gorm:"TYPE:varchar(255) REFERENCES consumers;not null;default:null"`
+	ProducerUUID    	string
+	DataStore 			datatypes.JSON  `json:"data_store"`
+	Timestamp    		time.Time 		`json:"timestamp"`
+}

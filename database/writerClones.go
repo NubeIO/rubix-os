@@ -79,8 +79,10 @@ func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone) (
 	_, err := d.UpdateProducer(proUUID, pro);if err != nil {
 		return nil, err
 	}
-	err = d.ProducerCOV(proUUID, wcm.DataStore);if err != nil {
-		return nil, err
+	if body.DataStore != nil {
+		err = d.ProducerCOV(proUUID, wcm.DataStore);if err != nil {
+			return nil, err
+		}
 	}
 
 	return wcm, nil

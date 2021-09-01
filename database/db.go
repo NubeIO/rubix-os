@@ -8,9 +8,22 @@ import (
 // DropAllFlow networks, gateways, commandGroup, consumers, jobs and children.
 func (d *GormDatabase) DropAllFlow() (bool, error) {
 
+	////delete streams
+	//var streamListModel *model.StreamList
+	//query := d.DB.Where("1 = 1").Delete(&streamListModel)
+	//if query.Error != nil {
+	//	return false, query.Error
+	//}
+
 	//delete networks
 	var flowNetworkModel *model.FlowNetwork
 	query := d.DB.Where("1 = 1").Delete(&flowNetworkModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
+	//delete streams
+	var streamsModel *model.Stream
+	query = d.DB.Where("1 = 1").Delete(&streamsModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
@@ -22,12 +35,6 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 		return false, query.Error
 	}
 
-	//delete streams
-	var gatewaysModel *model.Stream
-	query = d.DB.Where("1 = 1").Delete(&gatewaysModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
 	//delete jobs
 	var jobModel *model.Job
 	query = d.DB.Where("1 = 1").Delete(&jobModel)
@@ -64,7 +71,7 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 //SyncTopics sync all the topics
 func (d *GormDatabase) SyncTopics()  {
 
-	g, err := d.GetStreamGateways(false)
+	g, err := d.GetStreams(false)
 	for _, obj := range g {
 		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Stream, obj.UUID)
 	}

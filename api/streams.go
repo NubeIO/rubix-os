@@ -11,51 +11,51 @@ Stream
 */
 
 
-// The GatewayDatabase interface for encapsulating database access.
-type GatewayDatabase interface {
-	GetStreamGateway(uuid string) (*model.Stream, error)
-	GetStreamGateways(withChildren bool) ([]*model.Stream, error)
-	CreateStreamGateway(body *model.Stream) (*model.Stream, error)
-	UpdateStreamGateway(uuid string, body *model.Stream) (*model.Stream, error)
-	DeleteStreamGateway(uuid string) (bool, error)
+// The StreamDatabase interface for encapsulating database access.
+type StreamDatabase interface {
+	GetStream(uuid string) (*model.Stream, error)
+	GetStreams(withChildren bool) ([]*model.Stream, error)
+	CreateStream(body *model.Stream) (*model.Stream, error)
+	UpdateStream(uuid string, body *model.Stream) (*model.Stream, error)
+	DeleteStream(uuid string) (bool, error)
 }
 
-type GatewayAPI struct {
-	DB GatewayDatabase
-}
-
-
-func (j *GatewayAPI) GetStreamGateway(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	q, err := j.DB.GetStreamGateway(uuid)
-	reposeHandler(q, err, ctx)
+type StreamAPI struct {
+	DB StreamDatabase
 }
 
 
-func (j *GatewayAPI) GetStreamGateways(ctx *gin.Context) {
+func (j *StreamAPI) GetStreams(ctx *gin.Context) {
 	withChildren, _ := withChildrenArgs(ctx)
-	q, err := j.DB.GetStreamGateways(withChildren)
+	q, err := j.DB.GetStreams(withChildren)
 	reposeHandler(q, err, ctx)
 
 }
 
-func (j *GatewayAPI) CreateStreamGateway(ctx *gin.Context) {
-	body, _ := getBODYGateway(ctx)
+func (j *StreamAPI) GetStream(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := j.DB.GetStream(uuid)
+	reposeHandler(q, err, ctx)
+}
+
+
+func (j *StreamAPI) CreateStream(ctx *gin.Context) {
+	body, _ := getBODYStream(ctx)
 	_, err := govalidator.ValidateStruct(body)
-	q, err := j.DB.CreateStreamGateway(body)
+	q, err := j.DB.CreateStream(body)
 	reposeHandler(q, err, ctx)
 }
 
-func (j *GatewayAPI) UpdateGateway(ctx *gin.Context) {
-	body, _ := getBODYGateway(ctx)
+func (j *StreamAPI) UpdateStream(ctx *gin.Context) {
+	body, _ := getBODYStream(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateStreamGateway(uuid, body)
+	q, err := j.DB.UpdateStream(uuid, body)
 	reposeHandler(q, err, ctx)
 }
 
 
-func (j *GatewayAPI) DeleteStreamGateway(ctx *gin.Context) {
+func (j *StreamAPI) DeleteStream(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.DeleteStreamGateway(uuid)
+	q, err := j.DB.DeleteStream(uuid)
 	reposeHandler(q, err, ctx)
 }
