@@ -1,6 +1,9 @@
 package model
 
-import "gorm.io/datatypes"
+import (
+	"gorm.io/datatypes"
+	"time"
+)
 
 
 type ProducerType struct {
@@ -45,3 +48,12 @@ type Producer struct {
 	CommonCreated
 }
 
+//ProducerHistory for storing the history
+type ProducerHistory struct {
+	CommonUUID
+	ProducerUUID    		string  	`json:"producer_uuid" gorm:"TYPE:varchar(255) REFERENCES producers;not null;default:null"`
+	CurrentWriterCloneUUID  string  	`json:"current_writer_clone_uuid"`
+	DataStore 			datatypes.JSON  `json:"data_store"`
+	Timestamp    		time.Time 		`json:"timestamp"`
+
+}

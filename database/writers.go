@@ -2,9 +2,11 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/rest"
 	"github.com/NubeDev/flow-framework/utils"
+	"log"
 )
 
 type Writer struct {
@@ -82,6 +84,7 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.Writer, askRef
 	if wm == nil {
 		return nil, nil
 	}
+	fmt.Println(3333333, wm.ConsumerUUID, wm.WriteCloneUUID, wm.ConsumerThingUUID)
 	_, err := d.UpdateWriter(uuid, body);if err != nil {
 		return nil, errors.New("error: on update consumer feedback")
 	}
@@ -105,11 +108,19 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.Writer, askRef
 	wc := new(model.WriterClone)
 	wc.DataStore = body.DataStore
 	// update producer
+	fmt.Println(11111111, writerCloneUUID)
 	_, err = rest.WriteClone(writerCloneUUID, fn, wc, true)
 	if err != nil {
 		return nil, errors.New("error: write new value to writerClone")
 	}
+	fmt.Println(11111111)
+	log.Println("RemoteWriterWrite:", "writerUUID", uuid, "consumerUUID", consumerUUID, "streamUUID", streamUUID, "streamListUUID", streamListUUID, "producerUUID", producerUUID, "flowNetworkUUID", fn.UUID)
+
 	//get feedback from producer
+	if producerUUID == "" {
+		return nil, errors.New("error: producer uuid is none")
+	}
+
 	producerFeedback, err := rest.ProducerHistory(fn, producerUUID);if err != nil {
 		return nil, errors.New("error: on get feedback from producer history")
 	}
@@ -152,6 +163,7 @@ func (d *GormDatabase) RemoteWriterRead(uuid string) (*model.ProducerHistory, er
 	flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if consumer.Error != nil {
 		return nil, flow.Error
 	}
+	log.Println("RemoteWriterRead:", "writerUUID", uuid, "consumerUUID", consumerUUID, "streamUUID", streamUUID, "streamListUUID", streamListUUID, "producerUUID", producerUUID, "flowNetworkUUID", fn.UUID)
 	producerFeedback, err := rest.ProducerHistory(fn, producerUUID);if err != nil {
 		return nil, errors.New("error: on get feedback from producer history")
 	}

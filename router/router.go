@@ -54,7 +54,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	jobHandler := api.JobAPI{
 		DB: db,
 	}
-	gatewayHandler := api.GatewayAPI{
+	gatewayHandler := api.StreamAPI{
 		DB: db,
 	}
 	producerHandler := api.ProducerAPI{
@@ -192,6 +192,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.DELETE("/database/flows/drop", dbGroup.DropAllFlow)
 		control.POST("/database/wizard/mapping/local/point", dbGroup.WizardLocalPointMapping)
 		control.POST("/database/wizard/mapping/remote/point", dbGroup.WizardRemotePointMapping)
+		control.POST("/database/wizard/mapping/existing/stream", dbGroup.Wizard2ndFlowNetwork)
 		control.GET("/wires/plat", rubixPlatHandler.GetRubixPlat)
 		control.PATCH("/wires/plat", rubixPlatHandler.UpdateRubixPlat)
 
@@ -230,11 +231,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/point/:uuid", pointHandler.UpdatePoint)
 		control.DELETE("/point/:uuid", pointHandler.DeletePoint)
 
-		control.GET("/streams", gatewayHandler.GetStreamGateways)
-		control.POST("/stream", gatewayHandler.CreateStreamGateway)
-		control.GET("/stream/:uuid", gatewayHandler.GetStreamGateway)
-		control.PATCH("/stream/:uuid", gatewayHandler.UpdateGateway)
-		control.DELETE("/stream/:uuid", gatewayHandler.DeleteStreamGateway)
+		control.GET("/streams", gatewayHandler.GetStreams)
+		control.POST("/stream", gatewayHandler.CreateStream)
+		control.GET("/stream/:uuid", gatewayHandler.GetStream)
+		control.PATCH("/stream/:uuid", gatewayHandler.UpdateStream)
+		control.DELETE("/stream/:uuid", gatewayHandler.DeleteStream)
 
 		control.GET("/commands", rubixCommandGroup.GetCommandGroups)
 		control.POST("/command", rubixCommandGroup.CreateCommandGroup)

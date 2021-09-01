@@ -145,7 +145,7 @@ func getBODYWriterClone(ctx *gin.Context) (dto *model.WriterClone, err error) {
 	return dto, err
 }
 
-func getBODYGateway(ctx *gin.Context) (dto *model.Stream, err error) {
+func getBODYStream(ctx *gin.Context) (dto *model.Stream, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

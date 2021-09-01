@@ -35,7 +35,7 @@ func (d *GormDatabase) DBBusEvent(uuid string, body *model.Point) (*model.Point,
 			thingConsumerUUID = thingConsumer.ConsumerThingUUID
 		}
 
-		gateway, err := d.GetStreamGateway(producer.StreamUUID)
+		gateway, err := d.GetStream(producer.StreamUUID)
 		if err != nil {
 			return nil, query.Error
 		}
