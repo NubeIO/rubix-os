@@ -7,25 +7,23 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
-var CRON  *gocron.Scheduler
+var CRON *gocron.Scheduler
 
 // The JobDatabase interface for encapsulating database access.
 type JobDatabase interface {
 	GetJob(uuid string) (*model.Job, error)
 	GetJobs() ([]*model.Job, error)
-	CreateJob(body *model.Job)  (*model.Job, error)
+	CreateJob(body *model.Job) (*model.Job, error)
 	UpdateJob(uuid string, body *model.Job) (*model.Job, error)
 	DeleteJob(uuid string) (bool, error)
-
 }
 type JobAPI struct {
 	DB JobDatabase
 }
-
 
 func reposeHandler(body interface{}, err error, ctx *gin.Context) {
 	if err != nil {
@@ -38,7 +36,6 @@ func reposeHandler(body interface{}, err error, ctx *gin.Context) {
 		ctx.JSON(200, body)
 	}
 }
-
 
 func (j *JobAPI) GetJobs(ctx *gin.Context) {
 	q, err := j.DB.GetJobs()
@@ -53,7 +50,6 @@ func (j *JobAPI) CreateJob(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-
 func (j *JobAPI) UpdateJob(ctx *gin.Context) {
 	body, _ := getBODYJobs(ctx)
 	uuid := resolveID(ctx)
@@ -61,13 +57,11 @@ func (j *JobAPI) UpdateJob(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-
 func (j *JobAPI) GetJob(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetJob(uuid)
 	reposeHandler(q, err, ctx)
 }
-
 
 func (j *JobAPI) DeleteJob(ctx *gin.Context) {
 	uuid := resolveID(ctx)
@@ -76,11 +70,10 @@ func (j *JobAPI) DeleteJob(ctx *gin.Context) {
 }
 
 func (j *JobAPI) initCron() {
-	CRON = 	gocron.NewScheduler(time.UTC)
+	CRON = gocron.NewScheduler(time.UTC)
 	CRON.StartAsync()
 	//j.syncJobs()
 }
-
 
 //syncJobs start all the jobs on start of the app
 //func (j *JobAPI) syncJobs()  {
@@ -111,7 +104,6 @@ func (j *JobAPI) jobAdd(uuid string, body *model.Job) error {
 	return nil
 }
 
-
 func (j *JobAPI) jobRemover(uuid string) error {
 	err := CRON.RemoveByTag(uuid)
 	if err != nil {
@@ -120,7 +112,6 @@ func (j *JobAPI) jobRemover(uuid string) error {
 	return nil
 
 }
-
 
 //syncJobs start all the jobs on start of the app
 //func (j *JobAPI) syncJobs()  {
@@ -141,12 +132,8 @@ func (j *JobAPI) jobRemover(uuid string) error {
 
 func (j *JobAPI) NewJobEngine() {
 	j.initCron()
-	log.Println("INIT CRON")
+	log.Info("Init CRON...")
 }
-
-
-
-
 
 func taskWithParams(uuid string, body *model.Job) {
 	fmt.Println(uuid)

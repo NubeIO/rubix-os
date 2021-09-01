@@ -3,7 +3,7 @@
 
 server:
   keepaliveperiodseconds: 0 # 0 = use system default; set the interval in which keepalive packages will be sent. Only change this value if you know what you are doing.
-  listenaddr: "" # the address to bind on, leave empty to bind on all addresses
+  listenaddr: "0.0.0.0" # the address to bind on, leave empty to bind on all addresses
 
   responseheaders: # response headers are added to every response (default: none)
 #    X-Custom-Header: "custom value"
@@ -28,10 +28,12 @@ server:
 database: # for database see (configure database section)
   dialect: sqlite3
   connection: data.db
+  loglevel: "WARN" # options are: INFO, WARN, ERROR, SILENT (needs to be greater than or equal to global loglevel)
 
 defaultuser: # on database creation, creates an admin user
   name: admin # the username of the default user
   pass: admin # the password of the default user
-passstrength: 10 # the bcrypt password strength (higher = better but also slower)
 
+passstrength: 10 # the bcrypt password strength (higher = better but also slower)
+loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
 

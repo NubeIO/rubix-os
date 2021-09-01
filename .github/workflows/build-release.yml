@@ -83,7 +83,7 @@ jobs:
           COMMIT: ${{ needs.context.outputs.shortCommitId }}
           BUILD_DATE: ${{ steps.date.outputs.date }}
         run: |
-          sed -i -e 's/<version>/'"${VERSION}"'/' app.go
+          sed -i -e 's,<version>,'"${VERSION}"',' app.go
           sed -i -e 's/<commit>/'"${COMMIT}"'/' app.go
           sed -i -e 's/<build_date>/'"${BUILD_DATE}"'/' app.go
 

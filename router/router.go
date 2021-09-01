@@ -1,6 +1,8 @@
 package router
 
 import (
+	"github.com/NubeDev/flow-framework/logger"
+	"github.com/NubeDev/location"
 	"time"
 
 	"github.com/NubeDev/flow-framework/api"
@@ -12,17 +14,15 @@ import (
 	"github.com/NubeDev/flow-framework/error"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin"
-	"github.com/NubeDev/location"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-
 // Create creates the gin engine with all routes.
 func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Configuration) (*gin.Engine, func()) {
-	g := gin.New()
-	g.Use(gin.Logger(), gin.Recovery(), error.Handler(), location.Default())
-	g.NoRoute(error.NotFound())
+	engine := gin.New()
+	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), error.Handler(), location.Default())
+	engine.NoRoute(error.NotFound())
 
 	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
 	authentication := auth.Auth{DB: db}
@@ -83,7 +83,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	}
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), g.Group("/plugin/:uuid/custom/"), streamHandler);if err != nil {
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/plugin/:uuid/custom/"), streamHandler)
+	if err != nil {
 		panic(err)
 	}
 	pluginHandler := api.PluginAPI{
@@ -95,22 +96,22 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
 
-	g.GET("/ip", api.Hostname) //TODO remove
-	g.GET("/health", healthHandler.Health)
-	g.GET("/swagger", docs.Serve)
-	g.Static("/image", conf.GetAbsUploadedImagesDir())
-	g.GET("/docs", docs.UI)
+	engine.GET("/ip", api.Hostname) //TODO remove
+	engine.GET("/health", healthHandler.Health)
+	engine.GET("/swagger", docs.Serve)
+	engine.Static("/image", conf.GetAbsUploadedImagesDir())
+	engine.GET("/docs", docs.UI)
 
-	g.Use(func(ctx *gin.Context) {
+	engine.Use(func(ctx *gin.Context) {
 		ctx.Header("Content-Type", "application/json")
 		for header, value := range conf.Server.ResponseHeaders {
 			ctx.Header(header, value)
 		}
 	})
-	g.Use(cors.New(auth.CorsConfig(conf)))
+	engine.Use(cors.New(auth.CorsConfig(conf)))
 	{
-		g.GET("/plugin", authentication.RequireClient(), pluginHandler.GetPlugins)
-		pluginRoute := g.Group("/plugin/", authentication.RequireClient())
+		engine.GET("/plugin", authentication.RequireClient(), pluginHandler.GetPlugins)
+		pluginRoute := engine.Group("/plugin/", authentication.RequireClient())
 		{
 			pluginRoute.GET("/:uuid", pluginHandler.GetPlugin)
 			pluginRoute.GET("/path/:path", pluginHandler.GetPluginByPath)
@@ -122,7 +123,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			pluginRoute.POST("/:uuid/network", pluginHandler.EnablePlugin)
 		}
 	}
-	g.OPTIONS("/*any")
+	engine.OPTIONS("/*any")
 
 	// swagger:operation GET /version version getVersion
 	//
@@ -135,11 +136,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	//     description: Ok
 	//     schema:
 	//         $ref: "#/definitions/VersionInfo"
-	g.GET("version", func(ctx *gin.Context) {
+	engine.GET("version", func(ctx *gin.Context) {
 		ctx.JSON(200, vInfo)
 	})
-	g.Group("/").Use(authentication.RequireApplicationToken()).POST("/message", messageHandler.CreateMessage)
-	clientAuth := g.Group("")
+	engine.Group("/").Use(authentication.RequireApplicationToken()).POST("/message", messageHandler.CreateMessage)
+	clientAuth := engine.Group("")
 	{
 		clientAuth.Use(authentication.RequireClient())
 		app := clientAuth.Group("/application")
@@ -172,7 +173,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		clientAuth.GET("/stream", streamHandler.Handle)
 
 	}
-	authAdmin := g.Group("/api")
+	authAdmin := engine.Group("/api")
 	{
 		authAdmin.Use(authentication.RequireAdmin())
 		authAdmin.GET("/users", userHandler.GetUsers)
@@ -184,7 +185,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		authAdmin.PATCH("/user/:id", userHandler.UpdateUserByID)
 	}
 
-	control := g.Group("api")
+	control := engine.Group("api")
 	{
 		control.Use(authentication.RequireAdmin())
 		control.GET("", api.Hostname)
@@ -283,5 +284,5 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 	}
 
-	return g, streamHandler.Close
+	return engine, streamHandler.Close
 }
