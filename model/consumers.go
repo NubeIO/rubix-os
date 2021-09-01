@@ -58,3 +58,12 @@ type ConsumerHistory struct {
 	DataStore 			datatypes.JSON  `json:"data_store"`
 	Timestamp    		time.Time 		`json:"timestamp"`
 }
+
+
+//WriterBody could be a local network, job or alarm and so on
+type WriterBody struct {
+	FlowUUID 	string `json:"flow_uuid"`
+	CommonValue CommonValue `json:"common_value"`
+	Priority 	Priority `json:"priority"`
+
+}

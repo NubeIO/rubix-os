@@ -206,6 +206,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// writer (edge-2)
 	writerModel.ConsumerUUID = consumerModel.UUID
 	writerModel.ConsumerThingUUID = pnt2.UUID
+	writerModel.WriterType = model.CommonNaming.Point
 	writer, err := d.CreateWriter(&writerModel);if err != nil {
 		return false, err
 	}
@@ -213,6 +214,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// add consumer to the writerClone (edge-1)
 	writerCloneModel.ProducerUUID = producer.UUID
 	writerCloneModel.WriterUUID = writerModel.UUID
+	writerCloneModel.WriterType = model.CommonNaming.Point
 	writerClone, err := d.CreateWriterClone(&writerCloneModel);if err != nil {
 		return false, err
 	}

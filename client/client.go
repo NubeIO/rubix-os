@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-const defaultBaseURL = "http://localhost:1660"
+
 
 // FlowClient is used to invoke Form3 Accounts API.
 type FlowClient struct {
@@ -48,7 +48,6 @@ func NewSessionWithToken(token string, address string, port string) *FlowClient 
 	client.SetHostURL(apiURL)
 	client.SetError(&Error{})
 	client.SetHeader("Content-Type", "application/json")
-	//set token in header
 	client.SetHeader("Authorization", token)
 	return &FlowClient{client: client}
 }

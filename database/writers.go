@@ -1,8 +1,8 @@
 package database
 
 import (
+	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/rest"
 	"github.com/NubeDev/flow-framework/utils"
@@ -76,52 +76,51 @@ update the writerClone history
 
 */
 
-func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.Writer, askRefresh bool) (*model.ProducerHistory, error) {
-	var wm *model.Writer
-	writer := d.DB.Where("uuid = ? ", uuid).First(&wm); if writer.Error != nil {
-		return nil, writer.Error
+func validType(t string, body *model.WriterBody) ([]byte, error) {
+	if t == model.CommonNaming.Point {
+		var bk model.WriterBody
+		if body.Priority == bk.Priority {
+			return nil, errors.New("error: invalid json on writerBody")
+		}
+		b, err := json.Marshal(body.Priority);if err != nil {
+			return nil, errors.New("error: failed to marshal json on writeBody")
+		}
+		return b, err
+	} else {
+		return nil, errors.New("error: invalid data type on writerBody, ie type could be a point")
 	}
-	if wm == nil {
-		return nil, nil
+}
+
+
+func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.WriterBody, askRefresh bool) (*model.ProducerHistory, error) {
+	writer, err := d.GetWriter(uuid); if err != nil {
+		return nil, err
 	}
-	fmt.Println(3333333, wm.ConsumerUUID, wm.WriteCloneUUID, wm.ConsumerThingUUID)
-	_, err := d.UpdateWriter(uuid, body);if err != nil {
-		return nil, errors.New("error: on update consumer feedback")
-	}
-	var cm *model.Consumer
-	consumer := d.DB.Where("uuid = ? ", wm.ConsumerUUID).First(&cm); if consumer.Error != nil {
-		return nil, consumer.Error
-	}
-	consumerUUID := cm.UUID
-	streamUUID := cm.StreamUUID
-	producerUUID := cm.ProducerUUID
-	writerCloneUUID := wm.WriteCloneUUID
-	var s *model.Stream
-	stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if consumer.Error != nil {
-		return nil, stream.Error
-	}
-	streamListUUID := s.StreamListUUID
-	var fn *model.FlowNetwork
-	flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if consumer.Error != nil {
-		return nil, flow.Error
+	data, err := validType(writer.WriterType, body);if err != nil {
+		return nil, err
 	}
 	wc := new(model.WriterClone)
-	wc.DataStore = body.DataStore
+	wc.DataStore = data
+	writer.DataStore = data
+	consumer, err := d.GetConsumer(writer.ConsumerUUID); if err != nil {
+		return nil, errors.New("error: on get consumer")
+	}
+	consumerUUID := consumer.UUID
+	producerUUID := consumer.ProducerUUID
+	writerCloneUUID := writer.WriteCloneUUID
+	flow, err := d.GetFlowNetwork(body.FlowUUID); if err != nil {
+		return nil, errors.New("error: invalid flow UUID")
+	}
 	// update producer
-	fmt.Println(11111111, writerCloneUUID)
-	_, err = rest.WriteClone(writerCloneUUID, fn, wc, true)
+	_, err = rest.WriteClone(writerCloneUUID, flow, wc, true)
 	if err != nil {
 		return nil, errors.New("error: write new value to writerClone")
 	}
-	fmt.Println(11111111)
-	log.Println("RemoteWriterWrite:", "writerUUID", uuid, "consumerUUID", consumerUUID, "streamUUID", streamUUID, "streamListUUID", streamListUUID, "producerUUID", producerUUID, "flowNetworkUUID", fn.UUID)
-
-	//get feedback from producer
 	if producerUUID == "" {
 		return nil, errors.New("error: producer uuid is none")
 	}
 
-	producerFeedback, err := rest.ProducerHistory(fn, producerUUID);if err != nil {
+	producerFeedback, err := rest.ProducerHistory(flow, producerUUID);if err != nil {
 		return nil, errors.New("error: on get feedback from producer history")
 	}
 	// update the consumer based of the response from the producer

@@ -16,7 +16,6 @@ func (a *FlowClient) ClientGetRubixPlat() (*ResponseBody, error) {
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	fmt.Println(resp.String())
 	return resp.Result().(*ResponseBody), nil
 }
 
