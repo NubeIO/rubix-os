@@ -3,7 +3,6 @@ package database
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/rest"
 	"github.com/NubeDev/flow-framework/utils"
@@ -79,9 +78,7 @@ update the writerClone history
 func validType(t string, body *model.WriterBody) ([]byte, bool, error) {
 	if t == model.CommonNaming.Point {
 		var bk model.WriterBody
-		fmt.Println(body.Action, 909090909)
 		if body.Action == model.CommonNaming.Read {
-			fmt.Println(body.Action, 909090909)
 			return nil, true, nil
 		} else  if body.Priority == bk.Priority {
 			return nil, false, errors.New("error: invalid json on writerBody")
