@@ -59,6 +59,7 @@ func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, e
 	}
 }
 
+
 // CreatePoint creates a device.
 func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	var deviceModel *model.Device
