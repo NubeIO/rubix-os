@@ -10,6 +10,8 @@ var CommonNaming = struct {
 	Network   		string
 	Device   		string
 	Point   		string
+	Read   			string
+	Write   		string
 	Stream   		string
 	StreamList   	string
 	Job   			string
@@ -33,6 +35,8 @@ var CommonNaming = struct {
 	Network:   			"network",
 	Device:   			"device",
 	Point:   			"point",
+	Read:   			"read",
+	Write:   			"write",
 	Stream:   			"stream",
 	StreamList:   		"stream_list",
 	Job:   				"job",
@@ -63,10 +67,7 @@ var CommonNamingCommandGroup = struct {
 	PointWrite:   		"point_write",
 	MasterSchedule:   	"master_schedule",
 	SilenceAlarm:   	"silence_alarm",
-
 }
-
-
 
 
 type CommonDescription struct {

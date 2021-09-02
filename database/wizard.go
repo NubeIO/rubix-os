@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
@@ -24,7 +25,11 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	//get plugin
 	p, err := d.GetPluginByPath("system")
-	fmt.Println("GetPluginByPath", p.UUID)
+	if p.UUID == ""{
+		return false, errors.New("no valid plugin")
+	}
+
+
 
 	// streamList
 	streamList, err := d.CreateStreamList(&streamListModel)
@@ -126,8 +131,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var writerCloneModel model.WriterClone
 
 	//get plugin
-	p, err := d.GetPluginByPath("system")
-	fmt.Println("GetPluginByPath", p.UUID)
+	p, err := d.GetPluginByPath("system");if err != nil {
+		return false, errors.New("not valid plugin found")
+	}
 
 	//in writer add writeCloneUUID and same in writerClone
 

@@ -3,10 +3,10 @@ package database
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/rest"
 	"github.com/NubeDev/flow-framework/utils"
-	"log"
 )
 
 type Writer struct {
@@ -76,18 +76,22 @@ update the writerClone history
 
 */
 
-func validType(t string, body *model.WriterBody) ([]byte, error) {
+func validType(t string, body *model.WriterBody) ([]byte, bool, error) {
 	if t == model.CommonNaming.Point {
 		var bk model.WriterBody
-		if body.Priority == bk.Priority {
-			return nil, errors.New("error: invalid json on writerBody")
+		fmt.Println(body.Action, 909090909)
+		if body.Action == model.CommonNaming.Read {
+			fmt.Println(body.Action, 909090909)
+			return nil, true, nil
+		} else  if body.Priority == bk.Priority {
+			return nil, false, errors.New("error: invalid json on writerBody")
 		}
 		b, err := json.Marshal(body.Priority);if err != nil {
-			return nil, errors.New("error: failed to marshal json on writeBody")
+			return nil, false, errors.New("error: failed to marshal json on writeBody")
 		}
-		return b, err
+		return b, true, err
 	} else {
-		return nil, errors.New("error: invalid data type on writerBody, ie type could be a point")
+		return nil, false, errors.New("error: invalid data type on writerBody, ie type could be a point")
 	}
 }
 
@@ -96,7 +100,7 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.WriterBody, as
 	writer, err := d.GetWriter(uuid); if err != nil {
 		return nil, err
 	}
-	data, err := validType(writer.WriterType, body);if err != nil {
+	data, _,  err := validType(writer.WriterType, body);if err != nil {
 		return nil, err
 	}
 	wc := new(model.WriterClone)
@@ -119,7 +123,6 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.WriterBody, as
 	if producerUUID == "" {
 		return nil, errors.New("error: producer uuid is none")
 	}
-
 	producerFeedback, err := rest.ProducerHistory(flow, producerUUID);if err != nil {
 		return nil, errors.New("error: on get feedback from producer history")
 	}
@@ -138,32 +141,28 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.WriterBody, as
 }
 
 
-func (d *GormDatabase) RemoteWriterRead(uuid string) (*model.ProducerHistory, error) {
-	var wm *model.Writer
-	writer := d.DB.Where("uuid = ? ", uuid).First(&wm); if writer.Error != nil {
-		return nil, writer.Error
+func (d *GormDatabase) RemoteWriterRead(uuid string, body *model.WriterBody) (*model.ProducerHistory, error) {
+	writer, err := d.GetWriter(uuid); if err != nil {
+		return nil, err
 	}
-	if wm == nil {
-		return nil, nil
+	_, valid, err := validType(writer.WriterType, body);if err != nil || !valid {
+		return nil, err
 	}
-	var cm *model.Consumer
-	consumer := d.DB.Where("uuid = ? ", wm.ConsumerUUID).First(&cm); if consumer.Error != nil {
-		return nil, consumer.Error
+
+	consumer, err := d.GetConsumer(writer.ConsumerUUID); if err != nil {
+		return nil, errors.New("error: on get consumer")
 	}
-	consumerUUID := cm.UUID
-	streamUUID := cm.StreamUUID
-	producerUUID := cm.ProducerUUID
-	var s *model.Stream
-	stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if consumer.Error != nil {
-		return nil, stream.Error
+	consumerUUID := consumer.UUID
+	producerUUID := consumer.ProducerUUID
+	flow, err := d.GetFlowNetwork(body.FlowUUID); if err != nil {
+		return nil, errors.New("error: invalid flow UUID")
 	}
-	streamListUUID := s.StreamListUUID
-	var fn *model.FlowNetwork
-	flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if consumer.Error != nil {
-		return nil, flow.Error
+
+	if producerUUID == "" {
+		return nil, errors.New("error: producer uuid is none")
 	}
-	log.Println("RemoteWriterRead:", "writerUUID", uuid, "consumerUUID", consumerUUID, "streamUUID", streamUUID, "streamListUUID", streamListUUID, "producerUUID", producerUUID, "flowNetworkUUID", fn.UUID)
-	producerFeedback, err := rest.ProducerHistory(fn, producerUUID);if err != nil {
+
+	producerFeedback, err := rest.ProducerHistory(flow, producerUUID);if err != nil {
 		return nil, errors.New("error: on get feedback from producer history")
 	}
 	// update the consumer based of the response from the producer
@@ -175,6 +174,44 @@ func (d *GormDatabase) RemoteWriterRead(uuid string) (*model.ProducerHistory, er
 	}
 	return producerFeedback, err
 }
+
+//func (d *GormDatabase) RemoteWriterRead(uuid string) (*model.ProducerHistory, error) {
+//	var wm *model.Writer
+//	writer := d.DB.Where("uuid = ? ", uuid).First(&wm); if writer.Error != nil {
+//		return nil, writer.Error
+//	}
+//	if wm == nil {
+//		return nil, nil
+//	}
+//	var cm *model.Consumer
+//	consumer := d.DB.Where("uuid = ? ", wm.ConsumerUUID).First(&cm); if consumer.Error != nil {
+//		return nil, consumer.Error
+//	}
+//	consumerUUID := cm.UUID
+//	streamUUID := cm.StreamUUID
+//	producerUUID := cm.ProducerUUID
+//	var s *model.Stream
+//	stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if consumer.Error != nil {
+//		return nil, stream.Error
+//	}
+//	streamListUUID := s.StreamListUUID
+//	var fn *model.FlowNetwork
+//	flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if consumer.Error != nil {
+//		return nil, flow.Error
+//	}
+//	log.Println("RemoteWriterRead:", "writerUUID", uuid, "consumerUUID", consumerUUID, "streamUUID", streamUUID, "streamListUUID", streamListUUID, "producerUUID", producerUUID, "flowNetworkUUID", fn.UUID)
+//	producerFeedback, err := rest.ProducerHistory(fn, producerUUID);if err != nil {
+//		return nil, errors.New("error: on get feedback from producer history")
+//	}
+//	// update the consumer based of the response from the producer
+//	updateConsumer:= new(model.Consumer)
+//	updateConsumer.DataStore = producerFeedback.DataStore
+//	updateConsumer.CurrentWriterCloneUUID = producerFeedback.CurrentWriterCloneUUID
+//	_, _ = d.UpdateConsumer(consumerUUID, updateConsumer);if err != nil {
+//		return nil, errors.New("error: on update consumer feedback")
+//	}
+//	return producerFeedback, err
+//}
 
 
 // DeleteWriter deletes it

@@ -19,8 +19,6 @@ type ConsumersUse struct {
 	Plugin   		string `json:"plugin"`
 }
 
-
-
 //Writer could be a local network, job or alarm and so on
 type Writer struct {
 	CommonUUID
@@ -32,7 +30,6 @@ type Writer struct {
 	WriterSettings 				datatypes.JSON  `json:"producer_settings"` //like cov for a point or whatever is needed  #TODO this is why it needs settings
 	CommonCreated
 }
-
 
 
 //Consumer could be a local network, job or alarm and so on
@@ -63,7 +60,7 @@ type ConsumerHistory struct {
 //WriterBody could be a local network, job or alarm and so on
 type WriterBody struct {
 	FlowUUID 	string `json:"flow_uuid"`
+	Action 		string `json:"action"`  //read, write and so on
 	CommonValue CommonValue `json:"common_value"`
 	Priority 	Priority `json:"priority"`
-
 }
