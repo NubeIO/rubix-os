@@ -140,6 +140,11 @@ func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
 	return dto, err
 }
 
+func getBODYWriterBody(ctx *gin.Context) (dto *model.WriterBody, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYWriterClone(ctx *gin.Context) (dto *model.WriterClone, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err

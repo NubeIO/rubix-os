@@ -24,7 +24,7 @@ func (eb *notificationService) registerPointsProducer() {
 				case PointUpdated:
 					payload, ok := e.Data.(*model.Point)
 					msg := fmt.Sprintf("event %s wiii", payload.Name)
-					publishMQTT(payload)
+					//publishMQTT(payload)
 					logrus.Info(msg)
 
 					if !ok {
