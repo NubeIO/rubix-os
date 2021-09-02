@@ -38,14 +38,14 @@ func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
 // GetStream get it
 func (d *GormDatabase) GetStream(uuid string) (*model.Stream, error) {
 	var gatewayModel *model.Stream
-	query := d.DB.Where("uuid = ? ", uuid).First(&gatewayModel)
+	query := d.DB.Preload("FlowNetworks").Where("uuid = ? ", uuid).First(&gatewayModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	return gatewayModel, nil
 }
 
-// DeleteStreamGateway deletes it
+// DeleteStream deletes it
 func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&gatewayModel)
@@ -61,7 +61,7 @@ func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
 
 }
 
-// UpdateStreamGateway  update it
+// UpdateStream  update it
 func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Stream, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("uuid = ?", uuid).Find(&gatewayModel)
@@ -76,7 +76,7 @@ func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Str
 
 }
 
-// DropStreamGateways delete all.
+// DropStreams delete all.
 func (d *GormDatabase) DropStreams() (bool, error) {
 	var gatewayModel *model.Stream
 	query := d.DB.Where("1 = 1").Delete(&gatewayModel)

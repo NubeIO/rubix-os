@@ -112,14 +112,23 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.WriterBody, as
 	consumerUUID := consumer.UUID
 	producerUUID := consumer.ProducerUUID
 	writerCloneUUID := writer.WriteCloneUUID
-	flow, err := d.GetFlowNetwork(body.FlowUUID); if err != nil {
+	streamUUID := consumer.StreamUUID
+	flowNetworkUUID := ""
+	stream, err := d.GetStream(streamUUID); if err != nil {
+		return nil, errors.New("error: invalid stream UUID")
+	}
+	//stream.FlowNetworks
+	for _, net := range stream.FlowNetworks {
+		flowNetworkUUID = net.UUID
+
+	}
+	flow, err := d.GetFlowNetwork(flowNetworkUUID); if err != nil {
 		return nil, errors.New("error: invalid flow UUID")
 	}
-
 	// update producer
 	_, err = rest.WriteClone(writerCloneUUID, flow, wc, true)
 	if err != nil {
-		return nil, errors.New("error: write new value to writerClone")
+		return nil, err
 	}
 	if producerUUID == "" {
 		return nil, errors.New("error: producer uuid is none")
@@ -151,13 +160,22 @@ func (d *GormDatabase) RemoteWriterRead(uuid string, body *model.WriterBody) (*m
 	_, valid, err := validType(writer.WriterType, body);if err != nil || !valid {
 		return nil, err
 	}
-
 	consumer, err := d.GetConsumer(writer.ConsumerUUID); if err != nil {
 		return nil, errors.New("error: on get consumer")
 	}
 	consumerUUID := consumer.UUID
 	producerUUID := consumer.ProducerUUID
-	flow, err := d.GetFlowNetwork(body.FlowUUID); if err != nil {
+	streamUUID := consumer.StreamUUID
+	flowNetworkUUID := ""
+	stream, err := d.GetStream(streamUUID); if err != nil {
+		return nil, errors.New("error: invalid stream UUID")
+	}
+	//stream.FlowNetworks
+	for _, net := range stream.FlowNetworks {
+		flowNetworkUUID = net.UUID
+
+	}
+	flow, err := d.GetFlowNetwork(flowNetworkUUID); if err != nil {
 		return nil, errors.New("error: invalid flow UUID")
 	}
 

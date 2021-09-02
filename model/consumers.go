@@ -59,7 +59,6 @@ type ConsumerHistory struct {
 
 //WriterBody could be a local network, job or alarm and so on
 type WriterBody struct {
-	FlowUUID 	string `json:"flow_uuid"`
 	Action 		string `json:"action"`  //read, write and so on
 	CommonValue CommonValue `json:"common_value"`
 	Priority 	Priority `json:"priority"`
