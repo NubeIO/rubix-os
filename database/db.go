@@ -8,29 +8,9 @@ import (
 // DropAllFlow networks, gateways, commandGroup, consumers, jobs and children.
 func (d *GormDatabase) DropAllFlow() (bool, error) {
 
-	////delete streams
-	//var streamListModel *model.StreamList
-	//query := d.DB.Where("1 = 1").Delete(&streamListModel)
-	//if query.Error != nil {
-	//	return false, query.Error
-	//}
-
-	//delete networks
-	var flowNetworkModel *model.FlowNetwork
-	query := d.DB.Where("1 = 1").Delete(&flowNetworkModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	//delete streams
-	var streamsModel *model.Stream
-	query = d.DB.Where("1 = 1").Delete(&streamsModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
 	//delete networks
 	var networkModel *model.Network
-	query = d.DB.Where("1 = 1").Delete(&networkModel)
+	query := d.DB.Where("1 = 1").Delete(&networkModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
@@ -65,6 +45,22 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 	if query.Error != nil {
 		return false, query.Error
 	}
+
+	//delete streams
+	var streamsModel *model.Stream
+	query = d.DB.Where("1 = 1").Delete(&streamsModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
+
+
+	//delete networks
+	var flowNetworkModel *model.FlowNetwork
+	query = d.DB.Where("1 = 1").Delete(&flowNetworkModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
+
 	return true, nil
 }
 

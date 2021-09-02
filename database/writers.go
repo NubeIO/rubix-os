@@ -25,7 +25,8 @@ func (d *GormDatabase) GetWriters() ([]*model.Writer, error) {
 // CreateWriter make it
 func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Writer)
-	query := d.DB.Create(body);if query.Error != nil {
+	query := d.DB.Create(body)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return body, nil
@@ -34,7 +35,8 @@ func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 // GetWriter get it
 func (d *GormDatabase) GetWriter(uuid string) (*model.Writer, error) {
 	var consumerModel *model.Writer
-	query := d.DB.Where("uuid = ? ", uuid).First(&consumerModel); if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).First(&consumerModel)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return consumerModel, nil
@@ -43,7 +45,8 @@ func (d *GormDatabase) GetWriter(uuid string) (*model.Writer, error) {
 // GetWriterByThing get it by its thing uuid
 func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer, error) {
 	var consumerModel *model.Writer
-	query := d.DB.Where("producer_thing_uuid = ? ", producerThingUUID).First(&consumerModel); if query.Error != nil {
+	query := d.DB.Where("producer_thing_uuid = ? ", producerThingUUID).First(&consumerModel)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return consumerModel, nil
@@ -112,6 +115,7 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.WriterBody, as
 	flow, err := d.GetFlowNetwork(body.FlowUUID); if err != nil {
 		return nil, errors.New("error: invalid flow UUID")
 	}
+
 	// update producer
 	_, err = rest.WriteClone(writerCloneUUID, flow, wc, true)
 	if err != nil {
@@ -125,10 +129,11 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.WriterBody, as
 	}
 	// update the consumer based of the response from the producer
 	if askRefresh {
-		updateConsumer:= new(model.Consumer)
+		updateConsumer := new(model.Consumer)
 		updateConsumer.DataStore = producerFeedback.DataStore
 		updateConsumer.CurrentWriterCloneUUID = producerFeedback.CurrentWriterCloneUUID
-		_, _ = d.UpdateConsumer(consumerUUID, updateConsumer);if err != nil {
+		_, _ = d.UpdateConsumer(consumerUUID, updateConsumer)
+		if err != nil {
 			return nil, errors.New("error: on update consumer feedback")
 		}
 		return producerFeedback, err
@@ -136,6 +141,7 @@ func (d *GormDatabase) RemoteWriterWrite(uuid string, body *model.WriterBody, as
 		return producerFeedback, err
 	}
 }
+
 
 
 func (d *GormDatabase) RemoteWriterRead(uuid string, body *model.WriterBody) (*model.ProducerHistory, error) {
@@ -163,58 +169,22 @@ func (d *GormDatabase) RemoteWriterRead(uuid string, body *model.WriterBody) (*m
 		return nil, errors.New("error: on get feedback from producer history")
 	}
 	// update the consumer based of the response from the producer
-	updateConsumer:= new(model.Consumer)
+	updateConsumer := new(model.Consumer)
 	updateConsumer.DataStore = producerFeedback.DataStore
 	updateConsumer.CurrentWriterCloneUUID = producerFeedback.CurrentWriterCloneUUID
-	_, _ = d.UpdateConsumer(consumerUUID, updateConsumer);if err != nil {
+	_, _ = d.UpdateConsumer(consumerUUID, updateConsumer)
+	if err != nil {
 		return nil, errors.New("error: on update consumer feedback")
 	}
 	return producerFeedback, err
 }
 
-//func (d *GormDatabase) RemoteWriterRead(uuid string) (*model.ProducerHistory, error) {
-//	var wm *model.Writer
-//	writer := d.DB.Where("uuid = ? ", uuid).First(&wm); if writer.Error != nil {
-//		return nil, writer.Error
-//	}
-//	if wm == nil {
-//		return nil, nil
-//	}
-//	var cm *model.Consumer
-//	consumer := d.DB.Where("uuid = ? ", wm.ConsumerUUID).First(&cm); if consumer.Error != nil {
-//		return nil, consumer.Error
-//	}
-//	consumerUUID := cm.UUID
-//	streamUUID := cm.StreamUUID
-//	producerUUID := cm.ProducerUUID
-//	var s *model.Stream
-//	stream := d.DB.Where("uuid = ? ", streamUUID).First(&s); if consumer.Error != nil {
-//		return nil, stream.Error
-//	}
-//	streamListUUID := s.StreamListUUID
-//	var fn *model.FlowNetwork
-//	flow := d.DB.Where("stream_list_uuid = ? ", streamListUUID).First(&fn); if consumer.Error != nil {
-//		return nil, flow.Error
-//	}
-//	log.Println("RemoteWriterRead:", "writerUUID", uuid, "consumerUUID", consumerUUID, "streamUUID", streamUUID, "streamListUUID", streamListUUID, "producerUUID", producerUUID, "flowNetworkUUID", fn.UUID)
-//	producerFeedback, err := rest.ProducerHistory(fn, producerUUID);if err != nil {
-//		return nil, errors.New("error: on get feedback from producer history")
-//	}
-//	// update the consumer based of the response from the producer
-//	updateConsumer:= new(model.Consumer)
-//	updateConsumer.DataStore = producerFeedback.DataStore
-//	updateConsumer.CurrentWriterCloneUUID = producerFeedback.CurrentWriterCloneUUID
-//	_, _ = d.UpdateConsumer(consumerUUID, updateConsumer);if err != nil {
-//		return nil, errors.New("error: on update consumer feedback")
-//	}
-//	return producerFeedback, err
-//}
-
 
 // DeleteWriter deletes it
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	var consumerModel *model.Writer
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&consumerModel);if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&consumerModel)
+	if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -228,10 +198,12 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 // UpdateWriter  update it
 func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
 	var consumerModel *model.Writer
-	query := d.DB.Where("uuid = ?", uuid).Find(&consumerModel);if query.Error != nil {
+	query := d.DB.Where("uuid = ?", uuid).Find(&consumerModel)
+	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&consumerModel).Updates(body);if query.Error != nil {
+	query = d.DB.Model(&consumerModel).Updates(body)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return consumerModel, nil

@@ -41,8 +41,8 @@ type Consumer struct {
 	ConsumerType 				string  `json:"consumer_type"`
 	ConsumerApplication 		string 	`json:"consumer_application"`
 	StreamUUID     				string 	`json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
-	Writer						[]Writer `json:"writers" gorm:"constraint:OnDelete:CASCADE;"`
 	DataStore 					datatypes.JSON  `json:"data_store"`
+	Writer						[]Writer `json:"writers" gorm:"constraint:OnDelete:CASCADE;"`
 	ConsumerHistory				[]ConsumerHistory `json:"consumer_histories" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
 }
