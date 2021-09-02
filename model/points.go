@@ -70,9 +70,9 @@ type Point struct {
 
 type Priority struct {
 	PointUUID     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
-	P1  			string `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
-	P2  			string `json:"_2"`
-	P3  			string `json:"_3"`
+	P1  			float64 `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
+	P2  			float64 `json:"_2"`
+	P3  			float64 `json:"_3"`
 	//P4  			float64 `json:"_4"`
 	//P5  			float64 `json:"_5"`
 	//P6  			float64 `json:"_6"`

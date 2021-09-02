@@ -30,11 +30,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 		return false, errors.New("no valid plugin")
 	}
 
-	// streamList
-	//streamList, err := d.CreateStreamList(&streamListModel)
-
 	flowNetwork.IsRemote = false
-	//flowNetwork.StreamListUUID = streamList.UUID
 	flowNetwork.RemoteFlowUUID = utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.GlobalFlowID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.Name = "flow network"
@@ -52,11 +48,6 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
 	pnt, err := d.CreatePoint(&pointModel)
-
-	// stream
-	//streamModel.StreamListUUID = f.UUID
-	//streamModel.StreamListUUID = streamList.UUID
-	//stream, err := d.CreateStream(&streamModel)
 
 	// producer
 	//producerModel.StreamUUID = stream.UUID
@@ -227,6 +218,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	writerCloneModel.ProducerUUID = producer.UUID
 	writerCloneModel.WriterUUID = writerModel.UUID
 	writerCloneModel.WriterType = model.CommonNaming.Point
+
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
 	if err != nil {
 		return false, err
