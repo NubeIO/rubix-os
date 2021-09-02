@@ -5,6 +5,7 @@ import (
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 // WizardLocalPointMapping add a local network mapping stream.
@@ -113,7 +114,6 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 // WizardRemotePointMapping add a local network mapping stream.
 func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var flowNetwork model.FlowNetwork
-	//var pluginModel *model.PluginConf
 	var networkModel model.Network
 	var deviceModel model.Device
 	var pointModel model.Point
@@ -127,7 +127,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 
 	//get plugin
 	p, err := d.GetPluginByPath("system")
-	fmt.Println("GetPluginByPath", p.UUID)
+	log.Debug("GetPluginByPath: ", p.UUID)
 
 	//in writer add writeCloneUUID and same in writerClone
 	flowNetwork.IsRemote = true
@@ -139,38 +139,43 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
-	fmt.Println("CreateFlowNetwork", f.UUID)
+	log.Debug("Created a FlowNetwork: ", f.UUID)
 
 	// network
 	networkModel.PluginConfId = p.UUID
 	n, err := d.CreateNetwork(&networkModel)
-	fmt.Println("CreateNetwork")
+	log.Debug("Created a Network")
 	// device
 	deviceModel.NetworkUUID = n.UUID
 	dev, err := d.CreateDevice(&deviceModel)
+	log.Debug("Created a Device")
 	// point
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
 	pnt, err := d.CreatePoint(&pointModel)
+	log.Debug("Created a Point")
 
 	// stream
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
 	stream, err := d.CreateStream(&streamModel)
-	fmt.Println("Created Streams at Producer side:", stream.Name)
+	log.Debug("Created Streams at Producer side: ", stream.Name)
 
 	// producer
-	fmt.Println("stream.UUID", stream)
+	log.Debug("stream.UUID: ", stream.UUID)
 	producerModel.StreamUUID = stream.UUID
 	producerModel.ProducerThingUUID = pnt.UUID
 	producerModel.Name = "producer stream"
 	producerModel.ProducerType = model.CommonNaming.Point
 	producerModel.ProducerApplication = model.CommonNaming.Mapping
 	producer, err := d.CreateProducer(&producerModel)
-	fmt.Println("Created Producer:", producer.Name)
+	log.Debug("Created Producer: ", producer.Name)
 
 	consumerFlowNetwork.Name = "Consumer flow network"
+	consumerFlowNetwork.IsRemote = true
+	flowNetwork.FlowIP = "0.0.0.0"
+	flowNetwork.FlowPort = "1660"
 	cfn, err := d.CreateFlowNetwork(&consumerFlowNetwork)
-	fmt.Println("Created Consumer FlowNetwork:", cfn.UUID)
+	log.Debug("Created Consumer FlowNetwork: ", cfn.UUID)
 
 	// consumer stream (edge-2)
 	consumerStreamModel.IsConsumer = true
@@ -185,7 +190,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
 	consumerModel.ProducerThingUUID = pnt.UUID
 	consumer, err := d.CreateConsumer(&consumerModel)
-	fmt.Println("Created Consumer:", consumer.Name)
+	log.Debug("Created Consumer: ", consumer.Name)
 
 	// device to be used for consumer list (edge-2)
 	deviceModel.NetworkUUID = n.UUID
@@ -225,7 +230,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	fmt.Println("Updated write_clone_uuid on consumer side (edge-2):", writerCloneModel.UUID)
+	log.Debug("Updated write_clone_uuid on consumer side (edge-2): ", writerCloneModel.UUID)
 	writerCloneModel.WriterUUID = writer.UUID
 	_, err = d.UpdateWriterClone(writerCloneModel.UUID, &writerCloneModel)
 	if err != nil {

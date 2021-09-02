@@ -9,7 +9,7 @@ import (
 func (d *GormDatabase) GetStreams(withChildren bool) ([]*model.Stream, error) {
 	var gatewaysModel []*model.Stream
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload("Producer").Preload("Producer.WriterClone").Preload("Consumer").Preload("Consumer.Writer").Find(&gatewaysModel)
+		query := d.DB.Preload("FlowNetworks").Preload("Producer").Preload("Producer.WriterClone").Preload("Consumer").Preload("Consumer.Writer").Find(&gatewaysModel)
 		if query.Error != nil {
 			return nil, query.Error
 		}

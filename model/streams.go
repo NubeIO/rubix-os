@@ -9,11 +9,11 @@ type Stream struct {
 	CommonUUID
 	CommonName
 	CommonDescription
-	FlowNetworks []*FlowNetwork `gorm:"many2many:streams_flow_networks;"`
-	IsConsumer   bool           `json:"is_consumer"`
+	IsConsumer bool `json:"is_consumer"`
 	CommonEnable
 	Producer     []Producer     `json:"producers" gorm:"constraint:OnDelete:CASCADE;"`
 	Consumer     []Consumer     `json:"consumer" gorm:"constraint:OnDelete:CASCADE;"`
 	CommandGroup []CommandGroup `json:"command_group" gorm:"constraint:OnDelete:CASCADE;"`
+	FlowNetworks []*FlowNetwork `json:"flow_networks" gorm:"many2many:flow_networks_streams;constraint:OnDelete:CASCADE"`
 	CommonCreated
 }

@@ -24,6 +24,6 @@ type FlowNetwork struct {
 	MqttHTTPS               bool      `json:"mqtt_https"`
 	MqttUsername            string    `json:"mqtt_username"`
 	MqttPassword            string    `json:"mqtt_password"`
-	Streams                 []*Stream `gorm:"many2many:streams_flow_networks;"`
+	Streams                 []*Stream `json:"streams" gorm:"many2many:flow_networks_streams;constraint:OnDelete:CASCADE"`
 	CommonCreated
 }
