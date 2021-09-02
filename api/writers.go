@@ -16,8 +16,8 @@ type WriterDatabase interface {
 	CreateWriter(body *model.Writer) (*model.Writer, error)
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
-	RemoteWriterRead(uuid string) (*model.ProducerHistory, error)
-	RemoteWriterWrite(uuid string, body *model.Writer, askRefresh bool) (*model.ProducerHistory, error)
+	RemoteWriterRead(uuid string, body *model.WriterBody) (*model.ProducerHistory, error)
+	RemoteWriterWrite(uuid string, body *model.WriterBody, askRefresh bool) (*model.ProducerHistory, error)
 
 }
 
@@ -65,23 +65,6 @@ func (j *WriterAPI) DeleteWriter(ctx *gin.Context) {
 }
 
 
-//withConsumerArgs
-func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, write bool, thingType string, flowNetworkUUID string){
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-
-	args.AskRefresh = ctx.DefaultQuery(aType.AskRefresh, aDefault.AskRefresh)
-	args.AskResponse = ctx.DefaultQuery(aType.AskResponse, aDefault.AskResponse)
-	args.Write = ctx.DefaultQuery(aType.Write, aDefault.Write)
-	args.ThingType = ctx.DefaultQuery(aType.ThingType, aDefault.ThingType)
-	args.FlowNetworkUUID = ctx.DefaultQuery(aType.FlowNetworkUUID, aDefault.FlowNetworkUUID)
-	askRefresh, _ = toBool(args.AskRefresh)
-	askResponse, _ = toBool(args.AskResponse)
-	write, _ = toBool(args.Write)
-	return askRefresh, askResponse, write, args.ThingType, args.FlowNetworkUUID
-}
-
 
 //RemoteWriterRead get or update a producer value by using the consumer uuid
 //Default will just read the stored value of the consumer (as in don't get the current value from the producer)
@@ -91,7 +74,8 @@ func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, writ
 //thingsType:  "thing_type", //write a new value to the consumer
 func (j *WriterAPI) RemoteWriterRead(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.RemoteWriterRead(uuid)
+	body, _ := getBODYWriterBody(ctx)
+	q, err := j.DB.RemoteWriterRead(uuid, body)
 	reposeHandler(q, err, ctx)
 }
 
@@ -100,7 +84,7 @@ func (j *WriterAPI) RemoteWriterRead(ctx *gin.Context) {
 func (j *WriterAPI) RemoteWriterWrite(ctx *gin.Context) {
 	askRefresh, _, _, _, _ := withConsumerArgs(ctx)
 	uuid := resolveID(ctx)
-	body, _ := getBODYWriter(ctx)
+	body, _ := getBODYWriterBody(ctx)
 	q, err := j.DB.RemoteWriterWrite(uuid, body, askRefresh)
 	reposeHandler(q, err, ctx)
 }

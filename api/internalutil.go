@@ -26,7 +26,9 @@ type Args struct {
 	AskResponse  string
 	Write 		 string
 	ThingType 	 string
-	FlowNetworkUUID string
+	FlowNetworkUUID 	string
+	WriteHistory 		string
+	WriteConsumer 		string
 }
 
 var ArgsType = struct {
@@ -41,21 +43,24 @@ var ArgsType = struct {
 	AskResponse  string
 	Write 		 string
 	ThingType 	 string
-	FlowNetworkUUID string
+	FlowNetworkUUID 	string
+	WriteHistory 		string
+	WriteConsumer 		string
 }{
-	Sort:         "sort",
-	Order:        "order",
-	Offset:       "offset",
-	Limit:        "limit",
-	Search:       "search",
-	WithChildren: "with_children",
-	WithPoints:   "with_points",
-	AskRefresh:   "ask_refresh",
-	AskResponse:  "ask_response",
-	Write:  	  "write", //consumer to write a value
+	Sort:         	"sort",
+	Order:        	"order",
+	Offset:       	"offset",
+	Limit:        	"limit",
+	Search:       	"search",
+	WithChildren: 	"with_children",
+	WithPoints:   	"with_points",
+	AskRefresh:   	"ask_refresh",
+	AskResponse:  	"ask_response",
+	Write:  	  	"write", //consumer to write a value
 	ThingType:    	"thing_type", //the type of thing like a point
 	FlowNetworkUUID:"flow_network_uuid", //the type of thing like a point
-
+	WriteHistory:   "write_history",
+	WriteConsumer:  "write_consumer",
 
 }
 
@@ -140,6 +145,11 @@ func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
 	return dto, err
 }
 
+func getBODYWriterBody(ctx *gin.Context) (dto *model.WriterBody, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYWriterClone(ctx *gin.Context) (dto *model.WriterClone, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -181,14 +191,7 @@ func resolvePath(ctx *gin.Context) string {
 	return id
 }
 
-func WithChildren(value string) (bool, error) {
-	if value == "" {
-		return false, nil
-	} else {
-		c, err := bools.Boolean(value)
-		return c, err
-	}
-}
+
 
 func toBool(value string) (bool, error) {
 	if value == "" {

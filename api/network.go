@@ -19,30 +19,6 @@ type NetworksAPI struct {
 }
 
 
-func networkArgs(ctx *gin.Context) (withChildren bool, withPoints bool){
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.WithChildren = ctx.DefaultQuery(aType.WithChildren, aDefault.WithChildren)
-	args.WithPoints = ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints)
-	withChildren, _ = WithChildren(args.WithChildren) //?with_children=true&points=true
-	withPoints, _ = WithChildren(args.WithPoints)
-    return withChildren, withPoints
-
-}
-//withChildrenArgs
-func withChildrenArgs(ctx *gin.Context) (withChildren bool, withPoints bool){
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.WithChildren = ctx.DefaultQuery(aType.WithChildren, aDefault.WithChildren)
-	args.WithPoints = ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints)
-	withChildren, _ = WithChildren(args.WithChildren) //?with_children=true&points=true
-	withPoints, _ = WithChildren(args.WithPoints)
-	return withChildren, withPoints
-
-}
-
 func (a *NetworksAPI) GetNetworks(ctx *gin.Context) {
 	withChildren, withPoints := networkArgs(ctx)
 	q, err := a.DB.GetNetworks(withChildren, withPoints)

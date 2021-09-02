@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
@@ -25,7 +26,11 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	//get plugin
 	p, err := d.GetPluginByPath("system")
-	fmt.Println("GetPluginByPath", p.UUID)
+	if p.UUID == ""{
+		return false, errors.New("no valid plugin")
+	}
+
+
 
 	// streamList
 	//streamList, err := d.CreateStreamList(&streamListModel)
@@ -126,8 +131,10 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var writerCloneModel model.WriterClone
 
 	//get plugin
-	p, err := d.GetPluginByPath("system")
-	log.Debug("GetPluginByPath: ", p.UUID)
+	p, err := d.GetPluginByPath("system");if err != nil {
+		return false, errors.New("not valid plugin found")
+	}
+
 
 	//in writer add writeCloneUUID and same in writerClone
 	flowNetwork.IsRemote = true
@@ -211,16 +218,22 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// writer (edge-2)
 	writerModel.ConsumerUUID = consumerModel.UUID
 	writerModel.ConsumerThingUUID = pnt2.UUID
-	writer, err := d.CreateWriter(&writerModel)
-	if err != nil {
+	writerModel.WriterType = model.CommonNaming.Point
+	writer, err := d.CreateWriter(&writerModel);if err != nil {
+
 		return false, err
 	}
 
 	// add consumer to the writerClone (edge-1)
 	writerCloneModel.ProducerUUID = producer.UUID
 	writerCloneModel.WriterUUID = writerModel.UUID
+
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
-	if err != nil {
+
+
+	writerCloneModel.WriterType = model.CommonNaming.Point
+	writerClone, err := d.CreateWriterClone(&writerCloneModel);if err != nil {
+
 		return false, err
 	}
 
