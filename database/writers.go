@@ -1,7 +1,6 @@
 package database
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/streams"
@@ -126,12 +125,13 @@ update the writerClone history
 
 */
 
+//WriterAction read or write a value to the writer and onto the writer clone
 func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model.ProducerHistory, error) {
 	askRefresh := body.AskRefresh
 	writer, err := d.GetWriter(uuid); if err != nil {
 		return nil, err
 	}
-	data, action,  err := validType(writer.WriterType, body);if err != nil {
+	data, action,  err := streams.ValidateTypes(writer.WriterType, body);if err != nil {
 		return nil, err
 	}
 	wc := new(model.WriterClone)
@@ -154,7 +154,6 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	flow, err := d.GetFlowNetwork(flowNetworkUUID); if err != nil {
 		return nil, errors.New("error: invalid flow UUID")
 	}
-
 	if action == model.CommonNaming.Write{
 		wc.DataStore = data
 		writer.DataStore = data
@@ -163,7 +162,6 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 			return nil, err
 		}
 	}
-
 	producerFeedback, err := streams.ProducerFeedback(producerUUID, flow)
 	if err != nil {
 		return nil, err
@@ -183,66 +181,6 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	}
 }
 
-
-
-//
-//func (d *GormDatabase) RemoteWriterRead(uuid string, body *model.WriterBody) (*model.ProducerHistory, error) {
-//	writer, err := d.GetWriter(uuid); if err != nil {
-//		return nil, err
-//	}
-//	_, valid, err := validType(writer.WriterType, body);if err != nil || !valid {
-//		return nil, err
-//	}
-//	consumer, err := d.GetConsumer(writer.ConsumerUUID); if err != nil {
-//		return nil, errors.New("error: on get consumer")
-//	}
-//	consumerUUID := consumer.UUID
-//	producerUUID := consumer.ProducerUUID
-//	streamUUID := consumer.StreamUUID
-//	stream, err := d.GetStream(streamUUID); if err != nil {
-//		return nil, errors.New("error: invalid stream UUID")
-//	}
-//	//flow network uuid
-//	flowNetworkUUID := ""
-//	for _, net := range stream.FlowNetworks {
-//		flowNetworkUUID = net.UUID
-//
-//	}
-//	flow, err := d.GetFlowNetwork(flowNetworkUUID); if err != nil {
-//		return nil, errors.New("error: invalid flow UUID")
-//	}
-//	producerFeedback, err := streams.ProducerFeedback(producerUUID, flow)
-//	if err != nil {
-//		return nil, err
-//	}
-//	updateConsumer, err := consumerRefresh(producerFeedback)
-//	if err != nil {
-//		return nil, err
-//	}
-//	_, _ = d.UpdateConsumer(consumerUUID, updateConsumer)
-//	if err != nil {
-//		return nil, errors.New("error: on update consumer feedback")
-//	}
-//	return producerFeedback, err
-//}
-
-
-func validType(t string, body *model.WriterBody) ([]byte, string, error) {
-	if t == model.CommonNaming.Point {
-		var bk model.WriterBody
-		if body.Action == model.CommonNaming.Read {
-			return nil, body.Action, nil
-		} else  if body.Priority == bk.Priority {
-			return nil, body.Action, errors.New("error: invalid json on writerBody")
-		}
-		b, err := json.Marshal(body.Priority);if err != nil {
-			return nil, body.Action, errors.New("error: failed to marshal json on writeBody")
-		}
-		return b, body.Action, err
-	} else {
-		return nil, body.Action, errors.New("error: invalid data type on writerBody, ie type could be a point")
-	}
-}
 
 
 func consumerRefresh(producerFeedback  *model.ProducerHistory) (*model.Consumer, error){
