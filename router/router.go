@@ -269,8 +269,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.DELETE("/consumer/list/:uuid", writerHandler.DeleteWriter)
 
 		//action's writers
-		control.POST("/writer/remote/read/:uuid", writerHandler.RemoteWriterRead)
-		control.POST("/writer/remote/write/:uuid", writerHandler.RemoteWriterWrite)
+		control.POST("/writer/action/:uuid", writerHandler.WriterAction)
 
 		//action's writers clones
 		control.GET("/writer/clone/:uuid", writerCloneHandler.GetWriterClone)
