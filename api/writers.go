@@ -16,8 +16,7 @@ type WriterDatabase interface {
 	CreateWriter(body *model.Writer) (*model.Writer, error)
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
-	RemoteWriterRead(uuid string, body *model.WriterBody) (*model.ProducerHistory, error)
-	RemoteWriterWrite(uuid string, body *model.WriterBody, askRefresh bool) (*model.ProducerHistory, error)
+	WriterAction(uuid string, body *model.WriterBody) (*model.ProducerHistory, error)
 
 }
 
@@ -49,7 +48,6 @@ func (j *WriterAPI) CreateWriter(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-
 func (j *WriterAPI) UpdateWriter(ctx *gin.Context) {
 	body, _ := getBODYWriter(ctx)
 	uuid := resolveID(ctx)
@@ -64,27 +62,10 @@ func (j *WriterAPI) DeleteWriter(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-
-
-//RemoteWriterRead get or update a producer value by using the consumer uuid
-//Default will just read the stored value of the consumer (as in don't get the current value from the producer)
-//AskRefresh:   "ask_refresh",  // consumer to ask for value from the producer, And producer must resend its value, But don't wait for a response
-//AskResponse:  "ask_response", //consumer to ask for value from the producer, And wait for a response
-//Write:  "write", //write a new value to the consumer
-//thingsType:  "thing_type", //write a new value to the consumer
-func (j *WriterAPI) RemoteWriterRead(ctx *gin.Context) {
+//WriterAction get or update a producer value by using the writer uuid
+func (j *WriterAPI) WriterAction(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	body, _ := getBODYWriterBody(ctx)
-	q, err := j.DB.RemoteWriterRead(uuid, body)
-	reposeHandler(q, err, ctx)
-}
-
-
-//RemoteWriterWrite get or update a producer value by using the consumer uuid
-func (j *WriterAPI) RemoteWriterWrite(ctx *gin.Context) {
-	askRefresh, _, _, _, _ := withConsumerArgs(ctx)
-	uuid := resolveID(ctx)
-	body, _ := getBODYWriterBody(ctx)
-	q, err := j.DB.RemoteWriterWrite(uuid, body, askRefresh)
+	q, err := j.DB.WriterAction(uuid, body)
 	reposeHandler(q, err, ctx)
 }
