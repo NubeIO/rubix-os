@@ -19,6 +19,7 @@ func NewNotificationService(eb *bus.Bus) NotificationService {
 		eb: eb,
 	}
 	ns.registerPointsProducer() //add as types needed
+	ns.registerNodes() //add as types needed
 	return ns
 }
 
@@ -36,7 +37,6 @@ func (eb *notificationService) EmitString(ctx context.Context, topicName string,
 // Emit emits an event to the bus
 func (eb *notificationService) Emit(ctx context.Context, topicName string, data interface{}) {
 	err := eb.eb.Emit(ctx, topicName, data)
-
 	if err != nil {
 		log.Fatal(err.Error())
 	}

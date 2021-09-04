@@ -41,12 +41,14 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var rubixPlat []model.RubixPlat
 	var job []model.Job
 	var stream []model.Stream
-	//var streamList []model.StreamList
 	var commandGroup []model.CommandGroup
 	var producer []model.Producer
 	var consumer []model.Consumer
 	var writer []model.Writer
 	var writerClone []model.WriterClone
+	var nodesList []model.NodeList
+	var in1 []model.NodeIn1
+	var out1 []model.NodeOut1
 
 	var models = []interface{}{
 		&alerts,
@@ -65,12 +67,14 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&consumerHistory,
 		&job,
 		&stream,
-		//&streamList,
 		&commandGroup,
 		&producer,
 		&consumer,
 		&writer,
 		&writerClone,
+		&nodesList,
+		&in1,
+		&out1,
 	}
 
 	for _, v := range models {

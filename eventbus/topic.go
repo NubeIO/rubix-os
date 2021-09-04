@@ -9,6 +9,7 @@ const (
 	NetworksAll  	= "network.*"
 	PluginsAll  	= "plugin.*"
 	StreamsAll  	= "stream.*"
+	NodesAll  		= "node.*"
 
 	PluginsCreated  = "plugin.created"
 	PluginsUpdated  = "plugin.updated"
@@ -23,6 +24,13 @@ const (
 	PointCreated  	= "point.created"
 	PointCOV  		= "point.cov"
 
+	NodeUpdated  			= "node.updated"
+	NodeCreated  			= "node.created"
+	NodeEvent  				= "node.event"
+	NodeEventIn  			= "node.event.in"
+	NodeEventOut  			= "node.event.out"
+
+
 )
 
 
@@ -36,6 +44,7 @@ func BusTopics() []string {
 		PointsAll,
 		PluginsAll,
 		StreamsAll,
+		NodesAll,
 		PluginsCreated,
 		PluginsUpdated,
 		StreamsCreated,
@@ -45,5 +54,10 @@ func BusTopics() []string {
 		PointCreated,
 		PointUpdated,
 		PointCOV,
+		NodeUpdated,
+		NodeCreated,
+		NodeEvent,
+		NodeEventIn,
+		NodeEventOut,
 	}
 }

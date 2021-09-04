@@ -99,6 +99,10 @@ func (d *GormDatabase) SyncTopics()  {
 	for _, obj := range p {
 		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Point, obj.UUID)
 	}
+	node, err := d.GetNodesList()
+	for _, obj := range node {
+		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Node, obj.UUID)
+	}
 	if err != nil {
 
 	}

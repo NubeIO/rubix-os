@@ -81,6 +81,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	dbGroup := api.DatabaseAPI{
 		DB: db,
 	}
+	nodesHandler := api.NodeListAPI{
+		DB: db,
+	}
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
 	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/plugin/:uuid/custom/"), streamHandler)
@@ -194,6 +197,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.POST("/database/wizard/mapping/local/point", dbGroup.WizardLocalPointMapping)
 		control.POST("/database/wizard/mapping/remote/point", dbGroup.WizardRemotePointMapping)
 		control.POST("/database/wizard/mapping/existing/stream", dbGroup.Wizard2ndFlowNetwork)
+		control.POST("/database/wizard/nodes", dbGroup.NodeWizard)
 		control.GET("/wires/plat", rubixPlatHandler.GetRubixPlat)
 		control.PATCH("/wires/plat", rubixPlatHandler.UpdateRubixPlat)
 
@@ -280,6 +284,13 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.GET("/job/:uuid", jobHandler.GetJob)
 		control.PATCH("/job/:uuid", jobHandler.UpdateJob)
 		control.DELETE("/job/:uuid", jobHandler.DeleteJob)
+
+		control.GET("/nodes", nodesHandler.GetNodesList)
+		control.POST("/node", nodesHandler.CreateNodeList)
+		control.GET("/node/:uuid", nodesHandler.GetNodeList)
+		control.PATCH("/node/:uuid", nodesHandler.UpdateNode)
+		control.DELETE("/node/:uuid", nodesHandler.DeleteNodeList)
+		control.DELETE("/nodes/drop", nodesHandler.DropNodesList)
 
 	}
 

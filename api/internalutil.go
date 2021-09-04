@@ -145,6 +145,11 @@ func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
 	return dto, err
 }
 
+func getBODYNode(ctx *gin.Context) (dto *model.NodeList, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYWriterBody(ctx *gin.Context) (dto *model.WriterBody, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err

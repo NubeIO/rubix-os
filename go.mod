@@ -16,6 +16,7 @@ require (
 	github.com/h2non/filetype v1.1.1
 	github.com/mustafaturan/bus/v3 v3.0.3
 	github.com/mustafaturan/monoton/v2 v2.0.2
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/simonvetter/modbus v1.3.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0

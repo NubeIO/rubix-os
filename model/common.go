@@ -29,6 +29,7 @@ var CommonNaming = struct {
 	History   			string
 	ProducerHistory   	string
 	Histories   		string
+	Node   			string
 
 }{
 	Plugin:   			"plugin",
@@ -54,6 +55,7 @@ var CommonNaming = struct {
 	History:   			"history",
 	ProducerHistory:   	"producer_history",
 	Histories:   		"histories",
+	Node:   			"node",
 }
 
 
@@ -76,6 +78,18 @@ type CommonDescription struct {
 
 type CommonName struct {
 	Name string `json:"name"`
+}
+
+type CommonNodeType struct {
+	NodeType string `json:"node_type"`
+}
+
+type CommonType struct {
+	ObjectType string `json:"object_type"`
+}
+
+type CommonAction struct {
+	Action string `json:"action"`
 }
 
 type CommonNameUnique struct {

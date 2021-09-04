@@ -12,6 +12,7 @@ type DBDatabase interface {
 	WizardLocalPointMapping()  (bool, error)
 	WizardRemotePointMapping()  (bool, error)
 	Wizard2ndFlowNetwork(body *AddNewFlowNetwork)  (bool, error)
+	NodeWizard()  (bool, error)
 
 }
 type DatabaseAPI struct {
@@ -38,13 +39,18 @@ func (a *DatabaseAPI) WizardRemotePointMapping(ctx *gin.Context) {
 	reposeHandler(mapping, err, ctx)
 }
 
+func (a *DatabaseAPI) NodeWizard(ctx *gin.Context) {
+	mapping, err := a.DB.NodeWizard()
+	reposeHandler(mapping, err, ctx)
+}
+
 
 type AddNewFlowNetwork struct {
-	StreamUUID        string `json:"stream_uuid"`
-	StreamListUUID string `json:"stream_list_uuid"`
-	ProducerUUID      string `json:"producer_uuid"`
-	ExistingPointUUID string `json:"existing_point_uuid"`
-	FlowToken string 	`json:"flow_token"`
+	StreamUUID        	string `json:"stream_uuid"`
+	StreamListUUID 		string `json:"stream_list_uuid"`
+	ProducerUUID      	string `json:"producer_uuid"`
+	ExistingPointUUID 	string `json:"existing_point_uuid"`
+	FlowToken 			string 	`json:"flow_token"`
 
 }
 
@@ -59,7 +65,6 @@ func (a *DatabaseAPI) Wizard2ndFlowNetwork(ctx *gin.Context) {
 	body, _ := getBODYWizard(ctx)
 	q, err := a.DB.Wizard2ndFlowNetwork(body)
 	reposeHandler(q, err, ctx)
-
 }
 
 
