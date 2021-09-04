@@ -59,6 +59,7 @@ type NodeList struct {
 	NodeIn1 			[]NodeIn1 	`json:"node_in_1" gorm:"constraint:OnDelete:CASCADE;"`
 	NodeOut1 			[]NodeOut1 `json:"node_out_1" gorm:"constraint:OnDelete:CASCADE;"`
 	NodeSettings 		datatypes.JSON  `json:"node_settings"`
+	Out1Value string `json:"out_1_value"`
 }
 
 

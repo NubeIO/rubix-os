@@ -1,7 +1,9 @@
 package database
 
 import (
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/patrickmn/go-cache"
 )
 
 
@@ -101,8 +103,12 @@ func (d *GormDatabase) SyncTopics()  {
 	}
 	node, err := d.GetNodesList()
 	for _, obj := range node {
+		eventbus.C.Set(obj.UUID, obj, cache.NoExpiration)
 		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Node, obj.UUID)
 	}
+
+
+
 	if err != nil {
 
 	}

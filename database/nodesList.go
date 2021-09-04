@@ -1,10 +1,10 @@
 package database
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	"github.com/patrickmn/go-cache"
 )
 
 
@@ -69,6 +69,7 @@ func (d *GormDatabase) UpdateNodeList(uuid string, body *model.NodeList) (*model
 	if err != nil {
 		return nil, err
 	}
+	eventbus.C.Set(list.UUID, list, cache.NoExpiration)
 	busNodes(list.UUID,  list)
 	return wcm, nil
 }
@@ -92,6 +93,5 @@ func busNodes(UUID string, body *model.NodeList){
 	notificationService := eventbus.NewNotificationService(eventbus.BUS)
 	body.UUID = UUID
 	notificationService.Emit(eventbus.BusContext,eventbus.NodeEventIn, body)
-	fmt.Println("topics", eventbus.BUS.Topics())
 }
 

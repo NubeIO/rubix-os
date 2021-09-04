@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var c = cache.New(5*time.Minute, 10*time.Minute)
+var C = cache.New(5*time.Minute, 10*time.Minute)
 
 func getUnderlyingAsValue(data interface{}) reflect.Value {
 	return reflect.ValueOf(data)
@@ -20,10 +20,10 @@ func setOutTopic(ioNum string,uuid string) string {
 	return fmt.Sprintf("in%s.%s", ioNum ,uuid)
 }
 func setInputValue(topic string, payload string)  {
-	c.Set(topic, payload, cache.DefaultExpiration)
+	C.Set(topic, payload, cache.DefaultExpiration)
 }
 func getInputValue(topic string) interface{} {
-	v, _ := c.Get(topic)
+	v, _ := C.Get(topic)
 	return v
 }
 
@@ -33,56 +33,55 @@ func (eb *notificationService) registerNodes() {
 			go func() {
 			switch e.Topic {
 			case NodeEventIn: //from db event
-				fmt.Println("NodeEventIn")
-				payload, ok := e.Data.(*model.NodeList)
+				payload, ok := e.Data.(*model.NodeList);if !ok {
+					logrus.Error("EVENTBUS NodeEventIn failed to pass in payload")
+					return
+				}
+				var node  *model.NodeList
+				if x, found := C.Get(payload.UUID); found {
+					node = x.(*model.NodeList)
+				}
+
 				in1Updated := false
-				in1Topic := setOutTopic("1", payload.UUID)
+				in1Topic := setOutTopic("1", node.UUID)
 				in2Updated := false
-				in2Topic := setOutTopic("2", payload.UUID)
-				if payload.In1 != "" {
-					if getInputValue(in1Topic) != payload.In1 {
+				in2Topic := setOutTopic("2", node.UUID)
+				if node.In1 != "" {
+					if getInputValue(in1Topic) != node.In1 {
 						in1Updated = true
-						setInputValue(in1Topic, payload.In1)
+						setInputValue(in1Topic, node.In1)
 					}
 				}
-				if payload.In2 != "" {
-					if getInputValue(in2Topic) != payload.In2 {
+				if node.In2 != "" {
+					if getInputValue(in2Topic) != node.In2 {
 						in2Updated = true
-						setInputValue(in2Topic, payload.In2)
+						setInputValue(in2Topic, node.In2)
 					}
 				}
+				fmt.Println("!!!!!! NEW INPUT EVENT", node.UUID, "in1Topic", node.Name, "payload", node.In1, "in1Updated", in1Updated)
 				if in1Updated || in2Updated {
-					if payload.In1 != "null" && payload.In2 != "null"{
-						k1 := fmt.Sprintf("in1.%s", payload.UUID)
-						k2 := fmt.Sprintf("in2.%s", payload.UUID)
-						in1, _ := c.Get(k1)
-						in2, _ := c.Get(k2)
+						k1 := fmt.Sprintf("in1.%s", node.UUID)
+						k2 := fmt.Sprintf("in2.%s", node.UUID)
+						in1, _ := C.Get(k1)
+						in2, _ := C.Get(k2)
 						s1 := getUnderlyingAsValue(in1).String()
 						s2 := getUnderlyingAsValue(in2).String()
-						out1Updated := false
 						out := ""
-						in1NewValueTopic := ""
 						out1Topic := ""
-						if payload.NodeType == "add" {
-							out = add(s1, s2)
-							for _, el := range payload.NodeOut1 {
-								out1Topic = fmt.Sprintf("out1.%s", payload.UUID) //set out1 topic
-								o1, _ := c.Get(k1)
-								if o1 != out {
-									c.Set(out1Topic, out, cache.NoExpiration) // fire outputs
-									in1NewValueTopic = fmt.Sprintf("%s.%s", el.Connection, el.ToUUID) //set input topic
-									out1Updated = true
+						if node.NodeType == "add" {
+							out = add(s1, s2) //TODO update its context
+							for _, el := range node.NodeOut1 {
+								var updateNode  *model.NodeList
+								out1Topic = fmt.Sprintf("out1.%s", node.UUID) //set out1 topic
+								if x, found := C.Get(el.ToUUID); found {
+									updateNode = x.(*model.NodeList)
 								}
-								if out1Updated {
-									eventOut(in1NewValueTopic, out)
-									fmt.Println("RE-SYNC INPUTS new payload from UUID", out1Topic, "to", in1NewValueTopic, "value", out)
-								}
+								updateNode.In1 = out
+								fmt.Println("!!!!!!!!! OUT", "TOPIC FROM", node.Name, "out1Topic", out1Topic, el.UUID)
+								node.Out1Value = out
+								eventOut(updateNode)
 							}
 						}
-					}
-				}
-				if !ok {
-					return
 				}
 			case NodeEventOut:
 				payload, ok := e.Data.(*model.NodeList)
@@ -99,13 +98,9 @@ func (eb *notificationService) registerNodes() {
 	eb.eb.RegisterHandler("nodes.*", handler)
 }
 
-func eventOut(UUID string, data string){
+func eventOut(body *model.NodeList){
 	n := NewNotificationService(BUS)
-	d := new(model.NodeList)
-	d.In1 = data
-	d.UUID = UUID
-	fmt.Println("!!!!  OUT EVENT !!!!")
-	n.Emit(BusContext, NodeEventIn, d)
+	n.Emit(BusContext, NodeEventIn, body)
 }
 
 

@@ -330,24 +330,17 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 func (d *GormDatabase) NodeWizard() (bool, error) {
 	//delete networks
 	var nm1 model.NodeList
-
-
+	nm1.Name = "NODE-1"
 	n1, err := d.CreateNodeList(&nm1)
-	fmt.Println("n1", n1.UUID)
-	// network
+
+
 	var nm2 model.NodeList
-	//nm2.In1FromUUID = nm1.UUID
-	//nm2.In2FromUUID = nm1.UUID
-	//
-	//
+	nm2.Name = "NODE-2"
 	n2, err := d.CreateNodeList(&nm2)
-	fmt.Println("n2", n2.UUID)
 
-
-	//n1.In1ToUUID = nm2.UUID
-	//n1.In2ToUUID = nm2.UUID
-
-	//_, err = d.UpdateNodeList(n1.UUID, &nm1)
+	var nm3 model.NodeList
+	nm3.Name = "NODE-3"
+	n3, err := d.CreateNodeList(&nm3)
 
 
 	var out1m model.NodeOut1
@@ -372,25 +365,37 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	}
 
 
+	var out3m model.NodeOut1
+	out3m.UUID = utils.MakeTopicUUID("")
+	out3m.NodeListUUID = n2.UUID
+	out3m.ToUUID = n3.UUID
+	out3m.Connection = "in1"
+
+	query = d.DB.Create(out3m);if query.Error != nil {
+		return false, query.Error
+	}
+
 	var in1m model.NodeIn1
 	in1m.UUID = utils.MakeTopicUUID("")
 	in1m.NodeListUUID = n2.UUID
 	in1m.FromUUID = n1.UUID
 	in1m.Connection = "out1"
 
+
 	query = d.DB.Create(in1m);if query.Error != nil {
 		return false, query.Error
 	}
 
+	var in2m model.NodeIn1
+	in2m.UUID = utils.MakeTopicUUID("")
+	in2m.NodeListUUID = n3.UUID
+	in2m.FromUUID = n2.UUID
+	in2m.Connection = "out1"
 
-	//var out2m model.NodeOut1
-	//out2m.NodeListUUID = n1.UUID
-	//out2m.ToUUID = n2.UUID
-	//out2m.Connection = "in2"
-	//
-	//query = d.DB.Create(out2m);if query.Error != nil {
-	//	return false, query.Error
-	//}
+	query = d.DB.Create(in2m);if query.Error != nil {
+		return false, query.Error
+	}
+
 
 
 	if err != nil {
