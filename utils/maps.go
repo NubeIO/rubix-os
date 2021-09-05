@@ -20,13 +20,11 @@ func NewMapFrom(v interface{}) (m *Map) {
 	case *Map:
 		m = v
 	}
-
 	return
 }
 
 type Map struct {
 	mutex sync.RWMutex
-
 	data map[interface{}]interface{}
 }
 
@@ -42,32 +40,26 @@ func (m *Map) UnmarshalJSON(b []byte) error {
 func (m *Map) Set(key, value interface{}) *Map {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-
 	m.set(key, value)
-
 	return m
 }
 
 func (m *Map) Get(key interface{}) interface{} {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
-
 	return m.getOrNil(key)
 }
 
 func (m *Map) Keys() []interface{} {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
-
 	return m.keys()
 }
 
 func (m *Map) Remove(key interface{}) *Map {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-
 	m.remove(key)
-
 	return m
 }
 
@@ -76,16 +68,13 @@ func (m *Map) Remove(key interface{}) *Map {
 func (m *Map) GetIf(key interface{}) (value interface{}, exists bool) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
-
 	value, exists = m.data[key]
-
 	return
 }
 
 func (m *Map) Size() int {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-
 	return m.size()
 }
 

@@ -76,6 +76,10 @@ type CommonName struct {
 	Name string `json:"name"`
 }
 
+type CommonHelp struct {
+	Help string `json:"help"`
+}
+
 type CommonNodeType struct {
 	NodeType string `json:"node_type"`
 }

@@ -46,9 +46,9 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var consumer []model.Consumer
 	var writer []model.Writer
 	var writerClone []model.WriterClone
-	var nodesList []model.NodeList
-	var in1 []model.NodeIn1
-	var out1 []model.NodeOut1
+	var nodesList []model.Node
+	var in1 []model.In1Connections
+	var out1 []model.Out1Connections
 
 	var models = []interface{}{
 		&alerts,

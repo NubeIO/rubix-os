@@ -103,7 +103,7 @@ func (d *GormDatabase) SyncTopics()  {
 	}
 	node, err := d.GetNodesList()
 	for _, obj := range node {
-		eventbus.C.Set(obj.UUID, obj, cache.NoExpiration)
+		eventbus.NodeContext.Set(obj.UUID, obj, cache.NoExpiration)
 		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Node, obj.UUID)
 	}
 

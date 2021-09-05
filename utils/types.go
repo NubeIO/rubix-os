@@ -65,10 +65,8 @@ func toBool(v interface{}) bool {
 	if v == nil {
 		return false
 	}
-
 	switch t := v.(type) {
 	case string:
-		// for binding html form checkboxes
 		if t == "on" {
 			return true
 		}

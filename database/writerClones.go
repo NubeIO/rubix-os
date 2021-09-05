@@ -84,42 +84,9 @@ func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone) (
 			return nil, err
 		}
 	}
-
 	return wcm, nil
 
 }
-
-
-//// WriterCloneData  update it
-//func (d *GormDatabase) WriterCloneData(uuid string, body *model.WriterBody) (*model.WriterBody, error) {
-//	var wcm *model.WriterClone
-//	query := d.DB.Where("uuid = ?", uuid).Find(&wcm);if query.Error != nil {
-//		return nil, query.Error
-//	}
-//	query = d.DB.Model(&wcm).Updates(body);if query.Error != nil {
-//		return nil, query.Error
-//	}
-//
-//	producer, err := d.GetProducer(wcm.ProducerUUID)
-//	if err != nil {
-//		return nil, err
-//	}
-//	stream, err := d.GetStream(producer.StreamUUID)
-//	if err != nil {
-//		return nil, err
-//	}
-//	producerType := producer.ProducerType
-//	writerType := wcm.WriterType
-//
-//	data, action, err := streams.ValidateTypes(t, body)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//
-//	return wcm, nil
-//
-//}
 
 
 // DropWriterClone delete all.

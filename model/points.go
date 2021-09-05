@@ -1,11 +1,12 @@
 package model
 
+import "github.com/NubeIO/null"
+
 // Ops TODO add in later
 //Ops Means operations supported by a network, device, point and so on (example point supports point-write)
 type Ops struct {
 
 }
-
 
 // TimeOverride TODO add in later
 //TimeOverride where a point value can be overridden for a duration of time
@@ -70,9 +71,9 @@ type Point struct {
 
 type Priority struct {
 	PointUUID     	string `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
-	P1  			float64 `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
-	P2  			float64 `json:"_2"`
-	P3  			float64 `json:"_3"`
+	P1  			null.Float `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
+	P2  			null.Float `json:"_2"`
+	P3  			null.Float `json:"_3"`
 	//P4  			float64 `json:"_4"`
 	//P5  			float64 `json:"_5"`
 	//P6  			float64 `json:"_6"`

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"sync"
 )
 
@@ -11,6 +10,12 @@ type Array struct {
 	mutex sync.RWMutex
 }
 
+/*
+Example usage
+mArr := utils.NewArray()
+fmt.Println(utils.Unique(mArr.Add(1,2,1,2).Values()))
+ */
+
 func NewArray() *Array {
 	return new(Array)
 }
@@ -18,17 +23,16 @@ func NewArray() *Array {
 func (a *Array) Add(values ...interface{}) *Array {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
-
 	a.add(values...)
-
 	return a
 }
 
-//AddIfNotExist add one value if not existing
+/*
+AddIfNotExist add one value if not existing
+*/
 func (a *Array) AddIfNotExist(value interface{})  bool {
 	check := a.Exist(value)
 	if !check {
-		fmt.Println(check)
 		a.add(value)
 		return true
 	}
@@ -36,6 +40,9 @@ func (a *Array) AddIfNotExist(value interface{})  bool {
 }
 
 
+/*
+Get a value by its index number
+*/
 func (a *Array) Get(index int) interface{} {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
@@ -47,16 +54,66 @@ func (a *Array) Get(index int) interface{} {
 	return a.get(index)
 }
 
+/*
+RemoveNil any nil values.
+Example:
+	var arr = []interface{}{1, 2, 3, 4, nil, 5}
+	result := RemoveNil(arr)  // [1, 2, 3, 4, 5]
+*/
+func (a *Array) RemoveNil(arr []interface{}) []interface{} {
+	if arr == nil {
+		return arr
+	}
+	result := make([]interface{}, 0, len(arr))
+	for _, v := range arr {
+		if v != nil {
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+
+/*
+Unique a new array with duplicates removed.
+Example:
+	var myArray = []interface{}{1, 2, 3, 3, 4}
+	result := Unique(myArray)  // [1, 2, 3, 4]
+*/
+func (a *Array) Unique(arr []interface{}) []interface{} {
+	if arr == nil || len(arr) <= 1 {
+		return arr
+	}
+	result := make([]interface{}, 0, len(arr))
+	for _, v := range arr {
+		if len(result) == 0 {
+			result = append(result, v)
+			continue
+		}
+		duplicate := false
+		for _, r := range result {
+			if r == v {
+				duplicate = true
+				break
+			}
+		}
+		if !duplicate {
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+/*
+Remove a value from the array
+*/
 func (a *Array) Remove(value interface{}) *Array {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
-
 	i := a.index(value)
-
 	if i == -1 {
 		return a
 	}
-
 	a.data = a.data[:i+copy((a.data)[i:], (a.data)[i+1:])]
 
 	return a
@@ -65,36 +122,30 @@ func (a *Array) Remove(value interface{}) *Array {
 func (a *Array) Index(value interface{}) int {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
-
 	return a.index(value)
 }
 
 func (a *Array) Exist(value interface{}) bool {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
-
 	return a.index(value) > -1
 }
 
 func (a Array) Includes(values ...interface{}) bool {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
-
 	var count = 0
-
 	for _, value := range values {
 		if a.index(value) > -1 {
 			count++
 		}
 	}
-
 	return len(values) == count
 }
 
 func (a *Array) Values() []interface{} {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
-
 	newArr := make([]interface{}, len(a.data), len(a.data))
 	copy(newArr, a.data[:])
 	return newArr
@@ -108,7 +159,6 @@ func (a *Array) Data() []interface{} {
 func (a *Array) Size() int {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
-
 	return a.size()
 }
 
@@ -133,7 +183,6 @@ func (a *Array) add(values ...interface{}) {
 }
 
 func (a *Array) size() int {
-
 	return len(a.data)
 }
 
