@@ -342,6 +342,23 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	nm3.Name = "NODE-3"
 	n3, err := d.CreateNodeList(&nm3)
 
+	var nm4 model.NodeList
+	nm4.Name = "NODE-4"
+	n4, err := d.CreateNodeList(&nm4)
+
+
+	var nm5 model.NodeList
+	nm5.Name = "NODE-5"
+	nm5.NodeType = "add"
+	n5, err := d.CreateNodeList(&nm5)
+
+
+	var nm6 model.NodeList
+	nm6.Name = "NODE-6"
+	nm6.NodeType = "add"
+	n6, err := d.CreateNodeList(&nm6)
+
+
 
 	var out1m model.NodeOut1
 	out1m.UUID = utils.MakeTopicUUID("")
@@ -364,7 +381,6 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 		return false, query.Error
 	}
 
-
 	var out3m model.NodeOut1
 	out3m.UUID = utils.MakeTopicUUID("")
 	out3m.NodeListUUID = n2.UUID
@@ -374,6 +390,40 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	query = d.DB.Create(out3m);if query.Error != nil {
 		return false, query.Error
 	}
+
+	//out of 4 goes into node-3 in-1
+	var out4m model.NodeOut1
+	out4m.UUID = utils.MakeTopicUUID("")
+	out4m.NodeListUUID = n4.UUID
+	out4m.ToUUID = n3.UUID
+	out4m.Connection = "in1"
+
+	query = d.DB.Create(out4m);if query.Error != nil {
+		return false, query.Error
+	}
+
+	//out of 5 goes into node-4 in-1
+	var out5m model.NodeOut1
+	out5m.UUID = utils.MakeTopicUUID("")
+	out5m.NodeListUUID = n5.UUID
+	out5m.ToUUID = n4.UUID
+	out5m.Connection = "in1"
+
+	query = d.DB.Create(out5m);if query.Error != nil {
+		return false, query.Error
+	}
+
+	//out of 3 goes into node-6 in-1
+	var out6m model.NodeOut1
+	out6m.UUID = utils.MakeTopicUUID("")
+	out6m.NodeListUUID = n3.UUID
+	out6m.ToUUID = n6.UUID
+	out6m.Connection = "in1"
+
+	query = d.DB.Create(out6m);if query.Error != nil {
+		return false, query.Error
+	}
+
 
 	var in1m model.NodeIn1
 	in1m.UUID = utils.MakeTopicUUID("")
@@ -396,6 +446,36 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 		return false, query.Error
 	}
 
+	var in3m model.NodeIn1
+	in3m.UUID = utils.MakeTopicUUID("")
+	in3m.NodeListUUID = n3.UUID
+	in3m.FromUUID = n4.UUID
+	in3m.Connection = "out1"
+
+	query = d.DB.Create(in3m);if query.Error != nil {
+		return false, query.Error
+	}
+
+	var in4m model.NodeIn1
+	in4m.UUID = utils.MakeTopicUUID("")
+	in4m.NodeListUUID = n4.UUID
+	in4m.FromUUID = n5.UUID
+	in4m.Connection = "out1"
+
+	query = d.DB.Create(in4m);if query.Error != nil {
+		return false, query.Error
+	}
+
+	//node-6 in1 from node-3 out1
+	var in5m model.NodeIn1
+	in5m.UUID = utils.MakeTopicUUID("")
+	in5m.NodeListUUID = n6.UUID
+	in5m.FromUUID = n3.UUID
+	in5m.Connection = "out1"
+
+	query = d.DB.Create(in5m);if query.Error != nil {
+		return false, query.Error
+	}
 
 
 	if err != nil {

@@ -30,6 +30,7 @@ func (d *GormDatabase) CreateNodeList(body *model.NodeList) (*model.NodeList, er
 	query := d.DB.Create(body);if query.Error != nil {
 		return nil, query.Error
 	}
+	eventbus.C.Set(body.UUID, body, cache.NoExpiration)
 	return body, nil
 }
 
