@@ -29,7 +29,7 @@ var CommonNaming = struct {
 	History           string
 	ProducerHistory   string
 	Histories         string
-  Node:   			    string,
+  	Node   			  string
 }{
 	Plugin:            "plugin",
 	Network:           "network",
@@ -54,7 +54,7 @@ var CommonNaming = struct {
 	History:           "history",
 	ProducerHistory:   "producer_history",
 	Histories:         "histories",
-  Node:   			"node",
+  	Node:   			"node",
 
 }
 
