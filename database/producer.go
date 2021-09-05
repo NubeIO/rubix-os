@@ -2,7 +2,6 @@ package database
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"gorm.io/datatypes"
@@ -84,7 +83,6 @@ func (d *GormDatabase) ProducerCOV(uuid string, writeData datatypes.JSON) error 
 		if err != nil {
 			return  err
 		}
-		fmt.Println(898989, pnt.Priority.P2, "before insert")
 	return  err
 }
 

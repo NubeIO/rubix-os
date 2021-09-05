@@ -7,31 +7,7 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-func truncateString(str string, num int) string {
-	ret := str
-	if len(str) > num {
-		if num > 3 {
-			num -= 3
-		}
-		ret = str[0:num] + ""
-	}
-	return ret
-}
 
-func typeIsNil(t string, use string) string {
-	if t == "" {
-		return use
-	}
-	return t
-}
-
-func nameIsNil(name string) string {
-	if name == "" {
-		uuid := utils.MakeTopicUUID("")
-		return fmt.Sprintf("n_%s", truncateString(uuid, 8))
-	}
-	return name
-}
 
 // GetPoints returns all devices.
 func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
@@ -79,7 +55,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	if err := d.DB.Create(&body).Error; err != nil {
 		return  nil, query.Error
 	}
-	busUpdate(body.UUID, "create", body)
 	return body, query.Error
 }
 
@@ -106,7 +81,6 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	if r == 0 {
 		return false, nil
 	} else {
-		busUpdate(pointModel.UUID, "delete", pointModel)
 		return true, nil
 	}
 

@@ -1,6 +1,6 @@
 package eventbus
 
-import "C"
+
 import (
 	"context"
 	"fmt"
@@ -22,6 +22,7 @@ import (
  */
 
 var NodeContext = cache.New(5*time.Minute, 10*time.Minute)
+var NodeInValue = cache.New(5*time.Minute, 10*time.Minute)
 
 func getUnderlyingAsValue(data interface{}) reflect.Value {
 	return reflect.ValueOf(data)
@@ -30,10 +31,10 @@ func setOutTopic(ioNum string,uuid string) string {
 	return fmt.Sprintf("in%s.%s", ioNum ,uuid)
 }
 func setInputValue(topic string, payload string)  {
-	NodeContext.Set(topic, payload, cache.DefaultExpiration)
+	NodeInValue.Set(topic, payload, cache.DefaultExpiration)
 }
 func getInputValue(topic string) interface{} {
-	v, _ := NodeContext.Get(topic)
+	v, _ := NodeInValue.Get(topic)
 	return v
 }
 
@@ -72,7 +73,7 @@ func (eb *notificationService) registerNodes() {
 						if node.NodeType == "add" {
 							go add(node)
 						} else 	if node.NodeType == "addDog" {
-							go addDog(node)
+							go subtract(node)
 						}
 				}
 			case NodeEventOut:
@@ -97,18 +98,12 @@ func eventOut(body *model.Node){
 
 
 
-type addNodeSettings struct {
-	AddToEnd string `json:"add_to_end"`
-
-}
-
 //add node adds to string(its a demo node)
 func add(node *model.Node){
-	fmt.Println("ADD-NODE")
 	k1 := fmt.Sprintf("in1.%s", node.UUID)
 	k2 := fmt.Sprintf("in2.%s", node.UUID)
-	in1, _ := NodeContext.Get(k1)
-	in2, _ := NodeContext.Get(k2)
+	in1, _ := NodeInValue.Get(k1)
+	in2, _ := NodeInValue.Get(k2)
 	s1 := getUnderlyingAsValue(in1).String()
 	s2 := getUnderlyingAsValue(in2).String()
 	out := ""
@@ -133,7 +128,7 @@ func add(node *model.Node){
 			list := utils.NewArray()
 			list.AddIfNotExist(el.ToUUID)
 			outList = list.Values()
-			node.Out1Value = out
+			updateNode.Out1Value = out
 		}
 
 		for _, el := range outList { //publish the updated nodes on the bus
@@ -149,31 +144,7 @@ func add(node *model.Node){
 
 
 
-
-
-
-//addDog add I like dogs to the incoming string
-func addDog(node *model.Node){
-	k1 := fmt.Sprintf("in1.%s", node.UUID)
-	in1, _ :=NodeContext.Get(k1)
-	s1 := getUnderlyingAsValue(in1).String()
-	out := ""
-	out1Topic := "" //TODO make it update itself out1 (or all outputs that are used by the node developer)
-	for _, el := range node.Out1Connections {
-		var updateNode  *model.Node
-		out1Topic = fmt.Sprintf("out1.%s", node.UUID)
-		if x, found := NodeContext.Get(el.ToUUID); found {
-			updateNode = x.(*model.Node)
-		}
-		if el.Connection == "in1"{
-			updateNode.In1 = out
-		}
-		if el.Connection == "in2"{
-			updateNode.In2 = out
-		}
-		fmt.Println("!!!!!!!!! OUT", "TOPIC FROM", node.Name, "out1Topic", out1Topic, el.UUID, updateNode.In1, updateNode.In2)
-		out = s1 + "I like dogs"
-		node.Out1Value = out
-		eventOut(updateNode)
-	}
+//subtract subtract node
+func subtract(node *model.Node){
+	fmt.Println("ADD ME")
 }
