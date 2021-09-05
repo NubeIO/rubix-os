@@ -22,6 +22,7 @@ type MasterMqttConnection struct {
 
 
 type MqttConnection struct {
+	CommonUUID
 	Enabled                       bool   `json:"enabled"`
 	Master                        bool   `json:"master"`
 	Name                          string `json:"name"`
@@ -36,5 +37,6 @@ type MqttConnection struct {
 	AttemptReconnectOnUnavailable bool   `json:"attempt_reconnect_on_unavailable"`
 	AttemptReconnectSecs          int    `json:"attempt_reconnect_secs"`
 	Timeout                       int    `json:"timeout"`
+	IntegrationUUID     		 string  `json:"integration_uuid" gorm:"TYPE:varchar(255) REFERENCES integrations;null;default:null"`
 
 }
