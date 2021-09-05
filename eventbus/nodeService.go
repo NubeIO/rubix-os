@@ -12,6 +12,14 @@ import (
 	"time"
 )
 
+
+//TO DELETE THIS POC
+/*
+- DB models
+- rest-api files
+- wizard
+ */
+
 var C = cache.New(5*time.Minute, 10*time.Minute)
 
 func getUnderlyingAsValue(data interface{}) reflect.Value {
@@ -65,7 +73,6 @@ func (eb *notificationService) registerNodes() {
 						} else 	if node.NodeType == "addDog" {
 							addDog(node)
 						}
-
 				}
 			case NodeEventOut:
 				payload, ok := e.Data.(*model.NodeList)
@@ -131,7 +138,6 @@ func add(node *model.NodeList){
 		eventOut(updateNode)
 		fmt.Println("OUT ADD", "FROM-NODE", node.Name, "out1Topic", out1Topic, "TO-NODE", updateNode.Name, "TO In1", k1, "TO In2", k2, "OUT", out)
 	}
-
 }
 
 
