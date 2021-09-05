@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"sync"
 )
 
@@ -28,7 +27,6 @@ func (a *Array) Add(values ...interface{}) *Array {
 func (a *Array) AddIfNotExist(value interface{})  bool {
 	check := a.Exist(value)
 	if !check {
-		fmt.Println(check)
 		a.add(value)
 		return true
 	}

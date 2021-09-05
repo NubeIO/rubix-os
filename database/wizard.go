@@ -329,40 +329,40 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 
 func (d *GormDatabase) NodeWizard() (bool, error) {
 	//delete networks
-	var nm1 model.NodeList
+	var nm1 model.Node
 	nm1.Name = "NODE-1"
-	n1, err := d.CreateNodeList(&nm1)
+	n1, err := d.CreateNode(&nm1)
 
 
-	var nm2 model.NodeList
+	var nm2 model.Node
 	nm2.Name = "NODE-2"
-	n2, err := d.CreateNodeList(&nm2)
+	n2, err := d.CreateNode(&nm2)
 
-	var nm3 model.NodeList
+	var nm3 model.Node
 	nm3.Name = "NODE-3"
-	n3, err := d.CreateNodeList(&nm3)
+	n3, err := d.CreateNode(&nm3)
 
-	var nm4 model.NodeList
+	var nm4 model.Node
 	nm4.Name = "NODE-4"
-	n4, err := d.CreateNodeList(&nm4)
+	n4, err := d.CreateNode(&nm4)
 
 
-	var nm5 model.NodeList
+	var nm5 model.Node
 	nm5.Name = "NODE-5"
 	nm5.NodeType = "add"
-	n5, err := d.CreateNodeList(&nm5)
+	n5, err := d.CreateNode(&nm5)
 
 
-	var nm6 model.NodeList
+	var nm6 model.Node
 	nm6.Name = "NODE-6"
 	nm6.NodeType = "add"
-	n6, err := d.CreateNodeList(&nm6)
+	n6, err := d.CreateNode(&nm6)
 
 
 
-	var out1m model.NodeOut1
+	var out1m model.Out1Connections
 	out1m.UUID = utils.MakeTopicUUID("")
-	out1m.NodeListUUID = n1.UUID
+	out1m.NodeUUID = n1.UUID
 	out1m.ToUUID = n2.UUID
 	out1m.Connection = "in1"
 
@@ -371,9 +371,9 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	}
 
 
-	var out2m model.NodeOut1
+	var out2m model.Out1Connections
 	out2m.UUID = utils.MakeTopicUUID("")
-	out2m.NodeListUUID = n1.UUID
+	out2m.NodeUUID = n1.UUID
 	out2m.ToUUID = n2.UUID
 	out2m.Connection = "in2"
 
@@ -381,9 +381,9 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 		return false, query.Error
 	}
 
-	var out3m model.NodeOut1
+	var out3m model.Out1Connections
 	out3m.UUID = utils.MakeTopicUUID("")
-	out3m.NodeListUUID = n2.UUID
+	out3m.NodeUUID = n2.UUID
 	out3m.ToUUID = n3.UUID
 	out3m.Connection = "in1"
 
@@ -392,9 +392,9 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	}
 
 	//out of 4 goes into node-3 in-1
-	var out4m model.NodeOut1
+	var out4m model.Out1Connections
 	out4m.UUID = utils.MakeTopicUUID("")
-	out4m.NodeListUUID = n4.UUID
+	out4m.NodeUUID = n4.UUID
 	out4m.ToUUID = n3.UUID
 	out4m.Connection = "in1"
 
@@ -403,9 +403,9 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	}
 
 	//out of 5 goes into node-4 in-1
-	var out5m model.NodeOut1
+	var out5m model.Out1Connections
 	out5m.UUID = utils.MakeTopicUUID("")
-	out5m.NodeListUUID = n5.UUID
+	out5m.NodeUUID = n5.UUID
 	out5m.ToUUID = n4.UUID
 	out5m.Connection = "in1"
 
@@ -414,9 +414,9 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	}
 
 	//out of 3 goes into node-6 in-1
-	var out6m model.NodeOut1
+	var out6m model.Out1Connections
 	out6m.UUID = utils.MakeTopicUUID("")
-	out6m.NodeListUUID = n3.UUID
+	out6m.NodeUUID = n3.UUID
 	out6m.ToUUID = n6.UUID
 	out6m.Connection = "in1"
 
@@ -425,9 +425,9 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	}
 
 
-	var in1m model.NodeIn1
+	var in1m model.In1Connections
 	in1m.UUID = utils.MakeTopicUUID("")
-	in1m.NodeListUUID = n2.UUID
+	in1m.NodeUUID = n2.UUID
 	in1m.FromUUID = n1.UUID
 	in1m.Connection = "out1"
 
@@ -436,9 +436,9 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 		return false, query.Error
 	}
 
-	var in2m model.NodeIn1
+	var in2m model.In1Connections
 	in2m.UUID = utils.MakeTopicUUID("")
-	in2m.NodeListUUID = n3.UUID
+	in2m.NodeUUID = n3.UUID
 	in2m.FromUUID = n2.UUID
 	in2m.Connection = "out1"
 
@@ -446,9 +446,9 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 		return false, query.Error
 	}
 
-	var in3m model.NodeIn1
+	var in3m model.In1Connections
 	in3m.UUID = utils.MakeTopicUUID("")
-	in3m.NodeListUUID = n3.UUID
+	in3m.NodeUUID = n3.UUID
 	in3m.FromUUID = n4.UUID
 	in3m.Connection = "out1"
 
@@ -456,9 +456,9 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 		return false, query.Error
 	}
 
-	var in4m model.NodeIn1
+	var in4m model.In1Connections
 	in4m.UUID = utils.MakeTopicUUID("")
-	in4m.NodeListUUID = n4.UUID
+	in4m.NodeUUID = n4.UUID
 	in4m.FromUUID = n5.UUID
 	in4m.Connection = "out1"
 
@@ -467,9 +467,9 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	}
 
 	//node-6 in1 from node-3 out1
-	var in5m model.NodeIn1
+	var in5m model.In1Connections
 	in5m.UUID = utils.MakeTopicUUID("")
-	in5m.NodeListUUID = n6.UUID
+	in5m.NodeUUID = n6.UUID
 	in5m.FromUUID = n3.UUID
 	in5m.Connection = "out1"
 

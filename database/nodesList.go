@@ -9,43 +9,43 @@ import (
 
 
 type Node struct {
-	*model.NodeList
+	*model.Node
 }
 
 // GetNodesList get all of them
-func (d *GormDatabase) GetNodesList() ([]*model.NodeList, error) {
-	var producersModel []*model.NodeList
-	query := d.DB.Preload("NodeOut1").Preload("NodeIn1").Find(&producersModel)
+func (d *GormDatabase) GetNodesList() ([]*model.Node, error) {
+	var producersModel []*model.Node
+	query := d.DB.Preload("Out1Connections").Preload("In1Connections").Find(&producersModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	return producersModel, nil
 }
 
-// CreateNodeList make it
-func (d *GormDatabase) CreateNodeList(body *model.NodeList) (*model.NodeList, error) {
+// CreateNode make it
+func (d *GormDatabase) CreateNode(body *model.Node) (*model.Node, error) {
 	body.UUID = utils.MakeTopicUUID("")
 	body.Name = nameIsNil(body.Name)
 	body.NodeType = typeIsNil(body.NodeType, "add")
 	query := d.DB.Create(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	eventbus.C.Set(body.UUID, body, cache.NoExpiration)
+	eventbus.NodeContext.Set(body.UUID, body, cache.NoExpiration)
 	return body, nil
 }
 
-// GetNodeList get it
-func (d *GormDatabase) GetNodeList(uuid string) (*model.NodeList, error) {
-	var wcm *model.NodeList
-	query := d.DB.Preload("NodeOut1").Preload("NodeIn1").Where("uuid = ? ", uuid).First(&wcm); if query.Error != nil {
+// GetNode get it
+func (d *GormDatabase) GetNode(uuid string) (*model.Node, error) {
+	var wcm *model.Node
+	query := d.DB.Preload("Out1Connections").Preload("In1Connections").Where("uuid = ? ", uuid).First(&wcm); if query.Error != nil {
 		return nil, query.Error
 	}
 	return wcm, nil
 }
 
-// DeleteNodeList deletes it
-func (d *GormDatabase) DeleteNodeList(uuid string) (bool, error) {
-	var wcm *model.NodeList
+// DeleteNode deletes it
+func (d *GormDatabase) DeleteNode(uuid string) (bool, error) {
+	var wcm *model.Node
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&wcm);if query.Error != nil {
 		return false, query.Error
 	}
@@ -57,27 +57,27 @@ func (d *GormDatabase) DeleteNodeList(uuid string) (bool, error) {
 	}
 }
 
-// UpdateNodeList  update it
-func (d *GormDatabase) UpdateNodeList(uuid string, body *model.NodeList) (*model.NodeList, error) {
-	var wcm *model.NodeList
+// UpdateNode  update it
+func (d *GormDatabase) UpdateNode(uuid string, body *model.Node) (*model.Node, error) {
+	var wcm *model.Node
 	query := d.DB.Where("uuid = ?", uuid).Find(&wcm);if query.Error != nil {
 		return nil, query.Error
 	}
 	query = d.DB.Model(&wcm).Updates(body);if query.Error != nil {
 		return nil, query.Error
 	}
-	list, err := d.GetNodeList(uuid)
+	list, err := d.GetNode(uuid)
 	if err != nil {
 		return nil, err
 	}
-	eventbus.C.Set(list.UUID, list, cache.NoExpiration)
+	eventbus.NodeContext.Set(list.UUID, list, cache.NoExpiration)
 	busNodes(list.UUID,  list)
 	return wcm, nil
 }
 
 // DropNodesList delete all.
 func (d *GormDatabase) DropNodesList() (bool, error) {
-	var wcm *model.NodeList
+	var wcm *model.Node
 	query := d.DB.Where("1 = 1").Delete(&wcm)
 	if query.Error != nil {
 		return false, query.Error
@@ -90,7 +90,7 @@ func (d *GormDatabase) DropNodesList() (bool, error) {
 	}
 }
 
-func busNodes(UUID string, body *model.NodeList){
+func busNodes(UUID string, body *model.Node){
 	notificationService := eventbus.NewNotificationService(eventbus.BUS)
 	body.UUID = UUID
 	notificationService.Emit(eventbus.BusContext,eventbus.NodeEventIn, body)

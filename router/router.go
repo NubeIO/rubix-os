@@ -81,7 +81,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	dbGroup := api.DatabaseAPI{
 		DB: db,
 	}
-	nodesHandler := api.NodeListAPI{
+	nodesHandler := api.NodeAPI{
 		DB: db,
 	}
 	jobHandler.NewJobEngine()
@@ -286,10 +286,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.DELETE("/job/:uuid", jobHandler.DeleteJob)
 
 		control.GET("/nodes", nodesHandler.GetNodesList)
-		control.POST("/node", nodesHandler.CreateNodeList)
-		control.GET("/node/:uuid", nodesHandler.GetNodeList)
+		control.POST("/node", nodesHandler.CreateNode)
+		control.GET("/node/:uuid", nodesHandler.GetNode)
 		control.PATCH("/node/:uuid", nodesHandler.UpdateNode)
-		control.DELETE("/node/:uuid", nodesHandler.DeleteNodeList)
+		control.DELETE("/node/:uuid", nodesHandler.DeleteNode)
 		control.DELETE("/nodes/drop", nodesHandler.DropNodesList)
 
 	}

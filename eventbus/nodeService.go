@@ -1,5 +1,6 @@
 package eventbus
 
+import "C"
 import (
 	"context"
 	"fmt"
@@ -20,7 +21,7 @@ import (
 - wizard
  */
 
-var C = cache.New(5*time.Minute, 10*time.Minute)
+var NodeContext = cache.New(5*time.Minute, 10*time.Minute)
 
 func getUnderlyingAsValue(data interface{}) reflect.Value {
 	return reflect.ValueOf(data)
@@ -29,10 +30,10 @@ func setOutTopic(ioNum string,uuid string) string {
 	return fmt.Sprintf("in%s.%s", ioNum ,uuid)
 }
 func setInputValue(topic string, payload string)  {
-	C.Set(topic, payload, cache.DefaultExpiration)
+	NodeContext.Set(topic, payload, cache.DefaultExpiration)
 }
 func getInputValue(topic string) interface{} {
-	v, _ := C.Get(topic)
+	v, _ := NodeContext.Get(topic)
 	return v
 }
 
@@ -42,13 +43,13 @@ func (eb *notificationService) registerNodes() {
 			go func() {
 			switch e.Topic {
 			case NodeEventIn: //from db event
-				payload, ok := e.Data.(*model.NodeList);if !ok {
+				payload, ok := e.Data.(*model.Node);if !ok {
 					logrus.Error("EVENTBUS NodeEventIn failed to pass in payload")
 					return
 				}
-				var node  *model.NodeList
-				if x, found := C.Get(payload.UUID); found {
-					node = x.(*model.NodeList)
+				var node  *model.Node
+				if x, found := NodeContext.Get(payload.UUID); found {
+					node = x.(*model.Node)
 				}
 				in1Updated := false
 				in1Topic := setOutTopic("1", node.UUID)
@@ -69,13 +70,13 @@ func (eb *notificationService) registerNodes() {
 				fmt.Println("INPUT EVENT FROM NAME:", node.Name, "UUID", node.UUID, "IN1", node.In1, "IN2", node.In2, "in1Updated", in1Updated, "in2Updated", in2Updated)
 				if in1Updated || in2Updated {
 						if node.NodeType == "add" {
-							add(node)
+							go add(node)
 						} else 	if node.NodeType == "addDog" {
-							addDog(node)
+							go addDog(node)
 						}
 				}
 			case NodeEventOut:
-				payload, ok := e.Data.(*model.NodeList)
+				payload, ok := e.Data.(*model.Node)
 				msg := fmt.Sprintf("out event%s", payload.Name)
 				logrus.Info(msg)
 				if !ok {
@@ -89,19 +90,25 @@ func (eb *notificationService) registerNodes() {
 	eb.eb.RegisterHandler("nodes.*", handler)
 }
 
-func eventOut(body *model.NodeList){
+func eventOut(body *model.Node){
 	n := NewNotificationService(BUS)
 	n.Emit(BusContext, NodeEventIn, body)
 }
 
 
+
+type addNodeSettings struct {
+	AddToEnd string `json:"add_to_end"`
+
+}
+
 //add node adds to string(its a demo node)
-func add(node *model.NodeList){
+func add(node *model.Node){
 	fmt.Println("ADD-NODE")
 	k1 := fmt.Sprintf("in1.%s", node.UUID)
 	k2 := fmt.Sprintf("in2.%s", node.UUID)
-	in1, _ := C.Get(k1)
-	in2, _ := C.Get(k2)
+	in1, _ := NodeContext.Get(k1)
+	in2, _ := NodeContext.Get(k2)
 	s1 := getUnderlyingAsValue(in1).String()
 	s2 := getUnderlyingAsValue(in2).String()
 	out := ""
@@ -110,11 +117,11 @@ func add(node *model.NodeList){
 	//loop through a node and get the out connections that are for the same node
 	//then do the calc and send the output to the node
 	var outList []interface{}
-		for _, el := range node.NodeOut1 { //update the node context
-			var updateNode  *model.NodeList
+		for _, el := range node.Out1Connections { //update the node context
+			var updateNode  *model.Node
 			out1Topic = fmt.Sprintf("out1.%s", node.UUID)
-			if x, found := C.Get(el.ToUUID); found {
-				updateNode = x.(*model.NodeList)
+			if x, found := NodeContext.Get(el.ToUUID); found {
+				updateNode = x.(*model.Node)
 			}
 			out = s1 + s2
 			if el.Connection == "in1"{
@@ -130,10 +137,10 @@ func add(node *model.NodeList){
 		}
 
 		for _, el := range outList { //publish the updated nodes on the bus
-		var updateNode  *model.NodeList
+		var updateNode  *model.Node
 		out1Topic = fmt.Sprintf("out1.%s", node.UUID)
-		if x, found := C.Get(el.(string)); found {
-			updateNode = x.(*model.NodeList)
+		if x, found := NodeContext.Get(el.(string)); found {
+			updateNode = x.(*model.Node)
 		}
 		eventOut(updateNode)
 		fmt.Println("OUT ADD", "FROM-NODE", node.Name, "out1Topic", out1Topic, "TO-NODE", updateNode.Name, "TO In1", k1, "TO In2", k2, "OUT", out)
@@ -141,18 +148,22 @@ func add(node *model.NodeList){
 }
 
 
+
+
+
+
 //addDog add I like dogs to the incoming string
-func addDog(node *model.NodeList){
+func addDog(node *model.Node){
 	k1 := fmt.Sprintf("in1.%s", node.UUID)
-	in1, _ := C.Get(k1)
+	in1, _ :=NodeContext.Get(k1)
 	s1 := getUnderlyingAsValue(in1).String()
 	out := ""
 	out1Topic := "" //TODO make it update itself out1 (or all outputs that are used by the node developer)
-	for _, el := range node.NodeOut1 {
-		var updateNode  *model.NodeList
+	for _, el := range node.Out1Connections {
+		var updateNode  *model.Node
 		out1Topic = fmt.Sprintf("out1.%s", node.UUID)
-		if x, found := C.Get(el.ToUUID); found {
-			updateNode = x.(*model.NodeList)
+		if x, found := NodeContext.Get(el.ToUUID); found {
+			updateNode = x.(*model.Node)
 		}
 		if el.Connection == "in1"{
 			updateNode.In1 = out
