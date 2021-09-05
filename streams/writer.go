@@ -47,7 +47,7 @@ func ValidateTypes(t string, body *model.WriterBody) ([]byte, string, error) {
 			if body.Priority == bk.Priority {
 				return nil, body.Action, errors.New("error: invalid json on writerBody")
 			}
-			b, err := json.Marshal(body.Priority);
+			b, err := json.Marshal(body.Priority)
 			if err != nil {
 				return nil, body.Action, errors.New("error: failed to marshal json on writeBody")
 			}

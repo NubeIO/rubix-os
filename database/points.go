@@ -18,6 +18,13 @@ func truncateString(str string, num int) string {
 	return ret
 }
 
+func typeIsNil(t string, use string) string {
+	if t == "" {
+		return use
+	}
+	return t
+}
+
 func nameIsNil(name string) string {
 	if name == "" {
 		uuid := utils.MakeTopicUUID("")

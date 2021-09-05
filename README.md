@@ -20,7 +20,7 @@ go build -buildmode=plugin -o echo.so echo.go  && cp echo.so  ../../../data/plug
 example to build and run the apps
 ```
 cd plugin/example/system
-go build -buildmode=plugin -o system.so system.go  && cp system.so  ../../../data/plugins/ && (cd ~/code/go/flow-framework  && go run app.go  -config cd ~/code/go/flow-framework/config.yml)
+go build -buildmode=plugin -o system.so system.go  && cp system.so  ../../../data/plugins/ && (cd ~/code/go/flow-framework  && go run app.go)
 ```
 
 ## Logging
