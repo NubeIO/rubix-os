@@ -49,6 +49,10 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var nodesList []model.Node
 	var in1 []model.In1Connections
 	var out1 []model.Out1Connections
+	var integration []model.Integration
+	var mqttConnection []model.MqttConnection
+	var credentials []model.IntegrationCredentials
+
 
 	var models = []interface{}{
 		&alerts,
@@ -75,6 +79,9 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&nodesList,
 		&in1,
 		&out1,
+		&integration,
+		&mqttConnection,
+		&credentials,
 	}
 
 	for _, v := range models {

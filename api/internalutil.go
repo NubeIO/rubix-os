@@ -144,8 +144,17 @@ func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
-
 func getBODYNode(ctx *gin.Context) (dto *model.Node, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBODYMqttConnection(ctx *gin.Context) (dto *model.MqttConnection, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBODYIntegration(ctx *gin.Context) (dto *model.Integration, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

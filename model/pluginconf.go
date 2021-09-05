@@ -2,7 +2,7 @@ package model
 
 // PluginConf holds information about the plugin.
 type PluginConf struct {
-	UUID	string 	`json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
+	UUID          string `json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
 	UserID        uint
 	ModulePath    string `gorm:"type:text"`
 	Token         string `gorm:"type:varchar(180);unique_index"`
@@ -10,8 +10,9 @@ type PluginConf struct {
 	Enabled       bool
 	Config        []byte
 	Storage       []byte
-	Network 		Network `json:"networks" gorm:"constraint:OnDelete:CASCADE"`
-	Job 			[]Job `json:"jobs" gorm:"constraint:OnDelete:CASCADE"`
+	Network       Network     `json:"networks" gorm:"constraint:OnDelete:CASCADE"`
+	Integration   Integration `json:"integration" gorm:"constraint:OnDelete:CASCADE"`
+	Job           []Job       `json:"jobs" gorm:"constraint:OnDelete:CASCADE"`
 }
 
 // PluginConfExternal Model
@@ -25,7 +26,7 @@ type PluginConfExternal struct {
 	// read only: true
 	// required: true
 	// example: 25
-	UUID	string 	`json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
+	UUID string `json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
 	// The plugin name.
 	//
 	// read only: true
@@ -67,7 +68,8 @@ type PluginConfExternal struct {
 	//
 	// example: ["webhook","display"]
 	// required: true
-	Capabilities []string `json:"capabilities"`
-	Network 		Network `json:"networks" gorm:"constraint:OnDelete:CASCADE"`
-	Job 			[]Job `json:"jobs" gorm:"constraint:OnDelete:CASCADE"`
+	Capabilities []string      `json:"capabilities"`
+	Network      Network       `json:"networks" gorm:"constraint:OnDelete:CASCADE"`
+	Integration  []Integration `json:"integration" gorm:"constraint:OnDelete:CASCADE"`
+	Job          []Job         `json:"jobs" gorm:"constraint:OnDelete:CASCADE"`
 }

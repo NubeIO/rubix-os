@@ -84,6 +84,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	nodesHandler := api.NodeAPI{
 		DB: db,
 	}
+	integrationHandler := api.IntegrationAPI{
+		DB: db,
+	}
+	mqttHandler := api.MqttConnectionAPI{
+		DB: db,
+	}
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
 	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/plugin/:uuid/custom/"), streamHandler)
@@ -291,6 +297,20 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		control.PATCH("/node/:uuid", nodesHandler.UpdateNode)
 		control.DELETE("/node/:uuid", nodesHandler.DeleteNode)
 		control.DELETE("/nodes/drop", nodesHandler.DropNodesList)
+
+		control.GET("/integrations", integrationHandler.GetIntegrationsList)
+		control.POST("/integration", integrationHandler.CreateIntegration)
+		control.GET("/integration/:uuid", integrationHandler.GetIntegration)
+		control.PATCH("/integration/:uuid", integrationHandler.UpdateIntegration)
+		control.DELETE("/integration/:uuid", integrationHandler.DeleteIntegration)
+		control.DELETE("/integrations/drop", integrationHandler.DropIntegrationsList)
+
+		control.GET("/mqtt/clients", mqttHandler.GetMqttConnectionsList)
+		control.POST("/mqtt/client", mqttHandler.CreateMqttConnection)
+		control.GET("/mqtt/client/:uuid", mqttHandler.GetMqttConnection)
+		control.PATCH("/mqtt/client/:uuid", mqttHandler.UpdateMqttConnection)
+		control.DELETE("/mqtt/client/:uuid", mqttHandler.DeleteMqttConnection)
+		control.DELETE("/mqtt/clients/drop", mqttHandler.DropMqttConnectionsList)
 
 	}
 
