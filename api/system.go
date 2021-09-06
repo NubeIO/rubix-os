@@ -30,15 +30,17 @@ const (
 	HealhStatusDown = "DOWN"
 )
 
-type Health struct {
-	Status string `json:"status"`
-
+type HealthsAPI struct {
+	Handler *handler.Handler
 }
 
-func Hostname(ctx *gin.Context) {
-	h := Health{}
-	aa := handler.NewHandler()
-	aa.Get()
+type Healths struct {
+	Status string `json:"status"`
+}
+
+func (healths *HealthsAPI) Hostname(ctx *gin.Context) {
+	healths.Handler.Get()
+	h := Healths{}
 	h.Status, _ = system.Hostname()
 	ctx.JSON(http.StatusOK, h)
 }

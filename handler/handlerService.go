@@ -2,12 +2,11 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/patrickmn/go-cache"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
-
 
 type Handler struct {
 	SourceField           string
@@ -15,10 +14,18 @@ type Handler struct {
 	NotificationService   eventbus.NotificationService
 	ctx                   context.Context
 	store                 *cache.Cache
-	//DB 					  database.GormDatabase //TODO will cause cycle import
+	db                    *DB
 }
 
-func NewHandler() *Handler {
+type DBHandler interface {
+	Test()
+}
+
+type DB struct {
+	DBHandler DBHandler
+}
+
+func CustomHandler(db *DB) *Handler {
 	notificationService := eventbus.NewNotificationService(eventbus.BUS)
 	c := eventbus.BusContext
 	store := cache.New(5*time.Minute, 10*time.Minute)
@@ -27,19 +34,14 @@ func NewHandler() *Handler {
 		NotificationService:   notificationService,
 		ctx:                   c,
 		store:                 store,
+		db:                    db,
 	}
 }
 
 func (l *Handler) Get() string {
 	l.store.Set("sssss", "sss", cache.NoExpiration)
-	fmt.Println(l.store.Get("sssss"))
-
-	//l.DB.GetIntegrationsList()
-	//list, err := l.db.GetIntegrationsList()
-	//if err != nil {
-	//	fmt.Println(err)
-	//	return ""
-	//}
-	//fmt.Println(list)
+	v, isExist := l.store.Get("sssss")
+	log.Info("Get store value: ", v, ", which does exist: ", isExist)
+	l.db.DBHandler.Test()
 	return "l"
 }

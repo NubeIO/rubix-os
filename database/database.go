@@ -14,6 +14,8 @@ import (
 
 var mkdirAll = os.MkdirAll
 
+var gormDatabase *GormDatabase
+
 // New creates a new wrapper for the gorm database framework.
 func New(dialect, connection, defaultUser, defaultPass string, strength int, logLevel string,
 	createDefaultUserIfNotExist bool) (*GormDatabase, error) {
@@ -52,7 +54,6 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var integration []model.Integration
 	var mqttConnection []model.MqttConnection
 	var credentials []model.IntegrationCredentials
-
 
 	var models = []interface{}{
 		&alerts,
@@ -104,6 +105,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		rp.GlobalUuid = utils.MakeTopicUUID(model.CommonNaming.Rubix)
 		db.Create(&rp)
 	}
+	gormDatabase = &GormDatabase{DB: db}
 	return &GormDatabase{DB: db}, nil
 }
 
