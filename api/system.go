@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeDev/flow-framework/handler"
 	"github.com/NubeDev/flow-framework/system"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -31,10 +32,13 @@ const (
 
 type Health struct {
 	Status string `json:"status"`
+
 }
 
 func Hostname(ctx *gin.Context) {
 	h := Health{}
+	aa := handler.NewHandler()
+	aa.Get()
 	h.Status, _ = system.Hostname()
 	ctx.JSON(http.StatusOK, h)
 }
