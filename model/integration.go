@@ -20,9 +20,10 @@ type Integration struct {
 	CommonDescription
 	CommonEnable
 	CommonFault
-	CommonCreated
+	PluginName             string                   `json:"plugin_name"`
 	IntegrationType        string                   `json:"integration_type"`
 	PluginConfId           string                   `json:"plugin_conf_id" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
 	MqttConnection         []MqttConnection         `json:"mqtt_connections" gorm:"constraint:OnDelete:CASCADE;"`
 	IntegrationCredentials []IntegrationCredentials `json:"integration_credentials" gorm:"constraint:OnDelete:CASCADE;"`
+	CommonCreated
 }

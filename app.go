@@ -29,25 +29,24 @@ func main() {
 
 	eventbus.InitBus()
 	database.DataBus()
-
 	if err := os.MkdirAll(conf.GetAbsPluginDir(), 0755); err != nil {
 		panic(err)
 	}
 	if err := os.MkdirAll(conf.GetAbsUploadedImagesDir(), 0755); err != nil {
 		panic(err)
 	}
-
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
 		conf.PassStrength, conf.Database.LogLevel, true)
 	if err != nil {
 		panic(err)
 	}
-	//TODO add an init for the Jobs, needs to call the db and get all current jobs
+
 	defer db.Close()
 
 	engine, closeable := router.Create(db, vInfo, conf)
-	defer closeable()
 
+	defer closeable()
 	runner.Run(engine, conf)
+
 }

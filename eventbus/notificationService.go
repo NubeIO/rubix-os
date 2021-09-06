@@ -24,6 +24,8 @@ func NewNotificationService(eb *bus.Bus) NotificationService {
 }
 
 
+
+
 // EmitString emits an event to the bus
 func (eb *notificationService) EmitString(ctx context.Context, topicName string, data string) {
 	ctx = context.WithValue(ctx, bus.CtxKeyTxID, "")

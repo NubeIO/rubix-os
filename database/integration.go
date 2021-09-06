@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
@@ -9,6 +10,7 @@ import (
 type Integration struct {
 	*model.Integration
 }
+
 
 // GetIntegrationsList get all of them
 func (d *GormDatabase) GetIntegrationsList() ([]*model.Integration, error) {
@@ -24,7 +26,12 @@ func (d *GormDatabase) GetIntegrationsList() ([]*model.Integration, error) {
 func (d *GormDatabase) CreateIntegration(body *model.Integration) (*model.Integration, error) {
 	body.UUID = utils.MakeTopicUUID("")
 	body.Name = nameIsNil(body.Name)
-	body.IntegrationType = typeIsNil(body.IntegrationType, "system")
+	body.PluginName = pluginIsNil(body.PluginName)
+	body.IntegrationType = typeIsNil(body.IntegrationType, "mqtt")
+	p, err := d.GetPluginByPath(body.PluginName);if err != nil { //the integration can be added by the pluginName
+		return nil, errors.New("invalid plugin name or id")
+	}
+	body.PluginConfId = p.UUID
 	query := d.DB.Create(body);if query.Error != nil {
 		return nil, query.Error
 	}

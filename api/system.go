@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeDev/flow-framework/handler"
 	"github.com/NubeDev/flow-framework/system"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -29,12 +30,17 @@ const (
 	HealhStatusDown = "DOWN"
 )
 
-type Health struct {
+type HealthsAPI struct {
+	Handler *handler.Handler
+}
+
+type Healths struct {
 	Status string `json:"status"`
 }
 
-func Hostname(ctx *gin.Context) {
-	h := Health{}
+func (healths *HealthsAPI) Hostname(ctx *gin.Context) {
+	healths.Handler.Get()
+	h := Healths{}
 	h.Status, _ = system.Hostname()
 	ctx.JSON(http.StatusOK, h)
 }

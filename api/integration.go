@@ -20,6 +20,7 @@ type IntegrationAPI struct {
 	DB IntegrationDatabase
 }
 
+
 func (j *IntegrationAPI) GetIntegration(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetIntegration(uuid)
