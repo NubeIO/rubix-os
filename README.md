@@ -14,13 +14,12 @@ rename the `config-example.yml` file to `config.yml`
 add into /data/plugins
 
 ```
-go build -buildmode=plugin -o ehco.so echo.go
-go build -buildmode=plugin -o echo.so echo.go  && cp echo.so  ../../../data/plugins/  && go run ../../../app.go
+go build -buildmode=plugin -o ehco.so *.go
 ```
 example to build and run the apps
 ```
 cd plugin/example/system
-go build -buildmode=plugin -o system.so system.go  && cp system.so  ../../../data/plugins/ && (cd ~/code/go/flow-framework  && go run app.go)
+go build -buildmode=plugin -o system.so *.go  && cp system.so  ../../../data/plugins/ && rm system.so && (cd ~/code/go/nube/flow-framework  && go run app.go)
 ```
 
 ## Logging

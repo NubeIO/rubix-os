@@ -4,10 +4,10 @@ package model
 type PluginConf struct {
 	UUID          string `json:"uuid" sql:"uuid"  gorm:"type:varchar(255);unique;primaryKey"`
 	UserID        uint
-	ModulePath    string `gorm:"type:text"`
+	ModulePath    string `json:"module_path" gorm:"type:text"`
 	Token         string `gorm:"type:varchar(180);unique_index"`
 	ApplicationID uint
-	Enabled       bool
+	Enabled       bool `json:"enabled"`
 	Config        []byte
 	Storage       []byte
 	Network       Network     `json:"networks" gorm:"constraint:OnDelete:CASCADE"`
@@ -43,7 +43,7 @@ type PluginConfExternal struct {
 	// example: github.com/flow/server/plugin/example/echo
 	// read only: true
 	// required: true
-	ModulePath string `json:"modulePath" form:"modulePath" query:"modulePath"`
+	ModulePath string `json:"module_path" form:"modulePath" query:"modulePath"`
 	// The author of the plugin.
 	//
 	// example: jmattheis

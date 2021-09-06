@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"gorm.io/gorm"
@@ -26,9 +27,11 @@ func (d *GormDatabase) GetPlugins() ([]*model.PluginConf, error) {
 }
 
 
-// GetPluginByPath get object by uuid.
+// GetPluginByPath get object by path.
 func (d *GormDatabase) GetPluginByPath(path string) (*model.PluginConf, error) {
 	var plugin *model.PluginConf
+	p := pluginIsNil(path)
+	fmt.Println(p, 90909090)
 	query := d.DB.Where("module_path = ? ", path).First(&plugin); if query.Error != nil {
 		return nil, query.Error
 	}

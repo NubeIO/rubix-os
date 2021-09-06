@@ -23,6 +23,14 @@ func typeIsNil(t string, use string) string {
 	return t
 }
 
+func pluginIsNil(name string) string {
+	if name == "" {
+		return "system"
+	}
+	return name
+}
+
+
 func nameIsNil(name string) string {
 	if name == "" {
 		uuid := utils.MakeTopicUUID("")

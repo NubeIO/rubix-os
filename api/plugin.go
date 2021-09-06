@@ -45,37 +45,6 @@ func (c *PluginAPI) GetPluginByPath(ctx *gin.Context) {
 
 
 // GetPlugins returns all plugins a user has.
-// swagger:operation GET /plugin plugin getPlugins
-//
-// Return all plugins.
-//
-// ---
-// consumes: [application/json]
-// produces: [application/json]
-// security: [clientTokenHeader: [], clientTokenQuery: [], basicAuth: []]
-// responses:
-//   200:
-//     description: Ok
-//     schema:
-//       type: array
-//       items:
-//         $ref: "#/definitions/PluginConf"
-//   401:
-//     description: Unauthorized
-//     schema:
-//         $ref: "#/definitions/Error"
-//   403:
-//     description: Forbidden
-//     schema:
-//         $ref: "#/definitions/Error"
-//   404:
-//     description: Not Found
-//     schema:
-//         $ref: "#/definitions/Error"
-//   500:
-//     description: Internal Server Error
-//     schema:
-//         $ref: "#/definitions/Error"
 func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 	userID := auth.GetUserID(ctx)
 	plugins, err := c.DB.GetPluginConfByUser(userID)
@@ -100,165 +69,39 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 		}
 	}
 	reposeHandler(result, err, ctx)
-
 }
 
-// EnablePlugin enables a plugin.
-// swagger:operation POST /plugin/{uuid}/enable plugin enablePlugin
-//
-// Enable a plugin.
-//
-// ---
-// consumes: [application/json]
-// produces: [application/json]
-// parameters:
-// - name: uuid
-//   in: path
-//   description: the plugin uuid
-//   required: true
-//   type: integer
-//   format: int64
-// security: [clientTokenHeader: [], clientTokenQuery: [], basicAuth: []]
-// responses:
-//   200:
-//     description: Ok
-//   401:
-//     description: Unauthorized
-//     schema:
-//         $ref: "#/definitions/Error"
-//   403:
-//     description: Forbidden
-//     schema:
-//         $ref: "#/definitions/Error"
-//   404:
-//     description: Not Found
-//     schema:
-//         $ref: "#/definitions/Error"
-//   500:
-//     description: Internal Server Error
-//     schema:
-//         $ref: "#/definitions/Error"
-func (c *PluginAPI) EnablePlugin(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	conf, err := c.DB.GetPluginConfByID(uuid)
+
+// EnablePluginByName enables a plugin.
+func (c *PluginAPI) EnablePluginByName(ctx *gin.Context) {
+	//uuid := resolveID(ctx)
+	body, err := getBODYPlugin(ctx);if err != nil {
+		reposeHandler("error on body", err, ctx)
+	}
+	conf, err := c.DB.GetPluginByPath(body.ModulePath)
+	uuid := conf.UUID
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}
 	if conf == nil || !isPluginOwner(ctx, conf) {
-		ctx.AbortWithError(404, errors.New("unknown plugin"))
+		reposeHandler("unknown plugin", err, ctx)
 		return
 	}
 	_, err = c.Manager.Instance(uuid)
 	if err != nil {
-		ctx.AbortWithError(404, errors.New("plugin instance not found"))
+		reposeHandler("plugin not found", err, ctx)
 		return
 	}
 	if err := c.Manager.SetPluginEnabled(uuid, true); err == plugin.ErrAlreadyEnabledOrDisabled {
-		ctx.AbortWithError(400, err)
+		reposeHandler("err:", err, ctx)
 	} else if err != nil {
-		ctx.AbortWithError(500, err)
+		reposeHandler("err:", err, ctx)
 	}
 	reposeHandler("enabled", err, ctx)
 }
 
-// DisablePlugin disables a plugin.
-// swagger:operation POST /plugin/{uuid}/disable plugin disablePlugin
-//
-// Disable a plugin.
-//
-// ---
-// consumes: [application/json]
-// produces: [application/json]
-// parameters:
-// - name: uuid
-//   in: path
-//   description: the plugin uuid
-//   required: true
-//   type: integer
-//   format: int64
-// security: [clientTokenHeader: [], clientTokenQuery: [], basicAuth: []]
-// responses:
-//   200:
-//     description: Ok
-//   401:
-//     description: Unauthorized
-//     schema:
-//         $ref: "#/definitions/Error"
-//   403:
-//     description: Forbidden
-//     schema:
-//         $ref: "#/definitions/Error"
-//   404:
-//     description: Not Found
-//     schema:
-//         $ref: "#/definitions/Error"
-//   500:
-//     description: Internal Server Error
-//     schema:
-//         $ref: "#/definitions/Error"
-
-
-
-func (c *PluginAPI) DisablePlugin(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	conf, err := c.DB.GetPluginConfByID(uuid)
-	if success := successOrAbort(ctx, 500, err); !success {
-		return
-	}
-	if conf == nil || !isPluginOwner(ctx, conf) {
-		ctx.AbortWithError(404, errors.New("unknown plugin"))
-		return
-	}
-	_, err = c.Manager.Instance(uuid)
-	if err != nil {
-		ctx.AbortWithError(404, errors.New("plugin instance not found"))
-		return
-	}
-	if err := c.Manager.SetPluginEnabled(uuid, false); err == plugin.ErrAlreadyEnabledOrDisabled {
-		ctx.AbortWithError(400, err)
-	} else if err != nil {
-		ctx.AbortWithError(500, err)
-	}
-	reposeHandler("disabled", err, ctx)
-}
 
 // GetDisplay get display info for Displayer plugin.
-// swagger:operation GET /plugin/{uuid}/display plugin getPluginDisplay
-//
-// Get display info for a Displayer plugin.
-//
-// ---
-// consumes: [application/json]
-// produces: [application/json]
-// parameters:
-// - name: uuid
-//   in: path
-//   description: the plugin uuid
-//   required: true
-//   type: integer
-//   format: int64
-// security: [clientTokenHeader: [], clientTokenQuery: [], basicAuth: []]
-// responses:
-//   200:
-//     description: Ok
-//     schema:
-//       type: string
-//   401:
-//     description: Unauthorized
-//     schema:
-//         $ref: "#/definitions/Error"
-//   403:
-//     description: Forbidden
-//     schema:
-//         $ref: "#/definitions/Error"
-//   404:
-//     description: Not Found
-//     schema:
-//         $ref: "#/definitions/Error"
-//   500:
-//     description: Internal Server Error
-//     schema:
-//         $ref: "#/definitions/Error"
 func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	conf, err := c.DB.GetPluginConfByID(uuid)
@@ -279,47 +122,6 @@ func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
 }
 
 // GetConfig returns Configurer plugin configuration in YAML format.
-// swagger:operation GET /plugin/{uuid}/config plugin getPluginConfig
-//
-// Get YAML configuration for Configurer plugin.
-//
-// ---
-// consumes: [application/json]
-// produces: [application/x-yaml]
-// parameters:
-// - name: uuid
-//   in: path
-//   description: the plugin uuid
-//   required: true
-//   type: integer
-//   format: int64
-// security: [clientTokenHeader: [], clientTokenQuery: [], basicAuth: []]
-// responses:
-//   200:
-//     description: Ok
-//     schema:
-//         type: object
-//         description: plugin configuration
-//   400:
-//     description: Bad Request
-//     schema:
-//         $ref: "#/definitions/Error"
-//   401:
-//     description: Unauthorized
-//     schema:
-//         $ref: "#/definitions/Error"
-//   403:
-//     description: Forbidden
-//     schema:
-//         $ref: "#/definitions/Error"
-//   404:
-//     description: Not Found
-//     schema:
-//         $ref: "#/definitions/Error"
-//   500:
-//     description: Internal Server Error
-//     schema:
-//         $ref: "#/definitions/Error"
 func (c *PluginAPI) GetConfig(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	conf, err := c.DB.GetPluginConfByID(uuid)
@@ -346,44 +148,6 @@ func (c *PluginAPI) GetConfig(ctx *gin.Context) {
 }
 
 // UpdateConfig updates Configurer plugin configuration in YAML format.
-// swagger:operation POST /plugin/{uuid}/config plugin updatePluginConfig
-//
-// Update YAML configuration for Configurer plugin.
-//
-// ---
-// consumes: [application/x-yaml]
-// produces: [application/json]
-// parameters:
-// - name: uuid
-//   in: path
-//   description: the plugin uuid
-//   required: true
-//   type: integer
-//   format: int64
-// security: [clientTokenHeader: [], clientTokenQuery: [], basicAuth: []]
-// responses:
-//   200:
-//     description: Ok
-//   400:
-//     description: Bad Request
-//     schema:
-//         $ref: "#/definitions/Error"
-//   401:
-//     description: Unauthorized
-//     schema:
-//         $ref: "#/definitions/Error"
-//   403:
-//     description: Forbidden
-//     schema:
-//         $ref: "#/definitions/Error"
-//   404:
-//     description: Not Found
-//     schema:
-//         $ref: "#/definitions/Error"
-//   500:
-//     description: Internal Server Error
-//     schema:
-//         $ref: "#/definitions/Error"
 func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	conf, err := c.DB.GetPluginConfByID(uuid)
