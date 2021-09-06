@@ -126,16 +126,14 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.Use(cors.New(auth.CorsConfig(conf)))
 	{
 		engine.GET("/plugin", authentication.RequireClient(), pluginHandler.GetPlugins)
-		pluginRoute := engine.Group("/plugin/", authentication.RequireClient())
+		pluginRoute := engine.Group("api/plugin/", authentication.RequireClient())
 		{
 			pluginRoute.GET("/:uuid", pluginHandler.GetPlugin)
 			pluginRoute.GET("/path/:path", pluginHandler.GetPluginByPath)
 			pluginRoute.GET("/:uuid/config", pluginHandler.GetConfig)
 			pluginRoute.POST("/:uuid/config", pluginHandler.UpdateConfig)
 			pluginRoute.GET("/:uuid/display", pluginHandler.GetDisplay)
-			pluginRoute.POST("/:uuid/enable", pluginHandler.EnablePlugin)
-			pluginRoute.POST("/:uuid/disable", pluginHandler.DisablePlugin)
-			pluginRoute.POST("/:uuid/network", pluginHandler.EnablePlugin)
+			pluginRoute.POST("/enable", pluginHandler.EnablePluginByName)
 		}
 	}
 	engine.OPTIONS("/*any")
