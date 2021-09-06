@@ -23,36 +23,36 @@ type TDropletTHLM struct {
 
 func DropletTH(data string, sensor TSensorType) TDropletTH {
 	d := Common(data, sensor)
-	_temperature := dropletTemp(data)
-	_humidity := dropletHumidity(data)
-	_voltage := dropletVoltage(data)
-	_v := TDropletTH{
+	temperature := dropletTemp(data)
+	humidity := dropletHumidity(data)
+	voltage := dropletVoltage(data)
+	v := TDropletTH{
 		CommonValues: d,
-		Voltage:      _voltage,
-		Temperature:  _temperature,
-		Humidity:     _humidity,
+		Voltage:      voltage,
+		Temperature:  temperature,
+		Humidity:     humidity,
 	}
-	return _v
+	return v
 }
 
 func DropletTHL(data string, sensor TSensorType) TDropletTHL {
 	d := DropletTH(data, sensor)
-	_light := dropletLight(data)
-	_v := TDropletTHL{
+	light := dropletLight(data)
+	v := TDropletTHL{
 		TDropletTH: d,
-		Light:      _light,
+		Light:      light,
 	}
-	return _v
+	return v
 }
 
 func DropletTHLM(data string, sensor TSensorType) TDropletTHLM {
 	d := DropletTHL(data, sensor)
-	_motion := dropletMotion(data)
-	_v := TDropletTHLM{
+	motion := dropletMotion(data)
+	v := TDropletTHLM{
 		TDropletTHL: d,
-		Motion:      _motion,
+		Motion:      motion,
 	}
-	return _v
+	return v
 }
 
 func dropletTemp(data string) float64 {

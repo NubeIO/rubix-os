@@ -92,12 +92,18 @@ func (c *PluginAPI) EnablePluginByName(ctx *gin.Context) {
 		reposeHandler("plugin not found", err, ctx)
 		return
 	}
-	if err := c.Manager.SetPluginEnabled(uuid, true); err == plugin.ErrAlreadyEnabledOrDisabled {
+	if err := c.Manager.SetPluginEnabled(uuid, body.Enabled); err == plugin.ErrAlreadyEnabledOrDisabled {
 		reposeHandler("err:", err, ctx)
 	} else if err != nil {
 		reposeHandler("err:", err, ctx)
 	}
-	reposeHandler("enabled", err, ctx)
+	if body.Enabled {
+		reposeHandler("enabled", err, ctx)
+	} else {
+		reposeHandler("disabled", err, ctx)
+	}
+
+
 }
 
 

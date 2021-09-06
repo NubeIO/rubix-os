@@ -24,13 +24,18 @@ func (c *PluginTest) GetNetwork(id string) error {
 	panic("implement me")
 }
 
-// Enable implements plugin.Plugin
-func (c *PluginTest) Enable() error {
+func SerialOpenAndRead() {
 	bb := new(tty.SerialSetting)
-	bb.BaudRate = 9600
+	bb.BaudRate = 38400
 	aa := tty.New(bb)
 	aa.NewSerialConnection()
 	aa.Loop()
+}
+
+
+// Enable implements plugin.Plugin
+func (c *PluginTest) Enable() error {
+	go SerialOpenAndRead()
 	c.enabled = true
 	return nil
 }

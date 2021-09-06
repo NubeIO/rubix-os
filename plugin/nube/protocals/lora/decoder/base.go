@@ -92,25 +92,25 @@ func DecodePayload(data string) (CommonValues, interface{}) {
 	var common *CommonValues = nil
 	switch s {
 	case ME:
-		payload_full := MicroEdge(data, ME)
-		common = &payload_full.CommonValues
-		payload = payload_full
+		payloadFull := MicroEdge(data, ME)
+		common = &payloadFull.CommonValues
+		payload = payloadFull
 	case TH:
-		payload_full := DropletTH(data, TH)
-		common = &payload_full.CommonValues
-		payload = payload_full
+		payloadFull := DropletTH(data, TH)
+		common = &payloadFull.CommonValues
+		payload = payloadFull
 	case THL:
-		payload_full := DropletTHL(data, THL)
-		common = &payload_full.CommonValues
-		payload = payload_full
+		payloadFull := DropletTHL(data, THL)
+		common = &payloadFull.CommonValues
+		payload = payloadFull
 	case THLM:
-		payload_full := DropletTHLM(data, THLM)
-		common = &payload_full.CommonValues
-		payload = payload_full
+		payloadFull := DropletTHLM(data, THLM)
+		common = &payloadFull.CommonValues
+		payload = payloadFull
 	case ZHT:
-		base, payload_full := ZipHydrotap(data, ZHT)
+		base, payloadFull := ZipHydrotap(data, ZHT)
 		common = &base.CommonValues
-		payload = payload_full
+		payload = payloadFull
 	default:
 		log.Printf("ERROR! No decoder for sensor type: %s", s)
 		return CommonValues{}, nil

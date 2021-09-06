@@ -15,20 +15,20 @@ type TMicroEdge struct {
 
 func MicroEdge(data string, sensor TSensorType) TMicroEdge {
 	d := Common(data, sensor)
-	_pulse := pulse(data)
-	_ai1 := ai1(data)
-	_ai2 := ai2(data)
-	_ai3 := ai3(data)
-	_voltage := voltage(data)
-	_v := TMicroEdge{
+	p := pulse(data)
+	a1 := ai1(data)
+	a2 := ai2(data)
+	a3 := ai3(data)
+	vol := voltage(data)
+	v := TMicroEdge{
 		CommonValues: d,
-		Voltage:      _voltage,
-		Pulse:        _pulse,
-		AI1:          _ai1,
-		AI2:          _ai2,
-		AI3:          _ai3,
+		Voltage:      vol,
+		Pulse:        p,
+		AI1:          a1,
+		AI2:          a2,
+		AI3:          a3,
 	}
-	return _v
+	return v
 }
 
 func pulse(data string) int {
