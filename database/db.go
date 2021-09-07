@@ -69,44 +69,44 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 //SyncTopics sync all the topics
 func (d *GormDatabase) SyncTopics()  {
 
-	d.B.RegisterTopicParent("aa", "aa")
+	d.Bus.RegisterTopicParent("aa", "aa")
 
 	g, err := d.GetStreams(false)
 	for _, obj := range g {
-		d.B.RegisterTopicParent(model.CommonNaming.Stream, obj.UUID)
+		d.Bus.RegisterTopicParent(model.CommonNaming.Stream, obj.UUID)
 	}
 	s, err := d.GetPlugins()
 	for _, obj := range s {
-		d.B.RegisterTopicParent(model.CommonNaming.Plugin, obj.UUID)
+		d.Bus.RegisterTopicParent(model.CommonNaming.Plugin, obj.UUID)
 	}
 	sub, err := d.GetProducers()
 	for _, obj := range sub {
-		d.B.RegisterTopicParent(model.CommonNaming.Producer, obj.UUID)
+		d.Bus.RegisterTopicParent(model.CommonNaming.Producer, obj.UUID)
 	}
 	rip, err := d.GetConsumers()
 	for _, obj := range rip {
-		d.B.RegisterTopicParent(model.CommonNaming.Consumer, obj.UUID)
+		d.Bus.RegisterTopicParent(model.CommonNaming.Consumer, obj.UUID)
 	}
 	j, err := d.GetJobs()
 	for _, obj := range j {
-		d.B.RegisterTopicParent(model.CommonNaming.Job, obj.UUID)
+		d.Bus.RegisterTopicParent(model.CommonNaming.Job, obj.UUID)
 	}
 	n, err := d.GetNetworks(false, false)
 	for _, obj := range n {
-		d.B.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
+		d.Bus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
 	}
 	de, err := d.GetDevices(false)
 	for _, obj := range de {
-		d.B.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
+		d.Bus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
 	}
 	p, err := d.GetPoints(false)
 	for _, obj := range p {
-		d.B.RegisterTopicParent(model.CommonNaming.Point, obj.UUID)
+		d.Bus.RegisterTopicParent(model.CommonNaming.Point, obj.UUID)
 	}
 	node, err := d.GetNodesList()
 	for _, obj := range node {
 		eventbus.NodeContext.Set(obj.UUID, obj, cache.NoExpiration)
-		d.B.RegisterTopicParent(model.CommonNaming.Node, obj.UUID)
+		d.Bus.RegisterTopicParent(model.CommonNaming.Node, obj.UUID)
 	}
 
 

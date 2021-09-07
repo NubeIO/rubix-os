@@ -5,9 +5,6 @@ import (
 	"net/url"
 )
 
-
-
-
 // GetDisplay implements public.Displayer
 func (c *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
 	baseURL.Path = c.basePath

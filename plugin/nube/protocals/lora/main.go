@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NubeDev/flow-framework/cachestore"
 	"github.com/NubeDev/flow-framework/dbhandler"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/patrickmn/go-cache"
 )
@@ -28,6 +29,7 @@ type Instance struct {
 	basePath string
 	db       dbhandler.Handler
 	store    cachestore.Handler
+	bus 	eventbus.BusService
 	pluginUUID string
 	networkUUID string
 }

@@ -4,7 +4,14 @@ package main
 func (c *Instance) Enable() error {
 	//go SerialOpenAndRead()
 	c.enabled = true
+
 	c.setUUID()
+	c.BusServ()
+	q, err := c.db.GetNetworkByPlugin(c.pluginUUID, false, false, "serial")
+	if err != nil {
+		return err
+	}
+	c.networkUUID = q.UUID
 	return nil
 }
 
