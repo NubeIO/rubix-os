@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
@@ -11,6 +12,8 @@ var deviceChildTable = "Device"
 // GetNetworks returns all networks.
 func (d *GormDatabase) GetNetworks(withChildren bool, withPoints bool) ([]*model.Network, error) {
 	var networksModel []*model.Network
+	d.Bus.RegisterTopic("plg_8c410b2ce3aa4503")
+	d.Bus.EmitString(eventbus.CTX(), "plg_8c410b2ce3aa4503", "test")
 	if withChildren { // drop child to reduce json size
 		query := d.DB.Preload("Device").Find(&networksModel)
 		if query.Error != nil {
@@ -38,6 +41,38 @@ func (d *GormDatabase) GetNetwork(uuid string, withChildren bool, withPoints boo
 		return networkModel, nil
 	} else {
 		query := d.DB.Where("uuid = ? ", uuid).First(&networkModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
+		return networkModel, nil
+	}
+}
+
+
+// GetNetworkByPlugin returns the network for the given id or nil.
+func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, withPoints bool, byTransport string) (*model.Network, error) {
+	var networkModel *model.Network
+	trans := ""
+	if byTransport != "" {
+		if byTransport == model.CommonNaming.Serial{
+			trans = "SerialConnection"
+		}
+		if withChildren { // drop child to reduce json size
+			query := d.DB.Where("plugin_conf_id = ? ", pluginUUID).Preload(trans).First(&networkModel)
+			if query.Error != nil {
+				return nil, query.Error
+			}
+			return networkModel, nil
+		}
+	}
+	if withChildren { // drop child to reduce json size
+		query := d.DB.Where("plugin_conf_id = ? ", pluginUUID).Preload(deviceChildTable).First(&networkModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
+		return networkModel, nil
+	} else {
+		query := d.DB.Where("plugin_conf_id = ? ", pluginUUID).First(&networkModel)
 		if query.Error != nil {
 			return nil, query.Error
 		}

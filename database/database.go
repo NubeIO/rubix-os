@@ -108,9 +108,9 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		rp.GlobalUuid = utils.MakeTopicUUID(model.CommonNaming.Rubix)
 		db.Create(&rp)
 	}
-	notificationService := eventbus.NewService(eventbus.GetBus())
-	gormDatabase = &GormDatabase{DB: db, B: notificationService}
-	return &GormDatabase{DB: db, B: notificationService}, nil
+	busService := eventbus.NewService(eventbus.GetBus())
+	gormDatabase = &GormDatabase{DB: db, Bus: busService}
+	return &GormDatabase{DB: db, Bus: busService}, nil
 }
 
 func createDirectoryIfSqlite(dialect, connection string) {
@@ -128,7 +128,7 @@ func createDirectoryIfSqlite(dialect, connection string) {
 type GormDatabase struct {
 	DB *gorm.DB
 	Store cachestore.Handler
-    B eventbus.BusService
+    Bus eventbus.BusService
 }
 
 // Close closes the gorm database connection.

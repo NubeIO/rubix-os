@@ -195,6 +195,11 @@ func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 }
 
 
+func resolvePluginUUID(ctx *gin.Context) string {
+	id := ctx.Param("plugin_uuid")
+	return id
+}
+
 func resolveID(ctx *gin.Context) string {
 	id := ctx.Param("uuid")
 	return id

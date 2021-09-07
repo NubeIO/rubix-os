@@ -46,18 +46,6 @@ func (d *GormDatabase) GetPlugin(uuid string) (*model.PluginConf, error) {
 	return plugin, nil
 }
 
-// GetPluginByPluginName gets plugin by its name.
-func (d *GormDatabase) GetPluginByPluginName(name string) (*model.PluginConf, error) {
-	plugin := new(model.PluginConf)
-	err := d.DB.Where("name = ?", name).First(plugin).Error
-	if err == gorm.ErrRecordNotFound {
-		err = nil
-	}
-	if plugin.ModulePath == name {
-		return plugin, err
-	}
-	return nil, err
-}
 
 // GetPluginConfByUserAndPath gets plugin configuration by user and file name.
 func (d *GormDatabase) GetPluginConfByUserAndPath(userid uint, path string) (*model.PluginConf, error) {

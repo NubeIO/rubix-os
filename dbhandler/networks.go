@@ -1,20 +1,14 @@
 package dbhandler
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 )
 
-func (l *Handler) GetNetworks() []*model.Network {
-	users, err := getDb().GetNetworks(false, false)
-	if err != nil {
-		return nil
+func (l *Handler) GetNetworkByPlugin(pluginUUID string, withChildren bool, withPoints bool, transport string) (*model.Network, error){
+	q, err := getDb().GetNetworkByPlugin(pluginUUID, withChildren, withPoints, transport);if err != nil {
+		return nil, err
 	}
-	if err != nil {
-		fmt.Println(err, "ERR")
-	}
-
-	//store.Set("aa", "aaa", cache.NoExpiration)
-	//fmt.Println(store.Get("aa"))
-	return users
+	return q, nil
 }
+
+

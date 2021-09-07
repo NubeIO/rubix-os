@@ -35,7 +35,8 @@ type Network struct {
 	CommonCreated
 	Manufacture      string             `json:"manufacture"`
 	Model            string             `json:"model"`
-	NetworkType      string             `json:"network_type"`
+	NetworkType      string             `json:"network_type"  gorm:"type:varchar(255);not null"`   //lora
+	TransportType    string             `json:"transport_type"  gorm:"type:varchar(255);not null"` //serial
 	PluginConfId     string             `json:"plugin_conf_id" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
 	Device           []Device           `json:"devices" gorm:"constraint:OnDelete:CASCADE;"`
 	SerialConnection []SerialConnection `json:"serial_connection" gorm:"constraint:OnDelete:CASCADE;"`

@@ -25,7 +25,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var writerCloneModel model.WriterClone
 
 	//get plugin
-	p, err := d.GetPluginByPath("system")
+	p, err := d.GetPluginByPath("lora")
 	if p.UUID == "" {
 		return false, errors.New("no valid plugin")
 	}

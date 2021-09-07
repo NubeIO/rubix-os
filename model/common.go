@@ -29,7 +29,8 @@ var CommonNaming = struct {
 	History           string
 	ProducerHistory   string
 	Histories         string
-  	Node   			  string
+	Node              string
+	Serial            string
 }{
 	Plugin:            "plugin",
 	Network:           "network",
@@ -54,8 +55,8 @@ var CommonNaming = struct {
 	History:           "history",
 	ProducerHistory:   "producer_history",
 	Histories:         "histories",
-  	Node:   			"node",
-
+	Node:              "node",
+	Serial:            "serial",
 }
 
 var CommonNamingCommandGroup = struct {
@@ -76,6 +77,14 @@ type CommonName struct {
 	Name string `json:"name"`
 }
 
+type CommonNameUnique struct {
+	Name string `json:"name"  gorm:"type:varchar(255);unique;not null"`
+}
+
+type CommonModulePath struct {
+	ModulePath string `json:"module_path"  gorm:"type:varchar(255);unique;not null"`
+}
+
 type CommonHelp struct {
 	Help string `json:"help"`
 }
@@ -90,10 +99,6 @@ type CommonType struct {
 
 type CommonAction struct {
 	Action string `json:"action"`
-}
-
-type CommonNameUnique struct {
-	Name string `json:"name"  gorm:"type:varchar(255);unique;not null"`
 }
 
 type CommonEnable struct {

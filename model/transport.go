@@ -13,3 +13,4 @@ type SerialConnection struct {
 	Error       bool   `json:"error"`
 	NetworkUUID string `json:"network_uuid" gorm:"TYPE:varchar(255) REFERENCES networks;null;default:null"`
 }
+
