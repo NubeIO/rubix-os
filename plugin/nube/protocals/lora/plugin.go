@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/NubeDev/flow-framework/handler"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/tty"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
@@ -12,8 +14,8 @@ type PluginTest struct {
 	enabled    bool
 	msgHandler plugin.MessageHandler
 	basePath   string
-
-	UserCtx plugin.UserContext
+	H          handler.Handler
+	UserCtx    plugin.UserContext
 }
 
 func (c *PluginTest) GetNetworks() ([]*model.Network, error) {
@@ -26,7 +28,7 @@ func (c *PluginTest) GetNetwork(id string) error {
 
 func SerialOpenAndRead() {
 	bb := new(tty.SerialSetting)
-	bb.BaudRate = 38400
+	bb.BaudRate = 9600
 	aa := tty.New(bb)
 	aa.NewSerialConnection()
 	aa.Loop()
@@ -35,7 +37,11 @@ func SerialOpenAndRead() {
 
 // Enable implements plugin.Plugin
 func (c *PluginTest) Enable() error {
-	go SerialOpenAndRead()
+	aaa := c.H.GetNetworks()
+	for i, a := range aaa {
+		fmt.Println(i, a.Name, "networks")
+	}
+	//go SerialOpenAndRead()
 	c.enabled = true
 	return nil
 }

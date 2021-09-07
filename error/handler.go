@@ -15,18 +15,15 @@ import (
 func Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
-
 		if len(c.Errors) > 0 {
 			for _, e := range c.Errors {
 				switch e.Type {
 				case gin.ErrorTypeBind:
 					errs, ok := e.Err.(validator.ValidationErrors)
-
 					if !ok {
 						writeError(c, e.Error())
 						return
 					}
-
 					var stringErrors []string
 					for _, err := range errs {
 						stringErrors = append(stringErrors, validationErrorToText(err))

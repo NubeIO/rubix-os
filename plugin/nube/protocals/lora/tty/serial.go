@@ -35,10 +35,6 @@ func New(s *SerialSetting) *SerialSetting {
 	}
 }
 
-func (p *SerialSetting) SetLogMode(logLevel string)  string {
-	return "a"
-}
-
 func (p *SerialSetting) Disconnect() error {
 	return p.Port.Close()
 }

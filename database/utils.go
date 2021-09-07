@@ -38,10 +38,3 @@ func nameIsNil(name string) string {
 	}
 	return name
 }
-
-func pluginIsNil(name string) string {
-	if name == "" {
-		return "system"
-	}
-	return name
-}

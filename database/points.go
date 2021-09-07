@@ -115,17 +115,17 @@ publish to MQTT if there is an external producer
 
 
 
-var GetDatabaseBus eventbus.NotificationService
+var GetDatabaseBus eventbus.BusService
 
 func DataBus() {
-	notificationService := eventbus.NewNotificationService(eventbus.BUS)
+	notificationService := eventbus.NewBusService(eventbus.BUS)
 	GetDatabaseBus = notificationService
 
 }
 
 
 func busUpdate(UUID string, action string, body *model.Point){
-	notificationService := eventbus.NewNotificationService(eventbus.BUS)
+	notificationService := eventbus.NewBusService(eventbus.BUS)
 	notificationService.Emit(eventbus.BusContext, eventbus.PointUpdated, body)
 	fmt.Println("topics", eventbus.BUS.Topics())
 }
