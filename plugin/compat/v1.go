@@ -1,7 +1,6 @@
 package compat
 
 import (
-	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 
 	//papiv1 "github.com/NubeDev/flow-framework/plugin/plugin-api"
@@ -161,28 +160,13 @@ type PluginV1MessageHandler struct {
 func (c *PluginV1MessageHandler) SendMessage(msg plugin.Message) error {
 	return c.WrapperHandler.SendMessage(Message{
 		Message:  msg.Message,
-		MessageType:   			msg.MessageType,
-		IsProtocol:    			msg.IsProtocol,
-		DriverType:    			msg.DriverType,
-		ProtocolType:    		msg.ProtocolType,
-		Protocol:    			msg.Protocol,
-		WriteableNetwork: 		msg.WriteableNetwork,
 		Priority: msg.Priority,
 		Title:    msg.Title,
 		Extras:   msg.Extras,
 	})
 }
 
-// GetNetworks implements wrapper.Plugin.
-func (c *PluginV1Instance) GetNetworks() ([]*model.Network, error) {
-	net, err := c.instance.GetNetworks()
-	return net, err
-}
 
-// GetNetwork implements wrapper.Plugin.
-func (c *PluginV1Instance) GetNetwork(id string) error {
-	return c.instance.GetNetwork(id)
-}
 
 // Enable implements wrapper.Plugin.
 func (c *PluginV1Instance) Enable() error {
@@ -209,8 +193,3 @@ func (c *PluginV1StorageHandler) Load() ([]byte, error) {
 	return c.WrapperHandler.Load()
 }
 
-// GetNet implements wrapper.Storager.
-func (c *PluginV1StorageHandler) GetNet() ([]*model.Network, error) {
-	net, err := c.WrapperHandler.GetNet()
-	return net, err
-}

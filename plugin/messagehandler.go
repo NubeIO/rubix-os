@@ -26,12 +26,6 @@ func (c redirectToChannel) SendMessage(msg compat.Message) error {
 		Message: model.MessageExternal{
 			ApplicationID: c.ApplicationID,
 			Message:       	msg.Message,
-			MessageType:   	msg.MessageType,
-			IsProtocol:   	msg.IsProtocol,
-			DriverType:   	msg.DriverType,
-			ProtocolType:  	msg.ProtocolType,
-			Protocol:   	msg.Protocol,
-			WriteableNetwork:   msg.WriteableNetwork,
 			Title:         		msg.Title,
 			Priority:      		msg.Priority,
 			Date:          		time.Now(),
