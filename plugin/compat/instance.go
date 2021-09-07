@@ -1,7 +1,6 @@
 package compat
 
 import (
-	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
 	"net/url"
@@ -25,8 +24,6 @@ const (
 
 // PluginInstance is an encapsulation layer of plugin instances of different backends.
 type PluginInstance interface {
-	GetNetworks() ([]*model.Network, error)
-	GetNetwork(id string) error
 	Enable() error
 	Disable() error
 
@@ -83,18 +80,11 @@ type MessageHandler interface {
 type StorageHandler interface {
 	Save(b []byte) error
 	Load() ([]byte, error)
-	GetNet() ([]*model.Network, error)
 }
 
 // Message describes a message to be sent by MessageHandler#SendMessage.
 type Message struct {
 	Message  			string
-	MessageType   		model.MessageType
-	IsProtocol    		bool
-	DriverType    		model.DriverType
-	ProtocolType 		model.ProtocolType
-	Protocol			model.Protocol
-	WriteableNetwork 	model.WriteableNetwork
 	Title    			string
 	Priority 			int
 	Extras   			map[string]interface{}

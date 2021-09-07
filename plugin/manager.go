@@ -23,8 +23,6 @@ import (
 // The Database interface for encapsulating database access.
 type Database interface {
 	GetUsers() ([]*model.User, error)
-	GetNetworks(withChildren bool, withPoints bool) ([]*model.Network, error)
-	GetNetwork(id string, withChildren bool, withPoints bool) (*model.Network, error)
 	GetPluginConfByUserAndPath(userid uint, path string) (*model.PluginConf, error)
 	CreatePluginConf(p *model.PluginConf) error
 	GetPluginConfByApplicationID(appid uint) (*model.PluginConf, error)
@@ -77,23 +75,12 @@ func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier No
 			message := <-manager.messages
 			internalMsg := &model.Message{
 				ApplicationID: 			message.Message.ApplicationID,
-				MessageType:         	message.Message.MessageType,
-				IsProtocol:         	message.Message.IsProtocol,
-				DriverType:         	message.Message.DriverType,
-				ProtocolType:         	message.Message.ProtocolType,
-				Protocol:         		message.Message.Protocol,
-				WriteableNetwork:       message.Message.WriteableNetwork,
 				Title:         			message.Message.Title,
 				Priority:      			message.Message.Priority,
 				Date:          			message.Message.Date,
 				Message:       			message.Message.Message,
 			}
 
-			msg, _ := json.MarshalIndent(message, "", "\t")
-			fmt.Println(message.Message.DriverType)
-			fmt.Println(message.Message.DriverType)
-			fmt.Println(message.Message.DriverType)
-			log.Println("send message", string(msg), messageType(string(message.Message.DriverType)))
 			if message.Message.Extras != nil {
 				internalMsg.Extras, _ = json.Marshal(message.Message.Extras)
 			}
@@ -151,21 +138,6 @@ func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-
-	n, err := m.db.GetNetwork("b29697f853714a54", false, false) //TODO testing
-	fmt.Println(n)
-	if err != nil {
-		log.Println(err)
-
-	}
-
-	nn, err := m.db.GetNetworks(false, false) //TODO testing
-	fmt.Println(nn)
-	if err != nil {
-		log.Println(err)
-		//return err
-	}
-
 	if enabled {
 		err = instance.Enable()
 	} else {

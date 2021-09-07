@@ -1,14 +1,10 @@
 package plugin
 
-import "github.com/NubeDev/flow-framework/model"
-
 // Plugin is the interface every plugin need to implement
 type Plugin interface {
 	// Enable is called every time a plugin is started. Spawn custom goroutines here for polling, etc.
 	// It is always called after ^Set.*Handler$
 	Enable() error
-	GetNetworks() ([]*model.Network, error)
-	GetNetwork(id string) error
 	// Disable is called every time a plugin is disabled. Plugins should stop all custom goroutines here.
 	Disable() error
 }

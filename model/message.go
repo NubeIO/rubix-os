@@ -5,33 +5,13 @@ import (
 )
 
 
-type MessageType string
 
-var MessageTypeEnum = struct {
-	General   				string
-	Debug   				string
-	Protocol   				string
-	Alert   				string
-}{
-
-	General:   				"general",
-	Debug:   				"debug",
-	Protocol:   			"protocol",
-	Alert:   				"alert",
-
-}
 
 
 // Message holds information about a message.
 type Message struct {
 	ID            		uint `gorm:"AUTO_INCREMENT;primary_key;index"`
 	ApplicationID 		uint
-	MessageType   		MessageType
-	IsProtocol    		bool
-	DriverType    		DriverType
-	ProtocolType 		ProtocolType
-	Protocol 			Protocol
-	WriteableNetwork 	WriteableNetwork
 	Message       		string `gorm:"type:text"`
 	Title         		string `gorm:"type:text"`
 	Priority      		int
@@ -58,12 +38,6 @@ type MessageExternal struct {
 	// read only: true
 	// required: true
 	// example: 5
-	MessageType MessageType `json:"message_type"`
-	IsProtocol    		bool
-	DriverType    		DriverType
-	ProtocolType        ProtocolType
-	Protocol 			Protocol
-	WriteableNetwork 	WriteableNetwork
 	// The enum type of the message.
 	//
 	// read only: true
