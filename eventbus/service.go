@@ -15,13 +15,23 @@ type (
 		Emit(ctx context.Context, topicName string, data interface{})
 		RegisterTopic(topic string)
 		RegisterTopicParent(parent string, child string)
+		GetBusService() BusService
 	}
 )
 
 
+var BUS *bus.Bus
+var BusContext context.Context
+var bs  BusService
+
+func InitBus() {
+	BUS = newBus()
+	BusContext = context.Background()
+	BUS.RegisterTopics(BusTopics()...)
+}
+
 type notificationService struct {
 	eb   *bus.Bus
-
 }
 
 // NewBusService ...
@@ -31,9 +41,13 @@ func NewBusService(eb *bus.Bus) BusService {
 	}
 	ns.registerPointsProducer() //add as types needed
 	ns.registerNodes() //add as types needed
+	bs = ns
 	return ns
 }
 
+func (eb *notificationService) GetBusService() BusService {
+	return bs
+}
 
 
 

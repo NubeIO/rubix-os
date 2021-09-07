@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/auth/password"
+	"github.com/NubeDev/flow-framework/cachestore"
 	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
@@ -13,8 +14,8 @@ import (
 )
 
 var mkdirAll = os.MkdirAll
-
 var gormDatabase *GormDatabase
+
 
 // New creates a new wrapper for the gorm database framework.
 func New(dialect, connection, defaultUser, defaultPass string, strength int, logLevel string,
@@ -122,6 +123,8 @@ func createDirectoryIfSqlite(dialect, connection string) {
 // GormDatabase is a wrapper for the gorm framework.
 type GormDatabase struct {
 	DB *gorm.DB
+	Store cachestore.Handler
+
 }
 
 // Close closes the gorm database connection.

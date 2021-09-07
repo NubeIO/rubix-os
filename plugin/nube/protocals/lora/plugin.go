@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/handler"
+	"github.com/NubeDev/flow-framework/dbhandler"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/tty"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 )
@@ -13,8 +13,8 @@ type PluginTest struct {
 	enabled    bool
 	msgHandler plugin.MessageHandler
 	basePath   string
-	UserCtx    plugin.UserContext
-	H          handler.Handler
+	UserCtx plugin.UserContext
+	H       dbhandler.Handler
 }
 
 
