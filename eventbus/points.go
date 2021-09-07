@@ -26,7 +26,6 @@ func (eb *notificationService) registerPointsProducer() {
 					msg := fmt.Sprintf("event %s wiii", payload.Name)
 					//publishMQTT(payload)
 					logrus.Info(msg)
-
 					if !ok {
 						return
 					}

@@ -103,18 +103,6 @@ func (d *GormDatabase) DropPoints() (bool, error) {
 }
 
 
-/*
-update a point value
-need network, device and point uuid
-need to check if point device and network are enabled
-if all are enabled then check COV
-if COV is out of range to update db and publish a message on the eventbus
-send data to gateway
-publish to MQTT if there is an external producer
-*/
-
-
-
 var GetDatabaseBus eventbus.BusService
 
 func DataBus() {
@@ -123,10 +111,10 @@ func DataBus() {
 
 }
 
-
 func busUpdate(UUID string, action string, body *model.Point){
 	notificationService := eventbus.NewBusService(eventbus.BUS)
 	notificationService.Emit(eventbus.BusContext, eventbus.PointUpdated, body)
 	fmt.Println("topics", eventbus.BUS.Topics())
 }
+
 

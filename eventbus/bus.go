@@ -1,7 +1,6 @@
 package eventbus
 
 import (
-	"context"
 	"github.com/mustafaturan/bus/v3"
 	"github.com/mustafaturan/monoton/v2"
 	"github.com/mustafaturan/monoton/v2/sequencer"
@@ -9,7 +8,7 @@ import (
 )
 
 
-func NewBus() *bus.Bus {
+func newBus() *bus.Bus {
 	// configure id generator
 	node := uint64(1)
 	initialTime := uint64(1577865600000) // set 2020-01-01 PST as initial time
@@ -26,12 +25,6 @@ func NewBus() *bus.Bus {
 	}
 	return b
 }
-var BUS *bus.Bus
-var BusContext context.Context
 
 
-func InitBus() {
-	BUS = NewBus()
-	BusContext = context.Background()
-	BUS.RegisterTopics(BusTopics()...)
-}
+
