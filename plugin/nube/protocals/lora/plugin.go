@@ -30,6 +30,7 @@ func SerialOpenAndRead() {
 // Enable implements plugin.Plugin
 func (c *PluginTest) Enable() error {
 	aaa := c.H.GetNetworks()
+	//c.H.DB.GetNetworks(false, false)
 	for i, a := range aaa {
 		fmt.Println(i, a.Name, "networks")
 	}

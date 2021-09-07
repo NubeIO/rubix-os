@@ -24,8 +24,6 @@ var (
 )
 
 func intHandler(db *database.GormDatabase)  {
-
-	//database.DataBus()
 	//db access
 	dh := new(dbhandler.Handler)
 	dh.DB = db
@@ -50,16 +48,15 @@ func main() {
 		panic(err)
 	}
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
-	eventbus.InitBus()
+	eventbus.Init()
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
-		conf.PassStrength, conf.Database.LogLevel, true)
-	if err != nil {
+		conf.PassStrength, conf.Database.LogLevel, true);if err != nil {
 		panic(err)
 	}
+
 	intHandler(db)
 	defer db.Close()
-	engine, closeable := router.Create(db,vInfo, conf)
-
+	engine, closeable := router.Create(db, vInfo, conf)
 	defer closeable()
 	runner.Run(engine, conf)
 

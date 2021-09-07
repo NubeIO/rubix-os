@@ -21,6 +21,8 @@ type PluginDatabase interface {
 	GetPluginConfByID(uuid string) (*model.PluginConf, error)
 	GetPlugin(uuid string) (*model.PluginConf, error)
 	GetPluginByPath(name string) (*model.PluginConf, error)
+	GetPluginByPluginName(name string) (*model.PluginConf, error)
+
 }
 
 // The PluginAPI provides handlers for managing plugins.
@@ -42,6 +44,13 @@ func (c *PluginAPI) GetPluginByPath(ctx *gin.Context) {
 	q, err := c.DB.GetPluginByPath(path)
 	reposeHandler(q, err, ctx)
 }
+
+func (c *PluginAPI) GetPluginByPluginName(ctx *gin.Context) {
+	name := resolveName(ctx)
+	q, err := c.DB.GetPluginByPluginName(name)
+	reposeHandler(q, err, ctx)
+}
+
 
 
 // GetPlugins returns all plugins a user has.
@@ -72,14 +81,13 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 }
 
 
-// EnablePluginByName enables a plugin.
-func (c *PluginAPI) EnablePluginByName(ctx *gin.Context) {
-	//uuid := resolveID(ctx)
+// EnablePluginByUUID enables a plugin.
+func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
+	uuid := resolveID(ctx)
 	body, err := getBODYPlugin(ctx);if err != nil {
 		reposeHandler("error on body", err, ctx)
 	}
 	conf, err := c.DB.GetPluginByPath(body.ModulePath)
-	uuid := conf.UUID
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}

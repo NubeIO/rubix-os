@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +17,7 @@ type NetworkDatabase interface {
 }
 type NetworksAPI struct {
 	DB NetworkDatabase
+	Bus eventbus.BusService
 }
 
 
@@ -30,7 +32,6 @@ func (a *NetworksAPI) GetNetwork(ctx *gin.Context) {
 	withChildren, withPoints := networkArgs(ctx)
 	q, err := a.DB.GetNetwork(uuid, withChildren, withPoints)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
@@ -38,7 +39,6 @@ func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdateNetwork(uuid, body)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *NetworksAPI) CreateNetwork(ctx *gin.Context) {

@@ -23,22 +23,31 @@ var bu *bus.Bus
 var busContext context.Context
 var bs  BusService
 
-func InitBus() {
+func Init() {
 	bu = newBus()
 	busContext = context.Background()
 	bu.RegisterTopics(BusTopics()...)
 }
 
+//GetBus an
 func GetBus() *bus.Bus {
      return bu
+}
+
+func CTX() context.Context {
+	return busContext
+}
+
+func GetService() BusService {
+	return bs
 }
 
 type notificationService struct {
 	eb   *bus.Bus
 }
 
-// NewBusService ...
-func NewBusService(eb *bus.Bus) BusService {
+// NewService ...
+func NewService(eb *bus.Bus) BusService {
 	ns := &notificationService{
 		eb: eb,
 	}
@@ -48,9 +57,7 @@ func NewBusService(eb *bus.Bus) BusService {
 	return ns
 }
 
-func (eb *notificationService) GetBusService() BusService {
-	return bs
-}
+
 
 // EmitString emits an event to the bus
 func (eb *notificationService) EmitString(ctx context.Context, topicName string, data string) {

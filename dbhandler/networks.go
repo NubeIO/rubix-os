@@ -13,6 +13,7 @@ func (l *Handler) GetNetworks() []*model.Network {
 	if err != nil {
 		fmt.Println(err, "ERR")
 	}
+
 	//store.Set("aa", "aaa", cache.NoExpiration)
 	//fmt.Println(store.Get("aa"))
 	return users
