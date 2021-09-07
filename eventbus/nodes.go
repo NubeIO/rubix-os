@@ -92,8 +92,8 @@ func (eb *notificationService) registerNodes() {
 }
 
 func eventOut(body *model.Node){
-	n := NewBusService(BUS)
-	n.Emit(BusContext, NodeEventIn, body)
+	n := NewBusService(bu)
+	n.Emit(busContext, NodeEventIn, body)
 }
 
 

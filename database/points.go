@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
@@ -103,18 +101,18 @@ func (d *GormDatabase) DropPoints() (bool, error) {
 }
 
 
-var GetDatabaseBus eventbus.BusService
-
-func DataBus() {
-	notificationService := eventbus.NewBusService(eventbus.BUS)
-	GetDatabaseBus = notificationService
-
-}
-
-func busUpdate(UUID string, action string, body *model.Point){
-	notificationService := eventbus.NewBusService(eventbus.BUS)
-	notificationService.Emit(eventbus.BusContext, eventbus.PointUpdated, body)
-	fmt.Println("topics", eventbus.BUS.Topics())
-}
+//var GetDatabaseBus eventbus.BusService
+//
+//func DataBus() {
+//	notificationService := eventbus.NewBusService(eventbus.BUS)
+//	GetDatabaseBus = notificationService
+//
+//}
+//
+//func busUpdate(UUID string, action string, body *model.Point){
+//	notificationService := eventbus.NewBusService(eventbus.BUS)
+//	notificationService.Emit(eventbus.BusContext, eventbus.PointUpdated, body)
+//	fmt.Println("topics", eventbus.BUS.Topics())
+//}
 
 

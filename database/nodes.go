@@ -71,7 +71,7 @@ func (d *GormDatabase) UpdateNode(uuid string, body *model.Node) (*model.Node, e
 		return nil, err
 	}
 	eventbus.NodeContext.Set(list.UUID, list, cache.NoExpiration)
-	busNodes(list.UUID,  list)
+	//busNodes(list.UUID,  list)
 	return wcm, nil
 }
 
@@ -88,11 +88,5 @@ func (d *GormDatabase) DropNodesList() (bool, error) {
 	} else {
 		return true, nil
 	}
-}
-
-func busNodes(UUID string, body *model.Node){
-	notificationService := eventbus.NewBusService(eventbus.BUS)
-	body.UUID = UUID
-	notificationService.Emit(eventbus.BusContext,eventbus.NodeEventIn, body)
 }
 

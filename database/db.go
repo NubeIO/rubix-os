@@ -69,42 +69,44 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 //SyncTopics sync all the topics
 func (d *GormDatabase) SyncTopics()  {
 
+	d.B.RegisterTopicParent("aa", "aa")
+
 	g, err := d.GetStreams(false)
 	for _, obj := range g {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Stream, obj.UUID)
+		d.B.RegisterTopicParent(model.CommonNaming.Stream, obj.UUID)
 	}
 	s, err := d.GetPlugins()
 	for _, obj := range s {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Plugin, obj.UUID)
+		d.B.RegisterTopicParent(model.CommonNaming.Plugin, obj.UUID)
 	}
 	sub, err := d.GetProducers()
 	for _, obj := range sub {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Producer, obj.UUID)
+		d.B.RegisterTopicParent(model.CommonNaming.Producer, obj.UUID)
 	}
 	rip, err := d.GetConsumers()
 	for _, obj := range rip {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Consumer, obj.UUID)
+		d.B.RegisterTopicParent(model.CommonNaming.Consumer, obj.UUID)
 	}
 	j, err := d.GetJobs()
 	for _, obj := range j {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Job, obj.UUID)
+		d.B.RegisterTopicParent(model.CommonNaming.Job, obj.UUID)
 	}
 	n, err := d.GetNetworks(false, false)
 	for _, obj := range n {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
+		d.B.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
 	}
 	de, err := d.GetDevices(false)
 	for _, obj := range de {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
+		d.B.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
 	}
 	p, err := d.GetPoints(false)
 	for _, obj := range p {
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Point, obj.UUID)
+		d.B.RegisterTopicParent(model.CommonNaming.Point, obj.UUID)
 	}
 	node, err := d.GetNodesList()
 	for _, obj := range node {
 		eventbus.NodeContext.Set(obj.UUID, obj, cache.NoExpiration)
-		GetDatabaseBus.RegisterTopicParent(model.CommonNaming.Node, obj.UUID)
+		d.B.RegisterTopicParent(model.CommonNaming.Node, obj.UUID)
 	}
 
 
