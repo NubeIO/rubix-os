@@ -3,7 +3,7 @@ package tty
 import (
 	"bufio"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/handler"
+	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/payload"
 	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
 )
@@ -94,7 +94,7 @@ func (p *SerialSetting)  Loop() {
 			count = count + 1
 			log.Printf("loop count %d", count)
 			commonData, fullData := decoder.DecodePayload(data)
-			handler.PublishSensor(commonData, fullData)
+			payload.PublishSensor(commonData, fullData)
 		} else {
 			log.Printf("lora serial messsage size %d", len(data))
 		}

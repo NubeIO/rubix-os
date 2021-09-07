@@ -46,6 +46,38 @@ func (d *GormDatabase) GetNetwork(uuid string, withChildren bool, withPoints boo
 }
 
 
+// GetNetworkByPlugin returns the network for the given id or nil.
+func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, withPoints bool, byTransport string) (*model.Network, error) {
+	var networkModel *model.Network
+	trans := ""
+	if byTransport != "" {
+		if byTransport == model.CommonNaming.Serial{
+			trans = "SerialConnection"
+		}
+		if withChildren { // drop child to reduce json size
+			query := d.DB.Where("plugin_conf_id = ? ", pluginUUID).Preload(trans).First(&networkModel)
+			if query.Error != nil {
+				return nil, query.Error
+			}
+			return networkModel, nil
+		}
+	}
+	if withChildren { // drop child to reduce json size
+		query := d.DB.Where("plugin_conf_id = ? ", pluginUUID).Preload(deviceChildTable).First(&networkModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
+		return networkModel, nil
+	} else {
+		query := d.DB.Where("plugin_conf_id = ? ", pluginUUID).First(&networkModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
+		return networkModel, nil
+	}
+}
+
+
 // CreateNetwork creates a device.
 func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Network)

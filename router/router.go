@@ -129,12 +129,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			{
 				plugins.GET("", pluginHandler.GetPlugins)
 				plugins.GET("/:uuid", pluginHandler.GetPlugin)
-				plugins.GET("/:uuid/config", pluginHandler.GetConfig)
-				plugins.POST("/:uuid/config", pluginHandler.UpdateConfig)
-				plugins.GET("/:uuid/display", pluginHandler.GetDisplay)
-				plugins.POST("/:uuid/enable", pluginHandler.EnablePluginByUUID)
-				plugins.GET("/name/:name", pluginHandler.GetPluginByPluginName)
-				//plugins.POST("/enable", pluginHandler.EnablePluginByName)
+				plugins.GET("/config/:uuid", pluginHandler.GetConfig)
+				plugins.POST("/config/:uuid", pluginHandler.UpdateConfig)
+				plugins.GET("/display/:uuid", pluginHandler.GetDisplay)
+				plugins.POST("/enable/:uuid", pluginHandler.EnablePluginByUUID)
 				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
 			}
 
@@ -236,6 +234,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			networkRoutes.GET("", networkHandler.GetNetworks)
 			networkRoutes.POST("", networkHandler.CreateNetwork)
 			networkRoutes.GET("/:uuid", networkHandler.GetNetwork)
+			networkRoutes.GET("/plugin/:uuid", networkHandler.GetNetworkByPlugin)
 			networkRoutes.PATCH("/:uuid", networkHandler.UpdateNetwork)
 			networkRoutes.DELETE("/:uuid", networkHandler.DeleteNetwork)
 			networkRoutes.DELETE("/drop", networkHandler.DropNetworks)

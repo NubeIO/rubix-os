@@ -155,12 +155,6 @@ func (p *Plugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 				a.Publish("topic", 1, false, msg)
 				err := p.msgHandler.SendMessage(plugin.Message{
 					Title:            	"mqttClient-message",
-					MessageType:      	model.MessageType(model.MessageTypeEnum.Protocol),
-					IsProtocol:       	true,
-					DriverType:       	model.DriverType(model.DriverTypeEnum.IP),
-					ProtocolType:       model.ProtocolType(model.ProtocolTypeEnum.Client),
-					Protocol:       	model.Protocol(model.ProtocolEnum.MQTT),
-					WriteableNetwork: 	true,
 					Message:          	fmt.Sprintf("hello from rest %s time", time.Now().Format(time.RFC850)),
 					Priority:         	2,
 					Extras: map[string]interface{}{

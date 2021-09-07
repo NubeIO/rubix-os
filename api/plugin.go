@@ -21,7 +21,6 @@ type PluginDatabase interface {
 	GetPluginConfByID(uuid string) (*model.PluginConf, error)
 	GetPlugin(uuid string) (*model.PluginConf, error)
 	GetPluginByPath(name string) (*model.PluginConf, error)
-	GetPluginByPluginName(name string) (*model.PluginConf, error)
 
 }
 
@@ -44,13 +43,6 @@ func (c *PluginAPI) GetPluginByPath(ctx *gin.Context) {
 	q, err := c.DB.GetPluginByPath(path)
 	reposeHandler(q, err, ctx)
 }
-
-func (c *PluginAPI) GetPluginByPluginName(ctx *gin.Context) {
-	name := resolveName(ctx)
-	q, err := c.DB.GetPluginByPluginName(name)
-	reposeHandler(q, err, ctx)
-}
-
 
 
 // GetPlugins returns all plugins a user has.
@@ -183,12 +175,12 @@ func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
 	}
 
 	newConf := instance.DefaultConfig()
-	newconfBytes, err := ioutil.ReadAll(ctx.Request.Body)
+	newConfBytes, err := ioutil.ReadAll(ctx.Request.Body)
 	if err != nil {
 		ctx.AbortWithError(500, err)
 		return
 	}
-	if err := yaml.Unmarshal(newconfBytes, newConf); err != nil {
+	if err := yaml.Unmarshal(newConfBytes, newConf); err != nil {
 		ctx.AbortWithError(400, err)
 		return
 	}
@@ -196,7 +188,7 @@ func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
 		ctx.AbortWithError(400, err)
 		return
 	}
-	conf.Config = newconfBytes
+	conf.Config = newConfBytes
 	successOrAbort(ctx, 500, c.DB.UpdatePluginConf(conf))
 	
 }

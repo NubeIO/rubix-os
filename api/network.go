@@ -9,6 +9,7 @@ import (
 // The NetworkDatabase interface for encapsulating database access.
 type NetworkDatabase interface {
 	GetNetwork(uuid string, withChildren bool, withPoints bool) (*model.Network, error)
+	GetNetworkByPlugin(uuid string, withChildren bool, withPoints bool, transport string) (*model.Network, error)
 	GetNetworks(withChildren bool, withPoints bool) ([]*model.Network, error)
 	CreateNetwork(network *model.Network) (*model.Network, error)
 	UpdateNetwork(uuid string, body *model.Network) (*model.Network, error)
@@ -24,6 +25,13 @@ type NetworksAPI struct {
 func (a *NetworksAPI) GetNetworks(ctx *gin.Context) {
 	withChildren, withPoints := networkArgs(ctx)
 	q, err := a.DB.GetNetworks(withChildren, withPoints)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *NetworksAPI) GetNetworkByPlugin(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	withChildren, withPoints := networkArgs(ctx)
+	q, err := a.DB.GetNetworkByPlugin(uuid, withChildren, withPoints, "") //TODO fix this need to add in like "serial"
 	reposeHandler(q, err, ctx)
 }
 

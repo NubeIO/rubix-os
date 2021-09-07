@@ -100,13 +100,14 @@ func (c *PluginV1Instance) GetDisplay(location *url.URL)  plugin.Response {
 	if c.displayer != nil {
 		return c.displayer.GetDisplay(location)
 	}
-
-	messageURL := plugin.Response {
-		StatusCode: 1,
-		Headers:    map[string]string{"Content-Type": "application/json"},
-		Body:       "Hello World",
+	m := plugin.Help{
+		Name:  "name",
+		IsNetwork: false,
 	}
-	return messageURL
+	r := plugin.Response {
+		Details:       m,
+	}
+	return r
 }
 
 // SetMessageHandler see papiv1.Messenger.
