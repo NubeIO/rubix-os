@@ -70,6 +70,7 @@ require (
 
 require (
 	github.com/creack/goselect v0.1.2 // indirect
+	github.com/kisielk/godepgraph v0.0.0-20190626013829-57a7e4a651a9 // indirect
 	go.bug.st/serial v1.3.2 // indirect
 )
 

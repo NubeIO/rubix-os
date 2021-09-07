@@ -11,7 +11,6 @@ type PluginTest struct {
 	enabled    bool
 	msgHandler plugin.MessageHandler
 	basePath   string
-
 	UserCtx plugin.UserContext
 }
 

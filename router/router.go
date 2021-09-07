@@ -1,7 +1,6 @@
 package router
 
 import (
-	"github.com/NubeDev/flow-framework/handler"
 	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/location"
 	"time"
@@ -25,14 +24,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), error.Handler(), location.Default())
 	engine.NoRoute(error.NotFound())
 
-	a := &handler.DB{
-		DBHandler: &database.DBHandler{},
-	}
-	customHandler := handler.CustomHandler(a)
+
 	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
 	authentication := auth.Auth{DB: db}
 	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
-	healthsHandler := api.HealthsAPI{Handler: customHandler}
 	healthHandler := api.HealthAPI{DB: db}
 	clientHandler := api.ClientAPI{
 		DB:            db,
@@ -110,8 +105,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier.OnUserDeleted(streamHandler.NotifyDeletedUser)
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
-
-	engine.GET("/ip", healthsHandler.Hostname) //TODO remove this line
 	engine.GET("/health", healthHandler.Health)
 	engine.GET("/swagger", docs.Serve)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())

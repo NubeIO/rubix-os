@@ -18,7 +18,7 @@ var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 func main() {
 
 	//NewAgent
-	a := mqttClient.NewClient(mqttClient.ClientOptions{
+	a := mqttclient.NewClient(mqttclient.ClientOptions{
 		Servers: []string{"tcp://192.168.15.100:1883", "tcp://192.168.15.104:1883"},
 	})
 	err := a.Connect()
@@ -28,17 +28,17 @@ func main() {
 
 	fmt.Println(a.IsConnected())
 
-	err = a.Publish("adsdas", mqttClient.AtMostOnce, false, "ddd")
+	err = a.Publish("adsdas", mqttclient.AtMostOnce, false, "ddd")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	err = a.Subscribe("e", mqttClient.AtMostOnce, handle)
+	err = a.Subscribe("e", mqttclient.AtMostOnce, handle)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	err = a.Subscribe("ee", mqttClient.AtMostOnce, handle)
+	err = a.Subscribe("ee", mqttclient.AtMostOnce, handle)
 	if err != nil {
 		fmt.Println(err)
 	}
