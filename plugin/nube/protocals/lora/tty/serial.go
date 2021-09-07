@@ -36,7 +36,13 @@ func New(s *SerialSetting) *SerialSetting {
 }
 
 func (p *SerialSetting) Disconnect() error {
-	return p.Port.Close()
+	err := p.Port.Close()
+	log.Info("SERIAL: try and close port")
+	if err != nil {
+		log.Error("SERIAL: err on trying to close the port")
+		log.Error(err)
+	}
+	return err
 }
 
 

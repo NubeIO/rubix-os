@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/handler"
-	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/tty"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 )
@@ -14,17 +13,10 @@ type PluginTest struct {
 	enabled    bool
 	msgHandler plugin.MessageHandler
 	basePath   string
-	H          handler.Handler
 	UserCtx    plugin.UserContext
+	H          handler.Handler
 }
 
-func (c *PluginTest) GetNetworks() ([]*model.Network, error) {
-	panic("implement me")
-}
-
-func (c *PluginTest) GetNetwork(id string) error {
-	panic("implement me")
-}
 
 func SerialOpenAndRead() {
 	bb := new(tty.SerialSetting)

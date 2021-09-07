@@ -1,21 +1,19 @@
 package router
 
 import (
-	"github.com/NubeDev/flow-framework/logger"
-	"github.com/NubeDev/location"
-	"time"
-
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/api/stream"
 	"github.com/NubeDev/flow-framework/auth"
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/database"
-	"github.com/NubeDev/flow-framework/docs"
 	"github.com/NubeDev/flow-framework/error"
+	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin"
+	"github.com/NubeDev/location"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 // Create creates the gin engine with all routes.
@@ -23,8 +21,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine := gin.New()
 	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), error.Handler(), location.Default())
 	engine.NoRoute(error.NotFound())
-
-
 	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
 	authentication := auth.Auth{DB: db}
 	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
@@ -106,10 +102,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
 	engine.GET("/health", healthHandler.Health)
-	engine.GET("/swagger", docs.Serve)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
-	engine.GET("/docs", docs.UI)
-
 	engine.Use(func(ctx *gin.Context) {
 		ctx.Header("Content-Type", "application/json")
 		for header, value := range conf.Server.ResponseHeaders {
@@ -130,18 +123,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		}
 	}
 	engine.OPTIONS("/*any")
-
-	// swagger:operation GET /version version getVersion
-	//
-	// Get version information.
-	//
-	// ---
-	// produces: [application/json]
-	// responses:
-	//   200:
-	//     description: Ok
-	//     schema:
-	//         $ref: "#/definitions/VersionInfo"
 	engine.GET("version", func(ctx *gin.Context) {
 		ctx.JSON(200, vInfo)
 	})
@@ -177,7 +158,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			message.DELETE("/:id", messageHandler.DeleteMessage)
 		}
 		clientAuth.GET("/stream", streamHandler.Handle)
-
 	}
 	authAdmin := engine.Group("/api")
 	{
@@ -190,7 +170,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		authAdmin.GET("/user/:id", userHandler.GetUserByID)
 		authAdmin.PATCH("/user/:id", userHandler.UpdateUserByID)
 	}
-
 	control := engine.Group("api")
 	{
 		control.Use(authentication.RequireAdmin())
