@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/auth/password"
 	"github.com/NubeDev/flow-framework/cachestore"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
@@ -15,7 +16,7 @@ import (
 
 var mkdirAll = os.MkdirAll
 var gormDatabase *GormDatabase
-
+//var GetDatabaseBus eventbus.BusService
 
 // New creates a new wrapper for the gorm database framework.
 func New(dialect, connection, defaultUser, defaultPass string, strength int, logLevel string,
@@ -106,8 +107,9 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		rp.GlobalUuid = utils.MakeTopicUUID(model.CommonNaming.Rubix)
 		db.Create(&rp)
 	}
-	gormDatabase = &GormDatabase{DB: db}
-	return &GormDatabase{DB: db}, nil
+	notificationService := eventbus.NewBusService(eventbus.GetBus())
+	gormDatabase = &GormDatabase{DB: db, B: notificationService}
+	return &GormDatabase{DB: db, B: notificationService}, nil
 }
 
 func createDirectoryIfSqlite(dialect, connection string) {
@@ -120,11 +122,12 @@ func createDirectoryIfSqlite(dialect, connection string) {
 	}
 }
 
+
 // GormDatabase is a wrapper for the gorm framework.
 type GormDatabase struct {
 	DB *gorm.DB
 	Store cachestore.Handler
-
+    B eventbus.BusService
 }
 
 // Close closes the gorm database connection.

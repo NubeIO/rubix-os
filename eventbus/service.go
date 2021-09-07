@@ -15,19 +15,22 @@ type (
 		Emit(ctx context.Context, topicName string, data interface{})
 		RegisterTopic(topic string)
 		RegisterTopicParent(parent string, child string)
-		GetBusService() BusService
 	}
 )
 
 
-var BUS *bus.Bus
-var BusContext context.Context
+var bu *bus.Bus
+var busContext context.Context
 var bs  BusService
 
 func InitBus() {
-	BUS = newBus()
-	BusContext = context.Background()
-	BUS.RegisterTopics(BusTopics()...)
+	bu = newBus()
+	busContext = context.Background()
+	bu.RegisterTopics(BusTopics()...)
+}
+
+func GetBus() *bus.Bus {
+     return bu
 }
 
 type notificationService struct {
@@ -48,8 +51,6 @@ func NewBusService(eb *bus.Bus) BusService {
 func (eb *notificationService) GetBusService() BusService {
 	return bs
 }
-
-
 
 // EmitString emits an event to the bus
 func (eb *notificationService) EmitString(ctx context.Context, topicName string, data string) {
