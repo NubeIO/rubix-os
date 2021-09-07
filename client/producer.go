@@ -14,7 +14,7 @@ func (a *FlowClient) ClientAddProducer(body model.Producer) (*model.Producer, er
 	resp, err := a.client.R().
 		SetResult(&model.Producer{}).
 		SetBody(body).
-		Post("/api/producer")
+		Post("/api/producers")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -31,7 +31,7 @@ func (a *FlowClient) ClientGetProducer(uuid string) (*model.Producer, error) {
 	resp, err := a.client.R().
 		SetResult(&model.Producer{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/producer/{uuid}")
+		Get("/api/producers/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -51,7 +51,7 @@ func (a *FlowClient) ClientEditProducer(uuid string, body model.Producer) (*mode
 		SetResult(&model.Producer{}).
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Patch("/api/producer/{uuid}")
+		Patch("/api/producers/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}

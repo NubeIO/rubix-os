@@ -12,7 +12,7 @@ func (a *FlowClient) ClientGetWriterClone(uuid string) (*model.WriterClone, erro
 	resp, err := a.client.R().
 		SetResult(&model.WriterClone{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/writer/clone/{uuid}")
+		Get("/api/writers/clone/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -32,7 +32,7 @@ func (a *FlowClient) ClientEditWriterClone(uuid string, body model.WriterClone) 
 		SetResult(&model.WriterClone{}).
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Patch("/api/writer/clone/{uuid}")
+		Patch("/api/writers/clone/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
