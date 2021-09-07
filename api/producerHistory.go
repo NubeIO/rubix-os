@@ -19,16 +19,8 @@ type HistoriesAPI struct {
 	DB ProducerHistoryDatabase
 }
 
-
 func (a *HistoriesAPI) GetProducerHistories(ctx *gin.Context) {
 	q, err := a.DB.GetProducerHistories()
-	reposeHandler(q, err, ctx)
-}
-
-
-func (a *HistoriesAPI) HistoryByProducerUUID(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	q, err := a.DB.GetProducerHistory(uuid)
 	reposeHandler(q, err, ctx)
 }
 
@@ -61,4 +53,3 @@ func (a *HistoriesAPI) DropProducerHistories(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 
 }
-

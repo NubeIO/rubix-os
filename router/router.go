@@ -1,6 +1,11 @@
 package router
 
 import (
+	"github.com/NubeDev/flow-framework/logger"
+	"github.com/NubeDev/location"
+	"github.com/gin-contrib/cors"
+	"time"
+
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/api/stream"
 	"github.com/NubeDev/flow-framework/auth"
@@ -8,13 +13,9 @@ import (
 	"github.com/NubeDev/flow-framework/database"
 	"github.com/NubeDev/flow-framework/error"
 	"github.com/NubeDev/flow-framework/eventbus"
-	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin"
-	"github.com/NubeDev/location"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"time"
 )
 
 // Create creates the gin engine with all routes.
@@ -39,7 +40,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier := new(api.UserChangeNotifier)
 	userHandler := api.UserAPI{DB: db, PasswordStrength: conf.PassStrength, UserChangeNotifier: userChangeNotifier}
 	networkHandler := api.NetworksAPI{
-		DB: db,
+		DB:  db,
 		Bus: eventBus,
 	}
 	deviceHandler := api.DeviceAPI{
@@ -92,7 +93,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	}
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/plugin/:uuid/custom/"), streamHandler)
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/plugins/:uuid/custom"), streamHandler)
 	if err != nil {
 		panic(err)
 	}
@@ -104,6 +105,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier.OnUserDeleted(streamHandler.NotifyDeletedUser)
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
+
 	engine.GET("/health", healthHandler.Health)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
 	engine.Use(func(ctx *gin.Context) {
@@ -113,187 +115,243 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		}
 	})
 	engine.Use(cors.New(auth.CorsConfig(conf)))
-	{
-		engine.GET("/plugin", authentication.RequireClient(), pluginHandler.GetPlugins)
-		pluginRoute := engine.Group("api/plugin/", authentication.RequireClient())
-		{
-			pluginRoute.GET("/:uuid", pluginHandler.GetPlugin)
-			pluginRoute.GET("/path/:path", pluginHandler.GetPluginByPath)
-			pluginRoute.GET("/name/:name", pluginHandler.GetPluginByPluginName)
-			pluginRoute.POST("/:uuid/enable", pluginHandler.EnablePluginByUUID)
-			pluginRoute.GET("/:uuid/config", pluginHandler.GetConfig)
-			pluginRoute.POST("/:uuid/config", pluginHandler.UpdateConfig)
-			pluginRoute.GET("/:uuid/display", pluginHandler.GetDisplay)
-
-		}
-	}
 	engine.OPTIONS("/*any")
-	engine.GET("version", func(ctx *gin.Context) {
-		ctx.JSON(200, vInfo)
-	})
-	engine.Group("/").Use(authentication.RequireApplicationToken()).POST("/message", messageHandler.CreateMessage)
-	clientAuth := engine.Group("")
-	{
-		clientAuth.Use(authentication.RequireClient())
-		app := clientAuth.Group("/application")
-		{
-			app.GET("", applicationHandler.GetApplications)
-			app.POST("", applicationHandler.CreateApplication)
-			app.POST("/:id/image", applicationHandler.UploadApplicationImage)
-			app.PUT("/:id", applicationHandler.UpdateApplication)
-			app.DELETE("/:id", applicationHandler.DeleteApplication)
 
-			tokenMessage := app.Group("/:id/message")
+	apiRoutes := engine.Group("/api")
+	{
+		apiRoutes.GET("/version", func(ctx *gin.Context) {
+			ctx.JSON(200, vInfo)
+		})
+
+		requireClientsGroupRoutes := apiRoutes.Group("", authentication.RequireClient())
+		{
+			plugins := apiRoutes.Group("/plugins", authentication.RequireClient())
 			{
-				tokenMessage.GET("", messageHandler.GetMessagesWithApplication)
-				tokenMessage.DELETE("", messageHandler.DeleteMessageWithApplication)
+				plugins.GET("", pluginHandler.GetPlugins)
+				plugins.GET("/:uuid", pluginHandler.GetPlugin)
+				plugins.GET("/:uuid/config", pluginHandler.GetConfig)
+				plugins.POST("/:uuid/config", pluginHandler.UpdateConfig)
+				plugins.GET("/:uuid/display", pluginHandler.GetDisplay)
+				plugins.POST("/:uuid/enable", pluginHandler.EnablePluginByUUID)
+				plugins.GET("/name/:name", pluginHandler.GetPluginByPluginName)
+				//plugins.POST("/enable", pluginHandler.EnablePluginByName)
+				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
+			}
+
+			applicationRoutes := requireClientsGroupRoutes.Group("/applications", authentication.RequireClient())
+			{
+				applicationRoutes.GET("", applicationHandler.GetApplications)
+				applicationRoutes.POST("", applicationHandler.CreateApplication)
+				applicationRoutes.POST("/:id/image", applicationHandler.UploadApplicationImage)
+				applicationRoutes.PUT("/:id", applicationHandler.UpdateApplication)
+				applicationRoutes.DELETE("/:id", applicationHandler.DeleteApplication)
+
+				tokenMessageRoutes := applicationRoutes.Group("/:id/messages")
+				{
+					tokenMessageRoutes.GET("", messageHandler.GetMessagesWithApplication)
+					tokenMessageRoutes.DELETE("", messageHandler.DeleteMessageWithApplication)
+				}
+			}
+
+			clientRoutes := requireClientsGroupRoutes.Group("/clients", authentication.RequireClient())
+			{
+				clientRoutes.GET("", clientHandler.GetClients)
+				clientRoutes.POST("", clientHandler.CreateClient)
+				clientRoutes.DELETE("/:id", clientHandler.DeleteClient)
+				clientRoutes.PUT("/:id", clientHandler.UpdateClient)
+			}
+
+			messageRoutes := requireClientsGroupRoutes.Group("/messages", authentication.RequireClient())
+			{
+				messageRoutes.GET("", messageHandler.GetMessages)
+				messageRoutes.DELETE("", messageHandler.DeleteMessages)
+				messageRoutes.DELETE("/:id", messageHandler.DeleteMessage)
 			}
 		}
-		client := clientAuth.Group("/api/client")
+
+		apiRoutes.Group("").Use(authentication.RequireApplicationToken()).POST("/messages", messageHandler.CreateMessage)
+
+		apiRoutes.Use(authentication.RequireAdmin())
+
+		userRoutes := apiRoutes.Group("/users")
 		{
-			client.GET("", clientHandler.GetClients)
-			client.POST("", clientHandler.CreateClient)
-			client.DELETE("/:id", clientHandler.DeleteClient)
-			client.PUT("/:id", clientHandler.UpdateClient)
+			userRoutes.GET("", userHandler.GetUsers)
+			userRoutes.POST("", userHandler.CreateUser)
+			userRoutes.PATCH("/current/password", userHandler.ChangePassword)
+			userRoutes.GET("/current", userHandler.GetCurrentUser)
+			userRoutes.DELETE("/:id", userHandler.DeleteUserByID)
+			userRoutes.GET("/:id", userHandler.GetUserByID)
+			userRoutes.PATCH("/:id", userHandler.UpdateUserByID)
 		}
-		message := clientAuth.Group("/message")
+
+		databaseRoutes := apiRoutes.Group("/database")
 		{
-			message.GET("", messageHandler.GetMessages)
-			message.DELETE("", messageHandler.DeleteMessages)
-			message.DELETE("/:id", messageHandler.DeleteMessage)
+			//delete all networks, gateways, commandGroup, consumers, jobs and children.
+			databaseRoutes.DELETE("/flows/drop", dbGroup.DropAllFlow)
+			databaseWizard := databaseRoutes.Group("wizard")
+			{
+				databaseWizard.POST("/mappings/local/points", dbGroup.WizardLocalPointMapping)
+				databaseWizard.POST("/mappings/remote/points", dbGroup.WizardRemotePointMapping)
+				databaseWizard.POST("/mappings/existing/streams", dbGroup.Wizard2ndFlowNetwork)
+				databaseWizard.POST("/nodes", dbGroup.NodeWizard)
+			}
 		}
-		clientAuth.GET("/stream", streamHandler.Handle)
-	}
-	authAdmin := engine.Group("/api")
-	{
-		authAdmin.Use(authentication.RequireAdmin())
-		authAdmin.GET("/users", userHandler.GetUsers)
-		authAdmin.POST("/user", userHandler.CreateUser)
-		authAdmin.PATCH("user/current/password", userHandler.ChangePassword)
-		authAdmin.GET("/user/current", userHandler.GetCurrentUser)
-		authAdmin.DELETE("/user/:id", userHandler.DeleteUserByID)
-		authAdmin.GET("/user/:id", userHandler.GetUserByID)
-		authAdmin.PATCH("/user/:id", userHandler.UpdateUserByID)
-	}
-	control := engine.Group("api")
-	{
-		control.Use(authentication.RequireAdmin())
-		//control.GET("", api.Hostname) // TODO: remove comment
-		//delete all networks, gateways, commandGroup, consumers, jobs and children.
-		control.DELETE("/database/flows/drop", dbGroup.DropAllFlow)
-		control.POST("/database/wizard/mapping/local/point", dbGroup.WizardLocalPointMapping)
-		control.POST("/database/wizard/mapping/remote/point", dbGroup.WizardRemotePointMapping)
-		control.POST("/database/wizard/mapping/existing/stream", dbGroup.Wizard2ndFlowNetwork)
-		control.POST("/database/wizard/nodes", dbGroup.NodeWizard)
-		control.GET("/wires/plat", rubixPlatHandler.GetRubixPlat)
-		control.PATCH("/wires/plat", rubixPlatHandler.UpdateRubixPlat)
 
-		control.GET("/histories/producers", historyHandler.GetProducerHistories)
-		control.DELETE("/histories/producers/drop", historyHandler.DropProducerHistories)
-		control.GET("/histories/producer/:uuid", historyHandler.GetProducerHistory)
-		control.GET("/histories/by/producer/:uuid", historyHandler.HistoryByProducerUUID)
-		control.POST("/histories/producer/bulk", historyHandler.CreateBulkProducerHistory)
-		control.DELETE("/histories/producer/:uuid", historyHandler.DeleteProducerHistory)
+		wiresPlatRoutes := apiRoutes.Group("/wires/plat")
+		{
+			wiresPlatRoutes.GET("", rubixPlatHandler.GetRubixPlat)
+			wiresPlatRoutes.PATCH("", rubixPlatHandler.UpdateRubixPlat)
+		}
 
-		control.GET("/networks", networkHandler.GetNetworks)
-		control.DELETE("/networks/drop", networkHandler.DropNetworks)
-		control.POST("/network", networkHandler.CreateNetwork)
-		control.GET("/network/:uuid", networkHandler.GetNetwork)
-		control.PATCH("/network/:uuid", networkHandler.UpdateNetwork)
-		control.DELETE("/network/:uuid", networkHandler.DeleteNetwork)
+		historyProducerRoutes := apiRoutes.Group("/histories/producers")
+		{
+			historyProducerRoutes.GET("", historyHandler.GetProducerHistories)
+			historyProducerRoutes.DELETE("/drop", historyHandler.DropProducerHistories)
+			historyProducerRoutes.GET("/:uuid", historyHandler.GetProducerHistory)
+			historyProducerRoutes.POST("/bulk", historyHandler.CreateBulkProducerHistory)
+			historyProducerRoutes.DELETE("/:uuid", historyHandler.DeleteProducerHistory)
+		}
 
-		control.GET("/networks/flow", flowNetwork.GetFlowNetworks)
-		control.DELETE("/networks/flow/drop", flowNetwork.DropFlowNetworks)
-		control.POST("/network/flow", flowNetwork.CreateFlowNetwork)
-		control.GET("/network/flow/:uuid", flowNetwork.GetFlowNetwork)
-		control.PATCH("/network/flow/:uuid", flowNetwork.UpdateFlowNetwork)
-		control.DELETE("/network/flow/:uuid", flowNetwork.DeleteFlowNetwork)
+		flowNetworkRoutes := apiRoutes.Group("/flow/networks")
+		{
+			flowNetworkRoutes.GET("", flowNetwork.GetFlowNetworks)
+			flowNetworkRoutes.POST("", flowNetwork.CreateFlowNetwork)
+			flowNetworkRoutes.GET("/:uuid", flowNetwork.GetFlowNetwork)
+			flowNetworkRoutes.PATCH("/:uuid", flowNetwork.UpdateFlowNetwork)
+			flowNetworkRoutes.DELETE("/:uuid", flowNetwork.DeleteFlowNetwork)
+			flowNetworkRoutes.DELETE("/drop", flowNetwork.DropFlowNetworks)
+		}
 
-		control.GET("/devices", deviceHandler.GetDevices)
-		control.DELETE("/devices/drop", deviceHandler.DropDevices)
-		control.POST("/device", deviceHandler.CreateDevice)
-		control.GET("/device/:uuid", deviceHandler.GetDevice)
-		control.PATCH("/device/:uuid", deviceHandler.UpdateDevice)
-		control.DELETE("/device/:uuid", deviceHandler.DeleteDevice)
+		streamRoutes := apiRoutes.Group("/streams")
+		{
+			streamRoutes.GET("/", gatewayHandler.GetStreams)
+			streamRoutes.POST("/", gatewayHandler.CreateStream)
+			streamRoutes.GET("/:uuid", gatewayHandler.GetStream)
+			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
+			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
+		}
 
-		control.GET("/points", pointHandler.GetPoints)
-		control.DELETE("/points/drop", pointHandler.DropPoints)
-		control.POST("/point", pointHandler.CreatePoint)
-		control.GET("/point/:uuid", pointHandler.GetPoint)
-		control.PATCH("/point/:uuid", pointHandler.UpdatePoint)
-		control.DELETE("/point/:uuid", pointHandler.DeletePoint)
+		networkRoutes := apiRoutes.Group("/networks")
+		{
+			networkRoutes.GET("", networkHandler.GetNetworks)
+			networkRoutes.POST("", networkHandler.CreateNetwork)
+			networkRoutes.GET("/:uuid", networkHandler.GetNetwork)
+			networkRoutes.PATCH("/:uuid", networkHandler.UpdateNetwork)
+			networkRoutes.DELETE("/:uuid", networkHandler.DeleteNetwork)
+			networkRoutes.DELETE("/drop", networkHandler.DropNetworks)
+		}
 
-		control.GET("/streams", gatewayHandler.GetStreams)
-		control.POST("/stream", gatewayHandler.CreateStream)
-		control.GET("/stream/:uuid", gatewayHandler.GetStream)
-		control.PATCH("/stream/:uuid", gatewayHandler.UpdateStream)
-		control.DELETE("/stream/:uuid", gatewayHandler.DeleteStream)
+		deviceRoutes := apiRoutes.Group("/devices")
+		{
+			deviceRoutes.GET("", deviceHandler.GetDevices)
+			deviceRoutes.POST("", deviceHandler.CreateDevice)
+			deviceRoutes.GET("/:uuid", deviceHandler.GetDevice)
+			deviceRoutes.PATCH("/:uuid", deviceHandler.UpdateDevice)
+			deviceRoutes.DELETE("/:uuid", deviceHandler.DeleteDevice)
+			deviceRoutes.DELETE("/drop", deviceHandler.DropDevices)
+		}
 
-		control.GET("/commands", rubixCommandGroup.GetCommandGroups)
-		control.POST("/command", rubixCommandGroup.CreateCommandGroup)
-		control.GET("/command/:uuid", rubixCommandGroup.GetCommandGroup)
-		control.PATCH("/command/:uuid", rubixCommandGroup.UpdateCommandGroup)
-		control.DELETE("/command/:uuid", rubixCommandGroup.DeleteCommandGroup)
+		pointRoutes := apiRoutes.Group("/points")
+		{
+			pointRoutes.GET("", pointHandler.GetPoints)
+			pointRoutes.POST("", pointHandler.CreatePoint)
+			pointRoutes.GET("/:uuid", pointHandler.GetPoint)
+			pointRoutes.PATCH("/:uuid", pointHandler.UpdatePoint)
+			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
+			pointRoutes.DELETE("/drop", pointHandler.DropPoints)
+		}
 
-		control.GET("/producers", producerHandler.GetProducers)
-		control.POST("/producer", producerHandler.CreateProducer)
-		control.GET("/producer/:uuid", producerHandler.GetProducer)
-		control.PATCH("/producer/:uuid", producerHandler.UpdateProducer)
-		control.DELETE("/producer/:uuid", producerHandler.DeleteProducer)
+		commandRoutes := apiRoutes.Group("/commands")
+		{
+			commandRoutes.GET("", rubixCommandGroup.GetCommandGroups)
+			commandRoutes.POST("", rubixCommandGroup.CreateCommandGroup)
+			commandRoutes.GET("/:uuid", rubixCommandGroup.GetCommandGroup)
+			commandRoutes.PATCH("/:uuid", rubixCommandGroup.UpdateCommandGroup)
+			commandRoutes.DELETE("/:uuid", rubixCommandGroup.DeleteCommandGroup)
+		}
 
-		control.GET("/producers/list", writerCloneHandler.GetWriterClones)
-		control.POST("/producer/list", writerCloneHandler.CreateWriterClone)
-		control.GET("/producer/list/:uuid", writerCloneHandler.GetWriterClone)
-		control.PATCH("/producer/list/:uuid", writerCloneHandler.UpdateWriterClone)
-		control.DELETE("/producer/list/:uuid", writerCloneHandler.DeleteWriterClone)
+		producerRoutes := apiRoutes.Group("/producers")
+		{
+			producerRoutes.GET("", producerHandler.GetProducers)
+			producerRoutes.POST("", producerHandler.CreateProducer)
+			producerRoutes.GET("/:uuid", producerHandler.GetProducer)
+			producerRoutes.PATCH("/:uuid", producerHandler.UpdateProducer)
+			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
 
-		control.GET("/consumers", consumerHandler.GetConsumers)
-		control.POST("/consumer", consumerHandler.CreateConsumer)
-		control.GET("/consumer/:uuid", consumerHandler.GetConsumer)
-		control.PATCH("/consumer/:uuid", consumerHandler.UpdateConsumer)
-		control.DELETE("/consumer/:uuid", consumerHandler.DeleteConsumer)
+			producerWriterCloneRoutes := producerRoutes.Group("/writers")
+			{
+				producerWriterCloneRoutes.GET("", writerCloneHandler.GetWriterClones)
+				producerWriterCloneRoutes.POST("", writerCloneHandler.CreateWriterClone)
+				producerWriterCloneRoutes.GET("/:uuid", writerCloneHandler.GetWriterClone)
+				producerWriterCloneRoutes.PATCH("/:uuid", writerCloneHandler.UpdateWriterClone)
+				producerWriterCloneRoutes.DELETE("/:uuid", writerCloneHandler.DeleteWriterClone)
+			}
+		}
 
-		control.GET("/consumers/list", writerHandler.GetWriters)
-		control.POST("/consumer/list", writerHandler.CreateWriter)
-		control.GET("/consumer/list/:uuid", writerHandler.GetWriter)
-		control.PATCH("/consumer/list/:uuid", writerHandler.UpdateWriter)
-		control.DELETE("/consumer/list/:uuid", writerHandler.DeleteWriter)
+		consumerRoutes := apiRoutes.Group("/consumers")
+		{
+			consumerRoutes.GET("", consumerHandler.GetConsumers)
+			consumerRoutes.POST("", consumerHandler.CreateConsumer)
+			consumerRoutes.GET("/:uuid", consumerHandler.GetConsumer)
+			consumerRoutes.PATCH("/:uuid", consumerHandler.UpdateConsumer)
+			consumerRoutes.DELETE("/:uuid", consumerHandler.DeleteConsumer)
+
+			consumerWriterRoutes := consumerRoutes.Group("/writers")
+			{
+				consumerWriterRoutes.GET("", writerHandler.GetWriters)
+				consumerWriterRoutes.POST("", writerHandler.CreateWriter)
+				consumerWriterRoutes.GET("/:uuid", writerHandler.GetWriter)
+				consumerWriterRoutes.PATCH("/:uuid", writerHandler.UpdateWriter)
+				consumerWriterRoutes.DELETE("/:uuid", writerHandler.DeleteWriter)
+			}
+
+		}
 
 		//action's writers
-		control.POST("/writer/action/:uuid", writerHandler.WriterAction)
+		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)
 
 		//action's writers clones
-		control.GET("/writer/clone/:uuid", writerCloneHandler.GetWriterClone)
-		control.PATCH("/writer/clone/:uuid", writerCloneHandler.UpdateWriterClone)
+		apiRoutes.GET("/writers/clone/:uuid", writerCloneHandler.GetWriterClone)
+		apiRoutes.PATCH("/writers/clone/:uuid", writerCloneHandler.UpdateWriterClone)
 
-		control.GET("/jobs", jobHandler.GetJobs)
-		control.POST("/job", jobHandler.CreateJob)
-		control.GET("/job/:uuid", jobHandler.GetJob)
-		control.PATCH("/job/:uuid", jobHandler.UpdateJob)
-		control.DELETE("/job/:uuid", jobHandler.DeleteJob)
+		jobRoutes := apiRoutes.Group("/jobs")
+		{
+			jobRoutes.GET("", jobHandler.GetJobs)
+			jobRoutes.POST("", jobHandler.CreateJob)
+			jobRoutes.GET("/:uuid", jobHandler.GetJob)
+			jobRoutes.PATCH("/:uuid", jobHandler.UpdateJob)
+			jobRoutes.DELETE("/:uuid", jobHandler.DeleteJob)
+		}
 
-		control.GET("/nodes", nodesHandler.GetNodesList)
-		control.POST("/node", nodesHandler.CreateNode)
-		control.GET("/node/:uuid", nodesHandler.GetNode)
-		control.PATCH("/node/:uuid", nodesHandler.UpdateNode)
-		control.DELETE("/node/:uuid", nodesHandler.DeleteNode)
-		control.DELETE("/nodes/drop", nodesHandler.DropNodesList)
+		nodeRoutes := apiRoutes.Group("/nodes")
+		{
+			nodeRoutes.GET("", nodesHandler.GetNodesList)
+			nodeRoutes.POST("", nodesHandler.CreateNode)
+			nodeRoutes.GET("/:uuid", nodesHandler.GetNode)
+			nodeRoutes.PATCH("/:uuid", nodesHandler.UpdateNode)
+			nodeRoutes.DELETE("/:uuid", nodesHandler.DeleteNode)
+			nodeRoutes.DELETE("/drop", nodesHandler.DropNodesList)
+		}
 
-		control.GET("/integrations", integrationHandler.GetIntegrationsList)
-		control.POST("/integration", integrationHandler.CreateIntegration)
-		control.GET("/integration/:uuid", integrationHandler.GetIntegration)
-		control.PATCH("/integration/:uuid", integrationHandler.UpdateIntegration)
-		control.DELETE("/integration/:uuid", integrationHandler.DeleteIntegration)
-		control.DELETE("/integrations/drop", integrationHandler.DropIntegrationsList)
+		integrationRoutes := apiRoutes.Group("/integrations")
+		{
+			integrationRoutes.GET("", integrationHandler.GetIntegrationsList)
+			integrationRoutes.POST("", integrationHandler.CreateIntegration)
+			integrationRoutes.GET("/:uuid", integrationHandler.GetIntegration)
+			integrationRoutes.PATCH("/:uuid", integrationHandler.UpdateIntegration)
+			integrationRoutes.DELETE("/:uuid", integrationHandler.DeleteIntegration)
+			integrationRoutes.DELETE("/drop", integrationHandler.DropIntegrationsList)
+		}
 
-		control.GET("/mqtt/clients", mqttHandler.GetMqttConnectionsList)
-		control.POST("/mqtt/client", mqttHandler.CreateMqttConnection)
-		control.GET("/mqtt/client/:uuid", mqttHandler.GetMqttConnection)
-		control.PATCH("/mqtt/client/:uuid", mqttHandler.UpdateMqttConnection)
-		control.DELETE("/mqtt/client/:uuid", mqttHandler.DeleteMqttConnection)
-		control.DELETE("/mqtt/clients/drop", mqttHandler.DropMqttConnectionsList)
-
+		mqttClientRoutes := apiRoutes.Group("/mqtt/clients")
+		{
+			mqttClientRoutes.GET("", mqttHandler.GetMqttConnectionsList)
+			mqttClientRoutes.POST("", mqttHandler.CreateMqttConnection)
+			mqttClientRoutes.GET("/:uuid", mqttHandler.GetMqttConnection)
+			mqttClientRoutes.PATCH("/:uuid", mqttHandler.UpdateMqttConnection)
+			mqttClientRoutes.DELETE("/:uuid", mqttHandler.DeleteMqttConnection)
+			mqttClientRoutes.DELETE("/drop", mqttHandler.DropMqttConnectionsList)
+		}
 	}
-
 	return engine, streamHandler.Close
 }

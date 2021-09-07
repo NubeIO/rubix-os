@@ -120,7 +120,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var writerCloneModel model.WriterClone
 
 	//get plugin
-	p, err := d.GetPluginByPath("system")
+	p, err := d.GetPluginByPath("lora")
 	if err != nil {
 		return false, errors.New("not valid plugin found")
 	}
@@ -326,13 +326,11 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	return true, nil
 }
 
-
 func (d *GormDatabase) NodeWizard() (bool, error) {
 	//delete networks
 	var nm1 model.Node
 	nm1.Name = "NODE-1"
 	n1, err := d.CreateNode(&nm1)
-
 
 	var nm2 model.Node
 	nm2.Name = "NODE-2"
@@ -346,19 +344,15 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	nm4.Name = "NODE-4"
 	n4, err := d.CreateNode(&nm4)
 
-
 	var nm5 model.Node
 	nm5.Name = "NODE-5"
 	nm5.NodeType = "add"
 	n5, err := d.CreateNode(&nm5)
 
-
 	var nm6 model.Node
 	nm6.Name = "NODE-6"
 	nm6.NodeType = "add"
 	n6, err := d.CreateNode(&nm6)
-
-
 
 	var out1m model.Out1Connections
 	out1m.UUID = utils.MakeTopicUUID("")
@@ -366,10 +360,10 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	out1m.ToUUID = n2.UUID
 	out1m.Connection = "in1"
 
-	query := d.DB.Create(out1m);if query.Error != nil {
+	query := d.DB.Create(out1m)
+	if query.Error != nil {
 		return false, query.Error
 	}
-
 
 	var out2m model.Out1Connections
 	out2m.UUID = utils.MakeTopicUUID("")
@@ -377,7 +371,8 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	out2m.ToUUID = n2.UUID
 	out2m.Connection = "in2"
 
-	query = d.DB.Create(out2m);if query.Error != nil {
+	query = d.DB.Create(out2m)
+	if query.Error != nil {
 		return false, query.Error
 	}
 
@@ -387,7 +382,8 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	out3m.ToUUID = n3.UUID
 	out3m.Connection = "in1"
 
-	query = d.DB.Create(out3m);if query.Error != nil {
+	query = d.DB.Create(out3m)
+	if query.Error != nil {
 		return false, query.Error
 	}
 
@@ -398,7 +394,8 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	out4m.ToUUID = n3.UUID
 	out4m.Connection = "in1"
 
-	query = d.DB.Create(out4m);if query.Error != nil {
+	query = d.DB.Create(out4m)
+	if query.Error != nil {
 		return false, query.Error
 	}
 
@@ -409,7 +406,8 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	out5m.ToUUID = n4.UUID
 	out5m.Connection = "in1"
 
-	query = d.DB.Create(out5m);if query.Error != nil {
+	query = d.DB.Create(out5m)
+	if query.Error != nil {
 		return false, query.Error
 	}
 
@@ -420,10 +418,10 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	out6m.ToUUID = n6.UUID
 	out6m.Connection = "in1"
 
-	query = d.DB.Create(out6m);if query.Error != nil {
+	query = d.DB.Create(out6m)
+	if query.Error != nil {
 		return false, query.Error
 	}
-
 
 	var in1m model.In1Connections
 	in1m.UUID = utils.MakeTopicUUID("")
@@ -431,8 +429,8 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	in1m.FromUUID = n1.UUID
 	in1m.Connection = "out1"
 
-
-	query = d.DB.Create(in1m);if query.Error != nil {
+	query = d.DB.Create(in1m)
+	if query.Error != nil {
 		return false, query.Error
 	}
 
@@ -442,7 +440,8 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	in2m.FromUUID = n2.UUID
 	in2m.Connection = "out1"
 
-	query = d.DB.Create(in2m);if query.Error != nil {
+	query = d.DB.Create(in2m)
+	if query.Error != nil {
 		return false, query.Error
 	}
 
@@ -452,7 +451,8 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	in3m.FromUUID = n4.UUID
 	in3m.Connection = "out1"
 
-	query = d.DB.Create(in3m);if query.Error != nil {
+	query = d.DB.Create(in3m)
+	if query.Error != nil {
 		return false, query.Error
 	}
 
@@ -462,7 +462,8 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	in4m.FromUUID = n5.UUID
 	in4m.Connection = "out1"
 
-	query = d.DB.Create(in4m);if query.Error != nil {
+	query = d.DB.Create(in4m)
+	if query.Error != nil {
 		return false, query.Error
 	}
 
@@ -473,10 +474,10 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	in5m.FromUUID = n3.UUID
 	in5m.Connection = "out1"
 
-	query = d.DB.Create(in5m);if query.Error != nil {
+	query = d.DB.Create(in5m)
+	if query.Error != nil {
 		return false, query.Error
 	}
-
 
 	if err != nil {
 		fmt.Println("Error on wizard")
