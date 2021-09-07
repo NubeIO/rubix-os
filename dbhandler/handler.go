@@ -14,11 +14,7 @@ type Handler struct {
 
 //Init give db access
 func Init(h *Handler) {
-	initDb(h.DB)
-}
-
-func initDb(d *database.GormDatabase) {
-	db = d
+	db = h.DB
 }
 
 func getDb() *database.GormDatabase {

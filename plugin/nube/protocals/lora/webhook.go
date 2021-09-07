@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,21 +19,6 @@ type message struct {
 func (c *PluginTest) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	c.basePath = basePath
 	mux.GET("/message", func(ctx *gin.Context) {
-		msg := new(message)
-		a := usersList.GetUsersList()
-		fmt.Println(a)
-		fmt.Println(3)
-		if err := ctx.Bind(msg); err == nil {
-			err := c.msgHandler.SendMessage(plugin.Message{
-				Message:  msg.Message,
-				Title:    msg.Title,
-				Priority: msg.Priority,
-				Extras:   msg.Extras,
-			})
-			if err != nil {
-				return
-			}
-			ctx.JSON(200, msg)
-		}
+
 	})
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/database"
 	"github.com/NubeDev/flow-framework/error"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin"
@@ -21,6 +22,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine := gin.New()
 	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), error.Handler(), location.Default())
 	engine.NoRoute(error.NotFound())
+	eventBus := eventbus.NewService(eventbus.GetBus())
 	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
 	authentication := auth.Auth{DB: db}
 	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
@@ -38,6 +40,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userHandler := api.UserAPI{DB: db, PasswordStrength: conf.PassStrength, UserChangeNotifier: userChangeNotifier}
 	networkHandler := api.NetworksAPI{
 		DB: db,
+		Bus: eventBus,
 	}
 	deviceHandler := api.DeviceAPI{
 		DB: db,
@@ -116,10 +119,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		{
 			pluginRoute.GET("/:uuid", pluginHandler.GetPlugin)
 			pluginRoute.GET("/path/:path", pluginHandler.GetPluginByPath)
+			pluginRoute.GET("/name/:name", pluginHandler.GetPluginByPluginName)
+			pluginRoute.POST("/:uuid/enable", pluginHandler.EnablePluginByUUID)
 			pluginRoute.GET("/:uuid/config", pluginHandler.GetConfig)
 			pluginRoute.POST("/:uuid/config", pluginHandler.UpdateConfig)
 			pluginRoute.GET("/:uuid/display", pluginHandler.GetDisplay)
-			pluginRoute.POST("/enable", pluginHandler.EnablePluginByName)
+
 		}
 	}
 	engine.OPTIONS("/*any")

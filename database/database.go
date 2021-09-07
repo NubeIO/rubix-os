@@ -56,7 +56,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var integration []model.Integration
 	var mqttConnection []model.MqttConnection
 	var credentials []model.IntegrationCredentials
-
+	var serialConnection []model.SerialConnection
 	var models = []interface{}{
 		&alerts,
 		&user,
@@ -85,6 +85,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&integration,
 		&mqttConnection,
 		&credentials,
+		&serialConnection,
 	}
 
 	for _, v := range models {
@@ -107,7 +108,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		rp.GlobalUuid = utils.MakeTopicUUID(model.CommonNaming.Rubix)
 		db.Create(&rp)
 	}
-	notificationService := eventbus.NewBusService(eventbus.GetBus())
+	notificationService := eventbus.NewService(eventbus.GetBus())
 	gormDatabase = &GormDatabase{DB: db, B: notificationService}
 	return &GormDatabase{DB: db, B: notificationService}, nil
 }
