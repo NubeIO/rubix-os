@@ -5,14 +5,13 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-
 var deviceChildTable = "Device"
 
 // GetNetworks returns all networks.
 func (d *GormDatabase) GetNetworks(withChildren bool, withPoints bool) ([]*model.Network, error) {
 	var networksModel []*model.Network
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload("Device").Find(&networksModel)
+		query := d.DB.Preload("SerialConnection").Preload("IpConnection").Preload("Device").Find(&networksModel)
 		if query.Error != nil {
 			return nil, query.Error
 		}
@@ -31,7 +30,7 @@ func (d *GormDatabase) GetNetworks(withChildren bool, withPoints bool) ([]*model
 func (d *GormDatabase) GetNetwork(uuid string, withChildren bool, withPoints bool) (*model.Network, error) {
 	var networkModel *model.Network
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Where("uuid = ? ", uuid).Preload(deviceChildTable).First(&networkModel)
+		query := d.DB.Where("uuid = ? ", uuid).Preload("SerialConnection").Preload("IpConnection").Preload(deviceChildTable).First(&networkModel)
 		if query.Error != nil {
 			return nil, query.Error
 		}
@@ -45,13 +44,12 @@ func (d *GormDatabase) GetNetwork(uuid string, withChildren bool, withPoints boo
 	}
 }
 
-
 // GetNetworkByPlugin returns the network for the given id or nil.
 func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, withPoints bool, byTransport string) (*model.Network, error) {
 	var networkModel *model.Network
 	trans := ""
 	if byTransport != "" {
-		if byTransport == model.CommonNaming.Serial{
+		if byTransport == model.CommonNaming.Serial {
 			trans = "SerialConnection"
 		}
 		if withChildren { // drop child to reduce json size
@@ -77,12 +75,22 @@ func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, 
 	}
 }
 
-
 // CreateNetwork creates a device.
 func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Network)
 	body.Name = nameIsNil(body.Name)
-	body.PluginConfId = pluginIsNil(body.PluginConfId) //plugin path, will use system by default
+	var pluginConf *model.PluginConf
+	query := d.DB.Where("uuid = ?", body.PluginConfId).Find(&pluginConf)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	info := d.PluginManager.PluginInfo(pluginConf.ModulePath)
+	switch info.ProtocolType {
+	case "serial":
+		body.SerialConnection.UUID = utils.MakeTopicUUID(model.CommonNaming.Serial)
+	case "ip":
+		body.IpConnection.UUID = utils.MakeTopicUUID(model.CommonNaming.IP)
+	}
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
@@ -90,8 +98,6 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	//d.Bus.Emit(eventbus.CTX(), eventbus.NetworksAll, body)
 	return body, nil
 }
-
-
 
 // UpdateNetwork returns the network for the given id or nil.
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {

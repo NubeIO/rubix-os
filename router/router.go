@@ -104,6 +104,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		fmt.Println(err)
 		panic(err)
 	}
+	db.PluginManager = pluginManager
 	pluginHandler := api.PluginAPI{
 		Manager:  pluginManager,
 		Notifier: streamHandler,
@@ -367,9 +368,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			transportRoutes.POST("", transportHandler.CreateTransport)
 
 		}
-
-
-
 
 	}
 	return engine, streamHandler.Close

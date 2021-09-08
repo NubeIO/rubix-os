@@ -21,7 +21,6 @@ type PluginDatabase interface {
 	GetPluginConfByID(uuid string) (*model.PluginConf, error)
 	GetPlugin(uuid string) (*model.PluginConf, error)
 	GetPluginByPath(name string) (*model.PluginConf, error)
-
 }
 
 // The PluginAPI provides handlers for managing plugins.
@@ -30,7 +29,6 @@ type PluginAPI struct {
 	Manager  *plugin.Manager
 	DB       PluginDatabase
 }
-
 
 func (c *PluginAPI) GetPlugin(ctx *gin.Context) {
 	uuid := resolveID(ctx)
@@ -44,7 +42,6 @@ func (c *PluginAPI) GetPluginByPath(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-
 // GetPlugins returns all plugins a user has.
 func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 	userID := auth.GetUserID(ctx)
@@ -57,7 +54,7 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 		if inst, err := c.Manager.Instance(conf.UUID); err == nil {
 			info := c.Manager.PluginInfo(conf.ModulePath)
 			result = append(result, model.PluginConfExternal{
-				UUID:   	conf.UUID,
+				UUID:         conf.UUID,
 				Name:         info.String(),
 				Token:        conf.Token,
 				ModulePath:   conf.ModulePath,
@@ -65,6 +62,7 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 				Website:      info.Website,
 				License:      info.License,
 				Enabled:      conf.Enabled,
+				ProtocolType: info.ProtocolType,
 				Capabilities: inst.Supports().Strings(),
 			})
 		}
@@ -72,11 +70,11 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 	reposeHandler(result, err, ctx)
 }
 
-
 // EnablePluginByUUID enables a plugin.
 func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	body, err := getBODYPlugin(ctx);if err != nil {
+	body, err := getBODYPlugin(ctx)
+	if err != nil {
 		reposeHandler("error on body", err, ctx)
 	}
 	conf, err := c.DB.GetPluginConfByID(uuid)
@@ -129,7 +127,6 @@ func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
 	reposeHandler("plugin restart ok", err, ctx)
 
 }
-
 
 // GetDisplay get display info for Displayer plugin.
 func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
@@ -214,7 +211,7 @@ func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
 	}
 	conf.Config = newConfBytes
 	successOrAbort(ctx, 500, c.DB.UpdatePluginConf(conf))
-	
+
 }
 
 func isPluginOwner(ctx *gin.Context, conf *model.PluginConf) bool {

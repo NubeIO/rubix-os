@@ -31,6 +31,7 @@ var CommonNaming = struct {
 	Histories         string
 	Node              string
 	Serial            string
+	IP                string
 	TransportType     string
 }{
 	Plugin:            "plugin",

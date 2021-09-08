@@ -19,11 +19,12 @@ type UserContext struct {
 // Info is returned by the exported plugin function GetPluginInfo() for identification
 // plugins are identified by their ModulePath, flow will refuse to load plugins with empty ModulePath
 type Info struct {
-	Version     string
-	Author      string
-	Name        string
-	Website     string
-	Description string
-	License     string
-	ModulePath  string
+	Version      string
+	Author       string
+	Name         string
+	Website      string
+	Description  string
+	License      string
+	ModulePath   string
+	ProtocolType string
 }

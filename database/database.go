@@ -7,6 +7,7 @@ import (
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/plugin"
 	"github.com/NubeDev/flow-framework/utils"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -16,6 +17,7 @@ import (
 
 var mkdirAll = os.MkdirAll
 var gormDatabase *GormDatabase
+
 //var GetDatabaseBus eventbus.BusService
 
 // New creates a new wrapper for the gorm database framework.
@@ -57,6 +59,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var mqttConnection []model.MqttConnection
 	var credentials []model.IntegrationCredentials
 	var serialConnection []model.SerialConnection
+	var ipConnection []model.IpConnection
 	var models = []interface{}{
 		&alerts,
 		&user,
@@ -86,6 +89,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&mqttConnection,
 		&credentials,
 		&serialConnection,
+		&ipConnection,
 	}
 
 	for _, v := range models {
@@ -123,12 +127,12 @@ func createDirectoryIfSqlite(dialect, connection string) {
 	}
 }
 
-
 // GormDatabase is a wrapper for the gorm framework.
 type GormDatabase struct {
-	DB *gorm.DB
-	Store cachestore.Handler
-    Bus eventbus.BusService
+	DB            *gorm.DB
+	Store         cachestore.Handler
+	Bus           eventbus.BusService
+	PluginManager *plugin.Manager
 }
 
 // Close closes the gorm database connection.
