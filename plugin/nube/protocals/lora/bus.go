@@ -9,17 +9,31 @@ import (
 )
 
 func (c *Instance) BusServ()  {
-	topic := c.pluginUUID
-	handler := bus.Handler{
+	pluginUUID := c.pluginUUID
+	pluginHandler := bus.Handler{
 		Handle:  func(ctx context.Context, e bus.Event){
 			go func() {
-				fmt.Println(3333, e.Topic, topic)
 				switch e.Topic {
-				case topic:
+				case pluginUUID:
+					fmt.Println("plugin event")
 					payload := e.Data
 					msg := fmt.Sprintf("point %s created", payload)
 					log.Info(msg)
-				case "**":
+				}
+			}()
+		},
+		Matcher: eventbus.PluginsAll,
+	}
+	keyP := fmt.Sprintf("key_%s", pluginUUID)
+	eventbus.GetBus().RegisterHandler(keyP, pluginHandler)
+
+	networkUUID := c.networkUUID
+	handler := bus.Handler{
+		Handle:  func(ctx context.Context, e bus.Event){
+			go func() {
+				switch e.Topic {
+				case networkUUID:
+					fmt.Println("network event")
 					//payload, ok := e.Data.(*model.Point)
 					//msg := fmt.Sprintf("event %s wiii", payload.Name)
 					////publishMQTT(payload)
@@ -30,9 +44,9 @@ func (c *Instance) BusServ()  {
 				}
 			}()
 		},
-		Matcher: topic,
+		Matcher: eventbus.NetworksAll,
 	}
-	key := fmt.Sprintf("key_%s", topic)
-	eventbus.GetBus().RegisterHandler(key, handler)
+	keyN := fmt.Sprintf("key_%s", pluginUUID)
+	eventbus.GetBus().RegisterHandler(keyN, handler)
 
 }

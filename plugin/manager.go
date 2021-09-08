@@ -12,6 +12,7 @@ import (
 	"plugin"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/NubeDev/flow-framework/auth"
 	"github.com/NubeDev/flow-framework/model"
@@ -150,6 +151,24 @@ func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 	}
 	conf.Enabled = enabled
 	return m.db.UpdatePluginConf(conf)
+}
+
+
+// RestartPlugin reboots/restart the plugin.
+func (m *Manager) RestartPlugin(pluginID string) (string, error) {
+	instance, err := m.Instance(pluginID);if err != nil {
+		return "restart fail", errors.New("instance not found")
+	}
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	err = instance.Disable();if err != nil {
+		return "restart fail", err
+	}
+	time.Sleep(300 * time.Millisecond)
+	err = instance.Enable();if err != nil {
+		return "restart fail", err
+	}
+	return "restart ok", nil
 }
 
 // PluginInfo returns plugin info.

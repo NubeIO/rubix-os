@@ -7,7 +7,7 @@ import (
 
 // The DBDatabase interface for encapsulating database access.
 type DBDatabase interface {
-	DropAllFlow() (bool, error) //delete all networks, gateways and children
+	DropAllFlow() (string, error) //delete all networks, gateways and children
 	SyncTopics() //sync all the topics into the event bus
 	WizardLocalPointMapping()  (bool, error)
 	WizardRemotePointMapping()  (bool, error)

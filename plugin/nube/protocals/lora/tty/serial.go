@@ -2,7 +2,7 @@ package tty
 
 import (
 	"bufio"
-	"fmt"
+	"errors"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/payload"
 	log "github.com/sirupsen/logrus"
@@ -37,7 +37,7 @@ func New(s *SerialSetting) *SerialSetting {
 
 var Port serial.Port
 
-func (p *SerialSetting) NewSerialConnection() {
+func (p *SerialSetting) NewSerialConnection() error {
 	portName := p.SerialPort
 	baudRate := p.BaudRate
 	parity := p.Parity
@@ -49,9 +49,10 @@ func (p *SerialSetting) NewSerialConnection() {
 		if err != nil {
 			log.Info(err)
 			p.Error = true
+			return err
 		}
 	}
-	log.Info("SERIAL: try and connect to:", portName)
+	log.Info("LORA: try and connect to:", portName)
 	m := &serial.Mode{
 		BaudRate: baudRate,
 		Parity:   parity,
@@ -59,17 +60,26 @@ func (p *SerialSetting) NewSerialConnection() {
 		StopBits: stopBits,
 	}
 	ports, err := serial.GetPortsList()
-	log.Info("SERIAL: ports: ", ports)
-	p.ActivePortList = ports
-	port, err := serial.Open(portName, m)
-	Port = port
-	if err != nil {
-		p.Error = true
-		log.Fatal("SERIAL: ", err)
+	log.Info("LORA: ports: ", ports)
+	portNameFound := ""
+	for _, port := range ports {
+		if port == portName {
+			portNameFound = portName
+		}
 	}
+	if portNameFound == "" {
+		return errors.New("LORA: port not found")
+	}
+	p.ActivePortList = ports
+	port, err := serial.Open(portName, m);if err != nil {
+		p.Error = true
+		log.Fatal("LORA: error on open port", err)
+		return err
+	}
+	Port = port
 	p.Connected = true
-	log.Info("SERIAL: Connected to serial port: ", portName, " ", "connected: ", p.Connected)
-
+	log.Info("LORA: Connected to serial port: ", portName, " ", "connected: ", p.Connected)
+	return nil
 }
 
 func (p *SerialSetting) Loop() {
@@ -82,19 +92,17 @@ func (p *SerialSetting) Loop() {
 		var data = scanner.Text()
 		if decoder.CheckPayloadLength(data) {
 			count = count + 1
-			log.Printf("loop count %d", count)
 			commonData, fullData := decoder.DecodePayload(data)
 			payload.PublishSensor(commonData, fullData)
 		} else {
-			log.Printf("lora serial messsage size %d", len(data))
+			log.Printf("LORA: serial messsage size %d", len(data))
 		}
 	}
 }
 func Disconnect() error {
-	fmt.Println(Port.Close(), 99999456)
 	if Port != nil {
 		err := Port.Close();if err != nil {
-			log.Error("SERIAL: err on trying to close the port")
+			log.Error("LORA: err on trying to close the port")
 			return err
 		}
 	}

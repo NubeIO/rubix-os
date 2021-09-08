@@ -1,14 +1,10 @@
 package decoder
 
 import (
-	"log"
+
+	log "github.com/sirupsen/logrus"
 	"strconv"
 )
-
-// TODO: move this
-func printString(msg string) {
-	log.Println(msg)
-}
 
 type TSensorType string
 

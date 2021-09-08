@@ -1,7 +1,6 @@
 package database
 
 import (
-	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
@@ -12,8 +11,6 @@ var deviceChildTable = "Device"
 // GetNetworks returns all networks.
 func (d *GormDatabase) GetNetworks(withChildren bool, withPoints bool) ([]*model.Network, error) {
 	var networksModel []*model.Network
-	d.Bus.RegisterTopic("plg_8c410b2ce3aa4503")
-	d.Bus.EmitString(eventbus.CTX(), "plg_8c410b2ce3aa4503", "test")
 	if withChildren { // drop child to reduce json size
 		query := d.DB.Preload("Device").Find(&networksModel)
 		if query.Error != nil {
@@ -89,6 +86,8 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
+	//d.Bus.RegisterTopic("plg_8c410b2ce3aa4503")
+	//d.Bus.Emit(eventbus.CTX(), eventbus.NetworksAll, body)
 	return body, nil
 }
 

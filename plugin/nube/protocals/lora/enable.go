@@ -6,7 +6,6 @@ import (
 
 // Enable implements plugin.Plugin
 func (c *Instance) Enable() error {
-	//
 	c.enabled = true
 	c.setUUID()
 	c.BusServ()
@@ -25,7 +24,10 @@ func (c *Instance) Enable() error {
 // Disable implements plugin.Disable
 func (c *Instance) Disable() error {
 	c.enabled = false
-	c.SerialClose()
+	err := c.SerialClose()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

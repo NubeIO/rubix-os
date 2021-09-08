@@ -5,11 +5,24 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+/*
+user adds a network
+user adds a device
+- create device and send plugin the uuid
+- ask the plugin do you want to add pre-made points for example
+- add points
+ */
+
+
 func SerialOpenAndRead() error {
 	s := new(tty.SerialSetting)
+	s.SerialPort = "/dev/ttyACM0"
 	s.BaudRate = 38400
 	sc := tty.New(s)
-	sc.NewSerialConnection()
+	err := sc.NewSerialConnection()
+	if err != nil {
+		return err
+	}
 	sc.Loop()
 	return nil
 }
