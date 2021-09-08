@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/mustafaturan/bus/v3"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func (c *Instance) BusServ()  {
@@ -18,7 +18,7 @@ func (c *Instance) BusServ()  {
 				case topic:
 					payload := e.Data
 					msg := fmt.Sprintf("point %s created", payload)
-					logrus.Info(msg)
+					log.Info(msg)
 				case "**":
 					//payload, ok := e.Data.(*model.Point)
 					//msg := fmt.Sprintf("event %s wiii", payload.Name)

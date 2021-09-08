@@ -4,6 +4,7 @@ import (
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/patrickmn/go-cache"
+	log "github.com/sirupsen/logrus"
 )
 
 
@@ -55,7 +56,6 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 		return false, query.Error
 	}
 
-
 	//delete networks
 	var flowNetworkModel *model.FlowNetwork
 	query = d.DB.Where("1 = 1").Delete(&flowNetworkModel)
@@ -68,8 +68,6 @@ func (d *GormDatabase) DropAllFlow() (bool, error) {
 
 //SyncTopics sync all the topics
 func (d *GormDatabase) SyncTopics()  {
-
-	d.Bus.RegisterTopicParent("aa", "aa")
 
 	g, err := d.GetStreams(false)
 	for _, obj := range g {
@@ -109,9 +107,7 @@ func (d *GormDatabase) SyncTopics()  {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Node, obj.UUID)
 	}
 
-
-
 	if err != nil {
-
+		log.Error("ERROR sync node topic's at db")
 	}
 }
