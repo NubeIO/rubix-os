@@ -13,7 +13,7 @@ func (a *FlowClient) ClientAddConsumer(body Consumer) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(body).
-		Post("/api/consumer")
+		Post("/api/consumers")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -30,7 +30,7 @@ func (a *FlowClient) ClientGetConsumer(uuid string) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/consumer/{uuid}")
+		Get("/api/consumers/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -49,7 +49,7 @@ func (a *FlowClient) ClientEditConsumer(uuid string) (*ResponseBody, error) {
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/consumer/{}")
+		Post("/api/consumers/{}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}

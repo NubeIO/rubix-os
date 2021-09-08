@@ -14,3 +14,15 @@ type SerialConnection struct {
 	NetworkUUID string `json:"network_uuid" gorm:"TYPE:varchar(255) REFERENCES networks;null;default:null"`
 }
 
+type IpConnection struct {
+	Host        string `json:"host"`
+	Port        int    `json:"port"`
+	NetworkUUID string `json:"network_uuid" gorm:"TYPE:varchar(255) REFERENCES networks;null;default:null"`
+}
+
+type TransportBody struct {
+	NetworkType      string           `json:"network_type"`
+	TransportType    string           `json:"transport_type"`
+	IpConnection     IpConnection     `json:"ip_connection"`
+	SerialConnection SerialConnection `json:"serial_connection"`
+}
