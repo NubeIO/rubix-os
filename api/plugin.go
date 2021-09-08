@@ -79,7 +79,7 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 	body, err := getBODYPlugin(ctx);if err != nil {
 		reposeHandler("error on body", err, ctx)
 	}
-	conf, err := c.DB.GetPluginByPath(body.ModulePath)
+	conf, err := c.DB.GetPluginConfByID(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}
@@ -103,6 +103,30 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 		reposeHandler("disabled", err, ctx)
 	}
 
+}
+
+// RestartPlugin enables a plugin.
+func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	conf, err := c.DB.GetPluginConfByID(uuid)
+	if success := successOrAbort(ctx, 500, err); !success {
+		return
+	}
+	if conf == nil || !isPluginOwner(ctx, conf) {
+		reposeHandler("unknown plugin", err, ctx)
+		return
+	}
+	_, err = c.Manager.Instance(uuid)
+	if err != nil {
+		reposeHandler("plugin not found", err, ctx)
+		return
+	}
+	if res, err := c.Manager.RestartPlugin(uuid); err == plugin.ErrAlreadyEnabledOrDisabled {
+		reposeHandler(res, err, ctx)
+	} else if err != nil {
+		reposeHandler(res, nil, ctx)
+	}
+	reposeHandler("plugin restart ok", err, ctx)
 
 }
 

@@ -9,61 +9,98 @@ import (
 
 
 // DropAllFlow networks, gateways, commandGroup, consumers, jobs and children.
-func (d *GormDatabase) DropAllFlow() (bool, error) {
+func (d *GormDatabase) DropAllFlow() (string, error) {
 
 	//delete networks
 	var networkModel *model.Network
 	query := d.DB.Where("1 = 1").Delete(&networkModel)
 	if query.Error != nil {
-		return false, query.Error
+		log.Error("DB: fail bulk delete networkModel")
+		return "fail networkModel", query.Error
 	}
-
 	//delete jobs
 	var jobModel *model.Job
 	query = d.DB.Where("1 = 1").Delete(&jobModel)
 	if query.Error != nil {
-		return false, query.Error
+		log.Error("DB: fail bulk delete jobModel")
+		return "fail jobModel", query.Error
 	}
-	////delete producer
+	//delete producer
 	var producerModel *model.Producer
 	query = d.DB.Where("1 = 1").Delete(&producerModel)
 	if query.Error != nil {
-		return false, query.Error
+		log.Error("DB: fail bulk delete Producer")
+		return "fail Producer", query.Error
 	}
 	////delete consumers
 	var consumerModel *model.Consumer
 	query = d.DB.Where("1 = 1").Delete(&consumerModel)
 	if query.Error != nil {
-		return false, query.Error
+		log.Error("DB: fail bulk delete Consumer")
+		return "fail Consumer", query.Error
 	}
 	////delete consumersList
 	var consumersList *model.Writer
 	query = d.DB.Where("1 = 1").Delete(&consumersList)
 	if query.Error != nil {
-		return false, query.Error
+		log.Error("DB: fail bulk delete Writer")
+		return "fail Writer", query.Error
 	}
 	//delete commands
 	var commandsModel *model.CommandGroup
 	query = d.DB.Where("1 = 1").Delete(&commandsModel)
 	if query.Error != nil {
-		return false, query.Error
+		log.Error("DB: fail bulk delete CommandGroup")
+		return "fail CommandGroup", query.Error
 	}
 
 	//delete streams
 	var streamsModel *model.Stream
 	query = d.DB.Where("1 = 1").Delete(&streamsModel)
 	if query.Error != nil {
-		return false, query.Error
+		log.Error("DB: fail bulk delete Stream")
+		return "fail Stream", query.Error
 	}
 
 	//delete networks
 	var flowNetworkModel *model.FlowNetwork
 	query = d.DB.Where("1 = 1").Delete(&flowNetworkModel)
 	if query.Error != nil {
-		return false, query.Error
+		log.Error("DB: fail bulk delete FlowNetwork")
+		return "fail FlowNetwork", query.Error
 	}
 
-	return true, nil
+	var pluginConf *model.PluginConf
+	query = d.DB.Where("1 = 1").Delete(&pluginConf)
+	if query.Error != nil {
+		log.Error("DB: fail bulk delete PluginConf")
+		return "fail PluginConf", query.Error
+	}
+
+	var user *model.User
+	query = d.DB.Where("1 = 1").Delete(&user)
+	if query.Error != nil {
+		log.Error("DB: fail bulk delete PluginConfExternal")
+		return "fail PluginConfExternal", query.Error
+	}
+
+
+	//TODO throws an error
+	var pluginConfExternal *model.PluginConfExternal
+	query = d.DB.Where("1 = 1").Delete(&pluginConfExternal)
+	if query.Error != nil {
+		log.Error("DB: fail bulk delete PluginConfExternal")
+		return "fail PluginConfExternal", query.Error
+	}
+
+	var application *model.Application
+	query = d.DB.Where("1 = 1").Delete(&application)
+	if query.Error != nil {
+		log.Error("DB: fail bulk delete Application")
+		return "fail Application", query.Error
+	}
+
+	return "bulk delete pass", nil
 }
 
 //SyncTopics sync all the topics

@@ -13,6 +13,9 @@ type DeviceDatabase interface {
 	UpdateDevice(uuid string, body *model.Device) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
 	DropDevices() (bool, error)
+	GetDeviceByField(field string, value string, withPoints bool) (*model.Device, error)
+	UpdateDeviceByField(field string, value string, body *model.Device) (*model.Device, error)
+
 
 }
 type DeviceAPI struct {
@@ -31,6 +34,21 @@ func (a *DeviceAPI) GetDevice(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 
 }
+
+
+func (a *DeviceAPI) GetDeviceByField(ctx *gin.Context) {
+	field, value := withFieldsArgs(ctx)
+	q, err := a.DB.GetDeviceByField(field, value, false)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *DeviceAPI) UpdateDeviceByField(ctx *gin.Context) {
+	body, _ := getBODYDevice(ctx)
+	field, value := withFieldsArgs(ctx)
+	q, err := a.DB.UpdateDeviceByField(field, value, body)
+	reposeHandler(q, err, ctx)
+}
+
 
 func (a *DeviceAPI) UpdateDevice(ctx *gin.Context) {
 	body, _ := getBODYDevice(ctx)

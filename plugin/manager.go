@@ -12,6 +12,7 @@ import (
 	"plugin"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/NubeDev/flow-framework/auth"
 	"github.com/NubeDev/flow-framework/model"
@@ -135,7 +136,6 @@ func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 	if conf.Enabled == enabled {
 		return ErrAlreadyEnabledOrDisabled
 	}
-
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	if enabled {
@@ -146,12 +146,29 @@ func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 	if err != nil {
 		return err
 	}
-
 	if newConf, err := m.db.GetPluginConfByID(pluginID); /* conf might be updated by instance */ err == nil {
 		conf = newConf
 	}
 	conf.Enabled = enabled
 	return m.db.UpdatePluginConf(conf)
+}
+
+
+// RestartPlugin reboots/restart the plugin.
+func (m *Manager) RestartPlugin(pluginID string) (string, error) {
+	instance, err := m.Instance(pluginID);if err != nil {
+		return "restart fail", errors.New("instance not found")
+	}
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+	err = instance.Disable();if err != nil {
+		return "restart fail", err
+	}
+	time.Sleep(300 * time.Millisecond)
+	err = instance.Enable();if err != nil {
+		return "restart fail", err
+	}
+	return "restart ok", nil
 }
 
 // PluginInfo returns plugin info.
@@ -162,7 +179,6 @@ func (m *Manager) PluginInfo(modulePath string) compat.Info {
 	if p, ok := m.plugins[modulePath]; ok {
 		return p.PluginInfo()
 	}
-	log.Println("Could not get plugin info for", modulePath)
 	return compat.Info{
 		Name:        "UNKNOWN",
 		ModulePath:  modulePath,
