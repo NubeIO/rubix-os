@@ -2,6 +2,7 @@ package tty
 
 import (
 	"bufio"
+	"errors"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/payload"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +12,6 @@ import (
 type SerialSetting struct {
 	SerialPort     string
 	Enable         bool
-	Port           serial.Port
 	BaudRate       int
 	StopBits       serial.StopBits
 	Parity         serial.Parity
@@ -35,18 +35,9 @@ func New(s *SerialSetting) *SerialSetting {
 	}
 }
 
-func (p *SerialSetting) Disconnect() error {
-	err := p.Port.Close()
-	log.Info("SERIAL: try and close port")
-	if err != nil {
-		log.Error("SERIAL: err on trying to close the port")
-		log.Error(err)
-	}
-	return err
-}
+var Port serial.Port
 
-
-func (p *SerialSetting)  NewSerialConnection() {
+func (p *SerialSetting) NewSerialConnection() error {
 	portName := p.SerialPort
 	baudRate := p.BaudRate
 	parity := p.Parity
@@ -54,13 +45,14 @@ func (p *SerialSetting)  NewSerialConnection() {
 	dataBits := p.DataBits
 	if p.Connected {
 		log.Info("Existing serial port connection by this app is open So! close existing connection")
-		err := p.Disconnect()
+		err := Disconnect()
 		if err != nil {
 			log.Info(err)
 			p.Error = true
+			return err
 		}
 	}
-	log.Info("SERIAL: try and connect to:", portName)
+	log.Info("LORA: try and connect to:", portName)
 	m := &serial.Mode{
 		BaudRate: baudRate,
 		Parity:   parity,
@@ -68,35 +60,51 @@ func (p *SerialSetting)  NewSerialConnection() {
 		StopBits: stopBits,
 	}
 	ports, err := serial.GetPortsList()
-	log.Info("SERIAL: ports: ", ports)
-	p.ActivePortList = ports
-	port, err := serial.Open(portName, m)
-	p.Port = port
-	if err != nil {
-		p.Error = true
-		log.Fatal("SERIAL: ", err)
+	log.Info("LORA: ports: ", ports)
+	portNameFound := ""
+	for _, port := range ports {
+		if port == portName {
+			portNameFound = portName
+		}
 	}
+	if portNameFound == "" {
+		return errors.New("LORA: port not found")
+	}
+	p.ActivePortList = ports
+	port, err := serial.Open(portName, m);if err != nil {
+		p.Error = true
+		log.Fatal("LORA: error on open port", err)
+		return err
+	}
+	Port = port
 	p.Connected = true
-	log.Info("SERIAL: Connected to serial port: ", portName)
-
+	log.Info("LORA: Connected to serial port: ", portName, " ", "connected: ", p.Connected)
+	return nil
 }
 
-
-func (p *SerialSetting)  Loop() {
-	if p.Error || !p.Connected || p.Port == nil {
+func (p *SerialSetting) Loop() {
+	if p.Error || !p.Connected || Port == nil {
 		return
 	}
 	count := 0
-	scanner := bufio.NewScanner(p.Port)
+	scanner := bufio.NewScanner(Port)
 	for scanner.Scan() {
 		var data = scanner.Text()
 		if decoder.CheckPayloadLength(data) {
 			count = count + 1
-			log.Printf("loop count %d", count)
 			commonData, fullData := decoder.DecodePayload(data)
 			payload.PublishSensor(commonData, fullData)
 		} else {
-			log.Printf("lora serial messsage size %d", len(data))
+			log.Printf("LORA: serial messsage size %d", len(data))
 		}
 	}
+}
+func Disconnect() error {
+	if Port != nil {
+		err := Port.Close();if err != nil {
+			log.Error("LORA: err on trying to close the port")
+			return err
+		}
+	}
+	return nil
 }

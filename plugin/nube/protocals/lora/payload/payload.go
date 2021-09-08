@@ -2,13 +2,13 @@ package payload
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
+	log "github.com/sirupsen/logrus"
 )
 
 func PublishSensor(commonSensorData decoder.CommonValues, sensorStruct interface{}) {
 	jsonValue, _ := json.Marshal(sensorStruct)
-	fmt.Println(jsonValue)
+	log.Info("LORA: ", string(jsonValue))
 	//PublishJSON(commonSensorData, jsonValue, mqttConn)
 }
 

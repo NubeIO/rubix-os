@@ -1,19 +1,15 @@
 package database
 
 import (
-	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
-
 
 var deviceChildTable = "Device"
 
 // GetNetworks returns all networks.
 func (d *GormDatabase) GetNetworks(withChildren bool, withPoints bool) ([]*model.Network, error) {
 	var networksModel []*model.Network
-	d.Bus.RegisterTopic("plg_8c410b2ce3aa4503")
-	d.Bus.EmitString(eventbus.CTX(), "plg_8c410b2ce3aa4503", "test")
 	if withChildren { // drop child to reduce json size
 		query := d.DB.Preload("Device").Find(&networksModel)
 		if query.Error != nil {
@@ -48,13 +44,12 @@ func (d *GormDatabase) GetNetwork(uuid string, withChildren bool, withPoints boo
 	}
 }
 
-
 // GetNetworkByPlugin returns the network for the given id or nil.
 func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, withPoints bool, byTransport string) (*model.Network, error) {
 	var networkModel *model.Network
 	trans := ""
 	if byTransport != "" {
-		if byTransport == model.CommonNaming.Serial{
+		if byTransport == model.CommonNaming.Serial {
 			trans = "SerialConnection"
 		}
 		if withChildren { // drop child to reduce json size
@@ -80,7 +75,6 @@ func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, 
 	}
 }
 
-
 // CreateNetwork creates a device.
 func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Network)
@@ -91,8 +85,6 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	}
 	return body, nil
 }
-
-
 
 // UpdateNetwork returns the network for the given id or nil.
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {

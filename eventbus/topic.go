@@ -17,8 +17,11 @@ const (
 	StreamsCreated = "stream.created"
 	StreamsUpdated = "stream.updated"
 
+	Network        = "network"
 	NetworkCreated = "network.created"
 	NetworkUpdated = "network.updated"
+
+	NetDevUpdated = "network.dev.updated"
 
 	PointUpdated = "point.updated"
 	PointCreated = "point.created"
@@ -46,8 +49,10 @@ func BusTopics() []string {
 		PluginsUpdated,
 		StreamsCreated,
 		StreamsUpdated,
+		Network,
 		NetworkCreated,
 		NetworkUpdated,
+		NetDevUpdated,
 		PointCreated,
 		PointUpdated,
 		PointCOV,

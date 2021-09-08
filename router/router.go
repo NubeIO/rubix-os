@@ -1,6 +1,7 @@
 package router
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/location"
 	"github.com/gin-contrib/cors"
@@ -93,8 +94,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	}
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/plugins/:uuid/custom"), streamHandler)
+	//for the custom plugin endpoints you need to use the plugin token
+	//http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/api/plugins/api/:uuid"), streamHandler)
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 	pluginHandler := api.PluginAPI{
@@ -133,6 +137,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				plugins.POST("/config/:uuid", pluginHandler.UpdateConfig)
 				plugins.GET("/display/:uuid", pluginHandler.GetDisplay)
 				plugins.POST("/enable/:uuid", pluginHandler.EnablePluginByUUID)
+				plugins.POST("/restart/:uuid", pluginHandler.RestartPlugin)
 				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
 			}
 
@@ -245,6 +250,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			deviceRoutes.GET("", deviceHandler.GetDevices)
 			deviceRoutes.POST("", deviceHandler.CreateDevice)
 			deviceRoutes.GET("/:uuid", deviceHandler.GetDevice)
+			deviceRoutes.POST("/field/:uuid", deviceHandler.GetDeviceByField)
+			deviceRoutes.PATCH("/field/:uuid", deviceHandler.UpdateDeviceByField)
 			deviceRoutes.PATCH("/:uuid", deviceHandler.UpdateDevice)
 			deviceRoutes.DELETE("/:uuid", deviceHandler.DeleteDevice)
 			deviceRoutes.DELETE("/drop", deviceHandler.DropDevices)

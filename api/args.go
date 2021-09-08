@@ -13,6 +13,19 @@ func networkArgs(ctx *gin.Context) (withChildren bool, withPoints bool){
 	return withChildren, withPoints
 
 }
+
+//withChildrenArgs
+func withFieldsArgs(ctx *gin.Context) (field string, value string){
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Field = ctx.DefaultQuery(aType.Field, aDefault.Field)
+	args.Value = ctx.DefaultQuery(aType.Value, aDefault.Value)
+	return args.Field , args.Value
+}
+
+
+
 //withChildrenArgs
 func withChildrenArgs(ctx *gin.Context) (withChildren bool, withPoints bool){
 	var args Args
