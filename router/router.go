@@ -125,7 +125,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 		requireClientsGroupRoutes := apiRoutes.Group("", authentication.RequireClient())
 		{
-			plugins := apiRoutes.Group("/plugins", authentication.RequireClient())
+			plugins := requireClientsGroupRoutes.Group("/plugins")
 			{
 				plugins.GET("", pluginHandler.GetPlugins)
 				plugins.GET("/:uuid", pluginHandler.GetPlugin)
@@ -136,7 +136,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
 			}
 
-			applicationRoutes := requireClientsGroupRoutes.Group("/applications", authentication.RequireClient())
+			applicationRoutes := requireClientsGroupRoutes.Group("/applications")
 			{
 				applicationRoutes.GET("", applicationHandler.GetApplications)
 				applicationRoutes.POST("", applicationHandler.CreateApplication)
@@ -151,7 +151,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				}
 			}
 
-			clientRoutes := requireClientsGroupRoutes.Group("/clients", authentication.RequireClient())
+			clientRoutes := requireClientsGroupRoutes.Group("/clients")
 			{
 				clientRoutes.GET("", clientHandler.GetClients)
 				clientRoutes.POST("", clientHandler.CreateClient)
@@ -159,7 +159,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				clientRoutes.PUT("/:id", clientHandler.UpdateClient)
 			}
 
-			messageRoutes := requireClientsGroupRoutes.Group("/messages", authentication.RequireClient())
+			messageRoutes := requireClientsGroupRoutes.Group("/messages")
 			{
 				messageRoutes.GET("", messageHandler.GetMessages)
 				messageRoutes.DELETE("", messageHandler.DeleteMessages)
