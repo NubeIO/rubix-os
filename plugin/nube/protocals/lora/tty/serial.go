@@ -2,6 +2,7 @@ package tty
 
 import (
 	"bufio"
+	"fmt"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/payload"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +12,6 @@ import (
 type SerialSetting struct {
 	SerialPort     string
 	Enable         bool
-	Port           serial.Port
 	BaudRate       int
 	StopBits       serial.StopBits
 	Parity         serial.Parity
@@ -35,18 +35,9 @@ func New(s *SerialSetting) *SerialSetting {
 	}
 }
 
-func (p *SerialSetting) Disconnect() error {
-	err := p.Port.Close()
-	log.Info("SERIAL: try and close port")
-	if err != nil {
-		log.Error("SERIAL: err on trying to close the port")
-		log.Error(err)
-	}
-	return err
-}
+var Port serial.Port
 
-
-func (p *SerialSetting)  NewSerialConnection() {
+func (p *SerialSetting) NewSerialConnection() {
 	portName := p.SerialPort
 	baudRate := p.BaudRate
 	parity := p.Parity
@@ -54,7 +45,7 @@ func (p *SerialSetting)  NewSerialConnection() {
 	dataBits := p.DataBits
 	if p.Connected {
 		log.Info("Existing serial port connection by this app is open So! close existing connection")
-		err := p.Disconnect()
+		err := Disconnect()
 		if err != nil {
 			log.Info(err)
 			p.Error = true
@@ -71,23 +62,22 @@ func (p *SerialSetting)  NewSerialConnection() {
 	log.Info("SERIAL: ports: ", ports)
 	p.ActivePortList = ports
 	port, err := serial.Open(portName, m)
-	p.Port = port
+	Port = port
 	if err != nil {
 		p.Error = true
 		log.Fatal("SERIAL: ", err)
 	}
 	p.Connected = true
-	log.Info("SERIAL: Connected to serial port: ", portName)
+	log.Info("SERIAL: Connected to serial port: ", portName, " ", "connected: ", p.Connected)
 
 }
 
-
-func (p *SerialSetting)  Loop() {
-	if p.Error || !p.Connected || p.Port == nil {
+func (p *SerialSetting) Loop() {
+	if p.Error || !p.Connected || Port == nil {
 		return
 	}
 	count := 0
-	scanner := bufio.NewScanner(p.Port)
+	scanner := bufio.NewScanner(Port)
 	for scanner.Scan() {
 		var data = scanner.Text()
 		if decoder.CheckPayloadLength(data) {
@@ -99,4 +89,14 @@ func (p *SerialSetting)  Loop() {
 			log.Printf("lora serial messsage size %d", len(data))
 		}
 	}
+}
+func Disconnect() error {
+	fmt.Println(Port.Close(), 99999456)
+	if Port != nil {
+		err := Port.Close();if err != nil {
+			log.Error("SERIAL: err on trying to close the port")
+			return err
+		}
+	}
+	return nil
 }

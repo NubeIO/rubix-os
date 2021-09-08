@@ -135,7 +135,6 @@ func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 	if conf.Enabled == enabled {
 		return ErrAlreadyEnabledOrDisabled
 	}
-
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	if enabled {
@@ -146,7 +145,6 @@ func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 	if err != nil {
 		return err
 	}
-
 	if newConf, err := m.db.GetPluginConfByID(pluginID); /* conf might be updated by instance */ err == nil {
 		conf = newConf
 	}
@@ -162,7 +160,6 @@ func (m *Manager) PluginInfo(modulePath string) compat.Info {
 	if p, ok := m.plugins[modulePath]; ok {
 		return p.PluginInfo()
 	}
-	log.Println("Could not get plugin info for", modulePath)
 	return compat.Info{
 		Name:        "UNKNOWN",
 		ModulePath:  modulePath,

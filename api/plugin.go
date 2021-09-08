@@ -79,7 +79,7 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 	body, err := getBODYPlugin(ctx);if err != nil {
 		reposeHandler("error on body", err, ctx)
 	}
-	conf, err := c.DB.GetPluginByPath(body.ModulePath)
+	conf, err := c.DB.GetPluginConfByID(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}
