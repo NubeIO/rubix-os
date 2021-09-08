@@ -71,7 +71,7 @@ func (d *GormDatabase) UpdateNode(uuid string, body *model.Node) (*model.Node, e
 		return nil, err
 	}
 	eventbus.NodeContext.Set(list.UUID, list, cache.NoExpiration)
-	//busNodes(list.UUID,  list)
+	d.Bus.Emit(eventbus.CTX(), eventbus.NodeEventIn,  list)
 	return wcm, nil
 }
 
