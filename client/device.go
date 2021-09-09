@@ -13,7 +13,7 @@ func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) 
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name, "network_uuid": networkUUID}).
-		Post("/api/device")
+		Post("/api/devices")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -29,7 +29,7 @@ func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/device/{uuid}")
+		Get("/api/devices/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -48,7 +48,7 @@ func (a *FlowClient) ClientEditDevice(uuid string) (*ResponseBody, error) {
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/device/{}")
+		Post("/api/devices/{}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}

@@ -24,13 +24,14 @@ func (c PluginV1) APIVersion() string {
 // PluginInfo implements compat/Plugin.
 func (c PluginV1) PluginInfo() Info {
 	return Info{
-		Version:     c.Info.Version,
-		Author:      c.Info.Author,
-		Name:        c.Info.Name,
-		Website:     c.Info.Website,
-		Description: c.Info.Description,
-		License:     c.Info.License,
-		ModulePath:  c.Info.ModulePath,
+		Version:      c.Info.Version,
+		Author:       c.Info.Author,
+		Name:         c.Info.Name,
+		Website:      c.Info.Website,
+		Description:  c.Info.Description,
+		License:      c.Info.License,
+		ModulePath:   c.Info.ModulePath,
+		ProtocolType: c.Info.ProtocolType,
 	}
 }
 
@@ -96,16 +97,16 @@ func (c *PluginV1Instance) ValidateAndSetConfig(config interface{}) error {
 }
 
 // GetDisplay see papiv1.Displayer.
-func (c *PluginV1Instance) GetDisplay(location *url.URL)  plugin.Response {
+func (c *PluginV1Instance) GetDisplay(location *url.URL) plugin.Response {
 	if c.displayer != nil {
 		return c.displayer.GetDisplay(location)
 	}
 	m := plugin.Help{
-		Name:  "name",
+		Name:      "name",
 		IsNetwork: false,
 	}
-	r := plugin.Response {
-		Details:       m,
+	r := plugin.Response{
+		Details: m,
 	}
 	return r
 }
@@ -167,8 +168,6 @@ func (c *PluginV1MessageHandler) SendMessage(msg plugin.Message) error {
 	})
 }
 
-
-
 // Enable implements wrapper.Plugin.
 func (c *PluginV1Instance) Enable() error {
 	return c.instance.Enable()
@@ -193,4 +192,3 @@ func (c *PluginV1StorageHandler) Save(b []byte) error {
 func (c *PluginV1StorageHandler) Load() ([]byte, error) {
 	return c.WrapperHandler.Load()
 }
-

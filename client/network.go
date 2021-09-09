@@ -13,7 +13,7 @@ func (a *FlowClient) ClientAddNetwork(pluginUUID string) (*ResponseBody, error) 
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name, "plugin_conf_id": pluginUUID}).
-		Post("/api/network")
+		Post("/api/networks")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -29,7 +29,7 @@ func (a *FlowClient) ClientGetNetwork(uuid string) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/network/{uuid}")
+		Get("/api/networks/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}

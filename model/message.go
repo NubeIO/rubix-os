@@ -15,13 +15,17 @@ type Message struct {
 	Date          time.Time
 }
 
-// The MessageExternal holds information about a message which was sent by an Application.
+
+
+// MessageExternal Model
 type MessageExternal struct {
-	ID            uint                   `json:"id"`
-	ApplicationID uint                   `json:"appid"`
-	Message       string                 `form:"message" query:"message" json:"message" binding:"required"`
-	Title         string                 `form:"title" query:"title" json:"title"`
-	Priority      int                    `form:"priority" query:"priority" json:"priority"`
-	Extras        map[string]interface{} `form:"-" query:"-" json:"extras,omitempty" gorm:"type:text[]"`
-	Date          time.Time              `json:"date"`
+	ID uint `json:"id"`
+	ApplicationID uint `json:"appid"`
+	Message string `form:"message" query:"message" json:"message" binding:"required"`
+	Title string `form:"title" query:"title" json:"title"`
+	Priority int `form:"priority" query:"priority" json:"priority"`
+	Extras map[string]interface{} `form:"-" query:"-" json:"extras,omitempty" gorm:"type:text[]"`
+	Date time.Time `json:"date"`
 }
+
+

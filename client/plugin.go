@@ -9,7 +9,7 @@ import (
 func (a *FlowClient) ClientGetPlugins()(*ResponsePlugins, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponsePlugins{}).
-		Get("/plugin")
+		Get("/plugins")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -27,7 +27,7 @@ func (a *FlowClient) ClientGetPlugin(uuid string) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/plugin/{uuid}")
+		Get("/api/plugins/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}

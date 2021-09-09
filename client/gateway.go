@@ -14,7 +14,7 @@ func (a *FlowClient) ClientAddGateway(body *model.Stream) (*ResponseBody, error)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(body).
-		Post("/api/stream")
+		Post("/api/streams")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -30,7 +30,7 @@ func (a *FlowClient) ClientGetGateway(uuid string) (*ResponseBody, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/stream/{uuid}")
+		Get("/api/streams/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -49,7 +49,7 @@ func (a *FlowClient) ClientEditGateway(uuid string) (*ResponseBody, error) {
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/stream/{}")
+		Post("/api/streams/{}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}

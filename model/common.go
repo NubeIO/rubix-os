@@ -31,6 +31,8 @@ var CommonNaming = struct {
 	Histories         string
 	Node              string
 	Serial            string
+	IP                string
+	TransportType     string
 }{
 	Plugin:            "plugin",
 	Network:           "network",
@@ -57,6 +59,7 @@ var CommonNaming = struct {
 	Histories:         "histories",
 	Node:              "node",
 	Serial:            "serial",
+	TransportType:     "transport_type",
 }
 
 var CommonNamingCommandGroup = struct {

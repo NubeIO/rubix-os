@@ -27,3 +27,5 @@ type Integration struct {
 	IntegrationCredentials []IntegrationCredentials `json:"integration_credentials" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
 }
+
+
