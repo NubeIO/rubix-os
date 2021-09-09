@@ -7,20 +7,19 @@ import (
 	"time"
 )
 
-
-
-
 // RegisterWebhook implements plugin.Webhooker
-func (c *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
-	c.basePath = basePath
+func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
+	i.basePath = basePath
 	//restart plugin
 	mux.POST("/restart", func(ctx *gin.Context) {
-		err := c.Disable();if err != nil {
+		err := i.Disable()
+		if err != nil {
 			log.Error("LORA: error on restart (disable) plugin %s", err)
 			ctx.JSON(http.StatusBadRequest, "restart fail")
 		}
 		time.Sleep(300 * time.Millisecond)
-		err = c.Enable();if err != nil {
+		err = i.Enable()
+		if err != nil {
 			log.Error("LORA: error on restart (enable) plugin %s", err)
 			ctx.JSON(http.StatusBadRequest, "restart fail")
 		}

@@ -5,73 +5,6 @@ import (
 	"time"
 )
 
-var CommonNaming = struct {
-	Plugin            string
-	Network           string
-	Device            string
-	Point             string
-	Read              string
-	Write             string
-	Stream            string
-	StreamList        string
-	Job               string
-	Producer          string
-	Consumer          string
-	Writer            string
-	WriterClone       string
-	Alert             string
-	Mapping           string
-	CommandGroup      string
-	Rubix             string
-	RubixGlobal       string
-	FlowNetwork       string
-	RemoteFlowNetwork string
-	History           string
-	ProducerHistory   string
-	Histories         string
-	Node              string
-	Serial            string
-	IP                string
-	TransportType     string
-}{
-	Plugin:            "plugin",
-	Network:           "network",
-	Device:            "device",
-	Point:             "point",
-	Read:              "read",
-	Write:             "write",
-	Stream:            "stream",
-	StreamList:        "stream_list",
-	Job:               "job",
-	Producer:          "producer",
-	Consumer:          "consumer",
-	Writer:            "writer",
-	WriterClone:       "writer_clone",
-	Alert:             "alert",
-	Mapping:           "mapping",
-	CommandGroup:      "command_group",
-	Rubix:             "rubix",
-	RubixGlobal:       "rubix_global",
-	FlowNetwork:       "flow_network",
-	RemoteFlowNetwork: "remote_flow_network",
-	History:           "history",
-	ProducerHistory:   "producer_history",
-	Histories:         "histories",
-	Node:              "node",
-	Serial:            "serial",
-	TransportType:     "transport_type",
-}
-
-var CommonNamingCommandGroup = struct {
-	PointWrite     string
-	MasterSchedule string
-	SilenceAlarm   string
-}{
-	PointWrite:     "point_write",
-	MasterSchedule: "master_schedule",
-	SilenceAlarm:   "silence_alarm",
-}
-
 type CommonDescription struct {
 	Description string `json:"description,omitempty"`
 }
@@ -138,37 +71,13 @@ type CommonValue struct {
 	ValueRaw string     `json:"value_raw"`
 }
 
-var CommonFaultCode = struct {
-	ConfigError      string
-	SystemError      string
-	PluginNotEnabled string
-	Offline          string
-}{
-	ConfigError:      "configError",
-	SystemError:      "systemError",
-	PluginNotEnabled: "pluginNotEnabled",
-	Offline:          "offline",
-}
-
-var CommonFaultMessage = struct {
-	ConfigError      string
-	SystemError      string
-	PluginNotEnabled string
-	Offline          string
-}{
-	ConfigError:      "configError",
-	SystemError:      "systemError",
-	PluginNotEnabled: "plugin not enabled or no valid message from the network",
-	Offline:          "offline",
-}
-
 type CommonFault struct {
-	Fault     bool      `json:"fault"`
-	FaultCode string    `json:"fault_code"`
-	Message   string    `json:"message"`
-	FaultType string    `json:"fault_type"` //configError, systemError
-	LastFail  time.Time `json:"last_fail"`
-	LastOk    time.Time `json:"last_ok"`
+	InFault      bool      `json:"fault"`
+	MessageLevel string    `json:"message_level"`
+	MessageCode  string    `json:"fault_code"`
+	Message      string    `json:"message"`
+	LastOk       time.Time `json:"last_ok"`
+	LastFail     time.Time `json:"last_fail"`
 }
 
 type CommonIP struct {

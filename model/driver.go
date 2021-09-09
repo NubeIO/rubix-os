@@ -69,54 +69,10 @@ Low power wireless communication protocol for home automation
 
 //Driver the plugin when added will populate this and then based of its requirements will be able to use the network table or not
 type Driver struct {
-	PluginUUID       string           `json:"plugin_uuid"`
-	TransportType    string           `json:"transport_type"`    //serial, TCP, UDP, IP, MQTT
-	Protocol         string           `json:"protocol"`          //lora, bacnet, rest
-	WriteableNetwork WriteableNetwork `json:"writeable_network"` //is this a network that supports write or its read only like lora
+	PluginUUID    string `json:"plugin_uuid"`
+	TransportType string `json:"transport_type"` //serial, TCP, UDP, IP, MQTT
+	Protocol      string `json:"protocol"`       //lora, bacnet, rest
+	//WriteableNetwork WriteableNetwork `json:"writeable_network"` //is this a network that supports write or its read only like lora
 }
 
 type DriverType string
-
-var DriverTypeEnum = struct {
-	Serial string
-	IP     string
-}{
-	Serial: "serial",
-	IP:     "IP",
-}
-
-type ProtocolType string
-
-var ProtocolTypeEnum = struct {
-	Client          string
-	Server          string
-	WirelessGateway string
-	Stream          string
-}{
-	Client:          "client",
-	Server:          "server",
-	WirelessGateway: "wireless",
-	Stream:          "gateway",
-}
-
-type Protocol string
-
-var ProtocolEnum = struct {
-	REST         string
-	BACnet       string
-	Modbus       string
-	ModbusMaster string
-	MQTT         string
-	LoRa         string
-	LoRaWAN      string
-}{
-	REST:         "rest",
-	BACnet:       "BACnet",
-	Modbus:       "Modbus",
-	ModbusMaster: "ModbusMaster",
-	MQTT:         "MQTT",
-	LoRa:         "LoRa",
-	LoRaWAN:      "LoRaWAN",
-}
-
-type WriteableNetwork bool

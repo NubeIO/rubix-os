@@ -6,18 +6,17 @@ import (
 	"net/url"
 )
 
-
 // GetDisplay implements public.Displayer
-func (c *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
+func (i *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
 	loc := &url.URL{
-		Path: c.basePath,
+		Path: i.basePath,
 	}
 	loc = loc.ResolveReference(&url.URL{
 		Path: "restart",
 	})
 	fmt.Println(loc) //can show the ui the custom endpoints
 
-	baseURL.Path = c.basePath
+	baseURL.Path = i.basePath
 	m := plugin.Help{
 		Name:               name,
 		PluginType:         pluginType,
@@ -27,8 +26,8 @@ func (c *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
 		NetworkType:        networkType,
 		TransportType:      transportType,
 	}
-	messageURL := plugin.Response {
-		Details:       m,
+	messageURL := plugin.Response{
+		Details: m,
 	}
 	return messageURL
 }

@@ -92,9 +92,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	mqttHandler := api.MqttConnectionAPI{
 		DB: db,
 	}
-	transportHandler := api.TransportAPI{
-		DB: db,
-	}
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
 	//for the custom plugin endpoints you need to use the plugin token
@@ -267,6 +264,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			pointRoutes.POST("", pointHandler.CreatePoint)
 			pointRoutes.GET("/:uuid", pointHandler.GetPoint)
 			pointRoutes.PATCH("/:uuid", pointHandler.UpdatePoint)
+			pointRoutes.GET("/field/:uuid", pointHandler.GetPointByField)
+			pointRoutes.PATCH("/field/:uuid", pointHandler.UpdatePointByField)
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
 			pointRoutes.DELETE("/drop", pointHandler.DropPoints)
 		}
@@ -361,12 +360,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			mqttClientRoutes.PATCH("/:uuid", mqttHandler.UpdateMqttConnection)
 			mqttClientRoutes.DELETE("/:uuid", mqttHandler.DeleteMqttConnection)
 			mqttClientRoutes.DELETE("/drop", mqttHandler.DropMqttConnectionsList)
-		}
-
-		transportRoutes := apiRoutes.Group("/transports")
-		{
-			transportRoutes.POST("", transportHandler.CreateTransport)
-
 		}
 
 	}

@@ -53,14 +53,6 @@ type Manager struct {
 	mux       *gin.RouterGroup
 }
 
-func messageType(t string) string{
-	switch t {
-	case model.DriverTypeEnum.IP:
-		return model.DriverTypeEnum.IP
-	}
-	return "none"
-}
-
 // NewManager created a Manager from configurations.
 func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier Notifier) (*Manager, error) {
 	manager := &Manager{
@@ -75,11 +67,11 @@ func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier No
 		for {
 			message := <-manager.messages
 			internalMsg := &model.Message{
-				ApplicationID: 			message.Message.ApplicationID,
-				Title:         			message.Message.Title,
-				Priority:      			message.Message.Priority,
-				Date:          			message.Message.Date,
-				Message:       			message.Message.Message,
+				ApplicationID: message.Message.ApplicationID,
+				Title:         message.Message.Title,
+				Priority:      message.Message.Priority,
+				Date:          message.Message.Date,
+				Message:       message.Message.Message,
 			}
 
 			if message.Message.Extras != nil {
@@ -153,19 +145,21 @@ func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 	return m.db.UpdatePluginConf(conf)
 }
 
-
 // RestartPlugin reboots/restart the plugin.
-func (m *Manager) RestartPlugin(pluginID string) (string, error) {
-	instance, err := m.Instance(pluginID);if err != nil {
+func (m *Manager) RestartPlugin(pluginID string) (string, error) { //TODO update the logic to check if plugin was enabled as it dont work well if it was disabled
+	instance, err := m.Instance(pluginID)
+	if err != nil {
 		return "restart fail", errors.New("instance not found")
 	}
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	err = instance.Disable();if err != nil {
+	err = instance.Disable()
+	if err != nil {
 		return "restart fail", err
 	}
 	time.Sleep(300 * time.Millisecond)
-	err = instance.Enable();if err != nil {
+	err = instance.Enable()
+	if err != nil {
 		return "restart fail", err
 	}
 	return "restart ok", nil

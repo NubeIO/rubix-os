@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (c *Instance) BusServ() {
+func (i *Instance) BusServ() {
 	handlerCreated := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
@@ -32,7 +32,7 @@ func (c *Instance) BusServ() {
 				}
 				if dev != nil {
 					log.Info("LORA BUS PluginsCreated IsDevice", " ", dev.UUID)
-					_, err = c.addPoints(dev)
+					_, err = i.addPoints(dev)
 					if err != nil {
 						return
 					}
@@ -78,7 +78,7 @@ func (c *Instance) BusServ() {
 					return
 				}
 				if dev != nil {
-					_, err = c.addPoints(dev)
+					_, err = i.addPoints(dev)
 					log.Info("LORA BUS PluginsUpdated IsDevice", " ", dev.UUID)
 					if err != nil {
 						return

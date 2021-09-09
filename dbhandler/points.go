@@ -27,3 +27,19 @@ func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, err
 	}
 	return q, nil
 }
+
+func (h *Handler) GetPointByField(field string, value string, withChildren bool) (*model.Point, error) {
+	q, err := getDb().GetPointByField(field, value, withChildren)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
+func (h *Handler) UpdatePointByField(field string, value string, body *model.Point) (*model.Point, error) {
+	q, err := getDb().UpdatePointByField(field, value, body)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
