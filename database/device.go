@@ -79,8 +79,9 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 		return nil, query.Error
 	}
 	body.CommonEnable.Enable = true
-	body.CommonFault.Fault = true
-	body.CommonFault.FaultCode = model.CommonFaultCode.PluginNotEnabled
+	body.CommonFault.InFault = true
+	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
+	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
 	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()

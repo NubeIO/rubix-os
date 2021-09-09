@@ -97,8 +97,9 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 		body.IpConnection.UUID = utils.MakeTopicUUID(model.CommonNaming.IP)
 	}
 	body.CommonEnable.Enable = true
-	body.CommonFault.Fault = true
-	body.CommonFault.FaultCode = model.CommonFaultCode.PluginNotEnabled
+	body.CommonFault.InFault = true
+	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
+	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
 	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
@@ -116,11 +117,11 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	info := d.getPluginConf(networkModel)
-	switch info.ProtocolType {
-	case "serial":
+	//info := d.getPluginConf(networkModel)
+	switch networkModel.TransportType {
+	case model.TransType.Serial:
 		d.DB.Model(&networkModel.SerialConnection).Updates(body.SerialConnection)
-	case "ip":
+	case model.TransType.IP:
 		d.DB.Model(&networkModel.IpConnection).Updates(body.IpConnection)
 	}
 	query = d.DB.Model(&networkModel).Updates(&body)

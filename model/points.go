@@ -60,17 +60,17 @@ type CommonPoint struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	PresentValue  float64        `json:"present_value"` //point value
-	WriteValue    float64        `json:"write_value"`   //TODO add in logic if user writes to below priority 16
+	PresentValue  float64        `json:"present_value"` //point value, read only
+	WriteValue    null.Float     `json:"write_value"`   //TODO add in logic if user writes to below priority 16
 	ValueRaw      datatypes.JSON `json:"value_raw"`
-	Fallback      float64        `json:"fallback"`
+	Fallback      null.Float     `json:"fallback"`
 	DeviceUUID    string         `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	Writeable     bool           `json:"writeable"`
-	Cov           float64        `json:"cov"`
+	Cov           float32        `json:"cov"`
 	ObjectType    string         `json:"object_type"`    //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
 	AddressId     int            `json:"address_id"`     // for example a modbus address or bacnet address
 	AddressOffset int            `json:"address_offset"` // for example a modbus address offset
-	AddressCode   string         `json:"address_code"`   // for example a droplet id (so a string)
+	AddressUUID   string         `json:"address_uuid"`   // for example a droplet id (so a string)
 	PointType     string         `json:"point_type"`     // for example temp, rssi, voltage
 	CommonFault
 }
@@ -78,7 +78,7 @@ type CommonPoint struct {
 //Point table
 type Point struct {
 	CommonPoint
-	Priority Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
+	Priority Priority `json:"priority,omitempty" gorm:"constraint:OnDelete:CASCADE"`
 	CommonCreated
 }
 
@@ -99,6 +99,6 @@ type Priority struct {
 	P13       null.Float `json:"_13"`
 	P14       null.Float `json:"_14"`
 	P15       null.Float `json:"_15"`
-	P16       null.Float `json:"_16"` //removed and added to the point to save one DB write
+	//P16       null.Float `json:"_16"` //removed and added to the point to save one DB write
 
 }

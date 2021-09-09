@@ -11,6 +11,8 @@ type PointDatabase interface {
 	GetPoints(withChildren bool) ([]*model.Point, error)
 	CreatePoint(body *model.Point) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point) (*model.Point, error)
+	GetPointByField(field string, value string, withChildren bool) (*model.Point, error)
+	UpdatePointByField(field string, value string, body *model.Point) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
 	DropPoints() (bool, error)
 }
@@ -41,6 +43,20 @@ func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 
 }
 
+func (a *PointAPI) GetPointByField(ctx *gin.Context) {
+	field, value := withFieldsArgs(ctx)
+	withChildren, _ := withChildrenArgs(ctx)
+	q, err := a.DB.GetPointByField(field, value, withChildren)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *PointAPI) UpdatePointByField(ctx *gin.Context) {
+	body, _ := getBODYPoint(ctx)
+	field, value := withFieldsArgs(ctx)
+	q, err := a.DB.UpdatePointByField(field, value, body)
+	reposeHandler(q, err, ctx)
+}
+
 func (a *PointAPI) CreatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	q, err := a.DB.CreatePoint(body)
@@ -58,4 +74,3 @@ func (a *PointAPI) DropPoints(ctx *gin.Context) {
 	q, err := a.DB.DropPoints()
 	reposeHandler(q, err, ctx)
 }
-
