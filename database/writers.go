@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/streams"
 	"github.com/NubeDev/flow-framework/utils"
@@ -51,8 +52,6 @@ func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer
 	return consumerModel, nil
 }
 
-
-
 // DeleteWriter deletes it
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	var consumerModel *model.Writer
@@ -98,7 +97,6 @@ func (d *GormDatabase) DropConsumersList() (bool, error) {
 	}
 }
 
-
 /*
 
 1. update writer
@@ -128,22 +126,26 @@ update the writerClone history
 //WriterAction read or write a value to the writer and onto the writer clone
 func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model.ProducerHistory, error) {
 	askRefresh := body.AskRefresh
-	writer, err := d.GetWriter(uuid); if err != nil {
+	writer, err := d.GetWriter(uuid)
+	if err != nil {
 		return nil, err
 	}
-	data, action,  err := streams.ValidateTypes(writer.WriterType, body);if err != nil {
+	data, action, err := streams.ValidateTypes(writer.WriterType, body)
+	if err != nil {
 		return nil, err
 	}
 	wc := new(model.WriterClone)
 
-	consumer, err := d.GetConsumer(writer.ConsumerUUID); if err != nil {
+	consumer, err := d.GetConsumer(writer.ConsumerUUID)
+	if err != nil {
 		return nil, errors.New("error: on get consumer")
 	}
 	consumerUUID := consumer.UUID
 	producerUUID := consumer.ProducerUUID
 	writerCloneUUID := writer.WriteCloneUUID
 	streamUUID := consumer.StreamUUID
-	stream, err := d.GetStream(streamUUID); if err != nil {
+	stream, err := d.GetStream(streamUUID)
+	if err != nil {
 		return nil, errors.New("error: invalid stream UUID")
 	}
 	flowNetworkUUID := ""
@@ -151,10 +153,11 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 		flowNetworkUUID = net.UUID
 
 	}
-	flow, err := d.GetFlowNetwork(flowNetworkUUID); if err != nil {
+	flow, err := d.GetFlowNetwork(flowNetworkUUID)
+	if err != nil {
 		return nil, errors.New("error: invalid flow UUID")
 	}
-	if action == model.CommonNaming.Write{
+	if action == model.CommonNaming.Write {
 		wc.DataStore = data
 		writer.DataStore = data
 		_, err = streams.WriteClone(writerCloneUUID, flow, wc, true)
@@ -181,12 +184,38 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	}
 }
 
+type hists struct {
+	Items []*model.ProducerHistory
+}
 
+func buildHists(item *model.ProducerHistory) []*model.ProducerHistory {
+	h := new(hists)
+	h.Items = append(h.Items, item)
+	return h.Items
+}
 
-func consumerRefresh(producerFeedback  *model.ProducerHistory) (*model.Consumer, error){
+func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) ([]*model.ProducerHistory, error) {
+	var out []*model.ProducerHistory
+	for _, wri := range body {
+		b := new(model.WriterBody)
+		b.Action = wri.Action
+		b.AskRefresh = wri.AskRefresh
+		b.Priority = wri.Priority
+		action, err := d.WriterAction(wri.WriterUUID, b)
+		if err != nil {
+
+			fmt.Println(err, "error")
+			return nil, err
+		}
+		out = buildHists(action)
+	}
+	return out, nil
+
+}
+
+func consumerRefresh(producerFeedback *model.ProducerHistory) (*model.Consumer, error) {
 	updateConsumer := new(model.Consumer)
 	updateConsumer.DataStore = producerFeedback.DataStore
 	updateConsumer.CurrentWriterCloneUUID = producerFeedback.CurrentWriterCloneUUID
 	return updateConsumer, nil
 }
-

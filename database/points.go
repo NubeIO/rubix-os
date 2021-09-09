@@ -83,10 +83,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, query.Error
 	}
-	//
-	//if err := d.DB.Create(&body.Priority).Error; err != nil {
-	//	return nil, query.Error
-	//}
 	return body, query.Error
 }
 

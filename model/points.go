@@ -72,6 +72,8 @@ type CommonPoint struct {
 	AddressOffset int            `json:"address_offset"` // for example a modbus address offset
 	AddressUUID   string         `json:"address_uuid"`   // for example a droplet id (so a string)
 	PointType     string         `json:"point_type"`     // for example temp, rssi, voltage
+	isProducer    bool
+	isConsumer    bool
 	CommonFault
 }
 
