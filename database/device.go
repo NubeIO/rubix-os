@@ -5,6 +5,7 @@ import (
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	"time"
 )
 
 var pointChildTable = "Point"
@@ -77,6 +78,12 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	body.CommonEnable.Enable = true
+	body.CommonFault.Fault = true
+	body.CommonFault.FaultCode = model.CommonFaultCode.PluginNotEnabled
+	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
+	body.CommonFault.LastFail = time.Now().UTC()
+	body.CommonFault.LastOk = time.Now().UTC()
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, query.Error
 	}
@@ -94,7 +101,6 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 // UpdateDevice returns the device for the given id or nil.
 func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
 	var deviceModel *model.Device
-
 	query := d.DB.Where("uuid = ?", uuid).Find(&deviceModel)
 	if query.Error != nil {
 		return nil, query.Error

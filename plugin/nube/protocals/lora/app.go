@@ -50,12 +50,28 @@ func (c *Instance) SerialClose() error {
 	return nil
 }
 
+/*
+NETWORK
+*/
+// addPoints close serial port
+func (c *Instance) validateNetwork(body *model.Network) error {
+	//rules
+	// max one network for lora-raw, if user adds a 2nd network it will be put into fault
+	// serial port must be set
+
+	return nil
+}
+
+/*
+POINTS
+*/
+
 var THLM = []string{"rssi", "voltage", "temperature", "humidity", "light", "motion"}
 
 // addPoints close serial port
 func (c *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
 	p := new(model.Point)
-	p.DeviceUUID = deviceBody.UUID
+	p.UUID = deviceBody.UUID
 	code := deviceBody.AddressCode
 	if code == string(decoder.THLM) {
 		for _, e := range THLM {
