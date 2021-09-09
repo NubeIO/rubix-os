@@ -2,18 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/mqttClient"
+	"github.com/NubeDev/flow-framework/mqttclient"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 
 	"log"
 	"time"
 )
 
-
 var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	fmt.Printf("MSG recieved pointsValue: %s\n", msg.Payload())
 }
-
 
 func main() {
 

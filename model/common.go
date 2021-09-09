@@ -102,7 +102,7 @@ type CommonAction struct {
 }
 
 type CommonEnable struct {
-	Enable *bool `json:"enable"`
+	Enable bool `json:"enable"`
 }
 
 type CommonID struct {
@@ -135,9 +135,37 @@ type CommonValue struct {
 	ValueRaw string     `json:"value_raw"`
 }
 
+var CommonFaultCode = struct {
+	ConfigError      string
+	SystemError      string
+	PluginNotEnabled string
+	Offline          string
+}{
+	ConfigError:      "configError",
+	SystemError:      "systemError",
+	PluginNotEnabled: "pluginNotEnabled",
+	Offline:          "offline",
+}
+
+var CommonFaultMessage = struct {
+	ConfigError      string
+	SystemError      string
+	PluginNotEnabled string
+	Offline          string
+}{
+	ConfigError:      "configError",
+	SystemError:      "systemError",
+	PluginNotEnabled: "plugin not enabled or no valid message from the network",
+	Offline:          "offline",
+}
+
 type CommonFault struct {
-	Fault        bool `json:"fault"`
-	FaultMessage bool `json:"fault_message"`
+	Fault     bool      `json:"fault"`
+	FaultCode string    `json:"fault_code"`
+	Message   string    `json:"message"`
+	FaultType string    `json:"fault_type"` //configError, systemError
+	LastFail  time.Time `json:"last_fail"`
+	LastOk    time.Time `json:"last_ok"`
 }
 
 type CommonIP struct {
