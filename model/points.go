@@ -1,6 +1,9 @@
 package model
 
-import "github.com/NubeIO/null"
+import (
+	"github.com/NubeIO/null"
+	"gorm.io/datatypes"
+)
 
 // Ops TODO add in later
 //Ops Means operations supported by a network, device, point and so on (example point supports point-write)
@@ -35,32 +38,48 @@ type Units struct { // for example from temp c to temp f
 	To   string
 }
 
+var ObjectType = struct {
+	analogInput  string
+	analogOutput string
+	analogValue  string
+	binaryInput  string
+	binaryOutput string
+	binaryValue  string
+}{
+	analogInput:  "analogInput",
+	analogOutput: "analogOutput",
+	analogValue:  "analogValue",
+	binaryInput:  "binaryInput",
+	binaryOutput: "binaryOutput",
+	binaryValue:  "binaryValue",
+}
+
 //CommonPoint if a point is writable or not
 type CommonPoint struct {
 	CommonUUID
 	CommonName
 	CommonDescription
 	CommonEnable
-	PresentValue  float64 `json:"present_value"` //point value
-	WriteValue    float64 `json:"write_value"`   //TODO add in logic if user writes to below priority 16
-	ValueRaw      []byte  `json:"value_raw"`     //modbus array [0, 11]
-	Fallback      float64 `json:"fallback"`
-	Writeable     bool    `json:"writeable"`
-	Cov           float64 `json:"cov"`
-	ObjectType    string  `json:"object_type"`    //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
-	AddressId     int     `json:"address_id"`     // for example a modbus address or bacnet address
-	AddressOffset int     `json:"address_offset"` // for example a modbus address offset
-	AddressCode   string  `json:"address_code"`   // for example a droplet id (so a string)
-	PointType     string  `json:"point_type"`     // for example temp, rssi, voltage
-
+	PresentValue  float64        `json:"present_value"` //point value
+	WriteValue    float64        `json:"write_value"`   //TODO add in logic if user writes to below priority 16
+	ValueRaw      datatypes.JSON `json:"value_raw"`
+	Fallback      float64        `json:"fallback"`
+	DeviceUUID    string         `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
+	Writeable     bool           `json:"writeable"`
+	Cov           float64        `json:"cov"`
+	ObjectType    string         `json:"object_type"`    //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
+	AddressId     int            `json:"address_id"`     // for example a modbus address or bacnet address
+	AddressOffset int            `json:"address_offset"` // for example a modbus address offset
+	AddressCode   string         `json:"address_code"`   // for example a droplet id (so a string)
+	PointType     string         `json:"point_type"`     // for example temp, rssi, voltage
+	CommonFault
 }
 
 //Point table
 type Point struct {
 	CommonPoint
-	DeviceUUID string `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
-	CommonCreated
 	Priority Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
+	CommonCreated
 }
 
 type Priority struct {
@@ -68,18 +87,18 @@ type Priority struct {
 	P1        null.Float `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
 	P2        null.Float `json:"_2"`
 	P3        null.Float `json:"_3"`
-	//P4  			float64 `json:"_4"`
-	//P5  			float64 `json:"_5"`
-	//P6  			float64 `json:"_6"`
-	//P7  			float64 `json:"_7"`
-	//P8  			float64 `json:"_8"`
-	//P9  			float64 `json:"_9"`
-	//P10  			float64 `json:"_10"`
-	//P11  			float64 `json:"_11"`
-	//P12  			float64 `json:"_12"`
-	//P13  			float64 `json:"_13"`
-	//P14  			float64 `json:"_14"`
-	//P15  			float64 `json:"_15"`
-	//P16  			float64 `json:"_16"` removed and added to the point to save one DB write
-	//CommonCreated
+	P4        null.Float `json:"_4"`
+	P5        null.Float `json:"_5"`
+	P6        null.Float `json:"_6"`
+	P7        null.Float `json:"_7"`
+	P8        null.Float `json:"_8"`
+	P9        null.Float `json:"_9"`
+	P10       null.Float `json:"_10"`
+	P11       null.Float `json:"_11"`
+	P12       null.Float `json:"_12"`
+	P13       null.Float `json:"_13"`
+	P14       null.Float `json:"_14"`
+	P15       null.Float `json:"_15"`
+	P16       null.Float `json:"_16"` //removed and added to the point to save one DB write
+
 }

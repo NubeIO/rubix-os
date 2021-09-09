@@ -1,9 +1,12 @@
 package database
 
 import (
+	"fmt"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/compat"
 	"github.com/NubeDev/flow-framework/utils"
+	"time"
 )
 
 var deviceChildTable = "Device"
@@ -93,11 +96,16 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 		}
 		body.IpConnection.UUID = utils.MakeTopicUUID(model.CommonNaming.IP)
 	}
+	body.CommonEnable.Enable = true
+	body.CommonFault.Fault = true
+	body.CommonFault.FaultCode = model.CommonFaultCode.PluginNotEnabled
+	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
+	body.CommonFault.LastFail = time.Now().UTC()
+	body.CommonFault.LastOk = time.Now().UTC()
+	body.PluginConfId = pluginIsNil(body.PluginConfId) //plugin path, will use system by default
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
-	//d.Bus.RegisterTopic("plg_8c410b2ce3aa4503")
-	//d.Bus.Emit(eventbus.CTX(), eventbus.NetworksAll, body)
 	return body, nil
 }
 
@@ -119,6 +127,9 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, networkModel.PluginConfId, networkModel.UUID)
+	d.Bus.RegisterTopic(t)
+	d.Bus.Emit(eventbus.CTX(), t, networkModel)
 	return networkModel, nil
 
 }

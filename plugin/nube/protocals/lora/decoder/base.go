@@ -1,7 +1,6 @@
 package decoder
 
 import (
-
 	log "github.com/sirupsen/logrus"
 	"strconv"
 )
@@ -29,7 +28,6 @@ const (
 
 func GetSensorType(data string) TSensorType {
 	sensor := data[2:4]
-
 	switch sensor {
 	case string(MicroAA):
 		return ME
