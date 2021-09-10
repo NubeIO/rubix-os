@@ -44,25 +44,6 @@ func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, e
 	}
 }
 
-// GetPointByField returns the point for the given field ie name or nil.
-func (d *GormDatabase) GetPointByField(field string, value string, withChildren bool) (*model.Point, error) {
-	var pointModel *model.Point
-	f := fmt.Sprintf("%s = ? ", field)
-	if withChildren { // drop child to reduce json size
-		query := d.DB.Where(f, value).Preload("Priority").First(&pointModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return pointModel, nil
-	} else {
-		query := d.DB.Where(f, value).First(&pointModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return pointModel, nil
-	}
-}
-
 // CreatePoint creates a device.
 func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	var deviceModel *model.Device
@@ -108,6 +89,25 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue bo
 	return pointModel, nil
 }
 
+// GetPointByField returns the point for the given field ie name or nil.
+func (d *GormDatabase) GetPointByField(field string, value string, withChildren bool) (*model.Point, error) {
+	var pointModel *model.Point
+	f := fmt.Sprintf("%s = ? ", field)
+	if withChildren { // drop child to reduce json size
+		query := d.DB.Where(f, value).Preload("Priority").First(&pointModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
+		return pointModel, nil
+	} else {
+		query := d.DB.Where(f, value).First(&pointModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
+		return pointModel, nil
+	}
+}
+
 // UpdatePointByField get by field and update.
 func (d *GormDatabase) UpdatePointByField(field string, value string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point
@@ -116,10 +116,29 @@ func (d *GormDatabase) UpdatePointByField(field string, value string, body *mode
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&pointModel).Updates(body)
-	if query.Error != nil {
-		return nil, query.Error
+	if writeValue {
+		if body.IsProducer {
+			//producer, err := d.UpdateProducerByField("producer_thing_uuid", pointModel.UUID)
+			//if err != nil {
+			//	return nil, err
+			//}
+
+		}
+
+		query = d.DB.Model(&pointModel).Updates(body)
+		if query.Error != nil {
+			return nil, query.Error
+		}
 	}
+
+	//query := d.DB.Where(f, value).Find(&pointModel)
+	//if query.Error != nil {
+	//	return nil, query.Error
+	//}
+	//query = d.DB.Model(&pointModel).Updates(body)
+	//if query.Error != nil {
+	//	return nil, query.Error
+	//}
 	return pointModel, nil
 }
 
