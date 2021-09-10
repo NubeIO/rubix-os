@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"time"
@@ -70,16 +71,17 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	return body, query.Error
 }
 
+
+
 // UpdatePoint returns the device for the given id or nil.
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point
-
-	if writeValue {
-		//TODO point cov event
-	}
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
+	}
+	if writeValue {
+		//TODO point cov event
 	}
 	query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
 	query = d.DB.Model(&pointModel).Updates(&body)
@@ -88,6 +90,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue bo
 	}
 	return pointModel, nil
 }
+
 
 // GetPointByField returns the point for the given field ie name or nil.
 func (d *GormDatabase) GetPointByField(field string, value string, withChildren bool) (*model.Point, error) {
@@ -108,6 +111,43 @@ func (d *GormDatabase) GetPointByField(field string, value string, withChildren 
 	}
 }
 
+
+
+func (d *GormDatabase) pointBus(body *model.Point) error {
+	t := fmt.Sprintf("%s.%s.%s", eventbus.PointUpdated, "a", body.UUID)
+	d.Bus.RegisterTopic(t)
+	err := d.Bus.Emit(eventbus.CTX(), t, body);if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdatePointValue returns the device for the given id or nil.
+func (d *GormDatabase) UpdatePointValue(body *model.Point) (*model.Point, error) {
+	var pointModel *model.Point
+	// check if is enabled
+	// check cov
+	// check if is a producer, if so update producer and hist
+
+	//query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Updates(body)
+	//if query.Error != nil {
+	//	return nil, query.Error
+	//}
+	//query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
+	//query = d.DB.Model(&pointModel).Updates(&body)
+	//if query.Error != nil {
+	//	return nil, query.Error
+	//}
+	return pointModel, nil
+}
+
+
+//compare
+func compare(p1, p2 *model.Point) bool {
+	fmt.Println(p1.PresentValue, p2.PresentValue, "compare values")
+	return p1.PresentValue == p2.PresentValue
+}
+
 // UpdatePointByField get by field and update.
 func (d *GormDatabase) UpdatePointByField(field string, value string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point
@@ -116,6 +156,12 @@ func (d *GormDatabase) UpdatePointByField(field string, value string, body *mode
 	if query.Error != nil {
 		return nil, query.Error
 	}
+
+
+
+	fmt.Println(compare(pointModel, body), 99999999999)
+
+
 	if writeValue {
 		if body.IsProducer {
 			//producer, err := d.UpdateProducerByField("producer_thing_uuid", pointModel.UUID)
@@ -125,10 +171,11 @@ func (d *GormDatabase) UpdatePointByField(field string, value string, body *mode
 
 		}
 
-		query = d.DB.Model(&pointModel).Updates(body)
-		if query.Error != nil {
-			return nil, query.Error
-		}
+
+	}
+	query = d.DB.Model(&pointModel).Updates(body)
+	if query.Error != nil {
+		return nil, query.Error
 	}
 
 	//query := d.DB.Where(f, value).Find(&pointModel)

@@ -11,8 +11,8 @@ type (
 
 	// BusService :nodoc:
 	BusService interface {
-		EmitString(ctx context.Context, topicName string, data string)
-		Emit(ctx context.Context, topicName string, data interface{})
+		EmitString(ctx context.Context, topicName string, data string) error
+		Emit(ctx context.Context, topicName string, data interface{}) error
 		RegisterTopic(topic string)
 		RegisterTopicParent(parent string, child string)
 	}
@@ -60,21 +60,22 @@ func NewService(eb *bus.Bus) BusService {
 
 
 // EmitString emits an event to the bus
-func (eb *notificationService) EmitString(ctx context.Context, topicName string, data string) {
+func (eb *notificationService) EmitString(ctx context.Context, topicName string, data string) error {
 	ctx = context.WithValue(ctx, bus.CtxKeyTxID, "")
-	err := eb.eb.Emit(ctx, topicName, data)
-	fmt.Println("Emit")
-	if err != nil {
+	err := eb.eb.Emit(ctx, topicName, data);if err != nil {
 		log.Fatal(err.Error())
+		return err
 	}
+	return err
 }
 
 // Emit emits an event to the bus
-func (eb *notificationService) Emit(ctx context.Context, topicName string, data interface{}) {
-	err := eb.eb.Emit(ctx, topicName, data)
-	if err != nil {
+func (eb *notificationService) Emit(ctx context.Context, topicName string, data interface{}) error {
+	err := eb.eb.Emit(ctx, topicName, data);if err != nil {
 		log.Fatal(err.Error())
+		return err
 	}
+	return err
 }
 
 
