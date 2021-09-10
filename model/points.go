@@ -54,8 +54,8 @@ var ObjectType = struct {
 	binaryValue:  "binaryValue",
 }
 
-//CommonPoint if a point is writable or not
-type CommonPoint struct {
+//Point table
+type Point struct {
 	CommonUUID
 	CommonName
 	CommonDescription
@@ -72,14 +72,9 @@ type CommonPoint struct {
 	AddressOffset int            `json:"address_offset"` // for example a modbus address offset
 	AddressUUID   string         `json:"address_uuid"`   // for example a droplet id (so a string)
 	PointType     string         `json:"point_type"`     // for example temp, rssi, voltage
-	isProducer    bool
-	isConsumer    bool
+	IsProducer    bool           `json:"is_producer"`
+	IsConsumer    bool           `json:"is_consumer"`
 	CommonFault
-}
-
-//Point table
-type Point struct {
-	CommonPoint
 	Priority Priority `json:"priority,omitempty" gorm:"constraint:OnDelete:CASCADE"`
 	CommonCreated
 }
