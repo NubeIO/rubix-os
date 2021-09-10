@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
 	log "github.com/sirupsen/logrus"
@@ -133,11 +132,9 @@ func (i *Instance) devTHLM(pnt *model.Point, value float64) error {
 	pnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	pnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 	pnt.CommonFault.LastOk = time.Now().UTC()
-
-	fmt.Println(pnt)
 	err := i.updatePoint(pnt)
 	if err != nil {
-		fmt.Println("err", err)
+		log.Error("LORA issue on update points", " ", err)
 	}
 	return nil
 }
