@@ -75,13 +75,7 @@ type Point struct {
 	IsProducer    bool           `json:"is_producer"`
 	IsConsumer    bool           `json:"is_consumer"`
 	CommonFault
-}
-
-//Point table
-type Point struct {
-	CommonPoint
 	Priority *Priority `json:"priority,omitempty" gorm:"constraint:OnDelete:CASCADE"`
-	CommonCreated
 }
 
 type Priority struct {
