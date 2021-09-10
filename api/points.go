@@ -24,7 +24,6 @@ func (a *PointAPI) GetPoints(ctx *gin.Context) {
 	withChildren, _ := withChildrenArgs(ctx)
 	q, err := a.DB.GetPoints(withChildren)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *PointAPI) GetPoint(ctx *gin.Context) {
@@ -32,7 +31,6 @@ func (a *PointAPI) GetPoint(ctx *gin.Context) {
 	withChildren, _ := withChildrenArgs(ctx)
 	q, err := a.DB.GetPoint(uuid, withChildren)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
@@ -41,7 +39,6 @@ func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 	_, _, writeValue, _, _ := withConsumerArgs(ctx)
 	q, err := a.DB.UpdatePoint(uuid, body, writeValue)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *PointAPI) GetPointByField(ctx *gin.Context) {
