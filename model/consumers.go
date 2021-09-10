@@ -61,3 +61,12 @@ type WriterBody struct {
 	CommonValue CommonValue `json:"common_value"`
 	Priority    Priority    `json:"priority"`
 }
+
+//WriterBulk could be a local network, job or alarm and so on
+type WriterBulk struct {
+	WriterUUID  string      `json:"writer_uuid"`
+	Action      string      `json:"action"` //read, write and so on
+	AskRefresh  bool        `json:"ask_refresh"`
+	CommonValue CommonValue `json:"common_value"`
+	Priority    Priority    `json:"priority"`
+}

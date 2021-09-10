@@ -318,6 +318,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 		//action's writers
 		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)
+		apiRoutes.POST("/writers/action/bulk", writerHandler.WriterBulkAction)
 
 		//action's writers clones
 		apiRoutes.GET("/writers/clone/:uuid", writerCloneHandler.GetWriterClone)

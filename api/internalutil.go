@@ -105,8 +105,6 @@ func withID(ctx *gin.Context, name string, f func(id uint)) {
 	}
 }
 
-
-
 func getBODYTransport(ctx *gin.Context) (dto interface{}, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -141,7 +139,6 @@ func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
-
 
 func getBODYProducer(ctx *gin.Context) (dto *model.Producer, err error) {
 	err = ctx.ShouldBindJSON(&dto)
@@ -178,6 +175,11 @@ func getBODYIntegration(ctx *gin.Context) (dto *model.Integration, err error) {
 }
 
 func getBODYWriterBody(ctx *gin.Context) (dto *model.WriterBody, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBODYWriterBulk(ctx *gin.Context) (dto []*model.WriterBulk, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
