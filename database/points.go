@@ -80,6 +80,9 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
+	if body.Priority == nil {
+		body.Priority = &model.Priority{}
+	}
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, query.Error
 	}
@@ -97,7 +100,8 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue bo
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&pointModel.Priority).Updates(body.Priority)
+	query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
+	query = d.DB.Model(&pointModel).Updates(&body)
 	if query.Error != nil {
 		return nil, query.Error
 	}

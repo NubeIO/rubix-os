@@ -80,7 +80,7 @@ type CommonPoint struct {
 //Point table
 type Point struct {
 	CommonPoint
-	Priority Priority `json:"priority,omitempty" gorm:"constraint:OnDelete:CASCADE"`
+	Priority *Priority `json:"priority,omitempty" gorm:"constraint:OnDelete:CASCADE"`
 	CommonCreated
 }
 
