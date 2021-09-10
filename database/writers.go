@@ -2,7 +2,6 @@ package database
 
 import (
 	"errors"
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/streams"
 	"github.com/NubeDev/flow-framework/utils"
@@ -203,8 +202,6 @@ func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) ([]*model.Prod
 		b.Priority = wri.Priority
 		action, err := d.WriterAction(wri.WriterUUID, b)
 		if err != nil {
-
-			fmt.Println(err, "error")
 			return nil, err
 		}
 		out = buildHists(action)

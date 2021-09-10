@@ -124,6 +124,24 @@ func (i *Instance) updatePoint(body *model.Point) error {
 	return nil
 }
 
+// updatePoint by its lora id
+func (i *Instance) devTHLM(pnt *model.Point, value float64) error {
+
+	pnt.PresentValue = value
+	pnt.CommonFault.InFault = false
+	pnt.CommonFault.MessageLevel = model.MessageLevel.Info
+	pnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
+	pnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
+	pnt.CommonFault.LastOk = time.Now().UTC()
+
+	fmt.Println(pnt)
+	err := i.updatePoint(pnt)
+	if err != nil {
+		fmt.Println("err", err)
+	}
+	return nil
+}
+
 var THLM = []string{"rssi", "voltage", "temperature", "humidity", "light", "motion"}
 
 // PublishSensor close serial port
@@ -136,50 +154,26 @@ func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorSt
 			switch e {
 			case model.PointTags.RSSI:
 				f := float64(s.Rssi)
-				pnt.PresentValue = f
-				pnt.CommonFault.InFault = false
-				pnt.CommonFault.MessageLevel = model.MessageLevel.Info
-				pnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
-				pnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
-				pnt.CommonFault.LastOk = time.Now().UTC()
-				err := i.updatePoint(pnt)
+				err := i.devTHLM(pnt, f)
 				if err != nil {
-					fmt.Println("err", err, s.Id)
+					return
 				}
 			case model.PointTags.Voltage:
 				f := float64(s.Voltage)
-				pnt.PresentValue = f
-				pnt.CommonFault.InFault = false
-				pnt.CommonFault.MessageLevel = model.MessageLevel.Info
-				pnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
-				pnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
-				pnt.CommonFault.LastOk = time.Now().UTC()
-				err := i.updatePoint(pnt)
+				err := i.devTHLM(pnt, f)
 				if err != nil {
-					fmt.Println("err", err, s.Id)
+					return
 				}
 			case model.PointTags.Temp:
-				pnt.PresentValue = s.Temperature
-				pnt.CommonFault.InFault = false
-				pnt.CommonFault.MessageLevel = model.MessageLevel.Info
-				pnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
-				pnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
-				pnt.CommonFault.LastOk = time.Now().UTC()
-				err := i.updatePoint(pnt)
+				err := i.devTHLM(pnt, s.Temperature)
 				if err != nil {
-					fmt.Println("err", err, s.Id)
+					return
 				}
 			case model.PointTags.Humidity:
 				f := float64(s.Humidity)
-				pnt.PresentValue = f
-				pnt.CommonFault.InFault = false
-				pnt.CommonFault.MessageLevel = model.MessageLevel.Info
-				pnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
-				pnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
-				pnt.CommonFault.LastOk = time.Now().UTC()
-				err := i.updatePoint(pnt)
+				err := i.devTHLM(pnt, f)
 				if err != nil {
-					fmt.Println("err", err, s.Id)
+					return
 				}
 
 			}

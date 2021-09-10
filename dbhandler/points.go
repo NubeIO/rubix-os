@@ -21,7 +21,7 @@ func (h *Handler) CreatePoint(body *model.Point) (*model.Point, error) {
 }
 
 func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
-	q, err := getDb().UpdatePoint(uuid, body)
+	q, err := getDb().UpdatePoint(uuid, body, false)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (h *Handler) GetPointByField(field string, value string, withChildren bool)
 }
 
 func (h *Handler) UpdatePointByField(field string, value string, body *model.Point) (*model.Point, error) {
-	q, err := getDb().UpdatePointByField(field, value, body)
+	q, err := getDb().UpdatePointByField(field, value, body, false)
 	if err != nil {
 		return nil, err
 	}

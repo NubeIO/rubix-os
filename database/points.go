@@ -87,8 +87,12 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 }
 
 // UpdatePoint returns the device for the given id or nil.
-func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
+func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point
+
+	if writeValue {
+		//TODO point cov event
+	}
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
@@ -101,7 +105,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 }
 
 // UpdatePointByField get by field and update.
-func (d *GormDatabase) UpdatePointByField(field string, value string, body *model.Point) (*model.Point, error) {
+func (d *GormDatabase) UpdatePointByField(field string, value string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point
 	f := fmt.Sprintf("%s = ? ", field)
 	query := d.DB.Where(f, value).Find(&pointModel)

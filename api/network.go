@@ -17,27 +17,26 @@ type NetworkDatabase interface {
 	DropNetworks() (bool, error)
 }
 type NetworksAPI struct {
-	DB NetworkDatabase
+	DB  NetworkDatabase
 	Bus eventbus.BusService
 }
 
-
 func (a *NetworksAPI) GetNetworks(ctx *gin.Context) {
-	withChildren, withPoints := networkArgs(ctx)
+	withChildren, withPoints := withChildrenArgs(ctx)
 	q, err := a.DB.GetNetworks(withChildren, withPoints)
 	reposeHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) GetNetworkByPlugin(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	withChildren, withPoints := networkArgs(ctx)
+	withChildren, withPoints := withChildrenArgs(ctx)
 	q, err := a.DB.GetNetworkByPlugin(uuid, withChildren, withPoints, "") //TODO fix this need to add in like "serial"
 	reposeHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) GetNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	withChildren, withPoints := networkArgs(ctx)
+	withChildren, withPoints := withChildrenArgs(ctx)
 	q, err := a.DB.GetNetwork(uuid, withChildren, withPoints)
 	reposeHandler(q, err, ctx)
 }
@@ -67,4 +66,3 @@ func (a *NetworksAPI) DropNetworks(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 
 }
-
