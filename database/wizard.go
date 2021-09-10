@@ -148,6 +148,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// point
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
+	pointModel.IsProducer = true
 	pnt, err := d.CreatePoint(&pointModel)
 	log.Debug("Created a Point")
 
@@ -199,6 +200,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var pointModel2 model.Point
 	pointModel2.DeviceUUID = dev2.UUID
 	pointModel2.Name = "is the consumer"
+	pointModel2.IsConsumer = true
 	pnt2, err := d.CreatePoint(&pointModel2)
 	if err != nil {
 		return false, err
