@@ -1,15 +1,14 @@
 package utils
+
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uuid"
 )
 
-
 func MakeUUID() (string, error) {
 	return uuid.MakeUUID()
 }
-
 
 func MakeTopicUUID(attribute string) string {
 	u, _ := uuid.MakeUUID()
@@ -18,6 +17,7 @@ func MakeTopicUUID(attribute string) string {
 	fln := "fln" //flow network
 	str := "str" //stream gateway
 	pro := "pro" //producers
+	prh := "prh" //producer history
 	wrc := "wrc" //writerClone
 	con := "con" //consumers
 	wri := "wri" //writer
@@ -30,8 +30,6 @@ func MakeTopicUUID(attribute string) string {
 	job := "job" //job
 
 	stl := "stl" //list of flow network gateway
-
-	prh := "prh" //producer history
 	alt := "alt" //alerts
 	cmd := "cmd" //command
 	rub := "rbx" //rubix uuid
@@ -78,4 +76,3 @@ func MakeTopicUUID(attribute string) string {
 	}
 	return u
 }
-

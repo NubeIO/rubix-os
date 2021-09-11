@@ -13,6 +13,10 @@ type CommonName struct {
 	Name string `json:"name"`
 }
 
+type CommonThing struct {
+	ThingType string `json:"thing_type"`
+}
+
 type CommonNameUnique struct {
 	Name string `json:"name"  gorm:"type:varchar(255);unique;not null"`
 }
@@ -74,7 +78,7 @@ type CommonValue struct {
 type CommonFault struct {
 	InFault      bool      `json:"fault"`
 	MessageLevel string    `json:"message_level"`
-	MessageCode  string    `json:"fault_code"`
+	MessageCode  string    `json:"message_code"`
 	Message      string    `json:"message"`
 	LastOk       time.Time `json:"last_ok"`
 	LastFail     time.Time `json:"last_fail"`
@@ -98,13 +102,8 @@ type CommonProducerPermissions struct {
 	AllowCRUD bool `json:"allow_crud"` //not sure if this will be used, but it will allow the producer to update the producer
 }
 
-type CommonProducer struct {
-	CommonUUID
-	CommonName
-	CommonDescription
-	CommonEnable
-	ProducerType        string `json:"producer_type"`
-	ProducerApplication string `json:"producer_application"`
+type CommonCurrentProducer struct {
+	ThingWriterUUID string `json:"thing_writer_uuid"`
 }
 
 type CommonConsumer struct {

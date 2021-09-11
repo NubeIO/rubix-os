@@ -10,7 +10,6 @@ import (
 Stream
 */
 
-
 // The StreamDatabase interface for encapsulating database access.
 type StreamDatabase interface {
 	GetStream(uuid string) (*model.Stream, error)
@@ -18,12 +17,12 @@ type StreamDatabase interface {
 	CreateStream(body *model.Stream) (*model.Stream, error)
 	UpdateStream(uuid string, body *model.Stream) (*model.Stream, error)
 	DeleteStream(uuid string) (bool, error)
+	DropStreams() (bool, error)
 }
 
 type StreamAPI struct {
 	DB StreamDatabase
 }
-
 
 func (j *StreamAPI) GetStreams(ctx *gin.Context) {
 	withChildren, _ := withChildrenArgs(ctx)
@@ -37,7 +36,6 @@ func (j *StreamAPI) GetStream(ctx *gin.Context) {
 	q, err := j.DB.GetStream(uuid)
 	reposeHandler(q, err, ctx)
 }
-
 
 func (j *StreamAPI) CreateStream(ctx *gin.Context) {
 	body, _ := getBODYStream(ctx)
@@ -53,9 +51,13 @@ func (j *StreamAPI) UpdateStream(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-
 func (j *StreamAPI) DeleteStream(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteStream(uuid)
+	reposeHandler(q, err, ctx)
+}
+
+func (j *StreamAPI) DropStreams(ctx *gin.Context) {
+	q, err := j.DB.DropStreams()
 	reposeHandler(q, err, ctx)
 }

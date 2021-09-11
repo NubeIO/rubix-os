@@ -68,18 +68,19 @@ func (s *SerialSetting) NewSerialConnection() error {
 		}
 	}
 	if portNameFound == "" {
+		log.Error("LORA: port not found", " ", err)
 		return errors.New("LORA: port not found")
 	}
 	s.ActivePortList = ports
 	port, err := serial.Open(portName, m)
 	if err != nil {
 		s.Error = true
-		log.Fatal("LORA: error on open port", err)
+		log.Error("LORA: error on open port", " ", err)
 		return err
 	}
 	Port = port
 	s.Connected = true
-	log.Info("LORA: Connected to serial port: ", portName, " ", "connected: ", s.Connected)
+	log.Info("LORA: Connected to serial port: ", " ", portName, " ", "connected: ", " ", s.Connected)
 	return nil
 }
 

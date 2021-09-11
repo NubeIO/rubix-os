@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/null"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/datatypes"
 	"time"
 )
@@ -50,17 +52,15 @@ func (d *GormDatabase) GetProducer(uuid string) (*model.Producer, error) {
 }
 
 // UpdateProducer  update it
-func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error) {
+func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer, updateHist bool) (*model.Producer, error) {
 	var producerModel *model.Producer
-	query := d.DB.Where("uuid = ?", uuid).Find(&producerModel)
+	query := d.DB.Where("uuid = ?", uuid).Find(&producerModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&producerModel).Updates(body)
-	if query.Error != nil {
-		return nil, query.Error
-	}
+
 	return producerModel, nil
+
 }
 
 type Point struct {
@@ -70,7 +70,7 @@ type Point struct {
 // ProducerCOV  update it
 func (d *GormDatabase) ProducerCOV(uuid string, writeData datatypes.JSON) error {
 	ph := new(model.ProducerHistory)
-	ph.UUID = utils.MakeTopicUUID("")
+	ph.UUID = utils.MakeTopicUUID(model.CommonNaming.ProducerHistory)
 	ph.ProducerUUID = uuid
 	ph.DataStore = writeData
 	ph.Timestamp = time.Now().UTC()
@@ -78,10 +78,37 @@ func (d *GormDatabase) ProducerCOV(uuid string, writeData datatypes.JSON) error 
 	if err != nil {
 		return err
 	}
-	pnt := Point{}
-	err = json.Unmarshal(writeData, &pnt)
+	return err
+}
+
+// ProducerPointCOV  update it
+func (d *GormDatabase) ProducerPointCOV(point *model.Point) error {
+	var producerModel model.Producer
+	producerModel.ThingWriterUUID = point.UUID //point uuid
+	pointUUID := point.UUID
+	// update Producer to show this is the currentThingWriter
+	// get the Producer to update its hist
+	pro, err := d.GetProducerByField("producer_thing_uuid", pointUUID)
+	if err != nil {
+		log.Errorf("ERROR GetProducerByField")
+		return err
+	}
+	_, err = d.UpdateProducer(pointUUID, &producerModel, false)
+	if err != nil {
+		log.Errorf("UpdateProducer")
+		return err
+	}
+
+	pnt := point
+	pnt.Priority.P1 = null.FloatFrom(point.PresentValue)
+	b, err := json.Marshal(pnt)
+	if err != nil {
+		log.Errorf("UpdateProducer")
+	}
+	err = d.ProducerCOV(pro.UUID, b)
 	if err != nil {
 		return err
+
 	}
 	return err
 }
@@ -96,19 +123,14 @@ func (d *GormDatabase) GetProducerByField(field string, value string) (*model.Pr
 		return nil, query.Error
 	}
 	return producerModel, nil
-
 }
 
 // UpdateProducerByField get by field and update.
 //for example update a producer by its producer_thing_uuid
-func (d *GormDatabase) UpdateProducerByField(field string, value string, body *model.Producer) (*model.Producer, error) {
+func (d *GormDatabase) UpdateProducerByField(field string, value string, body *model.Producer, updateHist bool) (*model.Producer, error) {
 	var producerModel *model.Producer
 	f := fmt.Sprintf("%s = ? ", field)
-	query := d.DB.Where(f, value).Find(&producerModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	query = d.DB.Model(&producerModel).Updates(body)
+	query := d.DB.Where(f, value).Find(&producerModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
 	}

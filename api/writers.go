@@ -13,6 +13,7 @@ type WriterDatabase interface {
 	CreateWriter(body *model.Writer) (*model.Writer, error)
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
+	DropWriters() (bool, error)
 	WriterAction(uuid string, body *model.WriterBody) (*model.ProducerHistory, error)
 	WriterBulkAction(body []*model.WriterBulk) ([]*model.ProducerHistory, error)
 }
@@ -53,6 +54,11 @@ func (j *WriterAPI) UpdateWriter(ctx *gin.Context) {
 func (j *WriterAPI) DeleteWriter(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteWriter(uuid)
+	reposeHandler(q, err, ctx)
+}
+
+func (j *WriterAPI) DropWriters(ctx *gin.Context) {
+	q, err := j.DB.DropWriters()
 	reposeHandler(q, err, ctx)
 }
 

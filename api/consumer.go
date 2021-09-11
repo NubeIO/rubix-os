@@ -6,9 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
-
-
 // The ConsumersDatabase interface for encapsulating database access.
 type ConsumersDatabase interface {
 	GetConsumer(uuid string) (*model.Consumer, error)
@@ -16,8 +13,7 @@ type ConsumersDatabase interface {
 	CreateConsumer(body *model.Consumer) (*model.Consumer, error)
 	UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error)
 	DeleteConsumer(uuid string) (bool, error)
-
-
+	DropConsumers() (bool, error)
 }
 type ConsumersAPI struct {
 	DB ConsumersDatabase
@@ -52,10 +48,13 @@ func (j *ConsumersAPI) UpdateConsumer(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-
 func (j *ConsumersAPI) DeleteConsumer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteConsumer(uuid)
 	reposeHandler(q, err, ctx)
 }
 
+func (j *ConsumersAPI) DropConsumers(ctx *gin.Context) {
+	q, err := j.DB.DropConsumers()
+	reposeHandler(q, err, ctx)
+}

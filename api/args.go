@@ -25,17 +25,17 @@ func withChildrenArgs(ctx *gin.Context) (withChildren bool, withPoints bool) {
 }
 
 //withConsumerArgs
-func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, write bool, thingType string, flowNetworkUUID string) {
+func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, write bool, updateProducer bool) {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
 	args.AskRefresh = ctx.DefaultQuery(aType.AskRefresh, aDefault.AskRefresh)
 	args.AskResponse = ctx.DefaultQuery(aType.AskResponse, aDefault.AskResponse)
 	args.Write = ctx.DefaultQuery(aType.Write, aDefault.Write)
-	args.ThingType = ctx.DefaultQuery(aType.ThingType, aDefault.ThingType)
-	args.FlowNetworkUUID = ctx.DefaultQuery(aType.FlowNetworkUUID, aDefault.FlowNetworkUUID)
+	args.UpdateProducer = ctx.DefaultQuery(aType.UpdateProducer, aDefault.UpdateProducer)
 	askRefresh, _ = toBool(args.AskRefresh)
 	askResponse, _ = toBool(args.AskResponse)
 	write, _ = toBool(args.Write)
-	return askRefresh, askResponse, write, args.ThingType, args.FlowNetworkUUID
+	updateProducer, _ = toBool(args.UpdateProducer)
+	return askRefresh, askResponse, write, updateProducer
 }

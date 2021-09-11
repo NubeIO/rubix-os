@@ -27,6 +27,7 @@ type Args struct {
 	WriteConsumer   string
 	Field           string
 	Value           string
+	UpdateProducer  string
 }
 
 var ArgsType = struct {
@@ -46,6 +47,7 @@ var ArgsType = struct {
 	WriteConsumer   string
 	Field           string
 	Value           string
+	UpdateProducer  string
 }{
 	Sort:            "sort",
 	Order:           "order",
@@ -63,6 +65,7 @@ var ArgsType = struct {
 	WriteConsumer:   "write_consumer",
 	Field:           "field",
 	Value:           "value",
+	UpdateProducer:  "update_producer",
 }
 
 var ArgsDefault = struct {
@@ -80,6 +83,7 @@ var ArgsDefault = struct {
 	FlowNetworkUUID string
 	Field           string
 	Value           string
+	UpdateProducer  string
 }{
 	Sort:            "ID",
 	Order:           "DESC",
@@ -95,6 +99,7 @@ var ArgsDefault = struct {
 	FlowNetworkUUID: "",
 	Field:           "name",
 	Value:           "",
+	UpdateProducer:  "false",
 }
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {

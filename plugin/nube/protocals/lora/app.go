@@ -17,7 +17,7 @@ user adds a device
 
 func SerialOpenAndRead() error {
 	s := new(SerialSetting)
-	s.SerialPort = "/dev/ttyACM1"
+	s.SerialPort = "/dev/ttyACM0"
 	s.BaudRate = 38400
 	sc := New(s)
 	err := sc.NewSerialConnection()
@@ -73,7 +73,7 @@ func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
 	p.AddressUUID = deviceBody.AddressUUID
 	if deviceBody.Model == string(decoder.THLM) {
 		for _, e := range THLM {
-			p.PointType = e //temp
+			p.ThingType = e //temp
 			err := i.addPoint(p)
 			if err != nil {
 				log.Error("LORA: issue on add points", " ", err)
@@ -101,7 +101,7 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 	code := deviceBody.AddressUUID
 	if code == string(decoder.THLM) {
 		for _, e := range THLM {
-			p.PointType = e
+			p.ThingType = e
 			err := i.updatePoint(p)
 			if err != nil {
 				log.Error("LORA: issue on add points", " ", err)
@@ -116,7 +116,7 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 // updatePoint by its lora id
 func (i *Instance) updatePoint(body *model.Point) error {
 	addr := body.AddressUUID
-	_, err := i.db.UpdatePointByField("address_uuid", addr, body)
+	_, err := i.db.UpdatePointByFieldAndType("address_uuid", addr, body)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,6 @@ func (i *Instance) updatePoint(body *model.Point) error {
 
 // updatePoint by its lora id
 func (i *Instance) devTHLM(pnt *model.Point, value float64) error {
-
 	pnt.PresentValue = value
 	pnt.CommonFault.InFault = false
 	pnt.CommonFault.MessageLevel = model.MessageLevel.Info
@@ -145,28 +144,33 @@ var THLM = []string{"rssi", "voltage", "temperature", "humidity", "light", "moti
 func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorStruct interface{}) {
 	pnt := new(model.Point)
 	pnt.AddressUUID = commonSensorData.Id
+
 	if commonSensorData.Sensor == string(decoder.THLM) {
 		s := sensorStruct.(decoder.TDropletTHLM)
 		for _, e := range THLM {
 			switch e {
 			case model.PointTags.RSSI:
 				f := float64(s.Rssi)
+				pnt.ThingType = e //set point type
 				err := i.devTHLM(pnt, f)
 				if err != nil {
 					return
 				}
 			case model.PointTags.Voltage:
 				f := float64(s.Voltage)
+				pnt.ThingType = e //set point type
 				err := i.devTHLM(pnt, f)
 				if err != nil {
 					return
 				}
 			case model.PointTags.Temp:
+				pnt.ThingType = e //set point type
 				err := i.devTHLM(pnt, s.Temperature)
 				if err != nil {
 					return
 				}
 			case model.PointTags.Humidity:
+				pnt.ThingType = e //set point type
 				f := float64(s.Humidity)
 				err := i.devTHLM(pnt, f)
 				if err != nil {

@@ -71,7 +71,7 @@ type Point struct {
 	AddressId     int            `json:"address_id"`     // for example a modbus address or bacnet address
 	AddressOffset int            `json:"address_offset"` // for example a modbus address offset
 	AddressUUID   string         `json:"address_uuid"`   // for example a droplet id (so a string)
-	PointType     string         `json:"point_type"`     // for example temp, rssi, voltage
+	CommonThing                  // for example temp, rssi, voltage
 	IsProducer    bool           `json:"is_producer"`
 	IsConsumer    bool           `json:"is_consumer"`
 	CommonFault
