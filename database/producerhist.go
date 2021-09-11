@@ -6,7 +6,6 @@ import (
 	"time"
 )
 
-
 // GetProducerHistories returns all histories.
 func (d *GormDatabase) GetProducerHistories() ([]*model.ProducerHistory, error) {
 	var historiesModel []*model.ProducerHistory
@@ -16,9 +15,7 @@ func (d *GormDatabase) GetProducerHistories() ([]*model.ProducerHistory, error) 
 	}
 	return historiesModel, nil
 
-
 }
-
 
 // GetProducerHistory returns the history for the given id or nil.
 func (d *GormDatabase) GetProducerHistory(uuid string) (*model.ProducerHistory, error) {
@@ -31,7 +28,6 @@ func (d *GormDatabase) GetProducerHistory(uuid string) (*model.ProducerHistory, 
 
 }
 
-
 // HistoryByProducerUUID returns the history for the given id or nil.
 func (d *GormDatabase) HistoryByProducerUUID(uuid string) (*model.ProducerHistory, error) {
 	var historyModel *model.ProducerHistory
@@ -43,7 +39,6 @@ func (d *GormDatabase) HistoryByProducerUUID(uuid string) (*model.ProducerHistor
 
 }
 
-
 // CreateProducerHistory creates a thing.
 func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.ProducerHistory)
@@ -53,7 +48,6 @@ func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*mode
 	}
 	return body, nil
 }
-
 
 func (d *GormDatabase) CreateBulkProducerHistory(history []*model.ProducerHistory) (bool, error) {
 	for _, hist := range history {
@@ -68,7 +62,6 @@ func (d *GormDatabase) CreateBulkProducerHistory(history []*model.ProducerHistor
 	}
 	return false, nil
 }
-
 
 // DeleteProducerHistory delete a history. TODO //add in by thing_uuid
 func (d *GormDatabase) DeleteProducerHistory(uuid string) (bool, error) {
@@ -99,8 +92,4 @@ func (d *GormDatabase) DropProducerHistories() (bool, error) {
 	} else {
 		return true, nil
 	}
-
 }
-
-
-

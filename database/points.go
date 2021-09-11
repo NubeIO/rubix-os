@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
@@ -25,7 +24,6 @@ func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
 		}
 		return pointsModel, nil
 	}
-
 }
 
 // GetPoint returns the device for the given id or nil.
@@ -83,6 +81,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue bo
 		//TODO point cov event
 	}
 	query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
+	if query.Error != nil {
+		return nil, query.Error
+	}
 	query = d.DB.Model(&pointModel).Updates(&body)
 	if query.Error != nil {
 		return nil, query.Error
@@ -109,27 +110,6 @@ func (d *GormDatabase) GetPointByField(field string, value string, withChildren 
 	}
 }
 
-func (d *GormDatabase) pointBus(body *model.Point, cov bool) error {
-	t := ""
-	producerUUID := "noProducer"
-	if cov {
-		t = fmt.Sprintf("%s.%s", eventbus.PointCOV, producerUUID)
-	} else {
-		t = fmt.Sprintf("%s.%s", eventbus.PointUpdated, producerUUID)
-	}
-	d.Bus.RegisterTopic(t)
-	err := d.Bus.Emit(eventbus.CTX(), t, body)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-//compare a COV event
-func compare(p1, p2 *model.Point) bool {
-	return p1.PresentValue == p2.PresentValue
-}
-
 // UpdatePointByFieldAndType get by field and update.
 func (d *GormDatabase) UpdatePointByFieldAndType(field string, value string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point
@@ -141,14 +121,13 @@ func (d *GormDatabase) UpdatePointByFieldAndType(field string, value string, bod
 	if pointModel.IsProducer {
 		if compare(pointModel, body) {
 			log.Errorf("UpdatePointByFieldAndType")
-			err := d.ProducerPointCOV(pointModel)
+			_, err := d.ProducerWrite("point", pointModel)
 			if err != nil {
 				log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
 				return nil, err
 			}
 		}
 	}
-
 	return pointModel, nil
 }
 

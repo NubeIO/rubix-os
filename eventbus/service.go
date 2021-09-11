@@ -18,10 +18,9 @@ type (
 	}
 )
 
-
 var bu *bus.Bus
 var busContext context.Context
-var bs  BusService
+var bs BusService
 
 func Init() {
 	bu = newBus()
@@ -31,7 +30,7 @@ func Init() {
 
 //GetBus an
 func GetBus() *bus.Bus {
-     return bu
+	return bu
 }
 
 func CTX() context.Context {
@@ -43,7 +42,7 @@ func GetService() BusService {
 }
 
 type notificationService struct {
-	eb   *bus.Bus
+	eb *bus.Bus
 }
 
 // NewService ...
@@ -52,17 +51,17 @@ func NewService(eb *bus.Bus) BusService {
 		eb: eb,
 	}
 	ns.registerPointsProducer() //add as types needed
-	ns.registerNodes() //add as types needed
+	ns.registerNodes()
+	ns.registerProducer()
 	bs = ns
 	return ns
 }
 
-
-
 // EmitString emits an event to the bus
 func (eb *notificationService) EmitString(ctx context.Context, topicName string, data string) error {
 	ctx = context.WithValue(ctx, bus.CtxKeyTxID, "")
-	err := eb.eb.Emit(ctx, topicName, data);if err != nil {
+	err := eb.eb.Emit(ctx, topicName, data)
+	if err != nil {
 		log.Fatal(err.Error())
 		return err
 	}
@@ -71,13 +70,13 @@ func (eb *notificationService) EmitString(ctx context.Context, topicName string,
 
 // Emit emits an event to the bus
 func (eb *notificationService) Emit(ctx context.Context, topicName string, data interface{}) error {
-	err := eb.eb.Emit(ctx, topicName, data);if err != nil {
+	err := eb.eb.Emit(ctx, topicName, data)
+	if err != nil {
 		log.Fatal(err.Error())
 		return err
 	}
 	return err
 }
-
 
 // RegisterTopic registers a topic for publishing
 func (eb *notificationService) RegisterTopic(ds string) {
@@ -95,7 +94,6 @@ func (eb *notificationService) UnregisterTopic(topic string) {
 	eb.eb.DeregisterTopics(topic)
 }
 
-
 // UnregisterTopicChild removes a topic from consumer
 func (eb *notificationService) UnregisterTopicChild(parent string, child string) {
 	topic := fmt.Sprintf("%s.%s", parent, child)
@@ -106,5 +104,3 @@ func (eb *notificationService) UnregisterTopicChild(parent string, child string)
 func (eb *notificationService) UnsubscribeHandler(id string) {
 	eb.eb.DeregisterHandler(id)
 }
-
-

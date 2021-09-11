@@ -45,3 +45,13 @@ func IsPoint(topic string, payload bus.Event) (*model.Point, error) {
 	}
 	return nil, nil
 }
+
+// DecodeBody  update it
+func DecodeBody(thingType string, payload interface{}) (interface{}, error) {
+	switch thingType {
+	case model.CommonNaming.Point:
+		p := payload.(*model.Point)
+		return p, nil
+	}
+	return nil, nil
+}

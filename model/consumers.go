@@ -5,19 +5,6 @@ import (
 	"time"
 )
 
-type ConsumersType struct {
-	Network string `json:"network"`
-	Job     string `json:"job"`
-	Point   string `json:"point"`
-	Alarm   string `json:"alarm"`
-}
-
-type ConsumersUse struct {
-	Local  string `json:"local"`
-	Remote string `json:"remote"`
-	Plugin string `json:"plugin"`
-}
-
 //Writer could be a local network, job or alarm and so on
 type Writer struct {
 	CommonUUID
@@ -61,6 +48,7 @@ type WriterBody struct {
 	AskRefresh  bool        `json:"ask_refresh"`
 	CommonValue CommonValue `json:"common_value"`
 	Priority    Priority    `json:"priority"`
+	Point       Point       `json:"point"`
 }
 
 //WriterBulk could be a local network, job or alarm and so on
