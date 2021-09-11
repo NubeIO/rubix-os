@@ -59,3 +59,12 @@ type ProducerHistory struct {
 	DataStore datatypes.JSON `json:"data_store"`
 	Timestamp time.Time      `json:"timestamp"`
 }
+
+//ProducerBody could be a local network, job or alarm and so on
+type ProducerBody struct {
+	CommonThing
+	FlowNetworkUUID string      `json:"flow_network_uuid"`
+	ProducerUUID    string      `json:"producer_uuid,omitempty"`
+	StreamUUID      string      `json:"stream_uuid,omitempty"`
+	Payload         interface{} `json:"payload"`
+}

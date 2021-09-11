@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/NubeIO/null"
@@ -67,8 +68,8 @@ type Point struct {
 	Priority model.Priority `json:"priority"`
 }
 
-// ProducerCOV  update it
-func (d *GormDatabase) ProducerCOV(uuid string, writeData datatypes.JSON) error {
+// ProducerWriteHist  update it
+func (d *GormDatabase) ProducerWriteHist(uuid string, writeData datatypes.JSON) error {
 	ph := new(model.ProducerHistory)
 	ph.UUID = utils.MakeTopicUUID(model.CommonNaming.ProducerHistory)
 	ph.ProducerUUID = uuid
@@ -81,37 +82,85 @@ func (d *GormDatabase) ProducerCOV(uuid string, writeData datatypes.JSON) error 
 	return err
 }
 
-// ProducerPointCOV  update it
-func (d *GormDatabase) ProducerPointCOV(point *model.Point) error {
+// ProducerWrite  update it
+func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (string, error) {
 	var producerModel model.Producer
-	producerModel.ThingWriterUUID = point.UUID //point uuid
-	pointUUID := point.UUID
-	// update Producer to show this is the currentThingWriter
-	// get the Producer to update its hist
-	pro, err := d.GetProducerByField("producer_thing_uuid", pointUUID)
+	p, err := eventbus.DecodeBody(thingType, payload)
 	if err != nil {
-		log.Errorf("ERROR GetProducerByField")
-		return err
+		return "", err
 	}
-	_, err = d.UpdateProducer(pointUUID, &producerModel, false)
-	if err != nil {
-		log.Errorf("UpdateProducer")
-		return err
-	}
+	if thingType == model.CommonNaming.Point {
+		point := p.(*model.Point)
+		producerModel.ThingWriterUUID = point.UUID
+		pointUUID := point.UUID
 
-	pnt := point
-	pnt.Priority.P1 = null.FloatFrom(point.PresentValue)
-	b, err := json.Marshal(pnt)
-	if err != nil {
-		log.Errorf("UpdateProducer")
-	}
-	err = d.ProducerCOV(pro.UUID, b)
-	if err != nil {
-		return err
+		pro, err := d.GetProducerByField("producer_thing_uuid", pointUUID)
+		if err != nil {
+			log.Errorf("ERROR GetProducerByField")
+			return "", err
+		}
+		_, err = d.UpdateProducer(pointUUID, &producerModel, false)
+		if err != nil {
+			log.Errorf("UpdateProducer")
+			return "", err
+		}
 
+		point.Priority.P1 = null.FloatFrom(point.PresentValue)
+		b, err := json.Marshal(point)
+		if err != nil {
+			log.Errorf("UpdateProducer")
+		}
+		err = d.ProducerWriteHist(pro.UUID, b)
+		if err != nil {
+			return "", err
+		}
+		var proBody model.ProducerBody
+		proBody.StreamUUID = pro.StreamUUID
+		proBody.ProducerUUID = pro.UUID
+		proBody.ThingType = pro.ThingType
+		proBody.ThingType = point.ThingType
+		proBody.Payload = point
+
+		_, err = d.producerBroadcast(proBody)
+		if err != nil {
+			return "", err
+		}
+
+		return pro.UUID, err
 	}
-	return err
+	return "", err
 }
+
+//func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}, ) (string,error) {
+//	var producerModel model.Producer
+//	p, err := eventbus.DecodeBody(thingType, payload);if err != nil {
+//		return "", err
+//	}
+//	if thingType == model.CommonNaming.Point {
+//		point := p.(*model.Point)
+//		producerModel.ThingWriterUUID = point.UUID
+//		pointUUID := point.UUID
+//
+//		pro, err := d.GetProducerByField("producer_thing_uuid", pointUUID);if err != nil {
+//			log.Errorf("ERROR GetProducerByField")
+//			return "", err
+//		}
+//		_, err = d.UpdateProducer(pointUUID, &producerModel, false);if err != nil {
+//			log.Errorf("UpdateProducer")
+//			return "", err
+//		}
+//		pnt := point
+//		pnt.Priority.P1 = null.FloatFrom(point.PresentValue)
+//		b, err := json.Marshal(pnt);if err != nil {
+//			log.Errorf("UpdateProducer")
+//		}
+//		err = d.ProducerWriteHist(pro.UUID, b);if err != nil {
+//			return "", err
+//		}
+//		return pro.UUID, err
+//	}
+//	return "", err
+//}
 
 // GetProducerByField returns the point for the given field ie name or nil.
 //for example get a producer by its producer_thing_uuid

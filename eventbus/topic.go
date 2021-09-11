@@ -10,9 +10,14 @@ const (
 	PluginsAll  = "plugin.*"
 	StreamsAll  = "stream.*"
 	NodesAll    = "node.*"
+	ProducerAll = "producer.*"
 
 	PluginsCreated = "plugin.created"
 	PluginsUpdated = "plugin.updated"
+
+	ProducerCreated = "producer.created"
+	ProducerUpdated = "producer.updated"
+	ProducerEvent   = "producer.event"
 
 	StreamsCreated = "stream.created"
 	StreamsUpdated = "stream.updated"
@@ -61,5 +66,9 @@ func BusTopics() []string {
 		NodeEvent,
 		NodeEventIn,
 		NodeEventOut,
+		ProducerAll,
+		ProducerCreated,
+		ProducerUpdated,
+		ProducerEvent,
 	}
 }
