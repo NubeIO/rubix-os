@@ -91,7 +91,7 @@ var MessageLevel = struct {
 }{
 	Info:         "info",
 	Critical:     "critical",
-	NoneCritical: "none_critical",
+	NoneCritical: "noneCritical",
 	Warning:      "warning",
 	Fail:         "fail",
 	Normal:       "normal",
@@ -104,8 +104,8 @@ var CommonFaultMessage = struct {
 	Offline          string
 	NetworkMessage   string
 }{
-	ConfigError:      "configError",
-	SystemError:      "systemError",
+	ConfigError:      "config error",
+	SystemError:      "system error",
 	PluginNotEnabled: "plugin not enabled or no valid message from the network",
 	Offline:          "offline",
 	NetworkMessage:   "msg for network valid",

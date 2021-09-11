@@ -4,7 +4,6 @@ import (
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
-
 )
 
 /*
@@ -31,27 +30,24 @@ remote producer
 
 */
 
-
 // The ProducerDatabase interface for encapsulating database access.
 type ProducerDatabase interface {
 	GetProducer(uuid string) (*model.Producer, error)
 	GetProducers() ([]*model.Producer, error)
 	CreateProducer(body *model.Producer) (*model.Producer, error)
-	UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error)
+	UpdateProducer(uuid string, body *model.Producer, updateHist bool) (*model.Producer, error)
 	DeleteProducer(uuid string) (bool, error)
-
+	DropProducers() (bool, error)
 }
 type ProducerAPI struct {
 	DB ProducerDatabase
 }
-
 
 func (j *ProducerAPI) GetProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetProducer(uuid)
 	reposeHandler(q, err, ctx)
 }
-
 
 func (j *ProducerAPI) GetProducers(ctx *gin.Context) {
 	q, err := j.DB.GetProducers()
@@ -69,14 +65,12 @@ func (j *ProducerAPI) CreateProducer(ctx *gin.Context) {
 	reposeHandler(body, err, ctx)
 }
 
-
 func (j *ProducerAPI) UpdateProducer(ctx *gin.Context) {
 	body, _ := getBODYProducer(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateProducer(uuid, body)
+	q, err := j.DB.UpdateProducer(uuid, body, false)
 	reposeHandler(q, err, ctx)
 }
-
 
 func (j *ProducerAPI) DeleteProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
@@ -84,3 +78,7 @@ func (j *ProducerAPI) DeleteProducer(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
+func (j *ProducerAPI) DropProducers(ctx *gin.Context) {
+	q, err := j.DB.DropProducers()
+	reposeHandler(q, err, ctx)
+}

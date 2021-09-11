@@ -36,7 +36,8 @@ type Consumer struct {
 	CurrentWriterCloneUUID string            `json:"current_writer_clone_uuid"` // this could come from any flow-network on any instance
 	ProducerUUID           string            `json:"producer_uuid"`
 	ProducerThingUUID      string            `json:"producer_thing_uuid"` // this is the remote point UUID
-	ConsumerType           string            `json:"consumer_type"`
+	ThingType              string            `json:"thing_type"`
+	ConsumerThingType      string            `json:"consumer_thing_type"`
 	ConsumerApplication    string            `json:"consumer_application"`
 	StreamUUID             string            `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
 	DataStore              datatypes.JSON    `json:"data_store"`

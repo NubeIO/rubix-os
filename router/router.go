@@ -233,6 +233,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			streamRoutes.GET("/:uuid", gatewayHandler.GetStream)
 			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
 			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
+			streamRoutes.DELETE("/drop", gatewayHandler.DropStreams)
 		}
 
 		networkRoutes := apiRoutes.Group("/networks")
@@ -265,7 +266,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			pointRoutes.GET("/:uuid", pointHandler.GetPoint)
 			pointRoutes.PATCH("/:uuid", pointHandler.UpdatePoint)
 			pointRoutes.GET("/field/:uuid", pointHandler.GetPointByField)
-			pointRoutes.PATCH("/field/:uuid", pointHandler.UpdatePointByField)
+			pointRoutes.PATCH("/field/:uuid", pointHandler.UpdatePointByFieldAndType)
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
 			pointRoutes.DELETE("/drop", pointHandler.DropPoints)
 		}
@@ -286,6 +287,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			producerRoutes.GET("/:uuid", producerHandler.GetProducer)
 			producerRoutes.PATCH("/:uuid", producerHandler.UpdateProducer)
 			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
+			producerRoutes.DELETE("/drop", producerHandler.DropProducers)
 
 			producerWriterCloneRoutes := producerRoutes.Group("/writers")
 			{
@@ -294,6 +296,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				producerWriterCloneRoutes.GET("/:uuid", writerCloneHandler.GetWriterClone)
 				producerWriterCloneRoutes.PATCH("/:uuid", writerCloneHandler.UpdateWriterClone)
 				producerWriterCloneRoutes.DELETE("/:uuid", writerCloneHandler.DeleteWriterClone)
+				producerWriterCloneRoutes.DELETE("/drop", writerCloneHandler.DropWriterClone)
 			}
 		}
 
@@ -304,6 +307,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			consumerRoutes.GET("/:uuid", consumerHandler.GetConsumer)
 			consumerRoutes.PATCH("/:uuid", consumerHandler.UpdateConsumer)
 			consumerRoutes.DELETE("/:uuid", consumerHandler.DeleteConsumer)
+			consumerRoutes.DELETE("/drop", consumerHandler.DropConsumers)
 
 			consumerWriterRoutes := consumerRoutes.Group("/writers")
 			{
@@ -312,6 +316,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				consumerWriterRoutes.GET("/:uuid", writerHandler.GetWriter)
 				consumerWriterRoutes.PATCH("/:uuid", writerHandler.UpdateWriter)
 				consumerWriterRoutes.DELETE("/:uuid", writerHandler.DeleteWriter)
+				consumerWriterRoutes.DELETE("/drop", writerHandler.DropWriters)
 			}
 
 		}

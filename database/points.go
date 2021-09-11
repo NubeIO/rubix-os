@@ -2,8 +2,10 @@ package database
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -73,13 +75,12 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 // UpdatePoint returns the device for the given id or nil.
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point
-
-	if writeValue {
-		//TODO point cov event
-	}
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
+	}
+	if writeValue {
+		//TODO point cov event
 	}
 	query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
 	query = d.DB.Model(&pointModel).Updates(&body)
@@ -108,37 +109,46 @@ func (d *GormDatabase) GetPointByField(field string, value string, withChildren 
 	}
 }
 
-// UpdatePointByField get by field and update.
-func (d *GormDatabase) UpdatePointByField(field string, value string, body *model.Point, writeValue bool) (*model.Point, error) {
+func (d *GormDatabase) pointBus(body *model.Point, cov bool) error {
+	t := ""
+	producerUUID := "noProducer"
+	if cov {
+		t = fmt.Sprintf("%s.%s", eventbus.PointCOV, producerUUID)
+	} else {
+		t = fmt.Sprintf("%s.%s", eventbus.PointUpdated, producerUUID)
+	}
+	d.Bus.RegisterTopic(t)
+	err := d.Bus.Emit(eventbus.CTX(), t, body)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//compare a COV event
+func compare(p1, p2 *model.Point) bool {
+	return p1.PresentValue == p2.PresentValue
+}
+
+// UpdatePointByFieldAndType get by field and update.
+func (d *GormDatabase) UpdatePointByFieldAndType(field string, value string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point
-	f := fmt.Sprintf("%s = ? ", field)
-	query := d.DB.Where(f, value).Find(&pointModel)
+	f := fmt.Sprintf("%s = ? AND thing_type = ?", field)
+	query := d.DB.Where(f, value, body.ThingType).Preload("Priority").Find(&pointModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if writeValue {
-		if body.IsProducer {
-			//producer, err := d.UpdateProducerByField("producer_thing_uuid", pointModel.UUID)
-			//if err != nil {
-			//	return nil, err
-			//}
-
-		}
-
-		query = d.DB.Model(&pointModel).Updates(body)
-		if query.Error != nil {
-			return nil, query.Error
+	if pointModel.IsProducer {
+		if compare(pointModel, body) {
+			log.Errorf("UpdatePointByFieldAndType")
+			err := d.ProducerPointCOV(pointModel)
+			if err != nil {
+				log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
+				return nil, err
+			}
 		}
 	}
 
-	//query := d.DB.Where(f, value).Find(&pointModel)
-	//if query.Error != nil {
-	//	return nil, query.Error
-	//}
-	//query = d.DB.Model(&pointModel).Updates(body)
-	//if query.Error != nil {
-	//	return nil, query.Error
-	//}
 	return pointModel, nil
 }
 

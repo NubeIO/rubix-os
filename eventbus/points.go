@@ -10,7 +10,7 @@ import (
 
 func (eb *notificationService) registerPointsProducer() {
 	handler := bus.Handler{
-		Handle:  func(ctx context.Context, e bus.Event){
+		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				switch e.Topic {
 				case PointCreated:
@@ -29,6 +29,14 @@ func (eb *notificationService) registerPointsProducer() {
 					if !ok {
 						return
 					}
+				case PointCOV:
+					payload, ok := e.Data.(*model.Point)
+					//publishMQTT(payload)
+					logrus.Error(payload)
+					if !ok {
+						return
+					}
+
 				}
 			}()
 		},
@@ -36,8 +44,3 @@ func (eb *notificationService) registerPointsProducer() {
 	}
 	eb.eb.RegisterHandler("points.*", handler)
 }
-
-
-
-
-

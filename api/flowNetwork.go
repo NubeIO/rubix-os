@@ -47,12 +47,9 @@ func (a *FlowNetworksAPI) DeleteFlowNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteFlowNetwork(uuid)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *FlowNetworksAPI) DropFlowNetworks(ctx *gin.Context) {
 	q, err := a.DB.DropFlowNetworks()
 	reposeHandler(q, err, ctx)
-
 }
-

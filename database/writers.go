@@ -33,28 +33,28 @@ func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 
 // GetWriter get it
 func (d *GormDatabase) GetWriter(uuid string) (*model.Writer, error) {
-	var consumerModel *model.Writer
-	query := d.DB.Where("uuid = ? ", uuid).First(&consumerModel)
+	var writerModel *model.Writer
+	query := d.DB.Where("uuid = ? ", uuid).First(&writerModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return consumerModel, nil
+	return writerModel, nil
 }
 
 // GetWriterByThing get it by its thing uuid
 func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer, error) {
-	var consumerModel *model.Writer
-	query := d.DB.Where("producer_thing_uuid = ? ", producerThingUUID).First(&consumerModel)
+	var writerModel *model.Writer
+	query := d.DB.Where("producer_thing_uuid = ? ", producerThingUUID).First(&writerModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return consumerModel, nil
+	return writerModel, nil
 }
 
 // DeleteWriter deletes it
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
-	var consumerModel *model.Writer
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&consumerModel)
+	var writerModel *model.Writer
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&writerModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
@@ -68,23 +68,23 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 
 // UpdateWriter  update it
 func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
-	var consumerModel *model.Writer
-	query := d.DB.Where("uuid = ?", uuid).Find(&consumerModel)
+	var writerModel *model.Writer
+	query := d.DB.Where("uuid = ?", uuid).Find(&writerModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&consumerModel).Updates(body)
+	query = d.DB.Model(&writerModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return consumerModel, nil
+	return writerModel, nil
 
 }
 
-// DropConsumersList delete all.
-func (d *GormDatabase) DropConsumersList() (bool, error) {
-	var consumerModel *model.Writer
-	query := d.DB.Where("1 = 1").Delete(&consumerModel)
+// DropWriters delete all.
+func (d *GormDatabase) DropWriters() (bool, error) {
+	var writerModel *model.Writer
+	query := d.DB.Where("1 = 1").Delete(&writerModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
@@ -213,6 +213,6 @@ func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) ([]*model.Prod
 func consumerRefresh(producerFeedback *model.ProducerHistory) (*model.Consumer, error) {
 	updateConsumer := new(model.Consumer)
 	updateConsumer.DataStore = producerFeedback.DataStore
-	updateConsumer.CurrentWriterCloneUUID = producerFeedback.CurrentWriterCloneUUID
+	updateConsumer.CurrentWriterCloneUUID = producerFeedback.ThingWriterUUID
 	return updateConsumer, nil
 }

@@ -12,7 +12,7 @@ type PointDatabase interface {
 	CreatePoint(body *model.Point) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point, writeValue bool) (*model.Point, error)
 	GetPointByField(field string, value string, withChildren bool) (*model.Point, error)
-	UpdatePointByField(field string, value string, body *model.Point, writeValue bool) (*model.Point, error)
+	UpdatePointByFieldAndType(field string, value string, body *model.Point, writeValue bool) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
 	DropPoints() (bool, error)
 }
@@ -36,7 +36,7 @@ func (a *PointAPI) GetPoint(ctx *gin.Context) {
 func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	uuid := resolveID(ctx)
-	_, _, writeValue, _, _ := withConsumerArgs(ctx)
+	_, _, writeValue, _ := withConsumerArgs(ctx)
 	q, err := a.DB.UpdatePoint(uuid, body, writeValue)
 	reposeHandler(q, err, ctx)
 }
@@ -48,11 +48,11 @@ func (a *PointAPI) GetPointByField(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-func (a *PointAPI) UpdatePointByField(ctx *gin.Context) {
+func (a *PointAPI) UpdatePointByFieldAndType(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	field, value := withFieldsArgs(ctx)
-	_, _, writeValue, _, _ := withConsumerArgs(ctx)
-	q, err := a.DB.UpdatePointByField(field, value, body, writeValue)
+	_, _, writeValue, _ := withConsumerArgs(ctx)
+	q, err := a.DB.UpdatePointByFieldAndType(field, value, body, writeValue)
 	reposeHandler(q, err, ctx)
 }
 
