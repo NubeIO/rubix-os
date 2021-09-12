@@ -7,7 +7,7 @@ import (
 	"github.com/NubeDev/flow-framework/rest"
 )
 
-func ProducerFeedback(producerUUID string, flowBody *model.FlowNetwork) (*model.ProducerHistory, error) {
+func GetProducerHist(producerUUID string, flowBody *model.FlowNetwork) (*model.ProducerHistory, error) {
 	if producerUUID == "" {
 		return nil, errors.New("error: producer uuid is none")
 	}

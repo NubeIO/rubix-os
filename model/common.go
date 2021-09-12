@@ -21,7 +21,7 @@ type CommonThingType struct {
 	ThingType string `json:"thing_type"`
 }
 type CommonThingUUID struct {
-	ThingUUID string `json:"thing_class"`
+	ThingUUID string `json:"thing_uuid"`
 }
 
 type CommonNameUnique struct {
@@ -103,5 +103,5 @@ type CommonProducerPermissions struct {
 }
 
 type CommonCurrentProducer struct {
-	ThingWriterUUID string `json:"thing_writer_uuid"`
+	ThingWriterUUID string `json:"current_writer_uuid"`
 }
