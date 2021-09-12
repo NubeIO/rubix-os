@@ -174,8 +174,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 
 	consumerFlowNetwork.Name = "Consumer flow network"
 	consumerFlowNetwork.IsRemote = true
-	flowNetwork.FlowIP = "0.0.0.0"
-	flowNetwork.FlowPort = "1660"
+	consumerFlowNetwork.FlowIP = "0.0.0.0"
+	consumerFlowNetwork.FlowPort = "1660"
+	consumerFlowNetwork.FlowToken = "fakeToken123"
 	cfn, err := d.CreateFlowNetwork(&consumerFlowNetwork)
 	log.Debug("Created Consumer FlowNetwork: ", cfn.UUID)
 
