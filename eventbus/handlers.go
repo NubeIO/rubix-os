@@ -49,7 +49,7 @@ func IsPoint(topic string, payload bus.Event) (*model.Point, error) {
 // DecodeBody  update it
 func DecodeBody(thingType string, payload interface{}) (interface{}, error) {
 	switch thingType {
-	case model.CommonNaming.Point:
+	case model.ThingClass.Point:
 		p := payload.(*model.Point)
 		return p, nil
 	}

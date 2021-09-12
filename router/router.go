@@ -92,6 +92,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	mqttHandler := api.MqttConnectionAPI{
 		DB: db,
 	}
+	schHandler := api.ScheduleAPI{
+		DB: db,
+	}
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
 	//for the custom plugin endpoints you need to use the plugin token
@@ -366,6 +369,16 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			mqttClientRoutes.PATCH("/:uuid", mqttHandler.UpdateMqttConnection)
 			mqttClientRoutes.DELETE("/:uuid", mqttHandler.DeleteMqttConnection)
 			mqttClientRoutes.DELETE("/drop", mqttHandler.DropMqttConnectionsList)
+		}
+
+		schRoutes := apiRoutes.Group("/schedules")
+		{
+			schRoutes.GET("", schHandler.GetSchedules)
+			schRoutes.POST("", schHandler.CreateSchedule)
+			schRoutes.GET("/:uuid", schHandler.GetSchedule)
+			schRoutes.PATCH("/:uuid", schHandler.UpdateSchedule)
+			schRoutes.DELETE("/:uuid", schHandler.DeleteSchedule)
+			schRoutes.DELETE("/drop", schHandler.DropSchedules)
 		}
 
 	}

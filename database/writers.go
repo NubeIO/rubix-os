@@ -129,7 +129,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	if err != nil {
 		return nil, err
 	}
-	data, action, err := streams.ValidateTypes(writer.WriterType, body)
+	data, action, err := streams.ValidateTypes(writer.ThingClass, body)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	}
 	consumerUUID := consumer.UUID
 	producerUUID := consumer.ProducerUUID
-	writerCloneUUID := writer.WriteCloneUUID
+	writerCloneUUID := writer.CloneUUID
 	streamUUID := consumer.StreamUUID
 	stream, err := d.GetStream(streamUUID)
 	if err != nil {
@@ -213,6 +213,6 @@ func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) ([]*model.Prod
 func consumerRefresh(producerFeedback *model.ProducerHistory) (*model.Consumer, error) {
 	updateConsumer := new(model.Consumer)
 	updateConsumer.DataStore = producerFeedback.DataStore
-	updateConsumer.CurrentWriterCloneUUID = producerFeedback.ThingWriterUUID
+	updateConsumer.CurrentWriterUUID = producerFeedback.ThingWriterUUID
 	return updateConsumer, nil
 }

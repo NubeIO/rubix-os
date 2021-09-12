@@ -42,7 +42,6 @@ func (d *GormDatabase) HistoryByProducerUUID(uuid string) (*model.ProducerHistor
 // CreateProducerHistory creates a thing.
 func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.ProducerHistory)
-	//todo make sure thing_uuid is provided
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}

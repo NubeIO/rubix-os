@@ -11,14 +11,11 @@ import (
 
 // WizardLocalPointMapping add a local network mapping stream.
 func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
-	//delete networks
 	var flowNetwork model.FlowNetwork
-	//var pluginModel *model.PluginConf
 	var networkModel model.Network
 	var deviceModel model.Device
 	var pointModel model.Point
-	//var streamListModel model.StreamList
-	//var streamModel model.Stream
+	var streamModel model.Stream
 	var producerModel model.Producer
 	var consumerModel model.Consumer
 	var writerModel model.Writer
@@ -43,21 +40,32 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	// device
 	deviceModel.NetworkUUID = n.UUID
 	dev, err := d.CreateDevice(&deviceModel)
-
+	fmt.Println("CreateDevice")
 	// point
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
+	pointModel.IsProducer = true
 	pnt, err := d.CreatePoint(&pointModel)
+	fmt.Println("CreatePoint")
+
+	// stream
+	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
+	stream, err := d.CreateStream(&streamModel)
+	log.Debug("Created Streams at Producer side: ", stream.Name)
 
 	// producer
-	//producerModel.StreamUUID = stream.UUID
-	producerModel.ProducerThingUUID = pnt.UUID
+	log.Debug("stream.UUID: ", stream.UUID)
+	producerModel.StreamUUID = stream.UUID
+
+	// producer
+	producerModel.StreamUUID = stream.UUID
+	producerModel.ThingUUID = pnt.UUID
 	producerModel.Name = "producer stream"
-	producerModel.ThingType = model.CommonNaming.Point
+	producerModel.ThingType = model.ThingClass.Point
 	producerModel.ProducerApplication = model.CommonNaming.Mapping
 	producer, err := d.CreateProducer(&producerModel)
 	fmt.Println(producer.Name)
-
+	fmt.Println("CreateProducer")
 	// consumer stream
 	var streamModel2 model.Stream
 	streamModel2.IsConsumer = true
@@ -68,34 +76,26 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	consumerModel.StreamUUID = streamConsumer.UUID
 	consumerModel.Name = "consumer stream"
 	consumerModel.ProducerUUID = producerModel.UUID
-	consumerModel.ThingType = model.CommonNaming.Point
+	consumerModel.ProducerUUID = model.ThingClass.API
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
 	consumerModel.ProducerThingUUID = pnt.UUID
 	consumer, err := d.CreateConsumer(&consumerModel)
 	fmt.Println(consumer.Name)
-
-	// device to be used for consumer list
-	deviceModel.NetworkUUID = n.UUID
-	dev2, err := d.CreateDevice(&deviceModel)
-
-	// point 2 to add to consumer list
-	var pointModel2 model.Point
-	pointModel2.DeviceUUID = dev2.UUID
-	pointModel2.Name = "is the consumer"
-	pnt2, err := d.CreatePoint(&pointModel2)
-
+	fmt.Println("CreateConsumer")
 	// writer
 	writerModel.ConsumerUUID = consumerModel.UUID
-	writerModel.ConsumerThingUUID = pnt2.UUID
+	writerModel.ThingType = model.ThingClass.API
+	writerModel.ThingType = model.ThingClass.API
+	writerModel.ConsumerThingUUID = consumerModel.UUID //itself
 	writer, err := d.CreateWriter(&writerModel)
 	fmt.Println(writer)
-
+	fmt.Println("CreateWriter")
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = producer.UUID
-	//writerCloneModel.ConsumerUUID = pnt2.UUID
+	writerCloneModel.ThingClass = model.ThingClass.API
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
 	fmt.Println(writerClone)
-
+	fmt.Println("CreateWriterClone")
 	if err != nil {
 		fmt.Println("Error on wizard")
 		fmt.Println(err)
@@ -160,9 +160,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// producer
 	log.Debug("stream.UUID: ", stream.UUID)
 	producerModel.StreamUUID = stream.UUID
-	producerModel.ProducerThingUUID = pnt.UUID
+	producerModel.ThingUUID = pnt.UUID
 	producerModel.Name = "producer stream"
-	producerModel.ThingType = model.CommonNaming.Point
+	producerModel.ThingClass = model.ThingClass.Point
 	producerModel.ProducerApplication = model.CommonNaming.Mapping
 	producer, err := d.CreateProducer(&producerModel)
 	log.Debug("Created Producer: ", producer.Name)
@@ -183,7 +183,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	consumerModel.StreamUUID = consumerStream.UUID
 	consumerModel.Name = "consumer stream"
 	consumerModel.ProducerUUID = producerModel.UUID
-	consumerModel.ThingType = model.CommonNaming.Point
+	consumerModel.ProducerThingClass = model.ThingClass.Point
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
 	consumerModel.ProducerThingUUID = pnt.UUID
 	consumer, err := d.CreateConsumer(&consumerModel)
@@ -209,7 +209,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// writer (edge-2)
 	writerModel.ConsumerUUID = consumerModel.UUID
 	writerModel.ConsumerThingUUID = pnt2.UUID
-	writerModel.WriterType = model.CommonNaming.Point
+	writerModel.ThingClass = model.ThingClass.Point
 	writer, err := d.CreateWriter(&writerModel)
 	if err != nil {
 
@@ -219,7 +219,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// add consumer to the writerClone (edge-1)
 	writerCloneModel.ProducerUUID = producer.UUID
 	writerCloneModel.WriterUUID = writerModel.UUID
-	writerCloneModel.WriterType = model.CommonNaming.Point
+	writerCloneModel.ThingClass = model.ThingClass.Point
 
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
 	if err != nil {
@@ -227,7 +227,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	}
 
 	// Update write_clone_uuid on consumer side (edge-2)
-	writerModel.WriteCloneUUID = writerClone.UUID
+	writerModel.CloneUUID = writerClone.UUID
 	_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
 	if err != nil {
 		return false, err
@@ -295,7 +295,7 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	consumerModel.StreamUUID = body.StreamUUID
 	consumerModel.Name = "consumer stream 2nd network"
 	consumerModel.ProducerUUID = body.ProducerUUID
-	consumerModel.ThingType = model.CommonNaming.Point
+	consumerModel.ProducerThingType = model.ThingClass.Point
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
 	consumerModel.ProducerThingUUID = body.ExistingPointUUID //existing point
 	consumer, err := d.CreateConsumer(&consumerModel)
@@ -315,7 +315,7 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	fmt.Println(writerClone)
 
 	//update writerCloneUUID to writer
-	writerModel.WriteCloneUUID = writerClone.UUID
+	writerModel.CloneUUID = writerClone.UUID
 	_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
 	fmt.Println(writer)
 

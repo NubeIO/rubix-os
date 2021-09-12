@@ -81,7 +81,7 @@ func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, 
 
 // CreateNetwork creates a device.
 func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Network)
+	body.UUID = utils.MakeTopicUUID(model.ThingClass.Network)
 	body.Name = nameIsNil(body.Name)
 	info := d.getPluginConf(body)
 	switch info.ProtocolType {
@@ -96,6 +96,7 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 		}
 		body.IpConnection.UUID = utils.MakeTopicUUID(model.CommonNaming.IP)
 	}
+	body.ThingClass = model.ThingClass.Network
 	body.CommonEnable.Enable = true
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical

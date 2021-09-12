@@ -71,13 +71,14 @@ func (d *GormDatabase) GetDeviceByField(field string, value string, withPoints b
 // CreateDevice creates a device.
 func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	var net *model.Network
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Device)
+	body.UUID = utils.MakeTopicUUID(model.ThingClass.Device)
 	networkUUID := body.NetworkUUID
 	body.Name = nameIsNil(body.Name)
 	query := d.DB.Where("uuid = ? ", networkUUID).First(&net)
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	body.ThingClass = model.ThingClass.Device
 	body.CommonEnable.Enable = true
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical

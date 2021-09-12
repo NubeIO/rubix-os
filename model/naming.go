@@ -2,9 +2,6 @@ package model
 
 var CommonNaming = struct {
 	Plugin            string
-	Network           string
-	Device            string
-	Point             string
 	Read              string
 	Write             string
 	Stream            string
@@ -14,7 +11,6 @@ var CommonNaming = struct {
 	Consumer          string
 	Writer            string
 	WriterClone       string
-	Alert             string
 	Mapping           string
 	CommandGroup      string
 	Rubix             string
@@ -30,9 +26,6 @@ var CommonNaming = struct {
 	TransportType     string
 }{
 	Plugin:            "plugin",
-	Network:           "network",
-	Device:            "device",
-	Point:             "point",
 	Read:              "read",
 	Write:             "write",
 	Stream:            "stream",
@@ -42,7 +35,6 @@ var CommonNaming = struct {
 	Consumer:          "consumer",
 	Writer:            "writer",
 	WriterClone:       "writer_clone",
-	Alert:             "alert",
 	Mapping:           "mapping",
 	CommandGroup:      "command_group",
 	Rubix:             "rubix",
@@ -57,7 +49,30 @@ var CommonNaming = struct {
 	TransportType:     "transport_type",
 }
 
-var CommonNamingCommandGroup = struct {
+var ThingClass = struct {
+	API            string
+	Network        string
+	Device         string
+	Point          string
+	InternalAPI    string
+	ExternalAPI    string
+	Schedule       string
+	GlobalSchedule string
+	SilenceAlarm   string
+	Alert          string
+}{
+	API:            "api",
+	Network:        "network",
+	Device:         "device",
+	Point:          "point",
+	InternalAPI:    "internal_api",
+	ExternalAPI:    "external_api",
+	Schedule:       "schedule",
+	GlobalSchedule: "global_schedule",
+	Alert:          "alert",
+}
+
+var NamingCommandGroup = struct {
 	PointWrite     string
 	MasterSchedule string
 	SilenceAlarm   string
