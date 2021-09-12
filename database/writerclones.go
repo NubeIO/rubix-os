@@ -85,14 +85,44 @@ func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone, u
 			return nil, err
 		}
 		if body.DataStore != nil {
-			err = d.ProducerWriteHist(proUUID, wcm.DataStore)
+			_, err = d.ProducerWriteHist(proUUID, wcm.DataStore)
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
-
 	return wcm, nil
+}
+
+// UpdateCloneAndHist  update it
+func (d *GormDatabase) UpdateCloneAndHist(uuid string, body *model.WriterClone, updateProducer bool) (*model.ProducerHistory, error) {
+	var wcm *model.WriterClone
+	query := d.DB.Where("uuid = ?", uuid).Find(&wcm)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	query = d.DB.Model(&wcm).Updates(body)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	if updateProducer {
+		pro := new(model.Producer)
+		proUUID := wcm.ProducerUUID
+		pro.ThingWriterUUID = uuid
+		_, err := d.UpdateProducer(proUUID, pro, true)
+		if err != nil {
+			return nil, err
+		}
+		if body.DataStore != nil {
+			hist, err := d.ProducerWriteHist(proUUID, wcm.DataStore)
+			if err != nil {
+				return nil, err
+			}
+			return hist, nil
+		}
+	}
+
+	return nil, nil
 
 }
 

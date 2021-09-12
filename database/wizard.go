@@ -61,22 +61,19 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	producerModel.StreamUUID = stream.UUID
 	producerModel.ThingUUID = pnt.UUID
 	producerModel.Name = "producer stream"
+	producerModel.ThingClass = model.ThingClass.Point
 	producerModel.ThingType = model.ThingClass.Point
 	producerModel.ProducerApplication = model.CommonNaming.Mapping
 	producer, err := d.CreateProducer(&producerModel)
 	fmt.Println(producer.Name)
 	fmt.Println("CreateProducer")
-	// consumer stream
-	var streamModel2 model.Stream
-	streamModel2.IsConsumer = true
-	//streamModel2.StreamListUUID = streamList.UUID
-	streamConsumer, err := d.CreateStream(&streamModel2)
 
 	// consumer
-	consumerModel.StreamUUID = streamConsumer.UUID
+	consumerModel.StreamUUID = streamModel.UUID
 	consumerModel.Name = "consumer stream"
 	consumerModel.ProducerUUID = producerModel.UUID
-	consumerModel.ProducerUUID = model.ThingClass.API
+	consumerModel.ProducerThingClass = model.ThingClass.Point
+	consumerModel.ProducerThingType = model.ThingClass.Point
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
 	consumerModel.ProducerThingUUID = pnt.UUID
 	consumer, err := d.CreateConsumer(&consumerModel)
@@ -84,18 +81,26 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	fmt.Println("CreateConsumer")
 	// writer
 	writerModel.ConsumerUUID = consumerModel.UUID
-	writerModel.ThingType = model.ThingClass.API
-	writerModel.ThingType = model.ThingClass.API
+	writerModel.ThingClass = model.ThingClass.Point
+	writerModel.ThingType = model.ThingClass.Point
 	writerModel.ConsumerThingUUID = consumerModel.UUID //itself
 	writer, err := d.CreateWriter(&writerModel)
 	fmt.Println(writer)
 	fmt.Println("CreateWriter")
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = producer.UUID
-	writerCloneModel.ThingClass = model.ThingClass.API
+	writerCloneModel.ThingClass = model.ThingClass.Point
+	writerCloneModel.ThingType = model.ThingClass.Point
+	writerCloneModel.WriterUUID = writer.UUID
+	fmt.Println(writer.UUID, 1, 1, 1, 1)
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
 	fmt.Println(writerClone)
 	fmt.Println("CreateWriterClone")
+	writerModel.CloneUUID = writerClone.UUID
+	_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
+	if err != nil {
+		return false, err
+	}
 	if err != nil {
 		fmt.Println("Error on wizard")
 		fmt.Println(err)
@@ -304,13 +309,13 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	// writer
 	writerModel.ConsumerUUID = consumerModel.UUID
 	writerModel.ConsumerThingUUID = pnt.UUID //new point
+
 	writer, err := d.CreateWriter(&writerModel)
 	fmt.Println(writer)
 
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = body.ProducerUUID
-	//writerCloneModel.ConsumerUUID = pnt2.UUID
-	writerCloneModel.WriterUUID = writerModel.UUID
+	writerCloneModel.WriterUUID = writer.UUID
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
 	fmt.Println(writerClone)
 

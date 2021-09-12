@@ -144,7 +144,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	writerCloneUUID := writer.CloneUUID
 	streamUUID := consumer.StreamUUID
 	stream, err := d.GetStream(streamUUID)
-	if err != nil {
+	if err != nil || stream.UUID == "nil" {
 		return nil, errors.New("error: invalid stream UUID")
 	}
 	flowNetworkUUID := ""
@@ -156,31 +156,65 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	if err != nil {
 		return nil, errors.New("error: invalid flow UUID")
 	}
-	if action == model.CommonNaming.Write {
-		wc.DataStore = data
-		writer.DataStore = data
-		_, err = streams.WriteClone(writerCloneUUID, flow, wc, true)
+	//if action == model.CommonNaming.Write { //write value to the clone
+	wc.DataStore = data
+	writer.DataStore = data
+	if flow.IsRemote { //IF IS REMOTE FLOW-NETWORK
+		if action == model.CommonNaming.Write {
+			_, err = streams.WriteClone(writerCloneUUID, flow, wc, true)
+			if err != nil {
+				return nil, err
+			}
+		}
+		producerHistory, err := streams.GetProducerHist(producerUUID, flow)
 		if err != nil {
 			return nil, err
 		}
-	}
-	producerFeedback, err := streams.ProducerFeedback(producerUUID, flow)
-	if err != nil {
-		return nil, err
-	}
-	if askRefresh {
-		updateConsumer, err := consumerRefresh(producerFeedback)
-		if err != nil {
-			return nil, err
+		if askRefresh { //THIS WILL MAKE THE CONSUMER REFLECT THE CURRENT STATE OF THE PRODUCER (THIS WOULD BE USED FOR POINT MAPPING ONE TO MANY)
+			updateConsumer, err := consumerRefresh(producerHistory)
+			if err != nil {
+				return nil, err
+			}
+			_, _ = d.UpdateConsumer(consumerUUID, updateConsumer)
+			if err != nil {
+				return nil, errors.New("error: on update consumer feedback")
+			}
+			return producerHistory, err
+		} else {
+			return producerHistory, err
 		}
-		_, _ = d.UpdateConsumer(consumerUUID, updateConsumer)
-		if err != nil {
-			return nil, errors.New("error: on update consumer feedback")
+	} else { //IF IS LOCAL FLOW-NETWORK
+		var producerHistory *model.ProducerHistory
+		if action == model.CommonNaming.Write {
+			producerHistory, err = d.UpdateCloneAndHist(writerCloneUUID, wc, true)
+			if err != nil {
+				return nil, errors.New("WRITER: error on local WRITE to writer-clone")
+			}
+		} else {
+			producerHistory, err = d.HistoryByProducerUUID(producerUUID)
+			if err != nil {
+				return nil, errors.New("WRITER: error on local READ to producer history")
+			}
 		}
-		return producerFeedback, err
-	} else {
-		return producerFeedback, err
+		//producer feedback
+		if askRefresh {
+			updateConsumer, err := consumerRefresh(producerHistory)
+			if err != nil {
+				return nil, err
+			}
+			_, _ = d.UpdateConsumer(consumerUUID, updateConsumer)
+			if err != nil {
+				return nil, errors.New("error: on update consumer feedback")
+			}
+			return producerHistory, err
+		} else {
+			return producerHistory, err
+		}
+
 	}
+
+	//}
+
 }
 
 type hists struct {

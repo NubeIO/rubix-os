@@ -20,7 +20,7 @@ func (d *GormDatabase) GetProducerHistories() ([]*model.ProducerHistory, error) 
 // GetProducerHistory returns the history for the given id or nil.
 func (d *GormDatabase) GetProducerHistory(uuid string) (*model.ProducerHistory, error) {
 	var historyModel *model.ProducerHistory
-	query := d.DB.Where("producer_uuid = ? ", uuid).Order("timestamp DESC").First(&historyModel)
+	query := d.DB.Where("uuid = ? ", uuid).First(&historyModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -31,7 +31,7 @@ func (d *GormDatabase) GetProducerHistory(uuid string) (*model.ProducerHistory, 
 // HistoryByProducerUUID returns the history for the given id or nil.
 func (d *GormDatabase) HistoryByProducerUUID(uuid string) (*model.ProducerHistory, error) {
 	var historyModel *model.ProducerHistory
-	query := d.DB.Where("producer_uuid` = ? ", uuid).First(&historyModel)
+	query := d.DB.Where("producer_uuid` = ? ", uuid).Order("timestamp DESC").First(&historyModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -62,7 +62,7 @@ func (d *GormDatabase) CreateBulkProducerHistory(history []*model.ProducerHistor
 	return false, nil
 }
 
-// DeleteProducerHistory delete a history. TODO //add in by thing_uuid
+// DeleteProducerHistory delete a history.
 func (d *GormDatabase) DeleteProducerHistory(uuid string) (bool, error) {
 	var historyModel *model.ProducerHistory
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&historyModel)
@@ -78,7 +78,7 @@ func (d *GormDatabase) DeleteProducerHistory(uuid string) (bool, error) {
 
 }
 
-// DropProducerHistories delete all. TODO //add in by thing_uuid
+// DropProducerHistories delete all.
 func (d *GormDatabase) DropProducerHistories() (bool, error) {
 	var historyModel *model.ProducerHistory
 	query := d.DB.Where("1 = 1").Delete(&historyModel)
