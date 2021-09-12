@@ -81,8 +81,8 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	fmt.Println("CreateConsumer")
 	// writer
 	writerModel.ConsumerUUID = consumerModel.UUID
-	writerModel.ThingClass = model.ThingClass.Point
-	writerModel.ThingType = model.ThingClass.Point
+	writerModel.WriterThingClass = model.ThingClass.Point
+	writerModel.WriterThingType = model.ThingClass.Point
 	writerModel.ConsumerThingUUID = consumerModel.UUID //itself
 	writer, err := d.CreateWriter(&writerModel)
 	fmt.Println(writer)
@@ -168,6 +168,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	producerModel.ThingUUID = pnt.UUID
 	producerModel.Name = "producer stream"
 	producerModel.ThingClass = model.ThingClass.Point
+	producerModel.ThingType = model.ThingClass.Point
 	producerModel.ProducerApplication = model.CommonNaming.Mapping
 	producer, err := d.CreateProducer(&producerModel)
 	log.Debug("Created Producer: ", producer.Name)
@@ -190,6 +191,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	consumerModel.Name = "consumer stream"
 	consumerModel.ProducerUUID = producerModel.UUID
 	consumerModel.ProducerThingClass = model.ThingClass.Point
+	consumerModel.ProducerThingType = model.ThingClass.Point
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
 	consumerModel.ProducerThingUUID = pnt.UUID
 	consumer, err := d.CreateConsumer(&consumerModel)
@@ -215,7 +217,8 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// writer (edge-2)
 	writerModel.ConsumerUUID = consumerModel.UUID
 	writerModel.ConsumerThingUUID = pnt2.UUID
-	writerModel.ThingClass = model.ThingClass.Point
+	writerModel.WriterThingClass = model.ThingClass.Point
+	writerModel.WriterThingType = model.ThingClass.Point
 	writer, err := d.CreateWriter(&writerModel)
 	if err != nil {
 
@@ -226,7 +229,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	writerCloneModel.ProducerUUID = producer.UUID
 	writerCloneModel.WriterUUID = writerModel.UUID
 	writerCloneModel.ThingClass = model.ThingClass.Point
-
+	writerCloneModel.ThingType = model.ThingClass.Point
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
 	if err != nil {
 		return false, err

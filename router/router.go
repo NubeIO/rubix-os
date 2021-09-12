@@ -95,6 +95,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	schHandler := api.ScheduleAPI{
 		DB: db,
 	}
+	thingHandler := api.ThingAPI{}
+
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
 	//for the custom plugin endpoints you need to use the plugin token
@@ -380,6 +382,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			schRoutes.PATCH("/:uuid", schHandler.UpdateSchedule)
 			schRoutes.DELETE("/:uuid", schHandler.DeleteSchedule)
 			schRoutes.DELETE("/drop", schHandler.DropSchedules)
+		}
+		thingRoutes := apiRoutes.Group("/things")
+		{
+			thingRoutes.GET("/class", thingHandler.ThingClass)
+			thingRoutes.GET("/types", thingHandler.ThingTypes)
 		}
 
 	}

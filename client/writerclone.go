@@ -15,12 +15,9 @@ func (a *FlowClient) ClientGetWriterClone(uuid string) (*model.WriterClone, erro
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
-	fmt.Println(resp.Error())
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	fmt.Println(resp.String())
-
 	return resp.Result().(*model.WriterClone), nil
 }
 
@@ -36,10 +33,8 @@ func (a *FlowClient) ClientEditWriterClone(uuid string, body model.WriterClone, 
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
-	fmt.Println(resp.Error())
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	fmt.Println(resp.String())
 	return resp.Result().(*model.WriterClone), nil
 }

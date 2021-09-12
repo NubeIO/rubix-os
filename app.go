@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/cachestore"
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/database"
@@ -12,6 +15,7 @@ import (
 	"github.com/NubeDev/flow-framework/runner"
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
 	"os"
 	"path"
 	"time"
@@ -35,6 +39,8 @@ func intHandler(db *database.GormDatabase) {
 
 }
 
+//var ThingTypes interface{}
+
 func main() {
 	conf := config.CreateApp()
 	logger.SetLogger(conf.LogLevel)
@@ -49,13 +55,18 @@ func main() {
 	}
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
 	eventbus.Init()
-
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
 		conf.PassStrength, conf.Database.LogLevel, true, conf.Prod)
 	if err != nil {
 		panic(err)
 	}
-
+	p := conf.GetAbsConfigDir()
+	thingType := fmt.Sprintf("%s/tags.json", p)
+	plan, _ := ioutil.ReadFile(thingType)
+	err = json.Unmarshal(plan, &api.ThingTypes)
+	if err != nil {
+		fmt.Println(err)
+	}
 	intHandler(db)
 	defer db.Close()
 	engine, closeable := router.Create(db, vInfo, conf)
