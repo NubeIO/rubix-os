@@ -21,7 +21,7 @@ func (d *GormDatabase) GetConsumers() ([]*model.Consumer, error) {
 
 // CreateConsumer make it
 func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, error) {
-	_, err := d.GetStream(body.StreamUUID)
+	_, err := d.GetStream(body.StreamUUID, false)
 	if err != nil {
 		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the stream UUID", nil)
 	}

@@ -8,7 +8,7 @@ import (
 
 func (d *GormDatabase) producerBroadcast(producer model.ProducerBody) error {
 	t := fmt.Sprintf("%s", eventbus.ProducerEvent)
-	stream, err := d.GetStream(producer.StreamUUID)
+	stream, err := d.GetStream(producer.StreamUUID, false)
 	if err != nil {
 		return err
 	}

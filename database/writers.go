@@ -143,7 +143,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	producerUUID := consumer.ProducerUUID
 	writerCloneUUID := writer.CloneUUID
 	streamUUID := consumer.StreamUUID
-	stream, err := d.GetStream(streamUUID)
+	stream, err := d.GetStream(streamUUID, false)
 	if err != nil || stream.UUID == "nil" {
 		return nil, errors.New("error: invalid stream UUID")
 	}

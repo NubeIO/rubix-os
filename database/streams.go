@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	"gorm.io/gorm"
 )
 
 // GetStreams get all of them
@@ -36,9 +37,14 @@ func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
 }
 
 // GetStream get it
-func (d *GormDatabase) GetStream(uuid string) (*model.Stream, error) {
+func (d *GormDatabase) GetStream(uuid string, withChildren bool) (*model.Stream, error) {
 	var gatewayModel *model.Stream
-	query := d.DB.Preload("FlowNetworks").Where("uuid = ? ", uuid).First(&gatewayModel)
+	var query *gorm.DB = nil
+	if withChildren {
+		query = d.DB.Preload("FlowNetworks").Preload("Producer").Preload("Producer.WriterClone").Preload("Consumer").Preload("Consumer.Writer").Find(&gatewayModel).Where("uuid = ? ", uuid).First(&gatewayModel)
+	} else {
+		query = d.DB.Find(&gatewayModel)
+	}
 	if query.Error != nil {
 		return nil, query.Error
 	}
