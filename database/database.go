@@ -22,7 +22,7 @@ var gormDatabase *GormDatabase
 
 // New creates a new wrapper for the gorm database framework.
 func New(dialect, connection, defaultUser, defaultPass string, strength int, logLevel string,
-	createDefaultUserIfNotExist bool) (*GormDatabase, error) {
+	createDefaultUserIfNotExist bool, production bool) (*GormDatabase, error) {
 	createDirectoryIfSqlite(dialect, connection)
 	_connection := fmt.Sprintf("%s?_foreign_keys=on", connection)
 	db, err := gorm.Open(sqlite.Open(_connection), &gorm.Config{
@@ -95,7 +95,6 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	for _, v := range models {
 		err = db.AutoMigrate(v)
 		if err != nil {
-			fmt.Println(err)
 			panic("failed to AutoMigrate")
 		}
 	}
@@ -104,7 +103,16 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	db.Find(new(model.User)).Count(&userCount)
 	if createDefaultUserIfNotExist && userCount == 0 {
 		db.Create(&model.User{Name: defaultUser, Pass: password.CreatePassword(defaultPass, strength), Admin: true})
+		if !production { //make a fake token for dev
+			c := new(model.Client)
+			c.Token = "fakeToken123"
+			c.UserID = 1
+			c.Name = "admin"
+			db.Create(c)
+		}
+
 	}
+
 	var platCount int64 = 0
 	rp := new(model.RubixPlat)
 	db.Find(rp).Count(&platCount)
