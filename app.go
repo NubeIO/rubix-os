@@ -23,7 +23,7 @@ var (
 	BuildDate = "<build_date>"
 )
 
-func intHandler(db *database.GormDatabase)  {
+func intHandler(db *database.GormDatabase) {
 	//db access
 	dh := new(dbhandler.Handler)
 	dh.DB = db
@@ -49,8 +49,10 @@ func main() {
 	}
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
 	eventbus.Init()
+
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
-		conf.PassStrength, conf.Database.LogLevel, true);if err != nil {
+		conf.PassStrength, conf.Database.LogLevel, true, conf.Prod)
+	if err != nil {
 		panic(err)
 	}
 

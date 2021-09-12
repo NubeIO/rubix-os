@@ -31,7 +31,7 @@ func (d *GormDatabase) GetProducerHistory(uuid string) (*model.ProducerHistory, 
 // HistoryByProducerUUID returns the history for the given id or nil.
 func (d *GormDatabase) HistoryByProducerUUID(uuid string) (*model.ProducerHistory, error) {
 	var historyModel *model.ProducerHistory
-	query := d.DB.Where("producer_uuid` = ? ", uuid).Order("timestamp DESC").First(&historyModel)
+	query := d.DB.Where("producer_uuid = ? ", uuid).Order("timestamp DESC").First(&historyModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

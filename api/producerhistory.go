@@ -30,6 +30,12 @@ func (a *HistoriesAPI) GetProducerHistory(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
+func (a *HistoriesAPI) HistoryByProducerUUID(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := a.DB.HistoryByProducerUUID(uuid)
+	reposeHandler(q, err, ctx)
+}
+
 func (a *HistoriesAPI) CreateProducerHistory(ctx *gin.Context) {
 	body, _ := getBODYHistory(ctx)
 	q, err := a.DB.CreateProducerHistory(body)

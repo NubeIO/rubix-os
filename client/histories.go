@@ -5,14 +5,12 @@ import (
 	"github.com/NubeDev/flow-framework/model"
 )
 
-
-
 // ClientGetHistory an object
 func (a *FlowClient) ClientGetHistory(uuid string) (*model.ProducerHistory, error) {
 	resp, err := a.client.R().
 		SetResult(&model.ProducerHistory{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/histories/producers/{uuid}")
+		Get("/api/histories/producers/field/{uuid}")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
@@ -21,5 +19,3 @@ func (a *FlowClient) ClientGetHistory(uuid string) (*model.ProducerHistory, erro
 	}
 	return resp.Result().(*model.ProducerHistory), nil
 }
-
-
