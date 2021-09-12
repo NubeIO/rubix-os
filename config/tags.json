@@ -1,0 +1,2405 @@
+{
+  "Total Water Consumption": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "sensor",
+      "inclusion/exclusion",
+      "hisTotalized"
+    ]
+  },
+  "Water Target": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "target"
+    ]
+  },
+  "Total Gas Consumption": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "gas",
+      "sensor",
+      "exclusion",
+      "hisTotalized"
+    ]
+  },
+  "Gas Target": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "gas",
+      "target",
+      "sensor",
+      "exclusion",
+      "hisTotalized"
+    ]
+  },
+  "Total Active Energy": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "elec",
+      "energy",
+      "sensor",
+      "active",
+      "exclusion",
+      "hisOnWrite"
+    ]
+  },
+  "Total Active Power": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "elec",
+      "power",
+      "sensor",
+      "active"
+    ]
+  },
+  "Energy Target": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "elec ",
+      "energy",
+      "target"
+    ]
+  },
+  "???": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "gas",
+      "sensor",
+      "inclusion",
+      "hisTotalized"
+    ]
+  },
+  "Zone/Room Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sensor",
+      "zone",
+      "vav"
+    ]
+  },
+  "Zone/Room Temperature Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sp",
+      "zone",
+      "vav"
+    ]
+  },
+  "Supply Air Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sensor",
+      "supply",
+      "ahu"
+    ]
+  },
+  "Return Air Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sensor",
+      "return",
+      "ahu"
+    ]
+  },
+  "Zone/Room Relative Humidity": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "humidity",
+      "sensor",
+      "zone",
+      "vav"
+    ]
+  },
+  "Damper": {
+    "kind": "number",
+    "unit": "%",
+    "equipType": "",
+    "tags": [
+      "air",
+      "damper",
+      "cmd",
+      "vav"
+    ]
+  },
+  "Airflow": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "flow",
+      "sensor",
+      "ftu"
+    ]
+  },
+  "Airflow Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "flow",
+      "sp",
+      "vav"
+    ]
+  },
+  "Minimum Airflow": {
+    "kind": "string",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "flow",
+      "sensor",
+      "min",
+      "vav"
+    ]
+  },
+  "Electric Duct Heater Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "edh",
+      "run",
+      "sensor",
+      "ahu"
+    ]
+  },
+  "Electric Duct Heater S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "edh",
+      "run",
+      "cmd",
+      "ahu"
+    ]
+  },
+  "Terminal Load": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "sensor",
+      "terminalLoad",
+      "vav"
+    ]
+  },
+  "Maximum Airflow": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "flow",
+      "sensor",
+      "max",
+      "vav"
+    ]
+  },
+  "General Exhaust Air Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "exhaust",
+      "general"
+    ]
+  },
+  "General Exhaust Air Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "exhaust",
+      "general"
+    ]
+  },
+  "General Exhaust Air Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "exhaust",
+      "general"
+    ]
+  },
+  "General Exhaust Air const Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "exhaust",
+      "general"
+    ]
+  },
+  "Exhaust Air Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "exhaust"
+    ]
+  },
+  "Exhaust Air Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "exhaust"
+    ]
+  },
+  "Exhaust Air Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "exhaust"
+    ]
+  },
+  "Exhaust Air const Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "exhaust"
+    ]
+  },
+  "Kitchen Exhaust Air Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "exhaust",
+      "kitchen"
+    ]
+  },
+  "Kitchen Exhaust Air Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "exhaust",
+      "kitchen"
+    ]
+  },
+  "Kitchen Exhaust Air Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "exhaust",
+      "kitchen"
+    ]
+  },
+  "Kitchen Exhaust Air const Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "exhaust",
+      "kitchen"
+    ]
+  },
+  "Toilet Exhaust Air Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "exhaust",
+      "toilet"
+    ]
+  },
+  "Toilet Exhaust Air Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "exhaust",
+      "toilet"
+    ]
+  },
+  "Toilet Exhaust Air Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "exhaust",
+      "toilet"
+    ]
+  },
+  "Toilet Exhaust Air const Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "exhaust",
+      "toilet"
+    ]
+  },
+  "CarPark Exhaust Air Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "exhaust",
+      "carpark"
+    ]
+  },
+  "CarPark Exhaust Air Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "exhaust",
+      "carpark"
+    ]
+  },
+  "CarPark Exhaust Air Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "exhaust",
+      "carpark"
+    ]
+  },
+  "CarPark Exhaust Air Fan Speed": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "speed",
+      "cmd",
+      "exhaust",
+      "carpark"
+    ]
+  },
+  "CarPark Exhaust Air const Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "exhaust",
+      "carpark"
+    ]
+  },
+  "CarPark Exhaust Air const Pressure Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sp",
+      "exhaust",
+      "carpark"
+    ]
+  },
+  "CarPark Exhaust Carbon Monoxide": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "co",
+      "sensor",
+      "exhaust",
+      "carpark"
+    ]
+  },
+  "CarPark Exhaust Carbon Monoxide Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "co",
+      "sp",
+      "exhaust",
+      "carpark"
+    ]
+  },
+  "CarPark Supply Air Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "supply",
+      "carpark"
+    ]
+  },
+  "CarPark Supply Air Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "supply",
+      "carpark"
+    ]
+  },
+  "CarPark Supply Air Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "supply",
+      "carpark"
+    ]
+  },
+  "CarPark Supply Air Fan Speed": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "speed",
+      "cmd",
+      "supply",
+      "carpark"
+    ]
+  },
+  "CarPark Supply Air const Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "supply",
+      "carpark"
+    ]
+  },
+  "CarPark Supply Air const Pressure Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sp",
+      "supply",
+      "carpark"
+    ]
+  },
+  "AHU Return Air Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "return",
+      "ahu"
+    ]
+  },
+  "AHU Return Air Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "return",
+      "ahu"
+    ]
+  },
+  "AHU Return Air Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "return",
+      "ahu"
+    ]
+  },
+  "AHU Return Air Fan Speed": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "speed",
+      "cmd",
+      "return",
+      "ahu"
+    ]
+  },
+  "AHU Return Air Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sensor",
+      "return",
+      "ahu"
+    ]
+  },
+  "AHU Return Air Humidity": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "humidity",
+      "sensor",
+      "return",
+      "ahu"
+    ]
+  },
+  "AHU Return Air const Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "return",
+      "ahu"
+    ]
+  },
+  "AHU Return Air CO2": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "co2",
+      "sensor",
+      "return",
+      "ahu"
+    ]
+  },
+  "AHU Return Air const Pressure Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sp",
+      "return",
+      "ahu"
+    ]
+  },
+  "Return Air Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "return",
+      "raf"
+    ]
+  },
+  "Return Air Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "return",
+      "raf"
+    ]
+  },
+  "Return Air Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "return",
+      "raf"
+    ]
+  },
+  "Return Air Fan Speed": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "speed",
+      "cmd",
+      "return",
+      "raf"
+    ]
+  },
+  "Return Air Humidity": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "humidity",
+      "sensor",
+      "return",
+      "ahu"
+    ]
+  },
+  "Return Air Flow": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "flow",
+      "sensor",
+      "return",
+      "raf"
+    ]
+  },
+  "Return Air const Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "return",
+      "raf"
+    ]
+  },
+  "Return Air Enthalpy": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "enthalpy",
+      "sensor",
+      "return",
+      "raf"
+    ]
+  },
+  "Return Air Suction Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "return",
+      "raf"
+    ]
+  },
+  "Return Air CO2": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "co2",
+      "sensor",
+      "return",
+      "raf"
+    ]
+  },
+  "Return Air const Pressure Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sp",
+      "return",
+      "raf"
+    ]
+  },
+  "Supply Air Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "supply",
+      "saf"
+    ]
+  },
+  "Supply Air Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "supply",
+      "saf"
+    ]
+  },
+  "Supply Air Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "supply",
+      "saf"
+    ]
+  },
+  "Supply Air Fan Speed": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "speed",
+      "cmd",
+      "supply",
+      "saf"
+    ]
+  },
+  "Supply Air Flow": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "flow",
+      "sensor",
+      "supply",
+      "ahu"
+    ]
+  },
+  "Supply Air Humidity": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "humidity",
+      "sensor",
+      "supply",
+      "saf"
+    ]
+  },
+  "Supply Air const Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "supply",
+      "ahu"
+    ]
+  },
+  "Supply Air const Pressure Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sp",
+      "supply",
+      "ahu"
+    ]
+  },
+  "Outside Air Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "outside",
+      "oaf"
+    ]
+  },
+  "Outside Air Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "outside",
+      "oaf"
+    ]
+  },
+  "Outside Air Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "outside",
+      "oaf"
+    ]
+  },
+  "Outside Air Fan Speed": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "speed",
+      "cmd",
+      "outside",
+      "oaf"
+    ]
+  },
+  "Outside Air Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sensor",
+      "outside",
+      "dryBulb/wetBulb",
+      "buildingInfo"
+    ]
+  },
+  "Outside Air Humidity": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "humidity",
+      "sensor",
+      "outside",
+      "buildingInfo"
+    ]
+  },
+  "Outside Air Flow": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "flow",
+      "sensor",
+      "return",
+      "oaf"
+    ]
+  },
+  "Outside Air const Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "outside",
+      "oaf"
+    ]
+  },
+  "Outside Air const Pressure Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sp",
+      "outside",
+      "oaf"
+    ]
+  },
+  "PAC Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "pac"
+    ]
+  },
+  "PAC Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "pac"
+    ]
+  },
+  "PAC Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "pac"
+    ]
+  },
+  "Return/Room Air Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sensor",
+      "return/zone",
+      "fcu"
+    ]
+  },
+  "Return/Room Air Temperature Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sp",
+      "return",
+      "ahu"
+    ]
+  },
+  "Return/Room Air Humidity": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "humidity",
+      "sensor",
+      "return/zone",
+      "fcu"
+    ]
+  },
+  "Compressor S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "refrig",
+      "run",
+      "cmd",
+      "pac"
+    ]
+  },
+  "Condenser Water Call": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "run",
+      "cmd",
+      "condenser",
+      "pac"
+    ]
+  },
+  "Air Off Coil Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sensor",
+      "offCoil",
+      "hot/cold",
+      "ahu"
+    ]
+  },
+  "Outside Air Damper Control": {
+    "kind": "number/boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "damper",
+      "cmd",
+      "outside",
+      "ahu"
+    ]
+  },
+  "Filter Differential Pressure/Status": {
+    "kind": "number/boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "pressure",
+      "sensor",
+      "filter",
+      "ahu"
+    ]
+  },
+  "Reverse Valve Control": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "valve",
+      "run",
+      "cmd",
+      "reverse",
+      "pac"
+    ]
+  },
+  "Heating Coil Valve Control": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "valve",
+      "cmd",
+      "hot",
+      "ahu"
+    ]
+  },
+  "FTU Fan S/S": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "ftu"
+    ]
+  },
+  "Damper Feedback": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "damper",
+      "sensor",
+      "ftu"
+    ]
+  },
+  "FCU Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "fcu"
+    ]
+  },
+  "FCU Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "fcu"
+    ]
+  },
+  "FCU Fan Speed": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "speed",
+      "sensor",
+      "supply",
+      "fcu"
+    ]
+  },
+  "FCU Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "fcu"
+    ]
+  },
+  "Supply Air Temperature Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sp",
+      "supply",
+      "ahu"
+    ]
+  },
+  "Cooling Coil Valve Control": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "valve",
+      "cmd",
+      "chilled",
+      "ahu"
+    ]
+  },
+  "AHU Fan S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "supply",
+      "ahu"
+    ]
+  },
+  "AHU Fan Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "supply",
+      "ahu"
+    ]
+  },
+  "AHU Fan Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "supply",
+      "ahu"
+    ]
+  },
+  "Speed": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "speed",
+      "sensor",
+      "supply",
+      "ahu"
+    ]
+  },
+  "Room Air Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sensor",
+      "zone",
+      "ahu"
+    ]
+  },
+  "Mix Air Temperature": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sensor",
+      "mix",
+      "ahu"
+    ]
+  },
+  "Return Air Temperature Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sp",
+      "return",
+      "ahu"
+    ]
+  },
+  "Room Air Temperature Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sp",
+      "zone",
+      "ahu"
+    ]
+  },
+  "Room Air Humidity": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "humidity",
+      "sensor",
+      "zone",
+      "ahu"
+    ]
+  },
+  "Outside Air Relative Humidity": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "humidity",
+      "sensor",
+      "outside",
+      "ahu"
+    ]
+  },
+  "Minimum Outside Air Damper Control": {
+    "kind": "number/boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "damper",
+      "cmd",
+      "outside",
+      "minimum",
+      "ahu"
+    ]
+  },
+  "Minimum Outside Air Damper Feedback": {
+    "kind": "number/boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "damper",
+      "sensor",
+      "outside",
+      "minimum",
+      "ahu"
+    ]
+  },
+  "Exhaust Air Damper": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "damper",
+      "cmd",
+      "exhaust",
+      "ahu"
+    ]
+  },
+  "RACO2": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "co2",
+      "sensor",
+      "return",
+      "ahu"
+    ]
+  },
+  "Dew Point": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "dewPoint",
+      "sensor",
+      "ahu"
+    ]
+  },
+  "Dew Point Setpoint": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "dewPoint",
+      "sp",
+      "ahu"
+    ]
+  },
+  "AHU Fan Speed": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "speed",
+      "cmd",
+      "supply",
+      "ahu"
+    ]
+  },
+  "Outside/Return/Room Air Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sensor",
+      "outside/return",
+      "ahu"
+    ]
+  },
+  "Supply/Return/Room Air Humidity": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "humidity",
+      "sensor",
+      "supply/return",
+      "ahu"
+    ]
+  },
+  "Return Air Damper Control": {
+    "kind": "number/boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "damper",
+      "cmd",
+      "return",
+      "ahu"
+    ]
+  },
+  "Filter Differential Pressure": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "pressure",
+      "sensor",
+      "filter",
+      "delta",
+      "ahu"
+    ]
+  },
+  "Filter Differential Pressure Setpoint": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "pressure",
+      "sp",
+      "filter",
+      "delta",
+      "ahu"
+    ]
+  },
+  "Filter Status": {
+    "kind": "number/boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fault",
+      "sensor",
+      "filter",
+      "ahu"
+    ]
+  },
+  "Floor Occupancy": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "run",
+      "cmd",
+      "occupied",
+      "floor"
+    ]
+  },
+  "After Hours Active Time": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "run",
+      "cmd",
+      "afterHour",
+      "activeTime",
+      "floor"
+    ]
+  },
+  "Zone Occupancy": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "run",
+      "cmd",
+      "occupied",
+      "zone",
+      "floor"
+    ]
+  },
+  "Zone After Hours Active Time": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "run",
+      "cmd",
+      "afterHour",
+      "activeTime",
+      "zone",
+      "floor"
+    ]
+  },
+  "After Hours ElapsedTime": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "afterHour",
+      "floor"
+    ]
+  },
+  "AH Enable": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "cmd",
+      "afterHour",
+      "ahuRef",
+      "floor"
+    ]
+  },
+  "VAV Enable": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "enable",
+      "cmd",
+      "vav",
+      "floor"
+    ]
+  },
+  "Return Air Damper": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "cmd",
+      "return",
+      "common",
+      "damper",
+      "floor"
+    ]
+  },
+  "Supply Air Damper": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "cmd",
+      "supply",
+      "common",
+      "damper",
+      "floor"
+    ]
+  },
+  "Isolation Air Damper": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "cmd",
+      "isolation",
+      "damper",
+      "floor"
+    ]
+  },
+  "Zone Temperature Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "temp",
+      "sp",
+      "zone",
+      "floor"
+    ]
+  },
+  "Common Hot Water Supply Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "supply",
+      "hot",
+      "common"
+    ]
+  },
+  "Common Hot Water Return Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "return",
+      "hot",
+      "common"
+    ]
+  },
+  "Hot Water Pump S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "run",
+      "cmd",
+      "hot",
+      "pump"
+    ]
+  },
+  "Hot Water Pump Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "run",
+      "sensor",
+      "hot",
+      "pump"
+    ]
+  },
+  "Hot Water Pump Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fault",
+      "sensor",
+      "hot",
+      "pump"
+    ]
+  },
+  "Hot Water Pump Differential Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "pressure",
+      "sensor",
+      "differential",
+      "hot",
+      "pump"
+    ]
+  },
+  "Hot Water Pump Differential Pressure Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "pressure",
+      "sp",
+      "differential",
+      "hot",
+      "pump"
+    ]
+  },
+  "Hot Water Pump Speed": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "speed",
+      "cmd",
+      "hot",
+      "pump"
+    ]
+  },
+  "Boiler S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "run",
+      "cmd",
+      "hot",
+      "boiler"
+    ]
+  },
+  "Boiler Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "run",
+      "sensor",
+      "hot",
+      "boiler"
+    ]
+  },
+  "Boiler Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fault",
+      "sensor",
+      "hot",
+      "boiler"
+    ]
+  },
+  "Hot Water Supply Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "supply",
+      "hot",
+      "boiler"
+    ]
+  },
+  "Hot Water Supply Temperature Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sp",
+      "supply",
+      "hot",
+      "boiler"
+    ]
+  },
+  "Hot Water Return Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "return",
+      "hot",
+      "boiler"
+    ]
+  },
+  "Common Condenser Water Supply Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "supply",
+      "condenser",
+      "common"
+    ]
+  },
+  "Common Condenser Pressure Diff": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "pressure",
+      "sensor",
+      "differential",
+      "condenser",
+      "common"
+    ]
+  },
+  "Common Bypass Valve": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "valve",
+      "bypass",
+      "cmd",
+      "condenser",
+      "common"
+    ]
+  },
+  "Common Condenser Water Return Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "return",
+      "condenser",
+      "common"
+    ]
+  },
+  "Condenser Water Pump S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "run",
+      "cmd",
+      "condenser",
+      "pump"
+    ]
+  },
+  "Condenser Water Pump Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "run",
+      "sensor",
+      "condenser",
+      "pump"
+    ]
+  },
+  "Condenser Water Pump Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fault",
+      "sensor",
+      "condenser",
+      "pump"
+    ]
+  },
+  "Condenser Water Pump Differential Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "pressure",
+      "sensor",
+      "differential",
+      "condenser",
+      "pump"
+    ]
+  },
+  "Condenser Water Pump Differential Pressure Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "pressure",
+      "sp",
+      "differential",
+      "condenser",
+      "pump"
+    ]
+  },
+  "Condenser Water Flow": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      ""
+    ]
+  },
+  "Condenser Water Pump Speed": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "speed",
+      "cmd",
+      "condenser",
+      "pump"
+    ]
+  },
+  "Cooling Tower S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "cmd",
+      "condenser",
+      "coolingTower"
+    ]
+  },
+  "Cooling Tower Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "run",
+      "sensor",
+      "condenser",
+      "coolingTower"
+    ]
+  },
+  "Cooling Tower Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fan",
+      "fault",
+      "sensor",
+      "condenser",
+      "coolingTower"
+    ]
+  },
+  "Cooling Tower Fan Speed": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "fan",
+      "speed",
+      "cmd",
+      "condenser",
+      "coolingTower"
+    ]
+  },
+  "Condenser Water Supply Temperature": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "supply",
+      "condenser",
+      "chiller"
+    ]
+  },
+  "Condenser Water Supply Temperature Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sp",
+      "supply",
+      "condenser",
+      "coolingTower"
+    ]
+  },
+  "Condenser Water Return Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "return",
+      "condenser",
+      "chiller"
+    ]
+  },
+  "Primary Supply Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "supply",
+      "hot",
+      "primaryLoop",
+      "heatExchanger"
+    ]
+  },
+  "Primary Return Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "return",
+      "hot",
+      "primaryLoop",
+      "heatExchanger"
+    ]
+  },
+  "Primary Loop Valve": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "cmd",
+      "hot",
+      "primaryLoop",
+      "heatExchanger"
+    ]
+  },
+  "Secondary Supply Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "supply",
+      "hot",
+      "secondaryLoop",
+      "heatExchanger"
+    ]
+  },
+  "Secondary Return Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "return",
+      "hot",
+      "secondaryLoop",
+      "heatExchanger"
+    ]
+  },
+  "Secondary Loop Valve": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "cmd",
+      "hot",
+      "secondaryLoop",
+      "heatExchanger"
+    ]
+  },
+  "Outside Air Enthalpy": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "air",
+      "enthalpy",
+      "sensor",
+      "outside",
+      "buildingInfo"
+    ]
+  },
+  "Common Chilled Water Supply Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "supply",
+      "chilled",
+      "common"
+    ]
+  },
+  "Common Chilled Water Return Temperature": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "return",
+      "chilled",
+      "common"
+    ]
+  },
+  "Common Chilled Water Differential Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "pressure",
+      "sensor",
+      "differential",
+      "chilled",
+      "common"
+    ]
+  },
+  "Common Chilled Water Bypass Valve": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "valve",
+      "bypass",
+      "cmd",
+      "chilled",
+      "common"
+    ]
+  },
+  "Common Chilled Water Differential Pressure Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "pressure",
+      "sp",
+      "differential",
+      "chilled",
+      "common"
+    ]
+  },
+  "Chilled Water Pump S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "run",
+      "cmd",
+      "chilled",
+      "pump"
+    ]
+  },
+  "Chilled Water Pump Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "run",
+      "sensor",
+      "chilled",
+      "pump"
+    ]
+  },
+  "Chilled Water Pump Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fault",
+      "sensor",
+      "chilled",
+      "pump"
+    ]
+  },
+  "Chilled Water Pump Differential Pressure": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "pressure",
+      "sensor",
+      "differential",
+      "chilled",
+      "pump"
+    ]
+  },
+  "Chilled Water Pump Differential Pressure Setpoint": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "pressure",
+      "sp",
+      "differential",
+      "chilled",
+      "pump"
+    ]
+  },
+  "Chilled Water Flow": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "flow",
+      "sensor",
+      "chilled",
+      "pump"
+    ]
+  },
+  "Chilled Water Flow Setpoint": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "water",
+      "flow",
+      "sp",
+      "chilled",
+      "pump"
+    ]
+  },
+  "Chilled Water Pump Speed": {
+    "kind": "number",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "speed",
+      "cmd",
+      "chilled",
+      "pump"
+    ]
+  },
+  "Chiller S/S": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "run",
+      "cmd",
+      "chilled",
+      "chiller"
+    ]
+  },
+  "Chiller Status": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "run",
+      "sensor",
+      "chilled",
+      "chiller"
+    ]
+  },
+  "Chiller Fault": {
+    "kind": "boolean",
+    "unit": "",
+    "equipType": "hisTsPrecision",
+    "tags": [
+      "fault",
+      "sensor",
+      "chilled",
+      "chiller"
+    ]
+  },
+  "Load": {
+    "kind": "",
+    "unit": "",
+    "equipType": "",
+    "tags": [
+      "load",
+      "sensor",
+      "chilled",
+      "chiller"
+    ]
+  },
+  "Chilled Water Supply Temperature": {
+    "kind": "number",
+    "unit": "Temperature",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "supply",
+      "chilled",
+      "chiller"
+    ]
+  },
+  "Chilled Water Supply Temperature Setpoint": {
+    "kind": "number",
+    "unit": "Temperature",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sp",
+      "supply",
+      "chilled",
+      "chiller"
+    ]
+  },
+  "Chilled Water Return Temperature": {
+    "kind": "number",
+    "unit": "Temperature",
+    "equipType": "",
+    "tags": [
+      "water",
+      "temp",
+      "sensor",
+      "return",
+      "chilled",
+      "chiller"
+    ]
+  }
+}
