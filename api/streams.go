@@ -12,7 +12,7 @@ Stream
 
 // The StreamDatabase interface for encapsulating database access.
 type StreamDatabase interface {
-	GetStream(uuid string) (*model.Stream, error)
+	GetStream(uuid string, withChildren bool) (*model.Stream, error)
 	GetStreams(withChildren bool) ([]*model.Stream, error)
 	CreateStream(body *model.Stream) (*model.Stream, error)
 	UpdateStream(uuid string, body *model.Stream) (*model.Stream, error)
@@ -32,8 +32,9 @@ func (j *StreamAPI) GetStreams(ctx *gin.Context) {
 }
 
 func (j *StreamAPI) GetStream(ctx *gin.Context) {
+	withChildren, _ := withChildrenArgs(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.GetStream(uuid)
+	q, err := j.DB.GetStream(uuid, withChildren)
 	reposeHandler(q, err, ctx)
 }
 
