@@ -42,11 +42,11 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", fln, divider, u)
 	case model.CommonNaming.RemoteFlowNetwork:
 		return fmt.Sprintf("%s%s%s", rfn, divider, u)
-	case model.CommonNaming.Network:
+	case model.ThingClass.Network:
 		return fmt.Sprintf("%s%s%s", net, divider, u)
-	case model.CommonNaming.Device:
+	case model.ThingClass.Device:
 		return fmt.Sprintf("%s%s%s", dev, divider, u)
-	case model.CommonNaming.Point:
+	case model.ThingClass.Point:
 		return fmt.Sprintf("%s%s%s", pnt, divider, u)
 	case model.CommonNaming.Stream:
 		return fmt.Sprintf("%s%s%s", str, divider, u)
@@ -64,7 +64,7 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", con, divider, u)
 	case model.CommonNaming.Writer:
 		return fmt.Sprintf("%s%s%s", wri, divider, u)
-	case model.CommonNaming.Alert:
+	case model.ThingClass.Alert:
 		return fmt.Sprintf("%s%s%s", alt, divider, u)
 	case model.CommonNaming.CommandGroup:
 		return fmt.Sprintf("%s%s%s", cmd, divider, u)

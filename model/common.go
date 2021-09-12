@@ -13,8 +13,15 @@ type CommonName struct {
 	Name string `json:"name"`
 }
 
-type CommonThing struct {
+type CommonThingClass struct {
+	ThingClass string `json:"thing_class"`
+}
+
+type CommonThingType struct {
 	ThingType string `json:"thing_type"`
+}
+type CommonThingUUID struct {
+	ThingUUID string `json:"thing_class"`
 }
 
 type CommonNameUnique struct {
@@ -84,13 +91,6 @@ type CommonFault struct {
 	LastFail     time.Time `json:"last_fail"`
 }
 
-type CommonIP struct {
-	IP    string `json:"ip"`
-	Port  int    `json:"port"`
-	HTTP  bool   `json:"http"`
-	HTTPS bool   `json:"https"`
-}
-
 type CommonStore struct {
 	CommonValue
 	CommonFault
@@ -104,11 +104,4 @@ type CommonProducerPermissions struct {
 
 type CommonCurrentProducer struct {
 	ThingWriterUUID string `json:"thing_writer_uuid"`
-}
-
-type CommonConsumer struct {
-	CommonUUID
-	CommonName
-	CommonDescription
-	CommonEnable
 }

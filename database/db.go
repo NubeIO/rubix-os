@@ -7,7 +7,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-
 // DropAllFlow networks, gateways, commandGroup, consumers, jobs and children.
 func (d *GormDatabase) DropAllFlow() (string, error) {
 
@@ -70,41 +69,40 @@ func (d *GormDatabase) DropAllFlow() (string, error) {
 		return "fail FlowNetwork", query.Error
 	}
 
-	var pluginConf *model.PluginConf
-	query = d.DB.Where("1 = 1").Delete(&pluginConf)
-	if query.Error != nil {
-		log.Error("DB: fail bulk delete PluginConf")
-		return "fail PluginConf", query.Error
-	}
+	//var pluginConf *model.PluginConf
+	//query = d.DB.Where("1 = 1").Delete(&pluginConf)
+	//if query.Error != nil {
+	//	log.Error("DB: fail bulk delete PluginConf")
+	//	return "fail PluginConf", query.Error
+	//}
 
-	var user *model.User
-	query = d.DB.Where("1 = 1").Delete(&user)
-	if query.Error != nil {
-		log.Error("DB: fail bulk delete PluginConfExternal")
-		return "fail PluginConfExternal", query.Error
-	}
-
+	//var user *model.User
+	//query = d.DB.Where("1 = 1").Delete(&user)
+	//if query.Error != nil {
+	//	log.Error("DB: fail bulk delete PluginConfExternal")
+	//	return "fail PluginConfExternal", query.Error
+	//}
 
 	//TODO throws an error
-	var pluginConfExternal *model.PluginConfExternal
-	query = d.DB.Where("1 = 1").Delete(&pluginConfExternal)
-	if query.Error != nil {
-		log.Error("DB: fail bulk delete PluginConfExternal")
-		return "fail PluginConfExternal", query.Error
-	}
+	//var pluginConfExternal *model.PluginConfExternal
+	//query = d.DB.Where("1 = 1").Delete(&pluginConfExternal)
+	//if query.Error != nil {
+	//	log.Error("DB: fail bulk delete PluginConfExternal")
+	//	return "fail PluginConfExternal", query.Error
+	//}
 
-	var application *model.Application
-	query = d.DB.Where("1 = 1").Delete(&application)
-	if query.Error != nil {
-		log.Error("DB: fail bulk delete Application")
-		return "fail Application", query.Error
-	}
+	//var application *model.Application
+	//query = d.DB.Where("1 = 1").Delete(&application)
+	//if query.Error != nil {
+	//	log.Error("DB: fail bulk delete Application")
+	//	return "fail Application", query.Error
+	//}
 
 	return "bulk delete pass", nil
 }
 
 //SyncTopics sync all the topics
-func (d *GormDatabase) SyncTopics()  {
+func (d *GormDatabase) SyncTopics() {
 
 	g, err := d.GetStreams(false)
 	for _, obj := range g {
@@ -128,15 +126,15 @@ func (d *GormDatabase) SyncTopics()  {
 	}
 	n, err := d.GetNetworks(false, false)
 	for _, obj := range n {
-		d.Bus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
+		d.Bus.RegisterTopicParent(model.ThingClass.Network, obj.UUID)
 	}
 	de, err := d.GetDevices(false)
 	for _, obj := range de {
-		d.Bus.RegisterTopicParent(model.CommonNaming.Network, obj.UUID)
+		d.Bus.RegisterTopicParent(model.ThingClass.Network, obj.UUID)
 	}
 	p, err := d.GetPoints(false)
 	for _, obj := range p {
-		d.Bus.RegisterTopicParent(model.CommonNaming.Point, obj.UUID)
+		d.Bus.RegisterTopicParent(model.ThingClass.Point, obj.UUID)
 	}
 	node, err := d.GetNodesList()
 	for _, obj := range node {

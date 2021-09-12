@@ -36,7 +36,8 @@ type Network struct {
 	Manufacture      string `json:"manufacture"`
 	Model            string `json:"model"`
 	WriteableNetwork bool   `json:"writeable_network"` //is this a network that supports write or its read only like lora
-	CommonThing
+	CommonThingClass
+	CommonThingType
 	TransportType    string            `json:"transport_type"  gorm:"type:varchar(255);not null"` //serial
 	PluginConfId     string            `json:"plugin_conf_id" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
 	Device           []Device          `json:"devices" gorm:"constraint:OnDelete:CASCADE"`

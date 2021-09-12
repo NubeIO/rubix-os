@@ -5,11 +5,9 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-
 type Job struct {
 	*model.Job
 }
-
 
 func (d *GormDatabase) GetJobs() ([]*model.Job, error) {
 	var jobsModel []*model.Job
@@ -20,8 +18,7 @@ func (d *GormDatabase) GetJobs() ([]*model.Job, error) {
 	return jobsModel, nil
 }
 
-
-func (d *GormDatabase) CreateJob(body *model.Job)  (*model.Job, error) {
+func (d *GormDatabase) CreateJob(body *model.Job) (*model.Job, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Job)
 	body.Name = nameIsNil(body.Name)
 	if err := d.DB.Create(&body).Error; err != nil {
@@ -32,7 +29,8 @@ func (d *GormDatabase) CreateJob(body *model.Job)  (*model.Job, error) {
 
 func (d *GormDatabase) GetJob(uuid string) (*model.Job, error) {
 	var jobModel *model.Job
-	query := d.DB.Where("uuid = ? ", uuid).First(&jobModel); if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).First(&jobModel)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return jobModel, nil
@@ -41,7 +39,8 @@ func (d *GormDatabase) GetJob(uuid string) (*model.Job, error) {
 // DeleteJob delete a job
 func (d *GormDatabase) DeleteJob(uuid string) (bool, error) {
 	var jobModel *model.Job
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&jobModel);if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&jobModel)
+	if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -56,10 +55,12 @@ func (d *GormDatabase) DeleteJob(uuid string) (bool, error) {
 // UpdateJob  returns the device for the given id or nil.
 func (d *GormDatabase) UpdateJob(uuid string, body *model.Job) (*model.Job, error) {
 	var jobModel *model.Job
-	query := d.DB.Where("uuid = ?", uuid).Find(&jobModel);if query.Error != nil {
+	query := d.DB.Where("uuid = ?", uuid).Find(&jobModel)
+	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&jobModel).Updates(body);if query.Error != nil {
+	query = d.DB.Model(&jobModel).Updates(body)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return jobModel, nil
@@ -81,8 +82,6 @@ func (d *GormDatabase) DropJobs() (bool, error) {
 	}
 
 }
-
-
 
 //
 //func (d *GormDatabase) CreateJobProducer(body *model.JobProducer, jobUUID string)  error {

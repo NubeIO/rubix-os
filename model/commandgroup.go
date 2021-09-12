@@ -1,7 +1,5 @@
 package model
 
-
-
 // CommandGroup TODO add in later
 //CommandGroup is for issuing global schedule writes or global point writes (as in send a value to any point associated with this group)
 type CommandGroup struct {
@@ -9,8 +7,8 @@ type CommandGroup struct {
 	CommonName
 	CommonEnable
 	CommonDescription
-	CommandUse 				string  `json:"command_use"`  //common uses will be point write to many points, master schedules or schedule grouping
-	StreamUUID     			string 	`json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;null;default:null"`
+	CommandUse         string `json:"command_use"` //common uses will be point write to many points, master schedules or schedule grouping
+	StreamUUID         string `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;null;default:null"`
 	WriteValue         string `json:"write_value"`
 	WritePriority      string `json:"write_priority"`       //TODO maybe remove this and just use the writeJSON as we need things like Schedules aswell
 	WritePriorityArray string `json:"write_priority_array"` //TODO maybe remove this and just use the writeJSON as we need things like Schedules aswell
@@ -27,6 +25,4 @@ type CommandSlaves struct {
 	CommonName
 	CommonEnable
 	CommonDescription
-
 }
-

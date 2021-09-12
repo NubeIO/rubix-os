@@ -7,7 +7,6 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-
 type Node struct {
 	*model.Node
 }
@@ -27,7 +26,8 @@ func (d *GormDatabase) CreateNode(body *model.Node) (*model.Node, error) {
 	body.UUID = utils.MakeTopicUUID("")
 	body.Name = nameIsNil(body.Name)
 	body.NodeType = typeIsNil(body.NodeType, "add")
-	query := d.DB.Create(body);if query.Error != nil {
+	query := d.DB.Create(body)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	eventbus.NodeContext.Set(body.UUID, body, cache.NoExpiration)
@@ -37,7 +37,8 @@ func (d *GormDatabase) CreateNode(body *model.Node) (*model.Node, error) {
 // GetNode get it
 func (d *GormDatabase) GetNode(uuid string) (*model.Node, error) {
 	var wcm *model.Node
-	query := d.DB.Preload("Out1Connections").Preload("In1Connections").Where("uuid = ? ", uuid).First(&wcm); if query.Error != nil {
+	query := d.DB.Preload("Out1Connections").Preload("In1Connections").Where("uuid = ? ", uuid).First(&wcm)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return wcm, nil
@@ -46,7 +47,8 @@ func (d *GormDatabase) GetNode(uuid string) (*model.Node, error) {
 // DeleteNode deletes it
 func (d *GormDatabase) DeleteNode(uuid string) (bool, error) {
 	var wcm *model.Node
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&wcm);if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&wcm)
+	if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -60,10 +62,12 @@ func (d *GormDatabase) DeleteNode(uuid string) (bool, error) {
 // UpdateNode  update it
 func (d *GormDatabase) UpdateNode(uuid string, body *model.Node) (*model.Node, error) {
 	var wcm *model.Node
-	query := d.DB.Where("uuid = ?", uuid).Find(&wcm);if query.Error != nil {
+	query := d.DB.Where("uuid = ?", uuid).Find(&wcm)
+	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&wcm).Updates(body);if query.Error != nil {
+	query = d.DB.Model(&wcm).Updates(body)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	list, err := d.GetNode(uuid)
@@ -71,7 +75,10 @@ func (d *GormDatabase) UpdateNode(uuid string, body *model.Node) (*model.Node, e
 		return nil, err
 	}
 	eventbus.NodeContext.Set(list.UUID, list, cache.NoExpiration)
-	d.Bus.Emit(eventbus.CTX(), eventbus.NodeEventIn,  list)
+	err = d.Bus.Emit(eventbus.CTX(), eventbus.NodeEventIn, list)
+	if err != nil {
+		return nil, err
+	}
 	return wcm, nil
 }
 
@@ -89,4 +96,3 @@ func (d *GormDatabase) DropNodesList() (bool, error) {
 		return true, nil
 	}
 }
-

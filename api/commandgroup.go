@@ -10,7 +10,6 @@ import (
 Stream
 */
 
-
 // The CommandGroupDatabase interface for encapsulating database access.
 type CommandGroupDatabase interface {
 	GetCommandGroup(uuid string) (*model.CommandGroup, error)
@@ -24,13 +23,11 @@ type CommandGroupAPI struct {
 	DB CommandGroupDatabase
 }
 
-
 func (j *CommandGroupAPI) GetCommandGroup(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetCommandGroup(uuid)
 	reposeHandler(q, err, ctx)
 }
-
 
 func (j *CommandGroupAPI) GetCommandGroups(ctx *gin.Context) {
 	q, err := j.DB.GetCommandGroups()
@@ -51,7 +48,6 @@ func (j *CommandGroupAPI) UpdateCommandGroup(ctx *gin.Context) {
 	q, err := j.DB.UpdateCommandGroup(uuid, body)
 	reposeHandler(q, err, ctx)
 }
-
 
 func (j *CommandGroupAPI) DeleteCommandGroup(ctx *gin.Context) {
 	uuid := resolveID(ctx)

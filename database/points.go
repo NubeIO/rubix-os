@@ -47,13 +47,14 @@ func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, e
 // CreatePoint creates a device.
 func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	var deviceModel *model.Device
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Point)
+	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	deviceUUID := body.DeviceUUID
 	body.Name = nameIsNil(body.Name)
 	query := d.DB.Where("uuid = ? ", deviceUUID).First(&deviceModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	body.ThingClass = model.ThingClass.Point
 	body.CommonEnable.Enable = true
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical

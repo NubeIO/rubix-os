@@ -110,7 +110,7 @@ func withID(ctx *gin.Context, name string, f func(id uint)) {
 	}
 }
 
-func getBODYTransport(ctx *gin.Context) (dto interface{}, err error) {
+func getBODYSchedule(ctx *gin.Context) (dto *model.Schedule, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
