@@ -133,12 +133,12 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 		if action == model.CommonNaming.Write {
 			_, err = streams.WriteClone(writerCloneUUID, flow, wc, true)
 			if err != nil {
-				return nil, err
+				return nil, errors.New("WRITER-REMOTE: on update REMOTE WriteClone feedback")
 			}
 		}
 		producerHistory, err := streams.GetProducerHist(producerUUID, flow)
 		if err != nil {
-			return nil, err
+			return nil, errors.New("WRITER-REMOTE: on update GetProducerHist feedback")
 		}
 		if askRefresh { //THIS WILL MAKE THE CONSUMER REFLECT THE CURRENT STATE OF THE PRODUCER (THIS WOULD BE USED FOR POINT MAPPING ONE TO MANY)
 			updateConsumer, err := consumerRefresh(producerHistory)
@@ -147,7 +147,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 			}
 			_, _ = d.UpdateConsumer(consumerUUID, updateConsumer)
 			if err != nil {
-				return nil, errors.New("error: on update consumer feedback")
+				return nil, errors.New("WRITER-REMOTE: on update consumer feedback")
 			}
 			return producerHistory, err
 		} else {
@@ -158,12 +158,12 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 		if action == model.CommonNaming.Write {
 			producerHistory, err = d.UpdateCloneAndHist(writerCloneUUID, wc, true)
 			if err != nil {
-				return nil, errors.New("WRITER: error on local WRITE to writer-clone")
+				return nil, errors.New("WRITER-LOCAL: error on local WRITE to writer-clone")
 			}
 		} else {
 			producerHistory, err = d.HistoryLatestByProducerUUID(producerUUID)
 			if err != nil {
-				return nil, errors.New("WRITER: error on local READ to producer history")
+				return nil, errors.New("WRITER-LOCAL: error on local READ to producer history")
 			}
 		}
 		//producer feedback

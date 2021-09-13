@@ -25,13 +25,8 @@ type ResponseBody struct {
 }
 
 type ResponseCommon struct {
-	UUID        string `json:"uuid"`
-	Name        string `json:"name"`
-	NetworkUUID string `json:"network_uuid"`
-	DeviceUUID  string `json:"device_uuid"`
-	PointUUID   string `json:"point_uuid"`
-	StreamUUID  string `json:"stream_uuid"`
-	GlobalUUID  string `json:"global_uuid"`
+	UUID string `json:"uuid"`
+	//Name        string `json:"name"`
 }
 
 type Stream struct {

@@ -6,7 +6,6 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-
 // ClientAddProducer an object
 func (a *FlowClient) ClientAddProducer(body model.Producer) (*model.Producer, error) {
 	name, _ := utils.MakeUUID()
@@ -21,10 +20,8 @@ func (a *FlowClient) ClientAddProducer(body model.Producer) (*model.Producer, er
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	fmt.Println(resp.String())
 	return resp.Result().(*model.Producer), nil
 }
-
 
 // ClientGetProducer an object
 func (a *FlowClient) ClientGetProducer(uuid string) (*model.Producer, error) {
@@ -44,7 +41,6 @@ func (a *FlowClient) ClientGetProducer(uuid string) (*model.Producer, error) {
 	return resp.Result().(*model.Producer), nil
 }
 
-
 // ClientEditProducer edit an object
 func (a *FlowClient) ClientEditProducer(uuid string, body model.Producer) (*model.Producer, error) {
 	resp, err := a.client.R().
@@ -61,4 +57,3 @@ func (a *FlowClient) ClientEditProducer(uuid string, body model.Producer) (*mode
 	fmt.Println(resp.String())
 	return resp.Result().(*model.Producer), nil
 }
-

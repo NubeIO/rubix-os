@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeDev/flow-framework/client"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
@@ -263,16 +264,16 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	//delete networks
 	var flowNetwork model.FlowNetwork
 	var consumerModel model.Consumer
+	var streamModel model.Stream
 	var writerModel model.Writer
 	var writerCloneModel model.WriterClone
 
-	//get plugin
-	p, err := d.GetPluginByPath("system")
-	fmt.Println("GetPluginByPath", p.UUID)
+	isRemote := true
+	url := "165.227.72.56" //165.227.72.56
 
 	//in writer add writeCloneUUID and same in writerClone
-	flowNetwork.IsRemote = true
-	flowNetwork.FlowIP = "0.0.0.0"
+	flowNetwork.IsRemote = isRemote
+	flowNetwork.FlowIP = url
 	flowNetwork.FlowPort = "1660"
 	flowNetwork.FlowToken = "fakeToken123"
 
@@ -282,10 +283,28 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 
 	flowNetwork.Name = "NAME 2nd network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
+	if err != nil {
+		fmt.Println("Error on wizard CreateFlowNetwork")
+		fmt.Println(err)
+		fmt.Println("Error on wizard")
+		return false, err
+	}
 	fmt.Println("CreateFlowNetwork", f.UUID)
 
+	// consumer stream (edge-2)
+	streamModel.IsConsumer = true
+	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
+	consumerStream, err := d.CreateStream(&streamModel)
+	if err != nil {
+		fmt.Println("Error on wizard CreateStream")
+		fmt.Println(err)
+		fmt.Println("Error on wizard")
+		return false, err
+	}
+	fmt.Println(consumerStream.Name, consumerStream.Name)
+
 	// consumer
-	consumerModel.StreamUUID = body.StreamUUID
+	consumerModel.StreamUUID = consumerStream.UUID
 	consumerModel.Name = "consumer-2"
 	consumerModel.ProducerUUID = body.ProducerUUID
 	consumerModel.ProducerThingClass = body.ProducerThingClass
@@ -293,7 +312,13 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	consumerModel.ProducerThingUUID = body.ProducerThingUUID
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
 	consumer, err := d.CreateConsumer(&consumerModel)
-	fmt.Println(consumer.Name)
+	if err != nil {
+		fmt.Println("Error on wizard CreateConsumer")
+		fmt.Println(err)
+		fmt.Println("Error on wizard")
+		return false, err
+	}
+	fmt.Println(consumer.Name, consumer.UUID)
 
 	// writer
 	writerModel.ConsumerUUID = consumerModel.UUID
@@ -301,20 +326,57 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	writerModel.WriterThingClass = model.ThingClass.Point
 	writerModel.WriterThingType = model.ThingClass.API
 	writer, err := d.CreateWriter(&writerModel)
-	fmt.Println(writer)
+	if err != nil {
+		fmt.Println("Error on wizard CreateWriter")
+		fmt.Println(err)
+		fmt.Println("Error on wizard")
+		return false, err
+	}
+	fmt.Println(writer.WriterThingClass, writer.UUID)
 
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = body.ProducerUUID
 	writerCloneModel.WriterUUID = writer.UUID
 	writerModel.WriterThingClass = model.ThingClass.Point
 	writerModel.WriterThingType = model.ThingClass.API
-	writerClone, err := d.CreateWriterClone(&writerCloneModel)
-	fmt.Println(writerClone)
 
-	//update writerCloneUUID to writer
-	writerModel.CloneUUID = writerClone.UUID
-	_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
-	fmt.Println(writer)
+	if !isRemote {
+		writerClone, err := d.CreateWriterClone(&writerCloneModel)
+		if err != nil {
+			fmt.Println("Error on wizard CreateWriterClone")
+			fmt.Println(err)
+			fmt.Println("Error on wizard")
+			return false, err
+		}
+		fmt.Println(writerClone)
+		//update writerCloneUUID to writer
+		writerModel.CloneUUID = writerClone.UUID
+		_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
+		if err != nil {
+			fmt.Println("Error on wizard UpdateWriter")
+			fmt.Println(err)
+			fmt.Println("Error on wizard")
+			return false, err
+		}
+		fmt.Println(writer)
+	} else {
+		fmt.Println(writerCloneModel.ProducerUUID, writerCloneModel.WriterUUID, "rest add writerClone")
+		ap := client.NewSessionWithToken("fakeToken123", url, "1660")
+		clone, err := ap.CreateWriterClone(writerCloneModel)
+		if err != nil {
+			fmt.Println("Error on wizard CreateWriterClone", err)
+			return false, err
+		}
+		fmt.Println(clone.UUID, clone.ProducerUUID)
+		writerModel.CloneUUID = clone.UUID
+		fmt.Println(writerModel.CloneUUID, writerModel.UUID, "rest add EditWriter")
+		_, err = ap.EditWriter(writerModel.UUID, writerModel, false)
+		if err != nil {
+			fmt.Println("Error on wizard EditWriter", err)
+			return false, err
+		}
+
+	}
 
 	if err != nil {
 		fmt.Println("Error on wizard")
