@@ -18,7 +18,6 @@ func publishMQTT(sensorStruct model.ProducerBody) {
 	}
 	fmt.Println(a.IsConnected())
 	topic := fmt.Sprintf("rubix/%s", sensorStruct.ProducerUUID)
-	fmt.Println(11111, topic)
 	data, err := json.Marshal(sensorStruct)
 	if err != nil {
 		log.Fatal(err)

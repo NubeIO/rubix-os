@@ -22,7 +22,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var writerCloneModel model.WriterClone
 
 	//get plugin
-	p, err := d.GetPluginByPath("lora")
+	p, err := d.GetPluginByPath("system")
 	if p.UUID == "" {
 		return false, errors.New("no valid plugin")
 	}
@@ -60,10 +60,10 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	// producer
 	producerModel.StreamUUID = stream.UUID
-	producerModel.ThingUUID = pnt.UUID
+	producerModel.ProducerThingUUID = pnt.UUID
 	producerModel.Name = "producer stream"
-	producerModel.ThingClass = model.ThingClass.Point
-	producerModel.ThingType = model.ThingClass.Point
+	producerModel.ProducerThingClass = model.ThingClass.Point
+	producerModel.ProducerThingType = model.ThingClass.Point
 	producerModel.ProducerApplication = model.CommonNaming.Mapping
 	producer, err := d.CreateProducer(&producerModel)
 	fmt.Println(producer.Name)
@@ -126,7 +126,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var writerCloneModel model.WriterClone
 
 	//get plugin
-	p, err := d.GetPluginByPath("lora")
+	p, err := d.GetPluginByPath("system")
 	if err != nil {
 		return false, errors.New("not valid plugin found")
 	}
@@ -166,10 +166,10 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// producer
 	log.Debug("stream.UUID: ", stream.UUID)
 	producerModel.StreamUUID = stream.UUID
-	producerModel.ThingUUID = pnt.UUID
+	producerModel.ProducerThingUUID = pnt.UUID
 	producerModel.Name = "producer stream"
-	producerModel.ThingClass = model.ThingClass.Point
-	producerModel.ThingType = model.ThingClass.Point
+	producerModel.ProducerThingClass = model.ThingClass.Point
+	producerModel.ProducerThingType = model.ThingClass.Point
 	producerModel.ProducerApplication = model.CommonNaming.Mapping
 	producer, err := d.CreateProducer(&producerModel)
 	log.Debug("Created Producer: ", producer.Name)
@@ -262,11 +262,6 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, error) {
 	//delete networks
 	var flowNetwork model.FlowNetwork
-	//var pluginModel *model.PluginConf
-	var networkModel model.Network
-	var deviceModel model.Device
-	var pointModel model.Point
-	//var producerModel model.Producer
 	var consumerModel model.Consumer
 	var writerModel model.Writer
 	var writerCloneModel model.WriterClone
@@ -279,8 +274,8 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	flowNetwork.IsRemote = true
 	flowNetwork.FlowIP = "0.0.0.0"
 	flowNetwork.FlowPort = "1660"
-	flowNetwork.FlowToken = body.FlowToken
-	//flowNetwork.StreamListUUID = body.StreamListUUID
+	flowNetwork.FlowToken = "fakeToken123"
+
 	flowNetwork.GlobalFlowID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.GlobalRemoteFlowID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.RemoteFlowUUID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
@@ -288,39 +283,31 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	flowNetwork.Name = "NAME 2nd network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
 	fmt.Println("CreateFlowNetwork", f.UUID)
-	// network
-	networkModel.PluginConfId = p.UUID
-	n, err := d.CreateNetwork(&networkModel)
-	fmt.Println("CreateNetwork")
-	// device
-	deviceModel.NetworkUUID = n.UUID
-	dev, err := d.CreateDevice(&deviceModel)
-
-	// point
-	pointModel.DeviceUUID = dev.UUID
-	pointModel.Name = "is the producer 2nd point"
-	pnt, err := d.CreatePoint(&pointModel)
 
 	// consumer
 	consumerModel.StreamUUID = body.StreamUUID
-	consumerModel.Name = "consumer stream 2nd network"
+	consumerModel.Name = "consumer-2"
 	consumerModel.ProducerUUID = body.ProducerUUID
-	consumerModel.ProducerThingType = model.ThingClass.Point
+	consumerModel.ProducerThingClass = body.ProducerThingClass
+	consumerModel.ProducerThingType = body.ProducerThingType
+	consumerModel.ProducerThingUUID = body.ProducerThingUUID
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
-	consumerModel.ProducerThingUUID = body.ExistingPointUUID //existing point
 	consumer, err := d.CreateConsumer(&consumerModel)
 	fmt.Println(consumer.Name)
 
 	// writer
 	writerModel.ConsumerUUID = consumerModel.UUID
-	writerModel.ConsumerThingUUID = pnt.UUID //new point
-
+	writerModel.ConsumerThingUUID = consumerModel.UUID
+	writerModel.WriterThingClass = model.ThingClass.Point
+	writerModel.WriterThingType = model.ThingClass.API
 	writer, err := d.CreateWriter(&writerModel)
 	fmt.Println(writer)
 
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = body.ProducerUUID
 	writerCloneModel.WriterUUID = writer.UUID
+	writerModel.WriterThingClass = model.ThingClass.Point
+	writerModel.WriterThingType = model.ThingClass.API
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
 	fmt.Println(writerClone)
 

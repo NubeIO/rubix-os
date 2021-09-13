@@ -7,9 +7,9 @@ type Producer struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	CommonThingClass
-	CommonThingType
-	CommonThingUUID
+	ProducerThingUUID     string            `json:"producer_thing_uuid"` // this is the remote point UUID
+	ProducerThingClass    string            `json:"producer_thing_class"`
+	ProducerThingType     string            `json:"producer_thing_type"`
 	StreamUUID            string            `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
 	CommonCurrentProducer                   //if the point for example is read only the writer uuid would be the point uuid, ie: itself, so in this case there is no writer or writer clone
 	EnableHistory         bool              `json:"enable_history"`

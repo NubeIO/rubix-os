@@ -25,27 +25,25 @@ func (d *GormDatabase) GetPlugins() ([]*model.PluginConf, error) {
 	return plugins, nil
 }
 
-
 // GetPluginByPath get object by path.
 func (d *GormDatabase) GetPluginByPath(path string) (*model.PluginConf, error) {
 	var plugin *model.PluginConf
-	//p := pluginIsNil(path)
-	query := d.DB.Where("module_path = ? ", path).First(&plugin); if query.Error != nil {
+	query := d.DB.Where("module_path = ? ", path).First(&plugin)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return plugin, nil
 }
-
 
 // GetPlugin get object by uuid.
 func (d *GormDatabase) GetPlugin(uuid string) (*model.PluginConf, error) {
 	var plugin *model.PluginConf
-	query := d.DB.Where("uuid = ? ", uuid).First(&plugin); if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).First(&plugin)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return plugin, nil
 }
-
 
 // GetPluginConfByUserAndPath gets plugin configuration by user and file name.
 func (d *GormDatabase) GetPluginConfByUserAndPath(userid uint, path string) (*model.PluginConf, error) {
@@ -104,7 +102,6 @@ func (d *GormDatabase) GetPluginConfByID(id string) (*model.PluginConf, error) {
 	}
 	return nil, err
 }
-
 
 func (d *GormDatabase) UpdatePluginConf(p *model.PluginConf) error {
 	return d.DB.Save(p).Error
