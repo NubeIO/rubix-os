@@ -270,12 +270,13 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 
 	isRemote := true
 	url := "165.227.72.56" //165.227.72.56
+	token := "fakeToken123"
 
 	//in writer add writeCloneUUID and same in writerClone
 	flowNetwork.IsRemote = isRemote
 	flowNetwork.FlowIP = url
 	flowNetwork.FlowPort = "1660"
-	flowNetwork.FlowToken = "fakeToken123"
+	flowNetwork.FlowToken = token
 
 	flowNetwork.GlobalFlowID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.GlobalRemoteFlowID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
@@ -361,7 +362,7 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 		fmt.Println(writer)
 	} else {
 		fmt.Println(writerCloneModel.ProducerUUID, writerCloneModel.WriterUUID, "rest add writerClone")
-		ap := client.NewSessionWithToken("fakeToken123", url, "1660")
+		ap := client.NewSessionWithToken(token, url, "1660")
 		clone, err := ap.CreateWriterClone(writerCloneModel)
 		if err != nil {
 			fmt.Println("Error on wizard CreateWriterClone", err)
