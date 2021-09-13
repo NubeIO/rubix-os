@@ -38,6 +38,22 @@ type Units struct { // for example from temp c to temp f
 	To   string
 }
 
+//var ObjectTypeBACnet = struct {
+//	analogInput  string
+//	analogOutput string
+//	analogValue  string
+//	binaryInput  string
+//	binaryOutput string
+//	binaryValue  string
+//}{
+//	analogInput:  "analogInput",
+//	analogOutput: "analogOutput",
+//	analogValue:  "analogValue",
+//	binaryInput:  "binaryInput",
+//	binaryOutput: "binaryOutput",
+//	binaryValue:  "binaryValue",
+//}
+
 var ObjectType = struct {
 	analogInput  string
 	analogOutput string

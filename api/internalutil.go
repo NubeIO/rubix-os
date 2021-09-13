@@ -28,6 +28,8 @@ type Args struct {
 	Field           string
 	Value           string
 	UpdateProducer  string
+	CompactPayload  string
+	CompactWithName string
 }
 
 var ArgsType = struct {
@@ -48,6 +50,8 @@ var ArgsType = struct {
 	Field           string
 	Value           string
 	UpdateProducer  string
+	CompactPayload  string //for a point would be presentValue
+	CompactWithName string //for a point would be presentValue and pointName
 }{
 	Sort:            "sort",
 	Order:           "order",
@@ -66,6 +70,8 @@ var ArgsType = struct {
 	Field:           "field",
 	Value:           "value",
 	UpdateProducer:  "update_producer",
+	CompactPayload:  "compact_payload",
+	CompactWithName: "compact_with_name",
 }
 
 var ArgsDefault = struct {
@@ -84,6 +90,8 @@ var ArgsDefault = struct {
 	Field           string
 	Value           string
 	UpdateProducer  string
+	CompactPayload  string
+	CompactWithName string
 }{
 	Sort:            "ID",
 	Order:           "DESC", //ASC or DESC
@@ -100,6 +108,8 @@ var ArgsDefault = struct {
 	Field:           "name",
 	Value:           "",
 	UpdateProducer:  "false",
+	CompactPayload:  "false",
+	CompactWithName: "false",
 }
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {
