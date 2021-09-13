@@ -41,9 +41,9 @@ func (d *GormDatabase) GetStream(uuid string, withChildren bool) (*model.Stream,
 	var gatewayModel *model.Stream
 	var query *gorm.DB = nil
 	if withChildren {
-		query = d.DB.Preload("FlowNetworks").Preload("Producer").Preload("Producer.WriterClone").Preload("Consumer").Preload("Consumer.Writer").Find(&gatewayModel).Where("uuid = ? ", uuid).First(&gatewayModel)
+		query = d.DB.Preload("FlowNetworks").Preload("Producer").Preload("Producer.WriterClone").Preload("Consumer").Preload("Consumer.Writer").Where("uuid = ? ", uuid).First(&gatewayModel)
 	} else {
-		query = d.DB.Find(&gatewayModel)
+		query = d.DB.Where("uuid = ? ", uuid).First(&gatewayModel)
 	}
 	if query.Error != nil {
 		return nil, query.Error
