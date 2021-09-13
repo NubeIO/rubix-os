@@ -10,11 +10,12 @@ import (
 )
 
 func (i *Instance) BusServ() {
-	handlerCreated := bus.Handler{
+	handlerCreated := bus.Handler{ //PLUGIN CREATED BUS
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				//try and match is network
-				net, err := eventbus.IsNetwork(e.Topic, e);if err != nil {
+				net, err := eventbus.IsNetwork(e.Topic, e)
+				if err != nil {
 					return
 				}
 				if net != nil {
@@ -25,7 +26,8 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is device
-				dev, err := eventbus.IsDevice(e.Topic, e);if err != nil {
+				dev, err := eventbus.IsDevice(e.Topic, e)
+				if err != nil {
 					return
 				}
 				if dev != nil {
@@ -37,7 +39,8 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is point
-				pnt, err := eventbus.IsPoint(e.Topic, e);if err != nil {
+				pnt, err := eventbus.IsPoint(e.Topic, e)
+				if err != nil {
 					return
 				}
 				if pnt != nil {
@@ -54,11 +57,12 @@ func (i *Instance) BusServ() {
 	u, _ := utils.MakeUUID()
 	key := fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerCreated)
-	handlerUpdated := bus.Handler{
+	handlerUpdated := bus.Handler{ //PLUGIN UPDATED BUS
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				//try and match is network
-				net, err := eventbus.IsNetwork(e.Topic, e);if err != nil {
+				net, err := eventbus.IsNetwork(e.Topic, e)
+				if err != nil {
 					return
 				}
 				if net != nil {
@@ -69,7 +73,8 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is device
-				dev, err := eventbus.IsDevice(e.Topic, e);if err != nil {
+				dev, err := eventbus.IsDevice(e.Topic, e)
+				if err != nil {
 					return
 				}
 				if dev != nil {
@@ -81,11 +86,11 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is point
-				pnt, err := eventbus.IsPoint(e.Topic, e);if err != nil {
+				pnt, err := eventbus.IsPoint(e.Topic, e)
+				if err != nil {
 					return
 				}
 				if pnt != nil {
-					//_, err = c.addPoints(dev)
 					log.Info("LORA BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return

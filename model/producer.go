@@ -14,8 +14,6 @@ type Producer struct {
 	CommonCurrentProducer                   //if the point for example is read only the writer uuid would be the point uuid, ie: itself, so in this case there is no writer or writer clone
 	EnableHistory         bool              `json:"enable_history"`
 	ProducerApplication   string            `json:"producer_application"`
-	PublishName           bool              `json:"publish_name"`       //publish with the point name and the type as an example TODO add these in for when we do MQTT
-	PublishAttributes     bool              `json:"publish_attributes"` //publish all fields from the producer WARNING this will increase network data TODO add these in for when we do MQTT
 	WriterClone           []WriterClone     `json:"writer_clones" gorm:"constraint:OnDelete:CASCADE;"`
 	ProducerHistory       []ProducerHistory `json:"producer_histories" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
