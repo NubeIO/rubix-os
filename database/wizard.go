@@ -50,6 +50,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	// stream
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
+	fmt.Println(streamModel.FlowNetworks, 9898989)
 	stream, err := d.CreateStream(&streamModel)
 	log.Debug("Created Streams at Producer side: ", stream.Name)
 

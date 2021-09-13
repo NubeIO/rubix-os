@@ -36,12 +36,36 @@ func (d *GormDatabase) HistoryByProducerUUID(uuid string) (*model.ProducerHistor
 		return nil, query.Error
 	}
 	return historyModel, nil
+}
 
+// HistoriesByProducerUUID returns the history for the given id or nil.
+func (d *GormDatabase) HistoriesByProducerUUID(uuid string) ([]*model.ProducerHistory, int64, error) {
+	var count int64
+	var historiesModel []*model.ProducerHistory
+	q := d.DB.Where("producer_uuid = ? ", uuid).Order("timestamp DESC").Find(&historiesModel) //ASC or DESC
+	q.Count(&count)
+	return historiesModel, count, nil
 }
 
 // CreateProducerHistory creates a thing.
 func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.ProducerHistory)
+	hist, count, err := d.HistoriesByProducerUUID(body.ProducerUUID)
+	if err != nil {
+		return nil, err
+	}
+	var limit int64 = 10
+	//TODO add in the limit as a field in the producer
+	if count >= limit {
+		for i, e := range hist {
+			if i >= int(limit) {
+				_, err := d.DeleteProducerHistory(e.UUID)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}

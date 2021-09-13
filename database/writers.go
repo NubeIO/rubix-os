@@ -123,17 +123,9 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	producerUUID := consumer.ProducerUUID
 	writerCloneUUID := writer.CloneUUID
 	streamUUID := consumer.StreamUUID
-	stream, err := d.GetStream(streamUUID, false)
+	stream, flow, err := d.GetFlowUUID(streamUUID)
 	if err != nil || stream.UUID == "nil" {
 		return nil, errors.New("error: invalid stream UUID")
-	}
-	flowNetworkUUID := ""
-	for _, net := range stream.FlowNetworks {
-		flowNetworkUUID = net.UUID
-	}
-	flow, err := d.GetFlowNetwork(flowNetworkUUID)
-	if err != nil {
-		return nil, errors.New("error: invalid flow UUID")
 	}
 	wc.DataStore = data
 	writer.DataStore = data
@@ -188,11 +180,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 		} else {
 			return producerHistory, err
 		}
-
 	}
-
-	//}
-
 }
 
 type hists struct {

@@ -218,6 +218,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			historyProducerRoutes.DELETE("/drop", historyHandler.DropProducerHistories)
 			historyProducerRoutes.GET("/:uuid", historyHandler.GetProducerHistory)
 			historyProducerRoutes.GET("/field/:uuid", historyHandler.HistoryByProducerUUID)
+			historyProducerRoutes.GET("/all/:uuid", historyHandler.HistoriesByProducerUUID)
+			historyProducerRoutes.GET("/latest/:uuid", historyHandler.HistoryByProducerUUID)
 			historyProducerRoutes.POST("/bulk", historyHandler.CreateBulkProducerHistory)
 			historyProducerRoutes.DELETE("/:uuid", historyHandler.DeleteProducerHistory)
 		}
@@ -387,6 +389,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		{
 			thingRoutes.GET("/class", thingHandler.ThingClass)
 			thingRoutes.GET("/types", thingHandler.ThingTypes)
+			thingRoutes.GET("/writers/actions", thingHandler.WriterActions)
 		}
 
 	}

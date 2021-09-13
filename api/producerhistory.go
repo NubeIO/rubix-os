@@ -9,6 +9,7 @@ import (
 type ProducerHistoryDatabase interface {
 	GetProducerHistory(uuid string) (*model.ProducerHistory, error)
 	HistoryByProducerUUID(uuid string) (*model.ProducerHistory, error)
+	HistoriesByProducerUUID(uuid string) ([]*model.ProducerHistory, int64, error)
 	GetProducerHistories() ([]*model.ProducerHistory, error)
 	CreateProducerHistory(history *model.ProducerHistory) (*model.ProducerHistory, error)
 	DeleteProducerHistory(uuid string) (bool, error)
@@ -27,6 +28,12 @@ func (a *HistoriesAPI) GetProducerHistories(ctx *gin.Context) {
 func (a *HistoriesAPI) GetProducerHistory(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.GetProducerHistory(uuid)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *HistoriesAPI) HistoriesByProducerUUID(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, _, err := a.DB.HistoriesByProducerUUID(uuid)
 	reposeHandler(q, err, ctx)
 }
 
