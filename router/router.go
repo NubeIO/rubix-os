@@ -217,9 +217,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			historyProducerRoutes.GET("", historyHandler.GetProducerHistories)
 			historyProducerRoutes.DELETE("/drop", historyHandler.DropProducerHistories)
 			historyProducerRoutes.GET("/:uuid", historyHandler.GetProducerHistory)
-			historyProducerRoutes.GET("/field/:uuid", historyHandler.HistoryByProducerUUID)
-			historyProducerRoutes.GET("/all/:uuid", historyHandler.HistoriesByProducerUUID)
-			historyProducerRoutes.GET("/latest/:uuid", historyHandler.HistoryByProducerUUID)
+			historyProducerRoutes.GET("/latest/:uuid", historyHandler.HistoryLatestByProducerUUID) //gets the newest
+			historyProducerRoutes.GET("/all/:uuid", historyHandler.HistoriesAllByProducerUUID)
 			historyProducerRoutes.POST("/bulk", historyHandler.CreateBulkProducerHistory)
 			historyProducerRoutes.DELETE("/:uuid", historyHandler.DeleteProducerHistory)
 		}

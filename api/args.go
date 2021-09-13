@@ -13,6 +13,16 @@ func withFieldsArgs(ctx *gin.Context) (field string, value string) {
 }
 
 //withChildrenArgs
+func queryFields(ctx *gin.Context) (order string, limit string) {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault //ASC or DESC
+	args.Order = ctx.DefaultQuery(aType.Order, aDefault.Order)
+	args.Limit = ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints)
+	return args.Order, args.Limit
+}
+
+//withChildrenArgs
 func withChildrenArgs(ctx *gin.Context) (withChildren bool, withPoints bool) {
 	var args Args
 	var aType = ArgsType

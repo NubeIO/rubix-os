@@ -86,7 +86,7 @@ var ArgsDefault = struct {
 	UpdateProducer  string
 }{
 	Sort:            "ID",
-	Order:           "DESC",
+	Order:           "DESC", //ASC or DESC
 	Offset:          "0",
 	Limit:           "25",
 	Search:          "",
