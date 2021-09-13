@@ -81,13 +81,14 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue bo
 	if writeValue {
 		//TODO point cov event
 	}
-	query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	query = d.DB.Model(&pointModel).Updates(&body)
-	if query.Error != nil {
-		return nil, query.Error
+	if pointModel.IsProducer {
+		if compare(pointModel, body) {
+			_, err := d.ProducerWrite("point", pointModel)
+			if err != nil {
+				log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
+				return nil, err
+			}
+		}
 	}
 	return pointModel, nil
 }

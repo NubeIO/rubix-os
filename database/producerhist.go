@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"time"
@@ -28,21 +29,30 @@ func (d *GormDatabase) GetProducerHistory(uuid string) (*model.ProducerHistory, 
 
 }
 
-// HistoryByProducerUUID returns the history for the given id or nil.
-func (d *GormDatabase) HistoryByProducerUUID(uuid string) (*model.ProducerHistory, error) {
+// HistoryLatestByProducerUUID returns the history for the given id or nil.
+func (d *GormDatabase) HistoryLatestByProducerUUID(uuid string) (*model.ProducerHistory, error) {
 	var historyModel *model.ProducerHistory
-	query := d.DB.Where("producer_uuid = ? ", uuid).Order("timestamp DESC").First(&historyModel)
+	t := fmt.Sprintf("timestamp %s", "DESC")
+	query := d.DB.Where("producer_uuid = ? ", uuid).Order(t).First(&historyModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	return historyModel, nil
 }
 
-// HistoriesByProducerUUID returns the history for the given id or nil.
-func (d *GormDatabase) HistoriesByProducerUUID(uuid string) ([]*model.ProducerHistory, int64, error) {
+// HistoriesAllByProducerUUID returns the history for the given id or nil.
+func (d *GormDatabase) HistoriesAllByProducerUUID(uuid string, order string) ([]*model.ProducerHistory, int64, error) {
 	var count int64
 	var historiesModel []*model.ProducerHistory
-	q := d.DB.Where("producer_uuid = ? ", uuid).Order("timestamp DESC").Find(&historiesModel) //ASC or DESC
+	t := "DESC"
+	switch order {
+	case "ASC":
+		t = "ASC"
+	case "DESC":
+		t = "DESC"
+	}
+	t = fmt.Sprintf("timestamp %s", t)
+	q := d.DB.Where("producer_uuid = ? ", uuid).Order(t).Find(&historiesModel) //ASC or DESC
 	q.Count(&count)
 	return historiesModel, count, nil
 }
@@ -50,7 +60,7 @@ func (d *GormDatabase) HistoriesByProducerUUID(uuid string) ([]*model.ProducerHi
 // CreateProducerHistory creates a thing.
 func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.ProducerHistory)
-	hist, count, err := d.HistoriesByProducerUUID(body.ProducerUUID)
+	hist, count, err := d.HistoriesAllByProducerUUID(body.ProducerUUID, "DESC")
 	if err != nil {
 		return nil, err
 	}

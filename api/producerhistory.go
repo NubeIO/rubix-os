@@ -8,8 +8,8 @@ import (
 // The ProducerHistoryDatabase interface for encapsulating database access.
 type ProducerHistoryDatabase interface {
 	GetProducerHistory(uuid string) (*model.ProducerHistory, error)
-	HistoryByProducerUUID(uuid string) (*model.ProducerHistory, error)
-	HistoriesByProducerUUID(uuid string) ([]*model.ProducerHistory, int64, error)
+	HistoryLatestByProducerUUID(uuid string) (*model.ProducerHistory, error)
+	HistoriesAllByProducerUUID(uuid string, order string) ([]*model.ProducerHistory, int64, error)
 	GetProducerHistories() ([]*model.ProducerHistory, error)
 	CreateProducerHistory(history *model.ProducerHistory) (*model.ProducerHistory, error)
 	DeleteProducerHistory(uuid string) (bool, error)
@@ -31,15 +31,16 @@ func (a *HistoriesAPI) GetProducerHistory(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-func (a *HistoriesAPI) HistoriesByProducerUUID(ctx *gin.Context) {
+func (a *HistoriesAPI) HistoriesAllByProducerUUID(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, _, err := a.DB.HistoriesByProducerUUID(uuid)
+	order, _ := queryFields(ctx)
+	q, _, err := a.DB.HistoriesAllByProducerUUID(uuid, order)
 	reposeHandler(q, err, ctx)
 }
 
-func (a *HistoriesAPI) HistoryByProducerUUID(ctx *gin.Context) {
+func (a *HistoriesAPI) HistoryLatestByProducerUUID(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.HistoryByProducerUUID(uuid)
+	q, err := a.DB.HistoryLatestByProducerUUID(uuid)
 	reposeHandler(q, err, ctx)
 }
 

@@ -27,8 +27,8 @@ type Consumer struct {
 //ConsumerHistory for storing the history
 type ConsumerHistory struct {
 	CommonUUID
-	ConsumerUUID string `json:"consumer_uuid" gorm:"TYPE:varchar(255) REFERENCES consumers;not null;default:null"`
-	ProducerUUID string
+	ConsumerUUID string         `json:"consumer_uuid" gorm:"TYPE:varchar(255) REFERENCES consumers;not null;default:null"`
+	ProducerUUID string         `json:"producer_uuid"`
 	DataStore    datatypes.JSON `json:"data_store"`
 	Timestamp    time.Time      `json:"timestamp"`
 }

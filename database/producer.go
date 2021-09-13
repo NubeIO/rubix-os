@@ -93,7 +93,6 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 		point := p.(*model.Point)
 		producerModel.ThingWriterUUID = point.UUID
 		pointUUID := point.UUID
-
 		pro, err := d.GetProducerByField("producer_thing_uuid", pointUUID)
 		if err != nil {
 			log.Errorf("ERROR GetProducerByField")
@@ -104,7 +103,6 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 			log.Errorf("UpdateProducer")
 			return "", err
 		}
-
 		point.Priority.P1 = null.FloatFrom(point.PresentValue)
 		b, err := json.Marshal(point)
 		if err != nil {
@@ -117,7 +115,7 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 		var proBody model.ProducerBody
 		proBody.StreamUUID = pro.StreamUUID
 		proBody.ProducerUUID = pro.UUID
-		proBody.ThingType = pro.ThingType
+		proBody.ThingType = pro.ProducerThingType
 		proBody.ThingType = point.ThingType
 		proBody.Payload = point
 
@@ -130,37 +128,6 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 	}
 	return "", err
 }
-
-//func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}, ) (string,error) {
-//	var producerModel model.Producer
-//	p, err := eventbus.DecodeBody(thingType, payload);if err != nil {
-//		return "", err
-//	}
-//	if thingType == model.CommonNaming.Point {
-//		point := p.(*model.Point)
-//		producerModel.ThingWriterUUID = point.UUID
-//		pointUUID := point.UUID
-//
-//		pro, err := d.GetProducerByField("producer_thing_uuid", pointUUID);if err != nil {
-//			log.Errorf("ERROR GetProducerByField")
-//			return "", err
-//		}
-//		_, err = d.UpdateProducer(pointUUID, &producerModel, false);if err != nil {
-//			log.Errorf("UpdateProducer")
-//			return "", err
-//		}
-//		pnt := point
-//		pnt.Priority.P1 = null.FloatFrom(point.PresentValue)
-//		b, err := json.Marshal(pnt);if err != nil {
-//			log.Errorf("UpdateProducer")
-//		}
-//		err = d.ProducerWriteHist(pro.UUID, b);if err != nil {
-//			return "", err
-//		}
-//		return pro.UUID, err
-//	}
-//	return "", err
-//}
 
 // GetProducerByField returns the point for the given field ie name or nil.
 //for example get a producer by its producer_thing_uuid
