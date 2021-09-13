@@ -16,21 +16,6 @@ type HealthAPI struct {
 }
 
 // Health returns health information.
-// swagger:operation GET /health health getHealth
-//
-// Get health information.
-//
-// ---
-// produces: [application/json]
-// responses:
-//   200:
-//     description: Ok
-//     schema:
-//         $ref: "#/definitions/Health"
-//   500:
-//     description: Ok
-//     schema:
-//         $ref: "#/definitions/Health"
 func (a *HealthAPI) Health(ctx *gin.Context) {
 	if err := a.DB.Ping(); err != nil {
 		ctx.JSON(500, model.Health{

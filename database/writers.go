@@ -97,44 +97,24 @@ func (d *GormDatabase) DropWriters() (bool, error) {
 }
 
 /*
-
+WriterAction read or write a value to the writer and onto the writer clone
 1. update writer
 2. write to writerClone
 3. producer to decide if it's a valid cov
 3. producer to write to history
 4. return to consumer and update as required if it's a valid cov (update the writerConeUUID, this could be from another flow-framework instance)
-
-WRITER
-get http post:
-update the writer and writerHistory
-
-http post to writeClone:
-try to write value to writeClone
-update the writerClone history
-then try and write to the producer, the producer will decide if it will accept the value. example a point write with point cov
-if: the producer accepts then.
-- update producer with the writerCloneUUID (this is, so we know who wrote the last value to the producer)
-- update the consumer
-- return message to user
-
-else:
-update the writerClone history
-
 */
-
-//WriterAction read or write a value to the writer and onto the writer clone
 func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model.ProducerHistory, error) {
 	askRefresh := body.AskRefresh
 	writer, err := d.GetWriter(uuid)
 	if err != nil {
 		return nil, err
 	}
-	data, action, err := streams.ValidateTypes(writer.ThingClass, body)
+	data, action, err := streams.ValidateTypes(writer.WriterThingClass, body)
 	if err != nil {
 		return nil, err
 	}
 	wc := new(model.WriterClone)
-
 	consumer, err := d.GetConsumer(writer.ConsumerUUID)
 	if err != nil {
 		return nil, errors.New("error: on get consumer")
@@ -143,20 +123,10 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	producerUUID := consumer.ProducerUUID
 	writerCloneUUID := writer.CloneUUID
 	streamUUID := consumer.StreamUUID
-	stream, err := d.GetStream(streamUUID, false)
+	stream, flow, err := d.GetFlowUUID(streamUUID)
 	if err != nil || stream.UUID == "nil" {
 		return nil, errors.New("error: invalid stream UUID")
 	}
-	flowNetworkUUID := ""
-	for _, net := range stream.FlowNetworks {
-		flowNetworkUUID = net.UUID
-
-	}
-	flow, err := d.GetFlowNetwork(flowNetworkUUID)
-	if err != nil {
-		return nil, errors.New("error: invalid flow UUID")
-	}
-	//if action == model.CommonNaming.Write { //write value to the clone
 	wc.DataStore = data
 	writer.DataStore = data
 	if flow.IsRemote { //IF IS REMOTE FLOW-NETWORK
@@ -210,11 +180,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 		} else {
 			return producerHistory, err
 		}
-
 	}
-
-	//}
-
 }
 
 type hists struct {

@@ -58,7 +58,6 @@ var ThingClass = struct {
 	ExternalAPI    string
 	Schedule       string
 	GlobalSchedule string
-	SilenceAlarm   string
 	Alert          string
 }{
 	API:            "api",
@@ -72,14 +71,16 @@ var ThingClass = struct {
 	Alert:          "alert",
 }
 
-var NamingCommandGroup = struct {
-	PointWrite     string
-	MasterSchedule string
-	SilenceAlarm   string
+var WriterActions = struct {
+	Read   string
+	Write  string
+	Patch  string
+	Delete string
 }{
-	PointWrite:     "point_write",
-	MasterSchedule: "master_schedule",
-	SilenceAlarm:   "silence_alarm",
+	Read:   "read",
+	Write:  "write",
+	Patch:  "patch",
+	Delete: "delete",
 }
 
 var CommonFaultCode = struct {

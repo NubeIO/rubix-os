@@ -41,7 +41,7 @@ func ProducerHistory(flowBody *model.FlowNetwork, producerUUID string) (*model.P
 func ValidateTypes(t string, body *model.WriterBody) ([]byte, string, error) {
 	if t == model.ThingClass.Point {
 		var bk model.WriterBody
-		if body.Action == model.CommonNaming.Write {
+		if body.Action == model.WriterActions.Write {
 			if body.Priority == bk.Priority {
 				return nil, body.Action, errors.New("error: invalid json on writerBody")
 			}
@@ -51,7 +51,7 @@ func ValidateTypes(t string, body *model.WriterBody) ([]byte, string, error) {
 			}
 			return b, body.Action, err
 		} else {
-			if body.Action == model.CommonNaming.Read {
+			if body.Action == model.WriterActions.Read {
 				return nil, body.Action, nil
 			} else {
 				return nil, body.Action, errors.New("error: invalid action, try read or write")

@@ -20,6 +20,7 @@ type CommonThingClass struct {
 type CommonThingType struct {
 	ThingType string `json:"thing_type"`
 }
+
 type CommonThingUUID struct {
 	ThingUUID string `json:"thing_uuid"`
 }

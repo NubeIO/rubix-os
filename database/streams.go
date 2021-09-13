@@ -51,6 +51,24 @@ func (d *GormDatabase) GetStream(uuid string, withChildren bool) (*model.Stream,
 	return gatewayModel, nil
 }
 
+// GetFlowUUID get flowNetwork stream and flow network
+func (d *GormDatabase) GetFlowUUID(uuid string) (*model.Stream, *model.FlowNetwork, error) {
+	var stream *model.Stream
+	query := d.DB.Preload("FlowNetworks").Where("uuid = ? ", uuid).First(&stream)
+	if query.Error != nil {
+		return nil, nil, query.Error
+	}
+	flowUUID := ""
+	for _, net := range stream.FlowNetworks {
+		flowUUID = net.UUID
+	}
+	flow, err := d.GetFlowNetwork(flowUUID)
+	if err != nil {
+		return nil, nil, err
+	}
+	return stream, flow, nil
+}
+
 // DeleteStream deletes it
 func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
 	var gatewayModel *model.Stream

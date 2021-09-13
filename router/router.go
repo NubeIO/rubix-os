@@ -95,6 +95,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	schHandler := api.ScheduleAPI{
 		DB: db,
 	}
+	thingHandler := api.ThingAPI{}
+
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
 	//for the custom plugin endpoints you need to use the plugin token
@@ -216,6 +218,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			historyProducerRoutes.DELETE("/drop", historyHandler.DropProducerHistories)
 			historyProducerRoutes.GET("/:uuid", historyHandler.GetProducerHistory)
 			historyProducerRoutes.GET("/field/:uuid", historyHandler.HistoryByProducerUUID)
+			historyProducerRoutes.GET("/all/:uuid", historyHandler.HistoriesByProducerUUID)
+			historyProducerRoutes.GET("/latest/:uuid", historyHandler.HistoryByProducerUUID)
 			historyProducerRoutes.POST("/bulk", historyHandler.CreateBulkProducerHistory)
 			historyProducerRoutes.DELETE("/:uuid", historyHandler.DeleteProducerHistory)
 		}
@@ -380,6 +384,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			schRoutes.PATCH("/:uuid", schHandler.UpdateSchedule)
 			schRoutes.DELETE("/:uuid", schHandler.DeleteSchedule)
 			schRoutes.DELETE("/drop", schHandler.DropSchedules)
+		}
+		thingRoutes := apiRoutes.Group("/things")
+		{
+			thingRoutes.GET("/class", thingHandler.ThingClass)
+			thingRoutes.GET("/types", thingHandler.ThingTypes)
+			thingRoutes.GET("/writers/actions", thingHandler.WriterActions)
 		}
 
 	}

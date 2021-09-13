@@ -5,9 +5,9 @@ import "gorm.io/datatypes"
 //Writer could be a local network, job or alarm and so on
 type Writer struct {
 	CommonUUID
-	CommonThingClass
-	CommonThingType
-	CommonThingUUID
+	WriterThingClass  string         `json:"writer_thing_class"`
+	WriterThingType   string         `json:"writer_thing_type"`
+	WriterThingUUID   string         `json:"writer_thing_uuid"`
 	CloneUUID         string         `json:"clone_uuid"`
 	ConsumerUUID      string         `json:"consumer_uuid" gorm:"TYPE:string REFERENCES consumers;not null;default:null"`
 	ConsumerThingUUID string         `json:"consumer_thing_uuid"` // this is the consumer child point UUID or an API-WRITER
