@@ -12,13 +12,13 @@ func WriteClone(uuid string, flowBody *model.FlowNetwork, body *model.WriterClon
 		token := flowBody.FlowToken
 		c := client.NewSessionWithToken(token, ip, port)
 		if write {
-			res, err := c.ClientEditWriterClone(uuid, *body, write)
+			res, err := c.EditWriterClone(uuid, *body, write)
 			if err != nil {
 				return nil, err
 			}
 			return res, err
 		} else {
-			res, err := c.ClientGetWriterClone(uuid)
+			res, err := c.GetWriterClone(uuid)
 			if err != nil {
 				return nil, err
 			}
