@@ -35,13 +35,13 @@ func WriteProducer(uuid string, flowBody *model.FlowNetwork, body *model.Produce
 		token := flowBody.FlowToken
 		c := client.NewSessionWithToken(token, ip, port)
 		if write {
-			res, err := c.ClientEditProducer(uuid, *body)
+			res, err := c.EditProducer(uuid, *body)
 			if err != nil {
 				return nil, err
 			}
 			return res, err
 		} else {
-			res, err := c.ClientGetProducer(uuid)
+			res, err := c.GetProducer(uuid)
 			if err != nil {
 				return nil, err
 			}
@@ -56,7 +56,7 @@ func ProducerRead(flowBody *model.FlowNetwork, producerUUID string) (*model.Prod
 	port := flowBody.FlowPort
 	token := flowBody.FlowToken
 	c := client.NewSessionWithToken(token, ip, port)
-	point, err := c.ClientGetProducer(producerUUID)
+	point, err := c.GetProducer(producerUUID)
 	if err != nil {
 		return nil, err
 	}

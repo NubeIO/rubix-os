@@ -6,8 +6,8 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-// ClientAddProducer an object
-func (a *FlowClient) ClientAddProducer(body model.Producer) (*model.Producer, error) {
+// AddProducer an object
+func (a *FlowClient) AddProducer(body model.Producer) (*model.Producer, error) {
 	name, _ := utils.MakeUUID()
 	name = fmt.Sprintf("sub_name_%s", name)
 	resp, err := a.client.R().
@@ -23,8 +23,8 @@ func (a *FlowClient) ClientAddProducer(body model.Producer) (*model.Producer, er
 	return resp.Result().(*model.Producer), nil
 }
 
-// ClientGetProducer an object
-func (a *FlowClient) ClientGetProducer(uuid string) (*model.Producer, error) {
+// GetProducer an object
+func (a *FlowClient) GetProducer(uuid string) (*model.Producer, error) {
 	resp, err := a.client.R().
 		SetResult(&model.Producer{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
@@ -41,8 +41,8 @@ func (a *FlowClient) ClientGetProducer(uuid string) (*model.Producer, error) {
 	return resp.Result().(*model.Producer), nil
 }
 
-// ClientEditProducer edit an object
-func (a *FlowClient) ClientEditProducer(uuid string, body model.Producer) (*model.Producer, error) {
+// EditProducer edit an object
+func (a *FlowClient) EditProducer(uuid string, body model.Producer) (*model.Producer, error) {
 	resp, err := a.client.R().
 		SetResult(&model.Producer{}).
 		SetBody(body).

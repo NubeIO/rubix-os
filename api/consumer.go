@@ -11,6 +11,7 @@ type ConsumersDatabase interface {
 	GetConsumer(uuid string, withChildren bool) (*model.Consumer, error)
 	GetConsumers() ([]*model.Consumer, error)
 	CreateConsumer(body *model.Consumer) (*model.Consumer, error)
+	AddConsumerWizard(consumerStreamUUID, producerUUID string, body *model.Consumer) (*model.Consumer, error)
 	UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error)
 	DeleteConsumer(uuid string) (bool, error)
 	DropConsumers() (bool, error)
@@ -38,6 +39,17 @@ func (j *ConsumersAPI) CreateConsumer(ctx *gin.Context) {
 		reposeHandler(nil, err, ctx)
 	}
 	q, err := j.DB.CreateConsumer(body)
+	reposeHandler(q, err, ctx)
+}
+
+func (j *ConsumersAPI) AddConsumerWizard(ctx *gin.Context) {
+	body, _ := getBODYConsumer(ctx)
+	_, streamUUID, producerUUID, _, _ := streamFieldsArgs(ctx)
+	_, err := govalidator.ValidateStruct(body)
+	if err != nil {
+		reposeHandler(nil, err, ctx)
+	}
+	q, err := j.DB.AddConsumerWizard(streamUUID, producerUUID, body)
 	reposeHandler(q, err, ctx)
 }
 
