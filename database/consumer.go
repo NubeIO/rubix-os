@@ -139,7 +139,7 @@ func (d *GormDatabase) AddConsumerWizard(consumerStreamUUID, producerUUID string
 		}
 		producer = p
 	} else {
-		p, err := d.GetProducer(producerUUID)
+		p, err := d.GetProducer(producerUUID, false)
 		if err != nil {
 			return nil, errors.New("error: issue on get producer")
 		}
