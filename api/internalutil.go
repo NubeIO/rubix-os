@@ -30,6 +30,11 @@ type Args struct {
 	UpdateProducer  string
 	CompactPayload  string
 	CompactWithName string
+	FlowUUID        string
+	StreamUUID      string
+	ProducerUUID    string
+	ConsumerUUID    string
+	WriterUUID      string
 }
 
 var ArgsType = struct {
@@ -52,6 +57,11 @@ var ArgsType = struct {
 	UpdateProducer  string
 	CompactPayload  string //for a point would be presentValue
 	CompactWithName string //for a point would be presentValue and pointName
+	FlowUUID        string
+	StreamUUID      string
+	ProducerUUID    string
+	ConsumerUUID    string
+	WriterUUID      string
 }{
 	Sort:            "sort",
 	Order:           "order",
@@ -72,6 +82,11 @@ var ArgsType = struct {
 	UpdateProducer:  "update_producer",
 	CompactPayload:  "compact_payload",
 	CompactWithName: "compact_with_name",
+	FlowUUID:        "flow_uuid",
+	StreamUUID:      "stream_uuid",
+	ProducerUUID:    "producer_uuid",
+	ConsumerUUID:    "consumer_uuid",
+	WriterUUID:      "writer_uuid",
 }
 
 var ArgsDefault = struct {
@@ -92,6 +107,11 @@ var ArgsDefault = struct {
 	UpdateProducer  string
 	CompactPayload  string
 	CompactWithName string
+	FlowUUID        string
+	StreamUUID      string
+	ProducerUUID    string
+	ConsumerUUID    string
+	WriterUUID      string
 }{
 	Sort:            "ID",
 	Order:           "DESC", //ASC or DESC
@@ -110,6 +130,11 @@ var ArgsDefault = struct {
 	UpdateProducer:  "false",
 	CompactPayload:  "false",
 	CompactWithName: "false",
+	FlowUUID:        "",
+	StreamUUID:      "",
+	ProducerUUID:    "",
+	ConsumerUUID:    "",
+	WriterUUID:      "",
 }
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {

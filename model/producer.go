@@ -7,6 +7,7 @@ type Producer struct {
 	CommonName
 	CommonDescription
 	CommonEnable
+	ProducerThingName     string            `json:"producer_thing_name"`
 	ProducerThingUUID     string            `json:"producer_thing_uuid"` // this is the remote point UUID
 	ProducerThingClass    string            `json:"producer_thing_class"`
 	ProducerThingType     string            `json:"producer_thing_type"`

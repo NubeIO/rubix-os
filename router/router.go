@@ -311,6 +311,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		{
 			consumerRoutes.GET("", consumerHandler.GetConsumers)
 			consumerRoutes.POST("", consumerHandler.CreateConsumer)
+			consumerRoutes.POST("/wizard", consumerHandler.AddConsumerWizard)
 			consumerRoutes.GET("/:uuid", consumerHandler.GetConsumer)
 			consumerRoutes.PATCH("/:uuid", consumerHandler.UpdateConsumer)
 			consumerRoutes.DELETE("/:uuid", consumerHandler.DeleteConsumer)
