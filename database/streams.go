@@ -22,13 +22,15 @@ func (d *GormDatabase) GetStreams(withChildren bool) ([]*model.Stream, error) {
 		}
 		return gatewaysModel, nil
 	}
-
 }
 
 // CreateStream make it
-func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
+func (d *GormDatabase) CreateStream(body *model.Stream, AddToParent string) (*model.Stream, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
 	body.Name = nameIsNil(body.Name)
+	var flowNetwork model.FlowNetwork
+	flowNetwork.UUID = AddToParent
+	body.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
 	err := d.DB.Create(&body).Error
 	if err != nil {
 		return nil, errorMsg("CreateStreamGateway", "error on trying to add a new stream gateway", nil)

@@ -18,6 +18,7 @@ type Args struct {
 	Search          string
 	WithChildren    string
 	WithPoints      string
+	WithParent      string
 	AskRefresh      string
 	AskResponse     string
 	Write           string
@@ -30,6 +31,7 @@ type Args struct {
 	UpdateProducer  string
 	CompactPayload  string
 	CompactWithName string
+	AddToParent     string
 }
 
 var ArgsType = struct {
@@ -40,6 +42,7 @@ var ArgsType = struct {
 	Search          string
 	WithChildren    string
 	WithPoints      string
+	WithParent      string
 	AskRefresh      string
 	AskResponse     string
 	Write           string
@@ -52,6 +55,7 @@ var ArgsType = struct {
 	UpdateProducer  string
 	CompactPayload  string //for a point would be presentValue
 	CompactWithName string //for a point would be presentValue and pointName
+	AddToParent     string
 }{
 	Sort:            "sort",
 	Order:           "order",
@@ -60,6 +64,7 @@ var ArgsType = struct {
 	Search:          "search",
 	WithChildren:    "with_children",
 	WithPoints:      "with_points",
+	WithParent:      "with_parent",
 	AskRefresh:      "ask_refresh",
 	AskResponse:     "ask_response",
 	Write:           "write",             //consumer to write a value
@@ -72,6 +77,7 @@ var ArgsType = struct {
 	UpdateProducer:  "update_producer",
 	CompactPayload:  "compact_payload",
 	CompactWithName: "compact_with_name",
+	AddToParent:     "add_to_parent",
 }
 
 var ArgsDefault = struct {
@@ -82,6 +88,7 @@ var ArgsDefault = struct {
 	Search          string
 	WithChildren    string
 	WithPoints      string
+	WithParent      string
 	AskRefresh      string
 	AskResponse     string
 	Write           string
@@ -92,6 +99,7 @@ var ArgsDefault = struct {
 	UpdateProducer  string
 	CompactPayload  string
 	CompactWithName string
+	AddToParent     string
 }{
 	Sort:            "ID",
 	Order:           "DESC", //ASC or DESC
@@ -100,6 +108,7 @@ var ArgsDefault = struct {
 	Search:          "",
 	WithChildren:    "false",
 	WithPoints:      "false",
+	WithParent:      "false",
 	AskRefresh:      "false",
 	AskResponse:     "false",
 	Write:           "false",
@@ -110,6 +119,7 @@ var ArgsDefault = struct {
 	UpdateProducer:  "false",
 	CompactPayload:  "false",
 	CompactWithName: "false",
+	AddToParent:     "",
 }
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {

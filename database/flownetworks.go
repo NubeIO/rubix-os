@@ -26,7 +26,7 @@ func (d *GormDatabase) GetFlowNetworks(withChildren bool) ([]*model.FlowNetwork,
 // GetFlowNetwork returns the network for the given id or nil.
 func (d *GormDatabase) GetFlowNetwork(uuid string) (*model.FlowNetwork, error) {
 	var flowNetworkModel *model.FlowNetwork
-	query := d.DB.Where("uuid = ? ", uuid).First(&flowNetworkModel)
+	query := d.DB.Where("uuid = ? ", uuid).Preload("Streams").First(&flowNetworkModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
