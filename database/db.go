@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/patrickmn/go-cache"
@@ -104,7 +105,7 @@ func (d *GormDatabase) DropAllFlow() (string, error) {
 //SyncTopics sync all the topics
 func (d *GormDatabase) SyncTopics() {
 
-	g, err := d.GetStreams(false)
+	g, err := d.GetStreams(api.Args{})
 	for _, obj := range g {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Stream, obj.UUID)
 	}

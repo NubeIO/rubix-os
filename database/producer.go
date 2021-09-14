@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
@@ -29,7 +30,7 @@ func (d *GormDatabase) GetProducers() ([]*model.Producer, error) {
 // CreateProducer make it
 func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, error) {
 	//call points and make it exists
-	_, err := d.GetStream(body.StreamUUID, false)
+	_, err := d.GetStream(body.StreamUUID, api.Args{})
 	if err != nil {
 		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the gateway UUID", nil)
 	}

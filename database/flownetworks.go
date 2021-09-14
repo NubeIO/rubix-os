@@ -47,16 +47,18 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 // UpdateFlowNetwork returns the network for the given id or nil.
 func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (*model.FlowNetwork, error) {
 	var flowNetworkModel *model.FlowNetwork
-	query := d.DB.Where("uuid = ?", uuid).Find(&flowNetworkModel)
-	if query.Error != nil {
-		return nil, query.Error
+	if err := d.DB.Where("uuid = ?", uuid).Find(&flowNetworkModel).Error; err != nil {
+		return nil, err
 	}
-	query = d.DB.Model(&flowNetworkModel).Updates(body)
-	if query.Error != nil {
-		return nil, query.Error
+	if len(body.Streams) > 0 {
+		if err := d.DB.Model(&flowNetworkModel).Association("Streams").Replace(body.Streams); err != nil {
+			return nil, err
+		}
+	}
+	if err := d.DB.Model(&flowNetworkModel).Updates(body).Error; err != nil {
+		return nil, err
 	}
 	return flowNetworkModel, nil
-
 }
 
 // DeleteFlowNetwork delete a network.
@@ -72,7 +74,6 @@ func (d *GormDatabase) DeleteFlowNetwork(uuid string) (bool, error) {
 	} else {
 		return true, nil
 	}
-
 }
 
 // DropFlowNetworks delete all networks.
@@ -88,5 +89,4 @@ func (d *GormDatabase) DropFlowNetworks() (bool, error) {
 	} else {
 		return true, nil
 	}
-
 }

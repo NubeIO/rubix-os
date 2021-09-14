@@ -73,3 +73,15 @@ func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, writ
 	updateProducer, _ = toBool(args.UpdateProducer)
 	return askRefresh, askResponse, write, updateProducer
 }
+
+func streamArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.FlowNetworks, _ = toBool(ctx.DefaultQuery(aType.FlowNetworks, aDefault.FlowNetworks))
+	args.Producers, _ = toBool(ctx.DefaultQuery(aType.Producers, aDefault.Producers))
+	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
+	args.CommandGroups, _ = toBool(ctx.DefaultQuery(aType.CommandGroups, aDefault.CommandGroups))
+	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	return args
+}

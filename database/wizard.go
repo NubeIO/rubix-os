@@ -52,7 +52,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	// stream
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
 	fmt.Println(streamModel.FlowNetworks, 9898989)
-	stream, err := d.CreateStream(&streamModel, "")
+	stream, err := d.CreateStream(&streamModel)
 	log.Debug("Created Streams at Producer side: ", stream.Name)
 
 	// producer
@@ -161,7 +161,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 
 	// stream
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
-	stream, err := d.CreateStream(&streamModel, "")
+	stream, err := d.CreateStream(&streamModel)
 	log.Debug("Created Streams at Producer side: ", stream.Name)
 
 	// producer
@@ -186,7 +186,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// consumer stream (edge-2)
 	consumerStreamModel.IsConsumer = true
 	consumerStreamModel.FlowNetworks = []*model.FlowNetwork{&consumerFlowNetwork}
-	consumerStream, err := d.CreateStream(&consumerStreamModel, "")
+	consumerStream, err := d.CreateStream(&consumerStreamModel)
 
 	// consumer (edge-2)
 	consumerModel.StreamUUID = consumerStream.UUID
@@ -295,7 +295,7 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	// consumer stream (edge-2)
 	streamModel.IsConsumer = true
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
-	consumerStream, err := d.CreateStream(&streamModel, "")
+	consumerStream, err := d.CreateStream(&streamModel)
 	if err != nil {
 		fmt.Println("Error on wizard CreateStream")
 		fmt.Println(err)
