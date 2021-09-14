@@ -9,7 +9,7 @@ import (
 type PointDatabase interface {
 	GetPoint(uuid string, withChildren bool) (*model.Point, error)
 	GetPoints(withChildren bool) ([]*model.Point, error)
-	CreatePoint(body *model.Point) (*model.Point, error)
+	CreatePoint(body *model.Point, addToParent string) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point, writeValue bool) (*model.Point, error)
 	GetPointByField(field string, value string, withChildren bool) (*model.Point, error)
 	UpdatePointByFieldAndType(field string, value string, body *model.Point, writeValue bool) (*model.Point, error)
@@ -21,14 +21,14 @@ type PointAPI struct {
 }
 
 func (a *PointAPI) GetPoints(ctx *gin.Context) {
-	withChildren, _ := withChildrenArgs(ctx)
+	withChildren, _, _ := withChildrenArgs(ctx)
 	q, err := a.DB.GetPoints(withChildren)
 	reposeHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetPoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	withChildren, _ := withChildrenArgs(ctx)
+	withChildren, _, _ := withChildrenArgs(ctx)
 	q, err := a.DB.GetPoint(uuid, withChildren)
 	reposeHandler(q, err, ctx)
 }
@@ -43,7 +43,7 @@ func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 
 func (a *PointAPI) GetPointByField(ctx *gin.Context) {
 	field, value := withFieldsArgs(ctx)
-	withChildren, _ := withChildrenArgs(ctx)
+	withChildren, _, _ := withChildrenArgs(ctx)
 	q, err := a.DB.GetPointByField(field, value, withChildren)
 	reposeHandler(q, err, ctx)
 }
@@ -58,7 +58,8 @@ func (a *PointAPI) UpdatePointByFieldAndType(ctx *gin.Context) {
 
 func (a *PointAPI) CreatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
-	q, err := a.DB.CreatePoint(body)
+	addToParent := parentArgs(ctx) //flowUUID
+	q, err := a.DB.CreatePoint(body, addToParent)
 	reposeHandler(q, err, ctx)
 
 }

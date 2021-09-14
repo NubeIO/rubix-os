@@ -13,7 +13,7 @@ func (h *Handler) GetPoint(uuid string, withChildren bool) (*model.Point, error)
 }
 
 func (h *Handler) CreatePoint(body *model.Point) (*model.Point, error) {
-	q, err := getDb().CreatePoint(body)
+	q, err := getDb().CreatePoint(body, "")
 	if err != nil {
 		return nil, err
 	}

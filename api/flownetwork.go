@@ -19,7 +19,7 @@ type FlowNetworksAPI struct {
 }
 
 func (a *FlowNetworksAPI) GetFlowNetworks(ctx *gin.Context) {
-	withChildren, _ := withChildrenArgs(ctx)
+	withChildren, _, _ := withChildrenArgs(ctx)
 	q, err := a.DB.GetFlowNetworks(withChildren)
 	reposeHandler(q, err, ctx)
 }

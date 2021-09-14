@@ -46,13 +46,13 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
 	pointModel.IsProducer = true
-	pnt, err := d.CreatePoint(&pointModel)
+	pnt, err := d.CreatePoint(&pointModel, "")
 	fmt.Println("CreatePoint")
 
 	// stream
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
 	fmt.Println(streamModel.FlowNetworks, 9898989)
-	stream, err := d.CreateStream(&streamModel)
+	stream, err := d.CreateStream(&streamModel, "")
 	log.Debug("Created Streams at Producer side: ", stream.Name)
 
 	// producer
@@ -156,12 +156,12 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
 	pointModel.IsProducer = true
-	pnt, err := d.CreatePoint(&pointModel)
+	pnt, err := d.CreatePoint(&pointModel, "")
 	log.Debug("Created a Point")
 
 	// stream
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
-	stream, err := d.CreateStream(&streamModel)
+	stream, err := d.CreateStream(&streamModel, "")
 	log.Debug("Created Streams at Producer side: ", stream.Name)
 
 	// producer
@@ -186,7 +186,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// consumer stream (edge-2)
 	consumerStreamModel.IsConsumer = true
 	consumerStreamModel.FlowNetworks = []*model.FlowNetwork{&consumerFlowNetwork}
-	consumerStream, err := d.CreateStream(&consumerStreamModel)
+	consumerStream, err := d.CreateStream(&consumerStreamModel, "")
 
 	// consumer (edge-2)
 	consumerModel.StreamUUID = consumerStream.UUID
@@ -211,7 +211,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	pointModel2.DeviceUUID = dev2.UUID
 	pointModel2.Name = "is the consumer"
 	pointModel2.IsConsumer = true
-	pnt2, err := d.CreatePoint(&pointModel2)
+	pnt2, err := d.CreatePoint(&pointModel2, "")
 	if err != nil {
 		return false, err
 	}
@@ -295,7 +295,7 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	// consumer stream (edge-2)
 	streamModel.IsConsumer = true
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
-	consumerStream, err := d.CreateStream(&streamModel)
+	consumerStream, err := d.CreateStream(&streamModel, "")
 	if err != nil {
 		fmt.Println("Error on wizard CreateStream")
 		fmt.Println(err)

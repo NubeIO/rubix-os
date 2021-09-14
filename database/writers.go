@@ -115,7 +115,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 		return nil, err
 	}
 	wc := new(model.WriterClone)
-	consumer, err := d.GetConsumer(writer.ConsumerUUID)
+	consumer, err := d.GetConsumer(writer.ConsumerUUID, false)
 	if err != nil {
 		return nil, errors.New("error: on get consumer")
 	}

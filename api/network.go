@@ -22,21 +22,21 @@ type NetworksAPI struct {
 }
 
 func (a *NetworksAPI) GetNetworks(ctx *gin.Context) {
-	withChildren, withPoints := withChildrenArgs(ctx)
+	withChildren, withPoints, _ := withChildrenArgs(ctx)
 	q, err := a.DB.GetNetworks(withChildren, withPoints)
 	reposeHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) GetNetworkByPlugin(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	withChildren, withPoints := withChildrenArgs(ctx)
+	withChildren, withPoints, _ := withChildrenArgs(ctx)
 	q, err := a.DB.GetNetworkByPlugin(uuid, withChildren, withPoints, "") //TODO fix this need to add in like "serial"
 	reposeHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) GetNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	withChildren, withPoints := withChildrenArgs(ctx)
+	withChildren, withPoints, _ := withChildrenArgs(ctx)
 	q, err := a.DB.GetNetwork(uuid, withChildren, withPoints)
 	reposeHandler(q, err, ctx)
 }

@@ -43,11 +43,18 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 }
 
 // GetProducer get it
-func (d *GormDatabase) GetProducer(uuid string) (*model.Producer, error) {
+func (d *GormDatabase) GetProducer(uuid string, withChildren bool) (*model.Producer, error) {
 	var producerModel *model.Producer
-	query := d.DB.Where("uuid = ? ", uuid).First(&producerModel)
-	if query.Error != nil {
-		return nil, query.Error
+	if withChildren {
+		query := d.DB.Preload("WriterClone").Where("uuid = ? ", uuid).First(&producerModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
+	} else {
+		query := d.DB.Where("uuid = ? ", uuid).First(&producerModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
 	}
 	return producerModel, nil
 }

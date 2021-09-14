@@ -35,11 +35,18 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 }
 
 // GetConsumer get it
-func (d *GormDatabase) GetConsumer(uuid string) (*model.Consumer, error) {
+func (d *GormDatabase) GetConsumer(uuid string, withChildren bool) (*model.Consumer, error) {
 	var consumerModel *model.Consumer
-	query := d.DB.Where("uuid = ? ", uuid).First(&consumerModel)
-	if query.Error != nil {
-		return nil, query.Error
+	if withChildren {
+		query := d.DB.Preload("Writer").Where("uuid = ? ", uuid).First(&consumerModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
+	} else {
+		query := d.DB.Where("uuid = ? ", uuid).First(&consumerModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
 	}
 	return consumerModel, nil
 }

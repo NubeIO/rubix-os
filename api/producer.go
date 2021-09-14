@@ -32,7 +32,7 @@ remote producer
 
 // The ProducerDatabase interface for encapsulating database access.
 type ProducerDatabase interface {
-	GetProducer(uuid string) (*model.Producer, error)
+	GetProducer(uuid string, withChildren bool) (*model.Producer, error)
 	GetProducers() ([]*model.Producer, error)
 	CreateProducer(body *model.Producer) (*model.Producer, error)
 	UpdateProducer(uuid string, body *model.Producer, updateHist bool) (*model.Producer, error)
@@ -45,7 +45,8 @@ type ProducerAPI struct {
 
 func (j *ProducerAPI) GetProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := j.DB.GetProducer(uuid)
+	withChildren, _, _ := withChildrenArgs(ctx)
+	q, err := j.DB.GetProducer(uuid, withChildren)
 	reposeHandler(q, err, ctx)
 }
 

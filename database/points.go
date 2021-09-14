@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
@@ -45,7 +46,7 @@ func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, e
 }
 
 // CreatePoint creates a device.
-func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
+func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model.Point, error) {
 	var deviceModel *model.Device
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	deviceUUID := body.DeviceUUID
@@ -62,12 +63,25 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
+
 	if body.Priority == nil {
 		body.Priority = &model.Priority{}
 	}
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, query.Error
 	}
+	if streamUUID != "" {
+		producerModel := new(model.Producer)
+		producerModel.StreamUUID = streamUUID
+		producerModel.ProducerThingUUID = body.UUID
+		producerModel.ProducerThingClass = model.ThingClass.Point
+		producerModel.ProducerThingType = model.ThingClass.Point
+		_, err := d.CreateProducer(producerModel)
+		if err != nil {
+			return nil, errors.New("ERROR on create new producer to an existing stream")
+		}
+	}
+
 	return body, query.Error
 }
 
