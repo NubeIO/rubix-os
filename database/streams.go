@@ -53,13 +53,16 @@ func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
 
 func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Stream, error) {
 	var gatewayModel *model.Stream
-	query := d.DB.Where("uuid = ?", uuid).Find(&gatewayModel)
-	if query.Error != nil {
-		return nil, query.Error
+	if err := d.DB.Preload("FlowNetworks").Where("uuid = ?", uuid).Find(&gatewayModel).Error; err != nil {
+		return nil, err
 	}
-	query = d.DB.Model(&gatewayModel).Updates(body)
-	if query.Error != nil {
-		return nil, query.Error
+	if len(body.FlowNetworks) > 0 {
+		if err := d.DB.Model(&gatewayModel).Association("FlowNetworks").Replace(body.FlowNetworks); err != nil {
+			return nil, err
+		}
+	}
+	if err := d.DB.Model(&gatewayModel).Updates(body).Error; err != nil {
+		return nil, err
 	}
 	return gatewayModel, nil
 }
