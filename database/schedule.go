@@ -28,6 +28,9 @@ func (d *GormDatabase) GetSchedule(uuid string) (*model.Schedule, error) {
 // CreateSchedule creates a thing.
 func (d *GormDatabase) CreateSchedule(body *model.Schedule) (*model.Schedule, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Schedule)
+	body.Name = nameIsNil(body.Name)
+	body.ThingClass = model.ThingClass.Schedule
+	body.ThingType = model.ThingClass.Schedule
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}

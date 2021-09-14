@@ -7,16 +7,8 @@ type Schedule struct {
 	CommonUUID
 	CommonName
 	CommonEnable
+	CommonThingClass
+	CommonThingType
+	CommonCreated
 	DataStore datatypes.JSON `json:"data_store"`
 }
-
-//
-////ScheduleBody model
-//type ScheduleBody struct {
-//	CommonUUID
-//	CommonName
-//	CommonEnable
-//	DataStore datatypes.JSON `json:"data_store"`
-//
-//}
-//

@@ -5,6 +5,8 @@ type FlowNetwork struct {
 	CommonUUID
 	CommonName
 	CommonDescription
+	SiteID                  string    `json:"site_id"`
+	SiteName                string    `json:"site_name"`
 	GlobalFlowID            string    `json:"global_flow_id"`
 	GlobalRemoteFlowID      string    `json:"global_remote_flow_id"` //if is a remote
 	RemoteFlowUUID          string    `json:"remote_flow_uuid"`      //if is a remote

@@ -60,6 +60,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var credentials []model.IntegrationCredentials
 	var serialConnection []model.SerialConnection
 	var ipConnection []model.IpConnection
+	var schedule []model.Schedule
 	var models = []interface{}{
 		&alerts,
 		&user,
@@ -90,6 +91,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&credentials,
 		&serialConnection,
 		&ipConnection,
+		&schedule,
 	}
 
 	for _, v := range models {
