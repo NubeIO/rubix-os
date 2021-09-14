@@ -5,14 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-/*
-Stream
-*/
-
 // The StreamDatabase interface for encapsulating database access.
 type StreamDatabase interface {
-	GetStream(uuid string, withChildren bool) (*model.Stream, error)
-	GetStreams(withChildren bool) ([]*model.Stream, error)
+	GetStreams(args Args) ([]*model.Stream, error)
+	GetStream(uuid string, args Args) (*model.Stream, error)
 	CreateStream(body *model.Stream, AddToParent string) (*model.Stream, error)
 	UpdateStream(uuid string, body *model.Stream) (*model.Stream, error)
 	DeleteStream(uuid string) (bool, error)
@@ -24,15 +20,15 @@ type StreamAPI struct {
 }
 
 func (j *StreamAPI) GetStreams(ctx *gin.Context) {
-	withChildren, _, _ := withChildrenArgs(ctx)
-	q, err := j.DB.GetStreams(withChildren)
+	args := streamArgs(ctx)
+	q, err := j.DB.GetStreams(args)
 	reposeHandler(q, err, ctx)
 }
 
 func (j *StreamAPI) GetStream(ctx *gin.Context) {
-	withChildren, _, _ := withChildrenArgs(ctx)
+	args := streamArgs(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.GetStream(uuid, withChildren)
+	q, err := j.DB.GetStream(uuid, args)
 	reposeHandler(q, err, ctx)
 }
 

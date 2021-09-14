@@ -37,6 +37,11 @@ type Args struct {
 	ConsumerUUID    string
 	WriterUUID      string
 	AddToParent     string
+	FlowNetworks    bool
+	Producers       bool
+	Consumers       bool
+	CommandGroups   bool
+	Writers         bool
 }
 
 var ArgsType = struct {
@@ -66,7 +71,11 @@ var ArgsType = struct {
 	ConsumerUUID    string
 	WriterUUID      string
 	AddToParent     string
-  
+	FlowNetworks    string
+	Producers       string
+	Consumers       string
+	CommandGroups   string
+	Writers         string
 }{
 	Sort:            "sort",
 	Order:           "order",
@@ -94,6 +103,11 @@ var ArgsType = struct {
 	ConsumerUUID:    "consumer_uuid",
 	WriterUUID:      "writer_uuid",
 	AddToParent:     "add_to_parent",
+	FlowNetworks:    "flow_networks",
+	Producers:       "producers",
+	Consumers:       "consumers",
+	CommandGroups:   "command_groups",
+	Writers:         "writers",
 }
 
 var ArgsDefault = struct {
@@ -121,7 +135,11 @@ var ArgsDefault = struct {
 	ConsumerUUID    string
 	WriterUUID      string
 	AddToParent     string
-
+	FlowNetworks    string
+	Producers       string
+	Consumers       string
+	CommandGroups   string
+	Writers         string
 }{
 	Sort:            "ID",
 	Order:           "DESC", //ASC or DESC
@@ -147,7 +165,11 @@ var ArgsDefault = struct {
 	ConsumerUUID:    "",
 	WriterUUID:      "",
 	AddToParent:     "",
-
+	FlowNetworks:    "false",
+	Producers:       "false",
+	Consumers:       "false",
+	CommandGroups:   "false",
+	Writers:         "false",
 }
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {
