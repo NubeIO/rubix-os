@@ -18,6 +18,7 @@ type Args struct {
 	Search          string
 	WithChildren    string
 	WithPoints      string
+	WithParent      string
 	AskRefresh      string
 	AskResponse     string
 	Write           string
@@ -35,6 +36,7 @@ type Args struct {
 	ProducerUUID    string
 	ConsumerUUID    string
 	WriterUUID      string
+	AddToParent     string
 }
 
 var ArgsType = struct {
@@ -45,6 +47,7 @@ var ArgsType = struct {
 	Search          string
 	WithChildren    string
 	WithPoints      string
+	WithParent      string
 	AskRefresh      string
 	AskResponse     string
 	Write           string
@@ -62,6 +65,8 @@ var ArgsType = struct {
 	ProducerUUID    string
 	ConsumerUUID    string
 	WriterUUID      string
+	AddToParent     string
+  
 }{
 	Sort:            "sort",
 	Order:           "order",
@@ -70,6 +75,7 @@ var ArgsType = struct {
 	Search:          "search",
 	WithChildren:    "with_children",
 	WithPoints:      "with_points",
+	WithParent:      "with_parent",
 	AskRefresh:      "ask_refresh",
 	AskResponse:     "ask_response",
 	Write:           "write",             //consumer to write a value
@@ -87,6 +93,7 @@ var ArgsType = struct {
 	ProducerUUID:    "producer_uuid",
 	ConsumerUUID:    "consumer_uuid",
 	WriterUUID:      "writer_uuid",
+	AddToParent:     "add_to_parent",
 }
 
 var ArgsDefault = struct {
@@ -97,6 +104,7 @@ var ArgsDefault = struct {
 	Search          string
 	WithChildren    string
 	WithPoints      string
+	WithParent      string
 	AskRefresh      string
 	AskResponse     string
 	Write           string
@@ -112,6 +120,8 @@ var ArgsDefault = struct {
 	ProducerUUID    string
 	ConsumerUUID    string
 	WriterUUID      string
+	AddToParent     string
+
 }{
 	Sort:            "ID",
 	Order:           "DESC", //ASC or DESC
@@ -120,6 +130,7 @@ var ArgsDefault = struct {
 	Search:          "",
 	WithChildren:    "false",
 	WithPoints:      "false",
+	WithParent:      "false",
 	AskRefresh:      "false",
 	AskResponse:     "false",
 	Write:           "false",
@@ -135,6 +146,8 @@ var ArgsDefault = struct {
 	ProducerUUID:    "",
 	ConsumerUUID:    "",
 	WriterUUID:      "",
+	AddToParent:     "",
+
 }
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {
