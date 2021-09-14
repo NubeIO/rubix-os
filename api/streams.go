@@ -9,7 +9,7 @@ import (
 type StreamDatabase interface {
 	GetStreams(args Args) ([]*model.Stream, error)
 	GetStream(uuid string, args Args) (*model.Stream, error)
-	CreateStream(body *model.Stream, AddToParent string) (*model.Stream, error)
+	CreateStream(body *model.Stream) (*model.Stream, error)
 	UpdateStream(uuid string, body *model.Stream) (*model.Stream, error)
 	DeleteStream(uuid string) (bool, error)
 	DropStreams() (bool, error)
@@ -34,8 +34,7 @@ func (j *StreamAPI) GetStream(ctx *gin.Context) {
 
 func (j *StreamAPI) CreateStream(ctx *gin.Context) {
 	body, _ := getBODYStream(ctx)
-	AddToParent := parentArgs(ctx) //flowUUID
-	q, err := j.DB.CreateStream(body, AddToParent)
+	q, err := j.DB.CreateStream(body)
 	reposeHandler(q, err, ctx)
 }
 
