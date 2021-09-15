@@ -120,7 +120,7 @@ func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) (er
 }
 
 // NewClient creates an mqttClient client
-func NewClient(options ClientOptions) (c *Client) {
+func NewClient(options ClientOptions) (c *Client, err error) {
 	c = &Client{}
 	opts := mqtt.NewClientOptions()
 	// brokers
@@ -131,6 +131,7 @@ func NewClient(options ClientOptions) (c *Client) {
 		}
 	} else {
 		topicLog{"error", "min one server is required", nil}.logErr()
+		return nil, err
 	}
 
 	if options.ClientID == "" {
@@ -174,7 +175,7 @@ func NewClient(options ClientOptions) (c *Client) {
 		topicLog{"msg", "close down client", nil}.logInfo()
 		c.Close()
 	}()
-	return c
+	return c, nil
 }
 
 // Connect opens c new connection
@@ -187,7 +188,7 @@ func (c *Client) Connect() (err error) {
 		return token.Error()
 	}
 
-	return
+	return nil
 }
 
 func (c *Client) IsConnected() bool {

@@ -43,3 +43,11 @@ func (h *Handler) UpdatePointByFieldAndType(field string, value string, body *mo
 	}
 	return q, nil
 }
+
+func (h *Handler) PointAndQuery(value1, value2 string) (*model.Point, error) {
+	q, err := getDb().PointAndQuery(value1, value2 )
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}

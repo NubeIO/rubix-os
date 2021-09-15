@@ -11,6 +11,10 @@ const (
 	StreamsAll  = "stream.*"
 	NodesAll    = "node.*"
 	ProducerAll = "producer.*"
+	MQTTAll = "MQTT.*"
+
+	MQTTCreated = "MQTT.created"
+	MQTTUpdated = "MQTT.updated"
 
 	PluginsCreated = "plugin.created"
 	PluginsUpdated = "plugin.updated"
@@ -50,6 +54,7 @@ func BusTopics() []string {
 		PluginsAll,
 		StreamsAll,
 		NodesAll,
+		MQTTAll,
 		PluginsCreated,
 		PluginsUpdated,
 		StreamsCreated,
@@ -70,5 +75,7 @@ func BusTopics() []string {
 		ProducerCreated,
 		ProducerUpdated,
 		ProducerEvent,
+		MQTTCreated,
+		MQTTUpdated,
 	}
 }
