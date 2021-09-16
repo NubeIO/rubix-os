@@ -47,13 +47,13 @@ func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, e
 }
 
 // PointDeviceByAddressID will query by device_uuid = ? AND object_type = ? AND address_id = ?
-func (d *GormDatabase) PointDeviceByAddressID(body *model.Point) (*model.Point, bool) {
+func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Point) (*model.Point, bool) {
 	var pointModel *model.Point
 	deviceUUID := body.DeviceUUID
 	objType := body.ObjectType
 	addressID := body.AddressId
 	f := fmt.Sprintf("device_uuid = ? AND object_type = ? AND address_id = ?")
-	query := d.DB.Where(f, deviceUUID, objType, addressID).Preload("Priority").First(&pointModel)
+	query := d.DB.Where(f, deviceUUID, objType, addressID, pointUUID).Preload("Priority").First(&pointModel)
 	if query.Error != nil {
 		return nil, false
 	}
@@ -70,13 +70,14 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	if query.Error != nil {
 		return nil, query.Error
 	}
-
 	//check if there is an existing device with this address code
-	_, existing := d.PointDeviceByAddressID(body)
+	_, existing := d.PointDeviceByAddressID("", body)
 	if existing {
 		return nil, errors.New("an existing point of that ObjectType & id exists")
 	}
-
+	if body.Description == "" {
+		body.Description = "na"
+	}
 	body.ThingClass = model.ThingClass.Point
 	body.CommonEnable.Enable = true
 	body.CommonFault.InFault = true
@@ -119,6 +120,9 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 // UpdatePoint returns the device for the given id or nil.
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
+	//TODO add in a check to make sure user doesn't set the addressID and the ObjectType the same as another point
+	//check if there is an existing device with this address code
+
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
@@ -130,6 +134,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 	}
 	query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
 	query = d.DB.Model(&pointModel).Updates(&body)
+
 	if pointModel.IsProducer && body.IsProducer {
 		if compare(pointModel, body) {
 			_, err := d.ProducerWrite("point", pointModel)
@@ -208,6 +213,10 @@ func (d *GormDatabase) UpdatePointByFieldAndType(field string, value string, bod
 // DeletePoint delete a Device.
 func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	var pointModel *model.Point
+	point, err := d.GetPoint(uuid, false)
+	if err != nil {
+		return false, errors.New("point not exist")
+	}
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&pointModel)
 	if query.Error != nil {
 		return false, query.Error
@@ -216,6 +225,17 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	if r == 0 {
 		return false, nil
 	} else {
+		plug, err := d.GetPluginIDFromDevice(point.DeviceUUID)
+		if err != nil {
+			return false, errors.New("ERROR failed to get plugin uuid")
+		}
+		fmt.Println(point.DeviceUUID, point)
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsDeleted, plug.PluginConfId, point.UUID)
+		d.Bus.RegisterTopic(t)
+		err = d.Bus.Emit(eventbus.CTX(), t, point)
+		if err != nil {
+			return false, errors.New("ERROR on device eventbus")
+		}
 		return true, nil
 	}
 

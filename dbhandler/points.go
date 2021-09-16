@@ -51,3 +51,11 @@ func (h *Handler) PointAndQuery(value1, value2 string) (*model.Point, error) {
 	}
 	return q, nil
 }
+
+func (h *Handler) DeletePoint(uuid string) (bool, error) {
+	_, err := getDb().DeletePoint(uuid)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
