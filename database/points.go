@@ -46,6 +46,20 @@ func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, e
 	}
 }
 
+// PointDeviceByAddressID will query by device_uuid = ? AND object_type = ? AND address_id = ?
+func (d *GormDatabase) PointDeviceByAddressID(body *model.Point) (*model.Point, bool) {
+	var pointModel *model.Point
+	deviceUUID := body.DeviceUUID
+	objType := body.ObjectType
+	addressID := body.AddressId
+	f := fmt.Sprintf("device_uuid = ? AND object_type = ? AND address_id = ?")
+	query := d.DB.Where(f, deviceUUID, objType, addressID).Preload("Priority").First(&pointModel)
+	if query.Error != nil {
+		return nil, false
+	}
+	return pointModel, true
+}
+
 // CreatePoint creates a device.
 func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model.Point, error) {
 	var deviceModel *model.Device
@@ -56,6 +70,13 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	if query.Error != nil {
 		return nil, query.Error
 	}
+
+	//check if there is an existing device with this address code
+	_, existing := d.PointDeviceByAddressID(body)
+	if existing {
+		return nil, errors.New("an existing point of that ObjectType & id exists")
+	}
+
 	body.ThingClass = model.ThingClass.Point
 	body.CommonEnable.Enable = true
 	body.CommonFault.InFault = true

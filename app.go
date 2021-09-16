@@ -40,8 +40,6 @@ func intHandler(db *database.GormDatabase) {
 
 }
 
-//var ThingTypes interface{}
-
 func main() {
 	conf := config.CreateApp()
 	logger.SetLogger(conf.LogLevel)
@@ -63,7 +61,6 @@ func main() {
 	fmt.Println("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
 	eventbus.Init()
 	eventbus.RegisterMQTTBus()
-
 
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
 		conf.PassStrength, conf.Database.LogLevel, true, conf.Prod)
