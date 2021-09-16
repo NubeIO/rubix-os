@@ -38,6 +38,7 @@ type Args struct {
 	WriterUUID      string
 	AddToParent     string
 	FlowNetworks    bool
+	Streams         bool
 	Producers       bool
 	Consumers       bool
 	CommandGroups   bool
@@ -72,6 +73,7 @@ var ArgsType = struct {
 	WriterUUID      string
 	AddToParent     string
 	FlowNetworks    string
+	Streams         string
 	Producers       string
 	Consumers       string
 	CommandGroups   string
@@ -104,6 +106,7 @@ var ArgsType = struct {
 	WriterUUID:      "writer_uuid",
 	AddToParent:     "add_to_parent",
 	FlowNetworks:    "flow_networks",
+	Streams:         "streams",
 	Producers:       "producers",
 	Consumers:       "consumers",
 	CommandGroups:   "command_groups",
@@ -136,6 +139,7 @@ var ArgsDefault = struct {
 	WriterUUID      string
 	AddToParent     string
 	FlowNetworks    string
+	Streams         string
 	Producers       string
 	Consumers       string
 	CommandGroups   string
@@ -166,6 +170,7 @@ var ArgsDefault = struct {
 	WriterUUID:      "",
 	AddToParent:     "",
 	FlowNetworks:    "false",
+	Streams:         "false",
 	Producers:       "false",
 	Consumers:       "false",
 	CommandGroups:   "false",

@@ -8,7 +8,7 @@ import (
 
 func (d *GormDatabase) GetStreams(args api.Args) ([]*model.Stream, error) {
 	var gatewaysModel []*model.Stream
-	query := d.createStreamQuery(args)
+	query := d.buildStreamQuery(args)
 	query.Find(&gatewaysModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -18,7 +18,7 @@ func (d *GormDatabase) GetStreams(args api.Args) ([]*model.Stream, error) {
 
 func (d *GormDatabase) GetStream(uuid string, args api.Args) (*model.Stream, error) {
 	var gatewayModel *model.Stream
-	query := d.createStreamQuery(args)
+	query := d.buildStreamQuery(args)
 	query = query.Where("uuid = ? ", uuid).First(&gatewayModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -90,7 +90,7 @@ func (d *GormDatabase) GetFlowUUID(uuid string) (*model.Stream, *model.FlowNetwo
 	for _, net := range stream.FlowNetworks {
 		flowUUID = net.UUID
 	}
-	flow, err := d.GetFlowNetwork(flowUUID)
+	flow, err := d.GetFlowNetwork(flowUUID, api.Args{})
 	if err != nil {
 		return nil, nil, err
 	}

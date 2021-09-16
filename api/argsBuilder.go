@@ -74,6 +74,14 @@ func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, writ
 	return askRefresh, askResponse, write, updateProducer
 }
 
+func buildFlowNetworkArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
+	return args
+}
+
 func buildStreamArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType

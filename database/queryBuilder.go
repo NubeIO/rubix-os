@@ -5,7 +5,15 @@ import (
 	"gorm.io/gorm"
 )
 
-func (d *GormDatabase) createStreamQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.Streams {
+		query = query.Preload("Streams")
+	}
+	return query
+}
+
+func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.FlowNetworks {
 		query = query.Preload("FlowNetworks")
@@ -28,7 +36,7 @@ func (d *GormDatabase) createStreamQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) createConsumerQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.Writers {
 		query = query.Preload("Writers")
@@ -36,7 +44,7 @@ func (d *GormDatabase) createConsumerQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) createProducerQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.Writers {
 		query = query.Preload("WriterClones")

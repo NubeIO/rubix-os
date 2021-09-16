@@ -20,7 +20,7 @@ type Producer struct {
 
 func (d *GormDatabase) GetProducers(args api.Args) ([]*model.Producer, error) {
 	var producersModel []*model.Producer
-	query := d.createProducerQuery(args)
+	query := d.buildProducerQuery(args)
 	if err := query.Find(&producersModel).Error; err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func (d *GormDatabase) GetProducers(args api.Args) ([]*model.Producer, error) {
 
 func (d *GormDatabase) GetProducer(uuid string, args api.Args) (*model.Producer, error) {
 	var producerModel *model.Producer
-	query := d.createProducerQuery(args)
+	query := d.buildProducerQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&producerModel).Error; err != nil {
 		return nil, err
 	}

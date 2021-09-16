@@ -14,7 +14,7 @@ type Consumers struct {
 
 func (d *GormDatabase) GetConsumers(args api.Args) ([]*model.Consumer, error) {
 	var consumersModel []*model.Consumer
-	query := d.createConsumerQuery(args)
+	query := d.buildConsumerQuery(args)
 	if err := query.Find(&consumersModel).Error; err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func (d *GormDatabase) GetConsumers(args api.Args) ([]*model.Consumer, error) {
 
 func (d *GormDatabase) GetConsumer(uuid string, args api.Args) (*model.Consumer, error) {
 	var consumerModel *model.Consumer
-	query := d.createConsumerQuery(args)
+	query := d.buildConsumerQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&consumerModel).Error; err != nil {
 		return nil, err
 	}
