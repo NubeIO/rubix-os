@@ -23,6 +23,7 @@ const networkType = "bacnet"
 const transportType = "ip" //serial, ip
 const ip = "0.0.0.0"
 const port = "1717"
+
 // Instance is plugin instance
 type Instance struct {
 	config      *Config
@@ -33,7 +34,6 @@ type Instance struct {
 	bus         eventbus.BusService
 	pluginUUID  string
 	networkUUID string
-
 }
 
 // GetFlowPluginInfo returns plugin info.
@@ -51,7 +51,6 @@ func GetFlowPluginInfo() plugin.Info {
 // NewFlowPluginInstance creates a plugin instance for a user context.
 func NewFlowPluginInstance(ctx plugin.UserContext) plugin.Plugin {
 	return &Instance{}
-
 }
 
 //main will not let main run

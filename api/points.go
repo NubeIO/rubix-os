@@ -10,7 +10,7 @@ type PointDatabase interface {
 	GetPoint(uuid string, withChildren bool) (*model.Point, error)
 	GetPoints(withChildren bool) ([]*model.Point, error)
 	CreatePoint(body *model.Point, addToParent string) (*model.Point, error)
-	UpdatePoint(uuid string, body *model.Point, writeValue bool) (*model.Point, error)
+	UpdatePoint(uuid string, body *model.Point, writeValue, fromPlugin bool) (*model.Point, error)
 	GetPointByField(field string, value string, withChildren bool) (*model.Point, error)
 	UpdatePointByFieldAndType(field string, value string, body *model.Point, writeValue bool) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
@@ -37,7 +37,7 @@ func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	uuid := resolveID(ctx)
 	_, _, writeValue, _ := withConsumerArgs(ctx)
-	q, err := a.DB.UpdatePoint(uuid, body, writeValue)
+	q, err := a.DB.UpdatePoint(uuid, body, writeValue, false)
 	reposeHandler(q, err, ctx)
 }
 

@@ -98,7 +98,7 @@ func (i *Instance) BusServ() {
 				}
 
 				if pnt != nil {
-					//_, err = c.addPoints(dev)
+					_, err = i.pointPatch(pnt)
 					log.Info("BACNET BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return
@@ -116,25 +116,11 @@ func (i *Instance) BusServ() {
 	handlerMQTT := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
-				fmt.Println(e.Topic, e)
 				p, _ := e.Data.(mqtt.Message)
-
-				//fmt.Println(222, p.Topic(),string(p.Payload()))
-				//m := new(pkgmodel.MqttPayload)
-				//err := json.Unmarshal(p.Payload(), &m)
-				//if err != nil {
-				//
-				//}
 				_, err := i.bacnetUpdate(p)
 				if err != nil {
-					return 
+					return
 				}
-
-
-
-
-				//try and match is network
-
 			}()
 		},
 		Matcher: eventbus.MQTTUpdated,

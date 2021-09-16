@@ -1,44 +1,48 @@
 package pkgmodel
 
+import (
+	"github.com/NubeIO/null"
+)
+
 // MqttPayload payload from the bacnet server
 type MqttPayload struct {
-	Value    float64
+	Value    null.Float
 	Priority int
 }
 
 type BacnetPoint struct {
-	ObjectType           string  `json:"object_type"`
-	ObjectName           string  `json:"object_name"`
-	Address              int     `json:"address"`
-	RelinquishDefault    float64 `json:"relinquish_default"`
-	EventState           string  `json:"event_state"`
-	Units                string  `json:"units"`
-	Description          string  `json:"description"`
-	Enable               bool    `json:"enable"`
-	Fault                bool    `json:"fault"`
-	DataRound            float64 `json:"data_round"`
-	DataOffset           float64 `json:"data_offset"`
-	UseNextAvailableAddr *bool   `json:"use_next_available_address"`
-	COV                  float32 `json:"cov"`
-	Priority             `json:"priority_array_write"`
+	ObjectType           string  `json:"object_type,omitempty"`
+	ObjectName           string  `json:"object_name,omitempty"`
+	Address              int     `json:"address,omitempty"`
+	RelinquishDefault    float64 `json:"relinquish_default,omitempty"`
+	EventState           string  `json:"event_state,omitempty"`
+	Units                string  `json:"units,omitempty"`
+	Description          string  `json:"description,omitempty"`
+	Enable               bool    `json:"enable,omitempty"`
+	Fault                bool    `json:"fault,omitempty"`
+	DataRound            float64 `json:"data_round,omitempty"`
+	DataOffset           float64 `json:"data_offset,omitempty"`
+	UseNextAvailableAddr bool    `json:"use_next_available_address,omitempty"`
+	COV                  float32 `json:"cov,omitempty"`
+	Priority             `json:"priority_array_write,omitempty"`
 }
 
 type Priority struct {
-	P1        float64 `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
-	//P2        null.Float `json:"_2"`
-	//P3        null.Float `json:"_3"`
-	//P4        null.Float `json:"_4"`
-	//P5        null.Float `json:"_5"`
-	//P6        null.Float `json:"_6"`
-	//P7        null.Float `json:"_7"`
-	//P8        null.Float `json:"_8"`
-	//P9        null.Float `json:"_9"`
-	//P10       null.Float `json:"_10"`
-	//P11       null.Float `json:"_11"`
-	//P12       null.Float `json:"_12"`
-	//P13       null.Float `json:"_13"`
-	//P14       null.Float `json:"_14"`
-	//P15       null.Float `json:"_15"`
+	P1  null.Float `json:"_1,omitempty"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
+	P2  null.Float `json:"_2,omitempty"`
+	P3  null.Float `json:"_3,omitempty"`
+	P4  null.Float `json:"_4,omitempty"`
+	P5  null.Float `json:"_5,omitempty"`
+	P6  null.Float `json:"_6,omitempty"`
+	P7  null.Float `json:"_7,omitempty"`
+	P8  null.Float `json:"_8,omitempty"`
+	P9  null.Float `json:"_9,omitempty"`
+	P10 null.Float `json:"_10,omitempty"`
+	P11 null.Float `json:"_11,omitempty"`
+	P12 null.Float `json:"_12,omitempty"`
+	P13 null.Float `json:"_13,omitempty"`
+	P14 null.Float `json:"_14,omitempty"`
+	P15 null.Float `json:"_15,omitempty"`
 	//P16       null.Float `json:"_16"` //removed and added to the point to save one DB write
 
 }

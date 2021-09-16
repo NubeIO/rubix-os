@@ -17,7 +17,6 @@ func publishMQTT(sensorStruct model.ProducerBody) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(a.IsConnected())
 	topic := fmt.Sprintf("rubix/%s", sensorStruct.ProducerUUID)
 	data, err := json.Marshal(sensorStruct)
 	if err != nil {
@@ -29,7 +28,6 @@ func publishMQTT(sensorStruct model.ProducerBody) {
 	}
 }
 
-
 //used for getting data into the plugins
 var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	GetService().RegisterTopic(MQTTUpdated)
@@ -37,14 +35,12 @@ var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	if err != nil {
 		return
 	}
-	fmt.Println(msg.Topic(), 999999)
-	fmt.Printf("MSG recieved pointsValue: %s\n", msg.Payload())
 }
 
-func RegisterMQTTBus() ()  {
+func RegisterMQTTBus() {
 	c, _ := mqttclient.GetMQTT()
-	//TODO this needs to be removed as its for a plugin, the plugin needs to register the topics it wants the main framework to subscribe to
-	err := c.Subscribe("+/+/+/+/+/+/rubix/bacnet_server/points/+/#",mqttclient.AtMostOnce, handle)
+	//TODO this needs to be removed as its for a plugin, the plugin needs to register the topics it wants the main framework to subscribe to, also unsubscribe when the plugin is disabled
+	err := c.Subscribe("+/+/+/+/+/+/rubix/bacnet_server/points/+/#", mqttclient.AtMostOnce, handle)
 	if err != nil {
 
 	}
