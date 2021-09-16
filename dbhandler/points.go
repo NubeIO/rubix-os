@@ -20,8 +20,8 @@ func (h *Handler) CreatePoint(body *model.Point) (*model.Point, error) {
 	return q, nil
 }
 
-func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
-	q, err := getDb().UpdatePoint(uuid, body, false)
+func (h *Handler) UpdatePoint(uuid string, body *model.Point, writeValue, fromPlugin bool) (*model.Point, error) {
+	q, err := getDb().UpdatePoint(uuid, body, writeValue, fromPlugin)
 	if err != nil {
 		return nil, err
 	}
@@ -38,6 +38,14 @@ func (h *Handler) GetPointByField(field string, value string, withChildren bool)
 
 func (h *Handler) UpdatePointByFieldAndType(field string, value string, body *model.Point) (*model.Point, error) {
 	q, err := getDb().UpdatePointByFieldAndType(field, value, body, false)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
+func (h *Handler) PointAndQuery(value1, value2 string) (*model.Point, error) {
+	q, err := getDb().PointAndQuery(value1, value2)
 	if err != nil {
 		return nil, err
 	}

@@ -16,9 +16,8 @@ var StoreKeys = struct {
 	PluginName: "plugin_name",
 }
 
-
 type Handler struct {
-	Store  *cache.Cache
+	Store *cache.Cache
 }
 
 //Init init store
@@ -40,7 +39,6 @@ func (l *Handler) Get(key string) (interface{}, bool) {
 	value, found := store.Get(key)
 	return value, found
 }
-
 
 // Set an item to the cache, replacing any existing item. If the duration is 0
 // (DefaultExpiration), the cache's default expiration time is used. If it is -1

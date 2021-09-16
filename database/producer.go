@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/eventbus"
@@ -103,22 +104,21 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 		pointUUID := point.UUID
 		pro, err := d.GetProducerByField("producer_thing_uuid", pointUUID)
 		if err != nil {
-			log.Errorf("ERROR GetProducerByField")
-			return "", err
+			return "", errors.New("no point for this producer was not found")
 		}
 		_, err = d.UpdateProducer(pointUUID, &producerModel, false)
 		if err != nil {
 			log.Errorf("UpdateProducer")
-			return "", err
+			return "", errors.New("issue on update producer")
 		}
 		point.Priority.P1 = null.FloatFrom(point.PresentValue)
 		b, err := json.Marshal(point)
 		if err != nil {
-			log.Errorf("UpdateProducer")
+			return "", errors.New("issue on update write history for point")
 		}
 		_, err = d.ProducerWriteHist(pro.UUID, b)
 		if err != nil {
-			return "", err
+			return "", errors.New("issue on write history for point")
 		}
 		var proBody model.ProducerBody
 		proBody.StreamUUID = pro.StreamUUID
@@ -129,7 +129,7 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 
 		err = d.producerBroadcast(proBody)
 		if err != nil {
-			return "", err
+			return "", errors.New("issue on producer broadcast")
 		}
 
 		return pro.UUID, err

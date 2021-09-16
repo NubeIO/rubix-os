@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
@@ -68,6 +69,20 @@ func (d *GormDatabase) GetDeviceByField(field string, value string, withPoints b
 	}
 }
 
+
+// GetPluginIDFromDevice returns the pluginUUID by using the deviceUUID to query the network.
+func (d *GormDatabase) GetPluginIDFromDevice(uuid string) (*model.Network, error) {
+	device, err := d.GetDevice(uuid, false)
+	if err != nil {
+		return nil, err
+	}
+	network, err := d.GetNetwork(device.NetworkUUID, false, false)
+	if err != nil {
+		return nil, err
+	}
+	return network, err
+}
+
 // CreateDevice creates a device.
 func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	var net *model.Network
@@ -96,7 +111,10 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	}
 	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, nModel.PluginConfId, body.UUID)
 	d.Bus.RegisterTopic(t)
-	d.Bus.Emit(eventbus.CTX(), t, body)
+	err := d.Bus.Emit(eventbus.CTX(), t, body)
+	if err != nil {
+		return nil, errors.New("error on device eventbus")
+	}
 	return body, query.Error
 }
 
@@ -118,7 +136,10 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	}
 	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, nModel.PluginConfId, uuid)
 	d.Bus.RegisterTopic(t)
-	d.Bus.Emit(eventbus.CTX(), t, deviceModel)
+	err := d.Bus.Emit(eventbus.CTX(), t, deviceModel)
+	if err != nil {
+		return nil, errors.New("error on device eventbus")
+	}
 	return deviceModel, nil
 }
 

@@ -2,10 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/mqttclient"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 
-	"log"
 	"time"
 )
 
@@ -15,35 +13,42 @@ var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 
 func main() {
 
+	//internalMQTT, err := mqttclient.InternalMQTT()
+	//if err != nil {
+	//	return
+	//}
+	//
+	//internalMQTT.Connect()
+	//internalMQTT.Publish("adsdas", mqttclient.AtMostOnce, false, "ddd")
 	//NewAgent
-	a := mqttclient.NewClient(mqttclient.ClientOptions{
-		Servers: []string{"tcp://192.168.15.100:1883", "tcp://192.168.15.104:1883"},
-	})
-	err := a.Connect()
-	if err != nil {
-		log.Println(err)
-	}
-
-	fmt.Println(a.IsConnected())
-
-	err = a.Publish("adsdas", mqttclient.AtMostOnce, false, "ddd")
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	err = a.Subscribe("e", mqttclient.AtMostOnce, handle)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	err = a.Subscribe("ee", mqttclient.AtMostOnce, handle)
-	if err != nil {
-		fmt.Println(err)
-	}
-	err = a.Unsubscribe("e")
-	if err != nil {
-		fmt.Println(err)
-	}
+	//a, _ := mqttclient.NewClient(mqttclient.ClientOptions{
+	//	Servers: []string{"tcp://192.168.15.100:1883", "tcp://192.168.15.104:1883"},
+	//})
+	//err := a.Connect()
+	//if err != nil {
+	//	log.Println(err)
+	//}
+	//
+	//fmt.Println(a.IsConnected())
+	//
+	//err = a.Publish("adsdas", mqttclient.AtMostOnce, false, "ddd")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//
+	//err = a.Subscribe("e", mqttclient.AtMostOnce, handle)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//
+	//err = a.Subscribe("ee", mqttclient.AtMostOnce, handle)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//err = a.Unsubscribe("e")
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
 
 	//
 	for {

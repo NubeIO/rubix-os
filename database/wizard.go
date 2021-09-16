@@ -549,3 +549,43 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	}
 	return true, nil
 }
+
+
+// NetworkDevicePoint add a local network mapping stream.
+func (d *GormDatabase) NetworkDevicePoint() (bool, error) {
+
+	var networkModel model.Network
+	var deviceModel model.Device
+	var pointModel model.Point
+
+	//get plugin
+	p, err := d.GetPluginByPath("bacnetserver")
+	if p.UUID == "" {
+		return false, errors.New("no valid plugin")
+	}
+
+	// network
+	networkModel.PluginConfId = p.UUID
+	n, err := d.CreateNetwork(&networkModel)
+	fmt.Println("CreateNetwork")
+	// device
+	deviceModel.NetworkUUID = n.UUID
+	dev, err := d.CreateDevice(&deviceModel)
+	fmt.Println("CreateDevice")
+	// point
+	pointModel.DeviceUUID = dev.UUID
+	pointModel.IsProducer = true
+	_, err = d.CreatePoint(&pointModel, "")
+
+	fmt.Println("CreatePoint")
+	if err != nil {
+		return false, err
+	}
+	if err != nil {
+		fmt.Println("Error on wizard")
+		fmt.Println(err)
+		fmt.Println("Error on wizard")
+		return false, err
+	}
+	return true, nil
+}

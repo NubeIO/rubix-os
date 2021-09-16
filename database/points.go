@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
@@ -81,27 +82,52 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 			return nil, errors.New("ERROR on create new producer to an existing stream")
 		}
 	}
-
+	plug, err := d.GetPluginIDFromDevice(deviceUUID)
+	if err != nil {
+		return nil, errors.New("ERROR failed to get plugin uuid")
+	}
+	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, plug.PluginConfId, body.UUID)
+	d.Bus.RegisterTopic(t)
+	err = d.Bus.Emit(eventbus.CTX(), t, body)
+	if err != nil {
+		return nil, errors.New("ERROR on device eventbus")
+	}
 	return body, query.Error
 }
 
 // UpdatePoint returns the device for the given id or nil.
-func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue bool) (*model.Point, error) {
+func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	if writeValue {
-		//TODO point cov event
+		//TODO add this in to save a few DB read/write for the priority
+		//query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
+		//query = d.DB.Model(&pointModel).Updates(&body)
 	}
-	if pointModel.IsProducer {
+	query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
+	query = d.DB.Model(&pointModel).Updates(&body)
+	if pointModel.IsProducer && body.IsProducer {
 		if compare(pointModel, body) {
 			_, err := d.ProducerWrite("point", pointModel)
 			if err != nil {
 				log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
 				return nil, err
 			}
+		}
+	}
+	if !fromPlugin { //stop looping
+		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)
+		if err != nil {
+			return nil, errors.New("ERROR failed to get plugin uuid")
+		}
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, plug.PluginConfId, pointModel.UUID)
+		d.Bus.RegisterTopic(t)
+		err = d.Bus.Emit(eventbus.CTX(), t, pointModel)
+		if err != nil {
+			return nil, errors.New("ERROR on device eventbus")
 		}
 	}
 	return pointModel, nil
@@ -124,6 +150,17 @@ func (d *GormDatabase) GetPointByField(field string, value string, withChildren 
 		}
 		return pointModel, nil
 	}
+}
+
+// PointAndQuery will do an SQL AND
+func (d *GormDatabase) PointAndQuery(value1 string, value2 string) (*model.Point, error) {
+	var pointModel *model.Point
+	f := fmt.Sprintf("object_type = ? AND address_id = ?")
+	query := d.DB.Where(f, value1, value2).Preload("Priority").First(&pointModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return pointModel, nil
 }
 
 // UpdatePointByFieldAndType get by field and update.

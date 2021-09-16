@@ -11,6 +11,7 @@ import (
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/router"
 	"github.com/NubeDev/flow-framework/runner"
 	"github.com/patrickmn/go-cache"
@@ -54,7 +55,16 @@ func main() {
 		panic(err)
 	}
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
+	connected, err := mqttclient.InternalMQTT()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
 	eventbus.Init()
+	eventbus.RegisterMQTTBus()
+
+
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
 		conf.PassStrength, conf.Database.LogLevel, true, conf.Prod)
 	if err != nil {

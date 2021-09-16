@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
@@ -131,7 +132,10 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 	}
 	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, networkModel.PluginConfId, networkModel.UUID)
 	d.Bus.RegisterTopic(t)
-	d.Bus.Emit(eventbus.CTX(), t, networkModel)
+	err := d.Bus.Emit(eventbus.CTX(), t, networkModel)
+	if err != nil {
+		return nil, errors.New("error on network eventbus")
+	}
 	return networkModel, nil
 
 }
