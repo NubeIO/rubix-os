@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// The StreamDatabase interface for encapsulating database access.
 type StreamDatabase interface {
 	GetStreams(args Args) ([]*model.Stream, error)
 	GetStream(uuid string, args Args) (*model.Stream, error)

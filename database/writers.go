@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/streams"
 	"github.com/NubeDev/flow-framework/utils"
@@ -115,7 +116,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 		return nil, err
 	}
 	wc := new(model.WriterClone)
-	consumer, err := d.GetConsumer(writer.ConsumerUUID, false)
+	consumer, err := d.GetConsumer(writer.ConsumerUUID, api.Args{})
 	if err != nil {
 		return nil, errors.New("error: on get consumer")
 	}

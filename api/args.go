@@ -85,3 +85,11 @@ func streamArgs(ctx *gin.Context) Args {
 	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
 	return args
 }
+
+func consumerArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	return args
+}

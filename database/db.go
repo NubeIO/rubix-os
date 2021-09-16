@@ -117,7 +117,7 @@ func (d *GormDatabase) SyncTopics() {
 	for _, obj := range sub {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Producer, obj.UUID)
 	}
-	rip, err := d.GetConsumers()
+	rip, err := d.GetConsumers(api.Args{})
 	for _, obj := range rip {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Consumer, obj.UUID)
 	}

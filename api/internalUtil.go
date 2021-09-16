@@ -284,24 +284,12 @@ func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 	return dto, err
 }
 
-func resolvePluginUUID(ctx *gin.Context) string {
-	id := ctx.Param("plugin_uuid")
-	return id
-}
-
 func resolveID(ctx *gin.Context) string {
-	id := ctx.Param("uuid")
-	return id
-}
-
-func resolveName(ctx *gin.Context) string {
-	id := ctx.Param("name")
-	return id
+	return ctx.Param("uuid")
 }
 
 func resolvePath(ctx *gin.Context) string {
-	id := ctx.Param("path")
-	return id
+	return ctx.Param("path")
 }
 
 func toBool(value string) (bool, error) {
