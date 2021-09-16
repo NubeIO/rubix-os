@@ -35,3 +35,11 @@ func (d *GormDatabase) createConsumerQuery(args api.Args) *gorm.DB {
 	}
 	return query
 }
+
+func (d *GormDatabase) createProducerQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.Writers {
+		query = query.Preload("WriterClones")
+	}
+	return query
+}

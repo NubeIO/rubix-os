@@ -19,13 +19,13 @@ type StreamAPI struct {
 }
 
 func (j *StreamAPI) GetStreams(ctx *gin.Context) {
-	args := streamArgs(ctx)
+	args := buildStreamArgs(ctx)
 	q, err := j.DB.GetStreams(args)
 	reposeHandler(q, err, ctx)
 }
 
 func (j *StreamAPI) GetStream(ctx *gin.Context) {
-	args := streamArgs(ctx)
+	args := buildStreamArgs(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetStream(uuid, args)
 	reposeHandler(q, err, ctx)

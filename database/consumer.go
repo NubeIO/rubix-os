@@ -21,6 +21,15 @@ func (d *GormDatabase) GetConsumers(args api.Args) ([]*model.Consumer, error) {
 	return consumersModel, nil
 }
 
+func (d *GormDatabase) GetConsumer(uuid string, args api.Args) (*model.Consumer, error) {
+	var consumerModel *model.Consumer
+	query := d.createConsumerQuery(args)
+	if err := query.Where("uuid = ?", uuid).First(&consumerModel).Error; err != nil {
+		return nil, err
+	}
+	return consumerModel, nil
+}
+
 func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, error) {
 	_, err := d.GetStream(body.StreamUUID, api.Args{})
 	if err != nil {
@@ -33,15 +42,6 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 		return nil, query.Error
 	}
 	return body, nil
-}
-
-func (d *GormDatabase) GetConsumer(uuid string, args api.Args) (*model.Consumer, error) {
-	var consumerModel *model.Consumer
-	query := d.createConsumerQuery(args)
-	if err := query.First(&consumerModel).Error; err != nil {
-		return nil, err
-	}
-	return consumerModel, nil
 }
 
 func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
@@ -123,7 +123,7 @@ func (d *GormDatabase) AddConsumerWizard(consumerStreamUUID, producerUUID string
 		}
 		producer = p
 	} else {
-		p, err := d.GetProducer(producerUUID, false)
+		p, err := d.GetProducer(producerUUID, api.Args{})
 		if err != nil {
 			return nil, errors.New("error: issue on get producer")
 		}

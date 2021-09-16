@@ -14,10 +14,10 @@ type Producer struct {
 	ProducerThingUUID     string             `json:"producer_thing_uuid"`  //e.g. point.uuid
 	ProducerThingClass    string             `json:"producer_thing_class"` //e.g. point.thing_class, i.e. point, job etc.
 	ProducerThingType     string             `json:"producer_thing_type"`  //e.g. point.thing_type, i.e. temp, rssi, voltage etc.
-	StreamUUID            string             `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null"`
-	CommonCurrentProducer                    //if the point for example is read only the writer uuid would be the point uuid, ie: itself, so in this case there is no writer or writer clone
-	EnableHistory         *bool              `json:"enable_history"`
 	ProducerApplication   string             `json:"producer_application"`
+	CommonCurrentProducer                    //if the point for example is read only the writer.uuid would be the point.uuid, i.e.: itself, so in this case there is no writer or writer clone
+	EnableHistory         *bool              `json:"enable_history"`
+	StreamUUID            string             `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null"`
 	WriterClones          []*WriterClone     `json:"writer_clones" gorm:"constraint:OnDelete:CASCADE"`
 	ProducerHistories     []*ProducerHistory `json:"producer_histories" gorm:"constraint:OnDelete:CASCADE"`
 	CommonCreated

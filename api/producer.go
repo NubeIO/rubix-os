@@ -32,8 +32,8 @@ remote producer
 
 // The ProducerDatabase interface for encapsulating database access.
 type ProducerDatabase interface {
-	GetProducer(uuid string, withChildren bool) (*model.Producer, error)
-	GetProducers() ([]*model.Producer, error)
+	GetProducers(args Args) ([]*model.Producer, error)
+	GetProducer(uuid string, args Args) (*model.Producer, error)
 	CreateProducer(body *model.Producer) (*model.Producer, error)
 	UpdateProducer(uuid string, body *model.Producer, updateHist bool) (*model.Producer, error)
 	DeleteProducer(uuid string) (bool, error)
@@ -43,17 +43,17 @@ type ProducerAPI struct {
 	DB ProducerDatabase
 }
 
-func (j *ProducerAPI) GetProducer(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	withChildren, _, _ := withChildrenArgs(ctx)
-	q, err := j.DB.GetProducer(uuid, withChildren)
+func (j *ProducerAPI) GetProducers(ctx *gin.Context) {
+	args := buildProducerArgs(ctx)
+	q, err := j.DB.GetProducers(args)
 	reposeHandler(q, err, ctx)
 }
 
-func (j *ProducerAPI) GetProducers(ctx *gin.Context) {
-	q, err := j.DB.GetProducers()
+func (j *ProducerAPI) GetProducer(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	args := buildProducerArgs(ctx)
+	q, err := j.DB.GetProducer(uuid, args)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (j *ProducerAPI) CreateProducer(ctx *gin.Context) {

@@ -20,14 +20,14 @@ type ConsumersAPI struct {
 }
 
 func (j *ConsumersAPI) GetConsumers(ctx *gin.Context) {
-	args := consumerArgs(ctx)
+	args := buildConsumerArgs(ctx)
 	q, err := j.DB.GetConsumers(args)
 	reposeHandler(q, err, ctx)
 }
 
 func (j *ConsumersAPI) GetConsumer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	args := consumerArgs(ctx)
+	args := buildConsumerArgs(ctx)
 	q, err := j.DB.GetConsumer(uuid, args)
 	reposeHandler(q, err, ctx)
 }

@@ -74,7 +74,7 @@ func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, writ
 	return askRefresh, askResponse, write, updateProducer
 }
 
-func streamArgs(ctx *gin.Context) Args {
+func buildStreamArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
@@ -86,7 +86,15 @@ func streamArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func consumerArgs(ctx *gin.Context) Args {
+func buildConsumerArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	return args
+}
+
+func buildProducerArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault

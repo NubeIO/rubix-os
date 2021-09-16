@@ -18,59 +18,71 @@ type Producer struct {
 	*model.Producer
 }
 
-// GetProducers get all of them
-func (d *GormDatabase) GetProducers() ([]*model.Producer, error) {
+func (d *GormDatabase) GetProducers(args api.Args) ([]*model.Producer, error) {
 	var producersModel []*model.Producer
-	query := d.DB.Preload("WriterClone").Find(&producersModel)
-	if query.Error != nil {
-		return nil, query.Error
+	query := d.createProducerQuery(args)
+	if err := query.Find(&producersModel).Error; err != nil {
+		return nil, err
 	}
 	return producersModel, nil
 }
 
-// CreateProducer make it
+func (d *GormDatabase) GetProducer(uuid string, args api.Args) (*model.Producer, error) {
+	var producerModel *model.Producer
+	query := d.createProducerQuery(args)
+	if err := query.Where("uuid = ?", uuid).First(&producerModel).Error; err != nil {
+		return nil, err
+	}
+	return producerModel, nil
+}
+
 func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, error) {
-	//call points and make it exists
 	_, err := d.GetStream(body.StreamUUID, api.Args{})
 	if err != nil {
 		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the gateway UUID", nil)
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Producer)
 	body.Name = nameIsNil(body.Name)
-	err = d.DB.Create(&body).Error
-	if err != nil {
+	if err = d.DB.Create(&body).Error; err != nil {
 		return nil, errorMsg("CreateProducer", "error on trying to add a new Producer", nil)
 	}
 	return body, nil
 }
 
-// GetProducer get it
-func (d *GormDatabase) GetProducer(uuid string, withChildren bool) (*model.Producer, error) {
+func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer, updateHist bool) (*model.Producer, error) {
 	var producerModel *model.Producer
-	if withChildren {
-		query := d.DB.Preload("WriterClone").Where("uuid = ? ", uuid).First(&producerModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-	} else {
-		query := d.DB.Where("uuid = ? ", uuid).First(&producerModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
+	if err := d.DB.Where("uuid = ?", uuid).Find(&producerModel).Updates(body).Error; err != nil {
+		return nil, err
 	}
 	return producerModel, nil
 }
 
-// UpdateProducer  update it
-func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer, updateHist bool) (*model.Producer, error) {
+func (d *GormDatabase) DeleteProducer(uuid string) (bool, error) {
 	var producerModel *model.Producer
-	query := d.DB.Where("uuid = ?", uuid).Find(&producerModel).Updates(body)
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&producerModel)
 	if query.Error != nil {
-		return nil, query.Error
+		return false, query.Error
 	}
+	r := query.RowsAffected
+	if r == 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
+}
 
-	return producerModel, nil
-
+func (d *GormDatabase) DropProducers() (bool, error) {
+	var producerModel *model.Producer
+	query := d.DB.Where("1 = 1").Delete(&producerModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
+	r := query.RowsAffected
+	if r == 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
 }
 
 type Point struct {
@@ -159,36 +171,4 @@ func (d *GormDatabase) UpdateProducerByField(field string, value string, body *m
 		return nil, query.Error
 	}
 	return producerModel, nil
-}
-
-// DeleteProducer deletes it
-func (d *GormDatabase) DeleteProducer(uuid string) (bool, error) {
-	var producerModel *model.Producer
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&producerModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-
-}
-
-// DropProducers delete all.
-func (d *GormDatabase) DropProducers() (bool, error) {
-	var producerModel *model.Producer
-	query := d.DB.Where("1 = 1").Delete(&producerModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-
 }
