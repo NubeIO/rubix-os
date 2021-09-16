@@ -4,11 +4,14 @@ type FlowNetwork struct {
 	CommonUUID
 	CommonName
 	CommonDescription
-	SiteID                  string    `json:"site_id"`
+	GlobalUuid              string    `json:"global_uuid"`
+	ClientId                string    `json:"client_id"`
+	ClientName              string    `json:"client_name"`
+	SiteId                  string    `json:"site_id"`
 	SiteName                string    `json:"site_name"`
-	GlobalFlowID            string    `json:"global_flow_id"`
-	GlobalRemoteFlowID      string    `json:"global_remote_flow_id"` //if is a remote
-	RemoteFlowUUID          string    `json:"remote_flow_uuid"`      //if is a remote
+	DeviceId                string    `json:"device_id"`
+	DeviceName              string    `json:"device_name"`
+	RemoteFlowUUID          string    `json:"remote_flow_uuid"` //if is a remote
 	IsRemote                bool      `json:"is_remote"`
 	FetchHistories          bool      `json:"fetch_histories"`
 	FetchHistoriesFrequency int       `json:"fetch_hist_frequency"`      //time example 15min
