@@ -4,12 +4,11 @@ import (
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
-	"gorm.io/gorm"
 )
 
 func (d *GormDatabase) GetStreams(args api.Args) ([]*model.Stream, error) {
 	var gatewaysModel []*model.Stream
-	query := d.createStreamQueryWithArgs(args)
+	query := d.buildStreamQuery(args)
 	query.Find(&gatewaysModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -19,7 +18,7 @@ func (d *GormDatabase) GetStreams(args api.Args) ([]*model.Stream, error) {
 
 func (d *GormDatabase) GetStream(uuid string, args api.Args) (*model.Stream, error) {
 	var gatewayModel *model.Stream
-	query := d.createStreamQueryWithArgs(args)
+	query := d.buildStreamQuery(args)
 	query = query.Where("uuid = ? ", uuid).First(&gatewayModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -91,32 +90,9 @@ func (d *GormDatabase) GetFlowUUID(uuid string) (*model.Stream, *model.FlowNetwo
 	for _, net := range stream.FlowNetworks {
 		flowUUID = net.UUID
 	}
-	flow, err := d.GetFlowNetwork(flowUUID)
+	flow, err := d.GetFlowNetwork(flowUUID, api.Args{})
 	if err != nil {
 		return nil, nil, err
 	}
 	return stream, flow, nil
-}
-
-func (d *GormDatabase) createStreamQueryWithArgs(args api.Args) *gorm.DB {
-	query := d.DB
-	if args.FlowNetworks {
-		query = query.Preload("FlowNetworks")
-	}
-	if args.Producers {
-		query = query.Preload("Producers")
-		if args.Writers {
-			query = query.Preload("Producers.WriterClone")
-		}
-	}
-	if args.Consumers {
-		query = query.Preload("Consumers")
-		if args.Writers {
-			query = query.Preload("Consumers.Writer")
-		}
-	}
-	if args.CommandGroups {
-		query = query.Preload("CommandGroups")
-	}
-	return query
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/client"
 	"github.com/NubeDev/flow-framework/model"
-
 	"github.com/NubeDev/flow-framework/utils"
 )
 
@@ -13,17 +12,24 @@ type Consumers struct {
 	*model.Consumer
 }
 
-// GetConsumers get all of them
-func (d *GormDatabase) GetConsumers() ([]*model.Consumer, error) {
+func (d *GormDatabase) GetConsumers(args api.Args) ([]*model.Consumer, error) {
 	var consumersModel []*model.Consumer
-	query := d.DB.Preload("Writer").Find(&consumersModel)
-	if query.Error != nil {
-		return nil, query.Error
+	query := d.buildConsumerQuery(args)
+	if err := query.Find(&consumersModel).Error; err != nil {
+		return nil, err
 	}
 	return consumersModel, nil
 }
 
-// CreateConsumer make it
+func (d *GormDatabase) GetConsumer(uuid string, args api.Args) (*model.Consumer, error) {
+	var consumerModel *model.Consumer
+	query := d.buildConsumerQuery(args)
+	if err := query.Where("uuid = ?", uuid).First(&consumerModel).Error; err != nil {
+		return nil, err
+	}
+	return consumerModel, nil
+}
+
 func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, error) {
 	_, err := d.GetStream(body.StreamUUID, api.Args{})
 	if err != nil {
@@ -38,24 +44,6 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 	return body, nil
 }
 
-// GetConsumer get it
-func (d *GormDatabase) GetConsumer(uuid string, withChildren bool) (*model.Consumer, error) {
-	var consumerModel *model.Consumer
-	if withChildren {
-		query := d.DB.Preload("Writer").Where("uuid = ? ", uuid).First(&consumerModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-	} else {
-		query := d.DB.Where("uuid = ? ", uuid).First(&consumerModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-	}
-	return consumerModel, nil
-}
-
-// DeleteConsumer deletes it
 func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
 	var consumerModel *model.Consumer
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&consumerModel)
@@ -70,22 +58,18 @@ func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
 	}
 }
 
-// UpdateConsumer  update it
 func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error) {
 	var consumerModel *model.Consumer
-	query := d.DB.Where("uuid = ?", uuid).Find(&consumerModel)
-	if query.Error != nil {
-		return nil, query.Error
+	if err := d.DB.Where("uuid = ?", uuid).Find(&consumerModel).Error; err != nil {
+		return nil, err
 	}
-	query = d.DB.Model(&consumerModel).Updates(body)
-	if query.Error != nil {
-		return nil, query.Error
+	if err := d.DB.Model(&consumerModel).Updates(body).Error; err != nil {
+		return nil, err
 	}
 	return consumerModel, nil
 
 }
 
-// DropConsumers delete all.
 func (d *GormDatabase) DropConsumers() (bool, error) {
 	var consumerModel *model.Consumer
 	query := d.DB.Where("1 = 1").Delete(&consumerModel)
@@ -98,7 +82,6 @@ func (d *GormDatabase) DropConsumers() (bool, error) {
 	} else {
 		return true, nil
 	}
-
 }
 
 /*
@@ -140,7 +123,7 @@ func (d *GormDatabase) AddConsumerWizard(consumerStreamUUID, producerUUID string
 		}
 		producer = p
 	} else {
-		p, err := d.GetProducer(producerUUID, false)
+		p, err := d.GetProducer(producerUUID, api.Args{})
 		if err != nil {
 			return nil, errors.New("error: issue on get producer")
 		}

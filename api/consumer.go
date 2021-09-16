@@ -6,10 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// The ConsumersDatabase interface for encapsulating database access.
 type ConsumersDatabase interface {
-	GetConsumer(uuid string, withChildren bool) (*model.Consumer, error)
-	GetConsumers() ([]*model.Consumer, error)
+	GetConsumers(args Args) ([]*model.Consumer, error)
+	GetConsumer(uuid string, args Args) (*model.Consumer, error)
 	CreateConsumer(body *model.Consumer) (*model.Consumer, error)
 	AddConsumerWizard(consumerStreamUUID, producerUUID string, body *model.Consumer) (*model.Consumer, error)
 	UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error)
@@ -20,15 +19,16 @@ type ConsumersAPI struct {
 	DB ConsumersDatabase
 }
 
-func (j *ConsumersAPI) GetConsumer(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	withChildren, _, _ := withChildrenArgs(ctx)
-	q, err := j.DB.GetConsumer(uuid, withChildren)
+func (j *ConsumersAPI) GetConsumers(ctx *gin.Context) {
+	args := buildConsumerArgs(ctx)
+	q, err := j.DB.GetConsumers(args)
 	reposeHandler(q, err, ctx)
 }
 
-func (j *ConsumersAPI) GetConsumers(ctx *gin.Context) {
-	q, err := j.DB.GetConsumers()
+func (j *ConsumersAPI) GetConsumer(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	args := buildConsumerArgs(ctx)
+	q, err := j.DB.GetConsumer(uuid, args)
 	reposeHandler(q, err, ctx)
 }
 

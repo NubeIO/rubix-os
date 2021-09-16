@@ -113,11 +113,11 @@ func (d *GormDatabase) SyncTopics() {
 	for _, obj := range s {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Plugin, obj.UUID)
 	}
-	sub, err := d.GetProducers()
+	sub, err := d.GetProducers(api.Args{})
 	for _, obj := range sub {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Producer, obj.UUID)
 	}
-	rip, err := d.GetConsumers()
+	rip, err := d.GetConsumers(api.Args{})
 	for _, obj := range rip {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Consumer, obj.UUID)
 	}
@@ -125,11 +125,11 @@ func (d *GormDatabase) SyncTopics() {
 	for _, obj := range j {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Job, obj.UUID)
 	}
-	n, err := d.GetNetworks(false, false)
+	n, err := d.GetNetworks(api.Args{})
 	for _, obj := range n {
 		d.Bus.RegisterTopicParent(model.ThingClass.Network, obj.UUID)
 	}
-	de, err := d.GetDevices(false)
+	de, err := d.GetDevices(api.Args{})
 	for _, obj := range de {
 		d.Bus.RegisterTopicParent(model.ThingClass.Network, obj.UUID)
 	}

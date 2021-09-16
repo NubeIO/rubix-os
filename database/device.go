@@ -3,50 +3,29 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"time"
 )
 
-var pointChildTable = "Point"
-
-// GetDevices returns all devices.
-func (d *GormDatabase) GetDevices(withPoints bool) ([]*model.Device, error) {
+func (d *GormDatabase) GetDevices(args api.Args) ([]*model.Device, error) {
 	var devicesModel []*model.Device
-	withChildren := withPoints
-	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload("Point").Find(&devicesModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return devicesModel, nil
-	} else {
-		query := d.DB.Find(&devicesModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return devicesModel, nil
+	query := d.buildDeviceQuery(args)
+	if err := query.Find(&devicesModel).Error; err != nil {
+		return nil, err
 	}
+	return devicesModel, nil
 }
 
-// GetDevice returns the device for the given id or nil.
-func (d *GormDatabase) GetDevice(uuid string, withPoints bool) (*model.Device, error) {
+func (d *GormDatabase) GetDevice(uuid string, args api.Args) (*model.Device, error) {
 	var deviceModel *model.Device
-	withChildren := withPoints
-	if withChildren { // drop child to reduce json size
-		query := d.DB.Where("uuid = ? ", uuid).Preload(pointChildTable).First(&deviceModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return deviceModel, nil
-	} else {
-		query := d.DB.Where("uuid = ? ", uuid).First(&deviceModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return deviceModel, nil
+	query := d.buildDeviceQuery(args)
+	if err := query.Where("uuid = ? ", uuid).First(&deviceModel).Error; err != nil {
+		return nil, err
 	}
+	return deviceModel, nil
 }
 
 // GetDeviceByField returns the device for the given field ie name or nil.
@@ -55,7 +34,7 @@ func (d *GormDatabase) GetDeviceByField(field string, value string, withPoints b
 	f := fmt.Sprintf("%s = ? ", field)
 	withChildren := withPoints
 	if withChildren { // drop child to reduce json size
-		query := d.DB.Where(f, value).Preload(pointChildTable).First(&deviceModel)
+		query := d.DB.Where(f, value).Preload("Points").First(&deviceModel)
 		if query.Error != nil {
 			return nil, query.Error
 		}
@@ -69,21 +48,19 @@ func (d *GormDatabase) GetDeviceByField(field string, value string, withPoints b
 	}
 }
 
-
 // GetPluginIDFromDevice returns the pluginUUID by using the deviceUUID to query the network.
 func (d *GormDatabase) GetPluginIDFromDevice(uuid string) (*model.Network, error) {
-	device, err := d.GetDevice(uuid, false)
+	device, err := d.GetDevice(uuid, api.Args{})
 	if err != nil {
 		return nil, err
 	}
-	network, err := d.GetNetwork(device.NetworkUUID, false, false)
+	network, err := d.GetNetwork(device.NetworkUUID, api.Args{})
 	if err != nil {
 		return nil, err
 	}
 	return network, err
 }
 
-// CreateDevice creates a device.
 func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	var net *model.Network
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Device)
@@ -118,7 +95,6 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	return body, query.Error
 }
 
-// UpdateDevice returns the device for the given id or nil.
 func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
 	var deviceModel *model.Device
 	query := d.DB.Where("uuid = ?", uuid).Find(&deviceModel)
@@ -186,5 +162,4 @@ func (d *GormDatabase) DropDevices() (bool, error) {
 	} else {
 		return true, nil
 	}
-
 }

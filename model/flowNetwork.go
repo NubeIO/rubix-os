@@ -1,6 +1,5 @@
 package model
 
-//FlowNetwork flow network
 type FlowNetwork struct {
 	CommonUUID
 	CommonName

@@ -5,10 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// The DeviceDatabase interface for encapsulating database access.
 type DeviceDatabase interface {
-	GetDevice(uuid string, withPoints bool) (*model.Device, error)
-	GetDevices(withPoints bool) ([]*model.Device, error)
+	GetDevices(args Args) ([]*model.Device, error)
+	GetDevice(uuid string, args Args) (*model.Device, error)
 	CreateDevice(body *model.Device) (*model.Device, error)
 	UpdateDevice(uuid string, body *model.Device) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
@@ -21,14 +20,15 @@ type DeviceAPI struct {
 }
 
 func (a *DeviceAPI) GetDevices(ctx *gin.Context) {
-	q, err := a.DB.GetDevices(false)
+	args := buildDeviceArgs(ctx)
+	q, err := a.DB.GetDevices(args)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *DeviceAPI) GetDevice(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetDevice(uuid, false)
+	args := buildDeviceArgs(ctx)
+	q, err := a.DB.GetDevice(uuid, args)
 	reposeHandler(q, err, ctx)
 }
 
@@ -62,11 +62,9 @@ func (a *DeviceAPI) DeleteDevice(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteDevice(uuid)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *DeviceAPI) DropDevices(ctx *gin.Context) {
 	q, err := a.DB.DropDevices()
 	reposeHandler(q, err, ctx)
-
 }

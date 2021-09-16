@@ -74,7 +74,15 @@ func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, writ
 	return askRefresh, askResponse, write, updateProducer
 }
 
-func streamArgs(ctx *gin.Context) Args {
+func buildFlowNetworkArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
+	return args
+}
+
+func buildStreamArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
@@ -83,5 +91,42 @@ func streamArgs(ctx *gin.Context) Args {
 	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
 	args.CommandGroups, _ = toBool(ctx.DefaultQuery(aType.CommandGroups, aDefault.CommandGroups))
 	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	return args
+}
+
+func buildConsumerArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	return args
+}
+
+func buildProducerArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	return args
+}
+
+func buildNetworkArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Devices, _ = toBool(ctx.DefaultQuery(aType.Devices, aDefault.Devices))
+	args.Points, _ = toBool(ctx.DefaultQuery(aType.Points, aDefault.Points))
+	args.IpConnection, _ = toBool(ctx.DefaultQuery(aType.IpConnection, aDefault.IpConnection))
+	args.SerialConnection, _ = toBool(ctx.DefaultQuery(aType.SerialConnection, aDefault.SerialConnection))
+	return args
+}
+
+func buildDeviceArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Points, _ = toBool(ctx.DefaultQuery(aType.Points, aDefault.Points))
+	args.IpConnection, _ = toBool(ctx.DefaultQuery(aType.IpConnection, aDefault.IpConnection))
+	args.SerialConnection, _ = toBool(ctx.DefaultQuery(aType.SerialConnection, aDefault.SerialConnection))
 	return args
 }

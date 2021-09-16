@@ -11,17 +11,17 @@ type Consumer struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	StreamUUID          string            `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
-	ProducerUUID        string            `json:"producer_uuid"`
-	ProducerThingName   string            `json:"producer_thing_name"`
-	ProducerThingUUID   string            `json:"producer_thing_uuid"` // this is the remote point UUID
-	ProducerThingClass  string            `json:"producer_thing_class"`
-	ProducerThingType   string            `json:"producer_thing_type"`
-	ConsumerApplication string            `json:"consumer_application"`
-	CurrentWriterUUID   string            `json:"current_writer_uuid"` // this could come from any flow-network on any instance
-	DataStore           datatypes.JSON    `json:"data_store"`
-	Writer              []Writer          `json:"writers" gorm:"constraint:OnDelete:CASCADE;"`
-	ConsumerHistory     []ConsumerHistory `json:"consumer_histories" gorm:"constraint:OnDelete:CASCADE;"`
+	StreamUUID          string             `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
+	ProducerUUID        string             `json:"producer_uuid"`
+	ProducerThingName   string             `json:"producer_thing_name"`
+	ProducerThingUUID   string             `json:"producer_thing_uuid"` // this is the remote point UUID
+	ProducerThingClass  string             `json:"producer_thing_class"`
+	ProducerThingType   string             `json:"producer_thing_type"`
+	ConsumerApplication string             `json:"consumer_application"`
+	CurrentWriterUUID   string             `json:"current_writer_uuid"` // this could come from any flow-network on any instance
+	DataStore           datatypes.JSON     `json:"data_store"`
+	Writers             []*Writer          `json:"writers" gorm:"constraint:OnDelete:CASCADE;"`
+	ConsumerHistories   []*ConsumerHistory `json:"consumer_histories" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
 }
 

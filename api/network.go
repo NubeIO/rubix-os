@@ -6,11 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// The NetworkDatabase interface for encapsulating database access.
 type NetworkDatabase interface {
-	GetNetwork(uuid string, withChildren bool, withPoints bool) (*model.Network, error)
 	GetNetworkByPlugin(uuid string, withChildren bool, withPoints bool, transport string) (*model.Network, error)
-	GetNetworks(withChildren bool, withPoints bool) ([]*model.Network, error)
+	GetNetworks(args Args) ([]*model.Network, error)
+	GetNetwork(uuid string, args Args) (*model.Network, error)
 	CreateNetwork(network *model.Network) (*model.Network, error)
 	UpdateNetwork(uuid string, body *model.Network) (*model.Network, error)
 	DeleteNetwork(uuid string) (bool, error)
@@ -22,8 +21,8 @@ type NetworksAPI struct {
 }
 
 func (a *NetworksAPI) GetNetworks(ctx *gin.Context) {
-	withChildren, withPoints, _ := withChildrenArgs(ctx)
-	q, err := a.DB.GetNetworks(withChildren, withPoints)
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.GetNetworks(args)
 	reposeHandler(q, err, ctx)
 }
 
@@ -36,8 +35,14 @@ func (a *NetworksAPI) GetNetworkByPlugin(ctx *gin.Context) {
 
 func (a *NetworksAPI) GetNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	withChildren, withPoints, _ := withChildrenArgs(ctx)
-	q, err := a.DB.GetNetwork(uuid, withChildren, withPoints)
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.GetNetwork(uuid, args)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *NetworksAPI) CreateNetwork(ctx *gin.Context) {
+	body, _ := getBODYNetwork(ctx)
+	q, err := a.DB.CreateNetwork(body)
 	reposeHandler(q, err, ctx)
 }
 
@@ -48,21 +53,13 @@ func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-func (a *NetworksAPI) CreateNetwork(ctx *gin.Context) {
-	body, _ := getBODYNetwork(ctx)
-	q, err := a.DB.CreateNetwork(body)
-	reposeHandler(q, err, ctx)
-}
-
 func (a *NetworksAPI) DeleteNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteNetwork(uuid)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *NetworksAPI) DropNetworks(ctx *gin.Context) {
 	q, err := a.DB.DropNetworks()
 	reposeHandler(q, err, ctx)
-
 }
