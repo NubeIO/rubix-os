@@ -51,3 +51,28 @@ func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 	}
 	return query
 }
+
+func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.Devices {
+		query = query.Preload("Devices")
+	}
+	if args.Points {
+		query = query.Preload("Devices.Points")
+	}
+	if args.IpConnection {
+		query = query.Preload("IpConnection")
+	}
+	if args.SerialConnection {
+		query = query.Preload("SerialConnection")
+	}
+	return query
+}
+
+func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.Points {
+		query = query.Preload("Points")
+	}
+	return query
+}

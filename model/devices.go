@@ -16,8 +16,8 @@ type Device struct {
 	CommonFault
 	CommonCreated
 	CommonThingClass //point, job
-	CommonThingType  // for example temp, rssi, voltage
+	CommonThingType  //for example temp, rssi, voltage
 	CommonDevice
-	NetworkUUID string  `json:"network_uuid" gorm:"TYPE:varchar(255) REFERENCES networks;not null;default:null"`
-	Point       []Point `json:"points" gorm:"constraint:OnDelete:CASCADE"`
+	NetworkUUID string   `json:"network_uuid" gorm:"TYPE:varchar(255) REFERENCES networks;not null;default:null"`
+	Points      []*Point `json:"points" gorm:"constraint:OnDelete:CASCADE"`
 }

@@ -109,3 +109,24 @@ func buildProducerArgs(ctx *gin.Context) Args {
 	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
 	return args
 }
+
+func buildNetworkArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Devices, _ = toBool(ctx.DefaultQuery(aType.Devices, aDefault.Devices))
+	args.Points, _ = toBool(ctx.DefaultQuery(aType.Points, aDefault.Points))
+	args.IpConnection, _ = toBool(ctx.DefaultQuery(aType.IpConnection, aDefault.IpConnection))
+	args.SerialConnection, _ = toBool(ctx.DefaultQuery(aType.SerialConnection, aDefault.SerialConnection))
+	return args
+}
+
+func buildDeviceArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Points, _ = toBool(ctx.DefaultQuery(aType.Points, aDefault.Points))
+	args.IpConnection, _ = toBool(ctx.DefaultQuery(aType.IpConnection, aDefault.IpConnection))
+	args.SerialConnection, _ = toBool(ctx.DefaultQuery(aType.SerialConnection, aDefault.SerialConnection))
+	return args
+}

@@ -40,7 +40,7 @@ type Network struct {
 	CommonThingType
 	TransportType    string            `json:"transport_type"  gorm:"type:varchar(255);not null"` //serial
 	PluginConfId     string            `json:"plugin_conf_id" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
-	Device           []Device          `json:"devices" gorm:"constraint:OnDelete:CASCADE"`
+	Devices          []*Device         `json:"devices" gorm:"constraint:OnDelete:CASCADE"`
 	SerialConnection *SerialConnection `json:"serial_connection" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	IpConnection     *IpConnection     `json:"ip_connection" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }

@@ -125,11 +125,11 @@ func (d *GormDatabase) SyncTopics() {
 	for _, obj := range j {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Job, obj.UUID)
 	}
-	n, err := d.GetNetworks(false, false)
+	n, err := d.GetNetworks(api.Args{})
 	for _, obj := range n {
 		d.Bus.RegisterTopicParent(model.ThingClass.Network, obj.UUID)
 	}
-	de, err := d.GetDevices(false)
+	de, err := d.GetDevices(api.Args{})
 	for _, obj := range de {
 		d.Bus.RegisterTopicParent(model.ThingClass.Network, obj.UUID)
 	}
