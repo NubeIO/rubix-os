@@ -21,6 +21,14 @@ type CommonThingType struct {
 	ThingType string `json:"thing_type"`
 }
 
+type CommonThingObject struct {
+	ThingObject string `json:"thing_object"`
+}
+
+type CommonThingUse struct {
+	ThingUse string `json:"thing_use"`
+}
+
 type CommonThingUUID struct {
 	ThingUUID string `json:"thing_uuid"`
 }

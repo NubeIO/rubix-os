@@ -38,22 +38,6 @@ type Units struct { // for example from temp c to temp f
 	To   string
 }
 
-//var ObjectTypeBACnet = struct {
-//	analogInput  string
-//	analogOutput string
-//	analogValue  string
-//	binaryInput  string
-//	binaryOutput string
-//	binaryValue  string
-//}{
-//	analogInput:  "analogInput",
-//	analogOutput: "analogOutput",
-//	analogValue:  "analogValue",
-//	binaryInput:  "binaryInput",
-//	binaryOutput: "binaryOutput",
-//	binaryValue:  "binaryValue",
-//}
-
 var ObjectTypeBACnet = struct {
 	AnalogInput  string
 	AnalogOutput string
@@ -88,10 +72,14 @@ type Point struct {
 	AddressOffset        int            `json:"address_offset"` // for example a modbus address offset
 	AddressUUID          string         `json:"address_uuid"`   // for example a droplet id (so a string)
 	NextAvailableAddress *bool          `json:"use_next_available_address"`
-	CommonThingClass                    //point, job
-	CommonThingType                     // for example temp, rssi, voltage
-	IsProducer           bool           `json:"is_producer"`
-	IsConsumer           bool           `json:"is_consumer"`
+	Unit                 string
+	UnitsTo              string //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
+	CommonThingClass            //network
+	CommonThingUse              //lora
+	CommonThingObject           //point
+	CommonThingType             //temp
+	IsProducer           bool   `json:"is_producer"`
+	IsConsumer           bool   `json:"is_consumer"`
 	CommonFault
 	Priority *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
 }

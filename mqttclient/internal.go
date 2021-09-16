@@ -6,9 +6,9 @@ var m *Client
 
 //InternalMQTT internal non-secure mqtt connection
 // for plugins use the plugin path as the topi
-func InternalMQTT() (bool, error)  {
+func InternalMQTT(ip string) (bool, error)  {
 	c, err := NewClient(ClientOptions{
-		Servers: []string{"tcp://0.0.0.0:1883"},
+		Servers: []string{ip},
 	})
 	if err != nil {
 		fmt.Println(err, "CONNECT to broker")

@@ -113,7 +113,7 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 
 }
 
-// updatePoint by its lora id
+// updatePoint by its lora id and type as in temp or lux
 func (i *Instance) updatePoint(body *model.Point) error {
 	addr := body.AddressUUID
 	_, err := i.db.UpdatePointByFieldAndType("address_uuid", addr, body)

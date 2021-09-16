@@ -4,6 +4,18 @@ import (
 	"github.com/NubeIO/null"
 )
 
+type Server struct {
+	Ip                string `json:"ip"`
+	Port              int    `json:"port"`
+	DeviceId          string `json:"device_id"`
+	LocalObjName      string `json:"local_obj_name"`
+	ModelName         string `json:"model_name"`
+	VendorId          string `json:"vendor_id"`
+	VendorName        string `json:"vendor_name"`
+	EnableIpByNicName bool   `json:"enable_ip_by_nic_name"`
+	IpByNicName       string `json:"ip_by_nic_name"`  //eth0
+}
+
 // MqttPayload payload from the bacnet server
 type MqttPayload struct {
 	Value    null.Float

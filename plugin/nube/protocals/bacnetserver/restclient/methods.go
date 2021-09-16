@@ -65,3 +65,35 @@ func (a *RestClient) DeletePoint(obj string, addr int) (bool, error) {
 	}
 	return true, nil
 }
+
+
+
+// GetServer all points
+func (a *RestClient) GetServer() (*pkgmodel.Server, error) {
+	resp, err := a.client.R().
+		SetResult(&pkgmodel.Server{}).
+		Get("/api/bacnet/server")
+	if err != nil {
+		return nil, fmt.Errorf("error geting server %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*pkgmodel.Server), nil
+}
+
+
+// EditServer an object
+func (a *RestClient) EditServer(body pkgmodel.Server) (*pkgmodel.Server, error) {
+	resp, err := a.client.R().
+		SetResult(&pkgmodel.Server{}).
+		SetBody(body).
+		Patch("/api/bacnet/server")
+	if err != nil {
+		return nil, fmt.Errorf("failed to update %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*pkgmodel.Server), nil
+}

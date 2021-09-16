@@ -30,7 +30,6 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 
 	flowNetwork.IsRemote = false
 	flowNetwork.RemoteFlowUUID = utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
-	flowNetwork.GlobalFlowID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
 	fmt.Println("CreateFlowNetwork", f.UUID)
@@ -136,8 +135,6 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	flowNetwork.IsRemote = true
 	flowNetwork.FlowIP = "0.0.0.0"
 	flowNetwork.FlowPort = "1660"
-	flowNetwork.GlobalFlowID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
-	flowNetwork.GlobalRemoteFlowID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.RemoteFlowUUID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 
 	flowNetwork.Name = "flow network"
@@ -278,8 +275,6 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	flowNetwork.FlowPort = "1660"
 	flowNetwork.FlowToken = token
 
-	flowNetwork.GlobalFlowID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
-	flowNetwork.GlobalRemoteFlowID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 	flowNetwork.RemoteFlowUUID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 
 	flowNetwork.Name = "NAME 2nd network"

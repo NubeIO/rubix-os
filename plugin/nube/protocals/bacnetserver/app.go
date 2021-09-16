@@ -23,9 +23,6 @@ func (i *Instance) checkTypes(body *model.Point) (*model.Point, error) {
 func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	payload := new(pkgmodel.MqttPayload)
 	err := json.Unmarshal(body.Payload(), &payload)
-	if err != nil {
-
-	}
 	t := mqttclient.TopicParts(body.Topic())
 	top := t.Get(5)
 	aaa := top.(string)
@@ -34,8 +31,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	var pri model.Priority
 	pri.P1 = payload.Value
 	point.Priority = &pri
-	pnt, _ := i.db.PointAndQuery(objType, addr)
-	//TODO check if existing exists, as in the same addr
+	pnt, _ := i.db.PointAndQuery(objType, addr) //TODO check if existing exists, as in the same addr
 	if err != nil {
 		return nil, err
 	}
@@ -98,6 +94,16 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 func (i *Instance) deletePoint(body *model.Point) (bool, error) {
 	cli := plgrest.NewNoAuth(ip, port)
 	_, err := cli.DeletePoint(body.ObjectType, body.AddressId)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+//delete point make sure
+func (i *Instance) bacnetServerDeletePoint(body *pkgmodel.BacnetPoint) (bool, error) {
+	cli := plgrest.NewNoAuth(ip, port)
+	_, err := cli.DeletePoint(body.ObjectType, body.Address)
 	if err != nil {
 		return false, err
 	}
