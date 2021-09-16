@@ -22,6 +22,7 @@ func (a *RestClient) GetPoints() (*[]pkgmodel.BacnetPoint, error) {
 
 // AddPoint an object
 func (a *RestClient) AddPoint(body pkgmodel.BacnetPoint) (*pkgmodel.BacnetPoint, error) {
+	fmt.Println("ADD POINT ON IN BACNET REST CALL", body)
 	resp, err := a.client.R().
 		SetResult(&pkgmodel.BacnetPoint{}).
 		SetBody(body).

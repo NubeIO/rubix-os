@@ -14,7 +14,7 @@ type BacnetPoint struct {
 	ObjectType           string  `json:"object_type,omitempty"`
 	ObjectName           string  `json:"object_name,omitempty"`
 	Address              int     `json:"address,omitempty"`
-	RelinquishDefault    float64 `json:"relinquish_default,omitempty"`
+	RelinquishDefault    float64 `json:"relinquish_default"`
 	EventState           string  `json:"event_state,omitempty"`
 	Units                string  `json:"units,omitempty"`
 	Description          string  `json:"description,omitempty"`

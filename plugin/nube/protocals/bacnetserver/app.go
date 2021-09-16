@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
 	plgrest "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/restclient"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"time"
 )
 
 //checkTypes make sure
@@ -35,12 +35,15 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	pri.P1 = payload.Value
 	point.Priority = &pri
 	pnt, _ := i.db.PointAndQuery(objType, addr)
-
 	//TODO check if existing exists, as in the same addr
-
 	if err != nil {
 		return nil, err
 	}
+	point.CommonFault.InFault = false
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
+	point.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
+	point.CommonFault.LastOk = time.Now().UTC()
 	_, _ = i.db.UpdatePoint(pnt.UUID, &point, false, true)
 	if err != nil {
 		return nil, err
@@ -52,19 +55,20 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 func (i *Instance) addPoint(body *model.Point) (*model.Point, error) {
 	var point pkgmodel.BacnetPoint
 	point.ObjectName = body.Name
+	point.Enable = true
+	point.Description = body.Description
 	point.Address = body.AddressId
 	point.ObjectType = body.ObjectType
 	point.COV = body.COV
 	point.EventState = "normal"
 	point.Units = "noUnits"
-	point.RelinquishDefault = 0.0
+	point.RelinquishDefault = body.Fallback
 	cli := plgrest.NewNoAuth(ip, port)
 	_, err := cli.AddPoint(point)
 	//TODO check if existing exists, as in the same addr and also set the point in fault or out of fault
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(point.ObjectName, point.UseNextAvailableAddr)
 	return nil, nil
 
 }
@@ -88,4 +92,14 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 	}
 	return nil, nil
 
+}
+
+//delete point make sure
+func (i *Instance) deletePoint(body *model.Point) (bool, error) {
+	cli := plgrest.NewNoAuth(ip, port)
+	_, err := cli.DeletePoint(body.ObjectType, body.AddressId)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

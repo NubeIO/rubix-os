@@ -41,10 +41,10 @@ func (i *Instance) BusServ() {
 				}
 				//try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
+				fmt.Println("ADD POINT ON BUS")
 				if err != nil {
 					return
 				}
-				fmt.Println(111, pnt)
 				_, err = i.addPoint(pnt)
 				if err != nil {
 					return
@@ -96,7 +96,6 @@ func (i *Instance) BusServ() {
 				if err != nil {
 					return
 				}
-
 				if pnt != nil {
 					_, err = i.pointPatch(pnt)
 					log.Info("BACNET BUS PluginsUpdated IsPoint", " ", pnt.UUID)
@@ -112,7 +111,56 @@ func (i *Instance) BusServ() {
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerUpdated)
-
+	handlerDeleted := bus.Handler{
+		Handle: func(ctx context.Context, e bus.Event) {
+			go func() {
+				log.Info("BACNET BUS DELETED NEW MSG", " ", e.Topic)
+				//try and match is network
+				net, err := eventbus.IsNetwork(e.Topic, e)
+				if err != nil {
+					return
+				}
+				if net != nil {
+					log.Info("BACNET BUS DELETED isNetwork", " ", net.UUID)
+					if err != nil {
+						return
+					}
+					return
+				}
+				//try and match is device
+				dev, err := eventbus.IsDevice(e.Topic, e)
+				if err != nil {
+					return
+				}
+				if dev != nil {
+					//_, err = i.addPoints(dev)
+					log.Info("BACNET BUS DELETED IsDevice", " ", dev.UUID)
+					if err != nil {
+						return
+					}
+					return
+				}
+				//try and match is point
+				pnt, err := eventbus.IsPoint(e.Topic, e)
+				if err != nil {
+					return
+				}
+				log.Info("BACNET BUS DELETED IsPoint", " ")
+				if pnt != nil {
+					p, err := i.deletePoint(pnt)
+					log.Info("BACNET BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", p)
+					if err != nil {
+						return
+					}
+					return
+				}
+			}()
+		},
+		Matcher: eventbus.PluginsDeleted,
+	}
+	u, _ = utils.MakeUUID()
+	key = fmt.Sprintf("key_%s", u)
+	eventbus.GetBus().RegisterHandler(key, handlerDeleted)
 	handlerMQTT := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {

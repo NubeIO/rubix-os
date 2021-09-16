@@ -79,7 +79,7 @@ type Point struct {
 	PresentValue         float64        `json:"present_value"` //point value, read only
 	WriteValue           null.Float     `json:"write_value"`   //TODO add in logic if user writes to below priority 16
 	ValueRaw             datatypes.JSON `json:"value_raw"`
-	Fallback             null.Float     `json:"fallback"`
+	Fallback             float64        `json:"fallback"`
 	DeviceUUID           string         `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	Writeable            bool           `json:"writeable"`
 	COV                  float32        `json:"cov"`
@@ -93,7 +93,7 @@ type Point struct {
 	IsProducer           bool           `json:"is_producer"`
 	IsConsumer           bool           `json:"is_consumer"`
 	CommonFault
-	Priority *Priority `json:"priority,omitempty" gorm:"constraint:OnDelete:CASCADE"`
+	Priority *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type Priority struct {

@@ -16,7 +16,6 @@ func (i *Instance) Enable() error {
 	i.networkUUID = q.UUID
 	if err != nil {
 		return errors.New("error on enable lora-plugin")
-
 	}
 	return nil
 }
