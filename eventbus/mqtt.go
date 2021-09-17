@@ -30,6 +30,7 @@ func publishMQTT(sensorStruct model.ProducerBody) {
 
 //used for getting data into the plugins
 var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
+	log.Println(msg.Topic(), " ", "NEW MQTT MES")
 	GetService().RegisterTopic(MQTTUpdated)
 	err := GetService().Emit(CTX(), MQTTUpdated, msg)
 	if err != nil {

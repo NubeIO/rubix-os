@@ -101,6 +101,6 @@ type Priority struct {
 	P13       null.Float `json:"_13"`
 	P14       null.Float `json:"_14"`
 	P15       null.Float `json:"_15"`
-	//P16       null.Float `json:"_16"` //removed and added to the point to save one DB write
+	P16       null.Float `json:"_16"` //removed and added to the point to save one DB write
 
 }

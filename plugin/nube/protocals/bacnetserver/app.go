@@ -8,6 +8,7 @@ import (
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
 	plgrest "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/restclient"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -29,10 +30,11 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	objType, addr := getPointAddr(aaa)
 	var point model.Point
 	var pri model.Priority
-	pri.P1 = payload.Value
+	pri.P16 = payload.Value
 	point.Priority = &pri
 	pnt, _ := i.db.PointAndQuery(objType, addr) //TODO check if existing exists, as in the same addr
 	if err != nil {
+		log.Error("BACNET UPDATE POINT PointAndQuery")
 		return nil, err
 	}
 	point.CommonFault.InFault = false
@@ -42,6 +44,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	point.CommonFault.LastOk = time.Now().UTC()
 	_, _ = i.db.UpdatePoint(pnt.UUID, &point, false, true)
 	if err != nil {
+		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 		return nil, err
 	}
 	return nil, nil
@@ -78,6 +81,16 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 	point.Priority.P4 = body.Priority.P4
 	point.Priority.P5 = body.Priority.P5
 	point.Priority.P6 = body.Priority.P6
+	point.Priority.P7 = body.Priority.P7
+	point.Priority.P8 = body.Priority.P8
+	point.Priority.P9 = body.Priority.P9
+	point.Priority.P10 = body.Priority.P10
+	point.Priority.P11 = body.Priority.P11
+	point.Priority.P12 = body.Priority.P12
+	point.Priority.P13 = body.Priority.P13
+	point.Priority.P14 = body.Priority.P14
+	point.Priority.P15 = body.Priority.P15
+	point.Priority.P16 = body.Priority.P16
 	point.ObjectName = body.Name
 	addr := body.AddressId
 	obj := body.ObjectType
