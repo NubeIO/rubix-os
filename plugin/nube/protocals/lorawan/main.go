@@ -8,20 +8,24 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-const name = "lora" //must be unique across all plugins
-const description = "lora raw"
+const name = "lorawan" //must be unique across all plugins
+const description = "lorawan api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
-const protocolType = "serial"
+const protocolType = "ip"
 const DefaultExpiration = cache.DefaultExpiration
 
 const pluginType = "protocol"
 const allowConfigWrite = false
 const isNetwork = true
 const maxAllowedNetworks = 1
-const networkType = "lora"
-const transportType = "serial" //serial, ip
+const networkType = "lorawan"
+const transportType = "ip" //serial, ip
+const ip = "0.0.0.0"
+const port = "8080"
 
+// token
+//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5X2lkIjoiNzNmMDMzNjktMWE5Mi00YTBmLTkxYzItOWU1NWFjZjZlYTA4IiwiYXVkIjoiYXMiLCJpc3MiOiJhcyIsIm5iZiI6MTYzMTg0ODE3MSwic3ViIjoiYXBpX2tleSJ9.dqoUsP0tBfEX0rZQEXAWw8sSSlIqo_hfnucujy7PSJ8
 
 // Instance is plugin instance
 type Instance struct {
@@ -50,7 +54,6 @@ func GetFlowPluginInfo() plugin.Info {
 // NewFlowPluginInstance creates a plugin instance for a user context.
 func NewFlowPluginInstance(ctx plugin.UserContext) plugin.Plugin {
 	return &Instance{}
-
 }
 
 //main will not let main run

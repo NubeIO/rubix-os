@@ -4,6 +4,25 @@ import (
 	"github.com/NubeIO/null"
 )
 
+type ServerPing struct {
+	Version        string `json:"version"`
+	UpTimeDate     string `json:"up_time_date"`
+	UpMin          string `json:"up_min"`
+	UpHour         string `json:"up_hour"`
+	DeploymentMode string `json:"deployment_mode"`
+	Bacnet         struct {
+		Enabled                    bool    `json:"enabled"`
+		Status                     bool    `json:"status"`
+		UsePreSetEthernetInterface bool    `json:"use_pre_set_ethernet_interface"`
+		PreSetEthernetInterface    string  `json:"pre_set_ethernet_interface"`
+		DefaultPointCov            float32 `json:"default_point_cov"`
+	} `json:"bacnet"`
+	Mqtt struct {
+		Enabled bool `json:"enabled"`
+		Status  bool `json:"status"`
+	} `json:"mqtt"`
+}
+
 type Server struct {
 	Ip                string `json:"ip"`
 	Port              int    `json:"port"`

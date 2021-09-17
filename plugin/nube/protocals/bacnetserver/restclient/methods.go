@@ -66,6 +66,19 @@ func (a *RestClient) DeletePoint(obj string, addr int) (bool, error) {
 	return true, nil
 }
 
+// PingServer all points
+func (a *RestClient) PingServer() (*pkgmodel.ServerPing, error) {
+	resp, err := a.client.R().
+		SetResult(&pkgmodel.ServerPing{}).
+		Get("/api/system/ping")
+	if err != nil {
+		return nil, fmt.Errorf("error geting server %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*pkgmodel.ServerPing), nil
+}
 
 
 // GetServer all points

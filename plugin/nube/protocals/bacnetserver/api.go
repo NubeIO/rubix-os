@@ -17,6 +17,15 @@ func getBODYNetwork(ctx *gin.Context) (dto *pkgmodel.Server, err error) {
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
 
+	mux.GET("/bacnet/ping", func(ctx *gin.Context) {
+		cli := plgrest.NewNoAuth(ip, port)
+		p, err := cli.GetServer()
+		if err != nil {
+			fmt.Println(err, "ERROR ON GetServer")
+		}
+		ctx.JSON(http.StatusOK, p)
+	})
+
 	mux.GET("/bacnet/server", func(ctx *gin.Context) {
 		cli := plgrest.NewNoAuth(ip, port)
 		p, err := cli.GetServer()
