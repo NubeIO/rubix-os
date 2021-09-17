@@ -1,12 +1,23 @@
-package pkgmodel
+package lwmodel
 
 import (
 	"github.com/NubeIO/null"
 	"time"
 )
 
+type Organizations struct {
+	TotalCount string `json:"totalCount"`
+	Result     []struct {
+		Id              string    `json:"id"`
+		Name            string    `json:"name"`
+		DisplayName     string    `json:"displayName"`
+		CanHaveGateways bool      `json:"canHaveGateways"`
+		CreatedAt       time.Time `json:"createdAt"`
+		UpdatedAt       time.Time `json:"updatedAt"`
+	} `json:"result"`
+}
 
-
+//Devices GET
 type Devices struct {
 	TotalCount string `json:"totalCount"`
 	Result     []struct {
@@ -23,6 +34,44 @@ type Devices struct {
 		DeviceStatusBatteryLevel            int       `json:"deviceStatusBatteryLevel"`
 		LastSeenAt                          time.Time `json:"lastSeenAt"`
 	} `json:"result"`
+}
+
+//Device POST and PUT (put is edit)
+type Device struct {
+	Device struct {
+		DevEUI          string `json:"devEUI"`
+		Name            string `json:"name"`
+		ApplicationID   string `json:"applicationID"`
+		Description     string `json:"description"`
+		DeviceProfileID string `json:"deviceProfileID"`
+	} `json:"device"`
+}
+
+//DeviceActivation used to GET Activation
+type DeviceActivation struct {
+	DA struct {
+		DevAddr     string `json:"devAddr"`
+		NwkSEncKey  string `json:"nwkSEncKey"`
+		AppSKey     string `json:"appSKey"`
+		DevEUI      string `json:"devEUI"`
+		FNwkSIntKey string `json:"fNwkSIntKey"`
+		SNwkSIntKey string `json:"sNwkSIntKey"`
+	} `json:"deviceActivation"`
+}
+
+//DeviceActive used to POST active
+type DeviceActive struct {
+	DActive struct {
+		DevEUI      string `json:"devEUI"`
+		DevAddr     string `json:"devAddr"`
+		AppSKey     string `json:"appSKey"`
+		NwkSEncKey  string `json:"nwkSEncKey"`
+		SNwkSIntKey string `json:"sNwkSIntKey"`
+		FNwkSIntKey string `json:"fNwkSIntKey"`
+		FCntUp      int    `json:"fCntUp"`
+		NFCntDown   int    `json:"nFCntDown"`
+		AFCntDown   int    `json:"aFCntDown"`
+	} `json:"deviceActivation"`
 }
 
 type DeviceProfiles struct {
@@ -50,7 +99,6 @@ type Applications struct {
 	} `json:"result"`
 }
 
-
 type ServiceProfiles struct {
 	TotalCount string `json:"totalCount"`
 	Result     []struct {
@@ -64,6 +112,17 @@ type ServiceProfiles struct {
 	} `json:"result"`
 }
 
+type GatewayProfiles struct {
+	TotalCount string `json:"totalCount"`
+	Result     []struct {
+		Id                string    `json:"id"`
+		Name              string    `json:"name"`
+		NetworkServerID   string    `json:"networkServerID"`
+		NetworkServerName string    `json:"networkServerName"`
+		CreatedAt         time.Time `json:"createdAt"`
+		UpdatedAt         time.Time `json:"updatedAt"`
+	} `json:"result"`
+}
 
 type Users struct {
 	TotalCount string `json:"totalCount"`
@@ -77,7 +136,6 @@ type Users struct {
 		UpdatedAt  time.Time   `json:"updatedAt"`
 	} `json:"result"`
 }
-
 
 type Gateways struct {
 	TotalCount string `json:"totalCount"`
@@ -101,10 +159,6 @@ type Gateways struct {
 	} `json:"result"`
 }
 
-
-
-
-
 type Server struct {
 	Ip                string `json:"ip"`
 	Port              int    `json:"port"`
@@ -122,14 +176,6 @@ type MqttPayload struct {
 	Value    null.Float
 	Priority int
 }
-
-
-
-
-
-
-
-
 
 type BacnetPoint struct {
 	ObjectType           string  `json:"object_type,omitempty"`

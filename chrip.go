@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"crypto/tls"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"github.com/brocaar/lora-app-server/api"
@@ -103,9 +105,18 @@ func login(conn *grpc.ClientConn) error {
 
 	return nil
 }
-
+func GenerateSecureToken(length int) string {
+	b := make([]byte, length)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b)
+}
 
 func main() {
+
+	fmt.Println(GenerateSecureToken(8))
+
 	conn, err := getGRPCConn()
 	if err != nil {
 		log.Fatal("error connecting to api", err)
@@ -130,9 +141,7 @@ func main() {
 
 	deviceClient := api.NewDeviceServiceClient(conn)
 
-
-
-
+	//add a device
 	dev := api.Device{
 		DevEui:          "c9014a013d89fa5d",
 		Name:            "test name",
@@ -141,6 +150,7 @@ func main() {
 		DeviceProfileId: "b42d727b-1b10-46b8-972c-991046a4f952",
 	}
 
+	//activation
 	dk := api.DeviceKeys{
 		DevEui: "c9014a013d89fa5d",
 		NwkKey: "01020304050607080807060504030201",

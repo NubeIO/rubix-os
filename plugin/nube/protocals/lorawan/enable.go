@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	rest "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/restclient"
 )
 
 // Enable implements plugin.Plugin
@@ -17,6 +18,7 @@ func (i *Instance) Enable() error {
 	if err != nil {
 		return errors.New("error on enable lora-plugin")
 	}
+	i.CLI = rest.NewChirp(chirpName, chirpPass, ip, port)
 	return nil
 }
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/utils"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/mustafaturan/bus/v3"
 	log "github.com/sirupsen/logrus"
 )
@@ -45,7 +44,7 @@ func (i *Instance) BusServ() {
 				if err != nil {
 					return
 				}
-				_, err = i.addPoint(pnt)
+				//_, err = i.addPoint(pnt)
 				if err != nil {
 					return
 				}
@@ -97,7 +96,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if pnt != nil {
-					_, err = i.pointPatch(pnt)
+					//_, err = i.pointPatch(pnt)
 					log.Info("BACNET BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return
@@ -147,8 +146,8 @@ func (i *Instance) BusServ() {
 				}
 				log.Info("BACNET BUS DELETED IsPoint", " ")
 				if pnt != nil {
-					p, err := i.deletePoint(pnt)
-					log.Info("BACNET BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", p)
+					//p, err := i.deletePoint(pnt)
+					log.Info("BACNET BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", "p")
 					if err != nil {
 						return
 					}
@@ -164,11 +163,11 @@ func (i *Instance) BusServ() {
 	handlerMQTT := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
-				p, _ := e.Data.(mqtt.Message)
-				_, err := i.bacnetUpdate(p)
-				if err != nil {
-					return
-				}
+				//p, _ := e.Data.(mqtt.Message)
+				////_, err := i.bacnetUpdate(p)
+				//if err != nil {
+				//	return
+				//}
 			}()
 		},
 		Matcher: eventbus.MQTTUpdated,

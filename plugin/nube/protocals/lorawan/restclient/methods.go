@@ -1,101 +1,160 @@
-package csrest
+package lwrest
 
 import (
 	"fmt"
-	pkgmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
+	lwmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/model"
 )
 
+const limit = "50"
+const orgID = "1"
 
-
-// GetApplications all points
-func (a *RestClient) GetApplications() (*[]pkgmodel.BacnetPoint, error) {
+// GetOrganizations get all
+func (a *RestClient) GetOrganizations() (*lwmodel.Organizations, error) {
+	q := fmt.Sprintf("/api/organizations?limit=%s", limit)
 	resp, err := a.client.R().
-		SetResult([]pkgmodel.BacnetPoint{}).
-		Get("/api/applications")
-	//Get("/api/applications?limit=2&offset=2")
+		SetResult(lwmodel.Organizations{}).
+		Get(q)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
+		return nil, fmt.Errorf("GetOrganizations %s failed", err)
 	}
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*[]pkgmodel.BacnetPoint), nil
+	return resp.Result().(*lwmodel.Organizations), nil
 }
 
-//// AddPoint an object
-//func (a *RestClient) AddPoint(body pkgmodel.BacnetPoint) (*pkgmodel.BacnetPoint, error) {
-//	fmt.Println("ADD POINT ON IN BACNET REST CALL", body)
-//	resp, err := a.client.R().
-//		SetResult(&pkgmodel.BacnetPoint{}).
-//		SetBody(body).
-//		Post("/api/bacnet/points")
-//	if err != nil {
-//		return nil, fmt.Errorf("failed to add %s failed", err)
-//	}
-//	if resp.Error() != nil {
-//		return nil, getAPIError(resp)
-//	}
-//	return resp.Result().(*pkgmodel.BacnetPoint), nil
-//}
-//
-//// EditPoint an object
-//func (a *RestClient) EditPoint(body pkgmodel.BacnetPoint, obj string, addr int) (*pkgmodel.BacnetPoint, error) {
-//	resp, err := a.client.R().
-//		SetResult(&pkgmodel.BacnetPoint{}).
-//		SetBody(body).
-//		SetPathParams(map[string]string{"obj": obj, "addr": strconv.Itoa(addr)}).
-//		Patch("/api/bacnet/points/obj/{obj}/{addr}")
-//	if err != nil {
-//		return nil, fmt.Errorf("failed to update %s failed", err)
-//	}
-//	if resp.Error() != nil {
-//		return nil, getAPIError(resp)
-//	}
-//	return resp.Result().(*pkgmodel.BacnetPoint), nil
-//}
-//
-//// DeletePoint an object
-//func (a *RestClient) DeletePoint(obj string, addr int) (bool, error) {
-//	resp, err := a.client.R().
-//		SetPathParams(map[string]string{"obj": obj, "addr": strconv.Itoa(addr)}).
-//		Delete("/api/bacnet/points/obj/{obj}/{addr}")
-//	if err != nil {
-//		return false, fmt.Errorf("failed to delete %s", err)
-//	}
-//	if resp.Error() != nil {
-//		return false, getAPIError(resp)
-//	}
-//	return true, nil
-//}
-//
-//
-//
-//// GetServer all points
-//func (a *RestClient) GetServer() (*pkgmodel.Server, error) {
-//	resp, err := a.client.R().
-//		SetResult(&pkgmodel.Server{}).
-//		Get("/api/bacnet/server")
-//	if err != nil {
-//		return nil, fmt.Errorf("error geting server %s failed", err)
-//	}
-//	if resp.Error() != nil {
-//		return nil, getAPIError(resp)
-//	}
-//	return resp.Result().(*pkgmodel.Server), nil
-//}
-//
-//
-//// EditServer an object
-//func (a *RestClient) EditServer(body pkgmodel.Server) (*pkgmodel.Server, error) {
-//	resp, err := a.client.R().
-//		SetResult(&pkgmodel.Server{}).
-//		SetBody(body).
-//		Patch("/api/bacnet/server")
-//	if err != nil {
-//		return nil, fmt.Errorf("failed to update %s failed", err)
-//	}
-//	if resp.Error() != nil {
-//		return nil, getAPIError(resp)
-//	}
-//	return resp.Result().(*pkgmodel.Server), nil
-//}
+// GetGateways get all
+func (a *RestClient) GetGateways() (*lwmodel.Gateways, error) {
+	q := fmt.Sprintf("/api/gateways?limit=%s&organizationID=%s", limit, orgID)
+	resp, err := a.client.R().
+		SetResult(lwmodel.Gateways{}).
+		Get(q)
+	if err != nil {
+		return nil, fmt.Errorf("GetApplications %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*lwmodel.Gateways), nil
+}
+
+// GetApplications get all
+func (a *RestClient) GetApplications() (*lwmodel.Applications, error) {
+	q := fmt.Sprintf("/api/applications?limit=%s&organizationID=%s", limit, orgID)
+	resp, err := a.client.R().
+		SetResult(lwmodel.Applications{}).
+		Get(q)
+	if err != nil {
+		return nil, fmt.Errorf("GetApplications %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*lwmodel.Applications), nil
+}
+
+// GetDevices get all
+func (a *RestClient) GetDevices() (*lwmodel.Devices, error) {
+	q := fmt.Sprintf("/api/devices?limit=%s&organizationID=%s", limit, orgID)
+	resp, err := a.client.R().
+		SetResult(lwmodel.Devices{}).
+		Get(q)
+	if err != nil {
+		return nil, fmt.Errorf("GetDevices %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*lwmodel.Devices), nil
+}
+
+// GetDeviceProfiles get all
+func (a *RestClient) GetDeviceProfiles() (*lwmodel.DeviceProfiles, error) {
+	q := fmt.Sprintf("/api/device-profiles?limit=%s&organizationID=%s", limit, orgID)
+	resp, err := a.client.R().
+		SetResult(lwmodel.DeviceProfiles{}).
+		Get(q)
+	if err != nil {
+		return nil, fmt.Errorf("GetDeviceProfiles %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*lwmodel.DeviceProfiles), nil
+}
+
+// GetServiceProfiles get all
+func (a *RestClient) GetServiceProfiles() (*lwmodel.ServiceProfiles, error) {
+	q := fmt.Sprintf("/api/service-profiles?limit=%s&organizationID=%s", limit, orgID)
+	resp, err := a.client.R().
+		SetResult(lwmodel.ServiceProfiles{}).
+		Get(q)
+	if err != nil {
+		return nil, fmt.Errorf("GetServiceProfiles %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*lwmodel.ServiceProfiles), nil
+}
+
+// GetGatewayProfiles get all
+func (a *RestClient) GetGatewayProfiles() (*lwmodel.GatewayProfiles, error) {
+	q := fmt.Sprintf("/api/gateway-profiles?limit=%s&organizationID=%s", limit, orgID)
+	resp, err := a.client.R().
+		SetResult(lwmodel.GatewayProfiles{}).
+		Get(q)
+	if err != nil {
+		return nil, fmt.Errorf("GetGatewayProfiles %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*lwmodel.GatewayProfiles), nil
+}
+
+// AddDevice add all
+func (a *RestClient) AddDevice(body lwmodel.Devices) (*lwmodel.Devices, error) {
+	q := fmt.Sprintf("/api/devices")
+	resp, err := a.client.R().
+		SetResult(lwmodel.Devices{}).
+		SetBody(body).
+		Post(q)
+	if err != nil {
+		return nil, fmt.Errorf("AddDevice %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*lwmodel.Devices), nil
+}
+
+// EditDevice edit object
+func (a *RestClient) EditDevice(devEui string, body lwmodel.Device) (*lwmodel.Device, error) {
+	q := fmt.Sprintf("/api/devices/{%s}", devEui)
+	resp, err := a.client.R().
+		SetResult(lwmodel.Device{}).
+		SetBody(body).
+		Put(q)
+	if err != nil {
+		return nil, fmt.Errorf("EditDevice %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*lwmodel.Device), nil
+}
+
+// DeleteDevice delete
+func (a *RestClient) DeleteDevice(devEui string) (bool, error) {
+	q := fmt.Sprintf("/api/devices/{%s}", devEui)
+	resp, err := a.client.R().
+		Delete(q)
+	if err != nil {
+		return false, fmt.Errorf("DeleteDevice %s failed", err)
+	}
+	if resp.Error() != nil {
+		return false, getAPIError(resp)
+	}
+	return true, nil
+}

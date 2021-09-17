@@ -1,4 +1,4 @@
-package csrest
+package lwrest
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 
 // An Error maps to Form3 API error responses
 type Error struct {
-	Code    int `json:"error_code,omitempty"`
+	Code    int    `json:"error_code,omitempty"`
 	Message string `json:"error_message,omitempty"`
 }
 
@@ -18,4 +18,3 @@ func getAPIError(resp *resty.Response) error {
 	e.Message = resp.String()
 	return fmt.Errorf("request failed [%d]: %s", e.Code, e.Message)
 }
-

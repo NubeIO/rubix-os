@@ -1,4 +1,4 @@
-package csrest
+package lwrest
 
 import (
 	"fmt"
@@ -6,14 +6,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-
 type RestClient struct {
-	client *resty.Client
+	client      *resty.Client
 	ClientToken string
 }
 
 type Token struct {
-	JWT    string    `json:"jwt"`
+	JWT string `json:"jwt"`
 }
 
 // NewChirp returns a new instance of NewChirp.

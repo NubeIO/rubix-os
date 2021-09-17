@@ -4,6 +4,7 @@ import (
 	"github.com/NubeDev/flow-framework/cachestore"
 	"github.com/NubeDev/flow-framework/dbhandler"
 	"github.com/NubeDev/flow-framework/eventbus"
+	lwrest "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/restclient"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/patrickmn/go-cache"
 )
@@ -24,9 +25,6 @@ const transportType = "ip" //serial, ip
 const ip = "0.0.0.0"
 const port = "8080"
 
-// token
-//eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlfa2V5X2lkIjoiNzNmMDMzNjktMWE5Mi00YTBmLTkxYzItOWU1NWFjZjZlYTA4IiwiYXVkIjoiYXMiLCJpc3MiOiJhcyIsIm5iZiI6MTYzMTg0ODE3MSwic3ViIjoiYXBpX2tleSJ9.dqoUsP0tBfEX0rZQEXAWw8sSSlIqo_hfnucujy7PSJ8
-
 // Instance is plugin instance
 type Instance struct {
 	config      *Config
@@ -37,6 +35,7 @@ type Instance struct {
 	bus         eventbus.BusService
 	pluginUUID  string
 	networkUUID string
+	CLI         *lwrest.RestClient
 }
 
 // GetFlowPluginInfo returns plugin info.
