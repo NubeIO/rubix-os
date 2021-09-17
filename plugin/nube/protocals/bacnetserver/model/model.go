@@ -13,7 +13,7 @@ type Server struct {
 	VendorId          string `json:"vendor_id"`
 	VendorName        string `json:"vendor_name"`
 	EnableIpByNicName bool   `json:"enable_ip_by_nic_name"`
-	IpByNicName       string `json:"ip_by_nic_name"`  //eth0
+	IpByNicName       string `json:"ip_by_nic_name"` //eth0
 }
 
 // MqttPayload payload from the bacnet server
@@ -55,6 +55,6 @@ type Priority struct {
 	P13 null.Float `json:"_13,omitempty"`
 	P14 null.Float `json:"_14,omitempty"`
 	P15 null.Float `json:"_15,omitempty"`
-	//P16       null.Float `json:"_16"` //removed and added to the point to save one DB write
+	P16 null.Float `json:"_16"` //removed and added to the point to save one DB write
 
 }

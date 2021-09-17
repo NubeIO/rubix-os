@@ -122,7 +122,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 	var pointModel *model.Point
 	//TODO add in a check to make sure user doesn't set the addressID and the ObjectType the same as another point
 	//check if there is an existing device with this address code
-
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
