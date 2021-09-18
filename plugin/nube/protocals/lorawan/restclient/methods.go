@@ -129,25 +129,41 @@ func (a *RestClient) AddDevice(body lwmodel.Devices) (*lwmodel.Devices, error) {
 	return resp.Result().(*lwmodel.Devices), nil
 }
 
+// GetDevice get an object
+func (a *RestClient) GetDevice(devEui string) (*lwmodel.GetDevice, error) {
+	q := fmt.Sprintf("/api/devices/%s", devEui)
+	fmt.Println(q, 1234)
+	resp, err := a.client.R().
+		SetResult(lwmodel.GetDevice{}).
+		Get(q)
+	if err != nil {
+		return nil, fmt.Errorf("GetDevice %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*lwmodel.GetDevice), nil
+}
+
 // EditDevice edit object
-func (a *RestClient) EditDevice(devEui string, body lwmodel.Device) (*lwmodel.Device, error) {
-	q := fmt.Sprintf("/api/devices/{%s}", devEui)
+func (a *RestClient) EditDevice(devEui string, body lwmodel.Device) (bool, error) {
+	q := fmt.Sprintf("/api/devices/%s", devEui)
 	resp, err := a.client.R().
 		SetResult(lwmodel.Device{}).
 		SetBody(body).
 		Put(q)
 	if err != nil {
-		return nil, fmt.Errorf("EditDevice %s failed", err)
+		return false, fmt.Errorf("EditDevice %s failed", err)
 	}
 	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return false, getAPIError(resp)
 	}
-	return resp.Result().(*lwmodel.Device), nil
+	return true, nil
 }
 
 // DeleteDevice delete
 func (a *RestClient) DeleteDevice(devEui string) (bool, error) {
-	q := fmt.Sprintf("/api/devices/{%s}", devEui)
+	q := fmt.Sprintf("/api/devices/%s", devEui)
 	resp, err := a.client.R().
 		Delete(q)
 	if err != nil {

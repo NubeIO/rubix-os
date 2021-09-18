@@ -26,8 +26,8 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	err := json.Unmarshal(body.Payload(), &payload)
 	t := mqttclient.TopicParts(body.Topic())
 	top := t.Get(5)
-	aaa := top.(string)
-	objType, addr := getPointAddr(aaa)
+	tt := top.(string)
+	objType, addr := getPointAddr(tt)
 	var point model.Point
 	var pri model.Priority
 	pri.P16 = payload.Value
