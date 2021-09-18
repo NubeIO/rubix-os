@@ -20,7 +20,7 @@ type PluginDatabase interface {
 	UpdatePluginConf(p *model.PluginConf) error
 	GetPluginConfByID(uuid string) (*model.PluginConf, error)
 	GetPlugin(uuid string) (*model.PluginConf, error)
-	GetPluginByPath(name string) (*model.PluginConf, error)
+	GetPluginByPath(path string) (*model.PluginConf, error)
 }
 
 // The PluginAPI provides handlers for managing plugins.
