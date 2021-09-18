@@ -313,7 +313,7 @@ func resolveID(ctx *gin.Context) string {
 	return ctx.Param("uuid")
 }
 
-func resolvePath(ctx *gin.Context) string {
+func resolvePath(ctx *gin.Context)  string {
 	return ctx.Param("path")
 }
 
