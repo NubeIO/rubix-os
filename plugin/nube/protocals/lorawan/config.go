@@ -2,13 +2,13 @@ package main
 
 // Config is user plugin configuration
 type Config struct {
-	MagicString string `yaml:"magic_string"`
+	OrganizationID string `yaml:"organization_id"`
 }
 
 // DefaultConfig implements plugin.Configurer
 func (i *Instance) DefaultConfig() interface{} {
 	return &Config{
-		MagicString: "hello world",
+		OrganizationID: "1",
 	}
 }
 

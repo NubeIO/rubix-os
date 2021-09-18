@@ -47,6 +47,27 @@ type Device struct {
 	} `json:"device"`
 }
 
+type GetDevice struct {
+	Device struct {
+		DevEUI            string `json:"devEUI"`
+		Name              string `json:"name"`
+		ApplicationID     string `json:"applicationID"`
+		Description       string `json:"description"`
+		DeviceProfileID   string `json:"deviceProfileID"`
+		SkipFCntCheck     bool   `json:"skipFCntCheck"`
+		ReferenceAltitude int    `json:"referenceAltitude"`
+		Variables         struct {
+		} `json:"variables"`
+		Tags struct {
+		} `json:"tags"`
+		IsDisabled bool `json:"isDisabled"`
+	} `json:"device"`
+	LastSeenAt          interface{} `json:"lastSeenAt"`
+	DeviceStatusBattery int         `json:"deviceStatusBattery"`
+	DeviceStatusMargin  int         `json:"deviceStatusMargin"`
+	Location            interface{} `json:"location"`
+}
+
 //DeviceActivation used to GET Activation
 type DeviceActivation struct {
 	DA struct {
