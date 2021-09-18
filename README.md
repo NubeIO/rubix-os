@@ -38,4 +38,8 @@ error: while error happens, show it on red alert
 - producers with args ?writers=true
 - flow_networks with args ?streams=true
 - child params args available for networks, devices ?devices=true&points=true&serial_connection=true&ip_connection=true
+
+- /api/flow/networks?global_uuid=global_uuid1
+- /api/flow/networks/one/args?global_uuid=global_uuid1&client_id=client_id1&site_id=site_id1&device_id=device_id1
+
 ```
