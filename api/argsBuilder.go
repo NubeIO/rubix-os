@@ -79,6 +79,18 @@ func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	var aType = ArgsType
 	var aDefault = ArgsDefault
 	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
+	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
+		args.GlobalUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.ClientId); ok {
+		args.ClientId = &value
+	}
+	if value, ok := ctx.GetQuery(aType.SiteId); ok {
+		args.SiteId = &value
+	}
+	if value, ok := ctx.GetQuery(aType.DeviceId); ok {
+		args.DeviceId = &value
+	}
 	return args
 }
 

@@ -231,6 +231,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			flowNetworkRoutes.GET("/:uuid", flowNetwork.GetFlowNetwork)
 			flowNetworkRoutes.PATCH("/:uuid", flowNetwork.UpdateFlowNetwork)
 			flowNetworkRoutes.DELETE("/:uuid", flowNetwork.DeleteFlowNetwork)
+			flowNetworkRoutes.GET("/one/args", flowNetwork.GetOneFlowNetworkByArgs)
 			flowNetworkRoutes.DELETE("/drop", flowNetwork.DropFlowNetworks)
 		}
 

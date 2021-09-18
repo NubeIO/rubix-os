@@ -26,6 +26,15 @@ func (d *GormDatabase) GetFlowNetwork(uuid string, args api.Args) (*model.FlowNe
 	return flowNetworkModel, nil
 }
 
+func (d *GormDatabase) GetOneFlowNetworkByArgs(args api.Args) (*model.FlowNetwork, error) {
+	var flowNetworkModel *model.FlowNetwork
+	query := d.buildFlowNetworkQuery(args)
+	if err := query.First(&flowNetworkModel).Error; err != nil {
+		return nil, query.Error
+	}
+	return flowNetworkModel, nil
+}
+
 func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
 	body.Name = nameIsNil(body.Name)
