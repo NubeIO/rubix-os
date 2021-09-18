@@ -4,7 +4,7 @@ type FlowNetwork struct {
 	CommonUUID
 	CommonName
 	CommonDescription
-	GlobalUuid              string    `json:"global_uuid"`
+	GlobalUUID              string    `json:"global_uuid"`
 	ClientId                string    `json:"client_id"`
 	ClientName              string    `json:"client_name"`
 	SiteId                  string    `json:"site_id"`

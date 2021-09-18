@@ -47,6 +47,10 @@ type Args struct {
 	Points           bool
 	IpConnection     bool
 	SerialConnection bool
+	GlobalUUID       *string
+	ClientId         *string
+	SiteId           *string
+	DeviceId         *string
 }
 
 var ArgsType = struct {
@@ -86,6 +90,10 @@ var ArgsType = struct {
 	Points           string
 	IpConnection     string
 	SerialConnection string
+	GlobalUUID       string
+	ClientId         string
+	SiteId           string
+	DeviceId         string
 }{
 	Sort:             "sort",
 	Order:            "order",
@@ -123,6 +131,10 @@ var ArgsType = struct {
 	Points:           "points",
 	IpConnection:     "ip_connection",
 	SerialConnection: "serial_connection",
+	GlobalUUID:       "global_uuid",
+	ClientId:         "client_id",
+	SiteId:           "site_id",
+	DeviceId:         "device_id",
 }
 
 var ArgsDefault = struct {

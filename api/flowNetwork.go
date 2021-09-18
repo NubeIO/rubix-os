@@ -9,6 +9,7 @@ import (
 type FlowNetworkDatabase interface {
 	GetFlowNetworks(args Args) ([]*model.FlowNetwork, error)
 	GetFlowNetwork(uuid string, args Args) (*model.FlowNetwork, error)
+	GetOneFlowNetworkByArgs(args Args) (*model.FlowNetwork, error)
 	CreateFlowNetwork(network *model.FlowNetwork) (*model.FlowNetwork, error)
 	UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (*model.FlowNetwork, error)
 	DeleteFlowNetwork(uuid string) (bool, error)
@@ -28,6 +29,12 @@ func (a *FlowNetworksAPI) GetFlowNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildFlowNetworkArgs(ctx)
 	q, err := a.DB.GetFlowNetwork(uuid, args)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *FlowNetworksAPI) GetOneFlowNetworkByArgs(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	q, err := a.DB.GetOneFlowNetworkByArgs(args)
 	reposeHandler(q, err, ctx)
 }
 

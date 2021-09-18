@@ -10,6 +10,18 @@ func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 	if args.Streams {
 		query = query.Preload("Streams")
 	}
+	if args.GlobalUUID != nil {
+		query = query.Where("global_uuid = ?", *args.GlobalUUID)
+	}
+	if args.ClientId != nil {
+		query = query.Where("client_id = ?", *args.ClientId)
+	}
+	if args.SiteId != nil {
+		query = query.Where("site_id = ?", *args.SiteId)
+	}
+	if args.DeviceId != nil {
+		query = query.Where("device_id = ?", *args.DeviceId)
+	}
 	return query
 }
 
