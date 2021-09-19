@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/simonvetter/modbus"
@@ -63,7 +64,7 @@ func isConnected() bool {
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
 
-	mux.POST("/bool", func(ctx *gin.Context) {
+	mux.POST("/point/tcp/operation", func(ctx *gin.Context) {
 		body, _ := bodyClient(ctx)
 		var u utils.URLParts
 		u.Transport = "tcp"
@@ -75,20 +76,17 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusBadRequest, err)
 		}
 		cli := getClient()
+
 		if !isConnected() {
 			ctx.JSON(http.StatusBadRequest, "modbus not enabled")
 		} else {
-			var o Operation
 			request, err := parseRequest(body.Operation)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, "request was invalid, try readCoil or writeCoil")
 				return
 			}
-			o.Op = request.Op
-			o.IsCoil = request.IsCoil
-			o.Addr = request.Addr
-			o.Length = request.Length
-			r, err := Operations(cli, o)
+			fmt.Println(request)
+			r, err := Operations(cli, request)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, err)
 			} else {

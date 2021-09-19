@@ -7,7 +7,6 @@ import (
 	"unicode"
 )
 
-
 const (
 	First                = "first"
 	Last                 = "last"
@@ -18,19 +17,20 @@ const (
 	InvalidLogicalString = "invalid string value to test boolean value"
 )
 
-
 // input is struct that holds input form user and result
 type input struct {
 	Input  string
 	Result string
 }
 
-
 // StringManipulation is an interface that holds all abstract methods to manipulate strings
 type StringManipulation interface {
 	Get() string
 	Between(start, end string) StringManipulation
-	CamelCase(rule ...string) string
+	ToCamelCase(rule ...string) string
+	ToSnakeCase() string
+	UcFirstLetter() string
+	LcFirstLetter() string
 	RemoveSpecialCharacter() string
 	Reverse() string
 	ToLower() string
@@ -65,22 +65,30 @@ func (i *input) ReplaceLast(search, replace string) string {
 	return replaceStr(input, search, replace, Last)
 }
 
-// CamelCase is variadic function which takes one Param rule i.e slice of strings and it returns
+// ToCamelCase is variadic function which takes one Param rule i.e slice of strings and it returns
 // input type string in camel case form and rule helps to omit character you want to omit from string.
 // By default special characters like "_", "-","."," " are l\treated like word separator and treated
 // accordingly by default and you dont have to worry about it
 // Example input: hello user
 // Result : HelloUser
-func (i *input) CamelCase(rule ...string) string {
+func (i *input) ToCamelCase(rule ...string) string {
 	input := getInput(*i)
 	// removing excess space
 	wordArray := caseHelper(input, true, rule...)
 	for i, word := range wordArray {
-		wordArray[i] = ucfirst(word)
+		wordArray[i] = UcFirst(word)
 	}
 	return strings.Join(wordArray, "")
 }
 
+func (i *input) ToSnakeCase() string {
+	input := getInput(*i)
+	var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+	var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+	snake := matchFirstCap.ReplaceAllString(input, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	return strings.ToLower(snake)
+}
 
 // Between takes two string params start and end which and returns
 // value which is in middle of start and end part of input. You can
@@ -116,7 +124,6 @@ func getInput(i input) (input string) {
 	return
 }
 
-
 // RemoveSpecialCharacter removes all special characters and returns the string
 // it can be chained on function which return StringManipulation interface
 func (i *input) RemoveSpecialCharacter() string {
@@ -143,7 +150,6 @@ func (i *input) Reverse() string {
 	return string(r)
 }
 
-
 // ToLower makes all string of user input to lowercase
 // it can be chained on function which return StringManipulation interface
 func (i *input) ToLower() (result string) {
@@ -158,17 +164,17 @@ func (i *input) ToUpper() string {
 	return strings.ToUpper(input)
 }
 
-
-// UcFirst makes first word of user input to uppercase
-// it can be chained on function which return StringManipulation interface
-func (i *input) UcFirst() string {
+// UcFirstLetter makes first letter of the to uppercase
+func (i *input) UcFirstLetter() string {
 	input := getInput(*i)
-	return ucfirst(input)
+	return UcFirst(input)
 }
 
-
-
-
+// LcFirstLetter makes first letter of the to lowercase
+func (i *input) LcFirstLetter() string {
+	input := getInput(*i)
+	return LcFirst(input)
+}
 
 func caseHelper(input string, isCamel bool, rule ...string) []string {
 	if !isCamel {
@@ -187,7 +193,6 @@ func caseHelper(input string, isCamel bool, rule ...string) []string {
 	return words
 }
 
-
 func replaceStr(input, search, replace, types string) string {
 	lcInput := strings.ToLower(input)
 	lcSearch := strings.ToLower(search)
@@ -204,11 +209,16 @@ func replaceStr(input, search, replace, types string) string {
 	return input[:start] + replace + input[end:]
 }
 
-func ucfirst(val string) string {
+func UcFirst(val string) string {
 	for i, v := range val {
 		return string(unicode.ToUpper(v)) + val[i+1:]
 	}
 	return ""
 }
 
-
+func LcFirst(str string) string {
+	for i, v := range str {
+		return string(unicode.ToLower(v)) + str[i+1:]
+	}
+	return ""
+}
