@@ -1,27 +1,41 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/utils"
+	"fmt"
 	"strings"
 )
 
-
-
-func topicParts(topic string) *utils.Array {
-	s := strings.SplitAfter(topic, "/")
-	arr := utils.NewArray()
-	for _, e := range s {
-		res := strings.ReplaceAll(e, "/", "")
-		if res != ""{
-			arr.Add(res)
-		}
-	}
-	return arr
+type URLParts struct {
+	transport string
+	host      string
+	port      string
 }
 
+func SplitURL(url string) URLParts {
+	var o URLParts
+	u := strings.SplitN(url, "://", 2)
+	host := ""
+	if len(u) == 2 {
+		o.transport = u[0]
+		host = u[1]
+	}
+	p := strings.Split(host, ":")
+	o.host = p[0]
+	o.port = p[1]
+	return o
+}
 
-func main(){
+func JoinURL(u URLParts) (url string) {
+	return fmt.Sprintf("%s://%s:%s", u.transport, u.host, u.port)
+}
 
+func main() {
+
+	a := SplitURL("tcp://192.168.15.202:502")
+	fmt.Println(a.port, a.host, a.transport)
+
+	aaa := JoinURL(a)
+	fmt.Println(aaa)
 	//tf := utils.ToFloat64("123")
 	//fmt.Println(tf)
 	//
@@ -74,11 +88,7 @@ func main(){
 	//	//fmt.Println(e, i)
 	//}
 
-
-
 	//fmt.Println(aaa.Data()[2], 999)
-
-
 
 	//fmt.Println(11111)
 	//s := strings.SplitAfter(aa, "/")

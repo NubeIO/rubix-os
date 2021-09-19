@@ -1,7 +1,7 @@
 package main
 
 import (
-	lwmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/model"
+	"github.com/NubeDev/flow-framework/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/simonvetter/modbus"
 	log "github.com/sirupsen/logrus"
@@ -9,7 +9,17 @@ import (
 	"time"
 )
 
-func bodyDevice(ctx *gin.Context) (dto lwmodel.Device, err error) {
+type Client struct {
+	Host string `json:"ip"`
+	Port string `json:"port"`
+}
+
+type Bool struct {
+	Client    `json:"client"`
+	Operation `json:"request_body"`
+}
+
+func bodyClient(ctx *gin.Context) (dto Bool, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -18,13 +28,14 @@ func resolveID(ctx *gin.Context) string {
 	return ctx.Param("eui")
 }
 
-var restMB  *modbus.ModbusClient
+var restMB *modbus.ModbusClient
 var connected bool
 
-func setClient(url string) error {
+func setClient(u utils.URLParts) error {
+	url := utils.JoinURL(u)
 	c, err := modbus.NewClient(&modbus.ClientConfiguration{
 		URL:     url,
-		Timeout:  1 * time.Second,
+		Timeout: 1 * time.Second,
 	})
 	if err != nil {
 		connected = false
@@ -45,40 +56,46 @@ func getClient() *modbus.ModbusClient {
 }
 
 func isConnected() bool {
- return connected
+	return connected
 }
-
 
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
 
-	mux.POST("/client", func(ctx *gin.Context) {
-		err := setClient("tcp://192.168.15.202:502")
+	mux.POST("/bool", func(ctx *gin.Context) {
+		body, _ := bodyClient(ctx)
+		var u utils.URLParts
+		u.Transport = "tcp"
+		u.Host = body.Client.Host
+		u.Port = body.Client.Port
+		err := setClient(u)
 		if err != nil {
-			log.Info(err, "ERROR ON organizations")
+			log.Info(err, "ERROR ON set modbus client")
 			ctx.JSON(http.StatusBadRequest, err)
-		} else {
-			ctx.JSON(http.StatusOK, "ok")
 		}
-	})
-
-	mux.POST("/read/coils", func(ctx *gin.Context) {
 		cli := getClient()
 		if !isConnected() {
 			ctx.JSON(http.StatusBadRequest, "modbus not enabled")
-		}
-		var o operation
-		o.op = readBools
-		o.isCoil = true
-		o.addr = uint16(1)
-		o.quantity = uint16(1)
-		r, err := operations(cli,  o)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-		}
-		ctx.JSON(http.StatusOK, r)
+		} else {
+			var o Operation
+			request, err := parseRequest(body.Operation)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, "request was invalid, try readCoil or writeCoil")
+				return
+			}
+			o.Op = request.Op
+			o.IsCoil = request.IsCoil
+			o.Addr = request.Addr
+			o.Length = request.Length
+			r, err := Operations(cli, o)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, err)
+			} else {
+				ctx.JSON(http.StatusOK, r)
+			}
 
+		}
 
 	})
 

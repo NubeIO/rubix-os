@@ -1,16 +1,16 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/simonvetter/modbus"
 	"os"
 	"strings"
-	"time"
 )
 
 const (
-	readBools uint = iota + 1
+	readBool uint = iota + 1
 	readUint16
 	readInt16
 	readUint32
@@ -29,42 +29,86 @@ const (
 	writeInt64
 	writeUint64
 	writeFloat64
-	setUnitId
-	sleep
-	repeat
-	date
-	scanBools
-	scanRegisters
-	ping
 )
 
 var err error
 
-type operation struct {
-	op           uint
-	addr         uint16
-	isCoil       bool
-	isHoldingReg bool
-	quantity     uint16
+type Operation struct {
+	UnitId       uint8  `json:"unit_id"`
+	Request      string `json:"request"` //readCoil
+	Op           uint   `json:"op"`
+	Addr         uint16 `json:"addr"`
+	Length       uint16 `json:"length"`
+	IsCoil       bool   `json:"is_coil"`
+	IsHoldingReg bool   `json:"is_holding_reg"`
 	coil         bool
 	u16          uint16
 	u32          uint32
 	f32          float32
 	u64          uint64
 	f64          float64
-	duration     time.Duration
-	unitId       uint8
 }
 
-func operations(client *modbus.ModbusClient, o operation) (interface{}, error ) {
-	switch o.op {
-	case readBools:
+var req = struct {
+	readCoil           string
+	readCoils          string
+	readDiscreteInput  string
+	readDiscreteInputs string
+	writeCoil          string
+	writeCoils         string
+}{
+	readCoil:           "readCoil",
+	readCoils:          "readCoils",
+	readDiscreteInput:  "readDiscreteInput",
+	readDiscreteInputs: "readDiscreteInputs",
+	writeCoil:          "writeCoil",
+	writeCoils:         "writeCoils",
+}
+
+func setRequest(body Operation) (ops Operation, err error) {
+	r := body.Request
+	if r == req.readCoil || r == req.readDiscreteInput {
+		body.Length = 1
+	}
+	if r == req.readCoil || r == req.readCoils || r == req.writeCoil || r == req.writeCoils {
+		body.IsCoil = true
+	}
+	return body, nil
+}
+
+func addrLength(in uint16) (u16 uint16, err error) {
+
+	return in, nil
+}
+
+func parseRequest(body Operation) (Operation, error) {
+	set, _ := setRequest(body)
+	ops := body.Request //eg: readCoil, writeCoil
+	var o Operation
+	switch ops {
+	case req.readCoil, req.readCoils, req.readDiscreteInput, req.readDiscreteInputs:
+		o.Op = readBool
+		o.Length = set.Length
+		o.Addr = set.Addr
+		return o, err
+	case req.writeCoil, req.writeCoils:
+		if ops == req.writeCoil || ops == req.writeCoils {
+			o.IsCoil = true
+		}
+		o.Op = writeCoil
+	}
+	return o, errors.New("req not found")
+}
+
+func Operations(client *modbus.ModbusClient, o Operation) (repose interface{}, err error) {
+	switch o.Op {
+	case readBool:
 		var res []bool
-		if o.isCoil {
-			res, err = client.ReadCoils(o.addr, o.quantity+1)
+		if o.IsCoil {
+			res, err = client.ReadCoils(o.Addr, o.Length)
 			return res, err
 		} else {
-			res, err = client.ReadDiscreteInputs(o.addr, o.quantity+1)
+			res, err = client.ReadDiscreteInputs(o.Addr, o.Length)
 		}
 		if err != nil {
 			fmt.Printf("failed to read coils/discrete inputs: %v\n", err)
@@ -74,24 +118,24 @@ func operations(client *modbus.ModbusClient, o operation) (interface{}, error ) 
 	case readUint16, readInt16:
 		var res []uint16
 
-		if o.isHoldingReg {
-			res, err = client.ReadRegisters(o.addr, o.quantity+1, modbus.HOLDING_REGISTER)
+		if o.IsHoldingReg {
+			res, err = client.ReadRegisters(o.Addr, o.Length, modbus.HOLDING_REGISTER)
 		} else {
-			res, err = client.ReadRegisters(o.addr, o.quantity+1, modbus.INPUT_REGISTER)
+			res, err = client.ReadRegisters(o.Addr, o.Length, modbus.INPUT_REGISTER)
 		}
 		if err != nil {
 			fmt.Printf("failed to read holding/input registers: %v\n", err)
 		} else {
 			for idx := range res {
-				if o.op == readUint16 {
+				if o.Op == readUint16 {
 					fmt.Printf("0x%04x\t%-5v : 0x%04x\t%v\n",
-						o.addr+uint16(idx),
-						o.addr+uint16(idx),
+						o.Addr+uint16(idx),
+						o.Addr+uint16(idx),
 						res[idx], res[idx])
 				} else {
 					fmt.Printf("0x%04x\t%-5v : 0x%04x\t%v\n",
-						o.addr+uint16(idx),
-						o.addr+uint16(idx),
+						o.Addr+uint16(idx),
+						o.Addr+uint16(idx),
 						res[idx], int16(res[idx]))
 				}
 			}
@@ -99,24 +143,24 @@ func operations(client *modbus.ModbusClient, o operation) (interface{}, error ) 
 	case readUint32, readInt32:
 		var res []uint32
 
-		if o.isHoldingReg {
-			res, err = client.ReadUint32s(o.addr, o.quantity+1, modbus.HOLDING_REGISTER)
+		if o.IsHoldingReg {
+			res, err = client.ReadUint32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
 		} else {
-			res, err = client.ReadUint32s(o.addr, o.quantity+1, modbus.INPUT_REGISTER)
+			res, err = client.ReadUint32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
 		}
 		if err != nil {
 			fmt.Printf("failed to read holding/input registers: %v\n", err)
 		} else {
 			for idx := range res {
-				if o.op == readUint32 {
+				if o.Op == readUint32 {
 					fmt.Printf("0x%04x\t%-5v : 0x%08x\t%v\n",
-						o.addr+(uint16(idx)*2),
-						o.addr+(uint16(idx)*2),
+						o.Addr+(uint16(idx)*2),
+						o.Addr+(uint16(idx)*2),
 						res[idx], res[idx])
 				} else {
 					fmt.Printf("0x%04x\t%-5v : 0x%08x\t%v\n",
-						o.addr+(uint16(idx)*2),
-						o.addr+(uint16(idx)*2),
+						o.Addr+(uint16(idx)*2),
+						o.Addr+(uint16(idx)*2),
 						res[idx], int32(res[idx]))
 				}
 			}
@@ -125,18 +169,18 @@ func operations(client *modbus.ModbusClient, o operation) (interface{}, error ) 
 	case readFloat32:
 		var res []float32
 
-		if o.isHoldingReg {
-			res, err = client.ReadFloat32s(o.addr, o.quantity+1, modbus.HOLDING_REGISTER)
+		if o.IsHoldingReg {
+			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
 		} else {
-			res, err = client.ReadFloat32s(o.addr, o.quantity+1, modbus.INPUT_REGISTER)
+			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
 		}
 		if err != nil {
 			fmt.Printf("failed to read holding/input registers: %v\n", err)
 		} else {
 			for idx := range res {
 				fmt.Printf("0x%04x\t%-5v : %f\n",
-					o.addr+(uint16(idx)*2),
-					o.addr+(uint16(idx)*2),
+					o.Addr+(uint16(idx)*2),
+					o.Addr+(uint16(idx)*2),
 					res[idx])
 			}
 		}
@@ -144,24 +188,24 @@ func operations(client *modbus.ModbusClient, o operation) (interface{}, error ) 
 	case readUint64, readInt64:
 		var res []uint64
 
-		if o.isHoldingReg {
-			res, err = client.ReadUint64s(o.addr, o.quantity+1, modbus.HOLDING_REGISTER)
+		if o.IsHoldingReg {
+			res, err = client.ReadUint64s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
 		} else {
-			res, err = client.ReadUint64s(o.addr, o.quantity+1, modbus.INPUT_REGISTER)
+			res, err = client.ReadUint64s(o.Addr, o.Length, modbus.INPUT_REGISTER)
 		}
 		if err != nil {
 			fmt.Printf("failed to read holding/input registers: %v\n", err)
 		} else {
 			for idx := range res {
-				if o.op == readUint64 {
+				if o.Op == readUint64 {
 					fmt.Printf("0x%04x\t%-5v : 0x%016x\t%v\n",
-						o.addr+(uint16(idx)*4),
-						o.addr+(uint16(idx)*4),
+						o.Addr+(uint16(idx)*4),
+						o.Addr+(uint16(idx)*4),
 						res[idx], res[idx])
 				} else {
 					fmt.Printf("0x%04x\t%-5v : 0x%016x\t%v\n",
-						o.addr+(uint16(idx)*4),
-						o.addr+(uint16(idx)*4),
+						o.Addr+(uint16(idx)*4),
+						o.Addr+(uint16(idx)*4),
 						res[idx], int64(res[idx]))
 				}
 			}
@@ -169,110 +213,110 @@ func operations(client *modbus.ModbusClient, o operation) (interface{}, error ) 
 
 	case readFloat64:
 		var res []float64
-		if o.isHoldingReg {
-			res, err = client.ReadFloat64s(o.addr, o.quantity+1, modbus.HOLDING_REGISTER)
+		if o.IsHoldingReg {
+			res, err = client.ReadFloat64s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
 		} else {
-			res, err = client.ReadFloat64s(o.addr, o.quantity+1, modbus.INPUT_REGISTER)
+			res, err = client.ReadFloat64s(o.Addr, o.Length, modbus.INPUT_REGISTER)
 		}
 		if err != nil {
 			fmt.Printf("failed to read holding/input registers: %v\n", err)
 		} else {
 			for idx := range res {
 				fmt.Printf("0x%04x\t%-5v : %f\n",
-					o.addr+(uint16(idx)*4),
-					o.addr+(uint16(idx)*4),
+					o.Addr+(uint16(idx)*4),
+					o.Addr+(uint16(idx)*4),
 					res[idx])
 			}
 		}
 
 	case writeCoil:
-		err = client.WriteCoil(o.addr, o.coil)
+		err = client.WriteCoil(o.Addr, o.coil)
 		if err != nil {
 			fmt.Printf("failed to write %v at coil address 0x%04x: %v\n",
-				o.coil, o.addr, err)
+				o.coil, o.Addr, err)
 		} else {
 			fmt.Printf("wrote %v at coil address 0x%04x\n",
-				o.coil, o.addr)
+				o.coil, o.Addr)
 		}
 
 	case writeUint16:
-		err = client.WriteRegister(o.addr, o.u16)
+		err = client.WriteRegister(o.Addr, o.u16)
 		if err != nil {
 			fmt.Printf("failed to write %v at register address 0x%04x: %v\n",
-				o.u16, o.addr, err)
+				o.u16, o.Addr, err)
 		} else {
 			fmt.Printf("wrote %v at register address 0x%04x\n",
-				o.u16, o.addr)
+				o.u16, o.Addr)
 		}
 
 	case writeInt16:
-		err = client.WriteRegister(o.addr, o.u16)
+		err = client.WriteRegister(o.Addr, o.u16)
 		if err != nil {
 			fmt.Printf("failed to write %v at register address 0x%04x: %v\n",
-				int16(o.u16), o.addr, err)
+				int16(o.u16), o.Addr, err)
 		} else {
 			fmt.Printf("wrote %v at register address 0x%04x\n",
-				int16(o.u16), o.addr)
+				int16(o.u16), o.Addr)
 		}
 
 	case writeUint32:
-		err = client.WriteUint32(o.addr, o.u32)
+		err = client.WriteUint32(o.Addr, o.u32)
 		if err != nil {
 			fmt.Printf("failed to write %v at address 0x%04x: %v\n",
-				o.u32, o.addr, err)
+				o.u32, o.Addr, err)
 		} else {
 			fmt.Printf("wrote %v at address 0x%04x\n",
-				o.u32, o.addr)
+				o.u32, o.Addr)
 		}
 
 	case writeInt32:
-		err = client.WriteUint32(o.addr, o.u32)
+		err = client.WriteUint32(o.Addr, o.u32)
 		if err != nil {
 			fmt.Printf("failed to write %v at address 0x%04x: %v\n",
-				int32(o.u32), o.addr, err)
+				int32(o.u32), o.Addr, err)
 		} else {
 			fmt.Printf("wrote %v at address 0x%04x\n",
-				int32(o.u32), o.addr)
+				int32(o.u32), o.Addr)
 		}
 
 	case writeFloat32:
-		err = client.WriteFloat32(o.addr, o.f32)
+		err = client.WriteFloat32(o.Addr, o.f32)
 		if err != nil {
 			fmt.Printf("failed to write %f at address 0x%04x: %v\n",
-				o.f32, o.addr, err)
+				o.f32, o.Addr, err)
 		} else {
 			fmt.Printf("wrote %f at address 0x%04x\n",
-				o.f32, o.addr)
+				o.f32, o.Addr)
 		}
 
 	case writeUint64:
-		err = client.WriteUint64(o.addr, o.u64)
+		err = client.WriteUint64(o.Addr, o.u64)
 		if err != nil {
 			fmt.Printf("failed to write %v at address 0x%04x: %v\n",
-				o.u64, o.addr, err)
+				o.u64, o.Addr, err)
 		} else {
 			fmt.Printf("wrote %v at address 0x%04x\n",
-				o.u64, o.addr)
+				o.u64, o.Addr)
 		}
 
 	case writeInt64:
-		err = client.WriteUint64(o.addr, o.u64)
+		err = client.WriteUint64(o.Addr, o.u64)
 		if err != nil {
 			fmt.Printf("failed to write %v at address 0x%04x: %v\n",
-				int64(o.u64), o.addr, err)
+				int64(o.u64), o.Addr, err)
 		} else {
 			fmt.Printf("wrote %v at address 0x%04x\n",
-				int64(o.u64), o.addr)
+				int64(o.u64), o.Addr)
 		}
 
 	case writeFloat64:
-		err = client.WriteFloat64(o.addr, o.f64)
+		err = client.WriteFloat64(o.Addr, o.f64)
 		if err != nil {
 			fmt.Printf("failed to write %f at address 0x%04x: %v\n",
-				o.f64, o.addr, err)
+				o.f64, o.Addr, err)
 		} else {
 			fmt.Printf("wrote %f at address 0x%04x\n",
-				o.f64, o.addr)
+				o.f64, o.Addr)
 		}
 
 	}
@@ -327,4 +371,9 @@ func fWordOrder(wordOrder string) modbus.WordOrder {
 		os.Exit(1)
 	}
 	return w
+}
+
+func parseUintID(in uint16) (u16 uint16, err error) {
+
+	return in, nil
 }
