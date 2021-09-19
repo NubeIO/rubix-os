@@ -7,21 +7,23 @@ import (
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/patrickmn/go-cache"
 )
-const path = "lora" //must be unique across all plugins
-const name = "lora-api" //must be unique across all plugins
-const description = "lora raw"
+
+const path = "modbus" //must be unique across all plugins
+const name = "modbus-api" //must be unique across all plugins
+const description = "modbus api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
-const protocolType = "serial"
+const protocolType = "ip"
 const DefaultExpiration = cache.DefaultExpiration
 
 const pluginType = "protocol"
 const allowConfigWrite = false
 const isNetwork = true
 const maxAllowedNetworks = 1
-const networkType = "lora"
-const transportType = "serial" //serial, ip
-
+const networkType = "modbus"
+const transportType = "ip" //serial, ip
+const ip = "0.0.0.0"
+const port = "8080"
 
 // Instance is plugin instance
 type Instance struct {
@@ -33,6 +35,7 @@ type Instance struct {
 	bus         eventbus.BusService
 	pluginUUID  string
 	networkUUID string
+
 }
 
 // GetFlowPluginInfo returns plugin info.
@@ -50,7 +53,6 @@ func GetFlowPluginInfo() plugin.Info {
 // NewFlowPluginInstance creates a plugin instance for a user context.
 func NewFlowPluginInstance(ctx plugin.UserContext) plugin.Plugin {
 	return &Instance{}
-
 }
 
 //main will not let main run

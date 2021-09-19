@@ -1,7 +1,7 @@
 package main
 
 func (i *Instance) setUUID() {
-	q, err := i.db.GetPluginByPath(name)
+	q, err := i.db.GetPluginByPath(path)
 	if err != nil {
 		return
 	}

@@ -124,7 +124,6 @@ func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 	if err != nil {
 		return err
 	}
-
 	if conf.Enabled == enabled {
 		return ErrAlreadyEnabledOrDisabled
 	}
@@ -405,6 +404,7 @@ func (m *Manager) initializeConfigurerForSingleUserPlugin(instance compat.Plugin
 func (m *Manager) createPluginConf(instance compat.PluginInstance, info compat.Info, userID uint) (*model.PluginConf, error) {
 	pluginConf := &model.PluginConf{
 		UserID:     userID,
+		Name: info.Name,
 		ModulePath: info.ModulePath,
 		Token:      auth.GenerateNotExistingToken(auth.GeneratePluginToken, m.pluginConfExists),
 	}

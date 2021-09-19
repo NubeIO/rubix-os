@@ -8,8 +8,8 @@ import (
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/patrickmn/go-cache"
 )
-
-const name = "lorawan" //must be unique across all plugins
+const path = "lorawan" //must be unique across all plugins
+const name = "lorawan-api" //must be unique across all plugins
 const description = "lorawan api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
@@ -41,7 +41,7 @@ type Instance struct {
 // GetFlowPluginInfo returns plugin info.
 func GetFlowPluginInfo() plugin.Info {
 	return plugin.Info{
-		ModulePath:   name,
+		ModulePath:   path,
 		Name:         name,
 		Description:  description,
 		Author:       author,

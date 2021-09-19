@@ -8,7 +8,9 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-const name = "bacnetserver" //must be unique across all plugins
+
+const path = "bacnetserver" //must be unique across all plugins
+const name = "bacnetserver-api" //must be unique across all plugins
 const description = "bacnet server api to nube bacnet stack"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
@@ -39,7 +41,7 @@ type Instance struct {
 // GetFlowPluginInfo returns plugin info.
 func GetFlowPluginInfo() plugin.Info {
 	return plugin.Info{
-		ModulePath:   name,
+		ModulePath:   path,
 		Name:         name,
 		Description:  description,
 		Author:       author,
