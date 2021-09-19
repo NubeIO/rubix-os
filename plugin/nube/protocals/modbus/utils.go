@@ -41,6 +41,7 @@ type Operation struct {
 	IsCoil       bool    `json:"is_coil"`
 	IsHoldingReg bool    `json:"is_holding_reg"`
 	WriteValue   float64 `json:"write_value"`
+	Encoding     string  `json:"encoding"` //bewLeb, BEW_LEB
 	coil         bool
 	u16          uint16
 	u32          uint32
@@ -120,7 +121,6 @@ func Operations(client *modbus.ModbusClient, o Operation) (response interface{},
 		}
 	case readUint16, readInt16:
 		var res []uint16
-
 		if o.IsHoldingReg {
 			res, err = client.ReadRegisters(o.Addr, o.Length, modbus.HOLDING_REGISTER)
 		} else {
@@ -145,7 +145,6 @@ func Operations(client *modbus.ModbusClient, o Operation) (response interface{},
 		}
 	case readUint32, readInt32:
 		var res []uint32
-
 		if o.IsHoldingReg {
 			res, err = client.ReadUint32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
 		} else {
@@ -171,11 +170,14 @@ func Operations(client *modbus.ModbusClient, o Operation) (response interface{},
 
 	case readFloat32:
 		var res []float32
-
+		eClient, err := EncodingBuilder(o.Encoding, client)
+		if err != nil {
+			return nil, err
+		}
 		if o.IsHoldingReg {
-			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
+			res, err = eClient.ReadFloat32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
 		} else {
-			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
+			res, err = eClient.ReadFloat32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
 		}
 		if err != nil {
 			log.Errorf("modbus:  failed to read holding/input registers: %v\n", err)
@@ -361,20 +363,20 @@ var namesEncoding = struct {
 	bebBew: "bebBew",
 }
 
-func EncodingBuilder(selection string, client *modbus.ModbusClient) error {
+func EncodingBuilder(selection string, cli *modbus.ModbusClient) (client *modbus.ModbusClient, err error) {
 	sel := utils.NewString(selection).ToCamelCase() //eg: LEB_BEW, lebBew
 	sel = utils.LcFirst(sel)
 	switch sel {
 	case namesEncoding.lebBew:
-		err = client.SetEncoding(modbus.LITTLE_ENDIAN, modbus.HIGH_WORD_FIRST)
+		err = cli.SetEncoding(modbus.LITTLE_ENDIAN, modbus.HIGH_WORD_FIRST)
 	case namesEncoding.lebLew:
-		err = client.SetEncoding(modbus.LITTLE_ENDIAN, modbus.LOW_WORD_FIRST)
+		err = cli.SetEncoding(modbus.LITTLE_ENDIAN, modbus.LOW_WORD_FIRST)
 	case namesEncoding.bebLew:
-		err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.LOW_WORD_FIRST)
+		err = cli.SetEncoding(modbus.BIG_ENDIAN, modbus.LOW_WORD_FIRST)
 	case namesEncoding.bebBew:
-		err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
+		err = cli.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
 	default:
 		log.Errorf("modbus:  unknown endianness setting '%s' (should either be big or little)\n", selection)
 	}
-	return err
+	return client, err
 }
