@@ -11,6 +11,9 @@ import (
 	"time"
 )
 
+const ip = "IpConnection"
+const serial = "SerialConnection"
+
 func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
 	var networksModel []*model.Network
 	query := d.buildNetworkQuery(args)
@@ -35,7 +38,9 @@ func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, 
 	trans := ""
 	if byTransport != "" {
 		if byTransport == model.CommonNaming.Serial {
-			trans = "SerialConnection"
+			trans = serial
+		} else if byTransport == model.CommonNaming.IP {
+			trans = ip
 		}
 		if withChildren { // drop child to reduce json size
 			query := d.DB.Where("plugin_conf_id = ? ", pluginUUID).Preload(trans).First(&networkModel)
@@ -66,12 +71,12 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	body.Name = nameIsNil(body.Name)
 	info := d.getPluginConf(body)
 	switch info.ProtocolType {
-	case "serial":
+	case model.CommonNaming.Serial:
 		if body.SerialConnection == nil {
 			body.SerialConnection = &model.SerialConnection{}
 		}
 		body.SerialConnection.UUID = utils.MakeTopicUUID(model.CommonNaming.Serial)
-	case "ip":
+	case model.CommonNaming.IP:
 		if body.IpConnection == nil {
 			body.IpConnection = &model.IpConnection{}
 		}
@@ -94,7 +99,7 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
 	var networkModel *model.Network
-	query := d.DB.Where("uuid = ?", uuid).Preload("SerialConnection").Preload("IpConnection").Find(&networkModel)
+	query := d.DB.Where("uuid = ?", uuid).Preload(serial).Preload(ip).Find(&networkModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

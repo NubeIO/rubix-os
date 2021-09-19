@@ -66,6 +66,7 @@ require (
 	github.com/brocaar/lora-app-server v2.5.1+incompatible
 	github.com/creack/goselect v0.1.2 // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/simonvetter/modbus v1.3.0
 	go.bug.st/serial v1.3.2
 	google.golang.org/grpc v1.40.0
 )
@@ -73,6 +74,7 @@ require (
 require (
 	github.com/brocaar/loraserver v2.5.0+incompatible // indirect
 	github.com/brocaar/lorawan v0.0.0-20210809075358-95fc1667572e // indirect
+	github.com/goburrow/serial v0.1.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/jacobsa/crypto v0.0.0-20190317225127-9f44e2d11115 // indirect
 	golang.org/x/text v0.3.3 // indirect
