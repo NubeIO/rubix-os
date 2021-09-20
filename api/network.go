@@ -7,7 +7,7 @@ import (
 )
 
 type NetworkDatabase interface {
-	GetNetworkByPlugin(uuid string, withChildren bool, withPoints bool, transport string) (*model.Network, error)
+	GetNetworkByPlugin(uuid string, args Args) (*model.Network, error)
 	GetNetworksByPlugin(uuid string, args Args) ([]*model.Network, error)
 	GetNetworks(args Args) ([]*model.Network, error)
 	GetNetwork(uuid string, args Args) (*model.Network, error)
@@ -23,8 +23,8 @@ type NetworksAPI struct {
 
 func (a *NetworksAPI) GetNetworkByPlugin(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	withChildren, withPoints, _ := withChildrenArgs(ctx)
-	q, err := a.DB.GetNetworkByPlugin(uuid, withChildren, withPoints, "") //TODO fix this need to add in like "serial"
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.GetNetworkByPlugin(uuid, args) //TODO fix this need to add in like "serial"
 	reposeHandler(q, err, ctx)
 }
 

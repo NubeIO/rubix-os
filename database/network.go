@@ -33,36 +33,13 @@ func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, e
 }
 
 // GetNetworkByPlugin returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, withPoints bool, byTransport string) (*model.Network, error) {
+func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, args api.Args) (*model.Network, error) {
 	var networkModel *model.Network
-	trans := ""
-	if byTransport != "" {
-		if byTransport == model.TransType.Serial {
-			trans = serial
-		} else if byTransport == model.TransType.IP {
-			trans = ip
-		}
-		if withChildren { // drop child to reduce json size
-			query := d.DB.Where("plugin_conf_id = ? ", pluginUUID).Preload(trans).First(&networkModel)
-			if query.Error != nil {
-				return nil, query.Error
-			}
-			return networkModel, nil
-		}
+	query := d.buildNetworkQuery(args)
+	if err := query.Find(&networkModel).Where("plugin_conf_id = ? ", pluginUUID).Error; err != nil {
+		return nil, err
 	}
-	if withChildren { // drop child to reduce json size
-		query := d.DB.Where("plugin_conf_id = ? ", pluginUUID).Preload("Devices").First(&networkModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return networkModel, nil
-	} else {
-		query := d.DB.Where("plugin_conf_id = ? ", pluginUUID).First(&networkModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return networkModel, nil
-	}
+	return networkModel, nil
 }
 
 // GetNetworksByPlugin returns the network for the given id or nil.

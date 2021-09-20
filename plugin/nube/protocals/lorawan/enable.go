@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/NubeDev/flow-framework/api"
 	rest "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/restclient"
 )
 
@@ -10,7 +11,9 @@ func (i *Instance) Enable() error {
 	i.enabled = true
 	i.setUUID()
 	i.BusServ()
-	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, false, false, "ip")
+	var arg api.Args
+	arg.IpConnection = true
+	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
 	if err != nil {
 		return errors.New("there is no network added please add one")
 	}
