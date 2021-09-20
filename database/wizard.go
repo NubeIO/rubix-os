@@ -23,7 +23,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var writerCloneModel model.WriterClone
 
 	//get plugin
-	p, err := d.GetPluginByPath("system")
+	p, err := d.GetPluginByPath("modbus")
 	if p.UUID == "" {
 		return false, errors.New("no valid plugin")
 	}
@@ -33,25 +33,45 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
 	fmt.Println("CreateFlowNetwork", f.UUID)
+	if err != nil {
+		log.Errorf("wizzrad:  CreateFlowNetwork: %v\n", err)
+		return false, err
+	}
 	// network
 	networkModel.PluginConfId = p.UUID
+	networkModel.TransportType = model.TransType.IP
 	n, err := d.CreateNetwork(&networkModel)
 	fmt.Println("CreateNetwork")
+	if err != nil {
+		log.Errorf("wizzrad:  CreateNetwork: %v\n", err)
+		return false, err
+	}
 	// device
 	deviceModel.NetworkUUID = n.UUID
 	dev, err := d.CreateDevice(&deviceModel)
 	fmt.Println("CreateDevice")
+	if err != nil {
+		log.Errorf("wizzrad:  CreateDevice: %v\n", err)
+		return false, err
+	}
 	// point
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
 	pointModel.IsProducer = true
 	pnt, err := d.CreatePoint(&pointModel, "")
 	fmt.Println("CreatePoint")
-
+	if err != nil {
+		log.Errorf("wizzrad:  CreatePoint: %v\n", err)
+		return false, err
+	}
 	// stream
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
 	fmt.Println(streamModel.FlowNetworks, 9898989)
 	stream, err := d.CreateStream(&streamModel)
+	if err != nil {
+		log.Errorf("wizzrad:  CreateStream: %v\n", err)
+		return false, err
+	}
 	log.Debug("Created Streams at Producer side: ", stream.Name)
 
 	// producer
@@ -66,9 +86,11 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	producerModel.ProducerThingType = model.ThingClass.Point
 	producerModel.ProducerApplication = model.CommonNaming.Mapping
 	producer, err := d.CreateProducer(&producerModel)
-	fmt.Println(producer.Name)
 	fmt.Println("CreateProducer")
-
+	if err != nil {
+		log.Errorf("wizzrad:  CreateProducer: %v\n", err)
+		return false, err
+	}
 	// consumer
 	consumerModel.StreamUUID = streamModel.UUID
 	consumerModel.Name = "consumer stream"
@@ -77,16 +99,22 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	consumerModel.ProducerThingType = model.ThingClass.Point
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
 	consumerModel.ProducerThingUUID = pnt.UUID
-	consumer, err := d.CreateConsumer(&consumerModel)
-	fmt.Println(consumer.Name)
+	_, err = d.CreateConsumer(&consumerModel)
 	fmt.Println("CreateConsumer")
+	if err != nil {
+		log.Errorf("wizzrad:  CreateConsumer: %v\n", err)
+		return false, err
+	}
 	// writer
 	writerModel.ConsumerUUID = consumerModel.UUID
 	writerModel.WriterThingClass = model.ThingClass.Point
 	writerModel.WriterThingType = model.ThingClass.Point
 	writerModel.ConsumerThingUUID = consumerModel.UUID //itself
 	writer, err := d.CreateWriter(&writerModel)
-	fmt.Println(writer)
+	if err != nil {
+		log.Errorf("wizzrad:  CreateWriter: %v\n", err)
+		return false, err
+	}
 	fmt.Println("CreateWriter")
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = producer.UUID
@@ -95,11 +123,15 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	writerCloneModel.WriterUUID = writer.UUID
 	fmt.Println(writer.UUID, 1, 1, 1, 1)
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
-	fmt.Println(writerClone)
+	if err != nil {
+		log.Errorf("wizzrad:  CreateWriterClone: %v\n", err)
+		return false, err
+	}
 	fmt.Println("CreateWriterClone")
 	writerModel.CloneUUID = writerClone.UUID
 	_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
 	if err != nil {
+		log.Errorf("wizzrad:  UpdateWriter: %v\n", err)
 		return false, err
 	}
 	if err != nil {
@@ -382,169 +414,6 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	}
 	return true, nil
 }
-
-func (d *GormDatabase) NodeWizard() (bool, error) {
-	//delete networks
-	var nm1 model.Node
-	nm1.Name = "NODE-1"
-	n1, err := d.CreateNode(&nm1)
-
-	var nm2 model.Node
-	nm2.Name = "NODE-2"
-	n2, err := d.CreateNode(&nm2)
-
-	var nm3 model.Node
-	nm3.Name = "NODE-3"
-	n3, err := d.CreateNode(&nm3)
-
-	var nm4 model.Node
-	nm4.Name = "NODE-4"
-	n4, err := d.CreateNode(&nm4)
-
-	var nm5 model.Node
-	nm5.Name = "NODE-5"
-	nm5.NodeType = "add"
-	n5, err := d.CreateNode(&nm5)
-
-	var nm6 model.Node
-	nm6.Name = "NODE-6"
-	nm6.NodeType = "add"
-	n6, err := d.CreateNode(&nm6)
-
-	var out1m model.Out1Connections
-	out1m.UUID = utils.MakeTopicUUID("")
-	out1m.NodeUUID = n1.UUID
-	out1m.ToUUID = n2.UUID
-	out1m.Connection = "in1"
-
-	query := d.DB.Create(out1m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	var out2m model.Out1Connections
-	out2m.UUID = utils.MakeTopicUUID("")
-	out2m.NodeUUID = n1.UUID
-	out2m.ToUUID = n2.UUID
-	out2m.Connection = "in2"
-
-	query = d.DB.Create(out2m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	var out3m model.Out1Connections
-	out3m.UUID = utils.MakeTopicUUID("")
-	out3m.NodeUUID = n2.UUID
-	out3m.ToUUID = n3.UUID
-	out3m.Connection = "in1"
-
-	query = d.DB.Create(out3m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	//out of 4 goes into node-3 in-1
-	var out4m model.Out1Connections
-	out4m.UUID = utils.MakeTopicUUID("")
-	out4m.NodeUUID = n4.UUID
-	out4m.ToUUID = n3.UUID
-	out4m.Connection = "in1"
-
-	query = d.DB.Create(out4m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	//out of 5 goes into node-4 in-1
-	var out5m model.Out1Connections
-	out5m.UUID = utils.MakeTopicUUID("")
-	out5m.NodeUUID = n5.UUID
-	out5m.ToUUID = n4.UUID
-	out5m.Connection = "in1"
-
-	query = d.DB.Create(out5m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	//out of 3 goes into node-6 in-1
-	var out6m model.Out1Connections
-	out6m.UUID = utils.MakeTopicUUID("")
-	out6m.NodeUUID = n3.UUID
-	out6m.ToUUID = n6.UUID
-	out6m.Connection = "in1"
-
-	query = d.DB.Create(out6m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	var in1m model.In1Connections
-	in1m.UUID = utils.MakeTopicUUID("")
-	in1m.NodeUUID = n2.UUID
-	in1m.FromUUID = n1.UUID
-	in1m.Connection = "out1"
-
-	query = d.DB.Create(in1m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	var in2m model.In1Connections
-	in2m.UUID = utils.MakeTopicUUID("")
-	in2m.NodeUUID = n3.UUID
-	in2m.FromUUID = n2.UUID
-	in2m.Connection = "out1"
-
-	query = d.DB.Create(in2m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	var in3m model.In1Connections
-	in3m.UUID = utils.MakeTopicUUID("")
-	in3m.NodeUUID = n3.UUID
-	in3m.FromUUID = n4.UUID
-	in3m.Connection = "out1"
-
-	query = d.DB.Create(in3m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	var in4m model.In1Connections
-	in4m.UUID = utils.MakeTopicUUID("")
-	in4m.NodeUUID = n4.UUID
-	in4m.FromUUID = n5.UUID
-	in4m.Connection = "out1"
-
-	query = d.DB.Create(in4m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	//node-6 in1 from node-3 out1
-	var in5m model.In1Connections
-	in5m.UUID = utils.MakeTopicUUID("")
-	in5m.NodeUUID = n6.UUID
-	in5m.FromUUID = n3.UUID
-	in5m.Connection = "out1"
-
-	query = d.DB.Create(in5m)
-	if query.Error != nil {
-		return false, query.Error
-	}
-
-	if err != nil {
-		fmt.Println("Error on wizard")
-		fmt.Println(err)
-		fmt.Println("Error on wizard")
-		return false, err
-	}
-	return true, nil
-}
-
 
 // NetworkDevicePoint add a local network mapping stream.
 func (d *GormDatabase) NetworkDevicePoint() (bool, error) {

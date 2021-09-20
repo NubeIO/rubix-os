@@ -51,7 +51,6 @@ func NewService(eb *bus.Bus) BusService {
 		eb: eb,
 	}
 	ns.registerPointsProducer() //add as types needed
-	ns.registerNodes()
 	ns.registerProducer()
 	bs = ns
 	return ns

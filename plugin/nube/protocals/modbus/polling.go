@@ -35,6 +35,7 @@ func (i *Instance) PollingTCP(p polling) error {
 	var arg api.Args
 	arg.Devices = true
 	arg.Points = true
+	arg.IpConnection = true
 	f := func() (bool, error) {
 		fmt.Println("return false")
 		fmt.Println(counter)

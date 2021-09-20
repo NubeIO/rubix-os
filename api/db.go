@@ -11,7 +11,6 @@ type DBDatabase interface {
 	WizardLocalPointMapping() (bool, error)
 	WizardRemotePointMapping() (bool, error)
 	Wizard2ndFlowNetwork(body *AddNewFlowNetwork) (bool, error)
-	NodeWizard() (bool, error)
 	NetworkDevicePoint() (bool, error)
 }
 type DatabaseAPI struct {
@@ -37,15 +36,10 @@ func (a *DatabaseAPI) WizardRemotePointMapping(ctx *gin.Context) {
 	reposeHandler(mapping, err, ctx)
 }
 
-func (a *DatabaseAPI) NodeWizard(ctx *gin.Context) {
-	mapping, err := a.DB.NodeWizard()
-	reposeHandler(mapping, err, ctx)
-}
 func (a *DatabaseAPI) NetworkDevicePoint(ctx *gin.Context) {
 	mapping, err := a.DB.NetworkDevicePoint()
 	reposeHandler(mapping, err, ctx)
 }
-
 
 type AddNewFlowNetwork struct {
 	StreamUUID         string `json:"stream_uuid"`

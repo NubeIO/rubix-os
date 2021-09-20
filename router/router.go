@@ -83,9 +83,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	dbGroup := api.DatabaseAPI{
 		DB: db,
 	}
-	nodesHandler := api.NodeAPI{
-		DB: db,
-	}
 	integrationHandler := api.IntegrationAPI{
 		DB: db,
 	}
@@ -204,7 +201,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				databaseWizard.POST("/mappings/local/points", dbGroup.WizardLocalPointMapping)
 				databaseWizard.POST("/mappings/remote/points", dbGroup.WizardRemotePointMapping)
 				databaseWizard.POST("/mappings/existing/streams", dbGroup.Wizard2ndFlowNetwork)
-				databaseWizard.POST("/nodes", dbGroup.NodeWizard)
 				databaseWizard.POST("/networks/add", dbGroup.NetworkDevicePoint)
 			}
 		}
@@ -349,16 +345,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			jobRoutes.GET("/:uuid", jobHandler.GetJob)
 			jobRoutes.PATCH("/:uuid", jobHandler.UpdateJob)
 			jobRoutes.DELETE("/:uuid", jobHandler.DeleteJob)
-		}
-
-		nodeRoutes := apiRoutes.Group("/nodes")
-		{
-			nodeRoutes.GET("", nodesHandler.GetNodesList)
-			nodeRoutes.POST("", nodesHandler.CreateNode)
-			nodeRoutes.GET("/:uuid", nodesHandler.GetNode)
-			nodeRoutes.PATCH("/:uuid", nodesHandler.UpdateNode)
-			nodeRoutes.DELETE("/:uuid", nodesHandler.DeleteNode)
-			nodeRoutes.DELETE("/drop", nodesHandler.DropNodesList)
 		}
 
 		integrationRoutes := apiRoutes.Group("/integrations")
