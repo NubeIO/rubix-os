@@ -142,3 +142,11 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	args.SerialConnection, _ = toBool(ctx.DefaultQuery(aType.SerialConnection, aDefault.SerialConnection))
 	return args
 }
+
+func buildPluginArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.PluginName, _ = toBool(ctx.DefaultQuery(aType.PluginName, aDefault.PluginName))
+	return args
+}

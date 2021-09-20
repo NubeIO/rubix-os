@@ -31,7 +31,7 @@ type PluginAPI struct {
 }
 
 func (c *PluginAPI) GetPlugin(ctx *gin.Context) {
-	uuid := resolveID(ctx)
+	uuid := c.buildUUID(ctx)
 	q, err := c.DB.GetPlugin(uuid)
 	reposeHandler(q, err, ctx)
 }
@@ -70,13 +70,36 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 	reposeHandler(result, err, ctx)
 }
 
+//buildUUID a way to query a plugin by its name or uuid
+func (c *PluginAPI) buildUUID(ctx *gin.Context) string {
+	nameOrUUID := resolveID(ctx) //system?by_plugin_name=true is passed in then enable plugin by its name
+	uuid := ""
+	args := buildPluginArgs(ctx)
+	if args.PluginName {
+		path, err := c.DB.GetPluginByPath(nameOrUUID)
+		if err != nil {
+			reposeHandler("err: no plugin with that name was found", nil, ctx)
+			return ""
+		}
+		uuid = path.UUID
+	} else {
+		uuid = resolveID(ctx)
+	}
+	if uuid == "" {
+		reposeHandler("err: no valid uuid found", nil, ctx)
+		return ""
+	}
+	return uuid
+}
+
 // EnablePluginByUUID enables a plugin.
 func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
-	uuid := resolveID(ctx)
+	uuid := c.buildUUID(ctx)
 	body, err := getBODYPlugin(ctx)
 	if err != nil {
 		reposeHandler("error on body", err, ctx)
 	}
+	//uuid := ""
 	conf, err := c.DB.GetPluginConfByID(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
@@ -105,7 +128,7 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 
 // RestartPlugin enables a plugin.
 func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
-	uuid := resolveID(ctx)
+	uuid := c.buildUUID(ctx)
 	conf, err := c.DB.GetPluginConfByID(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
@@ -130,7 +153,7 @@ func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
 
 // GetDisplay get display info for Displayer plugin.
 func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
-	uuid := resolveID(ctx)
+	uuid := c.buildUUID(ctx)
 	conf, err := c.DB.GetPluginConfByID(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
@@ -150,7 +173,7 @@ func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
 
 // GetConfig returns Configurer plugin configuration in YAML format.
 func (c *PluginAPI) GetConfig(ctx *gin.Context) {
-	uuid := resolveID(ctx)
+	uuid := c.buildUUID(ctx)
 	conf, err := c.DB.GetPluginConfByID(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
@@ -176,7 +199,7 @@ func (c *PluginAPI) GetConfig(ctx *gin.Context) {
 
 // UpdateConfig updates Configurer plugin configuration in YAML format.
 func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
-	uuid := resolveID(ctx)
+	uuid := c.buildUUID(ctx)
 	conf, err := c.DB.GetPluginConfByID(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return

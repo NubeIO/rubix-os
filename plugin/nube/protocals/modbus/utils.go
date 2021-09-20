@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/simonvetter/modbus"
 	log "github.com/sirupsen/logrus"
@@ -37,11 +38,13 @@ type Operation struct {
 	Request      string  `json:"request"` //readCoil
 	Op           uint    `json:"op"`
 	Addr         uint16  `json:"addr"`
+	ZeroMode     bool    `json:"zero_mode"`
 	Length       uint16  `json:"length"`
 	IsCoil       bool    `json:"is_coil"`
-	IsHoldingReg bool    `json:"is_holding_reg"`
+	IsHoldingReg bool    `json:"is_holding_register"`
 	WriteValue   float64 `json:"write_value"`
-	Encoding     string  `json:"encoding"` //bewLeb, BEW_LEB
+	DataType     string  `json:"data_type"`
+	Encoding     string  `json:"encoding"` //Float32
 	coil         bool
 	u16          uint16
 	u32          uint32
@@ -50,7 +53,7 @@ type Operation struct {
 	f64          float64
 }
 
-var req = struct {
+var NameReq = struct {
 	readCoil           string
 	readCoils          string
 	readDiscreteInput  string
@@ -59,6 +62,9 @@ var req = struct {
 	writeCoils         string
 	ReadRegister       string
 	ReadRegisters      string
+	ReadSingleFloat32  string
+	ReadFloat32        string
+	WriteSingleFloat32 string
 }{
 	readCoil:           "readCoil",
 	readCoils:          "readCoils",
@@ -66,16 +72,27 @@ var req = struct {
 	readDiscreteInputs: "readDiscreteInputs",
 	writeCoil:          "writeCoil",
 	writeCoils:         "writeCoils",
-	ReadRegister:       "ReadRegister",
-	ReadRegisters:      "ReadRegisters",
+	ReadRegister:       "readRegister",
+	ReadRegisters:      "readRegisters",
+	ReadSingleFloat32:  "readSingleFloat32",
+	ReadFloat32:        "readFloat32",
+	WriteSingleFloat32: "writeSingleFloat32",
+}
+
+var NameDataType = struct {
+	Float32 string
+	Float64 string
+}{
+	Float32: "Float32",
+	Float64: "Float64",
 }
 
 func setRequest(body Operation) (Operation, error) {
 	r := body.Request
-	if r == req.readCoil || r == req.readDiscreteInput {
+	if r == NameReq.readCoil || r == NameReq.readDiscreteInput {
 		body.Length = 1
 	}
-	if r == req.readCoil || r == req.readCoils || r == req.writeCoil || r == req.writeCoils {
+	if r == NameReq.readCoil || r == NameReq.readCoils || r == NameReq.writeCoil || r == NameReq.writeCoils {
 		body.IsCoil = true
 	}
 	return body, nil
@@ -86,11 +103,11 @@ func parseRequest(body Operation) (Operation, error) {
 	ops := utils.NewString(body.Request).ToCamelCase() //eg: readCoil, read_coil, writeCoil
 	ops = utils.LcFirst(ops)
 	switch ops {
-	case req.readCoil, req.readCoils, req.readDiscreteInput, req.readDiscreteInputs:
+	case NameReq.readCoil, NameReq.readCoils, NameReq.readDiscreteInput, NameReq.readDiscreteInputs:
 		set.Op = readBool
 		return set, err
-	case req.writeCoil, req.writeCoils:
-		if ops == req.writeCoil || ops == req.writeCoils {
+	case NameReq.writeCoil, NameReq.writeCoils:
+		if ops == NameReq.writeCoil || ops == NameReq.writeCoils {
 			set.IsCoil = true
 		}
 		if body.WriteValue > 0 {
@@ -100,11 +117,39 @@ func parseRequest(body Operation) (Operation, error) {
 		}
 		set.Op = writeCoil
 		return set, err
+	case NameReq.ReadFloat32, NameReq.ReadSingleFloat32:
+		if body.IsHoldingReg {
+			set.IsHoldingReg = true
+		} else {
+			set.IsHoldingReg = false
+		}
+		set.Op = readFloat32
+		return set, err
+	case NameReq.WriteSingleFloat32:
+		set.IsHoldingReg = true
+		set.Op = writeFloat32
+		set.f32 = float32(body.WriteValue)
+		return set, err
 	}
 	return set, errors.New("req not found")
 }
 
+//zeroMode will subtract 1 from the register address
+func zeroMode(addr uint16, mode bool) uint16 {
+	if mode {
+		if addr == 0 {
+			return 0
+		} else {
+			return addr - 1
+		}
+	} else {
+		return addr
+	}
+
+}
+
 func Operations(client *modbus.ModbusClient, o Operation) (response interface{}, err error) {
+	o.Addr = zeroMode(o.Addr, o.ZeroMode)
 	switch o.Op {
 	case readBool:
 		var res []bool
@@ -147,46 +192,48 @@ func Operations(client *modbus.ModbusClient, o Operation) (response interface{},
 		var res []uint32
 		if o.IsHoldingReg {
 			res, err = client.ReadUint32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
+			return res, err
 		} else {
 			res, err = client.ReadUint32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
 		}
 		if err != nil {
 			log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 		} else {
-			for idx := range res {
-				if o.Op == readUint32 {
-					log.Infof("modbus:  0x%04x\t%-5v : 0x%08x\t%v\n",
-						o.Addr+(uint16(idx)*2),
-						o.Addr+(uint16(idx)*2),
-						res[idx], res[idx])
-				} else {
-					log.Infof("modbus:  0x%04x\t%-5v : 0x%08x\t%v\n",
-						o.Addr+(uint16(idx)*2),
-						o.Addr+(uint16(idx)*2),
-						res[idx], int32(res[idx]))
-				}
-			}
+			return res, err
 		}
 
 	case readFloat32:
 		var res []float32
-		eClient, err := EncodingBuilder(o.Encoding, client)
-		if err != nil {
-			return nil, err
+		if o.Request == NameReq.ReadSingleFloat32 {
+			o.Length = 1
 		}
 		if o.IsHoldingReg {
-			res, err = eClient.ReadFloat32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
+			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
+			if o.Request == NameReq.ReadSingleFloat32 {
+				if err != nil {
+					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
+					return nil, err
+				}
+				return res[0], err
+			} else {
+				if err != nil {
+					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
+					return nil, err
+				}
+				return res, err
+			}
 		} else {
-			res, err = eClient.ReadFloat32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
-		}
-		if err != nil {
-			log.Errorf("modbus:  failed to read holding/input registers: %v\n", err)
-		} else {
-			for idx := range res {
-				log.Infof("modbus: 0x%04x\t%-5v : %f\n",
-					o.Addr+(uint16(idx)*2),
-					o.Addr+(uint16(idx)*2),
-					res[idx])
+			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
+			if o.Request == NameReq.ReadSingleFloat32 {
+				if err != nil {
+					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
+				}
+				return res[0], err
+			} else {
+				if err != nil {
+					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
+				}
+				return res, err
 			}
 		}
 
@@ -292,8 +339,8 @@ func Operations(client *modbus.ModbusClient, o Operation) (response interface{},
 			log.Errorf("modbus: failed to write %f at address 0x%04x: %v\n",
 				o.f32, o.Addr, err)
 		} else {
-			log.Infof("modbus: wrote %f at address 0x%04x\n",
-				o.f32, o.Addr)
+			log.Infof("modbus: wrote %f at address 0x%04x\n", o.f32, o.Addr)
+			return o.f32, err
 		}
 
 	case writeUint64:
@@ -361,6 +408,46 @@ var namesEncoding = struct {
 	lebLew: "lebLew",
 	bebLew: "bebLew",
 	bebBew: "bebBew",
+}
+
+func performBoolScan(client *modbus.ModbusClient, isCoil bool, start uint32, count uint32) (uint, string) {
+	var err error
+	var addr uint32
+	var val bool
+	var countFound uint
+	var regType string
+
+	if isCoil {
+		regType = "coil"
+	} else {
+		regType = "discrete input"
+	}
+
+	fmt.Printf("starting %s scan\n", regType)
+	fmt.Println(start, count)
+	for addr = start; addr <= count; addr++ {
+		if isCoil {
+			val, err = client.ReadCoil(uint16(addr))
+		} else {
+			val, err = client.ReadDiscreteInput(uint16(addr))
+		}
+		if err == modbus.ErrIllegalDataAddress || err == modbus.ErrIllegalFunction {
+			// the register does not exist
+			continue
+		} else if err != nil {
+			fmt.Printf("failed to read %s at address 0x%04x: %v\n",
+				regType, addr, err)
+		} else {
+			// we found a coil: display its address and value
+			fmt.Printf("0x%04x\t%-5v : %v\n", addr, addr, val)
+			countFound++
+			fmt.Println(countFound)
+		}
+	}
+
+	fmt.Printf("found %v %ss\n", countFound, regType)
+
+	return countFound, regType
 }
 
 func EncodingBuilder(selection string, cli *modbus.ModbusClient) (client *modbus.ModbusClient, err error) {

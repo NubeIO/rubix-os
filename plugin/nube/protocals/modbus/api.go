@@ -11,16 +11,24 @@ import (
 )
 
 type Client struct {
-	Host string `json:"ip"`
-	Port string `json:"port"`
+	Host    string        `json:"ip"`
+	Port    string        `json:"port"`
+	Timeout time.Duration `json:"device_timeout_in_ms"`
 }
 
-type Bool struct {
+type Scan struct {
+	Start  uint32 `json:"start"`
+	Count  uint32 `json:"count"`
+	IsCoil bool   `json:"is_coil"`
+}
+
+type Body struct {
 	Client    `json:"client"`
 	Operation `json:"request_body"`
+	Scan      `json:"scan"`
 }
 
-func bodyClient(ctx *gin.Context) (dto Bool, err error) {
+func bodyClient(ctx *gin.Context) (dto Body, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -32,11 +40,19 @@ func resolveID(ctx *gin.Context) string {
 var restMB *modbus.ModbusClient
 var connected bool
 
-func setClient(u utils.URLParts) error {
-	url := utils.JoinURL(u)
+func setClient(client Client) error {
+	var cli utils.URLParts
+	cli.Transport = "tcp"
+	cli.Host = client.Host
+	cli.Port = client.Port
+	url := utils.JoinURL(cli)
+
+	if client.Timeout < 10 {
+		client.Timeout = 500
+	}
 	c, err := modbus.NewClient(&modbus.ClientConfiguration{
 		URL:     url,
-		Timeout: 1 * time.Second,
+		Timeout: client.Timeout * time.Millisecond,
 	})
 	if err != nil {
 		connected = false
@@ -63,20 +79,14 @@ func isConnected() bool {
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
-
 	mux.POST("/point/tcp/operation", func(ctx *gin.Context) {
 		body, _ := bodyClient(ctx)
-		var u utils.URLParts
-		u.Transport = "tcp"
-		u.Host = body.Client.Host
-		u.Port = body.Client.Port
-		err := setClient(u)
+		err := setClient(body.Client)
 		if err != nil {
 			log.Info(err, "ERROR ON set modbus client")
 			ctx.JSON(http.StatusBadRequest, err)
 		}
 		cli := getClient()
-
 		if !isConnected() {
 			ctx.JSON(http.StatusBadRequest, "modbus not enabled")
 		} else {
@@ -93,6 +103,21 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 				ctx.JSON(http.StatusOK, r)
 			}
 
+		}
+	})
+	mux.POST("/scan/bool", func(ctx *gin.Context) {
+		body, _ := bodyClient(ctx)
+		err := setClient(body.Client)
+		if err != nil {
+			log.Info(err, "ERROR ON set modbus client")
+			ctx.JSON(http.StatusBadRequest, err)
+		}
+		cli := getClient()
+		if !isConnected() {
+			ctx.JSON(http.StatusBadRequest, "modbus not enabled")
+		} else {
+			found, _ := performBoolScan(cli, body.Scan.IsCoil, body.Scan.Start, body.Scan.Count)
+			ctx.JSON(http.StatusOK, found)
 		}
 
 	})
