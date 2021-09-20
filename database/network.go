@@ -37,9 +37,9 @@ func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, 
 	var networkModel *model.Network
 	trans := ""
 	if byTransport != "" {
-		if byTransport == model.CommonNaming.Serial {
+		if byTransport == model.TransType.Serial {
 			trans = serial
-		} else if byTransport == model.CommonNaming.IP {
+		} else if byTransport == model.TransType.IP {
 			trans = ip
 		}
 		if withChildren { // drop child to reduce json size
@@ -69,19 +69,6 @@ func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, withChildren bool, 
 func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Network)
 	body.Name = nameIsNil(body.Name)
-	info := d.getPluginConf(body)
-	switch info.ProtocolType {
-	case model.CommonNaming.Serial:
-		if body.SerialConnection == nil {
-			body.SerialConnection = &model.SerialConnection{}
-		}
-		body.SerialConnection.UUID = utils.MakeTopicUUID(model.CommonNaming.Serial)
-	case model.CommonNaming.IP:
-		if body.IpConnection == nil {
-			body.IpConnection = &model.IpConnection{}
-		}
-		body.IpConnection.UUID = utils.MakeTopicUUID(model.CommonNaming.IP)
-	}
 	body.ThingClass = model.ThingClass.Network
 	body.CommonEnable.Enable = true
 	body.CommonFault.InFault = true
@@ -90,7 +77,39 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
-	body.PluginConfId = pluginIsNil(body.PluginConfId) //plugin path, will use system by default
+	t := body.TransportType
+	s := model.TransType.Serial
+	host := model.TransType.IP
+	if t != s && t != host {
+		return nil, errors.New("provide a transport_type must be ip, serial")
+	}
+	if body.PluginPath != "" || body.PluginConfId != "" {
+		if body.PluginConfId == "" {
+			plugin, err := d.GetPluginByPath(body.PluginPath)
+			if err != nil {
+				return nil, errors.New("failed to find a valid plugin")
+			}
+			if plugin.UUID == "" && body.PluginConfId != "" {
+				return nil, errors.New("failed to find a valid plugin uuid")
+			}
+			body.PluginConfId = plugin.UUID
+		}
+		switch t {
+		case s:
+			if body.SerialConnection == nil {
+				body.SerialConnection = &model.SerialConnection{}
+			}
+			body.SerialConnection.UUID = utils.MakeTopicUUID(model.TransType.Serial)
+		case host:
+			if body.IpConnection == nil {
+				body.IpConnection = &model.IpConnection{}
+			}
+			body.IpConnection.UUID = utils.MakeTopicUUID(model.TransType.IP)
+		}
+	} else {
+		return nil, errors.New("provide a plugin name ie: system, lora, modbus, lorawan, bacnet")
+	}
+
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
@@ -103,7 +122,6 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	//info := d.getPluginConf(networkModel)
 	switch networkModel.TransportType {
 	case model.TransType.Serial:
 		d.DB.Model(&networkModel.SerialConnection).Updates(body.SerialConnection)

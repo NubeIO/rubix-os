@@ -21,8 +21,6 @@ var CommonNaming = struct {
 	ProducerHistory   string
 	Histories         string
 	Node              string
-	Serial            string
-	IP                string
 	TransportType     string
 }{
 	Plugin:            "plugin",
@@ -45,7 +43,6 @@ var CommonNaming = struct {
 	ProducerHistory:   "producer_history",
 	Histories:         "histories",
 	Node:              "node",
-	Serial:            "serial",
 	TransportType:     "transport_type",
 }
 
@@ -132,7 +129,7 @@ var TransType = struct {
 	IP     string
 }{
 	Serial: "serial",
-	IP:     "IP",
+	IP:     "ip",
 }
 
 var TransClient = struct {

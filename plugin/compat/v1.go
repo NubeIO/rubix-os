@@ -24,14 +24,13 @@ func (c PluginV1) APIVersion() string {
 // PluginInfo implements compat/Plugin.
 func (c PluginV1) PluginInfo() Info {
 	return Info{
-		Version:      c.Info.Version,
-		Author:       c.Info.Author,
-		Name:         c.Info.Name,
-		Website:      c.Info.Website,
-		Description:  c.Info.Description,
-		License:      c.Info.License,
-		ModulePath:   c.Info.ModulePath,
-		ProtocolType: c.Info.ProtocolType,
+		Version:     c.Info.Version,
+		Author:      c.Info.Author,
+		Name:        c.Info.Name,
+		Website:     c.Info.Website,
+		Description: c.Info.Description,
+		License:     c.Info.License,
+		ModulePath:  c.Info.ModulePath,
 	}
 }
 
