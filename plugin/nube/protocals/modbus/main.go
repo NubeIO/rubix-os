@@ -8,7 +8,7 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-const path = "modbus" //must be unique across all plugins
+const path = "modbus"     //must be unique across all plugins
 const name = "modbus-api" //must be unique across all plugins
 const description = "modbus api"
 const author = "ap"
@@ -27,15 +27,15 @@ const port = "8080"
 
 // Instance is plugin instance
 type Instance struct {
-	config      *Config
-	enabled     bool
-	basePath    string
-	db          dbhandler.Handler
-	store       cachestore.Handler
-	bus         eventbus.BusService
-	pluginUUID  string
-	networkUUID string
-
+	config         *Config
+	enabled        bool
+	basePath       string
+	db             dbhandler.Handler
+	store          cachestore.Handler
+	bus            eventbus.BusService
+	pluginUUID     string
+	networkUUID    string
+	pollingEnabled bool
 }
 
 // GetFlowPluginInfo returns plugin info.
