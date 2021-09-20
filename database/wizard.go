@@ -23,7 +23,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var writerCloneModel model.WriterClone
 
 	//get plugin
-	p, err := d.GetPluginByPath("system")
+	p, err := d.GetPluginByPath("modbus")
 	if p.UUID == "" {
 		return false, errors.New("no valid plugin")
 	}
@@ -33,25 +33,45 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
 	fmt.Println("CreateFlowNetwork", f.UUID)
+	if err != nil {
+		log.Errorf("wizzrad:  CreateFlowNetwork: %v\n", err)
+		return false, err
+	}
 	// network
 	networkModel.PluginConfId = p.UUID
+	networkModel.TransportType = model.TransType.IP
 	n, err := d.CreateNetwork(&networkModel)
 	fmt.Println("CreateNetwork")
+	if err != nil {
+		log.Errorf("wizzrad:  CreateNetwork: %v\n", err)
+		return false, err
+	}
 	// device
 	deviceModel.NetworkUUID = n.UUID
 	dev, err := d.CreateDevice(&deviceModel)
 	fmt.Println("CreateDevice")
+	if err != nil {
+		log.Errorf("wizzrad:  CreateDevice: %v\n", err)
+		return false, err
+	}
 	// point
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
 	pointModel.IsProducer = true
 	pnt, err := d.CreatePoint(&pointModel, "")
 	fmt.Println("CreatePoint")
-
+	if err != nil {
+		log.Errorf("wizzrad:  CreatePoint: %v\n", err)
+		return false, err
+	}
 	// stream
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
 	fmt.Println(streamModel.FlowNetworks, 9898989)
 	stream, err := d.CreateStream(&streamModel)
+	if err != nil {
+		log.Errorf("wizzrad:  CreateStream: %v\n", err)
+		return false, err
+	}
 	log.Debug("Created Streams at Producer side: ", stream.Name)
 
 	// producer
@@ -66,9 +86,11 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	producerModel.ProducerThingType = model.ThingClass.Point
 	producerModel.ProducerApplication = model.CommonNaming.Mapping
 	producer, err := d.CreateProducer(&producerModel)
-	fmt.Println(producer.Name)
 	fmt.Println("CreateProducer")
-
+	if err != nil {
+		log.Errorf("wizzrad:  CreateProducer: %v\n", err)
+		return false, err
+	}
 	// consumer
 	consumerModel.StreamUUID = streamModel.UUID
 	consumerModel.Name = "consumer stream"
@@ -77,16 +99,22 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	consumerModel.ProducerThingType = model.ThingClass.Point
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
 	consumerModel.ProducerThingUUID = pnt.UUID
-	consumer, err := d.CreateConsumer(&consumerModel)
-	fmt.Println(consumer.Name)
+	_, err = d.CreateConsumer(&consumerModel)
 	fmt.Println("CreateConsumer")
+	if err != nil {
+		log.Errorf("wizzrad:  CreateConsumer: %v\n", err)
+		return false, err
+	}
 	// writer
 	writerModel.ConsumerUUID = consumerModel.UUID
 	writerModel.WriterThingClass = model.ThingClass.Point
 	writerModel.WriterThingType = model.ThingClass.Point
 	writerModel.ConsumerThingUUID = consumerModel.UUID //itself
 	writer, err := d.CreateWriter(&writerModel)
-	fmt.Println(writer)
+	if err != nil {
+		log.Errorf("wizzrad:  CreateWriter: %v\n", err)
+		return false, err
+	}
 	fmt.Println("CreateWriter")
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = producer.UUID
@@ -95,11 +123,15 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	writerCloneModel.WriterUUID = writer.UUID
 	fmt.Println(writer.UUID, 1, 1, 1, 1)
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
-	fmt.Println(writerClone)
+	if err != nil {
+		log.Errorf("wizzrad:  CreateWriterClone: %v\n", err)
+		return false, err
+	}
 	fmt.Println("CreateWriterClone")
 	writerModel.CloneUUID = writerClone.UUID
 	_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
 	if err != nil {
+		log.Errorf("wizzrad:  UpdateWriter: %v\n", err)
 		return false, err
 	}
 	if err != nil {
@@ -544,7 +576,6 @@ func (d *GormDatabase) NodeWizard() (bool, error) {
 	}
 	return true, nil
 }
-
 
 // NetworkDevicePoint add a local network mapping stream.
 func (d *GormDatabase) NetworkDevicePoint() (bool, error) {
