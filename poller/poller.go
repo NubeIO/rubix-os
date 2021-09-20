@@ -1,8 +1,7 @@
-package main
+package poller
 
 import (
 	"context"
-	"fmt"
 	"time"
 )
 
@@ -58,43 +57,4 @@ func (p Poller) Poll(ctx context.Context, f func() (bool, error)) error {
 		}
 
 	}
-}
-
-func main() {
-	p := New()
-	var counter int
-	f := func() (bool, error) {
-		fmt.Println("return false")
-		fmt.Println(counter)
-		counter++
-		//if counter < 5 {
-		//	fmt.Println("return false")
-
-		//	return false, nil
-		//}
-		//fmt.Println("return true")
-		return false, nil
-	}
-	err := p.Poll(context.Background(), f)
-	if err != nil {
-		return
-	}
-
-	//go func() {
-	//	p := New()
-	//	var counter int
-	//	f := func() (bool, error) {
-	//		counter++
-	//		if counter < 5 {
-	//			fmt.Println("return false")
-	//			return false, nil
-	//		}
-	//		fmt.Println("return true")
-	//		return true, nil
-	//	}
-	//	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
-	//	defer cancel()
-	//	fmt.Println(p.Poll(ctx, f))
-	//}()
-
 }
