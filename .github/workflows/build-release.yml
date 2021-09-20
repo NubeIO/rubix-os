@@ -88,7 +88,9 @@ jobs:
           sed -i -e 's/<build_date>/'"${BUILD_DATE}"'/' app.go
 
       - name: Build amd64
-        run: go build -o app-amd64 app.go
+        run: |
+          go mod tidy
+          go build -o app-amd64 app.go
 
       - name: Build armv7
         if: ${{ needs.context.outputs.isRelease == 'true' }}
