@@ -271,10 +271,6 @@ func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
-func getBODYNode(ctx *gin.Context) (dto *model.Node, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
 
 func getBODYPlugin(ctx *gin.Context) (dto *model.PluginConf, err error) {
 	err = ctx.ShouldBindJSON(&dto)
