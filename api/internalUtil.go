@@ -51,6 +51,7 @@ type Args struct {
 	ClientId         *string
 	SiteId           *string
 	DeviceId         *string
+	PluginName       bool
 }
 
 var ArgsType = struct {
@@ -94,6 +95,7 @@ var ArgsType = struct {
 	ClientId         string
 	SiteId           string
 	DeviceId         string
+	PluginName       string
 }{
 	Sort:             "sort",
 	Order:            "order",
@@ -135,6 +137,7 @@ var ArgsType = struct {
 	ClientId:         "client_id",
 	SiteId:           "site_id",
 	DeviceId:         "device_id",
+	PluginName:       "by_plugin_name",
 }
 
 var ArgsDefault = struct {
@@ -172,6 +175,7 @@ var ArgsDefault = struct {
 	Points           string
 	IpConnection     string
 	SerialConnection string
+	PluginName       string
 }{
 	Sort:             "ID",
 	Order:            "DESC", //ASC or DESC
@@ -207,6 +211,7 @@ var ArgsDefault = struct {
 	Points:           "false",
 	IpConnection:     "false",
 	SerialConnection: "false",
+	PluginName:       "false",
 }
 
 func withID(ctx *gin.Context, name string, f func(id uint)) {
@@ -325,7 +330,7 @@ func resolveID(ctx *gin.Context) string {
 	return ctx.Param("uuid")
 }
 
-func resolvePath(ctx *gin.Context)  string {
+func resolvePath(ctx *gin.Context) string {
 	return ctx.Param("path")
 }
 

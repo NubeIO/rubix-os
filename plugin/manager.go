@@ -352,8 +352,11 @@ func (m *Manager) initializeSingleUserPlugin(userCtx compat.UserContext, p compa
 	}
 	if compat.HasSupport(instance, compat.Webhooker) {
 		uuid := pluginConf.UUID
-		g := m.mux.Group(pluginConf.Token+"/", requirePluginEnabled(uuid, m.db))
-		instance.RegisterWebhook(strings.Replace(g.BasePath(), ":id", uuid, 1), g)
+		path := pluginConf.ModulePath
+		//g := m.mux.Group(pluginConf.Token+"/", requirePluginEnabled(uuid, m.db)) //uncomment this to add back in that the plugin needs a token
+		g := m.mux.Group("/", requirePluginEnabled(uuid, m.db))
+		instance.RegisterWebhook(strings.Replace(g.BasePath(), ":id", path, 1), g) //change path to uuid if we want the url to register as uuid
+
 	}
 	if pluginConf.Enabled {
 		err := instance.Enable()
@@ -404,7 +407,7 @@ func (m *Manager) initializeConfigurerForSingleUserPlugin(instance compat.Plugin
 func (m *Manager) createPluginConf(instance compat.PluginInstance, info compat.Info, userID uint) (*model.PluginConf, error) {
 	pluginConf := &model.PluginConf{
 		UserID:     userID,
-		Name: info.Name,
+		Name:       info.Name,
 		ModulePath: info.ModulePath,
 		Token:      auth.GenerateNotExistingToken(auth.GeneratePluginToken, m.pluginConfExists),
 	}
