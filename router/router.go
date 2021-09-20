@@ -26,7 +26,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.NoRoute(error.NotFound())
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
-	authentication := auth.Auth{DB: db}
+	//authentication := auth.Auth{DB: db}
 	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
 	healthHandler := api.HealthAPI{DB: db}
 	clientHandler := api.ClientAPI{
@@ -133,7 +133,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			ctx.JSON(200, vInfo)
 		})
 
-		requireClientsGroupRoutes := apiRoutes.Group("", authentication.RequireClient())
+		//requireClientsGroupRoutes := apiRoutes.Group("", authentication.RequireClient())
+		requireClientsGroupRoutes := apiRoutes.Group("")
 		{
 			plugins := requireClientsGroupRoutes.Group("/plugins")
 			{
@@ -178,9 +179,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			}
 		}
 
-		apiRoutes.Group("").Use(authentication.RequireApplicationToken()).POST("/messages", messageHandler.CreateMessage)
+		//apiRoutes.Group("").Use(authentication.RequireApplicationToken()).POST("/messages", messageHandler.CreateMessage)
+		apiRoutes.Group("").POST("/messages", messageHandler.CreateMessage)
 
-		apiRoutes.Use(authentication.RequireAdmin())
+		//apiRoutes.Use(authentication.RequireAdmin())
 
 		userRoutes := apiRoutes.Group("/users")
 		{
