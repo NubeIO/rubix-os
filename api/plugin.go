@@ -62,7 +62,6 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 				Website:      info.Website,
 				License:      info.License,
 				Enabled:      conf.Enabled,
-				ProtocolType: info.ProtocolType,
 				Capabilities: inst.Supports().Strings(),
 			})
 		}

@@ -8,6 +8,7 @@ import (
 
 type NetworkDatabase interface {
 	GetNetworkByPlugin(uuid string, withChildren bool, withPoints bool, transport string) (*model.Network, error)
+	GetNetworksByPlugin(uuid string, args Args) ([]*model.Network, error)
 	GetNetworks(args Args) ([]*model.Network, error)
 	GetNetwork(uuid string, args Args) (*model.Network, error)
 	CreateNetwork(network *model.Network) (*model.Network, error)
@@ -20,16 +21,23 @@ type NetworksAPI struct {
 	Bus eventbus.BusService
 }
 
-func (a *NetworksAPI) GetNetworks(ctx *gin.Context) {
-	args := buildNetworkArgs(ctx)
-	q, err := a.DB.GetNetworks(args)
-	reposeHandler(q, err, ctx)
-}
-
 func (a *NetworksAPI) GetNetworkByPlugin(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	withChildren, withPoints, _ := withChildrenArgs(ctx)
 	q, err := a.DB.GetNetworkByPlugin(uuid, withChildren, withPoints, "") //TODO fix this need to add in like "serial"
+	reposeHandler(q, err, ctx)
+}
+
+func (a *NetworksAPI) GetNetworksByPlugin(ctx *gin.Context) {
+	uuid := resolveID(ctx) //plugin uuid
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.GetNetworksByPlugin(uuid, args)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *NetworksAPI) GetNetworks(ctx *gin.Context) {
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.GetNetworks(args)
 	reposeHandler(q, err, ctx)
 }
 

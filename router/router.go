@@ -253,6 +253,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			networkRoutes.POST("", networkHandler.CreateNetwork)
 			networkRoutes.GET("/:uuid", networkHandler.GetNetwork)
 			networkRoutes.GET("/plugin/:uuid", networkHandler.GetNetworkByPlugin)
+			networkRoutes.GET("/plugin/all/:uuid", networkHandler.GetNetworksByPlugin)
 			networkRoutes.PATCH("/:uuid", networkHandler.UpdateNetwork)
 			networkRoutes.DELETE("/:uuid", networkHandler.DeleteNetwork)
 			networkRoutes.DELETE("/drop", networkHandler.DropNetworks)

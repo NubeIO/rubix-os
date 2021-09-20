@@ -53,7 +53,7 @@ type Operation struct {
 	f64          float64
 }
 
-var NameReq = struct {
+var NameModbusType = struct {
 	readCoil           string
 	readCoils          string
 	readDiscreteInput  string
@@ -62,9 +62,24 @@ var NameReq = struct {
 	writeCoils         string
 	ReadRegister       string
 	ReadRegisters      string
-	ReadSingleFloat32  string
+	ReadInt16          string
+	ReadSingleInt16    string
+	WriteSingleInt16   string
+	ReadUint16         string
+	ReadSingleUint16   string
+	WriteSingleUint16  string
+	ReadInt32          string
+	ReadSingleInt32    string
+	WriteSingleInt32   string
+	ReadUint32         string
+	ReadSingleUint32   string
+	WriteSingleUint32  string
 	ReadFloat32        string
+	ReadSingleFloat32  string
 	WriteSingleFloat32 string
+	ReadFloat64        string
+	ReadSingleFloat64  string
+	WriteSingleFloat64 string
 }{
 	readCoil:           "readCoil",
 	readCoils:          "readCoils",
@@ -74,25 +89,32 @@ var NameReq = struct {
 	writeCoils:         "writeCoils",
 	ReadRegister:       "readRegister",
 	ReadRegisters:      "readRegisters",
-	ReadSingleFloat32:  "readSingleFloat32",
+	ReadInt16:          "readInt16",
+	ReadSingleInt16:    "readSingleInt16",
+	WriteSingleInt16:   "writeSingleInt16",
+	ReadUint16:         "readUint16",
+	ReadSingleUint16:   "readSingleUint16",
+	WriteSingleUint16:  "writeSingleUint16",
+	ReadInt32:          "readInt32",
+	ReadSingleInt32:    "readSingleInt32",
+	WriteSingleInt32:   "writeSingleInt32",
+	ReadUint32:         "readUint32",
+	ReadSingleUint32:   "readSingleUint32",
+	WriteSingleUint32:  "writeSingleUint32",
 	ReadFloat32:        "readFloat32",
+	ReadSingleFloat32:  "readSingleFloat32",
 	WriteSingleFloat32: "writeSingleFloat32",
-}
-
-var NameDataType = struct {
-	Float32 string
-	Float64 string
-}{
-	Float32: "Float32",
-	Float64: "Float64",
+	ReadFloat64:        "readFloat64",
+	ReadSingleFloat64:  "readSingleFloat64",
+	WriteSingleFloat64: "writeSingleFloat64",
 }
 
 func setRequest(body Operation) (Operation, error) {
 	r := body.Request
-	if r == NameReq.readCoil || r == NameReq.readDiscreteInput {
+	if r == NameModbusType.readCoil || r == NameModbusType.readDiscreteInput {
 		body.Length = 1
 	}
-	if r == NameReq.readCoil || r == NameReq.readCoils || r == NameReq.writeCoil || r == NameReq.writeCoils {
+	if r == NameModbusType.readCoil || r == NameModbusType.readCoils || r == NameModbusType.writeCoil || r == NameModbusType.writeCoils {
 		body.IsCoil = true
 	}
 	return body, nil
@@ -103,11 +125,11 @@ func parseRequest(body Operation) (Operation, error) {
 	ops := utils.NewString(body.Request).ToCamelCase() //eg: readCoil, read_coil, writeCoil
 	ops = utils.LcFirst(ops)
 	switch ops {
-	case NameReq.readCoil, NameReq.readCoils, NameReq.readDiscreteInput, NameReq.readDiscreteInputs:
+	case NameModbusType.readCoil, NameModbusType.readCoils, NameModbusType.readDiscreteInput, NameModbusType.readDiscreteInputs:
 		set.Op = readBool
 		return set, err
-	case NameReq.writeCoil, NameReq.writeCoils:
-		if ops == NameReq.writeCoil || ops == NameReq.writeCoils {
+	case NameModbusType.writeCoil, NameModbusType.writeCoils:
+		if ops == NameModbusType.writeCoil || ops == NameModbusType.writeCoils {
 			set.IsCoil = true
 		}
 		if body.WriteValue > 0 {
@@ -117,7 +139,7 @@ func parseRequest(body Operation) (Operation, error) {
 		}
 		set.Op = writeCoil
 		return set, err
-	case NameReq.ReadFloat32, NameReq.ReadSingleFloat32:
+	case NameModbusType.ReadFloat32, NameModbusType.ReadSingleFloat32:
 		if body.IsHoldingReg {
 			set.IsHoldingReg = true
 		} else {
@@ -125,7 +147,7 @@ func parseRequest(body Operation) (Operation, error) {
 		}
 		set.Op = readFloat32
 		return set, err
-	case NameReq.WriteSingleFloat32:
+	case NameModbusType.WriteSingleFloat32:
 		set.IsHoldingReg = true
 		set.Op = writeFloat32
 		set.f32 = float32(body.WriteValue)
@@ -134,10 +156,10 @@ func parseRequest(body Operation) (Operation, error) {
 	return set, errors.New("req not found")
 }
 
-//zeroMode will subtract 1 from the register address
+//zeroMode will subtract 1 from the register address, so address 1 will be address 0 if set to true
 func zeroMode(addr uint16, mode bool) uint16 {
 	if mode {
-		if addr == 0 {
+		if addr <= 0 {
 			return 0
 		} else {
 			return addr - 1
@@ -148,7 +170,7 @@ func zeroMode(addr uint16, mode bool) uint16 {
 
 }
 
-func Operations(client *modbus.ModbusClient, o Operation) (response interface{}, err error) {
+func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{}, err error) {
 	o.Addr = zeroMode(o.Addr, o.ZeroMode)
 	switch o.Op {
 	case readBool:
@@ -204,12 +226,12 @@ func Operations(client *modbus.ModbusClient, o Operation) (response interface{},
 
 	case readFloat32:
 		var res []float32
-		if o.Request == NameReq.ReadSingleFloat32 {
+		if o.Request == NameModbusType.ReadSingleFloat32 {
 			o.Length = 1
 		}
 		if o.IsHoldingReg {
 			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
-			if o.Request == NameReq.ReadSingleFloat32 {
+			if o.Request == NameModbusType.ReadSingleFloat32 {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 					return nil, err
@@ -224,7 +246,7 @@ func Operations(client *modbus.ModbusClient, o Operation) (response interface{},
 			}
 		} else {
 			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
-			if o.Request == NameReq.ReadSingleFloat32 {
+			if o.Request == NameModbusType.ReadSingleFloat32 {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 				}
@@ -239,7 +261,6 @@ func Operations(client *modbus.ModbusClient, o Operation) (response interface{},
 
 	case readUint64, readInt64:
 		var res []uint64
-
 		if o.IsHoldingReg {
 			res, err = client.ReadUint64s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
 		} else {

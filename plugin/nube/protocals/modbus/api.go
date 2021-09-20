@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/simonvetter/modbus"
@@ -95,8 +94,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 				ctx.JSON(http.StatusBadRequest, "request was invalid, try readCoil or writeCoil")
 				return
 			}
-			fmt.Println(request)
-			r, err := Operations(cli, request)
+			r, err := DoOperations(cli, request)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, err)
 			} else {

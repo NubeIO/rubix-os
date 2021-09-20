@@ -9,14 +9,13 @@ type Plugin interface {
 
 // Info is the plugin info.
 type Info struct {
-	Version      string
-	Author       string
-	Name         string
-	Website      string
-	Description  string
-	License      string
-	ModulePath   string
-	ProtocolType string
+	Version     string
+	Author      string
+	Name        string
+	Website     string
+	Description string
+	License     string
+	ModulePath  string
 }
 
 func (c Info) String() string {
