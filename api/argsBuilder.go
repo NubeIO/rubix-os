@@ -79,6 +79,10 @@ func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	var aType = ArgsType
 	var aDefault = ArgsDefault
 	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
+	args.Producers, _ = toBool(ctx.DefaultQuery(aType.Producers, aDefault.Producers))
+	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
+	args.CommandGroups, _ = toBool(ctx.DefaultQuery(aType.CommandGroups, aDefault.CommandGroups))
+	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
 	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
 		args.GlobalUUID = &value
 	}

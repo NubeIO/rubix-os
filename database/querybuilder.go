@@ -9,6 +9,21 @@ func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.Streams {
 		query = query.Preload("Streams")
+		if args.Producers {
+			query = query.Preload("Streams.Producers")
+			if args.Writers {
+				query = query.Preload("Streams.Producers.WriterClones")
+			}
+		}
+		if args.Consumers {
+			query = query.Preload("Streams.Consumers")
+			if args.Writers {
+				query = query.Preload("Streams.Consumers.Writers")
+			}
+		}
+		if args.CommandGroups {
+			query = query.Preload("Streams.CommandGroups")
+		}
 	}
 	if args.GlobalUUID != nil {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
