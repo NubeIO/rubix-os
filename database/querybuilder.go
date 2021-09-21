@@ -45,6 +45,9 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	if args.CommandGroups {
 		query = query.Preload("CommandGroups")
 	}
+	if args.Tags {
+		query = query.Preload("Tags")
+	}
 	return query
 }
 

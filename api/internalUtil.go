@@ -47,6 +47,7 @@ type Args struct {
 	Points           bool
 	IpConnection     bool
 	SerialConnection bool
+	Tags             bool
 	GlobalUUID       *string
 	ClientId         *string
 	SiteId           *string
@@ -91,6 +92,7 @@ var ArgsType = struct {
 	Points           string
 	IpConnection     string
 	SerialConnection string
+	Tags             string
 	GlobalUUID       string
 	ClientId         string
 	SiteId           string
@@ -133,6 +135,7 @@ var ArgsType = struct {
 	Points:           "points",
 	IpConnection:     "ip_connection",
 	SerialConnection: "serial_connection",
+	Tags:             "tags",
 	GlobalUUID:       "global_uuid",
 	ClientId:         "client_id",
 	SiteId:           "site_id",
@@ -175,6 +178,7 @@ var ArgsDefault = struct {
 	Points           string
 	IpConnection     string
 	SerialConnection string
+	Tags             string
 	PluginName       string
 }{
 	Sort:             "ID",
@@ -211,6 +215,7 @@ var ArgsDefault = struct {
 	Points:           "false",
 	IpConnection:     "false",
 	SerialConnection: "false",
+	Tags:             "false",
 	PluginName:       "false",
 }
 

@@ -103,6 +103,7 @@ func buildStreamArgs(ctx *gin.Context) Args {
 	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
 	args.CommandGroups, _ = toBool(ctx.DefaultQuery(aType.CommandGroups, aDefault.CommandGroups))
 	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
 	return args
 }
 
