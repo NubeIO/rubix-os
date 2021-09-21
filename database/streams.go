@@ -60,6 +60,11 @@ func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Str
 			return nil, err
 		}
 	}
+	if len(body.Tags) > 0 {
+		if err := d.DB.Model(&gatewayModel).Association("Tags").Replace(body.Tags); err != nil {
+			return nil, err
+		}
+	}
 	if err := d.DB.Model(&gatewayModel).Updates(body).Error; err != nil {
 		return nil, err
 	}
