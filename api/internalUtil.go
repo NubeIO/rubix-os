@@ -322,8 +322,17 @@ func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 	return dto, err
 }
 
+func getBodyTag(ctx *gin.Context) (dto *model.Tag, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func resolveID(ctx *gin.Context) string {
 	return ctx.Param("uuid")
+}
+
+func getTagParam(ctx *gin.Context) string {
+	return ctx.Param("tag")
 }
 
 func resolvePath(ctx *gin.Context) string {

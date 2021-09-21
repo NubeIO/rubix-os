@@ -3,13 +3,11 @@ package database
 import (
 	"errors"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
-
-func  errorMsg (field string, msg string, err error) error {
-	r := fmt.Sprintf("error: %s - %s -%v", field, msg, err)
-	log.Println(r)
+func errorMsg(field string, msg string, err error) error {
+	r := fmt.Sprintf("Error: %s - %s - %v", field, msg, err)
+	log.Error(r)
 	return errors.New(r)
-
 }

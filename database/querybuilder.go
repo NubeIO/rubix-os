@@ -88,3 +88,8 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	}
 	return query
 }
+
+func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	return query
+}

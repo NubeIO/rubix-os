@@ -94,6 +94,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	}
 	thingHandler := api.ThingAPI{}
 
+	tagHandler := api.TagAPI{
+		DB: db,
+	}
+
 	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
 	//for the custom plugin endpoints you need to use the plugin token
@@ -381,6 +385,14 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			thingRoutes.GET("/class", thingHandler.ThingClass)
 			thingRoutes.GET("/types", thingHandler.ThingTypes)
 			thingRoutes.GET("/writers/actions", thingHandler.WriterActions)
+		}
+
+		tagRoutes := apiRoutes.Group("/tags")
+		{
+			tagRoutes.GET("", tagHandler.GetTags)
+			tagRoutes.POST("", tagHandler.CreateTag)
+			tagRoutes.GET("/:tag", tagHandler.GetTag)
+			tagRoutes.DELETE(":tag", tagHandler.DeleteTag)
 		}
 
 	}
