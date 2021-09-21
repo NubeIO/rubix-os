@@ -179,6 +179,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 
 	// network
 	networkModel.PluginConfId = p.UUID
+	networkModel.TransportType = "serial"
 	n, err := d.CreateNetwork(&networkModel)
 	log.Debug("Created a Network")
 	// device
