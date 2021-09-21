@@ -9,6 +9,21 @@ func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.Streams {
 		query = query.Preload("Streams")
+		if args.Producers {
+			query = query.Preload("Streams.Producers")
+			if args.Writers {
+				query = query.Preload("Streams.Producers.WriterClones")
+			}
+		}
+		if args.Consumers {
+			query = query.Preload("Streams.Consumers")
+			if args.Writers {
+				query = query.Preload("Streams.Consumers.Writers")
+			}
+		}
+		if args.CommandGroups {
+			query = query.Preload("Streams.CommandGroups")
+		}
 	}
 	if args.GlobalUUID != nil {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
@@ -44,6 +59,9 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	}
 	if args.CommandGroups {
 		query = query.Preload("CommandGroups")
+	}
+	if args.Tags {
+		query = query.Preload("Tags")
 	}
 	return query
 }
@@ -86,5 +104,10 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	if args.Points {
 		query = query.Preload("Points")
 	}
+	return query
+}
+
+func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
+	query := d.DB
 	return query
 }

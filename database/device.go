@@ -76,9 +76,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 		return nil, query.Error
 	}
 	body.ThingClass = model.ThingClass.Device
-	if body.CommonEnable.Enable != nil {
-		*body.CommonEnable.Enable = true
-	}
+	body.CommonEnable.Enable = utils.NewTrue()
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
 	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled

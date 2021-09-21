@@ -10,5 +10,6 @@ type Stream struct {
 	Producers     []*Producer     `json:"producers" gorm:"constraint:OnDelete:CASCADE;"`
 	Consumers     []*Consumer     `json:"consumers" gorm:"constraint:OnDelete:CASCADE;"`
 	CommandGroups []*CommandGroup `json:"command_groups" gorm:"constraint:OnDelete:CASCADE;"`
+	Tags          []*Tag          `json:"tags" gorm:"many2many:streams_tags;constraint:OnDelete:CASCADE"`
 	CommonCreated
 }

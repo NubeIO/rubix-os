@@ -57,9 +57,7 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Network)
 	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Network
-	if body.CommonEnable.Enable != nil {
-		*body.CommonEnable.Enable = true
-	}
+	body.CommonEnable.Enable = utils.NewTrue()
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
 	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled

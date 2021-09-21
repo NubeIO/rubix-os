@@ -8,7 +8,6 @@ import (
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
-	"github.com/NubeIO/null"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/datatypes"
 	"time"
@@ -123,7 +122,8 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 			log.Errorf("UpdateProducer")
 			return "", errors.New("issue on update producer")
 		}
-		point.Priority.P1 = null.FloatFrom(point.PresentValue)
+		value := point.PresentValue
+		point.Priority.P1 = &value
 		b, err := json.Marshal(point)
 		if err != nil {
 			return "", errors.New("issue on update write history for point")

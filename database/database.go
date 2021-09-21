@@ -58,6 +58,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var serialConnection []model.SerialConnection
 	var ipConnection []model.IpConnection
 	var schedule []model.Schedule
+	var tags []model.Tag
 	var models = []interface{}{
 		&alerts,
 		&user,
@@ -86,6 +87,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&serialConnection,
 		&ipConnection,
 		&schedule,
+		&tags,
 	}
 
 	for _, v := range models {

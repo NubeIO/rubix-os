@@ -7,6 +7,7 @@ import (
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
+	"reflect"
 	"time"
 )
 
@@ -84,9 +85,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 		body.Description = "na"
 	}
 	body.ThingClass = model.ThingClass.Point
-	if body.CommonEnable.Enable != nil {
-		*body.CommonEnable.Enable = true
-	}
+	body.CommonEnable.Enable = utils.NewTrue()
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
 	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
@@ -133,7 +132,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 	if err != nil {
 		return nil, err
 	}
-	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Updates(body)
+	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -142,7 +141,22 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 		//query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
 		//query = d.DB.Model(&pointModel).Updates(&body)
 	}
-	query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
+	if body.Priority != nil {
+		priority := map[string]interface{}{}
+		priorityValue := reflect.ValueOf(*body.Priority)
+		typeOfPriority := priorityValue.Type()
+		for i := 0; i < priorityValue.NumField(); i++ {
+			if priorityValue.Field(i).Type().Kind().String() == "ptr" {
+				val := priorityValue.Field(i).Interface().(*float64)
+				if val == nil {
+					priority[typeOfPriority.Field(i).Name] = nil
+				} else {
+					priority[typeOfPriority.Field(i).Name] = *val
+				}
+			}
+		}
+		d.DB.Model(&pointModel.Priority).Updates(&priority)
+	}
 	query = d.DB.Model(&pointModel).Updates(&body)
 
 	if *pointModel.IsProducer && *body.IsProducer {
