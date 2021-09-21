@@ -61,7 +61,10 @@ func (d *GormDatabase) WizardLocalPointMapping(body *api.WizardLocalMapping) (bo
 	// point
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
-	*pointModel.IsProducer = true
+
+	if pointModel.IsProducer != nil {
+		*pointModel.IsProducer = true
+	}
 	pnt, err := d.CreatePoint(&pointModel, "")
 	fmt.Println("CreatePoint")
 	if err != nil {

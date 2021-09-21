@@ -46,7 +46,6 @@ var ObjectTypes = struct {
 	BinaryInput  string
 	BinaryOutput string
 	BinaryValue  string
-
 	//modbus
 	ReadCoil           string
 	ReadCoils          string
@@ -82,7 +81,6 @@ var ObjectTypes = struct {
 	BinaryInput:  "binaryInput",
 	BinaryOutput: "binaryOutput",
 	BinaryValue:  "binaryValue",
-
 	//modbus
 	ReadCoil:           "readCoil",
 	ReadCoils:          "readCoils",
@@ -141,16 +139,23 @@ type Point struct {
 	ObjectType           string         `json:"object_type"`    //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
 	AddressId            int            `json:"address_id"`     // for example a modbus address or bacnet address
 	AddressOffset        int            `json:"address_offset"` // for example a modbus address offset
-	AddressUUID          string         `json:"address_uuid"`   // for example a droplet id (so a string)
+	ZeroMode             *bool          `json:"zero_mode"`
+	AddressUUID          string         `json:"address_uuid"` // for example a droplet id (so a string)
 	NextAvailableAddress *bool          `json:"use_next_available_address"`
 	Unit                 string
 	UnitsTo              string //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
-	CommonThingClass            //network
-	CommonThingUse              //lora
-	CommonThingObject           //point
-	CommonThingType             //temp
-	IsProducer           *bool  `json:"is_producer"`
-	IsConsumer           *bool  `json:"is_consumer"`
+	Decimal              int
+	Round                null.Float
+	InputMin             null.Float
+	InputMax             null.Float
+	ScaleMin             null.Float
+	ScaleMax             null.Float
+	CommonThingClass           //network
+	CommonThingUse             //lora
+	CommonThingObject          //point
+	CommonThingType            //temp
+	IsProducer           *bool `json:"is_producer"`
+	IsConsumer           *bool `json:"is_consumer"`
 	CommonFault
 	Priority *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
 }

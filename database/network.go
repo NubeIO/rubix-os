@@ -57,7 +57,9 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Network)
 	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Network
-	*body.CommonEnable.Enable = true
+	if body.CommonEnable.Enable != nil {
+		*body.CommonEnable.Enable = true
+	}
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
 	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
@@ -67,9 +69,11 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	t := body.TransportType
 	s := model.TransType.Serial
 	host := model.TransType.IP
-	if t != s && t != host {
-		return nil, errors.New("provide a transport_type must be ip, serial")
+	transport, err := checkTransport(body.TransportType) //set to ip by default
+	if err != nil {
+		return nil, err
 	}
+	body.TransportType = transport
 	if body.PluginPath != "" || body.PluginConfId != "" {
 		if body.PluginConfId == "" {
 			plugin, err := d.GetPluginByPath(body.PluginPath)
