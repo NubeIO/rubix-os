@@ -61,7 +61,7 @@ func (d *GormDatabase) WizardLocalPointMapping(body *api.WizardLocalMapping) (bo
 	// point
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
-	*pointModel.IsProducer = true
+	pointModel.IsProducer = utils.NewTrue()
 	pnt, err := d.CreatePoint(&pointModel, "")
 	fmt.Println("CreatePoint")
 	if err != nil {
@@ -175,6 +175,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
+	if err != nil {
+		return false, err
+	}
 	log.Debug("Created a FlowNetwork: ", f.UUID)
 
 	// network
@@ -184,18 +187,30 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	log.Debug("Created a Network")
 	// device
 	deviceModel.NetworkUUID = n.UUID
+	deviceModel.TransportType = "serial"
 	dev, err := d.CreateDevice(&deviceModel)
+	if err != nil {
+		return false, err
+	}
 	log.Debug("Created a Device")
+
 	// point
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
-	*pointModel.IsProducer = true
+	pointModel.IsProducer = utils.NewTrue()
+	pointModel.ObjectType = "analogInput" //TODO: check
 	pnt, err := d.CreatePoint(&pointModel, "")
-	log.Debug("Created a Point")
+	if err != nil {
+		return false, err
+	}
+	log.Debug("Created a Point", err, pnt)
 
 	// stream
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
 	stream, err := d.CreateStream(&streamModel)
+	if err != nil {
+		return false, err
+	}
 	log.Debug("Created Streams at Producer side: ", stream.Name)
 
 	// producer
@@ -207,6 +222,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	producerModel.ProducerThingType = model.ThingClass.Point
 	producerModel.ProducerApplication = model.CommonNaming.Mapping
 	producer, err := d.CreateProducer(&producerModel)
+	if err != nil {
+		return false, err
+	}
 	log.Debug("Created Producer: ", producer.Name)
 
 	consumerFlowNetwork.Name = "Consumer flow network"
@@ -215,12 +233,18 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	consumerFlowNetwork.FlowPort = "1660"
 	consumerFlowNetwork.FlowToken = "fakeToken123"
 	cfn, err := d.CreateFlowNetwork(&consumerFlowNetwork)
+	if err != nil {
+		return false, err
+	}
 	log.Debug("Created Consumer FlowNetwork: ", cfn.UUID)
 
 	// consumer stream (edge-2)
 	consumerStreamModel.IsConsumer = true
 	consumerStreamModel.FlowNetworks = []*model.FlowNetwork{&consumerFlowNetwork}
 	consumerStream, err := d.CreateStream(&consumerStreamModel)
+	if err != nil {
+		return false, err
+	}
 
 	// consumer (edge-2)
 	consumerModel.StreamUUID = consumerStream.UUID
@@ -231,6 +255,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
 	consumerModel.ProducerThingUUID = pnt.UUID
 	consumer, err := d.CreateConsumer(&consumerModel)
+	if err != nil {
+		return false, err
+	}
 	log.Debug("Created Consumer: ", consumer.Name)
 
 	// device to be used for consumer list (edge-2)
@@ -244,7 +271,8 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var pointModel2 model.Point
 	pointModel2.DeviceUUID = dev2.UUID
 	pointModel2.Name = "is the consumer"
-	*pointModel2.IsConsumer = true
+	pointModel2.IsConsumer = utils.NewTrue()
+	pointModel2.ObjectType = "analogInput" //TODO: check
 	pnt2, err := d.CreatePoint(&pointModel2, "")
 	if err != nil {
 		return false, err
@@ -257,7 +285,6 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	writerModel.WriterThingType = model.ThingClass.Point
 	writer, err := d.CreateWriter(&writerModel)
 	if err != nil {
-
 		return false, err
 	}
 
@@ -443,13 +470,9 @@ func (d *GormDatabase) NetworkDevicePoint() (bool, error) {
 	fmt.Println("CreateDevice")
 	// point
 	pointModel.DeviceUUID = dev.UUID
-	*pointModel.IsProducer = true
+	pointModel.IsProducer = utils.NewTrue()
 	_, err = d.CreatePoint(&pointModel, "")
-
 	fmt.Println("CreatePoint")
-	if err != nil {
-		return false, err
-	}
 	if err != nil {
 		fmt.Println("Error on wizard")
 		fmt.Println(err)

@@ -83,7 +83,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 		body.Description = "na"
 	}
 	body.ThingClass = model.ThingClass.Point
-	*body.CommonEnable.Enable = true
+	body.CommonEnable.Enable = utils.NewTrue()
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
 	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
