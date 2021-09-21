@@ -67,9 +67,11 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	t := body.TransportType
 	s := model.TransType.Serial
 	host := model.TransType.IP
-	if t != s && t != host {
-		return nil, errors.New("provide a transport_type must be ip, serial")
+	transport, err := checkTransport(body.TransportType) //set to ip by default
+	if err != nil {
+		return nil, err
 	}
+	body.TransportType = transport
 	if body.PluginPath != "" || body.PluginConfId != "" {
 		if body.PluginConfId == "" {
 			plugin, err := d.GetPluginByPath(body.PluginPath)

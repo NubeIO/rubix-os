@@ -338,7 +338,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			log.Infof("modbus: wrote %f at address 0x%04x\n",
 				o.f64, o.Addr)
 		}
-
 	}
 	return nil, nil
 }
@@ -370,13 +369,11 @@ func performBoolScan(client *modbus.ModbusClient, isCoil bool, start uint32, cou
 	var val bool
 	var countFound uint
 	var regType string
-
 	if isCoil {
 		regType = "coil"
 	} else {
 		regType = "discrete input"
 	}
-
 	fmt.Printf("starting %s scan\n", regType)
 	fmt.Println(start, count)
 	for addr = start; addr <= count; addr++ {
@@ -398,9 +395,7 @@ func performBoolScan(client *modbus.ModbusClient, isCoil bool, start uint32, cou
 			fmt.Println(countFound)
 		}
 	}
-
 	fmt.Printf("found %v %ss\n", countFound, regType)
-
 	return countFound, regType
 }
 

@@ -22,7 +22,6 @@ type polling struct {
 }
 
 func (i *Instance) PollingTCP(p polling) error {
-
 	if p.delayNetworks <= 0 {
 		p.delayNetworks = defaultInterval
 	}
@@ -56,22 +55,25 @@ func (i *Instance) PollingTCP(p polling) error {
 					if err != nil {
 						log.Info(err, "ERROR ON set modbus client")
 					}
-
 					fmt.Println(cnt, dev.UUID, dev.CommonIP.Host, dev.CommonIP.Port, dev.AddressId)
 					if dev.UUID != "" {
+						cli := getClient()
+						var ops Operation
+						ops.UnitId = uint8(dev.AddressId)
 						for _, pnt := range dev.Points { //points
 							fmt.Println(cnt, pnt.UUID, pnt.Name, pnt.ObjectType)
 							dPnt := p.delayPoints
-							cli := getClient()
 							if !isConnected() {
 								fmt.Println("isConnected")
 							} else {
-								var ops Operation
-								ops.UnitId = 1
-								ops.Addr = 1
-								ops.IsHoldingReg = true
+								ops.Addr = uint16(pnt.AddressId)
 								ops.ObjectType = pnt.ObjectType
-								ops.ZeroMode = true
+								if pnt.ZeroMode != nil {
+									ops.IsHoldingReg = *pnt.IsOutput
+								}
+								if pnt.ZeroMode != nil {
+									ops.ZeroMode = *pnt.ZeroMode
+								}
 								request, err := parseRequest(ops)
 								if err != nil {
 									fmt.Println(err)
@@ -86,9 +88,7 @@ func (i *Instance) PollingTCP(p polling) error {
 					}
 				}
 			}
-
 		}
-
 		return false, nil
 	}
 	err := a.Poll(context.Background(), f)

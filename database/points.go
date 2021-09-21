@@ -67,10 +67,11 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	deviceUUID := body.DeviceUUID
 	body.Name = nameIsNil(body.Name)
-	_, err := checkObjectType(body.ObjectType)
+	obj, err := checkObjectType(body.ObjectType)
 	if err != nil {
 		return nil, err
 	}
+	body.ObjectType = obj
 	query := d.DB.Where("uuid = ? ", deviceUUID).First(&deviceModel)
 	if query.Error != nil {
 		return nil, query.Error

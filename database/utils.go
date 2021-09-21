@@ -42,7 +42,7 @@ func nameIsNil(name string) string {
 
 func checkTransport(t string) (string, error) {
 	if t == "" {
-		return "", errors.New("no transport type was provided ie: ip or serial")
+		return model.TransType.IP, nil
 	}
 	i := utils.ArrayValues(model.TransType)
 	if !utils.ArrayContains(i, t) {
@@ -53,7 +53,7 @@ func checkTransport(t string) (string, error) {
 
 func checkObjectType(t string) (string, error) {
 	if t == "" {
-		return "", errors.New("no object type was provided ie: analogInput or readCoil")
+		return model.ObjectTypes.AnalogValue, nil
 	}
 	i := utils.ArrayValues(model.ObjectTypes)
 	if !utils.ArrayContains(i, t) {

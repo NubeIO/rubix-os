@@ -66,10 +66,11 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Device)
 	networkUUID := body.NetworkUUID
 	body.Name = nameIsNil(body.Name)
-	_, err := checkTransport(body.TransportType)
+	transport, err := checkTransport(body.TransportType) //set to ip by default
 	if err != nil {
 		return nil, err
 	}
+	body.TransportType = transport
 	query := d.DB.Where("uuid = ? ", networkUUID).First(&net)
 	if query.Error != nil {
 		return nil, query.Error
@@ -105,14 +106,19 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&deviceModel).Updates(body)
-	_, err := checkTransport(body.TransportType)
+	transport, err := checkTransport(body.TransportType)
 	if err != nil {
 		return nil, err
 	}
+	body.TransportType = transport
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	if body.CommonEnable.Enable != nil {
+		*body.CommonEnable.Enable = true
+	}
+	query = d.DB.Model(&deviceModel).Updates(body)
+
 	var nModel *model.Network
 	query = d.DB.Where("uuid = ?", deviceModel.NetworkUUID).Find(&nModel)
 	if query.Error != nil {
