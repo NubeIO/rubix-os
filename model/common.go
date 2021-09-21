@@ -45,6 +45,11 @@ type CommonHelp struct {
 	Help string `json:"help"`
 }
 
+type CommonIP struct {
+	Host string `json:"host"`
+	Port int    `json:"port"`
+}
+
 type CommonNodeType struct {
 	NodeType string `json:"node_type"`
 }
@@ -58,7 +63,7 @@ type CommonAction struct {
 }
 
 type CommonEnable struct {
-	Enable bool `json:"enable"`
+	Enable *bool `json:"enable"`
 }
 
 type CommonID struct {
@@ -79,7 +84,7 @@ type CommonCreated struct {
 }
 
 type CommonHistory struct {
-	EnableHistory bool `json:"history_enable"`
+	EnableHistory *bool `json:"history_enable"`
 }
 
 type CommonValue struct {

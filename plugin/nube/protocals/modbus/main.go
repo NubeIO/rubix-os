@@ -8,8 +8,8 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-const path = "modbus"     //must be unique across all plugins
-const name = "modbus-api" //must be unique across all plugins
+const path = "modbus" //must be unique across all plugins
+const name = "modbus" //must be unique across all plugins
 const description = "modbus api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"

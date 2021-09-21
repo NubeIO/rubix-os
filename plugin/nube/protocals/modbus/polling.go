@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/poller"
+	"github.com/NubeDev/flow-framework/utils"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -37,7 +39,6 @@ func (i *Instance) PollingTCP(p polling) error {
 	arg.Points = true
 	arg.IpConnection = true
 	f := func() (bool, error) {
-		fmt.Println("return false")
 		fmt.Println(counter)
 		counter++
 		nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, arg)
@@ -46,14 +47,43 @@ func (i *Instance) PollingTCP(p polling) error {
 		}
 		for cnt, net := range nets { //networks
 			//fmt.Println(cnt, net)
-			for _, dev := range net.Devices { //devices
-				//fmt.Println(cnt, dev.UUID, dev.Name)
+			if net.UUID != "" {
+				for _, dev := range net.Devices { //devices
+					var client Client
+					client.Host = dev.CommonIP.Host
+					client.Port = utils.PortAsString(dev.CommonIP.Port)
+					err := setClient(client)
+					if err != nil {
+						log.Info(err, "ERROR ON set modbus client")
+					}
 
-				for _, pnt := range dev.Points { //points
-					fmt.Println(cnt, pnt.UUID, pnt.Name)
-					dPnt := p.delayPoints
-					time.Sleep(dPnt)
-					fmt.Println(cnt, pnt.UUID, pnt.Name)
+					fmt.Println(cnt, dev.UUID, dev.CommonIP.Host, dev.CommonIP.Port, dev.AddressId)
+					if dev.UUID != "" {
+						for _, pnt := range dev.Points { //points
+							fmt.Println(cnt, pnt.UUID, pnt.Name, pnt.ObjectType)
+							dPnt := p.delayPoints
+							cli := getClient()
+							if !isConnected() {
+								fmt.Println("isConnected")
+							} else {
+								var ops Operation
+								ops.UnitId = 1
+								ops.Addr = 1
+								ops.IsHoldingReg = true
+								ops.ObjectType = pnt.ObjectType
+								ops.ZeroMode = true
+								request, err := parseRequest(ops)
+								if err != nil {
+									fmt.Println(err)
+								}
+								r, err := DoOperations(cli, request)
+								fmt.Println(r)
+								//cli.SetEncoding()
+							}
+							time.Sleep(dPnt)
+							fmt.Println(cnt, pnt.UUID, pnt.Name)
+						}
+					}
 				}
 			}
 

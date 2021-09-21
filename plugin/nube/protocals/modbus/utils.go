@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/simonvetter/modbus"
 	log "github.com/sirupsen/logrus"
@@ -34,17 +35,16 @@ const (
 var err error
 
 type Operation struct {
-	UnitId       uint8   `json:"unit_id"`
-	Request      string  `json:"request"` //readCoil
-	Op           uint    `json:"op"`
+	UnitId       uint8  `json:"unit_id"`     //device addr
+	ObjectType   string `json:"object_type"` //readCoil
+	op           uint
 	Addr         uint16  `json:"addr"`
 	ZeroMode     bool    `json:"zero_mode"`
 	Length       uint16  `json:"length"`
 	IsCoil       bool    `json:"is_coil"`
 	IsHoldingReg bool    `json:"is_holding_register"`
 	WriteValue   float64 `json:"write_value"`
-	DataType     string  `json:"data_type"`
-	Encoding     string  `json:"encoding"` //Float32
+	Encoding     string  `json:"encoding"` //BEB_LEW
 	coil         bool
 	u16          uint16
 	u32          uint32
@@ -53,68 +53,12 @@ type Operation struct {
 	f64          float64
 }
 
-var NameModbusType = struct {
-	readCoil           string
-	readCoils          string
-	readDiscreteInput  string
-	readDiscreteInputs string
-	writeCoil          string
-	writeCoils         string
-	ReadRegister       string
-	ReadRegisters      string
-	ReadInt16          string
-	ReadSingleInt16    string
-	WriteSingleInt16   string
-	ReadUint16         string
-	ReadSingleUint16   string
-	WriteSingleUint16  string
-	ReadInt32          string
-	ReadSingleInt32    string
-	WriteSingleInt32   string
-	ReadUint32         string
-	ReadSingleUint32   string
-	WriteSingleUint32  string
-	ReadFloat32        string
-	ReadSingleFloat32  string
-	WriteSingleFloat32 string
-	ReadFloat64        string
-	ReadSingleFloat64  string
-	WriteSingleFloat64 string
-}{
-	readCoil:           "readCoil",
-	readCoils:          "readCoils",
-	readDiscreteInput:  "readDiscreteInput",
-	readDiscreteInputs: "readDiscreteInputs",
-	writeCoil:          "writeCoil",
-	writeCoils:         "writeCoils",
-	ReadRegister:       "readRegister",
-	ReadRegisters:      "readRegisters",
-	ReadInt16:          "readInt16",
-	ReadSingleInt16:    "readSingleInt16",
-	WriteSingleInt16:   "writeSingleInt16",
-	ReadUint16:         "readUint16",
-	ReadSingleUint16:   "readSingleUint16",
-	WriteSingleUint16:  "writeSingleUint16",
-	ReadInt32:          "readInt32",
-	ReadSingleInt32:    "readSingleInt32",
-	WriteSingleInt32:   "writeSingleInt32",
-	ReadUint32:         "readUint32",
-	ReadSingleUint32:   "readSingleUint32",
-	WriteSingleUint32:  "writeSingleUint32",
-	ReadFloat32:        "readFloat32",
-	ReadSingleFloat32:  "readSingleFloat32",
-	WriteSingleFloat32: "writeSingleFloat32",
-	ReadFloat64:        "readFloat64",
-	ReadSingleFloat64:  "readSingleFloat64",
-	WriteSingleFloat64: "writeSingleFloat64",
-}
-
 func setRequest(body Operation) (Operation, error) {
-	r := body.Request
-	if r == NameModbusType.readCoil || r == NameModbusType.readDiscreteInput {
+	r := body.ObjectType
+	if r == model.ObjectTypes.ReadCoil || r == model.ObjectTypes.ReadDiscreteInput {
 		body.Length = 1
 	}
-	if r == NameModbusType.readCoil || r == NameModbusType.readCoils || r == NameModbusType.writeCoil || r == NameModbusType.writeCoils {
+	if r == model.ObjectTypes.ReadCoil || r == model.ObjectTypes.ReadCoils || r == model.ObjectTypes.WriteCoil || r == model.ObjectTypes.WriteCoils {
 		body.IsCoil = true
 	}
 	return body, nil
@@ -122,14 +66,15 @@ func setRequest(body Operation) (Operation, error) {
 
 func parseRequest(body Operation) (Operation, error) {
 	set, _ := setRequest(body)
-	ops := utils.NewString(body.Request).ToCamelCase() //eg: readCoil, read_coil, writeCoil
+	ops := utils.NewString(body.ObjectType).ToCamelCase() //eg: readCoil, read_coil, writeCoil
 	ops = utils.LcFirst(ops)
+
 	switch ops {
-	case NameModbusType.readCoil, NameModbusType.readCoils, NameModbusType.readDiscreteInput, NameModbusType.readDiscreteInputs:
-		set.Op = readBool
+	case model.ObjectTypes.ReadCoil, model.ObjectTypes.ReadCoils, model.ObjectTypes.ReadDiscreteInput, model.ObjectTypes.ReadDiscreteInputs:
+		set.op = readBool
 		return set, err
-	case NameModbusType.writeCoil, NameModbusType.writeCoils:
-		if ops == NameModbusType.writeCoil || ops == NameModbusType.writeCoils {
+	case model.ObjectTypes.WriteCoil, model.ObjectTypes.WriteCoils:
+		if ops == model.ObjectTypes.WriteCoil || ops == model.ObjectTypes.WriteCoils {
 			set.IsCoil = true
 		}
 		if body.WriteValue > 0 {
@@ -137,19 +82,19 @@ func parseRequest(body Operation) (Operation, error) {
 		} else {
 			set.coil = false
 		}
-		set.Op = writeCoil
+		set.op = writeCoil
 		return set, err
-	case NameModbusType.ReadFloat32, NameModbusType.ReadSingleFloat32:
+	case model.ObjectTypes.ReadFloat32, model.ObjectTypes.ReadSingleFloat32:
 		if body.IsHoldingReg {
 			set.IsHoldingReg = true
 		} else {
 			set.IsHoldingReg = false
 		}
-		set.Op = readFloat32
+		set.op = readFloat32
 		return set, err
-	case NameModbusType.WriteSingleFloat32:
+	case model.ObjectTypes.WriteSingleFloat32:
 		set.IsHoldingReg = true
-		set.Op = writeFloat32
+		set.op = writeFloat32
 		set.f32 = float32(body.WriteValue)
 		return set, err
 	}
@@ -172,7 +117,7 @@ func zeroMode(addr uint16, mode bool) uint16 {
 
 func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{}, err error) {
 	o.Addr = zeroMode(o.Addr, o.ZeroMode)
-	switch o.Op {
+	switch o.op {
 	case readBool:
 		var res []bool
 		if o.IsCoil {
@@ -197,7 +142,7 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 		} else {
 			for idx := range res {
-				if o.Op == readUint16 {
+				if o.op == readUint16 {
 					log.Infof("0x%04x\t%-5v : 0x%04x\t%v\n",
 						o.Addr+uint16(idx),
 						o.Addr+uint16(idx),
@@ -226,12 +171,12 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 
 	case readFloat32:
 		var res []float32
-		if o.Request == NameModbusType.ReadSingleFloat32 {
+		if o.ObjectType == model.ObjectTypes.ReadSingleFloat32 {
 			o.Length = 1
 		}
 		if o.IsHoldingReg {
 			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
-			if o.Request == NameModbusType.ReadSingleFloat32 {
+			if o.ObjectType == model.ObjectTypes.ReadSingleFloat32 {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 					return nil, err
@@ -246,7 +191,7 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			}
 		} else {
 			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
-			if o.Request == NameModbusType.ReadSingleFloat32 {
+			if o.ObjectType == model.ObjectTypes.ReadSingleFloat32 {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 				}
@@ -270,7 +215,7 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			log.Errorf("modbus:  failed to read holding/input registers: %v\n", err)
 		} else {
 			for idx := range res {
-				if o.Op == readUint64 {
+				if o.op == readUint64 {
 					log.Infof("modbus: 0x%04x\t%-5v : 0x%016x\t%v\n",
 						o.Addr+(uint16(idx)*4),
 						o.Addr+(uint16(idx)*4),
@@ -419,18 +364,6 @@ func ipCheck(target string) bool {
 	}
 }
 
-var namesEncoding = struct {
-	lebBew string
-	lebLew string
-	bebLew string
-	bebBew string
-}{
-	lebBew: "lebBew",
-	lebLew: "lebLew",
-	bebLew: "bebLew",
-	bebBew: "bebBew",
-}
-
 func performBoolScan(client *modbus.ModbusClient, isCoil bool, start uint32, count uint32) (uint, string) {
 	var err error
 	var addr uint32
@@ -475,13 +408,13 @@ func EncodingBuilder(selection string, cli *modbus.ModbusClient) (client *modbus
 	sel := utils.NewString(selection).ToCamelCase() //eg: LEB_BEW, lebBew
 	sel = utils.LcFirst(sel)
 	switch sel {
-	case namesEncoding.lebBew:
+	case model.ObjectEncoding.LebBew:
 		err = cli.SetEncoding(modbus.LITTLE_ENDIAN, modbus.HIGH_WORD_FIRST)
-	case namesEncoding.lebLew:
+	case model.ObjectEncoding.LebLew:
 		err = cli.SetEncoding(modbus.LITTLE_ENDIAN, modbus.LOW_WORD_FIRST)
-	case namesEncoding.bebLew:
+	case model.ObjectEncoding.BebLew:
 		err = cli.SetEncoding(modbus.BIG_ENDIAN, modbus.LOW_WORD_FIRST)
-	case namesEncoding.bebBew:
+	case model.ObjectEncoding.BebBew:
 		err = cli.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
 	default:
 		log.Errorf("modbus:  unknown endianness setting '%s' (should either be big or little)\n", selection)
