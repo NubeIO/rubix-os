@@ -1,7 +1,9 @@
 package database
 
 import (
+	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
@@ -30,11 +32,39 @@ func pluginIsNil(name string) string {
 	return name
 }
 
-
 func nameIsNil(name string) string {
 	if name == "" {
 		uuid := utils.MakeTopicUUID("")
 		return fmt.Sprintf("n_%s", truncateString(uuid, 8))
 	}
 	return name
+}
+
+func checkTransport(t string) (string, error) {
+	if t == "" {
+		return "", errors.New("no transport type was provided ie: ip or serial")
+	}
+	i := utils.ArrayValues(model.TransType)
+	if !utils.ArrayContains(i, t) {
+		return "", errors.New("please provide a valid transport type ie: ip or serial")
+	}
+	return t, nil
+}
+
+func checkObjectType(t string) (string, error) {
+	if t == "" {
+		return "", errors.New("no object type was provided ie: analogInput or readCoil")
+	}
+	i := utils.ArrayValues(model.ObjectTypes)
+	if !utils.ArrayContains(i, t) {
+		return "", errors.New("please provide a valid object type ie: analogInput or readCoil")
+	}
+	return t, nil
+}
+
+func transportIsNil(t string) string {
+	if t == "" {
+		return model.TransType.IP
+	}
+	return t
 }

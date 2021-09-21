@@ -38,20 +38,90 @@ type Units struct { // for example from temp c to temp f
 	To   string
 }
 
-var ObjectTypeBACnet = struct {
+var ObjectTypes = struct {
+	//bacnet
 	AnalogInput  string
 	AnalogOutput string
 	AnalogValue  string
 	BinaryInput  string
 	BinaryOutput string
 	BinaryValue  string
+
+	//modbus
+	ReadCoil           string
+	ReadCoils          string
+	ReadDiscreteInput  string
+	ReadDiscreteInputs string
+	WriteCoil          string
+	WriteCoils         string
+	ReadRegister       string
+	ReadRegisters      string
+	ReadInt16          string
+	ReadSingleInt16    string
+	WriteSingleInt16   string
+	ReadUint16         string
+	ReadSingleUint16   string
+	WriteSingleUint16  string
+	ReadInt32          string
+	ReadSingleInt32    string
+	WriteSingleInt32   string
+	ReadUint32         string
+	ReadSingleUint32   string
+	WriteSingleUint32  string
+	ReadFloat32        string
+	ReadSingleFloat32  string
+	WriteSingleFloat32 string
+	ReadFloat64        string
+	ReadSingleFloat64  string
+	WriteSingleFloat64 string
 }{
+	//bacnet
 	AnalogInput:  "analogInput",
 	AnalogOutput: "analogOutput",
 	AnalogValue:  "analogValue",
 	BinaryInput:  "binaryInput",
 	BinaryOutput: "binaryOutput",
 	BinaryValue:  "binaryValue",
+
+	//modbus
+	ReadCoil:           "readCoil",
+	ReadCoils:          "readCoils",
+	ReadDiscreteInput:  "readDiscreteInput",
+	ReadDiscreteInputs: "readDiscreteInputs",
+	WriteCoil:          "writeCoil",
+	WriteCoils:         "writeCoils",
+	ReadRegister:       "readRegister",
+	ReadRegisters:      "readRegisters",
+	ReadInt16:          "readInt16",
+	ReadSingleInt16:    "readSingleInt16",
+	WriteSingleInt16:   "writeSingleInt16",
+	ReadUint16:         "readUint16",
+	ReadSingleUint16:   "readSingleUint16",
+	WriteSingleUint16:  "writeSingleUint16",
+	ReadInt32:          "readInt32",
+	ReadSingleInt32:    "readSingleInt32",
+	WriteSingleInt32:   "writeSingleInt32",
+	ReadUint32:         "readUint32",
+	ReadSingleUint32:   "readSingleUint32",
+	WriteSingleUint32:  "writeSingleUint32",
+	ReadFloat32:        "readFloat32",
+	ReadSingleFloat32:  "readSingleFloat32",
+	WriteSingleFloat32: "writeSingleFloat32",
+	ReadFloat64:        "readFloat64",
+	ReadSingleFloat64:  "readSingleFloat64",
+	WriteSingleFloat64: "writeSingleFloat64",
+}
+
+var ObjectEncoding = struct {
+	LebBew string //LITTLE_ENDIAN, HIGH_WORD_FIRST
+	LebLew string
+	BebLew string
+	BebBew string
+}{
+	LebBew: "lebBew",
+	LebLew: "lebLew",
+	BebLew: "bebLew",
+	BebBew: "bebBew",
 }
 
 //Point table
@@ -65,7 +135,8 @@ type Point struct {
 	ValueRaw             datatypes.JSON `json:"value_raw"`
 	Fallback             float64        `json:"fallback"`
 	DeviceUUID           string         `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
-	Writeable            bool           `json:"writeable"`
+	EnableWriteable      *bool          `json:"writeable"`
+	IsOutput             *bool          `json:"is_output"`
 	COV                  float32        `json:"cov"`
 	ObjectType           string         `json:"object_type"`    //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
 	AddressId            int            `json:"address_id"`     // for example a modbus address or bacnet address
@@ -78,8 +149,8 @@ type Point struct {
 	CommonThingUse              //lora
 	CommonThingObject           //point
 	CommonThingType             //temp
-	IsProducer           bool   `json:"is_producer"`
-	IsConsumer           bool   `json:"is_consumer"`
+	IsProducer           *bool  `json:"is_producer"`
+	IsConsumer           *bool  `json:"is_consumer"`
 	CommonFault
 	Priority *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
 }

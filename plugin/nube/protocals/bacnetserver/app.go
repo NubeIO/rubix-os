@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
@@ -11,14 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"time"
 )
-
-//checkTypes make sure
-func (i *Instance) checkTypes(body *model.Point) (*model.Point, error) {
-	if body.ObjectType != model.ObjectTypeBACnet.AnalogValue || body.ObjectType != model.ObjectTypeBACnet.AnalogOutput {
-		return nil, errors.New("data types supported are only AnalogValue or AnalogOutput")
-	}
-	return nil, nil
-}
 
 //bacnetUpdate listen on mqtt and then update the point in flow-framework
 func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {

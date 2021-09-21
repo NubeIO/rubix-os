@@ -11,7 +11,7 @@ import (
 )
 
 // WizardLocalPointMapping add a local network mapping stream.
-func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
+func (d *GormDatabase) WizardLocalPointMapping(body *api.WizardLocalMapping) (bool, error) {
 	var flowNetwork model.FlowNetwork
 	var networkModel model.Network
 	var deviceModel model.Device
@@ -22,8 +22,12 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var writerModel model.Writer
 	var writerCloneModel model.WriterClone
 
+	if body.PluginName == "" {
+		body.PluginName = "system"
+	}
+
 	//get plugin
-	p, err := d.GetPluginByPath("modbus")
+	p, err := d.GetPluginByPath(body.PluginName)
 	if p.UUID == "" {
 		return false, errors.New("no valid plugin")
 	}
@@ -57,7 +61,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	// point
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
-	pointModel.IsProducer = true
+	*pointModel.IsProducer = true
 	pnt, err := d.CreatePoint(&pointModel, "")
 	fmt.Println("CreatePoint")
 	if err != nil {
@@ -184,7 +188,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	// point
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "is the producer"
-	pointModel.IsProducer = true
+	*pointModel.IsProducer = true
 	pnt, err := d.CreatePoint(&pointModel, "")
 	log.Debug("Created a Point")
 
@@ -239,7 +243,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var pointModel2 model.Point
 	pointModel2.DeviceUUID = dev2.UUID
 	pointModel2.Name = "is the consumer"
-	pointModel2.IsConsumer = true
+	*pointModel2.IsConsumer = true
 	pnt2, err := d.CreatePoint(&pointModel2, "")
 	if err != nil {
 		return false, err
@@ -438,7 +442,7 @@ func (d *GormDatabase) NetworkDevicePoint() (bool, error) {
 	fmt.Println("CreateDevice")
 	// point
 	pointModel.DeviceUUID = dev.UUID
-	pointModel.IsProducer = true
+	*pointModel.IsProducer = true
 	_, err = d.CreatePoint(&pointModel, "")
 
 	fmt.Println("CreatePoint")

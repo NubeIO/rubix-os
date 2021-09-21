@@ -8,7 +8,7 @@ import (
 type DBDatabase interface {
 	DropAllFlow() (string, error) //delete all networks, gateways and children
 	SyncTopics()                  //sync all the topics into the event bus
-	WizardLocalPointMapping() (bool, error)
+	WizardLocalPointMapping(body *WizardLocalMapping) (bool, error)
 	WizardRemotePointMapping() (bool, error)
 	Wizard2ndFlowNetwork(body *AddNewFlowNetwork) (bool, error)
 	NetworkDevicePoint() (bool, error)
@@ -26,8 +26,18 @@ func (a *DatabaseAPI) SyncTopics() {
 	a.DB.SyncTopics()
 }
 
+type WizardLocalMapping struct {
+	PluginName string `json:"plugin_name"`
+}
+
+func getBODYLocal(ctx *gin.Context) (dto *WizardLocalMapping, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func (a *DatabaseAPI) WizardLocalPointMapping(ctx *gin.Context) {
-	mapping, err := a.DB.WizardLocalPointMapping()
+	body, _ := getBODYLocal(ctx)
+	mapping, err := a.DB.WizardLocalPointMapping(body)
 	reposeHandler(mapping, err, ctx)
 }
 

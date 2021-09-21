@@ -66,12 +66,16 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Device)
 	networkUUID := body.NetworkUUID
 	body.Name = nameIsNil(body.Name)
+	_, err := checkTransport(body.TransportType)
+	if err != nil {
+		return nil, err
+	}
 	query := d.DB.Where("uuid = ? ", networkUUID).First(&net)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	body.ThingClass = model.ThingClass.Device
-	body.CommonEnable.Enable = true
+	*body.CommonEnable.Enable = true
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
 	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
@@ -88,7 +92,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	}
 	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, nModel.PluginConfId, body.UUID)
 	d.Bus.RegisterTopic(t)
-	err := d.Bus.Emit(eventbus.CTX(), t, body)
+	err = d.Bus.Emit(eventbus.CTX(), t, body)
 	if err != nil {
 		return nil, errors.New("error on device eventbus")
 	}
@@ -102,6 +106,10 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 		return nil, query.Error
 	}
 	query = d.DB.Model(&deviceModel).Updates(body)
+	_, err := checkTransport(body.TransportType)
+	if err != nil {
+		return nil, err
+	}
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -112,7 +120,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	}
 	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, nModel.PluginConfId, uuid)
 	d.Bus.RegisterTopic(t)
-	err := d.Bus.Emit(eventbus.CTX(), t, deviceModel)
+	err = d.Bus.Emit(eventbus.CTX(), t, deviceModel)
 	if err != nil {
 		return nil, errors.New("error on device eventbus")
 	}

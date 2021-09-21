@@ -8,8 +8,9 @@ import (
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/patrickmn/go-cache"
 )
+
 const path = "lorawan" //must be unique across all plugins
-const name = "lorawan-api" //must be unique across all plugins
+const name = "lorawan" //must be unique across all plugins
 const description = "lorawan api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"

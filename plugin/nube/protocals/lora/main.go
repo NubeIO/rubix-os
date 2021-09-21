@@ -7,8 +7,9 @@ import (
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/patrickmn/go-cache"
 )
+
 const path = "lora" //must be unique across all plugins
-const name = "lora-api" //must be unique across all plugins
+const name = "lora" //must be unique across all plugins
 const description = "lora raw"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
@@ -21,7 +22,6 @@ const isNetwork = true
 const maxAllowedNetworks = 1
 const networkType = "lora"
 const transportType = "serial" //serial, ip
-
 
 // Instance is plugin instance
 type Instance struct {

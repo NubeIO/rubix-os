@@ -66,6 +66,10 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	deviceUUID := body.DeviceUUID
 	body.Name = nameIsNil(body.Name)
+	_, err := checkObjectType(body.ObjectType)
+	if err != nil {
+		return nil, err
+	}
 	query := d.DB.Where("uuid = ? ", deviceUUID).First(&deviceModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -79,7 +83,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 		body.Description = "na"
 	}
 	body.ThingClass = model.ThingClass.Point
-	body.CommonEnable.Enable = true
+	*body.CommonEnable.Enable = true
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
 	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
@@ -122,6 +126,10 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 	var pointModel *model.Point
 	//TODO add in a check to make sure user doesn't set the addressID and the ObjectType the same as another point
 	//check if there is an existing device with this address code
+	_, err := checkObjectType(body.ObjectType)
+	if err != nil {
+		return nil, err
+	}
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
@@ -134,7 +142,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 	query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
 	query = d.DB.Model(&pointModel).Updates(&body)
 
-	if pointModel.IsProducer && body.IsProducer {
+	if *pointModel.IsProducer && *body.IsProducer {
 		if compare(pointModel, body) {
 			_, err := d.ProducerWrite("point", pointModel)
 			if err != nil {
@@ -196,7 +204,7 @@ func (d *GormDatabase) UpdatePointByFieldAndType(field string, value string, bod
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if pointModel.IsProducer {
+	if *pointModel.IsProducer {
 		if compare(pointModel, body) {
 			log.Errorf("UpdatePointByFieldAndType")
 			_, err := d.ProducerWrite("point", pointModel)

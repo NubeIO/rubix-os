@@ -5,6 +5,8 @@ type CommonDevice struct {
 	Model       string `json:"model"`        // thml
 	AddressId   int    `json:"address_id"`   // for example a modbus address or bacnet address
 	AddressUUID string `json:"address_uuid"` // AAB1213
+	CommonIP
+	TransportType string `json:"transport_type"  gorm:"type:varchar(255);not null"` //serial, ip
 
 }
 
