@@ -43,7 +43,7 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 		return nil, errors.New("please pass in a thing_type ie: a point type")
 	}
 	if body.ProducerThingClass == model.ThingClass.Point {
-		_, err := d.GetPoint(body.ProducerThingUUID, false)
+		_, err := d.GetPoint(body.ProducerThingUUID, api.Args{})
 		if err != nil {
 			return nil, errors.New("point not found, please supply a valid point uuid")
 		}
