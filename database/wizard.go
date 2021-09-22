@@ -10,97 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//in ff-1 make 1 producer stream and add 1 point
-//in ff-2 add a flow network with the details on ff-1 and make a stream, consumer and writer
-//in ff-1 make a writer clone of writer from ff-2
-//test writer action works on ff-2 and updates on ff-1
-
-//4 streams
-//make points, producers, consumers and writers
-//set point names and equipRef
-
-//func pointToWriter(d *GormDatabase, body *WizardLocalMapping) (bool, error) {
-//	var producerModel model.Producer
-//	var consumerModel model.Consumer
-//	var writerModel model.Writer
-//	var writerCloneModel model.WriterClone
-//
-//	var deviceModel model.Device
-//	var pointModel model.Point
-//
-//	producerStreamUUID := body.ProducerStreamUUID
-//	consumerStreamUUID := body.ConsumerStreamUUID
-//
-//	pointModel.DeviceUUID = body.DeviceUUID
-//	pointModel.Name = "is the producer"
-//	pointModel.IsProducer = utils.NewTrue()
-//	pnt, err := d.CreatePoint(&pointModel, producerStreamUUID)
-//	fmt.Println("CreatePoint")
-//	if err != nil {
-//		log.Errorf("wizzrad:  CreatePoint: %v\n", err)
-//		return false, err
-//	}
-//
-//	// producer
-//	producerModel.StreamUUID = producerStreamUUID
-//	producerModel.ProducerThingUUID = pnt.UUID
-//	producerModel.Name = "producer stream"
-//	producerModel.ProducerThingClass = model.ThingClass.Point
-//	producerModel.ProducerThingType = model.ThingClass.Point
-//	producerModel.ProducerApplication = model.CommonNaming.Mapping
-//	producer, err := d.CreateProducer(&producerModel)
-//	fmt.Println("CreateProducer")
-//	if err != nil {
-//		log.Errorf("wizzrad:  CreateProducer: %v\n", err)
-//		return false, err
-//	}
-//	// consumer
-//	consumerModel.StreamUUID = streamModel.UUID
-//	consumerModel.Name = "consumer stream"
-//	consumerModel.ProducerUUID = producerModel.UUID
-//	consumerModel.ProducerThingClass = model.ThingClass.Point
-//	consumerModel.ProducerThingType = model.ThingClass.Point
-//	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
-//	consumerModel.ProducerThingUUID = pnt.UUID
-//	_, err = d.CreateConsumer(&consumerModel)
-//	fmt.Println("CreateConsumer")
-//	if err != nil {
-//		log.Errorf("wizzrad:  CreateConsumer: %v\n", err)
-//		return false, err
-//	}
-//	// writer
-//	writerModel.ConsumerUUID = consumerModel.UUID
-//	writerModel.WriterThingClass = model.ThingClass.Point
-//	writerModel.WriterThingType = model.ThingClass.Point
-//	writerModel.ConsumerThingUUID = consumerModel.UUID //itself
-//	writer, err := d.CreateWriter(&writerModel)
-//	if err != nil {
-//		log.Errorf("wizzrad:  CreateWriter: %v\n", err)
-//		return false, err
-//	}
-//	fmt.Println("CreateWriter")
-//	// add consumer to the writerClone
-//	writerCloneModel.ProducerUUID = producer.UUID
-//	writerCloneModel.ThingClass = model.ThingClass.Point
-//	writerCloneModel.ThingType = model.ThingClass.Point
-//	writerCloneModel.WriterUUID = writer.UUID
-//	writerClone, err := d.CreateWriterClone(&writerCloneModel)
-//	if err != nil {
-//		log.Errorf("wizzrad:  CreateWriterClone: %v\n", err)
-//		return false, err
-//	}
-//	fmt.Println("CreateWriterClone")
-//	writerModel.CloneUUID = writerClone.UUID
-//	_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
-//	if err != nil {
-//		log.Errorf("wizzrad:  UpdateWriter: %v\n", err)
-//		return false, err
-//	}
-//
-//
-//	return true, err
-//}
-
 // WizardLocalPointMapping add a local network mapping stream.
 func (d *GormDatabase) WizardLocalPointMapping(body *api.WizardLocalMapping) (bool, error) {
 	var flowNetwork model.FlowNetwork
@@ -346,25 +255,6 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 		return false, err
 	}
 	log.Debug("Created Consumer: ", consumer.Name)
-
-	// device to be used for consumer list (edge-2)
-	//deviceModel.NetworkUUID = n.UUID
-	//_, err := d.CreateDevice(&deviceModel)
-	//if err != nil {
-	//	return false, err
-	//}
-
-	//// point 2 to add to consumer list (edge-2)
-	//var pointModel2 model.Point
-	//pointModel2.DeviceUUID = dev2.UUID
-	//pointModel2.Name = "is the consumer"
-	//pointModel2.IsConsumer = utils.NewTrue()
-	//pointModel2.ObjectType = "analogInput" //TODO: check
-	//pnt2, err := d.CreatePoint(&pointModel2, "")
-	//if err != nil {
-	//	return false, err
-	//}
-
 	// writer (edge-2)
 	writerModel.ConsumerUUID = consumerModel.UUID
 	writerModel.ConsumerThingUUID = consumerModel.UUID
@@ -417,9 +307,7 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	var writerCloneModel model.WriterClone
 
 	isRemote := true
-	url := "192.168.15.102" //165.227.72.56
-	//token := "fakeToken123"
-
+	url := "0.0.0.0" //165.227.72.56
 	//in writer add writeCloneUUID and same in writerClone
 	flowNetwork.IsRemote = isRemote
 	flowNetwork.FlowIP = url
@@ -545,7 +433,7 @@ func (d *GormDatabase) NetworkDevicePoint() (bool, error) {
 	var pointModel model.Point
 
 	//get plugin
-	p, err := d.GetPluginByPath("bacnetserver")
+	p, err := d.GetPluginByPath("system")
 	if p.UUID == "" {
 		return false, errors.New("no valid plugin")
 	}
