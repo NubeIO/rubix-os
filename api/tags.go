@@ -17,13 +17,13 @@ type TagAPI struct {
 }
 
 func (j *TagAPI) GetTags(ctx *gin.Context) {
-	args := buildTagsArgs(ctx)
+	args := buildTagArgs(ctx)
 	q, err := j.DB.GetTags(args)
 	reposeHandler(q, err, ctx)
 }
 
 func (j *TagAPI) GetTag(ctx *gin.Context) {
-	args := buildTagsArgs(ctx)
+	args := buildTagArgs(ctx)
 	tag := getTagParam(ctx)
 	q, err := j.DB.GetTag(tag, args)
 	reposeHandler(q, err, ctx)

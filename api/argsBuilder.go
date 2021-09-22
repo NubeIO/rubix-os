@@ -137,6 +137,7 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	args.Points, _ = toBool(ctx.DefaultQuery(aType.Points, aDefault.Points))
 	args.IpConnection, _ = toBool(ctx.DefaultQuery(aType.IpConnection, aDefault.IpConnection))
 	args.SerialConnection, _ = toBool(ctx.DefaultQuery(aType.SerialConnection, aDefault.SerialConnection))
+	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
 	return args
 }
 
@@ -147,6 +148,16 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	args.Points, _ = toBool(ctx.DefaultQuery(aType.Points, aDefault.Points))
 	args.IpConnection, _ = toBool(ctx.DefaultQuery(aType.IpConnection, aDefault.IpConnection))
 	args.SerialConnection, _ = toBool(ctx.DefaultQuery(aType.SerialConnection, aDefault.SerialConnection))
+	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
+	return args
+}
+
+func buildPointArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Priority, _ = toBool(ctx.DefaultQuery(aType.Priority, aDefault.Priority))
+	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
 	return args
 }
 
@@ -158,10 +169,13 @@ func buildPluginArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildTagsArgs(ctx *gin.Context) Args {
+func buildTagArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
+	args.Networks, _ = toBool(ctx.DefaultQuery(aType.Networks, aDefault.Networks))
+	args.Devices, _ = toBool(ctx.DefaultQuery(aType.Devices, aDefault.Devices))
+	args.Points, _ = toBool(ctx.DefaultQuery(aType.Points, aDefault.Points))
 	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
 	args.Producers, _ = toBool(ctx.DefaultQuery(aType.Producers, aDefault.Producers))
 	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))

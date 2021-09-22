@@ -66,7 +66,7 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 		return nil, err
 	}
 	if len(body.Tags) > 0 {
-		if err := d.DB.Model(&producerModel).Association("Tags").Replace(body.Tags); err != nil {
+		if err := d.updateTags(&producerModel, body.Tags); err != nil {
 			return nil, err
 		}
 	}

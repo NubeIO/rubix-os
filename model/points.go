@@ -158,6 +158,7 @@ type Point struct {
 	IsConsumer      *bool `json:"is_consumer"`
 	CommonFault
 	Priority *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
+	Tags     []*Tag    `json:"tags" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
 }
 
 type Priority struct {

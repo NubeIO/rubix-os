@@ -43,10 +43,12 @@ type Args struct {
 	Consumers        bool
 	CommandGroups    bool
 	Writers          bool
+	Networks         bool
 	Devices          bool
 	Points           bool
 	IpConnection     bool
 	SerialConnection bool
+	Priority         bool
 	Tags             bool
 	GlobalUUID       *string
 	ClientId         *string
@@ -88,10 +90,12 @@ var ArgsType = struct {
 	Consumers        string
 	CommandGroups    string
 	Writers          string
+	Networks         string
 	Devices          string
 	Points           string
 	IpConnection     string
 	SerialConnection string
+	Priority         string
 	Tags             string
 	GlobalUUID       string
 	ClientId         string
@@ -131,10 +135,12 @@ var ArgsType = struct {
 	Consumers:        "consumers",
 	CommandGroups:    "command_groups",
 	Writers:          "writers",
+	Networks:         "networks",
 	Devices:          "devices",
 	Points:           "points",
 	IpConnection:     "ip_connection",
 	SerialConnection: "serial_connection",
+	Priority:         "priority",
 	Tags:             "tags",
 	GlobalUUID:       "global_uuid",
 	ClientId:         "client_id",
@@ -174,10 +180,12 @@ var ArgsDefault = struct {
 	Consumers        string
 	CommandGroups    string
 	Writers          string
+	Networks         string
 	Devices          string
 	Points           string
 	IpConnection     string
 	SerialConnection string
+	Priority         string
 	Tags             string
 	PluginName       string
 }{
@@ -211,10 +219,12 @@ var ArgsDefault = struct {
 	Consumers:        "false",
 	CommandGroups:    "false",
 	Writers:          "false",
+	Networks:         "false",
 	Devices:          "false",
 	Points:           "false",
 	IpConnection:     "false",
 	SerialConnection: "false",
+	Priority:         "false",
 	Tags:             "false",
 	PluginName:       "false",
 }
