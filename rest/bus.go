@@ -6,7 +6,8 @@ import (
 )
 
 func WriteClone(uuid string, flowBody *model.FlowNetwork, body *model.WriterClone, write bool) (*model.WriterClone, error) {
-	if !flowBody.IsMQTT {
+	isMQTT := *flowBody.IsMQTT
+	if !isMQTT {
 		ip := flowBody.FlowIP
 		port := flowBody.FlowPort
 		token := flowBody.FlowToken
@@ -29,7 +30,8 @@ func WriteClone(uuid string, flowBody *model.FlowNetwork, body *model.WriterClon
 }
 
 func WriteProducer(uuid string, flowBody *model.FlowNetwork, body *model.Producer, write bool) (*model.Producer, error) {
-	if !flowBody.IsMQTT {
+	isMQTT := *flowBody.IsMQTT
+	if !isMQTT {
 		ip := flowBody.FlowIP
 		port := flowBody.FlowPort
 		token := flowBody.FlowToken

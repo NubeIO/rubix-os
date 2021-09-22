@@ -42,11 +42,17 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	if body.ProducerThingClass == "" {
 		return nil, errors.New("please pass in a thing_type ie: a point type")
 	}
+	thingName := ""
 	if body.ProducerThingClass == model.ThingClass.Point {
+<<<<<<< HEAD
 		_, err := d.GetPoint(body.ProducerThingUUID, api.Args{})
+=======
+		pnt, err := d.GetPoint(body.ProducerThingUUID, false)
+>>>>>>> misc-15
 		if err != nil {
 			return nil, errors.New("point not found, please supply a valid point uuid")
 		}
+		thingName = pnt.Name
 	}
 	_, err := d.GetStream(body.StreamUUID, api.Args{})
 	if err != nil {
@@ -54,6 +60,7 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Producer)
 	body.Name = nameIsNil(body.Name)
+	body.ProducerThingName = nameIsNil(thingName)
 	if err = d.DB.Create(&body).Error; err != nil {
 		return nil, errorMsg("CreateProducer", "error on trying to add a new Producer", nil)
 	}
