@@ -112,7 +112,7 @@ func (d *GormDatabase) AddConsumerWizard(consumerStreamUUID, producerUUID string
 	if err != nil || stream.UUID == "" {
 		return nil, errors.New("error: invalid stream UUID")
 	}
-	isRemote := flow.IsRemote
+	isRemote := *flow.IsRemote
 
 	var producer *model.Producer
 	if isRemote {

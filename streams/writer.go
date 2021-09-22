@@ -19,7 +19,8 @@ func GetProducerHist(producerUUID string, flowBody *model.FlowNetwork) (*model.P
 }
 
 func WriteClone(uuid string, flowBody *model.FlowNetwork, body *model.WriterClone, write bool) (*model.WriterClone, error) {
-	if !flowBody.IsMQTT {
+	isMQTT := *flowBody.IsMQTT
+	if !isMQTT {
 		call, err := rest.WriteClone(uuid, flowBody, body, write)
 		if err != nil {
 			return nil, err

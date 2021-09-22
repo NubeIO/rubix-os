@@ -84,9 +84,9 @@ func getBODYWriterWizard(ctx *gin.Context) (dto *WriterWizard, err error) {
 }
 
 type WriterWizard struct {
-	FlowUUID     string `json:"consumer_side_flow_uuid"`
-	StreamUUID   string `json:"consumer_side_stream_uuid"`
-	ProducerUUID string `json:"remote_producer_uuid"`
+	ConsumerFlowUUID   string `json:"consumer_side_flow_uuid"`
+	ConsumerStreamUUID string `json:"consumer_side_stream_uuid"`
+	ProducerUUID       string `json:"remote_producer_uuid"`
 }
 
 func (j *WriterAPI) CreateWriterWizard(ctx *gin.Context) {

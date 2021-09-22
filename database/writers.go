@@ -4,10 +4,11 @@ import (
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/client"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/streams"
 	"github.com/NubeDev/flow-framework/utils"
-	log "github.com/sirupsen/logrus"
 )
 
 type Writer struct {
@@ -105,32 +106,41 @@ func (d *GormDatabase) CreateWriterWizard(body *api.WriterWizard) (bool, error) 
 	var consumerModel model.Consumer
 	var writerModel model.Writer
 	var writerCloneModel model.WriterClone
-	flow, err := d.GetFlowNetwork(body.FlowUUID, api.Args{})
+	var session *client.FlowClient
+	producer := new(model.Producer)
+
+	flow, err := d.GetFlowNetwork(body.ConsumerFlowUUID, api.Args{})
 	if err != nil {
 		return false, err
 	}
-	isRemote := flow.IsRemote
-	var session *client.FlowClient
-	var producer *model.Producer
+
+	isRemote := utils.BoolIsNil(flow.IsRemote)
 
 	if isRemote {
 		session = client.NewSessionWithToken("", flow.FlowIP, flow.FlowPort)
-		producer, err = session.GetProducer(body.ProducerUUID)
+		pro, err := session.GetProducer(body.ProducerUUID)
 		if err != nil {
-			return false, err
-		}
-	} else {
-		pro, err := d.GetProducer(body.FlowUUID, api.Args{})
-		if err != nil {
-			return false, err
+			return false, errors.New("CREATE-WRITER: failed to remote GetProducer")
 		}
 		producer.UUID = pro.UUID
 		producer.ProducerThingClass = pro.ProducerThingClass
 		producer.ProducerThingType = pro.ProducerThingType
 		producer.ProducerThingName = pro.ProducerThingName
+		producer.ProducerThingUUID = pro.ProducerThingUUID
+	} else {
+		pro, err := d.GetProducer(body.ProducerUUID, api.Args{})
+		if err != nil {
+			return false, errors.New("CREATE-WRITER: failed to local GetProducer")
+		}
+		producer.UUID = pro.UUID
+		producer.ProducerThingClass = pro.ProducerThingClass
+		producer.ProducerThingType = pro.ProducerThingType
+		producer.ProducerThingName = pro.ProducerThingName
+		producer.ProducerThingUUID = pro.ProducerThingUUID
 
 	}
-	consumerModel.StreamUUID = body.StreamUUID
+
+	consumerModel.StreamUUID = body.ConsumerStreamUUID
 	consumerModel.Name = "consumer stream"
 	consumerModel.ProducerUUID = producer.UUID
 	consumerModel.ProducerThingClass = producer.ProducerThingClass
@@ -140,8 +150,8 @@ func (d *GormDatabase) CreateWriterWizard(body *api.WriterWizard) (bool, error) 
 	consumerModel.ProducerThingName = producer.ProducerThingName
 	_, err = d.CreateConsumer(&consumerModel)
 	if err != nil {
-		log.Errorf("wizzrad:  CreateConsumer: %v\n", err)
-		return false, err
+		log.Errorf("wizard:  CreateConsumer: %v\n", err)
+		return false, errors.New("CREATE-WRITER: failed to local CreateConsumer")
 	}
 	//// writer
 	writerModel.ConsumerUUID = consumerModel.UUID
@@ -150,7 +160,7 @@ func (d *GormDatabase) CreateWriterWizard(body *api.WriterWizard) (bool, error) 
 	writerModel.WriterThingType = model.ThingClass.API
 	writer, err := d.CreateWriter(&writerModel)
 	if err != nil {
-		return false, err
+		return false, errors.New("CREATE-WRITER: failed to local CreateWriter")
 	}
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = body.ProducerUUID
@@ -160,27 +170,24 @@ func (d *GormDatabase) CreateWriterWizard(body *api.WriterWizard) (bool, error) 
 	if !isRemote {
 		writerClone, err := d.CreateWriterClone(&writerCloneModel)
 		if err != nil {
-			return false, err
+			return false, errors.New("CREATE-WRITER: failed to local CreateWriterClone")
 		}
 		writerModel.CloneUUID = writerClone.UUID
 		_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
 		if err != nil {
-			return false, err
+			return false, errors.New("CREATE-WRITER: failed to local UpdateWriter")
 		}
 	} else {
 		clone, err := session.CreateWriterClone(writerCloneModel)
 		if err != nil {
-			return false, err
+			return false, errors.New("CREATE-WRITER: failed to remote CreateWriterClone")
 		}
 		writerModel.CloneUUID = clone.UUID
 		writerModel.CloneUUID = clone.UUID
 		_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
 		if err != nil {
-			return false, err
+			return false, errors.New("CREATE-WRITER: failed to local UpdateWriter")
 		}
-	}
-	if err != nil {
-		return false, err
 	}
 	return true, nil
 }
@@ -219,7 +226,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	wc.DataStore = data
 	writer.DataStore = data
 	d.DB.Model(&writer).Updates(writer)
-	if flow.IsRemote { //IF IS REMOTE FLOW-NETWORK
+	if *flow.IsRemote { //IF IS REMOTE FLOW-NETWORK
 		if action == model.CommonNaming.Write {
 			_, err = streams.WriteClone(writerCloneUUID, flow, wc, true)
 			if err != nil {
