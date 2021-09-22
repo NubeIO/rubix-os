@@ -116,6 +116,7 @@ func buildConsumerArgs(ctx *gin.Context) Args {
 	var aType = ArgsType
 	var aDefault = ArgsDefault
 	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
 	return args
 }
 
@@ -124,6 +125,7 @@ func buildProducerArgs(ctx *gin.Context) Args {
 	var aType = ArgsType
 	var aDefault = ArgsDefault
 	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
 	return args
 }
 
@@ -161,5 +163,7 @@ func buildTagsArgs(ctx *gin.Context) Args {
 	var aType = ArgsType
 	var aDefault = ArgsDefault
 	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
+	args.Producers, _ = toBool(ctx.DefaultQuery(aType.Producers, aDefault.Producers))
+	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
 	return args
 }

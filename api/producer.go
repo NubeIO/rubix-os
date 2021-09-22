@@ -35,7 +35,7 @@ type ProducerDatabase interface {
 	GetProducers(args Args) ([]*model.Producer, error)
 	GetProducer(uuid string, args Args) (*model.Producer, error)
 	CreateProducer(body *model.Producer) (*model.Producer, error)
-	UpdateProducer(uuid string, body *model.Producer, updateHist bool) (*model.Producer, error)
+	UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error)
 	DeleteProducer(uuid string) (bool, error)
 	DropProducers() (bool, error)
 }
@@ -69,7 +69,7 @@ func (j *ProducerAPI) CreateProducer(ctx *gin.Context) {
 func (j *ProducerAPI) UpdateProducer(ctx *gin.Context) {
 	body, _ := getBODYProducer(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateProducer(uuid, body, false)
+	q, err := j.DB.UpdateProducer(uuid, body)
 	reposeHandler(q, err, ctx)
 }
 

@@ -22,6 +22,7 @@ type Consumer struct {
 	DataStore           datatypes.JSON     `json:"data_store"`
 	Writers             []*Writer          `json:"writers" gorm:"constraint:OnDelete:CASCADE;"`
 	ConsumerHistories   []*ConsumerHistory `json:"consumer_histories" gorm:"constraint:OnDelete:CASCADE;"`
+	Tags                []*Tag             `json:"tags" gorm:"many2many:consumers_tags;constraint:OnDelete:CASCADE"`
 	CommonCreated
 }
 

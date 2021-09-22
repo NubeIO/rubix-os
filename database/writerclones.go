@@ -80,7 +80,7 @@ func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone, u
 		pro := new(model.Producer)
 		proUUID := wcm.ProducerUUID
 		pro.ThingWriterUUID = uuid
-		_, err := d.UpdateProducer(proUUID, pro, true)
+		_, err := d.UpdateProducer(proUUID, pro)
 		if err != nil {
 			return nil, err
 		}
@@ -109,7 +109,7 @@ func (d *GormDatabase) UpdateCloneAndHist(uuid string, body *model.WriterClone, 
 		pro := new(model.Producer)
 		proUUID := wcm.ProducerUUID
 		pro.ThingWriterUUID = uuid
-		_, err := d.UpdateProducer(proUUID, pro, true)
+		_, err := d.UpdateProducer(proUUID, pro)
 		if err != nil {
 			return nil, err
 		}

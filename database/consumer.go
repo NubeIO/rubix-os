@@ -63,6 +63,11 @@ func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model
 	if err := d.DB.Where("uuid = ?", uuid).Find(&consumerModel).Error; err != nil {
 		return nil, err
 	}
+	if len(body.Tags) > 0 {
+		if err := d.DB.Model(&consumerModel).Association("Tags").Replace(body.Tags); err != nil {
+			return nil, err
+		}
+	}
 	if err := d.DB.Model(&consumerModel).Updates(body).Error; err != nil {
 		return nil, err
 	}

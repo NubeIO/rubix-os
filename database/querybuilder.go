@@ -71,6 +71,9 @@ func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
 	if args.Writers {
 		query = query.Preload("Writers")
 	}
+	if args.Tags {
+		query = query.Preload("Tags")
+	}
 	return query
 }
 
@@ -78,6 +81,9 @@ func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.Writers {
 		query = query.Preload("WriterClones")
+	}
+	if args.Tags {
+		query = query.Preload("Tags")
 	}
 	return query
 }
@@ -111,6 +117,12 @@ func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.Streams {
 		query = query.Preload("Streams")
+	}
+	if args.Producers {
+		query = query.Preload("Producers")
+	}
+	if args.Consumers {
+		query = query.Preload("Consumers")
 	}
 	return query
 }

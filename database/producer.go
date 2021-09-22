@@ -60,9 +60,17 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	return body, nil
 }
 
-func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer, updateHist bool) (*model.Producer, error) {
+func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error) {
 	var producerModel *model.Producer
-	if err := d.DB.Where("uuid = ?", uuid).Find(&producerModel).Updates(body).Error; err != nil {
+	if err := d.DB.Where("uuid = ?", uuid).Find(&producerModel).Error; err != nil {
+		return nil, err
+	}
+	if len(body.Tags) > 0 {
+		if err := d.DB.Model(&producerModel).Association("Tags").Replace(body.Tags); err != nil {
+			return nil, err
+		}
+	}
+	if err := d.DB.Model(&producerModel).Updates(body).Error; err != nil {
 		return nil, err
 	}
 	return producerModel, nil
@@ -129,7 +137,7 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 		if err != nil {
 			return "", errors.New("no point for this producer was not found")
 		}
-		_, err = d.UpdateProducer(pointUUID, &producerModel, false)
+		_, err = d.UpdateProducer(pointUUID, &producerModel)
 		if err != nil {
 			log.Errorf("UpdateProducer")
 			return "", errors.New("issue on update producer")
