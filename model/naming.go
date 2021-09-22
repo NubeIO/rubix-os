@@ -68,6 +68,28 @@ var ThingClass = struct {
 	Alert:          "alert",
 }
 
+var ThingType = struct {
+	API            string
+	Network        string
+	Device         string
+	Point          string
+	InternalAPI    string
+	ExternalAPI    string
+	Schedule       string
+	GlobalSchedule string
+	Alert          string
+}{
+	API:            "api",
+	Network:        "network",
+	Device:         "device",
+	Point:          "point",
+	InternalAPI:    "internal_api",
+	ExternalAPI:    "external_api",
+	Schedule:       "schedule",
+	GlobalSchedule: "global_schedule",
+	Alert:          "alert",
+}
+
 var WriterActions = struct {
 	Read   string
 	Write  string

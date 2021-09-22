@@ -150,12 +150,12 @@ type Point struct {
 	InputMax             null.Float
 	ScaleMin             null.Float
 	ScaleMax             null.Float
-	CommonThingClass           //network
-	CommonThingUse             //lora
-	CommonThingObject          //point
-	CommonThingType            //temp
-	IsProducer           *bool `json:"is_producer"`
-	IsConsumer           *bool `json:"is_consumer"`
+	CommonThingClass     //point
+	CommonThingUse       //mapping, lora, api
+	//CommonThingObject          //point
+	CommonThingType       //temp
+	IsProducer      *bool `json:"is_producer"`
+	IsConsumer      *bool `json:"is_consumer"`
 	CommonFault
 	Priority *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
 }

@@ -23,6 +23,8 @@ func (i *Instance) Enable() error {
 
 	if !i.pollingEnabled {
 		var arg polling
+		i.pollingEnabled = true
+		arg.enable = true
 		go func() {
 			err := i.PollingTCP(arg)
 			if err != nil {
@@ -40,5 +42,21 @@ func (i *Instance) Enable() error {
 // Disable implements plugin.Disable
 func (i *Instance) Disable() error {
 	i.enabled = false
+
+	if i.pollingEnabled {
+		var arg polling
+		i.pollingEnabled = false
+		arg.enable = false
+		go func() {
+			err := i.PollingTCP(arg)
+			if err != nil {
+
+			}
+		}()
+		if err != nil {
+			return errors.New("error on starting polling")
+		}
+	}
+
 	return nil
 }

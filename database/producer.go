@@ -36,9 +36,21 @@ func (d *GormDatabase) GetProducer(uuid string, args api.Args) (*model.Producer,
 }
 
 func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, error) {
+	if body.ProducerThingUUID == "" {
+		return nil, errors.New("please pass in a thing_uuid ie: a point uuid")
+	}
+	if body.ProducerThingClass == "" {
+		return nil, errors.New("please pass in a thing_type ie: a point type")
+	}
+	if body.ProducerThingClass == model.ThingClass.Point {
+		_, err := d.GetPoint(body.ProducerThingUUID, false)
+		if err != nil {
+			return nil, errors.New("point not found, please supply a valid point uuid")
+		}
+	}
 	_, err := d.GetStream(body.StreamUUID, api.Args{})
 	if err != nil {
-		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the gateway UUID", nil)
+		return nil, errorMsg("GetStream", "error on trying to get validate the gateway UUID", nil)
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Producer)
 	body.Name = nameIsNil(body.Name)
@@ -138,12 +150,10 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 		proBody.ThingType = pro.ProducerThingType
 		proBody.ThingType = point.ThingType
 		proBody.Payload = point
-
 		err = d.producerBroadcast(proBody)
 		if err != nil {
 			return "", errors.New("issue on producer broadcast")
 		}
-
 		return pro.UUID, err
 	}
 	return "", err

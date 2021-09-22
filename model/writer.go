@@ -20,8 +20,8 @@ type Writer struct {
 type WriterBody struct {
 	Action           string   `json:"action"` //read, write and so on
 	AskRefresh       bool     `json:"ask_refresh"`
-	CommonThingClass          //point, job
-	CommonThingType           // for example temp, rssi, voltage
+	CommonThingClass          //point, job,
+	CommonThingType           // for example api, rssi, voltage
 	Priority         Priority `json:"priority"`
 	Point            Point    `json:"point"`
 }

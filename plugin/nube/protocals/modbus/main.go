@@ -22,8 +22,6 @@ const isNetwork = true
 const maxAllowedNetworks = 1
 const networkType = "modbus"
 const transportType = "ip" //serial, ip
-const ip = "0.0.0.0"
-const port = "8080"
 
 // Instance is plugin instance
 type Instance struct {

@@ -61,7 +61,7 @@ func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Poin
 	return pointModel, true
 }
 
-// CreatePoint creates a device.
+// CreatePoint creates an object.
 func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model.Point, error) {
 	var deviceModel *model.Device
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)

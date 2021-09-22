@@ -27,7 +27,10 @@ func (a *DatabaseAPI) SyncTopics() {
 }
 
 type WizardLocalMapping struct {
-	PluginName string `json:"plugin_name"`
+	PluginName         string `json:"plugin_name"`
+	ProducerStreamUUID string `json:"producer_stream_uuid"`
+	ConsumerStreamUUID string `json:"consumer_stream_uuid"`
+	DeviceUUID         string `json:"device_uuid"`
 }
 
 func getBODYLocal(ctx *gin.Context) (dto *WizardLocalMapping, err error) {
