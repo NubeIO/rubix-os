@@ -129,7 +129,8 @@ type Point struct {
 	CommonDescription
 	CommonEnable
 	PresentValue         float64        `json:"present_value"` //point value, read only
-	WriteValue           null.Float     `json:"write_value"`   //TODO add in logic if user writes to below priority 16
+	CurrentPriority      int            `json:"current_priority"`
+	WriteValue           null.Float     `json:"write_value"` //TODO add in logic if user writes to below priority 16
 	ValueRaw             datatypes.JSON `json:"value_raw"`
 	Fallback             float64        `json:"fallback"`
 	DeviceUUID           string         `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
