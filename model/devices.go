@@ -23,4 +23,5 @@ type Device struct {
 	CommonDevice
 	NetworkUUID string   `json:"network_uuid" gorm:"TYPE:varchar(255) REFERENCES networks;not null;default:null"`
 	Points      []*Point `json:"points" gorm:"constraint:OnDelete:CASCADE"`
+	Tags        []*Tag   `json:"tags" gorm:"many2many:devices_tags;constraint:OnDelete:CASCADE"`
 }

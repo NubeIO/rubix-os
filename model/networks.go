@@ -95,4 +95,5 @@ type Network struct {
 	Devices          []*Device         `json:"devices" gorm:"constraint:OnDelete:CASCADE"`
 	SerialConnection *SerialConnection `json:"serial_connection" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	IpConnection     *IpConnection     `json:"ip_connection" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Tags             []*Tag            `json:"tags" gorm:"many2many:networks_tags;constraint:OnDelete:CASCADE"`
 }

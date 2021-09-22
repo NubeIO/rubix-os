@@ -7,8 +7,8 @@ import (
 
 // The PointDatabase interface for encapsulating database access.
 type PointDatabase interface {
-	GetPoint(uuid string, withChildren bool) (*model.Point, error)
-	GetPoints(withChildren bool) ([]*model.Point, error)
+	GetPoints(args Args) ([]*model.Point, error)
+	GetPoint(uuid string, args Args) (*model.Point, error)
 	CreatePoint(body *model.Point, addToParent string) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point, writeValue, fromPlugin bool) (*model.Point, error)
 	GetPointByField(field string, value string, withChildren bool) (*model.Point, error)
@@ -21,15 +21,15 @@ type PointAPI struct {
 }
 
 func (a *PointAPI) GetPoints(ctx *gin.Context) {
-	withChildren, _, _ := withChildrenArgs(ctx)
-	q, err := a.DB.GetPoints(withChildren)
+	args := buildPointArgs(ctx)
+	q, err := a.DB.GetPoints(args)
 	reposeHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetPoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	withChildren, _, _ := withChildrenArgs(ctx)
-	q, err := a.DB.GetPoint(uuid, withChildren)
+	args := buildPointArgs(ctx)
+	q, err := a.DB.GetPoint(uuid, args)
 	reposeHandler(q, err, ctx)
 }
 

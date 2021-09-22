@@ -117,6 +117,11 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 	case model.TransType.IP:
 		d.DB.Model(&networkModel.IpConnection).Updates(body.IpConnection)
 	}
+	if len(body.Tags) > 0 {
+		if err := d.updateTags(&networkModel, body.Tags); err != nil {
+			return nil, err
+		}
+	}
 	query = d.DB.Model(&networkModel).Updates(&body)
 	if query.Error != nil {
 		return nil, query.Error

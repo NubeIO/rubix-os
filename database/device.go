@@ -115,7 +115,12 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 		return nil, query.Error
 	}
 	if body.CommonEnable.Enable != nil {
-		*body.CommonEnable.Enable = true
+		body.CommonEnable.Enable = utils.NewTrue()
+	}
+	if len(body.Tags) > 0 {
+		if err = d.updateTags(&deviceModel, body.Tags); err != nil {
+			return nil, err
+		}
 	}
 	query = d.DB.Model(&deviceModel).Updates(body)
 

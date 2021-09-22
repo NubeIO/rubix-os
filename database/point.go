@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
@@ -11,40 +12,22 @@ import (
 	"time"
 )
 
-// GetPoints returns all devices.
-func (d *GormDatabase) GetPoints(withChildren bool) ([]*model.Point, error) {
+func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
 	var pointsModel []*model.Point
-	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload("Priority").Find(&pointsModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return pointsModel, nil
-	} else {
-		query := d.DB.Find(&pointsModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return pointsModel, nil
+	query := d.buildPointQuery(args)
+	if err := query.Find(&pointsModel).Error; err != nil {
+		return nil, err
 	}
+	return pointsModel, nil
 }
 
-// GetPoint returns the device for the given id or nil.
-func (d *GormDatabase) GetPoint(uuid string, withChildren bool) (*model.Point, error) {
+func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error) {
 	var pointModel *model.Point
-	if withChildren { // drop child to reduce json size
-		query := d.DB.Preload("Priority").Where("uuid = ? ", uuid).First(&pointModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return pointModel, nil
-	} else {
-		query := d.DB.Where("uuid = ? ", uuid).First(&pointModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return pointModel, nil
+	query := d.buildPointQuery(args)
+	if err := query.Where("uuid = ? ", uuid).First(&pointModel).Error; err != nil {
+		return nil, err
 	}
+	return pointModel, nil
 }
 
 // PointDeviceByAddressID will query by device_uuid = ? AND object_type = ? AND address_id = ?
@@ -157,6 +140,11 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 		}
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
 	}
+	if len(body.Tags) > 0 {
+		if err = d.updateTags(&pointModel, body.Tags); err != nil {
+			return nil, err
+		}
+	}
 	query = d.DB.Model(&pointModel).Updates(&body)
 
 	if *pointModel.IsProducer && *body.IsProducer {
@@ -237,7 +225,7 @@ func (d *GormDatabase) UpdatePointByFieldAndType(field string, value string, bod
 // DeletePoint delete a Device.
 func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	var pointModel *model.Point
-	point, err := d.GetPoint(uuid, false)
+	point, err := d.GetPoint(uuid, api.Args{})
 	if err != nil {
 		return false, errors.New("point not exist")
 	}

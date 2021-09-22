@@ -131,7 +131,7 @@ func (d *GormDatabase) SyncTopics() {
 	for _, obj := range de {
 		d.Bus.RegisterTopicParent(model.ThingClass.Network, obj.UUID)
 	}
-	p, err := d.GetPoints(false)
+	p, err := d.GetPoints(api.Args{})
 	for _, obj := range p {
 		d.Bus.RegisterTopicParent(model.ThingClass.Point, obj.UUID)
 	}

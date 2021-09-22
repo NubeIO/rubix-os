@@ -20,6 +20,7 @@ type Producer struct {
 	StreamUUID            string             `json:"stream_uuid" gorm:"TYPE:string REFERENCES streams;not null"`
 	WriterClones          []*WriterClone     `json:"writer_clones" gorm:"constraint:OnDelete:CASCADE"`
 	ProducerHistories     []*ProducerHistory `json:"producer_histories" gorm:"constraint:OnDelete:CASCADE"`
+	Tags                  []*Tag             `json:"tags" gorm:"many2many:producers_tags;constraint:OnDelete:CASCADE"`
 	CommonCreated
 }
 

@@ -71,6 +71,9 @@ func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
 	if args.Writers {
 		query = query.Preload("Writers")
 	}
+	if args.Tags {
+		query = query.Preload("Tags")
+	}
 	return query
 }
 
@@ -78,6 +81,9 @@ func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.Writers {
 		query = query.Preload("WriterClones")
+	}
+	if args.Tags {
+		query = query.Preload("Tags")
 	}
 	return query
 }
@@ -96,6 +102,9 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 	if args.SerialConnection {
 		query = query.Preload("SerialConnection")
 	}
+	if args.Tags {
+		query = query.Preload("Tags")
+	}
 	return query
 }
 
@@ -104,10 +113,42 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	if args.Points {
 		query = query.Preload("Points")
 	}
+	if args.Tags {
+		query = query.Preload("Tags")
+	}
+	return query
+}
+
+func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.Priority {
+		query = query.Preload("Priority")
+	}
+	if args.Tags {
+		query = query.Preload("Tags")
+	}
 	return query
 }
 
 func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 	query := d.DB
+	if args.Networks {
+		query = query.Preload("Networks")
+	}
+	if args.Devices {
+		query = query.Preload("Devices")
+	}
+	if args.Points {
+		query = query.Preload("Points")
+	}
+	if args.Streams {
+		query = query.Preload("Streams")
+	}
+	if args.Producers {
+		query = query.Preload("Producers")
+	}
+	if args.Consumers {
+		query = query.Preload("Consumers")
+	}
 	return query
 }
