@@ -1,29 +1,30 @@
 package database
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
 func (d *GormDatabase) GetStreams(args api.Args) ([]*model.Stream, error) {
-	var gatewaysModel []*model.Stream
+	var streamsModel []*model.Stream
 	query := d.buildStreamQuery(args)
-	query.Find(&gatewaysModel)
+	query.Find(&streamsModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return gatewaysModel, nil
+	return streamsModel, nil
 }
 
 func (d *GormDatabase) GetStream(uuid string, args api.Args) (*model.Stream, error) {
-	var gatewayModel *model.Stream
+	var streamModel *model.Stream
 	query := d.buildStreamQuery(args)
-	query = query.Where("uuid = ? ", uuid).First(&gatewayModel)
+	query = query.Where("uuid = ? ", uuid).First(&streamModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return gatewayModel, nil
+	return streamModel, nil
 }
 
 func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
@@ -37,8 +38,8 @@ func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
 }
 
 func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
-	var gatewayModel *model.Stream
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&gatewayModel)
+	var streamModel *model.Stream
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&streamModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
@@ -51,29 +52,29 @@ func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
 }
 
 func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Stream, error) {
-	var gatewayModel *model.Stream
-	if err := d.DB.Preload("FlowNetworks").Where("uuid = ?", uuid).Find(&gatewayModel).Error; err != nil {
+	var streamModel *model.Stream
+	if err := d.DB.Preload("FlowNetworks").Where("uuid = ?", uuid).Find(&streamModel).Error; err != nil {
 		return nil, err
 	}
 	if len(body.FlowNetworks) > 0 {
-		if err := d.DB.Model(&gatewayModel).Association("FlowNetworks").Replace(body.FlowNetworks); err != nil {
+		if err := d.DB.Model(&streamModel).Association("FlowNetworks").Replace(body.FlowNetworks); err != nil {
 			return nil, err
 		}
 	}
 	if len(body.Tags) > 0 {
-		if err := d.DB.Model(&gatewayModel).Association("Tags").Replace(body.Tags); err != nil {
+		if err := d.DB.Model(&streamModel).Association("Tags").Replace(body.Tags); err != nil {
 			return nil, err
 		}
 	}
-	if err := d.DB.Model(&gatewayModel).Updates(body).Error; err != nil {
+	if err := d.DB.Model(&streamModel).Updates(body).Error; err != nil {
 		return nil, err
 	}
-	return gatewayModel, nil
+	return streamModel, nil
 }
 
 func (d *GormDatabase) DropStreams() (bool, error) {
-	var gatewayModel *model.Stream
-	query := d.DB.Where("1 = 1").Delete(&gatewayModel)
+	var streamModel *model.Stream
+	query := d.DB.Where("1 = 1").Delete(&streamModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
@@ -100,4 +101,16 @@ func (d *GormDatabase) GetFlowUUID(uuid string) (*model.Stream, *model.FlowNetwo
 		return nil, nil, err
 	}
 	return stream, flow, nil
+}
+
+// GetStreamByField ie: get stream by its name as an example
+func (d *GormDatabase) GetStreamByField(field string, value string, args api.Args) (*model.Stream, error) {
+	var streamModel *model.Stream
+	f := fmt.Sprintf("%s = ? ", field)
+	query := d.buildStreamQuery(args)
+	query = query.Where(f, value).First(&streamModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return streamModel, nil
 }

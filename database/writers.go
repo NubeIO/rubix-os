@@ -3,9 +3,11 @@ package database
 import (
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeDev/flow-framework/client"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/streams"
 	"github.com/NubeDev/flow-framework/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 type Writer struct {
@@ -95,6 +97,92 @@ func (d *GormDatabase) DropWriters() (bool, error) {
 	} else {
 		return true, nil
 	}
+}
+
+// CreateWriterWizard add a new consumer to an existing producer and add a new writer and writer clone
+// use the flow-network UUID
+func (d *GormDatabase) CreateWriterWizard(body *api.WriterWizard) (bool, error) {
+	var consumerModel model.Consumer
+	var writerModel model.Writer
+	var writerCloneModel model.WriterClone
+	flow, err := d.GetFlowNetwork(body.FlowUUID, api.Args{})
+	if err != nil {
+		return false, err
+	}
+	isRemote := flow.IsRemote
+	var session *client.FlowClient
+	var producer *model.Producer
+
+	if isRemote {
+		session = client.NewSessionWithToken("", flow.FlowIP, flow.FlowPort)
+		producer, err = session.GetProducer(body.ProducerUUID)
+		if err != nil {
+			return false, err
+		}
+	} else {
+		pro, err := d.GetProducer(body.FlowUUID, api.Args{})
+		if err != nil {
+			return false, err
+		}
+		producer.UUID = pro.UUID
+		producer.ProducerThingClass = pro.ProducerThingClass
+		producer.ProducerThingType = pro.ProducerThingType
+		producer.ProducerThingName = pro.ProducerThingName
+
+	}
+	consumerModel.StreamUUID = body.StreamUUID
+	consumerModel.Name = "consumer stream"
+	consumerModel.ProducerUUID = producer.UUID
+	consumerModel.ProducerThingClass = producer.ProducerThingClass
+	consumerModel.ProducerThingType = producer.ProducerThingType
+	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
+	consumerModel.ProducerThingUUID = producer.ProducerThingUUID
+	consumerModel.ProducerThingName = producer.ProducerThingName
+	_, err = d.CreateConsumer(&consumerModel)
+	if err != nil {
+		log.Errorf("wizzrad:  CreateConsumer: %v\n", err)
+		return false, err
+	}
+	//// writer
+	writerModel.ConsumerUUID = consumerModel.UUID
+	writerModel.ConsumerThingUUID = consumerModel.UUID
+	writerModel.WriterThingClass = model.ThingClass.Point
+	writerModel.WriterThingType = model.ThingClass.API
+	writer, err := d.CreateWriter(&writerModel)
+	if err != nil {
+		return false, err
+	}
+	// add consumer to the writerClone
+	writerCloneModel.ProducerUUID = body.ProducerUUID
+	writerCloneModel.WriterUUID = writer.UUID
+	writerModel.WriterThingClass = model.ThingClass.Point
+	writerModel.WriterThingType = model.ThingClass.API
+	if !isRemote {
+		writerClone, err := d.CreateWriterClone(&writerCloneModel)
+		if err != nil {
+			return false, err
+		}
+		writerModel.CloneUUID = writerClone.UUID
+		_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
+		if err != nil {
+			return false, err
+		}
+	} else {
+		clone, err := session.CreateWriterClone(writerCloneModel)
+		if err != nil {
+			return false, err
+		}
+		writerModel.CloneUUID = clone.UUID
+		writerModel.CloneUUID = clone.UUID
+		_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
+		if err != nil {
+			return false, err
+		}
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 /*

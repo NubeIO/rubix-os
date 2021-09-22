@@ -16,6 +16,7 @@ type WriterDatabase interface {
 	DropWriters() (bool, error)
 	WriterAction(uuid string, body *model.WriterBody) (*model.ProducerHistory, error)
 	WriterBulkAction(body []*model.WriterBulk) ([]*model.ProducerHistory, error)
+	CreateWriterWizard(*WriterWizard) (bool, error)
 }
 
 type WriterAPI struct {
@@ -74,5 +75,26 @@ func (j *WriterAPI) WriterAction(ctx *gin.Context) {
 func (j *WriterAPI) WriterBulkAction(ctx *gin.Context) {
 	body, _ := getBODYWriterBulk(ctx)
 	q, err := j.DB.WriterBulkAction(body)
+	reposeHandler(q, err, ctx)
+}
+
+func getBODYWriterWizard(ctx *gin.Context) (dto *WriterWizard, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+type WriterWizard struct {
+	FlowUUID     string `json:"consumer_side_flow_uuid"`
+	StreamUUID   string `json:"consumer_side_stream_uuid"`
+	ProducerUUID string `json:"remote_producer_uuid"`
+}
+
+func (j *WriterAPI) CreateWriterWizard(ctx *gin.Context) {
+	body, _ := getBODYWriterWizard(ctx)
+	_, err := govalidator.ValidateStruct(body)
+	if err != nil {
+		reposeHandler(nil, err, ctx)
+	}
+	q, err := j.DB.CreateWriterWizard(body)
 	reposeHandler(q, err, ctx)
 }

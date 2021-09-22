@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -27,8 +28,29 @@ func SplitURL(url string) URLParts {
 	return o
 }
 
-func JoinURL(u URLParts) (url string) {
-	return fmt.Sprintf("%s://%s:%s", u.Transport, u.Host, u.Port)
+func IsTCP(target string) bool {
+	if strings.HasPrefix(target, "tcp://") {
+		return true
+	} else {
+		return false
+	}
+}
+
+func JoinURL(u URLParts) (url string, err error) {
+	t := u.Transport
+	h := u.Host
+	p := u.Port
+	//if !IsTCP(t) {
+	//	return "",  errors.New("in valid url prefix try ie: tcp://")
+	//}
+	if !ValidIP4(h) {
+		return "", errors.New("in valid url try ie: 192.168.1.1")
+	}
+	if !ValidPort(p) {
+		return "", errors.New("in valid url try ie: 8080 as a string")
+	}
+	ip := fmt.Sprintf("%s://%s:%s", t, h, p)
+	return ip, nil
 }
 
 func ValidIP4(ipAddress string) bool {
@@ -40,9 +62,8 @@ func ValidIP4(ipAddress string) bool {
 	return false
 }
 
-func ValidPort(port int) bool {
-	t := strconv.Itoa(port)
-	t = strings.Trim(t, " ")
+func ValidPort(port string) bool {
+	t := strings.Trim(port, " ")
 	re, _ := regexp.Compile(`^((6553[0-5])|(655[0-2][0-9])|(65[0-4][0-9]{2})|(6[0-4][0-9]{3})|([1-5][0-9]{4})|([0-5]{0,5})|([0-9]{1,4}))$`)
 	if re.MatchString(t) {
 		return true

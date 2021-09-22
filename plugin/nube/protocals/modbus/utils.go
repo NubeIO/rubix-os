@@ -355,14 +355,6 @@ func getPointAddr(s string) (objType, addr string) {
 	return o.(string), a.(string)
 }
 
-func ipCheck(target string) bool {
-	if strings.HasPrefix(target, "tcp//") {
-		return true
-	} else {
-		return false
-	}
-}
-
 func performBoolScan(client *modbus.ModbusClient, isCoil bool, start uint32, count uint32) (uint, string) {
 	var err error
 	var addr uint32

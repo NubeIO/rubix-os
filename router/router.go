@@ -242,6 +242,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			streamRoutes.GET("/", gatewayHandler.GetStreams)
 			streamRoutes.POST("/", gatewayHandler.CreateStream)
 			streamRoutes.GET("/:uuid", gatewayHandler.GetStream)
+			streamRoutes.GET("/field/:uuid", gatewayHandler.GetStreamByField)
 			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
 			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
 			streamRoutes.DELETE("/drop", gatewayHandler.DropStreams)
@@ -325,6 +326,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			consumerWriterRoutes := consumerRoutes.Group("/writers")
 			{
 				consumerWriterRoutes.GET("", writerHandler.GetWriters)
+				consumerWriterRoutes.POST("wizard", writerHandler.CreateWriterWizard)
 				consumerWriterRoutes.POST("", writerHandler.CreateWriter)
 				consumerWriterRoutes.GET("/:uuid", writerHandler.GetWriter)
 				consumerWriterRoutes.PATCH("/:uuid", writerHandler.UpdateWriter)

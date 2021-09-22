@@ -70,7 +70,6 @@ func (d *GormDatabase) WizardLocalPointMapping(body *api.WizardLocalMapping) (bo
 	}
 	// stream
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
-	fmt.Println(streamModel.FlowNetworks, 9898989)
 	stream, err := d.CreateStream(&streamModel)
 	if err != nil {
 		log.Errorf("wizzrad:  CreateStream: %v\n", err)
@@ -125,7 +124,6 @@ func (d *GormDatabase) WizardLocalPointMapping(body *api.WizardLocalMapping) (bo
 	writerCloneModel.ThingClass = model.ThingClass.Point
 	writerCloneModel.ThingType = model.ThingClass.Point
 	writerCloneModel.WriterUUID = writer.UUID
-	fmt.Println(writer.UUID, 1, 1, 1, 1)
 	writerClone, err := d.CreateWriterClone(&writerCloneModel)
 	if err != nil {
 		log.Errorf("wizzrad:  CreateWriterClone: %v\n", err)
@@ -168,10 +166,8 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	}
 
 	//in writer add writeCloneUUID and same in writerClone
-	flowNetwork.IsRemote = true
-	flowNetwork.FlowIP = "0.0.0.0"
-	flowNetwork.FlowPort = "1660"
-	flowNetwork.RemoteFlowUUID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
+	flowNetwork.IsRemote = false
+	//flowNetwork.RemoteFlowUUID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 
 	flowNetwork.Name = "flow network"
 	f, err := d.CreateFlowNetwork(&flowNetwork)
@@ -182,7 +178,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 
 	// network
 	networkModel.PluginConfId = p.UUID
-	networkModel.TransportType = "serial"
+	networkModel.TransportType = "ip"
 	n, err := d.CreateNetwork(&networkModel)
 	log.Debug("Created a Network")
 	// device
@@ -259,28 +255,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 		return false, err
 	}
 	log.Debug("Created Consumer: ", consumer.Name)
-
-	// device to be used for consumer list (edge-2)
-	deviceModel.NetworkUUID = n.UUID
-	dev2, err := d.CreateDevice(&deviceModel)
-	if err != nil {
-		return false, err
-	}
-
-	// point 2 to add to consumer list (edge-2)
-	var pointModel2 model.Point
-	pointModel2.DeviceUUID = dev2.UUID
-	pointModel2.Name = "is the consumer"
-	pointModel2.IsConsumer = utils.NewTrue()
-	pointModel2.ObjectType = "analogInput" //TODO: check
-	pnt2, err := d.CreatePoint(&pointModel2, "")
-	if err != nil {
-		return false, err
-	}
-
 	// writer (edge-2)
 	writerModel.ConsumerUUID = consumerModel.UUID
-	writerModel.ConsumerThingUUID = pnt2.UUID
+	writerModel.ConsumerThingUUID = consumerModel.UUID
 	writerModel.WriterThingClass = model.ThingClass.Point
 	writerModel.WriterThingType = model.ThingClass.Point
 	writer, err := d.CreateWriter(&writerModel)
@@ -330,14 +307,12 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	var writerCloneModel model.WriterClone
 
 	isRemote := true
-	url := "165.227.72.56" //165.227.72.56
-	token := "fakeToken123"
-
+	url := "0.0.0.0" //165.227.72.56
 	//in writer add writeCloneUUID and same in writerClone
 	flowNetwork.IsRemote = isRemote
 	flowNetwork.FlowIP = url
 	flowNetwork.FlowPort = "1660"
-	flowNetwork.FlowToken = token
+	//flowNetwork.FlowToken = token
 
 	flowNetwork.RemoteFlowUUID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 
@@ -421,7 +396,7 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 		fmt.Println(writer)
 	} else {
 		fmt.Println(writerCloneModel.ProducerUUID, writerCloneModel.WriterUUID, "rest add writerClone")
-		ap := client.NewSessionWithToken(token, url, "1660")
+		ap := client.NewSessionWithToken("token", url, "1660")
 		clone, err := ap.CreateWriterClone(writerCloneModel)
 		if err != nil {
 			fmt.Println("Error on wizard CreateWriterClone", err)
@@ -430,12 +405,15 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 		fmt.Println(clone.UUID, clone.ProducerUUID)
 		writerModel.CloneUUID = clone.UUID
 		fmt.Println(writerModel.CloneUUID, writerModel.UUID, "rest add EditWriter")
-		_, err = ap.EditWriter(writerModel.UUID, writerModel, false)
+		writerModel.CloneUUID = clone.UUID
+		_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
 		if err != nil {
-			fmt.Println("Error on wizard EditWriter", err)
+			fmt.Println("Error on wizard UpdateWriter")
+			fmt.Println(err)
+			fmt.Println("Error on wizard")
 			return false, err
 		}
-
+		fmt.Println(writer)
 	}
 
 	if err != nil {
@@ -455,7 +433,7 @@ func (d *GormDatabase) NetworkDevicePoint() (bool, error) {
 	var pointModel model.Point
 
 	//get plugin
-	p, err := d.GetPluginByPath("bacnetserver")
+	p, err := d.GetPluginByPath("system")
 	if p.UUID == "" {
 		return false, errors.New("no valid plugin")
 	}
