@@ -155,3 +155,11 @@ func buildPluginArgs(ctx *gin.Context) Args {
 	args.PluginName, _ = toBool(ctx.DefaultQuery(aType.PluginName, aDefault.PluginName))
 	return args
 }
+
+func buildTagsArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
+	return args
+}

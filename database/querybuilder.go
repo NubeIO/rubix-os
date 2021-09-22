@@ -109,5 +109,8 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 	query := d.DB
+	if args.Streams {
+		query = query.Preload("Streams")
+	}
 	return query
 }
