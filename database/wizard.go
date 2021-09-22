@@ -126,7 +126,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	}
 
 	//in writer add writeCloneUUID and same in writerClone
-	*flowNetwork.IsRemote = false
+	flowNetwork.IsRemote = utils.NewFalse()
 	//flowNetwork.RemoteFlowUUID = "ID-" + utils.MakeTopicUUID(model.CommonNaming.RemoteFlowNetwork)
 
 	flowNetwork.Name = "flow network"
@@ -184,7 +184,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	log.Debug("Created Producer: ", producer.Name)
 
 	consumerFlowNetwork.Name = "Consumer flow network"
-	*consumerFlowNetwork.IsRemote = true
+	consumerFlowNetwork.IsRemote = utils.NewTrue()
 	consumerFlowNetwork.FlowIP = "0.0.0.0"
 	consumerFlowNetwork.FlowPort = "1660"
 	consumerFlowNetwork.FlowToken = "fakeToken123"
@@ -269,7 +269,7 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	isRemote := true
 	url := "0.0.0.0" //165.227.72.56
 	//in writer add writeCloneUUID and same in writerClone
-	*flowNetwork.IsRemote = isRemote
+	flowNetwork.IsRemote = utils.NewTrue()
 	flowNetwork.FlowIP = url
 	flowNetwork.FlowPort = "1660"
 

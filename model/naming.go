@@ -47,15 +47,15 @@ var CommonNaming = struct {
 }
 
 var ThingClass = struct {
-	API            string
-	Network        string
-	Device         string
-	Point          string
-	InternalAPI    string
-	ExternalAPI    string
-	Schedule       string
-	GlobalSchedule string
-	Alert          string
+	API            string `json:"api"`
+	Network        string `json:"network"`
+	Device         string `json:"device"`
+	Point          string `json:"point"`
+	InternalAPI    string `json:"internal_api"`
+	ExternalAPI    string `json:"external_api"`
+	Schedule       string `json:"schedule"`
+	GlobalSchedule string `json:"global_schedule"`
+	Alert          string `json:"alert"`
 }{
 	API:            "api",
 	Network:        "network",
@@ -91,10 +91,10 @@ var ThingType = struct {
 }
 
 var WriterActions = struct {
-	Read   string
-	Write  string
-	Patch  string
-	Delete string
+	Read   string `json:"read"`
+	Write  string `json:"write"`
+	Patch  string `json:"patch"`
+	Delete string `json:"delete"`
 }{
 	Read:   "read",
 	Write:  "write",
