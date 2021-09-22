@@ -55,6 +55,7 @@ type Args struct {
 	SiteId           *string
 	DeviceId         *string
 	PluginName       bool
+	TimestampGt      string
 }
 
 var ArgsType = struct {
@@ -102,6 +103,7 @@ var ArgsType = struct {
 	SiteId           string
 	DeviceId         string
 	PluginName       string
+	TimestampGt      string
 }{
 	Sort:             "sort",
 	Order:            "order",
@@ -147,6 +149,7 @@ var ArgsType = struct {
 	SiteId:           "site_id",
 	DeviceId:         "device_id",
 	PluginName:       "by_plugin_name",
+	TimestampGt:      "timestamp_gt",
 }
 
 var ArgsDefault = struct {
@@ -188,6 +191,7 @@ var ArgsDefault = struct {
 	Priority         string
 	Tags             string
 	PluginName       string
+	TimestampGt      string
 }{
 	Sort:             "ID",
 	Order:            "DESC", //ASC or DESC
@@ -227,6 +231,7 @@ var ArgsDefault = struct {
 	Priority:         "false",
 	Tags:             "false",
 	PluginName:       "false",
+	TimestampGt:      "",
 }
 
 func reposeHandler(body interface{}, err error, ctx *gin.Context) {

@@ -2,15 +2,18 @@ package database
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	"strings"
 	"time"
 )
 
 // GetProducerHistories returns all histories.
-func (d *GormDatabase) GetProducerHistories() ([]*model.ProducerHistory, error) {
+func (d *GormDatabase) GetProducerHistories(args api.Args) ([]*model.ProducerHistory, error) {
 	var historiesModel []*model.ProducerHistory
-	query := d.DB.Find(&historiesModel)
+	query := d.buildProducerHistoryQuery(args)
+	query.Find(&historiesModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -44,14 +47,11 @@ func (d *GormDatabase) HistoryLatestByProducerUUID(uuid string) (*model.Producer
 func (d *GormDatabase) HistoriesAllByProducerUUID(uuid string, order string) ([]*model.ProducerHistory, int64, error) {
 	var count int64
 	var historiesModel []*model.ProducerHistory
-	t := "DESC"
-	switch order {
-	case "ASC":
-		t = "ASC"
-	case "DESC":
-		t = "DESC"
+	order = strings.ToUpper(strings.TrimSpace(order))
+	if order != "ASC" && order != "DESC" {
+		order = "DESC"
 	}
-	t = fmt.Sprintf("timestamp %s", t)
+	t := fmt.Sprintf("timestamp %s", order)
 	q := d.DB.Where("producer_uuid = ? ", uuid).Order(t).Find(&historiesModel) //ASC or DESC
 	q.Count(&count)
 	return historiesModel, count, nil

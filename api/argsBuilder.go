@@ -181,3 +181,11 @@ func buildTagArgs(ctx *gin.Context) Args {
 	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
 	return args
 }
+
+func buildProducerHistoryArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.TimestampGt = ctx.DefaultQuery(aType.TimestampGt,aDefault.TimestampGt)
+	return args
+}
