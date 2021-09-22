@@ -298,10 +298,9 @@ func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) ([]*model.Prod
 		b.AskRefresh = wri.AskRefresh
 		b.Priority = wri.Priority
 		action, err := d.WriterAction(wri.WriterUUID, b)
-		if err != nil {
-			return nil, err
+		if err == nil {
+			out = buildHists(action)
 		}
-		out = buildHists(action)
 	}
 	return out, nil
 
