@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/utils"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +16,7 @@ type WriterDatabase interface {
 	DeleteWriter(uuid string) (bool, error)
 	DropWriters() (bool, error)
 	WriterAction(uuid string, body *model.WriterBody) (*model.ProducerHistory, error)
-	WriterBulkAction(body []*model.WriterBulk) ([]*model.ProducerHistory, error)
+	WriterBulkAction(body []*model.WriterBulk) (*utils.Array, error)
 	CreateWriterWizard(*WriterWizard) (bool, error)
 }
 
