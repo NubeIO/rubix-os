@@ -3,10 +3,11 @@ package rest
 import (
 	"github.com/NubeDev/flow-framework/client"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/utils"
 )
 
 func WriteClone(uuid string, flowBody *model.FlowNetwork, body *model.WriterClone, write bool) (*model.WriterClone, error) {
-	isMQTT := *flowBody.IsMQTT
+	isMQTT := utils.BoolIsNil(flowBody.IsMQTT)
 	if !isMQTT {
 		ip := flowBody.FlowIP
 		port := flowBody.FlowPort
@@ -30,7 +31,7 @@ func WriteClone(uuid string, flowBody *model.FlowNetwork, body *model.WriterClon
 }
 
 func WriteProducer(uuid string, flowBody *model.FlowNetwork, body *model.Producer, write bool) (*model.Producer, error) {
-	isMQTT := *flowBody.IsMQTT
+	isMQTT := utils.BoolIsNil(flowBody.IsMQTT)
 	if !isMQTT {
 		ip := flowBody.FlowIP
 		port := flowBody.FlowPort
