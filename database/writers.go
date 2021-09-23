@@ -246,8 +246,10 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 			if err != nil {
 				return nil, errors.New("WRITER-REMOTE: on update consumer feedback")
 			}
+			producerHistory.WriterUUID = writer.UUID
 			return producerHistory, err
 		} else {
+			producerHistory.WriterUUID = writer.UUID
 			return producerHistory, err
 		}
 	} else { //IF IS LOCAL FLOW-NETWORK
@@ -273,25 +275,17 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 			if err != nil {
 				return nil, errors.New("error: on update consumer feedback")
 			}
+			producerHistory.WriterUUID = writer.UUID
 			return producerHistory, err
 		} else {
+			producerHistory.WriterUUID = writer.UUID
 			return producerHistory, err
 		}
 	}
 }
 
-type hists struct {
-	Items []*model.ProducerHistory
-}
-
-func buildHists(item *model.ProducerHistory) []*model.ProducerHistory {
-	h := new(hists)
-	h.Items = append(h.Items, item)
-	return h.Items
-}
-
-func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) ([]*model.ProducerHistory, error) {
-	var out []*model.ProducerHistory
+func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) (*utils.Array, error) {
+	arr := utils.NewArray()
 	for _, wri := range body {
 		b := new(model.WriterBody)
 		b.Action = wri.Action
@@ -299,10 +293,10 @@ func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) ([]*model.Prod
 		b.Priority = wri.Priority
 		action, err := d.WriterAction(wri.WriterUUID, b)
 		if err == nil {
-			out = buildHists(action)
+			arr.Add(action)
 		}
 	}
-	return out, nil
+	return arr, nil
 
 }
 
