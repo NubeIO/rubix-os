@@ -154,26 +154,6 @@ func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
-	query := d.DB
-	if args.Devices {
-		query = query.Preload("Devices")
-	}
-	if args.Points {
-		query = query.Preload("Points")
-	}
-	if args.Streams {
-		query = query.Preload("Streams")
-	}
-	if args.Producers {
-		query = query.Preload("Producers")
-	}
-	if args.Consumers {
-		query = query.Preload("Consumers")
-	}
-	return query
-}
-
 func (d *GormDatabase) buildProducerHistoryQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.TimestampGt != nil {
