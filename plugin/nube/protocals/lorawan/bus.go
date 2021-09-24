@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/NubeDev/flow-framework/eventbus"
-	"github.com/NubeDev/flow-framework/src/mqttclient"
+	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/utils"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/mustafaturan/bus/v3"
