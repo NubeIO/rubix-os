@@ -98,12 +98,8 @@ func (i *Instance) PollingTCP(p polling) error {
 							} else {
 								ops.Addr = uint16(pnt.AddressId)
 								ops.ObjectType = pnt.ObjectType
-								if pnt.ZeroMode != nil {
-									ops.IsHoldingReg = *pnt.IsOutput
-								}
-								if pnt.ZeroMode != nil {
-									ops.ZeroMode = *pnt.ZeroMode
-								}
+								ops.IsHoldingReg = utils.BoolIsNil(pnt.IsOutput)
+								ops.ZeroMode = utils.BoolIsNil(pnt.ZeroMode)
 								request, err := parseRequest(ops)
 								if err != nil {
 									fmt.Println(err)

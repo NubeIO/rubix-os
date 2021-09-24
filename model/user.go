@@ -11,11 +11,6 @@ type User struct {
 	Plugins      []PluginConf
 }
 
-// UserExternal Model
-//
-// The User holds information about permission and other stuff.
-//
-// swagger:model User
 type UserExternal struct {
 	ID    uint   `json:"id"`
 	Name  string `binding:"required" json:"name" query:"name" form:"name"`

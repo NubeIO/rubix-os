@@ -207,7 +207,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				databaseWizard.POST("/mappings/local/points", dbGroup.WizardLocalPointMapping)
 				databaseWizard.POST("/mappings/remote/points", dbGroup.WizardRemotePointMapping)
 				databaseWizard.POST("/mappings/existing/streams", dbGroup.Wizard2ndFlowNetwork)
-				databaseWizard.POST("/networks/add", dbGroup.NetworkDevicePoint)
+				databaseWizard.POST("/networks/add", dbGroup.WizardNewNetDevPnt)
 			}
 		}
 

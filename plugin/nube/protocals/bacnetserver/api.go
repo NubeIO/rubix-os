@@ -4,7 +4,9 @@ import (
 	"fmt"
 	pkgmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
 	plgrest "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/restclient"
+	"github.com/NubeDev/flow-framework/utils"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -13,11 +15,33 @@ func getBODYNetwork(ctx *gin.Context) (dto *pkgmodel.Server, err error) {
 	return dto, err
 }
 
+func getBODYPoints(ctx *gin.Context) (dto *pkgmodel.BacnetPoint, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func resolveObject(ctx *gin.Context) string {
+	return ctx.Param("object")
+}
+
+func resolveAddress(ctx *gin.Context) string {
+	return ctx.Param("address")
+}
+
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
 
-	mux.GET("/bacnet/ping", func(ctx *gin.Context) {
+	mux.GET("/ping", func(ctx *gin.Context) {
+		cli := plgrest.NewNoAuth(ip, port)
+		p, err := cli.PingServer()
+		if err != nil {
+			fmt.Println(err, "ERROR ON GetServer")
+		}
+		ctx.JSON(http.StatusOK, p)
+	})
+
+	mux.GET("/server", func(ctx *gin.Context) {
 		cli := plgrest.NewNoAuth(ip, port)
 		p, err := cli.GetServer()
 		if err != nil {
@@ -26,16 +50,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, p)
 	})
 
-	mux.GET("/bacnet/server", func(ctx *gin.Context) {
-		cli := plgrest.NewNoAuth(ip, port)
-		p, err := cli.GetServer()
-		if err != nil {
-			fmt.Println(err, "ERROR ON GetServer")
-		}
-		ctx.JSON(http.StatusOK, p)
-	})
-
-	mux.PATCH("/bacnet/server", func(ctx *gin.Context) {
+	mux.PATCH("/server", func(ctx *gin.Context) {
 		body, _ := getBODYNetwork(ctx)
 		cli := plgrest.NewNoAuth(ip, port)
 		p, err := cli.EditServer(*body)
@@ -45,7 +60,8 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, p)
 	})
 
-	mux.GET("/bacnet/points", func(ctx *gin.Context) {
+	//POINTS
+	mux.GET("/points", func(ctx *gin.Context) {
 		cli := plgrest.NewNoAuth(ip, port)
 		p, err := cli.GetPoints()
 		if err != nil {
@@ -54,8 +70,30 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, p)
 	})
 
+	mux.POST("/points", func(ctx *gin.Context) {
+		body, _ := getBODYPoints(ctx)
+		cli := plgrest.NewNoAuth(ip, port)
+		p, err := cli.AddPoint(*body)
+		if err != nil {
+			fmt.Println(err, "ERROR ON GET POINTS")
+		}
+		ctx.JSON(http.StatusOK, p)
+	})
+
+	mux.PATCH("/points/:object/:address", func(ctx *gin.Context) {
+		body, _ := getBODYPoints(ctx)
+		obj := resolveObject(ctx)
+		addr := resolveAddress(ctx)
+		cli := plgrest.NewNoAuth(ip, port)
+		p, err := cli.EditPoint(*body, obj, utils.ToInt(addr))
+		if err != nil {
+			fmt.Println(err, "ERROR ON GET POINTS")
+		}
+		ctx.JSON(http.StatusOK, p)
+	})
+
 	//delete all the bacnet-server points
-	mux.DELETE("/bacnet/points", func(ctx *gin.Context) {
+	mux.DELETE("/points", func(ctx *gin.Context) {
 		cli := plgrest.NewNoAuth(ip, port)
 		p, err := cli.GetPoints()
 		for _, pnt := range *p {
@@ -68,6 +106,16 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			fmt.Println(err, "ERROR ON GET POINTS")
 		}
 		ctx.JSON(http.StatusOK, p)
+	})
+
+	mux.POST("/wizard", func(ctx *gin.Context) {
+		wizard, err := i.wizard()
+		if err != nil {
+			log.Info(err, "ERROR ON organizations")
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, wizard)
+		}
 	})
 
 }
