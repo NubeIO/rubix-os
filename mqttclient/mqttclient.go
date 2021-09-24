@@ -10,10 +10,9 @@ import (
 	"time"
 )
 
-
 type topicLog struct {
-	field  string
-	msg string
+	field string
+	msg   string
 	error error
 }
 
@@ -27,7 +26,6 @@ func (l topicLog) logErr() {
 	log.Info(msg)
 }
 
-
 // QOS describes the quality of service of an mqttClient publish
 type QOS byte
 
@@ -40,26 +38,24 @@ const (
 	ExactlyOnce
 )
 
-
 // Client runs an mqttClient client
 type Client struct {
-	client        	mqtt.Client
-	clientID      	string
-	connected    	bool
-	terminated    	bool
-	consumers 	[]consumer
+	client     mqtt.Client
+	clientID   string
+	connected  bool
+	terminated bool
+	consumers  []consumer
 }
-
 
 // ClientOptions is the list of options used to create c client
 type ClientOptions struct {
-	Servers  []string // The list of broker hostnames to connect to
-	ClientID string   // If left empty c uuid will automatically be generated
-	Username string   // If not set then authentication will not be used
-	Password string   // Will only be used if the username is set
-	SetKeepAlive time.Duration
-	SetPingTimeout  time.Duration
-	AutoReconnect bool // If the client should automatically try to reconnect when the connection is lost
+	Servers        []string // The list of broker hostnames to connect to
+	ClientID       string   // If left empty c uuid will automatically be generated
+	Username       string   // If not set then authentication will not be used
+	Password       string   // Will only be used if the username is set
+	SetKeepAlive   time.Duration
+	SetPingTimeout time.Duration
+	AutoReconnect  bool // If the client should automatically try to reconnect when the connection is lost
 }
 
 type consumer struct {
@@ -72,7 +68,6 @@ func (c *Client) Close() {
 	c.client.Disconnect(250)
 	c.terminated = true
 }
-
 
 // Subscribe to topic
 func (c *Client) Subscribe(topic string, qos QOS, handler mqtt.MessageHandler) (err error) {
@@ -181,7 +176,7 @@ func NewClient(options ClientOptions) (c *Client, err error) {
 // Connect opens c new connection
 func (c *Client) Connect() (err error) {
 	token := c.client.Connect()
-	if token.WaitTimeout(2 * time.Second) == false {
+	if token.WaitTimeout(2*time.Second) == false {
 		return errors.New("MQTT connection timeout")
 	}
 	if token.Error() != nil {

@@ -3,9 +3,9 @@ package api
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/auth"
 	"io/ioutil"
 
-	"github.com/NubeDev/flow-framework/auth"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin"
 	"github.com/NubeDev/flow-framework/plugin/compat"

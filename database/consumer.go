@@ -3,8 +3,8 @@ package database
 import (
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/client"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/src/client"
 	"github.com/NubeDev/flow-framework/utils"
 )
 

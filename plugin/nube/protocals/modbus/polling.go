@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/poller"
+	"github.com/NubeDev/flow-framework/src/poller"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"time"

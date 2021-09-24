@@ -2,6 +2,7 @@ package pkgrest
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/model"
 	pkgmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
 	"strconv"
 )
@@ -36,11 +37,17 @@ func (a *RestClient) AddPoint(body pkgmodel.BacnetPoint) (*pkgmodel.BacnetPoint,
 	return resp.Result().(*pkgmodel.BacnetPoint), nil
 }
 
+type PriorityWriter struct {
+	PriorityArrayWrite model.Priority `json:"priority_array_write,omitempty"`
+}
+
 // EditPoint an object
 func (a *RestClient) EditPoint(body pkgmodel.BacnetPoint, obj string, addr int) (*pkgmodel.BacnetPoint, error) {
+	priorityWriter := new(PriorityWriter)
+	priorityWriter.PriorityArrayWrite = *body.Priority
 	resp, err := a.client.R().
 		SetResult(&pkgmodel.BacnetPoint{}).
-		SetBody(body).
+		SetBody(priorityWriter).
 		SetPathParams(map[string]string{"obj": obj, "addr": strconv.Itoa(addr)}).
 		Patch("/api/bacnet/points/obj/{obj}/{addr}")
 	if err != nil {
@@ -80,7 +87,6 @@ func (a *RestClient) PingServer() (*pkgmodel.ServerPing, error) {
 	return resp.Result().(*pkgmodel.ServerPing), nil
 }
 
-
 // GetServer all points
 func (a *RestClient) GetServer() (*pkgmodel.Server, error) {
 	resp, err := a.client.R().
@@ -94,7 +100,6 @@ func (a *RestClient) GetServer() (*pkgmodel.Server, error) {
 	}
 	return resp.Result().(*pkgmodel.Server), nil
 }
-
 
 // EditServer an object
 func (a *RestClient) EditServer(body pkgmodel.Server) (*pkgmodel.Server, error) {

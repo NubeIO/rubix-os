@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
@@ -68,6 +67,7 @@ func (i *Instance) addPoint(body *model.Point) (*model.Point, error) {
 	_, err := cli.AddPoint(point)
 	//TODO check if existing exists, as in the same addr and also set the point in fault or out of fault
 	if err != nil {
+		log.Errorf("BACNET: ADD POINT issue on add rest: %v\n", err)
 		return nil, err
 	}
 	return nil, nil
@@ -76,36 +76,48 @@ func (i *Instance) addPoint(body *model.Point) (*model.Point, error) {
 
 //pointPatch from rest
 func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
-	var point pkgmodel.BacnetPoint
-	point.Priority.P1 = body.Priority.P1
-	point.Priority.P2 = body.Priority.P2
-	point.Priority.P3 = body.Priority.P3
-	point.Priority.P4 = body.Priority.P4
-	point.Priority.P5 = body.Priority.P5
-	point.Priority.P6 = body.Priority.P6
-	point.Priority.P7 = body.Priority.P7
-	point.Priority.P8 = body.Priority.P8
-	point.Priority.P9 = body.Priority.P9
-	point.Priority.P10 = body.Priority.P10
-	point.Priority.P11 = body.Priority.P11
-	point.Priority.P12 = body.Priority.P12
-	point.Priority.P13 = body.Priority.P13
-	point.Priority.P14 = body.Priority.P14
-	point.Priority.P15 = body.Priority.P15
-	point.Priority.P16 = body.Priority.P16
+	//point := new(pkgmodel.BacnetPoint)
+	point := new(pkgmodel.BacnetPoint)
+	//point.Priority.P1 = body.Priority.P1
+
+	//point.Priority.P2 = body.Priority.P2
+	//point.Priority.P3 = body.Priority.P3
+	//point.Priority.P4 = body.Priority.P4
+	//point.Priority.P5 = body.Priority.P5
+	//point.Priority.P6 = body.Priority.P6
+	//point.Priority.P7 = body.Priority.P7
+	//point.Priority.P8 = body.Priority.P8
+	//point.Priority.P9 = body.Priority.P9
+	//point.Priority.P10 = body.Priority.P10
+	//point.Priority.P11 = body.Priority.P11
+	//point.Priority.P12 = body.Priority.P12
+	//point.Priority.P13 = body.Priority.P13
+	//point.Priority.P14 = body.Priority.P14
+	//point.Priority.P15 = body.Priority.P15
+
+	//if reflect.ValueOf(body.Name).IsValid() {
+	//	point.ObjectName = body.Name
+	//}
+	point.Priority = new(model.Priority)
+	if (*body.Priority).P16 != nil {
+		(*point.Priority).P16 = (*body.Priority).P16
+	}
 	point.ObjectName = body.Name
 	addr := body.AddressId
 	obj := body.ObjectType
+
 	cli := plgrest.NewNoAuth(ip, port)
-	_, err := cli.EditPoint(point, obj, addr)
+	_, err := cli.EditPoint(*point, obj, addr)
 	if err != nil {
+		log.Errorf("BACNET: EDIT POINT issue on add rest: %v\n", err)
 		return nil, err
 	}
+
 	return nil, nil
 
 }
 
-//delete point make sure
+//deletePoint point make sure
 func (i *Instance) deletePoint(body *model.Point) (bool, error) {
 	cli := plgrest.NewNoAuth(ip, port)
 	_, err := cli.DeletePoint(body.ObjectType, body.AddressId)
@@ -115,7 +127,7 @@ func (i *Instance) deletePoint(body *model.Point) (bool, error) {
 	return true, nil
 }
 
-//delete point make sure
+//bacnetServerDeletePoint point make sure
 func (i *Instance) bacnetServerDeletePoint(body *pkgmodel.BacnetPoint) (bool, error) {
 	cli := plgrest.NewNoAuth(ip, port)
 	_, err := cli.DeletePoint(body.ObjectType, body.Address)
@@ -127,7 +139,6 @@ func (i *Instance) bacnetServerDeletePoint(body *pkgmodel.BacnetPoint) (bool, er
 
 //delete point make sure
 func (i *Instance) wizard() (string, error) {
-
 	//add point
 	cli := plgrest.NewNoAuth(ip, port)
 	var point pkgmodel.BacnetPoint
@@ -145,12 +156,8 @@ func (i *Instance) wizard() (string, error) {
 	if err != nil {
 		return "error: on add bacnet point to server", err
 	}
-	fmt.Println(11111)
-	fmt.Println(bacPnt)
-	fmt.Println(bacPnt.ObjectName)
 	var net model.Network
 	net.Name = "bacnet"
-	fmt.Println(11111)
 	net.TransportType = "ip"
 	net.PluginPath = "bacnetserver"
 	var dev model.Device
@@ -167,4 +174,30 @@ func (i *Instance) wizard() (string, error) {
 	}
 
 	return "pass: added network and points", err
+}
+
+//syncCheck point make sure
+//the idea is to make sure that the ff-network and the bacnet-server stay in sync
+func (i *Instance) syncCheck(body *pkgmodel.BacnetPoint) (bool, error) {
+	//cli := plgrest.NewNoAuth(ip, port)
+	//bacPnts, err := cli.GetPoints()
+	//if err != nil {
+	//	return false, err
+	//}
+	//var arg api.Args
+	//arg.IpConnection = true
+	//points, err := i.db.GetPoints(arg)
+	//if err != nil {
+	//	return false, err
+	//}
+	//for _, pnt := range points {
+	//	fmt.Println(pnt)
+	//
+	//}
+	//for _, pnt := range points {
+	//	fmt.Println(pnt)
+	//
+	//}
+
+	return true, nil
 }

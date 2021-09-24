@@ -6,7 +6,7 @@ var m *Client
 
 //InternalMQTT internal non-secure mqtt connection
 // for plugins use the plugin path as the topi
-func InternalMQTT(ip string) (bool, error)  {
+func InternalMQTT(ip string) (bool, error) {
 	c, err := NewClient(ClientOptions{
 		Servers: []string{ip},
 	})
@@ -23,9 +23,6 @@ func InternalMQTT(ip string) (bool, error)  {
 	return c.IsConnected(), nil
 }
 
-func GetMQTT() (*Client, bool)  {
-	return m , m.IsConnected()
+func GetMQTT() (*Client, bool) {
+	return m, m.IsConnected()
 }
-
-
-

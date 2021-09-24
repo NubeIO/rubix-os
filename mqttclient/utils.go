@@ -10,10 +10,9 @@ func TopicParts(topic string) *utils.Array {
 	arr := utils.NewArray()
 	for _, e := range s {
 		res := strings.ReplaceAll(e, "/", "")
-		if res != ""{
+		if res != "" {
 			arr.Add(res)
 		}
 	}
 	return arr
 }
-

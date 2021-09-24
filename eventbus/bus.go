@@ -7,7 +7,6 @@ import (
 	"log"
 )
 
-
 func newBus() *bus.Bus {
 	// configure id generator
 	node := uint64(1)
@@ -25,6 +24,3 @@ func newBus() *bus.Bus {
 	}
 	return b
 }
-
-
-
