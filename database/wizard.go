@@ -382,31 +382,26 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	return true, nil
 }
 
-// NetworkDevicePoint add a local network mapping stream.
-func (d *GormDatabase) NetworkDevicePoint() (bool, error) {
-
-	var networkModel model.Network
-	var deviceModel model.Device
-	var pointModel model.Point
+// WizardNewNetDevPnt add a local network mapping stream.
+func (d *GormDatabase) WizardNewNetDevPnt(plugin string, net *model.Network, dev *model.Device, pnt *model.Point) (bool, error) {
 
 	//get plugin
-	p, err := d.GetPluginByPath("system")
+	p, err := d.GetPluginByPath(plugin)
 	if p.UUID == "" {
 		return false, errors.New("no valid plugin")
 	}
-
 	// network
-	networkModel.PluginConfId = p.UUID
-	n, err := d.CreateNetwork(&networkModel)
+	net.PluginConfId = p.UUID
+	n, err := d.CreateNetwork(net)
 	fmt.Println("CreateNetwork")
 	// device
-	deviceModel.NetworkUUID = n.UUID
-	dev, err := d.CreateDevice(&deviceModel)
+	dev.NetworkUUID = n.UUID
+	de, err := d.CreateDevice(dev)
 	fmt.Println("CreateDevice")
 	// point
-	pointModel.DeviceUUID = dev.UUID
-	pointModel.IsProducer = utils.NewTrue()
-	_, err = d.CreatePoint(&pointModel, "")
+	pnt.DeviceUUID = de.UUID
+	pnt.IsProducer = utils.NewTrue()
+	_, err = d.CreatePoint(pnt, "")
 	fmt.Println("CreatePoint")
 	if err != nil {
 		fmt.Println("Error on wizard")

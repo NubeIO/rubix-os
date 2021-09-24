@@ -127,7 +127,6 @@ func toInt(v interface{}) int {
 	if v == nil {
 		return 0
 	}
-
 	switch t := v.(type) {
 	case int:
 		return t
@@ -152,7 +151,6 @@ func toInt(v interface{}) int {
 	case float32:
 		return int(t)
 	case string:
-
 		if i, err := strconv.Atoi(t); err == nil {
 			return i
 		}

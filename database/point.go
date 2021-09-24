@@ -147,7 +147,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 	}
 	query = d.DB.Model(&pointModel).Updates(&body)
 
-	if *pointModel.IsProducer && *body.IsProducer {
+	if utils.BoolIsNil(pointModel.IsProducer) && utils.BoolIsNil(body.IsProducer) {
 		if compare(pointModel, body) {
 			_, err := d.ProducerWrite("point", pointModel)
 			if err != nil {
