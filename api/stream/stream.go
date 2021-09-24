@@ -1,7 +1,7 @@
 package stream
 
 import (
-	"github.com/NubeDev/flow-framework/src/auth"
+	"github.com/NubeDev/flow-framework/auth"
 	"net/http"
 	"net/url"
 	"regexp"

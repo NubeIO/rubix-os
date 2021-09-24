@@ -3,7 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
-	auth2 "github.com/NubeDev/flow-framework/src/auth"
+	"github.com/NubeDev/flow-framework/auth"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -65,8 +65,8 @@ type ApplicationAPI struct {
 func (a *ApplicationAPI) CreateApplication(ctx *gin.Context) {
 	app := model.Application{}
 	if err := ctx.Bind(&app); err == nil {
-		app.Token = auth2.GenerateNotExistingToken(generateApplicationToken, a.applicationExists)
-		app.UserID = auth2.GetUserID(ctx)
+		app.Token = auth.GenerateNotExistingToken(generateApplicationToken, a.applicationExists)
+		app.UserID = auth.GetUserID(ctx)
 		app.Internal = false
 		if success := successOrAbort(ctx, 500, a.DB.CreateApplication(&app)); !success {
 			return
@@ -100,7 +100,7 @@ func (a *ApplicationAPI) CreateApplication(ctx *gin.Context) {
 //     schema:
 //         $ref: "#/definitions/Error"
 func (a *ApplicationAPI) GetApplications(ctx *gin.Context) {
-	userID := auth2.GetUserID(ctx)
+	userID := auth.GetUserID(ctx)
 	apps, err := a.DB.GetApplicationsByUser(userID)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
@@ -152,7 +152,7 @@ func (a *ApplicationAPI) DeleteApplication(ctx *gin.Context) {
 		if success := successOrAbort(ctx, 500, err); !success {
 			return
 		}
-		if app != nil && app.UserID == auth2.GetUserID(ctx) {
+		if app != nil && app.UserID == auth.GetUserID(ctx) {
 			if app.Internal {
 				ctx.AbortWithError(400, errors.New("cannot delete internal application"))
 				return
@@ -218,7 +218,7 @@ func (a *ApplicationAPI) UpdateApplication(ctx *gin.Context) {
 		if success := successOrAbort(ctx, 500, err); !success {
 			return
 		}
-		if app != nil && app.UserID == auth2.GetUserID(ctx) {
+		if app != nil && app.UserID == auth.GetUserID(ctx) {
 			newValues := &model.Application{}
 			if err := ctx.Bind(newValues); err == nil {
 				app.Description = newValues.Description
@@ -288,7 +288,7 @@ func (a *ApplicationAPI) UploadApplicationImage(ctx *gin.Context) {
 		if success := successOrAbort(ctx, 500, err); !success {
 			return
 		}
-		if app != nil && app.UserID == auth2.GetUserID(ctx) {
+		if app != nil && app.UserID == auth.GetUserID(ctx) {
 			file, err := ctx.FormFile("file")
 			if err == http.ErrMissingFile {
 				ctx.AbortWithError(400, errors.New("file with key 'file' must be present"))

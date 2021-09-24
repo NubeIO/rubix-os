@@ -3,7 +3,7 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeDev/flow-framework/src/auth"
+	"github.com/NubeDev/flow-framework/auth"
 	"io/ioutil"
 
 	"github.com/NubeDev/flow-framework/model"
