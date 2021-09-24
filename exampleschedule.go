@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/src/schedule"
+	"github.com/NubeDev/flow-framework/schedule"
 	"io/ioutil"
 	"log"
 	"time"

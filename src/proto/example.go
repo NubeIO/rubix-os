@@ -1,6 +1,5 @@
 package proto
 
-
 // GOLANG
 /*
 INSTALL
@@ -14,7 +13,6 @@ protoc -I . --go_out=. ./person.proto
 RUN
 go run *.go
 */
-
 
 //PROTO FILE
 /*
@@ -88,4 +86,4 @@ func main() {
 }
 
 
- */
+*/
