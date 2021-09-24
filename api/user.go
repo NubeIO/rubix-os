@@ -2,9 +2,9 @@ package api
 
 import (
 	"errors"
+	"github.com/NubeDev/flow-framework/src/auth"
+	"github.com/NubeDev/flow-framework/src/auth/password"
 
-	"github.com/NubeDev/flow-framework/auth"
-	"github.com/NubeDev/flow-framework/auth/password"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )

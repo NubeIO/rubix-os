@@ -2,6 +2,8 @@ package router
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/src/auth"
+	"github.com/NubeDev/flow-framework/src/eventbus"
 	"time"
 
 	"github.com/NubeDev/flow-framework/floweng/server"
@@ -11,11 +13,9 @@ import (
 
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/api/stream"
-	"github.com/NubeDev/flow-framework/auth"
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/database"
 	"github.com/NubeDev/flow-framework/error"
-	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin"
 	"github.com/gin-gonic/gin"

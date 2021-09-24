@@ -3,11 +3,11 @@ package database
 import (
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/client"
+	"github.com/NubeDev/flow-framework/src/client"
+	"github.com/NubeDev/flow-framework/src/streams"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/streams"
 	"github.com/NubeDev/flow-framework/utils"
 )
 

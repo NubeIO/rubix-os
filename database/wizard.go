@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/client"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/src/client"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 )

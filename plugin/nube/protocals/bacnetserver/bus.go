@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/NubeDev/flow-framework/eventbus"
+	eventbus2 "github.com/NubeDev/flow-framework/src/eventbus"
 	"github.com/NubeDev/flow-framework/utils"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/mustafaturan/bus/v3"
@@ -15,7 +15,7 @@ func (i *Instance) BusServ() {
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				//try and match is network
-				net, err := eventbus.IsNetwork(e.Topic, e)
+				net, err := eventbus2.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -27,7 +27,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is device
-				dev, err := eventbus.IsDevice(e.Topic, e)
+				dev, err := eventbus2.IsDevice(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -40,7 +40,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is point
-				pnt, err := eventbus.IsPoint(e.Topic, e)
+				pnt, err := eventbus2.IsPoint(e.Topic, e)
 				fmt.Println("BACNET ADD POINT ON BUS")
 				if err != nil {
 					return
@@ -59,16 +59,16 @@ func (i *Instance) BusServ() {
 				}
 			}()
 		},
-		Matcher: eventbus.PluginsCreated,
+		Matcher: eventbus2.PluginsCreated,
 	}
 	u, _ := utils.MakeUUID()
 	key := fmt.Sprintf("key_%s", u)
-	eventbus.GetBus().RegisterHandler(key, handlerCreated)
+	eventbus2.GetBus().RegisterHandler(key, handlerCreated)
 	handlerUpdated := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				//try and match is network
-				net, err := eventbus.IsNetwork(e.Topic, e)
+				net, err := eventbus2.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -80,7 +80,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is device
-				dev, err := eventbus.IsDevice(e.Topic, e)
+				dev, err := eventbus2.IsDevice(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -93,7 +93,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is point
-				pnt, err := eventbus.IsPoint(e.Topic, e)
+				pnt, err := eventbus2.IsPoint(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -107,17 +107,17 @@ func (i *Instance) BusServ() {
 				}
 			}()
 		},
-		Matcher: eventbus.PluginsUpdated,
+		Matcher: eventbus2.PluginsUpdated,
 	}
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
-	eventbus.GetBus().RegisterHandler(key, handlerUpdated)
+	eventbus2.GetBus().RegisterHandler(key, handlerUpdated)
 	handlerDeleted := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				log.Info("BACNET BUS DELETED NEW MSG", " ", e.Topic)
 				//try and match is network
-				net, err := eventbus.IsNetwork(e.Topic, e)
+				net, err := eventbus2.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -129,7 +129,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is device
-				dev, err := eventbus.IsDevice(e.Topic, e)
+				dev, err := eventbus2.IsDevice(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -142,7 +142,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is point
-				pnt, err := eventbus.IsPoint(e.Topic, e)
+				pnt, err := eventbus2.IsPoint(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -157,11 +157,11 @@ func (i *Instance) BusServ() {
 				}
 			}()
 		},
-		Matcher: eventbus.PluginsDeleted,
+		Matcher: eventbus2.PluginsDeleted,
 	}
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
-	eventbus.GetBus().RegisterHandler(key, handlerDeleted)
+	eventbus2.GetBus().RegisterHandler(key, handlerDeleted)
 	handlerMQTT := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
@@ -172,10 +172,10 @@ func (i *Instance) BusServ() {
 				}
 			}()
 		},
-		Matcher: eventbus.MQTTUpdated,
+		Matcher: eventbus2.MQTTUpdated,
 	}
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
-	eventbus.GetBus().RegisterHandler(key, handlerMQTT)
+	eventbus2.GetBus().RegisterHandler(key, handlerMQTT)
 
 }

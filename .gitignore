@@ -9,5 +9,5 @@ coverage.txt
 config.yml
 data/
 images/
-client/ws.conf
+src/client/ws.conf
 *.so

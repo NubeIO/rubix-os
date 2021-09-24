@@ -3,15 +3,13 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
 	plgrest "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/restclient"
+	"github.com/NubeDev/flow-framework/src/mqttclient"
 	"github.com/NubeDev/flow-framework/utils"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
-	"strconv"
 	"time"
 )
 
@@ -100,20 +98,15 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 	//if reflect.ValueOf(body.Name).IsValid() {
 	//	point.ObjectName = body.Name
 	//}
-	//aa := 11.0
-	//aa := 11.0
-	fmt.Println(1111111)
 	point.Priority = new(model.Priority)
 	if (*body.Priority).P16 != nil {
 		(*point.Priority).P16 = (*body.Priority).P16
 	}
-	print(*(*point.Priority).P16)
 	point.ObjectName = body.Name
 	addr := body.AddressId
 	obj := body.ObjectType
 
 	cli := plgrest.NewNoAuth(ip, port)
-	fmt.Println(point, 99999, *point.Priority, strconv.Itoa(addr), obj)
 	_, err := cli.EditPoint(*point, obj, addr)
 	if err != nil {
 		log.Errorf("BACNET: EDIT POINT issue on add rest: %v\n", err)

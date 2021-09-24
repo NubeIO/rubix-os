@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/src/auth"
 	"io/ioutil"
 	"log"
 	"path/filepath"
@@ -14,7 +15,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/NubeDev/flow-framework/auth"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/compat"
 	"github.com/gin-gonic/gin"

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/NubeDev/flow-framework/eventbus"
+	eventbus2 "github.com/NubeDev/flow-framework/src/eventbus"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/mustafaturan/bus/v3"
 	log "github.com/sirupsen/logrus"
@@ -14,7 +14,7 @@ func (i *Instance) BusServ() {
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				//try and match is network
-				net, err := eventbus.IsNetwork(e.Topic, e)
+				net, err := eventbus2.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -26,7 +26,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is device
-				dev, err := eventbus.IsDevice(e.Topic, e)
+				dev, err := eventbus2.IsDevice(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -39,7 +39,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is point
-				pnt, err := eventbus.IsPoint(e.Topic, e)
+				pnt, err := eventbus2.IsPoint(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -52,16 +52,16 @@ func (i *Instance) BusServ() {
 				}
 			}()
 		},
-		Matcher: eventbus.PluginsCreated,
+		Matcher: eventbus2.PluginsCreated,
 	}
 	u, _ := utils.MakeUUID()
 	key := fmt.Sprintf("key_%s", u)
-	eventbus.GetBus().RegisterHandler(key, handlerCreated)
+	eventbus2.GetBus().RegisterHandler(key, handlerCreated)
 	handlerUpdated := bus.Handler{ //PLUGIN UPDATED BUS
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				//try and match is network
-				net, err := eventbus.IsNetwork(e.Topic, e)
+				net, err := eventbus2.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -73,7 +73,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is device
-				dev, err := eventbus.IsDevice(e.Topic, e)
+				dev, err := eventbus2.IsDevice(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -86,7 +86,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				//try and match is point
-				pnt, err := eventbus.IsPoint(e.Topic, e)
+				pnt, err := eventbus2.IsPoint(e.Topic, e)
 				if err != nil {
 					return
 				}
@@ -99,10 +99,10 @@ func (i *Instance) BusServ() {
 				}
 			}()
 		},
-		Matcher: eventbus.PluginsUpdated,
+		Matcher: eventbus2.PluginsUpdated,
 	}
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
-	eventbus.GetBus().RegisterHandler(key, handlerUpdated)
+	eventbus2.GetBus().RegisterHandler(key, handlerUpdated)
 
 }

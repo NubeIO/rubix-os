@@ -1,6 +1,7 @@
 package stream
 
 import (
+	"github.com/NubeDev/flow-framework/src/auth"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -8,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/NubeDev/flow-framework/auth"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"

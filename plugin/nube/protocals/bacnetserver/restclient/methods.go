@@ -43,7 +43,6 @@ type PriorityWriter struct {
 
 // EditPoint an object
 func (a *RestClient) EditPoint(body pkgmodel.BacnetPoint, obj string, addr int) (*pkgmodel.BacnetPoint, error) {
-	fmt.Println("Priority", *body.Priority)
 	priorityWriter := new(PriorityWriter)
 	priorityWriter.PriorityArrayWrite = *body.Priority
 	resp, err := a.client.R().
@@ -54,7 +53,6 @@ func (a *RestClient) EditPoint(body pkgmodel.BacnetPoint, obj string, addr int) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to update %s failed", err)
 	}
-	fmt.Printf("dsf", string(resp.Body()))
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}

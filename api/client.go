@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
+	auth2 "github.com/NubeDev/flow-framework/src/auth"
 
-	"github.com/NubeDev/flow-framework/auth"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )
@@ -74,7 +74,7 @@ func (a *ClientAPI) UpdateClient(ctx *gin.Context) {
 		if success := successOrAbort(ctx, 500, err); !success {
 			return
 		}
-		if client != nil && client.UserID == auth.GetUserID(ctx) {
+		if client != nil && client.UserID == auth2.GetUserID(ctx) {
 			newValues := &model.Client{}
 			if err := ctx.Bind(newValues); err == nil {
 				client.Name = newValues.Name
@@ -126,8 +126,8 @@ func (a *ClientAPI) UpdateClient(ctx *gin.Context) {
 func (a *ClientAPI) CreateClient(ctx *gin.Context) {
 	client := model.Client{}
 	if err := ctx.Bind(&client); err == nil {
-		client.Token = auth.GenerateNotExistingToken(generateClientToken, a.clientExists)
-		client.UserID = auth.GetUserID(ctx)
+		client.Token = auth2.GenerateNotExistingToken(generateClientToken, a.clientExists)
+		client.UserID = auth2.GetUserID(ctx)
 		if success := successOrAbort(ctx, 500, a.DB.CreateClient(&client)); !success {
 			return
 		}
@@ -160,7 +160,7 @@ func (a *ClientAPI) CreateClient(ctx *gin.Context) {
 //     schema:
 //         $ref: "#/definitions/Error"
 func (a *ClientAPI) GetClients(ctx *gin.Context) {
-	userID := auth.GetUserID(ctx)
+	userID := auth2.GetUserID(ctx)
 	clients, err := a.DB.GetClientsByUser(userID)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
@@ -209,7 +209,7 @@ func (a *ClientAPI) DeleteClient(ctx *gin.Context) {
 		if success := successOrAbort(ctx, 500, err); !success {
 			return
 		}
-		if client != nil && client.UserID == auth.GetUserID(ctx) {
+		if client != nil && client.UserID == auth2.GetUserID(ctx) {
 			a.NotifyDeleted(client.UserID, client.Token)
 			successOrAbort(ctx, 500, a.DB.DeleteClientByID(id))
 		} else {

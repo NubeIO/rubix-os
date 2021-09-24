@@ -3,21 +3,21 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/NubeDev/flow-framework/src/cachestore"
+	"github.com/NubeDev/flow-framework/src/dbhandler"
+	eventbus2 "github.com/NubeDev/flow-framework/src/eventbus"
+	"github.com/NubeDev/flow-framework/src/mqttclient"
 	"io/ioutil"
 	"os"
 	"path"
 	"time"
 
 	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/cachestore"
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/database"
-	"github.com/NubeDev/flow-framework/dbhandler"
-	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/floweng"
 	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/router"
 	"github.com/NubeDev/flow-framework/runner"
 	"github.com/patrickmn/go-cache"
@@ -62,8 +62,8 @@ func main() {
 	}
 
 	fmt.Println("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
-	eventbus.Init()
-	eventbus.RegisterMQTTBus()
+	eventbus2.Init()
+	eventbus2.RegisterMQTTBus()
 
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
 		conf.PassStrength, conf.Database.LogLevel, true, conf.Prod)

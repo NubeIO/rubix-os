@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
+	eventbus2 "github.com/NubeDev/flow-framework/src/eventbus"
 	"github.com/NubeDev/flow-framework/utils"
 	"time"
 )
@@ -91,9 +91,9 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, nModel.PluginConfId, body.UUID)
+	t := fmt.Sprintf("%s.%s.%s", eventbus2.PluginsCreated, nModel.PluginConfId, body.UUID)
 	d.Bus.RegisterTopic(t)
-	err = d.Bus.Emit(eventbus.CTX(), t, body)
+	err = d.Bus.Emit(eventbus2.CTX(), t, body)
 	if err != nil {
 		return nil, errors.New("error on device eventbus")
 	}
@@ -129,9 +129,9 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, nModel.PluginConfId, uuid)
+	t := fmt.Sprintf("%s.%s.%s", eventbus2.PluginsUpdated, nModel.PluginConfId, uuid)
 	d.Bus.RegisterTopic(t)
-	err = d.Bus.Emit(eventbus.CTX(), t, deviceModel)
+	err = d.Bus.Emit(eventbus2.CTX(), t, deviceModel)
 	if err != nil {
 		return nil, errors.New("error on device eventbus")
 	}

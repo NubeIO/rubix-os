@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/src/eventbus"
 	"github.com/gin-gonic/gin"
 )
 
