@@ -55,7 +55,8 @@ type Args struct {
 	SiteId           *string
 	DeviceId         *string
 	PluginName       bool
-	TimestampGt      string
+	TimestampGt      *string
+	TimestampLt      *string
 }
 
 var ArgsType = struct {
@@ -104,6 +105,7 @@ var ArgsType = struct {
 	DeviceId         string
 	PluginName       string
 	TimestampGt      string
+	TimestampLt	     string
 }{
 	Sort:             "sort",
 	Order:            "order",
@@ -150,6 +152,7 @@ var ArgsType = struct {
 	DeviceId:         "device_id",
 	PluginName:       "by_plugin_name",
 	TimestampGt:      "timestamp_gt",
+	TimestampLt: 	  "timestamp_lt",
 }
 
 var ArgsDefault = struct {
@@ -191,7 +194,6 @@ var ArgsDefault = struct {
 	Priority         string
 	Tags             string
 	PluginName       string
-	TimestampGt      string
 }{
 	Sort:             "ID",
 	Order:            "DESC", //ASC or DESC
@@ -231,7 +233,6 @@ var ArgsDefault = struct {
 	Priority:         "false",
 	Tags:             "false",
 	PluginName:       "false",
-	TimestampGt:      "",
 }
 
 func reposeHandler(body interface{}, err error, ctx *gin.Context) {
@@ -361,6 +362,10 @@ func getBodyTag(ctx *gin.Context) (dto *model.Tag, err error) {
 
 func resolveID(ctx *gin.Context) string {
 	return ctx.Param("uuid")
+}
+
+func resolveProducerUUID(ctx *gin.Context) string {
+	return ctx.Param("producer_uuid")
 }
 
 func getTagParam(ctx *gin.Context) string {

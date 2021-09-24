@@ -218,12 +218,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		historyProducerRoutes := apiRoutes.Group("/histories/producers")
 		{
 			historyProducerRoutes.GET("", historyHandler.GetProducerHistories)
-			historyProducerRoutes.DELETE("/drop", historyHandler.DropProducerHistories)
-			historyProducerRoutes.GET("/:uuid", historyHandler.GetProducerHistory)
-			historyProducerRoutes.GET("/latest/:uuid", historyHandler.HistoryLatestByProducerUUID) //gets the newest
-			historyProducerRoutes.GET("/all/:uuid", historyHandler.HistoriesAllByProducerUUID)
+			historyProducerRoutes.GET("/:producer_uuid", historyHandler.GetProducerHistoriesByProducerUUID)
+			historyProducerRoutes.GET("/:producer_uuid/one", historyHandler.GetLatestProducerHistoryByProducerUUID)
 			historyProducerRoutes.POST("/bulk", historyHandler.CreateBulkProducerHistory)
-			historyProducerRoutes.DELETE("/:uuid", historyHandler.DeleteProducerHistory)
+			historyProducerRoutes.DELETE("/all", historyHandler.DeleteAllProducerHistories)
+			historyProducerRoutes.DELETE("/:producer_uuid", historyHandler.DeleteProducerHistoriesByProducerUUID)
 		}
 
 		flowNetworkRoutes := apiRoutes.Group("/flow/networks")

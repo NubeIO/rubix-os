@@ -1,11 +1,8 @@
 package database
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/utils"
-	"strings"
 	"time"
 )
 
@@ -18,62 +15,42 @@ func (d *GormDatabase) GetProducerHistories(args api.Args) ([]*model.ProducerHis
 		return nil, query.Error
 	}
 	return historiesModel, nil
-
 }
 
-// GetProducerHistory returns the history for the given id or nil.
-func (d *GormDatabase) GetProducerHistory(uuid string) (*model.ProducerHistory, error) {
-	var historyModel *model.ProducerHistory
-	query := d.DB.Where("uuid = ? ", uuid).First(&historyModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return historyModel, nil
-
-}
-
-// HistoryLatestByProducerUUID returns the history for the given id or nil.
-func (d *GormDatabase) HistoryLatestByProducerUUID(uuid string) (*model.ProducerHistory, error) {
-	var historyModel *model.ProducerHistory
-	t := fmt.Sprintf("timestamp %s", "DESC")
-	query := d.DB.Where("producer_uuid = ? ", uuid).Order(t).First(&historyModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return historyModel, nil
-}
-
-// HistoriesAllByProducerUUID returns the history for the given id or nil.
-func (d *GormDatabase) HistoriesAllByProducerUUID(uuid string, order string) ([]*model.ProducerHistory, int64, error) {
+// GetProducerHistoriesByProducerUUID returns the history for the given producer_uuid or nil.
+func (d *GormDatabase) GetProducerHistoriesByProducerUUID(pUuid string, args api.Args) ([]*model.ProducerHistory, int64, error) {
 	var count int64
 	var historiesModel []*model.ProducerHistory
-	order = strings.ToUpper(strings.TrimSpace(order))
-	if order != "ASC" && order != "DESC" {
-		order = "DESC"
-	}
-	t := fmt.Sprintf("timestamp %s", order)
-	q := d.DB.Where("producer_uuid = ? ", uuid).Order(t).Find(&historiesModel) //ASC or DESC
-	q.Count(&count)
+	query := d.buildProducerHistoryQuery(args)
+	query = query.Where("producer_uuid = ?", pUuid)
+	query.Find(&historiesModel)
+	query.Count(&count)
 	return historiesModel, count, nil
+}
+
+// GetLatestProducerHistoryByProducerUUID returns the latest history for the given producer_uuid or nil.
+func (d *GormDatabase) GetLatestProducerHistoryByProducerUUID(pUuid string) (*model.ProducerHistory, error) {
+	var historyModel *model.ProducerHistory
+	query := d.DB.Where("producer_uuid = ? ", pUuid).Order("timestamp desc").First(&historyModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return historyModel, nil
 }
 
 // CreateProducerHistory creates a thing.
 func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.ProducerHistory)
-	hist, count, err := d.HistoriesAllByProducerUUID(body.ProducerUUID, "DESC")
-	if err != nil {
-		return nil, err
-	}
-	var limit int64 = 10
-	//TODO add in the limit as a field in the producer
-	if count >= limit {
-		for i, e := range hist {
-			if i >= int(limit) {
-				_, err := d.DeleteProducerHistory(e.UUID)
-				if err != nil {
-					return nil, err
-				}
-			}
+	var limit = 10
+	var count int64
+	////TODO add in the limit as a field in the producer
+	subQuery := d.DB.Model(&model.ProducerHistory{}).Select("id").
+		Where("producer_uuid = ?", body.ProducerUUID).Order("timestamp desc").Limit(limit - 1)
+	subQuery.Count(&count)
+	if count >= int64(limit) {
+		query := d.DB.Where("producer_uuid = ?", body.ProducerUUID).Where("id not in (?)", subQuery).
+			Delete(&model.ProducerHistory{})
+		if query.Error != nil {
+			return nil, query.Error
 		}
 	}
 	if err := d.DB.Create(&body).Error; err != nil {
@@ -82,6 +59,7 @@ func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*mode
 	return body, nil
 }
 
+// CreateBulkProducerHistory bulk creates a thing.
 func (d *GormDatabase) CreateBulkProducerHistory(history []*model.ProducerHistory) (bool, error) {
 	for _, hist := range history {
 		ph := new(model.ProducerHistory)
@@ -90,39 +68,54 @@ func (d *GormDatabase) CreateBulkProducerHistory(history []*model.ProducerHistor
 		ph.Timestamp = time.Now().UTC()
 		_, err := d.CreateProducerHistory(ph)
 		if err != nil {
-			return true, err
+			return false, err
 		}
 	}
-	return false, nil
+	return true, nil
 }
 
-// DeleteProducerHistory delete a history.
-func (d *GormDatabase) DeleteProducerHistory(uuid string) (bool, error) {
+// DeleteProducerHistoriesByProducerUUID delete all history for given producer_uuid.
+func (d *GormDatabase) DeleteProducerHistoriesByProducerUUID(pUuid string, args api.Args) (bool, error) {
 	var historyModel *model.ProducerHistory
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&historyModel)
+	query := d.buildProducerHistoryQuery(args)
+	query = query.Where("producer_uuid = ? ", pUuid)
+	query.Delete(&historyModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
 	if r == 0 {
 		return false, nil
-	} else {
-		return true, nil
 	}
-
+	return true, nil
 }
 
-// DropProducerHistories delete all.
-func (d *GormDatabase) DropProducerHistories() (bool, error) {
+// DeleteProducerHistory delete a history for given id
+func (d *GormDatabase) DeleteProducerHistory(id int) (bool, error) {
 	var historyModel *model.ProducerHistory
-	query := d.DB.Where("1 = 1").Delete(&historyModel)
+	query := d.DB.Where("id = ? ", id).Delete(&historyModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
 	if r == 0 {
 		return false, nil
-	} else {
-		return true, nil
 	}
+	return true, nil
+}
+
+// DeleteAllProducerHistories delete all histories.
+func (d *GormDatabase) DeleteAllProducerHistories(args api.Args) (bool, error) {
+	var historyModel *model.ProducerHistory
+	query := d.buildProducerHistoryQuery(args)
+	query = query.Where("1 = 1")
+	query.Delete(&historyModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
+	r := query.RowsAffected
+	if r == 0 {
+		return false, nil
+	}
+	return true, nil
 }

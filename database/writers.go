@@ -260,7 +260,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 				return nil, errors.New("WRITER-LOCAL: error on local WRITE to writer-clone")
 			}
 		} else {
-			producerHistory, err = d.HistoryLatestByProducerUUID(producerUUID)
+			producerHistory, err = d.GetLatestProducerHistoryByProducerUUID(producerUUID)
 			if err != nil {
 				return nil, errors.New("WRITER-LOCAL: error on local READ to producer history")
 			}
