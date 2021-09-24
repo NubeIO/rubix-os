@@ -3,7 +3,7 @@ package router
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/auth"
-	"github.com/NubeDev/flow-framework/src/eventbus"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"time"
 
 	"github.com/NubeDev/flow-framework/floweng/server"

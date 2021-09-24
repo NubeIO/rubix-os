@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/compat"
-	eventbus2 "github.com/NubeDev/flow-framework/src/eventbus"
 	"github.com/NubeDev/flow-framework/utils"
 	"time"
 )
@@ -126,9 +126,9 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	t := fmt.Sprintf("%s.%s.%s", eventbus2.PluginsUpdated, networkModel.PluginConfId, networkModel.UUID)
+	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, networkModel.PluginConfId, networkModel.UUID)
 	d.Bus.RegisterTopic(t)
-	err := d.Bus.Emit(eventbus2.CTX(), t, networkModel)
+	err := d.Bus.Emit(eventbus.CTX(), t, networkModel)
 	if err != nil {
 		return nil, errors.New("error on network eventbus")
 	}

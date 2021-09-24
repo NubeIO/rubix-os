@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
-	eventbus2 "github.com/NubeDev/flow-framework/src/eventbus"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"reflect"
@@ -97,9 +97,9 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	if err != nil {
 		return nil, errors.New("ERROR failed to get plugin uuid")
 	}
-	t := fmt.Sprintf("%s.%s.%s", eventbus2.PluginsCreated, plug.PluginConfId, body.UUID)
+	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, plug.PluginConfId, body.UUID)
 	d.Bus.RegisterTopic(t)
-	err = d.Bus.Emit(eventbus2.CTX(), t, body)
+	err = d.Bus.Emit(eventbus.CTX(), t, body)
 	if err != nil {
 		return nil, errors.New("ERROR on device eventbus")
 	}
@@ -159,9 +159,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 		if err != nil {
 			return nil, errors.New("ERROR failed to get plugin uuid")
 		}
-		t := fmt.Sprintf("%s.%s.%s", eventbus2.PluginsUpdated, plug.PluginConfId, pointModel.UUID)
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, plug.PluginConfId, pointModel.UUID)
 		d.Bus.RegisterTopic(t)
-		err = d.Bus.Emit(eventbus2.CTX(), t, pointModel)
+		err = d.Bus.Emit(eventbus.CTX(), t, pointModel)
 		if err != nil {
 			return nil, errors.New("ERROR on device eventbus")
 		}
@@ -240,9 +240,9 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 			return false, errors.New("ERROR failed to get plugin uuid")
 		}
 		fmt.Println(point.DeviceUUID, point)
-		t := fmt.Sprintf("%s.%s.%s", eventbus2.PluginsDeleted, plug.PluginConfId, point.UUID)
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsDeleted, plug.PluginConfId, point.UUID)
 		d.Bus.RegisterTopic(t)
-		err = d.Bus.Emit(eventbus2.CTX(), t, point)
+		err = d.Bus.Emit(eventbus.CTX(), t, point)
 		if err != nil {
 			return false, errors.New("ERROR on device eventbus")
 		}

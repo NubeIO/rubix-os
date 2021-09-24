@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/src/cachestore"
 	"github.com/NubeDev/flow-framework/src/dbhandler"
-	eventbus2 "github.com/NubeDev/flow-framework/src/eventbus"
 	"github.com/NubeDev/flow-framework/src/mqttclient"
 	"io/ioutil"
 	"os"
@@ -62,8 +62,8 @@ func main() {
 	}
 
 	fmt.Println("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
-	eventbus2.Init()
-	eventbus2.RegisterMQTTBus()
+	eventbus.Init()
+	eventbus.RegisterMQTTBus()
 
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
 		conf.PassStrength, conf.Database.LogLevel, true, conf.Prod)
