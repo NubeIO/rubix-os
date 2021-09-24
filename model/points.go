@@ -163,7 +163,7 @@ type Point struct {
 }
 
 type Priority struct {
-	PointUUID string   `json:"point_uuid" gorm:"REFERENCES points;not null;default:null;primaryKey"`
+	PointUUID string   `json:"point_uuid,omitempty" gorm:"REFERENCES points;not null;default:null;primaryKey"`
 	P1        *float64 `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
 	P2        *float64 `json:"_2"`
 	P3        *float64 `json:"_3"`

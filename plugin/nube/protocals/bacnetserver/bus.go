@@ -41,12 +41,13 @@ func (i *Instance) BusServ() {
 				}
 				//try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
-				fmt.Println("ADD POINT ON BUS")
+				fmt.Println("BACNET ADD POINT ON BUS")
 				if err != nil {
 					return
 				}
 				_, err = i.addPoint(pnt)
 				if err != nil {
+					log.Error("BACNET ADD POINT BUS issue on add rest")
 					return
 				}
 				if pnt != nil {

@@ -119,11 +119,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if writeValue {
-		//TODO add this in to save a few DB read/write for the priority
-		//query = d.DB.Model(&pointModel.Priority).Updates(&body.Priority)
-		//query = d.DB.Model(&pointModel).Updates(&body)
-	}
+
 	if body.Priority != nil {
 		priority := map[string]interface{}{}
 		priorityValue := reflect.ValueOf(*body.Priority)
@@ -145,7 +141,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 			return nil, err
 		}
 	}
-	query = d.DB.Model(&pointModel).Updates(&body)
+	if !writeValue {
+		query = d.DB.Model(&pointModel).Updates(&body)
+	}
 
 	if utils.BoolIsNil(pointModel.IsProducer) && utils.BoolIsNil(body.IsProducer) {
 		if compare(pointModel, body) {

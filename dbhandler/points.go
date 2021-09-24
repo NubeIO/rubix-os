@@ -5,6 +5,14 @@ import (
 	"github.com/NubeDev/flow-framework/model"
 )
 
+func (h *Handler) GetPoints(args api.Args) ([]*model.Point, error) {
+	q, err := getDb().GetPoints(args)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
 func (h *Handler) GetPoint(uuid string, withChildren bool) (*model.Point, error) {
 	q, err := getDb().GetPoint(uuid, api.Args{})
 	if err != nil {

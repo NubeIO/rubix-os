@@ -93,7 +93,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	//delete all the bacnet-server points
-	mux.DELETE("/points", func(ctx *gin.Context) {
+	mux.DELETE("/points/drop", func(ctx *gin.Context) {
 		cli := plgrest.NewNoAuth(ip, port)
 		p, err := cli.GetPoints()
 		for _, pnt := range *p {
