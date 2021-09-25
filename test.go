@@ -10,9 +10,4 @@ func main() {
 	fmt.Println(res.String())
 	fmt.Println(res.AsFloat())
 
-	aa := unit.TagsTemp
-	for i, a := range aa.Tags {
-		fmt.Println(i, a)
-	}
-
 }

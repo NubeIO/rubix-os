@@ -135,7 +135,6 @@ type Point struct {
 	DeviceUUID           string         `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	EnableWriteable      *bool          `json:"writeable"`
 	IsOutput             *bool          `json:"is_output"`
-	Kind                 string         `json:"kind"`
 	BoolInvert           *bool          `json:"bool_invert"`
 	COV                  float32        `json:"cov"`
 	ObjectType           string         `json:"object_type"`    //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
@@ -144,8 +143,7 @@ type Point struct {
 	ZeroMode             *bool          `json:"zero_mode"`
 	AddressUUID          string         `json:"address_uuid"` // for example a droplet id (so a string)
 	NextAvailableAddress *bool          `json:"use_next_available_address"`
-	Unit                 string
-	UnitsTo              string //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
+	UnitsTo              string         //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
 	Decimal              int
 	Round                *float64
 	InputMin             *float64
@@ -158,8 +156,14 @@ type Point struct {
 	IsProducer           *bool `json:"is_producer"`
 	IsConsumer           *bool `json:"is_consumer"`
 	CommonFault
-	Priority *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
-	Tags     []*Tag    `json:"tags" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
+	ThingClass   string    `json:"thing_class"`
+	ThingType    string    `json:"thing_type"`
+	Kind         string    `json:"kind"`
+	Unit         string    `json:"unit"`
+	UnitImperial string    `json:"unit_imperial"`
+	EquipType    string    `json:"equip_type"`
+	Priority     *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
+	Tags         []*Tag    `json:"tags" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
 }
 
 type Priority struct {
