@@ -1,18 +1,15 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/src/cachestore"
 	"github.com/NubeDev/flow-framework/src/dbhandler"
-	"io/ioutil"
 	"os"
 	"path"
 	"time"
 
-	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/database"
 	"github.com/NubeDev/flow-framework/floweng"
@@ -64,18 +61,10 @@ func main() {
 	fmt.Println("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
 	eventbus.Init()
 	eventbus.RegisterMQTTBus()
-
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
 		conf.PassStrength, conf.Database.LogLevel, true, conf.Prod)
 	if err != nil {
 		panic(err)
-	}
-	p := conf.GetAbsConfigDir()
-	thingType := fmt.Sprintf("%s/tags.json", p)
-	plan, _ := ioutil.ReadFile(thingType)
-	err = json.Unmarshal(plan, &api.ThingTypes)
-	if err != nil {
-		fmt.Println(err)
 	}
 	intHandler(db)
 	floweng.FlowengStart(db)

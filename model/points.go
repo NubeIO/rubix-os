@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/NubeIO/null"
 	"gorm.io/datatypes"
 )
 
@@ -130,12 +129,14 @@ type Point struct {
 	CommonEnable
 	PresentValue         float64        `json:"present_value"` //point value, read only
 	CurrentPriority      int            `json:"current_priority"`
-	WriteValue           null.Float     `json:"write_value"` //TODO add in logic if user writes to below priority 16
+	WriteValue           *float64       `json:"write_value"` //TODO add in logic if user writes to below priority 16
 	ValueRaw             datatypes.JSON `json:"value_raw"`
 	Fallback             float64        `json:"fallback"`
 	DeviceUUID           string         `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	EnableWriteable      *bool          `json:"writeable"`
 	IsOutput             *bool          `json:"is_output"`
+	Kind                 string         `json:"kind"`
+	BoolInvert           *bool          `json:"bool_invert"`
 	COV                  float32        `json:"cov"`
 	ObjectType           string         `json:"object_type"`    //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
 	AddressId            int            `json:"address_id"`     // for example a modbus address or bacnet address
@@ -146,17 +147,16 @@ type Point struct {
 	Unit                 string
 	UnitsTo              string //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
 	Decimal              int
-	Round                null.Float
-	InputMin             null.Float
-	InputMax             null.Float
-	ScaleMin             null.Float
-	ScaleMax             null.Float
-	CommonThingClass     //point
-	CommonThingUse       //mapping, lora, api
-	//CommonThingObject          //point
-	CommonThingType       //temp
-	IsProducer      *bool `json:"is_producer"`
-	IsConsumer      *bool `json:"is_consumer"`
+	Round                *float64
+	InputMin             *float64
+	InputMax             *float64
+	ScaleMin             *float64
+	ScaleMax             *float64
+	CommonThingClass           //point
+	CommonThingUse             //mapping, lora, api
+	CommonThingType            //temp
+	IsProducer           *bool `json:"is_producer"`
+	IsConsumer           *bool `json:"is_consumer"`
 	CommonFault
 	Priority *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
 	Tags     []*Tag    `json:"tags" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`

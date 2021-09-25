@@ -389,6 +389,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			thingRoutes.GET("/class", thingHandler.ThingClass)
 			thingRoutes.GET("/types", thingHandler.ThingTypes)
 			thingRoutes.GET("/writers/actions", thingHandler.WriterActions)
+			thingRoutes.GET("/units", thingHandler.ThingUnits)
 		}
 
 		tagRoutes := apiRoutes.Group("/tags")

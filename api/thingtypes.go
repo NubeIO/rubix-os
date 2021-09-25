@@ -1,7 +1,9 @@
 package api
 
 import (
+	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/model"
+	unit "github.com/NubeDev/flow-framework/src/units"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,11 +15,15 @@ func (t *ThingAPI) ThingClass(ctx *gin.Context) {
 	reposeHandler(model.ThingClass, nil, ctx)
 }
 
-var ThingTypes interface{} //read in from json file /config/tags.json
 func (t *ThingAPI) ThingTypes(ctx *gin.Context) {
-	reposeHandler(ThingTypes, nil, ctx)
+	builder := config.Get().PointBuilder
+	reposeHandler(builder, nil, ctx)
 }
 
 func (t *ThingAPI) WriterActions(ctx *gin.Context) {
 	reposeHandler(model.WriterActions, nil, ctx)
+}
+
+func (t *ThingAPI) ThingUnits(ctx *gin.Context) {
+	reposeHandler(unit.UnitsMap, nil, ctx)
 }
