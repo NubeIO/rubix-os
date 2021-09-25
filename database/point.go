@@ -23,6 +23,7 @@ func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
 
 func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error) {
 	var pointModel *model.Point
+
 	query := d.buildPointQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&pointModel).Error; err != nil {
 		return nil, err

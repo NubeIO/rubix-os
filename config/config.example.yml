@@ -6,34 +6,2232 @@ server:
   listenaddr: "0.0.0.0" # the address to bind on, leave empty to bind on all addresses
 
   responseheaders: # response headers are added to every response (default: none)
-#    X-Custom-Header: "custom value"
+  #    X-Custom-Header: "custom value"
 
   stream:
     pingperiodseconds: 45 # the interval in which websocket pings will be sent. Only change this value if you know what you are doing.
     allowedorigins: # allowed origins for websocket connections (same origin is always allowed)
-#      - ".+.example.com"
-#      - "otherdomain.com"
+  #      - ".+.example.com"
+  #      - "otherdomain.com"
 
   cors: # Sets cors headers only when needed and provides support for multiple allowed origins. Overrides Access-Control-* Headers in response headers.
     alloworigins:
-#      - ".+.example.com"
-#      - "otherdomain.com"
+    #      - ".+.example.com"
+    #      - "otherdomain.com"
     allowmethods:
-#      - "GET"
-#      - "POST"
+    #      - "GET"
+    #      - "POST"
     allowheaders:
 #      - "Authorization"
 #      - "content-type"
-
-database: # for database see (configure database section)
-  dialect: sqlite3
-  connection: data.db
-  loglevel: "WARN" # options are: INFO, WARN, ERROR, SILENT (needs to be greater than or equal to global loglevel)
 
 defaultuser: # on database creation, creates an admin user
   name: admin # the username of the default user
   pass: admin # the password of the default user
 
+database: # for database see (configure database section)
+  dialect: sqlite3
+  connection: data.db
+  loglevel: "DEBUG" # options are: INFO, WARN, ERROR, SILENT (needs to be greater than or equal to global loglevel)
+
+
 passstrength: 10 # the bcrypt password strength (higher = better but also slower)
 loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
 
+pointbuilder:
+  TotalWaterConsumption:
+    thingClass: point
+    thingType: ''
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - sensor
+      - hisTotalized
+  WaterTarget:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - target
+  TotalGasConsumption:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - gas
+      - sensor
+      - exclusion
+      - hisTotalized
+  GasTarget:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - gas
+      - target
+      - sensor
+      - exclusion
+      - hisTotalized
+  TotalActiveEnergy:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - elec
+      - energy
+      - sensor
+      - active
+      - exclusion
+      - hisOnWrite
+  TotalActivePower:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - elec
+      - power
+      - sensor
+      - active
+  EnergyTarget:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - elec
+      - energy
+      - target
+  ZoneRoomTemperature:
+    thingClass: point
+    thingType: temperature
+    kind: number
+    unit: c
+    unitImperial: f
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sensor
+      - zone
+      - vav
+  ZoneRoomTemperatureSetPoint:
+    thingClass: point
+    thingType: temperature
+    kind: number
+    unit: c
+    unitImperial: f
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sp
+      - zone
+      - vav
+  SupplyAirTemperature:
+    thingClass: point
+    thingType: temperature
+    kind: number
+    unit: c
+    unitImperial: f
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sensor
+      - supply
+      - ahu
+  ReturnAirTemperature:
+    thingClass: point
+    thingType: temperature
+    kind: number
+    unit: c
+    unitImperial: f
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sensor
+      - return
+      - ahu
+  ZoneRoomRelativeHumidity:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - humidity
+      - sensor
+      - zone
+      - vav
+  Damper:
+    kind: number
+    unit: "%"
+    equipType: ''
+    tags:
+      - air
+      - damper
+      - cmd
+      - vav
+  Airflow:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - flow
+      - sensor
+      - ftu
+  AirflowSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - flow
+      - sp
+      - vav
+  MinimumAirflow:
+    kind: string
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - flow
+      - sensor
+      - min
+      - vav
+  ElectricDuctHeaterStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - edh
+      - run
+      - sensor
+      - ahu
+  ElectricDuctHeaterStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - edh
+      - run
+      - cmd
+      - ahu
+  TerminalLoad:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - sensor
+      - terminalLoad
+      - vav
+  MaximumAirflow:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - flow
+      - sensor
+      - max
+      - vav
+  GeneralExhaustAirFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - exhaust
+      - general
+  GeneralExhaustAirFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - exhaust
+      - general
+  GeneralExhaustAirFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - exhaust
+      - general
+  GeneralExhaustAirconstPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - exhaust
+      - general
+  ExhaustAirFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - exhaust
+  ExhaustAirFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - exhaust
+  ExhaustAirFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - exhaust
+  ExhaustAirconstPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - exhaust
+  KitchenExhaustAirFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - exhaust
+      - kitchen
+  KitchenExhaustAirFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - exhaust
+      - kitchen
+  KitchenExhaustAirFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - exhaust
+      - kitchen
+  KitchenExhaustAirconstPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - exhaust
+      - kitchen
+  ToiletExhaustAirFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - exhaust
+      - toilet
+  ToiletExhaustAirFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - exhaust
+      - toilet
+  ToiletExhaustAirFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - exhaust
+      - toilet
+  ToiletExhaustAirconstPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - exhaust
+      - toilet
+  CarParkExhaustAirFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - exhaust
+      - carpark
+  CarParkExhaustAirFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - exhaust
+      - carpark
+  CarParkExhaustAirFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - exhaust
+      - carpark
+  CarParkExhaustAirFanSpeed:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - speed
+      - cmd
+      - exhaust
+      - carpark
+  CarParkExhaustAirconstPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - exhaust
+      - carpark
+  CarParkExhaustAirconstPressureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sp
+      - exhaust
+      - carpark
+  CarParkExhaustCarbonMonoxide:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - co
+      - sensor
+      - exhaust
+      - carpark
+  CarParkExhaustCarbonMonoxideSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - co
+      - sp
+      - exhaust
+      - carpark
+  CarParkSupplyAirFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - supply
+      - carpark
+  CarParkSupplyAirFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - supply
+      - carpark
+  CarParkSupplyAirFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - supply
+      - carpark
+  CarParkSupplyAirFanSpeed:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - speed
+      - cmd
+      - supply
+      - carpark
+  CarParkSupplyAirconstPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - supply
+      - carpark
+  CarParkSupplyAirconstPressureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sp
+      - supply
+      - carpark
+  AHUReturnAirFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - return
+      - ahu
+  AHUReturnAirFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - return
+      - ahu
+  AHUReturnAirFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - return
+      - ahu
+  AHUReturnAirFanSpeed:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - speed
+      - cmd
+      - return
+      - ahu
+  AHUReturnAirTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sensor
+      - return
+      - ahu
+  AHUReturnAirHumidity:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - humidity
+      - sensor
+      - return
+      - ahu
+  AHUReturnAirconstPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - return
+      - ahu
+  AHUReturnAirCO2:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - co2
+      - sensor
+      - return
+      - ahu
+  AHUReturnAirconstPressureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sp
+      - return
+      - ahu
+  ReturnAirFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - return
+      - raf
+  ReturnAirFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - return
+      - raf
+  ReturnAirFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - return
+      - raf
+  ReturnAirFanSpeed:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - speed
+      - cmd
+      - return
+      - raf
+  ReturnAirHumidity:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - humidity
+      - sensor
+      - return
+      - ahu
+  ReturnAirFlow:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - flow
+      - sensor
+      - return
+      - raf
+  ReturnAirconstPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - return
+      - raf
+  ReturnAirEnthalpy:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - enthalpy
+      - sensor
+      - return
+      - raf
+  ReturnAirSuctionPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - return
+      - raf
+  ReturnAirCO2:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - co2
+      - sensor
+      - return
+      - raf
+  ReturnAirconstPressureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sp
+      - return
+      - raf
+  SupplyAirFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - supply
+      - saf
+  SupplyAirFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - supply
+      - saf
+  SupplyAirFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - supply
+      - saf
+  SupplyAirFanSpeed:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - speed
+      - cmd
+      - supply
+      - saf
+  SupplyAirFlow:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - flow
+      - sensor
+      - supply
+      - ahu
+  SupplyAirHumidity:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - humidity
+      - sensor
+      - supply
+      - saf
+  SupplyAirconstPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - supply
+      - ahu
+  SupplyAirconstPressureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sp
+      - supply
+      - ahu
+  OutsideAirFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - outside
+      - oaf
+  OutsideAirFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - outside
+      - oaf
+  OutsideAirFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - outside
+      - oaf
+  OutsideAirFanSpeed:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - speed
+      - cmd
+      - outside
+      - oaf
+  OutsideAirTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sensor
+      - outside
+      - dryBulbwetBulb
+      - buildingInfo
+  OutsideAirHumidity:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - humidity
+      - sensor
+      - outside
+      - buildingInfo
+  OutsideAirFlow:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - flow
+      - sensor
+      - return
+      - oaf
+  OutsideAirconstPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - outside
+      - oaf
+  OutsideAirconstPressureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sp
+      - outside
+      - oaf
+  PACFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - pac
+  PACFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - pac
+  PACFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - pac
+  ReturnRoomAirTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sensor
+      - returnzone
+      - fcu
+  ReturnRoomAirTemperatureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sp
+      - return
+      - ahu
+  ReturnRoomAirHumidity:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - humidity
+      - sensor
+      - returnzone
+      - fcu
+  CompressorStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - refrig
+      - run
+      - cmd
+      - pac
+  CondenserWaterCall:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - run
+      - cmd
+      - condenser
+      - pac
+  AirOffCoilTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sensor
+      - offCoil
+      - hotcold
+      - ahu
+  OutsideAirDamperControl:
+    kind: numberboolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - damper
+      - cmd
+      - outside
+      - ahu
+  FilterDifferentialPressureStatus:
+    kind: numberboolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - pressure
+      - sensor
+      - filter
+      - ahu
+  ReverseValveControl:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - valve
+      - run
+      - cmd
+      - reverse
+      - pac
+  HeatingCoilValveControl:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - valve
+      - cmd
+      - hot
+      - ahu
+  FTUFanStartStop:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - run
+      - cmd
+      - ftu
+  DamperFeedback:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - damper
+      - sensor
+      - ftu
+  FCUFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - fcu
+  FCUFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - fcu
+  FCUFanSpeed:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - speed
+      - sensor
+      - supply
+      - fcu
+  FCUFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - fcu
+  SupplyAirTemperatureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sp
+      - supply
+      - ahu
+  CoolingCoilValveControl:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - valve
+      - cmd
+      - chilled
+      - ahu
+  AHUFanStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - supply
+      - ahu
+  AHUFanStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - supply
+      - ahu
+  AHUFanFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - supply
+      - ahu
+  Speed:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - speed
+      - sensor
+      - supply
+      - ahu
+  RoomAirTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sensor
+      - zone
+      - ahu
+  MixAirTemperature:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sensor
+      - mix
+      - ahu
+  ReturnAirTemperatureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sp
+      - return
+      - ahu
+  RoomAirTemperatureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sp
+      - zone
+      - ahu
+  RoomAirHumidity:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - humidity
+      - sensor
+      - zone
+      - ahu
+  OutsideAirRelativeHumidity:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - humidity
+      - sensor
+      - outside
+      - ahu
+  MinimumOutsideAirDamperControl:
+    kind: numberboolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - damper
+      - cmd
+      - outside
+      - minimum
+      - ahu
+  MinimumOutsideAirDamperFeedback:
+    kind: numberboolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - damper
+      - sensor
+      - outside
+      - minimum
+      - ahu
+  ExhaustAirDamper:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - damper
+      - cmd
+      - exhaust
+      - ahu
+  RACO2:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - co2
+      - sensor
+      - return
+      - ahu
+  DewPoint:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - dewPoint
+      - sensor
+      - ahu
+  DewPointSetPoint:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - dewPoint
+      - sp
+      - ahu
+  AHUFanSpeed:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - speed
+      - cmd
+      - supply
+      - ahu
+  OutsideReturnRoomAirTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sensor
+      - outsidereturn
+      - ahu
+  SupplyReturnRoomAirHumidity:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - humidity
+      - sensor
+      - supplyreturn
+      - ahu
+  ReturnAirDamperControl:
+    kind: numberboolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - damper
+      - cmd
+      - return
+      - ahu
+  FilterDifferentialPressure:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - pressure
+      - sensor
+      - filter
+      - delta
+      - ahu
+  FilterDifferentialPressureSetPoint:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - pressure
+      - sp
+      - filter
+      - delta
+      - ahu
+  FilterStatus:
+    kind: numberboolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fault
+      - sensor
+      - filter
+      - ahu
+  FloorOccupancy:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - run
+      - cmd
+      - occupied
+      - floor
+  AfterHoursActiveTime:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - run
+      - cmd
+      - afterHour
+      - activeTime
+      - floor
+  ZoneOccupancy:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - run
+      - cmd
+      - occupied
+      - zone
+      - floor
+  ZoneAfterHoursActiveTime:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - run
+      - cmd
+      - afterHour
+      - activeTime
+      - zone
+      - floor
+  AfterHoursElapsedTime:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - afterHour
+      - floor
+  AHEnable:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - cmd
+      - afterHour
+      - ahuRef
+      - floor
+  VAVEnable:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - enable
+      - cmd
+      - vav
+      - floor
+  ReturnAirDamper:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - cmd
+      - return
+      - common
+      - damper
+      - floor
+  SupplyAirDamper:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - cmd
+      - supply
+      - common
+      - damper
+      - floor
+  IsolationAirDamper:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - cmd
+      - isolation
+      - damper
+      - floor
+  ZoneTemperatureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - temp
+      - sp
+      - zone
+      - floor
+  CommonHotWaterSupplyTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - supply
+      - hot
+      - common
+  CommonHotWaterReturnTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - return
+      - hot
+      - common
+  HotWaterPumpStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - run
+      - cmd
+      - hot
+      - pump
+  HotWaterPumpStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - run
+      - sensor
+      - hot
+      - pump
+  HotWaterPumpFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fault
+      - sensor
+      - hot
+      - pump
+  HotWaterPumpDifferentialPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - pressure
+      - sensor
+      - differential
+      - hot
+      - pump
+  HotWaterPumpDifferentialPressureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - pressure
+      - sp
+      - differential
+      - hot
+      - pump
+  HotWaterPumpSpeed:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - speed
+      - cmd
+      - hot
+      - pump
+  BoilerStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - run
+      - cmd
+      - hot
+      - boiler
+  BoilerStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - run
+      - sensor
+      - hot
+      - boiler
+  BoilerFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fault
+      - sensor
+      - hot
+      - boiler
+  HotWaterSupplyTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - supply
+      - hot
+      - boiler
+  HotWaterSupplyTemperatureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sp
+      - supply
+      - hot
+      - boiler
+  HotWaterReturnTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - return
+      - hot
+      - boiler
+  CommonCondenserWaterSupplyTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - supply
+      - condenser
+      - common
+  CommonCondenserPressureDiff:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - pressure
+      - sensor
+      - differential
+      - condenser
+      - common
+  CommonBypassValve:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - valve
+      - bypass
+      - cmd
+      - condenser
+      - common
+  CommonCondenserWaterReturnTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - return
+      - condenser
+      - common
+  CondenserWaterPumpStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - run
+      - cmd
+      - condenser
+      - pump
+  CondenserWaterPumpStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - run
+      - sensor
+      - condenser
+      - pump
+  CondenserWaterPumpFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fault
+      - sensor
+      - condenser
+      - pump
+  CondenserWaterPumpDifferentialPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - pressure
+      - sensor
+      - differential
+      - condenser
+      - pump
+  CondenserWaterPumpDifferentialPressureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - pressure
+      - sp
+      - differential
+      - condenser
+      - pump
+  CondenserWaterFlow:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - ''
+  CondenserWaterPumpSpeed:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - speed
+      - cmd
+      - condenser
+      - pump
+  CoolingTowerStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - cmd
+      - condenser
+      - coolingTower
+  CoolingTowerStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - run
+      - sensor
+      - condenser
+      - coolingTower
+  CoolingTowerFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fan
+      - fault
+      - sensor
+      - condenser
+      - coolingTower
+  CoolingTowerFanSpeed:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - fan
+      - speed
+      - cmd
+      - condenser
+      - coolingTower
+  CondenserWaterSupplyTemperature:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - supply
+      - condenser
+      - chiller
+  CondenserWaterSupplyTemperatureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sp
+      - supply
+      - condenser
+      - coolingTower
+  CondenserWaterReturnTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - return
+      - condenser
+      - chiller
+  PrimarySupplyTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - supply
+      - hot
+      - primaryLoop
+      - heatExchanger
+  PrimaryReturnTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - return
+      - hot
+      - primaryLoop
+      - heatExchanger
+  PrimaryLoopValve:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - cmd
+      - hot
+      - primaryLoop
+      - heatExchanger
+  SecondarySupplyTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - supply
+      - hot
+      - secondaryLoop
+      - heatExchanger
+  SecondaryReturnTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - return
+      - hot
+      - secondaryLoop
+      - heatExchanger
+  SecondaryLoopValve:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - cmd
+      - hot
+      - secondaryLoop
+      - heatExchanger
+  OutsideAirEnthalpy:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - air
+      - enthalpy
+      - sensor
+      - outside
+      - buildingInfo
+  CommonChilledWaterSupplyTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - supply
+      - chilled
+      - common
+  CommonChilledWaterReturnTemperature:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - return
+      - chilled
+      - common
+  CommonChilledWaterDifferentialPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - pressure
+      - sensor
+      - differential
+      - chilled
+      - common
+  CommonChilledWaterBypassValve:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - valve
+      - bypass
+      - cmd
+      - chilled
+      - common
+  CommonChilledWaterDifferentialPressureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - pressure
+      - sp
+      - differential
+      - chilled
+      - common
+  ChilledWaterPumpStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - run
+      - cmd
+      - chilled
+      - pump
+  ChilledWaterPumpStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - run
+      - sensor
+      - chilled
+      - pump
+  ChilledWaterPumpFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fault
+      - sensor
+      - chilled
+      - pump
+  ChilledWaterPumpDifferentialPressure:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - pressure
+      - sensor
+      - differential
+      - chilled
+      - pump
+  ChilledWaterPumpDifferentialPressureSetPoint:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - pressure
+      - sp
+      - differential
+      - chilled
+      - pump
+  ChilledWaterFlow:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - flow
+      - sensor
+      - chilled
+      - pump
+  ChilledWaterFlowSetPoint:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - water
+      - flow
+      - sp
+      - chilled
+      - pump
+  ChilledWaterPumpSpeed:
+    kind: number
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - speed
+      - cmd
+      - chilled
+      - pump
+  ChillerStartStop:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - run
+      - cmd
+      - chilled
+      - chiller
+  ChillerStatus:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - run
+      - sensor
+      - chilled
+      - chiller
+  ChillerFault:
+    kind: boolean
+    unit: ''
+    unitImperial: ''
+    equipType: hisTsPrecision
+    tags:
+      - fault
+      - sensor
+      - chilled
+      - chiller
+  Load:
+    kind: ''
+    unit: ''
+    unitImperial: ''
+    equipType: ''
+    tags:
+      - load
+      - sensor
+      - chilled
+      - chiller
+  ChilledWaterSupplyTemperature:
+    kind: number
+    unit: Temperature
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - supply
+      - chilled
+      - chiller
+  ChilledWaterSupplyTemperatureSetPoint:
+    kind: number
+    unit: Temperature
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sp
+      - supply
+      - chilled
+      - chiller
+  ChilledWaterReturnTemperature:
+    kind: number
+    unit: Temperature
+    equipType: ''
+    tags:
+      - water
+      - temp
+      - sensor
+      - return
+      - chilled
+      - chiller
