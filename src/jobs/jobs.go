@@ -12,14 +12,14 @@ import (
 
 type Jobs struct {
 	db      dbhandler.Handler
-	bus     eventbus.BusService
 	Enabled bool
 }
 
 var cron *gocron.Scheduler
+var bus eventbus.BusService
 
 func (j *Jobs) InitCron() {
-	j.bus = eventbus.NewService(eventbus.GetBus())
+	bus = eventbus.NewService(eventbus.GetBus())
 	fmt.Println("IN InitCron")
 	cron = gocron.NewScheduler(time.UTC)
 	cron.StartAsync()
@@ -28,24 +28,25 @@ func (j *Jobs) InitCron() {
 
 }
 
-func task() {
+func (j *Jobs) task() {
 	fmt.Println("TASK RUN")
+	t := fmt.Sprintf("%s.%s.%s", eventbus.JobTrigger, "aa", "aa")
+	bus.RegisterTopic("job.trigger.aa.aa")
+	aa := cron.Jobs()
+	for i, e := range aa {
+		fmt.Println(i, e.Tags())
+	}
+	err := bus.Emit(eventbus.CTX(), t, "MESGA OVER BUS")
+	if err != nil {
+
+	}
 
 }
 
 func (j *Jobs) syncJobs() {
-	//handler := bus.Handler{
-	//	Handle: func(ctx context.Context, e bus.Event) {
-	//		fmt.Println(e.Data)
-	//		// do something
-	//		// NOTE: Highly recommended to process the event in an async way
-	//	},
-	//	Matcher: ".*", // matches all topics
-	//}
-	//eventbus.GetBus().RegisterHandler("a unique key for the handler", handler)
+	fmt.Println("IN JOBS")
 
-	fmt.Println("IN JSOBS")
-	_, err := cron.Cron("*/1 * * * *").Do(task)
+	_, err := cron.Cron("*/1 * * * *").Do(j.task)
 	if err != nil {
 		//return
 	}
@@ -95,7 +96,7 @@ func (j *Jobs) JobAdd(body *model.Job) error {
 	if job.Frequency == "" {
 		return errors.New("invalid time frequency, example 5m")
 	}
-	_, err = cron.Every(body.Frequency).Tag(job.UUID).Do(task)
+	_, err = cron.Every(body.Frequency).Tag(job.UUID).Do(j.task)
 
 	if err != nil {
 		fmt.Println(job.UUID, err)

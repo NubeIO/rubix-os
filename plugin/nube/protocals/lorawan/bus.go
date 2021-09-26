@@ -181,7 +181,6 @@ func (i *Instance) BusServ() {
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerMQTT)
-
 }
 
 func decodeMQTT(topic string) (devEUI, appID string, valid bool) {

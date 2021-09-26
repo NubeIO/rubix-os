@@ -160,5 +160,18 @@ func (i *Instance) BusServ() {
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerDeleted)
+	handlerJobs := bus.Handler{
+		Handle: func(ctx context.Context, e bus.Event) {
+			go func() {
+				//p, _ := e.Data.(model.Job)
+				fmt.Println("JOBS TRIGGER ON EVENT BUS")
+
+			}()
+		},
+		Matcher: eventbus.JobTrigger,
+	}
+	u, _ = utils.MakeUUID()
+	key = fmt.Sprintf("key_%s", u)
+	eventbus.GetBus().RegisterHandler(key, handlerJobs)
 
 }
