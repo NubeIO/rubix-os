@@ -20,6 +20,8 @@ type Integration struct {
 	CommonDescription
 	CommonEnable
 	CommonFault
+	IP                     string                   `json:"ip"`
+	PORT                   string                   `json:"port"`
 	PluginName             string                   `json:"plugin_name"`
 	IntegrationType        string                   `json:"integration_type"`
 	PluginConfId           string                   `json:"plugin_conf_id" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
@@ -27,5 +29,3 @@ type Integration struct {
 	IntegrationCredentials []IntegrationCredentials `json:"integration_credentials" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
 }
-
-

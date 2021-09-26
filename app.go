@@ -6,6 +6,7 @@ import (
 	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/src/cachestore"
 	"github.com/NubeDev/flow-framework/src/dbhandler"
+	"github.com/NubeDev/flow-framework/src/jobs"
 	"os"
 	"path"
 	"time"
@@ -36,6 +37,9 @@ func intHandler(db *database.GormDatabase) {
 	s := new(cachestore.Handler)
 	s.Store = cache.New(5*time.Minute, 10*time.Minute)
 	cachestore.Init(s)
+
+	j := new(jobs.Jobs)
+	j.InitCron()
 
 }
 

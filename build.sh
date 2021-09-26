@@ -18,6 +18,9 @@ go build -buildmode=plugin -o modbus.so *.go  && cp modbus.so "$dir"/data/plugin
 cd "$dir"/plugin/nube/protocals/bacnetserver
 go build -buildmode=plugin -o bacnetserver.so *.go  && cp bacnetserver.so "$dir"/data/plugins
 # shellcheck disable=SC2164
+cd "$dir"/plugin/nube/database/influx
+go build -buildmode=plugin -o influx.so *.go  && cp influx.so "$dir"/data/plugins
+# shellcheck disable=SC2164
 cd "$dir"
 go run app.go
 

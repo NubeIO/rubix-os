@@ -22,7 +22,7 @@ func (i *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*model.P
 	payload := new(lwmodel.BasePayload)
 	err := json.Unmarshal(body.Payload(), &payload)
 
-	dev, err := i.CLI.GetDevice(payload.DevEUI)
+	dev, err := i.REST.GetDevice(payload.DevEUI)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (i *Instance) deletePoint(body *model.Point) (bool, error) {
 
 //DropDevices drop all devices
 func (i *Instance) DropDevices() (bool, error) {
-	cli := i.CLI
+	cli := i.REST
 	devices, err := cli.GetDevices()
 	if err != nil {
 		return false, err

@@ -229,6 +229,18 @@ var ArgsDefault = struct {
 	PluginName:       "false",
 }
 
+func reposeHandler(body interface{}, err error, ctx *gin.Context) {
+	if err != nil {
+		if body == nil {
+			ctx.JSON(404, "unknown error")
+		} else {
+			ctx.JSON(404, err.Error())
+		}
+	} else {
+		ctx.JSON(200, body)
+	}
+}
+
 func withID(ctx *gin.Context, name string, f func(id uint)) {
 	if id, err := strconv.ParseUint(ctx.Param(name), 10, bits.UintSize); err == nil {
 		f(uint(id))

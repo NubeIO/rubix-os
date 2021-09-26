@@ -36,6 +36,7 @@ require (
 require (
 	github.com/go-gormigrate/gormigrate/v2 v2.0.0
 	github.com/gorilla/mux v1.8.0
+	github.com/influxdata/influxdb-client-go/v2 v2.5.1
 	github.com/martinlindhe/unit v0.0.0-20210313160520-19b60e03648d
 	github.com/oleiade/lane v1.0.1
 	github.com/thejerf/suture v4.0.1+incompatible
@@ -81,6 +82,8 @@ require (
 )
 
 require (
+	github.com/deepmap/oapi-codegen v1.8.2 // indirect
+	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )

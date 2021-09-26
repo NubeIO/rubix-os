@@ -99,8 +99,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	tagHandler := api.TagAPI{
 		DB: db,
 	}
-
-	jobHandler.NewJobEngine()
 	dbGroup.SyncTopics()
 	//for the custom plugin endpoints you need to use the plugin token
 	//http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
@@ -387,7 +385,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		thingRoutes := apiRoutes.Group("/things")
 		{
 			thingRoutes.GET("/class", thingHandler.ThingClass)
-			thingRoutes.GET("/types", thingHandler.ThingTypes)
 			thingRoutes.GET("/writers/actions", thingHandler.WriterActions)
 			thingRoutes.GET("/units", thingHandler.ThingUnits)
 		}

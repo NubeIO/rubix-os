@@ -4,11 +4,6 @@ import (
 	"gorm.io/datatypes"
 )
 
-// Ops TODO add in later
-//Ops Means operations supported by a network, device, point and so on (example point supports point-write)
-type Ops struct {
-}
-
 // TimeOverride TODO add in later
 //TimeOverride where a point value can be overridden for a duration of time
 type TimeOverride struct {
@@ -23,18 +18,6 @@ type TimeOverride struct {
 type MathOperation struct {
 	Calc string //x + 1
 	X    float64
-}
-
-//Scale point value limits TODO add in later
-type Scale struct {
-	High float64
-	Low  float64
-}
-
-//Units this will be for point value conversion TODO add in later
-type Units struct { // for example from temp c to temp f
-	From string //https://github.com/martinlindhe/unit
-	To   string
 }
 
 var ObjectTypes = struct {
@@ -143,27 +126,23 @@ type Point struct {
 	ZeroMode             *bool          `json:"zero_mode"`
 	AddressUUID          string         `json:"address_uuid"` // for example a droplet id (so a string)
 	NextAvailableAddress *bool          `json:"use_next_available_address"`
-	UnitsTo              string         //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
 	Decimal              int
-	Round                *float64
-	InputMin             *float64
-	InputMax             *float64
-	ScaleMin             *float64
-	ScaleMax             *float64
-	CommonThingClass           //point
-	CommonThingUse             //mapping, lora, api
-	CommonThingType            //temp
-	IsProducer           *bool `json:"is_producer"`
-	IsConsumer           *bool `json:"is_consumer"`
+	Round                *float64 `json:"round"`
+	InputMin             *float64 `json:"input_min"`
+	InputMax             *float64 `json:"input_max"`
+	ScaleMin             *float64 `json:"scale_min"`
+	ScaleMax             *float64 `json:"scale_max"`
+	Unit                 string   `json:"unit"`
+	UnitsTo              string   `json:"units_to"` //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
+	CommonThingClass
+	CommonThingType
+	IsProducer *bool `json:"is_producer"`
+	IsConsumer *bool `json:"is_consumer"`
 	CommonFault
-	ThingClass   string    `json:"thing_class"`
-	ThingType    string    `json:"thing_type"`
-	Kind         string    `json:"kind"`
-	Unit         string    `json:"unit"`
-	UnitImperial string    `json:"unit_imperial"`
-	EquipType    string    `json:"equip_type"`
-	Priority     *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
-	Tags         []*Tag    `json:"tags" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
+	ThingClass string    `json:"thing_class"`
+	ThingType  string    `json:"thing_type"`
+	Priority   *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
+	Tags       []*Tag    `json:"tags" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
 }
 
 type Priority struct {

@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/auth/password"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/src/cachestore"
 	"os"
@@ -114,19 +113,19 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		}
 	}
 
-	var userCount int64 = 0
-	db.Find(new(model.User)).Count(&userCount)
-	if createDefaultUserIfNotExist && userCount == 0 {
-		db.Create(&model.User{Name: defaultUser, Pass: password.CreatePassword(defaultPass, strength), Admin: true})
-		if !production { //make a fake token for dev
-			c := new(model.Client)
-			c.Token = "fakeToken123"
-			c.UserID = 1
-			c.Name = "admin"
-			db.Create(c)
-		}
-
-	}
+	//var userCount int64 = 0
+	//db.Find(new(model.User)).Count(&userCount)
+	//if createDefaultUserIfNotExist && userCount == 0 {
+	//	db.Create(&model.User{Name: defaultUser, Pass: password.CreatePassword(defaultPass, strength), Admin: true})
+	//	if !production { //make a fake token for dev
+	//		c := new(model.Client)
+	//		c.Token = "fakeToken123"
+	//		c.UserID = 1
+	//		c.Name = "admin"
+	//		db.Create(c)
+	//	}
+	//
+	//}
 
 	var platCount int64 = 0
 	rp := new(model.RubixPlat)
