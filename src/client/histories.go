@@ -10,7 +10,7 @@ func (a *FlowClient) ClientGetHistory(uuid string) (*model.ProducerHistory, erro
 	resp, err := a.client.R().
 		SetResult(&model.ProducerHistory{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/histories/producers/latest/{uuid}")
+		Get("/api/histories/producers/{uuid}/one")
 	if err != nil {
 		return nil, fmt.Errorf("%s failed", err)
 	}
