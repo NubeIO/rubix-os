@@ -27,7 +27,7 @@ func (i *Instance) Enable() error {
 	m := new(model.Job)
 	m.StartDate = time.Date(2000, time.Month(2), 21, 1, 10, 30, 0, time.UTC)
 	m.EndDate = time.Date(2055, time.Month(2), 21, 1, 10, 30, 0, time.UTC)
-	m.Frequency = "60s"
+	m.Frequency = "15s"
 	m.PluginConfId = i.pluginUUID
 	err = i.jobs.JobAdd(m)
 	if err != nil {

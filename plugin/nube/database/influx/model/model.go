@@ -11,6 +11,15 @@ type Temperature struct {
 	TemperatureValue float64 `json:"temperature_value"`
 }
 
+type HistPayload struct {
+	ID              int       `json:"id"`
+	ProducerUUID    string    `json:"producer_uuid"`
+	WriterUUID      string    `json:"writer_uuid"`
+	ThingWriterUUID string    `json:"current_writer_uuid"`
+	Out16           *float64  `json:"out_16"`
+	Timestamp       time.Time `json:"timestamp"`
+}
+
 type FluxTemperature struct {
 	City             string    `json:"city"`
 	Country          string    `json:"country"`

@@ -12,3 +12,11 @@ func (h *Handler) GetProducerHistories() ([]*model.ProducerHistory, error) {
 	}
 	return q, nil
 }
+
+func (h *Handler) GetLatestProducerHistoryByProducerUUID(pUUID string) (*model.ProducerHistory, error) {
+	q, err := getDb().GetLatestProducerHistoryByProducerUUID(pUUID)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
