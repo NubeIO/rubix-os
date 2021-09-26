@@ -163,8 +163,11 @@ func (i *Instance) BusServ() {
 	handlerJobs := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
-				//p, _ := e.Data.(model.Job)
-				fmt.Println("JOBS TRIGGER ON EVENT BUS")
+				//send data to influx
+				_, err := i.writeData()
+				if err != nil {
+					return
+				}
 
 			}()
 		},

@@ -14,11 +14,27 @@ const token = "biwutj0neNcj5oI_SbvIKMh7jFNf7Y_hRfApSmqpCKH9bpuHBRXLoJtyEZua2LmeY
 const bucket = "mydb"
 const org = "mydb"
 
+/*
+THIS IS HERE JUST TO DEMO THE INFLUX-2 API
+*/
+
 // Write function writes
 func Write(t influxmodel.Temperature) {
 	client := influxdb2.NewClient("http://localhost:8086", token)
 	writeAPI := client.WriteAPI(org, bucket)
 	p := influxdb2.NewPoint(Measurement(t), Tags(t), Fields(t), time.Now())
+	writeAPI.WritePoint(p)
+}
+
+// WriteHist function writes histories
+func WriteHist(t influxmodel.HistPayload) {
+	client := influxdb2.NewClient("http://localhost:8086", token)
+	writeAPI := client.WriteAPI(org, bucket)
+	p := influxdb2.NewPoint(
+		MeasurementHist(),
+		TagsHist(t),
+		FieldsHist(t),
+		t.Timestamp)
 	writeAPI.WritePoint(p)
 }
 
@@ -41,8 +57,25 @@ func Read(measurement string) [][]byte {
 		}
 		temperaturesArray = append(temperaturesArray, j)
 	}
-
 	return temperaturesArray
+}
+
+func TagsHist(t influxmodel.HistPayload) map[string]string {
+	newMap := make(map[string]string)
+	newMap["producer_uuid"] = t.ProducerUUID
+	newMap["writer_uuid"] = t.WriterUUID
+	newMap["current_writer_uuid"] = t.ThingWriterUUID
+	return newMap
+}
+
+func FieldsHist(t influxmodel.HistPayload) map[string]interface{} {
+	newMap := make(map[string]interface{})
+	newMap["out_16"] = *t.Out16
+	return newMap
+}
+
+func MeasurementHist() string {
+	return "hist"
 }
 
 func Tags(t influxmodel.Temperature) map[string]string {
@@ -50,7 +83,6 @@ func Tags(t influxmodel.Temperature) map[string]string {
 	newMap["city"] = t.City
 	newMap["country"] = t.Country
 	newMap["temperature_scale"] = t.TemperatureScale
-
 	return newMap
 }
 
