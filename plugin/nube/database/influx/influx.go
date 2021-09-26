@@ -70,7 +70,10 @@ func TagsHist(t influxmodel.HistPayload) map[string]string {
 
 func FieldsHist(t influxmodel.HistPayload) map[string]interface{} {
 	newMap := make(map[string]interface{})
-	newMap["out_16"] = *t.Out16
+	if t.Out16 != nil {
+		newMap["out_16"] = *t.Out16
+	}
+
 	return newMap
 }
 
