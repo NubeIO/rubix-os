@@ -5,7 +5,7 @@ const (
 	All         = ".*"
 	DevicesAll  = "device.*"
 	PointsAll   = "point.*"
-	JobsAll     = "jobs.*"
+	JobsAll     = "job.*"
 	NetworksAll = "network.*"
 	PluginsAll  = "plugin.*"
 	StreamsAll  = "stream.*"
@@ -15,6 +15,11 @@ const (
 
 	MQTTCreated = "MQTT.created"
 	MQTTUpdated = "MQTT.updated"
+
+	JobTrigger = "job.trigger"
+	JobCreated = "job.created"
+	JobUpdated = "job.updated"
+	JobDeleted = "job.deleted"
 
 	PluginsCreated = "plugin.created"
 	PluginsUpdated = "plugin.updated"
@@ -56,6 +61,10 @@ func BusTopics() []string {
 		StreamsAll,
 		NodesAll,
 		MQTTAll,
+		JobTrigger,
+		JobCreated,
+		JobUpdated,
+		JobDeleted,
 		PluginsCreated,
 		PluginsUpdated,
 		PluginsDeleted,

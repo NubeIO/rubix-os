@@ -1,47 +1,43 @@
 package main
 
 import (
-	lwmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/model"
-	rest "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/restclient"
+	"encoding/json"
+	influxmodel "github.com/NubeDev/flow-framework/plugin/nube/database/influx/model"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
-func bodyDevice(ctx *gin.Context) (dto lwmodel.Device, err error) {
+func bodyDevice(ctx *gin.Context) (dto influxmodel.Temperature, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
 
-func resolveID(ctx *gin.Context) string {
-	return ctx.Param("eui")
-}
-
-const chirpName = "admin"
-const chirpPass = "admin"
-
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
-	cli := rest.NewChirp(chirpName, chirpPass, ip, port)
 
 	mux.GET("/influx/temperatures", func(ctx *gin.Context) {
-		p, err := cli.GetOrganizations()
-		if err != nil {
-			log.Info(err, "ERROR ON organizations")
-			ctx.JSON(http.StatusBadRequest, err)
-		} else {
-			ctx.JSON(http.StatusOK, p)
+		records := Read("temperatures")
+		var temperatures []influxmodel.FluxTemperature
+		for _, data := range records {
+			var temp influxmodel.FluxTemperature
+			if err := json.Unmarshal(data, &temp); err != nil {
+				ctx.JSON(http.StatusBadRequest, err)
+			}
+			temperatures = append(temperatures, temp)
 		}
-	})
+		ctx.JSON(http.StatusOK, temperatures)
 
+	})
 	mux.POST("/influx/temperature", func(ctx *gin.Context) {
-		p, err := cli.GetOrganizations()
+		body, err := bodyDevice(ctx)
 		if err != nil {
-			log.Info(err, "ERROR ON organizations")
+			log.Info(err, "ERROR ON influx write")
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-			ctx.JSON(http.StatusOK, p)
+			Write(body)
+			ctx.JSON(http.StatusOK, "ok")
 		}
 	})
 
