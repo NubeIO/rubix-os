@@ -55,6 +55,8 @@ type Args struct {
 	SiteId           *string
 	DeviceId         *string
 	PluginName       bool
+	TimestampGt      *string
+	TimestampLt      *string
 }
 
 var ArgsType = struct {
@@ -102,6 +104,8 @@ var ArgsType = struct {
 	SiteId           string
 	DeviceId         string
 	PluginName       string
+	TimestampGt      string
+	TimestampLt	     string
 }{
 	Sort:             "sort",
 	Order:            "order",
@@ -147,6 +151,8 @@ var ArgsType = struct {
 	SiteId:           "site_id",
 	DeviceId:         "device_id",
 	PluginName:       "by_plugin_name",
+	TimestampGt:      "timestamp_gt",
+	TimestampLt: 	  "timestamp_lt",
 }
 
 var ArgsDefault = struct {
@@ -356,6 +362,10 @@ func getBodyTag(ctx *gin.Context) (dto *model.Tag, err error) {
 
 func resolveID(ctx *gin.Context) string {
 	return ctx.Param("uuid")
+}
+
+func resolveProducerUUID(ctx *gin.Context) string {
+	return ctx.Param("producer_uuid")
 }
 
 func getTagParam(ctx *gin.Context) string {

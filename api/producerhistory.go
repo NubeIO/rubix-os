@@ -1,52 +1,41 @@
 package api
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )
 
 // The ProducerHistoryDatabase interface for encapsulating database access.
 type ProducerHistoryDatabase interface {
-	GetProducerHistory(uuid string) (*model.ProducerHistory, error)
-	HistoryLatestByProducerUUID(uuid string) (*model.ProducerHistory, error)
-	HistoriesAllByProducerUUID(uuid string, order string) ([]*model.ProducerHistory, int64, error)
-	GetProducerHistories() ([]*model.ProducerHistory, error)
-	CreateProducerHistory(history *model.ProducerHistory) (*model.ProducerHistory, error)
-	DeleteProducerHistory(uuid string) (bool, error)
-	DropProducerHistories() (bool, error)
+	GetProducerHistories(args Args) ([]*model.ProducerHistory, error)
+	GetProducerHistoriesByProducerUUID(pUuid string, args Args) ([]*model.ProducerHistory, int64, error)
+	GetLatestProducerHistoryByProducerUUID(pUuid string) (*model.ProducerHistory, error)
 	CreateBulkProducerHistory(history []*model.ProducerHistory) (bool, error)
+	DeleteAllProducerHistories(args Args) (bool, error)
+	DeleteProducerHistoriesByProducerUUID(pUuid string, args Args) (bool, error)
 }
 type HistoriesAPI struct {
 	DB ProducerHistoryDatabase
 }
 
 func (a *HistoriesAPI) GetProducerHistories(ctx *gin.Context) {
-	q, err := a.DB.GetProducerHistories()
+	args := buildProducerHistoryArgs(ctx)
+	q, err := a.DB.GetProducerHistories(args)
 	reposeHandler(q, err, ctx)
 }
 
-func (a *HistoriesAPI) GetProducerHistory(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	q, err := a.DB.GetProducerHistory(uuid)
+func (a *HistoriesAPI) GetProducerHistoriesByProducerUUID(ctx *gin.Context) {
+	pUuid := resolveProducerUUID(ctx)
+	args := buildProducerHistoryArgs(ctx)
+	q, _, err := a.DB.GetProducerHistoriesByProducerUUID(pUuid, args)
 	reposeHandler(q, err, ctx)
 }
 
-func (a *HistoriesAPI) HistoriesAllByProducerUUID(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	order, _ := queryFields(ctx)
-	q, _, err := a.DB.HistoriesAllByProducerUUID(uuid, order)
-	reposeHandler(q, err, ctx)
-}
-
-func (a *HistoriesAPI) HistoryLatestByProducerUUID(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	q, err := a.DB.HistoryLatestByProducerUUID(uuid)
-	reposeHandler(q, err, ctx)
-}
-
-func (a *HistoriesAPI) CreateProducerHistory(ctx *gin.Context) {
-	body, _ := getBODYHistory(ctx)
-	q, err := a.DB.CreateProducerHistory(body)
+func (a *HistoriesAPI) GetLatestProducerHistoryByProducerUUID(ctx *gin.Context) {
+	pUuid := resolveProducerUUID(ctx)
+	fmt.Println(pUuid)
+	q, err := a.DB.GetLatestProducerHistoryByProducerUUID(pUuid)
 	reposeHandler(q, err, ctx)
 }
 
@@ -56,14 +45,16 @@ func (a *HistoriesAPI) CreateBulkProducerHistory(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-func (a *HistoriesAPI) DeleteProducerHistory(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	q, err := a.DB.DeleteProducerHistory(uuid)
+func (a *HistoriesAPI) DeleteAllProducerHistories(ctx *gin.Context) {
+	args := buildProducerHistoryArgs(ctx)
+	q, err := a.DB.DeleteAllProducerHistories(args)
 	reposeHandler(q, err, ctx)
+
 }
 
-func (a *HistoriesAPI) DropProducerHistories(ctx *gin.Context) {
-	q, err := a.DB.DropProducerHistories()
+func (a *HistoriesAPI) DeleteProducerHistoriesByProducerUUID(ctx *gin.Context) {
+	pUuid := resolveProducerUUID(ctx)
+	args := buildProducerHistoryArgs(ctx)
+	q, err := a.DB.DeleteProducerHistoriesByProducerUUID(pUuid, args)
 	reposeHandler(q, err, ctx)
-
 }

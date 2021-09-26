@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/NubeDev/flow-framework/api"
 	"gorm.io/gorm"
+	"strings"
 )
 
 func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
@@ -149,6 +150,24 @@ func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 	}
 	if args.Consumers {
 		query = query.Preload("Consumers")
+	}
+	return query
+}
+
+func (d *GormDatabase) buildProducerHistoryQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.TimestampGt != nil {
+		query = query.Where("timestamp > datetime(?)", args.TimestampGt)
+	}
+	if args.TimestampLt != nil {
+		query = query.Where("timestamp < datetime(?)", args.TimestampLt)
+	}
+	if args.Order != "" {
+		order := strings.ToUpper(strings.TrimSpace(args.Order))
+		if order != "ASC" && order != "DESC" {
+			args.Order = "DESC"
+		}
+		query = query.Order("timestamp " + args.Order)
 	}
 	return query
 }

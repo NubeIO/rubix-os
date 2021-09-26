@@ -1,6 +1,8 @@
 package api
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 //withChildrenArgs
 func streamFieldsArgs(ctx *gin.Context) (flowUUID string, streamUUID string, producerUUID string, consumerUUID string, writerUUID string) {
@@ -179,5 +181,20 @@ func buildTagArgs(ctx *gin.Context) Args {
 	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
 	args.Producers, _ = toBool(ctx.DefaultQuery(aType.Producers, aDefault.Producers))
 	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
+	return args
+}
+
+func buildProducerHistoryArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	if value, ok := ctx.GetQuery(aType.TimestampGt); ok {
+		args.TimestampGt = &value
+	}
+	if value, ok := ctx.GetQuery(aType.TimestampLt); ok {
+		args.TimestampLt = &value
+	}
+	if order, ok := ctx.GetQuery(aType.Order); ok {
+		args.Order = order
+	}
 	return args
 }

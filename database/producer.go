@@ -115,7 +115,6 @@ type Point struct {
 // ProducerWriteHist  update it
 func (d *GormDatabase) ProducerWriteHist(uuid string, writeData datatypes.JSON) (*model.ProducerHistory, error) {
 	ph := new(model.ProducerHistory)
-	ph.UUID = utils.MakeTopicUUID(model.CommonNaming.ProducerHistory)
 	ph.ProducerUUID = uuid
 	ph.DataStore = writeData
 	ph.Timestamp = time.Now().UTC()
