@@ -51,19 +51,17 @@ func main() {
 	}
 
 	// read a single 16-bit holding register at address 100
-	var reg16 float32
-	client.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
-	reg16, err = client.ReadFloat32(0, modbus.HOLDING_REGISTER)
+	var res []uint16
+	res, err = client.ReadRegisters(0, 4, modbus.HOLDING_REGISTER)
 	if err != nil {
 		// error out
 	} else {
-		// use value
-		fmt.Printf("value: %v\n", reg16) // as unsigned integer
+		for idx := range res {
+			fmt.Printf("0x%04x\t%-5v : 0x%04x\t%v\n",
+				0+uint16(idx),
+				0+uint16(idx),
+				res[idx], res[idx])
 
+		}
 	}
-
-	var res []bool
-	res, err = client.ReadCoils(0, 1)
-	fmt.Printf("value: %v\n", res)
-
 }

@@ -147,17 +147,17 @@ var CommonFaultMessage = struct {
 }
 
 var TransType = struct {
-	Serial string
-	IP     string
+	Serial string `json:"serial"`
+	IP     string `json:"ip"`
 }{
 	Serial: "serial",
 	IP:     "ip",
 }
 
 var SerialParity = struct {
-	None string
-	Odd  string
-	Even string
+	None string `json:"none"`
+	Odd  string `json:"odd"`
+	Even string `json:"even"`
 }{
 	None: "none",
 	Odd:  "odd",

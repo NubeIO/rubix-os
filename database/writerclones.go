@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/json"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
@@ -65,6 +66,8 @@ func (d *GormDatabase) DeleteWriterClone(uuid string) (bool, error) {
 
 }
 
+//TODO both functions are doing the same thing UpdateWriterClone UpdateCloneAndHist so merge into one
+
 // UpdateWriterClone  update it
 func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone, updateProducer bool) (*model.WriterClone, error) {
 	var wcm *model.WriterClone
@@ -80,12 +83,25 @@ func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone, u
 		pro := new(model.Producer)
 		proUUID := wcm.ProducerUUID
 		pro.ThingWriterUUID = uuid
-		_, err := d.UpdateProducer(proUUID, pro)
+		p, err := d.UpdateProducer(proUUID, pro)
 		if err != nil {
 			return nil, err
 		}
 		if body.DataStore != nil {
-			_, err = d.ProducerWriteHist(proUUID, wcm.DataStore)
+			_, err := d.ProducerWriteHist(proUUID, wcm.DataStore)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if p.ProducerThingClass == model.ThingClass.Point {
+			pnt := new(model.Point)
+			pri := new(model.Priority)
+			err := json.Unmarshal(body.DataStore, &pri)
+			if err != nil {
+				return nil, err
+			}
+			pnt.Priority = pri
+			_, err = d.UpdatePoint(p.ProducerThingUUID, pnt, true, false)
 			if err != nil {
 				return nil, err
 			}
@@ -109,21 +125,33 @@ func (d *GormDatabase) UpdateCloneAndHist(uuid string, body *model.WriterClone, 
 		pro := new(model.Producer)
 		proUUID := wcm.ProducerUUID
 		pro.ThingWriterUUID = uuid
-		_, err := d.UpdateProducer(proUUID, pro)
+		p, err := d.UpdateProducer(proUUID, pro)
 		if err != nil {
 			return nil, err
 		}
+		var hist *model.ProducerHistory
 		if body.DataStore != nil {
-			hist, err := d.ProducerWriteHist(proUUID, wcm.DataStore)
+			hist, err = d.ProducerWriteHist(proUUID, wcm.DataStore)
 			if err != nil {
 				return nil, err
 			}
-			return hist, nil
 		}
+		if p.ProducerThingClass == model.ThingClass.Point {
+			pnt := new(model.Point)
+			pri := new(model.Priority)
+			err := json.Unmarshal(body.DataStore, &pri)
+			if err != nil {
+				return nil, err
+			}
+			pnt.Priority = pri
+			_, err = d.UpdatePoint(p.ProducerThingUUID, pnt, true, false)
+			if err != nil {
+				return nil, err
+			}
+		}
+		return hist, err
 	}
-
 	return nil, nil
-
 }
 
 // DropWriterClone delete all.
@@ -139,5 +167,4 @@ func (d *GormDatabase) DropWriterClone() (bool, error) {
 	} else {
 		return true, nil
 	}
-
 }

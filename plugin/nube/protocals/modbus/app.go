@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
+	"go.bug.st/serial"
 )
 
 //wizard make a network/dev/pnt
@@ -15,6 +16,8 @@ func (i *Instance) wizardTCP() (string, error) {
 
 	var dev model.Device
 	dev.Name = "modbus"
+	dev.CommonIP.Host = "192.168.15.202"
+	dev.CommonIP.Port = 502
 	dev.AddressId = 1
 	dev.ZeroMode = utils.NewTrue()
 
@@ -22,7 +25,7 @@ func (i *Instance) wizardTCP() (string, error) {
 	pnt.Name = "modbus"
 	pnt.Description = "modbus"
 	pnt.AddressId = 1
-	pnt.ObjectType = model.ObjectTypes.WriteSingleFloat64
+	pnt.ObjectType = model.ObjectTypes.WriteSingleFloat32
 
 	_, err = i.db.WizardNewNetDevPnt("modbus", &net, &dev, &pnt)
 	if err != nil {
@@ -47,6 +50,7 @@ func (i *Instance) wizardSerial() (string, error) {
 	var dev model.Device
 	dev.Name = "modbus"
 	dev.AddressId = 1
+	dev.ZeroMode = utils.NewTrue()
 
 	var pnt model.Point
 	pnt.Name = "modbus"
@@ -60,4 +64,14 @@ func (i *Instance) wizardSerial() (string, error) {
 	}
 
 	return "pass: added network and points", err
+}
+
+//listSerialPorts list all serial ports on host
+func (i *Instance) listSerialPorts() (*utils.Array, error) {
+	ports, err := serial.GetPortsList()
+	p := utils.NewArray()
+	for _, port := range ports {
+		p.Add(port)
+	}
+	return p, err
 }
