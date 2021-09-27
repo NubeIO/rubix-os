@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/poller"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
@@ -53,6 +54,7 @@ func (i *Instance) PollingTCP(p polling) error {
 	var arg api.Args
 	arg.Devices = true
 	arg.Points = true
+	arg.SerialConnection = true
 	arg.IpConnection = true
 	f := func() (bool, error) {
 		log.Infof("modbus: LOOP COUNT: %v\n", counter)
@@ -67,12 +69,23 @@ func (i *Instance) PollingTCP(p polling) error {
 					var client Client
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
-					dCheck.client = client
-					client.Host = dev.CommonIP.Host
-					client.Port = utils.PortAsString(dev.CommonIP.Port)
-					err := setClient(client)
-					if err != nil {
-						log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
+					if net.TransportType == model.TransType.Serial {
+						client.SerialPort = net.SerialConnection.SerialPort
+						client.BaudRate = net.SerialConnection.BaudRate
+						client.DataBits = net.SerialConnection.DataBits
+						client.StopBits = net.SerialConnection.StopBits
+						err = setClientSerial(client)
+						if err != nil {
+							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
+						}
+					} else {
+						dCheck.client = client
+						client.Host = dev.CommonIP.Host
+						client.Port = utils.PortAsString(dev.CommonIP.Port)
+						err = setClient(client)
+						if err != nil {
+							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
+						}
 					}
 
 					validDev, err := checkDevValid(dCheck)

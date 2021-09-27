@@ -137,7 +137,7 @@ func (i *Instance) bacnetServerDeletePoint(body *pkgmodel.BacnetPoint) (bool, er
 	return true, nil
 }
 
-//delete point make sure
+//wizard make a network/dev/pnt
 func (i *Instance) wizard() (string, error) {
 	//add point
 	cli := plgrest.NewNoAuth(ip, port)
