@@ -123,8 +123,7 @@ type Point struct {
 	ObjectType           string         `json:"object_type"`    //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
 	AddressId            int            `json:"address_id"`     // for example a modbus address or bacnet address
 	AddressOffset        int            `json:"address_offset"` // for example a modbus address offset
-	ZeroMode             *bool          `json:"zero_mode"`
-	AddressUUID          string         `json:"address_uuid"` // for example a droplet id (so a string)
+	AddressUUID          string         `json:"address_uuid"`   // for example a droplet id (so a string)
 	NextAvailableAddress *bool          `json:"use_next_available_address"`
 	Decimal              int
 	Round                *float64 `json:"round"`
