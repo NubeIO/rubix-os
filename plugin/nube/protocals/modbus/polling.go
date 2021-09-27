@@ -87,7 +87,6 @@ func (i *Instance) PollingTCP(p polling) error {
 							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
 						}
 					}
-
 					validDev, err := checkDevValid(dCheck)
 					if err != nil {
 						log.Errorf("modbus: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
@@ -105,7 +104,7 @@ func (i *Instance) PollingTCP(p polling) error {
 								ops.Addr = uint16(pnt.AddressId)
 								ops.ObjectType = pnt.ObjectType
 								ops.IsHoldingReg = utils.BoolIsNil(pnt.IsOutput)
-								ops.ZeroMode = utils.BoolIsNil(pnt.ZeroMode)
+								ops.ZeroMode = utils.BoolIsNil(dev.ZeroMode)
 								if pnt.Priority != nil {
 									if (*pnt.Priority).P16 != nil {
 										ops.WriteValue = *pnt.Priority.P16
