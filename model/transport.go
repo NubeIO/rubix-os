@@ -2,13 +2,12 @@ package model
 
 type SerialConnection struct {
 	CommonUUID
+	CommonEnable
 	SerialPort  string `json:"serial_port"`
-	Enable      bool   `json:"enable"`
-	Port        string `json:"port"`
-	BaudRate    int    `json:"baud_rate"`
-	StopBits    int    `json:"stop_bits"`
-	Parity      int    `json:"parity"`
-	DataBits    int    `json:"data_bits"`
+	BaudRate    uint   `json:"baud_rate"`
+	StopBits    uint   `json:"stop_bits"`
+	Parity      uint   `json:"parity"`
+	DataBits    uint   `json:"data_bits"`
 	Timeout     int    `json:"timeout"`
 	Connected   bool   `json:"connected"`
 	Error       bool   `json:"error"`

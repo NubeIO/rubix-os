@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/poller"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
@@ -32,13 +32,12 @@ func checkDevValid(d devCheck) (bool, error) {
 		log.Errorf("modbus: device id is null \n")
 		return false, errors.New("modbus: failed to set client")
 	}
-	return false, nil
+	return true, nil
 }
 
 var poll poller.Poller
 
 func (i *Instance) PollingTCP(p polling) error {
-
 	if p.delayNetworks <= 0 {
 		p.delayNetworks = defaultInterval
 	}
@@ -48,65 +47,77 @@ func (i *Instance) PollingTCP(p polling) error {
 	if p.delayPoints <= 0 {
 		p.delayPoints = defaultInterval
 	}
-
 	if p.enable {
 		poll = poller.New()
 	}
-
 	var counter int
 	var arg api.Args
 	arg.Devices = true
 	arg.Points = true
+	arg.SerialConnection = true
 	arg.IpConnection = true
 	f := func() (bool, error) {
-		fmt.Println(counter)
+		log.Infof("modbus: LOOP COUNT: %v\n", counter)
 		counter++
 		nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, arg)
 		if err != nil {
 			return false, err
 		}
-		for cnt, net := range nets { //networks
-			if net.UUID != "" {
+		for _, net := range nets { //networks
+			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
 				for _, dev := range net.Devices { //devices
 					var client Client
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
-					dCheck.client = client
-					client.Host = dev.CommonIP.Host
-					client.Port = utils.PortAsString(dev.CommonIP.Port)
-					err := setClient(client)
-					if err != nil {
-						log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
+					if net.TransportType == model.TransType.Serial {
+						client.SerialPort = net.SerialConnection.SerialPort
+						client.BaudRate = net.SerialConnection.BaudRate
+						client.DataBits = net.SerialConnection.DataBits
+						client.StopBits = net.SerialConnection.StopBits
+						err = setClientSerial(client)
+						if err != nil {
+							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
+						}
+					} else {
+						dCheck.client = client
+						client.Host = dev.CommonIP.Host
+						client.Port = utils.PortAsString(dev.CommonIP.Port)
+						err = setClient(client)
+						if err != nil {
+							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
+						}
 					}
-					fmt.Println(cnt, dev.UUID, dev.CommonIP.Host, dev.CommonIP.Port, dev.AddressId)
+
 					validDev, err := checkDevValid(dCheck)
 					if err != nil {
 						log.Errorf("modbus: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
 					}
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
-
 					if validDev {
 						cli := getClient()
 						var ops Operation
 						ops.UnitId = uint8(dev.AddressId)
 						for _, pnt := range dev.Points { //points
-							fmt.Println(cnt, pnt.UUID, pnt.Name, pnt.ObjectType)
 							dPnt := p.delayPoints
 							if !isConnected() {
-								fmt.Println("isConnected")
 							} else {
 								ops.Addr = uint16(pnt.AddressId)
 								ops.ObjectType = pnt.ObjectType
 								ops.IsHoldingReg = utils.BoolIsNil(pnt.IsOutput)
 								ops.ZeroMode = utils.BoolIsNil(pnt.ZeroMode)
+								if pnt.Priority != nil {
+									if (*pnt.Priority).P16 != nil {
+										ops.WriteValue = *pnt.Priority.P16
+										log.Infof("modbus: WRITE ObjectType: %s  Addr: %d WriteValue: %v\n", ops.ObjectType, ops.Addr, ops.WriteValue)
+									}
+								}
 								request, err := parseRequest(ops)
 								if err != nil {
-									fmt.Println(err)
+									log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 								}
 								r, err := DoOperations(cli, request)
-								fmt.Println(r)
-								//cli.SetEncoding()
+								log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, r)
 							}
 							time.Sleep(dPnt)
 						}

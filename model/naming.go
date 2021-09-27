@@ -154,6 +154,16 @@ var TransType = struct {
 	IP:     "ip",
 }
 
+var SerialParity = struct {
+	None string
+	Odd  string
+	Even string
+}{
+	None: "none",
+	Odd:  "odd",
+	Even: "even",
+}
+
 var TransClient = struct {
 	Client          string
 	Server          string
