@@ -46,9 +46,9 @@ type Args struct {
 	Networks         bool
 	Devices          bool
 	Points           bool
+	Priority         bool
 	IpConnection     bool
 	SerialConnection bool
-	Priority         bool
 	Tags             bool
 	GlobalUUID       *string
 	ClientId         *string
@@ -95,9 +95,9 @@ var ArgsType = struct {
 	Networks         string
 	Devices          string
 	Points           string
+	Priority         string
 	IpConnection     string
 	SerialConnection string
-	Priority         string
 	Tags             string
 	GlobalUUID       string
 	ClientId         string
@@ -105,7 +105,7 @@ var ArgsType = struct {
 	DeviceId         string
 	PluginName       string
 	TimestampGt      string
-	TimestampLt	     string
+	TimestampLt      string
 }{
 	Sort:             "sort",
 	Order:            "order",
@@ -142,9 +142,9 @@ var ArgsType = struct {
 	Networks:         "networks",
 	Devices:          "devices",
 	Points:           "points",
+	Priority:         "priority",
 	IpConnection:     "ip_connection",
 	SerialConnection: "serial_connection",
-	Priority:         "priority",
 	Tags:             "tags",
 	GlobalUUID:       "global_uuid",
 	ClientId:         "client_id",
@@ -152,7 +152,7 @@ var ArgsType = struct {
 	DeviceId:         "device_id",
 	PluginName:       "by_plugin_name",
 	TimestampGt:      "timestamp_gt",
-	TimestampLt: 	  "timestamp_lt",
+	TimestampLt:      "timestamp_lt",
 }
 
 var ArgsDefault = struct {
@@ -189,9 +189,9 @@ var ArgsDefault = struct {
 	Networks         string
 	Devices          string
 	Points           string
+	Priority         string
 	IpConnection     string
 	SerialConnection string
-	Priority         string
 	Tags             string
 	PluginName       string
 }{
@@ -228,9 +228,9 @@ var ArgsDefault = struct {
 	Networks:         "false",
 	Devices:          "false",
 	Points:           "false",
+	Priority:         "false",
 	IpConnection:     "false",
 	SerialConnection: "false",
-	Priority:         "false",
 	Tags:             "false",
 	PluginName:       "false",
 }
@@ -374,6 +374,14 @@ func getTagParam(ctx *gin.Context) string {
 
 func resolvePath(ctx *gin.Context) string {
 	return ctx.Param("path")
+}
+
+func resolvePluginUUID(ctx *gin.Context) string {
+	return ctx.Param("plugin_uuid")
+}
+
+func resolvePluginName(ctx *gin.Context) string {
+	return ctx.Param("plugin_name")
 }
 
 func toBool(value string) (bool, error) {

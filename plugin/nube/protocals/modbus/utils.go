@@ -68,7 +68,6 @@ func parseRequest(body Operation) (Operation, error) {
 	set, _ := setRequest(body)
 	ops := utils.NewString(body.ObjectType).ToCamelCase() //eg: readCoil, read_coil, writeCoil
 	ops = utils.LcFirst(ops)
-
 	switch ops {
 	case model.ObjectTypes.ReadCoil, model.ObjectTypes.ReadCoils, model.ObjectTypes.ReadDiscreteInput, model.ObjectTypes.ReadDiscreteInputs:
 		set.op = readBool
@@ -117,6 +116,20 @@ func zeroMode(addr uint16, mode bool) uint16 {
 
 func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{}, err error) {
 	o.Addr = zeroMode(o.Addr, o.ZeroMode)
+	sel := utils.NewString(o.Encoding).ToCamelCase() //eg: LEB_BEW, lebBew
+	sel = utils.LcFirst(sel)
+	switch sel {
+	case model.ObjectEncoding.LebBew:
+		err = client.SetEncoding(modbus.LITTLE_ENDIAN, modbus.HIGH_WORD_FIRST)
+	case model.ObjectEncoding.LebLew:
+		err = client.SetEncoding(modbus.LITTLE_ENDIAN, modbus.LOW_WORD_FIRST)
+	case model.ObjectEncoding.BebLew:
+		err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.LOW_WORD_FIRST)
+	case model.ObjectEncoding.BebBew:
+		err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
+	default:
+		err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
+	}
 	switch o.op {
 	case readBool:
 		var res []bool
@@ -127,7 +140,7 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			res, err = client.ReadDiscreteInputs(o.Addr, o.Length)
 		}
 		if err != nil {
-			log.Infof("modbus: failed to read coils/discrete inputs: %v\n", err)
+			log.Errorf("modbus: failed to read coils/discrete inputs: %v\n", err)
 		} else {
 			return res, err
 		}
@@ -168,7 +181,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 		} else {
 			return res, err
 		}
-
 	case readFloat32:
 		var res []float32
 		if o.ObjectType == model.ObjectTypes.ReadSingleFloat32 {
@@ -203,7 +215,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 				return res, err
 			}
 		}
-
 	case readUint64, readInt64:
 		var res []uint64
 		if o.IsHoldingReg {
@@ -228,7 +239,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 				}
 			}
 		}
-
 	case readFloat64:
 		var res []float64
 		if o.IsHoldingReg {
@@ -246,7 +256,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 					res[idx])
 			}
 		}
-
 	case writeCoil:
 		err = client.WriteCoil(o.Addr, o.coil)
 		if err != nil {
@@ -258,7 +267,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 				o.coil, o.Addr)
 			return o.coil, err
 		}
-
 	case writeUint16:
 		err = client.WriteRegister(o.Addr, o.u16)
 		if err != nil {
@@ -268,7 +276,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			log.Infof("modbus: wrote %v at register address 0x%04x\n",
 				o.u16, o.Addr)
 		}
-
 	case writeInt16:
 		err = client.WriteRegister(o.Addr, o.u16)
 		if err != nil {
@@ -278,7 +285,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			log.Infof("modbus: wrote %v at register address 0x%04x\n",
 				int16(o.u16), o.Addr)
 		}
-
 	case writeUint32:
 		err = client.WriteUint32(o.Addr, o.u32)
 		if err != nil {
@@ -288,7 +294,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			log.Infof("modbus: wrote %v at address 0x%04x\n",
 				o.u32, o.Addr)
 		}
-
 	case writeInt32:
 		err = client.WriteUint32(o.Addr, o.u32)
 		if err != nil {
@@ -298,7 +303,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			log.Infof("modbus: wrote %v at address 0x%04x\n",
 				int32(o.u32), o.Addr)
 		}
-
 	case writeFloat32:
 		err = client.WriteFloat32(o.Addr, o.f32)
 		if err != nil {
@@ -308,7 +312,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			log.Infof("modbus: wrote %f at address 0x%04x\n", o.f32, o.Addr)
 			return o.f32, err
 		}
-
 	case writeUint64:
 		err = client.WriteUint64(o.Addr, o.u64)
 		if err != nil {
@@ -318,7 +321,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			log.Infof("modbus: wrote %v at address 0x%04x\n",
 				o.u64, o.Addr)
 		}
-
 	case writeInt64:
 		err = client.WriteUint64(o.Addr, o.u64)
 		if err != nil {
@@ -328,7 +330,6 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			log.Infof("modbus: wrote %v at address 0x%04x\n",
 				int64(o.u64), o.Addr)
 		}
-
 	case writeFloat64:
 		err = client.WriteFloat64(o.Addr, o.f64)
 		if err != nil {
@@ -389,22 +390,4 @@ func performBoolScan(client *modbus.ModbusClient, isCoil bool, start uint32, cou
 	}
 	fmt.Printf("found %v %ss\n", countFound, regType)
 	return countFound, regType
-}
-
-func EncodingBuilder(selection string, cli *modbus.ModbusClient) (client *modbus.ModbusClient, err error) {
-	sel := utils.NewString(selection).ToCamelCase() //eg: LEB_BEW, lebBew
-	sel = utils.LcFirst(sel)
-	switch sel {
-	case model.ObjectEncoding.LebBew:
-		err = cli.SetEncoding(modbus.LITTLE_ENDIAN, modbus.HIGH_WORD_FIRST)
-	case model.ObjectEncoding.LebLew:
-		err = cli.SetEncoding(modbus.LITTLE_ENDIAN, modbus.LOW_WORD_FIRST)
-	case model.ObjectEncoding.BebLew:
-		err = cli.SetEncoding(modbus.BIG_ENDIAN, modbus.LOW_WORD_FIRST)
-	case model.ObjectEncoding.BebBew:
-		err = cli.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
-	default:
-		log.Errorf("modbus:  unknown endianness setting '%s' (should either be big or little)\n", selection)
-	}
-	return client, err
 }

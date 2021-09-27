@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,7 +11,6 @@ type DBDatabase interface {
 	WizardLocalPointMapping(body *WizardLocalMapping) (bool, error)
 	WizardRemotePointMapping() (bool, error)
 	Wizard2ndFlowNetwork(body *AddNewFlowNetwork) (bool, error)
-	WizardNewNetDevPnt(plugin string, net *model.Network, dev *model.Device, pnt *model.Point) (bool, error)
 }
 type DatabaseAPI struct {
 	DB DBDatabase
@@ -47,16 +45,6 @@ func (a *DatabaseAPI) WizardLocalPointMapping(ctx *gin.Context) {
 
 func (a *DatabaseAPI) WizardRemotePointMapping(ctx *gin.Context) {
 	mapping, err := a.DB.WizardRemotePointMapping()
-	reposeHandler(mapping, err, ctx)
-}
-
-func (a *DatabaseAPI) WizardNewNetDevPnt(ctx *gin.Context) {
-	var net *model.Network
-	net.Name = "test"
-	var dev *model.Device
-	dev.Name = "test"
-	var pnt *model.Point
-	mapping, err := a.DB.WizardNewNetDevPnt("", net, dev, pnt)
 	reposeHandler(mapping, err, ctx)
 }
 

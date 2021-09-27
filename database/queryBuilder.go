@@ -94,9 +94,12 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 	if args.Devices {
 		query = query.Preload("Devices")
 	}
-	if args.Points {
-		query = query.Preload("Devices.Points")
+	if args.Points { //TODO args.Priority always returned false, fuck knows why
+		query = query.Preload("Devices.Points").Preload("Devices.Points.Priority")
 	}
+	//if args.Points {
+	//	query = query.Preload("Devices.Points")
+	//}
 	if args.IpConnection {
 		query = query.Preload("IpConnection")
 	}
