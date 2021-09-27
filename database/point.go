@@ -120,21 +120,29 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 	if query.Error != nil {
 		return nil, query.Error
 	}
-
 	if body.Priority != nil {
 		priority := map[string]interface{}{}
 		priorityValue := reflect.ValueOf(*body.Priority)
 		typeOfPriority := priorityValue.Type()
+		highestPri := utils.NewArray()
+		highestValue := utils.NewMap()
 		for i := 0; i < priorityValue.NumField(); i++ {
 			if priorityValue.Field(i).Type().Kind().String() == "ptr" {
 				val := priorityValue.Field(i).Interface().(*float64)
 				if val == nil {
 					priority[typeOfPriority.Field(i).Name] = nil
 				} else {
+					highestPri.Add(i)
+					highestValue.Set(i, *val)
 					priority[typeOfPriority.Field(i).Name] = *val
 				}
 			}
 		}
+		min, _ := highestPri.MinMaxInt() //get the highest priority
+		val := highestValue.Get(min)     //get the highest priority value
+		pointModel.CurrentPriority = min
+		pointModel.PresentValue = val.(float64)
+		d.DB.Model(&pointModel).Updates(&pointModel)
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
 	}
 	if len(body.Tags) > 0 {
@@ -145,7 +153,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 	if !writeValue {
 		query = d.DB.Model(&pointModel).Updates(&body)
 	}
-
 	if utils.BoolIsNil(pointModel.IsProducer) && utils.BoolIsNil(body.IsProducer) {
 		if compare(pointModel, body) {
 			_, err := d.ProducerWrite("point", pointModel)

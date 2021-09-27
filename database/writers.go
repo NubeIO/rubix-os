@@ -226,7 +226,8 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	wc.DataStore = data
 	writer.DataStore = data
 	d.DB.Model(&writer).Updates(writer)
-	if *flow.IsRemote { //IF IS REMOTE FLOW-NETWORK
+	remote := utils.BoolIsNil(flow.IsRemote)
+	if remote { //IF IS REMOTE FLOW-NETWORK
 		if action == model.CommonNaming.Write {
 			_, err = streams.WriteClone(writerCloneUUID, flow, wc, true)
 			if err != nil {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -27,9 +28,45 @@ func resolveID(ctx *gin.Context) string {
 	return ctx.Param("eui")
 }
 
+type Enable struct {
+	Type        string
+	ReadOnly    string
+	WriteValues interface{}
+}
+
+type T struct {
+	Enabled      bool        `json:"enabled"`
+	ProtocolType interface{} `json:"protocol_type"`
+	Capabilities []string    `json:"capabilities"`
+	Networks     struct {
+		Uuid   string      `json:"uuid"`
+		Name   string      `json:"name"`
+		Enable interface{} `json:"enable"`
+	} `json:"networks"`
+}
+
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
+	mux.GET("/modbus/help/network", func(ctx *gin.Context) {
+
+		h := new(T)
+		h.ProtocolType = model.TransType
+
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, h)
+		}
+	})
+	mux.GET("/modbus/list/serial", func(ctx *gin.Context) {
+		serial, err := i.listSerialPorts()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, serial)
+		}
+	})
 	mux.POST("/modbus/point/tcp/operation", func(ctx *gin.Context) {
 		body, _ := bodyClient(ctx)
 		err := setClient(body.Client)
@@ -87,7 +124,6 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			found, _ := performBoolScan(cli, body.Scan.IsCoil, body.Scan.Start, body.Scan.Count)
 			ctx.JSON(http.StatusOK, found)
 		}
-
 	})
 
 }

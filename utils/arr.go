@@ -14,7 +14,7 @@ type Array struct {
 Example usage
 mArr := utils.NewArray()
 fmt.Println(utils.Unique(mArr.Add(1,2,1,2).Values()))
- */
+*/
 
 func NewArray() *Array {
 	return new(Array)
@@ -30,7 +30,7 @@ func (a *Array) Add(values ...interface{}) *Array {
 /*
 AddIfNotExist add one value if not existing
 */
-func (a *Array) AddIfNotExist(value interface{})  bool {
+func (a *Array) AddIfNotExist(value interface{}) bool {
 	check := a.Exist(value)
 	if !check {
 		a.add(value)
@@ -38,7 +38,6 @@ func (a *Array) AddIfNotExist(value interface{})  bool {
 	}
 	return false
 }
-
 
 /*
 Get a value by its index number
@@ -73,6 +72,20 @@ func (a *Array) RemoveNil(arr []interface{}) []interface{} {
 	return result
 }
 
+//MinMaxInt min and max value from an array
+func (a *Array) MinMaxInt() (minVal int, maxVal int) {
+	max := a.data[0].(int)
+	min := a.data[0].(int)
+	for _, value := range a.data {
+		if max < value.(int) {
+			max = value.(int)
+		}
+		if min > value.(int) {
+			min = value.(int)
+		}
+	}
+	return min, max
+}
 
 /*
 Unique a new array with duplicates removed.
@@ -170,8 +183,6 @@ func (a *Array) UnmarshalJSON(b []byte) error {
 	return json.Unmarshal(b, &a.data)
 }
 
-
-
 // private
 
 func (a *Array) get(index int) interface{} {
@@ -199,4 +210,3 @@ func (a *Array) index(value interface{}) int {
 
 	return -1
 }
-
