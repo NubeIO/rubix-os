@@ -108,14 +108,11 @@ func (d *GormDatabase) CreateWriterWizard(body *api.WriterWizard) (bool, error) 
 	var writerCloneModel model.WriterClone
 	var session *client.FlowClient
 	producer := new(model.Producer)
-
 	flow, err := d.GetFlowNetwork(body.ConsumerFlowUUID, api.Args{})
 	if err != nil {
 		return false, err
 	}
-
 	isRemote := utils.BoolIsNil(flow.IsRemote)
-
 	if isRemote {
 		session = client.NewSessionWithToken("", flow.FlowIP, flow.FlowPort)
 		pro, err := session.GetProducer(body.ProducerUUID)

@@ -76,9 +76,6 @@ func GetLibrary() map[string]Spec {
 		ToString(),
 		ToNumber(),
 
-		MQTTClientConnect(),
-		MQTTClientSend(),
-
 		// random
 		UniformRandom(),
 		NormalRandom(),
@@ -141,7 +138,6 @@ func GetLibrary() map[string]Spec {
 
 		// network IO
 		HTTPRequest(),
-
 
 		//string functions
 		StringConcat(),
