@@ -11,7 +11,7 @@ import (
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
 	//restart plugin
-	mux.POST("/system/restart", func(ctx *gin.Context) {
+	mux.POST("/broker/restart", func(ctx *gin.Context) {
 		err := i.Disable()
 		if err != nil {
 			log.Error("LORA: error on restart (disable) plugin %s", err)

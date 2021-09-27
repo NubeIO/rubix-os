@@ -2,7 +2,6 @@ package core
 
 func GetSources() map[string]SourceSpec {
 	sources := []SourceSpec{
-		MQTTClient(),
 		KeyValueStore(),
 		ValueStore(),
 		PriorityQueueStore(),
