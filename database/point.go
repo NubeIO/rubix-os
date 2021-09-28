@@ -6,6 +6,7 @@ import (
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
+	unit "github.com/NubeDev/flow-framework/src/units"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"reflect"
@@ -107,6 +108,18 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	return body, query.Error
 }
 
+func pointUnits(pointModel *model.Point) (value float64, displayValue string, valid bool, err error) {
+	if pointModel.Unit != "" {
+		_, res, err := unit.Process(pointModel.PresentValue, pointModel.Unit, pointModel.UnitTo)
+		if err != nil {
+			return 0, "", false, err
+		}
+		return res.AsFloat(), res.String(), true, err
+	} else {
+		return 0, "", false, nil
+	}
+}
+
 // UpdatePoint returns the device for the given id or nil.
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
@@ -140,9 +153,25 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 		}
 		min, _ := highestPri.MinMaxInt() //get the highest priority
 		val := highestValue.Get(min)     //get the highest priority value
-		pointModel.CurrentPriority = min
-		pointModel.PresentValue = val.(float64)
-		d.DB.Model(&pointModel).Updates(&pointModel)
+		body.CurrentPriority = min
+		//body.ValueRaw = value //TODO set raw value
+		body.PresentValue = val.(float64) //process the units as in temperature conversion
+		if !utils.FloatIsNilCheck(body.LimitMin) && !utils.FloatIsNilCheck(body.LimitMin) {
+			body.PresentValue = utils.LimitToRange(body.PresentValue, *body.LimitMin, *body.LimitMax)
+		}
+		if !utils.FloatIsNilCheck(body.ScaleInMin) && !utils.FloatIsNilCheck(body.ScaleInMax) && !utils.FloatIsNilCheck(body.ScaleOutMin) && !utils.FloatIsNilCheck(body.ScaleOutMax) {
+			body.PresentValue = utils.Scale(body.PresentValue, *body.ScaleInMin, *body.ScaleInMax, *body.ScaleOutMin, *body.ScaleOutMax)
+		}
+		value, display, ok, err := pointUnits(body)
+		if err != nil {
+			log.Errorf("ERROR on point invalid point unit")
+			return nil, err
+		}
+		if ok {
+			body.PresentValue = value
+			body.ValueDisplay = display
+		}
+		body.PresentValue = utils.RoundTo(body.PresentValue, body.Decimal)
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
 	}
 	if len(body.Tags) > 0 {
@@ -150,9 +179,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 			return nil, err
 		}
 	}
-	if !writeValue {
-		query = d.DB.Model(&pointModel).Updates(&body)
-	}
+	query = d.DB.Model(&pointModel).Updates(&body)
 	if utils.BoolIsNil(pointModel.IsProducer) && utils.BoolIsNil(body.IsProducer) {
 		if compare(pointModel, body) {
 			_, err := d.ProducerWrite("point", pointModel)

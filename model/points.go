@@ -111,6 +111,7 @@ type Point struct {
 	CommonDescription
 	CommonEnable
 	PresentValue         float64        `json:"present_value"` //point value, read only
+	ValueDisplay         string         `json:"value_display"` //point value, read only
 	CurrentPriority      int            `json:"current_priority"`
 	WriteValue           *float64       `json:"write_value"` //TODO add in logic if user writes to below priority 16
 	ValueRaw             datatypes.JSON `json:"value_raw"`
@@ -125,14 +126,15 @@ type Point struct {
 	AddressOffset        int            `json:"address_offset"` // for example a modbus address offset
 	AddressUUID          string         `json:"address_uuid"`   // for example a droplet id (so a string)
 	NextAvailableAddress *bool          `json:"use_next_available_address"`
-	Decimal              int
-	Round                *float64 `json:"round"`
-	InputMin             *float64 `json:"input_min"`
-	InputMax             *float64 `json:"input_max"`
-	ScaleMin             *float64 `json:"scale_min"`
-	ScaleMax             *float64 `json:"scale_max"`
-	Unit                 string   `json:"unit"`
-	UnitsTo              string   `json:"units_to"` //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
+	Decimal              uint32         `json:"decimal"`
+	LimitMin             *float64       `json:"limit_min"`
+	LimitMax             *float64       `json:"limit_max"`
+	ScaleInMin           *float64       `json:"scale_in_min"`
+	ScaleInMax           *float64       `json:"scale_in_max"`
+	ScaleOutMin          *float64       `json:"scale_out_min"`
+	ScaleOutMax          *float64       `json:"scale_out_max"`
+	Unit                 string         `json:"unit"`
+	UnitTo               string         `json:"unit_to"` //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
 	CommonThingClass
 	CommonThingRef
 	CommonThingType

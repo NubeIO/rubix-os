@@ -1,16 +1,17 @@
 package unit
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 )
 
-func Process(value float64, fromUnit, toUint string) (string, UnitVal) {
+func Process(value float64, fromUnit, toUint string) (string, UnitVal, error) {
 	cmd := fmt.Sprintf("%f %s to %s", value, fromUnit, toUint)
 	res, _, ok := convertExpr([]byte(cmd))
 	if !ok {
 		log.Printf("Invalid command: `%v` %v\n", cmd, res)
-		return "Usage: !conv [amount][from-unit] to [to-unit]", nil
+		return "", nil, errors.New("invalid unit usage: [amount][from-unit] to [to-unit]")
 	}
 	c := res.([]interface{})
 	cmdFrom := c[0]
@@ -21,7 +22,8 @@ func Process(value float64, fromUnit, toUint string) (string, UnitVal) {
 	case unparsedUnitVal:
 		fromUnit, ok := ParseUnit(uv.unit)
 		if !ok {
-			return fmt.Sprintf("Invalid unit %s", uv.unit), nil
+			msg := fmt.Sprintf("Invalid unit %s", uv.unit)
+			return "", nil, errors.New(msg)
 		}
 		from = fromUnit.FromFloat(uv.val)
 
@@ -30,13 +32,14 @@ func Process(value float64, fromUnit, toUint string) (string, UnitVal) {
 	}
 	toUnt, ok := ParseUnit(cmdTo)
 	if !ok {
-		return fmt.Sprintf("Invalid unit %s", cmdTo), nil
+		msg := fmt.Sprintf("Invalid unit %s", cmdTo)
+		return "", nil, errors.New(msg)
 	}
 	to, err := from.Convert(toUnt)
 	if err != nil {
-		return err.Error(), nil
+		return "", nil, err
 	}
-	return fmt.Sprintf("%s = %s", from, to), to
+	return fmt.Sprintf("%s = %s", from, to), to, nil
 }
 
 type unparsedUnitVal struct {
