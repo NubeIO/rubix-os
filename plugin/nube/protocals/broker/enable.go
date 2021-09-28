@@ -1,25 +1,20 @@
 package main
 
 import (
-	"errors"
-	"github.com/NubeDev/flow-framework/api"
+	"github.com/fhmq/hmq/broker"
+	log "github.com/sirupsen/logrus"
+	"os"
+	"os/signal"
 )
 
 // Enable implements plugin.Plugin
 func (i *Instance) Enable() error {
-	i.enabled = true
 	i.setUUID()
-	i.BusServ()
-	var arg api.Args
-	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
-	if err != nil {
-		return errors.New("there is no network added please add one")
+	if !i.brokerEnabled {
+		go i.enableBroker()
 	}
-	i.networkUUID = q.UUID
-	if err != nil {
-		return errors.New("error on enable lora-plugin")
-
-	}
+	i.brokerEnabled = true
+	i.enabled = true
 	return nil
 }
 
@@ -27,4 +22,32 @@ func (i *Instance) Enable() error {
 func (i *Instance) Disable() error {
 	i.enabled = false
 	return nil
+}
+
+func (i *Instance) enableBroker() {
+	port := "1882"
+	if i.config.Port != "" {
+		port = i.config.Port
+	}
+	os.Args = []string{"-port", port}
+	config, err := broker.ConfigureConfig(os.Args)
+	if err != nil {
+		log.Error("configure broker config error: ", err)
+	}
+	b, err := broker.NewBroker(config)
+	if err != nil {
+		log.Error("New Broker error: ", err)
+	}
+	b.Start()
+	s := waitForSignal()
+	log.Println("signal received, broker closed.", s)
+}
+
+func waitForSignal() os.Signal {
+	signalChan := make(chan os.Signal, 1)
+	defer close(signalChan)
+	signal.Notify(signalChan, os.Kill, os.Interrupt)
+	s := <-signalChan
+	signal.Stop(signalChan)
+	return s
 }
