@@ -10,10 +10,8 @@ import (
 
 /*
 Implements functionality to define a weekly prototypical schedule in JSON format. You can then
-query the schedule to determine if a given time is within that schedule. Additionally, you can retrieve all
-intervals within the schedule that a supplied time matches.
 https://github.com/rickar/cal TODO add in holidays
-https://github.com/teambition/rrule-go TODO add in events
+
 
 TODO add in a master/global schedule feature
 
@@ -132,6 +130,11 @@ func (sd *Definition) String() string {
 		s += fmt.Sprintf("%s\n", v)
 	}
 	return s
+}
+
+// GetDescription implementation for printing
+func (sd *Definition) GetDescription() string {
+	return sd.Description
 }
 
 // Within Determines if the supplied time is within the defined prototypical schedule, using Second precision. This function

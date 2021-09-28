@@ -32,8 +32,8 @@ func TestOverlappingIntervals(weekday time.Weekday) (bool, []schedule.IntervalVa
 	return false, shifts
 }
 
-func EventCheckLoop() {
-	json, err := ioutil.ReadFile("./schedule/test.json")
+func EventCheckLoop(file string) {
+	json, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,16 +41,14 @@ func EventCheckLoop() {
 	if err != nil {
 		log.Println("Unexpected error parsing json")
 	}
-	log.Println(sd.String())
-	log.Println(sd.Intervals)
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 	go func() {
 		for dt := range ticker.C {
 			if sd.Within(dt) {
-				log.Println(dt, " is WITHIN schedule.")
+				log.Println(sd.GetDescription(), dt, " is TRUE schedule.")
 			} else {
-				log.Println(dt, " is OUTSIDE schedule.")
+				log.Println(sd.GetDescription(), dt, " is FALSE schedule.")
 			}
 		}
 	}()
@@ -62,6 +60,15 @@ func main() {
 	o, oo := TestOverlappingIntervals(time.Monday)
 	fmt.Println(oo)
 	fmt.Println(o, "is an overlap if its true")
-	EventCheckLoop()
+	go EventCheckLoop("./schedule/test.json")
+	go EventCheckLoop("./schedule/test2.json")
+	go forever()
+	select {} // block forever
 
+}
+func forever() {
+	for {
+		//fmt.Printf("%v+\n", time.Now())
+		time.Sleep(time.Second)
+	}
 }
