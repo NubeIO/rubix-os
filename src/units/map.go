@@ -53,6 +53,11 @@ var supportedUnits = map[UnitType][]string{
 	Year:   {"yr", "year", "years"},
 }
 
+const (
+	Length = "Length"
+	Mass   = "Mass"
+)
+
 var UnitsLength = struct {
 	Meter      string `json:"meter"`
 	Kilometer  string `json:"kilometer"`
@@ -67,6 +72,13 @@ var UnitsLength = struct {
 	Nanometer:  "nanometer",
 }
 
+var UnitsMass = struct {
+	Gram string `json:"gram"`
+}{
+	Gram: "gram",
+}
+
 var UnitsMap = map[string]interface{}{
-	"unitTemp": UnitsLength,
+	"UnitsLength": UnitsLength,
+	"UnitsMass":   UnitsMass,
 }

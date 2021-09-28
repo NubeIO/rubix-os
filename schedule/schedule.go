@@ -27,7 +27,7 @@ const AnsiFormat = "1504"
 type IntervalJSONEncoding struct {
 	Start    string `json:"start"`
 	Duration string `json:"duration"`
-	name     string `json:"name"`
+	Name     string `json:"name"`
 }
 
 // IntervalValue Identifies unique intervals in the ScheduleDefinition
@@ -112,7 +112,7 @@ func (sd *Definition) loadNew(t time.Time) (err error) {
 			}
 			duration -= 1 * time.Second
 			eventEnd := eventStart.Add(duration)
-			sd.Intervals = append(sd.Intervals, IntervalValue{eventStart, eventEnd, interval.name})
+			sd.Intervals = append(sd.Intervals, IntervalValue{eventStart, eventEnd, interval.Name})
 		}
 		epoch = epoch.Add(24 * time.Hour)
 	}
