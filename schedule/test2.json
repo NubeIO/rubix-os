@@ -1,5 +1,5 @@
 {
-  "description": "Normal Schedule",
+  "description": "Normal Schedule2",
   "schedule": {
     "mon": [
       {
@@ -48,8 +48,8 @@
     "wed": [
       {
         "name": "event1",
-        "start": "0800",
-        "duration": "0h15m"
+        "start": "0400",
+        "duration": "2h15m"
       },
       {
         "name": "event1",
