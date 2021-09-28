@@ -8,7 +8,6 @@ import (
 )
 
 type (
-
 	// BusService :nodoc:
 	BusService interface {
 		EmitString(ctx context.Context, topicName string, data string) error

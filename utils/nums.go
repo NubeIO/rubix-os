@@ -6,6 +6,22 @@ import (
 	"time"
 )
 
+func FloatIsNil(b *float64) float64 {
+	if b == nil {
+		return 0
+	} else {
+		return *b
+	}
+}
+
+func FloatIsNilCheck(b *float64) bool {
+	if b == nil {
+		return true
+	} else {
+		return false
+	}
+}
+
 //LimitToRange returns the input value clamped within the specified range
 func LimitToRange(value float64, range1 float64, range2 float64) float64 {
 	if range1 == range2 {
