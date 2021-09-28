@@ -18,6 +18,6 @@ func main() {
 	fmt.Println(utils.RandInt(1, 11))
 	fmt.Println(utils.RandInt(1, 11))
 	fmt.Println(utils.RandFloat(1, 1011))
-	fmt.Println(utils.RandFloat(1, 1011))
+	fmt.Println(unit.UnitsMap)
 
 }

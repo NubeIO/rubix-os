@@ -116,6 +116,20 @@ var CommonFaultCode = struct {
 	Ok:               "ok",
 }
 
+var CommonFaultMessage = struct {
+	ConfigError      string
+	SystemError      string
+	PluginNotEnabled string
+	Offline          string
+	NetworkMessage   string
+}{
+	ConfigError:      "config error",
+	SystemError:      "system error",
+	PluginNotEnabled: "plugin not enabled or no valid message from the network",
+	Offline:          "offline",
+	NetworkMessage:   "msg for network valid",
+}
+
 var MessageLevel = struct {
 	Info         string
 	Critical     string
@@ -130,20 +144,6 @@ var MessageLevel = struct {
 	Warning:      "warning",
 	Fail:         "fail",
 	Normal:       "normal",
-}
-
-var CommonFaultMessage = struct {
-	ConfigError      string
-	SystemError      string
-	PluginNotEnabled string
-	Offline          string
-	NetworkMessage   string
-}{
-	ConfigError:      "config error",
-	SystemError:      "system error",
-	PluginNotEnabled: "plugin not enabled or no valid message from the network",
-	Offline:          "offline",
-	NetworkMessage:   "msg for network valid",
 }
 
 var TransType = struct {

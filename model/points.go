@@ -133,6 +133,7 @@ type Point struct {
 	ScaleInMax           *float64       `json:"scale_in_max"`
 	ScaleOutMin          *float64       `json:"scale_out_min"`
 	ScaleOutMax          *float64       `json:"scale_out_max"`
+	UnitType             string         `json:"unit_type"` //temp
 	Unit                 string         `json:"unit"`
 	UnitTo               string         `json:"unit_to"` //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
 	CommonThingClass
