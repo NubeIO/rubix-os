@@ -16,7 +16,6 @@ func bodyDevice(ctx *gin.Context) (dto influxmodel.Temperature, err error) {
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
-
 	mux.GET("/influx/temperatures", func(ctx *gin.Context) {
 		records := Read("temperatures")
 		var temperatures []influxmodel.FluxTemperature
@@ -28,7 +27,6 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			temperatures = append(temperatures, temp)
 		}
 		ctx.JSON(http.StatusOK, temperatures)
-
 	})
 	mux.POST("/influx/temperature", func(ctx *gin.Context) {
 		body, err := bodyDevice(ctx)
@@ -40,5 +38,4 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, "ok")
 		}
 	})
-
 }

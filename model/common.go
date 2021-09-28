@@ -25,8 +25,8 @@ type CommonThingObject struct {
 	ThingObject string `json:"thing_object"`
 }
 
-type CommonThingUse struct {
-	ThingUse string `json:"thing_use"`
+type CommonThingRef struct {
+	ThingRef string `json:"thing_reference"`
 }
 
 type CommonThingUUID struct {

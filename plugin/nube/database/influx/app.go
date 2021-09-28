@@ -25,7 +25,6 @@ func (i *Instance) writeData() (bool, error) {
 		hist.Timestamp = e.Timestamp
 		hist.Out16 = histPri.P16
 		WriteHist(hist)
-
 	}
 	return true, nil
 }

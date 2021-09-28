@@ -112,7 +112,6 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 		log.Errorf("BACNET: EDIT POINT issue on add rest: %v\n", err)
 		return nil, err
 	}
-
 	return nil, nil
 
 }
@@ -172,32 +171,5 @@ func (i *Instance) wizard() (string, error) {
 	if err != nil {
 		return "error: on flow-framework add network wizard", err
 	}
-
 	return "pass: added network and points", err
-}
-
-//syncCheck point make sure
-//the idea is to make sure that the ff-network and the bacnet-server stay in sync
-func (i *Instance) syncCheck(body *pkgmodel.BacnetPoint) (bool, error) {
-	//cli := plgrest.NewNoAuth(ip, port)
-	//bacPnts, err := cli.GetPoints()
-	//if err != nil {
-	//	return false, err
-	//}
-	//var arg api.Args
-	//arg.IpConnection = true
-	//points, err := i.db.GetPoints(arg)
-	//if err != nil {
-	//	return false, err
-	//}
-	//for _, pnt := range points {
-	//	fmt.Println(pnt)
-	//
-	//}
-	//for _, pnt := range points {
-	//	fmt.Println(pnt)
-	//
-	//}
-
-	return true, nil
 }

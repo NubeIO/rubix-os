@@ -16,6 +16,7 @@ type Consumer struct {
 	ProducerThingName   string             `json:"producer_thing_name"`
 	ProducerThingUUID   string             `json:"producer_thing_uuid"` // this is the remote point UUID
 	ProducerThingClass  string             `json:"producer_thing_class"`
+	ProducerThingRef    string             `json:"producer_thing_reference"`
 	ProducerThingType   string             `json:"producer_thing_type"`
 	ConsumerApplication string             `json:"consumer_application"`
 	CurrentWriterUUID   string             `json:"current_writer_uuid"` // this could come from any flow-network on any instance
