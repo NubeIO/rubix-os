@@ -134,6 +134,7 @@ type Point struct {
 	Unit                 string   `json:"unit"`
 	UnitsTo              string   `json:"units_to"` //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
 	CommonThingClass
+	CommonThingRef
 	CommonThingType
 	IsProducer *bool `json:"is_producer"`
 	IsConsumer *bool `json:"is_consumer"`

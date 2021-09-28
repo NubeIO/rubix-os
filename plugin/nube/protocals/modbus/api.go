@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"net/url"
 )
 
 type Scan struct {
@@ -30,7 +32,7 @@ func resolveID(ctx *gin.Context) string {
 
 type Enable struct {
 	Type        string
-	ReadOnly    string
+	ReadOnly    url.URL
 	WriteValues interface{}
 }
 
@@ -50,13 +52,24 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
 	mux.GET("/modbus/help/network", func(ctx *gin.Context) {
 
+		o := new(Enable)
+
+		loc := &url.URL{
+			Path: i.basePath,
+		}
+
+		fmt.Println(loc)
+		msg := fmt.Sprintf("http://0.0.0.0:1660%smodbus", loc)
+		o.Type = msg
+		fmt.Println(msg)
+
 		h := new(T)
 		h.ProtocolType = model.TransType
 
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-			ctx.JSON(http.StatusOK, h)
+			ctx.JSON(http.StatusOK, o)
 		}
 	})
 	mux.GET("/modbus/list/serial", func(ctx *gin.Context) {
