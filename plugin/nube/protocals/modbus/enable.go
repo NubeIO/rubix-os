@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
+	log "github.com/sirupsen/logrus"
 )
 
 // Enable implements plugin.Plugin
@@ -25,13 +26,16 @@ func (i *Instance) Enable() error {
 			var arg polling
 			i.pollingEnabled = true
 			arg.enable = true
-			go func() {
+			go func() error {
 				err := i.PollingTCP(arg)
 				if err != nil {
-
+					log.Errorf("modbus: POLLING ERROR on routine: %v\n", err)
+					return err
 				}
+				return nil
 			}()
 			if err != nil {
+				log.Errorf("modbus: POLLING ERROR: %v\n", err)
 				return errors.New("error on starting polling")
 			}
 		}
