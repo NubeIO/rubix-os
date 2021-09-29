@@ -27,17 +27,6 @@ func updateUnitMap() {
 	}
 }
 
-// SupportedUnits returns all the supported unit types mapped to a list of alises
-func SupportedUnits() map[UnitType][]string {
-	unitLock.RLock()
-	defer unitLock.RUnlock()
-	supported := make(map[UnitType][]string, len(supportedUnits))
-	for unit, aliases := range supportedUnits {
-		supported[unit] = aliases
-	}
-	return supported
-}
-
 // ParseUnit parses a UnitType.
 // Lazily loads currency units
 func ParseUnit(s string) (UnitType, bool) {

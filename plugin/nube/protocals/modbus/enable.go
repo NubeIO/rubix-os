@@ -20,22 +20,22 @@ func (i *Instance) Enable() error {
 	if err != nil {
 		return errors.New("error on enable lora-plugin")
 	}
+	if i.config.EnablePolling {
+		if !i.pollingEnabled {
+			var arg polling
+			i.pollingEnabled = true
+			arg.enable = true
+			go func() {
+				err := i.PollingTCP(arg)
+				if err != nil {
 
-	if !i.pollingEnabled {
-		var arg polling
-		i.pollingEnabled = true
-		arg.enable = true
-		go func() {
-			err := i.PollingTCP(arg)
+				}
+			}()
 			if err != nil {
-
+				return errors.New("error on starting polling")
 			}
-		}()
-		if err != nil {
-			return errors.New("error on starting polling")
 		}
 	}
-
 	return nil
 }
 

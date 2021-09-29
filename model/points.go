@@ -112,9 +112,9 @@ type Point struct {
 	CommonEnable
 	PresentValue         float64        `json:"present_value"` //point value, read only
 	ValueDisplay         string         `json:"value_display"` //point value, read only
-	CurrentPriority      int            `json:"current_priority"`
-	WriteValue           *float64       `json:"write_value"` //TODO add in logic if user writes to below priority 16
+	ValueOriginal        float64        `json:"value_original"`
 	ValueRaw             datatypes.JSON `json:"value_raw"`
+	CurrentPriority      int            `json:"current_priority"`
 	Fallback             float64        `json:"fallback"`
 	DeviceUUID           string         `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	EnableWriteable      *bool          `json:"writeable"`
@@ -133,7 +133,7 @@ type Point struct {
 	ScaleInMax           *float64       `json:"scale_in_max"`
 	ScaleOutMin          *float64       `json:"scale_out_min"`
 	ScaleOutMax          *float64       `json:"scale_out_max"`
-	UnitType             string         `json:"unit_type"` //temp
+	UnitType             string         `json:"unit_type"` //temperature
 	Unit                 string         `json:"unit"`
 	UnitTo               string         `json:"unit_to"` //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
 	CommonThingClass
@@ -142,10 +142,8 @@ type Point struct {
 	IsProducer *bool `json:"is_producer"`
 	IsConsumer *bool `json:"is_consumer"`
 	CommonFault
-	ThingClass string    `json:"thing_class"`
-	ThingType  string    `json:"thing_type"`
-	Priority   *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
-	Tags       []*Tag    `json:"tags" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
+	Priority *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
+	Tags     []*Tag    `json:"tags" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
 }
 
 type Priority struct {
