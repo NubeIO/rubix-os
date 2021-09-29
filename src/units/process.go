@@ -73,12 +73,3 @@ func mapFeetInches(v interface{}) interface{} {
 	inches := vs[2].(int)
 	return FootInchVal{Feet: float64(feet), Inches: float64(inches)}
 }
-
-//func mapCurrency(v interface{}) interface{} {
-//	c := v.([]interface{})
-//	u, ok := ParseUnit(string(c[0].(rune)))
-//	if !ok {
-//		return nil
-//	}
-//	return CurrencyVal{V: c[1].(float64), U: u.(*CurrencyUnit)}
-//}

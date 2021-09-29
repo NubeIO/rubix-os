@@ -1,5 +1,11 @@
 package unit
 
+const (
+	Length      = "length"
+	Mass        = "mass"
+	Temperature = "temperature"
+)
+
 var supportedUnits = map[UnitType][]string{
 	// Length
 	Meter:        {"m", "meter", "meters"},
@@ -53,11 +59,6 @@ var supportedUnits = map[UnitType][]string{
 	Year:   {"yr", "year", "years"},
 }
 
-const (
-	Length = "Length"
-	Mass   = "Mass"
-)
-
 var UnitsLength = struct {
 	Meter      string `json:"meter"`
 	Kilometer  string `json:"kilometer"`
@@ -79,6 +80,30 @@ var UnitsMass = struct {
 }
 
 var UnitsMap = map[string]interface{}{
-	"UnitsLength": UnitsLength,
-	"UnitsMass":   UnitsMass,
+	Length: UnitsLength,
+	Mass:   UnitsMass,
+}
+
+//Exists checks if the selected unit exists by category ie: @unt temperature
+func Exists(unt string) (found bool, options interface{}) {
+	var out interface{}
+	var f = false
+	for i, e := range UnitsMap {
+		if i == unt {
+			out = e
+			f = true
+		}
+	}
+	return f, out
+}
+
+// SupportedUnits returns all the supported unit types mapped to a list of aliases
+func SupportedUnits() map[UnitType][]string {
+	unitLock.RLock()
+	defer unitLock.RUnlock()
+	supported := make(map[UnitType][]string, len(supportedUnits))
+	for unit, aliases := range supportedUnits {
+		supported[unit] = aliases
+	}
+	return supported
 }

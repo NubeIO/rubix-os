@@ -10,7 +10,7 @@ cd "$dir"/plugin/nube/protocals/lorawan
 go build -buildmode=plugin -o lorawan.so *.go  && cp lorawan.so "$dir"/data/plugins
 # shellcheck disable=SC2164
 cd "$dir"/plugin/nube/protocals/modbus
-#go build -buildmode=plugin -o modbus.so *.go  && cp modbus.so "$dir"/data/plugins
+go build -buildmode=plugin -o modbus.so *.go  && cp modbus.so "$dir"/data/plugins
 # shellcheck disable=SC2164
 #cd "$dir"/plugin/nube/protocals/lora
 #go build -buildmode=plugin -o lora.so *.go  && cp lora.so "$dir"/data/plugins

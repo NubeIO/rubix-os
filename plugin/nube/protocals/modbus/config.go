@@ -2,13 +2,13 @@ package main
 
 // Config is user plugin configuration
 type Config struct {
-	OrganizationID string `yaml:"organization_id"`
+	EnablePolling bool `yaml:"enable"`
 }
 
 // DefaultConfig implements plugin.Configurer
 func (i *Instance) DefaultConfig() interface{} {
 	return &Config{
-		OrganizationID: "1",
+		EnablePolling: false,
 	}
 }
 
