@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const defaultInterval = 2000 * time.Millisecond
+const defaultInterval = 100 * time.Millisecond
 
 type polling struct {
 	enable        bool
@@ -74,7 +74,7 @@ func (i *Instance) PollingTCP(p polling) error {
 						client.BaudRate = net.SerialConnection.BaudRate
 						client.DataBits = net.SerialConnection.DataBits
 						client.StopBits = net.SerialConnection.StopBits
-						err = setClientSerial(client)
+						err = i.setClient(client, net.UUID, true, true)
 						if err != nil {
 							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
 						}
@@ -82,7 +82,7 @@ func (i *Instance) PollingTCP(p polling) error {
 						dCheck.client = client
 						client.Host = dev.CommonIP.Host
 						client.Port = utils.PortAsString(dev.CommonIP.Port)
-						err = setClient(client)
+						err = i.setClient(client, net.UUID, true, false)
 						if err != nil {
 							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
 						}
@@ -95,6 +95,10 @@ func (i *Instance) PollingTCP(p polling) error {
 					time.Sleep(dNet)
 					if validDev {
 						cli := getClient()
+						err := cli.SetUnitId(uint8(dev.AddressId))
+						if err != nil {
+							log.Errorf("modbus: failed to vaildate SetUnitId %v %d\n", err, dev.AddressId)
+						}
 						var ops Operation
 						ops.UnitId = uint8(dev.AddressId)
 						for _, pnt := range dev.Points { //points
