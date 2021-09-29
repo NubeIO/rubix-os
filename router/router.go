@@ -278,7 +278,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			pointRoutes.GET("/:uuid", pointHandler.GetPoint)
 			pointRoutes.PATCH("/:uuid", pointHandler.UpdatePoint)
 			pointRoutes.GET("/field/:uuid", pointHandler.GetPointByField)
-			pointRoutes.PATCH("/field/:uuid", pointHandler.UpdatePointByFieldAndType)
+			pointRoutes.PATCH("/field/:uuid", pointHandler.UpdatePointByFieldAndUnit)
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
 			pointRoutes.DELETE("/drop", pointHandler.DropPoints)
 		}

@@ -14,23 +14,23 @@ type CommonName struct {
 }
 
 type CommonThingClass struct {
-	ThingClass string `json:"thing_class"`
+	ThingClass string `json:"thing_class,omitempty"`
 }
 
 type CommonThingType struct {
-	ThingType string `json:"thing_type"`
+	ThingType string `json:"thing_type,omitempty"`
 }
 
 type CommonThingObject struct {
-	ThingObject string `json:"thing_object"`
+	ThingObject string `json:"thing_object,omitempty"`
 }
 
 type CommonThingRef struct {
-	ThingRef string `json:"thing_reference"`
+	ThingRef string `json:"thing_reference,omitempty"`
 }
 
 type CommonThingUUID struct {
-	ThingUUID string `json:"thing_uuid"`
+	ThingUUID string `json:"thing_uuid,omitempty"`
 }
 
 type CommonNameUnique struct {

@@ -24,7 +24,7 @@ func (i *Instance) wizardTCP() (string, error) {
 	var pnt model.Point
 	pnt.Name = "modbus"
 	pnt.Description = "modbus"
-	pnt.AddressId = 1
+	pnt.AddressId = utils.NewInt(1) //TODO check conversion
 	pnt.ObjectType = model.ObjectTypes.WriteSingleFloat32
 
 	_, err = i.db.WizardNewNetDevPnt("modbus", &net, &dev, &pnt)
@@ -55,7 +55,7 @@ func (i *Instance) wizardSerial() (string, error) {
 	var pnt model.Point
 	pnt.Name = "modbus"
 	pnt.Description = "modbus"
-	pnt.AddressId = 1
+	pnt.AddressId = utils.NewInt(1) //TODO check conversion
 	pnt.ObjectType = model.ObjectTypes.WriteCoil
 
 	_, err = i.db.WizardNewNetDevPnt("modbus", &net, &dev, &pnt)

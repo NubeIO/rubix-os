@@ -110,32 +110,32 @@ type Point struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	PresentValue         float64        `json:"present_value"` //point value, read only
-	ValueDisplay         string         `json:"value_display"` //point value, read only
-	ValueOriginal        float64        `json:"value_original"`
-	ValueRaw             datatypes.JSON `json:"value_raw"`
-	CurrentPriority      int            `json:"current_priority"`
-	Fallback             float64        `json:"fallback"`
-	DeviceUUID           string         `json:"device_uuid" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
-	EnableWriteable      *bool          `json:"writeable"`
-	IsOutput             *bool          `json:"is_output"`
-	BoolInvert           *bool          `json:"bool_invert"`
-	COV                  float32        `json:"cov"`
-	ObjectType           string         `json:"object_type"`    //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
-	AddressId            int            `json:"address_id"`     // for example a modbus address or bacnet address
-	AddressOffset        int            `json:"address_offset"` // for example a modbus address offset
-	AddressUUID          string         `json:"address_uuid"`   // for example a droplet id (so a string)
-	NextAvailableAddress *bool          `json:"use_next_available_address"`
-	Decimal              uint32         `json:"decimal"`
-	LimitMin             *float64       `json:"limit_min"`
-	LimitMax             *float64       `json:"limit_max"`
-	ScaleInMin           *float64       `json:"scale_in_min"`
-	ScaleInMax           *float64       `json:"scale_in_max"`
-	ScaleOutMin          *float64       `json:"scale_out_min"`
-	ScaleOutMax          *float64       `json:"scale_out_max"`
-	UnitType             string         `json:"unit_type"` //temperature
-	Unit                 string         `json:"unit"`
-	UnitTo               string         `json:"unit_to"` //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
+	PresentValue         float64        `json:"present_value,omitempty"` //point value, read only
+	ValueDisplay         string         `json:"value_display,omitempty"` //point value, read only
+	ValueOriginal        *float64       `json:"value_original,omitempty"`
+	ValueRaw             datatypes.JSON `json:"value_raw,omitempty"`
+	CurrentPriority      *int           `json:"current_priority,omitempty"`
+	Fallback             float64        `json:"fallback,omitempty"`
+	DeviceUUID           string         `json:"device_uuid,omitempty" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
+	EnableWriteable      *bool          `json:"writeable,omitempty"`
+	IsOutput             *bool          `json:"is_output,omitempty"`
+	BoolInvert           *bool          `json:"bool_invert,omitempty"`
+	COV                  *float32       `json:"cov,omitempty"`
+	ObjectType           string         `json:"object_type,omitempty"`    //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
+	AddressId            *int           `json:"address_id,omitempty"`     // for example a modbus address or bacnet address
+	AddressOffset        *int           `json:"address_offset,omitempty"` // for example a modbus address offset
+	AddressUUID          string         `json:"address_uuid,omitempty"`   // for example a droplet id (so a string)
+	NextAvailableAddress *bool          `json:"use_next_available_address,omitempty"`
+	Decimal              *uint32        `json:"decimal,omitempty"`
+	LimitMin             *float64       `json:"limit_min,omitempty"`
+	LimitMax             *float64       `json:"limit_max,omitempty"`
+	ScaleInMin           *float64       `json:"scale_in_min,omitempty"`
+	ScaleInMax           *float64       `json:"scale_in_max,omitempty"`
+	ScaleOutMin          *float64       `json:"scale_out_min,omitempty"`
+	ScaleOutMax          *float64       `json:"scale_out_max,omitempty"`
+	UnitType             string         `json:"unit_type,omitempty"` //temperature
+	Unit                 string         `json:"unit,omitempty"`
+	UnitTo               string         `json:"unit_to,omitempty"` //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
 	CommonThingClass
 	CommonThingRef
 	CommonThingType
@@ -148,20 +148,20 @@ type Point struct {
 
 type Priority struct {
 	PointUUID string   `json:"point_uuid,omitempty" gorm:"REFERENCES points;not null;default:null;primaryKey"`
-	P1        *float64 `json:"_1"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
-	P2        *float64 `json:"_2"`
-	P3        *float64 `json:"_3"`
-	P4        *float64 `json:"_4"`
-	P5        *float64 `json:"_5"`
-	P6        *float64 `json:"_6"`
-	P7        *float64 `json:"_7"`
-	P8        *float64 `json:"_8"`
-	P9        *float64 `json:"_9"`
-	P10       *float64 `json:"_10"`
-	P11       *float64 `json:"_11"`
-	P12       *float64 `json:"_12"`
-	P13       *float64 `json:"_13"`
-	P14       *float64 `json:"_14"`
-	P15       *float64 `json:"_15"`
-	P16       *float64 `json:"_16"` //removed and added to the point to save one DB write
+	P1        *float64 `json:"_1,omitempty"` //would be better if we stored the TS and where it was written from, for example from a Remote Producer
+	P2        *float64 `json:"_2,omitempty"`
+	P3        *float64 `json:"_3,omitempty"`
+	P4        *float64 `json:"_4,omitempty"`
+	P5        *float64 `json:"_5,omitempty"`
+	P6        *float64 `json:"_6,omitempty"`
+	P7        *float64 `json:"_7,omitempty"`
+	P8        *float64 `json:"_8,omitempty"`
+	P9        *float64 `json:"_9,omitempty"`
+	P10       *float64 `json:"_10,omitempty"`
+	P11       *float64 `json:"_11,omitempty"`
+	P12       *float64 `json:"_12,omitempty"`
+	P13       *float64 `json:"_13,omitempty"`
+	P14       *float64 `json:"_14,omitempty"`
+	P15       *float64 `json:"_15,omitempty"`
+	P16       *float64 `json:"_16,omitempty"` //removed and added to the point to save one DB write
 }

@@ -1,6 +1,7 @@
 package model
 
 var CommonNaming = struct {
+	NubeIO            string
 	Plugin            string
 	Read              string
 	Write             string
@@ -23,6 +24,7 @@ var CommonNaming = struct {
 	Node              string
 	TransportType     string
 }{
+	NubeIO:            "Nube-IO",
 	Plugin:            "plugin",
 	Read:              "read",
 	Write:             "write",
@@ -183,6 +185,7 @@ var TransProtocol = struct {
 	ModbusMaster string
 	MQTT         string
 	LoRa         string
+	Lora         string
 	LoRaWAN      string
 }{
 	REST:         "rest",
@@ -191,6 +194,7 @@ var TransProtocol = struct {
 	ModbusMaster: "ModbusMaster",
 	MQTT:         "MQTT",
 	LoRa:         "LoRa",
+	Lora:         "lora",
 	LoRaWAN:      "LoRaWAN",
 }
 

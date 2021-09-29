@@ -34,7 +34,9 @@ require (
 )
 
 require (
+	github.com/fhmq/hmq v0.0.0-20210810024638-1d6979189a22
 	github.com/go-gormigrate/gormigrate/v2 v2.0.0
+	github.com/gomarkdown/markdown v0.0.0-20210918233619-6c1113f12c4a
 	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
 	github.com/martinlindhe/unit v0.0.0-20210313160520-19b60e03648d
@@ -89,7 +91,6 @@ require (
 	github.com/eapache/go-resiliency v1.1.0 // indirect
 	github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21 // indirect
 	github.com/eapache/queue v1.1.0 // indirect
-	github.com/fhmq/hmq v0.0.0-20210810024638-1d6979189a22 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.1 // indirect

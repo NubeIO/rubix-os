@@ -1,9 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
-	unit "github.com/NubeDev/flow-framework/src/units"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
@@ -66,9 +66,15 @@ func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
 	p := new(model.Point)
 	p.DeviceUUID = deviceBody.UUID
 	p.AddressUUID = deviceBody.AddressUUID
+	p.IsProducer = utils.NewFalse()
+	p.IsConsumer = utils.NewFalse()
+	p.IsOutput = utils.NewFalse()
 	if deviceBody.Model == string(decoder.THLM) {
 		for _, e := range THLM {
-			p.Unit = e //temp
+			n := fmt.Sprintf("%s_%s_%s", model.TransProtocol.Lora, deviceBody.AddressUUID, e)
+			p.Name = n
+			p.Description = deviceBody.Model
+			p.UnitType = e //temp
 			err := i.addPoint(p)
 			if err != nil {
 				log.Errorf("lora: issue on addPoint: %v\n", err)
@@ -77,7 +83,6 @@ func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
 		}
 	}
 	return nil, nil
-
 }
 
 // addPoints add a pnt
@@ -112,7 +117,8 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 // updatePoint by its lora id and type as in temp or lux
 func (i *Instance) updatePoint(body *model.Point) error {
 	addr := body.AddressUUID
-	_, err := i.db.UpdatePointByFieldAndType("address_uuid", addr, body)
+	_, err := i.db.UpdatePointByFieldAndUnit("address_uuid", addr, body)
+	log.Infof("lora UpdatePointByFieldAndUnit: AddressUUID: %s value:%v UnitType:%s \n", addr, body.PresentValue, body.UnitType)
 	if err != nil {
 		log.Errorf("lora: issue on UpdatePointByFieldAndType: %v\n", err)
 		return err
@@ -141,33 +147,33 @@ var THLM = []string{"rssi", "voltage", "temperature", "humidity", "light", "moti
 func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorStruct interface{}) {
 	pnt := new(model.Point)
 	pnt.AddressUUID = commonSensorData.Id
-
 	if commonSensorData.Sensor == string(decoder.THLM) {
 		s := sensorStruct.(decoder.TDropletTHLM)
+		log.Infof("lora decode as DropletTHLM: AddressUUID: %s Sensor:%s voltage:%v \n", pnt.AddressUUID, commonSensorData.Sensor, float64(s.Voltage))
 		for _, e := range THLM {
 			switch e {
 			case model.PointTags.RSSI:
 				f := float64(s.Rssi)
-				pnt.Unit = e //set point type
+				pnt.UnitType = e //set point type
 				err := i.devTHLM(pnt, f)
 				if err != nil {
 					return
 				}
 			case model.PointTags.Voltage:
 				f := float64(s.Voltage)
-				pnt.Unit = e //set point type
+				pnt.UnitType = e //set point type
 				err := i.devTHLM(pnt, f)
 				if err != nil {
 					return
 				}
 			case model.PointTags.Temp:
-				pnt.Unit = e //set point type
+				pnt.UnitType = e //set point type
 				err := i.devTHLM(pnt, s.Temperature)
 				if err != nil {
 					return
 				}
 			case model.PointTags.Humidity:
-				pnt.Unit = e //set point type
+				pnt.UnitType = e //set point type
 				f := float64(s.Humidity)
 				err := i.devTHLM(pnt, f)
 				if err != nil {
@@ -186,21 +192,22 @@ func (i *Instance) wizardSerial() (string, error) {
 	ser.BaudRate = 38400
 
 	var net model.Network
-	net.Name = "lora"
+	net.Name = model.TransProtocol.Lora
 	net.TransportType = model.TransType.Serial
-	net.PluginPath = "lora"
+	net.PluginPath = model.TransProtocol.Lora
 	net.SerialConnection = &ser
 
 	var dev model.Device
-	dev.Name = "lora"
-	dev.AddressId = 1
-	dev.ZeroMode = utils.NewTrue()
+	dev.Name = model.TransProtocol.Lora
+	dev.AddressUUID = "AAB296C4"
+	dev.Manufacture = model.CommonNaming.NubeIO
+	dev.Model = string(decoder.THLM)
 
 	var pnt model.Point
-	pnt.Name = "lora"
-	pnt.Description = "lora"
-	pnt.AddressUUID = "AAB296C4"
-	pnt.Unit = unit.Temperature
+	//pnt.Name = model.TransProtocol.Lora
+	//pnt.Description = model.TransProtocol.Lora
+	//pnt.AddressUUID = "AAB296C4"
+	//pnt.Unit = unit.Temperature
 	_, err = i.db.WizardNewNetDevPnt("lora", &net, &dev, &pnt)
 	if err != nil {
 		return "error: on flow-framework add lora serial network wizard", err

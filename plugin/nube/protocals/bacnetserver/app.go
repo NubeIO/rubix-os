@@ -25,7 +25,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	var pri model.Priority
 	pri.P16 = payload.Value
 	point.Priority = &pri
-	pnt, _ := i.db.PointAndQuery(objType, addr) //TODO check if existing exists, as in the same addr
+	pnt, _ := i.db.PointAndQuery(objType, addr) //TODO check conversion if existing exists, as in the same addr
 	if err != nil {
 		log.Error("BACNET UPDATE POINT PointAndQuery")
 		return nil, err
@@ -53,9 +53,9 @@ func (i *Instance) addPoint(body *model.Point) (*model.Point, error) {
 	point.ObjectName = body.Name
 	point.Enable = true
 	point.Description = body.Description
-	point.Address = body.AddressId
+	point.Address = utils.IntIsNil(body.AddressId)
 	point.ObjectType = body.ObjectType
-	point.COV = body.COV
+	point.COV = utils.Float32IsNil(body.COV)
 	point.EventState = "normal"
 	point.Units = "noUnits"
 	point.RelinquishDefault = body.Fallback
@@ -65,7 +65,7 @@ func (i *Instance) addPoint(body *model.Point) (*model.Point, error) {
 		return nil, errors.New("BACNET ADD POINT issue on add")
 	}
 	_, err := cli.AddPoint(point)
-	//TODO check if existing exists, as in the same addr and also set the point in fault or out of fault
+	//TODO check conversion if existing exists, as in the same addr and also set the point in fault or out of fault
 	if err != nil {
 		log.Errorf("BACNET: ADD POINT issue on add rest: %v\n", err)
 		return nil, err
@@ -107,7 +107,7 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 	obj := body.ObjectType
 
 	cli := plgrest.NewNoAuth(ip, port)
-	_, err := cli.EditPoint(*point, obj, addr)
+	_, err := cli.EditPoint(*point, obj, utils.IntIsNil(addr))
 	if err != nil {
 		log.Errorf("BACNET: EDIT POINT issue on add rest: %v\n", err)
 		return nil, err
@@ -119,7 +119,7 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 //deletePoint point make sure
 func (i *Instance) deletePoint(body *model.Point) (bool, error) {
 	cli := plgrest.NewNoAuth(ip, port)
-	_, err := cli.DeletePoint(body.ObjectType, body.AddressId)
+	_, err := cli.DeletePoint(body.ObjectType, utils.IntIsNil(body.AddressId))
 	if err != nil {
 		return false, err
 	}
@@ -164,7 +164,8 @@ func (i *Instance) wizard() (string, error) {
 	var pnt model.Point
 	pnt.Name = bacPnt.ObjectName
 	pnt.Description = bacPnt.Description
-	pnt.AddressId = bacPnt.Address
+
+	*pnt.AddressId = bacPnt.Address //TODO check conversion
 	pnt.AddressUUID = bacPnt.AddressUUID
 	pnt.ObjectType = bacPnt.ObjectType
 	_, err = i.db.WizardNewNetDevPnt("bacnetserver", &net, &dev, &pnt)

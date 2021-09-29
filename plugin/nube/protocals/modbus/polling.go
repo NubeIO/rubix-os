@@ -105,7 +105,8 @@ func (i *Instance) PollingTCP(p polling) error {
 							dPnt := p.delayPoints
 							if !isConnected() {
 							} else {
-								ops.Addr = uint16(pnt.AddressId)
+								a := utils.IntIsNil(pnt.AddressId) //TODO check conversion
+								ops.Addr = uint16(a)
 								ops.ObjectType = pnt.ObjectType
 								ops.IsHoldingReg = utils.BoolIsNil(pnt.IsOutput)
 								ops.ZeroMode = utils.BoolIsNil(dev.ZeroMode)

@@ -2,28 +2,47 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
-	"net/http"
-	"time"
+	"github.com/gomarkdown/markdown"
 )
+
+//markdown guide
+const help = `
+# LoRa Help Guide
+
+### line 2
+*new tab*
+<a href="https://stackoverflow.com" target="_blank">New Tab</a>
+You will never use anything else than this [website].
+
+- this is some normal texy
+- this is ***some*** normal texy
+-- aaaaaa
+1. First item
+2. Second item
+3. Third item
+
+| Syntax | Description |
+| ----------- | ----------- |
+| Header | Title |
+| Paragraph | Text |
+
+- [x] Write the press release
+- [ ] Update the website
+- [ ] Contact the media
+
+this is *some* normal texy`
 
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
 	//restart plugin
-	mux.POST("/system/restart", func(ctx *gin.Context) {
-		err := i.Disable()
-		if err != nil {
-			log.Error("LORA: error on restart (disable) plugin %s", err)
-			ctx.JSON(http.StatusBadRequest, "restart fail")
-		}
-		time.Sleep(300 * time.Millisecond)
-		err = i.Enable()
-		if err != nil {
-			log.Error("LORA: error on restart (enable) plugin %s", err)
-			ctx.JSON(http.StatusBadRequest, "restart fail")
-		}
-		ctx.JSON(http.StatusOK, "restart ok")
+	mux.GET("/system/help", func(ctx *gin.Context) {
+		md := []byte(help)
+		output := markdown.ToHTML(md, nil, nil)
+		ctx.Writer.Write(output)
+		//ctx.Writer.Write(output)
+		//ctx.Writer.WriteString(fmt.Sprintf("Magic string is: %s\r\nEcho server running at %secho", "22", i.basePath))
+
 	})
 
 }

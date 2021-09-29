@@ -62,10 +62,10 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 		return nil, query.Error
 	}
 	//check if there is an existing device with this address code
-	_, existing := d.PointDeviceByAddressID("", body)
-	if existing {
-		return nil, errors.New("an existing point of that ObjectType & id exists")
-	}
+	//_, existing := d.PointDeviceByAddressID("", body)
+	//if existing {
+	//	return nil, errors.New("an existing point of that ObjectType & id exists")
+	//}
 	if body.Description == "" {
 		body.Description = "na"
 	}
@@ -153,7 +153,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 		}
 		min, _ := highestPri.MinMaxInt() //get the highest priority
 		val := highestValue.Get(min)     //get the highest priority value
-		body.CurrentPriority = min
+		body.CurrentPriority = &min      //TODO check conversion
 		//body.ValueRaw = value //TODO set raw value
 		body.PresentValue = val.(float64) //process the units as in temperature conversion
 		if !utils.FloatIsNilCheck(body.LimitMin) && !utils.FloatIsNilCheck(body.LimitMin) {
@@ -171,7 +171,10 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 			body.PresentValue = value
 			body.ValueDisplay = display
 		}
-		body.PresentValue = utils.RoundTo(body.PresentValue, body.Decimal)
+
+		if !utils.Unit32NilCheck(body.Decimal) {
+			body.PresentValue = utils.RoundTo(body.PresentValue, *body.Decimal)
+		}
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
 	}
 	if len(body.Tags) > 0 {
@@ -234,11 +237,11 @@ func (d *GormDatabase) PointAndQuery(value1 string, value2 string) (*model.Point
 	return pointModel, nil
 }
 
-// UpdatePointByFieldAndType get by field and update.
-func (d *GormDatabase) UpdatePointByFieldAndType(field string, value string, body *model.Point, writeValue bool) (*model.Point, error) {
+// UpdatePointByFieldAndUnit get by field and update.
+func (d *GormDatabase) UpdatePointByFieldAndUnit(field string, value string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point
-	f := fmt.Sprintf("%s = ? AND thing_type = ?", field)
-	query := d.DB.Where(f, value, body.ThingType).Preload("Priority").Find(&pointModel).Updates(body)
+	f := fmt.Sprintf("%s = ? AND unit_type = ?", field)
+	query := d.DB.Where(f, value, body.UnitType).Preload("Priority").Find(&pointModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
 	}

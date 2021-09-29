@@ -15,12 +15,12 @@ const webSite = "https://www.github.com/NubeIO"
 const protocolType = "system"
 const DefaultExpiration = cache.DefaultExpiration
 
-const pluginType = "protocol"
+const pluginType = "system"
 const allowConfigWrite = false
-const isNetwork = true
+const isNetwork = false
 const maxAllowedNetworks = 1
-const networkType = "lora"
-const transportType = "serial" //serial, ip
+const networkType = ""
+const transportType = "" //serial, ip
 
 // Instance is plugin instance
 type Instance struct {

@@ -8,11 +8,11 @@ type WriterClone struct { //TODO the WriterClone needs to publish a COV event as
 	CommonUUID
 	CommonThingClass
 	CommonThingType
-	WriterUUID       string         `json:"writer_uuid"`
-	WriterThingClass string         `json:"writer_thing_class"`
-	WriterThingType  string         `json:"writer_thing_type"`
+	WriterUUID       string         `json:"writer_uuid,omitempty"`
+	WriterThingClass string         `json:"writer_thing_class,omitempty"`
+	WriterThingType  string         `json:"writer_thing_type,omitempty"`
 	ProducerUUID     string         `json:"producer_uuid" gorm:"TYPE:string REFERENCES producers;not null;default:null"` // is the producer UUID
-	DataStore        datatypes.JSON `json:"data_store"`
-	WriterSettings   datatypes.JSON `json:"producer_settings"` //like cov for a point or whatever is needed  #TODO this is why it needs settings
+	DataStore        datatypes.JSON `json:"data_store,omitempty"`
+	WriterSettings   datatypes.JSON `json:"producer_settings,omitempty"` //like cov for a point or whatever is needed  #TODO this is why it needs settings
 	CommonCreated
 }

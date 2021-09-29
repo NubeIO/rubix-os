@@ -83,17 +83,17 @@ type Network struct {
 	CommonEnable
 	CommonFault
 	CommonCreated
-	Manufacture      string `json:"manufacture"`
-	Model            string `json:"model"`
-	WriteableNetwork bool   `json:"writeable_network"` //is this a network that supports write or its read only like lora
+	Manufacture      string `json:"manufacture,omitempty"`
+	Model            string `json:"model,omitempty"`
+	WriteableNetwork bool   `json:"writeable_network,omitempty"` //is this a network that supports write or its read only like lora
 	CommonThingClass
 	CommonThingRef
 	CommonThingType
-	TransportType    string            `json:"transport_type"  gorm:"type:varchar(255);not null"` //serial
-	PluginConfId     string            `json:"plugin_conf_id" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
-	PluginPath       string            `json:"plugin_name"`
-	Devices          []*Device         `json:"devices" gorm:"constraint:OnDelete:CASCADE"`
-	SerialConnection *SerialConnection `json:"serial_connection" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	IpConnection     *IpConnection     `json:"ip_connection" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	Tags             []*Tag            `json:"tags" gorm:"many2many:networks_tags;constraint:OnDelete:CASCADE"`
+	TransportType    string            `json:"transport_type,omitempty"  gorm:"type:varchar(255);not null"` //serial
+	PluginConfId     string            `json:"plugin_conf_id,omitempty" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
+	PluginPath       string            `json:"plugin_name,omitempty"`
+	Devices          []*Device         `json:"devices,omitempty" gorm:"constraint:OnDelete:CASCADE"`
+	SerialConnection *SerialConnection `json:"serial_connection,omitempty" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	IpConnection     *IpConnection     `json:"ip_connection,omitempty" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	Tags             []*Tag            `json:"tags,omitempty" gorm:"many2many:networks_tags;constraint:OnDelete:CASCADE"`
 }

@@ -45,8 +45,8 @@ func (h *Handler) GetPointByField(field string, value string, withChildren bool)
 	return q, nil
 }
 
-func (h *Handler) UpdatePointByFieldAndType(field string, value string, body *model.Point) (*model.Point, error) {
-	q, err := getDb().UpdatePointByFieldAndType(field, value, body, false)
+func (h *Handler) UpdatePointByFieldAndUnit(field string, value string, body *model.Point) (*model.Point, error) {
+	q, err := getDb().UpdatePointByFieldAndUnit(field, value, body, false)
 	if err != nil {
 		return nil, err
 	}

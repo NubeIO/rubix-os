@@ -121,6 +121,7 @@ func (d *GormDatabase) UpdateCloneAndHist(uuid string, body *model.WriterClone, 
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	var hist *model.ProducerHistory
 	if updateProducer {
 		pro := new(model.Producer)
 		proUUID := wcm.ProducerUUID
@@ -128,13 +129,6 @@ func (d *GormDatabase) UpdateCloneAndHist(uuid string, body *model.WriterClone, 
 		p, err := d.UpdateProducer(proUUID, pro)
 		if err != nil {
 			return nil, err
-		}
-		var hist *model.ProducerHistory
-		if body.DataStore != nil {
-			hist, err = d.ProducerWriteHist(proUUID, wcm.DataStore)
-			if err != nil {
-				return nil, err
-			}
 		}
 		if p.ProducerThingClass == model.ThingClass.Point {
 			pnt := new(model.Point)
@@ -144,10 +138,23 @@ func (d *GormDatabase) UpdateCloneAndHist(uuid string, body *model.WriterClone, 
 				return nil, err
 			}
 			pnt.Priority = pri
-			_, err = d.UpdatePoint(p.ProducerThingUUID, pnt, true, false)
+			pntReturn, err := d.UpdatePoint(p.ProducerThingUUID, pnt, true, false)
 			if err != nil {
 				return nil, err
 			}
+			//get the point presentValue and add it into the history
+			marshal, err := json.Marshal(pntReturn)
+			if err != nil {
+				return nil, err
+			}
+			if body.DataStore != nil {
+				hist, err = d.ProducerWriteHist(proUUID, marshal)
+				if err != nil {
+					return nil, err
+				}
+			}
+
+			//fmt.Println(pntReturn.AddressUUID)
 		}
 		return hist, err
 	}
