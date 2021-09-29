@@ -42,7 +42,6 @@ func (i *Instance) Enable() error {
 // Disable implements plugin.Disable
 func (i *Instance) Disable() error {
 	i.enabled = false
-
 	if i.pollingEnabled {
 		var arg polling
 		i.pollingEnabled = false

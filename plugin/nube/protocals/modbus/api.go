@@ -118,7 +118,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.POST("/modbus/point/tcp/operation", func(ctx *gin.Context) {
 		body, _ := bodyClient(ctx)
-		err := setClient(body.Client)
+		err := i.setClient(body.Client, "", false, false)
 		if err != nil {
 			log.Info(err, "ERROR ON set modbus client")
 			ctx.JSON(http.StatusBadRequest, err)
@@ -161,7 +161,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.POST("/scan/bool", func(ctx *gin.Context) {
 		body, _ := bodyClient(ctx)
-		err := setClient(body.Client)
+		err := i.setClient(body.Client, "", false, false)
 		if err != nil {
 			log.Info(err, "ERROR ON set modbus client")
 			ctx.JSON(http.StatusBadRequest, err)

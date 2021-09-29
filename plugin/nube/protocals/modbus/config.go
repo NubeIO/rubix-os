@@ -8,7 +8,7 @@ type Config struct {
 // DefaultConfig implements plugin.Configurer
 func (i *Instance) DefaultConfig() interface{} {
 	return &Config{
-		EnablePolling: false,
+		EnablePolling: true,
 	}
 }
 
