@@ -62,7 +62,6 @@ func (i *Instance) setClient(client Client, networkUUID string, cacheClient, isS
 			return err
 		}
 	}
-
 	var getC interface{}
 	if cacheClient { //store modbus client in cache to reuse the instance
 		getC, _ = i.store.Get(networkUUID)
@@ -100,7 +99,6 @@ func setParity(in string) uint {
 	} else {
 		return modbus.PARITY_NONE
 	}
-
 }
 
 func setSerial(port string) string {
