@@ -3,7 +3,10 @@ package main
 import (
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
+	unit "github.com/NubeDev/flow-framework/src/units"
+	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
+	"go.bug.st/serial"
 	"time"
 )
 
@@ -15,6 +18,8 @@ user adds a device
 - add points
 */
 
+var err error
+
 func SerialOpenAndRead() error {
 	s := new(SerialSetting)
 	s.SerialPort = "/dev/ttyACM0"
@@ -22,6 +27,7 @@ func SerialOpenAndRead() error {
 	sc := New(s)
 	err := sc.NewSerialConnection()
 	if err != nil {
+		log.Errorf("lora: issue on SerialOpenAndRead: %v\n", err)
 		return err
 	}
 	sc.Loop()
@@ -33,6 +39,7 @@ func (i *Instance) SerialOpen() error {
 	go func() error {
 		err := SerialOpenAndRead()
 		if err != nil {
+			log.Errorf("lora: issue on SerialOpen: %v\n", err)
 			return err
 		}
 		return nil
@@ -51,18 +58,6 @@ func (i *Instance) SerialClose() error {
 }
 
 /*
-NETWORK
-*/
-// addPoints close serial port
-func (i *Instance) validateNetwork(body *model.Network) error {
-	//rules
-	// max one network for lora-raw, if user adds a 2nd network it will be put into fault
-	// serial port must be set
-
-	return nil
-}
-
-/*
 POINTS
 */
 
@@ -73,10 +68,10 @@ func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
 	p.AddressUUID = deviceBody.AddressUUID
 	if deviceBody.Model == string(decoder.THLM) {
 		for _, e := range THLM {
-			p.ThingType = e //temp
+			p.Unit = e //temp
 			err := i.addPoint(p)
 			if err != nil {
-				log.Error("LORA: issue on add points", " ", err)
+				log.Errorf("lora: issue on addPoint: %v\n", err)
 				return nil, err
 			}
 		}
@@ -85,10 +80,11 @@ func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
 
 }
 
-// addPoints close serial port
+// addPoints add a pnt
 func (i *Instance) addPoint(body *model.Point) error {
 	_, err := i.db.CreatePoint(body)
 	if err != nil {
+		log.Errorf("lora: issue on CreatePoint: %v\n", err)
 		return err
 	}
 	return nil
@@ -104,7 +100,7 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 			p.ThingType = e
 			err := i.updatePoint(p)
 			if err != nil {
-				log.Error("LORA: issue on add points", " ", err)
+				log.Errorf("lora: issue on updatePoint: %v\n", err)
 				return nil, err
 			}
 		}
@@ -118,6 +114,7 @@ func (i *Instance) updatePoint(body *model.Point) error {
 	addr := body.AddressUUID
 	_, err := i.db.UpdatePointByFieldAndType("address_uuid", addr, body)
 	if err != nil {
+		log.Errorf("lora: issue on UpdatePointByFieldAndType: %v\n", err)
 		return err
 	}
 	return nil
@@ -133,7 +130,7 @@ func (i *Instance) devTHLM(pnt *model.Point, value float64) error {
 	pnt.CommonFault.LastOk = time.Now().UTC()
 	err := i.updatePoint(pnt)
 	if err != nil {
-		log.Error("LORA issue on update points", " ", err)
+		log.Errorf("lora: issue on update points %v\n", err)
 	}
 	return nil
 }
@@ -151,26 +148,26 @@ func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorSt
 			switch e {
 			case model.PointTags.RSSI:
 				f := float64(s.Rssi)
-				pnt.ThingType = e //set point type
+				pnt.Unit = e //set point type
 				err := i.devTHLM(pnt, f)
 				if err != nil {
 					return
 				}
 			case model.PointTags.Voltage:
 				f := float64(s.Voltage)
-				pnt.ThingType = e //set point type
+				pnt.Unit = e //set point type
 				err := i.devTHLM(pnt, f)
 				if err != nil {
 					return
 				}
 			case model.PointTags.Temp:
-				pnt.ThingType = e //set point type
+				pnt.Unit = e //set point type
 				err := i.devTHLM(pnt, s.Temperature)
 				if err != nil {
 					return
 				}
 			case model.PointTags.Humidity:
-				pnt.ThingType = e //set point type
+				pnt.Unit = e //set point type
 				f := float64(s.Humidity)
 				err := i.devTHLM(pnt, f)
 				if err != nil {
@@ -180,4 +177,43 @@ func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorSt
 			}
 		}
 	}
+}
+
+//wizard make a network/dev/pnt
+func (i *Instance) wizardSerial() (string, error) {
+	var ser model.SerialConnection
+	ser.SerialPort = "/dev/ttyACM0"
+	ser.BaudRate = 38400
+
+	var net model.Network
+	net.Name = "lora"
+	net.TransportType = model.TransType.Serial
+	net.PluginPath = "lora"
+	net.SerialConnection = &ser
+
+	var dev model.Device
+	dev.Name = "lora"
+	dev.AddressId = 1
+	dev.ZeroMode = utils.NewTrue()
+
+	var pnt model.Point
+	pnt.Name = "lora"
+	pnt.Description = "lora"
+	pnt.AddressUUID = "AAB296C4"
+	pnt.Unit = unit.Temperature
+	_, err = i.db.WizardNewNetDevPnt("lora", &net, &dev, &pnt)
+	if err != nil {
+		return "error: on flow-framework add lora serial network wizard", err
+	}
+	return "pass: added network and points", err
+}
+
+//listSerialPorts list all serial ports on host
+func (i *Instance) listSerialPorts() (*utils.Array, error) {
+	ports, err := serial.GetPortsList()
+	p := utils.NewArray()
+	for _, port := range ports {
+		p.Add(port)
+	}
+	return p, err
 }

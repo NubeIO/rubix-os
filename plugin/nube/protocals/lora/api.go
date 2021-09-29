@@ -2,28 +2,41 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
-	"time"
+)
+
+const (
+	help         = "/lora/help"
+	listSerial   = "/lora/list/serial"
+	wizardSerial = "/lora/wizard/serial"
 )
 
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
-	//restart plugin
-	mux.POST("/lora/restart", func(ctx *gin.Context) {
-		err := i.Disable()
+	mux.GET(help, func(ctx *gin.Context) {
 		if err != nil {
-			log.Error("LORA: error on restart (disable) plugin %s", err)
-			ctx.JSON(http.StatusBadRequest, "restart fail")
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, "add")
 		}
-		time.Sleep(300 * time.Millisecond)
-		err = i.Enable()
+	})
+	mux.GET(listSerial, func(ctx *gin.Context) {
+		serial, err := i.listSerialPorts()
 		if err != nil {
-			log.Error("LORA: error on restart (enable) plugin %s", err)
-			ctx.JSON(http.StatusBadRequest, "restart fail")
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, serial)
 		}
-		ctx.JSON(http.StatusOK, "restart ok")
+	})
+	mux.POST(wizardSerial, func(ctx *gin.Context) {
+		serial, err := i.wizardSerial()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+
+			ctx.JSON(http.StatusOK, serial)
+		}
 	})
 
 }

@@ -242,7 +242,7 @@ func (d *GormDatabase) UpdatePointByFieldAndType(field string, value string, bod
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if *pointModel.IsProducer {
+	if utils.BoolIsNil(pointModel.IsProducer) {
 		if compare(pointModel, body) {
 			log.Errorf("UpdatePointByFieldAndType")
 			_, err := d.ProducerWrite("point", pointModel)
@@ -274,7 +274,6 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 		if err != nil {
 			return false, errors.New("ERROR failed to get plugin uuid")
 		}
-		fmt.Println(point.DeviceUUID, point)
 		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsDeleted, plug.PluginConfId, point.UUID)
 		d.Bus.RegisterTopic(t)
 		err = d.Bus.Emit(eventbus.CTX(), t, point)
