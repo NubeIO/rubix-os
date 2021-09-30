@@ -22,39 +22,39 @@ type MathOperation struct {
 
 var ObjectTypes = struct {
 	//bacnet
-	AnalogInput  string
-	AnalogOutput string
-	AnalogValue  string
-	BinaryInput  string
-	BinaryOutput string
-	BinaryValue  string
+	AnalogInput  string `json:"analog_input"`
+	AnalogOutput string `json:"analog_output"`
+	AnalogValue  string `json:"analog_value"`
+	BinaryInput  string `json:"binary_input"`
+	BinaryOutput string `json:"binary_output"`
+	BinaryValue  string `json:"binary_value"`
 	//modbus
-	ReadCoil           string
-	ReadCoils          string
-	ReadDiscreteInput  string
-	ReadDiscreteInputs string
-	WriteCoil          string
-	WriteCoils         string
-	ReadRegister       string
-	ReadRegisters      string
-	ReadInt16          string
-	ReadSingleInt16    string
-	WriteSingleInt16   string
-	ReadUint16         string
-	ReadSingleUint16   string
-	WriteSingleUint16  string
-	ReadInt32          string
-	ReadSingleInt32    string
-	WriteSingleInt32   string
-	ReadUint32         string
-	ReadSingleUint32   string
-	WriteSingleUint32  string
-	ReadFloat32        string
-	ReadSingleFloat32  string
-	WriteSingleFloat32 string
-	ReadFloat64        string
-	ReadSingleFloat64  string
-	WriteSingleFloat64 string
+	ReadCoil           string `json:"read_coil"`
+	ReadCoils          string `json:"read_coils"`
+	ReadDiscreteInput  string `json:"read_discrete_input"`
+	ReadDiscreteInputs string `json:"read_discrete_inputs"`
+	WriteCoil          string `json:"write_coil"`
+	WriteCoils         string `json:"write_coils"`
+	ReadRegister       string `json:"read_register"`
+	ReadRegisters      string `json:"read_registers"`
+	ReadInt16          string `json:"read_int_16"`
+	ReadSingleInt16    string `json:"read_single_int_16"`
+	WriteSingleInt16   string `json:"write_single_int_16"`
+	ReadUint16         string `json:"read_uint_16"`
+	ReadSingleUint16   string `json:"read_single_uint_16"`
+	WriteSingleUint16  string `json:"write_single_uint_16"`
+	ReadInt32          string `json:"read_int_32"`
+	ReadSingleInt32    string `json:"read_single_int_32"`
+	WriteSingleInt32   string `json:"write_single_int_32"`
+	ReadUint32         string `json:"read_uint_32"`
+	ReadSingleUint32   string `json:"read_single_uint_32"`
+	WriteSingleUint32  string `json:"write_single_uint_32"`
+	ReadFloat32        string `json:"read_float_32"`
+	ReadSingleFloat32  string `json:"read_single_float_32"`
+	WriteSingleFloat32 string `json:"write_single_float_32"`
+	ReadFloat64        string `json:"read_float_64"`
+	ReadSingleFloat64  string `json:"read_single_float_64"`
+	WriteSingleFloat64 string `json:"write_single_float_64"`
 }{
 	//bacnet
 	AnalogInput:  "analogInput",
@@ -93,15 +93,29 @@ var ObjectTypes = struct {
 }
 
 var ObjectEncoding = struct {
-	LebBew string //LITTLE_ENDIAN, HIGH_WORD_FIRST
-	LebLew string
-	BebLew string
-	BebBew string
+	LebBew string `json:"leb_bew"` //LITTLE_ENDIAN, HIGH_WORD_FIRST
+	LebLew string `json:"leb_lew"`
+	BebLew string `json:"beb_lew"`
+	BebBew string `json:"beb_bew"`
 }{
 	LebBew: "lebBew",
 	LebLew: "lebLew",
 	BebLew: "bebLew",
 	BebBew: "bebBew",
+}
+
+var PointType = struct {
+	Digital       string `json:"digital"`
+	AToDigital    string `json:"a_to_digital"`
+	VoltageDC     string `json:"voltage_dc"`
+	Current       string `json:"current"`
+	Thermistor10K string `json:"thermistor_10_k"`
+}{
+	Digital:       "digital",
+	AToDigital:    "analogue to Digital",
+	VoltageDC:     "voltage dc",
+	Current:       "current",
+	Thermistor10K: "10k thermistor",
 }
 
 //Point table
@@ -139,11 +153,11 @@ type Point struct {
 	CommonThingClass
 	CommonThingRef
 	CommonThingType
-	IsProducer *bool `json:"is_producer"`
-	IsConsumer *bool `json:"is_consumer"`
+	IsProducer *bool `json:"is_producer,omitempty"`
+	IsConsumer *bool `json:"is_consumer,omitempty"`
 	CommonFault
-	Priority *Priority `json:"priority" gorm:"constraint:OnDelete:CASCADE"`
-	Tags     []*Tag    `json:"tags" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
+	Priority *Priority `json:"priority,omitempty" gorm:"constraint:OnDelete:CASCADE"`
+	Tags     []*Tag    `json:"tags,omitempty" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
 }
 
 type Priority struct {
