@@ -205,10 +205,6 @@ func (i *Instance) wizardSerial() (string, error) {
 	dev.Model = string(decoder.THLM)
 
 	var pnt model.Point
-	//pnt.Name = model.TransProtocol.Lora
-	//pnt.Description = model.TransProtocol.Lora
-	//pnt.AddressUUID = "AAB296C4"
-	//pnt.Unit = unit.Temperature
 	_, err = i.db.WizardNewNetDevPnt("lora", &net, &dev, &pnt)
 	if err != nil {
 		return "error: on flow-framework add lora serial network wizard", err
