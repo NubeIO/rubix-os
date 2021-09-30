@@ -2,19 +2,19 @@ package model
 
 type MqttConnection struct {
 	CommonUUID
-	Enabled                       bool   `json:"enabled"`
-	Master                        bool   `json:"master"`
-	Name                          string `json:"name"`
-	Host                          string `json:"host"`
-	Port                          int    `json:"port"`
-	Authentication                bool   `json:"authentication"`
-	Username                      string `json:"username"`
-	Password                      string `json:"password"`
-	Keepalive                     int    `json:"keepalive"`
-	Qos                           int    `json:"qos"`
-	Retain                        bool   `json:"retain"`
-	AttemptReconnectOnUnavailable bool   `json:"attempt_reconnect_on_unavailable"`
-	AttemptReconnectSecs          int    `json:"attempt_reconnect_secs"`
-	Timeout                       int    `json:"timeout"`
+	Enabled                       bool   `json:"enabled,omitempty"`
+	Master                        bool   `json:"master,omitempty"`
+	Name                          string `json:"name,omitempty"`
+	Host                          string `json:"host,omitempty"`
+	Port                          int    `json:"port,omitempty"`
+	Authentication                bool   `json:"authentication,omitempty"`
+	Username                      string `json:"username,omitempty"`
+	Password                      string `json:"password,omitempty"`
+	Keepalive                     int    `json:"keepalive,omitempty"`
+	Qos                           int    `json:"qos,omitempty"`
+	Retain                        bool   `json:"retain,omitempty"`
+	AttemptReconnectOnUnavailable bool   `json:"attempt_reconnect_on_unavailable,omitempty"`
+	AttemptReconnectSecs          int    `json:"attempt_reconnect_secs,omitempty"`
+	Timeout                       int    `json:"timeout,omitempty"`
 	IntegrationUUID               string `json:"integration_uuid" gorm:"TYPE:varchar(255) REFERENCES integrations;null;default:null"`
 }

@@ -46,8 +46,8 @@ type CommonHelp struct {
 }
 
 type CommonIP struct {
-	Host string `json:"host"`
-	Port int    `json:"port"`
+	Host string `json:"host,omitempty"`
+	Port int    `json:"port,omitempty"`
 }
 
 type CommonNodeType struct {
@@ -79,26 +79,26 @@ type CommonUUID struct {
 }
 
 type CommonCreated struct {
-	CreatedAt time.Time `json:"created_on"`
-	UpdatedAt time.Time `json:"updated_on"`
+	CreatedAt time.Time `json:"created_on,omitempty"`
+	UpdatedAt time.Time `json:"updated_on,omitempty"`
 }
 
 type CommonHistory struct {
-	EnableHistory *bool `json:"history_enable"`
+	EnableHistory *bool `json:"history_enable,omitempty"`
 }
 
 type CommonValue struct {
-	Value    null.Float `json:"value"`
-	ValueRaw string     `json:"value_raw"`
+	Value    null.Float `json:"value,omitempty"`
+	ValueRaw string     `json:"value_raw,omitempty"`
 }
 
 type CommonFault struct {
-	InFault      bool      `json:"fault"`
-	MessageLevel string    `json:"message_level"`
-	MessageCode  string    `json:"message_code"`
-	Message      string    `json:"message"`
-	LastOk       time.Time `json:"last_ok"`
-	LastFail     time.Time `json:"last_fail"`
+	InFault      bool      `json:"fault,omitempty"`
+	MessageLevel string    `json:"message_level,omitempty"`
+	MessageCode  string    `json:"message_code,omitempty"`
+	Message      string    `json:"message,omitempty"`
+	LastOk       time.Time `json:"last_ok,omitempty"`
+	LastFail     time.Time `json:"last_fail,omitempty"`
 }
 
 type CommonStore struct {
