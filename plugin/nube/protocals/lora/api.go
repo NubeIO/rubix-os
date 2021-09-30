@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	help         = "/lora/help"
-	listSerial   = "/lora/list/serial"
-	wizardSerial = "/lora/wizard/serial"
+	help          = "/lora/help"
+	restartSerial = "/lora/serial/restart"
+	listSerial    = "/lora/serial/list"
+	wizardSerial  = "/lora/wizard/serial"
 )
 
 // RegisterWebhook implements plugin.Webhooker
@@ -19,6 +20,18 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
 			ctx.JSON(http.StatusOK, "add")
+		}
+	})
+	mux.POST(restartSerial, func(ctx *gin.Context) {
+		err := i.SerialClose()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			err := i.SerialOpen()
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, err)
+			}
+			ctx.JSON(http.StatusOK, "ok")
 		}
 	})
 	mux.GET(listSerial, func(ctx *gin.Context) {

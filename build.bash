@@ -67,4 +67,9 @@ cd $dir/plugin/nube/protocals/broker
 go build -buildmode=plugin -o broker.so *.go  && cp broker.so $pluginDir
 
 cd $dir
-go run app.go -g /data/flow-framework  -d data --prod
+
+if [ ${PRODUCTION} == true ]; then
+  go run app.go -g /data/flow-framework  -d data --prod
+else
+    go run app.go
+fi
