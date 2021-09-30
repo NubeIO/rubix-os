@@ -31,6 +31,8 @@ func GetSensorType(data string) TSensorType {
 	switch sensor {
 	case string(MicroAA):
 		return ME
+	case string(DropletAB): //this is an older version of the droplet
+		return THLM
 	case string(DropletB0):
 		return TH
 	case string(DropletB1):
@@ -46,7 +48,6 @@ func GetSensorType(data string) TSensorType {
 
 func CheckSensorCode(data string) TSensorCode {
 	sensor := data[2:4]
-
 	switch sensor {
 	case string(MicroAA):
 		return MicroAA
@@ -133,11 +134,21 @@ func DataLength(data string) int {
 	return len(data)
 }
 
+//works for both old and new
 func decodeID(data string) string {
 	return data[0:8]
 }
 
 func rssi(data string) int {
+	_len := DataLength(data)
+	v, _ := strconv.ParseInt(data[_len-4:_len-2], 16, 0)
+	_v := v * -1
+	return int(_v)
+}
+
+//TODO add in the old code
+//msg.rssi = parseInt("0x" + hexString.substring(32, 34)) * -1;
+func rssiOld(data string) int {
 	_len := DataLength(data)
 	v, _ := strconv.ParseInt(data[_len-4:_len-2], 16, 0)
 	_v := v * -1
