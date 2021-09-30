@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
 	"github.com/NubeDev/flow-framework/utils"
@@ -20,32 +21,32 @@ user adds a device
 
 var err error
 
-func SerialOpenAndRead() error {
-	s := new(SerialSetting)
-	s.SerialPort = "/dev/ttyACM0"
-	s.BaudRate = 38400
-	sc := New(s)
-	err := sc.NewSerialConnection()
-	if err != nil {
-		log.Errorf("lora: issue on SerialOpenAndRead: %v\n", err)
-		return err
-	}
-	sc.Loop()
-	return nil
-}
-
 // SerialOpen open serial port
 func (i *Instance) SerialOpen() error {
+	s := new(SerialSetting)
+	var arg api.Args
+	arg.SerialConnection = true
+	net, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
+	if err != nil {
+		return err
+	}
+	if net.SerialConnection == nil {
+		return err
+	}
+	s.SerialPort = net.SerialConnection.SerialPort
+	s.BaudRate = int(net.SerialConnection.BaudRate)
+	connected := false
 	go func() error {
-		err := SerialOpenAndRead()
+		sc := New(s)
+		connected, err = sc.NewSerialConnection()
 		if err != nil {
-			log.Errorf("lora: issue on SerialOpen: %v\n", err)
-			return err
+			log.Errorf("lora: issue on SerialOpenAndRead: %v\n", err)
 		}
+		sc.Loop()
 		return nil
 	}()
-	log.Info("LORA: open serial port")
 	return nil
+
 }
 
 // SerialClose close serial port

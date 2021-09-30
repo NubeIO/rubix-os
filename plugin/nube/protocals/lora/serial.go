@@ -37,7 +37,7 @@ func New(s *SerialSetting) *SerialSetting {
 
 var Port serial.Port
 
-func (s *SerialSetting) NewSerialConnection() error {
+func (s *SerialSetting) NewSerialConnection() (connected bool, err error) {
 	portName := s.SerialPort
 	baudRate := s.BaudRate
 	parity := s.Parity
@@ -49,7 +49,7 @@ func (s *SerialSetting) NewSerialConnection() error {
 		if err != nil {
 			log.Info(err)
 			s.Error = true
-			return err
+			return false, err
 		}
 	}
 	log.Info("LORA: try and connect to:", portName)
@@ -69,19 +69,19 @@ func (s *SerialSetting) NewSerialConnection() error {
 	}
 	if portNameFound == "" {
 		log.Error("LORA: port not found", " ", err)
-		return errors.New("LORA: port not found")
+		return false, errors.New("LORA: port not found")
 	}
 	s.ActivePortList = ports
 	port, err := serial.Open(portName, m)
 	if err != nil {
 		s.Error = true
 		log.Error("LORA: error on open port", " ", err)
-		return err
+		return false, err
 	}
 	Port = port
 	s.Connected = true
 	log.Info("LORA: Connected to serial port: ", " ", portName, " ", "connected: ", " ", s.Connected)
-	return nil
+	return s.Connected, nil
 }
 
 func (s *SerialSetting) Loop() {
