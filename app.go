@@ -64,7 +64,6 @@ func main() {
 
 	fmt.Println("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
 	eventbus.Init()
-	eventbus.RegisterMQTTBus()
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
 		conf.PassStrength, conf.Database.LogLevel, true, conf.Prod)
 	if err != nil {
@@ -75,6 +74,7 @@ func main() {
 	defer db.Close()
 	engine, closeable := router.Create(db, vInfo, conf)
 	defer closeable()
+	eventbus.RegisterMQTTBus()
 	runner.Run(engine, conf)
 
 }
