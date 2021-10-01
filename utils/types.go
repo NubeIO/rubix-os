@@ -37,7 +37,7 @@ func toString(v interface{}) string {
 	case int32:
 		return strconv.FormatInt(int64(t), 10)
 	case int64:
-		return strconv.FormatInt(int64(t), 10)
+		return strconv.FormatInt(t, 10)
 	case uint:
 		return strconv.FormatUint(uint64(t), 10)
 	case uint8:
@@ -47,9 +47,9 @@ func toString(v interface{}) string {
 	case uint32:
 		return strconv.FormatUint(uint64(t), 10)
 	case uint64:
-		return strconv.FormatUint(uint64(t), 10)
+		return strconv.FormatUint(t, 10)
 	case float64:
-		return strconv.FormatFloat(float64(t), 'E', -1, 64)
+		return strconv.FormatFloat(t, 'E', -1, 64)
 	case float32:
 		return strconv.FormatFloat(float64(t), 'E', -1, 64)
 	case string:
@@ -114,7 +114,6 @@ func toInt64(v interface{}) int64 {
 	case float32:
 		return int64(t)
 	case string:
-
 		if i, err := strconv.ParseInt(t, 10, 64); err == nil {
 			return i
 		}
