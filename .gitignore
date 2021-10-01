@@ -1,6 +1,6 @@
 vendor/
 .idea/
-build/
+builds/
 certs/
 licenses/
 coverage.txt
@@ -11,3 +11,4 @@ data/
 images/
 src/client/ws.conf
 *.so
+*.zip
