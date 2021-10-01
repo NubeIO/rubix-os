@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const defaultInterval = 100 * time.Millisecond
+const defaultInterval = 1000 * time.Millisecond
 
 type polling struct {
 	enable        bool
@@ -121,6 +121,11 @@ func (i *Instance) PollingTCP(p polling) error {
 									log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 								}
 								r, err := DoOperations(cli, request)
+								pnt.PresentValue = utils.ToFloat64(r)
+								_, err = i.pointUpdate(pnt)
+								if err != nil {
+									log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, r)
+								}
 								log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, r)
 							}
 							time.Sleep(dPnt)

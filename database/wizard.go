@@ -384,7 +384,6 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 
 // WizardNewNetDevPnt add a local network mapping stream.
 func (d *GormDatabase) WizardNewNetDevPnt(plugin string, net *model.Network, dev *model.Device, pnt *model.Point) (bool, error) {
-
 	//get plugin
 	p, err := d.GetPluginByPath(plugin)
 	if p.UUID == "" {
@@ -400,7 +399,7 @@ func (d *GormDatabase) WizardNewNetDevPnt(plugin string, net *model.Network, dev
 	fmt.Println("CreateDevice")
 	// point
 	pnt.DeviceUUID = de.UUID
-	pnt.IsProducer = utils.NewTrue()
+	pnt.IsProducer = utils.NewFalse()
 	_, err = d.CreatePoint(pnt, "")
 	fmt.Println("CreatePoint")
 	if err != nil {

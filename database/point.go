@@ -151,11 +151,20 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 				}
 			}
 		}
-		min, _ := highestPri.MinMaxInt() //get the highest priority
-		val := highestValue.Get(min)     //get the highest priority value
-		body.CurrentPriority = &min      //TODO check conversion
+		notNil := false
+		for _, v := range priority { //check if there is a value in priority array
+			if v != nil {
+				notNil = true
+			}
+		}
+		if notNil {
+			fmt.Println(priority)
+			min, _ := highestPri.MinMaxInt()  //get the highest priority
+			val := highestValue.Get(min)      //get the highest priority value
+			body.CurrentPriority = &min       //TODO check conversion
+			body.PresentValue = val.(float64) //process the units as in temperature conversion
+		}
 		//body.ValueRaw = value //TODO set raw value
-		body.PresentValue = val.(float64) //process the units as in temperature conversion
 		if !utils.FloatIsNilCheck(body.LimitMin) && !utils.FloatIsNilCheck(body.LimitMin) {
 			body.PresentValue = utils.LimitToRange(body.PresentValue, *body.LimitMin, *body.LimitMax)
 		}
@@ -171,7 +180,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 			body.PresentValue = value
 			body.ValueDisplay = display
 		}
-
 		if !utils.Unit32NilCheck(body.Decimal) {
 			body.PresentValue = utils.RoundTo(body.PresentValue, *body.Decimal)
 		}
