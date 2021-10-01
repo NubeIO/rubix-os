@@ -42,18 +42,64 @@ type WeeklyScheduleCheckerResult struct {
 	NextStop     uint64 //unix timestamp as from Date()   End time for the following scheduled period.
 	CheckTime    uint64 //unix timestamp as from Date()
 	ErrorFlag    bool
+	AlertFlag    bool
 	ErrorStrings []string
 }
 
 //CheckWeeklyScheduleEntry checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period.
-func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry) WeeklyScheduleCheckerResult {
+func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, timezone string) WeeklyScheduleCheckerResult {
 	result := WeeklyScheduleCheckerResult{}
+	//get local time parts in locale of entry.Timezone
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		result.ErrorFlag = true
+		result.ErrorStrings = append(result.ErrorStrings, "Critical: Invalid Timezone")
+		return result
+	}
+	now := time.Now().In(loc)
 
+	//get day of week and compare with entry.Days
+	nowHour, nowMinute, nowSecond := now.Clock()
+	nowDayOfWeek := now.Day()
+	nowDayOfWeekString := now.String()
+	found := false
+	for day, _ = range entry.Days {
+		if day == nowDayOfWeek {
+			found = true
+			break
+		}
+	}
+	if found {
+		//parse start and end time into current day timestamps
+		//choose format with only date, and sub in hours and minutes from event
+		https://golang.org/src/time/format.go
+		func (t Time) Format(layout string) string
+		https://pkg.go.dev/time#ParseInLocation
+		func ParseInLocation(layout, value string, loc *Location) (Time, error)
+
+		//check if now() is between the start and end timestamps
+
+
+
+	}
+
+
+	//
 }
 
 //CombineWeeklyScheduleCheckerResults checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period.
 func CombineWeeklyScheduleCheckerResults(current WeeklyScheduleCheckerResult, new WeeklyScheduleCheckerResult, nextStopStartRequired bool) WeeklyScheduleCheckerResult {
 	result := WeeklyScheduleCheckerResult{}
+
+	//AlertFlag & ErrorFlag & ErrorStrings
+	if new.ErrorFlag {
+		return current.ErrorFlag
+	}
+	if current.ErrorFlag {
+		return new.ErrorFlag
+	}
+	result.AlertFlag = current.AlertFlag || new.AlertFlag
+	result.ErrorStrings = append(current.ErrorStrings, new.ErrorStrings...)
 
 	//Check if schedule periods overlap
 	overlap := false
@@ -93,7 +139,7 @@ func CombineWeeklyScheduleCheckerResults(current WeeklyScheduleCheckerResult, ne
 		result.Payload = new.Payload
 	}
 	if (current.IsActive && new.IsActive) && (current.Payload != 0 && new.Payload != 0) {
-		result.ErrorFlag = true
+		result.AlertFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Multiple Payload Values For Active Schedule Period")
 	}
 
