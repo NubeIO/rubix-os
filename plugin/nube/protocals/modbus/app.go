@@ -15,7 +15,7 @@ func (i *Instance) pointUpdate(uuid string, point *model.Point) (*model.Point, e
 	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	point.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 	point.CommonFault.LastOk = time.Now().UTC()
-	_, _ = i.db.UpdatePoint(uuid, point, false, true)
+	_, _ = i.db.UpdatePoint(uuid, point, true, true)
 	if err != nil {
 		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 		return nil, err
@@ -37,6 +37,7 @@ func (i *Instance) wizardTCP() (string, error) {
 	dev.CommonIP.Port = 502
 	dev.AddressId = 1
 	dev.ZeroMode = utils.NewTrue()
+	dev.PollDelayPointsMS = 5000
 
 	var pnt model.Point
 	pnt.Name = "modbus"
@@ -68,6 +69,7 @@ func (i *Instance) wizardSerial() (string, error) {
 	dev.Name = "modbus"
 	dev.AddressId = 1
 	dev.ZeroMode = utils.NewTrue()
+	dev.PollDelayPointsMS = 5000
 
 	var pnt model.Point
 	pnt.Name = "modbus"

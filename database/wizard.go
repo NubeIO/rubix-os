@@ -59,14 +59,36 @@ func (d *GormDatabase) WizardLocalPointMapping(body *api.WizardLocalMapping) (bo
 		log.Errorf("wizard:  CreateDevice: %v\n", err)
 		return false, err
 	}
-	// point
-	pointModel.DeviceUUID = dev.UUID
-	pointModel.Name = "is the producer"
-	pointModel.IsProducer = utils.NewTrue()
-	pnt, err := d.CreatePoint(&pointModel, "")
-	fmt.Println("CreatePoint")
-	if err != nil {
-		log.Errorf("wizard:  CreatePoint: %v\n", err)
+
+	var pnt *model.Point
+
+	if body.ThingUUID == "" {
+		// point
+		pointModel.DeviceUUID = dev.UUID
+		pointModel.Name = "is the producer"
+		pointModel.IsProducer = utils.NewTrue()
+		pnt, err = d.CreatePoint(&pointModel, "")
+		fmt.Println("CreatePoint")
+		if err != nil {
+			log.Errorf("wizard:  CreatePoint: %v\n", err)
+			return false, err
+		}
+	} else {
+		var arg api.Args
+		pnt, err = d.GetPoint(body.ThingUUID, arg)
+		if err != nil {
+			log.Errorf("wizard:  GetPoint: %v\n", err)
+			return false, err
+		}
+		pnt.IsProducer = utils.NewTrue()
+		_, err := d.UpdatePoint(pnt.UUID, pnt, false, false)
+		if err != nil {
+			log.Errorf("wizard:  UpdatePoint: %v\n", err)
+			return false, err
+		}
+	}
+	if pnt.UUID == "" {
+		log.Errorf("wizard:  faild to find or create point: %v\n", err)
 		return false, err
 	}
 	// stream

@@ -125,7 +125,7 @@ func (i *Instance) PollingTCP(p polling) error {
 								}
 								_, responseValue, err := DoOperations(cli, request)
 								var pntVal model.Point
-								pntVal.PresentValue = responseValue //update point value
+								pntVal.PresentValue = ops.WriteValue //update point value
 								_, err = i.pointUpdate(pnt.UUID, &pntVal)
 								if err != nil {
 									log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)

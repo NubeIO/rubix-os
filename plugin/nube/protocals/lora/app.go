@@ -33,6 +33,7 @@ func (i *Instance) SerialOpen() error {
 	if net.SerialConnection == nil {
 		return err
 	}
+	fmt.Println(i.pluginUUID, net)
 	s.SerialPort = net.SerialConnection.SerialPort
 	s.BaudRate = int(net.SerialConnection.BaudRate)
 	connected := false

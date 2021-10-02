@@ -140,19 +140,21 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 		if err != nil {
 			return "", errors.New("no point for this producer was not found")
 		}
-		_, err = d.UpdateProducer(pointUUID, &producerModel)
+		_, err = d.UpdateProducer(pro.UUID, &producerModel)
 		if err != nil {
-			log.Errorf("UpdateProducer")
+			log.Errorf("producer: issue on update producer err: %v\n", err)
 			return "", errors.New("issue on update producer")
 		}
 		value := point.PresentValue
 		point.Priority.P16 = &value
 		b, err := json.Marshal(point)
 		if err != nil {
+			log.Errorf("producer: on update write history for point err: %v\n", err)
 			return "", errors.New("issue on update write history for point")
 		}
 		_, err = d.ProducerWriteHist(pro.UUID, b)
 		if err != nil {
+			log.Errorf("producer: issue on write history ProducerWriteHist: %v\n", err)
 			return "", errors.New("issue on write history for point")
 		}
 		var proBody model.ProducerBody

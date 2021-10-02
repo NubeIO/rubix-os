@@ -68,7 +68,7 @@ func (s *SerialSetting) NewSerialConnection() (connected bool, err error) {
 		}
 	}
 	if portNameFound == "" {
-		log.Error("LORA: port not found", " ", err)
+		log.Errorf("LORA: port not found: %v\n", s.SerialPort)
 		return false, errors.New("LORA: port not found")
 	}
 	s.ActivePortList = ports
