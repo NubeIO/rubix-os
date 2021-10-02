@@ -30,6 +30,7 @@ type WizardLocalMapping struct {
 	ProducerStreamUUID string `json:"producer_stream_uuid"`
 	ConsumerStreamUUID string `json:"consumer_stream_uuid"`
 	DeviceUUID         string `json:"device_uuid"`
+	ThingUUID          string `json:"thing_uuid"`
 }
 
 func getBODYLocal(ctx *gin.Context) (dto *WizardLocalMapping, err error) {

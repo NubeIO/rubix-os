@@ -184,6 +184,15 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 			body.PresentValue = utils.RoundTo(body.PresentValue, *body.Decimal)
 		}
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
+		if utils.BoolIsNil(pointModel.IsProducer) && utils.BoolIsNil(body.IsProducer) {
+			if compare(pointModel, body) {
+				_, err := d.ProducerWrite("point", pointModel)
+				if err != nil {
+					log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
+					return nil, err
+				}
+			}
+		}
 	}
 	if len(body.Tags) > 0 {
 		if err = d.updateTags(&pointModel, body.Tags); err != nil {
@@ -191,15 +200,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 		}
 	}
 	query = d.DB.Model(&pointModel).Updates(&body)
-	if utils.BoolIsNil(pointModel.IsProducer) && utils.BoolIsNil(body.IsProducer) {
-		if compare(pointModel, body) {
-			_, err := d.ProducerWrite("point", pointModel)
-			if err != nil {
-				log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
-				return nil, err
-			}
-		}
-	}
 	if !fromPlugin { //stop looping
 		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)
 		if err != nil {
@@ -255,7 +255,6 @@ func (d *GormDatabase) UpdatePointByFieldAndUnit(field string, value string, bod
 	}
 	if utils.BoolIsNil(pointModel.IsProducer) {
 		if compare(pointModel, body) {
-			log.Errorf("UpdatePointByFieldAndType")
 			_, err := d.ProducerWrite("point", pointModel)
 			if err != nil {
 				log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
