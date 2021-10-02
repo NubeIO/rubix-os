@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const defaultInterval = 1000 * time.Millisecond
+const defaultInterval = 100 * time.Millisecond
 
 type polling struct {
 	enable        bool
@@ -102,7 +102,10 @@ func (i *Instance) PollingTCP(p polling) error {
 						var ops Operation
 						ops.UnitId = uint8(dev.AddressId)
 						for _, pnt := range dev.Points { //points
-							dPnt := p.delayPoints
+							dPnt := dev.PollDelayPointsMS
+							if dPnt <= 0 {
+								dPnt = 100
+							}
 							if !isConnected() {
 							} else {
 								a := utils.IntIsNil(pnt.AddressId) //TODO check conversion
@@ -120,15 +123,17 @@ func (i *Instance) PollingTCP(p polling) error {
 								if err != nil {
 									log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 								}
-								r, err := DoOperations(cli, request)
-								pnt.PresentValue = utils.ToFloat64(r)
-								_, err = i.pointUpdate(pnt)
+								_, responseValue, err := DoOperations(cli, request)
+								var pntVal model.Point
+								pntVal.PresentValue = responseValue //update point value
+								_, err = i.pointUpdate(pnt.UUID, &pntVal)
 								if err != nil {
-									log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, r)
+									log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 								}
-								log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, r)
+								log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+								time.Sleep(dPnt * time.Millisecond)
 							}
-							time.Sleep(dPnt)
+
 						}
 					}
 				}

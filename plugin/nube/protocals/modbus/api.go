@@ -132,11 +132,12 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 				ctx.JSON(http.StatusBadRequest, "request was invalid, try readCoil or writeCoil")
 				return
 			}
-			r, err := DoOperations(cli, request)
+			rArray, responseValue, err := DoOperations(cli, request)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, err)
 			} else {
-				ctx.JSON(http.StatusOK, r)
+				log.Info(responseValue)
+				ctx.JSON(http.StatusOK, rArray)
 			}
 
 		}
