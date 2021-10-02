@@ -36,7 +36,7 @@ func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, e
 func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, args api.Args) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.buildNetworkQuery(args)
-	if err := query.Find(&networkModel).Where("plugin_conf_id = ? ", pluginUUID).Error; err != nil {
+	if err := query.Where("plugin_conf_id = ? ", pluginUUID).First(&networkModel).Error; err != nil {
 		return nil, err
 	}
 	return networkModel, nil
