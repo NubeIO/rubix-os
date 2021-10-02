@@ -95,7 +95,7 @@ jobs:
           cd ./plugin/nube/system
           go build -buildmode=plugin -o system-amd64.so *.go  && cp system-amd64.so ../../../
 
-          cd ../../../../plugin/nube/utils/git
+          cd ../../../plugin/nube/utils/git
           go build -buildmode=plugin -o git-amd64.so *.go  && cp git-amd64.so ../../../../
 
           cd ../../../../plugin/nube/protocals/lorawan
@@ -126,7 +126,7 @@ jobs:
           cd ./plugin/nube/system
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o system-armv7.so *.go  && cp system-armv7.so ../../../
 
-          cd ../../../../plugin/nube/utils/git
+          cd ../../../plugin/nube/utils/git
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o git-armv7.so *.go  && cp git-armv7.so ../../../../
 
           cd ../../../../plugin/nube/protocals/lorawan
