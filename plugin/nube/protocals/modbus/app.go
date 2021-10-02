@@ -9,13 +9,13 @@ import (
 )
 
 //pointUpdate update point present value
-func (i *Instance) pointUpdate(point *model.Point) (*model.Point, error) {
+func (i *Instance) pointUpdate(uuid string, point *model.Point) (*model.Point, error) {
 	point.CommonFault.InFault = false
 	point.CommonFault.MessageLevel = model.MessageLevel.Info
 	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	point.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 	point.CommonFault.LastOk = time.Now().UTC()
-	_, _ = i.db.UpdatePoint(point.UUID, point, false, true)
+	_, _ = i.db.UpdatePoint(uuid, point, false, true)
 	if err != nil {
 		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 		return nil, err

@@ -40,7 +40,7 @@ func download(token string) error {
 	fmt.Println(downloads)
 	uz := unzip.New()
 
-	err = utils.RemoveContents(pluginsDir)
+	err = utils.DirRemoveContents(pluginsDir)
 	if err != nil {
 		return errors.New("error on delete all plugins")
 	}

@@ -114,7 +114,7 @@ func zeroMode(addr uint16, mode bool) uint16 {
 
 }
 
-func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{}, err error) {
+func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{}, responseValue float64, err error) {
 	o.Addr = zeroMode(o.Addr, o.ZeroMode)
 	sel := utils.NewString(o.Encoding).ToCamelCase() //eg: LEB_BEW, lebBew
 	sel = utils.LcFirst(sel)
@@ -135,14 +135,14 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 		var res []bool
 		if o.IsCoil {
 			res, err = client.ReadCoils(o.Addr, o.Length)
-			return res, err
+			return res, 0, err
 		} else {
 			res, err = client.ReadDiscreteInputs(o.Addr, o.Length)
 		}
 		if err != nil {
 			log.Errorf("modbus: failed to read coils/discrete inputs: %v\n", err)
 		} else {
-			return res, err
+			return res, 0, err
 		}
 	case readUint16, readInt16:
 		var res []uint16
@@ -172,14 +172,14 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 		var res []uint32
 		if o.IsHoldingReg {
 			res, err = client.ReadUint32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
-			return res, err
+			return res, 0, err
 		} else {
 			res, err = client.ReadUint32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
 		}
 		if err != nil {
 			log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 		} else {
-			return res, err
+			return res, 0, err
 		}
 	case readFloat32:
 		var res []float32
@@ -191,15 +191,15 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 			if o.ObjectType == model.ObjectTypes.ReadSingleFloat32 {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
-					return nil, err
+					return nil, 0, err
 				}
-				return res[0], err
+				return res[0], 0, err
 			} else {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
-					return nil, err
+					return nil, 0, err
 				}
-				return res, err
+				return res, 0, err
 			}
 		} else {
 			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
@@ -207,12 +207,12 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 				}
-				return res[0], err
+				return res[0], 0, err
 			} else {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 				}
-				return res, err
+				return res, 0, err
 			}
 		}
 	case readUint64, readInt64:
@@ -261,11 +261,11 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 		if err != nil {
 			log.Infof("modbus: failed to write %v at coil address 0x%04x: %v\n",
 				o.coil, o.Addr, err)
-			return nil, err
+			return nil, 0, err
 		} else {
 			log.Infof("modbus: wrote %v at coil address 0x%04x\n",
 				o.coil, o.Addr)
-			return o.coil, err
+			return o.coil, utils.ToFloat64(o.coil), err
 		}
 	case writeUint16:
 		err = client.WriteRegister(o.Addr, o.u16)
@@ -310,7 +310,7 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 				o.f32, o.Addr, err)
 		} else {
 			log.Infof("modbus: wrote %f at address 0x%04x\n", o.f32, o.Addr)
-			return o.f32, err
+			return o.f32, float64(o.f32), err
 		}
 	case writeUint64:
 		err = client.WriteUint64(o.Addr, o.u64)
@@ -340,7 +340,7 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 				o.f64, o.Addr)
 		}
 	}
-	return nil, nil
+	return nil, 0, nil
 }
 
 func getPointAddr(s string) (objType, addr string) {
