@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
@@ -33,6 +34,14 @@ func checkDevValid(d devCheck) (bool, error) {
 		return false, errors.New("modbus: failed to set client")
 	}
 	return true, nil
+}
+
+func valueRaw(responseRaw interface{}) []byte {
+	j, err := json.Marshal(responseRaw)
+	if err != nil {
+		log.Fatalf("Error occured during marshaling. Error: %s", err.Error())
+	}
+	return j
 }
 
 var poll poller.Poller
@@ -108,8 +117,10 @@ func (i *Instance) PollingTCP(p polling) error {
 							}
 							if !isConnected() {
 							} else {
-								a := utils.IntIsNil(pnt.AddressId) //TODO check conversion
+								a := utils.IntIsNil(pnt.AddressId)
 								ops.Addr = uint16(a)
+								l := utils.IntIsNil(pnt.AddressLength)
+								ops.Length = uint16(l)
 								ops.ObjectType = pnt.ObjectType
 								ops.IsHoldingReg = utils.BoolIsNil(pnt.IsOutput)
 								ops.ZeroMode = utils.BoolIsNil(dev.ZeroMode)
@@ -123,7 +134,7 @@ func (i *Instance) PollingTCP(p polling) error {
 								if err != nil {
 									log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 								}
-								_, responseValue, err := DoOperations(cli, request)
+								responseRaw, responseValue, err := networkRequest(cli, request)
 								var _pnt model.Point
 								pntStore, _ := i.store.Get(pnt.UUID)
 								if isWrite(ops.ObjectType) { //IS WRITE
@@ -151,11 +162,11 @@ func (i *Instance) PollingTCP(p polling) error {
 										}
 										log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 									}
-
-								} else if pntStore != nil {
+								} else { //READ
 									if pntStore != nil {
 										_pnt.UUID = pnt.UUID
-										*_pnt.PresentValue = responseValue //update point value
+										_pnt.PresentValue = &responseValue //update point value
+										_pnt.ValueRaw = valueRaw(responseRaw)
 										pntStore, _ = i.store.Get(pnt.UUID)
 										cov := utils.Float64IsNil(pnt.COV)
 										pn := pntStore.(model.Point)
@@ -170,7 +181,8 @@ func (i *Instance) PollingTCP(p polling) error {
 										}
 									} else {
 										_pnt.UUID = pnt.UUID
-										*_pnt.PresentValue = responseValue //update point value
+										_pnt.PresentValue = &responseValue //update point value
+										_pnt.ValueRaw = valueRaw(responseRaw)
 										_, err = i.pointUpdate(pnt.UUID, &_pnt)
 										i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
 										if err != nil {
@@ -178,12 +190,9 @@ func (i *Instance) PollingTCP(p polling) error {
 										}
 										log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 									}
-
 								}
 								time.Sleep(dPnt * time.Millisecond)
-
 							}
-
 						}
 					}
 				}
