@@ -260,7 +260,7 @@ func getBODYSchedule(ctx *gin.Context) (dto *model.Schedule, err error) {
 	return dto, err
 }
 
-func getBODYRubixPlat(ctx *gin.Context) (dto *model.RubixPlat, err error) {
+func getBodyLocalStorageFlowNetwork(ctx *gin.Context) (dto *model.LocalStorageFlowNetwork, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

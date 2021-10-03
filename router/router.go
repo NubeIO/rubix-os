@@ -42,6 +42,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	}
 	userChangeNotifier := new(api.UserChangeNotifier)
 	userHandler := api.UserAPI{DB: db, PasswordStrength: conf.PassStrength, UserChangeNotifier: userChangeNotifier}
+	localStorageFlowNetworkHandler := api.LocalStorageFlowNetworkAPI{
+		DB: db,
+	}
 	networkHandler := api.NetworksAPI{
 		DB:  db,
 		Bus: eventBus,
@@ -71,9 +74,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		DB: db,
 	}
 	writerCloneHandler := api.WriterCloneAPI{
-		DB: db,
-	}
-	rubixPlatHandler := api.RubixPlatAPI{
 		DB: db,
 	}
 	rubixCommandGroup := api.CommandGroupAPI{
@@ -209,10 +209,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			}
 		}
 
-		wiresPlatRoutes := apiRoutes.Group("/wires/plat")
+		localStorageFlowNetworkRoutes := apiRoutes.Group("/localstorage_flow_network")
 		{
-			wiresPlatRoutes.GET("", rubixPlatHandler.GetRubixPlat)
-			wiresPlatRoutes.PATCH("", rubixPlatHandler.UpdateRubixPlat)
+			localStorageFlowNetworkRoutes.GET("", localStorageFlowNetworkHandler.GetLocalStorageFlowNetwork)
+			localStorageFlowNetworkRoutes.PATCH("", localStorageFlowNetworkHandler.UpdateLocalStorageFlowNetwork)
 		}
 
 		historyProducerRoutes := apiRoutes.Group("/histories/producers")
