@@ -45,9 +45,11 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var producerHistory []model.ProducerHistory
 	var consumerHistory []model.ConsumerHistory
 	var flowNetwork []model.FlowNetwork
+	var flowNetworkClone []model.FlowNetworkClone
 	var rubixPlat []model.RubixPlat
 	var job []model.Job
 	var stream []model.Stream
+	var streamClone []model.StreamClone
 	var commandGroup []model.CommandGroup
 	var producer []model.Producer
 	var consumer []model.Consumer
@@ -82,11 +84,13 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&point,
 		&rubixPlat,
 		&flowNetwork,
+		&flowNetworkClone,
 		&priority,
 		&producerHistory,
 		&consumerHistory,
 		&job,
 		&stream,
+		&streamClone,
 		&commandGroup,
 		&producer,
 		&consumer,

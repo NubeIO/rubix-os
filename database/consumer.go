@@ -31,9 +31,9 @@ func (d *GormDatabase) GetConsumer(uuid string, args api.Args) (*model.Consumer,
 }
 
 func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, error) {
-	_, err := d.GetStream(body.StreamUUID, api.Args{})
+	_, err := d.GetStream(body.StreamCloneUUID, api.Args{})
 	if err != nil {
-		return nil, errorMsg("GetStreamGateway", "error on trying to get validate the stream UUID", nil)
+		return nil, errorMsg("GetStreamClone", "error on trying to get validate the stream_clone UUID", nil)
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Consumer)
 	body.Name = nameIsNil(body.Name)
@@ -139,7 +139,7 @@ func (d *GormDatabase) AddConsumerWizard(consumerStreamUUID, producerUUID string
 		return nil, errors.New("error: no producer producer found with that UUID")
 	}
 
-	consumerModel.StreamUUID = stream.UUID
+	consumerModel.StreamCloneUUID = stream.UUID // TODO: BIOND
 	consumerModel.ProducerUUID = producer.UUID
 	consumerModel.ProducerThingName = producer.ProducerThingName
 	consumerModel.ProducerThingUUID = producer.ProducerThingUUID
@@ -153,7 +153,7 @@ func (d *GormDatabase) AddConsumerWizard(consumerStreamUUID, producerUUID string
 	}
 	// writer
 	writerModel.ConsumerUUID = consumer.UUID
-	writerModel.ConsumerThingUUID = consumerModel.UUID
+	//writerModel.ConsumerThingUUID = consumerModel.UUID //TODO: BINOD
 	writerModel.WriterThingClass = model.ThingClass.Point
 	writerModel.WriterThingType = model.ThingClass.API
 	writer, err := d.CreateWriter(&writerModel)
@@ -162,28 +162,28 @@ func (d *GormDatabase) AddConsumerWizard(consumerStreamUUID, producerUUID string
 	}
 	// add consumer to the writerClone
 	writerCloneModel.ProducerUUID = producer.UUID
-	writerCloneModel.WriterUUID = writer.UUID
+	writerCloneModel.SourceUUID = writer.UUID
 	writerModel.WriterThingClass = model.ThingClass.Point
 	writerModel.WriterThingType = model.ThingClass.API
 
 	if !isRemote {
-		writerClone, err := d.CreateWriterClone(&writerCloneModel)
+		_, err := d.CreateWriterClone(&writerCloneModel)
 		if err != nil {
 			return nil, errors.New("error: issue on create writer clone over rest")
 		}
 		//update writerCloneUUID to writer
-		writerModel.CloneUUID = writerClone.UUID
+		//writerModel.CloneUUID = writerClone.UUID //TODO: Binod
 		_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
 		if err != nil {
 			return nil, errors.New("error: issue on update writer over rest")
 		}
 	} else {
 		cli := client.NewSessionWithToken(flow.FlowToken, flow.FlowIP, flow.FlowPort)
-		clone, err := cli.CreateWriterClone(writerCloneModel)
+		_, err := cli.CreateWriterClone(writerCloneModel)
 		if err != nil {
 			return nil, errors.New("error: issue on create writer clone")
 		}
-		writerModel.CloneUUID = clone.UUID
+		//writerModel.CloneUUID = clone.UUID //TODO: Binod
 		_, err = cli.EditWriter(writerModel.UUID, writerModel, false)
 		if err != nil {
 			return nil, errors.New("error: issue on update writer")

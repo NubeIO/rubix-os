@@ -11,7 +11,7 @@ type Consumer struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	StreamUUID          string             `json:"stream_uuid,omitempty" gorm:"TYPE:string REFERENCES streams;not null;default:null"`
+	StreamCloneUUID     string             `json:"stream_clone_uuid,omitempty" gorm:"TYPE:string REFERENCES stream_clones;not null;default:null"`
 	ProducerUUID        string             `json:"producer_uuid,omitempty"`
 	ProducerThingName   string             `json:"producer_thing_name,omitempty"`
 	ProducerThingUUID   string             `json:"producer_thing_uuid,omitempty"` // this is the remote point UUID

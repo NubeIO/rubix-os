@@ -1,7 +1,8 @@
 package model
 
-type FlowNetwork struct {
+type CommonFlowNetwork struct {
 	CommonUUID
+	CommonSyncUUID
 	CommonName
 	CommonDescription
 	GlobalUUID              string    `json:"global_uuid,omitempty"`
@@ -29,4 +30,15 @@ type FlowNetwork struct {
 	MqttPassword            string    `json:"mqtt_password,omitempty"`
 	Streams                 []*Stream `json:"streams" gorm:"many2many:flow_networks_streams;constraint:OnDelete:CASCADE"`
 	CommonCreated
+}
+
+type FlowNetwork struct {
+	CommonFlowNetwork
+	Streams []*Stream `json:"streams" gorm:"many2many:flow_networks_streams;constraint:OnDelete:CASCADE"`
+}
+
+type FlowNetworkClone struct {
+	CommonFlowNetwork
+	CommonSourceUUID
+	StreamClones []*StreamClone `json:"stream_clones" gorm:"constraint:OnDelete:CASCADE;"`
 }

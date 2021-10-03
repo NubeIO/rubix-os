@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/client"
 	"github.com/NubeDev/flow-framework/utils"
-	log "github.com/sirupsen/logrus"
 )
 
 // WizardLocalPointMapping add a local network mapping stream.
@@ -15,6 +13,7 @@ import (
 //use the point uuid to make a producer
 //use the writerWizard to make consumer, writer and writer clone api.WriterWizard
 func (d *GormDatabase) WizardLocalPointMapping(body *api.WizardLocalMapping) (bool, error) {
+	/*TODO: Binod
 	var flowNetwork model.FlowNetwork
 	var networkModel model.Network
 	var deviceModel model.Device
@@ -123,12 +122,13 @@ func (d *GormDatabase) WizardLocalPointMapping(body *api.WizardLocalMapping) (bo
 	if err != nil {
 		log.Errorf("wizard:  CreateWriterWizard: %v\n", err)
 		return false, err
-	}
+	}*/
 	return true, nil
 }
 
 // WizardRemotePointMapping add a local network mapping stream.
 func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
+	/*TODO: Binod
 	var flowNetwork model.FlowNetwork
 	var networkModel model.Network
 	var deviceModel model.Device
@@ -217,7 +217,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	log.Debug("Created Consumer FlowNetwork: ", cfn.UUID)
 
 	// consumer stream (edge-2)
-	consumerStreamModel.IsConsumer = true
+	//consumerStreamModel.IsConsumer = true TODO
 	consumerStreamModel.FlowNetworks = []*model.FlowNetwork{&consumerFlowNetwork}
 	consumerStream, err := d.CreateStream(&consumerStreamModel)
 	if err != nil {
@@ -268,7 +268,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	_, err = d.UpdateWriterClone(writerCloneModel.UUID, &writerCloneModel, false)
 	if err != nil {
 		return false, err
-	}
+	}*/
 	return true, nil
 }
 
@@ -282,6 +282,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 // Wizard2ndFlowNetwork add a local network mapping stream.
 func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, error) {
 	//delete networks
+	/*TODO: Binod
 	var flowNetwork model.FlowNetwork
 	var consumerModel model.Consumer
 	var streamModel model.Stream
@@ -306,7 +307,7 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 	fmt.Println("CreateFlowNetwork", f.UUID)
 
 	// consumer stream (edge-2)
-	streamModel.IsConsumer = true
+	//streamModel.IsConsumer = true TODO
 	streamModel.FlowNetworks = []*model.FlowNetwork{&flowNetwork}
 	consumerStream, err := d.CreateStream(&streamModel)
 	if err != nil {
@@ -400,7 +401,7 @@ func (d *GormDatabase) Wizard2ndFlowNetwork(body *api.AddNewFlowNetwork) (bool, 
 		fmt.Println(err)
 		fmt.Println("Error on wizard")
 		return false, err
-	}
+	}*/
 	return true, nil
 }
 

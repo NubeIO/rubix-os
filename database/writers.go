@@ -3,9 +3,7 @@ package database
 import (
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/src/client"
 	"github.com/NubeDev/flow-framework/src/streams"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
@@ -103,6 +101,7 @@ func (d *GormDatabase) DropWriters() (bool, error) {
 // CreateWriterWizard add a new consumer to an existing producer and add a new writer and writer clone
 // use the flow-network UUID
 func (d *GormDatabase) CreateWriterWizard(body *api.WriterWizard) (bool, error) {
+	/*TODO: Binod
 	var consumerModel model.Consumer
 	var writerModel model.Writer
 	var writerCloneModel model.WriterClone
@@ -185,7 +184,7 @@ func (d *GormDatabase) CreateWriterWizard(body *api.WriterWizard) (bool, error) 
 		if err != nil {
 			return false, errors.New("CREATE-WRITER: failed to local UpdateWriter")
 		}
-	}
+	}*/
 	return true, nil
 }
 
@@ -214,8 +213,8 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	}
 	consumerUUID := consumer.UUID
 	producerUUID := consumer.ProducerUUID
-	writerCloneUUID := writer.CloneUUID
-	streamUUID := consumer.StreamUUID
+	//writerCloneUUID := writer.CloneUUID TODO: BINOD
+	streamUUID := consumer.StreamCloneUUID // TODO: BIOND
 	stream, flow, err := d.GetFlowUUID(streamUUID)
 	if err != nil || stream.UUID == "nil" {
 		return nil, errors.New("error: invalid stream UUID")
@@ -226,10 +225,11 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	remote := utils.BoolIsNil(flow.IsRemote)
 	if remote { //IF IS REMOTE FLOW-NETWORK
 		if action == model.CommonNaming.Write {
-			_, err = streams.WriteClone(writerCloneUUID, flow, wc, true)
-			if err != nil {
-				return nil, errors.New("WRITER-REMOTE: on update REMOTE WriteClone feedback")
-			}
+			// TODO: BINOD
+			//_, err = streams.WriteClone(writerCloneUUID, flow, wc, true)
+			//if err != nil {
+			//	return nil, errors.New("WRITER-REMOTE: on update REMOTE WriteClone feedback")
+			//}
 		}
 		producerHistory, err := streams.GetProducerHist(producerUUID, flow)
 		if err != nil {
@@ -253,10 +253,11 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	} else { //IF IS LOCAL FLOW-NETWORK
 		var producerHistory *model.ProducerHistory
 		if action == model.CommonNaming.Write {
-			producerHistory, err = d.UpdateCloneAndHist(writerCloneUUID, wc, true)
-			if err != nil {
-				return nil, errors.New("WRITER-LOCAL: error on local WRITE to writer-clone")
-			}
+			//TODO: BINOD
+			//producerHistory, err = d.UpdateCloneAndHist(writerCloneUUID, wc, true)
+			//if err != nil {
+			//	return nil, errors.New("WRITER-LOCAL: error on local WRITE to writer-clone")
+			//}
 		} else {
 			producerHistory, err = d.GetLatestProducerHistoryByProducerUUID(producerUUID)
 			if err != nil {
