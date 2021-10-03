@@ -36,6 +36,8 @@ func isWrite(t string) bool {
 	switch t {
 	case model.ObjectTypes.WriteCoil, model.ObjectTypes.WriteCoils:
 		return true
+	case model.ObjectTypes.WriteHolding, model.ObjectTypes.WriteHoldings:
+		return true
 	case model.ObjectTypes.WriteSingleInt16, model.ObjectTypes.WriteSingleUint16:
 		return true
 	case model.ObjectTypes.WriteSingleFloat32, model.ObjectTypes.WriteSingleFloat64:
@@ -67,11 +69,14 @@ type Operation struct {
 
 func setRequest(body Operation) (Operation, error) {
 	r := body.ObjectType
-	if r == model.ObjectTypes.ReadCoil || r == model.ObjectTypes.ReadDiscreteInput {
+	if r == model.ObjectTypes.ReadCoil || r == model.ObjectTypes.ReadDiscreteInput || r == model.ObjectTypes.ReadHolding {
 		body.Length = 1
 	}
 	if r == model.ObjectTypes.ReadCoil || r == model.ObjectTypes.ReadCoils || r == model.ObjectTypes.WriteCoil || r == model.ObjectTypes.WriteCoils {
 		body.IsCoil = true
+	}
+	if r == model.ObjectTypes.ReadHolding || r == model.ObjectTypes.ReadHoldings {
+		body.IsHoldingReg = true
 	}
 	return body, nil
 }
@@ -80,15 +85,11 @@ func parseRequest(body Operation) (Operation, error) {
 	set, _ := setRequest(body)
 	ops := utils.NewString(body.ObjectType).ToCamelCase() //eg: readCoil, read_coil, writeCoil
 	ops = utils.LcFirst(ops)
-
 	switch ops {
 	case model.ObjectTypes.ReadCoil, model.ObjectTypes.ReadCoils, model.ObjectTypes.ReadDiscreteInput, model.ObjectTypes.ReadDiscreteInputs:
 		set.op = readBool
 		return set, err
 	case model.ObjectTypes.WriteCoil, model.ObjectTypes.WriteCoils:
-		if ops == model.ObjectTypes.WriteCoil || ops == model.ObjectTypes.WriteCoils {
-			set.IsCoil = true
-		}
 		if body.WriteValue > 0 {
 			set.coil = true
 		} else {
@@ -96,11 +97,13 @@ func parseRequest(body Operation) (Operation, error) {
 		}
 		set.op = writeCoil
 		return set, err
+	case model.ObjectTypes.ReadRegister, model.ObjectTypes.ReadRegisters, model.ObjectTypes.ReadHolding, model.ObjectTypes.ReadHoldings:
+		set.op = readInt16
+		return set, err
 	case model.ObjectTypes.ReadFloat32, model.ObjectTypes.ReadSingleFloat32:
+		set.IsHoldingReg = false
 		if body.IsHoldingReg {
 			set.IsHoldingReg = true
-		} else {
-			set.IsHoldingReg = false
 		}
 		set.op = readFloat32
 		return set, err
@@ -126,7 +129,7 @@ func zeroMode(addr uint16, mode bool) uint16 {
 	}
 }
 
-func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{}, responseValue float64, err error) {
+func networkRequest(client *modbus.ModbusClient, o Operation) (response interface{}, responseValue float64, err error) {
 	o.Addr = zeroMode(o.Addr, o.ZeroMode)
 	sel := utils.NewString(o.Encoding).ToCamelCase() //eg: LEB_BEW, lebBew
 	sel = utils.LcFirst(sel)
@@ -142,7 +145,7 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 	default:
 		err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
 	}
-	if o.Length <= 0 {
+	if o.Length <= 0 { //make sure length is > 0
 		o.Length = 1
 	}
 	switch o.op {
@@ -181,7 +184,9 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 						o.Addr+uint16(idx),
 						res[idx], int16(res[idx]))
 				}
+				return res, float64(res[0]), err
 			}
+
 		}
 	case readUint32, readInt32:
 		var res []uint32
