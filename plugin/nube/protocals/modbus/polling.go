@@ -125,14 +125,25 @@ func (i *Instance) PollingTCP(p polling) error {
 								}
 								_, responseValue, err := DoOperations(cli, request)
 								var _pnt model.Point
-								_pnt.UUID = pnt.UUID
-								_pnt.PresentValue = &ops.WriteValue //update point value
 								pntStore, _ := i.store.Get(pnt.UUID)
-								if pntStore != nil {
-									cov := utils.Float64IsNil(pnt.COV)
-									pn := pntStore.(model.Point)
-									covEvent, _ := utils.COV(ops.WriteValue, *pn.PresentValue, cov)
-									if covEvent {
+								if isWrite(ops.ObjectType) { //IS WRITE
+									if pntStore != nil {
+										_pnt.UUID = pnt.UUID
+										_pnt.PresentValue = &ops.WriteValue //update point value
+										cov := utils.Float64IsNil(pnt.COV)
+										pn := pntStore.(model.Point)
+										covEvent, _ := utils.COV(ops.WriteValue, *pn.PresentValue, cov)
+										if covEvent {
+											_, err = i.pointUpdate(pnt.UUID, &_pnt)
+											i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
+											if err != nil {
+												log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+											}
+											log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+										}
+									} else {
+										_pnt.UUID = pnt.UUID
+										_pnt.PresentValue = &ops.WriteValue //update point value
 										_, err = i.pointUpdate(pnt.UUID, &_pnt)
 										i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
 										if err != nil {
@@ -140,13 +151,34 @@ func (i *Instance) PollingTCP(p polling) error {
 										}
 										log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 									}
-								} else {
-									_, err = i.pointUpdate(pnt.UUID, &_pnt)
-									i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
-									if err != nil {
+
+								} else if pntStore != nil {
+									if pntStore != nil {
+										_pnt.UUID = pnt.UUID
+										*_pnt.PresentValue = responseValue //update point value
+										pntStore, _ = i.store.Get(pnt.UUID)
+										cov := utils.Float64IsNil(pnt.COV)
+										pn := pntStore.(model.Point)
+										covEvent, _ := utils.COV(ops.WriteValue, *pn.PresentValue, cov)
+										if covEvent {
+											_, err = i.pointUpdate(pnt.UUID, &_pnt)
+											i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
+											if err != nil {
+												log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+											}
+											log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+										}
+									} else {
+										_pnt.UUID = pnt.UUID
+										*_pnt.PresentValue = responseValue //update point value
+										_, err = i.pointUpdate(pnt.UUID, &_pnt)
+										i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
+										if err != nil {
+											log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+										}
 										log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 									}
-									log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+
 								}
 								time.Sleep(dPnt * time.Millisecond)
 

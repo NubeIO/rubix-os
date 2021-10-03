@@ -61,6 +61,13 @@ func toString(v interface{}) string {
 	return ""
 }
 
+func BoolToInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
+}
+
 func toBool(v interface{}) bool {
 	if v == nil {
 		return false
@@ -81,7 +88,6 @@ func toBool(v interface{}) bool {
 		return t
 		// TODO: from integers
 	}
-
 	return false
 }
 
@@ -162,8 +168,9 @@ func toFloat64(v interface{}) float64 {
 	if v == nil {
 		return 0
 	}
-
 	switch t := v.(type) {
+	case bool:
+		return float64(BoolToInt(t))
 	case int:
 		return float64(t)
 	case int16:
@@ -183,11 +190,10 @@ func toFloat64(v interface{}) float64 {
 	case uint64:
 		return float64(t)
 	case float64:
-		return float64(t)
+		return t
 	case float32:
 		return float64(t)
 	case string:
-
 		if i, err := strconv.ParseFloat(t, 64); err == nil {
 			return i
 		}
