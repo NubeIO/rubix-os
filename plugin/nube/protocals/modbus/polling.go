@@ -124,14 +124,32 @@ func (i *Instance) PollingTCP(p polling) error {
 									log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 								}
 								_, responseValue, err := DoOperations(cli, request)
-								var pntVal model.Point
-								pntVal.PresentValue = ops.WriteValue //update point value
-								_, err = i.pointUpdate(pnt.UUID, &pntVal)
-								if err != nil {
+								var _pnt model.Point
+								_pnt.UUID = pnt.UUID
+								_pnt.PresentValue = &ops.WriteValue //update point value
+								pntStore, _ := i.store.Get(pnt.UUID)
+								if pntStore != nil {
+									cov := utils.Float64IsNil(pnt.COV)
+									pn := pntStore.(model.Point)
+									covEvent, _ := utils.COV(ops.WriteValue, *pn.PresentValue, cov)
+									if covEvent {
+										_, err = i.pointUpdate(pnt.UUID, &_pnt)
+										i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
+										if err != nil {
+											log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+										}
+										log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+									}
+								} else {
+									_, err = i.pointUpdate(pnt.UUID, &_pnt)
+									i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
+									if err != nil {
+										log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+									}
 									log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 								}
-								log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 								time.Sleep(dPnt * time.Millisecond)
+
 							}
 
 						}

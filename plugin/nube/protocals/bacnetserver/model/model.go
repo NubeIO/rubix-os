@@ -55,6 +55,6 @@ type BacnetPoint struct {
 	DataRound            float64         `json:"data_round,omitempty"`
 	DataOffset           float64         `json:"data_offset,omitempty"`
 	UseNextAvailableAddr bool            `json:"use_next_available_address,omitempty"`
-	COV                  float32         `json:"cov,omitempty"`
+	COV                  float64         `json:"cov,omitempty"`
 	Priority             *model.Priority `json:"priority_array_write,omitempty"`
 }

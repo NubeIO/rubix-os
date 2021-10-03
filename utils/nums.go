@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func FloatIsNil(b *float64) float64 {
+func Float64IsNil(b *float64) float64 {
 	if b == nil {
 		return 0
 	} else {

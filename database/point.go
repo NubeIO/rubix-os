@@ -110,7 +110,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 
 func pointUnits(pointModel *model.Point) (value float64, displayValue string, valid bool, err error) {
 	if pointModel.Unit != "" {
-		_, res, err := unit.Process(pointModel.PresentValue, pointModel.Unit, pointModel.UnitTo)
+		_, res, err := unit.Process(*pointModel.PresentValue, pointModel.Unit, pointModel.UnitTo)
 		if err != nil {
 			return 0, "", false, err
 		}
@@ -157,19 +157,20 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 				notNil = true
 			}
 		}
+
 		if notNil {
-			fmt.Println(priority)
-			min, _ := highestPri.MinMaxInt()  //get the highest priority
-			val := highestValue.Get(min)      //get the highest priority value
-			body.CurrentPriority = &min       //TODO check conversion
-			body.PresentValue = val.(float64) //process the units as in temperature conversion
+			min, _ := highestPri.MinMaxInt() //get the highest priority
+			val := highestValue.Get(min)     //get the highest priority value
+			body.CurrentPriority = &min      //TODO check conversion
+			v := val.(float64)
+			body.PresentValue = &v //process the units as in temperature conversion
 		}
 		//body.ValueRaw = value //TODO set raw value
 		if !utils.FloatIsNilCheck(body.LimitMin) && !utils.FloatIsNilCheck(body.LimitMin) {
-			body.PresentValue = utils.LimitToRange(body.PresentValue, *body.LimitMin, *body.LimitMax)
+			*body.PresentValue = utils.LimitToRange(*body.PresentValue, *body.LimitMin, *body.LimitMax)
 		}
 		if !utils.FloatIsNilCheck(body.ScaleInMin) && !utils.FloatIsNilCheck(body.ScaleInMax) && !utils.FloatIsNilCheck(body.ScaleOutMin) && !utils.FloatIsNilCheck(body.ScaleOutMax) {
-			body.PresentValue = utils.Scale(body.PresentValue, *body.ScaleInMin, *body.ScaleInMax, *body.ScaleOutMin, *body.ScaleOutMax)
+			*body.PresentValue = utils.Scale(*body.PresentValue, *body.ScaleInMin, *body.ScaleInMax, *body.ScaleOutMin, *body.ScaleOutMax)
 		}
 		value, display, ok, err := pointUnits(body)
 		if err != nil {
@@ -177,11 +178,11 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 			return nil, err
 		}
 		if ok {
-			body.PresentValue = value
+			*body.PresentValue = value
 			body.ValueDisplay = display
 		}
 		if !utils.Unit32NilCheck(body.Decimal) {
-			body.PresentValue = utils.RoundTo(body.PresentValue, *body.Decimal)
+			*body.PresentValue = utils.RoundTo(*body.PresentValue, *body.Decimal)
 		}
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
 		if utils.BoolIsNil(pointModel.IsProducer) && utils.BoolIsNil(body.IsProducer) {

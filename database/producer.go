@@ -146,7 +146,7 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 			return "", errors.New("issue on update producer")
 		}
 		value := point.PresentValue
-		point.Priority.P16 = &value
+		point.Priority.P16 = value
 		b, err := json.Marshal(point)
 		if err != nil {
 			log.Errorf("producer: on update write history for point err: %v\n", err)
