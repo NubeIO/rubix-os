@@ -32,6 +32,18 @@ const (
 	writeFloat64
 )
 
+func isWrite(t string) bool {
+	switch t {
+	case model.ObjectTypes.WriteCoil, model.ObjectTypes.WriteCoils:
+		return true
+	case model.ObjectTypes.WriteSingleInt16, model.ObjectTypes.WriteSingleUint16:
+		return true
+	case model.ObjectTypes.WriteSingleFloat32, model.ObjectTypes.WriteSingleFloat64:
+		return true
+	}
+	return false
+}
+
 var err error
 
 type Operation struct {
@@ -68,6 +80,7 @@ func parseRequest(body Operation) (Operation, error) {
 	set, _ := setRequest(body)
 	ops := utils.NewString(body.ObjectType).ToCamelCase() //eg: readCoil, read_coil, writeCoil
 	ops = utils.LcFirst(ops)
+
 	switch ops {
 	case model.ObjectTypes.ReadCoil, model.ObjectTypes.ReadCoils, model.ObjectTypes.ReadDiscreteInput, model.ObjectTypes.ReadDiscreteInputs:
 		set.op = readBool
@@ -111,7 +124,6 @@ func zeroMode(addr uint16, mode bool) uint16 {
 	} else {
 		return addr
 	}
-
 }
 
 func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{}, responseValue float64, err error) {
@@ -130,19 +142,22 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 	default:
 		err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
 	}
+	if o.Length <= 0 {
+		o.Length = 1
+	}
 	switch o.op {
 	case readBool:
 		var res []bool
 		if o.IsCoil {
 			res, err = client.ReadCoils(o.Addr, o.Length)
-			return res, 0, err
+			return res, utils.ToFloat64(res[0]), err
 		} else {
 			res, err = client.ReadDiscreteInputs(o.Addr, o.Length)
 		}
 		if err != nil {
 			log.Errorf("modbus: failed to read coils/discrete inputs: %v\n", err)
 		} else {
-			return res, 0, err
+			return res, utils.ToFloat64(res[0]), err
 		}
 	case readUint16, readInt16:
 		var res []uint16
@@ -193,13 +208,13 @@ func DoOperations(client *modbus.ModbusClient, o Operation) (response interface{
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 					return nil, 0, err
 				}
-				return res[0], 0, err
+				return res[0], float64(res[0]), err
 			} else {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 					return nil, 0, err
 				}
-				return res, 0, err
+				return res, float64(res[0]), err
 			}
 		} else {
 			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
