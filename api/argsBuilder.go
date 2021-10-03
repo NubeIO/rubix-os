@@ -82,8 +82,29 @@ func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	var aDefault = ArgsDefault
 	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
 	args.Producers, _ = toBool(ctx.DefaultQuery(aType.Producers, aDefault.Producers))
-	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
 	args.CommandGroups, _ = toBool(ctx.DefaultQuery(aType.CommandGroups, aDefault.CommandGroups))
+	args.WriterClones, _ = toBool(ctx.DefaultQuery(aType.WriterClones, aDefault.WriterClones))
+	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
+		args.GlobalUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.ClientId); ok {
+		args.ClientId = &value
+	}
+	if value, ok := ctx.GetQuery(aType.SiteId); ok {
+		args.SiteId = &value
+	}
+	if value, ok := ctx.GetQuery(aType.DeviceId); ok {
+		args.DeviceId = &value
+	}
+	return args
+}
+
+func buildFlowNetworkCloneArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.StreamClones, _ = toBool(ctx.DefaultQuery(aType.StreamClones, aDefault.StreamClones))
+	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
 	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
 	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
 		args.GlobalUUID = &value
@@ -106,8 +127,17 @@ func buildStreamArgs(ctx *gin.Context) Args {
 	var aDefault = ArgsDefault
 	args.FlowNetworks, _ = toBool(ctx.DefaultQuery(aType.FlowNetworks, aDefault.FlowNetworks))
 	args.Producers, _ = toBool(ctx.DefaultQuery(aType.Producers, aDefault.Producers))
-	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
 	args.CommandGroups, _ = toBool(ctx.DefaultQuery(aType.CommandGroups, aDefault.CommandGroups))
+	args.WriterClones, _ = toBool(ctx.DefaultQuery(aType.WriterClones, aDefault.WriterClones))
+	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
+	return args
+}
+
+func buildStreamCloneArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
 	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
 	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
 	return args
@@ -126,7 +156,7 @@ func buildProducerArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	args.WriterClones, _ = toBool(ctx.DefaultQuery(aType.WriterClones, aDefault.WriterClones))
 	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
 	return args
 }

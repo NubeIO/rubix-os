@@ -39,10 +39,12 @@ type Args struct {
 	AddToParent      string
 	FlowNetworks     bool
 	Streams          bool
+	StreamClones     bool
 	Producers        bool
 	Consumers        bool
 	CommandGroups    bool
 	Writers          bool
+	WriterClones     bool
 	Networks         bool
 	Devices          bool
 	Points           bool
@@ -88,10 +90,12 @@ var ArgsType = struct {
 	AddToParent      string
 	FlowNetworks     string
 	Streams          string
+	StreamClones     string
 	Producers        string
 	Consumers        string
 	CommandGroups    string
 	Writers          string
+	WriterClones     string
 	Networks         string
 	Devices          string
 	Points           string
@@ -135,10 +139,12 @@ var ArgsType = struct {
 	AddToParent:      "add_to_parent",
 	FlowNetworks:     "flow_networks",
 	Streams:          "streams",
+	StreamClones:     "stream_clones",
 	Producers:        "producers",
 	Consumers:        "consumers",
 	CommandGroups:    "command_groups",
 	Writers:          "writers",
+	WriterClones:     "writer_clones",
 	Networks:         "networks",
 	Devices:          "devices",
 	Points:           "points",
@@ -182,10 +188,12 @@ var ArgsDefault = struct {
 	AddToParent      string
 	FlowNetworks     string
 	Streams          string
+	StreamClones     string
 	Producers        string
 	Consumers        string
 	CommandGroups    string
 	Writers          string
+	WriterClones     string
 	Networks         string
 	Devices          string
 	Points           string
@@ -221,10 +229,12 @@ var ArgsDefault = struct {
 	AddToParent:      "",
 	FlowNetworks:     "false",
 	Streams:          "false",
+	StreamClones:     "false",
 	Producers:        "false",
 	Consumers:        "false",
 	CommandGroups:    "false",
 	Writers:          "false",
+	WriterClones:     "false",
 	Networks:         "false",
 	Devices:          "false",
 	Points:           "false",

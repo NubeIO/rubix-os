@@ -12,18 +12,38 @@ func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 		query = query.Preload("Streams")
 		if args.Producers {
 			query = query.Preload("Streams.Producers")
-			if args.Writers {
+			if args.WriterClones {
 				query = query.Preload("Streams.Producers.WriterClones")
-			}
-		}
-		if args.Consumers {
-			query = query.Preload("Streams.Consumers")
-			if args.Writers {
-				query = query.Preload("Streams.Consumers.Writers")
 			}
 		}
 		if args.CommandGroups {
 			query = query.Preload("Streams.CommandGroups")
+		}
+	}
+	if args.GlobalUUID != nil {
+		query = query.Where("global_uuid = ?", *args.GlobalUUID)
+	}
+	if args.ClientId != nil {
+		query = query.Where("client_id = ?", *args.ClientId)
+	}
+	if args.SiteId != nil {
+		query = query.Where("site_id = ?", *args.SiteId)
+	}
+	if args.DeviceId != nil {
+		query = query.Where("device_id = ?", *args.DeviceId)
+	}
+	return query
+}
+
+func (d *GormDatabase) buildFlowNetworkCloneQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.StreamClones {
+		query = query.Preload("StreamClones")
+		if args.Consumers {
+			query = query.Preload("StreamClones.Consumers")
+			if args.Writers {
+				query = query.Preload("StreamClones.Consumers.Writers")
+			}
 		}
 	}
 	if args.GlobalUUID != nil {
@@ -48,18 +68,26 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	}
 	if args.Producers {
 		query = query.Preload("Producers")
-		if args.Writers {
+		if args.WriterClones {
 			query = query.Preload("Producers.WriterClones")
 		}
 	}
+	if args.CommandGroups {
+		query = query.Preload("CommandGroups")
+	}
+	if args.Tags {
+		query = query.Preload("Tags")
+	}
+	return query
+}
+
+func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
+	query := d.DB
 	if args.Consumers {
 		query = query.Preload("Consumers")
 		if args.Writers {
 			query = query.Preload("Consumers.Writers")
 		}
-	}
-	if args.CommandGroups {
-		query = query.Preload("CommandGroups")
 	}
 	if args.Tags {
 		query = query.Preload("Tags")

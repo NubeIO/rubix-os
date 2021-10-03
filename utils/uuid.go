@@ -32,7 +32,7 @@ func MakeTopicUUID(attribute string) string {
 	con := "con" //consumers
 	wri := "wri" //writer
 
-	rfn := "rfn" //flow network
+	fnc := "rfn" //flow network clone
 	plg := "plg" //plugin
 	net := "net" //network
 	dev := "dev" //device
@@ -50,8 +50,8 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", plg, divider, u)
 	case model.CommonNaming.FlowNetwork:
 		return fmt.Sprintf("%s%s%s", fln, divider, u)
-	case model.CommonNaming.RemoteFlowNetwork:
-		return fmt.Sprintf("%s%s%s", rfn, divider, u)
+	case model.CommonNaming.FlowNetworkClone:
+		return fmt.Sprintf("%s%s%s", fnc, divider, u)
 	case model.ThingClass.Network:
 		return fmt.Sprintf("%s%s%s", net, divider, u)
 	case model.ThingClass.Device:

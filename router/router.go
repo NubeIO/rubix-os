@@ -64,6 +64,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	gatewayHandler := api.StreamAPI{
 		DB: db,
 	}
+	streamCloneHandler := api.StreamCloneAPI{
+		DB: db,
+	}
 	producerHandler := api.ProducerAPI{
 		DB: db,
 	}
@@ -80,6 +83,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		DB: db,
 	}
 	flowNetwork := api.FlowNetworksAPI{
+		DB: db,
+	}
+	flowNetworkCloneHandler := api.FlowNetworkClonesAPI{
 		DB: db,
 	}
 	dbGroup := api.DatabaseAPI{
@@ -225,7 +231,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			historyProducerRoutes.DELETE("/:producer_uuid", historyHandler.DeleteProducerHistoriesByProducerUUID)
 		}
 
-		flowNetworkRoutes := apiRoutes.Group("/flow/networks")
+		flowNetworkRoutes := apiRoutes.Group("/flow_networks")
 		{
 			flowNetworkRoutes.GET("", flowNetwork.GetFlowNetworks)
 			flowNetworkRoutes.POST("", flowNetwork.CreateFlowNetwork)
@@ -234,6 +240,13 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			flowNetworkRoutes.DELETE("/:uuid", flowNetwork.DeleteFlowNetwork)
 			flowNetworkRoutes.GET("/one/args", flowNetwork.GetOneFlowNetworkByArgs)
 			flowNetworkRoutes.DELETE("/drop", flowNetwork.DropFlowNetworks)
+		}
+
+		flowNetworkCloneRoutes := apiRoutes.Group("/flow_network_clones")
+		{
+			flowNetworkCloneRoutes.GET("", flowNetworkCloneHandler.GetFlowNetworkClones)
+			flowNetworkCloneRoutes.GET("/:uuid", flowNetworkCloneHandler.GetFlowNetworkClone)
+			flowNetworkCloneRoutes.GET("/one/args", flowNetworkCloneHandler.GetOneFlowNetworkCloneByArgs)
 		}
 
 		streamRoutes := apiRoutes.Group("/streams")
@@ -245,6 +258,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
 			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
 			streamRoutes.DELETE("/drop", gatewayHandler.DropStreams)
+		}
+
+		streamCloneRoutes := apiRoutes.Group("/stream_clones")
+		{
+			streamCloneRoutes.GET("", streamCloneHandler.GetStreamClones)
+			streamCloneRoutes.GET("/:uuid", streamCloneHandler.GetStreamClone)
 		}
 
 		networkRoutes := apiRoutes.Group("/networks")
