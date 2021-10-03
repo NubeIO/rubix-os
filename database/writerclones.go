@@ -153,8 +153,6 @@ func (d *GormDatabase) UpdateCloneAndHist(uuid string, body *model.WriterClone, 
 					return nil, err
 				}
 			}
-
-			//fmt.Println(pntReturn.AddressUUID)
 		}
 		return hist, err
 	}

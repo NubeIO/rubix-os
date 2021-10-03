@@ -13,14 +13,12 @@ func (i *Instance) Enable() error {
 	var arg api.Args
 	arg.SerialConnection = true
 	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
-	if err != nil {
-		return errors.New("there is no network added please add one")
-	}
-	i.networkUUID = q.UUID
-	err = i.SerialOpen()
-	if err != nil {
-		return errors.New("error on enable lora-plugin")
-
+	if err == nil {
+		i.networkUUID = q.UUID
+		err = i.SerialOpen()
+		if err != nil {
+			return errors.New("error on enable lora-plugin")
+		}
 	}
 	return nil
 }

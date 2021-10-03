@@ -124,7 +124,7 @@ type Point struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	PresentValue         float64        `json:"present_value"`           //point value, read only
+	PresentValue         *float64       `json:"present_value"`           //point value, read only
 	ValueDisplay         string         `json:"value_display,omitempty"` //point value, read only
 	ValueOriginal        *float64       `json:"value_original"`
 	ValueRaw             datatypes.JSON `json:"value_raw,omitempty"`
@@ -134,7 +134,7 @@ type Point struct {
 	EnableWriteable      *bool          `json:"writeable,omitempty"`
 	IsOutput             *bool          `json:"is_output,omitempty"`
 	BoolInvert           *bool          `json:"bool_invert,omitempty"`
-	COV                  *float32       `json:"cov"`
+	COV                  *float64       `json:"cov"`
 	ObjectType           string         `json:"object_type,omitempty"`  //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
 	AddressId            *int           `json:"address_id"`             // for example a modbus address or bacnet address
 	AddressOffset        *int           `json:"address_offset"`         // for example a modbus address offset

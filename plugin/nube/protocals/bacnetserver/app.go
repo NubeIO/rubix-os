@@ -55,7 +55,7 @@ func (i *Instance) addPoint(body *model.Point) (*model.Point, error) {
 	point.Description = body.Description
 	point.Address = utils.IntIsNil(body.AddressId)
 	point.ObjectType = body.ObjectType
-	point.COV = utils.Float32IsNil(body.COV)
+	point.COV = utils.Float64IsNil(body.COV)
 	point.EventState = "normal"
 	point.Units = "noUnits"
 	point.RelinquishDefault = body.Fallback

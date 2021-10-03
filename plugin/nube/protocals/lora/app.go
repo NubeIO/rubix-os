@@ -130,7 +130,7 @@ func (i *Instance) updatePoint(body *model.Point) error {
 
 // updatePoint by its lora id
 func (i *Instance) devTHLM(pnt *model.Point, value float64) error {
-	pnt.PresentValue = value
+	pnt.PresentValue = &value
 	pnt.CommonFault.InFault = false
 	pnt.CommonFault.MessageLevel = model.MessageLevel.Info
 	pnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
