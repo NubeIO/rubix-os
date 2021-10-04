@@ -3,6 +3,8 @@ package schedule
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
 	"io/ioutil"
 	"log"
 	"math"
@@ -15,14 +17,13 @@ type WeeklyScheduleEntry struct {
 	Name     string
 	Days     []DaysOfTheWeek
 	Start    string
-	End      string
+	Stop      string
 	Timezone string
 	Value    float64
 	Colour   string
 }
 
 type DaysOfTheWeek int
-
 const (
 	sunday    DaysOfTheWeek = iota // 0
 	monday                         // 1
@@ -36,11 +37,11 @@ const (
 type WeeklyScheduleCheckerResult struct {
 	IsActive     bool
 	Payload      float64
-	PeriodStart  uint64 //unix timestamp as from Date()
-	PeriodStop   uint64 //unix timestamp as from Date()
-	NextStart    uint64 //unix timestamp as from Date().  Start time for the following scheduled period.
-	NextStop     uint64 //unix timestamp as from Date()   End time for the following scheduled period.
-	CheckTime    uint64 //unix timestamp as from Date()
+	PeriodStart  int64 //unix timestamp in seconds
+	PeriodStop   int64 //unix timestamp in seconds
+	NextStart    int64 //unix timestamp in seconds.  Start time for the following scheduled period.
+	NextStop     int64 //unix timestamp in seconds   End time for the following scheduled period.
+	CheckTime    int64 //unix timestamp in seconds
 	ErrorFlag    bool
 	AlertFlag    bool
 	ErrorStrings []string
@@ -49,6 +50,8 @@ type WeeklyScheduleCheckerResult struct {
 //CheckWeeklyScheduleEntry checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period.
 func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, timezone string) WeeklyScheduleCheckerResult {
 	result := WeeklyScheduleCheckerResult{}
+	result.payload = entry.Value
+
 	//get local time parts in locale of entry.Timezone
 	loc, err := time.LoadLocation(timezone)
 	if err != nil {
@@ -59,25 +62,115 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, timezone string) Weekly
 	now := time.Now().In(loc)
 
 	//get day of week and compare with entry.Days
-	nowHour, nowMinute, nowSecond := now.Clock()
-	nowDayOfWeek := now.Day()
+	//nowHour, nowMinute, nowSecond := now.Clock()
+	nowYear, nowMonth, nowDate := now.Date()
+	nowDayOfWeek := DaysOfTheWeek(now.Weekday())
 	nowDayOfWeekString := now.String()
-	found := false
-	for day, _ = range entry.Days {
+
+	scheduleActiveToday := false
+	for _, day := range entry.Days {
 		if day == nowDayOfWeek {
-			found = true
+			scheduleActiveToday = true
 			break
 		}
 	}
-	if found {
-		//parse start and end time into current day timestamps
-		//choose format with only date, and sub in hours and minutes from event
-		https://golang.org/src/time/format.go
-		func (t Time) Format(layout string) string
-		https://pkg.go.dev/time#ParseInLocation
-		func ParseInLocation(layout, value string, loc *Location) (Time, error)
 
-		//check if now() is between the start and end timestamps
+	//find the next active schedule day
+
+	//if only 1 day in schedule
+	/*
+	if len(entry.Days) == 1 {
+		oneWeek := time.ParseDuration("168h")
+		result.NextStart = startTimestamp.Add(oneWeek).Unix()
+		result.NextStart = stopTimestamp.Add(oneWeek).Unix()
+	}
+	*/
+
+	//TODO: Turn this into a function (returns the int of the next scheduled day)
+	i := int(nowDayOfWeek)
+	j := 0
+	var nextDay DaysOfTheWeek = 0
+	nextFound := false
+	//check until the next scheduled day is found in entry.Day
+	for j < 7 {
+		//check the next day (rollover at end of week (Saturday/6)
+		if i == 6{
+			i = 0
+		} else {
+			i++
+		}
+		//check each of the scheduled days in entry
+		for x := 0; x <= len(entry.Days); x++ {
+			if entry.Days[x] == DaysOfTheWeek(i) {
+				nextDay = DaysOfTheWeek(i)
+				nextFound = true
+				break
+			}
+		}
+		if nextFound {
+			break
+		}
+		j++
+	}
+
+	//TODO: Turn this into a function (returns the Duration to the next scheduled day) takes (now, nextDayInt)
+	//make Duration to next scheduled day
+	daysTillNext := 0
+	if nextDay > nowDayOfWeek {
+		daysTillNext = int(nextDay) - int(nowDayOfWeek)
+	} else {
+		//rest of the week, plus the next day as integer
+		daysTillNext = (7 - int(nowDayOfWeek)) + int(nextDay)
+	}
+	//strconv.Itoa() converts int to string
+	tillNextDayDuration, _ := time.ParseDuration(strconv.Itoa(daysTillNext)+"h")
+
+	//parse start and stop times
+	var entryStartHour, entryStartMins, entryStopHour, entryStopMins int
+	n, err1 := fmt.Sscanf(entry.Start, "%d:%d", &entryStartHour, &entryStartMins)
+	m, err2 := fmt.Sscanf(entry.Stop, "%d:%d", &entryStopHour, &entryStopMins)
+	if n != 2 || m != 2 || err1 != nil || err2 != nil {
+		result.ErrorFlag = true
+		result.ErrorStrings = append(result.ErrorStrings, "Critical: Invalid Start/Stop Time")
+	}
+
+	if scheduleActiveToday {
+		//parse start and end time into current day timestamps
+		startTimestamp := time.Date(nowYear, nowMonth, nowDate, entryStartHour, entryStartMins, 0, 0, loc)
+		stopTimestamp := time.Date(nowYear, nowMonth, nowDate, entryStopHour, entryStopMins, 59, 0, loc)
+
+		//check if today's schedule is currently active
+		activeNow := false
+		if now.After(startTimestamp) && now.Before(stopTimestamp) {
+			activeNow = true
+		}
+		result.IsActive = activeNow
+
+		if now.After(stopTimestamp) {
+			//PeriodStartStop
+			//NextStartStop
+		}
+
+		if activeNow  {
+			//PeriodStartStop
+			//NextStartStop
+		} else if now.After(stopTimestamp)
+
+
+		result.PeriodStart = startTimestamp.Unix()
+		result.PeriodStop = stopTimestamp.Unix()
+		result.CheckTime = now.Unix()
+
+
+
+		//get timestamps for the next scheduled day
+		if activeNow  {
+			result.NextStart = startTimestamp.Add(tillNextDayDuration).Unix()
+			result.NextStop = stopTimestamp.Unix()
+		} else if now.After(stopTimestamp)
+
+		tillNextDayDuration
+
 
 
 
@@ -93,10 +186,10 @@ func CombineWeeklyScheduleCheckerResults(current WeeklyScheduleCheckerResult, ne
 
 	//AlertFlag & ErrorFlag & ErrorStrings
 	if new.ErrorFlag {
-		return current.ErrorFlag
+		return current
 	}
 	if current.ErrorFlag {
-		return new.ErrorFlag
+		return new
 	}
 	result.AlertFlag = current.AlertFlag || new.AlertFlag
 	result.ErrorStrings = append(current.ErrorStrings, new.ErrorStrings...)
@@ -145,11 +238,10 @@ func CombineWeeklyScheduleCheckerResults(current WeeklyScheduleCheckerResult, ne
 
 	if !nextStopStartRequired {
 		return result
-
 	} else {
 		//NextStart
-		var currentNextStartTime uint64
-		var newNextStartTime uint64
+		var currentNextStartTime int64
+		var newNextStartTime int64
 
 		if current.IsActive {
 			currentNextStartTime = current.NextStart
@@ -170,8 +262,8 @@ func CombineWeeklyScheduleCheckerResults(current WeeklyScheduleCheckerResult, ne
 		}
 
 		//NextStop
-		var currentNextStopTime uint64
-		var newNextStopTime uint64
+		var currentNextStopTime int64
+		var newNextStopTime int64
 
 		if current.IsActive {
 			currentNextStopTime = current.PeriodStop
