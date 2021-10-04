@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.0.5](https://github.com/NubeIO/flow-framework/tree/v0.0.5) (2021-10-05)
+- Added point calc's, units, and eval
+- clean up on lora and modbus plugins
+
 ## [v0.0.4](https://github.com/NubeIO/flow-framework/tree/v0.0.4) (2021-10-02)
 - Added git plugin and updates to modbus
 
