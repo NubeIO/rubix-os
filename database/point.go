@@ -112,6 +112,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, err
 		}
 	}
+	pointModel.InSync = false
 	query = d.DB.Model(&pointModel).Updates(&body)
 	if !fromPlugin { //stop looping
 		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)

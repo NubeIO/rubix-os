@@ -44,14 +44,6 @@ func valueRaw(responseRaw interface{}) []byte {
 	return j
 }
 
-//func sync(d ) (bool, error) {
-//	if d.devUUID == "" {
-//		log.Errorf("modbus: device id is null \n")
-//		return false, errors.New("modbus: failed to set client")
-//	}
-//	return true, nil
-//}
-
 var poll poller.Poller
 
 func (i *Instance) PollingTCP(p polling) error {
