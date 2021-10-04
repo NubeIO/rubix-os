@@ -134,6 +134,18 @@ var EvalExamples = struct {
 	CelsiusToFahrenheit: "(x * 9/5) + 32",
 }
 
+var EvalMode = struct {
+	Enable              string `json:"enable"`
+	Disabled            string `json:"disabled"`
+	CalcOnValueOriginal string `json:"calc_on_value_original"`
+	CalcAfterScale      string `json:"calc_after_scale"`
+}{
+	Enable:              "enable",
+	Disabled:            "disabled",
+	CalcOnValueOriginal: "calcOnValueOriginal",
+	CalcAfterScale:      "calcAfterScale",
+}
+
 //Point table
 type Point struct {
 	CommonUUID
@@ -144,12 +156,12 @@ type Point struct {
 	ValueDisplay         string   `json:"value_display,omitempty"` //point value, read only
 	ValueOriginal        *float64 `json:"value_original"`
 	CurrentPriority      *int     `json:"current_priority,omitempty"`
-	InSync               bool
+	InSync               *bool
 	Fallback             float64  `json:"fallback"`
 	DeviceUUID           string   `json:"device_uuid,omitempty" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	EnableWriteable      *bool    `json:"writeable,omitempty"`
 	IsOutput             *bool    `json:"is_output,omitempty"`
-	EnableEval           *bool    `json:"enable_eval,omitempty"`
+	EvalMode             string   `json:"eval_mode,omitempty"`
 	Eval                 string   `json:"eval_expression,omitempty"`
 	EvalExample          string   `json:"eval_example,omitempty"`
 	COV                  *float64 `json:"cov"`

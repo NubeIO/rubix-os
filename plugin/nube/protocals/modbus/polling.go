@@ -147,19 +147,19 @@ func (i *Instance) PollingTCP(p polling) error {
 										if err != nil {
 											log.Errorf("modbus-write-cov: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										} else {
-											_pnt.InSync = true
+											_pnt.InSync = utils.NewTrue()
 											_, err = i.pointUpdate(pnt.UUID, &_pnt)
 											log.Infof("modbus-write-cov: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										}
 									} else {
-										if !pnt.InSync {
+										if !utils.BoolIsNil(pnt.InSync) {
 											log.Infof("MODBUS WRITE SYNC POINT")
 											_pnt.UUID = pnt.UUID
 											_pnt.PresentValue = &ops.WriteValue //update point value
 											if err != nil {
 												log.Errorf("modbus-write-sync: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 											} else {
-												_pnt.InSync = true
+												_pnt.InSync = utils.NewTrue()
 												_, err = i.pointUpdate(pnt.UUID, &_pnt)
 												log.Infof("modbus-write-sync: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 											}
@@ -171,7 +171,7 @@ func (i *Instance) PollingTCP(p polling) error {
 											if err != nil {
 												log.Errorf("modbus-write-start-sync: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 											} else {
-												_pnt.InSync = true
+												_pnt.InSync = utils.NewTrue()
 												_, err = i.pointUpdate(pnt.UUID, &_pnt)
 												log.Infof("modbus-write-start-sync: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 											}
@@ -190,7 +190,7 @@ func (i *Instance) PollingTCP(p polling) error {
 										if err != nil {
 											log.Errorf("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										} else {
-											_pnt.InSync = true
+											_pnt.InSync = utils.NewTrue()
 											log.Infof("modbus: ObjectType---------: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										}
 
@@ -204,7 +204,7 @@ func (i *Instance) PollingTCP(p polling) error {
 										if err != nil {
 											log.Errorf("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										} else {
-											_pnt.InSync = true
+											_pnt.InSync = utils.NewTrue()
 											log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										}
 
