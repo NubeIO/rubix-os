@@ -6,7 +6,6 @@ import (
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/model"
-	unit "github.com/NubeDev/flow-framework/src/units"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"reflect"
@@ -24,7 +23,6 @@ func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
 
 func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error) {
 	var pointModel *model.Point
-
 	query := d.buildPointQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&pointModel).Error; err != nil {
 		return nil, err
@@ -61,11 +59,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	//check if there is an existing device with this address code
-	//_, existing := d.PointDeviceByAddressID("", body)
-	//if existing {
-	//	return nil, errors.New("an existing point of that ObjectType & id exists")
-	//}
 	if body.Description == "" {
 		body.Description = "na"
 	}
@@ -77,7 +70,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
-
 	if body.Priority == nil {
 		body.Priority = &model.Priority{}
 	}
@@ -108,27 +100,37 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	return body, query.Error
 }
 
-func pointUnits(pointModel *model.Point) (value float64, displayValue string, valid bool, err error) {
-	if pointModel.Unit != "" {
-		_, res, err := unit.Process(*pointModel.PresentValue, pointModel.Unit, pointModel.UnitTo)
-		if err != nil {
-			return 0, "", false, err
-		}
-		return res.AsFloat(), res.String(), true, err
-	} else {
-		return 0, "", false, nil
+// UpdatePoint returns the device for the given id or nil.
+func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
+	var pointModel *model.Point
+	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
+	if query.Error != nil {
+		return nil, query.Error
 	}
+	if len(body.Tags) > 0 {
+		if err := d.updateTags(&pointModel, body.Tags); err != nil {
+			return nil, err
+		}
+	}
+	query = d.DB.Model(&pointModel).Updates(&body)
+	if !fromPlugin { //stop looping
+		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)
+		if err != nil {
+			return nil, errors.New("ERROR failed to get plugin uuid")
+		}
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, plug.PluginConfId, pointModel.UUID)
+		d.Bus.RegisterTopic(t)
+		err = d.Bus.Emit(eventbus.CTX(), t, pointModel)
+		if err != nil {
+			return nil, errors.New("ERROR on device eventbus")
+		}
+	}
+	return pointModel, nil
 }
 
-// UpdatePoint returns the device for the given id or nil.
-func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, fromPlugin bool) (*model.Point, error) {
+// PointWrite returns the device for the given id or nil.
+func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
-	//TODO add in a check to make sure user doesn't set the addressID and the ObjectType the same as another point
-	//check if there is an existing device with this address code
-	_, err := checkObjectType(body.ObjectType)
-	if err != nil {
-		return nil, err
-	}
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -157,7 +159,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 				notNil = true
 			}
 		}
-
 		if notNil {
 			min, _ := highestPri.MinMaxInt() //get the highest priority
 			val := highestValue.Get(min)     //get the highest priority value
@@ -165,41 +166,161 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, writeValue, f
 			v := val.(float64)
 			body.PresentValue = &v //process the units as in temperature conversion
 		}
-		//body.ValueRaw = value //TODO set raw value
-		if !utils.FloatIsNilCheck(body.LimitMin) && !utils.FloatIsNilCheck(body.LimitMin) {
-			*body.PresentValue = utils.LimitToRange(*body.PresentValue, *body.LimitMin, *body.LimitMax)
-		}
-		if !utils.FloatIsNilCheck(body.ScaleInMin) && !utils.FloatIsNilCheck(body.ScaleInMax) && !utils.FloatIsNilCheck(body.ScaleOutMin) && !utils.FloatIsNilCheck(body.ScaleOutMax) {
-			*body.PresentValue = utils.Scale(*body.PresentValue, *body.ScaleInMin, *body.ScaleInMax, *body.ScaleOutMin, *body.ScaleOutMax)
-		}
-		value, display, ok, err := pointUnits(body)
-		if err != nil {
-			log.Errorf("ERROR on point invalid point unit")
-			return nil, err
-		}
-		if ok {
-			*body.PresentValue = value
-			body.ValueDisplay = display
-		}
-		if !utils.Unit32NilCheck(body.Decimal) {
-			*body.PresentValue = utils.RoundTo(*body.PresentValue, *body.Decimal)
-		}
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
-		if utils.BoolIsNil(pointModel.IsProducer) && utils.BoolIsNil(body.IsProducer) {
-			if compare(pointModel, body) {
-				_, err := d.ProducerWrite("point", pointModel)
-				if err != nil {
-					log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
-					return nil, err
+	}
+	if !fromPlugin { //stop looping
+		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)
+		if err != nil {
+			return nil, errors.New("ERROR failed to get plugin uuid")
+		}
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, plug.PluginConfId, pointModel.UUID)
+		d.Bus.RegisterTopic(t)
+		err = d.Bus.Emit(eventbus.CTX(), t, pointModel)
+		if err != nil {
+			return nil, errors.New("ERROR on device eventbus")
+		}
+	}
+	return pointModel, nil
+}
+
+// UpdatePointValue returns the device for the given id or nil.
+func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
+	var pointModel *model.Point
+	//TODO add in a check to make sure user doesn't set the addressID and the ObjectType the same as another point
+	//check if there is an existing device with this address code
+	_, err := checkObjectType(body.ObjectType)
+	if err != nil {
+		return nil, err
+	}
+	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	var presentValue *float64
+	if body.PresentValue == nil {
+		if pointModel.PresentValue != nil {
+			presentValue = pointModel.PresentValue
+		} else {
+			presentValue = body.PresentValue
+		}
+	} else {
+		presentValue = body.PresentValue
+	}
+	value := *body.PresentValue
+	body.ValueOriginal = &value
+	var limitMin *float64
+	if body.LimitMin == nil {
+		if pointModel.LimitMin != nil {
+			limitMin = pointModel.LimitMin
+		} else {
+			limitMin = body.LimitMin
+		}
+	}
+	var limitMax *float64
+	if body.LimitMax == nil {
+		if pointModel.LimitMax != nil {
+			limitMax = pointModel.LimitMax
+		} else {
+			limitMax = body.LimitMax
+		}
+	}
+	var scaleInMin *float64
+	if body.ScaleInMin == nil {
+		if pointModel.ScaleInMin != nil {
+			scaleInMin = pointModel.ScaleInMin
+		} else {
+			scaleInMin = body.ScaleInMin
+		}
+	}
+	var scaleInMax *float64
+	if body.ScaleInMax == nil {
+		if pointModel.ScaleInMax != nil {
+			scaleInMax = pointModel.ScaleInMax
+		} else {
+			scaleInMax = body.ScaleInMax
+		}
+	}
+	var scaleOutMin *float64
+	if body.ScaleOutMin == nil {
+		if pointModel.ScaleOutMin != nil {
+			scaleOutMin = pointModel.ScaleOutMin
+		} else {
+			scaleOutMin = body.ScaleOutMin
+		}
+	}
+	var scaleOutMax *float64
+	if body.ScaleOutMax == nil {
+		if pointModel.ScaleOutMax != nil {
+			scaleOutMax = pointModel.ScaleOutMax
+		} else {
+			scaleOutMax = body.ScaleOutMax
+		}
+	}
+	if body.Priority != nil {
+		priority := map[string]interface{}{}
+		priorityValue := reflect.ValueOf(*body.Priority)
+		typeOfPriority := priorityValue.Type()
+		highestPri := utils.NewArray()
+		highestValue := utils.NewMap()
+		for i := 0; i < priorityValue.NumField(); i++ {
+			if priorityValue.Field(i).Type().Kind().String() == "ptr" {
+				val := priorityValue.Field(i).Interface().(*float64)
+				if val == nil {
+					priority[typeOfPriority.Field(i).Name] = nil
+				} else {
+					highestPri.Add(i)
+					highestValue.Set(i, *val)
+					priority[typeOfPriority.Field(i).Name] = *val
 				}
 			}
 		}
+		notNil := false
+		for _, v := range priority { //check if there is a value in priority array
+			if v != nil {
+				notNil = true
+			}
+		}
+		if notNil {
+			min, _ := highestPri.MinMaxInt() //get the highest priority
+			val := highestValue.Get(min)     //get the highest priority value
+			body.CurrentPriority = &min      //TODO check conversion
+			v := val.(float64)
+			body.PresentValue = &v //process the units as in temperature conversion
+		}
+		d.DB.Model(&pointModel.Priority).Updates(&priority)
 	}
-	if len(body.Tags) > 0 {
-		if err = d.updateTags(&pointModel, body.Tags); err != nil {
-			return nil, err
+	presentValue = pointScale(presentValue, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax)
+	presentValue = pointRange(presentValue, limitMin, limitMax)
+	eval, err := pointEval(presentValue, pointModel.EnableEval, pointModel.Eval)
+	if err != nil {
+		log.Errorf("ERROR on point invalid point unit")
+		return nil, err
+	} else {
+		pointModel.PresentValue = eval
+	}
+	vv, display, ok, err := pointUnits(pointModel)
+	if err != nil {
+		log.Errorf("ERROR on point invalid point unit")
+		return nil, err
+	}
+	if ok {
+		presentValue = &vv
+		body.ValueDisplay = display
+	}
+	if !utils.Unit32NilCheck(pointModel.Decimal) {
+		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
+		presentValue = &val
+	}
+	if utils.BoolIsNil(pointModel.IsProducer) && utils.BoolIsNil(body.IsProducer) {
+		if compare(pointModel, body) {
+			_, err := d.ProducerWrite("point", pointModel)
+			if err != nil {
+				log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
+				return nil, err
+			}
 		}
 	}
+	body.PresentValue = presentValue
 	query = d.DB.Model(&pointModel).Updates(&body)
 	if !fromPlugin { //stop looping
 		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)

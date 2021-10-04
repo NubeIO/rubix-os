@@ -101,7 +101,7 @@ func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone, u
 				return nil, err
 			}
 			pnt.Priority = pri
-			_, err = d.UpdatePoint(p.ProducerThingUUID, pnt, true, false)
+			_, err = d.UpdatePointValue(p.ProducerThingUUID, pnt, false)
 			if err != nil {
 				return nil, err
 			}
@@ -138,7 +138,7 @@ func (d *GormDatabase) UpdateCloneAndHist(uuid string, body *model.WriterClone, 
 				return nil, err
 			}
 			pnt.Priority = pri
-			pntReturn, err := d.UpdatePoint(p.ProducerThingUUID, pnt, true, false)
+			pntReturn, err := d.UpdatePointValue(p.ProducerThingUUID, pnt, false)
 			if err != nil {
 				return nil, err
 			}

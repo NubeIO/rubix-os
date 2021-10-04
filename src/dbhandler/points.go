@@ -29,8 +29,16 @@ func (h *Handler) CreatePoint(body *model.Point) (*model.Point, error) {
 	return q, nil
 }
 
-func (h *Handler) UpdatePoint(uuid string, body *model.Point, writeValue, fromPlugin bool) (*model.Point, error) {
-	q, err := getDb().UpdatePoint(uuid, body, writeValue, fromPlugin)
+func (h *Handler) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
+	q, err := getDb().UpdatePoint(uuid, body, fromPlugin)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
+func (h *Handler) UpdatePointValue(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
+	q, err := getDb().UpdatePointValue(uuid, body, fromPlugin)
 	if err != nil {
 		return nil, err
 	}

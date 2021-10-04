@@ -81,7 +81,7 @@ func (d *GormDatabase) WizardLocalPointMapping(body *api.WizardLocalMapping) (bo
 			return false, err
 		}
 		pnt.IsProducer = utils.NewTrue()
-		_, err := d.UpdatePoint(pnt.UUID, pnt, false, false)
+		_, err := d.UpdatePoint(pnt.UUID, pnt, false)
 		if err != nil {
 			log.Errorf("wizard:  UpdatePoint: %v\n", err)
 			return false, err
