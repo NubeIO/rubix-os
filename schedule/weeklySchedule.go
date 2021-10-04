@@ -364,6 +364,19 @@ func ConvertDaysStringsToInt(weeklyScheduleEntry WeeklyScheduleEntry) WeeklySche
 	return weeklyScheduleEntry
 }
 
+//GetNextStartStop gets the next start and stop times from a single WeeklyScheduleCheckerResult
+func GetNextStartStop(weeklyResultObj WeeklyScheduleCheckerResult) (nextStart int64, nextStop int64) {
+	var start, stop int64
+	if weeklyResultObj.IsActive {
+		stop = weeklyResultObj.PeriodStop
+		start = weeklyResultObj.NextStart
+	} else {
+		stop = weeklyResultObj.PeriodStop
+		start = weeklyResultObj.PeriodStart
+	}
+	return start, stop
+}
+
 func WeeklyCheck(file string, scheduleName string) {
 	log.Println("WeeklyCheck()")
 	fileContentsInBytes, err := ioutil.ReadFile(file)
