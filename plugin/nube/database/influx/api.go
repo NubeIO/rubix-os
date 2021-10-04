@@ -8,33 +8,35 @@ import (
 	"net/http"
 )
 
-func bodyDevice(ctx *gin.Context) (dto influxmodel.Temperature, err error) {
+func bodyDevice(ctx *gin.Context) (dto influxmodel.HistPayload, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
 
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
+	influxSetting := new(InfluxSetting)
+	isc := New(influxSetting)
 	i.basePath = basePath
-	mux.GET("/influx/temperatures", func(ctx *gin.Context) {
-		records := Read("temperatures")
-		var temperatures []influxmodel.FluxTemperature
+	mux.GET("/influx/histories", func(ctx *gin.Context) {
+		records := isc.Read("hist")
+		var histories []influxmodel.HistPayload
 		for _, data := range records {
-			var temp influxmodel.FluxTemperature
+			var temp influxmodel.HistPayload
 			if err := json.Unmarshal(data, &temp); err != nil {
 				ctx.JSON(http.StatusBadRequest, err)
 			}
-			temperatures = append(temperatures, temp)
+			histories = append(histories, temp)
 		}
-		ctx.JSON(http.StatusOK, temperatures)
+		ctx.JSON(http.StatusOK, histories)
 	})
-	mux.POST("/influx/temperature", func(ctx *gin.Context) {
+	mux.POST("/influx/histories", func(ctx *gin.Context) {
 		body, err := bodyDevice(ctx)
 		if err != nil {
 			log.Info(err, "ERROR ON influx write")
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-			Write(body)
+			isc.WriteHist(body)
 			ctx.JSON(http.StatusOK, "ok")
 		}
 	})

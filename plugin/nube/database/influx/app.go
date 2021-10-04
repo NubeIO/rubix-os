@@ -1,30 +1,48 @@
 package main
 
 import (
-	"encoding/json"
-	"github.com/NubeDev/flow-framework/model"
+	"fmt"
 	influxmodel "github.com/NubeDev/flow-framework/plugin/nube/database/influx/model"
+	log "github.com/sirupsen/logrus"
 )
 
-//writeData to influx
-func (i *Instance) writeData() (bool, error) {
-	histories, err := i.db.GetProducerHistories()
-	var hist influxmodel.HistPayload
-	var histPri *model.Priority
+//syncInflux
+func (i *Instance) syncInflux() (bool, error) {
+	log.Info("InfluxDB sync has is been called")
+	integrations, err := i.db.GetEnabledIntegrationByPluginConfId(i.pluginUUID)
 	if err != nil {
-		return true, nil
+		return false, err
 	}
-	for _, e := range histories {
-		err := json.Unmarshal(e.DataStore, &histPri)
+	for _, integration := range integrations {
+		influxSetting := new(InfluxSetting)
+		influxSetting.ServerURL = integration.IP + ":" + integration.PORT
+		influxSetting.AuthToken = integration.IntegrationCredential.Token
+		isc := New(influxSetting)
+		histories, err := i.db.GetHistoriesForSync()
 		if err != nil {
 			return false, err
 		}
-		hist.WriterUUID = e.WriterUUID
-		hist.ThingWriterUUID = e.ThingWriterUUID
-		hist.ProducerUUID = e.ProducerUUID
-		hist.Timestamp = e.Timestamp
-		hist.Out16 = histPri.P16
-		WriteHist(hist)
+		for _, h := range histories {
+			var hist influxmodel.HistPayload
+			hist.ID = h.ID
+			hist.UUID = h.UUID
+			hist.Timestamp = h.Timestamp
+			hist.Value = h.Value
+			isc.WriteHist(hist)
+		}
+		historyCount := len(histories)
+		if historyCount > 0 {
+			_, err := i.db.UpdateHistoryLogLastSyncId(histories[historyCount-1].ID)
+			if err != nil {
+				return false, err
+			}
+			log.Info(fmt.Sprintf("Stored %v rows on %v", historyCount, path))
+		} else {
+			log.Info("Nothing to store, no new records")
+		}
+	}
+	if len(integrations) == 0 {
+		log.Info("InfluxDB can't be registered, integration details missing.")
 	}
 	return true, nil
 }

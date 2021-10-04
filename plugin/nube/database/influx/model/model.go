@@ -12,12 +12,10 @@ type Temperature struct {
 }
 
 type HistPayload struct {
-	ID              int       `json:"id"`
-	ProducerUUID    string    `json:"producer_uuid"`
-	WriterUUID      string    `json:"writer_uuid"`
-	ThingWriterUUID string    `json:"current_writer_uuid"`
-	Out16           *float64  `json:"out_16"`
-	Timestamp       time.Time `json:"timestamp"`
+	ID        int       `json:"id"`
+	UUID      string    `json:"uuid"`
+	Value     float64   `json:"value"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type FluxTemperature struct {
@@ -31,4 +29,11 @@ type FluxTemperature struct {
 	Field            string    `json:"_field"`
 	Value            float64   `json:"_value"`
 	Table            int       `json:"table"`
+}
+
+type InfluxTest struct {
+	Org       string
+	Bucket    string
+	ServerURL string
+	AuthToken string
 }

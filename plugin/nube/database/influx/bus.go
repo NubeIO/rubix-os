@@ -7,6 +7,7 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/mustafaturan/bus/v3"
 	log "github.com/sirupsen/logrus"
+	"strings"
 )
 
 func (i *Instance) BusServ() {
@@ -163,12 +164,14 @@ func (i *Instance) BusServ() {
 	handlerJobs := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
-				//send data to influx
-				_, err := i.writeData()
-				if err != nil {
-					return
+				//sync data to influx
+				if strings.Split(e.Topic, ".")[2] == path {
+					_, err := i.syncInflux()
+					if err != nil {
+						return
+					}
 				}
-
+				return
 			}()
 		},
 		Matcher: eventbus.JobTrigger,
@@ -176,5 +179,4 @@ func (i *Instance) BusServ() {
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerJobs)
-
 }
