@@ -17,3 +17,11 @@ func BoolIsNil(b *bool) bool {
 		return *b
 	}
 }
+
+func IsTrue(b *bool) bool {
+	if b == nil {
+		return false
+	} else {
+		return *b
+	}
+}

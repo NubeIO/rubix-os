@@ -105,6 +105,12 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	tagHandler := api.TagAPI{
 		DB: db,
 	}
+	deviceInfoHandler := api.DeviceInfoAPI{
+		DB: db,
+	}
+	syncFlowNetworkHandler := api.SyncFlowNetworkAPI{
+		DB: db,
+	}
 	dbGroup.SyncTopics()
 	//for the custom plugin endpoints you need to use the plugin token
 	//http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
@@ -416,6 +422,15 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			tagRoutes.DELETE(":tag", tagHandler.DeleteTag)
 		}
 
+		deviceInfoRoutes := apiRoutes.Group("/device_info")
+		{
+			deviceInfoRoutes.GET("", deviceInfoHandler.GetDeviceInfo)
+		}
+
+		syncRoutes := apiRoutes.Group("/sync")
+		{
+			syncRoutes.POST("/flow_network", syncFlowNetworkHandler.SyncFlowNetwork)
+		}
 	}
 
 	server.NewRouter(engine, apiRoutes)
