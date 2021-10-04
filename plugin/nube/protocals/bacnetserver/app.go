@@ -39,7 +39,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 		return nil, err
 	}
-	_, _ = i.db.UpdatePoint(pnt.UUID, &point, false, true)
+	_, _ = i.db.UpdatePointValue(pnt.UUID, &point, true)
 	if err != nil {
 		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 		return nil, err

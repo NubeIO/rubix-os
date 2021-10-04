@@ -124,6 +124,16 @@ var PointType = struct {
 	Thermistor10K: "10k thermistor",
 }
 
+var EvalExamples = struct {
+	Example             string `json:"example"`
+	BoolInvert          string `json:"bool_invert"`
+	CelsiusToFahrenheit string `json:"celsius_to_fahrenheit"`
+}{
+	Example:             "x + 0",
+	BoolInvert:          "1-x",
+	CelsiusToFahrenheit: "(x * 9/5) + 32",
+}
+
 //Point table
 type Point struct {
 	CommonUUID
@@ -134,11 +144,14 @@ type Point struct {
 	ValueDisplay         string   `json:"value_display,omitempty"` //point value, read only
 	ValueOriginal        *float64 `json:"value_original"`
 	CurrentPriority      *int     `json:"current_priority,omitempty"`
+	InSync               bool
 	Fallback             float64  `json:"fallback"`
 	DeviceUUID           string   `json:"device_uuid,omitempty" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	EnableWriteable      *bool    `json:"writeable,omitempty"`
 	IsOutput             *bool    `json:"is_output,omitempty"`
-	BoolInvert           *bool    `json:"bool_invert,omitempty"`
+	EnableEval           *bool    `json:"enable_eval,omitempty"`
+	Eval                 string   `json:"eval_expression,omitempty"`
+	EvalExample          string   `json:"eval_example,omitempty"`
 	COV                  *float64 `json:"cov"`
 	ObjectType           string   `json:"object_type,omitempty"`  //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
 	AddressId            *int     `json:"address_id"`             // for example a modbus address or bacnet address

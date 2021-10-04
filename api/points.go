@@ -10,7 +10,8 @@ type PointDatabase interface {
 	GetPoints(args Args) ([]*model.Point, error)
 	GetPoint(uuid string, args Args) (*model.Point, error)
 	CreatePoint(body *model.Point, addToParent string) (*model.Point, error)
-	UpdatePoint(uuid string, body *model.Point, writeValue, fromPlugin bool) (*model.Point, error)
+	UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
+	PointWrite(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
 	GetPointByField(field string, value string, withChildren bool) (*model.Point, error)
 	UpdatePointByFieldAndUnit(field string, value string, body *model.Point, writeValue bool) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
@@ -36,8 +37,14 @@ func (a *PointAPI) GetPoint(ctx *gin.Context) {
 func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	uuid := resolveID(ctx)
-	_, _, writeValue, _ := withConsumerArgs(ctx)
-	q, err := a.DB.UpdatePoint(uuid, body, writeValue, false)
+	q, err := a.DB.UpdatePoint(uuid, body, false)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *PointAPI) PointWrite(ctx *gin.Context) {
+	body, _ := getBODYPoint(ctx)
+	uuid := resolveID(ctx)
+	q, err := a.DB.PointWrite(uuid, body, false)
 	reposeHandler(q, err, ctx)
 }
 
@@ -61,7 +68,6 @@ func (a *PointAPI) CreatePoint(ctx *gin.Context) {
 	addToParent := parentArgs(ctx) //flowUUID
 	q, err := a.DB.CreatePoint(body, addToParent)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (a *PointAPI) DeletePoint(ctx *gin.Context) {
