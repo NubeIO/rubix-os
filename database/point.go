@@ -203,16 +203,23 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 		return nil, query.Error
 	}
 	var presentValue *float64
-	if body.PresentValue == nil {
-		if pointModel.PresentValue != nil {
-			presentValue = pointModel.PresentValue
-		} else {
-			presentValue = body.PresentValue
-		}
-	} else {
+	var presentValueIsNil = true
+	if body.PresentValue == nil && pointModel.PresentValue == nil {
+		presentValueIsNil = true
+	} else if body.PresentValue != nil {
+		presentValueIsNil = false
 		presentValue = body.PresentValue
+		_v := utils.Float64IsNil(presentValue)
+		body.ValueOriginal = &_v
+	} else if pointModel.PresentValue != nil {
+		presentValue = pointModel.PresentValue
+		_v := utils.Float64IsNil(presentValue)
+		body.ValueOriginal = &_v
+	} else {
+		presentValueIsNil = true
 	}
-	value := *body.PresentValue
+
+	value := utils.Float64IsNil(body.PresentValue)
 	body.ValueOriginal = &value
 	var limitMin *float64
 	if body.LimitMin == nil {
@@ -292,6 +299,12 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 			body.CurrentPriority = &min      //TODO check conversion
 			v := val.(float64)
 			body.PresentValue = &v //process the units as in temperature conversion
+			if presentValueIsNil {
+				_pv := v
+				presentValue = &_pv
+				_v := utils.Float64IsNil(presentValue)
+				body.ValueOriginal = &_v
+			}
 		}
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
 	}
