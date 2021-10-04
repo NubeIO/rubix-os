@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.0.6](https://github.com/NubeIO/flow-framework/tree/v0.0.6) (2021-10-05)
+- Fix bug on action write
+
 ## [v0.0.5](https://github.com/NubeIO/flow-framework/tree/v0.0.5) (2021-10-05)
 - Added point calc's, units, and eval
 - clean up on lora and modbus plugins
