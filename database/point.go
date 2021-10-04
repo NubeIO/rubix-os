@@ -70,6 +70,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
+	body.InSync = utils.NewFalse()
 	if body.Priority == nil {
 		body.Priority = &model.Priority{}
 	}
@@ -112,8 +113,12 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, err
 		}
 	}
-	pointModel.InSync = false
+	body.InSync = utils.NewFalse()
 	query = d.DB.Model(&pointModel).Updates(&body)
+	pnt, err := d.UpdatePointValue(uuid, pointModel, false)
+	if err != nil {
+		return nil, err
+	}
 	if !fromPlugin { //stop looping
 		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)
 		if err != nil {
@@ -126,7 +131,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, errors.New("ERROR on device eventbus")
 		}
 	}
-	return pointModel, nil
+	return pnt, nil
 }
 
 // PointWrite returns the device for the given id or nil.
@@ -292,7 +297,7 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 	}
 	presentValue = pointScale(presentValue, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax)
 	presentValue = pointRange(presentValue, limitMin, limitMax)
-	eval, err := pointEval(presentValue, pointModel.EnableEval, pointModel.Eval)
+	eval, err := pointEval(presentValue, body.ValueOriginal, pointModel.EvalMode, pointModel.Eval)
 	if err != nil {
 		log.Errorf("ERROR on point invalid point unit")
 		return nil, err

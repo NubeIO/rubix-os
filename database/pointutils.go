@@ -42,22 +42,27 @@ func pointScale(presentValue *float64, scaleInMin, scaleInMax, scaleOutMin, scal
 	return presentValue
 }
 
-func pointEval(presentValue *float64, enable *bool, evalString string) (value *float64, err error) {
-	if utils.BoolIsNil(enable) {
-		exp := evalString
-		if evalString != "" {
-			eval, err := gval.Full().NewEvaluable(exp)
-			if err != nil && presentValue != nil {
-				return nil, err
-			}
-			v, err := eval.EvalFloat64(context.Background(), map[string]interface{}{"x": *presentValue})
-			if err != nil {
-				return nil, err
-			}
-			_v := v
-			return &_v, nil
-		}
+func pointEval(presentValue, valueOriginal *float64, evalMode, evalString string) (value *float64, err error) {
+	var val *float64
+	if evalMode == model.EvalMode.CalcAfterScale || evalMode == model.EvalMode.Enable {
+		val = presentValue
+	} else if evalMode == model.EvalMode.CalcOnValueOriginal {
+		val = valueOriginal
+	} else {
+		val = presentValue
 	}
-	return presentValue, nil
-
+	exp := evalString
+	if evalString != "" && evalMode != model.EvalMode.Disabled {
+		eval, err := gval.Full().NewEvaluable(exp)
+		if err != nil && val != nil {
+			return nil, err
+		}
+		v, err := eval.EvalFloat64(context.Background(), map[string]interface{}{"x": *val})
+		if err != nil {
+			return nil, err
+		}
+		_v := v
+		return &_v, nil
+	}
+	return val, nil
 }
