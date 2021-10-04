@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
 	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
@@ -90,6 +91,7 @@ func (s *SerialSetting) Loop() {
 	}
 	count := 0
 	scanner := bufio.NewScanner(Port)
+	fmt.Println(scanner)
 	for scanner.Scan() {
 		var data = scanner.Text()
 		if decoder.CheckPayloadLength(data) {

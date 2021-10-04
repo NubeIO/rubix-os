@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"github.com/NubeDev/flow-framework/api"
 )
 
@@ -13,11 +12,16 @@ func (i *Instance) Enable() error {
 	var arg api.Args
 	arg.SerialConnection = true
 	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
+	if q != nil {
+		i.networkUUID = q.UUID
+	} else {
+		i.networkUUID = "NA"
+	}
 	if err == nil {
 		i.networkUUID = q.UUID
 		err = i.SerialOpen()
 		if err != nil {
-			return errors.New("error on enable lora-plugin")
+			//return errors.New("error on enable lora-plugin")
 		}
 	}
 	return nil

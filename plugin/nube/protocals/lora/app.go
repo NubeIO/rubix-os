@@ -119,7 +119,7 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 func (i *Instance) updatePoint(body *model.Point) error {
 	addr := body.AddressUUID
 	_, err := i.db.UpdatePointByFieldAndUnit("address_uuid", addr, body)
-	log.Infof("lora UpdatePointByFieldAndUnit: AddressUUID: %s value:%v UnitType:%s \n", addr, body.PresentValue, body.UnitType)
+	log.Infof("lora UpdatePointByFieldAndUnit: AddressUUID: %s value:%v UnitType:%s \n", addr, *body.PresentValue, body.UnitType)
 	if err != nil {
 		log.Errorf("lora: issue on UpdatePointByFieldAndType: %v\n", err)
 		return err
