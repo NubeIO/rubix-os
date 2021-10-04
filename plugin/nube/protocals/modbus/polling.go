@@ -66,14 +66,14 @@ func (i *Instance) PollingTCP(p polling) error {
 	arg.SerialConnection = true
 	arg.IpConnection = true
 	f := func() (bool, error) {
-		log.Infof("modbus: LOOP COUNT: %v\n", counter)
-		counter++
 		nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, arg)
 		if err != nil {
 			return false, err
 		}
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
+				log.Infof("modbus: LOOP COUNT: %v\n", counter)
+				counter++
 				for _, dev := range net.Devices { //DEVICES
 					var client Client
 					var dCheck devCheck

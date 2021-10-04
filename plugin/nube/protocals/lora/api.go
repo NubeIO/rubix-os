@@ -30,8 +30,9 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			err := i.SerialOpen()
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, err)
+			} else {
+				ctx.JSON(http.StatusOK, "ok")
 			}
-			ctx.JSON(http.StatusOK, "ok")
 		}
 	})
 	mux.GET(listSerial, func(ctx *gin.Context) {
@@ -47,7 +48,6 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-
 			ctx.JSON(http.StatusOK, serial)
 		}
 	})

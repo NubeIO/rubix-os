@@ -14,12 +14,10 @@ func (i *Instance) Enable() error {
 	var arg api.Args
 	arg.IpConnection = true
 	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
-	if err != nil {
-		return errors.New("there is no network added please add one")
-	}
-	i.networkUUID = q.UUID
-	if err != nil {
-		return errors.New("error on enable lora-plugin")
+	if q != nil {
+		i.networkUUID = q.UUID
+	} else {
+		i.networkUUID = "NA"
 	}
 	if i.config.EnablePolling {
 		if !i.pollingEnabled {
@@ -30,13 +28,11 @@ func (i *Instance) Enable() error {
 				err := i.PollingTCP(arg)
 				if err != nil {
 					log.Errorf("modbus: POLLING ERROR on routine: %v\n", err)
-					return err
 				}
 				return nil
 			}()
 			if err != nil {
 				log.Errorf("modbus: POLLING ERROR: %v\n", err)
-				return errors.New("error on starting polling")
 			}
 		}
 	}
