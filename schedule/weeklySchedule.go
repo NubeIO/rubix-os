@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -357,8 +358,10 @@ func getDurationTillNextScheduleDay(today DaysOfTheWeek, nextDay DaysOfTheWeek) 
 
 //ConvertDaysStringsToInt converts strings of weekdays to integers
 func ConvertDaysStringsToInt(weeklyScheduleEntry WeeklyScheduleEntry) WeeklyScheduleEntry {
+	var lowerCaseStringDay string
 	for _, v := range weeklyScheduleEntry.Days {
-		dayInt := DaysMap[v]
+		lowerCaseStringDay = strings.ToLower(v)
+		dayInt := DaysMap[lowerCaseStringDay]
 		weeklyScheduleEntry.DaysNums = append(weeklyScheduleEntry.DaysNums, dayInt)
 	}
 	return weeklyScheduleEntry
