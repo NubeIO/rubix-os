@@ -21,7 +21,7 @@ func pointUnits(pointModel *model.Point) (value float64, displayValue string, ok
 }
 
 func pointRange(presentValue, limitMin, limitMax *float64) (value *float64) {
-	if !utils.FloatIsNilCheck(limitMin) && !utils.FloatIsNilCheck(limitMax) {
+	if !utils.FloatIsNilCheck(presentValue) && !utils.FloatIsNilCheck(limitMin) && !utils.FloatIsNilCheck(limitMax) {
 		if *limitMin == 0 && *limitMax == 0 {
 			return presentValue
 		}
@@ -32,7 +32,7 @@ func pointRange(presentValue, limitMin, limitMax *float64) (value *float64) {
 }
 
 func pointScale(presentValue *float64, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax *float64) (value *float64) {
-	if !utils.FloatIsNilCheck(scaleInMin) && !utils.FloatIsNilCheck(scaleInMax) && !utils.FloatIsNilCheck(scaleOutMin) && !utils.FloatIsNilCheck(scaleOutMax) {
+	if !utils.FloatIsNilCheck(presentValue) && !utils.FloatIsNilCheck(scaleInMin) && !utils.FloatIsNilCheck(scaleInMax) && !utils.FloatIsNilCheck(scaleOutMin) && !utils.FloatIsNilCheck(scaleOutMax) {
 		if *scaleInMin == 0 && *scaleInMax == 0 && *scaleOutMin == 0 && *scaleOutMax == 0 {
 			return presentValue
 		}
