@@ -19,7 +19,13 @@ type Stream struct {
 
 type StreamClone struct {
 	CommonStream
+	CommonSourceUUID
 	FlowNetworkCloneUUID string      `json:"flow_network_clone_uuid" gorm:"TYPE:string REFERENCES flow_network_clones;not null;default:null"`
 	Consumers            []*Consumer `json:"consumers" gorm:"constraint:OnDelete:CASCADE;"`
 	Tags                 []*Tag      `json:"tags" gorm:"many2many:stream_clones_tags;constraint:OnDelete:CASCADE"`
+}
+
+type StreamSync struct {
+	GlobalUUID string
+	Stream     *Stream
 }

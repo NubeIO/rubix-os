@@ -111,6 +111,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	syncFlowNetworkHandler := api.SyncFlowNetworkAPI{
 		DB: db,
 	}
+	syncStreamHandler := api.SyncStreamAPI{
+		DB: db,
+	}
 	dbGroup.SyncTopics()
 	//for the custom plugin endpoints you need to use the plugin token
 	//http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
@@ -430,6 +433,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		syncRoutes := apiRoutes.Group("/sync")
 		{
 			syncRoutes.POST("/flow_network", syncFlowNetworkHandler.SyncFlowNetwork)
+			syncRoutes.POST("/stream", syncStreamHandler.SyncStream)
 		}
 	}
 

@@ -40,6 +40,7 @@ func (d *GormDatabase) GetOneFlowNetworkByArgs(args api.Args) (*model.FlowNetwor
 /*
 - Create UUID
 - Create Name if doesn't exist
+- Create SyncUUID
 - If it's pointing local device make that is_remote=false forcefully (straightforward: 0.0.0.0 can be remote)
 - If local then don't apply rollback feature, it leads deadlock
 - Create flow_network
@@ -52,6 +53,7 @@ func (d *GormDatabase) GetOneFlowNetworkByArgs(args api.Args) (*model.FlowNetwor
 func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
 	body.Name = nameIsNil(body.Name)
+	body.SyncUUID, _ = utils.MakeUUID()
 	if !utils.IsTrue(body.IsRemote) || body.FlowIP == "0.0.0.0" || body.FlowIP == "127.0.0.0" || body.FlowIP == "localhost" {
 		body.FlowHTTPS = utils.NewFalse()
 		body.FlowIP = "0.0.0.0"

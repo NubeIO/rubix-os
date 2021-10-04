@@ -350,6 +350,11 @@ func getBODYStream(ctx *gin.Context) (dto *model.Stream, err error) {
 	return dto, err
 }
 
+func getBodyStreamSync(ctx *gin.Context) (dto *model.StreamSync, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYCommandGroup(ctx *gin.Context) (dto *model.CommandGroup, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
