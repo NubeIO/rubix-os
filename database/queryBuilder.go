@@ -8,15 +8,15 @@ import (
 
 func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 	query := d.DB
-	if args.Streams {
+	if args.WithStreams {
 		query = query.Preload("Streams")
-		if args.Producers {
+		if args.WithProducers {
 			query = query.Preload("Streams.Producers")
-			if args.WriterClones {
+			if args.WithWriterClones {
 				query = query.Preload("Streams.Producers.WriterClones")
 			}
 		}
-		if args.CommandGroups {
+		if args.WithCommandGroups {
 			query = query.Preload("Streams.CommandGroups")
 		}
 	}
@@ -37,11 +37,11 @@ func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildFlowNetworkCloneQuery(args api.Args) *gorm.DB {
 	query := d.DB
-	if args.StreamClones {
+	if args.WithStreamClones {
 		query = query.Preload("StreamClones")
-		if args.Consumers {
+		if args.WithConsumers {
 			query = query.Preload("StreamClones.Consumers")
-			if args.Writers {
+			if args.WithWriters {
 				query = query.Preload("StreamClones.Consumers.Writers")
 			}
 		}
@@ -63,19 +63,19 @@ func (d *GormDatabase) buildFlowNetworkCloneQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	query := d.DB
-	if args.FlowNetworks {
+	if args.WithFlowNetworks {
 		query = query.Preload("FlowNetworks")
 	}
-	if args.Producers {
+	if args.WithProducers {
 		query = query.Preload("Producers")
-		if args.WriterClones {
+		if args.WithWriterClones {
 			query = query.Preload("Producers.WriterClones")
 		}
 	}
-	if args.CommandGroups {
+	if args.WithCommandGroups {
 		query = query.Preload("CommandGroups")
 	}
-	if args.Tags {
+	if args.WithTags {
 		query = query.Preload("Tags")
 	}
 	return query
@@ -83,13 +83,13 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
 	query := d.DB
-	if args.Consumers {
+	if args.WithConsumers {
 		query = query.Preload("Consumers")
-		if args.Writers {
+		if args.WithWriters {
 			query = query.Preload("Consumers.Writers")
 		}
 	}
-	if args.Tags {
+	if args.WithTags {
 		query = query.Preload("Tags")
 	}
 	return query
@@ -97,10 +97,10 @@ func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
 	query := d.DB
-	if args.Writers {
+	if args.WithWriters {
 		query = query.Preload("Writers")
 	}
-	if args.Tags {
+	if args.WithTags {
 		query = query.Preload("Tags")
 	}
 	return query
@@ -108,10 +108,10 @@ func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 	query := d.DB
-	if args.Writers {
+	if args.WithWriterClones {
 		query = query.Preload("WriterClones")
 	}
-	if args.Tags {
+	if args.WithTags {
 		query = query.Preload("Tags")
 	}
 	return query
@@ -119,22 +119,19 @@ func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 	query := d.DB
-	if args.Devices {
+	if args.WithDevices {
 		query = query.Preload("Devices")
 	}
-	if args.Points { //TODO args.Priority always returned false, fuck knows why
+	if args.WithPoints {
 		query = query.Preload("Devices.Points").Preload("Devices.Points.Priority")
 	}
-	//if args.Points {
-	//	query = query.Preload("Devices.Points")
-	//}
-	if args.IpConnection {
+	if args.WithIpConnection {
 		query = query.Preload("IpConnection")
 	}
-	if args.SerialConnection {
+	if args.WithSerialConnection {
 		query = query.Preload("SerialConnection")
 	}
-	if args.Tags {
+	if args.WithTags {
 		query = query.Preload("Tags")
 	}
 	return query
@@ -142,10 +139,10 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	query := d.DB
-	if args.Points {
+	if args.WithPoints {
 		query = query.Preload("Points")
 	}
-	if args.Tags {
+	if args.WithTags {
 		query = query.Preload("Tags")
 	}
 	return query
@@ -153,10 +150,10 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	query := d.DB
-	if args.Priority {
+	if args.WithPriority {
 		query = query.Preload("Priority")
 	}
-	if args.Tags {
+	if args.WithTags {
 		query = query.Preload("Tags")
 	}
 	return query
@@ -167,19 +164,19 @@ func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 	if args.Networks {
 		query = query.Preload("Networks")
 	}
-	if args.Devices {
+	if args.WithDevices {
 		query = query.Preload("Devices")
 	}
-	if args.Points {
+	if args.WithPoints {
 		query = query.Preload("Points")
 	}
-	if args.Streams {
+	if args.WithStreams {
 		query = query.Preload("Streams")
 	}
-	if args.Producers {
+	if args.WithProducers {
 		query = query.Preload("Producers")
 	}
-	if args.Consumers {
+	if args.WithConsumers {
 		query = query.Preload("Consumers")
 	}
 	return query

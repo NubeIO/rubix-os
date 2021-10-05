@@ -24,7 +24,7 @@ var err error
 func (i *Instance) SerialOpen() error {
 	s := new(SerialSetting)
 	var arg api.Args
-	arg.SerialConnection = true
+	arg.WithSerialConnection = true
 	net, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
 	if err != nil {
 		return err

@@ -12,7 +12,7 @@ func (i *Instance) Enable() error {
 	i.setUUID()
 	i.BusServ()
 	var arg api.Args
-	arg.IpConnection = true
+	arg.WithIpConnection = true
 	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
 	if q != nil {
 		i.networkUUID = q.UUID
