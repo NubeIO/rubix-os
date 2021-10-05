@@ -1,9 +1,9 @@
 package main
 
 import (
-	"errors"
 	"github.com/NubeDev/flow-framework/api"
 	rest "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/restclient"
+	"github.com/labstack/gommon/log"
 )
 
 // Enable implements plugin.Plugin
@@ -14,12 +14,13 @@ func (i *Instance) Enable() error {
 	var arg api.Args
 	arg.IpConnection = true
 	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
-	if err != nil {
-		return errors.New("there is no network added please add one")
+	if q != nil {
+		i.networkUUID = q.UUID
+	} else {
+		i.networkUUID = "NA"
 	}
-	i.networkUUID = q.UUID
 	if err != nil {
-		return errors.New("error on enable lora-plugin")
+		log.Error("error on enable lora-plugin")
 	}
 	i.REST = rest.NewChirp(chirpName, chirpPass, ip, port)
 	return nil
