@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NubeDev/flow-framework/api"
+	"github.com/labstack/gommon/log"
 )
 
 // Enable implements plugin.Plugin
@@ -21,7 +22,7 @@ func (i *Instance) Enable() error {
 		i.networkUUID = q.UUID
 		err = i.SerialOpen()
 		if err != nil {
-			//return errors.New("error on enable lora-plugin")
+			log.Error("error on enable lora-plugin")
 		}
 	}
 	return nil
