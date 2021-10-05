@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.0.7](https://github.com/NubeIO/flow-framework/tree/v0.0.7) (2021-10-05)
+- Updates to lora and modbus plugin
+
 ## [v0.0.6](https://github.com/NubeIO/flow-framework/tree/v0.0.6) (2021-10-05)
 - Fix bug on action write
 
