@@ -11,7 +11,7 @@ type Consumer struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	StreamCloneUUID     string             `json:"stream_clone_uuid,omitempty" gorm:"TYPE:string REFERENCES stream_clones;not null;default:null"`
+	CommonSyncUUID
 	ProducerUUID        string             `json:"producer_uuid,omitempty"`
 	ProducerThingName   string             `json:"producer_thing_name,omitempty"`
 	ProducerThingUUID   string             `json:"producer_thing_uuid,omitempty"` // this is the remote point UUID
@@ -20,6 +20,7 @@ type Consumer struct {
 	ProducerThingType   string             `json:"producer_thing_type,omitempty"`
 	ConsumerApplication string             `json:"consumer_application,omitempty"`
 	CurrentWriterUUID   string             `json:"current_writer_uuid,omitempty"` // this could come from any flow-network on any instance
+	StreamCloneUUID     string             `json:"stream_clone_uuid,omitempty" gorm:"TYPE:string REFERENCES stream_clones;not null;default:null"`
 	DataStore           datatypes.JSON     `json:"data_store,omitempty"`
 	Writers             []*Writer          `json:"writers,omitempty" gorm:"constraint:OnDelete:CASCADE;"`
 	ConsumerHistories   []*ConsumerHistory `json:"consumer_histories,omitempty" gorm:"constraint:OnDelete:CASCADE;"`

@@ -120,6 +120,6 @@ type CommonProducerPermissions struct {
 	AllowCRUD bool `json:"allow_crud"` //not sure if this will be used, but it will allow the producer to update the producer
 }
 
-type CommonCurrentProducer struct {
+type CommonCurrentWriterUUID struct {
 	ThingWriterUUID string `json:"current_writer_uuid"`
 }

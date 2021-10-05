@@ -33,7 +33,7 @@ func (d *GormDatabase) GetConsumer(uuid string, args api.Args) (*model.Consumer,
 func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, error) {
 	_, err := d.GetStream(body.StreamCloneUUID, api.Args{})
 	if err != nil {
-		return nil, errorMsg("GetStreamClone", "error on trying to get validate the stream_clone UUID", nil)
+		return nil, newError("GetStreamClone", "error on trying to get validate the stream_clone UUID")
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Consumer)
 	body.Name = nameIsNil(body.Name)

@@ -28,7 +28,7 @@ func (d *GormDatabase) GetTag(tag string, args api.Args) (*model.Tag, error) {
 func (d *GormDatabase) CreateTag(body *model.Tag) (*model.Tag, error) {
 	err := d.DB.Create(&body).Error
 	if err != nil {
-		return nil, errorMsg("CreateTag", "error on trying to add a new tag", err)
+		return nil, newDetailedError("CreateTag", "error on trying to add a new tag", err)
 	}
 	return body, nil
 }
