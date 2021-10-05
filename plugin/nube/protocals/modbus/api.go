@@ -16,9 +16,12 @@ type Scan struct {
 }
 
 type Body struct {
-	Client    `json:"client"`
-	Operation `json:"request_body"`
-	Scan      `json:"scan"`
+	Client        `json:"client"`
+	Operation     `json:"request_body"`
+	Scan          `json:"scan"`
+	ReturnArray   bool  `json:"return_array"`
+	IsSerial      bool  `json:"is_serial"`
+	DeviceAddress uint8 `json:"device_address"`
 }
 
 func bodyClient(ctx *gin.Context) (dto Body, err error) {
@@ -116,9 +119,9 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, serial)
 		}
 	})
-	mux.POST("/modbus/point/tcp/operation", func(ctx *gin.Context) {
+	mux.POST("/modbus/point/operation", func(ctx *gin.Context) {
 		body, _ := bodyClient(ctx)
-		err := i.setClient(body.Client, "", false, false)
+		err := i.setClient(body.Client, "", false, body.IsSerial)
 		if err != nil {
 			log.Info(err, "ERROR ON set modbus client")
 			ctx.JSON(http.StatusBadRequest, err)
@@ -127,6 +130,11 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		if !isConnected() {
 			ctx.JSON(http.StatusBadRequest, "modbus not enabled")
 		} else {
+			err := cli.SetUnitId(body.DeviceAddress)
+			if err != nil {
+				ctx.JSON(http.StatusBadRequest, "request was invalid, failed to SetUnitId")
+				return
+			}
 			request, err := parseRequest(body.Operation)
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, "request was invalid, try readCoil or writeCoil")
@@ -136,10 +144,13 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, err)
 			} else {
-				log.Info(responseValue)
-				ctx.JSON(http.StatusOK, rArray)
+				if body.ReturnArray {
+					log.Info(responseValue)
+					ctx.JSON(http.StatusOK, rArray)
+				} else {
+					ctx.JSON(http.StatusOK, responseValue)
+				}
 			}
-
 		}
 	})
 	mux.POST("/modbus/wizard/tcp", func(ctx *gin.Context) {
@@ -147,7 +158,6 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-
 			ctx.JSON(http.StatusOK, serial)
 		}
 	})

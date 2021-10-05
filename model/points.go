@@ -156,7 +156,7 @@ type Point struct {
 	ValueDisplay         string   `json:"value_display,omitempty"` //point value, read only
 	ValueOriginal        *float64 `json:"value_original"`
 	CurrentPriority      *int     `json:"current_priority,omitempty"`
-	InSync               *bool
+	InSync               *bool    `json:"in_sync"`
 	Fallback             float64  `json:"fallback"`
 	DeviceUUID           string   `json:"device_uuid,omitempty" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	EnableWriteable      *bool    `json:"writeable,omitempty"`

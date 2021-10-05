@@ -135,6 +135,7 @@ func (i *Instance) PollingTCP(p polling) error {
 									log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 								}
 								responseRaw, responseValue, err := networkRequest(cli, request)
+								log.Infof("modbus: ObjectType: %s  Addr: %d ARRAY: %v\n", ops.ObjectType, ops.Addr, responseRaw)
 								var _pnt model.Point
 								if isWrite(ops.ObjectType) { //IS WRITE
 									_pnt.UUID = pnt.UUID
@@ -181,7 +182,7 @@ func (i *Instance) PollingTCP(p polling) error {
 									_pnt.UUID = pnt.UUID
 									rs := responseValue
 									_pnt.PresentValue = &rs //update point value
-									_pnt.ValueRaw = valueRaw(responseRaw)
+									//_pnt.ValueRaw = valueRaw(responseRaw)
 									cov := utils.Float64IsNil(pnt.COV)
 									covEvent, _ := utils.COV(ops.WriteValue, utils.Float64IsNil(pnt.ValueOriginal), cov)
 									if covEvent {
@@ -193,12 +194,11 @@ func (i *Instance) PollingTCP(p polling) error {
 											_pnt.InSync = utils.NewTrue()
 											log.Infof("modbus: ObjectType---------: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										}
-
 									} else {
 										_pnt.UUID = pnt.UUID
 										rs = responseValue
 										_pnt.PresentValue = &rs //update point value
-										_pnt.ValueRaw = valueRaw(responseRaw)
+										//_pnt.ValueRaw = valueRaw(responseRaw)
 										_, err = i.pointUpdate(pnt.UUID, &_pnt)
 										i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
 										if err != nil {

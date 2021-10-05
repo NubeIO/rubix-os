@@ -12,6 +12,18 @@ const (
 	wizardSerial  = "/lora/wizard/serial"
 )
 
+// wizard
+type wizard struct {
+	SerialPort string `json:"serial_port"`
+	SensorID   string `json:"sensor_id"`
+	SensorType string `json:"sensor_type"`
+}
+
+func bodyWizard(ctx *gin.Context) (dto wizard, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
@@ -44,7 +56,8 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 	mux.POST(wizardSerial, func(ctx *gin.Context) {
-		serial, err := i.wizardSerial()
+		body, err := bodyWizard(ctx)
+		serial, err := i.wizardSerial(body)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {

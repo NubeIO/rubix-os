@@ -180,6 +180,20 @@ func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorSt
 				if err != nil {
 					return
 				}
+			case model.PointTags.Light:
+				pnt.UnitType = e //set point type
+				f := float64(s.Light)
+				err := i.devTHLM(pnt, f)
+				if err != nil {
+					return
+				}
+			case model.PointTags.Motion:
+				pnt.UnitType = e //set point type
+				f := float64(s.Motion)
+				err := i.devTHLM(pnt, f)
+				if err != nil {
+					return
+				}
 
 			}
 		}
@@ -187,9 +201,21 @@ func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorSt
 }
 
 //wizard make a network/dev/pnt
-func (i *Instance) wizardSerial() (string, error) {
+func (i *Instance) wizardSerial(body wizard) (string, error) {
+	sp := "/dev/ttyACM0"
+	if body.SerialPort != "" {
+		sp = body.SerialPort
+	}
+	id := "AAB296C4"
+	if body.SensorID != "" {
+		id = body.SensorID
+	}
+	st := string(decoder.THLM)
+	if body.SensorType != "" {
+		st = body.SensorType
+	}
 	var ser model.SerialConnection
-	ser.SerialPort = "/dev/ttyACM0"
+	ser.SerialPort = sp
 	ser.BaudRate = 38400
 
 	var net model.Network
@@ -200,9 +226,9 @@ func (i *Instance) wizardSerial() (string, error) {
 
 	var dev model.Device
 	dev.Name = model.TransProtocol.Lora
-	dev.AddressUUID = "AAB296C4"
+	dev.AddressUUID = id
 	dev.Manufacture = model.CommonNaming.NubeIO
-	dev.Model = string(decoder.THLM)
+	dev.Model = st
 
 	var pnt model.Point
 	_, err = i.db.WizardNewNetDevPnt("lora", &net, &dev, &pnt)
