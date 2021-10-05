@@ -2,14 +2,16 @@ package database
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-func (d *GormDatabase) SyncStream(body *model.StreamSync) (*model.StreamClone, error) {
+func (d *GormDatabase) SyncStream(body *model.SyncStream) (*model.StreamClone, error) {
 	var flowNetworkClone *model.FlowNetworkClone
-	if err := d.DB.Find(&flowNetworkClone).Error; err != nil {
-		return nil, err
+	if err := d.DB.Where("global_uuid = ?", body.GlobalUUID).Find(&flowNetworkClone).Error; err != nil {
+		return nil, errors.New(fmt.Sprintf("we don't have flow_network_clone with global_uuid=%s", body.GlobalUUID))
 	}
 	mStream, err := json.Marshal(body.Stream)
 	if err != nil {

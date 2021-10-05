@@ -49,11 +49,11 @@ func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
 	}
 	for _, fn := range *flowNetworks {
 		cli := client.NewSessionWithToken(fn.FlowToken, fn.FlowIP, fn.FlowPort)
-		streamSyncBody := model.StreamSync{
+		syncStreamBody := model.SyncStream{
 			GlobalUUID: deviceInfo.GlobalUUID,
 			Stream:     body,
 		}
-		_, err = cli.SyncStream(&streamSyncBody)
+		_, err = cli.SyncStream(&syncStreamBody)
 		if err != nil {
 			log.Error(err)
 		}

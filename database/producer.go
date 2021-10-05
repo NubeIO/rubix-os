@@ -46,9 +46,11 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	if body.ProducerThingClass == model.ThingClass.Point {
 		pnt, err := d.GetPoint(body.ProducerThingUUID, api.Args{})
 		if err != nil {
-			return nil, errors.New("point not found, please supply a valid point uuid")
+			return nil, errors.New("point not found, please supply a valid point producer_thing_uuid")
 		}
 		producerThingName = pnt.Name
+	} else {
+		return nil, errors.New("we are not supporting producer_thing_class other than point for now")
 	}
 	_, err := d.GetStream(body.StreamUUID, api.Args{})
 	if err != nil {

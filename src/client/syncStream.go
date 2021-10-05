@@ -5,7 +5,7 @@ import (
 	"github.com/NubeDev/flow-framework/model"
 )
 
-func (a *FlowClient) SyncStream(body *model.StreamSync) (*model.StreamClone, error) {
+func (a *FlowClient) SyncStream(body *model.SyncStream) (*model.StreamClone, error) {
 	resp, err := a.client.R().
 		SetResult(&model.StreamClone{}).
 		SetBody(body).

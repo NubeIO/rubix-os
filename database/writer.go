@@ -3,7 +3,9 @@ package database
 import (
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeDev/flow-framework/src/client"
 	"github.com/NubeDev/flow-framework/src/streams"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
@@ -23,12 +25,33 @@ func (d *GormDatabase) GetWriters() ([]*model.Writer, error) {
 	return consumersModel, nil
 }
 
-// CreateWriter make it
 func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
+	if body.WriterThingClass == model.ThingClass.Point {
+		_, err := d.GetPoint(body.WriterThingUUID, api.Args{})
+		if err != nil {
+			return nil, errors.New("point not found, please supply a valid point writer_thing_uuid")
+		}
+	} else {
+		return nil, errors.New("we are not supporting writer_thing_class other than point for now")
+	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Writer)
+	body.SyncUUID, _ = utils.MakeUUID()
 	query := d.DB.Create(body)
 	if query.Error != nil {
 		return nil, query.Error
+	}
+	// ignore err coz CASCADE delete is there, so there must be data
+	consumer, _ := d.GetConsumer(body.ConsumerUUID, api.Args{})
+	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
+	fn, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
+	cli := client.NewSessionWithToken(fn.FlowToken, fn.FlowIP, fn.FlowPort)
+	syncWriterBody := model.SyncWriter{
+		Writer:       *body,
+		ProducerUUID: consumer.ProducerUUID,
+	}
+	_, err := cli.SyncWriter(&syncWriterBody)
+	if err != nil {
+		log.Error(err)
 	}
 	return body, nil
 }

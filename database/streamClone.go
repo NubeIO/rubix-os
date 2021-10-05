@@ -7,7 +7,7 @@ import (
 
 func (d *GormDatabase) GetStreamClones(args api.Args) ([]*model.StreamClone, error) {
 	var streamClonesModel []*model.StreamClone
-	query := d.buildStreamQuery(args)
+	query := d.buildStreamCloneQuery(args)
 	query.Find(&streamClonesModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -17,7 +17,7 @@ func (d *GormDatabase) GetStreamClones(args api.Args) ([]*model.StreamClone, err
 
 func (d *GormDatabase) GetStreamClone(uuid string, args api.Args) (*model.StreamClone, error) {
 	var streamCloneModel *model.StreamClone
-	query := d.buildStreamQuery(args)
+	query := d.buildStreamCloneQuery(args)
 	query = query.Where("uuid = ? ", uuid).First(&streamCloneModel)
 	if query.Error != nil {
 		return nil, query.Error

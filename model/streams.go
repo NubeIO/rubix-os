@@ -25,7 +25,7 @@ type StreamClone struct {
 	Tags                 []*Tag      `json:"tags" gorm:"many2many:stream_clones_tags;constraint:OnDelete:CASCADE"`
 }
 
-type StreamSync struct {
+type SyncStream struct {
 	GlobalUUID string
 	Stream     *Stream
 }

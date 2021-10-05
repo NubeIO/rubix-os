@@ -306,6 +306,11 @@ func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
 	return dto, err
 }
 
+func getBodySyncWriter(ctx *gin.Context) (dto *model.SyncWriter, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYPlugin(ctx *gin.Context) (dto *model.PluginConf, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -341,7 +346,7 @@ func getBODYStream(ctx *gin.Context) (dto *model.Stream, err error) {
 	return dto, err
 }
 
-func getBodyStreamSync(ctx *gin.Context) (dto *model.StreamSync, err error) {
+func getBodySyncStream(ctx *gin.Context) (dto *model.SyncStream, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

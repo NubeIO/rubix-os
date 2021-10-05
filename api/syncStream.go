@@ -6,7 +6,7 @@ import (
 )
 
 type SyncStreamDatabase interface {
-	SyncStream(fn *model.StreamSync) (*model.StreamClone, error)
+	SyncStream(fn *model.SyncStream) (*model.StreamClone, error)
 }
 
 type SyncStreamAPI struct {
@@ -14,7 +14,7 @@ type SyncStreamAPI struct {
 }
 
 func (a *SyncStreamAPI) SyncStream(ctx *gin.Context) {
-	body, _ := getBodyStreamSync(ctx)
+	body, _ := getBodySyncStream(ctx)
 	q, err := a.DB.SyncStream(body)
 	reposeHandler(q, err, ctx)
 }
