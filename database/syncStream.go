@@ -19,7 +19,7 @@ func (d *GormDatabase) SyncStream(body *model.StreamSync) (*model.StreamClone, e
 	if err = json.Unmarshal(mStream, &streamClone); err != nil {
 		return nil, err
 	}
-	streamClone.UUID = utils.MakeTopicUUID(model.CommonNaming.WriterClone)
+	streamClone.UUID = utils.MakeTopicUUID(model.CommonNaming.StreamClone)
 	streamClone.FlowNetworkCloneUUID = flowNetworkClone.UUID
 	streamClone.SourceUUID = body.Stream.UUID
 	var streamClonesModel []*model.StreamClone

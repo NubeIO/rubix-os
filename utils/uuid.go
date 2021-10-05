@@ -25,7 +25,8 @@ func MakeTopicUUID(attribute string) string {
 	divider := "_"
 
 	fln := "fln" //flow network
-	str := "str" //stream gateway
+	str := "str" //stream
+	stc := "stc" //stream clone
 	pro := "pro" //producers
 	prh := "prh" //producer history
 	wrc := "wrc" //writerClone
@@ -60,6 +61,8 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", pnt, divider, u)
 	case model.CommonNaming.Stream:
 		return fmt.Sprintf("%s%s%s", str, divider, u)
+	case model.CommonNaming.StreamClone:
+		return fmt.Sprintf("%s%s%s", stc, divider, u)
 	case model.CommonNaming.StreamList:
 		return fmt.Sprintf("%s%s%s", stl, divider, u)
 	case model.CommonNaming.Job:

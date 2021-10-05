@@ -58,6 +58,9 @@ func (d *GormDatabase) buildFlowNetworkCloneQuery(args api.Args) *gorm.DB {
 	if args.DeviceId != nil {
 		query = query.Where("device_id = ?", *args.DeviceId)
 	}
+	if args.UUID != nil {
+		query = query.Where("uuid = ?", *args.UUID)
+	}
 	return query
 }
 

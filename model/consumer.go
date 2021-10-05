@@ -12,11 +12,10 @@ type Consumer struct {
 	CommonDescription
 	CommonEnable
 	CommonSyncUUID
-	ProducerUUID        string             `json:"producer_uuid,omitempty"`
+	ProducerUUID        string             `json:"producer_uuid,omitempty" gorm:"uniqueIndex;not null"`
 	ProducerThingName   string             `json:"producer_thing_name,omitempty"`
 	ProducerThingUUID   string             `json:"producer_thing_uuid,omitempty"` // this is the remote point UUID
 	ProducerThingClass  string             `json:"producer_thing_class,omitempty"`
-	ProducerThingRef    string             `json:"producer_thing_reference,omitempty"`
 	ProducerThingType   string             `json:"producer_thing_type,omitempty"`
 	ConsumerApplication string             `json:"consumer_application,omitempty"`
 	CurrentWriterUUID   string             `json:"current_writer_uuid,omitempty"` // this could come from any flow-network on any instance

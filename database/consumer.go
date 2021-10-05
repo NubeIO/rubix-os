@@ -31,12 +31,30 @@ func (d *GormDatabase) GetConsumer(uuid string, args api.Args) (*model.Consumer,
 }
 
 func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, error) {
-	_, err := d.GetStream(body.StreamCloneUUID, api.Args{})
+	streamClone, err := d.GetStreamClone(body.StreamCloneUUID, api.Args{})
 	if err != nil {
-		return nil, newError("GetStreamClone", "error on trying to get validate the stream_clone UUID")
+		return nil, newError("GetStreamClone", "error on trying to get validate the stream_clone_uuid")
+	}
+	flowNetworkCloneUUID := streamClone.FlowNetworkCloneUUID
+	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{UUID: &flowNetworkCloneUUID})
+	if err != nil {
+		return nil, newError("GetOneFlowNetworkCloneByArgs", "error on trying to get validate flow_network_clone from stream_clone_uuid")
+	}
+	cli := client.NewSessionWithToken(fnc.FlowToken, fnc.FlowIP, fnc.FlowPort)
+	producer, err := cli.GetProducer(body.ProducerUUID)
+	if err != nil {
+		return nil, newError("GetProducer", "error on finding producer by producer_uuid")
+	}
+	if streamClone.SourceUUID != producer.StreamUUID {
+		return nil, newError("Validation failure", "consumer stream_clones & producer stream are different source of truth")
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Consumer)
 	body.Name = nameIsNil(body.Name)
+	body.SyncUUID = producer.SyncUUID
+	body.ProducerThingName = producer.ProducerThingName
+	body.ProducerThingUUID = producer.ProducerThingUUID
+	body.ProducerThingClass = producer.ProducerThingClass
+	body.ProducerThingType = producer.ProducerThingType
 	query := d.DB.Create(body)
 	if query.Error != nil {
 		return nil, query.Error

@@ -79,7 +79,7 @@ type CommonUUID struct {
 }
 
 type CommonSourceUUID struct {
-	SourceUUID string `json:"source_uuid"`
+	SourceUUID string `json:"source_uuid" gorm:"uniqueIndex;not null"`
 }
 
 type CommonSyncUUID struct {

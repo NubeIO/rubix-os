@@ -20,7 +20,9 @@ type Args struct {
 	AskResponse          string
 	Write                string
 	ThingType            string
+	UUID                 *string
 	FlowNetworkUUID      string
+	FlowNetworkCloneUUID *string
 	WriteHistory         string
 	WriteConsumer        string
 	Field                string
@@ -68,7 +70,9 @@ var ArgsType = struct {
 	AskResponse          string
 	Write                string
 	ThingType            string
+	UUID                 string
 	FlowNetworkUUID      string
+	FlowNetworkCloneUUID string
 	WriteHistory         string
 	WriteConsumer        string
 	Field                string
@@ -112,9 +116,11 @@ var ArgsType = struct {
 	Search:               "search",
 	AskRefresh:           "ask_refresh",
 	AskResponse:          "ask_response",
-	Write:                "write",             //consumer to write a value
-	ThingType:            "thing_type",        //the type of thing like a point
-	FlowNetworkUUID:      "flow_network_uuid", //the type of thing like a point
+	Write:                "write",      //consumer to write a value
+	ThingType:            "thing_type", //the type of thing like a point
+	UUID:                 "uuid",
+	FlowNetworkUUID:      "flow_network_uuid",
+	FlowNetworkCloneUUID: "flow_network_clone_uuid",
 	WriteHistory:         "write_history",
 	WriteConsumer:        "write_consumer",
 	Field:                "field",
