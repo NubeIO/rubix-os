@@ -14,7 +14,7 @@ type Client struct {
 	SerialPort string        `json:"serial_port"`
 	BaudRate   uint          `json:"baud_rate"`
 	StopBits   uint          `json:"stop_bits"`
-	Parity     string        `json:"parity"` //none, odd, even
+	Parity     string        `json:"parity"` //none, odd, even DEFAULT IS PARITY_NONE
 	DataBits   uint          `json:"data_bits"`
 	Timeout    time.Duration `json:"device_timeout_in_ms"`
 }
@@ -33,10 +33,10 @@ func (i *Instance) setClient(client Client, networkUUID string, cacheClient, isS
 		//TODO add in a check if client with same details exists
 		c, err = modbus.NewClient(&modbus.ClientConfiguration{
 			URL:      serialPort,
-			Speed:    client.BaudRate, // default
-			DataBits: client.DataBits, // default, optional
-			Parity:   parity,          // default, optional
-			StopBits: 2,               // default if no parity, optional
+			Speed:    client.BaudRate,
+			DataBits: client.DataBits,
+			Parity:   parity,
+			StopBits: client.StopBits,
 			Timeout:  client.Timeout * time.Millisecond,
 		})
 	} else {

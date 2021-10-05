@@ -153,6 +153,10 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		var res []bool
 		if o.IsCoil {
 			res, err = client.ReadCoils(o.Addr, o.Length)
+			if err != nil {
+				log.Errorf("modbus: failed to read coils/discrete inputs: %v\n", err)
+				return nil, 0, err
+			}
 			return res, utils.ToFloat64(res[0]), err
 		} else {
 			res, err = client.ReadDiscreteInputs(o.Addr, o.Length)
