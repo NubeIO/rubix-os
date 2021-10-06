@@ -202,7 +202,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		apiRoutes.Group("").POST("/messages", messageHandler.CreateMessage)
 
 		// apiRoutes.Use(authentication.RequireAdmin())
-
 		userRoutes := apiRoutes.Group("/users")
 		{
 			userRoutes.GET("", userHandler.GetUsers)
@@ -227,7 +226,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			}
 		}
 
-		localStorageFlowNetworkRoutes := apiRoutes.Group("/localstorage_flow_network")
+		localStorageFlowNetworkRoutes := apiRoutes.Group("/flow/networks/localstorage")
 		{
 			localStorageFlowNetworkRoutes.GET("", localStorageFlowNetworkHandler.GetLocalStorageFlowNetwork)
 			localStorageFlowNetworkRoutes.PATCH("", localStorageFlowNetworkHandler.UpdateLocalStorageFlowNetwork)
@@ -244,7 +243,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			historyProducerRoutes.DELETE("/:producer_uuid", historyHandler.DeleteProducerHistoriesByProducerUUID)
 		}
 
-		flowNetworkRoutes := apiRoutes.Group("/flow_networks")
+		flowNetworkRoutes := apiRoutes.Group("/flow/networks")
 		{
 			flowNetworkRoutes.GET("", flowNetwork.GetFlowNetworks)
 			flowNetworkRoutes.POST("", flowNetwork.CreateFlowNetwork)
@@ -255,7 +254,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			flowNetworkRoutes.DELETE("/drop", flowNetwork.DropFlowNetworks)
 		}
 
-		flowNetworkCloneRoutes := apiRoutes.Group("/flow_network_clones")
+		flowNetworkCloneRoutes := apiRoutes.Group("/flow/networks/clones")
 		{
 			flowNetworkCloneRoutes.GET("", flowNetworkCloneHandler.GetFlowNetworkClones)
 			flowNetworkCloneRoutes.GET("/:uuid", flowNetworkCloneHandler.GetFlowNetworkClone)
@@ -273,7 +272,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			streamRoutes.DELETE("/drop", gatewayHandler.DropStreams)
 		}
 
-		streamCloneRoutes := apiRoutes.Group("/stream_clones")
+		streamCloneRoutes := apiRoutes.Group("/streams/clones")
 		{
 			streamCloneRoutes.GET("", streamCloneHandler.GetStreamClones)
 			streamCloneRoutes.GET("/:uuid", streamCloneHandler.GetStreamClone)
@@ -334,7 +333,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
 			producerRoutes.DELETE("/drop", producerHandler.DropProducers)
 
-			producerWriterCloneRoutes := producerRoutes.Group("/writer_clones")
+			producerWriterCloneRoutes := producerRoutes.Group("/writers/clones")
 			{
 				producerWriterCloneRoutes.GET("", writerCloneHandler.GetWriterClones)
 				producerWriterCloneRoutes.POST("", writerCloneHandler.CreateWriterClone)
@@ -429,14 +428,14 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			tagRoutes.DELETE(":tag", tagHandler.DeleteTag)
 		}
 
-		deviceInfoRoutes := apiRoutes.Group("/device_info")
+		deviceInfoRoutes := apiRoutes.Group("/system/device")
 		{
 			deviceInfoRoutes.GET("", deviceInfoHandler.GetDeviceInfo)
 		}
 
 		syncRoutes := apiRoutes.Group("/sync")
 		{
-			syncRoutes.POST("/flow_network", syncFlowNetworkHandler.SyncFlowNetwork)
+			syncRoutes.POST("/flow/network", syncFlowNetworkHandler.SyncFlowNetwork)
 			syncRoutes.POST("/stream", syncStreamHandler.SyncStream)
 			syncRoutes.POST("/writer", syncWriterHandler.SyncWriter)
 		}
