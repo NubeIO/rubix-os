@@ -68,6 +68,8 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var blockRouteValueBool []model.BlockRouteValueBool
 	var sourceParams []model.SourceParameter
 	var links []model.Link
+	var history []model.History
+	var historyLog []model.HistoryLog
 	var models = []interface{}{
 		&alerts,
 		&user,
@@ -105,6 +107,8 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&blockRouteValueBool,
 		&sourceParams,
 		&links,
+		&history,
+		&historyLog,
 	}
 
 	for _, v := range models {

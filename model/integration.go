@@ -1,6 +1,6 @@
 package model
 
-//IntegrationCredentials is to be used when a plugin wants to use username and password for an
+//IntegrationCredential is to be used when a plugin wants to use username and password for an
 type IntegrationCredentials struct {
 	CommonUUID
 	CommonName
@@ -20,12 +20,12 @@ type Integration struct {
 	CommonDescription
 	CommonEnable
 	CommonFault
-	IP                     string                   `json:"ip"`
-	PORT                   string                   `json:"port"`
-	PluginName             string                   `json:"plugin_name"`
-	IntegrationType        string                   `json:"integration_type"`
-	PluginConfId           string                   `json:"plugin_conf_id" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
-	MqttConnection         []MqttConnection         `json:"mqtt_connections" gorm:"constraint:OnDelete:CASCADE;"`
-	IntegrationCredentials []IntegrationCredentials `json:"integration_credentials" gorm:"constraint:OnDelete:CASCADE;"`
+	IP                    string                 `json:"ip"`
+	PORT                  string                 `json:"port"`
+	PluginName            string                 `json:"plugin_name"`
+	IntegrationType       string                 `json:"integration_type"`
+	PluginConfId          string                 `json:"plugin_conf_id" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
+	MqttConnection        []MqttConnection       `json:"mqtt_connections" gorm:"constraint:OnDelete:CASCADE;"`
+	IntegrationCredential IntegrationCredentials `json:"integration_credentials" gorm:"constraint:OnDelete:CASCADE;"`
 	CommonCreated
 }

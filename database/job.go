@@ -36,6 +36,15 @@ func (d *GormDatabase) GetJob(uuid string) (*model.Job, error) {
 	return jobModel, nil
 }
 
+func (d *GormDatabase) GetJobByPluginConfId(pcId string) (*model.Job, error) {
+	var jobModel *model.Job
+	query := d.DB.Where("plugin_conf_id = ?", pcId).Find(&jobModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return jobModel, nil
+}
+
 // DeleteJob delete a job
 func (d *GormDatabase) DeleteJob(uuid string) (bool, error) {
 	var jobModel *model.Job

@@ -11,8 +11,8 @@ import (
 )
 
 type Jobs struct {
-	db      dbhandler.Handler
-	Enabled bool
+	db         dbhandler.Handler
+	Enabled    bool
 }
 
 var cron *gocron.Scheduler
@@ -26,34 +26,22 @@ func (j *Jobs) InitCron() {
 
 }
 
-func (j *Jobs) task() {
+func (j *Jobs) task(mp string, uuid string) {
 	fmt.Println("TASK RUN")
-	t := fmt.Sprintf("%s.%s.%s", eventbus.JobTrigger, "aa", "aa")
-	bus.RegisterTopic("job.trigger.aa.aa") //TODO send via job uuid
-	//aa := cron.Jobs()
-	//for i, e := range aa {
-	//	//fmt.Println("JOB TAGS", i, e.Tags())
-	//}
-	err := bus.Emit(eventbus.CTX(), t, "MEG OVER BUS") //TODO send via job uuid
+	t := fmt.Sprintf("%s.%s.%s", eventbus.JobTrigger, mp, uuid)
+	bus.RegisterTopic(t)
+	err := bus.Emit(eventbus.CTX(), t, "MEG OVER BUS")
 	if err != nil {
 		//TODO FIX ERROR
 	}
 }
 
 func (j *Jobs) JobAdd(body *model.Job) error {
-	job, err := j.db.CreateJob(body) //TODO is being added to the DB for the plugin influx but maybe its not needed
+	pc, err := j.db.GetPlugin(body.PluginConfId)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
-	if job.UUID == "" {
-		return errors.New("jobs failed to create a job")
-	}
-	if job.Frequency == "" {
-		return errors.New("invalid time frequency, example 5m")
-	}
-	_, err = cron.Every(body.Frequency).Tag(job.UUID).Do(j.task)
-
+	_, err = cron.Every(body.Frequency).Tag(body.UUID).Do(j.task, pc.ModulePath, body.UUID)
 	if err != nil {
 		return err
 	}

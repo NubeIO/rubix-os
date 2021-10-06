@@ -20,6 +20,14 @@ func (h *Handler) GetJob(uuid string) (*model.Job, error) {
 	return q, nil
 }
 
+func (h *Handler) GetJobByPluginConfId(pcId string) (*model.Job, error) {
+	q, err := getDb().GetJobByPluginConfId(pcId)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
 func (h *Handler) CreateJob(body *model.Job) (*model.Job, error) {
 	q, err := getDb().CreateJob(body)
 	if err != nil {

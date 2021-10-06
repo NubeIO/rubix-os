@@ -47,6 +47,17 @@ func (d *GormDatabase) GetIntegration(uuid string) (*model.Integration, error) {
 	return wcm, nil
 }
 
+// GetEnabledIntegrationByPluginConfId get it
+func (d *GormDatabase) GetEnabledIntegrationByPluginConfId(pcId string) ([]*model.Integration, error) {
+	var wcm []*model.Integration
+	query := d.DB.Preload("IntegrationCredential").Where("plugin_conf_id = ? ", pcId).
+		Where("enable = ?", true).Find(&wcm)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return wcm, nil
+}
+
 // DeleteIntegration deletes it
 func (d *GormDatabase) DeleteIntegration(uuid string) (bool, error) {
 	var wcm *model.Integration

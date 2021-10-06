@@ -7,42 +7,52 @@ import (
 	influxmodel "github.com/NubeDev/flow-framework/plugin/nube/database/influx/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
-const token = "biwutj0neNcj5oI_SbvIKMh7jFNf7Y_hRfApSmqpCKH9bpuHBRXLoJtyEZua2LmeYJWvDKxCisy0Kzc4_qYX2A=="
-const bucket = "mydb"
-const org = "mydb"
+type InfluxSetting struct {
+	Org       string
+	Bucket    string
+	ServerURL string
+	AuthToken string
+}
 
-/*
-THIS IS HERE JUST TO DEMO THE INFLUX-2 API
-*/
-
-// Write function writes
-func Write(t influxmodel.Temperature) {
-	client := influxdb2.NewClient("http://localhost:8086", token)
-	writeAPI := client.WriteAPI(org, bucket)
-	p := influxdb2.NewPoint(Measurement(t), Tags(t), Fields(t), time.Now())
-	writeAPI.WritePoint(p)
+func New(s *InfluxSetting) *InfluxSetting {
+	if s.Org == "" {
+		s.Org = "mydb"
+	}
+	if s.Bucket == "" {
+		s.Bucket = "mydb"
+	}
+	if s.ServerURL == "" {
+		s.ServerURL = "http://localhost:8086"
+	}
+	return &InfluxSetting{
+		Org:       s.Org,
+		Bucket:    s.Bucket,
+		ServerURL: s.ServerURL,
+		AuthToken: s.AuthToken,
+	}
 }
 
 // WriteHist function writes histories
-func WriteHist(t influxmodel.HistPayload) {
-	client := influxdb2.NewClient("http://localhost:8086", token)
-	writeAPI := client.WriteAPI(org, bucket)
+func (i *InfluxSetting) WriteHist(t influxmodel.HistPayload) {
+	client := influxdb2.NewClient(i.ServerURL, i.AuthToken)
+	writeAPI := client.WriteAPI(i.Org, i.Bucket)
 	p := influxdb2.NewPoint(
-		MeasurementHist(),
-		TagsHist(t),
-		FieldsHist(t),
+		measurementHist(),
+		tagsHist(t),
+		fieldsHist(t),
 		t.Timestamp)
 	writeAPI.WritePoint(p)
+	writeAPI.Flush()
+	client.Close()
 }
 
-// Read functions reads all the temperatures saved inside of InfluxDB and returns them as array
-func Read(measurement string) [][]byte {
-	client := influxdb2.NewClient("http://localhost:8086", token)
-	queryAPI := client.QueryAPI(org)
-	fluxQuery := fmt.Sprintf(`from(bucket:"%v") |> range(start:-5) |> filter(fn:(r) => r._measurement == "%v")`, bucket, measurement)
+// Read functions reads all the histories saved inside of InfluxDB and returns them as array
+func (i *InfluxSetting) Read(measurement string) [][]byte {
+	client := influxdb2.NewClient(i.ServerURL, i.AuthToken)
+	queryAPI := client.QueryAPI(i.Org)
+	fluxQuery := fmt.Sprintf(`from(bucket:"%v") |> range(start:-5) |> filter(fn:(r) => r._measurement == "%v")`, i.Bucket, measurement)
 	logrus.Infof("FLUX QUERY: %v", fluxQuery)
 	result, err := queryAPI.Query(context.Background(), fluxQuery)
 	if err != nil {
@@ -57,45 +67,22 @@ func Read(measurement string) [][]byte {
 		}
 		temperaturesArray = append(temperaturesArray, j)
 	}
+	client.Close()
 	return temperaturesArray
 }
 
-func TagsHist(t influxmodel.HistPayload) map[string]string {
+func tagsHist(t influxmodel.HistPayload) map[string]string {
 	newMap := make(map[string]string)
-	newMap["producer_uuid"] = t.ProducerUUID
-	newMap["writer_uuid"] = t.WriterUUID
-	newMap["current_writer_uuid"] = t.ThingWriterUUID
+	newMap["uuid"] = t.UUID
 	return newMap
 }
 
-func FieldsHist(t influxmodel.HistPayload) map[string]interface{} {
+func fieldsHist(t influxmodel.HistPayload) map[string]interface{} {
 	newMap := make(map[string]interface{})
-	if t.Out16 != nil {
-		newMap["out_16"] = *t.Out16
-	}
-
+	newMap["value"] = t.Value
 	return newMap
 }
 
-func MeasurementHist() string {
+func measurementHist() string {
 	return "hist"
-}
-
-func Tags(t influxmodel.Temperature) map[string]string {
-	newMap := make(map[string]string)
-	newMap["city"] = t.City
-	newMap["country"] = t.Country
-	newMap["temperature_scale"] = t.TemperatureScale
-	return newMap
-}
-
-func Fields(t influxmodel.Temperature) map[string]interface{} {
-	newMap := make(map[string]interface{})
-	newMap["temperature_value"] = t.TemperatureValue
-
-	return newMap
-}
-
-func Measurement(t influxmodel.Temperature) string {
-	return "temperatures"
 }
