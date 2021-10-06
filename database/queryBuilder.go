@@ -95,6 +95,9 @@ func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
 	if args.WithTags {
 		query = query.Preload("Tags")
 	}
+	if args.SourceUUID != nil {
+		query = query.Where("source_uuid = ?", *args.SourceUUID)
+	}
 	return query
 }
 

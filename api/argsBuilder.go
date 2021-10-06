@@ -116,6 +116,9 @@ func buildStreamCloneArgs(ctx *gin.Context) Args {
 	args.WithConsumers, _ = toBool(ctx.DefaultQuery(aType.WithConsumers, aDefault.WithConsumers))
 	args.WithWriters, _ = toBool(ctx.DefaultQuery(aType.WithWriters, aDefault.WithWriters))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
+		args.SourceUUID = &value
+	}
 	return args
 }
 
