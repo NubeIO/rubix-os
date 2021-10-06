@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/src/client"
 	"github.com/NubeDev/flow-framework/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 func (d *GormDatabase) GetStreams(args api.Args) ([]*model.Stream, error) {
@@ -30,11 +32,44 @@ func (d *GormDatabase) GetStream(uuid string, args api.Args) (*model.Stream, err
 func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
 	body.Name = nameIsNil(body.Name)
-	err := d.DB.Create(&body).Error
+	body.SyncUUID, _ = utils.MakeUUID()
+	if err := d.DB.Create(&body).Error; err != nil {
+		return nil, err
+	}
+	flowNetworks, err := d.GetFlowNetworksFromStreamUUID(body.UUID)
 	if err != nil {
-		return nil, errorMsg("CreateStreamGateway", "error on trying to add a new stream gateway", nil)
+		return nil, err
+	}
+	deviceInfo, err := d.GetDeviceInfo()
+	if err != nil {
+		return nil, err
+	}
+	if flowNetworks == nil {
+		return body, nil
+	}
+	for _, fn := range *flowNetworks {
+		cli := client.NewSessionWithToken(fn.FlowToken, fn.FlowIP, fn.FlowPort)
+		syncStreamBody := model.SyncStream{
+			GlobalUUID: deviceInfo.GlobalUUID,
+			Stream:     body,
+		}
+		_, err = cli.SyncStream(&syncStreamBody)
+		if err != nil {
+			log.Error(err)
+		}
 	}
 	return body, nil
+}
+
+func (d *GormDatabase) GetFlowNetworksFromStreamUUID(streamUUID string) (*[]model.FlowNetwork, error) {
+	var flowNetworks *[]model.FlowNetwork
+	err := d.DB.
+		Joins("JOIN flow_networks_streams ON flow_networks_streams.flow_network_uuid = flow_networks.uuid").
+		Where("flow_networks_streams.stream_uuid IN (?)", streamUUID).Find(&flowNetworks).Error
+	if err != nil {
+		return nil, nil
+	}
+	return flowNetworks, nil
 }
 
 func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {

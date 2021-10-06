@@ -78,6 +78,14 @@ type CommonUUID struct {
 	UUID string `json:"uuid" sql:"uuid" gorm:"type:varchar(255);unique;primaryKey"`
 }
 
+type CommonSourceUUID struct {
+	SourceUUID string `json:"source_uuid" gorm:"uniqueIndex;not null"`
+}
+
+type CommonSyncUUID struct {
+	SyncUUID string `json:"sync_uuid"`
+}
+
 type CommonCreated struct {
 	CreatedAt time.Time `json:"created_on,omitempty"`
 	UpdatedAt time.Time `json:"updated_on,omitempty"`
@@ -112,6 +120,6 @@ type CommonProducerPermissions struct {
 	AllowCRUD bool `json:"allow_crud"` //not sure if this will be used, but it will allow the producer to update the producer
 }
 
-type CommonCurrentProducer struct {
-	ThingWriterUUID string `json:"current_writer_uuid"`
+type CommonCurrentWriterUUID struct {
+	CurrentWriterUUID string `json:"current_writer_uuid"`
 }

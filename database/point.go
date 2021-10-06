@@ -357,22 +357,14 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 }
 
 // GetPointByField returns the point for the given field ie name or nil.
-func (d *GormDatabase) GetPointByField(field string, value string, withChildren bool) (*model.Point, error) {
+func (d *GormDatabase) GetPointByField(field string, value string) (*model.Point, error) {
 	var pointModel *model.Point
 	f := fmt.Sprintf("%s = ? ", field)
-	if withChildren { // drop child to reduce json size
-		query := d.DB.Where(f, value).Preload("Priority").First(&pointModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return pointModel, nil
-	} else {
-		query := d.DB.Where(f, value).First(&pointModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return pointModel, nil
+	query := d.DB.Where(f, value).Preload("Priority").First(&pointModel)
+	if query.Error != nil {
+		return nil, query.Error
 	}
+	return pointModel, nil
 }
 
 // PointAndQuery will do an SQL AND

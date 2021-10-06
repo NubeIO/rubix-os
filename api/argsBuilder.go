@@ -36,30 +36,6 @@ func parentArgs(ctx *gin.Context) (AddToParent string) {
 	return args.AddToParent
 }
 
-//withChildrenArgs
-func queryFields(ctx *gin.Context) (order string, limit string) {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault //ASC or DESC
-	args.Order = ctx.DefaultQuery(aType.Order, aDefault.Order)
-	args.Limit = ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints)
-	return args.Order, args.Limit
-}
-
-//withChildrenArgs
-func withChildrenArgs(ctx *gin.Context) (withChildren bool, withPoints bool, withParent bool) {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.WithChildren = ctx.DefaultQuery(aType.WithChildren, aDefault.WithChildren)
-	args.WithPoints = ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints)
-	args.WithParent = ctx.DefaultQuery(aType.WithParent, aDefault.WithParent)
-	withChildren, _ = toBool(args.WithChildren) //?with_children=true&points=true
-	withPoints, _ = toBool(args.WithPoints)
-	withParent, _ = toBool(args.WithParent)
-	return withChildren, withPoints, withParent
-}
-
 //withConsumerArgs
 func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, write bool, updateProducer bool) {
 	var args Args
@@ -80,11 +56,32 @@ func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
-	args.Producers, _ = toBool(ctx.DefaultQuery(aType.Producers, aDefault.Producers))
-	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
-	args.CommandGroups, _ = toBool(ctx.DefaultQuery(aType.CommandGroups, aDefault.CommandGroups))
-	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
+	args.WithStreams, _ = toBool(ctx.DefaultQuery(aType.WithStreams, aDefault.WithStreams))
+	args.WithProducers, _ = toBool(ctx.DefaultQuery(aType.WithProducers, aDefault.WithProducers))
+	args.WithCommandGroups, _ = toBool(ctx.DefaultQuery(aType.WithCommandGroups, aDefault.WithCommandGroups))
+	args.WithWriterClones, _ = toBool(ctx.DefaultQuery(aType.WithWriterClones, aDefault.WithWriterClones))
+	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
+		args.GlobalUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.ClientId); ok {
+		args.ClientId = &value
+	}
+	if value, ok := ctx.GetQuery(aType.SiteId); ok {
+		args.SiteId = &value
+	}
+	if value, ok := ctx.GetQuery(aType.DeviceId); ok {
+		args.DeviceId = &value
+	}
+	return args
+}
+
+func buildFlowNetworkCloneArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithStreamClones, _ = toBool(ctx.DefaultQuery(aType.WithStreamClones, aDefault.WithStreamClones))
+	args.WithConsumers, _ = toBool(ctx.DefaultQuery(aType.WithConsumers, aDefault.WithConsumers))
+	args.WithWriters, _ = toBool(ctx.DefaultQuery(aType.WithWriters, aDefault.WithWriters))
 	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
 		args.GlobalUUID = &value
 	}
@@ -104,12 +101,24 @@ func buildStreamArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.FlowNetworks, _ = toBool(ctx.DefaultQuery(aType.FlowNetworks, aDefault.FlowNetworks))
-	args.Producers, _ = toBool(ctx.DefaultQuery(aType.Producers, aDefault.Producers))
-	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
-	args.CommandGroups, _ = toBool(ctx.DefaultQuery(aType.CommandGroups, aDefault.CommandGroups))
-	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
-	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
+	args.WithFlowNetworks, _ = toBool(ctx.DefaultQuery(aType.WithFlowNetworks, aDefault.WithFlowNetworks))
+	args.WithProducers, _ = toBool(ctx.DefaultQuery(aType.WithProducers, aDefault.WithProducers))
+	args.WithCommandGroups, _ = toBool(ctx.DefaultQuery(aType.WithCommandGroups, aDefault.WithCommandGroups))
+	args.WithWriterClones, _ = toBool(ctx.DefaultQuery(aType.WithWriterClones, aDefault.WithWriterClones))
+	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	return args
+}
+
+func buildStreamCloneArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithConsumers, _ = toBool(ctx.DefaultQuery(aType.WithConsumers, aDefault.WithConsumers))
+	args.WithWriters, _ = toBool(ctx.DefaultQuery(aType.WithWriters, aDefault.WithWriters))
+	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
+		args.SourceUUID = &value
+	}
 	return args
 }
 
@@ -117,8 +126,8 @@ func buildConsumerArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
-	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
+	args.WithWriters, _ = toBool(ctx.DefaultQuery(aType.WithWriters, aDefault.WithWriters))
+	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	return args
 }
 
@@ -126,8 +135,8 @@ func buildProducerArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.Writers, _ = toBool(ctx.DefaultQuery(aType.Writers, aDefault.Writers))
-	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
+	args.WithWriterClones, _ = toBool(ctx.DefaultQuery(aType.WithWriterClones, aDefault.WithWriterClones))
+	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	return args
 }
 
@@ -135,11 +144,11 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.Devices, _ = toBool(ctx.DefaultQuery(aType.Devices, aDefault.Devices))
-	args.Points, _ = toBool(ctx.DefaultQuery(aType.Points, aDefault.Points))
-	args.IpConnection, _ = toBool(ctx.DefaultQuery(aType.IpConnection, aDefault.IpConnection))
-	args.SerialConnection, _ = toBool(ctx.DefaultQuery(aType.SerialConnection, aDefault.SerialConnection))
-	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
+	args.WithDevices, _ = toBool(ctx.DefaultQuery(aType.WithDevices, aDefault.WithDevices))
+	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
+	args.WithIpConnection, _ = toBool(ctx.DefaultQuery(aType.WithIpConnection, aDefault.WithIpConnection))
+	args.WithSerialConnection, _ = toBool(ctx.DefaultQuery(aType.WithSerialConnection, aDefault.WithSerialConnection))
+	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	return args
 }
 
@@ -147,10 +156,10 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.Points, _ = toBool(ctx.DefaultQuery(aType.Points, aDefault.Points))
-	args.IpConnection, _ = toBool(ctx.DefaultQuery(aType.IpConnection, aDefault.IpConnection))
-	args.SerialConnection, _ = toBool(ctx.DefaultQuery(aType.SerialConnection, aDefault.SerialConnection))
-	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
+	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
+	args.WithIpConnection, _ = toBool(ctx.DefaultQuery(aType.WithIpConnection, aDefault.WithIpConnection))
+	args.WithSerialConnection, _ = toBool(ctx.DefaultQuery(aType.WithSerialConnection, aDefault.WithSerialConnection))
+	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	return args
 }
 
@@ -158,8 +167,8 @@ func buildPointArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.Priority, _ = toBool(ctx.DefaultQuery(aType.Priority, aDefault.Priority))
-	args.Tags, _ = toBool(ctx.DefaultQuery(aType.Tags, aDefault.Tags))
+	args.WithPriority, _ = toBool(ctx.DefaultQuery(aType.WithPriority, aDefault.WithPriority))
+	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	return args
 }
 
@@ -175,12 +184,12 @@ func buildTagArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.Networks, _ = toBool(ctx.DefaultQuery(aType.Networks, aDefault.Networks))
-	args.Devices, _ = toBool(ctx.DefaultQuery(aType.Devices, aDefault.Devices))
-	args.Points, _ = toBool(ctx.DefaultQuery(aType.Points, aDefault.Points))
-	args.Streams, _ = toBool(ctx.DefaultQuery(aType.Streams, aDefault.Streams))
-	args.Producers, _ = toBool(ctx.DefaultQuery(aType.Producers, aDefault.Producers))
-	args.Consumers, _ = toBool(ctx.DefaultQuery(aType.Consumers, aDefault.Consumers))
+	args.Networks, _ = toBool(ctx.DefaultQuery(aType.WithNetworks, aDefault.WithNetworks))
+	args.WithDevices, _ = toBool(ctx.DefaultQuery(aType.WithDevices, aDefault.WithDevices))
+	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
+	args.WithStreams, _ = toBool(ctx.DefaultQuery(aType.WithStreams, aDefault.WithStreams))
+	args.WithProducers, _ = toBool(ctx.DefaultQuery(aType.WithProducers, aDefault.WithProducers))
+	args.WithConsumers, _ = toBool(ctx.DefaultQuery(aType.WithConsumers, aDefault.WithConsumers))
 	return args
 }
 

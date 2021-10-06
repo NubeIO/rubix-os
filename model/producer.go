@@ -10,17 +10,18 @@ type Producer struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	ProducerThingName     string             `json:"producer_thing_name,omitempty"`  //e.g. point.name, user will understand what name it is
-	ProducerThingUUID     string             `json:"producer_thing_uuid,omitempty"`  //e.g. point.uuid
-	ProducerThingClass    string             `json:"producer_thing_class,omitempty"` //e.g. point.thing_class, i.e. point, job etc.
-	ProducerThingType     string             `json:"producer_thing_type,omitempty"`  //e.g. point.thing_type, i.e. temp, rssi, voltage etc.
-	ProducerApplication   string             `json:"producer_application,omitempty"`
-	CommonCurrentProducer                    //if the point for example is read only the writer.uuid would be the point.uuid, i.e.: itself, so in this case there is no writer or writer clone
-	EnableHistory         *bool              `json:"enable_history,omitempty"`
-	StreamUUID            string             `json:"stream_uuid,omitempty" gorm:"TYPE:string REFERENCES streams;not null"`
-	WriterClones          []*WriterClone     `json:"writer_clones,omitempty" gorm:"constraint:OnDelete:CASCADE"`
-	ProducerHistories     []*ProducerHistory `json:"producer_histories,omitempty" gorm:"constraint:OnDelete:CASCADE"`
-	Tags                  []*Tag             `json:"tags,omitempty" gorm:"many2many:producers_tags;constraint:OnDelete:CASCADE"`
+	CommonSyncUUID
+	ProducerThingName       string             `json:"producer_thing_name,omitempty"`  //e.g. point.name, user will understand what name it is
+	ProducerThingUUID       string             `json:"producer_thing_uuid,omitempty"`  //e.g. point.uuid
+	ProducerThingClass      string             `json:"producer_thing_class,omitempty"` //e.g. point.thing_class, i.e. point, job etc.
+	ProducerThingType       string             `json:"producer_thing_type,omitempty"`  //e.g. point.thing_type, i.e. temp, rssi, voltage etc.
+	ProducerApplication     string             `json:"producer_application,omitempty"`
+	CommonCurrentWriterUUID                    //if the point for example is read only the writer.uuid would be the point.uuid, i.e.: itself, so in this case there is no writer or writer clone
+	EnableHistory           *bool              `json:"enable_history,omitempty"`
+	StreamUUID              string             `json:"stream_uuid,omitempty" gorm:"TYPE:string REFERENCES streams;not null"`
+	WriterClones            []*WriterClone     `json:"writer_clones,omitempty" gorm:"constraint:OnDelete:CASCADE"`
+	ProducerHistories       []*ProducerHistory `json:"producer_histories,omitempty" gorm:"constraint:OnDelete:CASCADE"`
+	Tags                    []*Tag             `json:"tags,omitempty" gorm:"many2many:producers_tags;constraint:OnDelete:CASCADE"`
 	CommonCreated
 }
 

@@ -1,10 +1,7 @@
 package model
 
-type RubixPlat struct {
-	ID		int `json:"id" sql:"id"  gorm:"type:varchar(255);unique;primaryKey"`
-	GlobalUuid  string `json:"global_uuid"`
-	CreatedOn   string `json:"created_on"`
-	UpdatedOn   string `json:"updated_on"`
+type DeviceInfo struct {
+	GlobalUUID  string `json:"global_uuid"`
 	ClientId    string `json:"client_id"`
 	ClientName  string `json:"client_name"`
 	SiteId      string `json:"site_id"`
@@ -19,4 +16,6 @@ type RubixPlat struct {
 	SiteLat     string `json:"site_lat"`
 	SiteLon     string `json:"site_lon"`
 	TimeZone    string `json:"time_zone"`
+	CreatedOn   string `json:"created_on"`
+	UpdatedOn   string `json:"updated_on"`
 }

@@ -37,10 +37,10 @@ func NewSession(name string, password string, address string, port string) *Flow
 }
 
 // NewSessionWithToken returns a new instance of FlowClient.
-func NewSessionWithToken(token string, address string, port string) *FlowClient {
+func NewSessionWithToken(token string, address string, port int) *FlowClient {
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%s", address, port)
+	url := fmt.Sprintf("http://%s:%d", address, port)
 	apiURL := url
 	client.SetHostURL(apiURL)
 	client.SetError(&Error{})

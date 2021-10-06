@@ -5,13 +5,13 @@ import (
 	"github.com/NubeDev/flow-framework/auth/password"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/src/cachestore"
+	"github.com/NubeDev/flow-framework/utils"
 	"os"
 	"path/filepath"
 
 	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin"
-	"github.com/NubeDev/flow-framework/utils"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -32,6 +32,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	if err != nil {
 		panic("failed to connect database")
 	}
+	var localStorageFlowNetwork []model.LocalStorageFlowNetwork
 	var alerts []model.Alert
 	var user []model.User
 	var application []model.Application
@@ -45,9 +46,10 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var producerHistory []model.ProducerHistory
 	var consumerHistory []model.ConsumerHistory
 	var flowNetwork []model.FlowNetwork
-	var rubixPlat []model.RubixPlat
+	var flowNetworkClone []model.FlowNetworkClone
 	var job []model.Job
 	var stream []model.Stream
+	var streamClone []model.StreamClone
 	var commandGroup []model.CommandGroup
 	var producer []model.Producer
 	var consumer []model.Consumer
@@ -71,6 +73,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var history []model.History
 	var historyLog []model.HistoryLog
 	var models = []interface{}{
+		&localStorageFlowNetwork,
 		&alerts,
 		&user,
 		&application,
@@ -80,13 +83,14 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&network,
 		&device,
 		&point,
-		&rubixPlat,
 		&flowNetwork,
+		&flowNetworkClone,
 		&priority,
 		&producerHistory,
 		&consumerHistory,
 		&job,
 		&stream,
+		&streamClone,
 		&commandGroup,
 		&producer,
 		&consumer,
@@ -130,13 +134,15 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		//	db.Create(c)
 		//}
 	}
-
-	var platCount int64 = 0
-	rp := new(model.RubixPlat)
-	db.Find(rp).Count(&platCount)
-	if createDefaultUserIfNotExist && platCount == 0 {
-		rp.GlobalUuid = utils.MakeTopicUUID(model.CommonNaming.Rubix)
-		db.Create(&rp)
+	var lsFlowNetworkCount int64 = 0
+	lsFlowNetwork := model.LocalStorageFlowNetwork{
+		FlowIP:    "0.0.0.0",
+		FlowPort:  1660,
+		FlowHTTPS: utils.NewFalse(),
+	}
+	db.Find(&lsFlowNetwork).Count(&lsFlowNetworkCount)
+	if lsFlowNetworkCount == 0 {
+		db.Create(&lsFlowNetwork)
 	}
 	busService := eventbus.NewService(eventbus.GetBus())
 	gormDatabase = &GormDatabase{DB: db, Bus: busService}

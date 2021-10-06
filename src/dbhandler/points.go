@@ -13,7 +13,7 @@ func (h *Handler) GetPoints(args api.Args) ([]*model.Point, error) {
 	return q, nil
 }
 
-func (h *Handler) GetPoint(uuid string, withChildren bool) (*model.Point, error) {
+func (h *Handler) GetPoint(uuid string) (*model.Point, error) {
 	q, err := getDb().GetPoint(uuid, api.Args{})
 	if err != nil {
 		return nil, err
@@ -45,8 +45,8 @@ func (h *Handler) UpdatePointValue(uuid string, body *model.Point, fromPlugin bo
 	return q, nil
 }
 
-func (h *Handler) GetPointByField(field string, value string, withChildren bool) (*model.Point, error) {
-	q, err := getDb().GetPointByField(field, value, withChildren)
+func (h *Handler) GetPointByField(field string, value string) (*model.Point, error) {
+	q, err := getDb().GetPointByField(field, value)
 	if err != nil {
 		return nil, err
 	}

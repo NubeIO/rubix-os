@@ -61,10 +61,10 @@ func (i *Instance) PollingTCP(p polling) error {
 	}
 	var counter int
 	var arg api.Args
-	arg.Devices = true
-	arg.Points = true
-	arg.SerialConnection = true
-	arg.IpConnection = true
+	arg.WithDevices = true
+	arg.WithPoints = true
+	arg.WithSerialConnection = true
+	arg.WithIpConnection = true
 	f := func() (bool, error) {
 		nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, arg)
 		if err != nil {

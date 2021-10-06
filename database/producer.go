@@ -37,29 +37,31 @@ func (d *GormDatabase) GetProducer(uuid string, args api.Args) (*model.Producer,
 
 func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, error) {
 	if body.ProducerThingUUID == "" {
-		return nil, errors.New("please pass in a thing_uuid ie: a point uuid")
+		return nil, errors.New("please pass in a producer_thing_uuid i.e. uuid of that class")
 	}
 	if body.ProducerThingClass == "" {
-		return nil, errors.New("please pass in a thing_type ie: a point type")
+		return nil, errors.New("please pass in a producer_thing_class i.e. point, job etc")
 	}
-	thingName := ""
+	producerThingName := ""
 	if body.ProducerThingClass == model.ThingClass.Point {
 		pnt, err := d.GetPoint(body.ProducerThingUUID, api.Args{})
-
 		if err != nil {
-			return nil, errors.New("point not found, please supply a valid point uuid")
+			return nil, errors.New("point not found, please supply a valid point producer_thing_uuid")
 		}
-		thingName = pnt.Name
+		producerThingName = pnt.Name
+	} else {
+		return nil, errors.New("we are not supporting producer_thing_class other than point for now")
 	}
 	_, err := d.GetStream(body.StreamUUID, api.Args{})
 	if err != nil {
-		return nil, errorMsg("GetStream", "error on trying to get validate the gateway UUID", nil)
+		return nil, newError("GetStream", "error on trying to get validate the gateway UUID")
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Producer)
 	body.Name = nameIsNil(body.Name)
-	body.ProducerThingName = nameIsNil(thingName)
+	body.SyncUUID, _ = utils.MakeUUID()
+	body.ProducerThingName = nameIsNil(producerThingName)
 	if err = d.DB.Create(&body).Error; err != nil {
-		return nil, errorMsg("CreateProducer", "error on trying to add a new Producer", nil)
+		return nil, newError("CreateProducer", "error on trying to add a new Producer")
 	}
 	return body, nil
 }
@@ -134,7 +136,7 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 	}
 	if thingType == model.ThingClass.Point {
 		point := p.(*model.Point)
-		producerModel.ThingWriterUUID = point.UUID
+		producerModel.CurrentWriterUUID = point.UUID
 		pointUUID := point.UUID
 		pro, err := d.GetProducerByField("producer_thing_uuid", pointUUID)
 		if err != nil {

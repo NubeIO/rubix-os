@@ -32,8 +32,7 @@ func (d *GormDatabase) GetDevice(uuid string, args api.Args) (*model.Device, err
 func (d *GormDatabase) GetDeviceByField(field string, value string, withPoints bool) (*model.Device, error) {
 	var deviceModel *model.Device
 	f := fmt.Sprintf("%s = ? ", field)
-	withChildren := withPoints
-	if withChildren { // drop child to reduce json size
+	if withPoints { // drop child to reduce json size
 		query := d.DB.Where(f, value).Preload("Points").First(&deviceModel)
 		if query.Error != nil {
 			return nil, query.Error

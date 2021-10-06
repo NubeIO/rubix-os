@@ -30,14 +30,12 @@ func (a *FlowClient) GetProducer(uuid string) (*model.Producer, error) {
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/producers/{uuid}")
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
+		if resp == nil || resp.String() == "" {
+			return nil, fmt.Errorf("GetProducer: %s", err)
+		} else {
+			return nil, fmt.Errorf("GetProducer: %s", resp)
+		}
 	}
-	fmt.Println(resp.Error())
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
-	}
-	fmt.Println(resp.String())
-
 	return resp.Result().(*model.Producer), nil
 }
 
