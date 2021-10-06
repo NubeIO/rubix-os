@@ -4,7 +4,7 @@ package main
 func (i *Instance) Enable() error {
 	i.enabled = true
 	i.setUUID()
-	i.networkUUID = "NA"
+	i.connect()
 	return nil
 }
 
