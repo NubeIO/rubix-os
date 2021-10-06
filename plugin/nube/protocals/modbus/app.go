@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
@@ -24,8 +25,19 @@ func (i *Instance) pointUpdate(uuid string, point *model.Point) (*model.Point, e
 }
 
 //wizard make a network/dev/pnt
-func (i *Instance) wizardTCP() (string, error) {
-
+func (i *Instance) wizardTCP(body wizard) (string, error) {
+	ip := "192.168.15.202"
+	if body.IP != "" {
+		ip = body.IP
+	}
+	p := 502
+	if body.Port != 0 {
+		p = body.Port
+	}
+	da := 1
+	if body.DeviceAddr != 0 {
+		da = int(body.BaudRate)
+	}
 	var net model.Network
 	net.Name = "modbus"
 	net.TransportType = model.TransType.IP
@@ -33,11 +45,13 @@ func (i *Instance) wizardTCP() (string, error) {
 
 	var dev model.Device
 	dev.Name = "modbus"
-	dev.CommonIP.Host = "192.168.15.202"
-	dev.CommonIP.Port = 502
-	dev.AddressId = 1
+	dev.CommonIP.Host = ip
+	dev.CommonIP.Port = p
+	dev.AddressId = da
 	dev.ZeroMode = utils.NewTrue()
 	dev.PollDelayPointsMS = 5000
+
+	fmt.Println(dev)
 
 	var pnt model.Point
 	pnt.Name = "modbus"
@@ -54,10 +68,19 @@ func (i *Instance) wizardTCP() (string, error) {
 }
 
 //wizard make a network/dev/pnt
-func (i *Instance) wizardSerial() (string, error) {
+func (i *Instance) wizardSerial(body wizard) (string, error) {
+
 	var s model.SerialConnection
-	s.SerialPort = "dev/ttyUSB0"
-	s.BaudRate = 9600
+	sp := "/dev/ttyUSB0"
+	if body.SerialPort != "" {
+		sp = body.SerialPort
+	}
+	br := 9600
+	if body.BaudRate != 0 {
+		br = int(body.BaudRate)
+	}
+	s.SerialPort = sp
+	s.BaudRate = uint(br)
 
 	var net model.Network
 	net.Name = "modbus"
@@ -65,9 +88,14 @@ func (i *Instance) wizardSerial() (string, error) {
 	net.PluginPath = "modbus"
 	net.SerialConnection = &s
 
+	da := 1
+	if body.DeviceAddr != 0 {
+		da = int(body.BaudRate)
+	}
+
 	var dev model.Device
 	dev.Name = "modbus"
-	dev.AddressId = 1
+	dev.AddressId = da
 	dev.ZeroMode = utils.NewTrue()
 	dev.PollDelayPointsMS = 5000
 

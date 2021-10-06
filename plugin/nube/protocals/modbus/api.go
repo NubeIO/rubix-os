@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
-	"net/url"
 )
 
 type Scan struct {
@@ -29,21 +28,18 @@ func bodyClient(ctx *gin.Context) (dto Body, err error) {
 	return dto, err
 }
 
-func resolveID(ctx *gin.Context) string {
-	return ctx.Param("eui")
+// serialWizard
+type wizard struct {
+	IP         string `json:"ip"`
+	Port       int    `json:"port"`
+	SerialPort string `json:"serial_port"`
+	BaudRate   uint   `json:"baud_rate"`
+	DeviceAddr uint   `json:"device_addr"`
 }
 
-type Enable struct {
-	Type        string
-	ReadOnly    url.URL
-	WriteValues interface{}
-}
-
-type T struct {
-	Networks struct {
-		Enable Urls        `json:"capabilities"`
-		Body   interface{} `json:"body"`
-	} `json:"networks"`
+func bodyWizard(ctx *gin.Context) (dto wizard, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
 }
 
 type Urls struct {
@@ -154,15 +150,17 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 	mux.POST("/modbus/wizard/tcp", func(ctx *gin.Context) {
-		serial, err := i.wizardTCP()
+		body, _ := bodyWizard(ctx)
+		n, err := i.wizardTCP(body)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-			ctx.JSON(http.StatusOK, serial)
+			ctx.JSON(http.StatusOK, n)
 		}
 	})
 	mux.POST("/modbus/wizard/serial", func(ctx *gin.Context) {
-		serial, err := i.wizardSerial()
+		body, _ := bodyWizard(ctx)
+		serial, err := i.wizardSerial(body)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
