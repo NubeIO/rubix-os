@@ -1,10 +1,10 @@
 package database
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/src/client"
-	"github.com/NubeDev/flow-framework/src/streams"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/NubeDev/flow-framework/model"
@@ -225,85 +225,38 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	if err != nil {
 		return nil, err
 	}
-	data, action, err := streams.ValidateTypes(writer.WriterThingClass, body)
+	data, action, err := validateWriterBody(writer.WriterThingClass, body)
 	if err != nil {
 		return nil, err
 	}
-	wc := new(model.WriterClone)
-	consumer, err := d.GetConsumer(writer.ConsumerUUID, api.Args{})
-	if err != nil {
-		return nil, errors.New("error: on get consumer")
-	}
-	consumerUUID := consumer.UUID
+	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
+	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
+	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	producerUUID := consumer.ProducerUUID
-	//writerCloneUUID := writer.CloneUUID TODO: BINOD
-	streamUUID := consumer.StreamCloneUUID // TODO: BIOND
-	stream, flow, err := d.GetFlowUUID(streamUUID)
-	if err != nil || stream.UUID == "nil" {
-		return nil, errors.New("error: invalid stream UUID")
-	}
-	wc.DataStore = data
-	writer.DataStore = data
-	d.DB.Model(&writer).Updates(writer)
-	remote := utils.BoolIsNil(flow.IsRemote)
-	if remote { //IF IS REMOTE FLOW-NETWORK
-		if action == model.CommonNaming.Write {
-			// TODO: BINOD
-			//_, err = streams.WriteClone(writerCloneUUID, flow, wc, true)
-			//if err != nil {
-			//	return nil, errors.New("WRITER-REMOTE: on update REMOTE WriteClone feedback")
-			//}
+	cli := client.NewSessionWithToken(fnc.FlowToken, fnc.FlowIP, fnc.FlowPort)
+	var pHistory *model.ProducerHistory
+	if action == model.CommonNaming.Write {
+		pHistoryModel := model.ProducerHistory{
+			ProducerUUID: producerUUID,
+			CommonCurrentWriterUUID: model.CommonCurrentWriterUUID{
+				CurrentWriterUUID: writer.UUID,
+			},
+			DataStore: data,
 		}
-		producerHistory, err := streams.GetProducerHist(producerUUID, flow)
+		if _, e := cli.AddProducerHistory(pHistoryModel); e != nil {
+			return nil, e
+		}
+		pHistory = &pHistoryModel
+	} else {
+		pHistory, err = cli.GetProducerHistory(producerUUID)
 		if err != nil {
-			return nil, errors.New("WRITER-REMOTE: on update GetProducerHist feedback")
-		}
-		if askRefresh { //THIS WILL MAKE THE CONSUMER REFLECT THE CURRENT STATE OF THE PRODUCER (THIS WOULD BE USED FOR POINT MAPPING ONE TO MANY)
-			updateConsumer, err := consumerRefresh(producerHistory)
-			if err != nil {
-				return nil, err
-			}
-			_, _ = d.UpdateConsumer(consumerUUID, updateConsumer)
-			if err != nil {
-				return nil, errors.New("WRITER-REMOTE: on update consumer feedback")
-			}
-			producerHistory.WriterUUID = writer.UUID
-			return producerHistory, err
-		} else {
-			producerHistory.WriterUUID = writer.UUID
-			return producerHistory, err
-		}
-	} else { //IF IS LOCAL FLOW-NETWORK
-		var producerHistory *model.ProducerHistory
-		if action == model.CommonNaming.Write {
-			//TODO: BINOD
-			//producerHistory, err = d.UpdateCloneAndHist(writerCloneUUID, wc, true)
-			//if err != nil {
-			//	return nil, errors.New("WRITER-LOCAL: error on local WRITE to writer-clone")
-			//}
-		} else {
-			producerHistory, err = d.GetLatestProducerHistoryByProducerUUID(producerUUID)
-			if err != nil {
-				return nil, errors.New("WRITER-LOCAL: error on local READ to producer history")
-			}
-		}
-		//producer feedback
-		if askRefresh {
-			updateConsumer, err := consumerRefresh(producerHistory)
-			if err != nil {
-				return nil, err
-			}
-			_, _ = d.UpdateConsumer(consumerUUID, updateConsumer)
-			if err != nil {
-				return nil, errors.New("error: on update consumer feedback")
-			}
-			producerHistory.WriterUUID = writer.UUID
-			return producerHistory, err
-		} else {
-			producerHistory.WriterUUID = writer.UUID
-			return producerHistory, err
+			return nil, err
 		}
 	}
+	if askRefresh {
+		// TODO: get producer history and have it on consumer side
+	}
+	return pHistory, nil
 }
 
 func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) (*utils.Array, error) {
@@ -325,6 +278,27 @@ func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) (*utils.Array,
 func consumerRefresh(producerFeedback *model.ProducerHistory) (*model.Consumer, error) {
 	updateConsumer := new(model.Consumer)
 	updateConsumer.DataStore = producerFeedback.DataStore
-	updateConsumer.CurrentWriterUUID = producerFeedback.ThingWriterUUID
+	updateConsumer.CurrentWriterUUID = producerFeedback.CurrentWriterUUID
 	return updateConsumer, nil
+}
+
+func validateWriterBody(thingClass string, body *model.WriterBody) ([]byte, string, error) {
+	if thingClass == model.ThingClass.Point {
+		var bk model.WriterBody
+		if body.Action == model.WriterActions.Write {
+			if body.Priority == bk.Priority {
+				return nil, body.Action, errors.New("error: invalid json on writer body")
+			}
+			b, err := json.Marshal(body.Priority)
+			if err != nil {
+				return nil, body.Action, errors.New("error: failed to marshal priority on write body")
+			}
+			return b, body.Action, err
+		} else if body.Action == model.WriterActions.Read {
+			return nil, body.Action, nil
+		} else {
+			return nil, body.Action, errors.New("error: invalid action, try read or write")
+		}
+	}
+	return nil, body.Action, errors.New("error: invalid data type on writer body, i.e. type could be a point")
 }

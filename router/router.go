@@ -238,6 +238,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			historyProducerRoutes.GET("", historyHandler.GetProducerHistories)
 			historyProducerRoutes.GET("/:producer_uuid", historyHandler.GetProducerHistoriesByProducerUUID)
 			historyProducerRoutes.GET("/:producer_uuid/one", historyHandler.GetLatestProducerHistoryByProducerUUID)
+			historyProducerRoutes.POST("", historyHandler.CreateProducerHistory)
 			historyProducerRoutes.POST("/bulk", historyHandler.CreateBulkProducerHistory)
 			historyProducerRoutes.DELETE("/all", historyHandler.DeleteAllProducerHistories)
 			historyProducerRoutes.DELETE("/:producer_uuid", historyHandler.DeleteProducerHistoriesByProducerUUID)
@@ -333,7 +334,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
 			producerRoutes.DELETE("/drop", producerHandler.DropProducers)
 
-			producerWriterCloneRoutes := producerRoutes.Group("/writers")
+			producerWriterCloneRoutes := producerRoutes.Group("/writer_clones")
 			{
 				producerWriterCloneRoutes.GET("", writerCloneHandler.GetWriterClones)
 				producerWriterCloneRoutes.POST("", writerCloneHandler.CreateWriterClone)

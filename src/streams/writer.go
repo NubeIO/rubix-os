@@ -1,7 +1,6 @@
 package streams
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/rest"
@@ -37,29 +36,4 @@ func ProducerHistory(flowBody *model.FlowNetwork, producerUUID string) (*model.P
 		return nil, err
 	}
 	return producerFeedback, err
-}
-
-//ValidateTypes check the type of the producer or consumer, as in type=point
-func ValidateTypes(t string, body *model.WriterBody) ([]byte, string, error) {
-	if t == model.ThingClass.Point {
-		var bk model.WriterBody
-		if body.Action == model.WriterActions.Write {
-			if body.Priority == bk.Priority {
-				return nil, body.Action, errors.New("error: invalid json on writerBody")
-			}
-			b, err := json.Marshal(body.Priority)
-			if err != nil {
-				return nil, body.Action, errors.New("error: failed to marshal json on writeBody")
-			}
-			return b, body.Action, err
-		} else {
-			if body.Action == model.WriterActions.Read {
-				return nil, body.Action, nil
-			} else {
-				return nil, body.Action, errors.New("error: invalid action, try read or write")
-			}
-		}
-	}
-	return nil, body.Action, errors.New("error: invalid data type on writerBody, ie type could be a point")
-
 }

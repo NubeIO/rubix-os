@@ -71,7 +71,7 @@ func ProducerHistory(flowBody *model.FlowNetwork, producerUUID string) (*model.P
 	port := flowBody.FlowPort
 	token := flowBody.FlowToken
 	c := client.NewSessionWithToken(token, ip, port)
-	point, err := c.ClientGetHistory(producerUUID)
+	point, err := c.GetProducerHistory(producerUUID)
 	if err != nil {
 		return nil, err
 	}

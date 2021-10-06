@@ -276,12 +276,12 @@ func getBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
 	return dto, err
 }
 
-func getBODYHistory(ctx *gin.Context) (dto *model.ProducerHistory, err error) {
+func getBodyHistory(ctx *gin.Context) (dto *model.ProducerHistory, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
 
-func getBODYBulkHistory(ctx *gin.Context) (dto []*model.ProducerHistory, err error) {
+func getBodyBulkHistory(ctx *gin.Context) (dto []*model.ProducerHistory, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

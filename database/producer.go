@@ -136,7 +136,7 @@ func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (str
 	}
 	if thingType == model.ThingClass.Point {
 		point := p.(*model.Point)
-		producerModel.ThingWriterUUID = point.UUID
+		producerModel.CurrentWriterUUID = point.UUID
 		pointUUID := point.UUID
 		pro, err := d.GetProducerByField("producer_thing_uuid", pointUUID)
 		if err != nil {

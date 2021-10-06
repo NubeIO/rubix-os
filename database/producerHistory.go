@@ -38,11 +38,10 @@ func (d *GormDatabase) GetLatestProducerHistoryByProducerUUID(pUuid string) (*mo
 	return historyModel, nil
 }
 
-// CreateProducerHistory creates a thing.
-func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
+func (d *GormDatabase) AppendProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
 	var limit = 10
 	var count int64
-	////TODO add in the limit as a field in the producer
+	//TODO add in the limit as a field in the producer
 	subQuery := d.DB.Model(&model.ProducerHistory{}).Select("id").
 		Where("producer_uuid = ?", body.ProducerUUID).Order("timestamp desc").Limit(limit - 1)
 	subQuery.Count(&count)
@@ -59,18 +58,32 @@ func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*mode
 	return body, nil
 }
 
-// CreateBulkProducerHistory bulk creates a thing.
-func (d *GormDatabase) CreateBulkProducerHistory(history []*model.ProducerHistory) (bool, error) {
-	for _, hist := range history {
+func (d *GormDatabase) CreateBulkProducerHistory(histories []*model.ProducerHistory) (bool, error) {
+	for _, history := range histories {
 		ph := new(model.ProducerHistory)
-		ph.ProducerUUID = hist.ProducerUUID
-		ph.DataStore = hist.DataStore
+		ph.ProducerUUID = history.ProducerUUID
+		ph.DataStore = history.DataStore
 		ph.Timestamp = time.Now().UTC()
-		_, err := d.CreateProducerHistory(ph)
+		_, err := d.AppendProducerHistory(ph)
 		if err != nil {
 			return false, err
 		}
+		d.DB.Model(&model.Producer{}).Where("uuid = ?").Update("current_writer_uuid", ph.CurrentWriterUUID)
 	}
+	return true, nil
+}
+
+func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (bool, error) {
+	ph := new(model.ProducerHistory)
+	ph.ProducerUUID = history.ProducerUUID
+	ph.CurrentWriterUUID = history.CurrentWriterUUID
+	ph.DataStore = history.DataStore
+	ph.Timestamp = time.Now().UTC()
+	_, err := d.AppendProducerHistory(ph)
+	if err != nil {
+		return false, err
+	}
+	d.DB.Model(&model.Producer{}).Where("uuid = ?", history.ProducerUUID).Update("current_writer_uuid", ph.CurrentWriterUUID)
 	return true, nil
 }
 

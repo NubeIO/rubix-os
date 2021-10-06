@@ -68,7 +68,6 @@ func (d *GormDatabase) DeleteWriterClone(uuid string) (bool, error) {
 
 //TODO both functions are doing the same thing UpdateWriterClone UpdateCloneAndHist so merge into one
 
-// UpdateWriterClone  update it
 func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone, updateProducer bool) (*model.WriterClone, error) {
 	var wcm *model.WriterClone
 	query := d.DB.Where("uuid = ?", uuid).Find(&wcm)
@@ -82,7 +81,7 @@ func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone, u
 	if updateProducer {
 		pro := new(model.Producer)
 		proUUID := wcm.ProducerUUID
-		pro.ThingWriterUUID = uuid
+		pro.CurrentWriterUUID = uuid
 		p, err := d.UpdateProducer(proUUID, pro)
 		if err != nil {
 			return nil, err
@@ -125,7 +124,7 @@ func (d *GormDatabase) UpdateCloneAndHist(uuid string, body *model.WriterClone, 
 	if updateProducer {
 		pro := new(model.Producer)
 		proUUID := wcm.ProducerUUID
-		pro.ThingWriterUUID = uuid
+		pro.CurrentWriterUUID = uuid
 		p, err := d.UpdateProducer(proUUID, pro)
 		if err != nil {
 			return nil, err

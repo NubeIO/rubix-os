@@ -33,21 +33,16 @@ type SyncWriter struct {
 
 //WriterBody could be a local network, job or alarm and so on
 type WriterBody struct {
-	Action           string   `json:"action,omitempty"` //read, write and so on
-	AskRefresh       bool     `json:"ask_refresh,omitempty"`
-	CommonThingClass          //point, job,
-	CommonThingType           //for example api, rssi, voltage
-	Priority         Priority `json:"priority,omitempty"`
-	Point            Point    `json:"point,omitempty"`
+	Action     string   `json:"action,omitempty"` //read, write and so on
+	AskRefresh bool     `json:"ask_refresh,omitempty"`
+	Priority   Priority `json:"priority,omitempty"`
 }
 
 //WriterBulk could be a local network, job or alarm and so on
 type WriterBulk struct {
-	WriterUUID       string      `json:"writer_uuid,omitempty"`
-	Action           string      `json:"action,omitempty"` //read, write and so on
-	AskRefresh       bool        `json:"ask_refresh,omitempty"`
-	CommonThingClass             //point, job
-	CommonThingType              //for example temp, rssi, voltage
-	CommonValue      CommonValue `json:"common_value,omitempty"`
-	Priority         Priority    `json:"priority,omitempty"`
+	WriterUUID  string      `json:"writer_uuid,omitempty"`
+	Action      string      `json:"action,omitempty"` //read, write and so on
+	AskRefresh  bool        `json:"ask_refresh,omitempty"`
+	CommonValue CommonValue `json:"common_value,omitempty"`
+	Priority    Priority    `json:"priority,omitempty"`
 }
