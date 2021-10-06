@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NubeDev/flow-framework/api"
-	"github.com/labstack/gommon/log"
+	log "github.com/sirupsen/logrus"
 )
 
 // Enable implements plugin.Plugin
@@ -18,7 +18,7 @@ func (i *Instance) Enable() error {
 		i.networkUUID = "NA"
 	}
 	if err != nil {
-		log.Error("error on enable system-plugin")
+		log.Error("system-plugin: error on enable system-plugin")
 	}
 	return nil
 }

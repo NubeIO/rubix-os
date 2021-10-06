@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/NubeDev/flow-framework/eventbus"
+	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/NubeDev/flow-framework/src/cachestore"
 	"github.com/NubeDev/flow-framework/src/dbhandler"
-	"github.com/patrickmn/go-cache"
 )
 
 const name = "mqttapi" //must be unique across all plugins
@@ -13,14 +13,13 @@ const description = "mqttapi"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "mqtt"
-const DefaultExpiration = cache.DefaultExpiration
 
-const pluginType = "utils"
+const pluginType = "network"
 const allowConfigWrite = false
 const isNetwork = false
 const maxAllowedNetworks = 1
-const networkType = ""
-const transportType = "" //serial, ip
+const networkType = "ip"
+const transportType = "ip" //serial, ip
 
 // Instance is plugin instance
 type Instance struct {
@@ -32,6 +31,7 @@ type Instance struct {
 	bus         eventbus.BusService
 	pluginUUID  string
 	networkUUID string
+	mqtt        *mqttclient.Client
 }
 
 // GetFlowPluginInfo returns plugin info.

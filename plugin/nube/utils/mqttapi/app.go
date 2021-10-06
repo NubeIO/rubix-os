@@ -1,58 +1,69 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"github.com/NubeDev/flow-framework/plugin/nube/utils/git/github"
-	"github.com/NubeDev/flow-framework/utils"
-	"github.com/NubeDev/flow-framework/utils/unzip"
-	"strings"
+	"github.com/NubeDev/flow-framework/mqttclient"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	log "github.com/sirupsen/logrus"
 )
 
-func download(token string) error {
-	owner := "NubeIO"
-	repo := "flow-framework"
-	tag := "latest"
-	deviceType := "armv7"
-	dir := "/"
-	pluginsDir := "/data/flow-framework/data/plugins"
+//connect to brokers
+func (i *Instance) connect() {
+	log.Info("mqtt-api: sync has is been called")
 
-	a := github.New()
-	var version string
-	if tag == "latest" {
-		_repo := fmt.Sprintf("%s/%s", owner, repo)
-		fmt.Println("repo", _repo)
-		tags, err := a.GetLatestReleaseTag(_repo)
-		if err != nil {
-			fmt.Println("error:", _repo)
-		}
-		version = tags
+	integrations, err := i.db.GetEnabledIntegrationByPluginConfId(i.pluginUUID)
+	if err != nil {
+		//return false, err
+	}
+	for _, integration := range integrations {
+		fmt.Println(integration)
+
+	}
+	if len(integrations) == 0 {
+		log.Info("mqtt-api: can't be registered, integration details missing.")
+	}
+
+	localBroker := "tcp://0.0.0.0:1883" //TODO add to config, this is meant to be an unsecure broker
+	connected, err := i.initMQTT(localBroker)
+	if err != nil {
+		log.Error(err, "mqtt-api: failed to broker")
+	}
+	fmt.Println(connected, "connected")
+	i.subscribe()
+
+}
+
+//used for getting data into the plugins
+var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
+	log.Println(msg.Topic(), " ", "NEW MQTT MES", " ", string(msg.Payload()))
+
+}
+
+func (i *Instance) subscribe() {
+	err := i.mqtt.Subscribe("test", mqttclient.AtMostOnce, handle) //lorawan chirpstack
+	if err != nil {
+
+	}
+
+}
+
+//initMQTT  mqtt connection
+func (i *Instance) initMQTT(ip string) (bool, error) {
+	c, err := mqttclient.NewClient(mqttclient.ClientOptions{
+		Servers: []string{ip},
+	})
+	if err != nil {
+		log.Error(err, "mqtt-api: failed to broker")
+	}
+	fmt.Println(11111111)
+	log.Info(err, "CONNECT to broker")
+	i.mqtt = c
+
+	err = c.Connect()
+	if err != nil {
+		log.Error(err, "mqtt-api: failed to broker")
 	} else {
-		version = tag
+		fmt.Println(22222, err)
 	}
-	fmt.Println("version:", version)
-	downloads, err := github.RetrieveAssets(owner, repo, version, token, deviceType)
-	if err != nil {
-		fmt.Println("error: main github.RetrieveAssets:", err)
-		return err
-	}
-	fmt.Println(dir)
-	fmt.Println(downloads)
-	uz := unzip.New()
-
-	err = utils.DirRemoveContents(pluginsDir)
-	if err != nil {
-		return errors.New("error on delete all plugins")
-	}
-	for _, v := range downloads.Values() {
-		n := v.(string)
-		if !strings.Contains(n, "flow-framework") { //dont unzip main app build
-			_, err = uz.Extract(n, pluginsDir)
-			if err != nil {
-				fmt.Println(err)
-				return err
-			}
-		}
-	}
-	return nil
+	return c.IsConnected(), nil
 }
