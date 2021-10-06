@@ -40,6 +40,7 @@ require (
 	github.com/gomarkdown/markdown v0.0.0-20210918233619-6c1113f12c4a
 	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
+	github.com/labstack/gommon v0.3.0
 	github.com/martinlindhe/unit v0.0.0-20210313160520-19b60e03648d
 	github.com/oleiade/lane v1.0.1
 	github.com/thejerf/suture v4.0.1+incompatible
@@ -97,12 +98,15 @@ require (
 	github.com/hashicorp/go-uuid v1.0.1 // indirect
 	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
 	github.com/jcmturner/gofork v0.0.0-20190328161633-dc7c13fece03 // indirect
+	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/pierrec/lz4 v0.0.0-20190327172049-315a67e90e41 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a // indirect
 	github.com/segmentio/fasthash v0.0.0-20180216231524-a72b379d632e // indirect
 	github.com/tidwall/gjson v1.6.8 // indirect
 	github.com/tidwall/match v1.0.3 // indirect
 	github.com/tidwall/pretty v1.0.2 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasttemplate v1.2.1 // indirect
 	go.uber.org/atomic v1.6.0 // indirect
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.10.0 // indirect

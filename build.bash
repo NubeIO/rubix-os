@@ -48,6 +48,9 @@ mkdir -p $pluginDir
 cd $dir/plugin/nube/system/
 go build -buildmode=plugin -o system.so *.go  && cp system.so  $pluginDir
 
+cd $dir/plugin/nube/utils/mqttapi
+go build -buildmode=plugin -o mqttapi.so *.go  && cp mqttapi.so  $pluginDir
+
 cd $dir/plugin/nube/utils/git
 go build -buildmode=plugin -o git.so *.go  && cp git.so  $pluginDir
 
