@@ -1,16 +1,16 @@
 package model
 
-//IntegrationCredential is to be used when a plugin wants to use username and password for an
+//IntegrationCredentials is to be used when a plugin wants to use username and password for an
 type IntegrationCredentials struct {
 	CommonUUID
 	CommonName
 	CommonDescription
 	CommonEnable
-	Username        string
-	Password        string
-	Token           string
-	HeaderName      string //used for headers if they are needed for auth
-	HeaderValue     string
+	Username        string `json:"username"`
+	Password        string `json:"password"`
+	Token           string `json:"token"`
+	HeaderName      string `json:"header_name"` //used for HTTP headers if they are needed for auth
+	HeaderValue     string `json:"header_value"`
 	IntegrationUUID string `json:"integration_uuid" gorm:"TYPE:varchar(255) REFERENCES integrations;null;default:null"`
 }
 
