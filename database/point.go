@@ -382,9 +382,13 @@ func (d *GormDatabase) PointAndQuery(value1 string, value2 string) (*model.Point
 func (d *GormDatabase) UpdatePointByFieldAndUnit(field string, value string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point
 	f := fmt.Sprintf("%s = ? AND unit_type = ?", field)
-	query := d.DB.Where(f, value, body.UnitType).Preload("Priority").Find(&pointModel).Updates(body)
+	query := d.DB.Where(f, value, body.UnitType).First(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error
+	}
+	_, err := d.UpdatePointValue(pointModel.UUID, body, true)
+	if err != nil {
+		return nil, err
 	}
 	if utils.BoolIsNil(pointModel.IsProducer) {
 		if compare(pointModel, body) {

@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"gorm.io/gorm"
 )
@@ -44,7 +43,6 @@ func (d *GormDatabase) GetMessagesByUserSince(userID uint, limit int, since uint
 	if since != 0 {
 		db = db.Where("messages.id < ?", since)
 	}
-	fmt.Println(userID, db)
 	err := db.Find(&messages).Error
 
 	if err == gorm.ErrRecordNotFound {

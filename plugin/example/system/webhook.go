@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
 )
-
 
 type message struct {
 	Message  string                 `json:"message" query:"message" form:"message"`
@@ -14,17 +12,12 @@ type message struct {
 	Extras   map[string]interface{} `json:"extras" query:"-" form:"-"`
 }
 
-
-
-
 // RegisterWebhook implements plugin.Webhooker
 func (c *PluginTest) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	c.basePath = basePath
 	mux.GET("/message", func(ctx *gin.Context) {
 		msg := new(message)
 		a := usersList.GetUsersList()
-		fmt.Println(a)
-		fmt.Println(3)
 		if err := ctx.Bind(msg); err == nil {
 			err := c.msgHandler.SendMessage(plugin.Message{
 				Message:  msg.Message,

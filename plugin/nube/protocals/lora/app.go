@@ -81,6 +81,30 @@ func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
 				return nil, err
 			}
 		}
+	} else if deviceBody.Model == string(decoder.THL) {
+		for _, e := range THL {
+			n := fmt.Sprintf("%s_%s_%s", model.TransProtocol.Lora, deviceBody.AddressUUID, e)
+			p.Name = n
+			p.Description = deviceBody.Model
+			p.UnitType = e //temp
+			err := i.addPoint(p)
+			if err != nil {
+				log.Errorf("lora: issue on addPoint: %v\n", err)
+				return nil, err
+			}
+		}
+	} else if deviceBody.Model == string(decoder.TH) {
+		for _, e := range TH {
+			n := fmt.Sprintf("%s_%s_%s", model.TransProtocol.Lora, deviceBody.AddressUUID, e)
+			p.Name = n
+			p.Description = deviceBody.Model
+			p.UnitType = e //temp
+			err := i.addPoint(p)
+			if err != nil {
+				log.Errorf("lora: issue on addPoint: %v\n", err)
+				return nil, err
+			}
+		}
 	}
 	return nil, nil
 }
@@ -102,6 +126,15 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 	code := deviceBody.AddressUUID
 	if code == string(decoder.THLM) {
 		for _, e := range THLM {
+			p.ThingType = e
+			err := i.updatePoint(p)
+			if err != nil {
+				log.Errorf("lora: issue on updatePoint: %v\n", err)
+				return nil, err
+			}
+		}
+	} else if code == string(decoder.THL) {
+		for _, e := range THL {
 			p.ThingType = e
 			err := i.updatePoint(p)
 			if err != nil {
@@ -141,4 +174,6 @@ func (i *Instance) devTHLM(pnt *model.Point, value float64) error {
 	return nil
 }
 
+var TH = []string{"rssi", "voltage", "temperature", "humidity"}
+var THL = []string{"rssi", "voltage", "temperature", "humidity", "light"}
 var THLM = []string{"rssi", "voltage", "temperature", "humidity", "light", "motion"}

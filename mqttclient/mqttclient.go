@@ -121,7 +121,6 @@ func NewClient(options ClientOptions) (c *Client, err error) {
 	// brokers
 	if options.Servers != nil && len(options.Servers) > 0 {
 		for _, server := range options.Servers {
-			fmt.Println(server)
 			opts.AddBroker(server)
 		}
 	} else {

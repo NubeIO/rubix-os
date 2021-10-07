@@ -27,7 +27,7 @@ func main() {
 	// for an RTU (serial) device/bus
 	client, err = modbus.NewClient(&modbus.ClientConfiguration{
 		URL:      "rtu:///dev/ttyUSB0",
-		Speed:    9600,               // default
+		Speed:    38400,              // default
 		DataBits: 8,                  // default, optional
 		Parity:   modbus.PARITY_NONE, // default, optional
 		StopBits: 2,                  // default if no parity, optional
@@ -64,4 +64,9 @@ func main() {
 
 		}
 	}
+
+	client.SetEncoding(modbus.BIG_ENDIAN, modbus.LOW_WORD_FIRST)
+
+	err = client.WriteFloat32(0, 0)
+	fmt.Println(err)
 }

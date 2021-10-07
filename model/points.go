@@ -165,10 +165,11 @@ type Point struct {
 	Eval                 string   `json:"eval_expression,omitempty"`
 	EvalExample          string   `json:"eval_example,omitempty"`
 	COV                  *float64 `json:"cov"`
-	ObjectType           string   `json:"object_type,omitempty"`  //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
-	AddressId            *int     `json:"address_id"`             // for example a modbus address or bacnet address
-	AddressLength        *int     `json:"address_length"`         // for example a modbus address offset
-	AddressUUID          string   `json:"address_uuid,omitempty"` // for example a droplet id (so a string)
+	ObjectType           string   `json:"object_type,omitempty"`     //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
+	ObjectEncoding       string   `json:"object_encoding,omitempty"` //BEB_LEW bebLew
+	AddressId            *int     `json:"address_id"`                // for example a modbus address or bacnet address
+	AddressLength        *int     `json:"address_length"`            // for example a modbus address offset
+	AddressUUID          string   `json:"address_uuid,omitempty"`    // for example a droplet id (so a string)
 	NextAvailableAddress *bool    `json:"use_next_available_address,omitempty"`
 	Decimal              *uint32  `json:"decimal,omitempty"`
 	LimitMin             *float64 `json:"limit_min"`

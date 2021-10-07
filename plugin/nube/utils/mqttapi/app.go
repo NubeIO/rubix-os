@@ -55,7 +55,6 @@ func (i *Instance) initMQTT(ip string) (bool, error) {
 	if err != nil {
 		log.Error(err, "mqtt-api: failed to broker")
 	}
-	fmt.Println(11111111)
 	log.Info(err, "CONNECT to broker")
 	i.mqtt = c
 
@@ -63,7 +62,7 @@ func (i *Instance) initMQTT(ip string) (bool, error) {
 	if err != nil {
 		log.Error(err, "mqtt-api: failed to broker")
 	} else {
-		fmt.Println(22222, err)
+		fmt.Println(err)
 	}
 	return c.IsConnected(), nil
 }

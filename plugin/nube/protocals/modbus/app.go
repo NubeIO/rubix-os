@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
@@ -18,7 +17,7 @@ func (i *Instance) pointUpdate(uuid string, point *model.Point) (*model.Point, e
 	point.CommonFault.LastOk = time.Now().UTC()
 	_, _ = i.db.UpdatePointValue(uuid, point, true)
 	if err != nil {
-		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
+		log.Error("MODBUS UPDATE POINT issue on message from mqtt update point")
 		return nil, err
 	}
 	return nil, nil
@@ -50,8 +49,6 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 	dev.AddressId = da
 	dev.ZeroMode = utils.NewTrue()
 	dev.PollDelayPointsMS = 5000
-
-	fmt.Println(dev)
 
 	var pnt model.Point
 	pnt.Name = "modbus"
@@ -105,11 +102,12 @@ func (i *Instance) wizardSerial(body wizard) (string, error) {
 	pnt.AddressId = utils.NewInt(1) //TODO check conversion
 	pnt.ObjectType = model.ObjectTypes.WriteCoil
 
-	_, err = i.db.WizardNewNetDevPnt("modbus", &net, &dev, &pnt)
+	pntRet, err := i.db.WizardNewNetDevPnt("modbus", &net, &dev, &pnt)
 	if err != nil {
 		return "error: on flow-framework add modbus serial network wizard", err
 	}
 
+	log.Println(pntRet, err)
 	return "pass: added network and points", err
 }
 
