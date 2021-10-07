@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
 	lwmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/model"
@@ -30,7 +29,6 @@ func (i *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*model.P
 	if dev.Device.DeviceProfileID == elsysAPB {
 		decoded := new(lwmodel.ElsysAPB)
 		err = json.Unmarshal(body.Payload(), &decoded)
-		fmt.Println()
 	}
 	if err != nil {
 		return nil, err

@@ -48,7 +48,6 @@ func (a *FlowClient) CreateWriterClone(body model.WriterClone) (*model.WriterClo
 	if err != nil {
 		return nil, fmt.Errorf("%s failed", err)
 	}
-	fmt.Println(resp.String())
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}

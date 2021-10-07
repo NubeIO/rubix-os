@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-const defaultInterval = 100 * time.Millisecond
+const defaultInterval = 1000 * time.Millisecond
 
 type polling struct {
 	enable        bool
@@ -70,6 +70,10 @@ func (i *Instance) PollingTCP(p polling) error {
 		if err != nil {
 			return false, err
 		}
+		if len(nets) == 0 {
+			time.Sleep(15000 * time.Millisecond)
+			log.Info("NO MODBUS NETWORKS FOUND")
+		}
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
 				log.Infof("modbus: LOOP COUNT: %v\n", counter)
@@ -122,6 +126,7 @@ func (i *Instance) PollingTCP(p polling) error {
 								l := utils.IntIsNil(pnt.AddressLength)
 								ops.Length = uint16(l)
 								ops.ObjectType = pnt.ObjectType
+								ops.Encoding = pnt.ObjectEncoding
 								ops.IsHoldingReg = utils.BoolIsNil(pnt.IsOutput)
 								ops.ZeroMode = utils.BoolIsNil(dev.ZeroMode)
 								if pnt.Priority != nil {
@@ -207,7 +212,6 @@ func (i *Instance) PollingTCP(p polling) error {
 											_pnt.InSync = utils.NewTrue()
 											log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										}
-
 									}
 								}
 								time.Sleep(dPnt * time.Millisecond)
@@ -222,6 +226,7 @@ func (i *Instance) PollingTCP(p polling) error {
 		} else {
 			return false, nil
 		}
+
 	}
 	err := poll.Poll(context.Background(), f)
 	if err != nil {

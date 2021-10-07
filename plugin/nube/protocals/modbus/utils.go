@@ -58,7 +58,7 @@ type Operation struct {
 	IsCoil       bool    `json:"is_coil"`
 	IsHoldingReg bool    `json:"is_holding_register"`
 	WriteValue   float64 `json:"write_value"`
-	Encoding     string  `json:"encoding"` //BEB_LEW
+	Encoding     string  `json:"object_encoding"` //BEB_LEW
 	coil         bool
 	u16          uint16
 	u32          uint32
@@ -143,7 +143,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 	case model.ObjectEncoding.BebBew:
 		err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
 	default:
-		err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.HIGH_WORD_FIRST)
+		err = client.SetEncoding(modbus.BIG_ENDIAN, modbus.LOW_WORD_FIRST)
 	}
 	if o.Length <= 0 { //make sure length is > 0
 		o.Length = 1

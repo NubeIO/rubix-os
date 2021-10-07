@@ -112,7 +112,7 @@ func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorSt
 	if commonSensorData.Sensor == string(decoder.THL) {
 		s := sensorStruct.(decoder.TDropletTHLM)
 		log.Infof("lora decode as DropletTHLM: AddressUUID: %s Sensor:%s voltage:%v \n", pnt.AddressUUID, commonSensorData.Sensor, float64(s.Voltage))
-		for _, e := range THLM {
+		for _, e := range THL {
 			switch e {
 			case model.PointTags.RSSI:
 				f := float64(s.Rssi)
@@ -154,7 +154,7 @@ func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorSt
 	if commonSensorData.Sensor == string(decoder.TH) {
 		s := sensorStruct.(decoder.TDropletTHLM)
 		log.Infof("lora decode as DropletTHLM: AddressUUID: %s Sensor:%s voltage:%v \n", pnt.AddressUUID, commonSensorData.Sensor, float64(s.Voltage))
-		for _, e := range THLM {
+		for _, e := range TH {
 			switch e {
 			case model.PointTags.RSSI:
 				f := float64(s.Rssi)

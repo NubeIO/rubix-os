@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"net/url"
 )
@@ -14,7 +13,6 @@ func (i *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
 	loc = loc.ResolveReference(&url.URL{
 		Path: "restart",
 	})
-	fmt.Println(loc) //can show the ui the custom endpoints
 
 	baseURL.Path = i.basePath
 	m := plugin.Help{

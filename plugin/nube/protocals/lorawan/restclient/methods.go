@@ -132,7 +132,6 @@ func (a *RestClient) AddDevice(body lwmodel.Devices) (*lwmodel.Devices, error) {
 // GetDevice get an object
 func (a *RestClient) GetDevice(devEui string) (*lwmodel.GetDevice, error) {
 	q := fmt.Sprintf("/api/devices/%s", devEui)
-	fmt.Println(q, 1234)
 	resp, err := a.client.R().
 		SetResult(lwmodel.GetDevice{}).
 		Get(q)

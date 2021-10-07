@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )
@@ -35,7 +34,6 @@ func (a *HistoriesAPI) GetProducerHistoriesByProducerUUID(ctx *gin.Context) {
 
 func (a *HistoriesAPI) GetLatestProducerHistoryByProducerUUID(ctx *gin.Context) {
 	pUuid := resolveProducerUUID(ctx)
-	fmt.Println(pUuid)
 	q, err := a.DB.GetLatestProducerHistoryByProducerUUID(pUuid)
 	reposeHandler(q, err, ctx)
 }
