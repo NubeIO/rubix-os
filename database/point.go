@@ -71,6 +71,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
 	body.InSync = utils.NewFalse()
+	body.WriteValueOnceSync = utils.NewFalse()
 	if body.Priority == nil {
 		body.Priority = &model.Priority{}
 	}
@@ -114,6 +115,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		}
 	}
 	body.InSync = utils.NewFalse()
+	body.WriteValueOnceSync = utils.NewFalse()
 	query = d.DB.Model(&pointModel).Updates(&body)
 	pnt, err := d.UpdatePointValue(uuid, pointModel, false)
 	if err != nil {
@@ -173,6 +175,12 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 			body.PresentValue = &v //process the units as in temperature conversion
 		}
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
+	}
+	var pntSync model.Point
+	pntSync.WriteValueOnceSync = utils.NewFalse()
+	_, err := d.UpdatePoint(uuid, &pntSync, fromPlugin)
+	if err != nil {
+		return nil, err
 	}
 	if !fromPlugin { //stop looping
 		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)

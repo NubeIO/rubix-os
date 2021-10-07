@@ -72,7 +72,7 @@ func (i *Instance) PollingTCP(p polling) error {
 		}
 		if len(nets) == 0 {
 			time.Sleep(15000 * time.Millisecond)
-			log.Info("NO MODBUS NETWORKS FOUND")
+			log.Info("modbus: NO MODBUS NETWORKS FOUND")
 		}
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
@@ -129,65 +129,78 @@ func (i *Instance) PollingTCP(p polling) error {
 								ops.Encoding = pnt.ObjectEncoding
 								ops.IsHoldingReg = utils.BoolIsNil(pnt.IsOutput)
 								ops.ZeroMode = utils.BoolIsNil(dev.ZeroMode)
-								if pnt.Priority != nil {
-									if (*pnt.Priority).P16 != nil {
-										ops.WriteValue = *pnt.Priority.P16
-										log.Infof("modbus: WRITE ObjectType: %s  Addr: %d WriteValue: %v\n", ops.ObjectType, ops.Addr, ops.WriteValue)
-									}
-								}
-								request, err := parseRequest(ops)
-								if err != nil {
-									log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
-								}
-								responseRaw, responseValue, err := networkRequest(cli, request)
-								log.Infof("modbus: ObjectType: %s  Addr: %d ARRAY: %v\n", ops.ObjectType, ops.Addr, responseRaw)
+								_isWrite := isWrite(ops.ObjectType)
 								var _pnt model.Point
-								if isWrite(ops.ObjectType) { //IS WRITE
+								if _isWrite && !utils.BoolIsNil(pnt.WriteValueOnceSync) || counter == 1 { //IS WRITE
+									if pnt.Priority != nil {
+										if (*pnt.Priority).P16 != nil {
+											ops.WriteValue = *pnt.Priority.P16
+											log.Infof("modbus: WRITE ObjectType: %s  Addr: %d WriteValue: %v\n", ops.ObjectType, ops.Addr, ops.WriteValue)
+										}
+									}
+									request, err := parseRequest(ops)
+									if err != nil {
+										log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
+									}
+									responseRaw, responseValue, err := networkRequest(cli, request)
+									log.Infof("modbus: ObjectType: %s  Addr: %d ARRAY: %v\n", ops.ObjectType, ops.Addr, responseRaw)
 									_pnt.UUID = pnt.UUID
 									_pnt.PresentValue = &ops.WriteValue //update point value
 									cov := utils.Float64IsNil(pnt.COV)
 									covEvent, _ := utils.COV(ops.WriteValue, utils.Float64IsNil(pnt.ValueOriginal), cov)
 									if covEvent {
-										log.Infof("MODBUS WRITE COV EVENT")
-										i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
+										log.Infof("modbus: MODBUS WRITE COV EVENT: COV value is %v\n", cov)
 										if err != nil {
 											log.Errorf("modbus-write-cov: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										} else {
 											_pnt.InSync = utils.NewTrue()
+											if utils.BoolIsNil(pnt.WriteValueOnce) {
+												_pnt.WriteValueOnceSync = utils.NewTrue()
+											}
 											_, err = i.pointUpdate(pnt.UUID, &_pnt)
 											log.Infof("modbus-write-cov: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										}
 									} else {
 										if !utils.BoolIsNil(pnt.InSync) {
-											log.Infof("MODBUS WRITE SYNC POINT")
+											log.Infof("modbus: MODBUS WRITE SYNC POINT")
 											_pnt.UUID = pnt.UUID
 											_pnt.PresentValue = &ops.WriteValue //update point value
 											if err != nil {
 												log.Errorf("modbus-write-sync: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 											} else {
 												_pnt.InSync = utils.NewTrue()
+												if utils.BoolIsNil(pnt.WriteValueOnce) {
+													_pnt.WriteValueOnceSync = utils.NewTrue()
+												}
 												_, err = i.pointUpdate(pnt.UUID, &_pnt)
 												log.Infof("modbus-write-sync: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 											}
 										}
 										if counter == 1 {
-											log.Infof("MODBUS WRITE SYNC ON START")
+											log.Infof("modbus: MODBUS WRITE SYNC ON START")
 											_pnt.UUID = pnt.UUID
 											_pnt.PresentValue = &ops.WriteValue //update point value
 											if err != nil {
 												log.Errorf("modbus-write-start-sync: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 											} else {
 												_pnt.InSync = utils.NewTrue()
+												if utils.BoolIsNil(pnt.WriteValueOnce) {
+													_pnt.WriteValueOnceSync = utils.NewTrue()
+												}
 												_, err = i.pointUpdate(pnt.UUID, &_pnt)
 												log.Infof("modbus-write-start-sync: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 											}
 										}
 									}
-								} else { //READ
+								} else if !_isWrite { //READ
+									request, err := parseRequest(ops)
+									if err != nil {
+										log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
+									}
+									_, responseValue, err := networkRequest(cli, request)
 									_pnt.UUID = pnt.UUID
 									rs := responseValue
 									_pnt.PresentValue = &rs //update point value
-									//_pnt.ValueRaw = valueRaw(responseRaw)
 									cov := utils.Float64IsNil(pnt.COV)
 									covEvent, _ := utils.COV(ops.WriteValue, utils.Float64IsNil(pnt.ValueOriginal), cov)
 									if covEvent {
