@@ -156,7 +156,9 @@ type Point struct {
 	ValueDisplay         string   `json:"value_display,omitempty"` //point value, read only
 	ValueOriginal        *float64 `json:"value_original"`
 	CurrentPriority      *int     `json:"current_priority,omitempty"`
-	InSync               *bool    `json:"in_sync"`
+	InSync               *bool    `json:"in_sync"`                    //if user edits the point it will disable the COV for one time
+	WriteValueOnce       *bool    `json:"write_value_once,omitempty"` //when point is used for polling and if it's a writeable point and WriteValueOnce is true then on a successful write it will set the WriteValueOnceSync to true and on the next poll cycle it will not send the write value
+	WriteValueOnceSync   *bool    `json:"write_value_once_sync,omitempty"`
 	Fallback             float64  `json:"fallback"`
 	DeviceUUID           string   `json:"device_uuid,omitempty" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	EnableWriteable      *bool    `json:"writeable,omitempty"`
@@ -165,7 +167,7 @@ type Point struct {
 	Eval                 string   `json:"eval_expression,omitempty"`
 	EvalExample          string   `json:"eval_example,omitempty"`
 	COV                  *float64 `json:"cov"`
-	ObjectType           string   `json:"object_type,omitempty"`     //binaryInput, coil, if type os input dont return the priority array  TODO decide if we just stick to bacnet object types, as a binaryOut is the sample as a coil in modbus
+	ObjectType           string   `json:"object_type,omitempty"`     //binaryInput, coil, if type os input don't return the priority array
 	ObjectEncoding       string   `json:"object_encoding,omitempty"` //BEB_LEW bebLew
 	AddressId            *int     `json:"address_id"`                // for example a modbus address or bacnet address
 	AddressLength        *int     `json:"address_length"`            // for example a modbus address offset
