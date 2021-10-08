@@ -31,7 +31,7 @@ func GetSensorType(data string) TSensorType {
 	switch sensor {
 	case string(MicroAA):
 		return ME
-	case string(DropletAB): //this is an older version of the droplet
+	case string(DropletAB):
 		return THLM
 	case string(DropletB0):
 		return TH
@@ -46,15 +46,21 @@ func GetSensorType(data string) TSensorType {
 	}
 }
 
-func CheckSensorCode(data string) TSensorCode {
+func GetSensorCode(data string) TSensorCode {
 	sensor := data[2:4]
 	switch sensor {
 	case string(MicroAA):
-		return MicroAA
+		fallthrough
+	case string(DropletAB):
+		fallthrough
+	case string(DropletB0):
+		fallthrough
+	case string(DropletB1):
+		fallthrough
 	case string(DropletB2):
-		return DropletB2
+		fallthrough
 	case string(ZipHydrotapD1):
-		return ZipHydrotapD1
+		return TSensorCode(sensor)
 	default:
 		return "None"
 	}
@@ -69,8 +75,15 @@ func CheckPayloadLength(data string) bool {
 	if data == "!\r\n" || data == "!\n" {
 		return false
 	}
-	switch id := CheckSensorCode(data); id {
+	switch id := GetSensorCode(data); id {
 	case MicroAA:
+		fallthrough
+	case DropletAB:
+		fallthrough
+	case DropletB0:
+		fallthrough
+	case DropletB1:
+		fallthrough
 	case DropletB2:
 		return dl == 36 || dl == 32 || dl == 44
 	case ZipHydrotapD1:
@@ -78,7 +91,6 @@ func CheckPayloadLength(data string) bool {
 	default:
 		return false
 	}
-	return false
 }
 
 func DecodePayload(data string) (CommonValues, interface{}) {
@@ -134,7 +146,6 @@ func DataLength(data string) int {
 	return len(data)
 }
 
-//works for both old and new
 func decodeID(data string) string {
 	return data[0:8]
 }
@@ -142,15 +153,6 @@ func decodeID(data string) string {
 func rssi(data string) int {
 	_len := DataLength(data)
 	v, _ := strconv.ParseInt(data[_len-4:_len-2], 16, 0)
-	_v := v * -1
-	return int(_v)
-}
-
-//TODO add in the old code
-//msg.rssi = parseInt("0x" + hexString.substring(32, 34)) * -1;
-func rssiOld(data string) int {
-	_len := DataLength(data)
-	v, _ := strconv.ParseInt(data[_len-4:_len-2], 16, 0)
-	_v := v * -1
-	return int(_v)
+	v = v * -1
+	return int(v)
 }

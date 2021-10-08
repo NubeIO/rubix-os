@@ -6,8 +6,9 @@ import (
 
 type TDropletTH struct {
 	CommonValues
-	Voltage     int     `json:"voltage"`
+	Voltage     float64 `json:"voltage"`
 	Temperature float64 `json:"temperature"`
+	Pressure    float64 `json:"pressure"`
 	Humidity    int     `json:"humidity"`
 }
 
@@ -18,18 +19,20 @@ type TDropletTHL struct {
 
 type TDropletTHLM struct {
 	TDropletTHL
-	Motion int `json:"motion"`
+	Motion bool `json:"motion"`
 }
 
 func DropletTH(data string, sensor TSensorType) TDropletTH {
 	d := Common(data, sensor)
 	temperature := dropletTemp(data)
+	pressure := dropletPressure(data)
 	humidity := dropletHumidity(data)
 	voltage := dropletVoltage(data)
 	v := TDropletTH{
 		CommonValues: d,
 		Voltage:      voltage,
 		Temperature:  temperature,
+		Pressure:     pressure,
 		Humidity:     humidity,
 	}
 	return v
@@ -55,47 +58,36 @@ func DropletTHLM(data string, sensor TSensorType) TDropletTHLM {
 	return v
 }
 
-// works with old and new
 func dropletTemp(data string) float64 {
 	v, _ := strconv.ParseInt(data[10:12]+data[8:10], 16, 0)
 	v_ := float64(v) / 100
 	return v_
 }
 
-//dropletHumidity new
+func dropletPressure(data string) float64 {
+	v, _ := strconv.ParseInt(data[14:16]+data[12:14], 16, 0)
+	v_ := float64(v) / 10
+	return v_
+}
+
 func dropletHumidity(data string) int {
 	v, _ := strconv.ParseInt(data[16:18], 16, 0)
-	v_ := v & 127
-	return int(v_)
+	v = v & 127
+	return int(v)
 }
 
-//dropletHumidityOld older version
-func dropletHumidityOld(data string) int {
-	v, _ := strconv.ParseInt(data[16:18], 16, 0)
-	v_ := v % 128
-	return int(v_)
-}
-
-// works with old and new
-func dropletVoltage(data string) int {
+func dropletVoltage(data string) float64 {
 	v, _ := strconv.ParseInt(data[22:24], 16, 0)
-	v_ := v / 50
-	return int(v_)
+	v_ := float64(v) / 50
+	return v_
 }
 
-// works with old and new
 func dropletLight(data string) int {
-	v := data[20:22] + data[18:20]
-	v_, _ := strconv.ParseInt(v, 16, 0)
-	return int(v_)
+	v, _ := strconv.ParseInt(data[20:22]+data[18:20], 16, 0)
+	return int(v)
 }
 
-// works with old and new
-func dropletMotion(data string) int {
-	v_, _ := strconv.ParseInt(data[16:18], 16, 0)
-	if v_ > 127 {
-		return 1
-	} else {
-		return 0
-	}
+func dropletMotion(data string) bool {
+	v, _ := strconv.ParseInt(data[16:18], 16, 0)
+	return v > 127
 }
