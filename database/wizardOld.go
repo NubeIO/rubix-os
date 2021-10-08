@@ -415,10 +415,22 @@ func (d *GormDatabase) WizardNewNetDevPnt(plugin string, net *model.Network, dev
 	// network
 	net.PluginConfId = p.UUID
 	n, err := d.CreateNetwork(net)
+	if err != nil {
+		fmt.Println("Error on wizard")
+		fmt.Println(err)
+		fmt.Println("Error on wizard")
+		return false, err
+	}
 	fmt.Println("CreateNetwork")
 	// device
 	dev.NetworkUUID = n.UUID
 	de, err := d.CreateDevice(dev)
+	if err != nil {
+		fmt.Println("Error on wizard")
+		fmt.Println(err)
+		fmt.Println("Error on wizard")
+		return false, err
+	}
 	fmt.Println("CreateDevice")
 	// point
 	pnt.DeviceUUID = de.UUID

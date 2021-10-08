@@ -78,7 +78,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if dev != nil {
-					_, err = i.addPoints(dev)
+					//_, err = i.addPoints(dev)
 					log.Info("LORA BUS PluginsUpdated IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
