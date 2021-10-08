@@ -1,72 +1,84 @@
 package auth
 
 import (
-	"crypto/rand"
-	"math/big"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"errors"
+	"fmt"
+	"github.com/NubeDev/flow-framework/config"
+	"github.com/dgrijalva/jwt-go"
+	log "github.com/sirupsen/logrus"
+	"strings"
+	"time"
 )
 
-var (
-	tokenCharacters   = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	randomTokenLength = 14
-	applicationPrefix = "A"
-	clientPrefix      = "C"
-	pluginPrefix      = "P"
-
-	randReader = rand.Reader
-)
-
-func randIntn(n int) int {
-	max := big.NewInt(int64(n))
-	res, err := rand.Int(randReader, max)
+func GetToken(username string, password string, conf *config.Configuration) (*string, error) {
+	if _, err := isValidCredential(username, password, conf); err != nil {
+		log.Warn(fmt.Sprintf("Credential: %s", err))
+		return nil, err
+	}
+	secretKey, err := GetSecretKey(conf.Location.SecretKeyLocation)
 	if err != nil {
-		panic("random source is not available")
+		log.Error(err)
+		return nil, err
 	}
-	return int(res.Int64())
-}
-
-// GenerateNotExistingToken receives a token generation func and a func to check whether the token exists, returns a unique token.
-func GenerateNotExistingToken(generateToken func() string, tokenExists func(token string) bool) string {
-	for {
-		token := generateToken()
-		if !tokenExists(token) {
-			return token
-		}
+	c := jwt.MapClaims{
+		"exp": time.Now().UTC().Add(time.Hour * time.Duration(12)).Unix(),
+		"iat": time.Now().UTC().Unix(),
+		"sub": "admin",
 	}
-}
-
-// GenerateApplicationToken generates an application token.
-func GenerateApplicationToken() string {
-	return generateRandomToken(applicationPrefix)
-}
-
-// GenerateClientToken generates a client token.
-func GenerateClientToken() string {
-	return generateRandomToken(clientPrefix)
-}
-
-// GeneratePluginToken generates a plugin token.
-func GeneratePluginToken() string {
-	return generateRandomToken(pluginPrefix)
-}
-
-// GenerateImageName generates an image name.
-func GenerateImageName() string {
-	return generateRandomString(25)
-}
-
-func generateRandomToken(prefix string) string {
-	return prefix + generateRandomString(randomTokenLength)
-}
-
-func generateRandomString(length int) string {
-	res := make([]byte, length)
-	for i := range res {
-		index := randIntn(len(tokenCharacters))
-		res[i] = tokenCharacters[index]
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
+	signedToken, err := token.SignedString(secretKey)
+	if err != nil {
+		log.Error(err)
+		return nil, err
 	}
-	return string(res)
+	return &signedToken, nil
 }
 
-func init() {
-	randIntn(2)
+func VerifyToken(tokenInput string, conf *config.Configuration) (bool, error) {
+	secretKey, err := GetSecretKey(conf.Location.SecretKeyLocation)
+	if err != nil {
+		log.Error(err)
+		return false, err
+	}
+	token, err := jwt.Parse(tokenInput, func(token *jwt.Token) (interface{}, error) {
+		log.Error(err)
+		return secretKey, nil
+	})
+	if err != nil {
+		log.Error(err)
+		return false, err
+	}
+	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return true, nil
+	}
+	return false, nil
+}
+
+func isValidCredential(usernameInput string, password string, conf *config.Configuration) (bool, error) {
+	username, hashedPassword, err := GetCredentials(conf.Location.CredentialLocation)
+	if err != nil {
+		log.Error(err)
+		return false, err
+	}
+	if usernameInput == *username {
+		return false, errors.New("username not found")
+	}
+	if strings.Count(*hashedPassword, "$") < 2 {
+		return false, errors.New("invalid hashed password")
+	}
+	hashedPasswordList := strings.Split(*hashedPassword, "$")
+	if hashedPasswordList[2] == hashInternal(hashedPasswordList[1], password) {
+		return true, nil
+	}
+	return false, errors.New("incorrect password")
+}
+
+func hashInternal(salt string, password string) string {
+	mac := hmac.New(sha256.New, []byte(salt))
+	mac.Write([]byte(password))
+	expectedMAC := mac.Sum(nil)
+	return hex.EncodeToString(expectedMAC)
 }
