@@ -6,7 +6,7 @@ import (
 
 type TMicroEdge struct {
 	CommonValues
-	Voltage int     `json:"voltage"`
+	Voltage float64 `json:"voltage"`
 	Pulse   int     `json:"pulse"`
 	AI1     float64 `json:"ai_1"`
 	AI2     float64 `json:"ai_2"`
@@ -51,8 +51,8 @@ func ai3(data string) float64 {
 	return float64(v)
 }
 
-func voltage(data string) int {
+func voltage(data string) float64 {
 	v, _ := strconv.ParseInt(data[16:18], 16, 0)
-	v_ := v / 50
-	return int(v_)
+	v_ := float64(v) / 50
+	return v_
 }
