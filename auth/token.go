@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
@@ -21,7 +20,6 @@ var (
 
 func GetToken(username string, password string, conf *config.Configuration) (*string, error) {
 	if _, err := isValidCredential(username, password, conf); err != nil {
-		log.Warn(fmt.Sprintf("Credential: %s", err))
 		return nil, err
 	}
 	secretKey, err := GetSecretKey(path.Join(conf.Location.BiosDataDir, secretKeyLocation))
@@ -65,7 +63,7 @@ func isValidCredential(usernameInput string, password string, conf *config.Confi
 	if err != nil {
 		return false, err
 	}
-	if usernameInput == *username {
+	if usernameInput != *username {
 		return false, errors.New("username not found")
 	}
 	if strings.Count(*hashedPassword, "$") < 2 {

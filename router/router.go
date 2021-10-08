@@ -31,6 +31,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	authHandler := auth.Auth{Conf: conf}
 	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
 	healthHandler := api.HealthAPI{DB: db}
+	loginHandler := api.LoginAPI{Conf: conf}
 	clientHandler := api.ClientAPI{
 		DB:            db,
 		ImageDir:      conf.GetAbsUploadedImagesDir(),
@@ -135,6 +136,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
 
+	engine.POST("/api/users/login", loginHandler.Login)
+	engine.GET("/api/system/ping", healthHandler.Health)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
 	engine.Use(func(ctx *gin.Context) {
 		ctx.Header("Content-Type", "application/json") //if you comment it out it will detected as text on proxy-handlers
