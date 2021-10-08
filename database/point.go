@@ -178,7 +178,7 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 	}
 	var pntSync model.Point
 	pntSync.WriteValueOnceSync = utils.NewFalse()
-	_, err := d.UpdatePoint(uuid, &pntSync, fromPlugin)
+	point, err := d.UpdatePoint(uuid, &pntSync, fromPlugin)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 			return nil, errors.New("ERROR on device eventbus")
 		}
 	}
-	return pointModel, nil
+	return point, nil
 }
 
 // UpdatePointValue returns the device for the given id or nil.

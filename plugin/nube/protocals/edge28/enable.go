@@ -1,6 +1,7 @@
 package main
 
 import (
+	edgerest "github.com/NubeDev/flow-framework/plugin/nube/protocals/edge28/restclient"
 	"os"
 	"os/signal"
 )
@@ -8,10 +9,8 @@ import (
 // Enable implements plugin.Plugin
 func (i *Instance) Enable() error {
 	i.setUUID()
-	if !i.brokerEnabled {
 
-	}
-	i.brokerEnabled = true
+	i.rest = edgerest.NewNoAuth("192.168.15.101", "5000")
 	i.enabled = true
 	return nil
 }
