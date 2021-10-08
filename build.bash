@@ -57,7 +57,6 @@ go build -buildmode=plugin -o git.so *.go  && cp git.so  $pluginDir
 cd $dir/plugin/nube/protocals/edge28
 go build -buildmode=plugin -o edge28.so *.go  && cp edge28.so $pluginDir
 
-
 cd $dir/plugin/nube/protocals/lorawan
 go build -buildmode=plugin -o lorawan.so *.go  && cp lorawan.so $pluginDir
 

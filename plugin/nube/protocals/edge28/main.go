@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NubeDev/flow-framework/eventbus"
+	edgerest "github.com/NubeDev/flow-framework/plugin/nube/protocals/edge28/restclient"
 	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 	"github.com/NubeDev/flow-framework/src/cachestore"
 	"github.com/NubeDev/flow-framework/src/dbhandler"
@@ -22,15 +23,15 @@ const transportType = "ip" //serial, ip
 
 // Instance is plugin instance
 type Instance struct {
-	config        *Config
-	enabled       bool
-	basePath      string
-	db            dbhandler.Handler
-	store         cachestore.Handler
-	bus           eventbus.BusService
-	pluginUUID    string
-	networkUUID   string
-	brokerEnabled bool
+	config      *Config
+	enabled     bool
+	basePath    string
+	db          dbhandler.Handler
+	store       cachestore.Handler
+	bus         eventbus.BusService
+	pluginUUID  string
+	networkUUID string
+	rest        *edgerest.RestClient
 }
 
 // GetFlowPluginInfo returns plugin info.
