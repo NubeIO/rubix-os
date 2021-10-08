@@ -32,6 +32,25 @@ func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, e
 	return networkModel, nil
 }
 
+// GetNetworkByField returns the network for the given field ie name or nil.
+func (d *GormDatabase) GetNetworkByField(field string, value string, withDevices bool) (*model.Network, error) {
+	var networkModel *model.Network
+	f := fmt.Sprintf("%s = ? ", field)
+	if withDevices { // drop child to reduce json size
+		query := d.DB.Where(f, value).Preload("Devices").First(&networkModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
+		return networkModel, nil
+	} else {
+		query := d.DB.Where(f, value).First(&networkModel)
+		if query.Error != nil {
+			return nil, query.Error
+		}
+		return networkModel, nil
+	}
+}
+
 // GetNetworkByPlugin returns the network for the given id or nil.
 func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, args api.Args) (*model.Network, error) {
 	var networkModel *model.Network

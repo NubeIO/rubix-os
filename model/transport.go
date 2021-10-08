@@ -63,7 +63,7 @@ var SerialParity = struct {
 type SerialConnection struct {
 	CommonUUID
 	CommonEnable
-	SerialPort  string `json:"serial_port"`
+	SerialPort  string `json:"serial_port" gorm:"type:varchar(255);unique"`
 	BaudRate    uint   `json:"baud_rate"` //9600
 	StopBits    uint   `json:"stop_bits"`
 	Parity      string `json:"parity"`

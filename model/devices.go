@@ -8,7 +8,7 @@ type CommonDevice struct {
 	AddressId         int           `json:"address_id,omitempty"`  // for example a modbus address or bacnet address
 	ZeroMode          *bool         `json:"zero_mode,omitempty"`
 	PollDelayPointsMS time.Duration `json:"poll_delay_points_ms"`
-	AddressUUID       string        `json:"address_uuid,omitempty"` // AAB1213
+	AddressUUID       string        `json:"address_uuid" gorm:"type:varchar(255);unique"` // AAB1213
 	CommonIP
 	TransportType string `json:"transport_type,omitempty"  gorm:"type:varchar(255);not null"` //serial, ip
 

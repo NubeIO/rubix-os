@@ -28,3 +28,11 @@ func (h *Handler) GetNetworksByName(name string, args api.Args) ([]*model.Networ
 	}
 	return q, nil
 }
+
+func (h *Handler) GetNetworkByField(field string, value string, withDevices bool) (*model.Network, error) {
+	q, err := getDb().GetNetworkByField(field, value, withDevices)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}

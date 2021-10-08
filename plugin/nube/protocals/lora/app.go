@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
@@ -63,6 +64,16 @@ POINTS
 
 // addPoints close serial port
 func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
+
+	checkDeviceNotExist, err := i.db.GetDeviceByField("address_uuid", deviceBody.AddressUUID, false)
+	if err != nil {
+		return nil, err
+	}
+	if checkDeviceNotExist.UUID != "" {
+		log.Errorf("lora: a device with the same lora ID (address_uuid) exists: %v\n", checkDeviceNotExist.UUID)
+		return nil, errors.New("a device with the same lora ID (address_uuid) exists")
+	}
+
 	p := new(model.Point)
 	p.DeviceUUID = deviceBody.UUID
 	p.AddressUUID = deviceBody.AddressUUID
