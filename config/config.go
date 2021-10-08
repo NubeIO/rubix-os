@@ -41,10 +41,10 @@ type Configuration struct {
 			PluginsDir        string `default:"plugins"`
 			UploadedImagesDir string `default:"images"`
 		}
-		SecretKeyLocation  string `default:"/data/rubix-bios/config/secret_key.txt"`
-		CredentialLocation string `default:"/data/rubix-bios/data/users.txt"`
+		BiosDataDir string `default:"/data/rubix-bios"`
 	}
 	Prod bool `default:"false"`
+	Auth bool `default:"false"`
 }
 
 var config *Configuration = nil

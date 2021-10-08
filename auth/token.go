@@ -9,8 +9,14 @@ import (
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/dgrijalva/jwt-go"
 	log "github.com/sirupsen/logrus"
+	"path"
 	"strings"
 	"time"
+)
+
+var (
+	secretKeyLocation  = "config/secret_key.txt"
+	credentialLocation = "data/users.txt"
 )
 
 func GetToken(username string, password string, conf *config.Configuration) (*string, error) {
@@ -18,7 +24,7 @@ func GetToken(username string, password string, conf *config.Configuration) (*st
 		log.Warn(fmt.Sprintf("Credential: %s", err))
 		return nil, err
 	}
-	secretKey, err := GetSecretKey(conf.Location.SecretKeyLocation)
+	secretKey, err := GetSecretKey(path.Join(conf.Location.BiosDataDir, secretKeyLocation))
 	if err != nil {
 		log.Error(err)
 		return nil, err
@@ -38,17 +44,14 @@ func GetToken(username string, password string, conf *config.Configuration) (*st
 }
 
 func VerifyToken(tokenInput string, conf *config.Configuration) (bool, error) {
-	secretKey, err := GetSecretKey(conf.Location.SecretKeyLocation)
+	secretKey, err := GetSecretKey(path.Join(conf.Location.BiosDataDir, secretKeyLocation))
 	if err != nil {
-		log.Error(err)
 		return false, err
 	}
 	token, err := jwt.Parse(tokenInput, func(token *jwt.Token) (interface{}, error) {
-		log.Error(err)
 		return secretKey, nil
 	})
 	if err != nil {
-		log.Error(err)
 		return false, err
 	}
 	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
@@ -58,9 +61,8 @@ func VerifyToken(tokenInput string, conf *config.Configuration) (bool, error) {
 }
 
 func isValidCredential(usernameInput string, password string, conf *config.Configuration) (bool, error) {
-	username, hashedPassword, err := GetCredentials(conf.Location.CredentialLocation)
+	username, hashedPassword, err := GetCredentials(path.Join(conf.Location.BiosDataDir, credentialLocation))
 	if err != nil {
-		log.Error(err)
 		return false, err
 	}
 	if usernameInput == *username {

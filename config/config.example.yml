@@ -38,6 +38,11 @@ database: # for database see (configure database section)
 passstrength: 10 # the bcrypt password strength (higher = better but also slower)
 loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
 
+location:
+  biosdatadir: '/data/rubix-bios' # for local when auth: true, `/<parent_dir>/rubix-bios/out`
+
+auth: false
+
 pointbuilder:
   TotalWaterConsumption:
     thingClass: point
