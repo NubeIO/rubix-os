@@ -17,7 +17,7 @@ func streamFieldsArgs(ctx *gin.Context) (flowUUID string, streamUUID string, pro
 	return args.FlowUUID, args.StreamUUID, args.ProducerUUID, args.ConsumerUUID, args.WriterUUID
 }
 
-//withChildrenArgs
+//withFieldsArgs
 func withFieldsArgs(ctx *gin.Context) (field string, value string) {
 	var args Args
 	var aType = ArgsType
@@ -27,7 +27,18 @@ func withFieldsArgs(ctx *gin.Context) (field string, value string) {
 	return args.Field, args.Value
 }
 
-//withChildrenArgs
+//withFieldsArgs
+func networkDevicePointNames(ctx *gin.Context) (networkName, deviceName, pointName string) {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.NetworkName = ctx.DefaultQuery(aType.NetworkName, aDefault.NetworkName)
+	args.DeviceName = ctx.DefaultQuery(aType.DeviceName, aDefault.DeviceName)
+	args.PointName = ctx.DefaultQuery(aType.PointName, aDefault.PointName)
+	return args.NetworkName, args.DeviceName, args.PointName
+}
+
+//parentArgs
 func parentArgs(ctx *gin.Context) (AddToParent string) {
 	var args Args
 	var aType = ArgsType

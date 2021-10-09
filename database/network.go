@@ -81,6 +81,16 @@ func (d *GormDatabase) GetNetworksByName(name string, args api.Args) ([]*model.N
 	return networksModel, nil
 }
 
+// GetNetworkByName returns the network for the given id or nil.
+func (d *GormDatabase) GetNetworkByName(name string, args api.Args) (*model.Network, error) {
+	var networksModel *model.Network
+	query := d.buildNetworkQuery(args)
+	if err := query.Where("name = ? ", name).Find(&networksModel).Error; err != nil {
+		return nil, err
+	}
+	return networksModel, nil
+}
+
 // CreateNetwork creates a device.
 func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Network)

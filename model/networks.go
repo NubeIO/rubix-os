@@ -18,7 +18,7 @@ type IPNetwork struct {
 
 type Network struct {
 	CommonUUID
-	CommonName
+	CommonNameUnique
 	CommonDescription
 	CommonEnable
 	CommonFault

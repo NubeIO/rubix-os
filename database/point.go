@@ -30,6 +30,51 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 	return pointModel, nil
 }
 
+//GetPointByName get point by name
+func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string) (*model.Point, error) {
+	var args api.Args
+	args.WithDevices = true
+	args.WithPoints = true
+	var pointModel *model.Point
+	net, err := d.GetNetworkByName(networkName, args)
+	if net.UUID == "" || err != nil {
+		return nil, errors.New("failed to find a network with that name")
+	}
+	foundDev := false
+	foundPnt := false
+	for _, dev := range net.Devices {
+		if dev.Name == deviceName {
+			foundDev = true
+			for _, pnt := range dev.Points {
+				if pnt.Name == pointName {
+					foundPnt = true
+					pointModel = pnt
+				}
+			}
+		}
+	}
+	if !foundDev {
+		return nil, errors.New("failed to find a device with that name")
+	}
+	if !foundPnt {
+		return nil, errors.New("found device but failed to find a point with that name")
+	}
+	return pointModel, nil
+}
+
+//PointWriteByName get point by name and update its priority or present value
+func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.Point, fromPlugin bool) (*model.Point, error) {
+	getPnt, err := d.GetPointByName(networkName, deviceName, pointName)
+	if err != nil {
+		return nil, err
+	}
+	write, err := d.PointWrite(getPnt.UUID, body, fromPlugin)
+	if err != nil {
+		return nil, err
+	}
+	return write, nil
+}
+
 // PointDeviceByAddressID will query by device_uuid = ? AND object_type = ? AND address_id = ?
 func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Point) (*model.Point, bool) {
 	var pointModel *model.Point
