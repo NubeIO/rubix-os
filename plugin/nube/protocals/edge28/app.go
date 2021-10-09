@@ -1,12 +1,26 @@
 package main
 
-var Rls = []string{"R2", "R2"}
+var Rls = []string{"R1", "R2"}
 var DOs = []string{"DO1", "DO2", "DO3", "DO4", "DO5"}
 var UOs = []string{"UO1", "UO2", "UO3", "UO4", "UO5", "UO6", "UO7"}
 var UIs = []string{"UI1", "UI2", "UI3", "UI4", "UI5", "UI6", "UI7"}
 var DIs = []string{"DI1", "DI2", "DI3", "DI4", "DI5", "DI6", "DI7"}
 
 var pointList = struct {
+	R1  string `json:"R1"`
+	R2  string `json:"R2"`
+	DO1 string `json:"DO1"`
+	DO2 string `json:"DO2"`
+	DO3 string `json:"DO3"`
+	DO4 string `json:"DO4"`
+	DO5 string `json:"DO5"`
+	UO1 string `json:"UO1"`
+	UO2 string `json:"UO2"`
+	UO3 string `json:"UO3"`
+	UO4 string `json:"UO4"`
+	UO5 string `json:"UO5"`
+	UO6 string `json:"UO6"`
+	UO7 string `json:"UO7"`
 	UI1 string `json:"UI1"`
 	UI2 string `json:"UI2"`
 	UI3 string `json:"UI3"`
@@ -22,6 +36,20 @@ var pointList = struct {
 	DI6 string `json:"DI6"`
 	DI7 string `json:"DI7"`
 }{
+	R1:  "R1",
+	R2:  "R2",
+	DO1: "DO1",
+	DO2: "DO2",
+	DO3: "DO3",
+	DO4: "DO4",
+	DO5: "DO5",
+	UO1: "UO1",
+	UO2: "UO2",
+	UO3: "UO3",
+	UO4: "UO4",
+	UO5: "UO5",
+	UO6: "UO6",
+	UO7: "UO7",
 	UI1: "UI1",
 	UI2: "UI2",
 	UI3: "UI3",

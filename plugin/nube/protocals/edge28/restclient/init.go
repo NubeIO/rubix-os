@@ -12,10 +12,10 @@ type RestClient struct {
 }
 
 // NewNoAuth returns a new instance
-func NewNoAuth(address string, port string) *RestClient {
+func NewNoAuth(address string, port int) *RestClient {
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%s", address, port)
+	url := fmt.Sprintf("http://%s:%d", address, port)
 	apiURL := url
 	client.SetHostURL(apiURL)
 	client.SetError(&Error{})
