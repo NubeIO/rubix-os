@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	edgerest "github.com/NubeDev/flow-framework/plugin/nube/protocals/edge28/restclient"
@@ -12,7 +11,7 @@ import (
 	"time"
 )
 
-const defaultInterval = 5000 * time.Millisecond
+const defaultInterval = 2500 * time.Millisecond //default polling is 2.5 sec
 
 type polling struct {
 	enable        bool
@@ -27,23 +26,15 @@ var poll poller.Poller
 var getUI *edgerest.UI
 var getDI *edgerest.DI
 
-func isWrite(t string) bool {
-	switch t {
-	case pointList.R1:
-		return true
-	case model.ObjectTypes.WriteHolding, model.ObjectTypes.WriteHoldings:
-		return true
-	case model.ObjectTypes.WriteSingleInt16, model.ObjectTypes.WriteSingleUint16:
-		return true
-	case model.ObjectTypes.WriteSingleFloat32, model.ObjectTypes.WriteSingleFloat64:
-		return true
-	}
-	return false
-}
-
-func processWriteDO(pnt *model.Point, value float64, rest *edgerest.RestClient, pollCount float64) (float64, error) {
+//TODO add COV WriteValueOnceSync and InSync
+func (i *Instance) processWrite(pnt *model.Point, value float64, rest *edgerest.RestClient, pollCount float64, isUO bool) (float64, error) {
 	//!utils.BoolIsNil(pnt.WriteValueOnceSync)
-	_, err := rest.WriteDO(pnt.IoID, value)
+	var err error
+	if isUO {
+		_, err = rest.WriteUO(pnt.IoID, value)
+	} else {
+		_, err = rest.WriteDO(pnt.IoID, value)
+	}
 	if err != nil {
 		log.Errorf("edge-28: failed to write IO %s:  value:%f error:%v\n", pnt.IoID, value, err)
 		return 0, err
@@ -53,30 +44,42 @@ func processWriteDO(pnt *model.Point, value float64, rest *edgerest.RestClient, 
 	}
 }
 
-func processWriteUO(pnt *model.Point, value float64, rest *edgerest.RestClient, pollCount float64) (float64, error) {
-	//!utils.BoolIsNil(pnt.WriteValueOnceSync)
-	_, err := rest.WriteUO(pnt.IoID, value)
-	if err != nil {
-		log.Errorf("edge-28: failed to write IO %s:  value:%f error:%v\n", pnt.IoID, value, err)
-		return 0, err
-	} else {
-		log.Infof("edge-28: wrote IO %s: %v\n", pnt.IoID, value)
-		return value, err
+//GPIOValueToDigital
+//TODO remove this and get from helpers
+func GPIOValueToDigital(value float64) float64 {
+	if value < 0.2 {
+		return 1 //ON / Closed Circuit
+	} else { //previous functions used > 0.6 as an OFF threshold.
+		return 0 //OFF / Open Circuit
 	}
 }
 
-func processRead(pnt *model.Point, value, pollCount float64) (float64, error) {
-	cov := utils.Float64IsNil(pnt.COV)
-	covEvent, _ := utils.COV(value, utils.Float64IsNil(pnt.ValueOriginal), cov)
-	//write when pollCount is == 1
-	//write on re-sync
-	//write on covEvent
+func (i *Instance) processRead(pnt *model.Point, value float64, pollCount float64) (float64, error) {
+	cov := utils.Float64IsNil(pnt.COV) //TODO add in point scaling to get COV to work correct (as in scale temp or 0-10)
+	covEvent, _ := utils.COV(value, utils.Float64IsNil(pnt.PresentValue), cov)
+	if pollCount == 1 || !utils.BoolIsNil(pnt.InSync) {
+		pnt.InSync = utils.NewTrue()
+		_, err := i.db.UpdatePointValue(pnt.UUID, pnt, false)
+		if err != nil {
+			log.Errorf("edge-28: READ UPDATE POINT %s: %v\n", pnt.IoID, value)
+			return value, err
+		}
+		if utils.BoolIsNil(pnt.InSync) {
+			log.Infof("edge-28: READ POINT SYNC %s: %v\n", pnt.IoID, value)
+		} else {
+			log.Infof("edge-28: READ ON START %s: %v\n", pnt.IoID, value)
+		}
+	} else if covEvent {
+		pnt.InSync = utils.NewTrue()
+		_, err := i.db.UpdatePointValue(pnt.UUID, pnt, false)
+		if err != nil {
+			log.Errorf("edge-28: READ UPDATE POINT %s: %v\n", pnt.IoID, value)
+			return value, err
+		} else {
+			log.Infof("edge-28: READ ON START %s: %v\n", pnt.IoID, value)
+		}
 
-	if covEvent {
 	}
-	fmt.Println(getUI.Val.UI1.Val, pointList.UI1, pnt.UUID, pnt.IoID)
-	//_, err := i.db.UpdatePointValue(pnt.UUID, &pnt, false)
-	//log.Infof("modbus-write-cov: Addr: %s  Value: %f \n", pnt.IoID, pv)
 	return value, nil
 
 }
@@ -125,7 +128,7 @@ func (i *Instance) polling(p polling) error {
 					for _, pnt := range dev.Points { //POINTS
 						var _pnt model.Point
 						var pv float64
-						if pnt.Priority != nil { //WRITE
+						if pnt.Priority != nil { //WRITE TODO add in all the extra GPIO
 							var wv float64
 							if (*pnt.Priority).P16 != nil {
 								wv = *pnt.Priority.P16
@@ -137,29 +140,25 @@ func (i *Instance) polling(p polling) error {
 								} else {
 									wv = 0
 								}
-								_, err = processWriteDO(pnt, wv, rest, counter)
+								_, err = i.processWrite(pnt, wv, rest, counter, false)
 							case pointList.DO1, pointList.DO2, pointList.DO3, pointList.DO4, pointList.DO5:
-								_, err = processWriteDO(pnt, wv, rest, counter)
+								_, err = i.processWrite(pnt, wv, rest, counter, false)
 							case pointList.UO1, pointList.UO2, pointList.UO3, pointList.UO4, pointList.UO5, pointList.UO6, pointList.UO7:
-								_, err = processWriteUO(pnt, wv, rest, counter)
+								_, err = i.processWrite(pnt, wv, rest, counter, true)
 							}
-						} else { //READ
-							_pnt.UUID = pnt.UUID
-							switch pnt.IoID {
-							case pointList.UI1:
-								_, err = processRead(pnt, getUI.Val.UI1.Val, counter)
-							case pointList.UI2:
-								pv = getUI.Val.UI2.Val
-								fmt.Println(getUI.Val.UI2.Val, pointList.UI2, pnt.UUID, pnt.IoID)
-							case pointList.DI1:
-								pv = getDI.Val.DI1.Val
-								fmt.Println(getDI.Val.DI1.Val, pointList.DI1, pnt.UUID, pnt.IoID)
-							}
+						} //READ TODO add in all the extra GPIO
+						_pnt.UUID = pnt.UUID
+						switch pnt.IoID {
+						case pointList.UI1:
+							pv = getUI.Val.UI1.Val
+							_, err = i.processRead(pnt, pv, counter)
+						case pointList.UI2:
+							pv = getUI.Val.UI2.Val
+							_, err = i.processRead(pnt, pv, counter)
+						case pointList.DI1:
+							pv = GPIOValueToDigital(getDI.Val.DI1.Val)
+							_, err = i.processRead(pnt, pv, counter)
 						}
-
-						_pnt.PresentValue = &pv
-						_, err = i.db.UpdatePointValue(pnt.UUID, &_pnt, false)
-						log.Infof("modbus-write-cov: Addr: %s  Value: %f \n", pnt.IoID, pv)
 					}
 				}
 			}

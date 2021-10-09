@@ -18,6 +18,10 @@ func NewInt(value int) *int {
 	return &value
 }
 
+func NewFloat64(value float64) *float64 {
+	return &value
+}
+
 func IntIsNil(b *int) int {
 	if b == nil {
 		return 0
