@@ -55,6 +55,12 @@ func (i *Instance) listSerialPorts() (*utils.Array, error) {
 	}
 	return p, err
 }
+func B2i(b bool) float64 {
+	if b {
+		return 1
+	}
+	return 0
+}
 
 // PublishSensor close serial port
 func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorStruct interface{}) {
@@ -62,47 +68,47 @@ func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorSt
 	pnt.AddressUUID = commonSensorData.Id
 	if commonSensorData.Sensor == string(decoder.THLM) {
 		s := sensorStruct.(decoder.TDropletTHLM)
-		log.Infof("lora decode as DropletTHLM: AddressUUID: %s Sensor:%s voltage:%v \n", pnt.AddressUUID, commonSensorData.Sensor, float64(s.Voltage))
+		log.Infof("lora decode as THLM: AddressUUID: %s Sensor:%s voltage:%v \n", pnt.AddressUUID, commonSensorData.Sensor, s.Voltage)
 		for _, e := range THLM {
 			switch e {
 			case model.PointTags.RSSI:
 				f := float64(s.Rssi)
-				pnt.UnitType = e //set point type
-				err := i.devTHLM(pnt, f)
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.THLM))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Voltage:
-				f := float64(s.Voltage)
-				pnt.UnitType = e //set point type
-				err := i.devTHLM(pnt, f)
+				f := s.Voltage
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.THLM))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Temp:
-				pnt.UnitType = e //set point type
-				err := i.devTHLM(pnt, s.Temperature)
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, s.Temperature, string(decoder.THLM))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Humidity:
-				pnt.UnitType = e //set point type
+				pnt.IoID = e //set point type
 				f := float64(s.Humidity)
-				err := i.devTHLM(pnt, f)
+				err := i.devTHLM(pnt, f, string(decoder.THLM))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Light:
-				pnt.UnitType = e //set point type
+				pnt.IoID = e //set point type
 				f := float64(s.Light)
-				err := i.devTHLM(pnt, f)
+				err := i.devTHLM(pnt, f, string(decoder.THLM))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Motion:
-				pnt.UnitType = e //set point type
-				f := float64(s.Motion)
-				err := i.devTHLM(pnt, f)
+				pnt.IoID = e //set point type
+				f := B2i(s.Motion)
+				err := i.devTHLM(pnt, f, string(decoder.THLM))
 				if err != nil {
 					return
 				}
@@ -111,40 +117,40 @@ func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorSt
 	}
 	if commonSensorData.Sensor == string(decoder.THL) {
 		s := sensorStruct.(decoder.TDropletTHLM)
-		log.Infof("lora decode as DropletTHLM: AddressUUID: %s Sensor:%s voltage:%v \n", pnt.AddressUUID, commonSensorData.Sensor, float64(s.Voltage))
+		log.Infof("lora decode as THL: AddressUUID: %s Sensor:%s voltage:%v \n", pnt.AddressUUID, commonSensorData.Sensor, s.Voltage)
 		for _, e := range THL {
 			switch e {
 			case model.PointTags.RSSI:
 				f := float64(s.Rssi)
-				pnt.UnitType = e //set point type
-				err := i.devTHLM(pnt, f)
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.THL))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Voltage:
-				f := float64(s.Voltage)
-				pnt.UnitType = e //set point type
-				err := i.devTHLM(pnt, f)
+				f := s.Voltage
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.THL))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Temp:
-				pnt.UnitType = e //set point type
-				err := i.devTHLM(pnt, s.Temperature)
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, s.Temperature, string(decoder.THL))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Humidity:
-				pnt.UnitType = e //set point type
+				pnt.IoID = e //set point type
 				f := float64(s.Humidity)
-				err := i.devTHLM(pnt, f)
+				err := i.devTHLM(pnt, f, string(decoder.THL))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Light:
-				pnt.UnitType = e //set point type
+				pnt.IoID = e //set point type
 				f := float64(s.Light)
-				err := i.devTHLM(pnt, f)
+				err := i.devTHLM(pnt, f, string(decoder.THL))
 				if err != nil {
 					return
 				}
@@ -153,33 +159,83 @@ func (i *Instance) publishSensor(commonSensorData decoder.CommonValues, sensorSt
 	}
 	if commonSensorData.Sensor == string(decoder.TH) {
 		s := sensorStruct.(decoder.TDropletTHLM)
-		log.Infof("lora decode as DropletTHLM: AddressUUID: %s Sensor:%s voltage:%v \n", pnt.AddressUUID, commonSensorData.Sensor, float64(s.Voltage))
+		log.Infof("lora decode as TH: AddressUUID: %s Sensor:%s voltage:%v \n", pnt.AddressUUID, commonSensorData.Sensor, s.Voltage)
 		for _, e := range TH {
 			switch e {
 			case model.PointTags.RSSI:
 				f := float64(s.Rssi)
-				pnt.UnitType = e //set point type
-				err := i.devTHLM(pnt, f)
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.TH))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Voltage:
-				f := float64(s.Voltage)
-				pnt.UnitType = e //set point type
-				err := i.devTHLM(pnt, f)
+				f := s.Voltage
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.TH))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Temp:
-				pnt.UnitType = e //set point type
-				err := i.devTHLM(pnt, s.Temperature)
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, s.Temperature, string(decoder.TH))
 				if err != nil {
 					return
 				}
 			case model.PointTags.Humidity:
-				pnt.UnitType = e //set point type
+				pnt.IoID = e //set point type
 				f := float64(s.Humidity)
-				err := i.devTHLM(pnt, f)
+				err := i.devTHLM(pnt, f, string(decoder.TH))
+				if err != nil {
+					return
+				}
+			}
+		}
+	}
+	if commonSensorData.Sensor == string(decoder.ME) {
+		s := sensorStruct.(decoder.TMicroEdge)
+		log.Infof("lora decode as ME: AddressUUID: %s Sensor:%s voltage:%v \n", pnt.AddressUUID, commonSensorData.Sensor, s.Voltage)
+		for _, e := range ME {
+			switch e {
+			case model.PointTags.RSSI:
+				f := float64(s.Rssi)
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.ME))
+				if err != nil {
+					return
+				}
+			case model.PointTags.Voltage:
+				f := s.Voltage
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.ME))
+				if err != nil {
+					return
+				}
+			case model.PointTags.Pulse:
+				f := s.Pulse
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, float64(f), string(decoder.ME))
+				if err != nil {
+					return
+				}
+			case model.PointTags.AI1:
+				f := s.AI1
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.ME))
+				if err != nil {
+					return
+				}
+			case model.PointTags.AI2:
+				f := s.AI2
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.ME))
+				if err != nil {
+					return
+				}
+			case model.PointTags.AI3:
+				f := s.AI3
+				pnt.IoID = e //set point type
+				err := i.devTHLM(pnt, f, string(decoder.ME))
 				if err != nil {
 					return
 				}

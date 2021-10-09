@@ -61,6 +61,22 @@ func (h *Handler) UpdatePointByFieldAndUnit(field string, value string, body *mo
 	return q, nil
 }
 
+func (h *Handler) GetPointByFieldAndIOID(field string, value string, body *model.Point) (*model.Point, error) {
+	q, err := getDb().GetPointByFieldAndIOID(field, value, body)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
+func (h *Handler) GetPointByFieldAndThingType(field string, value string, body *model.Point) (*model.Point, error) {
+	q, err := getDb().GetPointByFieldAndThingType(field, value, body)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
 func (h *Handler) PointAndQuery(value1, value2 string) (*model.Point, error) {
 	q, err := getDb().PointAndQuery(value1, value2)
 	if err != nil {

@@ -386,6 +386,28 @@ func (d *GormDatabase) PointAndQuery(value1 string, value2 string) (*model.Point
 	return pointModel, nil
 }
 
+// GetPointByFieldAndIOID get by field and update.
+func (d *GormDatabase) GetPointByFieldAndIOID(field string, value string, body *model.Point) (*model.Point, error) {
+	var pointModel *model.Point
+	f := fmt.Sprintf("%s = ? AND io_id = ?", field)
+	query := d.DB.Where(f, value, body.IoID).First(&pointModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return pointModel, nil
+}
+
+// GetPointByFieldAndThingType get by field and thing_type.
+func (d *GormDatabase) GetPointByFieldAndThingType(field string, value string, body *model.Point) (*model.Point, error) {
+	var pointModel *model.Point
+	f := fmt.Sprintf("%s = ? AND thing_type = ?", field)
+	query := d.DB.Where(f, value, body.ThingType).First(&pointModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return pointModel, nil
+}
+
 // UpdatePointByFieldAndUnit get by field and update.
 func (d *GormDatabase) UpdatePointByFieldAndUnit(field string, value string, body *model.Point, writeValue bool) (*model.Point, error) {
 	var pointModel *model.Point

@@ -110,18 +110,22 @@ var ObjectEncoding = struct {
 	BebBew: "bebBew",
 }
 
-var PointType = struct {
+var IOType = struct {
+	RAW           string `json:"raw"`
 	Digital       string `json:"digital"`
 	AToDigital    string `json:"a_to_digital"`
 	VoltageDC     string `json:"voltage_dc"`
 	Current       string `json:"current"`
-	Thermistor10K string `json:"thermistor_10_k"`
+	Thermistor    string `json:"thermistor"`
+	Thermistor10K string `json:"thermistor_10k_type_2"`
 }{
+	RAW:           "raw",
 	Digital:       "digital",
-	AToDigital:    "analogue to Digital",
-	VoltageDC:     "voltage dc",
+	AToDigital:    "a_to_digital",
+	VoltageDC:     "voltage_dc",
 	Current:       "current",
-	Thermistor10K: "10k thermistor",
+	Thermistor:    "thermistor",
+	Thermistor10K: "thermistor_10k_type_2",
 }
 
 var EvalExamples = struct {
@@ -169,6 +173,8 @@ type Point struct {
 	COV                  *float64 `json:"cov"`
 	ObjectType           string   `json:"object_type,omitempty"`     //binaryInput, coil, if type os input don't return the priority array
 	ObjectEncoding       string   `json:"object_encoding,omitempty"` //BEB_LEW bebLew
+	IoID                 string   `json:"io_id,omitempty"`           //DI1,UI1,AO1, temp, pulse, motion
+	IoType               string   `json:"io_type,omitempty"`         //0-10dc, 0-40ma, thermistor
 	AddressId            *int     `json:"address_id"`                // for example a modbus address or bacnet address
 	AddressLength        *int     `json:"address_length"`            // for example a modbus address offset
 	AddressUUID          string   `json:"address_uuid,omitempty"`    // for example a droplet id (so a string)
