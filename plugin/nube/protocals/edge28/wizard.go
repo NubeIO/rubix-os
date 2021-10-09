@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/utils"
 )
 
 // wizard
@@ -42,7 +43,7 @@ func (i *Instance) wizard(body wizard) (string, error) {
 	dev.Name = "edge28"
 	dev.CommonIP.Host = ip
 	dev.CommonIP.Port = p
-	dev.PollDelayPointsMS = 5000
+	dev.PollDelayPointsMS = 2500
 
 	device, err := i.db.CreateDevice(&dev)
 	if err != nil {
@@ -61,6 +62,7 @@ func (i *Instance) wizard(body wizard) (string, error) {
 		pnt.Description = pName
 		pnt.IoID = e
 		pnt.IoType = model.IOType.RAW
+		pnt.COV = utils.NewFloat64(0.5)
 		point, err := i.db.CreatePoint(&pnt)
 		if err != nil {
 			return "", err
