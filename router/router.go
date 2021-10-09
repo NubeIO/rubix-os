@@ -148,7 +148,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.Use(cors.New(auth.CorsConfig(conf)))
 	engine.OPTIONS("/*any")
 
-	engine.GET("/api/system/ping", healthHandler.Health)
 	apiRoutes := engine.Group("/api")
 	{
 		apiRoutes.GET("/version", func(ctx *gin.Context) {

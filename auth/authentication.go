@@ -5,10 +5,11 @@ import (
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/gin-gonic/gin"
+	"strings"
 )
 
 const (
-	AuthorizationToken = "Authorization"
+	Authorization = "Authorization"
 )
 
 type Database interface {
@@ -26,37 +27,24 @@ type Auth struct {
 func (a *Auth) RequireValidToken() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if a.Conf.Prod || a.Conf.Auth {
-			token := a.tokenFromQueryOrHeader(ctx)
+			token := ctx.Request.Header.Get(Authorization)
 			if token == "" {
 				ctx.AbortWithError(401, errors.New("missing authorization header"))
 				return
 			}
-			_, err := VerifyToken(token, a.Conf)
-			if err != nil {
-				ctx.AbortWithError(401, err)
-				return
+			if strings.Contains(token, "Internal ") {
+				if GetRubixServiceInternalToken() != token {
+					ctx.AbortWithError(401, errors.New("internal token mismatch"))
+					return
+				}
+			} else {
+				_, err := VerifyToken(token, a.Conf)
+				if err != nil {
+					ctx.AbortWithError(401, err)
+					return
+				}
 			}
 		}
 		ctx.Next()
 	}
-}
-
-func (a *Auth) tokenFromQueryOrHeader(ctx *gin.Context) string {
-	if token := a.tokenFromQuery(ctx); token != "" {
-		return token
-	} else if token = a.tokenFromHeader(ctx); token != "" {
-		return token
-	}
-	return ""
-}
-
-func (a *Auth) tokenFromQuery(ctx *gin.Context) string {
-	return ctx.Request.URL.Query().Get("token")
-}
-
-func (a *Auth) tokenFromHeader(ctx *gin.Context) string {
-	if ctx.Request.Header.Get(AuthorizationToken) != "" {
-		return ctx.Request.Header.Get(AuthorizationToken)
-	}
-	return ""
 }

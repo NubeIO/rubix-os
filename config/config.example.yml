@@ -39,7 +39,7 @@ passstrength: 10 # the bcrypt password strength (higher = better but also slower
 loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
 
 location:
-  biosdatadir: '/data/rubix-bios' # for local when auth: true, `/<parent_dir>/rubix-bios/out`
+  authdatadir: '/data/rubix-service' # for local when auth: true, it needs to be: `/<rubix_service_parent_dir>/data/rubix-service/out/rubix-service`
 
 auth: false
 

@@ -41,7 +41,9 @@ type Configuration struct {
 			PluginsDir        string `default:"plugins"`
 			UploadedImagesDir string `default:"images"`
 		}
-		BiosDataDir string `default:"/data/rubix-bios"`
+		DeviceInfoFile       string `default:"/data/rubix-registry/device_info.json"`
+		AuthDataDir          string `default:"/data/rubix-service"`
+		RelativeAuthDataFile string `default:"/data/internal_token.txt"`
 	}
 	Prod bool `default:"false"`
 	Auth bool `default:"false"`

@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/json"
+	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/model"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -9,7 +10,7 @@ import (
 )
 
 func (d *GormDatabase) GetDeviceInfo() (*model.DeviceInfo, error) {
-	file, err := os.Open("/data/rubix-registry/device_info.json")
+	file, err := os.Open(config.Get().Location.DeviceInfoFile)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err

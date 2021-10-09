@@ -22,7 +22,7 @@ func GetToken(username string, password string, conf *config.Configuration) (*st
 	if _, err := isValidCredential(username, password, conf); err != nil {
 		return nil, err
 	}
-	secretKey, err := GetSecretKey(path.Join(conf.Location.BiosDataDir, secretKeyLocation))
+	secretKey, err := GetSecretKey(path.Join(conf.Location.AuthDataDir, secretKeyLocation))
 	if err != nil {
 		log.Error(err)
 		return nil, err
@@ -42,7 +42,7 @@ func GetToken(username string, password string, conf *config.Configuration) (*st
 }
 
 func VerifyToken(tokenInput string, conf *config.Configuration) (bool, error) {
-	secretKey, err := GetSecretKey(path.Join(conf.Location.BiosDataDir, secretKeyLocation))
+	secretKey, err := GetSecretKey(path.Join(conf.Location.AuthDataDir, secretKeyLocation))
 	if err != nil {
 		return false, err
 	}
@@ -59,7 +59,7 @@ func VerifyToken(tokenInput string, conf *config.Configuration) (bool, error) {
 }
 
 func isValidCredential(usernameInput string, password string, conf *config.Configuration) (bool, error) {
-	username, hashedPassword, err := GetCredentials(path.Join(conf.Location.BiosDataDir, credentialLocation))
+	username, hashedPassword, err := GetCredentials(path.Join(conf.Location.AuthDataDir, credentialLocation))
 	if err != nil {
 		return false, err
 	}
