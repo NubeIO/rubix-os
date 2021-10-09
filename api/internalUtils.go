@@ -59,6 +59,9 @@ type Args struct {
 	WithIpConnection     bool
 	WithSerialConnection bool
 	WithTags             bool
+	NetworkName          string
+	DeviceName           string
+	PointName            string
 }
 
 var ArgsType = struct {
@@ -110,6 +113,9 @@ var ArgsType = struct {
 	WithIpConnection     string
 	WithSerialConnection string
 	WithTags             string
+	NetworkName          string
+	DeviceName           string
+	PointName            string
 }{
 	Sort:                 "sort",
 	Order:                "order",
@@ -159,6 +165,9 @@ var ArgsType = struct {
 	WithIpConnection:     "with_ip_connection",
 	WithSerialConnection: "with_serial_connection",
 	WithTags:             "with_tags",
+	NetworkName:          "network_name",
+	DeviceName:           "device_name",
+	PointName:            "point_name",
 }
 
 var ArgsDefault = struct {
@@ -199,6 +208,9 @@ var ArgsDefault = struct {
 	WithIpConnection     string
 	WithSerialConnection string
 	WithTags             string
+	NetworkName          string
+	DeviceName           string
+	PointName            string
 }{
 	Sort:                 "ID",
 	Order:                "DESC", //ASC or DESC
@@ -237,6 +249,9 @@ var ArgsDefault = struct {
 	WithIpConnection:     "false",
 	WithSerialConnection: "false",
 	WithTags:             "false",
+	NetworkName:          "",
+	DeviceName:           "",
+	PointName:            "",
 }
 
 func reposeHandler(body interface{}, err error, ctx *gin.Context) {

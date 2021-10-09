@@ -12,7 +12,9 @@ type PointDatabase interface {
 	CreatePoint(body *model.Point, addToParent string) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
 	PointWrite(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
+	GetPointByName(networkName, deviceName, pointName string) (*model.Point, error)
 	GetPointByField(field string, value string) (*model.Point, error)
+	PointWriteByName(networkName, deviceName, pointName string, body *model.Point, fromPlugin bool) (*model.Point, error)
 	UpdatePointByFieldAndUnit(field string, value string, body *model.Point, writeValue bool) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
 	DropPoints() (bool, error)
@@ -48,9 +50,22 @@ func (a *PointAPI) PointWrite(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
+func (a *PointAPI) GetPointByName(ctx *gin.Context) {
+	networkName, deviceName, pointName := networkDevicePointNames(ctx)
+	q, err := a.DB.GetPointByName(networkName, deviceName, pointName)
+	reposeHandler(q, err, ctx)
+}
+
 func (a *PointAPI) GetPointByField(ctx *gin.Context) {
 	field, value := withFieldsArgs(ctx)
 	q, err := a.DB.GetPointByField(field, value)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *PointAPI) PointWriteByName(ctx *gin.Context) {
+	body, _ := getBODYPoint(ctx)
+	networkName, deviceName, pointName := networkDevicePointNames(ctx)
+	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body, false)
 	reposeHandler(q, err, ctx)
 }
 
