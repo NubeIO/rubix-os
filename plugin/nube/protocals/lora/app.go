@@ -1,9 +1,7 @@
 package main
 
 import (
-	"errors"
 	"fmt"
-	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
 	"github.com/NubeDev/flow-framework/utils"
@@ -11,69 +9,10 @@ import (
 	"time"
 )
 
-/*
-user adds a network
-user adds a device
-- create device and send plugin the uuid
-- ask the plugin do you want to add pre-made points for example
-- add points
-*/
-
 var err error
-
-// SerialOpen open serial port
-func (i *Instance) SerialOpen() error {
-	s := new(SerialSetting)
-	var arg api.Args
-	arg.WithSerialConnection = true
-	net, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
-	if err != nil {
-		return err
-	}
-	if net.SerialConnection == nil {
-		return err
-	}
-	s.SerialPort = net.SerialConnection.SerialPort
-	s.BaudRate = int(net.SerialConnection.BaudRate)
-	connected := false
-	go func() error {
-		sc := New(s)
-		connected, err = sc.NewSerialConnection()
-		if err != nil {
-			log.Errorf("lora: issue on SerialOpenAndRead: %v\n", err)
-		}
-		sc.Loop()
-		return nil
-	}()
-	return nil
-
-}
-
-// SerialClose close serial port
-func (i *Instance) SerialClose() error {
-	err := Disconnect()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-POINTS
-*/
 
 // addPoints close serial port
 func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
-
-	checkDeviceNotExist, err := i.db.GetDeviceByField("address_uuid", deviceBody.AddressUUID, false)
-	if err != nil {
-		return nil, err
-	}
-	if checkDeviceNotExist.UUID != "" {
-		log.Errorf("lora: a device with the same lora ID (address_uuid) exists: %v\n", checkDeviceNotExist.UUID)
-		return nil, errors.New("a device with the same lora ID (address_uuid) exists")
-	}
-
 	p := new(model.Point)
 	p.DeviceUUID = deviceBody.UUID
 	p.AddressUUID = deviceBody.AddressUUID
@@ -85,7 +24,7 @@ func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
 			n := fmt.Sprintf("%s_%s_%s", model.TransProtocol.Lora, deviceBody.AddressUUID, e)
 			p.Name = n
 			p.Description = deviceBody.Model
-			p.UnitType = e //temp
+			p.IoID = e //temp
 			err := i.addPoint(p)
 			if err != nil {
 				log.Errorf("lora: issue on addPoint: %v\n", err)
@@ -97,7 +36,7 @@ func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
 			n := fmt.Sprintf("%s_%s_%s", model.TransProtocol.Lora, deviceBody.AddressUUID, e)
 			p.Name = n
 			p.Description = deviceBody.Model
-			p.UnitType = e //temp
+			p.IoID = e //temp
 			err := i.addPoint(p)
 			if err != nil {
 				log.Errorf("lora: issue on addPoint: %v\n", err)
@@ -109,7 +48,20 @@ func (i *Instance) addPoints(deviceBody *model.Device) (*model.Point, error) {
 			n := fmt.Sprintf("%s_%s_%s", model.TransProtocol.Lora, deviceBody.AddressUUID, e)
 			p.Name = n
 			p.Description = deviceBody.Model
-			p.UnitType = e //temp
+			p.IoID = e //temp
+			err := i.addPoint(p)
+			if err != nil {
+				log.Errorf("lora: issue on addPoint: %v\n", err)
+				return nil, err
+			}
+		}
+	} else if deviceBody.Model == string(decoder.ME) {
+		for _, e := range ME {
+			n := fmt.Sprintf("%s_%s_%s", model.TransProtocol.Lora, deviceBody.AddressUUID, e)
+			p.Name = n
+			p.Description = deviceBody.Model
+			p.IoID = e                  //temp
+			p.IoType = model.IOType.RAW //raw
 			err := i.addPoint(p)
 			if err != nil {
 				log.Errorf("lora: issue on addPoint: %v\n", err)
@@ -138,7 +90,7 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 	if code == string(decoder.THLM) {
 		for _, e := range THLM {
 			p.ThingType = e
-			err := i.updatePoint(p)
+			err := i.updatePoint(p, code)
 			if err != nil {
 				log.Errorf("lora: issue on updatePoint: %v\n", err)
 				return nil, err
@@ -147,7 +99,25 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 	} else if code == string(decoder.THL) {
 		for _, e := range THL {
 			p.ThingType = e
-			err := i.updatePoint(p)
+			err := i.updatePoint(p, code)
+			if err != nil {
+				log.Errorf("lora: issue on updatePoint: %v\n", err)
+				return nil, err
+			}
+		}
+	} else if code == string(decoder.TH) {
+		for _, e := range THL {
+			p.ThingType = e
+			err := i.updatePoint(p, code)
+			if err != nil {
+				log.Errorf("lora: issue on updatePoint: %v\n", err)
+				return nil, err
+			}
+		}
+	} else if code == string(decoder.ME) {
+		for _, e := range ME {
+			p.ThingType = e
+			err := i.updatePoint(p, code)
 			if err != nil {
 				log.Errorf("lora: issue on updatePoint: %v\n", err)
 				return nil, err
@@ -159,32 +129,45 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 }
 
 // updatePoint by its lora id and type as in temp or lux
-func (i *Instance) updatePoint(body *model.Point) error {
+func (i *Instance) updatePoint(body *model.Point, sensorType string) error {
 	addr := body.AddressUUID
-	_, err := i.db.UpdatePointByFieldAndUnit("address_uuid", addr, body)
-	log.Infof("lora UpdatePointByFieldAndUnit: AddressUUID: %s value:%v UnitType:%s \n", addr, *body.PresentValue, body.UnitType)
+	pnt, err := i.db.GetPointByFieldAndIOID("address_uuid", addr, body)
 	if err != nil {
-		log.Errorf("lora: issue on UpdatePointByFieldAndType: %v\n", err)
+		log.Errorf("lora: issue on failed to find point: %v\n", err)
 		return err
 	}
+
+	if sensorType == string(decoder.ME) {
+		fmt.Println(pnt.IoType, *body.PresentValue)
+		*body.PresentValue = decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue)
+	}
+
+	_, err = i.db.UpdatePoint(pnt.UUID, body, true)
+	log.Infof("lora UpdatePoint: AddressUUID: %s value:%v IoID:%s Type:%s \n", addr, *body.PresentValue, body.IoID, sensorType)
+	if err != nil {
+		log.Errorf("lora: issue on UpdatePoint: %v\n", err)
+		return err
+	}
+
 	return nil
 }
 
 // updatePoint by its lora id
-func (i *Instance) devTHLM(pnt *model.Point, value float64) error {
+func (i *Instance) devTHLM(pnt *model.Point, value float64, sensorType string) error {
 	pnt.PresentValue = &value
 	pnt.CommonFault.InFault = false
 	pnt.CommonFault.MessageLevel = model.MessageLevel.Info
 	pnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	pnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 	pnt.CommonFault.LastOk = time.Now().UTC()
-	err := i.updatePoint(pnt)
+	err := i.updatePoint(pnt, sensorType)
 	if err != nil {
 		log.Errorf("lora: issue on update points %v\n", err)
 	}
 	return nil
 }
 
+var ME = []string{"rssi", "voltage", "pulse", "ai1", "ai2", "ai3"}
 var TH = []string{"rssi", "voltage", "temperature", "humidity"}
 var THL = []string{"rssi", "voltage", "temperature", "humidity", "light"}
 var THLM = []string{"rssi", "voltage", "temperature", "humidity", "light", "motion"}

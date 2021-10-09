@@ -1,12 +1,10 @@
-package main
+package decoder
 
 // TODO: make this actual test file
 
 import (
-	"fmt"
 	"encoding/json"
-
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
+	"fmt"
 )
 
 func main() {
@@ -25,10 +23,10 @@ func main() {
 	}
 
 	for _, s := range strings {
-		_, all := decoder.DecodePayload(s)
+		_, all := DecodePayload(s)
 		j, _ := json.MarshalIndent(all, "", "  ")
-        fmt.Println(s)
+		fmt.Println(s)
 		fmt.Println(string(j))
-        fmt.Println()
+		fmt.Println()
 	}
 }

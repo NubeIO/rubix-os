@@ -1,6 +1,8 @@
 package decoder
 
 import (
+	"github.com/NubeDev/flow-framework/model"
+	"math"
 	"strconv"
 )
 
@@ -55,4 +57,34 @@ func voltage(data string) float64 {
 	v, _ := strconv.ParseInt(data[16:18], 16, 0)
 	v_ := float64(v) / 50
 	return v_
+}
+
+func MicroEdgePointType(sensorType string, value float64) float64 {
+	switch sensorType {
+	case model.IOType.RAW:
+		return value
+	case model.IOType.Digital:
+		if value == 0 || value >= 1000 {
+			return 0
+		} else {
+			return 1
+		}
+	case model.IOType.Thermistor10K:
+		vlt := 3.34
+		v := (value / 1024) * vlt
+		R0 := 10000.0
+		R := (R0 * v) / (vlt - v)
+		t0 := 273.0 + 25.0
+		b := 3850.0
+		var ml float64
+		ml = math.Log(R / R0)
+		T := 1.0 / (1.0/t0 + (1.0/b)*ml)
+		output := T - 273.15
+		return output
+	case model.IOType.VoltageDC:
+		output := (value / 1024) * 10
+		return output
+	default:
+		return value
+	}
 }

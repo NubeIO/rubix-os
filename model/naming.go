@@ -197,11 +197,18 @@ var PointTags = struct {
 	Humidity string
 	Light    string
 	Motion   string
+	Pulse    string
+	AI1      string
+	AI2      string
+	AI3      string
 }{
 	RSSI:     "rssi",
 	Voltage:  "voltage",
 	Temp:     "temperature",
 	Humidity: "humidity",
 	Light:    "light",
-	Motion:   "motion",
+	Pulse:    "pulse",
+	AI1:      "ai1",
+	AI2:      "ai2",
+	AI3:      "ai3",
 }

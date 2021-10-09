@@ -23,15 +23,16 @@ const transportType = "ip" //serial, ip
 
 // Instance is plugin instance
 type Instance struct {
-	config      *Config
-	enabled     bool
-	basePath    string
-	db          dbhandler.Handler
-	store       cachestore.Handler
-	bus         eventbus.BusService
-	pluginUUID  string
-	networkUUID string
-	rest        *edgerest.RestClient
+	config         *Config
+	enabled        bool
+	basePath       string
+	db             dbhandler.Handler
+	store          cachestore.Handler
+	bus            eventbus.BusService
+	pluginUUID     string
+	networkUUID    string
+	rest           *edgerest.RestClient
+	pollingEnabled bool
 }
 
 // GetFlowPluginInfo returns plugin info.

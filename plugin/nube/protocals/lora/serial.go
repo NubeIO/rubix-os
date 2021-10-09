@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
-	"fmt"
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
 	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
@@ -21,6 +21,43 @@ type SerialSetting struct {
 	Connected      bool
 	Error          bool
 	I              Instance
+}
+
+// SerialOpen open serial port
+func (i *Instance) SerialOpen() error {
+	s := new(SerialSetting)
+	var arg api.Args
+	arg.WithSerialConnection = true
+	net, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
+	if err != nil {
+		return err
+	}
+	if net.SerialConnection == nil {
+		return err
+	}
+	s.SerialPort = net.SerialConnection.SerialPort
+	s.BaudRate = int(net.SerialConnection.BaudRate)
+	connected := false
+	go func() error {
+		sc := New(s)
+		connected, err = sc.NewSerialConnection()
+		if err != nil {
+			log.Errorf("lora: issue on SerialOpenAndRead: %v\n", err)
+		}
+		sc.Loop()
+		return nil
+	}()
+	return nil
+
+}
+
+// SerialClose close serial port
+func (i *Instance) SerialClose() error {
+	err := Disconnect()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func New(s *SerialSetting) *SerialSetting {
@@ -91,7 +128,6 @@ func (s *SerialSetting) Loop() {
 	}
 	count := 0
 	scanner := bufio.NewScanner(Port)
-	fmt.Println(scanner)
 	for scanner.Scan() {
 		var data = scanner.Text()
 		if decoder.CheckPayloadLength(data) {

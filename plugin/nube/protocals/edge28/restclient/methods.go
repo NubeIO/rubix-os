@@ -56,6 +56,36 @@ type UI struct {
 	} `json:"7_max_range"`
 }
 
+type DI struct {
+	State string `json:"1_state"`
+	IoNum string `json:"2_ioNum"`
+	Gpio  string `json:"3_gpio"`
+	Val   struct {
+		DI1 struct {
+			Val int `json:"val"`
+		} `json:"DI1"`
+		DI2 struct {
+			Val int `json:"val"`
+		} `json:"DI2"`
+		DI3 struct {
+			Val int `json:"val"`
+		} `json:"DI3"`
+		DI4 struct {
+			Val int `json:"val"`
+		} `json:"DI4"`
+		DI5 struct {
+			Val int `json:"val"`
+		} `json:"DI5"`
+		DI6 struct {
+			Val int `json:"val"`
+		} `json:"DI6"`
+		DI7 struct {
+			Val int `json:"val"`
+		} `json:"DI7"`
+	} `json:"4_val"`
+	Msg string `json:"5_msg"`
+}
+
 // PingServer all points
 func (a *RestClient) PingServer() (*ServerPing, error) {
 	resp, err := a.client.R().
@@ -73,14 +103,27 @@ func (a *RestClient) PingServer() (*ServerPing, error) {
 // GetUIs all ui points
 func (a *RestClient) GetUIs() (*UI, error) {
 	resp, err := a.client.R().
-		SetResult([]UI{}).
+		SetResult(UI{}).
 		Get("/api/1.1/read/all/ui")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
 	}
-	fmt.Println(resp.String())
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
 	return resp.Result().(*UI), nil
+}
+
+// GetDIs all di points
+func (a *RestClient) GetDIs() (*DI, error) {
+	resp, err := a.client.R().
+		SetResult(DI{}).
+		Get("/api/1.1/read/all/di")
+	if err != nil {
+		return nil, fmt.Errorf("fetch name for name %s failed", err)
+	}
+	if resp.Error() != nil {
+		return nil, getAPIError(resp)
+	}
+	return resp.Result().(*DI), nil
 }
