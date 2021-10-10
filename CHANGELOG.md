@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.0.9](https://github.com/NubeIO/flow-framework/tree/v0.0.9) (2021-10-11)
+- Updates to lora and modbus plugins
+- added edge-28 plugin
+
 ## [v0.0.8](https://github.com/NubeIO/flow-framework/tree/v0.0.8) (2021-10-08)
 - Updates to lora and modbus plugins
 
