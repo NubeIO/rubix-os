@@ -12,8 +12,15 @@ type Schedule struct {
 	CommonEnable
 	CommonThingClass
 	CommonThingType
+	IsGlobal  *bool          `json:"is_global"`
+	Schedules datatypes.JSON `json:"schedule"`
 	CommonCreated
-	DataStore datatypes.JSON `json:"data_store"`
+}
+
+type Schedules struct {
+	Events  map[string]Events  `json:"events"`
+	Weekly  map[string]Weekly  `json:"weekly"`
+	Holiday map[string]Holiday `json:"holiday"`
 }
 
 type Events struct {
@@ -41,10 +48,4 @@ type Holiday struct {
 	Color string `json:"color"`
 	Date  string `json:"date"`
 	Value int    `json:"value"`
-}
-
-type Schedules struct {
-	Events  map[string]Events  `json:"events"`
-	Weekly  map[string]Weekly  `json:"weekly"`
-	Holiday map[string]Holiday `json:"holiday"`
 }

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 )
@@ -19,6 +20,17 @@ func (d *GormDatabase) GetSchedules() ([]*model.Schedule, error) {
 func (d *GormDatabase) GetSchedule(uuid string) (*model.Schedule, error) {
 	var schModel *model.Schedule
 	query := d.DB.Where("uuid = ? ", uuid).First(&schModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return schModel, nil
+}
+
+// GetScheduleByField returns the sch for the given field ie name or nil.
+func (d *GormDatabase) GetScheduleByField(field string, value string) (*model.Schedule, error) {
+	var schModel *model.Schedule
+	f := fmt.Sprintf("%s = ? ", field)
+	query := d.DB.Where(f, value).First(&schModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

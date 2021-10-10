@@ -411,6 +411,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			schRoutes.GET("", schHandler.GetSchedules)
 			schRoutes.POST("", schHandler.CreateSchedule)
 			schRoutes.GET("/:uuid", schHandler.GetSchedule)
+			schRoutes.GET("/field", schHandler.GetScheduleByField)
 			schRoutes.PATCH("/:uuid", schHandler.UpdateSchedule)
 			schRoutes.DELETE("/:uuid", schHandler.DeleteSchedule)
 			schRoutes.DELETE("/drop", schHandler.DropSchedules)
