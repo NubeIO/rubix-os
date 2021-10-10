@@ -8,7 +8,7 @@ import (
 func (a *FlowClient) DeviceInfo() (*model.DeviceInfo, error) {
 	resp, err := a.client.R().
 		SetResult(&model.DeviceInfo{}).
-		Get("/api/device_info")
+		Get("/api/system/device_info")
 	if err != nil {
 		if resp == nil || resp.String() == "" {
 			return nil, fmt.Errorf("DeviceInfo: %s", err)
