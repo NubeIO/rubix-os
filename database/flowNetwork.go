@@ -38,6 +38,7 @@ func (d *GormDatabase) GetOneFlowNetworkByArgs(args api.Args) (*model.FlowNetwor
 }
 
 /*
+CreateFlowNetwork
 - Create UUID
 - Create Name if doesn't exist
 - Create SyncUUID
