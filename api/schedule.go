@@ -37,10 +37,8 @@ func (a *ScheduleAPI) UpdateSchedule(ctx *gin.Context) {
 }
 
 func (a *ScheduleAPI) CreateSchedule(ctx *gin.Context) {
-	body, _ := getBODYSchedule(ctx)
-	q, err := a.DB.CreateSchedule(body)
-	reposeHandler(q, err, ctx)
-
+	body, _ := getBODYSchedules(ctx)
+	reposeHandler(body, nil, ctx) //TODO
 }
 
 func (a *ScheduleAPI) DeleteSchedule(ctx *gin.Context) {
