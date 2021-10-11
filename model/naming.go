@@ -207,6 +207,7 @@ var PointTags = struct {
 	Temp:     "temperature",
 	Humidity: "humidity",
 	Light:    "light",
+	Motion:   "motion",
 	Pulse:    "pulse",
 	AI1:      "ai1",
 	AI2:      "ai2",

@@ -53,7 +53,7 @@ func DropletTHLM(data string, sensor TSensorType) TDropletTHLM {
 	motion := dropletMotion(data)
 	v := TDropletTHLM{
 		TDropletTHL: d,
-		Motion:      motion,
+		Motion: motion,
 	}
 	return v
 }
