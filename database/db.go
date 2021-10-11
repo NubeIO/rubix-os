@@ -60,12 +60,33 @@ func (d *GormDatabase) DropAllFlow() (string, error) {
 		return "fail Stream", query.Error
 	}
 
+	var StreamClone *model.StreamClone
+	query = d.DB.Where("1 = 1").Delete(&StreamClone)
+	if query.Error != nil {
+		log.Error("DB: fail bulk delete Stream")
+		return "fail StreamClone", query.Error
+	}
+
 	//delete networks
 	var flowNetworkModel *model.FlowNetwork
 	query = d.DB.Where("1 = 1").Delete(&flowNetworkModel)
 	if query.Error != nil {
 		log.Error("DB: fail bulk delete FlowNetwork")
 		return "fail FlowNetwork", query.Error
+	}
+
+	var FlowNetworkClone *model.FlowNetworkClone
+	query = d.DB.Where("1 = 1").Delete(&FlowNetworkClone)
+	if query.Error != nil {
+		log.Error("DB: fail bulk delete FlowNetworkClone")
+		return "fail FlowNetworkClone", query.Error
+	}
+
+	var Schedule *model.Schedule
+	query = d.DB.Where("1 = 1").Delete(&Schedule)
+	if query.Error != nil {
+		log.Error("DB: fail bulk delete Schedule")
+		return "fail Schedule", query.Error
 	}
 
 	//var pluginConf *model.PluginConf

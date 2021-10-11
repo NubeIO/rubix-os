@@ -111,10 +111,8 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	return true, nil
 }
 
-
 func (d *GormDatabase) WizardRemoteSchedule() (bool, error) {
 	var schModel model.Schedule
-
 
 	var flowNetworkModel model.FlowNetwork
 	var streamModel model.Stream
@@ -137,6 +135,7 @@ func (d *GormDatabase) WizardRemoteSchedule() (bool, error) {
 	flowNetworkModel.Name = "FlowNetwork1"
 	fn, err := d.CreateFlowNetwork(&flowNetworkModel)
 	if err != nil {
+		log.Error("FlowNetwork creation failure: ", err)
 		return false, errors.New("FlowNetwork creation failure")
 	}
 	log.Info("FlowNetwork is created successfully: ", fn)
@@ -145,6 +144,7 @@ func (d *GormDatabase) WizardRemoteSchedule() (bool, error) {
 	streamModel.Name = "Stream1"
 	stream, err := d.CreateStream(&streamModel)
 	if err != nil {
+		log.Error("stream creation failure: ", err)
 		return false, errors.New("stream creation failure")
 	}
 	log.Info("Stream is created successfully: ", stream)
@@ -156,6 +156,7 @@ func (d *GormDatabase) WizardRemoteSchedule() (bool, error) {
 	producerModel.ProducerApplication = "schedule"
 	producer, err := d.CreateProducer(&producerModel)
 	if err != nil {
+		log.Error("producer creation failure: ", err)
 		return false, errors.New("producer creation failure")
 	}
 	log.Info("Producer is created successfully: ", producer)
@@ -163,6 +164,7 @@ func (d *GormDatabase) WizardRemoteSchedule() (bool, error) {
 	streamUUID := stream.UUID
 	streamClones, err := d.GetStreamClones(api.Args{SourceUUID: &streamUUID})
 	if err != nil {
+		log.Error("StreamClone creation failure: ", err)
 		return false, errors.New("StreamClone search failure")
 	}
 	consumerModel.Name = "Consumer1"
@@ -171,6 +173,7 @@ func (d *GormDatabase) WizardRemoteSchedule() (bool, error) {
 	consumerModel.StreamCloneUUID = streamClones[0].UUID
 	consumer, err := d.CreateConsumer(&consumerModel)
 	if err != nil {
+		log.Error("CreateConsumer creation failure: ", err)
 		return false, errors.New("consumer creation failure")
 	}
 	log.Info("Consumer is created successfully: ", consumer)
@@ -181,6 +184,7 @@ func (d *GormDatabase) WizardRemoteSchedule() (bool, error) {
 	writerModel.WriterThingUUID = sch.UUID
 	writer, err := d.CreateWriter(&writerModel)
 	if err != nil {
+		log.Error("CreateWriter creation failure: ", err)
 		return false, errors.New("writer creation failure")
 	}
 	log.Info("Writer is created successfully: ", writer)
