@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
 	"github.com/NubeDev/flow-framework/utils"
@@ -125,8 +126,9 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 		}
 	}
 	return nil, nil
-
 }
+
+
 
 // updatePoint by its lora id and type as in temp or lux
 func (i *Instance) updatePoint(body *model.Point, sensorType string) error {
@@ -149,7 +151,25 @@ func (i *Instance) updatePoint(body *model.Point, sensorType string) error {
 	return nil
 }
 
-// updatePoint by its lora id
+// updatePointAddress by its lora id and type as in temp or lux
+func (i *Instance) updatePointAddress(body *model.Device) error {
+	var pnt model.Point
+	pnt.AddressUUID = body.AddressUUID
+	var arg api.Args
+	arg.WithPoints = true
+	dev, err := i.db.GetDevice(body.UUID, arg)
+	for _, pt := range dev.Points {
+		_, err = i.db.UpdatePoint(pt.UUID, &pnt, true)
+		if err != nil {
+			log.Errorf("lora: issue on UpdatePoint: %v\n", err)
+			return err
+		}
+	}
+	return nil
+}
+
+
+
 func (i *Instance) devTHLM(pnt *model.Point, value float64, sensorType string) error {
 	pnt.PresentValue = &value
 	pnt.CommonFault.InFault = false
