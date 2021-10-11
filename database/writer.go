@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/src/client"
 	log "github.com/sirupsen/logrus"
@@ -26,14 +27,24 @@ func (d *GormDatabase) GetWriters() ([]*model.Writer, error) {
 }
 
 func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
-	if body.WriterThingClass == model.ThingClass.Point {
+
+	fmt.Println(body.WriterThingClass, body.WriterThingUUID)
+	switch body.WriterThingClass {
+	case model.ThingClass.Point:
 		_, err := d.GetPoint(body.WriterThingUUID, api.Args{})
 		if err != nil {
 			return nil, errors.New("point not found, please supply a valid point writer_thing_uuid")
 		}
-	} else {
-		return nil, errors.New("we are not supporting writer_thing_class other than point for now")
+	case model.ThingClass.Schedule:
+		fmt.Println(body.WriterThingUUID)
+		_, err := d.GetSchedule(body.WriterThingUUID)
+		if err != nil {
+			return nil, errors.New("schedule not found, please supply a valid point writer_thing_uuid")
+		}
+	default:
+		return nil, errors.New("we are not supporting writer_thing_uuid other than point for now")
 	}
+
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Writer)
 	body.SyncUUID, _ = utils.MakeUUID()
 	query := d.DB.Create(body)
@@ -292,6 +303,18 @@ func validateWriterBody(thingClass string, body *model.WriterBody) ([]byte, stri
 			b, err := json.Marshal(body.Priority)
 			if err != nil {
 				return nil, body.Action, errors.New("error: failed to marshal priority on write body")
+			}
+			return b, body.Action, err
+		} else if body.Action == model.WriterActions.Read {
+			return nil, body.Action, nil
+		} else {
+			return nil, body.Action, errors.New("error: invalid action, try read or write")
+		}
+	} else if thingClass == model.ThingClass.Schedule {
+		if body.Action == model.WriterActions.Write {
+			b, err := json.Marshal(body.Schedule.Schedules)
+			if err != nil {
+				return nil, body.Action, errors.New("error: failed to marshal schedule on write body")
 			}
 			return b, body.Action, err
 		} else if body.Action == model.WriterActions.Read {

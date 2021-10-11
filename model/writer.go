@@ -9,7 +9,6 @@ type CommonWriter struct {
 	WriterThingType  string         `json:"writer_thing_type,omitempty"`
 	WriterThingUUID  string         `json:"writer_thing_uuid,omitempty"`
 	DataStore        datatypes.JSON `json:"data_store,omitempty"`
-	WriterSettings   datatypes.JSON `json:"producer_settings,omitempty"` //like cov for a point or whatever is needed  #TODO this is why it needs settings
 	CommonCreated
 }
 
@@ -36,6 +35,7 @@ type WriterBody struct {
 	Action     string   `json:"action,omitempty"` //read, write and so on
 	AskRefresh bool     `json:"ask_refresh,omitempty"`
 	Priority   Priority `json:"priority,omitempty"`
+	Schedule   Schedule `json:"schedule,omitempty"`
 }
 
 //WriterBulk could be a local network, job or alarm and so on
