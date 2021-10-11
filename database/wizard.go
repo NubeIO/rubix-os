@@ -12,6 +12,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	var networkModel model.Network
 	var deviceModel model.Device
 	var pointModel model.Point
+	var schModel model.Schedule
 
 	var flowNetworkModel model.FlowNetwork
 	var streamModel model.Stream
@@ -29,7 +30,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	log.Info("Created a Network")
 
 	deviceModel.NetworkUUID = n.UUID
-	deviceModel.TransportType = "serial"
+	deviceModel.TransportType = "ip"
 	dev, err := d.CreateDevice(&deviceModel)
 	if err != nil {
 		return false, err
@@ -37,9 +38,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	log.Info("Created a Device")
 
 	pointModel.DeviceUUID = dev.UUID
-	pointModel.Name = "Point1 Producer"
+	pointModel.Name = "ZATSP"
 	pointModel.IsProducer = utils.NewTrue()
-	pointModel.ObjectType = "analogInput" // TODO: check
+	pointModel.ObjectType = "analogValue" // TODO: check
 	pointProducer, err := d.CreatePoint(&pointModel, "")
 	if err != nil {
 		return false, err
@@ -47,9 +48,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	log.Info("Created a Point for Producer", pointProducer)
 
 	pointModel.DeviceUUID = dev.UUID
-	pointModel.Name = "Point1 Consumer"
+	pointModel.Name = "ZATSP"
 	pointModel.IsProducer = utils.NewTrue()
-	pointModel.ObjectType = "analogInput" // TODO: check
+	pointModel.ObjectType = "analogValue" // TODO: check
 	pointConsumer, err := d.CreatePoint(&pointModel, "")
 	if err != nil {
 		return false, err
@@ -57,7 +58,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	log.Info("Created a Point for Consumer", pointConsumer)
 
 	flowNetworkModel.FlowIP = "0.0.0.0"
-	flowNetworkModel.Name = "FlowNetwork1"
+	flowNetworkModel.Name = "network"
 	fn, err := d.CreateFlowNetwork(&flowNetworkModel)
 	if err != nil {
 		return false, errors.New("FlowNetwork creation failure")
@@ -65,14 +66,14 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	log.Info("FlowNetwork is created successfully: ", fn)
 
 	streamModel.FlowNetworks = []*model.FlowNetwork{fn}
-	streamModel.Name = "Stream1"
+	streamModel.Name = "stream"
 	stream, err := d.CreateStream(&streamModel)
 	if err != nil {
 		return false, errors.New("stream creation failure")
 	}
 	log.Info("Stream is created successfully: ", stream)
 
-	producerModel.Name = "Producer1"
+	producerModel.Name = "ZATSP"
 	producerModel.StreamUUID = stream.UUID
 	producerModel.ProducerThingUUID = pointProducer.UUID
 	producerModel.ProducerThingClass = "point"
@@ -88,7 +89,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	if err != nil {
 		return false, errors.New("StreamClone search failure")
 	}
-	consumerModel.Name = "Consumer1"
+	consumerModel.Name = "ZATSP"
 	consumerModel.ProducerUUID = producer.UUID
 	consumerModel.ConsumerApplication = "mapping"
 	consumerModel.StreamCloneUUID = streamClones[0].UUID
@@ -107,6 +108,47 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 		return false, errors.New("writer creation failure")
 	}
 	log.Info("Writer is created successfully: ", writer)
+
+	sch, err := d.CreateSchedule(&schModel)
+	if err != nil {
+		return false, errors.New("CreateSchedule creation failure")
+	}
+	producerModel = model.Producer{}
+	producerModel.Name = "SCH"
+	producerModel.StreamUUID = stream.UUID
+	producerModel.ProducerThingUUID = sch.UUID
+	producerModel.ProducerThingClass = "schedule"
+	producerModel.ProducerApplication = "schedule"
+	producer2, err := d.CreateProducer(&producerModel)
+	if err != nil {
+		return false, errors.New("producer-sch creation failure")
+	}
+	log.Info("Producer-sch is created successfully: ", producer2)
+
+
+	consumerModel.Name = "schedule"
+	consumerModel.ProducerUUID = producer.UUID
+	consumerModel.ConsumerApplication = "schedule"
+	consumerModel.StreamCloneUUID = streamClones[0].UUID
+	consumer2, err := d.CreateConsumer(&consumerModel)
+	if err != nil {
+		log.Error("CreateConsumer-sch creation failure: ", err)
+		return false, errors.New("consumer creation failure")
+	}
+	log.Info("Consumer-sch is created successfully: ", consumer2)
+
+
+	writerModel.ConsumerUUID = consumerModel.UUID
+	writerModel.WriterThingClass = "schedule"
+	writerModel.WriterThingType = "schedule"
+	writerModel.WriterThingUUID = sch.UUID
+	writer2, err := d.CreateWriter(&writerModel)
+	if err != nil {
+		log.Error("CreateWriter-sch creation failure: ", err)
+		return false, errors.New("writer creation failure")
+	}
+	log.Info("Writer-sch is created successfully: ", writer2)
+
 
 	return true, nil
 }
