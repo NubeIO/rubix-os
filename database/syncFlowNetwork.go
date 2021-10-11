@@ -41,6 +41,7 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 			return nil, err
 		}
 	} else {
+		fnc.UUID = flowNetworkClonesModel[0].UUID
 		if err = d.DB.Model(&flowNetworkClonesModel[0]).Updates(fnc).Error; err != nil {
 			return nil, err
 		}
