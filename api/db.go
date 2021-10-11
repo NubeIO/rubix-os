@@ -10,6 +10,7 @@ type DBDatabase interface {
 	SyncTopics()                  //sync all the topics into the event bus
 	WizardLocalPointMapping(body *WizardLocalMapping) (bool, error)
 	WizardRemotePointMapping() (bool, error)
+	WizardRemoteSchedule() (bool, error)
 	Wizard2ndFlowNetwork(body *AddNewFlowNetwork) (bool, error)
 }
 type DatabaseAPI struct {
@@ -47,6 +48,11 @@ func (a *DatabaseAPI) WizardLocalPointMapping(ctx *gin.Context) {
 func (a *DatabaseAPI) WizardRemotePointMapping(ctx *gin.Context) {
 	mapping, err := a.DB.WizardRemotePointMapping()
 	reposeHandler(mapping, err, ctx)
+}
+
+func (a *DatabaseAPI) WizardRemoteSchedule(ctx *gin.Context) {
+	sch, err := a.DB.WizardRemoteSchedule()
+	reposeHandler(sch, err, ctx)
 }
 
 type AddNewFlowNetwork struct {
