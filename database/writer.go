@@ -265,7 +265,10 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 		}
 	}
 	if askRefresh {
-		// TODO: get producer history and have it on consumer side
+		writer.DataStore = pHistory.DataStore
+		consumer.CurrentWriterUUID = writer.UUID
+		d.DB.Model(&writer).Updates(writer)
+		d.DB.Model(&consumer).Updates(consumer)
 	}
 	return pHistory, nil
 }
