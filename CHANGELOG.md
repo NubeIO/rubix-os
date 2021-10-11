@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.1.0](https://github.com/NubeIO/flow-framework/tree/v0.1.0) (2021-10-12)
+- fix issues on droplet motion
+- added writer-action as thingClass schedule
+
 ## [v0.0.9](https://github.com/NubeIO/flow-framework/tree/v0.0.9) (2021-10-11)
 - Updates to lora and modbus plugins
 - added edge-28 plugin
