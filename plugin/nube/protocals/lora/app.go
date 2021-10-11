@@ -136,12 +136,9 @@ func (i *Instance) updatePoint(body *model.Point, sensorType string) error {
 		log.Errorf("lora: issue on failed to find point: %v\n", err)
 		return err
 	}
-
 	if sensorType == string(decoder.ME) {
-		fmt.Println(pnt.IoType, *body.PresentValue)
 		*body.PresentValue = decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue)
 	}
-
 	_, err = i.db.UpdatePoint(pnt.UUID, body, true)
 	log.Infof("lora UpdatePoint: AddressUUID: %s value:%v IoID:%s Type:%s \n", addr, *body.PresentValue, body.IoID, sensorType)
 	if err != nil {
