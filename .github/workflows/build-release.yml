@@ -98,7 +98,7 @@ jobs:
           cd ../../../plugin/nube/utils/backup
           go build -buildmode=plugin -o backup-amd64.so *.go  && cp backup-amd64.so ../../../../
 
-          cd ../../../plugin/nube/utils/mqttapi
+          cd ../../../../plugin/nube/utils/mqttapi
           go build -buildmode=plugin -o mqttapi-amd64.so *.go  && cp mqttapi-amd64.so ../../../../
 
           cd ../../../../plugin/nube/utils/git
@@ -138,7 +138,7 @@ jobs:
           cd ../../../plugin/nube/utils/backup
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o backup-armv7.so *.go  && cp backup-armv7.so ../../../../
 
-          cd ../../../plugin/nube/utils/mqttapi
+          cd ../../../../plugin/nube/utils/mqttapi
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o mqttapi-armv7.so *.go  && cp mqttapi-armv7.so ../../../../
 
           cd ../../../../plugin/nube/utils/git
