@@ -5,9 +5,8 @@ import (
 	"github.com/NubeDev/flow-framework/src/client"
 	unit "github.com/NubeDev/flow-framework/src/units"
 	"github.com/NubeDev/flow-framework/utils"
-	log "github.com/sirupsen/logrus"
-	"os/user"
 	"reflect"
+	"time"
 )
 
 func main() {
@@ -35,13 +34,8 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-
-	user, err := user.Current()
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-	homeDirectory := user.HomeDir
-	fmt.Printf("Home Directory: %s\n", homeDirectory)
+	t := time.Now()
+	fmt.Println(t.Format("2006-01-02-15-04-05"))
 
 	//fmt.Println(deleteFile)
 }

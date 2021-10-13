@@ -60,9 +60,8 @@ func MakeDirIfNotExists(path string) error {
 
 func GetUserHomeDir() (string, error) {
 	u, err := user.Current()
-	if err == nil {
+	if err != nil {
 		return "", err
 	}
-	homeDirectory := u.HomeDir
-	return homeDirectory, err
+	return u.HomeDir, err
 }
