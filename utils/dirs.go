@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 	"os"
+	"os/user"
 	"path/filepath"
 )
 
@@ -48,4 +49,19 @@ func DirExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+func MakeDirIfNotExists(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return os.Mkdir(path, os.ModeDir|0755)
+	}
+	return nil
+}
+
+func GetUserHomeDir() (string, error) {
+	u, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	return u.HomeDir, err
 }

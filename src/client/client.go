@@ -48,3 +48,15 @@ func NewSessionWithToken(token string, address string, port int) *FlowClient {
 	client.SetHeader("Authorization", token)
 	return &FlowClient{client: client}
 }
+
+// NewSessionNoAUTH returns a new instance of FlowClient.
+func NewSessionNoAUTH(address string, port int) *FlowClient {
+	client := resty.New()
+	client.SetDebug(false)
+	url := fmt.Sprintf("http://%s:%d", address, port)
+	apiURL := url
+	client.SetHostURL(apiURL)
+	client.SetError(&Error{})
+	client.SetHeader("Content-Type", "application/json")
+	return &FlowClient{client: client}
+}
