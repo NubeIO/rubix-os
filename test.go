@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/src/client"
 	unit "github.com/NubeDev/flow-framework/src/units"
 	"github.com/NubeDev/flow-framework/utils"
+	log "github.com/sirupsen/logrus"
+	"os/user"
+	"reflect"
 )
 
 func main() {
@@ -20,22 +23,25 @@ func main() {
 	fmt.Println(utils.RandFloat(1, 1011))
 	fmt.Println(unit.Exists("length1"))
 
-	out := utils.NewArray()
-	objs := utils.ArrayValues(model.ObjectTypes)
-	for _, obj := range objs {
-		switch obj {
-		case model.ObjectTypes.AnalogInput:
-			out.Add(obj)
-		case model.ObjectTypes.AnalogOutput:
-		case model.ObjectTypes.AnalogValue:
-		case model.ObjectTypes.BinaryInput:
-		case model.ObjectTypes.BinaryOutput:
-		case model.ObjectTypes.BinaryValue:
-		default:
-			//out.Add(obj)
-		}
-
+	aa := client.NewSessionNoAUTH("0.0.0.0", 1660)
+	ping, err := aa.Ping()
+	if err != nil {
+		return
 	}
-	fmt.Println(out)
+	file := "/tmp/test.json"
+	i := reflect.ValueOf(ping).Interface().(interface{})
+	_, err = utils.WriteDataToFileAsJSON(i, file)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
+	user, err := user.Current()
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	homeDirectory := user.HomeDir
+	fmt.Printf("Home Directory: %s\n", homeDirectory)
+
+	//fmt.Println(deleteFile)
 }
