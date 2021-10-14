@@ -110,6 +110,13 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	if body.Name != "" {
+		existing := d.deviceNameExists(deviceModel, body)
+		if existing {
+			eMsg := fmt.Sprintf("a device with existing name: %s exists", body.Name)
+			return nil, errors.New(eMsg)
+		}
+	}
 	transport, err := checkTransport(body.TransportType)
 	if err != nil {
 		return nil, err

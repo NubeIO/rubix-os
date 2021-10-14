@@ -18,11 +18,8 @@ func (d *GormDatabase) pointNameExists(pnt *model.Point, body *model.Point) bool
 		return false
 	}
 	for _, p := range device.Points {
-		fmt.Println(111, p.UUID, pnt.UUID, p.Name, body.Name)
 		if p.Name == body.Name {
-			fmt.Println(22222, p.UUID, pnt.UUID, p.Name, body.Name)
 			if p.UUID == pnt.UUID {
-				fmt.Println(333333, p.UUID, pnt.UUID, p.Name, body.Name)
 				return false
 			} else {
 				return true
