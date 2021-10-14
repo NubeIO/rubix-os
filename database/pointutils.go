@@ -2,11 +2,49 @@ package database
 
 import (
 	"context"
+	"fmt"
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	unit "github.com/NubeDev/flow-framework/src/units"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/PaesslerAG/gval"
 )
+
+func (d *GormDatabase) pointNameExists(pnt *model.Point, body *model.Point) bool {
+	var arg api.Args
+	arg.WithPoints = true
+	device, err := d.GetDevice(pnt.DeviceUUID, arg)
+	if err != nil {
+		return false
+	}
+	for _, p := range device.Points {
+		fmt.Println(111, p.UUID, pnt.UUID, p.Name, body.Name)
+		if p.Name == body.Name {
+			fmt.Println(22222, p.UUID, pnt.UUID, p.Name, body.Name)
+			if p.UUID == pnt.UUID {
+				fmt.Println(333333, p.UUID, pnt.UUID, p.Name, body.Name)
+				return false
+			} else {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// PointDeviceByAddressID will query by device_uuid = ? AND object_type = ? AND address_id = ?
+func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Point) (*model.Point, bool) {
+	var pointModel *model.Point
+	deviceUUID := body.DeviceUUID
+	objType := body.ObjectType
+	addressID := body.AddressId
+	f := fmt.Sprintf("device_uuid = ? AND object_type = ? AND address_id = ?")
+	query := d.DB.Where(f, deviceUUID, objType, addressID, pointUUID).Preload("Priority").First(&pointModel)
+	if query.Error != nil {
+		return nil, false
+	}
+	return pointModel, true
+}
 
 func pointUnits(pointModel *model.Point) (value float64, displayValue string, ok bool, err error) {
 	if pointModel.Unit != "" {

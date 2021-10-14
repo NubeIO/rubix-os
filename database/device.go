@@ -62,6 +62,11 @@ func (d *GormDatabase) GetPluginIDFromDevice(uuid string) (*model.Network, error
 
 func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	var net *model.Network
+	existing := d.deviceNameExists(body, body)
+	if existing {
+		eMsg := fmt.Sprintf("a device with existing name: %s exists", body.Name)
+		return nil, errors.New(eMsg)
+	}
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Device)
 	networkUUID := body.NetworkUUID
 	body.Name = nameIsNil(body.Name)
