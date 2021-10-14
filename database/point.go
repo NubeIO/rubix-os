@@ -75,26 +75,17 @@ func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName strin
 	return write, nil
 }
 
-// PointDeviceByAddressID will query by device_uuid = ? AND object_type = ? AND address_id = ?
-func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Point) (*model.Point, bool) {
-	var pointModel *model.Point
-	deviceUUID := body.DeviceUUID
-	objType := body.ObjectType
-	addressID := body.AddressId
-	f := fmt.Sprintf("device_uuid = ? AND object_type = ? AND address_id = ?")
-	query := d.DB.Where(f, deviceUUID, objType, addressID, pointUUID).Preload("Priority").First(&pointModel)
-	if query.Error != nil {
-		return nil, false
-	}
-	return pointModel, true
-}
-
 // CreatePoint creates an object.
 func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model.Point, error) {
 	var deviceModel *model.Device
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	deviceUUID := body.DeviceUUID
 	body.Name = nameIsNil(body.Name)
+	existing := d.pointNameExists(body, body)
+	if existing {
+		eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
+		return nil, errors.New(eMsg)
+	}
 	obj, err := checkObjectType(body.ObjectType)
 	if err != nil {
 		return nil, err
@@ -147,12 +138,19 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	return body, query.Error
 }
 
-// UpdatePoint returns the device for the given id or nil.
+// UpdatePoint update it.
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error
+	}
+	if body.Name != "" {
+		existing := d.pointNameExists(pointModel, body)
+		if existing {
+			eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
+			return nil, errors.New(eMsg)
+		}
 	}
 	if len(body.Tags) > 0 {
 		if err := d.updateTags(&pointModel, body.Tags); err != nil {
