@@ -1,41 +1,43 @@
 package main
 
 import (
+	"github.com/NubeDev/flow-framework/src/system/networking"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 const (
-	listBuckets        = "/rubix/networking/buckets/list"
-	backUpdateNetworks = "/rubix/networks"
+	localIP    = "/rubixnet/local/ip"
+	externalIP = "/rubixnet/external/ip"
 )
+
+type MqttPayload struct {
+	Value    *float64
+	Priority int
+}
+
+func getBODYPoints(ctx *gin.Context) (dto *MqttPayload, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
 
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
-	mux.GET(listBuckets, func(ctx *gin.Context) {
-		err := i.connection()
+	mux.GET(localIP, func(ctx *gin.Context) {
+		address, err := networking.IpAddresses()
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-			buckets, err := i.minioClient.ListBuckets()
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, err)
-			}
-			ctx.JSON(http.StatusOK, buckets)
+			ctx.JSON(http.StatusOK, address)
 		}
 	})
-	mux.POST(backUpdateNetworks, func(ctx *gin.Context) {
-		err := i.connection()
+	mux.GET(externalIP, func(ctx *gin.Context) {
+		address, err := networking.ExternalIPV4()
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-			err := i.backNetworks()
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, err)
-			} else {
-				ctx.JSON(http.StatusOK, "upload ok")
-			}
+			ctx.JSON(http.StatusOK, address)
 		}
 	})
 }

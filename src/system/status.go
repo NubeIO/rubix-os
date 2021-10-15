@@ -5,13 +5,9 @@ package system
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/src/system/command"
-	"io/ioutil"
-	"net"
-	"net/http"
 	"runtime"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // Hostname fetches hostname
@@ -145,88 +141,4 @@ func CpuThrottled() (result string, err error) {
 // (`cat /proc/cpuinfo`)
 func CpuInfo() (result string, err error) {
 	return command.Run("cat", "/proc/cpuinfo")
-}
-
-// IpAddresses fetches IP addresses
-//
-// http://play.golang.org/p/BDt3qEQ_2H
-func IpAddresses() []string {
-	ips := []string{}
-	if ifaces, err := net.Interfaces(); err == nil {
-		for _, iface := range ifaces {
-			// skip
-			if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
-				continue
-			}
-
-			if addrs, err := iface.Addrs(); err == nil {
-				for _, addr := range addrs {
-					var ip net.IP
-					switch v := addr.(type) {
-					case *net.IPNet:
-						ip = v.IP
-					case *net.IPAddr:
-						ip = v.IP
-					}
-					if ip == nil || ip.IsLoopback() {
-						continue
-					}
-					ip = ip.To4()
-					if ip == nil {
-						continue
-					}
-
-					ips = append(ips, ip.String())
-				}
-			}
-		}
-	}
-
-	return ips
-}
-
-// ExternalIpAddress fetches external IP address (https://gist.github.com/jniltinho/9788121)
-func ExternalIpAddress() (ip string, err error) {
-	client := &http.Client{
-		Transport: &http.Transport{
-			Dial: (&net.Dialer{
-				Timeout:   5 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).Dial,
-			IdleConnTimeout:       30 * time.Second,
-			TLSHandshakeTimeout:   5 * time.Second,
-			ResponseHeaderTimeout: 5 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-		},
-	}
-
-	// http get request
-	var req *http.Request
-	if req, err = http.NewRequest("GET", "https://domains.google.com/checkip", nil); err == nil {
-		// user-agent
-		req.Header.Set("User-Agent", fmt.Sprintf("rpi-tools (golang; %s; %s)", runtime.GOOS, runtime.GOARCH))
-
-		// http get
-		var resp *http.Response
-		resp, err = client.Do(req)
-
-		if resp != nil {
-			defer resp.Body.Close() // in case of http redirects
-		}
-
-		if err == nil && resp.StatusCode == 200 {
-			var body []byte
-			if body, err = ioutil.ReadAll(resp.Body); err == nil {
-				ip := strings.TrimSpace(string(body))
-
-				return ip, nil
-			}
-
-			err = fmt.Errorf("failed to read external ip: %s", err)
-		} else {
-			err = fmt.Errorf("failed to fetch external ip: %s (http %d)", err, resp.StatusCode)
-		}
-	}
-
-	return "0.0.0.0", err
 }
