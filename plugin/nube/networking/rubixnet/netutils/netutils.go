@@ -3,34 +3,20 @@ package netutils
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/src/system/networking"
+	"github.com/labstack/gommon/log"
 	"io/ioutil"
 	"net"
 	"os"
-	"os/exec"
 	"regexp"
 	"runtime"
 	"strings"
 )
 
 func main() {
-	fmt.Println(getGatewayIP("enp9s0"))
+	fmt.Println(networking.GetGatewayIP("enp9s0"))
 	fmt.Println(HasStaticIP("enp9s0", true))
 	fmt.Println(SetStaticIP("enp9s0", "192.168.15.11/24", "192.168.15.1", "8.8.8.8"))
-	//fmt.Println(HasStaticIP("enp9s0", true))
-	//fmt.Println(GetCurrentHardwarePortInfo("enp9s0"))
-	//removeLine("/etc/dhcpcd.conf", 62)
-	//updateStaticIPDhcpcdConf("eth0", "192.168.15.109", "192.168.15.1", "8.8.8.8")
-
-	//func updateStaticIPDhcpcdConf(iFaceName, ip, gatewayIP, dnsIP string) string {
-}
-
-func RunCommand(command string, arguments ...string) (int, string, error) {
-	cmd := exec.Command(command, arguments...)
-	out, err := cmd.Output()
-	if err != nil {
-		return 1, "", fmt.Errorf("exec.Command(%s) failed: %v: %s", command, err, string(out))
-	}
-	return cmd.ProcessState.ExitCode(), string(out), nil
 }
 
 type NetInterface struct {
@@ -40,19 +26,6 @@ type NetInterface struct {
 	Addresses    []string // Array with the network interface addresses
 	Subnets      []string // Array with CIDR addresses of this network interface
 	Flags        string   // Network interface flags (up, broadcast, etc)
-}
-
-func GetValidNetInterfaces() ([]net.Interface, error) {
-	iFaces, err := net.Interfaces()
-	if err != nil {
-		return nil, fmt.Errorf("couldn't get list of interfaces: %s", err)
-	}
-	netIfaces := []net.Interface{}
-	for i := range iFaces {
-		iface := iFaces[i]
-		netIfaces = append(netIfaces, iface)
-	}
-	return netIfaces, nil
 }
 
 func removeLine(path string, lineNumber int) error {
@@ -68,54 +41,10 @@ func removeLine(path string, lineNumber int) error {
 	return err
 }
 
-func GetValidNetInterfacesForWeb() ([]NetInterface, error) {
-	ifaces, err := GetValidNetInterfaces()
-	if err != nil {
-		return nil, errors.New("couldn't get interfaces")
-	}
-	if len(ifaces) == 0 {
-		return nil, errors.New("couldn't find any legible interface")
-	}
-	var netInterfaces []NetInterface
-	for _, iface := range ifaces {
-		addrs, e := iface.Addrs()
-		if e != nil {
-			return nil, errors.New("failed to get addresses for interface")
-		}
-		netIface := NetInterface{
-			Name:         iface.Name,
-			MTU:          iface.MTU,
-			HardwareAddr: iface.HardwareAddr.String(),
-		}
-		if iface.Flags != 0 {
-			netIface.Flags = iface.Flags.String()
-		}
-		// Collect network interface addresses
-		for _, addr := range addrs {
-			ipNet, ok := addr.(*net.IPNet)
-			if !ok {
-				// not an IPNet, should not happen
-				return nil, fmt.Errorf("got iface.Addrs() element %s that is not net.IPNet, it is %T", addr, addr)
-			}
-			// ignore link-local
-			if ipNet.IP.IsLinkLocalUnicast() {
-				continue
-			}
-			netIface.Addresses = append(netIface.Addresses, ipNet.IP.String())
-			netIface.Subnets = append(netIface.Subnets, ipNet.String())
-		}
-		// Discard interfaces with no addresses
-		if len(netIface.Addresses) != 0 {
-			netInterfaces = append(netInterfaces, netIface)
-		}
-	}
-	return netInterfaces, nil
-}
-
 func GetSubnet(iFaceName string) string {
-	netIfaces, err := GetValidNetInterfacesForWeb()
+	netIfaces, err := networking.GetValidNetInterfacesForWeb()
 	if err != nil {
-		fmt.Printf("Could not get network interfaces info: %v", err)
+		log.Errorf("Could not get network interfaces info: %v", err)
 		return ""
 	}
 	for _, netIface := range netIfaces {
@@ -145,18 +74,6 @@ func SetStaticIP(iFaceName, ip, gatewayIP, dnsIP string) error {
 		return setStaticIPDhcpdConf(iFaceName, ip, gatewayIP, dnsIP)
 	}
 	return fmt.Errorf("cannot set static IP on %s", runtime.GOOS)
-}
-
-// GetCurrentHardwarePortInfo gets information the specified network interface
-func GetCurrentHardwarePortInfo(iFaceName string) (HardwarePortInfo, error) {
-
-	m := getNetworkSetupHardwareReports()
-	hardwarePort, ok := m[iFaceName]
-	if !ok {
-		return HardwarePortInfo{}, fmt.Errorf("could not find hardware port for %s", iFaceName)
-	}
-
-	return getHardwarePortInfo(hardwarePort)
 }
 
 // for dhcpcd.conf
@@ -202,27 +119,8 @@ func hasStaticIPDhcpcdConf(dhcpConf, iFaceName string, delete bool) bool {
 	return false
 }
 
-// Get gateway IP address
-func getGatewayIP(iFaceName string) string {
-	cmd := exec.Command("ip", "route", "show", "dev", iFaceName)
-	d, err := cmd.Output()
-	if err != nil || cmd.ProcessState.ExitCode() != 0 {
-		return ""
-	}
-	fields := strings.Fields(string(d))
-	if len(fields) < 3 || fields[0] != "default" {
-		return ""
-	}
-	ip := net.ParseIP(fields[2])
-	if ip == nil {
-		return ""
-	}
-	return fields[2]
-}
-
 // setStaticIPDhcpdConf - updates /etc/dhcpd.conf and sets the current IP address to be static
 func setStaticIPDhcpdConf(iFaceName, ip, gatewayIP, dnsIP string) error {
-	fmt.Println(iFaceName, ip, gatewayIP, dnsIP)
 	_ip := ip
 	if ip == "" {
 		_ip = GetSubnet(iFaceName)
@@ -236,13 +134,12 @@ func setStaticIPDhcpdConf(iFaceName, ip, gatewayIP, dnsIP string) error {
 	}
 	gateIP := gatewayIP
 	if gatewayIP == "" {
-		gateIP = getGatewayIP(iFaceName)
+		gateIP = networking.GetGatewayIP(iFaceName)
 	}
 	_dnsIP := dnsIP
 	if dnsIP == "" {
 		_dnsIP = ip4.String()
 	}
-	fmt.Println(iFaceName, ip, _ip, gateIP, _dnsIP)
 	add := updateStaticIPDhcpcdConf(iFaceName, _ip, gateIP, _dnsIP)
 	body, err := ioutil.ReadFile("/etc/dhcpcd.conf")
 	if err != nil {
@@ -275,87 +172,20 @@ func updateStaticIPDhcpcdConf(iFaceName, ip, gatewayIP, dnsIP string) string {
 	return string(body)
 }
 
-// getNetworkSetupHardwareReports parses the output of the `networksetup -listallhardwareports` command
-// it returns a map where the key is the interface name, and the value is the "hardware port"
-// returns nil if it fails to parse the output
-func getNetworkSetupHardwareReports() map[string]string {
-	_, out, err := RunCommand("networksetup", "-listallhardwareports")
-	if err != nil {
-		return nil
-	}
-
-	re, err := regexp.Compile("Hardware Port: (.*?)\nDevice: (.*?)\n")
-	if err != nil {
-		return nil
-	}
-
-	m := make(map[string]string, 0)
-
-	matches := re.FindAllStringSubmatch(out, -1)
-	for i := range matches {
-		port := matches[i][1]
-		device := matches[i][2]
-		m[device] = port
-	}
-
-	return m
-}
-
-// HardwarePortInfo - information obtained using MacOS networksetup
-// about the current state of the internet connection
-type HardwarePortInfo struct {
-	name      string
-	ip        string
-	subnet    string
-	gatewayIP string
-	static    bool
-}
-
-func getHardwarePortInfo(hardwarePort string) (HardwarePortInfo, error) {
-	h := HardwarePortInfo{}
-
-	_, out, err := RunCommand("networksetup", "-getinfo", hardwarePort)
-	if err != nil {
-		return h, err
-	}
-
-	re := regexp.MustCompile("IP address: (.*?)\nSubnet mask: (.*?)\nRouter: (.*?)\n")
-
-	match := re.FindStringSubmatch(out)
-	if len(match) == 0 {
-		return h, errors.New("could not find hardware port info")
-	}
-
-	h.name = hardwarePort
-	h.ip = match[1]
-	h.subnet = match[2]
-	h.gatewayIP = match[3]
-
-	if strings.Index(out, "Manual Configuration") == 0 {
-		h.static = true
-	}
-
-	return h, nil
-}
-
 // Gets a list of nameservers currently configured in the /etc/resolv.conf
 func getEtcResolvConfServers() ([]string, error) {
 	body, err := ioutil.ReadFile("/etc/resolv.conf")
 	if err != nil {
 		return nil, err
 	}
-
 	re := regexp.MustCompile("nameserver ([a-zA-Z0-9.:]+)")
-
 	matches := re.FindAllStringSubmatch(string(body), -1)
 	if len(matches) == 0 {
 		return nil, errors.New("found no DNS servers in /etc/resolv.conf")
 	}
-
 	addrs := make([]string, 0)
 	for i := range matches {
 		addrs = append(addrs, matches[i][1])
 	}
-
 	return addrs, nil
 }

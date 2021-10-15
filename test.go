@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/src/client"
+	"github.com/NubeDev/flow-framework/src/system/networking"
 	unit "github.com/NubeDev/flow-framework/src/units"
 	"github.com/NubeDev/flow-framework/utils"
 	"reflect"
@@ -10,6 +11,7 @@ import (
 )
 
 func main() {
+
 	_, res, err := unit.Process(1, "c", "c")
 	if err != nil {
 		return
@@ -37,5 +39,8 @@ func main() {
 	t := time.Now()
 	fmt.Println(t.Format("2006-01-02-15-04-05"))
 
-	//fmt.Println(deleteFile)
+	aaa, _ := networking.GetValidNetInterfacesForWeb()
+	fmt.Println(aaa)
+	//fmt.Println(networking.ExternalIpAddress())
+
 }
