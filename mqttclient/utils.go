@@ -5,14 +5,19 @@ import (
 	"strings"
 )
 
-func TopicParts(topic string) *utils.Array {
+func TopicParts(topic string) (clean, raw *utils.Array) {
 	s := strings.SplitAfter(topic, "/")
-	arr := utils.NewArray()
-	for _, e := range s {
-		res := strings.ReplaceAll(e, "/", "")
-		if res != "" {
-			arr.Add(res)
+	clean = utils.NewArray()
+	raw = utils.NewArray()
+	for _, t := range s {
+		if t == "/" {
+			clean.Add("EMPTY-TOPIC-SPACE")
 		}
+		res := strings.ReplaceAll(t, "/", "")
+		if res != "" {
+			clean.Add(res)
+		}
+		raw.Add(t)
 	}
-	return arr
+	return clean, raw
 }

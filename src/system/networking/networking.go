@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/utils"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -20,6 +21,15 @@ type NetInterface struct {
 	Addresses    []string // Array with the network interface addresses
 	Subnets      []string // Array with CIDR addresses of this network interface
 	Flags        string   // Network interface flags (up, broadcast, etc)
+}
+
+type NetworkInterfaces struct {
+	Interface     string `json:"interface"`
+	IP            string `json:"ip"`
+	IPMask        string `json:"ip_and_mask"`
+	NetMask       string `json:"netmask"`
+	NetMaskLength string `json:"net_mask_length"`
+	Gateway       string `json:"gateway"`
 }
 
 func GetValidNetInterfacesForWeb() ([]NetInterface, error) {
@@ -66,6 +76,18 @@ func GetValidNetInterfacesForWeb() ([]NetInterface, error) {
 	return netInterfaces, nil
 }
 
+func GetInterfacesNames() (*utils.Array, error) {
+	i, err := GetValidNetInterfaces()
+	if err != nil {
+		return nil, errors.New("couldn't get interfaces")
+	}
+	out := utils.NewArray()
+	for _, n := range i {
+		out.Add(n.Name)
+	}
+	return out, nil
+}
+
 func GetValidNetInterfaces() ([]net.Interface, error) {
 	iFaces, err := net.Interfaces()
 	if err != nil {
@@ -77,6 +99,23 @@ func GetValidNetInterfaces() ([]net.Interface, error) {
 		netIfaces = append(netIfaces, iface)
 	}
 	return netIfaces, nil
+}
+
+//GetGatewaysIP Get all gateway IP address
+func GetGatewaysIP() (*utils.Array, error) {
+	names, err := GetInterfacesNames()
+	if err != nil {
+		return nil, err
+	}
+	interfaces := names.Values()
+	out := utils.NewArray()
+	var g NetworkInterfaces
+	for _, e := range interfaces {
+		g.Interface = e.(string)
+		g.IP = GetGatewayIP(e.(string))
+		out.Add(g)
+	}
+	return out, nil
 }
 
 //GetGatewayIP Get gateway IP address
@@ -97,15 +136,45 @@ func GetGatewayIP(iFaceName string) string {
 	return fields[2]
 }
 
+//CheckInternetConnection Get gateway IP address
+func CheckInternetConnection(iFaceName string) string {
+
+	cmd := exec.Command("ip", "route", "show", "dev", iFaceName)
+	d, err := cmd.Output()
+	if err != nil || cmd.ProcessState.ExitCode() != 0 {
+		return ""
+	}
+	fields := strings.Fields(string(d))
+	if len(fields) < 3 || fields[0] != "default" {
+		return ""
+	}
+	ip := net.ParseIP(fields[2])
+	if ip == nil {
+		return ""
+	}
+	return fields[2]
+}
+
+//
+
+func ipv4MaskString(m []byte) string {
+	if len(m) != 4 {
+		panic("ipv4Mask: len must be 4 bytes")
+	}
+	return fmt.Sprintf("%d.%d.%d.%d", m[0], m[1], m[2], m[3])
+}
+
 // IpAddresses fetches IP addresses
-func IpAddresses() ([]string, error) {
+func IpAddresses() (ip, name []string, ipAndNames *utils.Array, err error) {
+	var names []string
 	var ips []string
+	out := utils.NewArray()
+	var interfaces NetworkInterfaces
 	if ifaces, err := net.Interfaces(); err == nil {
 		if err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 		for _, iface := range ifaces {
-			// skip
 			if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
 				continue
 			}
@@ -121,17 +190,28 @@ func IpAddresses() ([]string, error) {
 					if ip == nil || ip.IsLoopback() {
 						continue
 					}
+
 					ip = ip.To4()
 					if ip == nil {
 						continue
 					}
-
+					mask := strings.Split(addr.String(), "/")
+					interfaces.Interface = iface.Name
+					interfaces.IP = ip.String()
+					interfaces.IPMask = addr.String()
+					if len(mask) >= 1 {
+						interfaces.NetMaskLength = mask[1]
+					}
+					interfaces.NetMask = ipv4MaskString(ip.DefaultMask())
+					interfaces.Gateway = GetGatewayIP(iface.Name)
+					out.Add(interfaces)
+					names = append(names, iface.Name)
 					ips = append(ips, ip.String())
 				}
 			}
 		}
 	}
-	return ips, nil
+	return ips, names, out, nil
 }
 
 // ExternalIPV4 fetches external IP address in ipv4 format
@@ -147,7 +227,8 @@ func ExternalIPV4() (ip string, err error) {
 	if err != nil {
 		return "", err
 	}
-	return string(content), nil
+	out := strings.TrimRight(string(content), "\r\n")
+	return out, nil
 }
 
 // ExternalIpAddress fetches external IP address

@@ -184,7 +184,7 @@ func (i *Instance) BusServ() {
 }
 
 func decodeMQTT(topic string) (devEUI, appID string, valid bool) {
-	t := mqttclient.TopicParts(topic)
+	t, _ := mqttclient.TopicParts(topic)
 
 	//is from topic application
 	application := t.Get(0)

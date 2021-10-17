@@ -25,7 +25,7 @@ func getBODYPoints(ctx *gin.Context) (dto *MqttPayload, err error) {
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
 	mux.GET(localIP, func(ctx *gin.Context) {
-		address, err := networking.IpAddresses()
+		address, _, _, err := networking.IpAddresses()
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {

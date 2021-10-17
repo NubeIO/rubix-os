@@ -284,8 +284,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			networkRoutes.GET("", networkHandler.GetNetworks)
 			networkRoutes.POST("", networkHandler.CreateNetwork)
 			networkRoutes.GET("/:uuid", networkHandler.GetNetwork)
-			networkRoutes.GET("/plugin/:uuid", networkHandler.GetNetworkByPlugin)
-			networkRoutes.GET("/plugin/all/:uuid", networkHandler.GetNetworksByPlugin)
+			networkRoutes.GET("/plugin/:name", networkHandler.GetNetworkByPluginName)
+			networkRoutes.GET("/plugin/all/:name", networkHandler.GetNetworksByPluginName)
+			networkRoutes.GET("/name/:name", networkHandler.GetNetworkByName)
+			networkRoutes.GET("/name/all/:name", networkHandler.GetNetworksByName)
 			networkRoutes.PATCH("/:uuid", networkHandler.UpdateNetwork)
 			networkRoutes.DELETE("/:uuid", networkHandler.DeleteNetwork)
 			networkRoutes.DELETE("/drop", networkHandler.DropNetworks)
@@ -308,6 +310,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			pointRoutes.GET("", pointHandler.GetPoints)
 			pointRoutes.POST("", pointHandler.CreatePoint)
 			pointRoutes.GET("/:uuid", pointHandler.GetPoint)
+			pointRoutes.GET("/network/name/:name", pointHandler.GetPointsByNetworkPluginName)
+			pointRoutes.GET("/network/uuid/:uuid", pointHandler.GetPointsByNetworkUUID)
 			pointRoutes.PATCH("/:uuid", pointHandler.UpdatePoint)
 			pointRoutes.PATCH("/write/:uuid", pointHandler.PointWrite)
 			pointRoutes.GET("/name", pointHandler.GetPointByName)
@@ -432,9 +436,14 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			tagRoutes.DELETE(":tag", tagHandler.DeleteTag)
 		}
 
-		deviceInfoRoutes := apiRoutes.Group("/system/device_info")
+		deviceInfoRoutes := apiRoutes.Group("/system")
 		{
-			deviceInfoRoutes.GET("", deviceInfoHandler.GetDeviceInfo)
+			deviceInfoRoutes.GET("/device_info", deviceInfoHandler.GetDeviceInfo)
+			deviceInfoRoutes.GET("/ip/host", deviceInfoHandler.GetHostInfo)
+			deviceInfoRoutes.GET("/time", deviceInfoHandler.GetSystemTime)
+			deviceInfoRoutes.GET("/ip/internal", deviceInfoHandler.GetNetworks)
+			deviceInfoRoutes.GET("/ip/external", deviceInfoHandler.GetExternalIP)
+			deviceInfoRoutes.GET("/ip/interfaces", deviceInfoHandler.GetInterfacesNames)
 		}
 
 		syncRoutes := apiRoutes.Group("/sync")

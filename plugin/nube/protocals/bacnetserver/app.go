@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
@@ -17,8 +18,11 @@ import (
 func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	payload := new(pkgmodel.MqttPayload)
 	err := json.Unmarshal(body.Payload(), &payload)
-	t := mqttclient.TopicParts(body.Topic())
-	top := t.Get(5)
+	fmt.Println(body.Payload())
+	fmt.Println(body.Topic())
+	t, _ := mqttclient.TopicParts(body.Topic())
+	const objectType = 10
+	top := t.Get(objectType)
 	tt := top.(string)
 	objType, addr := getPointAddr(tt)
 	var point model.Point
@@ -58,7 +62,7 @@ func (i *Instance) addPoint(body *model.Point) (*model.Point, error) {
 	point.COV = utils.Float64IsNil(body.COV)
 	point.EventState = "normal"
 	point.Units = "noUnits"
-	point.RelinquishDefault = body.Fallback
+	point.RelinquishDefault = utils.Float64IsNil(body.Fallback)
 	cli := plgrest.NewNoAuth(ip, port)
 	if &point == nil {
 		log.Error("BACNET ADD POINT issue on add")
@@ -95,9 +99,6 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 	//point.Priority.P14 = body.Priority.P14
 	//point.Priority.P15 = body.Priority.P15
 
-	//if reflect.ValueOf(body.Name).IsValid() {
-	//	point.ObjectName = body.Name
-	//}
 	point.Priority = new(model.Priority)
 	if (*body.Priority).P16 != nil {
 		(*point.Priority).P16 = (*body.Priority).P16
@@ -134,43 +135,4 @@ func (i *Instance) bacnetServerDeletePoint(body *pkgmodel.BacnetPoint) (bool, er
 		return false, err
 	}
 	return true, nil
-}
-
-//wizard make a network/dev/pnt
-func (i *Instance) wizard() (string, error) {
-	//add point
-	cli := plgrest.NewNoAuth(ip, port)
-	var point pkgmodel.BacnetPoint
-	point.ObjectName = utils.NameIsNil()
-	point.Enable = true
-	point.Description = "test"
-	point.UseNextAvailableAddr = true
-	point.ObjectType = "analogValue"
-	point.COV = 0
-	point.EventState = "normal"
-	point.Units = "noUnits"
-	point.RelinquishDefault = 0
-
-	bacPnt, err := cli.AddPoint(point)
-	if err != nil {
-		return "error: on add bacnet point to server", err
-	}
-	var net model.Network
-	net.Name = "bacnet"
-	net.TransportType = "ip"
-	net.PluginPath = "bacnetserver"
-	var dev model.Device
-	dev.Name = "bacnet"
-	var pnt model.Point
-	pnt.Name = bacPnt.ObjectName
-	pnt.Description = bacPnt.Description
-
-	*pnt.AddressId = bacPnt.Address //TODO check conversion
-	pnt.AddressUUID = bacPnt.AddressUUID
-	pnt.ObjectType = bacPnt.ObjectType
-	_, err = i.db.WizardNewNetDevPnt("bacnetserver", &net, &dev, &pnt)
-	if err != nil {
-		return "error: on flow-framework add network wizard", err
-	}
-	return "pass: added network and points", err
 }

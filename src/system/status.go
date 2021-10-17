@@ -8,10 +8,64 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
-// Hostname fetches hostname
-// (`hostname`)
+type Details struct {
+	HostName            string `json:"host_name"`
+	User                string `json:"user"`
+	HostUptime          string `json:"host_uptime"`
+	FlowFrameworkUptime string `json:"flow_framework_uptime"`
+}
+
+func Info() (Details, error) {
+	var s Details
+	hostname, err := Hostname()
+	if err != nil {
+		return Details{}, err
+	}
+	name, err := Uname()
+	if err != nil {
+		return Details{}, err
+	}
+	up, err := HostUptime()
+	if err != nil {
+		return Details{}, err
+	}
+
+	pUptime := ProgramUptime()
+	if err != nil {
+		return Details{}, err
+	}
+
+	s.HostName = hostname
+	s.User = name
+	s.HostUptime = up
+	s.FlowFrameworkUptime = pUptime
+	return s, nil
+}
+
+var startTime time.Time
+
+func init() {
+	startTime = time.Now()
+}
+
+func FormatDuration(d time.Duration) string {
+	scale := 100 * time.Second
+	for scale > d {
+		scale = scale / 10
+	}
+	return d.Round(scale / 100).String()
+}
+
+// ProgramUptime fetches hostname
+func ProgramUptime() string {
+	out := time.Since(startTime)
+	return FormatDuration(out)
+}
+
+// Hostname go lang program uptime
 func Hostname() (result string, err error) {
 	return command.Run("hostname")
 }
@@ -22,10 +76,18 @@ func Uname() (result string, err error) {
 	return command.Run("uname", "-a")
 }
 
-// Uptime fetches system uptime
+// HostUptime fetches system uptime
 // (`uptime`)
-func Uptime() (result string, err error) {
-	return command.Run("uptime")
+func HostUptime() (result string, err error) {
+	up, e := command.Run("uptime")
+	if e != nil {
+		return "", e
+	}
+	s := strings.Split(up, ",")
+	if len(s) >= 1 {
+		return s[0], nil
+	}
+	return "", nil
 }
 
 // FreeSpaces fetches disk usages

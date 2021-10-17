@@ -5,15 +5,17 @@ import (
 	"strings"
 )
 
-func getPointAddr(s string) (objType,  addr string) {
+func getPointAddr(s string) (objType, addr string) {
 	mArr := utils.NewArray()
 	ss := strings.Split(s, "-")
 	for _, e := range ss {
-		if e != ""{
+		if e != "" {
 			mArr.Add(e)
 		}
 	}
-	o := mArr.Get(0)
-	a := mArr.Get(1)
-	return o.(string),  a.(string)
+	const objectType = 0
+	const address = 1
+	o := mArr.Get(objectType)
+	a := mArr.Get(address)
+	return o.(string), a.(string)
 }

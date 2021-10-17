@@ -30,6 +30,40 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 	return pointModel, nil
 }
 
+// GetPointsByNetworkUUID get all points by a networkUUID, will return all the points under a network
+func (d *GormDatabase) GetPointsByNetworkUUID(networkUUID string) (*utils.Array, error) {
+	var arg api.Args
+	arg.WithDevices = true
+	arg.WithPoints = true
+	network, err := d.GetNetwork(networkUUID, arg)
+	if err != nil {
+		return nil, err
+	}
+	p := utils.NewArray()
+	for _, dev := range network.Devices {
+		for _, pnt := range dev.Points {
+			p.Add(pnt)
+		}
+	}
+	return p, nil
+}
+
+// GetPointsByNetworkPluginName get all points by a network plugin name, will return all the points under a network
+func (d *GormDatabase) GetPointsByNetworkPluginName(name string) (*utils.Array, error) {
+	var arg api.Args
+	arg.WithDevices = true
+	arg.WithPoints = true
+	network, err := d.GetNetworkByPluginName(name, arg)
+	if err != nil {
+		return nil, err
+	}
+	points, err := d.GetPointsByNetworkUUID(network.UUID)
+	if err != nil {
+		return nil, err
+	}
+	return points, nil
+}
+
 //GetPointByName get point by name
 func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string) (*model.Point, error) {
 	var args api.Args

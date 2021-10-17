@@ -7,8 +7,10 @@ import (
 )
 
 type NetworkDatabase interface {
-	GetNetworkByPlugin(uuid string, args Args) (*model.Network, error)
-	GetNetworksByPlugin(uuid string, args Args) ([]*model.Network, error)
+	GetNetworkByName(name string, args Args) (*model.Network, error)
+	GetNetworksByName(name string, args Args) ([]*model.Network, error)
+	GetNetworkByPluginName(name string, args Args) (*model.Network, error)
+	GetNetworksByPluginName(name string, args Args) ([]*model.Network, error)
 	GetNetworks(args Args) ([]*model.Network, error)
 	GetNetwork(uuid string, args Args) (*model.Network, error)
 	CreateNetwork(network *model.Network) (*model.Network, error)
@@ -21,17 +23,31 @@ type NetworksAPI struct {
 	Bus eventbus.BusService
 }
 
-func (a *NetworksAPI) GetNetworkByPlugin(ctx *gin.Context) {
-	uuid := resolveID(ctx)
+func (a *NetworksAPI) GetNetworkByName(ctx *gin.Context) {
+	name := resolveName(ctx)
 	args := buildNetworkArgs(ctx)
-	q, err := a.DB.GetNetworkByPlugin(uuid, args) //TODO fix this need to add in like "serial"
+	q, err := a.DB.GetNetworkByName(name, args) //TODO fix this need to add in like "serial"
 	reposeHandler(q, err, ctx)
 }
 
-func (a *NetworksAPI) GetNetworksByPlugin(ctx *gin.Context) {
-	uuid := resolveID(ctx) //plugin uuid
+func (a *NetworksAPI) GetNetworksByName(ctx *gin.Context) {
+	name := resolveName(ctx)
 	args := buildNetworkArgs(ctx)
-	q, err := a.DB.GetNetworksByPlugin(uuid, args)
+	q, err := a.DB.GetNetworksByName(name, args)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *NetworksAPI) GetNetworkByPluginName(ctx *gin.Context) {
+	name := resolveName(ctx)
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.GetNetworkByPluginName(name, args) //TODO fix this need to add in like "serial"
+	reposeHandler(q, err, ctx)
+}
+
+func (a *NetworksAPI) GetNetworksByPluginName(ctx *gin.Context) {
+	name := resolveName(ctx)
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.GetNetworksByPluginName(name, args)
 	reposeHandler(q, err, ctx)
 }
 
