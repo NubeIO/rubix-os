@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/src/system/command"
 	"github.com/NubeDev/flow-framework/utils"
 	"io/ioutil"
 	"net"
@@ -30,6 +31,12 @@ type NetworkInterfaces struct {
 	NetMask       string `json:"netmask"`
 	NetMaskLength string `json:"net_mask_length"`
 	Gateway       string `json:"gateway"`
+}
+
+type CheckInternet struct {
+	Interface     string `json:"interface"`
+	Message       string `json:"message"`
+	FoundInternet bool   `json:"found_internet"`
 }
 
 func GetValidNetInterfacesForWeb() ([]NetInterface, error) {
@@ -101,23 +108,6 @@ func GetValidNetInterfaces() ([]net.Interface, error) {
 	return netIfaces, nil
 }
 
-//GetGatewaysIP Get all gateway IP address
-func GetGatewaysIP() (*utils.Array, error) {
-	names, err := GetInterfacesNames()
-	if err != nil {
-		return nil, err
-	}
-	interfaces := names.Values()
-	out := utils.NewArray()
-	var g NetworkInterfaces
-	for _, e := range interfaces {
-		g.Interface = e.(string)
-		g.IP = GetGatewayIP(e.(string))
-		out.Add(g)
-	}
-	return out, nil
-}
-
 //GetGatewayIP Get gateway IP address
 func GetGatewayIP(iFaceName string) string {
 	cmd := exec.Command("ip", "route", "show", "dev", iFaceName)
@@ -136,26 +126,43 @@ func GetGatewayIP(iFaceName string) string {
 	return fields[2]
 }
 
-//CheckInternetConnection Get gateway IP address
-func CheckInternetConnection(iFaceName string) string {
-
-	cmd := exec.Command("ip", "route", "show", "dev", iFaceName)
-	d, err := cmd.Output()
-	if err != nil || cmd.ProcessState.ExitCode() != 0 {
-		return ""
+//CheckInternetConnection check internet connection for a port (will ping google.com 2 times)
+func CheckInternetConnection(iface string) (msg string, connected bool, err error) {
+	cmd := fmt.Sprintf("if ping -I %s -c 2 google.com; then echo OK; else echo DEAD ;fi", iface)
+	ping, err := command.Run("bash", "-c", cmd)
+	if err != nil {
+		return "", false, err
 	}
-	fields := strings.Fields(string(d))
-	if len(fields) < 3 || fields[0] != "default" {
-		return ""
+	if strings.Contains(ping, "OK") {
+		return "PASS", true, nil
+	} else if strings.Contains(ping, "unknown iface") {
+		return "FAIL: failed to find network interface", false, err
+	} else if strings.Contains(ping, "Name or service not known") {
+		return "FAIL: Name or service not known", false, err
 	}
-	ip := net.ParseIP(fields[2])
-	if ip == nil {
-		return ""
-	}
-	return fields[2]
+	return "Unknown Fail", false, err
 }
 
-//
+//CheckInternetStatus check internet connection for all ports (will ping google.com 2 times)
+func CheckInternetStatus() (msg *utils.Array, err error) {
+	_, ifaceNames, _, err := IpAddresses()
+	if err != nil {
+		return nil, err
+	}
+	var ci CheckInternet
+	out := utils.NewArray()
+	for _, iface := range ifaceNames {
+		message, ok, err := CheckInternetConnection(iface)
+		if err != nil {
+			return nil, err
+		}
+		ci.Interface = iface
+		ci.FoundInternet = ok
+		ci.Message = message
+		out.Add(ci)
+	}
+	return out, err
+}
 
 func ipv4MaskString(m []byte) string {
 	if len(m) != 4 {
@@ -165,7 +172,7 @@ func ipv4MaskString(m []byte) string {
 }
 
 // IpAddresses fetches IP addresses
-func IpAddresses() (ip, name []string, ipAndNames *utils.Array, err error) {
+func IpAddresses() (ip, ifaceNames []string, ipAndNames *utils.Array, err error) {
 	var names []string
 	var ips []string
 	out := utils.NewArray()

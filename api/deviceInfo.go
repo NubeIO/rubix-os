@@ -45,3 +45,8 @@ func (a *DeviceInfoAPI) GetInterfacesNames(ctx *gin.Context) {
 	t, err := networking.GetInterfacesNames()
 	reposeHandler(t, err, ctx)
 }
+
+func (a *DeviceInfoAPI) GetInternetStatus(ctx *gin.Context) {
+	t, err := networking.CheckInternetStatus()
+	reposeHandler(t, err, ctx)
+}
