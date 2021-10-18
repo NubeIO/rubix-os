@@ -8,7 +8,7 @@ func getKernelData(debug bool) KernelInfo {
 	var k KernelInfo
 
 	sh := "uname -r -i"
-	res, e := cmdRun(sh, debug)
+	res, e := CMDRun(sh, debug)
 	if e != nil {
 		return k
 	}
@@ -20,7 +20,7 @@ func getKernelData(debug bool) KernelInfo {
 
 	// sh = "lsb_release -d|sed 's/'$(lsb_release -d|awk '{print $1}')'//g'"
 	sh = "lsb_release -d"
-	res, e = cmdRun(sh, debug)
+	res, e = CMDRun(sh, debug)
 
 	if e != nil {
 		k.KernelOs = "linux"

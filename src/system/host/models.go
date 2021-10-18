@@ -21,7 +21,6 @@ type Combination struct {
 	ServerInfo   string          `json:"server_info"`
 	SystemTime   *utilstime.Time `json:"system_time"`
 	Uptime       system.Details  `json:"uptime"`
-	CPUInfo      CPUInfo         `json:"cpu_info"`
 	MemInfo      *utils.Array    `json:"mem_info"`
 	KernelInfo   KernelInfo      `json:"kernel_info"`
 	ProgressInfo ProgressInfo    `json:"progress_info"`
@@ -119,10 +118,4 @@ type DiskInfoDetail struct {
 	Label string              `json:"label"`
 	Model string              `json:"model"`
 	List  []map[string]string `json:"list"`
-}
-
-type cacheNet struct {
-	Download   int
-	Upload     int
-	UpdateTime int64
 }

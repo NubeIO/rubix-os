@@ -11,7 +11,6 @@ func GetCombinationData(debug bool) Combination {
 	chServer := make(chan string)
 	chTime := make(chan *utilstime.Time)
 	chUptime := make(chan system.Details)
-	chCPU := make(chan CPUInfo)
 	chMem := make(chan *utils.Array)
 	chKernel := make(chan KernelInfo)
 	chPro := make(chan ProgressInfo)
@@ -20,7 +19,6 @@ func GetCombinationData(debug bool) Combination {
 	go func() { chServer <- getServerInfo(debug) }()
 	go func() { chTime <- utilstime.SystemTime() }()
 	go func() { chUptime <- system.Info() }()
-	go func() { chCPU <- getCPUInfo(debug) }()
 	go func() { chMem <- GetMemory() }()
 	go func() { chKernel <- getKernelData(debug) }()
 	go func() { chPro <- getProgressData(debug) }()
@@ -29,7 +27,6 @@ func GetCombinationData(debug bool) Combination {
 	comb.ServerInfo = <-chServer
 	comb.SystemTime = <-chTime
 	comb.Uptime = <-chUptime
-	comb.CPUInfo = <-chCPU
 	comb.MemInfo = <-chMem
 	comb.KernelInfo = <-chKernel
 	comb.ProgressInfo = <-chPro

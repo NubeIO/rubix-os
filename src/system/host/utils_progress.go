@@ -10,7 +10,7 @@ func getProgressData(debug bool) ProgressInfo {
 	var pro ProgressInfo
 
 	sh := "ps ax | wc -l;ps ax | awk '{print $3}' | grep R | wc -l;ps ax | awk '{print $3}' | grep Z | wc -l;ps ax | awk '{print $3}' | grep S | wc -l"
-	res, e := cmdRun(sh, debug)
+	res, e := CMDRun(sh, debug)
 	if e != nil {
 		pro.ProgressAll = "0"
 		pro.ProgressRun = "0"
@@ -55,7 +55,7 @@ func getProgressListData(num string, debug bool) []ProgressListInfo {
 	}
 
 	sh := fmt.Sprintf("ps aux | grep -v PID | awk '{print $2, $3, $4, $11}' | sort -rn -k +3 | head -n %s | tr '\n' ','", num)
-	res, e := cmdRun(sh, debug)
+	res, e := CMDRun(sh, debug)
 	if e != nil {
 		return []ProgressListInfo{}
 	}

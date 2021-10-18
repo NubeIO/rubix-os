@@ -9,7 +9,7 @@ func getLogData(log string, debug bool) string {
 		return ""
 	}
 	sh := fmt.Sprintf("tail -n 100 %s", log)
-	res, e := cmdRun(sh, debug)
+	res, e := CMDRun(sh, debug)
 	if e != nil {
 		return ""
 	}
@@ -22,7 +22,7 @@ func delLog(log string, debug bool) string {
 		return "ok"
 	}
 	sh := fmt.Sprintf(":> %s", log)
-	_, e := cmdRun(sh, debug)
+	_, e := CMDRun(sh, debug)
 	if e != nil {
 		return "fail"
 	}

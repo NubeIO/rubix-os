@@ -8,7 +8,7 @@ func getDiskInfo(d string, debug bool) DiskInfo {
 	var disk DiskInfo
 	// Size  Used Use%
 	sh := "df -hl / | awk 'NR==2{print $1, $2, $3, $5}'"
-	res, e := cmdRun(sh, debug)
+	res, e := CMDRun(sh, debug)
 	disk_info := strings.Fields(string(res))
 	if e != nil || len(disk_info) < 4 {
 		disk.DiskMount = "/"
@@ -28,7 +28,7 @@ func getDiskInfoDetail(debug bool) DiskInfoDetail {
 	var disk DiskInfoDetail
 
 	sh := "fdisk -l|grep Disklabel"
-	res, e := cmdRun(sh, debug)
+	res, e := CMDRun(sh, debug)
 	if e != nil {
 		disk.Label = "unknown"
 	} else {
@@ -36,7 +36,7 @@ func getDiskInfoDetail(debug bool) DiskInfoDetail {
 	}
 
 	sh = "fdisk -l|grep 'model'"
-	res, e = cmdRun(sh, debug)
+	res, e = CMDRun(sh, debug)
 	if e != nil {
 		disk.Model = "unknown"
 	} else {
@@ -44,7 +44,7 @@ func getDiskInfoDetail(debug bool) DiskInfoDetail {
 	}
 
 	sh = "df -h|grep -v Filesystem|tr '\n' ','"
-	res, e = cmdRun(sh, debug)
+	res, e = CMDRun(sh, debug)
 	if e != nil {
 		disk.List = []map[string]string{}
 	} else {

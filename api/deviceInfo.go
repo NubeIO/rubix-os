@@ -50,3 +50,8 @@ func (a *DeviceInfoAPI) GetOSDetails(ctx *gin.Context) {
 	out := host.GetCombinationData(false)
 	reposeHandler(out, nil, ctx)
 }
+
+func (a *DeviceInfoAPI) GetTZoneList(ctx *gin.Context) {
+	out, err := utilstime.GetTimeZoneList()
+	reposeHandler(out, err, ctx)
+}
