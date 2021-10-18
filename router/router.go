@@ -135,10 +135,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
 
-	engine.GET("/api/system/ping", healthHandler.Health)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
 	engine.Use(func(ctx *gin.Context) {
-		// ctx.Header("Content-Type", "application/json")
+		ctx.Header("Content-Type", "application/json") //if you comment it out it will detected as text on proxy-handlers
 		for header, value := range conf.Server.ResponseHeaders {
 			ctx.Header(header, value)
 		}
@@ -146,6 +145,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.Use(cors.New(auth.CorsConfig(conf)))
 	engine.OPTIONS("/*any")
 
+	engine.GET("/api/system/ping", healthHandler.Health)
 	apiRoutes := engine.Group("/api")
 	{
 		apiRoutes.GET("/version", func(ctx *gin.Context) {

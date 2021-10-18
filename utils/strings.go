@@ -222,3 +222,7 @@ func LcFirst(str string) string {
 	}
 	return ""
 }
+
+func NewStringAddress(str string) *string {
+	return &str
+}

@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
@@ -27,18 +28,18 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	networkModel.PluginConfId = p.UUID
 	networkModel.TransportType = "ip"
 	n, err := d.CreateNetwork(&networkModel)
-	log.Info("Created a Network")
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("network creation failure: %s", err)
 	}
+	log.Info("Created a Network")
 
 	deviceModel.NetworkUUID = n.UUID
 	deviceModel.TransportType = "ip"
 	dev, err := d.CreateDevice(&deviceModel)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("device creation failure: %s", err)
 	}
-	log.Info("Created a Device")
+	log.Info("Created a Device: ", dev)
 
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "ZATSP-PRO"
@@ -46,7 +47,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	pointModel.ObjectType = "analogValue" // TODO: check
 	pointProducer, err := d.CreatePoint(&pointModel, "")
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("producer point creation failure: %s", err)
 	}
 	log.Info("Created a Point for Producer", pointProducer)
 
@@ -56,15 +57,15 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	pointModel.ObjectType = "analogValue" // TODO: check
 	pointConsumer, err := d.CreatePoint(&pointModel, "")
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("consumer point creation failure: %s", err)
 	}
 	log.Info("Created a Point for Consumer", pointConsumer)
 
-	flowNetworkModel.FlowIP = "0.0.0.0"
+	flowNetworkModel.FlowIP = utils.NewStringAddress("0.0.0.0")
 	flowNetworkModel.Name = "network"
 	fn, err := d.CreateFlowNetwork(&flowNetworkModel)
 	if err != nil {
-		return false, errors.New("FlowNetwork creation failure")
+		return false, fmt.Errorf("FlowNetwork creation failure: %s", err)
 	}
 	log.Info("FlowNetwork is created successfully: ", fn)
 
@@ -72,7 +73,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	streamModel.Name = "stream"
 	stream, err := d.CreateStream(&streamModel)
 	if err != nil {
-		return false, errors.New("stream creation failure")
+		return false, fmt.Errorf("stream creation failure: %s", err)
 	}
 	log.Info("Stream is created successfully: ", stream)
 
@@ -83,22 +84,22 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	producerModel.ProducerApplication = "mapping"
 	producer, err := d.CreateProducer(&producerModel)
 	if err != nil {
-		return false, errors.New("producer creation failure")
+		return false, fmt.Errorf("producer creation failure: %s", err)
 	}
 	log.Info("Producer is created successfully: ", producer)
 
 	streamUUID := stream.UUID
 	streamClones, err := d.GetStreamClones(api.Args{SourceUUID: &streamUUID})
 	if err != nil {
-		return false, errors.New("StreamClone search failure")
+		return false, fmt.Errorf("StreamClone search failure: %s", err)
 	}
-	consumerModel.Name = "ZATSP"
+	consumerModel.Name = "ZATSP_2"
 	consumerModel.ProducerUUID = producer.UUID
 	consumerModel.ConsumerApplication = "mapping"
 	consumerModel.StreamCloneUUID = streamClones[0].UUID
 	consumer, err := d.CreateConsumer(&consumerModel)
 	if err != nil {
-		return false, errors.New("consumer creation failure")
+		return false, fmt.Errorf("consumer creation failure: %s", err)
 	}
 	log.Info("Consumer is created successfully: ", consumer)
 
@@ -108,7 +109,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	writerModel.WriterThingUUID = pointConsumer.UUID
 	writer, err := d.CreateWriter(&writerModel)
 	if err != nil {
-		return false, errors.New("writer creation failure")
+		return false, fmt.Errorf("writer creation failure: %s", err)
 	}
 	log.Info("Writer is created successfully: ", writer)
 
@@ -128,7 +129,6 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	}
 	log.Info("Producer-sch is created successfully: ", producer2)
 
-
 	consumerModel.Name = "schedule"
 	consumerModel.ProducerUUID = producer.UUID
 	consumerModel.ConsumerApplication = "schedule"
@@ -140,7 +140,6 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	}
 	log.Info("Consumer-sch is created successfully: ", consumer2)
 
-
 	writerModel.ConsumerUUID = consumerModel.UUID
 	writerModel.WriterThingClass = "schedule"
 	writerModel.WriterThingType = "schedule"
@@ -151,6 +150,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 		return false, errors.New("writer creation failure")
 	}
 	log.Info("Writer-sch is created successfully: ", writer2)
+
 	return true, nil
 }
 
@@ -174,7 +174,7 @@ func (d *GormDatabase) WizardRemoteSchedule() (bool, error) {
 		return false, errors.New("CreateSchedule creation failure")
 	}
 
-	flowNetworkModel.FlowIP = "0.0.0.0"
+	flowNetworkModel.FlowIP = utils.NewStringAddress("0.0.0.0")
 	flowNetworkModel.Name = "FlowNetwork1"
 	fn, err := d.CreateFlowNetwork(&flowNetworkModel)
 	if err != nil {

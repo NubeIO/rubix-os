@@ -2,8 +2,8 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/utils"
 	"github.com/go-resty/resty/v2"
-	"log"
 )
 
 // FlowClient is used to invoke Form3 Accounts API.
@@ -12,40 +12,43 @@ type FlowClient struct {
 	ClientToken string
 }
 
-// NewSession returns a new instance of FlowClient.
-func NewSession(name string, password string, address string, port string) *FlowClient {
-	client := resty.New()
-	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%s", address, port)
-	apiURL := url
-	client.SetHostURL(apiURL)
-	client.SetError(&Error{})
-	client.SetHeader("Content-Type", "application/json")
-	//set token in header
-	var t Token
-	getToken, err := client.R().
-		SetResult(&t).
-		SetHeader("Content-Type", "application/json").
-		SetBody(`{"name":"admin"}`).
-		SetBasicAuth(name, password).
-		Post("/client")
-	if err != nil {
-		log.Println("getToken err:", err, getToken.Status())
+func NewFlowClientCli(ip *string, port *int, token *string, isMasterSlave *bool, globalUUD string, isFNCreator bool) *FlowClient {
+	if utils.IsTrue(isMasterSlave) {
+		if isFNCreator {
+			return newSlaveToMasterCallSession()
+		} else {
+			return newMasterToSlaveSession(globalUUD)
+		}
+	} else {
+		return newSessionWithToken(*ip, *port, *token)
 	}
-	client.SetHeader("Authorization", t.Token)
-	return &FlowClient{client: client, ClientToken: t.Token}
 }
 
-// NewSessionWithToken returns a new instance of FlowClient.
-func NewSessionWithToken(token string, address string, port int) *FlowClient {
+func newSessionWithToken(ip string, port int, token string) *FlowClient { //TODO: Change into newSessionWithToken
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%d", address, port)
-	apiURL := url
-	client.SetHostURL(apiURL)
+	url := fmt.Sprintf("http://%s:%d", ip, port)
+	client.SetHostURL(url)
 	client.SetError(&Error{})
-	client.SetHeader("Content-Type", "application/json")
 	client.SetHeader("Authorization", token)
+	return &FlowClient{client: client}
+}
+
+func newMasterToSlaveSession(globalUUID string) *FlowClient {
+	client := resty.New()
+	client.SetDebug(false)
+	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", 1616, globalUUID)
+	client.SetHostURL(url)
+	client.SetError(&Error{})
+	return &FlowClient{client: client}
+}
+
+func newSlaveToMasterCallSession() *FlowClient {
+	client := resty.New()
+	client.SetDebug(false)
+	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", 1616)
+	client.SetHostURL(url)
+	client.SetError(&Error{})
 	return &FlowClient{client: client}
 }
 

@@ -16,5 +16,8 @@ func (a *FlowClient) DeviceInfo() (*model.DeviceInfo, error) {
 			return nil, fmt.Errorf("DeviceInfo: %s", resp)
 		}
 	}
+	if resp.IsError() {
+		return nil, fmt.Errorf("DeviceInfo: %s", resp)
+	}
 	return resp.Result().(*model.DeviceInfo), nil
 }

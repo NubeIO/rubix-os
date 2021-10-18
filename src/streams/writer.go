@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/rest"
-	"github.com/NubeDev/flow-framework/utils"
 )
 
 func GetProducerHist(producerUUID string, flowBody *model.FlowNetwork) (*model.ProducerHistory, error) {
@@ -19,15 +18,11 @@ func GetProducerHist(producerUUID string, flowBody *model.FlowNetwork) (*model.P
 }
 
 func WriteClone(uuid string, flowBody *model.FlowNetwork, body *model.WriterClone, write bool) (*model.WriterClone, error) {
-	isMQTT := utils.BoolIsNil(flowBody.IsMQTT)
-	if !isMQTT {
-		call, err := rest.WriteClone(uuid, flowBody, body, write)
-		if err != nil {
-			return nil, err
-		}
-		return call, nil
+	call, err := rest.WriteClone(uuid, flowBody, body, write)
+	if err != nil {
+		return nil, err
 	}
-	return nil, nil
+	return call, nil
 }
 
 func ProducerHistory(flowBody *model.FlowNetwork, producerUUID string) (*model.ProducerHistory, error) {

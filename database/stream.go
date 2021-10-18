@@ -48,7 +48,7 @@ func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
 		return body, nil
 	}
 	for _, fn := range *flowNetworks {
-		cli := client.NewSessionWithToken(fn.FlowToken, fn.FlowIP, fn.FlowPort)
+		cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
 		syncStreamBody := model.SyncStream{
 			GlobalUUID: deviceInfo.GlobalUUID,
 			Stream:     body,

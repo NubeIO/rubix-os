@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/client"
@@ -55,12 +56,42 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = utils.MakeUUID()
-	if !utils.IsTrue(body.IsRemote) || body.FlowIP == "0.0.0.0" || body.FlowIP == "127.0.0.0" || body.FlowIP == "localhost" {
-		body.FlowHTTPS = utils.NewFalse()
-		body.FlowIP = "0.0.0.0"
-		body.FlowPort = 1660
-		body.IsRemote = utils.NewFalse()
+	isMasterSlave := utils.IsTrue(body.IsMasterSlave)
+	deviceInfo, err := d.GetDeviceInfo()
+	if err != nil {
+		return nil, err
 	}
+	if isMasterSlave {
+		body.FlowHTTPS = nil
+		body.FlowIP = nil
+		body.FlowPort = nil
+		body.IsRemote = nil
+		body.FlowToken = nil
+		cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
+		deviceInfo, err := cli.DeviceInfo()
+		if err != nil {
+			return nil, err
+		} else {
+			body.IsRemote = utils.NewTrue()
+			if deviceInfo.GlobalUUID == deviceInfo.GlobalUUID {
+				body.IsRemote = utils.NewFalse()
+			}
+		}
+	} else {
+		if !utils.IsTrue(body.IsRemote) || *body.FlowIP == "0.0.0.0" || *body.FlowIP == "127.0.0.0" || *body.FlowIP == "localhost" {
+			body.FlowHTTPS = utils.NewFalse()
+			body.FlowIP = utils.NewStringAddress("0.0.0.0")
+			body.FlowPort = utils.NewInt(1660)
+			body.IsRemote = utils.NewFalse()
+		}
+		if body.FlowIP == nil || body.FlowPort == nil {
+			return nil, errors.New("FlowIP and FlowPort can't be null when we it's not master/slave flow network")
+		}
+		if body.FlowToken == nil {
+			body.FlowToken = utils.NewStringAddress("token")
+		}
+	}
+
 	isRemote := utils.IsTrue(body.IsRemote)
 	//rollback is needed only when flow-network is remote,
 	//if we make it true in local it blocks the next transaction of clone creation which leads deadlock
@@ -75,24 +106,20 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 		return nil, err
 	}
 	fnb := *body
-	var localStorageFlowNetwork *model.LocalStorageFlowNetwork
-	if err := d.DB.First(&localStorageFlowNetwork).Error; err != nil {
-		if isRemote {
-			tx.Rollback()
+	if !isMasterSlave {
+		var localStorageFlowNetwork *model.LocalStorageFlowNetwork
+		if err := d.DB.First(&localStorageFlowNetwork).Error; err != nil {
+			if isRemote {
+				tx.Rollback()
+			}
+			return nil, err
 		}
-		return nil, err
-	}
-	if utils.IsTrue(body.IsRemote) {
 		fnb.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
-		fnb.FlowIP = localStorageFlowNetwork.FlowIP
-		fnb.FlowPort = localStorageFlowNetwork.FlowPort
-	}
-	fnb.FlowUsername = localStorageFlowNetwork.FlowUsername
-	fnb.FlowPassword = localStorageFlowNetwork.FlowPassword
-	fnb.FlowToken = localStorageFlowNetwork.FlowToken
-	deviceInfo, err := d.GetDeviceInfo()
-	if err != nil {
-		return nil, err
+		fnb.FlowIP = utils.NewStringAddress(localStorageFlowNetwork.FlowIP)
+		fnb.FlowPort = utils.NewInt(localStorageFlowNetwork.FlowPort)
+		fnb.FlowUsername = utils.NewStringAddress(localStorageFlowNetwork.FlowUsername)
+		fnb.FlowPassword = utils.NewStringAddress(localStorageFlowNetwork.FlowPassword)
+		fnb.FlowToken = utils.NewStringAddress(localStorageFlowNetwork.FlowToken)
 	}
 	fnb.GlobalUUID = deviceInfo.GlobalUUID
 	fnb.ClientId = deviceInfo.ClientId
@@ -101,7 +128,7 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	fnb.SiteName = deviceInfo.SiteName
 	fnb.DeviceId = deviceInfo.DeviceId
 	fnb.DeviceName = deviceInfo.DeviceName
-	cli := client.NewSessionWithToken(body.FlowToken, body.FlowIP, body.FlowPort)
+	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
 	res, err := cli.SyncFlowNetwork(&fnb)
 	if err != nil {
 		if isRemote {

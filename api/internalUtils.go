@@ -254,12 +254,16 @@ var ArgsDefault = struct {
 	PointName:            "",
 }
 
+type Message struct {
+	Message string `json:"message"`
+}
+
 func reposeHandler(body interface{}, err error, ctx *gin.Context) {
 	if err != nil {
 		if body == nil {
-			ctx.JSON(404, "unknown error")
+			ctx.JSON(404, Message{Message: "unknown error"})
 		} else {
-			ctx.JSON(404, err.Error())
+			ctx.JSON(404, Message{Message: err.Error()})
 		}
 	} else {
 		ctx.JSON(200, body)
