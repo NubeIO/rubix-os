@@ -10,7 +10,7 @@
         "saturday"
       ],
       "start": "5:00",
-      "stop": "9:00",
+      "end": "9:00",
       "timezone": "Australia/Sydney",
       "value": 20,
       "color": "#f5a623"
@@ -23,7 +23,7 @@
         "thursday"
       ],
       "start": "12:00",
-      "stop": "13:00",
+      "end": "13:00",
       "timezone": "Australia/Sydney",
       "value": 20,
       "color": "#7ed321"

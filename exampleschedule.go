@@ -62,6 +62,8 @@ func main() {
 	fmt.Println(o, "is an overlap if its true")
 	go EventCheckLoop("./schedule/test.json")
 	go EventCheckLoop("./schedule/test2.json")
+	log.Println("Starting Weekly Checks")
+	go schedule.WeeklyCheck("schedule/weekly_schedule.json", "TEST")
 	go forever()
 	select {} // block forever
 

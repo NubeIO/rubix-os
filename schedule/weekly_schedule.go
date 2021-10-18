@@ -24,7 +24,7 @@ type WeeklyScheduleEntry struct {
 	Days     []string
 	DaysNums []DaysOfTheWeek
 	Start    string
-	Stop     string
+	End      string
 	Timezone string
 	Value    float64
 	Colour   string
@@ -96,7 +96,7 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) W
 	//parse start and stop times
 	var entryStartHour, entryStartMins, entryStopHour, entryStopMins int
 	n, err1 := fmt.Sscanf(entry.Start, "%d:%d", &entryStartHour, &entryStartMins)
-	m, err2 := fmt.Sscanf(entry.Stop, "%d:%d", &entryStopHour, &entryStopMins)
+	m, err2 := fmt.Sscanf(entry.End, "%d:%d", &entryStopHour, &entryStopMins)
 	if n != 2 || m != 2 || err1 != nil || err2 != nil {
 		result.ErrorFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Critical: Invalid Start/Stop Time")
