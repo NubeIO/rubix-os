@@ -28,6 +28,9 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	networkModel.TransportType = "ip"
 	n, err := d.CreateNetwork(&networkModel)
 	log.Info("Created a Network")
+	if err != nil {
+		return false, err
+	}
 
 	deviceModel.NetworkUUID = n.UUID
 	deviceModel.TransportType = "ip"
@@ -38,7 +41,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	log.Info("Created a Device")
 
 	pointModel.DeviceUUID = dev.UUID
-	pointModel.Name = "ZATSP"
+	pointModel.Name = "ZATSP-PRO"
 	pointModel.IsProducer = utils.NewTrue()
 	pointModel.ObjectType = "analogValue" // TODO: check
 	pointProducer, err := d.CreatePoint(&pointModel, "")
@@ -49,7 +52,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 
 	pointModel.DeviceUUID = dev.UUID
 	pointModel.Name = "ZATSP"
-	pointModel.IsProducer = utils.NewTrue()
+	pointModel.IsProducer = utils.NewFalse()
 	pointModel.ObjectType = "analogValue" // TODO: check
 	pointConsumer, err := d.CreatePoint(&pointModel, "")
 	if err != nil {
@@ -148,8 +151,6 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 		return false, errors.New("writer creation failure")
 	}
 	log.Info("Writer-sch is created successfully: ", writer2)
-
-
 	return true, nil
 }
 

@@ -17,6 +17,9 @@ func (d *GormDatabase) pointNameExists(pnt *model.Point, body *model.Point) bool
 	if err != nil {
 		return false
 	}
+	if pnt.UUID == "" && body.UUID == ""  {
+		return false
+	}
 	for _, p := range device.Points {
 		if p.Name == body.Name {
 			if p.UUID == pnt.UUID {
