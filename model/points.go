@@ -163,7 +163,7 @@ type Point struct {
 	InSync               *bool    `json:"in_sync"`                    //if user edits the point it will disable the COV for one time
 	WriteValueOnce       *bool    `json:"write_value_once,omitempty"` //when point is used for polling and if it's a writeable point and WriteValueOnce is true then on a successful write it will set the WriteValueOnceSync to true and on the next poll cycle it will not send the write value
 	WriteValueOnceSync   *bool    `json:"write_value_once_sync,omitempty"`
-	Fallback             float64  `json:"fallback"`
+	Fallback             *float64 `json:"fallback"`
 	DeviceUUID           string   `json:"device_uuid,omitempty" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
 	EnableWriteable      *bool    `json:"writeable,omitempty"`
 	IsOutput             *bool    `json:"is_output,omitempty"`

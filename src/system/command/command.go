@@ -21,7 +21,6 @@ func SudoRun(cmdAndParams ...string) (string, error) {
 	if len(cmdAndParams) <= 0 {
 		return "", fmt.Errorf("no command provided")
 	}
-
 	output, err := exec.Command("sudo", cmdAndParams...).CombinedOutput()
 	return strings.TrimRight(string(output), "\n"), err
 }

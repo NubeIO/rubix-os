@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -9,6 +10,8 @@ import (
 type PointDatabase interface {
 	GetPoints(args Args) ([]*model.Point, error)
 	GetPoint(uuid string, args Args) (*model.Point, error)
+	GetPointsByNetworkPluginName(networkUUID string) (*utils.Array, error)
+	GetPointsByNetworkUUID(networkUUID string) (*utils.Array, error)
 	CreatePoint(body *model.Point, addToParent string) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
 	PointWrite(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
@@ -33,6 +36,18 @@ func (a *PointAPI) GetPoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildPointArgs(ctx)
 	q, err := a.DB.GetPoint(uuid, args)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *PointAPI) GetPointsByNetworkPluginName(ctx *gin.Context) {
+	name := resolveName(ctx)
+	q, err := a.DB.GetPointsByNetworkPluginName(name)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *PointAPI) GetPointsByNetworkUUID(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := a.DB.GetPointsByNetworkUUID(uuid)
 	reposeHandler(q, err, ctx)
 }
 

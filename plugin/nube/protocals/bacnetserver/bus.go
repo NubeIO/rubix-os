@@ -98,7 +98,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if pnt != nil {
-					_, err = i.pointPatch(pnt)
+					//_, err = i.pointPatch(pnt)
 					log.Info("BACNET BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return

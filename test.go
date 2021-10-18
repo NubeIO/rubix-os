@@ -2,45 +2,32 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/src/client"
-	"github.com/NubeDev/flow-framework/src/system/networking"
-	unit "github.com/NubeDev/flow-framework/src/units"
-	"github.com/NubeDev/flow-framework/utils"
-	"reflect"
-	"time"
+	"log"
+	"net"
 )
 
+func getMacAddr() ([]string, error) {
+	ifas, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
+	var as []string
+	for _, ifa := range ifas {
+		fmt.Println(ifa.HardwareAddr)
+		a := ifa.HardwareAddr.String()
+		if a != "" {
+			as = append(as, a)
+		}
+	}
+	return as, nil
+}
+
 func main() {
-
-	_, res, err := unit.Process(1, "c", "c")
+	as, err := getMacAddr()
 	if err != nil {
-		return
+		log.Fatal(err)
 	}
-	fmt.Println(err)
-	fmt.Println(res.String())
-	fmt.Println(res.AsFloat())
-	fmt.Println(utils.RandInt(1, 11))
-	fmt.Println(utils.RandInt(1, 11))
-	fmt.Println(utils.RandFloat(1, 1011))
-	fmt.Println(unit.Exists("length1"))
-
-	aa := client.NewSessionNoAUTH("0.0.0.0", 1660)
-	ping, err := aa.Ping()
-	if err != nil {
-		return
+	for _, a := range as {
+		fmt.Println(a)
 	}
-	file := "/tmp/test.json"
-	i := reflect.ValueOf(ping).Interface().(interface{})
-	_, err = utils.WriteDataToFileAsJSON(i, file)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	t := time.Now()
-	fmt.Println(t.Format("2006-01-02-15-04-05"))
-
-	aaa, _ := networking.GetValidNetInterfacesForWeb()
-	fmt.Println(aaa)
-	//fmt.Println(networking.ExternalIpAddress())
-
 }

@@ -414,6 +414,10 @@ func resolvePluginUUID(ctx *gin.Context) string {
 	return ctx.Param("plugin_uuid")
 }
 
+func resolveName(ctx *gin.Context) string {
+	return ctx.Param("name")
+}
+
 func resolvePluginName(ctx *gin.Context) string {
 	return ctx.Param("plugin_name")
 }
