@@ -440,6 +440,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		{
 			deviceInfoRoutes.GET("/device_info", deviceInfoHandler.GetDeviceInfo)
 			deviceInfoRoutes.GET("/host/info", deviceInfoHandler.GetOSDetails)
+			deviceInfoRoutes.GET("/host/timezone/list", deviceInfoHandler.GetTZoneList)
 			deviceInfoRoutes.GET("/time", deviceInfoHandler.GetSystemTime)
 			deviceInfoRoutes.GET("/ip/internal", deviceInfoHandler.GetNetworks)
 			deviceInfoRoutes.GET("/ip/external", deviceInfoHandler.GetExternalIP)

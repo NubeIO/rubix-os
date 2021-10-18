@@ -1,9 +1,3 @@
-/*
-Name: plume
-File: utils_cpu.go
-Author: Landers
-*/
-
 package host
 
 import (
@@ -23,7 +17,7 @@ func getCPUInfo(debug bool) CPUInfo {
 	// sh := "top -bn 1 -i -c | grep %Cpu | sed 's/%Cpu(s)://g'"
 	// avg-cpu:  %user   %nice %system %iowait  %steal   %idle
 	sh := "iostat -c|awk 'NR==4{print $1,$2,$3,$4,$6}'"
-	res, e := cmdRun(sh, debug)
+	res, e := CMDRun(sh, debug)
 	cpu_info := strings.Split(string(res), " ")
 
 	if e != nil || len(cpu_info) < 5 {
@@ -46,7 +40,7 @@ func getCPUInfo(debug bool) CPUInfo {
 
 	// load
 	sh = "cat /proc/loadavg | awk '{print $1,$2,$3}'"
-	res, e = cmdRun(sh, debug)
+	res, e = CMDRun(sh, debug)
 	if e != nil {
 		cpu.CpuLoad = "0 0 0"
 	} else {
@@ -55,16 +49,15 @@ func getCPUInfo(debug bool) CPUInfo {
 
 	// cpu count
 	sh = "cat /proc/cpuinfo | grep \"cpu cores\" | uniq | awk '{print $4}'"
-	res, e = cmdRun(sh, debug)
+	res, e = CMDRun(sh, debug)
 	if e != nil {
 		cpu.CpuCount = "0"
 	} else {
 		cpu.CpuCount = strings.Trim(string(res), "\n")
 	}
 
-	// cpu逻辑核心
 	sh = "cat /proc/cpuinfo | grep \"processor\" | wc -l"
-	res, e = cmdRun(sh, debug)
+	res, e = CMDRun(sh, debug)
 	if e != nil {
 		cpu.CpuPhysical = "0"
 	} else {
@@ -73,7 +66,7 @@ func getCPUInfo(debug bool) CPUInfo {
 
 	// cpu run days
 	sh = "uptime | awk '{print $3}'"
-	res, e = cmdRun(sh, debug)
+	res, e = CMDRun(sh, debug)
 	if e != nil {
 		cpu.CpuRun = "0"
 	} else {
@@ -87,7 +80,7 @@ func getCpuInfoDetail(debug bool) CPUInfoDetail {
 	var cpu CPUInfoDetail
 
 	sh := "cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq"
-	res, e := cmdRun(sh, debug)
+	res, e := CMDRun(sh, debug)
 	if e != nil {
 		cpu.Info = "unknown cpu"
 	} else {
@@ -95,7 +88,7 @@ func getCpuInfoDetail(debug bool) CPUInfoDetail {
 	}
 
 	sh = "cat /proc/cpuinfo | grep \"cpu MHz\" | uniq"
-	res, e = cmdRun(sh, debug)
+	res, e = CMDRun(sh, debug)
 	if e != nil {
 		cpu.Freq = "unknown cpu"
 	} else {
@@ -103,7 +96,7 @@ func getCpuInfoDetail(debug bool) CPUInfoDetail {
 	}
 
 	sh = "cat /proc/cpuinfo | grep \"cache size\" | uniq"
-	res, e = cmdRun(sh, debug)
+	res, e = CMDRun(sh, debug)
 	if e != nil {
 		cpu.Cache = "unknown cpu"
 	} else {

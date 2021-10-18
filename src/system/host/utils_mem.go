@@ -9,7 +9,7 @@ import (
 func getMemInfo(debug bool) MemInfo {
 	var m MemInfo
 	sh := "free -m | grep Mem | sed 's/Mem://g' | awk '{print $1, $2, $5, $6}'"
-	res, e := cmdRun(sh, debug)
+	res, e := CMDRun(sh, debug)
 	mem_info := strings.Fields(string(res))
 
 	if e != nil || len(mem_info) < 4 {
@@ -30,7 +30,7 @@ func getMemInfoDetail(debug bool) MemInfoDetail {
 	var mem MemInfoDetail
 
 	sh := "dmidecode | grep -A2 \"System Information\"|grep -v \"System Information\" | tr '\n' '|'"
-	res, e := cmdRun(sh, debug)
+	res, e := CMDRun(sh, debug)
 	if e != nil {
 		mem.ManuFacturer = "unknown"
 		mem.Product = "unknown"
@@ -41,7 +41,7 @@ func getMemInfoDetail(debug bool) MemInfoDetail {
 	}
 
 	sh = "dmidecode -t memory|grep  -E 'Size|Speed|Total Width'|head -n 3|sort|tr '\n' '|'"
-	res, e = cmdRun(sh, debug)
+	res, e = CMDRun(sh, debug)
 	if e != nil {
 		mem.Size = "unknown"
 		mem.Speed = "unknown"

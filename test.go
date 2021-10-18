@@ -2,32 +2,17 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"net"
+	"golang.org/x/term"
+	"os"
+	"syscall"
 )
 
-func getMacAddr() ([]string, error) {
-	ifas, err := net.Interfaces()
-	if err != nil {
-		return nil, err
-	}
-	var as []string
-	for _, ifa := range ifas {
-		fmt.Println(ifa.HardwareAddr)
-		a := ifa.HardwareAddr.String()
-		if a != "" {
-			as = append(as, a)
-		}
-	}
-	return as, nil
-}
-
 func main() {
-	as, err := getMacAddr()
+	fmt.Print("Password: ")
+	bytepw, err := term.ReadPassword(int(syscall.Stdin))
 	if err != nil {
-		log.Fatal(err)
+		os.Exit(1)
 	}
-	for _, a := range as {
-		fmt.Println(a)
-	}
+	pass := string(bytepw)
+	fmt.Printf("\nYou've entered: %q\n", pass)
 }

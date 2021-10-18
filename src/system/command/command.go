@@ -24,3 +24,19 @@ func SudoRun(cmdAndParams ...string) (string, error) {
 	output, err := exec.Command("sudo", cmdAndParams...).CombinedOutput()
 	return strings.TrimRight(string(output), "\n"), err
 }
+
+func RunCMD(sh string, debug bool) ([]byte, error) {
+	cmd := exec.Command("bash", "-c", sh)
+	res, e := cmd.Output()
+
+	if debug {
+		fmt.Printf("[cmd debug] %s\n", cmd.String())
+	}
+	if e != nil {
+		defer cmd.Process.Kill()
+		return nil, e
+	}
+
+	defer cmd.Process.Kill()
+	return res, e
+}

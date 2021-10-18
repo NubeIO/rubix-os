@@ -5,7 +5,7 @@ import (
 	"os/exec"
 )
 
-func cmdRun(sh string, debug bool) ([]byte, error) {
+func CMDRun(sh string, debug bool) ([]byte, error) {
 	cmd := exec.Command("bash", "-c", sh)
 	res, e := cmd.Output()
 
