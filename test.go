@@ -1,13 +1,33 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/src/system/networking"
+	"fmt"
+	"log"
+	"net"
 )
 
-func main() {
-	//fmt.Println(networking.GetValidNetInterfacesForWeb())
-	networking.CheckInternetStatus()
+func getMacAddr() ([]string, error) {
+	ifas, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
+	var as []string
+	for _, ifa := range ifas {
+		fmt.Println(ifa.HardwareAddr)
+		a := ifa.HardwareAddr.String()
+		if a != "" {
+			as = append(as, a)
+		}
+	}
+	return as, nil
+}
 
-	//exec.Command("bash", "-c", `if ping -I eth0 -c 2 google.com; then echo OK; else echo DEAD ;fi`)
-	//
+func main() {
+	as, err := getMacAddr()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, a := range as {
+		fmt.Println(a)
+	}
 }

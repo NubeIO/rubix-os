@@ -31,6 +31,7 @@ type NetworkInterfaces struct {
 	NetMask       string `json:"netmask"`
 	NetMaskLength string `json:"net_mask_length"`
 	Gateway       string `json:"gateway"`
+	MacAddress    string `json:"mac_address"`
 }
 
 type CheckInternet struct {
@@ -197,7 +198,6 @@ func IpAddresses() (ip, ifaceNames []string, ipAndNames *utils.Array, err error)
 					if ip == nil || ip.IsLoopback() {
 						continue
 					}
-
 					ip = ip.To4()
 					if ip == nil {
 						continue
@@ -211,6 +211,7 @@ func IpAddresses() (ip, ifaceNames []string, ipAndNames *utils.Array, err error)
 					}
 					interfaces.NetMask = ipv4MaskString(ip.DefaultMask())
 					interfaces.Gateway = GetGatewayIP(iface.Name)
+					interfaces.MacAddress = iface.HardwareAddr.String()
 					out.Add(interfaces)
 					names = append(names, iface.Name)
 					ips = append(ips, ip.String())

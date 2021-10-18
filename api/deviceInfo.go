@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/system"
+	"github.com/NubeDev/flow-framework/src/system/host"
 	"github.com/NubeDev/flow-framework/src/system/networking"
 	"github.com/NubeDev/flow-framework/src/utilstime"
 	"github.com/gin-gonic/gin"
@@ -36,11 +36,6 @@ func (a *DeviceInfoAPI) GetNetworks(ctx *gin.Context) {
 	reposeHandler(all, err, ctx)
 }
 
-func (a *DeviceInfoAPI) GetHostInfo(ctx *gin.Context) {
-	t, err := system.Info()
-	reposeHandler(t, err, ctx)
-}
-
 func (a *DeviceInfoAPI) GetInterfacesNames(ctx *gin.Context) {
 	t, err := networking.GetInterfacesNames()
 	reposeHandler(t, err, ctx)
@@ -49,4 +44,9 @@ func (a *DeviceInfoAPI) GetInterfacesNames(ctx *gin.Context) {
 func (a *DeviceInfoAPI) GetInternetStatus(ctx *gin.Context) {
 	t, err := networking.CheckInternetStatus()
 	reposeHandler(t, err, ctx)
+}
+
+func (a *DeviceInfoAPI) GetOSDetails(ctx *gin.Context) {
+	out := host.GetCombinationData(false)
+	reposeHandler(out, nil, ctx)
 }
