@@ -1,0 +1,32 @@
+{
+  "events": {},
+  "holiday": {},
+  "weekly": {
+    "87e7fb9a89bb46e1": {
+      "name": "TEST",
+      "days": [
+        "tuesday",
+        "thursday",
+        "saturday"
+      ],
+      "start": "5:00",
+      "end": "9:00",
+      "timezone": "Australia/Sydney",
+      "value": 20,
+      "color": "#f5a623"
+    },
+    "861e1bb67d43f915": {
+      "name": "TEST2",
+      "days": [
+        "tuesday",
+        "wednesday",
+        "thursday"
+      ],
+      "start": "12:00",
+      "end": "13:00",
+      "timezone": "Australia/Sydney",
+      "value": 20,
+      "color": "#7ed321"
+    }
+  }
+}
