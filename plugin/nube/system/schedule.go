@@ -29,14 +29,13 @@ func (i *Instance) run() {
 			log.Infof("system-plugin-schedule: schedule is active %v\n", sch.IsActive)
 			log.Infof("system-plugin-schedule: schedule payload %v\n", sch.Payload)
 		}
-
 	}
 }
 
 func (i *Instance) schedule() {
 	j, ok := jobs.GetJobService()
 	if ok {
-		_, err := j.Every(11).Second().Tag("foo").Do(i.run)
+		_, err := j.Every(30).Second().Do(i.run)
 		if err != nil {
 			log.Infof("system-plugin-schedule: error on create job %v\n", err)
 		}
