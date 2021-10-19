@@ -1,19 +1,27 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
-	"time"
+	"fmt"
+	"os/exec"
 )
 
-func main() {
-	//var wg sync.WaitGroup
-	log.Println("Starting Weekly Checks")
-
+func RunCMD(sh string, debug bool) ([]byte, error) {
+	cmd := exec.Command("bash", "-c", sh)
+	res, e := cmd.Output()
+	if debug {
+		fmt.Printf("[cmd debug] %s\n", cmd.String())
+	}
+	if e != nil {
+		defer cmd.Process.Kill()
+		return nil, e
+	}
+	defer cmd.Process.Kill()
+	return res, e
 }
 
-func forever() {
-	for {
-		//fmt.Printf("%v+\n", time.Now())
-		time.Sleep(time.Second)
-	}
+func main() {
+	cmd := "sudo ufw enable"
+	o, err := RunCMD(cmd, false)
+	fmt.Println(string(o), err)
+
 }

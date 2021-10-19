@@ -446,6 +446,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			deviceInfoRoutes.GET("/ip/external", deviceInfoHandler.GetExternalIP)
 			deviceInfoRoutes.GET("/ip/interfaces", deviceInfoHandler.GetInterfacesNames)
 			deviceInfoRoutes.GET("/ip/internet/connection", deviceInfoHandler.GetInternetStatus)
+			deviceInfoRoutes.GET("/firewall/status", deviceInfoHandler.FirewallStatus)
 
 		}
 
