@@ -11,19 +11,28 @@ import (
 )
 
 type Jobs struct {
-	db         dbhandler.Handler
-	Enabled    bool
+	db      dbhandler.Handler
+	Enabled bool
 }
 
 var cron *gocron.Scheduler
 var bus eventbus.BusService
+var enabled bool
+
+//GetJobService will return the instance of the job service
+func GetJobService() (*gocron.Scheduler, bool) {
+	if enabled {
+		return cron, true
+	}
+	return cron, false
+}
 
 func (j *Jobs) InitCron() {
 	bus = eventbus.NewService(eventbus.GetBus())
 	cron = gocron.NewScheduler(time.UTC)
 	cron.StartAsync()
 	j.Enabled = true
-
+	enabled = j.Enabled
 }
 
 func (j *Jobs) task(mp string, uuid string) {

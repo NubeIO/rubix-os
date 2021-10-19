@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"gorm.io/datatypes"
 	"log"
 	"strconv"
 	"strings"
@@ -289,7 +289,6 @@ func CheckWeeklyScheduleCollection(scheduleMap WeeklyScheduleCollection, schedul
 			log.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
 			//singleResult = CheckWeeklyScheduleEntry(scheduleEntry, "Australia/Sydney")
 			singleResult = CheckWeeklyScheduleEntryWithEntryTimezone(scheduleEntry)
-
 			log.Println("finalResult ", finalResult, "singleResult: ", singleResult)
 			if count == 0 {
 				finalResult = singleResult
@@ -380,29 +379,48 @@ func GetNextStartStop(weeklyResultObj WeeklyScheduleCheckerResult) (nextStart in
 	return start, stop
 }
 
-func WeeklyCheck(file string, scheduleName string) {
-	log.Println("WeeklyCheck()")
-	fileContentsInBytes, err := ioutil.ReadFile(file)
-	if err != nil {
-		log.Fatal(err)
-	}
+func WeeklyCheck(schedules datatypes.JSON, scheduleName string) (WeeklyScheduleCheckerResult, error) {
 	var AllSchedules SchedJSON
-	err = json.Unmarshal(fileContentsInBytes, &AllSchedules)
+	err := json.Unmarshal(schedules, &AllSchedules)
 	if err != nil {
 		log.Println("Unexpected error parsing json")
+		return WeeklyScheduleCheckerResult{}, err
 	}
-	var AllWeeklySchedules WeeklyScheduleCollection = AllSchedules.Weekly
+	var AllWeeklySchedules = AllSchedules.Weekly
 	for i, v := range AllWeeklySchedules {
 		log.Println("WEEKLY SCHEDULE ", i, ": ", v)
 	}
 	results := CheckWeeklyScheduleCollection(AllWeeklySchedules, scheduleName)
 	log.Println("RESULT: ", results)
+	return results, nil
 }
+
+//TODO old way for reading json file
+//func WeeklyCheck(file string, scheduleName string) (WeeklyScheduleCheckerResult, error) {
+//	fileContentsInBytes, err := ioutil.ReadFile(file)
+//	if err != nil {
+//		log.Fatal(err)
+//		return WeeklyScheduleCheckerResult{}, err
+//	}
+//	var AllSchedules SchedJSON
+//	err = json.Unmarshal(fileContentsInBytes, &AllSchedules)
+//	if err != nil {
+//		log.Println("Unexpected error parsing json")
+//		return WeeklyScheduleCheckerResult{}, err
+//	}
+//	var AllWeeklySchedules WeeklyScheduleCollection = AllSchedules.Weekly
+//	for i, v := range AllWeeklySchedules {
+//		log.Println("WEEKLY SCHEDULE ", i, ": ", v)
+//	}
+//	results := CheckWeeklyScheduleCollection(AllWeeklySchedules, scheduleName)
+//	log.Println("RESULT: ", results)
+//	return results, nil
+//}
 
 func main() {
 	//var wg sync.WaitGroup
 	log.Println("Starting Weekly Checks")
-	WeeklyCheck("./schedule/weekly_schedule.json", "TEST")
+	//WeeklyCheck("./schedule/weekly_schedule.json", "TEST")
 	/*
 		go func() {
 			wg.Add(1)

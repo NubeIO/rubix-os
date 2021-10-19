@@ -2,17 +2,24 @@ package main
 
 import (
 	"fmt"
-	"golang.org/x/term"
-	"os"
-	"syscall"
+	"github.com/NubeDev/flow-framework/src/schedule"
+	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 func main() {
-	fmt.Print("Password: ")
-	bytepw, err := term.ReadPassword(int(syscall.Stdin))
+	//var wg sync.WaitGroup
+	log.Println("Starting Weekly Checks")
+	check, err := schedule.WeeklyCheck("./src/schedule/weekly_schedule.json", "TEST")
 	if err != nil {
-		os.Exit(1)
+		return
 	}
-	pass := string(bytepw)
-	fmt.Printf("\nYou've entered: %q\n", pass)
+	fmt.Println(check.IsActive)
+}
+
+func forever() {
+	for {
+		//fmt.Printf("%v+\n", time.Now())
+		time.Sleep(time.Second)
+	}
 }
