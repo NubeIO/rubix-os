@@ -5,19 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/datatypes"
-	"log"
 	"strconv"
 	"strings"
 	"time"
 )
 
-type SchedJSON struct {
-	Weekly  WeeklyScheduleCollection
+type SchTypes struct {
+	Weekly  TypeWeekly
 	Events  interface{}
 	Holiday interface{}
 }
 
-type WeeklyScheduleCollection map[string]WeeklyScheduleEntry
+type TypeWeekly map[string]WeeklyScheduleEntry
 
 type WeeklyScheduleEntry struct {
 	Name     string
@@ -89,7 +88,7 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) W
 	//get day of week and compare with entry.DaysNums
 	//nowHour, nowMinute, nowSecond := now.Clock()
 	nowYear, nowMonth, nowDate := now.Date()
-	log.Println("nowYear: ", nowYear, "nowMonth: ", nowMonth, "nowDate: ", nowDate)
+	//log.Println("nowYear: ", nowYear, "nowMonth: ", nowMonth, "nowDate: ", nowDate)
 	nowDayOfWeek := DaysOfTheWeek(now.Weekday())
 	//nowDayOfWeekString := now.String()
 
@@ -101,7 +100,7 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) W
 		result.ErrorFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Critical: Invalid Start/Stop Time")
 	}
-	log.Println("entryStartHour: ", entryStartHour, "entryStartMins: ", entryStartMins, "entryStopHour: ", entryStopHour, "entryStopMins: ", entryStopMins)
+	//log.Println("entryStartHour: ", entryStartHour, "entryStartMins: ", entryStartMins, "entryStopHour: ", entryStopHour, "entryStopMins: ", entryStopMins)
 
 	//parse start and end time into current day timestamps
 	startTimestamp := time.Date(nowYear, nowMonth, nowDate, entryStartHour, entryStartMins, 0, 0, location)
@@ -115,17 +114,17 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) W
 			break
 		}
 	}
-	log.Println("scheduleActiveToday: ", scheduleActiveToday)
+	//log.Println("scheduleActiveToday: ", scheduleActiveToday)
 
 	//find the next active schedule day
-	log.Println("nowDayOfWeek: ", nowDayOfWeek, "entry.DaysNums: ", entry.DaysNums)
+	//log.Println("nowDayOfWeek: ", nowDayOfWeek, "entry.DaysNums: ", entry.DaysNums)
 	nextDay, err := getNextScheduleDay(nowDayOfWeek, entry.DaysNums)
 	if err != nil {
 		result.ErrorFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Critical: Scheduled Days are Invalid")
 	}
 	nextDayDuration := getDurationTillNextScheduleDay(nowDayOfWeek, nextDay)
-	log.Println("nextDay: ", nextDay, "nextDayDuration: ", nextDayDuration)
+	//log.Println("nextDay: ", nextDay, "nextDayDuration: ", nextDayDuration)
 
 	if scheduleActiveToday && now.Before(stopTimestamp) { //scheduled today and hasn't finished yet
 		//check if today's schedule is currently active
@@ -153,13 +152,13 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) W
 		result.NextStart = startTimestamp.Add(nextDayDuration).Add(nextNextDayDuration).Unix()
 		result.NextStop = stopTimestamp.Add(nextDayDuration).Add(nextNextDayDuration).Unix()
 	}
-	log.Println("CheckWeeklyScheduleEntry RETURN: ", result)
+	//log.Println("CheckWeeklyScheduleEntry RETURN: ", result)
 	return result
 }
 
 //CombineWeeklyScheduleCheckerResults checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period.
 func CombineWeeklyScheduleCheckerResults(current WeeklyScheduleCheckerResult, new WeeklyScheduleCheckerResult, nextStopStartRequired bool) WeeklyScheduleCheckerResult {
-	log.Println("CombineWeeklyScheduleCheckerResults()")
+	//log.Println("CombineWeeklyScheduleCheckerResults()")
 	result := WeeklyScheduleCheckerResult{}
 
 	//AlertFlag & ErrorFlag & ErrorStrings
@@ -177,7 +176,7 @@ func CombineWeeklyScheduleCheckerResults(current WeeklyScheduleCheckerResult, ne
 	if (new.PeriodStart >= current.PeriodStart && new.PeriodStart <= current.PeriodStop) || (new.PeriodStop >= current.PeriodStart && new.PeriodStop <= current.PeriodStop) {
 		overlap = true
 	}
-	log.Println("overlap: ", overlap)
+	//log.Println("overlap: ", overlap)
 
 	//IsActive
 	result.IsActive = current.IsActive || new.IsActive
@@ -259,7 +258,7 @@ func CombineWeeklyScheduleCheckerResults(current WeeklyScheduleCheckerResult, ne
 		if (newNextStartTime >= currentNextStartTime && newNextStartTime <= currentNextStopTime) || (newNextStopTime >= currentNextStartTime && newNextStopTime <= currentNextStopTime) {
 			nextOverlap = true
 		}
-		log.Println("nextOverlap: ", nextOverlap)
+		//log.Println("nextOverlap: ", nextOverlap)
 
 		if nextOverlap {
 			if currentNextStopTime >= newNextStopTime {
@@ -279,23 +278,23 @@ func CombineWeeklyScheduleCheckerResults(current WeeklyScheduleCheckerResult, ne
 }
 
 //CheckWeeklyScheduleCollection checks if there is a WeeklyScheduleEntry in the provided WeeklyScheduleCollection that matches the specified schedule Name and is currently within the scheduled period.
-func CheckWeeklyScheduleCollection(scheduleMap WeeklyScheduleCollection, scheduleName string) WeeklyScheduleCheckerResult {
+func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) WeeklyScheduleCheckerResult {
 	finalResult := WeeklyScheduleCheckerResult{}
 	var singleResult WeeklyScheduleCheckerResult
 	count := 0
-	for i, scheduleEntry := range scheduleMap {
+	for _, scheduleEntry := range scheduleMap {
 		if scheduleEntry.Name == scheduleName {
 			scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
-			log.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
+			//log.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
 			//singleResult = CheckWeeklyScheduleEntry(scheduleEntry, "Australia/Sydney")
 			singleResult = CheckWeeklyScheduleEntryWithEntryTimezone(scheduleEntry)
-			log.Println("finalResult ", finalResult, "singleResult: ", singleResult)
+			//log.Println("finalResult ", finalResult, "singleResult: ", singleResult)
 			if count == 0 {
 				finalResult = singleResult
 			} else {
 				finalResult = CombineWeeklyScheduleCheckerResults(finalResult, singleResult, true)
 			}
-			log.Println("finalResult ", finalResult)
+			//log.Println("finalResult ", finalResult)
 			count++
 		}
 	}
@@ -349,8 +348,7 @@ func getDurationTillNextScheduleDay(today DaysOfTheWeek, nextDay DaysOfTheWeek) 
 		//rest of the week, plus the next day as integer
 		daysTillNext = (7 - int(today)) + int(nextDay)
 	}
-	//strconv.Itoa() converts int to string
-	log.Println("daysTillNext: ", daysTillNext, "strconv.Itoa(daysTillNext): ", strconv.Itoa(daysTillNext))
+	//log.Println("daysTillNext: ", daysTillNext, "strconv.Itoa(daysTillNext): ", strconv.Itoa(daysTillNext))
 	tillNextDayDuration, _ := time.ParseDuration(strconv.Itoa(daysTillNext*24) + "h")
 	return tillNextDayDuration
 }
@@ -379,60 +377,17 @@ func GetNextStartStop(weeklyResultObj WeeklyScheduleCheckerResult) (nextStart in
 	return start, stop
 }
 
-func WeeklyCheck(schedules datatypes.JSON, scheduleName string) (WeeklyScheduleCheckerResult, error) {
-	var AllSchedules SchedJSON
+func DecodeSchedule(schedules datatypes.JSON) (SchTypes, error) {
+	var AllSchedules SchTypes
 	err := json.Unmarshal(schedules, &AllSchedules)
 	if err != nil {
-		log.Println("Unexpected error parsing json")
-		return WeeklyScheduleCheckerResult{}, err
+		//log.Println("Unexpected error parsing json")
+		return SchTypes{}, err
 	}
-	var AllWeeklySchedules = AllSchedules.Weekly
-	for i, v := range AllWeeklySchedules {
-		log.Println("WEEKLY SCHEDULE ", i, ": ", v)
-	}
-	results := CheckWeeklyScheduleCollection(AllWeeklySchedules, scheduleName)
-	log.Println("RESULT: ", results)
+	return AllSchedules, nil
+}
+
+func WeeklyCheck(weekly TypeWeekly, scheduleName string) (WeeklyScheduleCheckerResult, error) {
+	results := CheckWeeklyScheduleCollection(weekly, scheduleName)
 	return results, nil
-}
-
-//TODO old way for reading json file
-//func WeeklyCheck(file string, scheduleName string) (WeeklyScheduleCheckerResult, error) {
-//	fileContentsInBytes, err := ioutil.ReadFile(file)
-//	if err != nil {
-//		log.Fatal(err)
-//		return WeeklyScheduleCheckerResult{}, err
-//	}
-//	var AllSchedules SchedJSON
-//	err = json.Unmarshal(fileContentsInBytes, &AllSchedules)
-//	if err != nil {
-//		log.Println("Unexpected error parsing json")
-//		return WeeklyScheduleCheckerResult{}, err
-//	}
-//	var AllWeeklySchedules WeeklyScheduleCollection = AllSchedules.Weekly
-//	for i, v := range AllWeeklySchedules {
-//		log.Println("WEEKLY SCHEDULE ", i, ": ", v)
-//	}
-//	results := CheckWeeklyScheduleCollection(AllWeeklySchedules, scheduleName)
-//	log.Println("RESULT: ", results)
-//	return results, nil
-//}
-
-func main() {
-	//var wg sync.WaitGroup
-	log.Println("Starting Weekly Checks")
-	//WeeklyCheck("./schedule/weekly_schedule.json", "TEST")
-	/*
-		go func() {
-			wg.Add(1)
-			WeeklyCheck("./schedule/weekly_schedule.json", "TEST")
-			wg.Done()
-		}()
-	*/
-}
-
-func forever() {
-	for {
-		//fmt.Printf("%v+\n", time.Now())
-		time.Sleep(time.Second)
-	}
 }

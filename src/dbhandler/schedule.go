@@ -19,3 +19,11 @@ func (h *Handler) GetSchedule(uuid string) (*model.Schedule, error) {
 	}
 	return q, nil
 }
+
+func (h *Handler) UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error) {
+	q, err := getDb().UpdateSchedule(uuid, body)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
