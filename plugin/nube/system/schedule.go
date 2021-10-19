@@ -15,7 +15,7 @@ func (i *Instance) run() {
 	for _, s := range schedules {
 		decodeSchedule, err := schedule.DecodeSchedule(s.Schedules)
 		if err != nil {
-			log.Errorf("system-plugin-schedule: issue on WeeklyCheck %v\n", err)
+			log.Errorf("system-plugin-schedule: issue on DecodeSchedule %v\n", err)
 		}
 		for schKey, week := range decodeSchedule.Weekly {
 			sch, err := schedule.WeeklyCheck(decodeSchedule.Weekly, week.Name)
