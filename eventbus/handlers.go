@@ -46,6 +46,24 @@ func IsPoint(topic string, payload bus.Event) (*model.Point, error) {
 	return nil, nil
 }
 
+//IsSchedule check if the payload is of type schedule
+func IsSchedule(topic string, payload bus.Event) (*model.Schedule, error) {
+	if GetTopicPart(topic, 3, "sch") != "" {
+		p, _ := payload.Data.(*model.Schedule)
+		return p, nil
+	}
+	return nil, nil
+}
+
+//IsJob check if the payload is of type job
+func IsJob(topic string, payload bus.Event) (*model.Job, error) {
+	if GetTopicPart(topic, 3, "job") != "" {
+		p, _ := payload.Data.(*model.Job)
+		return p, nil
+	}
+	return nil, nil
+}
+
 // DecodeBody  update it
 func DecodeBody(thingType string, payload interface{}) (interface{}, error) {
 	switch thingType {

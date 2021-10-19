@@ -20,6 +20,7 @@ func (i *Instance) Enable() error {
 	if err != nil {
 		log.Error("system-plugin: error on enable system-plugin")
 	}
+	i.schedule()
 	return nil
 }
 
