@@ -28,7 +28,6 @@ func SudoRun(cmdAndParams ...string) (string, error) {
 func RunCMD(sh string, debug bool) ([]byte, error) {
 	cmd := exec.Command("bash", "-c", sh)
 	res, e := cmd.Output()
-
 	if debug {
 		fmt.Printf("[cmd debug] %s\n", cmd.String())
 	}
@@ -36,7 +35,6 @@ func RunCMD(sh string, debug bool) ([]byte, error) {
 		defer cmd.Process.Kill()
 		return nil, e
 	}
-
 	defer cmd.Process.Kill()
 	return res, e
 }

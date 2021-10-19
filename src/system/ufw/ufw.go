@@ -1,16 +1,23 @@
 package ufw
 
 import (
+	"github.com/NubeDev/flow-framework/src/system/command"
 	log "github.com/sirupsen/logrus"
 	"os/exec"
 )
 
 func EnableFirewall() {
-	cmd := exec.Command("ufw", "--force", "enable")
-	err := cmd.Run()
+	cmd := "sudo ufw enable"
+	_, err := command.RunCMD(cmd, false)
 	if err != nil {
 		log.Error("firewall: Enable Error: ", err)
 	}
+}
+
+func FirewallStatus() (result string, err error) {
+	cmd := "sudo ufw status"
+	c, err := command.RunCMD(cmd, false)
+	return string(c), err
 }
 
 func DisableFirewall() {

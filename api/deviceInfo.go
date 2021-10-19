@@ -4,6 +4,7 @@ import (
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/system/host"
 	"github.com/NubeDev/flow-framework/src/system/networking"
+	"github.com/NubeDev/flow-framework/src/system/ufw"
 	"github.com/NubeDev/flow-framework/src/utilstime"
 	"github.com/gin-gonic/gin"
 )
@@ -53,5 +54,10 @@ func (a *DeviceInfoAPI) GetOSDetails(ctx *gin.Context) {
 
 func (a *DeviceInfoAPI) GetTZoneList(ctx *gin.Context) {
 	out, err := utilstime.GetTimeZoneList()
+	reposeHandler(out, err, ctx)
+}
+
+func (a *DeviceInfoAPI) FirewallStatus(ctx *gin.Context) {
+	out, err := ufw.FirewallStatus()
 	reposeHandler(out, err, ctx)
 }

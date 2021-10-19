@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"github.com/NubeDev/flow-framework/src/jobs"
 	"github.com/NubeDev/flow-framework/src/schedule"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 func (i *Instance) run() {
@@ -22,12 +22,13 @@ func (i *Instance) run() {
 			if err != nil {
 				log.Errorf("system-plugin-schedule: issue on WeeklyCheck %v\n", err)
 			}
-			fmt.Println(schKey)
 			//TODO we need to now update the schedule
-			log.Infof("system-plugin-schedule: schedule is active %v\n", week.Name)
-			log.Infof("system-plugin-schedule: schedule is active %v\n", sch.NextStart)
-			log.Infof("system-plugin-schedule: schedule is active %v\n", sch.IsActive)
-			log.Infof("system-plugin-schedule: schedule payload %v\n", sch.Payload)
+			log.Infof("system-plugin-schedule: schedule schKey %v\n", schKey)
+			log.Infof("system-plugin-schedule: schedule Name %v\n", week.Name)
+			log.Infof("system-plugin-schedule: schedule NextStart %v\n", time.Unix(sch.NextStart, 0))
+			log.Infof("system-plugin-schedule: schedule NextStop %v\n", time.Unix(sch.NextStop, 0))
+			log.Infof("system-plugin-schedule: schedule is IsActive %v\n", sch.IsActive)
+			log.Infof("system-plugin-schedule: schedule Payload %v\n", sch.Payload)
 		}
 	}
 }
