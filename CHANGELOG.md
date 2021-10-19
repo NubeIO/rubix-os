@@ -1,4 +1,10 @@
 # CHANGELOG
+## [v0.1.1](https://github.com/NubeIO/flow-framework/tree/v0.1.1) (2021-10-19)
+- added api for milo db
+- clean up of bacnetserver plugin
+- added system and time api
+- added schedules api
+
 ## [v0.1.0](https://github.com/NubeIO/flow-framework/tree/v0.1.0) (2021-10-12)
 - fix issues on droplet motion
 - added writer-action as thingClass schedule
