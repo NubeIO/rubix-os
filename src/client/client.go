@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/go-resty/resty/v2"
+	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"os"
+	"path"
 )
 
 // FlowClient is used to invoke Form3 Accounts API.
@@ -24,7 +28,7 @@ func NewFlowClientCli(ip *string, port *int, token *string, isMasterSlave *bool,
 	}
 }
 
-func newSessionWithToken(ip string, port int, token string) *FlowClient { //TODO: Change into newSessionWithToken
+func newSessionWithToken(ip string, port int, token string) *FlowClient {
 	client := resty.New()
 	client.SetDebug(false)
 	url := fmt.Sprintf("http://%s:%d", ip, port)
@@ -40,6 +44,7 @@ func newMasterToSlaveSession(globalUUID string) *FlowClient {
 	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", 1616, globalUUID)
 	client.SetHostURL(url)
 	client.SetError(&Error{})
+	client.SetHeader("Authorization", getRubixServiceInternalToken())
 	return &FlowClient{client: client}
 }
 
@@ -49,17 +54,26 @@ func newSlaveToMasterCallSession() *FlowClient {
 	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", 1616)
 	client.SetHostURL(url)
 	client.SetError(&Error{})
+	client.SetHeader("Authorization", getRubixServiceInternalToken())
 	return &FlowClient{client: client}
 }
 
-// NewSessionNoAUTH returns a new instance of FlowClient.
-func NewSessionNoAUTH(address string, port int) *FlowClient {
-	client := resty.New()
-	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%d", address, port)
-	apiURL := url
-	client.SetHostURL(apiURL)
-	client.SetError(&Error{})
-	client.SetHeader("Content-Type", "application/json")
-	return &FlowClient{client: client}
+func getRubixServiceInternalToken() string {
+	rubixServiceDataLocation := "/data/rubix-service" //TODO: move on registry or config
+	relativeAuthDataFile := "/data/internal_token.txt"
+	authDataFile := path.Join(rubixServiceDataLocation, relativeAuthDataFile)
+	file, err := os.Open(authDataFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() {
+		if err = file.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+	internalToken, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(internalToken)
 }
