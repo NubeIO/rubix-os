@@ -20,5 +20,8 @@ func (a *FlowClient) Ping() (*Ping, error) {
 			return nil, fmt.Errorf("ping: %s", resp)
 		}
 	}
+	if resp.IsError() {
+		return nil, fmt.Errorf("ping: %s", resp)
+	}
 	return resp.Result().(*Ping), nil
 }

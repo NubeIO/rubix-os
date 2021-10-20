@@ -31,7 +31,7 @@ type Args struct {
 	CompactPayload       string
 	CompactWithName      string
 	FlowUUID             string
-	StreamUUID           string
+	StreamUUID           *string
 	ProducerUUID         string
 	ConsumerUUID         string
 	WriterUUID           string
@@ -228,7 +228,6 @@ var ArgsDefault = struct {
 	CompactPayload:       "false",
 	CompactWithName:      "false",
 	FlowUUID:             "",
-	StreamUUID:           "",
 	ProducerUUID:         "",
 	ConsumerUUID:         "",
 	WriterUUID:           "",
@@ -254,12 +253,16 @@ var ArgsDefault = struct {
 	PointName:            "",
 }
 
+type Message struct {
+	Message string `json:"message"`
+}
+
 func reposeHandler(body interface{}, err error, ctx *gin.Context) {
 	if err != nil {
 		if body == nil {
-			ctx.JSON(404, "unknown error")
+			ctx.JSON(404, Message{Message: "unknown error"})
 		} else {
-			ctx.JSON(404, err.Error())
+			ctx.JSON(404, Message{Message: err.Error()})
 		}
 	} else {
 		ctx.JSON(200, body)
@@ -392,6 +395,10 @@ func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 func getBodyTag(ctx *gin.Context) (dto *model.Tag, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
+}
+
+func resolveGlobalUUID(ctx *gin.Context) string {
+	return ctx.Param("global_uuid")
 }
 
 func resolveID(ctx *gin.Context) string {

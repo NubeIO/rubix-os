@@ -40,7 +40,7 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 	if err != nil {
 		return nil, newError("GetOneFlowNetworkCloneByArgs", "error on trying to get validate flow_network_clone from stream_clone_uuid")
 	}
-	cli := client.NewSessionWithToken(fnc.FlowToken, fnc.FlowIP, fnc.FlowPort)
+	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
 	producer, err := cli.GetProducer(body.ProducerUUID)
 	if err != nil {
 		return nil, newError("GetProducer", "error on finding producer by producer_uuid")
@@ -139,7 +139,7 @@ func (d *GormDatabase) AddConsumerWizard(consumerStreamUUID, producerUUID string
 
 	var producer *model.Producer
 	if isRemote {
-		cli := client.NewSessionWithToken(flow.FlowToken, flow.FlowIP, flow.FlowPort)
+		cli := client.NewFlowClientCli(flow.FlowIP, flow.FlowPort, flow.FlowToken, flow.IsMasterSlave, flow.GlobalUUID, model.IsFNCreator(flow))
 		p, err := cli.GetProducer(producerUUID)
 		if err != nil {
 			return nil, errors.New("error: issue on get producer over rest client")
@@ -196,7 +196,7 @@ func (d *GormDatabase) AddConsumerWizard(consumerStreamUUID, producerUUID string
 			return nil, errors.New("error: issue on update writer over rest")
 		}
 	} else {
-		cli := client.NewSessionWithToken(flow.FlowToken, flow.FlowIP, flow.FlowPort)
+		cli := client.NewFlowClientCli(flow.FlowIP, flow.FlowPort, flow.FlowToken, flow.IsMasterSlave, flow.GlobalUUID, model.IsFNCreator(flow))
 		_, err := cli.CreateWriterClone(writerCloneModel)
 		if err != nil {
 			return nil, errors.New("error: issue on create writer clone")

@@ -9,10 +9,10 @@ import (
 )
 
 func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetworkClone, error) {
-	cli := client.NewSessionWithToken(body.FlowToken, body.FlowIP, body.FlowPort)
+	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, false)
 	remoteDeviceInfo, err := cli.DeviceInfo()
 	if err != nil {
-		return nil, errors.New("please change your localstorage device info, we are unable to connect")
+		return nil, err
 	}
 	if remoteDeviceInfo.GlobalUUID != body.GlobalUUID {
 		return nil, errors.New("please check your flow_ip, flow_port, it's pointing different device")

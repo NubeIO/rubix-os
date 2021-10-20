@@ -4,17 +4,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//withChildrenArgs
+// TODO: REMOVE
 func streamFieldsArgs(ctx *gin.Context) (flowUUID string, streamUUID string, producerUUID string, consumerUUID string, writerUUID string) {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
 	args.FlowUUID = ctx.DefaultQuery(aType.FlowUUID, aDefault.FlowUUID)
-	args.StreamUUID = ctx.DefaultQuery(aType.StreamUUID, aDefault.StreamUUID)
+	//args.StreamUUID = ctx.DefaultQuery(aType.StreamUUID, aDefault.StreamUUID)
 	args.ProducerUUID = ctx.DefaultQuery(aType.ProducerUUID, aDefault.ProducerUUID)
 	args.ConsumerUUID = ctx.DefaultQuery(aType.ConsumerUUID, aDefault.ConsumerUUID)
 	args.WriterUUID = ctx.DefaultQuery(aType.WriterUUID, aDefault.WriterUUID)
-	return args.FlowUUID, args.StreamUUID, args.ProducerUUID, args.ConsumerUUID, args.WriterUUID
+	return args.FlowUUID, "todo remove", args.ProducerUUID, args.ConsumerUUID, args.WriterUUID
 }
 
 //withFieldsArgs
@@ -130,6 +130,9 @@ func buildStreamCloneArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
 		args.SourceUUID = &value
 	}
+	if value, ok := ctx.GetQuery(aType.FlowNetworkCloneUUID); ok {
+		args.FlowNetworkCloneUUID = &value
+	}
 	return args
 }
 
@@ -148,6 +151,9 @@ func buildProducerArgs(ctx *gin.Context) Args {
 	var aDefault = ArgsDefault
 	args.WithWriterClones, _ = toBool(ctx.DefaultQuery(aType.WithWriterClones, aDefault.WithWriterClones))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	if value, ok := ctx.GetQuery(aType.StreamUUID); ok {
+		args.StreamUUID = &value
+	}
 	return args
 }
 

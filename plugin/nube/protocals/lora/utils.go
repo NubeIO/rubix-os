@@ -39,7 +39,7 @@ func (i *Instance) wizardSerial(body wizard) (string, error) {
 	dev.Model = st
 
 	var pnt model.Point
-	_, err = i.db.WizardNewNetDevPnt("lora", &net, &dev, &pnt)
+	_, err = i.db.WizardNewNetworkDevicePoint("lora", &net, &dev, &pnt)
 	if err != nil {
 		return "error: on flow-framework add lora serial network wizard", err
 	}

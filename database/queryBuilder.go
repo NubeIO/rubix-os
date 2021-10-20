@@ -98,6 +98,9 @@ func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
 	if args.SourceUUID != nil {
 		query = query.Where("source_uuid = ?", *args.SourceUUID)
 	}
+	if args.FlowNetworkCloneUUID != nil {
+		query = query.Where("flow_network_clone_uuid = ?", *args.FlowNetworkCloneUUID)
+	}
 	return query
 }
 
@@ -119,6 +122,9 @@ func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 	}
 	if args.WithTags {
 		query = query.Preload("Tags")
+	}
+	if args.StreamUUID != nil {
+		query = query.Where("stream_uuid = ?", *args.StreamUUID)
 	}
 	return query
 }

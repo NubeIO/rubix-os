@@ -55,7 +55,7 @@ func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 	consumer, _ := d.GetConsumer(body.ConsumerUUID, api.Args{})
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 	fn, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
-	cli := client.NewSessionWithToken(fn.FlowToken, fn.FlowIP, fn.FlowPort)
+	cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
 	syncWriterBody := model.SyncWriter{
 		Writer:       *body,
 		ProducerUUID: consumer.ProducerUUID,
@@ -244,7 +244,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	producerUUID := consumer.ProducerUUID
-	cli := client.NewSessionWithToken(fnc.FlowToken, fnc.FlowIP, fnc.FlowPort)
+	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
 	var pHistory *model.ProducerHistory
 	if action == model.CommonNaming.Write {
 		pHistoryModel := model.ProducerHistory{

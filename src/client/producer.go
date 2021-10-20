@@ -23,7 +23,27 @@ func (a *FlowClient) AddProducer(body model.Producer) (*model.Producer, error) {
 	return resp.Result().(*model.Producer), nil
 }
 
-// GetProducer an object
+func (a *FlowClient) GetProducers(streamUUID *string) (*[]model.Producer, error) {
+	req := a.client.R().
+		SetResult(&[]model.Producer{})
+	if streamUUID != nil {
+		req.SetQueryParam("stream_uuid", *streamUUID)
+	}
+	resp, err := req.
+		Get("/api/producers")
+	if err != nil {
+		if resp == nil || resp.String() == "" {
+			return nil, fmt.Errorf("GetProducers: %s", err)
+		} else {
+			return nil, fmt.Errorf("GetProducers: %s", resp)
+		}
+	}
+	if resp.IsError() {
+		return nil, fmt.Errorf("GetProducers: %s", resp)
+	}
+	return resp.Result().(*[]model.Producer), nil
+}
+
 func (a *FlowClient) GetProducer(uuid string) (*model.Producer, error) {
 	resp, err := a.client.R().
 		SetResult(&model.Producer{}).
@@ -35,6 +55,9 @@ func (a *FlowClient) GetProducer(uuid string) (*model.Producer, error) {
 		} else {
 			return nil, fmt.Errorf("GetProducer: %s", resp)
 		}
+	}
+	if resp.IsError() {
+		return nil, fmt.Errorf("GetProducer: %s", resp)
 	}
 	return resp.Result().(*model.Producer), nil
 }

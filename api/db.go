@@ -8,10 +8,10 @@ import (
 type DBDatabase interface {
 	DropAllFlow() (string, error) //delete all networks, gateways and children
 	SyncTopics()                  //sync all the topics into the event bus
-	WizardLocalPointMapping(body *WizardLocalMapping) (bool, error)
+	WizardLocalPointMapping() (bool, error)
 	WizardRemotePointMapping() (bool, error)
 	WizardRemoteSchedule() (bool, error)
-	Wizard2ndFlowNetwork(body *AddNewFlowNetwork) (bool, error)
+	WizardRemotePointMappingOnConsumerSideByProducerSide(globalUUID string) (bool, error)
 }
 type DatabaseAPI struct {
 	DB DBDatabase
@@ -26,22 +26,8 @@ func (a *DatabaseAPI) SyncTopics() {
 	a.DB.SyncTopics()
 }
 
-type WizardLocalMapping struct {
-	PluginName         string `json:"plugin_name"`
-	ProducerStreamUUID string `json:"producer_stream_uuid"`
-	ConsumerStreamUUID string `json:"consumer_stream_uuid"`
-	DeviceUUID         string `json:"device_uuid"`
-	ThingUUID          string `json:"thing_uuid"`
-}
-
-func getBODYLocal(ctx *gin.Context) (dto *WizardLocalMapping, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
 func (a *DatabaseAPI) WizardLocalPointMapping(ctx *gin.Context) {
-	body, _ := getBODYLocal(ctx)
-	mapping, err := a.DB.WizardLocalPointMapping(body)
+	mapping, err := a.DB.WizardLocalPointMapping()
 	reposeHandler(mapping, err, ctx)
 }
 
@@ -55,6 +41,12 @@ func (a *DatabaseAPI) WizardRemoteSchedule(ctx *gin.Context) {
 	reposeHandler(sch, err, ctx)
 }
 
+func (a *DatabaseAPI) WizardRemotePointMappingOnConsumerSideByProducerSide(ctx *gin.Context) {
+	globalUUID := resolveGlobalUUID(ctx)
+	sch, err := a.DB.WizardRemotePointMappingOnConsumerSideByProducerSide(globalUUID)
+	reposeHandler(sch, err, ctx)
+}
+
 type AddNewFlowNetwork struct {
 	StreamUUID         string `json:"stream_uuid"`
 	ProducerUUID       string `json:"producer_uuid"`
@@ -62,15 +54,4 @@ type AddNewFlowNetwork struct {
 	ProducerThingClass string `json:"producer_thing_class"`
 	ProducerThingType  string `json:"producer_thing_type"`
 	FlowToken          string `json:"flow_token"`
-}
-
-func getBODYWizard(ctx *gin.Context) (dto *AddNewFlowNetwork, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func (a *DatabaseAPI) Wizard2ndFlowNetwork(ctx *gin.Context) {
-	body, _ := getBODYWizard(ctx)
-	q, err := a.DB.Wizard2ndFlowNetwork(body)
-	reposeHandler(q, err, ctx)
 }

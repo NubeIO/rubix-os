@@ -17,5 +17,8 @@ func (a *FlowClient) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwor
 			return nil, fmt.Errorf("SyncFlowNetwork: %s", resp)
 		}
 	}
+	if resp.IsError() {
+		return nil, fmt.Errorf("SyncFlowNetwork: %s", resp)
+	}
 	return resp.Result().(*model.FlowNetworkClone), nil
 }
