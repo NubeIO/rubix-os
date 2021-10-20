@@ -56,7 +56,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 	pnt.AddressId = utils.NewInt(1) //TODO check conversion
 	pnt.ObjectType = model.ObjectTypes.WriteSingleFloat32
 
-	_, err = i.db.WizardNewNetDevPnt("modbus", &net, &dev, &pnt)
+	_, err = i.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 	if err != nil {
 		return "error: on flow-framework add modbus TCP network wizard", err
 	}
@@ -102,7 +102,7 @@ func (i *Instance) wizardSerial(body wizard) (string, error) {
 	pnt.AddressId = utils.NewInt(1) //TODO check conversion
 	pnt.ObjectType = model.ObjectTypes.WriteCoil
 
-	pntRet, err := i.db.WizardNewNetDevPnt("modbus", &net, &dev, &pnt)
+	pntRet, err := i.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 	if err != nil {
 		return "error: on flow-framework add modbus serial network wizard", err
 	}

@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
+func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	var networkModel model.Network
 	var deviceModel model.Device
 	var pointModel model.Point
@@ -93,7 +93,7 @@ func (d *GormDatabase) WizardRemotePointMapping() (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("StreamClone search failure: %s", err)
 	}
-	consumerModel.Name = "ZATSP_2"
+	consumerModel.Name = "ZATSP"
 	consumerModel.ProducerUUID = producer.UUID
 	consumerModel.ConsumerApplication = "mapping"
 	consumerModel.StreamCloneUUID = streamClones[0].UUID

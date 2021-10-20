@@ -31,7 +31,7 @@ type Args struct {
 	CompactPayload       string
 	CompactWithName      string
 	FlowUUID             string
-	StreamUUID           string
+	StreamUUID           *string
 	ProducerUUID         string
 	ConsumerUUID         string
 	WriterUUID           string
@@ -228,7 +228,6 @@ var ArgsDefault = struct {
 	CompactPayload:       "false",
 	CompactWithName:      "false",
 	FlowUUID:             "",
-	StreamUUID:           "",
 	ProducerUUID:         "",
 	ConsumerUUID:         "",
 	WriterUUID:           "",
@@ -396,6 +395,10 @@ func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 func getBodyTag(ctx *gin.Context) (dto *model.Tag, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
+}
+
+func resolveGlobalUUID(ctx *gin.Context) string {
+	return ctx.Param("global_uuid")
 }
 
 func resolveID(ctx *gin.Context) string {
