@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.1.2](https://github.com/NubeIO/flow-framework/tree/v0.1.2) (2021-10-21)
+- added flow network mqtt api
+
 ## [v0.1.1](https://github.com/NubeIO/flow-framework/tree/v0.1.1) (2021-10-19)
 - added api for milo db
 - clean up of bacnetserver plugin
