@@ -68,12 +68,12 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 		body.IsRemote = nil
 		body.FlowToken = nil
 		cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
-		deviceInfo, err := cli.DeviceInfo()
+		remoteDeviceInfo, err := cli.DeviceInfo()
 		if err != nil {
 			return nil, err
 		} else {
 			body.IsRemote = utils.NewTrue()
-			if deviceInfo.GlobalUUID == deviceInfo.GlobalUUID {
+			if deviceInfo.GlobalUUID == remoteDeviceInfo.GlobalUUID {
 				body.IsRemote = utils.NewFalse()
 			}
 		}
