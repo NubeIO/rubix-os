@@ -62,7 +62,7 @@ func (d *GormDatabase) WizardLocalPointMapping() (bool, error) {
 	log.Info("Created a Point for Consumer", pointConsumer)
 
 	flowNetworkModel.FlowIP = utils.NewStringAddress("0.0.0.0")
-	flowNetworkModel.Name = "network"
+	flowNetworkModel.Name = "FlowNetwork"
 	fn, err := d.CreateFlowNetwork(&flowNetworkModel)
 	if err != nil {
 		return false, fmt.Errorf("FlowNetwork creation failure: %s", err)

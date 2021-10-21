@@ -405,6 +405,11 @@ func getBodyTag(ctx *gin.Context) (dto *model.Tag, err error) {
 	return dto, err
 }
 
+func getBodyFlowNetworkCredential(ctx *gin.Context) (dto *model.FlowNetworkCredential, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func resolveGlobalUUID(ctx *gin.Context) string {
 	return ctx.Param("global_uuid")
 }

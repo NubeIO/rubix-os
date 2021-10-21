@@ -78,17 +78,19 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 			}
 		}
 	} else {
-		if !utils.IsTrue(body.IsRemote) || *body.FlowIP == "0.0.0.0" || *body.FlowIP == "127.0.0.0" || *body.FlowIP == "localhost" {
-			body.FlowHTTPS = utils.NewFalse()
-			body.FlowIP = utils.NewStringAddress("0.0.0.0")
-			body.FlowPort = utils.NewInt(1660)
-			body.IsRemote = utils.NewFalse()
-		}
 		if body.FlowIP == nil || body.FlowPort == nil {
 			return nil, errors.New("FlowIP and FlowPort can't be null when we it's not master/slave flow network")
 		}
 		if body.FlowToken == nil {
 			body.FlowToken = utils.NewStringAddress("token")
+		}
+		if *body.FlowIP == "0.0.0.0" || *body.FlowIP == "127.0.0.0" || *body.FlowIP == "localhost" {
+			body.FlowHTTPS = utils.NewFalse()
+			body.FlowIP = utils.NewStringAddress("0.0.0.0")
+			body.FlowPort = utils.NewInt(1660)
+			body.IsRemote = utils.NewFalse()
+		} else {
+			body.IsRemote = utils.NewTrue()
 		}
 	}
 
@@ -99,6 +101,16 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	if tx = d.DB; isRemote {
 		tx = d.DB.Begin()
 	}
+	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
+	token, err := cli.Login(&model.LoginBody{
+		Username: *body.FlowUsername,
+		Password: *body.FlowPassword,
+	})
+	if err != nil {
+		return nil, err
+	}
+	body.FlowToken = utils.NewStringAddress(token.AccessToken)
+	cli = client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
 	if err := tx.Create(&body).Error; err != nil {
 		if isRemote {
 			tx.Rollback()
@@ -120,6 +132,11 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 		fnb.FlowUsername = utils.NewStringAddress(localStorageFlowNetwork.FlowUsername)
 		fnb.FlowPassword = utils.NewStringAddress(localStorageFlowNetwork.FlowPassword)
 		fnb.FlowToken = utils.NewStringAddress(localStorageFlowNetwork.FlowToken)
+		token, err := GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
+		if err != nil {
+			return nil, err
+		}
+		body.FlowToken = token
 	}
 	fnb.GlobalUUID = deviceInfo.GlobalUUID
 	fnb.ClientId = deviceInfo.ClientId
@@ -128,13 +145,15 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	fnb.SiteName = deviceInfo.SiteName
 	fnb.DeviceId = deviceInfo.DeviceId
 	fnb.DeviceName = deviceInfo.DeviceName
-	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
 	res, err := cli.SyncFlowNetwork(&fnb)
 	if err != nil {
 		if isRemote {
 			tx.Rollback()
 		}
 		return nil, err
+	}
+	if isRemote {
+		tx.Commit()
 	}
 	body.SyncUUID = res.SyncUUID
 	body.GlobalUUID = res.GlobalUUID
@@ -145,9 +164,6 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	body.DeviceId = res.DeviceId
 	body.DeviceName = res.DeviceName
 	d.DB.Model(&body).Updates(body)
-	if isRemote {
-		tx.Commit()
-	}
 	return body, nil
 }
 
