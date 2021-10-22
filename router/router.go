@@ -393,7 +393,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 		integrationRoutes := apiRoutes.Group("/integrations")
 		{
-			integrationRoutes.GET("", integrationHandler.GetIntegrationsList)
+			integrationRoutes.GET("", integrationHandler.GetIntegrations)
 			integrationRoutes.POST("", integrationHandler.CreateIntegration)
 			integrationRoutes.GET("/:uuid", integrationHandler.GetIntegration)
 			integrationRoutes.PATCH("/:uuid", integrationHandler.UpdateIntegration)

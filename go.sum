@@ -8,8 +8,8 @@ github.com/NubeDev/configor v0.0.2 h1:DYFf3OMA3LgBmWs4lGTNGu7B6sVvL0BPfalkleccMY
 github.com/NubeDev/configor v0.0.2/go.mod h1:DVm+MnCPzqO2oqCzf27MolZw8qSoK5yqHk1sgG3PFHc=
 github.com/NubeDev/location v0.0.2 h1:EkXOIx6g6i6DRaDPWQzTH+qjgHnJYsUlBASL/p0OPFQ=
 github.com/NubeDev/location v0.0.2/go.mod h1:wvL1deOEefQrsTv+nojlMOKbwpos4xUbEGSHQ4AKERs=
-github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.0.8 h1:25E3/6uCkUwAwZFTuytKRD4KyNxzDxjJGUXDJJmGsas=
-github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.0.8/go.mod h1:To2cBanmqPSFjuPNxN8riz5bz4eIQ/eaFAMyMDnW6vI=
+github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.0.9 h1:iuJnqQS24NWBRX7Mln6rYRWJiNsydV8CsPozU8h8ViE=
+github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.0.9/go.mod h1:To2cBanmqPSFjuPNxN8riz5bz4eIQ/eaFAMyMDnW6vI=
 github.com/NubeIO/null v4.0.1+incompatible h1:sOYi+CLi5FWWxfNkoyM/f2D8ikuFINRp8r5RGu5u+Pg=
 github.com/NubeIO/null v4.0.1+incompatible/go.mod h1:hbr3y+tluKsgNfmhBjewLJ4gUEHmn0dR2PdYg9dRBvk=
 github.com/PaesslerAG/gval v1.1.1 h1:4d7pprU9876+m3rc08X33UjGip8oV1kkm8Gh5GBuTss=

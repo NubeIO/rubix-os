@@ -6,33 +6,33 @@ import (
 	"github.com/NubeDev/flow-framework/utils"
 )
 
-
 type Integration struct {
 	*model.Integration
 }
 
-
-// GetIntegrationsList get all of them
-func (d *GormDatabase) GetIntegrationsList() ([]*model.Integration, error) {
-	var producersModel []*model.Integration
-	query := d.DB.Find(&producersModel)
+// GetIntegrations get all of them
+func (d *GormDatabase) GetIntegrations() ([]*model.Integration, error) {
+	var integrations []*model.Integration
+	query := d.DB.Find(&integrations)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return producersModel, nil
+	return integrations, nil
 }
 
 // CreateIntegration make it
 func (d *GormDatabase) CreateIntegration(body *model.Integration) (*model.Integration, error) {
-	body.UUID = utils.MakeTopicUUID("")
+	body.UUID = utils.MakeTopicUUID(model.ThingClass.Integration)
 	body.Name = nameIsNil(body.Name)
 	body.PluginName = pluginIsNil(body.PluginName)
 	body.IntegrationType = typeIsNil(body.IntegrationType, "mqtt")
-	p, err := d.GetPluginByPath(body.PluginName);if err != nil { //the integration can be added by the pluginName
+	p, err := d.GetPluginByPath(body.PluginName)
+	if err != nil { //the integration can be added by the pluginName
 		return nil, errors.New("invalid plugin name or id")
 	}
 	body.PluginConfId = p.UUID
-	query := d.DB.Create(body);if query.Error != nil {
+	query := d.DB.Create(body)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return body, nil
@@ -40,28 +40,40 @@ func (d *GormDatabase) CreateIntegration(body *model.Integration) (*model.Integr
 
 // GetIntegration get it
 func (d *GormDatabase) GetIntegration(uuid string) (*model.Integration, error) {
-	var wcm *model.Integration
-	query := d.DB.Where("uuid = ? ", uuid).First(&wcm); if query.Error != nil {
+	var integration *model.Integration
+	query := d.DB.Where("uuid = ? ", uuid).First(&integration)
+	if query.Error != nil {
 		return nil, query.Error
 	}
-	return wcm, nil
+	return integration, nil
+}
+
+// GetIntegrationByName get it by name
+func (d *GormDatabase) GetIntegrationByName(name string) (*model.Integration, error) {
+	var integration *model.Integration
+	query := d.DB.Where("name = ? ", name).First(&integration)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return integration, nil
 }
 
 // GetEnabledIntegrationByPluginConfId get it
 func (d *GormDatabase) GetEnabledIntegrationByPluginConfId(pcId string) ([]*model.Integration, error) {
-	var wcm []*model.Integration
-	query := d.DB.Preload("IntegrationCredential").Where("plugin_conf_id = ? ", pcId).
-		Where("enable = ?", true).Find(&wcm)
+	var integration []*model.Integration
+	query := d.DB.Where("plugin_conf_id = ? ", pcId).
+		Where("enable = ?", true).Find(&integration)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return wcm, nil
+	return integration, nil
 }
 
 // DeleteIntegration deletes it
 func (d *GormDatabase) DeleteIntegration(uuid string) (bool, error) {
-	var wcm *model.Integration
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&wcm);if query.Error != nil {
+	var integration *model.Integration
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&integration)
+	if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -74,20 +86,22 @@ func (d *GormDatabase) DeleteIntegration(uuid string) (bool, error) {
 
 // UpdateIntegration  update it
 func (d *GormDatabase) UpdateIntegration(uuid string, body *model.Integration) (*model.Integration, error) {
-	var wcm *model.Integration
-	query := d.DB.Where("uuid = ?", uuid).Find(&wcm);if query.Error != nil {
+	var integration *model.Integration
+	query := d.DB.Where("uuid = ?", uuid).Find(&integration)
+	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&wcm).Updates(body);if query.Error != nil {
+	query = d.DB.Model(&integration).Updates(body)
+	if query.Error != nil {
 		return nil, query.Error
 	}
-	return wcm, nil
+	return integration, nil
 }
 
 // DropIntegrationsList delete all.
 func (d *GormDatabase) DropIntegrationsList() (bool, error) {
-	var wcm *model.Integration
-	query := d.DB.Where("1 = 1").Delete(&wcm)
+	var integration *model.Integration
+	query := d.DB.Where("1 = 1").Delete(&integration)
 	if query.Error != nil {
 		return false, query.Error
 	}
@@ -98,4 +112,3 @@ func (d *GormDatabase) DropIntegrationsList() (bool, error) {
 		return true, nil
 	}
 }
-

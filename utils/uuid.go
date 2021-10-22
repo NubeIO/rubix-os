@@ -40,6 +40,7 @@ func MakeTopicUUID(attribute string) string {
 	pnt := "pnt" //point
 	job := "job" //job
 	sch := "sch" //schedule
+	ing := "ing" //integration
 
 	stl := "stl" //list of flow network gateway
 	alt := "alt" //alerts
@@ -72,6 +73,8 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", sch, divider, u)
 	case model.CommonNaming.Producer:
 		return fmt.Sprintf("%s%s%s", pro, divider, u)
+	case model.ThingClass.Integration:
+		return fmt.Sprintf("%s%s%s", ing, divider, u)
 	case model.CommonNaming.WriterClone:
 		return fmt.Sprintf("%s%s%s", wrc, divider, u)
 	case model.CommonNaming.ProducerHistory:

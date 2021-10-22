@@ -9,7 +9,7 @@ import (
 // The IntegrationDatabase interface for encapsulating database access.
 type IntegrationDatabase interface {
 	GetIntegration(uuid string) (*model.Integration, error)
-	GetIntegrationsList() ([]*model.Integration, error)
+	GetIntegrations() ([]*model.Integration, error)
 	CreateIntegration(body *model.Integration) (*model.Integration, error)
 	UpdateIntegration(uuid string, body *model.Integration) (*model.Integration, error)
 	DeleteIntegration(uuid string) (bool, error)
@@ -20,15 +20,14 @@ type IntegrationAPI struct {
 	DB IntegrationDatabase
 }
 
-
 func (j *IntegrationAPI) GetIntegration(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetIntegration(uuid)
 	reposeHandler(q, err, ctx)
 }
 
-func (j *IntegrationAPI) GetIntegrationsList(ctx *gin.Context) {
-	q, err := j.DB.GetIntegrationsList()
+func (j *IntegrationAPI) GetIntegrations(ctx *gin.Context) {
+	q, err := j.DB.GetIntegrations()
 	reposeHandler(q, err, ctx)
 
 }
@@ -50,13 +49,11 @@ func (j *IntegrationAPI) UpdateIntegration(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-
 func (j *IntegrationAPI) DeleteIntegration(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteIntegration(uuid)
 	reposeHandler(q, err, ctx)
 }
-
 
 func (j *IntegrationAPI) DropIntegrationsList(ctx *gin.Context) {
 	q, err := j.DB.DropIntegrationsList()
