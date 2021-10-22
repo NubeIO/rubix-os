@@ -57,7 +57,6 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var writerClone []model.WriterClone
 	var integration []model.Integration
 	var mqttConnection []model.MqttConnection
-	var credentials []model.IntegrationCredentials
 	var serialConnection []model.SerialConnection
 	var ipConnection []model.IpConnection
 	var schedule []model.Schedule
@@ -98,7 +97,6 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		&writerClone,
 		&integration,
 		&mqttConnection,
-		&credentials,
 		&serialConnection,
 		&ipConnection,
 		&schedule,

@@ -89,36 +89,14 @@ func (d *GormDatabase) DropAllFlow() (string, error) {
 		return "fail Schedule", query.Error
 	}
 
-	//var pluginConf *model.PluginConf
-	//query = d.DB.Where("1 = 1").Delete(&pluginConf)
-	//if query.Error != nil {
-	//	log.Error("DB: fail bulk delete PluginConf")
-	//	return "fail PluginConf", query.Error
-	//}
+	var integration *model.Integration
+	query = d.DB.Where("1 = 1").Delete(&integration)
+	if query.Error != nil {
+		log.Error("DB: fail bulk delete integration")
+		return "fail integration", query.Error
+	}
 
-	//var user *model.User
-	//query = d.DB.Where("1 = 1").Delete(&user)
-	//if query.Error != nil {
-	//	log.Error("DB: fail bulk delete PluginConfExternal")
-	//	return "fail PluginConfExternal", query.Error
-	//}
-
-	//TODO throws an error
-	//var pluginConfExternal *model.PluginConfExternal
-	//query = d.DB.Where("1 = 1").Delete(&pluginConfExternal)
-	//if query.Error != nil {
-	//	log.Error("DB: fail bulk delete PluginConfExternal")
-	//	return "fail PluginConfExternal", query.Error
-	//}
-
-	//var application *model.Application
-	//query = d.DB.Where("1 = 1").Delete(&application)
-	//if query.Error != nil {
-	//	log.Error("DB: fail bulk delete Application")
-	//	return "fail Application", query.Error
-	//}
-
-	return "bulk delete pass", nil
+	return "ok", nil
 }
 
 //SyncTopics sync all the topics

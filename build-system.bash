@@ -48,6 +48,9 @@ mkdir -p $pluginDir
 
 cd $dir/plugin/nube/system/
 go build -buildmode=plugin -o system.so *.go  && cp system.so  $pluginDir
+cd $dir/plugin/nube/protocals/rubix
+go build -buildmode=plugin -o rubix.so *.go  && cp rubix.so $pluginDir
+
 
 cd $dir
 
