@@ -50,6 +50,7 @@ type AppsInstallElement struct {
 	LatestVersion      string `json:"latest_version"`
 }
 
+//AppsDownload install an app
 type AppsDownload []AppsDownloadElement
 
 type AppsDownloadElement struct {
@@ -57,6 +58,7 @@ type AppsDownloadElement struct {
 	Version string `json:"version"`
 }
 
+//AppsLatestVersions get version
 type AppsLatestVersions struct {
 	WIRES             string `json:"WIRES"`
 	RUBIXPLAT         string `json:"RUBIX_PLAT"`
@@ -68,4 +70,19 @@ type AppsLatestVersions struct {
 	DATAPUSH          string `json:"DATA_PUSH"`
 	RUBIXBACNETMASTER string `json:"RUBIX_BACNET_MASTER"`
 	FLOWFRAMEWORK     string `json:"FLOW_FRAMEWORK"`
+}
+
+//DownloadState state
+type DownloadState struct {
+	State    string `json:"state"`
+	Services []struct {
+		Service  string `json:"service"`
+		Version  string `json:"version"`
+		Download bool   `json:"download"`
+		Error    string `json:"error"`
+	} `json:"services"`
+}
+
+type DeleteDownloadState struct {
+	Message string `json:"message"`
 }

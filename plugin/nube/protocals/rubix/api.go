@@ -23,6 +23,11 @@ func bodyAppsDownload(ctx *gin.Context) (dto rubixmodel.AppsDownload, err error)
 	return dto, err
 }
 
+func bodyWiresPlat(ctx *gin.Context) (dto rubixmodel.WiresPlat, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func bodyJson(ctx *gin.Context) (dto interface{}, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -32,30 +37,47 @@ func resolveName(ctx *gin.Context) string {
 	return ctx.Param("name")
 }
 
-//user
 const (
-	rubix     = "rubix"
-	users     = "users"
-	usersList = "rubix/users"
+	rubix    = "rubix"
+	users    = "users"
+	apps     = "apps"
+	discover = "discover"
+	slaves   = "slaves"
+	wires    = "wires"
 )
 
-//app
-const (
-	apps         = "apps"
-	appsList     = "rubix/apps"
-	appsDownload = "rubix/apps/download"
-)
+func httpRes(obj interface{}, err error, ctx *gin.Context) {
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, err)
+	} else {
+		ctx.JSON(http.StatusOK, obj)
+	}
+}
 
 var endPoints = struct {
-	Users              string
-	AppsControl        string
-	AppsInstalled      string
-	AppsLatestVersions string
+	Users                 string
+	AppsControl           string
+	AppsInstalled         string
+	AppsLatestVersions    string
+	AppsInstall           string
+	AppsDownloadState     string
+	AppsReleases          string
+	DiscoverRemoteDevices string
+	Slaves                string
+	SlavesDelete          string
+	WiresPlat             string
 }{
-	Users:              fmt.Sprintf("/%s/:name/%s", rubix, users),
-	AppsControl:        fmt.Sprintf("/%s/:name/%s/%s", rubix, apps, "control"),
-	AppsInstalled:      fmt.Sprintf("/%s/:name/%s", rubix, apps),
-	AppsLatestVersions: fmt.Sprintf("/%s/:name/%s/%s", rubix, apps, "latest_versions"),
+	Users:                 fmt.Sprintf("/%s/:name/%s", rubix, users),
+	AppsControl:           fmt.Sprintf("/%s/:name/%s/%s", rubix, apps, "control"),
+	AppsInstalled:         fmt.Sprintf("/%s/:name/%s", rubix, apps),
+	AppsLatestVersions:    fmt.Sprintf("/%s/:name/%s/%s", rubix, apps, "latest_versions"),
+	AppsInstall:           fmt.Sprintf("/%s/:name/%s/%s", rubix, apps, "install"),
+	AppsDownloadState:     fmt.Sprintf("/%s/:name/%s/%s", rubix, apps, "download_state"),
+	AppsReleases:          fmt.Sprintf("/%s/:name/%s/%s", rubix, apps, "releases"),
+	DiscoverRemoteDevices: fmt.Sprintf("/%s/:name/%s/%s", rubix, discover, "remote_devices"),
+	Slaves:                fmt.Sprintf("/%s/:name/%s", rubix, slaves),
+	SlavesDelete:          fmt.Sprintf("/%s/:name/%s/:uuid", rubix, slaves),
+	WiresPlat:             fmt.Sprintf("/%s/:name/%s/%s", rubix, wires, "plat"),
 }
 
 // RegisterWebhook implements plugin.Webhooker
@@ -65,16 +87,14 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.GET(endPoints.Users, func(ctx *gin.Context) {
 		cli := rubixapi.New()
 		_name := resolveName(ctx)
-		fmt.Println(endPoints.AppsControl)
 		req, err := i.getIntegration("", _name)
 		r, err := cli.GetUsers(req)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-		} else {
-			ctx.JSON(http.StatusOK, r)
-		}
+		httpRes(r, err, ctx)
 	})
 
+	/*
+		APPS
+	*/
 	mux.POST(endPoints.AppsControl, func(ctx *gin.Context) {
 		cli := rubixapi.New()
 		_name := resolveName(ctx)
@@ -82,11 +102,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		body, _ := bodyAppControl(ctx)
 		req.Body = body
 		r, err := cli.AppControl(req)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-		} else {
-			ctx.JSON(http.StatusOK, r)
-		}
+		httpRes(r, err, ctx)
 	})
 
 	mux.GET(endPoints.AppsInstalled, func(ctx *gin.Context) {
@@ -94,11 +110,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		_name := resolveName(ctx)
 		req, err := i.getIntegration("", _name)
 		r, err := cli.AppsInstalled(req)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-		} else {
-			ctx.JSON(http.StatusOK, r)
-		}
+		httpRes(r, err, ctx)
 	})
 
 	mux.GET(endPoints.AppsLatestVersions, func(ctx *gin.Context) {
@@ -106,10 +118,74 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		_name := resolveName(ctx)
 		req, err := i.getIntegration("", _name)
 		r, err := cli.AppsLatestVersions(req)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-		} else {
-			ctx.JSON(http.StatusOK, r)
-		}
+		httpRes(r, err, ctx)
+	})
+
+	mux.POST(endPoints.AppsInstall, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		req, err := i.getIntegration("", _name)
+		body, _ := bodyAppsDownload(ctx)
+		req.Body = body
+		r, err := cli.AppsInstall(req)
+		httpRes(r, err, ctx)
+	})
+
+	mux.GET(endPoints.AppsDownloadState, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		req, err := i.getIntegration("", _name)
+		r, err := cli.AppsDownloadState(req)
+		httpRes(r, err, ctx)
+	})
+
+	mux.DELETE(endPoints.AppsDownloadState, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		req, err := i.getIntegration("", _name)
+		r, err := cli.AppsDeleteDownloadState(req)
+		httpRes(r, err, ctx)
+	})
+
+	/*
+		MASTER API CALLS
+	*/
+
+	mux.GET(endPoints.DiscoverRemoteDevices, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		req, err := i.getIntegration("", _name)
+		r, err := cli.SlaveDevices(req, true)
+		httpRes(r, err, ctx)
+	})
+
+	/*
+		SLAVES, get, add delete
+	*/
+	mux.GET(endPoints.Slaves, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		req, err := i.getIntegration("", _name)
+		r, err := cli.SlaveDevices(req, false)
+		httpRes(r, err, ctx)
+	})
+	/*
+		WIRES_PLAT, get, add edit
+	*/
+	mux.GET(endPoints.WiresPlat, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		req, err := i.getIntegration("", _name)
+		r, err := cli.WiresPlat(req, false)
+		httpRes(r, err, ctx)
+	})
+	mux.PUT(endPoints.WiresPlat, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		body, _ := bodyWiresPlat(ctx)
+		req, err := i.getIntegration("", _name)
+		req.Body = body
+		r, err := cli.WiresPlat(req, true)
+		httpRes(r, err, ctx)
 	})
 }
