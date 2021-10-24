@@ -45,6 +45,7 @@ require (
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/oleiade/lane v1.0.1
 	github.com/thejerf/suture v4.0.1+incompatible
+	github.com/vulcand/oxy v1.3.0
 	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf
 )
@@ -108,7 +109,7 @@ require (
 	github.com/pierrec/lz4 v0.0.0-20190327172049-315a67e90e41 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a // indirect
 	github.com/rs/xid v1.2.1 // indirect
-	github.com/segmentio/fasthash v0.0.0-20180216231524-a72b379d632e // indirect
+	github.com/segmentio/fasthash v1.0.3 // indirect
 	github.com/tidwall/gjson v1.6.8 // indirect
 	github.com/tidwall/match v1.0.3 // indirect
 	github.com/tidwall/pretty v1.0.2 // indirect
