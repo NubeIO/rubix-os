@@ -53,9 +53,16 @@ func httpRes(obj interface{}, err error, ctx *gin.Context) {
 
 func urlPath(u string) (clean string) {
 	_url := fmt.Sprintf("http://%s", u)
-	p, _ := url.Parse(_url)
-	parts := strings.SplitAfter(p.Path, "any")
-	return parts[1]
+	p, err := url.Parse(_url)
+	if err != nil {
+		return ""
+	}
+	parts := strings.SplitAfter(p.String(), "any")
+	if len(parts) >= 1 {
+		return parts[1]
+	} else {
+		return ""
+	}
 }
 
 var endPoints = struct {
@@ -70,7 +77,7 @@ var endPoints = struct {
 	Slaves                string
 	SlavesDelete          string
 	WiresPlat             string
-	Any                   string
+	Proxy                 string
 }{
 	Users:                 fmt.Sprintf("/%s/:name/%s", rubix, users),
 	AppsControl:           fmt.Sprintf("/%s/:name/%s/%s", rubix, apps, "control"),
@@ -83,7 +90,7 @@ var endPoints = struct {
 	Slaves:                fmt.Sprintf("/%s/:name/%s", rubix, slaves),
 	SlavesDelete:          fmt.Sprintf("/%s/:name/%s/:uuid", rubix, slaves),
 	WiresPlat:             fmt.Sprintf("/%s/:name/%s/%s", rubix, wires, "plat"),
-	Any:                   fmt.Sprintf("/%s/:name/any/*any", rubix),
+	Proxy:                 fmt.Sprintf("/%s/:name/proxy/*proxy", rubix),
 }
 
 // RegisterWebhook implements plugin.Webhooker
@@ -205,27 +212,46 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		httpRes(r, err, ctx)
 	})
 	/*
-		ANY
+		Proxy
 		Will get the incoming url path and body and forward on the request
 	*/
-	mux.GET(endPoints.Any, func(ctx *gin.Context) {
+	mux.GET(endPoints.Proxy, func(ctx *gin.Context) {
 		cli := rubixapi.New()
 		_name := resolveName(ctx)
 		req, err := i.getIntegration("", _name)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-			req.URL = urlPath(ctx.Request.URL.Path)
+			req.URL = urlPath(ctx.Request.URL.String())
 			if req.URL == "" || req.URL == "/" {
 				ctx.JSON(http.StatusBadRequest, "invalid request")
 			} else {
-				r, err := cli.AnyGet(req)
+				r, err := cli.AnyRequest(req)
+				req.Method = rubixapi.GET
 				httpRes(r, err, ctx)
 			}
 		}
 
 	})
-	mux.POST(endPoints.Any, func(ctx *gin.Context) {
+	mux.DELETE(endPoints.Proxy, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		req, err := i.getIntegration("", _name)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			req.URL = urlPath(ctx.Request.URL.String())
+			if req.URL == "" || req.URL == "/" {
+				ctx.JSON(http.StatusBadRequest, "invalid request")
+			} else {
+				r, err := cli.AnyRequest(req)
+				req.Method = rubixapi.DELETE
+				httpRes(r, err, ctx)
+			}
+		}
+
+	})
+	mux.POST(endPoints.Proxy, func(ctx *gin.Context) {
 		cli := rubixapi.New()
 		_name := resolveName(ctx)
 		var getBody interface{} //get the body and put it into an interface
@@ -237,13 +263,62 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-			req.URL = urlPath(ctx.Request.URL.Path)
+			req.URL = urlPath(ctx.Request.URL.String())
 			if req.URL == "" || req.URL == "/" {
 				ctx.JSON(http.StatusBadRequest, "invalid request")
 			} else {
-				req.URL = urlPath(ctx.Request.URL.Path) //pass on the path
-				req.Body = getBody                      //pass on the body
-				r, err := cli.AnyPost(req)
+				req.URL = urlPath(ctx.Request.URL.String()) //pass on the path
+				req.Body = getBody                          //pass on the body
+				req.Method = rubixapi.POST
+				r, err := cli.AnyRequestWithBody(req)
+				httpRes(r, err, ctx)
+			}
+		}
+	})
+	mux.PATCH(endPoints.Proxy, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		var getBody interface{} //get the body and put it into an interface
+		err := ctx.ShouldBindJSON(&getBody)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		}
+		req, err := i.getIntegration("", _name)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			req.URL = urlPath(ctx.Request.URL.String())
+			if req.URL == "" || req.URL == "/" {
+				ctx.JSON(http.StatusBadRequest, "invalid request")
+			} else {
+				req.URL = urlPath(ctx.Request.URL.String()) //pass on the path
+				req.Body = getBody                          //pass on the body
+				req.Method = rubixapi.PATCH
+				r, err := cli.AnyRequestWithBody(req)
+				httpRes(r, err, ctx)
+			}
+		}
+	})
+	mux.PUT(endPoints.Proxy, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		var getBody interface{} //get the body and put it into an interface
+		err := ctx.ShouldBindJSON(&getBody)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		}
+		req, err := i.getIntegration("", _name)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			req.URL = urlPath(ctx.Request.URL.String())
+			if req.URL == "" || req.URL == "/" {
+				ctx.JSON(http.StatusBadRequest, "invalid request")
+			} else {
+				req.URL = urlPath(ctx.Request.URL.String()) //pass on the path
+				req.Body = getBody                          //pass on the body
+				req.Method = rubixapi.PUT
+				r, err := cli.AnyRequestWithBody(req)
 				httpRes(r, err, ctx)
 			}
 		}

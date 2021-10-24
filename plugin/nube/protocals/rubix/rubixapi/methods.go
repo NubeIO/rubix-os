@@ -257,8 +257,7 @@ func (a *RestClient) WiresPlat(r Req, update bool) (*rubixmodel.WiresPlat, error
 	return res, nil
 }
 
-func (a *RestClient) AnyGet(r Req) (interface{}, error) {
-	r.Method = GET
+func (a *RestClient) AnyRequest(r Req) (interface{}, error) {
 	request, err := Request(r)
 	if err != nil {
 		return nil, err
@@ -271,8 +270,8 @@ func (a *RestClient) AnyGet(r Req) (interface{}, error) {
 	return res, nil
 }
 
-func (a *RestClient) AnyPost(r Req) (interface{}, error) {
-	r.Method = POST
+//AnyRequestWithBody is for post, put or patch
+func (a *RestClient) AnyRequestWithBody(r Req) (interface{}, error) {
 	request, err := Request(r)
 	if err != nil {
 		return nil, err
