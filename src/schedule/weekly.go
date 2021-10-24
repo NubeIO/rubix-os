@@ -287,7 +287,6 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) 
 		if scheduleEntry.Name == scheduleName {
 			scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
 			//log.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
-			fmt.Println("WEEKLY SCHEDULE : ", scheduleEntry)
 			if scheduleEntry.Timezone == "" {
 				//scheduleEntry.Timezone = "Australia/Sydney"
 				systemTimezone := utilstime.SystemTime().SystemTimeZone
