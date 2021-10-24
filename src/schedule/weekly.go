@@ -52,16 +52,16 @@ var DaysMap = map[string]DaysOfTheWeek{
 }
 
 type WeeklyScheduleCheckerResult struct {
-	IsActive     bool
-	Payload      float64
-	PeriodStart  int64 //unix timestamp in seconds
-	PeriodStop   int64 //unix timestamp in seconds
-	NextStart    int64 //unix timestamp in seconds.  Start time for the following scheduled period.
-	NextStop     int64 //unix timestamp in seconds   End time for the following scheduled period.
-	CheckTime    int64 //unix timestamp in seconds
-	ErrorFlag    bool
-	AlertFlag    bool
-	ErrorStrings []string
+	IsActive     bool     `json:"is_active"`
+	Payload      float64  `json:"payload"`
+	PeriodStart  int64    `json:"period_start"` //unix timestamp in seconds
+	PeriodStop   int64    `json:"period_stop"`  //unix timestamp in seconds
+	NextStart    int64    `json:"next_start"`   //unix timestamp in seconds.  Start time for the following scheduled period.
+	NextStop     int64    `json:"next_stop"`    //unix timestamp in seconds   End time for the following scheduled period.
+	CheckTime    int64    `json:"check_time"`   //unix timestamp in seconds
+	ErrorFlag    bool     `json:"error_flag"`
+	AlertFlag    bool     `json:"alert_flag"`
+	ErrorStrings []string `json:"error_strings"`
 }
 
 //CheckWeeklyScheduleEntryWithEntryTimezone checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period ignores entry.Timezone and uses Local timezone.

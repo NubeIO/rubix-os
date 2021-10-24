@@ -21,7 +21,10 @@ func (i *Instance) run() {
 			if err != nil {
 				log.Errorf("system-plugin-schedule: issue on WeeklyCheck %v\n", err)
 			}
-			//TODO we need to now update the schedule
+
+			if sch.IsActive {
+				i.store.Set(week.Name, sch, -1)
+			}
 			log.Infof("system-plugin-schedule: schedule schKey %v\n", schKey)
 			log.Infof("system-plugin-schedule: schedule Name %v\n", week.Name)
 			log.Infof("system-plugin-schedule: schedule NextStart %v\n", time.Unix(sch.NextStart, 0))
