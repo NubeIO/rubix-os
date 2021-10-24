@@ -57,7 +57,8 @@ func urlPath(u string) (clean string) {
 	if err != nil {
 		return ""
 	}
-	parts := strings.SplitAfter(p.String(), "any")
+	parts := strings.SplitAfter(p.String(), "proxy")
+	fmt.Println(parts)
 	if len(parts) >= 1 {
 		return parts[1]
 	} else {
@@ -216,8 +217,10 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		Will get the incoming url path and body and forward on the request
 	*/
 	mux.GET(endPoints.Proxy, func(ctx *gin.Context) {
+
 		cli := rubixapi.New()
 		_name := resolveName(ctx)
+		fmt.Println(111, _name)
 		req, err := i.getIntegration("", _name)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
@@ -228,6 +231,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			} else {
 				r, err := cli.AnyRequest(req)
 				req.Method = rubixapi.GET
+				fmt.Println(req.URL)
 				httpRes(r, err, ctx)
 			}
 		}
