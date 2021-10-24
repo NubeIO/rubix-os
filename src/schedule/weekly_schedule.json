@@ -11,7 +11,7 @@
       ],
       "start": "5:00",
       "end": "19:00",
-      "timezone": "Australia/Sydney",
+      "timezone": "",
       "value": 20,
       "color": "#f5a623"
     },

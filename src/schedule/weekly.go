@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/src/utilstime"
 	"gorm.io/datatypes"
 	"strconv"
 	"strings"
@@ -285,16 +286,25 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) 
 	for _, scheduleEntry := range scheduleMap {
 		if scheduleEntry.Name == scheduleName {
 			scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
-			//log.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
+			//fmt.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
+			if scheduleEntry.Timezone == "" { // If timezone field is not assigned, get timezone from System Time
+				systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
+				//fmt.Println("systemTimezone 2: ", systemTimezone)
+				if systemTimezone == "" {
+					scheduleEntry.Timezone = "Australia/Sydney"
+				} else {
+					scheduleEntry.Timezone = systemTimezone
+				}
+			}
 			//singleResult = CheckWeeklyScheduleEntry(scheduleEntry, "Australia/Sydney")
 			singleResult = CheckWeeklyScheduleEntryWithEntryTimezone(scheduleEntry)
-			//log.Println("finalResult ", finalResult, "singleResult: ", singleResult)
+			//fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)
 			if count == 0 {
 				finalResult = singleResult
 			} else {
 				finalResult = CombineWeeklyScheduleCheckerResults(finalResult, singleResult, true)
 			}
-			//log.Println("finalResult ", finalResult)
+			//fmt.Println("finalResult ", finalResult)
 			count++
 		}
 	}
