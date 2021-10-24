@@ -6,12 +6,9 @@ import (
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/rubix/rubixmodel"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"net/url"
+	"strings"
 )
-
-func bodyToken(ctx *gin.Context) (dto rubixmodel.TokenBody, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
 
 func bodyAppControl(ctx *gin.Context) (dto rubixmodel.AppControl, err error) {
 	err = ctx.ShouldBindJSON(&dto)
@@ -28,7 +25,7 @@ func bodyWiresPlat(ctx *gin.Context) (dto rubixmodel.WiresPlat, err error) {
 	return dto, err
 }
 
-func bodyJson(ctx *gin.Context) (dto interface{}, err error) {
+func bodyGlobalUUID(ctx *gin.Context) (dto rubixmodel.GeneralResponse, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -54,6 +51,13 @@ func httpRes(obj interface{}, err error, ctx *gin.Context) {
 	}
 }
 
+func urlPath(u string) (clean string) {
+	_url := fmt.Sprintf("http://%s", u)
+	p, _ := url.Parse(_url)
+	parts := strings.SplitAfter(p.Path, "any")
+	return parts[1]
+}
+
 var endPoints = struct {
 	Users                 string
 	AppsControl           string
@@ -66,6 +70,7 @@ var endPoints = struct {
 	Slaves                string
 	SlavesDelete          string
 	WiresPlat             string
+	Any                   string
 }{
 	Users:                 fmt.Sprintf("/%s/:name/%s", rubix, users),
 	AppsControl:           fmt.Sprintf("/%s/:name/%s/%s", rubix, apps, "control"),
@@ -78,6 +83,7 @@ var endPoints = struct {
 	Slaves:                fmt.Sprintf("/%s/:name/%s", rubix, slaves),
 	SlavesDelete:          fmt.Sprintf("/%s/:name/%s/:uuid", rubix, slaves),
 	WiresPlat:             fmt.Sprintf("/%s/:name/%s/%s", rubix, wires, "plat"),
+	Any:                   fmt.Sprintf("/%s/:name/any/*any", rubix),
 }
 
 // RegisterWebhook implements plugin.Webhooker
@@ -91,7 +97,6 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		r, err := cli.GetUsers(req)
 		httpRes(r, err, ctx)
 	})
-
 	/*
 		APPS
 	*/
@@ -146,11 +151,9 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		r, err := cli.AppsDeleteDownloadState(req)
 		httpRes(r, err, ctx)
 	})
-
 	/*
-		MASTER API CALLS
+		SLAVES, discover get, add delete
 	*/
-
 	mux.GET(endPoints.DiscoverRemoteDevices, func(ctx *gin.Context) {
 		cli := rubixapi.New()
 		_name := resolveName(ctx)
@@ -158,15 +161,28 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		r, err := cli.SlaveDevices(req, true)
 		httpRes(r, err, ctx)
 	})
-
-	/*
-		SLAVES, get, add delete
-	*/
 	mux.GET(endPoints.Slaves, func(ctx *gin.Context) {
 		cli := rubixapi.New()
 		_name := resolveName(ctx)
 		req, err := i.getIntegration("", _name)
 		r, err := cli.SlaveDevices(req, false)
+		httpRes(r, err, ctx)
+	})
+	mux.POST(endPoints.Slaves, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		req, err := i.getIntegration("", _name)
+		body, _ := bodyGlobalUUID(ctx)
+		req.Body = body
+		r, err := cli.SlaveDevicesAddDelete(req, false, body.GlobalUUID)
+		httpRes(r, err, ctx)
+	})
+	mux.DELETE(endPoints.Slaves, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		body, _ := bodyGlobalUUID(ctx)
+		req, err := i.getIntegration("", _name)
+		r, err := cli.SlaveDevicesAddDelete(req, true, body.GlobalUUID)
 		httpRes(r, err, ctx)
 	})
 	/*
@@ -187,5 +203,49 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		req.Body = body
 		r, err := cli.WiresPlat(req, true)
 		httpRes(r, err, ctx)
+	})
+	/*
+		ANY
+		Will get the incoming url path and body and forward on the request
+	*/
+	mux.GET(endPoints.Any, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		req, err := i.getIntegration("", _name)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			req.URL = urlPath(ctx.Request.URL.Path)
+			if req.URL == "" || req.URL == "/" {
+				ctx.JSON(http.StatusBadRequest, "invalid request")
+			} else {
+				r, err := cli.AnyGet(req)
+				httpRes(r, err, ctx)
+			}
+		}
+
+	})
+	mux.POST(endPoints.Any, func(ctx *gin.Context) {
+		cli := rubixapi.New()
+		_name := resolveName(ctx)
+		var getBody interface{} //get the body and put it into an interface
+		err := ctx.ShouldBindJSON(&getBody)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		}
+		req, err := i.getIntegration("", _name)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			req.URL = urlPath(ctx.Request.URL.Path)
+			if req.URL == "" || req.URL == "/" {
+				ctx.JSON(http.StatusBadRequest, "invalid request")
+			} else {
+				req.URL = urlPath(ctx.Request.URL.Path) //pass on the path
+				req.Body = getBody                      //pass on the body
+				r, err := cli.AnyPost(req)
+				httpRes(r, err, ctx)
+			}
+		}
 	})
 }

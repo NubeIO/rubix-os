@@ -83,6 +83,7 @@ type DownloadState struct {
 	} `json:"services"`
 }
 
-type DeleteDownloadState struct {
-	Message string `json:"message"`
+type GeneralResponse struct {
+	GlobalUUID string `json:"global_uuid,omitempty"`
+	Message    string `json:"message,omitempty"`
 }

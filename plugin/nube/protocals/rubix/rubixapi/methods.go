@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/rubix/rubixmodel"
+	"github.com/NubeDev/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/rest"
+	"strings"
 )
 
 const (
@@ -23,6 +25,23 @@ type Req struct {
 	Body           interface{}
 	URL            string
 	Repose         interface{}
+}
+
+func splitURL(topic string) (clean, raw *utils.Array) {
+	s := strings.SplitAfter(topic, "/")
+	clean = utils.NewArray()
+	raw = utils.NewArray()
+	for _, t := range s {
+		if t == "/" {
+			clean.Add("EMPTY-TOPIC-SPACE")
+		}
+		res := strings.ReplaceAll(t, "/", "")
+		if res != "" {
+			clean.Add(res)
+		}
+		raw.Add(t)
+	}
+	return clean, raw
 }
 
 // Request builder. default query is GET, default Req.URL is /
@@ -154,14 +173,14 @@ func (a *RestClient) AppsDownloadState(r Req) (*rubixmodel.DownloadState, error)
 	return res, nil
 }
 
-func (a *RestClient) AppsDeleteDownloadState(r Req) (*rubixmodel.DeleteDownloadState, error) {
+func (a *RestClient) AppsDeleteDownloadState(r Req) (*rubixmodel.GeneralResponse, error) {
 	r.URL = fmt.Sprintf("/api/app/download_state")
 	r.Method = DELETE
 	request, err := Request(r)
 	if err != nil {
 		return nil, err
 	}
-	res := new(rubixmodel.DeleteDownloadState)
+	res := new(rubixmodel.GeneralResponse)
 	err = json.Unmarshal(request.Bytes(), &res)
 	if err != nil {
 		return nil, err
@@ -199,6 +218,26 @@ func (a *RestClient) SlaveDevices(r Req, remoteDevices bool) (*rubixmodel.Discov
 	return s, nil
 }
 
+func (a *RestClient) SlaveDevicesAddDelete(r Req, delete bool, globalUUID string) (*rubixmodel.GeneralResponse, error) {
+	if delete {
+		r.Method = DELETE
+		r.URL = fmt.Sprintf("/api/slaves/%s", globalUUID)
+	} else {
+		r.URL = fmt.Sprintf("/api/slaves")
+		r.Method = POST
+	}
+	request, err := Request(r)
+	if err != nil {
+		return nil, err
+	}
+	res := new(rubixmodel.GeneralResponse)
+	err = json.Unmarshal(request.Bytes(), &res)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (a *RestClient) WiresPlat(r Req, update bool) (*rubixmodel.WiresPlat, error) {
 	r.URL = fmt.Sprintf("/api/wires/plat")
 	if update {
@@ -211,6 +250,34 @@ func (a *RestClient) WiresPlat(r Req, update bool) (*rubixmodel.WiresPlat, error
 		return nil, err
 	}
 	res := new(rubixmodel.WiresPlat)
+	err = json.Unmarshal(request.Bytes(), &res)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (a *RestClient) AnyGet(r Req) (interface{}, error) {
+	r.Method = GET
+	request, err := Request(r)
+	if err != nil {
+		return nil, err
+	}
+	var res interface{}
+	err = json.Unmarshal(request.Bytes(), &res)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (a *RestClient) AnyPost(r Req) (interface{}, error) {
+	r.Method = POST
+	request, err := Request(r)
+	if err != nil {
+		return nil, err
+	}
+	var res interface{}
 	err = json.Unmarshal(request.Bytes(), &res)
 	if err != nil {
 		return nil, err
