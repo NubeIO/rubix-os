@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/NubeDev/flow-framework/src/utilstime"
 	"gorm.io/datatypes"
 	"strconv"
 	"strings"
@@ -286,6 +287,16 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) 
 		if scheduleEntry.Name == scheduleName {
 			scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
 			//log.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
+			fmt.Println("WEEKLY SCHEDULE : ", scheduleEntry)
+			if scheduleEntry.Timezone == "" {
+				//scheduleEntry.Timezone = "Australia/Sydney"
+				systemTimezone := utilstime.SystemTime().SystemTimeZone
+				if systemTimezone == "" {
+					scheduleEntry.Timezone = "Australia/Sydney"
+				} else {
+					scheduleEntry.Timezone = systemTimezone
+				}
+			}
 			//singleResult = CheckWeeklyScheduleEntry(scheduleEntry, "Australia/Sydney")
 			singleResult = CheckWeeklyScheduleEntryWithEntryTimezone(scheduleEntry)
 			//log.Println("finalResult ", finalResult, "singleResult: ", singleResult)
