@@ -405,6 +405,10 @@ func resolveID(ctx *gin.Context) string {
 	return ctx.Param("uuid")
 }
 
+func resolveWriterThingClass(ctx *gin.Context) string {
+	return ctx.Param("writer_thing_class")
+}
+
 func resolveProducerUUID(ctx *gin.Context) string {
 	return ctx.Param("producer_uuid")
 }

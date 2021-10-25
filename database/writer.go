@@ -18,17 +18,28 @@ type Writer struct {
 
 // GetWriters get all of them
 func (d *GormDatabase) GetWriters() ([]*model.Writer, error) {
-	var consumersModel []*model.Writer
-	query := d.DB.Find(&consumersModel)
+	var w []*model.Writer
+	query := d.DB.Find(&w)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return consumersModel, nil
+	return w, nil
+}
+
+// GetWritersByThingClass get all of them by thing_class
+func (d *GormDatabase) GetWritersByThingClass(thingClass string) ([]*model.Writer, error) {
+	var w []*model.Writer
+	if thingClass == "" {
+		thingClass = "schedule"
+	}
+	query := d.DB.Where("writer_thing_class = ? ", thingClass).Find(&w)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return w, nil
 }
 
 func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
-
-	fmt.Println(body.WriterThingClass, body.WriterThingUUID)
 	switch body.WriterThingClass {
 	case model.ThingClass.Point:
 		_, err := d.GetPoint(body.WriterThingUUID, api.Args{})
@@ -236,7 +247,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	if err != nil {
 		return nil, err
 	}
-	data, action, err := validateWriterBody(writer.WriterThingClass, body)
+	data, action, err := d.validateWriterBody(writer.WriterThingClass, body)
 	if err != nil {
 		return nil, err
 	}
@@ -296,7 +307,7 @@ func consumerRefresh(producerFeedback *model.ProducerHistory) (*model.Consumer, 
 	return updateConsumer, nil
 }
 
-func validateWriterBody(thingClass string, body *model.WriterBody) ([]byte, string, error) {
+func (d *GormDatabase) validateWriterBody(thingClass string, body *model.WriterBody) ([]byte, string, error) {
 	if thingClass == model.ThingClass.Point {
 		var bk model.WriterBody
 		if body.Action == model.WriterActions.Write {
