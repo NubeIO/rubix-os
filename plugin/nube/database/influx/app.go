@@ -16,7 +16,7 @@ func (i *Instance) syncInflux() (bool, error) {
 	for _, integration := range integrations {
 		influxSetting := new(InfluxSetting)
 		influxSetting.ServerURL = integration.IP + ":" + integration.PORT
-		influxSetting.AuthToken = integration.IntegrationCredential.Token
+		influxSetting.AuthToken = integration.Token
 		isc := New(influxSetting)
 		histories, err := i.db.GetHistoriesForSync()
 		if err != nil {

@@ -2,6 +2,7 @@
 ## [v0.1.3](https://github.com/NubeIO/flow-framework/tree/v0.1.3) (2021-10-25)
 - added rubix-service api
 - fix up on schedules
+- improvement on writer & writer_clone args query
 
 ## [v0.1.2](https://github.com/NubeIO/flow-framework/tree/v0.1.2) (2021-10-21)
 - added flow network mqtt api
@@ -17,30 +18,30 @@
 - added writer-action as thingClass schedule
 
 ## [v0.0.9](https://github.com/NubeIO/flow-framework/tree/v0.0.9) (2021-10-11)
-- Updates to lora and modbus plugins
+- updates to lora and modbus plugins
 - added edge-28 plugin
 
 ## [v0.0.8](https://github.com/NubeIO/flow-framework/tree/v0.0.8) (2021-10-08)
-- Updates to lora and modbus plugins
+- updates to lora and modbus plugins
 
 ## [v0.0.7](https://github.com/NubeIO/flow-framework/tree/v0.0.7) (2021-10-05)
-- Updates to lora and modbus plugin
+- updates to lora and modbus plugin
 
 ## [v0.0.6](https://github.com/NubeIO/flow-framework/tree/v0.0.6) (2021-10-05)
-- Fix bug on action write
+- fix bug on action write
 
 ## [v0.0.5](https://github.com/NubeIO/flow-framework/tree/v0.0.5) (2021-10-05)
-- Added point calc's, units, and eval
+- added point calc's, units, and eval
 - clean up on lora and modbus plugins
 
 ## [v0.0.4](https://github.com/NubeIO/flow-framework/tree/v0.0.4) (2021-10-02)
-- Added git plugin and updates to modbus
+- added git plugin and updates to modbus
 
 ## [v0.0.3](https://github.com/NubeIO/flow-framework/tree/v0.0.3) (2021-10-01)
-- Make that artifacts working for armv7
+- make that artifacts working for armv7
 
 ## [v0.0.2](https://github.com/NubeIO/flow-framework/tree/v0.0.2) (2021-09-29)
-- Include plugins on artifacts
+- include plugins on artifacts
 
 ## [v0.0.1](https://github.com/NubeIO/flow-framework/tree/v0.0.1) (2021-08-26)
-- First initial release
+- first initial release
