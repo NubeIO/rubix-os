@@ -233,7 +233,7 @@ jobs:
 
           artifact=rubix-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./rubix-amd64.so
-          artifact=lora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+          artifact=rubix-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./rubix-armv7.so
 
           artifact=bacnetserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
