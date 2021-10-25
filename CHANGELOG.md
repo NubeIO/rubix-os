@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.1.3](https://github.com/NubeIO/flow-framework/tree/v0.1.3) (2021-10-25)
+- added rubix-service api
+- fix up on schedules
+
 ## [v0.1.2](https://github.com/NubeIO/flow-framework/tree/v0.1.2) (2021-10-21)
 - added flow network mqtt api
 
