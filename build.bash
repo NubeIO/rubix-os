@@ -52,6 +52,9 @@ go build -buildmode=plugin -o system.so *.go  && cp system.so  $pluginDir
 cd $dir/plugin/nube/networking/rubixnet
 go build -buildmode=plugin -o rubixnet.so *.go  && cp rubixnet.so  $pluginDir
 
+cd $dir/plugin/nube/protocals/rubix
+go build -buildmode=plugin -o rubix.so *.go  && cp rubix.so $pluginDir
+
 cd $dir/plugin/nube/utils/backup
 go build -buildmode=plugin -o backup.so *.go  && cp backup.so  $pluginDir
 
