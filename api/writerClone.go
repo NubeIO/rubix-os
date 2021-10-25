@@ -9,7 +9,7 @@ import (
 // The WriterCloneDatabase interface for encapsulating database access.
 type WriterCloneDatabase interface {
 	GetWriterClone(uuid string) (*model.WriterClone, error)
-	GetWriterClones() ([]*model.WriterClone, error)
+	GetWriterClones(args Args) ([]*model.WriterClone, error)
 	CreateWriterClone(body *model.WriterClone) (*model.WriterClone, error)
 	UpdateWriterClone(uuid string, body *model.WriterClone, updateProducer bool) (*model.WriterClone, error)
 	DeleteWriterClone(uuid string) (bool, error)
@@ -26,9 +26,9 @@ func (j *WriterCloneAPI) GetWriterClone(ctx *gin.Context) {
 }
 
 func (j *WriterCloneAPI) GetWriterClones(ctx *gin.Context) {
-	q, err := j.DB.GetWriterClones()
+	args := buildWriterCloneArgs(ctx)
+	q, err := j.DB.GetWriterClones(args)
 	reposeHandler(q, err, ctx)
-
 }
 
 func (j *WriterCloneAPI) CreateWriterClone(ctx *gin.Context) {
