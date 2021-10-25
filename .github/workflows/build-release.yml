@@ -119,12 +119,15 @@ jobs:
           cd ../../../../plugin/nube/protocals/lora
           go build -buildmode=plugin -o lora-amd64.so *.go  && cp lora-amd64.so ../../../../
 
+          cd ../../../../plugin/nube/protocals/rubix
+          go build -buildmode=plugin -o rubix-amd64.so *.go  && cp rubix-amd64.so ../../../../
+
           cd ../../../../plugin/nube/protocals/bacnetserver
           go build -buildmode=plugin -o bacnetserver-amd64.so *.go  && cp bacnetserver-amd64.so ../../../../
-          
+
           cd ../../../../plugin/nube/database/influx
           go build -buildmode=plugin -o influx-amd64.so *.go  && cp influx-amd64.so ../../../../
-          
+
           cd ../../../../plugin/nube/protocals/broker
           go build -buildmode=plugin -o broker-amd64.so *.go  && cp broker-amd64.so ../../../../
 
@@ -161,6 +164,9 @@ jobs:
 
           cd ../../../../plugin/nube/protocals/lora
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o lora-armv7.so *.go  && cp lora-armv7.so ../../../../
+
+          cd ../../../../plugin/nube/protocals/rubix
+          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o rubix-armv7.so *.go  && cp rubix-armv7.so ../../../../
 
           cd ../../../../plugin/nube/protocals/bacnetserver
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o bacnetserver-armv7.so *.go  && cp bacnetserver-armv7.so ../../../../
@@ -219,11 +225,16 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./modbus-amd64.so
           artifact=modbus-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./modbus-armv7.so
-          
+
           artifact=lora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./lora-amd64.so
           artifact=lora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./lora-armv7.so
+
+          artifact=rubix-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+          zip -r /tmp/zip/$artifact.zip ./rubix-amd64.so
+          artifact=lora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+          zip -r /tmp/zip/$artifact.zip ./rubix-armv7.so
 
           artifact=bacnetserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./bacnetserver-amd64.so
