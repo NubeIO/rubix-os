@@ -217,10 +217,8 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		Will get the incoming url path and body and forward on the request
 	*/
 	mux.GET(endPoints.Proxy, func(ctx *gin.Context) {
-
 		cli := rubixapi.New()
 		_name := resolveName(ctx)
-		fmt.Println(111, _name)
 		req, err := i.getIntegration("", _name)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
@@ -229,9 +227,8 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			if req.URL == "" || req.URL == "/" {
 				ctx.JSON(http.StatusBadRequest, "invalid request")
 			} else {
-				r, err := cli.AnyRequest(req)
 				req.Method = rubixapi.GET
-				fmt.Println(req.URL)
+				r, err := cli.AnyRequest(req)
 				httpRes(r, err, ctx)
 			}
 		}
@@ -248,8 +245,8 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			if req.URL == "" || req.URL == "/" {
 				ctx.JSON(http.StatusBadRequest, "invalid request")
 			} else {
-				r, err := cli.AnyRequest(req)
 				req.Method = rubixapi.DELETE
+				r, err := cli.AnyRequest(req)
 				httpRes(r, err, ctx)
 			}
 		}
