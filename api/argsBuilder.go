@@ -189,6 +189,24 @@ func buildPointArgs(ctx *gin.Context) Args {
 	return args
 }
 
+func buildWriterArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	if value, ok := ctx.GetQuery(aType.WriterThingClass); ok {
+		args.WriterThingClass = &value
+	}
+	return args
+}
+
+func buildWriterCloneArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	if value, ok := ctx.GetQuery(aType.WriterThingClass); ok {
+		args.WriterThingClass = &value
+	}
+	return args
+}
+
 func buildPluginArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType

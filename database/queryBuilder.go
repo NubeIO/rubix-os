@@ -171,6 +171,22 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	return query
 }
 
+func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.WriterThingClass != nil {
+		query = query.Where("writer_thing_class = ?", *args.WriterThingClass)
+	}
+	return query
+}
+
+func (d *GormDatabase) buildWriterCloneQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.WriterThingClass != nil {
+		query = query.Where("writer_thing_class = ?", *args.WriterThingClass)
+	}
+	return query
+}
+
 func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.Networks {

@@ -16,27 +16,13 @@ type Writer struct {
 	*model.Writer
 }
 
-// GetWriters get all of them
-func (d *GormDatabase) GetWriters() ([]*model.Writer, error) {
-	var w []*model.Writer
-	query := d.DB.Find(&w)
-	if query.Error != nil {
+func (d *GormDatabase) GetWriters(args api.Args) ([]*model.Writer, error) {
+	var writers []*model.Writer
+	query := d.buildWriterQuery(args)
+	if err := query.Find(&writers).Error; err != nil {
 		return nil, query.Error
 	}
-	return w, nil
-}
-
-// GetWritersByThingClass get all of them by thing_class
-func (d *GormDatabase) GetWritersByThingClass(thingClass string) ([]*model.Writer, error) {
-	var w []*model.Writer
-	if thingClass == "" {
-		thingClass = "schedule"
-	}
-	query := d.DB.Where("writer_thing_class = ? ", thingClass).Find(&w)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return w, nil
+	return writers, nil
 }
 
 func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {

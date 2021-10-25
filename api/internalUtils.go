@@ -40,6 +40,7 @@ type Args struct {
 	ClientId             *string
 	SiteId               *string
 	DeviceId             *string
+	WriterThingClass     *string
 	SourceUUID           *string
 	PluginName           bool
 	TimestampGt          *string
@@ -94,6 +95,7 @@ var ArgsType = struct {
 	ClientId             string
 	SiteId               string
 	DeviceId             string
+	WriterThingClass     string
 	SourceUUID           string
 	PluginName           string
 	TimestampGt          string
@@ -146,6 +148,7 @@ var ArgsType = struct {
 	ClientId:             "client_id",
 	SiteId:               "site_id",
 	DeviceId:             "device_id",
+	WriterThingClass:     "writer_thing_class",
 	SourceUUID:           "source_uuid",
 	PluginName:           "by_plugin_name",
 	TimestampGt:          "timestamp_gt",
