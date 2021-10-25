@@ -3,7 +3,7 @@ module github.com/NubeDev/flow-framework
 require (
 	github.com/NubeDev/configor v0.0.2
 	github.com/NubeDev/location v0.0.2
-	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.0.9
+	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.1.0
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -45,7 +45,6 @@ require (
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/oleiade/lane v1.0.1
 	github.com/thejerf/suture v4.0.1+incompatible
-	github.com/vulcand/oxy v1.3.0
 	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
 	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf
 )

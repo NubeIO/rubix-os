@@ -15,6 +15,21 @@ type HardwareClock struct {
 	RTCInLocalTZ            string `json:"rtc_in_local_tz"`
 }
 
+func GetHardwareTZ() (string, error) {
+	cmd := "cat /etc/timezone"
+	o, err := command.RunCMD(cmd, false)
+	if err != nil {
+		return "", err
+	}
+	out := strings.Split(string(o), "\n")
+	if len(out) >= 0 {
+		return out[0], err
+	} else {
+		return "", err
+	}
+
+}
+
 func GetHardwareClock() (HardwareClock, error) {
 	cmd := "timedatectl status"
 	o, err := command.RunCMD(cmd, false)

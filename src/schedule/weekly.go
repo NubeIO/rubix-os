@@ -291,7 +291,8 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) 
 				systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
 				//fmt.Println("systemTimezone 2: ", systemTimezone)
 				if systemTimezone == "" {
-					scheduleEntry.Timezone = "Australia/Sydney"
+					zone, _ := utilstime.GetHardwareTZ()
+					scheduleEntry.Timezone = zone
 				} else {
 					scheduleEntry.Timezone = systemTimezone
 				}
