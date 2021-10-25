@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.1.4](https://github.com/NubeIO/flow-framework/tree/v0.1.4) (2021-10-25)
+- rubix plugin build fix
+
 ## [v0.1.3](https://github.com/NubeIO/flow-framework/tree/v0.1.3) (2021-10-25)
 - added rubix-service api
 - fix up on schedules

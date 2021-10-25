@@ -37,7 +37,7 @@ pluginDir=$dir/data/plugins
 
 if [ ${PRODUCTION} == true ]; then
     echo -e "${GREEN}We are running in production mode!${DEFAULT}"
-    pluginDir=/data/flow-framework/data/plugin
+    pluginDir=/data/flow-framework/data/plugins
 else
     echo -e "${GREEN}We are running in development mode!${DEFAULT}"
 fi
