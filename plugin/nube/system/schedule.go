@@ -1,13 +1,15 @@
 package main
 
 import (
+	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/src/schedule"
+	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
 func (i *Instance) run() {
-	class, err := i.db.GetWritersByThingClass("schedule")
+	class, err := i.db.GetWriters(api.Args{WriterThingClass: utils.NewStringAddress("schedule")})
 	if err != nil {
 		return
 	}

@@ -7,11 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// The WriterDatabase interface for encapsulating database access.
 type WriterDatabase interface {
 	GetWriter(uuid string) (*model.Writer, error)
-	GetWriters() ([]*model.Writer, error)
-	GetWritersByThingClass(thingClass string) ([]*model.Writer, error)
+	GetWriters(args Args) ([]*model.Writer, error)
 	CreateWriter(body *model.Writer) (*model.Writer, error)
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
@@ -32,13 +30,8 @@ func (j *WriterAPI) GetWriter(ctx *gin.Context) {
 }
 
 func (j *WriterAPI) GetWriters(ctx *gin.Context) {
-	q, err := j.DB.GetWriters()
-	reposeHandler(q, err, ctx)
-}
-
-func (j *WriterAPI) GetWritersByThingClass(ctx *gin.Context) {
-	thingClass := resolveWriterThingClass(ctx)
-	q, err := j.DB.GetWritersByThingClass(thingClass)
+	args := buildWriterArgs(ctx)
+	q, err := j.DB.GetWriters(args)
 	reposeHandler(q, err, ctx)
 }
 
