@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/src/client"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
@@ -62,9 +63,14 @@ func checkObjectType(t string) (string, error) {
 	return t, nil
 }
 
-func transportIsNil(t string) string {
-	if t == "" {
-		return model.TransType.IP
+func GetFlowToken(ip string, port int, username string, password string) (*string, error) {
+	cli := client.NewFlowClientCli(utils.NewStringAddress(ip), utils.NewInt(port), utils.NewStringAddress(""), nil, "", false)
+	token, err := cli.Login(&model.LoginBody{
+		Username: username,
+		Password: password,
+	})
+	if err != nil {
+		return nil, err
 	}
-	return t
+	return utils.NewStringAddress(token.AccessToken), nil
 }

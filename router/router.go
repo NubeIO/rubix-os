@@ -28,9 +28,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.NoRoute(error.NotFound())
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
-	//authentication := auth.Auth{DB: db}
+	authHandler := auth.Auth{Conf: conf}
 	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
 	healthHandler := api.HealthAPI{DB: db}
+	loginHandler := api.LoginAPI{Conf: conf}
 	clientHandler := api.ClientAPI{
 		DB:            db,
 		ImageDir:      conf.GetAbsUploadedImagesDir(),
@@ -135,6 +136,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
 
+	engine.POST("/api/users/login", loginHandler.Login)
+	engine.GET("/api/system/ping", healthHandler.Health)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
 	engine.Use(func(ctx *gin.Context) {
 		ctx.Header("Content-Type", "application/json") //if you comment it out it will detected as text on proxy-handlers
@@ -145,14 +148,13 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.Use(cors.New(auth.CorsConfig(conf)))
 	engine.OPTIONS("/*any")
 
-	engine.GET("/api/system/ping", healthHandler.Health)
 	apiRoutes := engine.Group("/api")
 	{
 		apiRoutes.GET("/version", func(ctx *gin.Context) {
 			ctx.JSON(200, vInfo)
 		})
 
-		//requireClientsGroupRoutes := apiRoutes.Group("", authentication.RequireClient())
+		apiRoutes.Use(authHandler.RequireValidToken())
 		requireClientsGroupRoutes := apiRoutes.Group("")
 		{
 			plugins := requireClientsGroupRoutes.Group("/plugins")
@@ -198,10 +200,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			}
 		}
 
-		//apiRoutes.Group("").Use(authentication.RequireApplicationToken()).POST("/messages", messageHandler.CreateMessage)
 		apiRoutes.Group("").POST("/messages", messageHandler.CreateMessage)
 
-		// apiRoutes.Use(authentication.RequireAdmin())
 		userRoutes := apiRoutes.Group("/users")
 		{
 			userRoutes.GET("", userHandler.GetUsers)
@@ -219,10 +219,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			databaseRoutes.DELETE("/flows/drop", dbGroup.DropAllFlow)
 			databaseWizard := databaseRoutes.Group("wizard")
 			{
-				databaseWizard.POST("/mappings/local/points", dbGroup.WizardLocalPointMapping)
-				databaseWizard.POST("/mappings/remote/points", dbGroup.WizardRemotePointMapping)
-				databaseWizard.POST("/mappings/remote/schedule", dbGroup.WizardRemoteSchedule)
-				databaseWizard.POST("/mapping/remote/points/consumer/:global_uuid", dbGroup.WizardRemotePointMappingOnConsumerSideByProducerSide) //supplementary API for remote_mapping
+				databaseWizard.POST("/mappings/p2p/points", dbGroup.WizardP2PMapping)
+				databaseWizard.POST("/mappings/master_slave/points", dbGroup.WizardMasterSlavePointMapping)
+				databaseWizard.POST("/mapping/master_slave/points/consumer/:global_uuid", dbGroup.WizardMasterSlavePointMappingOnConsumerSideByProducerSide) //supplementary API for remote_mapping
+				databaseWizard.POST("/mapping/p2p/points/consumer/:global_uuid", dbGroup.WizardP2PMappingOnConsumerSideByProducerSide)                       //supplementary API for remote_mapping
 			}
 		}
 
@@ -230,6 +230,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		{
 			localStorageFlowNetworkRoutes.GET("", localStorageFlowNetworkHandler.GetLocalStorageFlowNetwork)
 			localStorageFlowNetworkRoutes.PATCH("", localStorageFlowNetworkHandler.UpdateLocalStorageFlowNetwork)
+			localStorageFlowNetworkRoutes.GET("/refresh_flow_token", localStorageFlowNetworkHandler.RefreshLocalStorageFlowToken)
 		}
 
 		historyProducerRoutes := apiRoutes.Group("/histories/producers")
@@ -252,6 +253,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			flowNetworkRoutes.DELETE("/:uuid", flowNetwork.DeleteFlowNetwork)
 			flowNetworkRoutes.GET("/one/args", flowNetwork.GetOneFlowNetworkByArgs)
 			flowNetworkRoutes.DELETE("/drop", flowNetwork.DropFlowNetworks)
+			flowNetworkRoutes.GET("/refresh_connections", flowNetwork.RefreshFlowNetworksConnections)
 		}
 
 		flowNetworkCloneRoutes := apiRoutes.Group("/flow_network_clones")
@@ -259,6 +261,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			flowNetworkCloneRoutes.GET("", flowNetworkCloneHandler.GetFlowNetworkClones)
 			flowNetworkCloneRoutes.GET("/:uuid", flowNetworkCloneHandler.GetFlowNetworkClone)
 			flowNetworkCloneRoutes.GET("/one/args", flowNetworkCloneHandler.GetOneFlowNetworkCloneByArgs)
+			flowNetworkCloneRoutes.GET("/refresh_connections", flowNetworkCloneHandler.RefreshFlowNetworkClonesConnections)
 		}
 
 		streamRoutes := apiRoutes.Group("/streams")

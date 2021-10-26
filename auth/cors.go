@@ -42,7 +42,7 @@ func CorsConfig(conf *config.Configuration) cors.Config {
 	return corsConf
 }
 
-func headerIgnoreCase(conf *config.Configuration, search string) (value string) {
+func headerIgnoreCase(conf *config.Configuration, search string) string {
 	for key, value := range conf.Server.ResponseHeaders {
 		if strings.ToLower(key) == search {
 			return value

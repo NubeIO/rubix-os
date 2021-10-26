@@ -17,7 +17,6 @@ func (c *PluginTest) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	c.basePath = basePath
 	mux.GET("/message", func(ctx *gin.Context) {
 		msg := new(message)
-		a := usersList.GetUsersList()
 		if err := ctx.Bind(msg); err == nil {
 			err := c.msgHandler.SendMessage(plugin.Message{
 				Message:  msg.Message,

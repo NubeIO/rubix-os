@@ -2,15 +2,11 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeDev/flow-framework/auth"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/go-resty/resty/v2"
-	log "github.com/sirupsen/logrus"
-	"io/ioutil"
-	"os"
-	"path"
 )
 
-// FlowClient is used to invoke Form3 Accounts API.
 type FlowClient struct {
 	client      *resty.Client
 	ClientToken string
@@ -44,7 +40,7 @@ func newMasterToSlaveSession(globalUUID string) *FlowClient {
 	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", 1616, globalUUID)
 	client.SetHostURL(url)
 	client.SetError(&Error{})
-	client.SetHeader("Authorization", getRubixServiceInternalToken())
+	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
 	return &FlowClient{client: client}
 }
 
@@ -54,26 +50,6 @@ func newSlaveToMasterCallSession() *FlowClient {
 	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", 1616)
 	client.SetHostURL(url)
 	client.SetError(&Error{})
-	client.SetHeader("Authorization", getRubixServiceInternalToken())
+	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
 	return &FlowClient{client: client}
-}
-
-func getRubixServiceInternalToken() string {
-	rubixServiceDataLocation := "/data/rubix-service" //TODO: move on registry or config
-	relativeAuthDataFile := "/data/internal_token.txt"
-	authDataFile := path.Join(rubixServiceDataLocation, relativeAuthDataFile)
-	file, err := os.Open(authDataFile)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func() {
-		if err = file.Close(); err != nil {
-			log.Fatal(err)
-		}
-	}()
-	internalToken, err := ioutil.ReadAll(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return string(internalToken)
 }

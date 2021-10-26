@@ -138,7 +138,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		FlowPort:  1660,
 		FlowHTTPS: utils.NewFalse(),
 	}
-	db.Find(&lsFlowNetwork).Count(&lsFlowNetworkCount)
+	db.Find(&model.LocalStorageFlowNetwork{}).Count(&lsFlowNetworkCount)
 	if lsFlowNetworkCount == 0 {
 		db.Create(&lsFlowNetwork)
 	}
