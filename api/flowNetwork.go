@@ -14,6 +14,7 @@ type FlowNetworkDatabase interface {
 	UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (*model.FlowNetwork, error)
 	DeleteFlowNetwork(uuid string) (bool, error)
 	DropFlowNetworks() (bool, error)
+	RefreshFlowNetworksConnections() (*bool, error)
 }
 type FlowNetworksAPI struct {
 	DB FlowNetworkDatabase
@@ -59,5 +60,10 @@ func (a *FlowNetworksAPI) DeleteFlowNetwork(ctx *gin.Context) {
 
 func (a *FlowNetworksAPI) DropFlowNetworks(ctx *gin.Context) {
 	q, err := a.DB.DropFlowNetworks()
+	reposeHandler(q, err, ctx)
+}
+
+func (a *FlowNetworksAPI) RefreshFlowNetworksConnections(ctx *gin.Context) {
+	q, err := a.DB.RefreshFlowNetworksConnections()
 	reposeHandler(q, err, ctx)
 }

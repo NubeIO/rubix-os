@@ -23,6 +23,8 @@ type CommonFlowNetwork struct {
 	FlowUsername            *string   `json:"flow_username,omitempty"`
 	FlowPassword            *string   `json:"flow_password,omitempty"`
 	FlowToken               *string   `json:"flow_token,omitempty"`
+	IsError                 *bool     `json:"is_error,omitempty"`
+	ErrorMsg                *string   `json:"error_msg,omitempty"`
 	Streams                 []*Stream `json:"streams" gorm:"many2many:flow_networks_streams;constraint:OnDelete:CASCADE"`
 	CommonCreated
 }

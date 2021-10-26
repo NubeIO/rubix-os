@@ -232,7 +232,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		{
 			localStorageFlowNetworkRoutes.GET("", localStorageFlowNetworkHandler.GetLocalStorageFlowNetwork)
 			localStorageFlowNetworkRoutes.PATCH("", localStorageFlowNetworkHandler.UpdateLocalStorageFlowNetwork)
-			localStorageFlowNetworkRoutes.PATCH("/refresh_flow_token", localStorageFlowNetworkHandler.RefreshLocalStorageFlowToken)
+			localStorageFlowNetworkRoutes.GET("/refresh_flow_token", localStorageFlowNetworkHandler.RefreshLocalStorageFlowToken)
 		}
 
 		historyProducerRoutes := apiRoutes.Group("/histories/producers")
@@ -255,6 +255,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			flowNetworkRoutes.DELETE("/:uuid", flowNetwork.DeleteFlowNetwork)
 			flowNetworkRoutes.GET("/one/args", flowNetwork.GetOneFlowNetworkByArgs)
 			flowNetworkRoutes.DELETE("/drop", flowNetwork.DropFlowNetworks)
+			flowNetworkRoutes.GET("/refresh_connections", flowNetwork.RefreshFlowNetworksConnections)
 		}
 
 		flowNetworkCloneRoutes := apiRoutes.Group("/flow_network_clones")
@@ -262,6 +263,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			flowNetworkCloneRoutes.GET("", flowNetworkCloneHandler.GetFlowNetworkClones)
 			flowNetworkCloneRoutes.GET("/:uuid", flowNetworkCloneHandler.GetFlowNetworkClone)
 			flowNetworkCloneRoutes.GET("/one/args", flowNetworkCloneHandler.GetOneFlowNetworkCloneByArgs)
+			flowNetworkCloneRoutes.GET("/refresh_connections", flowNetworkCloneHandler.RefreshFlowNetworkClonesConnections)
 		}
 
 		streamRoutes := apiRoutes.Group("/streams")

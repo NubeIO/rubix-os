@@ -210,3 +210,22 @@ func (d *GormDatabase) DropFlowNetworks() (bool, error) {
 		return true, nil
 	}
 }
+
+func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
+	var flowNetworks []*model.FlowNetwork
+	d.DB.Where("is_master_slave = ?", false).Find(&flowNetworks)
+	for _, fn := range flowNetworks {
+		cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
+		token, err := cli.Login(&model.LoginBody{Username: *fn.FlowUsername, Password: *fn.FlowPassword})
+		if err != nil {
+			fn.IsError = utils.NewTrue()
+			fn.ErrorMsg = utils.NewStringAddress(err.Error())
+		} else {
+			fn.IsError = utils.NewFalse()
+			fn.ErrorMsg = nil
+			fn.FlowToken = utils.NewStringAddress(token.AccessToken)
+		}
+		d.DB.Model(&fn).Updates(fn)
+	}
+	return utils.NewTrue(), nil
+}

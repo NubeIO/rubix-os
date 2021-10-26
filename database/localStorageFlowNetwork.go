@@ -19,7 +19,8 @@ func (d *GormDatabase) UpdateLocalStorageFlowNetwork(body *model.LocalStorageFlo
 	if err := d.DB.First(&lsfn).Error; err != nil {
 		return nil, err
 	}
-	token, err := GetFlowToken(body.FlowIP, body.FlowPort, body.FlowUsername, body.FlowPassword)
+	conf := config.Get()
+	token, err := GetFlowToken(conf.Server.ListenAddr, conf.Server.Port, body.FlowUsername, body.FlowPassword)
 	if err != nil {
 		return nil, err
 	}
