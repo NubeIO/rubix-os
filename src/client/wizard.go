@@ -21,19 +21,19 @@ func (a *FlowClient) WizardMasterSlavePointMappingOnConsumerSideByProducerSide(g
 	return true, nil
 }
 
-func (a *FlowClient) WizardRemotePointMappingOnConsumerSideByProducerSide(globalUUID string) (bool, error) {
+func (a *FlowClient) WizardP2PMappingOnConsumerSideByProducerSide(globalUUID string) (bool, error) {
 	resp, err := a.client.R().
 		SetPathParams(map[string]string{"global_uuid": globalUUID}).
-		Post("/api/database/wizard/mapping/remote/points/consumer/{global_uuid}")
+		Post("/api/database/wizard/mapping/p2p/points/consumer/{global_uuid}")
 	if err != nil {
 		if resp == nil || resp.String() == "" {
-			return false, fmt.Errorf("WizardRemotePointMappingOnConsumerSideByProducerSide: %s", err)
+			return false, fmt.Errorf("WizardP2PMappingOnConsumerSideByProducerSide: %s", err)
 		} else {
-			return false, fmt.Errorf("WizardRemotePointMappingOnConsumerSideByProducerSide: %s", resp)
+			return false, fmt.Errorf("WizardP2PMappingOnConsumerSideByProducerSide: %s", resp)
 		}
 	}
 	if resp.IsError() {
-		return false, fmt.Errorf("WizardRemotePointMappingOnConsumerSideByProducerSide: %s", resp)
+		return false, fmt.Errorf("WizardP2PMappingOnConsumerSideByProducerSide: %s", resp)
 	}
 	return true, nil
 }

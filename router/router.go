@@ -219,12 +219,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			databaseRoutes.DELETE("/flows/drop", dbGroup.DropAllFlow)
 			databaseWizard := databaseRoutes.Group("wizard")
 			{
-				databaseWizard.POST("/mappings/local/points", dbGroup.WizardLocalPointMapping)
-				databaseWizard.POST("/mappings/remote/points/http", dbGroup.WizardRemotePointMapping)
+				databaseWizard.POST("/mappings/p2p/points", dbGroup.WizardP2PMapping)
 				databaseWizard.POST("/mappings/master_slave/points", dbGroup.WizardMasterSlavePointMapping)
-				databaseWizard.POST("/mappings/remote/schedule", dbGroup.WizardRemoteSchedule)
 				databaseWizard.POST("/mapping/master_slave/points/consumer/:global_uuid", dbGroup.WizardMasterSlavePointMappingOnConsumerSideByProducerSide) //supplementary API for remote_mapping
-				databaseWizard.POST("/mapping/remote/points/consumer/:global_uuid", dbGroup.WizardRemotePointMappingOnConsumerSideByProducerSide)            //supplementary API for remote_mapping
+				databaseWizard.POST("/mapping/p2p/points/consumer/:global_uuid", dbGroup.WizardP2PMappingOnConsumerSideByProducerSide)                       //supplementary API for remote_mapping
 			}
 		}
 

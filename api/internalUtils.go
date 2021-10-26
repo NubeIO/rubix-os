@@ -405,7 +405,7 @@ func getBodyTag(ctx *gin.Context) (dto *model.Tag, err error) {
 	return dto, err
 }
 
-func getBodyFlowNetworkCredential(ctx *gin.Context) (dto *model.FlowNetworkCredential, err error) {
+func getP2PBody(ctx *gin.Context) (dto *model.P2PBody, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

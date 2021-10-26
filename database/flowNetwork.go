@@ -6,6 +6,7 @@ import (
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/client"
 	"github.com/NubeDev/flow-framework/utils"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -78,11 +79,20 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 			}
 		}
 	} else {
-		if body.FlowIP == nil || body.FlowPort == nil {
-			return nil, errors.New("FlowIP and FlowPort can't be null when we it's not master/slave flow network")
+		if body.FlowIP == nil {
+			body.FlowIP = utils.NewStringAddress("0.0.0.0")
+		}
+		if body.FlowPort == nil {
+			body.FlowPort = utils.NewInt(1660)
 		}
 		if body.FlowToken == nil {
 			body.FlowToken = utils.NewStringAddress("token")
+		}
+		if body.FlowUsername == nil {
+			return nil, errors.New("FlowUsername can't be null when we it's not master/slave flow network")
+		}
+		if body.FlowPassword == nil {
+			return nil, errors.New("FlowPassword can't be null when we it's not master/slave flow network")
 		}
 		if *body.FlowIP == "0.0.0.0" || *body.FlowIP == "127.0.0.0" || *body.FlowIP == "localhost" {
 			body.FlowHTTPS = utils.NewFalse()
@@ -213,19 +223,24 @@ func (d *GormDatabase) DropFlowNetworks() (bool, error) {
 
 func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 	var flowNetworks []*model.FlowNetwork
-	d.DB.Where("is_master_slave = ?", false).Find(&flowNetworks)
+	d.DB.Where("is_master_slave IS NOT TRUE").Find(&flowNetworks)
 	for _, fn := range flowNetworks {
 		cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
 		token, err := cli.Login(&model.LoginBody{Username: *fn.FlowUsername, Password: *fn.FlowPassword})
+		fnModel := model.FlowNetworkClone{}
 		if err != nil {
-			fn.IsError = utils.NewTrue()
-			fn.ErrorMsg = utils.NewStringAddress(err.Error())
+			fnModel.IsError = utils.NewTrue()
+			fnModel.ErrorMsg = utils.NewStringAddress(err.Error())
+			fnModel.FlowToken = fn.FlowToken
 		} else {
-			fn.IsError = utils.NewFalse()
-			fn.ErrorMsg = nil
-			fn.FlowToken = utils.NewStringAddress(token.AccessToken)
+			fnModel.IsError = utils.NewFalse()
+			fnModel.ErrorMsg = nil
+			fnModel.FlowToken = utils.NewStringAddress(token.AccessToken)
 		}
-		d.DB.Model(&fn).Updates(fn)
+		// here `.Select` is needed because NULL value needs to set on is_error=false
+		if err := d.DB.Model(&fn).Select("IsError", "ErrorMsg", "FlowToken").Updates(&fnModel).Error; err != nil {
+			log.Error(err)
+		}
 	}
 	return utils.NewTrue(), nil
 }

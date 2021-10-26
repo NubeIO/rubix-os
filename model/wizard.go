@@ -1,8 +1,12 @@
 package model
 
-type FlowNetworkCredential struct {
-	FlowIP       string `json:"flow_ip"`
-	FlowPort     int    `json:"flow_port"`
-	FlowUsername string `json:"flow_username"`
-	FlowPassword string `json:"flow_password"`
+type P2PBody struct {
+	LocalFlowIP        *string `json:"local_flow_ip"`
+	LocalFlowPort      *int    `json:"local_flow_port"`
+	LocalFlowUsername  *string `json:"local_flow_username"`
+	LocalFlowPassword  *string `json:"local_flow_password"`
+	RemoteFlowIP       *string `json:"remote_flow_ip"`
+	RemoteFlowPort     *int    `json:"remote_flow_port"`
+	RemoteFlowUsername *string `json:"remote_flow_username"`
+	RemoteFlowPassword *string `json:"remote_flow_password"`
 }
