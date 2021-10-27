@@ -102,6 +102,15 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 		} else {
 			body.IsRemote = utils.NewTrue()
 		}
+		cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
+		token, err := cli.Login(&model.LoginBody{
+			Username: *body.FlowUsername,
+			Password: *body.FlowPassword,
+		})
+		if err != nil {
+			return nil, err
+		}
+		body.FlowToken = utils.NewStringAddress(token.AccessToken)
 	}
 
 	isRemote := utils.IsTrue(body.IsRemote)
@@ -112,15 +121,6 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 		tx = d.DB.Begin()
 	}
 	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
-	token, err := cli.Login(&model.LoginBody{
-		Username: *body.FlowUsername,
-		Password: *body.FlowPassword,
-	})
-	if err != nil {
-		return nil, err
-	}
-	body.FlowToken = utils.NewStringAddress(token.AccessToken)
-	cli = client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
 	if err := tx.Create(&body).Error; err != nil {
 		if isRemote {
 			tx.Rollback()

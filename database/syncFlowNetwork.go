@@ -10,15 +10,17 @@ import (
 
 func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetworkClone, error) {
 	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, false)
-	token, err := cli.Login(&model.LoginBody{
-		Username: *body.FlowUsername,
-		Password: *body.FlowPassword,
-	})
-	if err != nil {
-		return nil, err
+	if !utils.IsTrue(body.IsMasterSlave) {
+		token, err := cli.Login(&model.LoginBody{
+			Username: *body.FlowUsername,
+			Password: *body.FlowPassword,
+		})
+		if err != nil {
+			return nil, err
+		}
+		body.FlowToken = utils.NewStringAddress(token.AccessToken)
+		cli = client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, false)
 	}
-	body.FlowToken = utils.NewStringAddress(token.AccessToken)
-	cli = client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, false)
 	remoteDeviceInfo, err := cli.DeviceInfo()
 	if err != nil {
 		return nil, err
