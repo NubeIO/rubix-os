@@ -4,6 +4,7 @@
 server:
   keepaliveperiodseconds: 0 # 0 = use system default; set the interval in which keepalive packages will be sent. Only change this value if you know what you are doing.
   listenaddr: "0.0.0.0" # the address to bind on, leave empty to bind on all addresses
+  rsport: 1616
 
   responseheaders: # response headers are added to every response (default: none)
   #    X-Custom-Header: "custom value"

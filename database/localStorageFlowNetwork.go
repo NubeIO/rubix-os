@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/src/client"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
@@ -20,7 +21,7 @@ func (d *GormDatabase) UpdateLocalStorageFlowNetwork(body *model.LocalStorageFlo
 		return nil, err
 	}
 	conf := config.Get()
-	token, err := GetFlowToken(conf.Server.ListenAddr, conf.Server.Port, body.FlowUsername, body.FlowPassword)
+	token, err := client.GetFlowToken(conf.Server.ListenAddr, conf.Server.RSPort, body.FlowUsername, body.FlowPassword)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +38,7 @@ func (d *GormDatabase) RefreshLocalStorageFlowToken() (*bool, error) {
 		return nil, err
 	}
 	conf := config.Get()
-	token, err := GetFlowToken(conf.Server.ListenAddr, conf.Server.Port, lsfn.FlowUsername, lsfn.FlowPassword)
+	token, err := client.GetFlowToken(conf.Server.ListenAddr, conf.Server.RSPort, lsfn.FlowUsername, lsfn.FlowPassword)
 	if err != nil {
 		return nil, err
 	}

@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/client"
 	"github.com/NubeDev/flow-framework/utils"
@@ -57,6 +58,7 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = utils.MakeUUID()
+	body.IsRemote = utils.NewTrue()
 	isMasterSlave := utils.IsTrue(body.IsMasterSlave)
 	deviceInfo, err := d.GetDeviceInfo()
 	if err != nil {
@@ -66,27 +68,23 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 		body.FlowHTTPS = nil
 		body.FlowIP = nil
 		body.FlowPort = nil
-		body.IsRemote = nil
 		body.FlowToken = nil
 		cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
 		remoteDeviceInfo, err := cli.DeviceInfo()
 		if err != nil {
 			return nil, err
 		} else {
-			body.IsRemote = utils.NewTrue()
 			if deviceInfo.GlobalUUID == remoteDeviceInfo.GlobalUUID {
 				body.IsRemote = utils.NewFalse()
 			}
 		}
 	} else {
+		conf := config.Get()
 		if body.FlowIP == nil {
-			body.FlowIP = utils.NewStringAddress("0.0.0.0")
+			body.FlowIP = &conf.Server.ListenAddr
 		}
 		if body.FlowPort == nil {
-			body.FlowPort = utils.NewInt(1660)
-		}
-		if body.FlowToken == nil {
-			body.FlowToken = utils.NewStringAddress("token")
+			body.FlowPort = &conf.Server.Port
 		}
 		if body.FlowUsername == nil {
 			return nil, errors.New("FlowUsername can't be null when we it's not master/slave flow network")
@@ -97,20 +95,13 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 		if *body.FlowIP == "0.0.0.0" || *body.FlowIP == "127.0.0.0" || *body.FlowIP == "localhost" {
 			body.FlowHTTPS = utils.NewFalse()
 			body.FlowIP = utils.NewStringAddress("0.0.0.0")
-			body.FlowPort = utils.NewInt(1660)
 			body.IsRemote = utils.NewFalse()
-		} else {
-			body.IsRemote = utils.NewTrue()
 		}
-		cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
-		token, err := cli.Login(&model.LoginBody{
-			Username: *body.FlowUsername,
-			Password: *body.FlowPassword,
-		})
+		accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
 		if err != nil {
 			return nil, err
 		}
-		body.FlowToken = utils.NewStringAddress(token.AccessToken)
+		body.FlowToken = accessToken
 	}
 
 	isRemote := utils.IsTrue(body.IsRemote)
@@ -142,11 +133,11 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 		fnb.FlowUsername = utils.NewStringAddress(localStorageFlowNetwork.FlowUsername)
 		fnb.FlowPassword = utils.NewStringAddress(localStorageFlowNetwork.FlowPassword)
 		fnb.FlowToken = utils.NewStringAddress(localStorageFlowNetwork.FlowToken)
-		token, err := GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
+		accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
 		if err != nil {
 			return nil, err
 		}
-		body.FlowToken = token
+		body.FlowToken = accessToken
 	}
 	fnb.GlobalUUID = deviceInfo.GlobalUUID
 	fnb.ClientId = deviceInfo.ClientId
@@ -225,8 +216,7 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 	var flowNetworks []*model.FlowNetwork
 	d.DB.Where("is_master_slave IS NOT TRUE").Find(&flowNetworks)
 	for _, fn := range flowNetworks {
-		cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
-		token, err := cli.Login(&model.LoginBody{Username: *fn.FlowUsername, Password: *fn.FlowPassword})
+		accessToken, err := client.GetFlowToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowUsername, *fn.FlowPassword)
 		fnModel := model.FlowNetworkClone{}
 		if err != nil {
 			fnModel.IsError = utils.NewTrue()
@@ -235,7 +225,7 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 		} else {
 			fnModel.IsError = utils.NewFalse()
 			fnModel.ErrorMsg = nil
-			fnModel.FlowToken = utils.NewStringAddress(token.AccessToken)
+			fnModel.FlowToken = accessToken
 		}
 		// here `.Select` is needed because NULL value needs to set on is_error=false
 		if err := d.DB.Model(&fn).Select("IsError", "ErrorMsg", "FlowToken").Updates(&fnModel).Error; err != nil {

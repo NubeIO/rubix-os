@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/auth/password"
+	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/src/cachestore"
 	"github.com/NubeDev/flow-framework/utils"
@@ -133,9 +134,10 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		//}
 	}
 	var lsFlowNetworkCount int64 = 0
+	conf := config.Get()
 	lsFlowNetwork := model.LocalStorageFlowNetwork{
-		FlowIP:    "0.0.0.0",
-		FlowPort:  1660,
+		FlowIP:    conf.Server.ListenAddr,
+		FlowPort:  conf.Server.RSPort,
 		FlowHTTPS: utils.NewFalse(),
 	}
 	db.Find(&model.LocalStorageFlowNetwork{}).Count(&lsFlowNetworkCount)
