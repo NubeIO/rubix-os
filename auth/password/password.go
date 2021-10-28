@@ -10,8 +10,3 @@ func CreatePassword(pw string, strength int) []byte {
 	}
 	return hashedPassword
 }
-
-// ComparePassword compares a hashed password with its possible plaintext equivalent.
-func ComparePassword(hashedPassword, password []byte) bool {
-	return bcrypt.CompareHashAndPassword(hashedPassword, password) == nil
-}

@@ -3,13 +3,33 @@ package client
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/auth"
+	"github.com/NubeDev/flow-framework/config"
+	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/go-resty/resty/v2"
+)
+
+var (
+	conf = config.Get()
 )
 
 type FlowClient struct {
 	client      *resty.Client
 	ClientToken string
+}
+
+func GetFlowToken(ip string, port int, username string, password string) (*string, error) {
+	client := resty.New()
+	client.SetDebug(false)
+	url := fmt.Sprintf("http://%s:%d", ip, port)
+	client.SetHostURL(url)
+	client.SetError(&Error{})
+	cli := &FlowClient{client: client}
+	token, err := cli.Login(&model.LoginBody{Username: username, Password: password})
+	if err != nil {
+		return nil, err
+	}
+	return &token.AccessToken, nil
 }
 
 func NewFlowClientCli(ip *string, port *int, token *string, isMasterSlave *bool, globalUUD string, isFNCreator bool) *FlowClient {
@@ -27,7 +47,7 @@ func NewFlowClientCli(ip *string, port *int, token *string, isMasterSlave *bool,
 func newSessionWithToken(ip string, port int, token string) *FlowClient {
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%d", ip, port)
+	url := fmt.Sprintf("http://%s:%d/ff", ip, port)
 	client.SetHostURL(url)
 	client.SetError(&Error{})
 	client.SetHeader("Authorization", token)
@@ -37,7 +57,7 @@ func newSessionWithToken(ip string, port int, token string) *FlowClient {
 func newMasterToSlaveSession(globalUUID string) *FlowClient {
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", 1616, globalUUID)
+	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", conf.Server.RSPort, globalUUID)
 	client.SetHostURL(url)
 	client.SetError(&Error{})
 	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
@@ -47,7 +67,7 @@ func newMasterToSlaveSession(globalUUID string) *FlowClient {
 func newSlaveToMasterCallSession() *FlowClient {
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", 1616)
+	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", conf.Server.RSPort)
 	client.SetHostURL(url)
 	client.SetError(&Error{})
 	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())

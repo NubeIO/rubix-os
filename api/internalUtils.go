@@ -295,11 +295,6 @@ func getBodyLocalStorageFlowNetwork(ctx *gin.Context) (dto *model.LocalStorageFl
 	return dto, err
 }
 
-func getBodyLogin(ctx *gin.Context) (dto *model.LoginBody, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
 func getBODYFlowNetwork(ctx *gin.Context) (dto *model.FlowNetwork, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err

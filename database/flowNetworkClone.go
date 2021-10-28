@@ -41,8 +41,7 @@ func (d *GormDatabase) RefreshFlowNetworkClonesConnections() (*bool, error) {
 	var flowNetworkClones []*model.FlowNetworkClone
 	d.DB.Where("is_master_slave IS NOT TRUE").Find(&flowNetworkClones)
 	for _, fnc := range flowNetworkClones {
-		cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-		token, err := cli.Login(&model.LoginBody{Username: *fnc.FlowUsername, Password: *fnc.FlowPassword})
+		accessToken, err := client.GetFlowToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowUsername, *fnc.FlowPassword)
 		fncModel := model.FlowNetworkClone{}
 		if err != nil {
 			fncModel.IsError = utils.NewTrue()
@@ -51,7 +50,7 @@ func (d *GormDatabase) RefreshFlowNetworkClonesConnections() (*bool, error) {
 		} else {
 			fncModel.IsError = utils.NewFalse()
 			fncModel.ErrorMsg = nil
-			fncModel.FlowToken = utils.NewStringAddress(token.AccessToken)
+			fncModel.FlowToken = accessToken
 		}
 		// here `.Select` is needed because NULL value needs to set on is_error=false
 		if err := d.DB.Model(&fnc).Select("IsError", "ErrorMsg", "FlowToken").Updates(fncModel).Error; err != nil {

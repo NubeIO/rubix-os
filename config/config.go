@@ -11,6 +11,7 @@ type Configuration struct {
 		KeepAlivePeriodSeconds int
 		ListenAddr             string `default:"0.0.0.0"`
 		Port                   int
+		RSPort                 int `default:"1616"`
 		ResponseHeaders        map[string]string
 		Stream                 struct {
 			PingPeriodSeconds int `default:"45"`

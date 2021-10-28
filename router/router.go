@@ -28,10 +28,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.NoRoute(error.NotFound())
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
-	authHandler := auth.Auth{Conf: conf}
 	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
 	healthHandler := api.HealthAPI{DB: db}
-	loginHandler := api.LoginAPI{Conf: conf}
 	clientHandler := api.ClientAPI{
 		DB:            db,
 		ImageDir:      conf.GetAbsUploadedImagesDir(),
@@ -136,7 +134,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
 	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
 
-	engine.POST("/api/users/login", loginHandler.Login)
 	engine.GET("/api/system/ping", healthHandler.Health)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
 	engine.Use(func(ctx *gin.Context) {
@@ -154,7 +151,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			ctx.JSON(200, vInfo)
 		})
 
-		apiRoutes.Use(authHandler.RequireValidToken())
 		requireClientsGroupRoutes := apiRoutes.Group("")
 		{
 			plugins := requireClientsGroupRoutes.Group("/plugins")
