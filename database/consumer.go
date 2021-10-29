@@ -5,6 +5,7 @@ import (
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/client"
+	"github.com/NubeDev/flow-framework/urls"
 	"github.com/NubeDev/flow-framework/utils"
 )
 
@@ -41,10 +42,14 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 		return nil, newError("GetOneFlowNetworkCloneByArgs", "error on trying to get validate flow_network_clone from stream_clone_uuid")
 	}
 	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-	producer, err := cli.GetProducer(body.ProducerUUID)
+	rawProducer, err := cli.GetQueryMarshal(
+		urls.ProducerSingularURL(body.ProducerUUID),
+		nil,
+		model.Producer{})
 	if err != nil {
-		return nil, newError("GetProducer", "error on finding producer by producer_uuid")
+		return nil, err
 	}
+	producer := rawProducer.(*model.Producer)
 	if streamClone.SourceUUID != producer.StreamUUID {
 		return nil, newError("Validation failure", "consumer stream_clones & producer stream are different source of truth")
 	}
