@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.1.5](https://github.com/NubeIO/flow-framework/tree/v0.1.5) (2021-11-01)
+- nubeio-rubix-lib-helpers-go version upgrade to v0.1.2
+
 ## [v0.1.4](https://github.com/NubeIO/flow-framework/tree/v0.1.4) (2021-10-25)
 - rubix plugin build fix
 
