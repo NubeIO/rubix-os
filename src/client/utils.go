@@ -6,18 +6,18 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-func (a *FlowClient) GetQuery(url string, params map[string]string) (*string, error) {
+func (a *FlowClient) GetQuery(url string) (*[]byte, error) {
 	resp, err := a.client.R().
-		SetPathParams(params).
 		Get(url)
 	e := checkError("GET", url, resp, err)
 	if e != nil {
 		return nil, *e
 	}
-	return utils.NewStringAddress(resp.String()), nil
+	output := resp.Body()
+	return &output, nil
 }
 
-func (a *FlowClient) PostQuery(url string, body interface{}) (*string, error) {
+func (a *FlowClient) PostQuery(url string, body interface{}) (*[]byte, error) {
 	resp, err := a.client.R().
 		SetBody(body).
 		Post(url)
@@ -25,10 +25,23 @@ func (a *FlowClient) PostQuery(url string, body interface{}) (*string, error) {
 	if e != nil {
 		return nil, *e
 	}
-	return utils.NewStringAddress(resp.String()), nil
+	output := resp.Body()
+	return &output, nil
 }
 
-func (a *FlowClient) PatchQuery(url string, body interface{}) (*string, error) {
+func (a *FlowClient) PutQuery(url string, body interface{}) (*[]byte, error) {
+	resp, err := a.client.R().
+		SetBody(body).
+		Patch(url)
+	e := checkError("PUT", url, resp, err)
+	if e != nil {
+		return nil, *e
+	}
+	output := resp.Body()
+	return &output, nil
+}
+
+func (a *FlowClient) PatchQuery(url string, body interface{}) (*[]byte, error) {
 	resp, err := a.client.R().
 		SetBody(body).
 		Patch(url)
@@ -36,12 +49,13 @@ func (a *FlowClient) PatchQuery(url string, body interface{}) (*string, error) {
 	if e != nil {
 		return nil, *e
 	}
-	return utils.NewStringAddress(resp.String()), nil
+	output := resp.Body()
+	return &output, nil
 }
 
 func (a *FlowClient) DeleteQuery(url string) error {
 	resp, err := a.client.R().
-		Patch(url)
+		Delete(url)
 	e := checkError("DELETE", url, resp, err)
 	if e != nil {
 		return *e
@@ -49,9 +63,8 @@ func (a *FlowClient) DeleteQuery(url string) error {
 	return nil
 }
 
-func (a *FlowClient) GetQueryMarshal(url string, params map[string]string, result interface{}) (interface{}, error) {
+func (a *FlowClient) GetQueryMarshal(url string, result interface{}) (interface{}, error) {
 	resp, err := a.client.R().
-		SetQueryParams(params).
 		SetResult(result).
 		Get(url)
 	e := checkError("GET", url, resp, err)
@@ -67,6 +80,18 @@ func (a *FlowClient) PostQueryMarshal(url string, body interface{}, result inter
 		SetResult(result).
 		Post(url)
 	e := checkError("POST", url, resp, err)
+	if e != nil {
+		return nil, *e
+	}
+	return resp.Result(), nil
+}
+
+func (a *FlowClient) PutQueryMarshal(url string, body interface{}, result interface{}) (interface{}, error) {
+	resp, err := a.client.R().
+		SetBody(body).
+		SetResult(result).
+		Put(url)
+	e := checkError("PUT", url, resp, err)
 	if e != nil {
 		return nil, *e
 	}

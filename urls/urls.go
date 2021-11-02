@@ -2,14 +2,14 @@ package urls
 
 import "fmt"
 
-var (
-	producerURL = "/api/producers"
-)
-
 func ProducerURL() string {
-	return producerURL
+	return "/api/producers"
+}
+
+func ProducerURLWithStream(streamUUID string) string {
+	return fmt.Sprintf("%s?stream_uuid=%s", ProducerURL(), streamUUID)
 }
 
 func ProducerSingularURL(uuid string) string {
-	return fmt.Sprintf("%s/%s", producerURL, uuid)
+	return fmt.Sprintf("%s/%s", ProducerURL(), uuid)
 }

@@ -104,10 +104,7 @@ func (d *GormDatabase) WizardMasterSlavePointMappingOnConsumerSideByProducerSide
 	}
 
 	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-	rawProducers, err := cli.GetQueryMarshal(
-		urls.ProducerURL(),
-		map[string]string{"stream_uuid": streamClones[0].SourceUUID},
-		[]model.Producer{})
+	rawProducers, err := cli.GetQueryMarshal(urls.ProducerURLWithStream(streamClones[0].SourceUUID), []model.Producer{})
 	if err != nil {
 		return false, err
 	}
