@@ -10,21 +10,21 @@ import (
 
 type ProxyDatabase interface {
 	GetFN(uuid string) (*model.FlowNetwork, error)
+	GetFNC(uuid string) (*model.FlowNetworkClone, error)
 }
 
 type Proxy struct {
 	DB ProxyDatabase
 }
 
-func (a *Proxy) GetProxy() gin.HandlerFunc {
+func (a *Proxy) GetProxy(isFN bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		fnUUID, url := getUrl(ctx)
-		fn, err := a.DB.GetFN(fnUUID)
+		uuid, url := getUrl(ctx)
+		cli, err := a.getFlowClient(isFN, uuid)
 		if err != nil {
 			ctx.AbortWithError(404, err)
 			return
 		}
-		cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
 
 		val, err := cli.GetQuery(url)
 		if err != nil {
@@ -35,15 +35,14 @@ func (a *Proxy) GetProxy() gin.HandlerFunc {
 	}
 }
 
-func (a *Proxy) PostProxy() gin.HandlerFunc {
+func (a *Proxy) PostProxy(isFN bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		fnUUID, url := getUrl(ctx)
-		fn, err := a.DB.GetFN(fnUUID)
+		uuid, url := getUrl(ctx)
+		cli, err := a.getFlowClient(isFN, uuid)
 		if err != nil {
 			ctx.AbortWithError(404, err)
 			return
 		}
-		cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
 
 		body, err := getMapBody(ctx)
 		val, err := cli.PostQuery(url, body)
@@ -55,15 +54,14 @@ func (a *Proxy) PostProxy() gin.HandlerFunc {
 	}
 }
 
-func (a *Proxy) PutProxy() gin.HandlerFunc {
+func (a *Proxy) PutProxy(isFN bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		fnUUID, url := getUrl(ctx)
-		fn, err := a.DB.GetFN(fnUUID)
+		uuid, url := getUrl(ctx)
+		cli, err := a.getFlowClient(isFN, uuid)
 		if err != nil {
 			ctx.AbortWithError(404, err)
 			return
 		}
-		cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
 
 		body, err := getMapBody(ctx)
 		val, err := cli.PutQuery(url, body)
@@ -75,15 +73,14 @@ func (a *Proxy) PutProxy() gin.HandlerFunc {
 	}
 }
 
-func (a *Proxy) PatchProxy() gin.HandlerFunc {
+func (a *Proxy) PatchProxy(isFN bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		fnUUID, url := getUrl(ctx)
-		fn, err := a.DB.GetFN(fnUUID)
+		uuid, url := getUrl(ctx)
+		cli, err := a.getFlowClient(isFN, uuid)
 		if err != nil {
 			ctx.AbortWithError(404, err)
 			return
 		}
-		cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
 
 		body, err := getMapBody(ctx)
 		val, err := cli.PatchQuery(url, body)
@@ -95,15 +92,14 @@ func (a *Proxy) PatchProxy() gin.HandlerFunc {
 	}
 }
 
-func (a *Proxy) DeleteProxy() gin.HandlerFunc {
+func (a *Proxy) DeleteProxy(isFN bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		fnUUID, url := getUrl(ctx)
-		fn, err := a.DB.GetFN(fnUUID)
+		uuid, url := getUrl(ctx)
+		cli, err := a.getFlowClient(isFN, uuid)
 		if err != nil {
 			ctx.AbortWithError(404, err)
 			return
 		}
-		cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
 
 		err = cli.DeleteQuery(url)
 		if err != nil {
@@ -114,15 +110,33 @@ func (a *Proxy) DeleteProxy() gin.HandlerFunc {
 	}
 }
 
+func (a *Proxy) getFlowClient(isFN bool, uuid string) (*client.FlowClient, error) {
+	var cli *client.FlowClient
+	if isFN {
+		fn, err := a.DB.GetFN(uuid)
+		if err != nil {
+			return nil, err
+		}
+		cli = client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
+	} else {
+		fnc, err := a.DB.GetFNC(uuid)
+		if err != nil {
+			return nil, err
+		}
+		cli = client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
+	}
+	return cli, nil
+}
+
 func getUrl(ctx *gin.Context) (string, string) {
 	path := ctx.Request.URL.String()
 	subStrings := strings.Split(path, "/")
-	fnUUID := subStrings[3]
+	uuid := subStrings[3]
 	url := ""
 	for i := 4; i < len(subStrings); i++ {
 		url += "/" + subStrings[i]
 	}
-	return fnUUID, url
+	return uuid, url
 }
 
 func response(ctx *gin.Context, val *[]byte) {

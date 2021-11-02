@@ -154,11 +154,20 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 		fnProxy := apiRoutes.Group("/fn")
 		{
-			fnProxy.GET("/*any", proxyHandler.GetProxy())
-			fnProxy.POST("/*any", proxyHandler.PostProxy())
-			fnProxy.PUT("/*any", proxyHandler.PutProxy())
-			fnProxy.PATCH("/*any", proxyHandler.PatchProxy())
-			fnProxy.DELETE("/*any", proxyHandler.DeleteProxy())
+			fnProxy.GET("/*any", proxyHandler.GetProxy(true))
+			fnProxy.POST("/*any", proxyHandler.PostProxy(true))
+			fnProxy.PUT("/*any", proxyHandler.PutProxy(true))
+			fnProxy.PATCH("/*any", proxyHandler.PatchProxy(true))
+			fnProxy.DELETE("/*any", proxyHandler.DeleteProxy(true))
+		}
+
+		fncProxy := apiRoutes.Group("/fnc")
+		{
+			fncProxy.GET("/*any", proxyHandler.GetProxy(false))
+			fncProxy.POST("/*any", proxyHandler.PostProxy(false))
+			fncProxy.PUT("/*any", proxyHandler.PutProxy(false))
+			fncProxy.PATCH("/*any", proxyHandler.PatchProxy(false))
+			fncProxy.DELETE("/*any", proxyHandler.DeleteProxy(false))
 		}
 
 		requireClientsGroupRoutes := apiRoutes.Group("")
