@@ -5,6 +5,7 @@ import (
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/client"
+	"github.com/NubeDev/flow-framework/urls"
 	"github.com/NubeDev/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -103,10 +104,11 @@ func (d *GormDatabase) WizardMasterSlavePointMappingOnConsumerSideByProducerSide
 	}
 
 	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-	producers, err := cli.GetProducers(&streamClones[0].SourceUUID)
+	rawProducers, err := cli.GetQueryMarshal(urls.ProducerURLWithStream(streamClones[0].SourceUUID), []model.Producer{})
 	if err != nil {
-		return false, fmt.Errorf("producer search failure: %s", err)
+		return false, err
 	}
+	producers := rawProducers.(*[]model.Producer)
 
 	consumerModel.Name = "ZATSP"
 	consumerModel.ProducerUUID = (*producers)[0].UUID

@@ -6,6 +6,7 @@ import (
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/src/client"
+	"github.com/NubeDev/flow-framework/urls"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -40,7 +41,10 @@ func (d *GormDatabase) WizardP2PMapping(body *model.P2PBody) (bool, error) {
 	}
 
 	cli := client.NewFlowClientCli(flow.FlowIP, flow.FlowPort, flow.FlowToken, flow.IsMasterSlave, flow.GlobalUUID, model.IsFNCreator(flow))
-	_, err = cli.WizardP2PMappingOnConsumerSideByProducerSide(deviceInfo.GlobalUUID)
+	//_, err = cli.WizardP2PMappingOnConsumerSideByProducerSide(deviceInfo.GlobalUUID)
+	url := fmt.Sprintf("/api/database/wizard/mapping/p2p/points/consumer/%s", deviceInfo.GlobalUUID)
+	fmt.Println("WizardP2PMappingOnConsumerSideByProducerSide>>> ", url)
+	_, err = cli.PostQuery(url, nil)
 	if err != nil {
 		return false, err
 	}
@@ -156,10 +160,11 @@ func (d *GormDatabase) WizardP2PMappingOnConsumerSideByProducerSide(producerGlob
 	}
 
 	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-	producers, err := cli.GetProducers(&streamClones[0].SourceUUID)
+	rawProducers, err := cli.GetQueryMarshal(urls.ProducerURLWithStream(streamClones[0].SourceUUID), []model.Producer{})
 	if err != nil {
-		return false, fmt.Errorf("producer search failure: %s", err)
+		return false, err
 	}
+	producers := rawProducers.(*[]model.Producer)
 
 	consumerModel.Name = "ZATSP"
 	consumerModel.ProducerUUID = (*producers)[0].UUID

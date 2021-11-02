@@ -4,20 +4,19 @@ import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/auth"
 	"github.com/NubeDev/flow-framework/eventbus"
-	"time"
-
 	"github.com/NubeDev/flow-framework/floweng/server"
-	"github.com/NubeDev/flow-framework/logger"
-	"github.com/NubeDev/location"
 	"github.com/gin-contrib/cors"
+	"time"
 
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/api/stream"
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/database"
 	"github.com/NubeDev/flow-framework/error"
+	"github.com/NubeDev/flow-framework/logger"
 	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/plugin"
+	"github.com/NubeDev/location"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,6 +27,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.NoRoute(error.NotFound())
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
+	proxyHandler := api.Proxy{DB: db}
 	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
 	healthHandler := api.HealthAPI{DB: db}
 	clientHandler := api.ClientAPI{
@@ -142,6 +142,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			ctx.Header(header, value)
 		}
 	})
+
 	engine.Use(cors.New(auth.CorsConfig(conf)))
 	engine.OPTIONS("/*any")
 
@@ -150,6 +151,24 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		apiRoutes.GET("/version", func(ctx *gin.Context) {
 			ctx.JSON(200, vInfo)
 		})
+
+		fnProxy := apiRoutes.Group("/fn")
+		{
+			fnProxy.GET("/*any", proxyHandler.GetProxy(true))
+			fnProxy.POST("/*any", proxyHandler.PostProxy(true))
+			fnProxy.PUT("/*any", proxyHandler.PutProxy(true))
+			fnProxy.PATCH("/*any", proxyHandler.PatchProxy(true))
+			fnProxy.DELETE("/*any", proxyHandler.DeleteProxy(true))
+		}
+
+		fncProxy := apiRoutes.Group("/fnc")
+		{
+			fncProxy.GET("/*any", proxyHandler.GetProxy(false))
+			fncProxy.POST("/*any", proxyHandler.PostProxy(false))
+			fncProxy.PUT("/*any", proxyHandler.PutProxy(false))
+			fncProxy.PATCH("/*any", proxyHandler.PatchProxy(false))
+			fncProxy.DELETE("/*any", proxyHandler.DeleteProxy(false))
+		}
 
 		requireClientsGroupRoutes := apiRoutes.Group("")
 		{

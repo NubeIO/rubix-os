@@ -300,6 +300,11 @@ func getBODYFlowNetwork(ctx *gin.Context) (dto *model.FlowNetwork, err error) {
 	return dto, err
 }
 
+func getMapBody(ctx *gin.Context) (dto *map[string]interface{}, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
