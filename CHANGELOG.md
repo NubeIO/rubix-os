@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.1.6](https://github.com/NubeIO/flow-framework/tree/v0.1.6) (2021-11-04)
+- add APIs for proxying fn, fnc
+- serial port fix (#288)
+
 ## [v0.1.5](https://github.com/NubeIO/flow-framework/tree/v0.1.5) (2021-11-01)
 - nubeio-rubix-lib-helpers-go version upgrade to v0.1.2
 
