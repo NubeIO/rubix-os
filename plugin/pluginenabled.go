@@ -8,7 +8,7 @@ import (
 
 func requirePluginEnabled(uuid string, db Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		conf, err := db.GetPluginConfByID(uuid)
+		conf, err := db.GetPlugin(uuid)
 		if err != nil {
 			c.AbortWithError(500, err)
 			return

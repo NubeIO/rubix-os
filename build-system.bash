@@ -43,7 +43,7 @@ else
 fi
 
 echo -e "${GREEN}Creating a plugin directory if does not exist at: ${pluginDir}${DEFAULT}"
-rm -r $pluginDir/*
+rm -rf $pluginDir/* || true
 mkdir -p $pluginDir
 
 cd $dir/plugin/nube/system/

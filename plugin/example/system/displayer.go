@@ -5,14 +5,13 @@ import (
 	"net/url"
 )
 
-
 // GetDisplay implements public.Displayer
 func (c *PluginTest) GetDisplay(baseURL *url.URL) plugin.Response {
 	baseURL.Path = c.basePath
-	messageURL := plugin.Response {
-		StatusCode: 1,
-		Headers:    map[string]string{"Content-Type": "application/json"},
-		Body:       "Hello World",
+	messageURL := plugin.Response{
+		Details: plugin.Help{
+			Name: "System",
+		},
 	}
 	return messageURL
 }

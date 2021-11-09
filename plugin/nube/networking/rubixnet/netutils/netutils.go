@@ -146,7 +146,7 @@ func setStaticIPDhcpdConf(iFaceName, ip, gatewayIP, dnsIP string) error {
 		return err
 	}
 	body = append(body, []byte(add)...)
-	err = os.WriteFile("/etc/dhcpcd.conf", body, 0755)
+	err = ioutil.WriteFile("/etc/dhcpcd.conf", body, 0755)
 	if err != nil {
 		return err
 	}

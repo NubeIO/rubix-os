@@ -49,7 +49,7 @@ func GetFlowPluginInfo() plugin.Info {
 }
 
 // NewFlowPluginInstance creates a plugin instance for a user context.
-func NewFlowPluginInstance(ctx plugin.UserContext) plugin.Plugin {
+func NewFlowPluginInstance() plugin.Plugin {
 	return &Instance{}
 }
 

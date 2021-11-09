@@ -8,30 +8,17 @@ import (
 )
 
 type redirectToChannel struct {
-	ApplicationID uint
-	UserID        uint
-	Messages      chan MessageWithUserID
+	Messages chan model.MessageExternal
 }
-
-// MessageWithUserID encapsulates a message with a given user ID.
-type MessageWithUserID struct {
-	Message model.MessageExternal
-	UserID  uint
-}
-
 
 // SendMessage sends a message to the underlying message channel.
 func (c redirectToChannel) SendMessage(msg compat.Message) error {
-	c.Messages <- MessageWithUserID{
-		Message: model.MessageExternal{
-			ApplicationID: c.ApplicationID,
-			Message:       	msg.Message,
-			Title:         		msg.Title,
-			Priority:      		msg.Priority,
-			Date:          		time.Now(),
-			Extras:       		msg.Extras,
-		},
-		UserID: c.UserID,
+	c.Messages <- model.MessageExternal{
+		Message:  msg.Message,
+		Title:    msg.Title,
+		Priority: msg.Priority,
+		Date:     time.Now(),
+		Extras:   msg.Extras,
 	}
 	return nil
 }

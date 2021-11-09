@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/auth/password"
 	"github.com/NubeDev/flow-framework/config"
 	"github.com/NubeDev/flow-framework/eventbus"
 	"github.com/NubeDev/flow-framework/src/cachestore"
@@ -21,8 +20,7 @@ var mkdirAll = os.MkdirAll
 var gormDatabase *GormDatabase
 
 // New creates a new wrapper for the gorm database framework.
-func New(dialect, connection, defaultUser, defaultPass string, strength int, logLevel string,
-	createDefaultUserIfNotExist bool) (*GormDatabase, error) {
+func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 	createDirectoryIfSqlite(dialect, connection)
 	_connection := fmt.Sprintf("%s?_foreign_keys=on", connection)
 	db, err := gorm.Open(sqlite.Open(_connection), &gorm.Config{
@@ -34,10 +32,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	}
 	var localStorageFlowNetwork []model.LocalStorageFlowNetwork
 	var alerts []model.Alert
-	var user []model.User
-	var application []model.Application
 	var message []model.Message
-	var client []model.Client
 	var pluginConf []model.PluginConf
 	var network []model.Network
 	var device []model.Device
@@ -74,10 +69,7 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	var models = []interface{}{
 		&localStorageFlowNetwork,
 		&alerts,
-		&user,
-		&application,
 		&message,
-		&client,
 		&pluginConf,
 		&network,
 		&device,
@@ -120,11 +112,6 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 		}
 	}
 
-	var userCount int64 = 0
-	db.Find(new(model.User)).Count(&userCount)
-	if createDefaultUserIfNotExist && userCount == 0 {
-		db.Create(&model.User{Name: defaultUser, Pass: password.CreatePassword(defaultPass, strength), Admin: true})
-	}
 	var lsFlowNetworkCount int64 = 0
 	conf := config.Get()
 	lsFlowNetwork := model.LocalStorageFlowNetwork{

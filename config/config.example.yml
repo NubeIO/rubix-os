@@ -26,17 +26,11 @@ server:
 #      - "Authorization"
 #      - "content-type"
 
-defaultuser: # on database creation, creates an admin user
-  name: admin # the username of the default user
-  pass: admin # the password of the default user
-
 database: # for database see (configure database section)
   dialect: sqlite3
   connection: data.db
   loglevel: "DEBUG" # options are: INFO, WARN, ERROR, SILENT (needs to be greater than or equal to global loglevel)
 
-
-passstrength: 10 # the bcrypt password strength (higher = better but also slower)
 loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
 
 location:

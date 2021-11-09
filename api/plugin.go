@@ -3,7 +3,6 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeDev/flow-framework/auth"
 	"io/ioutil"
 
 	"github.com/NubeDev/flow-framework/model"
@@ -16,11 +15,10 @@ import (
 
 // The PluginDatabase interface for encapsulating database access.
 type PluginDatabase interface {
-	GetPluginConfByUser(userid uint) ([]*model.PluginConf, error)
-	UpdatePluginConf(p *model.PluginConf) error
-	GetPluginConfByID(uuid string) (*model.PluginConf, error)
-	GetPlugin(uuid string) (*model.PluginConf, error)
+	GetPlugins() ([]*model.PluginConf, error)
 	GetPluginByPath(path string) (*model.PluginConf, error)
+	GetPlugin(uuid string) (*model.PluginConf, error)
+	UpdatePluginConf(p *model.PluginConf) error
 }
 
 // The PluginAPI provides handlers for managing plugins.
@@ -44,8 +42,7 @@ func (c *PluginAPI) GetPluginByPath(ctx *gin.Context) {
 
 // GetPlugins returns all plugins a user has.
 func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
-	userID := auth.GetUserID(ctx)
-	plugins, err := c.DB.GetPluginConfByUser(userID)
+	plugins, err := c.DB.GetPlugins()
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}
@@ -56,7 +53,6 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 			result = append(result, model.PluginConfExternal{
 				UUID:         conf.UUID,
 				Name:         info.String(),
-				Token:        conf.Token,
 				ModulePath:   conf.ModulePath,
 				Author:       info.Author,
 				Website:      info.Website,
@@ -98,12 +94,11 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 	if err != nil {
 		reposeHandler("error on body", err, ctx)
 	}
-	//uuid := ""
-	conf, err := c.DB.GetPluginConfByID(uuid)
+	conf, err := c.DB.GetPlugin(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}
-	if conf == nil || !isPluginOwner(ctx, conf) {
+	if conf == nil {
 		reposeHandler("unknown plugin", err, ctx)
 		return
 	}
@@ -122,17 +117,16 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 	} else {
 		reposeHandler("disabled", err, ctx)
 	}
-
 }
 
 // RestartPlugin enables a plugin.
 func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
 	uuid := c.buildUUID(ctx)
-	conf, err := c.DB.GetPluginConfByID(uuid)
+	conf, err := c.DB.GetPlugin(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}
-	if conf == nil || !isPluginOwner(ctx, conf) {
+	if conf == nil {
 		reposeHandler("unknown plugin", err, ctx)
 		return
 	}
@@ -153,11 +147,11 @@ func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
 // GetDisplay get display info for Displayer plugin.
 func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
 	uuid := c.buildUUID(ctx)
-	conf, err := c.DB.GetPluginConfByID(uuid)
+	conf, err := c.DB.GetPlugin(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}
-	if conf == nil || !isPluginOwner(ctx, conf) {
+	if conf == nil {
 		ctx.AbortWithError(404, errors.New("unknown plugin"))
 		return
 	}
@@ -173,11 +167,11 @@ func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
 // GetConfig returns Configurer plugin configuration in YAML format.
 func (c *PluginAPI) GetConfig(ctx *gin.Context) {
 	uuid := c.buildUUID(ctx)
-	conf, err := c.DB.GetPluginConfByID(uuid)
+	conf, err := c.DB.GetPlugin(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}
-	if conf == nil || !isPluginOwner(ctx, conf) {
+	if conf == nil {
 		ctx.AbortWithError(404, errors.New("unknown plugin"))
 		return
 	}
@@ -199,11 +193,11 @@ func (c *PluginAPI) GetConfig(ctx *gin.Context) {
 // UpdateConfig updates Configurer plugin configuration in YAML format.
 func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
 	uuid := c.buildUUID(ctx)
-	conf, err := c.DB.GetPluginConfByID(uuid)
+	conf, err := c.DB.GetPlugin(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}
-	if conf == nil || !isPluginOwner(ctx, conf) {
+	if conf == nil {
 		ctx.AbortWithError(404, errors.New("unknown plugin"))
 		return
 	}
@@ -234,10 +228,6 @@ func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
 	conf.Config = newConfBytes
 	successOrAbort(ctx, 500, c.DB.UpdatePluginConf(conf))
 
-}
-
-func isPluginOwner(ctx *gin.Context, conf *model.PluginConf) bool {
-	return conf.UserID == auth.GetUserID(ctx)
 }
 
 func supportOrAbort(ctx *gin.Context, instance compat.PluginInstance, module compat.Capability) (aborted bool) {

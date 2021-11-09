@@ -22,11 +22,8 @@ func GetFlowPluginInfo() plugin.Info {
 }
 
 // NewFlowPluginInstance creates a plugin instance for a user context.
-func NewFlowPluginInstance(ctx plugin.UserContext) plugin.Plugin {
-	usersList.AddUser(ctx)
-	p := &PluginTest{
-		UserCtx: ctx,
-	}
+func NewFlowPluginInstance() plugin.Plugin {
+	p := &PluginTest{}
 	return p
 }
 

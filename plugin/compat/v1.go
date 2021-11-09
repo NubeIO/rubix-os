@@ -13,7 +13,7 @@ import (
 // PluginV1 is an abstraction of a plugin written in the v1 plugin API. Exported for testing purposes only.
 type PluginV1 struct {
 	Info        plugin.Info
-	Constructor func(ctx plugin.UserContext) plugin.Plugin
+	Constructor func() plugin.Plugin
 }
 
 // APIVersion returns the API version.
@@ -35,12 +35,8 @@ func (c PluginV1) PluginInfo() Info {
 }
 
 // NewPluginInstance implements compat/Plugin.
-func (c PluginV1) NewPluginInstance(ctx UserContext) PluginInstance {
-	instance := c.Constructor(plugin.UserContext{
-		ID:    ctx.ID,
-		Name:  ctx.Name,
-		Admin: ctx.Admin,
-	})
+func (c PluginV1) NewPluginInstance() PluginInstance {
+	instance := c.Constructor()
 
 	compat := &PluginV1Instance{
 		instance: instance,

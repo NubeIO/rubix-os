@@ -9,13 +9,6 @@ type Plugin interface {
 	Disable() error
 }
 
-// UserContext is provided when calling New to create a plugin instance for each user
-type UserContext struct {
-	ID    uint
-	Name  string
-	Admin bool
-}
-
 // Info is returned by the exported plugin function GetPluginInfo() for identification
 // plugins are identified by their ModulePath, flow will refuse to load plugins with empty ModulePath
 type Info struct {
