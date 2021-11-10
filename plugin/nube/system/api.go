@@ -16,6 +16,8 @@ func resolveName(ctx *gin.Context) string {
 const helpText = `
 # LoRa Help Guide
 
+help
+
 ### line 2
 *new tab*
 <a href="https://stackoverflow.com" target="_blank">New Tab</a>
