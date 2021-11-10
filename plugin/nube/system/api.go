@@ -42,7 +42,7 @@ this is *some* normal texy`
 type Point struct {
 	ObjectType struct {
 		Options  interface{} `json:"options"`
-		Type     string      `json:"type"`	
+		Type     string      `json:"type"`
 		Required bool        `json:"required"`
 	} `json:"object_type"`
 }
@@ -72,17 +72,16 @@ func supportedObjects() *utils.Array {
 }
 
 const (
-	help = "/system/help"
-	helpHTML = "/system/help/guide"
-	pointHelp = "/system/point/help"
+	help        = "/help"
+	helpHTML    = "/help/guide"
+	schemaPoint = "/schema/point"
 )
 
 var Supports = struct {
-	Network bool `json:"network"`
+	Network     bool `json:"network"`
 	NetworkCRUD bool `json:"networkCRUD"`
-
 }{
-	Network: true,
+	Network:     true,
 	NetworkCRUD: true,
 }
 
@@ -97,7 +96,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		output := markdown.ToHTML(md, nil, nil)
 		ctx.Writer.Write(output)
 	})
-	mux.GET(pointHelp, func(ctx *gin.Context) {
+	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		var h Point
 		h.ObjectType.Options = supportedObjects()
 		h.ObjectType.Type = "array"
@@ -112,7 +111,5 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else {
 			ctx.JSON(http.StatusOK, obj)
 		}
-
 	})
-
 }
