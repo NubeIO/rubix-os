@@ -29,18 +29,16 @@ var (
 )
 
 func intHandler(db *database.GormDatabase) {
-	//db access
 	dh := new(dbhandler.Handler)
 	dh.DB = db
 	dbhandler.Init(dh)
-	//store access
+
 	s := new(cachestore.Handler)
 	s.Store = cache.New(5*time.Minute, 10*time.Minute)
 	cachestore.Init(s)
 
 	j := new(jobs.Jobs)
 	j.InitCron()
-
 }
 
 func main() {
@@ -65,7 +63,7 @@ func main() {
 	fmt.Println("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
 	eventbus.Init()
 	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
-		conf.PassStrength, conf.Database.LogLevel, true, conf.Prod)
+		conf.PassStrength, conf.Database.LogLevel, true)
 	if err != nil {
 		panic(err)
 	}
@@ -76,5 +74,4 @@ func main() {
 	defer closeable()
 	eventbus.RegisterMQTTBus()
 	runner.Run(engine, conf)
-
 }
