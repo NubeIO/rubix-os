@@ -20,16 +20,15 @@ import (
 var mkdirAll = os.MkdirAll
 var gormDatabase *GormDatabase
 
-//var GetDatabaseBus eventbus.BusService
-
 // New creates a new wrapper for the gorm database framework.
 func New(dialect, connection, defaultUser, defaultPass string, strength int, logLevel string,
-	createDefaultUserIfNotExist bool, production bool) (*GormDatabase, error) {
+	createDefaultUserIfNotExist bool) (*GormDatabase, error) {
 	createDirectoryIfSqlite(dialect, connection)
 	_connection := fmt.Sprintf("%s?_foreign_keys=on", connection)
 	db, err := gorm.Open(sqlite.Open(_connection), &gorm.Config{
 		Logger: logger.New().SetLogMode(logLevel),
 	})
+
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -125,13 +124,6 @@ func New(dialect, connection, defaultUser, defaultPass string, strength int, log
 	db.Find(new(model.User)).Count(&userCount)
 	if createDefaultUserIfNotExist && userCount == 0 {
 		db.Create(&model.User{Name: defaultUser, Pass: password.CreatePassword(defaultPass, strength), Admin: true})
-		//if !production { //make a fake token for dev
-		//	c := new(model.Client)
-		//	c.Token = "fakeToken123"
-		//	c.UserID = 1
-		//	c.Name = "admin"
-		//	db.Create(c)
-		//}
 	}
 	var lsFlowNetworkCount int64 = 0
 	conf := config.Get()
@@ -169,6 +161,9 @@ type GormDatabase struct {
 
 // Close closes the gorm database connection.
 func (d *GormDatabase) Close() {
-	fmt.Println("FIX THIS CLOSE DB dont work after upgrade of gorm")
-	//d.Close() //TODO this is broken it calls itself
+	sqlDB, err := d.DB.DB()
+	if err != nil {
+		panic(err)
+	}
+	sqlDB.Close()
 }
