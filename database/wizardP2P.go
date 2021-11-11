@@ -41,9 +41,7 @@ func (d *GormDatabase) WizardP2PMapping(body *model.P2PBody) (bool, error) {
 	}
 
 	cli := client.NewFlowClientCli(flow.FlowIP, flow.FlowPort, flow.FlowToken, flow.IsMasterSlave, flow.GlobalUUID, model.IsFNCreator(flow))
-	//_, err = cli.WizardP2PMappingOnConsumerSideByProducerSide(deviceInfo.GlobalUUID)
 	url := fmt.Sprintf("/api/database/wizard/mapping/p2p/points/consumer/%s", deviceInfo.GlobalUUID)
-	fmt.Println("WizardP2PMappingOnConsumerSideByProducerSide>>> ", url)
 	_, err = cli.PostQuery(url, nil)
 	if err != nil {
 		return false, err

@@ -28,10 +28,6 @@ type Configuration struct {
 		Connection string `default:"data.db"`
 		LogLevel   string `default:"WARN"`
 	}
-	DefaultUser struct {
-		Name string `default:"admin"`
-		Pass string `default:"admin"`
-	}
 	PassStrength int `default:"10"`
 	LogLevel     string
 	Location     struct {

@@ -20,27 +20,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Create creates the gin engine with all routes.
 func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Configuration) (*gin.Engine, func()) {
 	engine := gin.New()
 	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), error.Handler(), location.Default())
 	engine.NoRoute(error.NotFound())
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
-	proxyHandler := api.Proxy{DB: db}
 	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
+	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
-	clientHandler := api.ClientAPI{
-		DB:            db,
-		ImageDir:      conf.GetAbsUploadedImagesDir(),
-		NotifyDeleted: streamHandler.NotifyDeletedClient,
-	}
-	applicationHandler := api.ApplicationAPI{
-		DB:       db,
-		ImageDir: conf.GetAbsUploadedImagesDir(),
-	}
-	userChangeNotifier := new(api.UserChangeNotifier)
-	userHandler := api.UserAPI{DB: db, PasswordStrength: conf.PassStrength, UserChangeNotifier: userChangeNotifier}
 	localStorageFlowNetworkHandler := api.LocalStorageFlowNetworkAPI{
 		DB: db,
 	}
@@ -130,9 +118,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		Notifier: streamHandler,
 		DB:       db,
 	}
-	userChangeNotifier.OnUserDeleted(streamHandler.NotifyDeletedUser)
-	userChangeNotifier.OnUserDeleted(pluginManager.RemoveUser)
-	userChangeNotifier.OnUserAdded(pluginManager.InitializeForUserID)
 
 	engine.GET("/api/system/ping", healthHandler.Health)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
@@ -145,6 +130,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 	engine.Use(cors.New(auth.CorsConfig(conf)))
 	engine.OPTIONS("/*any")
+
+	engine.GET("/stream", streamHandler.Handle)
 
 	apiRoutes := engine.Group("/api")
 	{
@@ -184,48 +171,13 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
 			}
 
-			applicationRoutes := requireClientsGroupRoutes.Group("/applications")
-			{
-				applicationRoutes.GET("", applicationHandler.GetApplications)
-				applicationRoutes.POST("", applicationHandler.CreateApplication)
-				applicationRoutes.POST("/:id/image", applicationHandler.UploadApplicationImage)
-				applicationRoutes.PUT("/:id", applicationHandler.UpdateApplication)
-				applicationRoutes.DELETE("/:id", applicationHandler.DeleteApplication)
-
-				tokenMessageRoutes := applicationRoutes.Group("/:id/messages")
-				{
-					tokenMessageRoutes.GET("", messageHandler.GetMessagesWithApplication)
-					tokenMessageRoutes.DELETE("", messageHandler.DeleteMessageWithApplication)
-				}
-			}
-
-			clientRoutes := requireClientsGroupRoutes.Group("/clients")
-			{
-				clientRoutes.GET("", clientHandler.GetClients)
-				clientRoutes.POST("", clientHandler.CreateClient)
-				clientRoutes.DELETE("/:id", clientHandler.DeleteClient)
-				clientRoutes.PUT("/:id", clientHandler.UpdateClient)
-			}
-
 			messageRoutes := requireClientsGroupRoutes.Group("/messages")
 			{
+				messageRoutes.POST("", messageHandler.CreateMessage)
 				messageRoutes.GET("", messageHandler.GetMessages)
 				messageRoutes.DELETE("", messageHandler.DeleteMessages)
 				messageRoutes.DELETE("/:id", messageHandler.DeleteMessage)
 			}
-		}
-
-		apiRoutes.Group("").POST("/messages", messageHandler.CreateMessage)
-
-		userRoutes := apiRoutes.Group("/users")
-		{
-			userRoutes.GET("", userHandler.GetUsers)
-			userRoutes.POST("", userHandler.CreateUser)
-			userRoutes.PATCH("/current/password", userHandler.ChangePassword)
-			userRoutes.GET("/current", userHandler.GetCurrentUser)
-			userRoutes.DELETE("/:id", userHandler.DeleteUserByID)
-			userRoutes.GET("/:id", userHandler.GetUserByID)
-			userRoutes.PATCH("/:id", userHandler.UpdateUserByID)
 		}
 
 		databaseRoutes := apiRoutes.Group("/database")

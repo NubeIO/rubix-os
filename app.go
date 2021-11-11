@@ -62,8 +62,7 @@ func main() {
 
 	fmt.Println("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
 	eventbus.Init()
-	db, err := database.New(conf.Database.Dialect, connection, conf.DefaultUser.Name, conf.DefaultUser.Pass,
-		conf.PassStrength, conf.Database.LogLevel, true)
+	db, err := database.New(conf.Database.Dialect, connection, conf.Database.LogLevel)
 	if err != nil {
 		panic(err)
 	}

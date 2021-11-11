@@ -1,7 +1,6 @@
 package stream
 
 import (
-	"github.com/NubeDev/flow-framework/auth"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -16,7 +15,7 @@ import (
 
 // The API provides a handler for a WebSocket stream API.
 type API struct {
-	clients     map[uint][]*client
+	clients     []*client
 	lock        sync.RWMutex
 	pingPeriod  time.Duration
 	pongTimeout time.Duration
@@ -29,7 +28,7 @@ type API struct {
 // pong command.
 func New(pingPeriod, pongTimeout time.Duration, allowedWebSocketOrigins []string, prod bool) *API {
 	return &API{
-		clients:     make(map[uint][]*client),
+		clients:     []*client{},
 		pingPeriod:  pingPeriod,
 		pongTimeout: pingPeriod + pongTimeout,
 		upgrader:    newUpgrader(allowedWebSocketOrigins, prod),
@@ -40,51 +39,28 @@ func New(pingPeriod, pongTimeout time.Duration, allowedWebSocketOrigins []string
 func (a *API) NotifyDeletedUser(userID uint) error {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	if clients, ok := a.clients[userID]; ok {
-		for _, client := range clients {
-			client.Close()
-		}
-		delete(a.clients, userID)
+	for _, client := range a.clients {
+		client.Close()
 	}
 	return nil
 }
 
-// NotifyDeletedClient closes existing connections with the given token.
-func (a *API) NotifyDeletedClient(userID uint, token string) {
-	a.lock.Lock()
-	defer a.lock.Unlock()
-	if clients, ok := a.clients[userID]; ok {
-		for i := len(clients) - 1; i >= 0; i-- {
-			client := clients[i]
-			if client.token == token {
-				client.Close()
-				clients = append(clients[:i], clients[i+1:]...)
-			}
-		}
-		a.clients[userID] = clients
-	}
-}
-
 // Notify notifies the clients with the given userID that a new messages was created.
-func (a *API) Notify(userID uint, msg *model.MessageExternal) {
+func (a *API) Notify(msg *model.MessageExternal) {
 	a.lock.RLock()
 	defer a.lock.RUnlock()
-	if clients, ok := a.clients[userID]; ok {
-		for _, c := range clients {
-			c.write <- msg
-		}
+	for _, c := range a.clients {
+		c.write <- msg
 	}
 }
 
 func (a *API) remove(remove *client) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	if userIDClients, ok := a.clients[remove.userID]; ok {
-		for i, client := range userIDClients {
-			if client == remove {
-				a.clients[remove.userID] = append(userIDClients[:i], userIDClients[i+1:]...)
-				break
-			}
+	for i, client := range a.clients {
+		if client == remove {
+			a.clients = append(a.clients[:i], a.clients[i+1:]...)
+			break
 		}
 	}
 }
@@ -92,40 +68,10 @@ func (a *API) remove(remove *client) {
 func (a *API) register(client *client) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	a.clients[client.userID] = append(a.clients[client.userID], client)
+	a.clients = append(a.clients, client)
 }
 
 // Handle handles incoming requests. First it upgrades the protocol to the WebSocket protocol and then starts listening
-// for read and writes.
-// swagger:operation GET /stream message streamMessages
-//
-// Websocket, return newly created messages.
-//
-// ---
-// schema: ws, wss
-// produces: [application/json]
-// security: [clientTokenHeader: [], clientTokenQuery: [], basicAuth: []]
-// responses:
-//   200:
-//     description: Ok
-//     schema:
-//         $ref: "#/definitions/Message"
-//   400:
-//     description: Bad Request
-//     schema:
-//         $ref: "#/definitions/Error"
-//   401:
-//     description: Unauthorized
-//     schema:
-//         $ref: "#/definitions/Error"
-//   403:
-//     description: Forbidden
-//     schema:
-//         $ref: "#/definitions/Error"
-//   500:
-//     description: Server Error
-//     schema:
-//         $ref: "#/definitions/Error"
 func (a *API) Handle(ctx *gin.Context) {
 	conn, err := a.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {
@@ -133,7 +79,7 @@ func (a *API) Handle(ctx *gin.Context) {
 		return
 	}
 
-	client := newClient(conn, auth.GetUserID(ctx), auth.GetTokenID(ctx), a.remove)
+	client := newClient(conn, a.remove)
 	a.register(client)
 	go client.startReading(a.pongTimeout)
 	go client.startWriteHandler(a.pingPeriod)
@@ -143,14 +89,11 @@ func (a *API) Handle(ctx *gin.Context) {
 func (a *API) Close() {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-
-	for _, clients := range a.clients {
-		for _, client := range clients {
-			client.Close()
-		}
+	for _, client := range a.clients {
+		client.Close()
 	}
-	for k := range a.clients {
-		delete(a.clients, k)
+	for _, client := range a.clients {
+		a.remove(client)
 	}
 }
 

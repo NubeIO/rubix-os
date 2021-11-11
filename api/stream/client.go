@@ -24,17 +24,13 @@ type client struct {
 	conn    *websocket.Conn
 	onClose func(*client)
 	write   chan *model.MessageExternal
-	userID  uint
-	token   string
 	once    once
 }
 
-func newClient(conn *websocket.Conn, userID uint, token string, onClose func(*client)) *client {
+func newClient(conn *websocket.Conn, onClose func(*client)) *client {
 	return &client{
 		conn:    conn,
 		write:   make(chan *model.MessageExternal, 1),
-		userID:  userID,
-		token:   token,
 		onClose: onClose,
 	}
 }

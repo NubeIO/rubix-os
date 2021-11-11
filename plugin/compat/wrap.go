@@ -23,9 +23,9 @@ func Wrap(p *plugin.Plugin) (Plugin, error) {
 		if err != nil {
 			return nil, errors.New("missing NewFlowPluginInstance symbol")
 		}
-		constructor, ok := newInstanceHandle.(func(ctx papiv1.UserContext) papiv1.Plugin)
+		constructor, ok := newInstanceHandle.(func() papiv1.Plugin)
 		if !ok {
-			return nil, fmt.Errorf("NewFlowPluginInstance signature mismatch, func(ctx plugin.UserContext) plugin.Plugin expected, got %T", newInstanceHandle)
+			return nil, fmt.Errorf("NewFlowPluginInstance signature mismatch, func() plugin.Plugin expected, got %T", newInstanceHandle)
 		}
 		v1.Constructor = constructor
 		return v1, nil

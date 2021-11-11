@@ -27,9 +27,9 @@ func GetFlowPluginInfo() plugin.Info {
 }
 
 type Server struct {
-	Address string
-	Username string
-	Password string
+	Address   string
+	Username  string
+	Password  string
 	Subscribe []string
 }
 
@@ -39,11 +39,10 @@ type Config struct {
 
 // Plugin is plugin instance
 type Plugin struct {
-	userCtx    plugin.UserContext
 	msgHandler plugin.MessageHandler
-	config *Config
-	clients []mqtt.Client
-	enabled bool
+	config     *Config
+	clients    []mqtt.Client
+	enabled    bool
 }
 
 func (p *Plugin) GetNetworks() ([]*model.Network, error) {
@@ -149,14 +148,14 @@ func (p *Plugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 	g.POST("/mqttClient", func(ctx *gin.Context) {
 		for _, a := range p.clients {
 			log.Println("try a message")
-			if a.IsConnected(){
+			if a.IsConnected() {
 				log.Println("send a message")
 				msg := fmt.Sprintf("hello from MQTT %s time", time.Now().Format(time.RFC850))
 				a.Publish("topic", 1, false, msg)
 				err := p.msgHandler.SendMessage(plugin.Message{
-					Title:            	"mqttClient-message",
-					Message:          	fmt.Sprintf("hello from rest %s time", time.Now().Format(time.RFC850)),
-					Priority:         	2,
+					Title:    "mqttClient-message",
+					Message:  fmt.Sprintf("hello from rest %s time", time.Now().Format(time.RFC850)),
+					Priority: 2,
 					Extras: map[string]interface{}{
 						"plugin::name": "echo",
 					},
@@ -219,10 +218,9 @@ func (p *Plugin) newClient(serverConfig Server) (mqtt.Client, error) {
 }
 
 // NewFlowPluginInstance creates a plugin instance for a user context.
-func NewFlowPluginInstance(ctx plugin.UserContext) plugin.Plugin {
+func NewFlowPluginInstance() plugin.Plugin {
 	//return &Plugin{}
 	return &Plugin{
-		userCtx: ctx,
 		clients: make([]mqtt.Client, 0),
 	}
 }
