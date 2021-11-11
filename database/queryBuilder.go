@@ -212,6 +212,9 @@ func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildProducerHistoryQuery(args api.Args) *gorm.DB {
 	query := d.DB
+	if args.IdGt != nil {
+		query = query.Where("Id > ?", args.IdGt)
+	}
 	if args.TimestampGt != nil {
 		query = query.Where("timestamp > datetime(?)", args.TimestampGt)
 	}

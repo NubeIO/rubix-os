@@ -63,6 +63,7 @@ type Args struct {
 	NetworkName          string
 	DeviceName           string
 	PointName            string
+	IdGt                 *string
 }
 
 var ArgsType = struct {
@@ -118,6 +119,7 @@ var ArgsType = struct {
 	NetworkName          string
 	DeviceName           string
 	PointName            string
+	IdGt                 string
 }{
 	Sort:                 "sort",
 	Order:                "order",
@@ -171,6 +173,7 @@ var ArgsType = struct {
 	NetworkName:          "network_name",
 	DeviceName:           "device_name",
 	PointName:            "point_name",
+	IdGt:                 "id_gt",
 }
 
 var ArgsDefault = struct {

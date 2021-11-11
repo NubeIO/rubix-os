@@ -6,7 +6,7 @@ import (
 )
 
 func (h *Handler) GetFlowNetworkClones() ([]*model.FlowNetworkClone, error) {
-	q, err := getDb().GetFlowNetworkClones(api.Args{WithStreamClones: true})
+	q, err := getDb().GetFlowNetworkClones(api.Args{})
 	if err != nil {
 		return nil, err
 	}

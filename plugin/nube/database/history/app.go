@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/src/client"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 func (i *Instance) syncHistory() (bool, error) {
@@ -13,23 +15,31 @@ func (i *Instance) syncHistory() (bool, error) {
 		return false, err
 	}
 	var histories []*model.History
-	for _, fnClone := range fnClones {
-		sClones := fnClone.StreamClones
-		for _, sClone := range sClones {
-			url := fmt.Sprintf("%s:%v/%s", *fnClone.FlowIP, *fnClone.FlowPort, sClone.UUID)
-			sHistories, _ := getProducerHistories(url)
-			histories = append(histories, sHistories...)
-			//example for testing only
-			//histories = append(histories, &model.History{
-			//	UUID:      sClone.UUID,
-			//	ID:        0,
-			//	Timestamp: time.Now(),
-			//	Value:     rand.Float64(),
-			//})
+	for _, fnc := range fnClones {
+		hisLog, err := i.db.GetHistoryLogByFlowNetworkCloneUUID(fnc.UUID)
+		if err != nil {
+			return false, err
+		}
+		cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
+		pHistories, err := cli.GetProducerHistoriesPoints(fnc.UUID, hisLog.LastSyncID)
+		if err != nil {
+			return false, err
+		}
+		for k, h := range *pHistories {
+			histories = append(histories, &h)
+			// Update History Log
+			if k == len(*pHistories) - 1 {
+				hisLog.FlowNetworkCloneUUID = fnc.UUID
+				hisLog.LastSyncID = h.ID
+				hisLog.Timestamp = time.Now()
+				_, err = i.db.UpdateHistoryLog(hisLog)
+				if err != nil {
+					return false, err
+				}
+			}
 		}
 	}
 	if len(histories) > 0 {
-		//save histories
 		_, err = i.db.CreateBulkHistory(histories)
 		if err != nil {
 			return false, err
