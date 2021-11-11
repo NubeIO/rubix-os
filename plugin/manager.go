@@ -217,7 +217,6 @@ func (m *Manager) LoadPlugin(compatPlugin compat.Plugin) error {
 
 func (m *Manager) initializePlugins() error {
 	for _, p := range m.plugins {
-		fmt.Println("plugin>>>>", p.PluginInfo())
 		if err := m.initializePlugin(p); err != nil {
 			return err
 		}

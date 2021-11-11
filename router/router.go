@@ -131,6 +131,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.Use(cors.New(auth.CorsConfig(conf)))
 	engine.OPTIONS("/*any")
 
+	engine.GET("/stream", streamHandler.Handle)
+
 	apiRoutes := engine.Group("/api")
 	{
 		apiRoutes.GET("/version", func(ctx *gin.Context) {
@@ -171,6 +173,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 			messageRoutes := requireClientsGroupRoutes.Group("/messages")
 			{
+				messageRoutes.POST("", messageHandler.CreateMessage)
 				messageRoutes.GET("", messageHandler.GetMessages)
 				messageRoutes.DELETE("", messageHandler.DeleteMessages)
 				messageRoutes.DELETE("/:id", messageHandler.DeleteMessage)
