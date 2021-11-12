@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/json"
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/model"
 	"time"
@@ -36,6 +37,25 @@ func (d *GormDatabase) GetLatestProducerHistoryByProducerUUID(pUuid string) (*mo
 		return nil, query.Error
 	}
 	return historyModel, nil
+}
+
+// GetProducerHistoriesPoints returns point histories of producer histories
+func (d *GormDatabase) GetProducerHistoriesPoints(args api.Args) ([]*model.History, error) {
+	var historiesModel []*model.History
+	var proHistoriesModel []*model.ProducerHistory
+	subQuery := d.DB.Model(&model.Producer{}).Select("uuid").Where("producer_thing_class = ?", "point")
+	query := d.buildProducerHistoryQuery(args)
+	query = query.Where("producer_uuid in (?)", subQuery).Find(&proHistoriesModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	for _, pHis := range proHistoriesModel {
+		pri := new(model.Priority)
+		_ = json.Unmarshal(pHis.DataStore, &pri)
+		historiesModel = append(historiesModel,
+			&model.History{ID: pHis.ID, UUID: pHis.ProducerUUID, Value: pri.GetHighestPriority(), Timestamp: pHis.Timestamp})
+	}
+	return historiesModel, nil
 }
 
 func (d *GormDatabase) AppendProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {

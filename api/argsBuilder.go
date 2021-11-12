@@ -231,6 +231,9 @@ func buildTagArgs(ctx *gin.Context) Args {
 func buildProducerHistoryArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
+	if value, ok := ctx.GetQuery(aType.IdGt); ok {
+		args.IdGt = &value
+	}
 	if value, ok := ctx.GetQuery(aType.TimestampGt); ok {
 		args.TimestampGt = &value
 	}

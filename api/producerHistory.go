@@ -10,6 +10,7 @@ type ProducerHistoryDatabase interface {
 	GetProducerHistories(args Args) ([]*model.ProducerHistory, error)
 	GetProducerHistoriesByProducerUUID(pUuid string, args Args) ([]*model.ProducerHistory, int64, error)
 	GetLatestProducerHistoryByProducerUUID(pUuid string) (*model.ProducerHistory, error)
+	GetProducerHistoriesPoints(args Args)([]*model.History, error)
 	CreateBulkProducerHistory(histories []*model.ProducerHistory) (bool, error)
 	CreateProducerHistory(history *model.ProducerHistory) (bool, error)
 	DeleteAllProducerHistories(args Args) (bool, error)
@@ -35,6 +36,12 @@ func (a *HistoriesAPI) GetProducerHistoriesByProducerUUID(ctx *gin.Context) {
 func (a *HistoriesAPI) GetLatestProducerHistoryByProducerUUID(ctx *gin.Context) {
 	pUuid := resolveProducerUUID(ctx)
 	q, err := a.DB.GetLatestProducerHistoryByProducerUUID(pUuid)
+	reposeHandler(q, err, ctx)
+}
+
+func (a *HistoriesAPI) GetProducerHistoriesPoints(ctx *gin.Context) {
+	args := buildProducerHistoryArgs(ctx)
+	q, err := a.DB.GetProducerHistoriesPoints(args)
 	reposeHandler(q, err, ctx)
 }
 
