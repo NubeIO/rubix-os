@@ -6,6 +6,10 @@ GREEN="\033[32m"
 RED="\033[31m"
 
 PRODUCTION=false
+SYSTEM=true
+RUBIX=false
+MODBUS=false
+LORA=false
 
 help() {
     echo "Service commands:"
@@ -21,7 +25,19 @@ parseCommand() {
             ;;
         --prod | --production)
             PRODUCTION=true
-            ;;
+          ;;
+        --system)
+            SYSTEM=true
+          ;;
+        --rubix)
+            RUBIX=true
+          ;;
+        --modbus)
+            MODBUS=true
+          ;;
+        --lora)
+            LORA=true
+          ;;
         *)
             echo -e "${RED}Unknown options ${i}  (-h, --help for help)${DEFAULT}"
             ;;
@@ -46,10 +62,27 @@ echo -e "${GREEN}Creating a plugin directory if does not exist at: ${pluginDir}$
 rm -rf $pluginDir/* || true
 mkdir -p $pluginDir
 
-cd $dir/plugin/nube/system/
-go build -buildmode=plugin -o system.so *.go  && cp system.so  $pluginDir
-cd $dir/plugin/nube/protocals/rubix
-go build -buildmode=plugin -o rubix.so *.go  && cp rubix.so $pluginDir
+
+if [ ${SYSTEM} == true ]; then
+     cd $dir/plugin/nube/system/
+     go build -buildmode=plugin -o system.so *.go  && cp system.so  $pluginDir
+     echo -e "${GREEN}BUILD SYSTEM"
+fi
+if [ ${RUBIX} == true ]; then
+     cd $dir/plugin/nube/protocals/rubix
+     go build -buildmode=plugin -o rubix.so *.go  && cp rubix.so  $pluginDir
+     echo -e "${GREEN}BUILD RUBIX"
+fi
+if [ ${MODBUS} == true ]; then
+    cd $dir/plugin/nube/protocals/modbus
+    go build -buildmode=plugin -o modbus.so *.go  && cp modbus.so $pluginDir
+    echo -e "${GREEN}BUILD MODBUS"
+fi
+if [ ${LORA} == true ]; then
+    cd $dir/plugin/nube/protocals/lora
+    go build -buildmode=plugin -o lora.so *.go  && cp lora.so $pluginDir
+    echo -e "${GREEN}BUILD LORA"
+fi
 
 
 cd $dir
