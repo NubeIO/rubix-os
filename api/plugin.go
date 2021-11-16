@@ -58,6 +58,7 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 				Website:      info.Website,
 				License:      info.License,
 				Enabled:      conf.Enabled,
+				HasNetwork:   conf.HasNetwork,
 				Capabilities: inst.Supports().Strings(),
 			})
 		}

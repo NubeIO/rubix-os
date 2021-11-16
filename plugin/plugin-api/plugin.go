@@ -19,5 +19,6 @@ type Info struct {
 	Description  string
 	License      string
 	ModulePath   string
+	HasNetwork   bool
 	ProtocolType string
 }

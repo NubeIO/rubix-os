@@ -44,6 +44,7 @@ func GetFlowPluginInfo() plugin.Info {
 		Description:  description,
 		Author:       author,
 		Website:      webSite,
+		HasNetwork:   true,
 		ProtocolType: protocolType,
 	}
 }
