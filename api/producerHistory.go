@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,7 +10,7 @@ type ProducerHistoryDatabase interface {
 	GetProducerHistories(args Args) ([]*model.ProducerHistory, error)
 	GetProducerHistoriesByProducerUUID(pUuid string, args Args) ([]*model.ProducerHistory, int64, error)
 	GetLatestProducerHistoryByProducerUUID(pUuid string) (*model.ProducerHistory, error)
-	GetProducerHistoriesPoints(args Args)([]*model.History, error)
+	GetProducerHistoriesPoints(args Args) ([]*model.History, error)
 	CreateBulkProducerHistory(histories []*model.ProducerHistory) (bool, error)
 	CreateProducerHistory(history *model.ProducerHistory) (bool, error)
 	DeleteAllProducerHistories(args Args) (bool, error)

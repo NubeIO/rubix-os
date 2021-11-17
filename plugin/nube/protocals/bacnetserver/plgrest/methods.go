@@ -2,8 +2,8 @@ package plgrest
 
 import (
 	"fmt"
-	baseModel "github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
+	baseModel "github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/model"
 	"strconv"
 )
 

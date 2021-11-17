@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
+	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
@@ -128,8 +128,6 @@ func (i *Instance) updatePoints(deviceBody *model.Device) (*model.Point, error) 
 	return nil, nil
 }
 
-
-
 // updatePoint by its lora id and type as in temp or lux
 func (i *Instance) updatePoint(body *model.Point, sensorType string) error {
 	addr := body.AddressUUID
@@ -167,8 +165,6 @@ func (i *Instance) updatePointAddress(body *model.Device) error {
 	}
 	return nil
 }
-
-
 
 func (i *Instance) devTHLM(pnt *model.Point, value float64, sensorType string) error {
 	pnt.PresentValue = &value

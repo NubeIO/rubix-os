@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/model"
-	system_model "github.com/NubeDev/flow-framework/plugin/nube/system/model"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/model"
+	system_model "github.com/NubeIO/flow-framework/plugin/nube/system/model"
+	"github.com/NubeIO/flow-framework/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gomarkdown/markdown"
 	"net/http"

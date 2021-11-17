@@ -2,7 +2,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils"
 	"github.com/go-resty/resty/v2"
 )
 

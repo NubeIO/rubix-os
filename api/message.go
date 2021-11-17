@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/location"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )

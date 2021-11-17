@@ -1,7 +1,7 @@
 package compat
 
 import (
-	"github.com/NubeDev/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
 	"net/url"
 )
@@ -84,8 +84,8 @@ type StorageHandler interface {
 
 // Message describes a message to be sent by MessageHandler#SendMessage.
 type Message struct {
-	Message  			string
-	Title    			string
-	Priority 			int
-	Extras   			map[string]interface{}
+	Message  string
+	Title    string
+	Priority int
+	Extras   map[string]interface{}
 }

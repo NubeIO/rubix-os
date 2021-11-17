@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )
 

@@ -1,7 +1,7 @@
 package system_model
 
 import (
-	"github.com/NubeDev/flow-framework/plugin/defaults"
+	"github.com/NubeIO/flow-framework/plugin/defaults"
 )
 
 type Point struct {

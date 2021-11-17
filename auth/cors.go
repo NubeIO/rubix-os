@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NubeDev/flow-framework/config"
+	"github.com/NubeIO/flow-framework/config"
 	"github.com/gin-contrib/cors"
 )
 

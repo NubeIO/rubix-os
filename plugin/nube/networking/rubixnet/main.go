@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/eventbus"
-	min "github.com/NubeDev/flow-framework/plugin/nube/utils/backup/minio"
-	"github.com/NubeDev/flow-framework/plugin/plugin-api"
-	"github.com/NubeDev/flow-framework/src/cachestore"
-	"github.com/NubeDev/flow-framework/src/dbhandler"
+	"github.com/NubeIO/flow-framework/eventbus"
+	min "github.com/NubeIO/flow-framework/plugin/nube/utils/backup/minio"
+	"github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/src/cachestore"
+	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/patrickmn/go-cache"
 )
 

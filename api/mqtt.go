@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 )
@@ -49,13 +49,11 @@ func (j *MqttConnectionAPI) UpdateMqttConnection(ctx *gin.Context) {
 	reposeHandler(q, err, ctx)
 }
 
-
 func (j *MqttConnectionAPI) DeleteMqttConnection(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteMqttConnection(uuid)
 	reposeHandler(q, err, ctx)
 }
-
 
 func (j *MqttConnectionAPI) DropMqttConnectionsList(ctx *gin.Context) {
 	q, err := j.DB.DropMqttConnectionsList()

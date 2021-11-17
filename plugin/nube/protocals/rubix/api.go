@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/rubix/rubixapi"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/rubix/rubixmodel"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/rubix/rubixapi"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/rubix/rubixmodel"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/url"

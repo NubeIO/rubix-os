@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
 )
 

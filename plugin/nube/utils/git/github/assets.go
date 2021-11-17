@@ -3,7 +3,7 @@ package github
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils"
 	"io"
 	"net/http"
 	"os"

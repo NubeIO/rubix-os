@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	influxmodel "github.com/NubeDev/flow-framework/plugin/nube/database/influx/model"
+	influxmodel "github.com/NubeIO/flow-framework/plugin/nube/database/influx/model"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"

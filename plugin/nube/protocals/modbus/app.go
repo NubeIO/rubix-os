@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
 	"time"

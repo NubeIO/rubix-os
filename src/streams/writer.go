@@ -2,8 +2,8 @@ package streams
 
 import (
 	"errors"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/rest"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/rest"
 )
 
 func GetProducerHist(producerUUID string, flowBody *model.FlowNetwork) (*model.ProducerHistory, error) {

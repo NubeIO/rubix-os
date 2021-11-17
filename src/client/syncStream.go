@@ -2,7 +2,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 )
 
 func (a *FlowClient) SyncStream(body *model.SyncStream) (*model.StreamClone, error) {

@@ -1,8 +1,8 @@
 package floweng
 
 import (
-	"github.com/NubeDev/flow-framework/database"
-	"github.com/NubeDev/flow-framework/floweng/server"
+	"github.com/NubeIO/flow-framework/database"
+	"github.com/NubeIO/flow-framework/floweng/server"
 )
 
 var flowEngServer *server.Server

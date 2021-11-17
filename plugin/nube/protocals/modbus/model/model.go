@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/NubeDev/flow-framework/plugin/defaults"
+	"github.com/NubeIO/flow-framework/plugin/defaults"
 	"github.com/NubeIO/null"
 )
 

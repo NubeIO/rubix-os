@@ -2,11 +2,11 @@ package database
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/client"
-	"github.com/NubeDev/flow-framework/urls"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 )
 

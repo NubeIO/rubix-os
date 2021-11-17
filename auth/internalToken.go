@@ -2,7 +2,7 @@ package auth
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/config"
+	"github.com/NubeIO/flow-framework/config"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"

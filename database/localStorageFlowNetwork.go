@@ -1,10 +1,10 @@
 package database
 
 import (
-	"github.com/NubeDev/flow-framework/config"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/client"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/utils"
 )
 
 func (d *GormDatabase) GetLocalStorageFlowNetwork() (*model.LocalStorageFlowNetwork, error) {

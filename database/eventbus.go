@@ -2,9 +2,9 @@ package database
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/eventbus"
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/model"
 )
 
 func (d *GormDatabase) producerBroadcast(producer model.ProducerBody) error {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeIO/flow-framework/api"
 	log "github.com/sirupsen/logrus"
 )
 

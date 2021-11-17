@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 )
 
 // GetHistoryLogByFlowNetworkCloneUUID return history log for the given fncUuid or nil..

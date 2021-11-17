@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/NubeDev/flow-framework/floweng/core"
+	"github.com/NubeIO/flow-framework/floweng/core"
 )
 
 type LibraryEntry struct {

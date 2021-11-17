@@ -2,7 +2,7 @@ package api
 
 import (
 	"errors"
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/bools"
 	"math/bits"
 	"strconv"

@@ -2,8 +2,8 @@ package database
 
 import (
 	"encoding/json"
-	"github.com/NubeDev/flow-framework/config"
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/model"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"

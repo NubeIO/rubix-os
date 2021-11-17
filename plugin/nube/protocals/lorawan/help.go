@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"net/url"
 )
 

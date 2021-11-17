@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

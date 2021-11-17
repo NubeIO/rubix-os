@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/NubeDev/flow-framework/model"
-	unit "github.com/NubeDev/flow-framework/src/units"
+	"github.com/NubeIO/flow-framework/model"
+	unit "github.com/NubeIO/flow-framework/src/units"
 	"github.com/gin-gonic/gin"
 )
 

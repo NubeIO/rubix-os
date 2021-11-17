@@ -2,16 +2,16 @@ package database
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/config"
-	"github.com/NubeDev/flow-framework/eventbus"
-	"github.com/NubeDev/flow-framework/src/cachestore"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/src/cachestore"
+	"github.com/NubeIO/flow-framework/utils"
 	"os"
 	"path/filepath"
 
-	"github.com/NubeDev/flow-framework/logger"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/plugin"
+	"github.com/NubeIO/flow-framework/logger"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )

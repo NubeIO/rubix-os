@@ -3,7 +3,7 @@ package error
 import (
 	"net/http"
 
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/gin-gonic/gin"
 )
 

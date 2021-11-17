@@ -3,12 +3,12 @@ package error
 import (
 	"encoding/json"
 	"errors"
-	"github.com/NubeDev/flow-framework/error"
+	"github.com/NubeIO/flow-framework/error"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )

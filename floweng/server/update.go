@@ -1,6 +1,6 @@
 package server
 
-import "github.com/NubeDev/flow-framework/floweng/core"
+import "github.com/NubeIO/flow-framework/floweng/core"
 
 type Update struct {
 	Action string      `json:"action"`

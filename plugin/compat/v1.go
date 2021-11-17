@@ -1,12 +1,12 @@
 package compat
 
 import (
-	"github.com/NubeDev/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 
-	//papiv1 "github.com/NubeDev/flow-framework/plugin/plugin-api"
+	//papiv1 "github.com/NubeIO/flow-framework/plugin/plugin-api"
 
 	"net/url"
-	//papiv1 "github.com/NubeDev/flow-framework/plugin/plugin-api"
+	//papiv1 "github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/gin-gonic/gin"
 )
 

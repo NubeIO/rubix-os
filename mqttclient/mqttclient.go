@@ -3,7 +3,7 @@ package mqttclient
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils"
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 	"os"

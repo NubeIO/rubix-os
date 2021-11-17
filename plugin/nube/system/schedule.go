@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/src/schedule"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/src/schedule"
+	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"time"
 )

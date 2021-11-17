@@ -2,8 +2,8 @@ package main
 
 import (
 	"bufio"
-	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
 	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
 )

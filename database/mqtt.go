@@ -1,10 +1,9 @@
 package database
 
 import (
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/utils"
 )
-
 
 type MqttConnection struct {
 	*model.MqttConnection
@@ -24,7 +23,8 @@ func (d *GormDatabase) GetMqttConnectionsList() ([]*model.MqttConnection, error)
 func (d *GormDatabase) CreateMqttConnection(body *model.MqttConnection) (*model.MqttConnection, error) {
 	body.UUID = utils.MakeTopicUUID("")
 	body.Name = nameIsNil(body.Name)
-	query := d.DB.Create(body);if query.Error != nil {
+	query := d.DB.Create(body)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return body, nil
@@ -33,7 +33,8 @@ func (d *GormDatabase) CreateMqttConnection(body *model.MqttConnection) (*model.
 // GetMqttConnection get it
 func (d *GormDatabase) GetMqttConnection(uuid string) (*model.MqttConnection, error) {
 	var wcm *model.MqttConnection
-	query := d.DB.Where("uuid = ? ", uuid).First(&wcm); if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).First(&wcm)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return wcm, nil
@@ -42,7 +43,8 @@ func (d *GormDatabase) GetMqttConnection(uuid string) (*model.MqttConnection, er
 // DeleteMqttConnection deletes it
 func (d *GormDatabase) DeleteMqttConnection(uuid string) (bool, error) {
 	var wcm *model.MqttConnection
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&wcm);if query.Error != nil {
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&wcm)
+	if query.Error != nil {
 		return false, query.Error
 	}
 	r := query.RowsAffected
@@ -56,10 +58,12 @@ func (d *GormDatabase) DeleteMqttConnection(uuid string) (bool, error) {
 // UpdateMqttConnection  update it
 func (d *GormDatabase) UpdateMqttConnection(uuid string, body *model.MqttConnection) (*model.MqttConnection, error) {
 	var wcm *model.MqttConnection
-	query := d.DB.Where("uuid = ?", uuid).Find(&wcm);if query.Error != nil {
+	query := d.DB.Where("uuid = ?", uuid).Find(&wcm)
+	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&wcm).Updates(body);if query.Error != nil {
+	query = d.DB.Model(&wcm).Updates(body)
+	if query.Error != nil {
 		return nil, query.Error
 	}
 	return wcm, nil
@@ -79,4 +83,3 @@ func (d *GormDatabase) DropMqttConnectionsList() (bool, error) {
 		return true, nil
 	}
 }
-

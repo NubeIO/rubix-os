@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/gorilla/websocket"
 )
 
