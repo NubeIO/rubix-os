@@ -3,11 +3,11 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/eventbus"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/plugin/compat"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin/compat"
+	"github.com/NubeIO/flow-framework/utils"
 	"time"
 )
 

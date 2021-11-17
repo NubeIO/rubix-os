@@ -1,7 +1,7 @@
 package dbhandler
 
 import (
-	"github.com/NubeDev/flow-framework/database"
+	"github.com/NubeIO/flow-framework/database"
 )
 
 var db *database.GormDatabase

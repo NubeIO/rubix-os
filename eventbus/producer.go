@@ -2,7 +2,7 @@ package eventbus
 
 import (
 	"context"
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/mustafaturan/bus/v3"
 )
 

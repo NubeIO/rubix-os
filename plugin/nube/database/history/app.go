@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/client"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
@@ -28,7 +28,7 @@ func (i *Instance) syncHistory() (bool, error) {
 		for k, h := range *pHistories {
 			histories = append(histories, &h)
 			// Update History Log
-			if k == len(*pHistories) - 1 {
+			if k == len(*pHistories)-1 {
 				hisLog.FlowNetworkCloneUUID = fnc.UUID
 				hisLog.LastSyncID = h.ID
 				hisLog.Timestamp = time.Now()

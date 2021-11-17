@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/gorilla/mux"
 )
 

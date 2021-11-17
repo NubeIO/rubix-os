@@ -1,8 +1,8 @@
 package model
 
 import (
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/plugin/defaults"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin/defaults"
 )
 
 type ServerPing struct {

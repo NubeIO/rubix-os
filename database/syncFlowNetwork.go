@@ -3,9 +3,9 @@ package database
 import (
 	"encoding/json"
 	"errors"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/client"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/utils"
 )
 
 func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetworkClone, error) {

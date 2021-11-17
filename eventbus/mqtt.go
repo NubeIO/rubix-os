@@ -3,8 +3,8 @@ package eventbus
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/mqttclient"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/mqttclient"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"log"
 )

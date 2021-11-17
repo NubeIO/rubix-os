@@ -1,8 +1,8 @@
 package main
 
 import (
-	lwmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/model"
-	rest "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/restclient"
+	lwmodel "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/model"
+	rest "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/restclient"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"

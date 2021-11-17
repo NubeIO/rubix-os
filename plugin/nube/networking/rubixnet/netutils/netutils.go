@@ -3,7 +3,7 @@ package netutils
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeDev/flow-framework/src/system/networking"
+	"github.com/NubeIO/flow-framework/src/system/networking"
 	"github.com/labstack/gommon/log"
 	"io/ioutil"
 	"net"

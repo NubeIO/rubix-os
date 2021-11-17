@@ -3,7 +3,7 @@ package eventbus
 import (
 	"context"
 	"fmt"
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/mustafaturan/bus/v3"
 	"github.com/sirupsen/logrus"
 )

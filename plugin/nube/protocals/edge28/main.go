@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/eventbus"
-	edgerest "github.com/NubeDev/flow-framework/plugin/nube/protocals/edge28/restclient"
-	"github.com/NubeDev/flow-framework/plugin/plugin-api"
-	"github.com/NubeDev/flow-framework/src/cachestore"
-	"github.com/NubeDev/flow-framework/src/dbhandler"
+	"github.com/NubeIO/flow-framework/eventbus"
+	edgerest "github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/restclient"
+	"github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/src/cachestore"
+	"github.com/NubeIO/flow-framework/src/dbhandler"
 )
 
 const name = "edge28" //must be unique across all plugins

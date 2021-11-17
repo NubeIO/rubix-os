@@ -3,10 +3,10 @@ package database
 import (
 	"context"
 	"fmt"
-	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/model"
-	unit "github.com/NubeDev/flow-framework/src/units"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/model"
+	unit "github.com/NubeIO/flow-framework/src/units"
+	"github.com/NubeIO/flow-framework/utils"
 	"github.com/PaesslerAG/gval"
 )
 
@@ -17,7 +17,7 @@ func (d *GormDatabase) pointNameExists(pnt *model.Point, body *model.Point) bool
 	if err != nil {
 		return false
 	}
-	if pnt.UUID == "" && body.UUID == ""  {
+	if pnt.UUID == "" && body.UUID == "" {
 		return false
 	}
 	for _, p := range device.Points {

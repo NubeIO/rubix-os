@@ -1,7 +1,7 @@
 package main
 
 import (
-	edgerest "github.com/NubeDev/flow-framework/plugin/nube/protocals/edge28/restclient"
+	edgerest "github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/restclient"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"

@@ -1,7 +1,7 @@
 package error
 
 import (
-	"github.com/NubeDev/flow-framework/error"
+	"github.com/NubeIO/flow-framework/error"
 	"net/http/httptest"
 	"testing"
 

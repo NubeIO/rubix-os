@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	influxmodel "github.com/NubeDev/flow-framework/plugin/nube/database/influx/model"
+	influxmodel "github.com/NubeIO/flow-framework/plugin/nube/database/influx/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/sirupsen/logrus"
 )

@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/rubix/rubixapi"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/rubix/rubixmodel"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/rubix/rubixapi"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/rubix/rubixmodel"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/rest"
 	"net/http"
 	"time"

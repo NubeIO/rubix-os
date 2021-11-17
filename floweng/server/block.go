@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/NubeDev/flow-framework/floweng/core"
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/floweng/core"
+	"github.com/NubeIO/flow-framework/model"
 
 	"github.com/gorilla/mux"
 )
@@ -291,7 +291,7 @@ func (s *Server) DeleteBlock(id int) error {
 	}
 
 	// delete the connections that involve this block
-	for k, _ := range deleteSet {
+	for k := range deleteSet {
 		s.DeleteConnection(k)
 	}
 

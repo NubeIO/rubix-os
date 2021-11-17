@@ -1,9 +1,9 @@
 package main
 
 import (
-	baseModel "github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/modbus/model"
-	"github.com/NubeDev/flow-framework/utils"
+	baseModel "github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/model"
+	"github.com/NubeIO/flow-framework/utils"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"

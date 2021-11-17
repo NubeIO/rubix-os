@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 )
 
 func (d *GormDatabase) GetFN(uuid string) (*model.FlowNetwork, error) {

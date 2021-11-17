@@ -2,7 +2,7 @@ package edgerest
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils"
 	"strings"
 )
 

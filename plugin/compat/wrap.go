@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"plugin"
 
-	papiv1 "github.com/NubeDev/flow-framework/plugin/plugin-api"
+	papiv1 "github.com/NubeIO/flow-framework/plugin/plugin-api"
 )
 
 // Wrap wraps around a raw go plugin to provide typesafe access.

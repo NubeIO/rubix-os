@@ -4,9 +4,9 @@ import (
 	"log"
 	"sync"
 
-	"github.com/NubeDev/flow-framework/database"
-	"github.com/NubeDev/flow-framework/floweng/core"
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/database"
+	"github.com/NubeIO/flow-framework/floweng/core"
+	"github.com/NubeIO/flow-framework/model"
 )
 
 const (

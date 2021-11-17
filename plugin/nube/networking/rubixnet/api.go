@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/src/system/networking"
+	"github.com/NubeIO/flow-framework/src/system/networking"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

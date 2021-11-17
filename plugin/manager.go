@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/plugin/compat"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin/compat"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
 )

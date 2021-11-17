@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/NubeDev/flow-framework/api"
+	"github.com/NubeIO/flow-framework/api"
 	"gorm.io/gorm"
 	"strings"
 )

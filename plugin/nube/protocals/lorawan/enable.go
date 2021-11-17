@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/api"
-	rest "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/restclient"
+	"github.com/NubeIO/flow-framework/api"
+	rest "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/restclient"
 	"github.com/labstack/gommon/log"
 )
 

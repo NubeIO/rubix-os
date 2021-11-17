@@ -3,9 +3,9 @@ package jobs
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeDev/flow-framework/eventbus"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/dbhandler"
+	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/go-co-op/gocron"
 	"time"
 )

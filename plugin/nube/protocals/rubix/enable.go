@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/rubix/rubixapi"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/rubix/rubixapi"
 	"github.com/labstack/gommon/log"
 )
 

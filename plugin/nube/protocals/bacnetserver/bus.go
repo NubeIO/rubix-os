@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/NubeDev/flow-framework/eventbus"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/utils"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/mustafaturan/bus/v3"
 	log "github.com/sirupsen/logrus"

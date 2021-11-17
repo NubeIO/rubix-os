@@ -1,11 +1,11 @@
 package api
 
 import (
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/system/host"
-	"github.com/NubeDev/flow-framework/src/system/networking"
-	"github.com/NubeDev/flow-framework/src/system/ufw"
-	"github.com/NubeDev/flow-framework/src/utilstime"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/system/host"
+	"github.com/NubeIO/flow-framework/src/system/networking"
+	"github.com/NubeIO/flow-framework/src/system/ufw"
+	"github.com/NubeIO/flow-framework/src/utilstime"
 	"github.com/gin-gonic/gin"
 )
 

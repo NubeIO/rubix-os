@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/gin-gonic/gin"
 	"strings"
 )

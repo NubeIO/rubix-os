@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/NubeDev/flow-framework/floweng/core"
-	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeIO/flow-framework/floweng/core"
+	"github.com/NubeIO/flow-framework/model"
 
 	"github.com/gorilla/mux"
 )
@@ -165,14 +165,14 @@ func (s *Server) ResetGraph(conn *ConnectionLedger) {
 	traverse = func(id int) {
 		found[id] = struct{}{}
 		if _, ok := cacheST[id]; ok {
-			for k, _ := range cacheST[id] {
+			for k := range cacheST[id] {
 				if _, ok = found[k]; !ok {
 					traverse(k)
 				}
 			}
 		}
 		if _, ok := cacheTS[id]; ok {
-			for k, _ := range cacheTS[id] {
+			for k := range cacheTS[id] {
 				if _, ok = found[k]; !ok {
 					traverse(k)
 				}
@@ -182,17 +182,17 @@ func (s *Server) ResetGraph(conn *ConnectionLedger) {
 
 	traverse(conn.Source.Id)
 
-	for k, _ := range found {
+	for k := range found {
 		log.Println("tidy: stopping id", k, s.blocks[k].Type)
 		s.blocks[k].Block.Stop()
 	}
 
-	for k, _ := range found {
+	for k := range found {
 		log.Println("tidy: resetting id", k)
 		s.blocks[k].Block.Reset()
 	}
 
-	for k, _ := range found {
+	for k := range found {
 		log.Println("tidy: starting id", k)
 		go s.blocks[k].Block.Serve()
 	}

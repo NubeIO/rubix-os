@@ -3,7 +3,7 @@ package server
 import (
 	"time"
 
-	"github.com/NubeDev/flow-framework/floweng/core"
+	"github.com/NubeIO/flow-framework/floweng/core"
 )
 
 // monitor infers the current state of an st-core block and emits it over

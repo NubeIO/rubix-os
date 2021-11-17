@@ -2,7 +2,7 @@ package lwrest
 
 import (
 	"fmt"
-	lwmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/model"
+	lwmodel "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/model"
 )
 
 const limit = "50"

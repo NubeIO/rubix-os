@@ -2,7 +2,7 @@ package systemd
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/src/system/command"
+	"github.com/NubeIO/flow-framework/src/system/command"
 	"strings"
 )
 

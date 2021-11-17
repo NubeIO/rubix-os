@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/eventbus"
-	lwrest "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/restclient"
-	"github.com/NubeDev/flow-framework/plugin/plugin-api"
-	"github.com/NubeDev/flow-framework/src/cachestore"
-	"github.com/NubeDev/flow-framework/src/dbhandler"
-	"github.com/NubeDev/flow-framework/src/jobs"
+	"github.com/NubeIO/flow-framework/eventbus"
+	lwrest "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/restclient"
+	"github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/src/cachestore"
+	"github.com/NubeIO/flow-framework/src/dbhandler"
+	"github.com/NubeIO/flow-framework/src/jobs"
 	"github.com/patrickmn/go-cache"
 )
 

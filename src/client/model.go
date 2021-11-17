@@ -1,6 +1,6 @@
 package client
 
-import "github.com/NubeDev/flow-framework/model"
+import "github.com/NubeIO/flow-framework/model"
 
 type Token struct {
 	ID    int    `json:"id"`

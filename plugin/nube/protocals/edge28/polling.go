@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/NubeDev/flow-framework/api"
-	"github.com/NubeDev/flow-framework/model"
-	edgerest "github.com/NubeDev/flow-framework/plugin/nube/protocals/edge28/restclient"
-	"github.com/NubeDev/flow-framework/src/poller"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/model"
+	edgerest "github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/restclient"
+	"github.com/NubeIO/flow-framework/src/poller"
+	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"time"
 )

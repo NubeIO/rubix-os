@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/src/utilstime"
+	"github.com/NubeIO/flow-framework/src/utilstime"
 )
 
 func main() {

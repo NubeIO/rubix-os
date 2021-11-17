@@ -1,8 +1,8 @@
 package rest
 
 import (
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/client"
 )
 
 func WriteClone(uuid string, flowBody *model.FlowNetwork, body *model.WriterClone, write bool) (*model.WriterClone, error) {

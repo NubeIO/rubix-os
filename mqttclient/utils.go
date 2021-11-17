@@ -1,7 +1,7 @@
 package mqttclient
 
 import (
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils"
 	"strings"
 )
 

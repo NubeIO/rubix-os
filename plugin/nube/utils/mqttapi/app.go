@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/mqttclient"
+	"github.com/NubeIO/flow-framework/mqttclient"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 )

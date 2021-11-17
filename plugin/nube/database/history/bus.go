@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/NubeDev/flow-framework/eventbus"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/utils"
 	"github.com/mustafaturan/bus/v3"
 )
 

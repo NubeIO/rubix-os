@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	influxmodel "github.com/NubeDev/flow-framework/plugin/nube/database/influx/model"
+	influxmodel "github.com/NubeIO/flow-framework/plugin/nube/database/influx/model"
 	log "github.com/sirupsen/logrus"
 )
 

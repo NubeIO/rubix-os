@@ -3,8 +3,8 @@ package rubixapi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/rubix/rubixmodel"
-	"github.com/NubeDev/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/rubix/rubixmodel"
+	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/rest"
 	"strings"
 )
