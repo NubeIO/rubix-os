@@ -72,4 +72,11 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, serial_model.GetNetworkSchema())
 	})
 
+	mux.GET(schemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, serial_model.GetDeviceSchema())
+	})
+
+	mux.GET(schemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, serial_model.GetPointSchema())
+	})
 }
