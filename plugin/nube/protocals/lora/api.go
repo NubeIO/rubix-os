@@ -1,7 +1,7 @@
 package main
 
 import (
-	serial_model "github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/model"
+	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -69,14 +69,14 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, serial_model.GetNetworkSchema())
+		ctx.JSON(http.StatusOK, model.GetNetworkSchema())
 	})
 
 	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, serial_model.GetDeviceSchema())
+		ctx.JSON(http.StatusOK, model.GetDeviceSchema())
 	})
 
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, serial_model.GetPointSchema())
+		ctx.JSON(http.StatusOK, model.GetPointSchema())
 	})
 }

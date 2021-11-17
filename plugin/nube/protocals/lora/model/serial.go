@@ -1,16 +1,8 @@
-package serial_model
+package model
 
 import (
 	"github.com/NubeDev/flow-framework/plugin/defaults"
-	"github.com/NubeDev/flow-framework/plugin/plugin-api"
 )
-
-// Message is a message wrapper with the channel, sender and recipient.
-type Message struct {
-	Msg         plugin.Message
-	ChannelName string
-	IsSend      bool
-}
 
 type NameStruct struct {
 	Type     string `json:"type" default:"string"`
