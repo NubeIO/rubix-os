@@ -1,4 +1,4 @@
-package pkgrest
+package plgrest
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 
 // RestClient is used to invoke Form3 Accounts API.
 type RestClient struct {
-	client *resty.Client
+	client      *resty.Client
 	ClientToken string
 }
 

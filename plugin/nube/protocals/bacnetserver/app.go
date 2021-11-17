@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/NubeDev/flow-framework/model"
+	baseModel "github.com/NubeDev/flow-framework/model"
 	"github.com/NubeDev/flow-framework/mqttclient"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
-	plgrest "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/restclient"
+	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/plgrest"
 	"github.com/NubeDev/flow-framework/utils"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -16,7 +16,7 @@ import (
 
 //bacnetUpdate listen on mqtt and then update the point in flow-framework
 func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
-	payload := new(pkgmodel.MqttPayload)
+	payload := new(model.MqttPayload)
 	err := json.Unmarshal(body.Payload(), &payload)
 	fmt.Println(body.Payload())
 	fmt.Println(body.Topic())
@@ -25,8 +25,8 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	top := t.Get(objectType)
 	tt := top.(string)
 	objType, addr := getPointAddr(tt)
-	var point model.Point
-	var pri model.Priority
+	var point baseModel.Point
+	var pri baseModel.Priority
 	pri.P16 = payload.Value
 	point.Priority = &pri
 	pnt, _ := i.db.PointAndQuery(objType, addr) //TODO check conversion if existing exists, as in the same addr
@@ -35,9 +35,9 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 		return nil, err
 	}
 	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
-	point.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
+	point.CommonFault.MessageLevel = baseModel.MessageLevel.Info
+	point.CommonFault.MessageCode = baseModel.CommonFaultCode.Ok
+	point.CommonFault.Message = baseModel.CommonFaultMessage.NetworkMessage
 	point.CommonFault.LastOk = time.Now().UTC()
 	if pnt == nil {
 		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
@@ -52,8 +52,8 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 }
 
 //addPoint from rest api
-func (i *Instance) addPoint(body *model.Point) (*model.Point, error) {
-	var point pkgmodel.BacnetPoint
+func (i *Instance) addPoint(body *baseModel.Point) (*model.Point, error) {
+	var point model.BacnetPoint
 	point.ObjectName = body.Name
 	point.Enable = true
 	point.Description = body.Description
@@ -79,9 +79,9 @@ func (i *Instance) addPoint(body *model.Point) (*model.Point, error) {
 }
 
 //pointPatch from rest
-func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
-	//point := new(pkgmodel.BacnetPoint)
-	point := new(pkgmodel.BacnetPoint)
+func (i *Instance) pointPatch(body *baseModel.Point) (*model.Point, error) {
+	//point := new(model.BacnetPoint)
+	point := new(model.BacnetPoint)
 	//point.Priority.P1 = body.Priority.P1
 
 	//point.Priority.P2 = body.Priority.P2
@@ -99,7 +99,7 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 	//point.Priority.P14 = body.Priority.P14
 	//point.Priority.P15 = body.Priority.P15
 
-	point.Priority = new(model.Priority)
+	point.Priority = new(baseModel.Priority)
 	if (*body.Priority).P16 != nil {
 		(*point.Priority).P16 = (*body.Priority).P16
 	}
@@ -118,7 +118,7 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 }
 
 //deletePoint point make sure
-func (i *Instance) deletePoint(body *model.Point) (bool, error) {
+func (i *Instance) deletePoint(body *baseModel.Point) (bool, error) {
 	cli := plgrest.NewNoAuth(ip, port)
 	_, err := cli.DeletePoint(body.ObjectType, utils.IntIsNil(body.AddressId))
 	if err != nil {
@@ -128,7 +128,7 @@ func (i *Instance) deletePoint(body *model.Point) (bool, error) {
 }
 
 //bacnetServerDeletePoint point make sure
-func (i *Instance) bacnetServerDeletePoint(body *pkgmodel.BacnetPoint) (bool, error) {
+func (i *Instance) bacnetServerDeletePoint(body *model.BacnetPoint) (bool, error) {
 	cli := plgrest.NewNoAuth(ip, port)
 	_, err := cli.DeletePoint(body.ObjectType, body.Address)
 	if err != nil {

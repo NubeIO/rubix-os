@@ -2,9 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/NubeDev/flow-framework/model"
-	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
-	lwmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/model"
+	baseModel "github.com/NubeDev/flow-framework/model"
+	bacnetServerModel "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
+	model "github.com/NubeDev/flow-framework/plugin/nube/protocals/lorawan/model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -13,12 +13,12 @@ const (
 )
 
 //mqttUpdate listen on mqtt and then update the point in flow-framework
-func (i *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*model.Point, error) {
+func (i *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*baseModel.Point, error) {
 	//do an api call to chirpstack to get the device profile
 	//decode the mqtt payload based of the device profile
 	//if deviceProfileName
 
-	payload := new(lwmodel.BasePayload)
+	payload := new(model.BasePayload)
 	err := json.Unmarshal(body.Payload(), &payload)
 
 	dev, err := i.REST.GetDevice(payload.DevEUI)
@@ -27,7 +27,7 @@ func (i *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*model.P
 	}
 	//check the payload for how to decode from
 	if dev.Device.DeviceProfileID == elsysAPB {
-		decoded := new(lwmodel.ElsysAPB)
+		decoded := new(model.ElsysAPB)
 		err = json.Unmarshal(body.Payload(), &decoded)
 	}
 	if err != nil {
@@ -38,19 +38,17 @@ func (i *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*model.P
 }
 
 //addPoint from rest api
-func (i *Instance) addPoint(body *model.Point) (*model.Point, error) {
+func (i *Instance) addPoint(body *baseModel.Point) (*baseModel.Point, error) {
 	return nil, nil
-
 }
 
 //pointPatch from rest
-func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
+func (i *Instance) pointPatch(body *baseModel.Point) (*baseModel.Point, error) {
 	return nil, nil
-
 }
 
 //delete point make sure
-func (i *Instance) deletePoint(body *model.Point) (bool, error) {
+func (i *Instance) deletePoint(body *baseModel.Point) (bool, error) {
 	return true, nil
 }
 
@@ -71,6 +69,6 @@ func (i *Instance) DropDevices() (bool, error) {
 }
 
 //delete point make sure
-func (i *Instance) serverDeletePoint(body *pkgmodel.BacnetPoint) (bool, error) {
+func (i *Instance) serverDeletePoint(body *bacnetServerModel.BacnetPoint) (bool, error) {
 	return true, nil
 }

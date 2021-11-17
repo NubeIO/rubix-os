@@ -1,16 +1,16 @@
-package pkgrest
+package plgrest
 
 import (
 	"fmt"
-	"github.com/NubeDev/flow-framework/model"
-	pkgmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
+	baseModel "github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
 	"strconv"
 )
 
 // GetPoints all points
-func (a *RestClient) GetPoints() (*[]pkgmodel.BacnetPoint, error) {
+func (a *RestClient) GetPoints() (*[]model.BacnetPoint, error) {
 	resp, err := a.client.R().
-		SetResult([]pkgmodel.BacnetPoint{}).
+		SetResult([]model.BacnetPoint{}).
 		Get("/api/bacnet/points")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
@@ -18,14 +18,14 @@ func (a *RestClient) GetPoints() (*[]pkgmodel.BacnetPoint, error) {
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*[]pkgmodel.BacnetPoint), nil
+	return resp.Result().(*[]model.BacnetPoint), nil
 }
 
 // AddPoint an object
-func (a *RestClient) AddPoint(body pkgmodel.BacnetPoint) (*pkgmodel.BacnetPoint, error) {
+func (a *RestClient) AddPoint(body model.BacnetPoint) (*model.BacnetPoint, error) {
 	fmt.Println("ADD POINT ON IN BACNET REST CALL", body)
 	resp, err := a.client.R().
-		SetResult(&pkgmodel.BacnetPoint{}).
+		SetResult(&model.BacnetPoint{}).
 		SetBody(body).
 		Post("/api/bacnet/points")
 	if err != nil {
@@ -34,19 +34,19 @@ func (a *RestClient) AddPoint(body pkgmodel.BacnetPoint) (*pkgmodel.BacnetPoint,
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*pkgmodel.BacnetPoint), nil
+	return resp.Result().(*model.BacnetPoint), nil
 }
 
 type PriorityWriter struct {
-	PriorityArrayWrite model.Priority `json:"priority_array_write,omitempty"`
+	PriorityArrayWrite baseModel.Priority `json:"priority_array_write,omitempty"`
 }
 
 // EditPoint an object
-func (a *RestClient) EditPoint(body pkgmodel.BacnetPoint, obj string, addr int) (*pkgmodel.BacnetPoint, error) {
+func (a *RestClient) EditPoint(body model.BacnetPoint, obj string, addr int) (*model.BacnetPoint, error) {
 	priorityWriter := new(PriorityWriter)
 	priorityWriter.PriorityArrayWrite = *body.Priority
 	resp, err := a.client.R().
-		SetResult(&pkgmodel.BacnetPoint{}).
+		SetResult(&model.BacnetPoint{}).
 		SetBody(priorityWriter).
 		SetPathParams(map[string]string{"obj": obj, "addr": strconv.Itoa(addr)}).
 		Patch("/api/bacnet/points/obj/{obj}/{addr}")
@@ -56,7 +56,7 @@ func (a *RestClient) EditPoint(body pkgmodel.BacnetPoint, obj string, addr int) 
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*pkgmodel.BacnetPoint), nil
+	return resp.Result().(*model.BacnetPoint), nil
 }
 
 // DeletePoint an object
@@ -74,9 +74,9 @@ func (a *RestClient) DeletePoint(obj string, addr int) (bool, error) {
 }
 
 // PingServer all points
-func (a *RestClient) PingServer() (*pkgmodel.ServerPing, error) {
+func (a *RestClient) PingServer() (*model.ServerPing, error) {
 	resp, err := a.client.R().
-		SetResult(&pkgmodel.ServerPing{}).
+		SetResult(&model.ServerPing{}).
 		Get("/api/system/ping")
 	if err != nil {
 		return nil, fmt.Errorf("error geting server %s failed", err)
@@ -84,13 +84,13 @@ func (a *RestClient) PingServer() (*pkgmodel.ServerPing, error) {
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*pkgmodel.ServerPing), nil
+	return resp.Result().(*model.ServerPing), nil
 }
 
 // GetServer all points
-func (a *RestClient) GetServer() (*pkgmodel.Server, error) {
+func (a *RestClient) GetServer() (*model.Server, error) {
 	resp, err := a.client.R().
-		SetResult(&pkgmodel.Server{}).
+		SetResult(&model.Server{}).
 		Get("/api/bacnet/server")
 	if err != nil {
 		return nil, fmt.Errorf("error geting server %s failed", err)
@@ -98,13 +98,13 @@ func (a *RestClient) GetServer() (*pkgmodel.Server, error) {
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*pkgmodel.Server), nil
+	return resp.Result().(*model.Server), nil
 }
 
 // EditServer an object
-func (a *RestClient) EditServer(body pkgmodel.Server) (*pkgmodel.Server, error) {
+func (a *RestClient) EditServer(body model.Server) (*model.Server, error) {
 	resp, err := a.client.R().
-		SetResult(&pkgmodel.Server{}).
+		SetResult(&model.Server{}).
 		SetBody(body).
 		Patch("/api/bacnet/server")
 	if err != nil {
@@ -113,5 +113,5 @@ func (a *RestClient) EditServer(body pkgmodel.Server) (*pkgmodel.Server, error) 
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*pkgmodel.Server), nil
+	return resp.Result().(*model.Server), nil
 }
