@@ -1,15 +1,19 @@
 package main
 
 import (
+	serial_model "github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 const (
-	help          = "/lora/help"
-	restartSerial = "/lora/serial/restart"
-	listSerial    = "/lora/serial/list"
-	wizardSerial  = "/lora/wizard/serial"
+	help          = "/help"
+	restartSerial = "/serial/restart"
+	listSerial    = "/serial/list"
+	wizardSerial  = "/wizard/serial"
+	schemaNetwork = "/schema/network"
+	schemaDevice  = "/schema/device"
+	schemaPoint   = "/schema/point"
 )
 
 // wizard
@@ -63,6 +67,9 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else {
 			ctx.JSON(http.StatusOK, serial)
 		}
+	})
+	mux.GET(schemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, serial_model.GetNetworkSchema())
 	})
 
 }

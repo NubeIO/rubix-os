@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NubeDev/flow-framework/model"
+	system_model "github.com/NubeDev/flow-framework/plugin/nube/system/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/gomarkdown/markdown"
@@ -40,14 +41,6 @@ You will never use anything else than this [website].
 - [ ] Contact the media
 
 this is *some* normal texy`
-
-type Point struct {
-	ObjectType struct {
-		Options  interface{} `json:"options"`
-		Type     string      `json:"type"`
-		Required bool        `json:"required"`
-	} `json:"object_type"`
-}
 
 //supportedObjects return all objects that are not bacnet
 func supportedObjects() *utils.Array {
@@ -99,12 +92,8 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.Writer.Write(output)
 	})
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		var h Point
-		h.ObjectType.Options = supportedObjects()
-		h.ObjectType.Type = "array"
-		h.ObjectType.Required = true
-		ctx.JSON(http.StatusOK, h)
-
+		point := system_model.GetPointSchema()
+		ctx.JSON(http.StatusOK, point)
 	})
 	mux.GET("/system/schedule/store/:name", func(ctx *gin.Context) {
 		obj, ok := i.store.Get(resolveName(ctx))
