@@ -11,9 +11,6 @@ import (
 	"time"
 )
 
-const ip = "IpConnection"
-const serial = "SerialConnection"
-
 func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
 	var networksModel []*model.Network
 	query := d.buildNetworkQuery(args)
@@ -123,9 +120,6 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
-	t := body.TransportType
-	s := model.TransType.Serial
-	host := model.TransType.IP
 	transport, err := checkTransport(body.TransportType) //set to ip by default
 	if err != nil {
 		return nil, err
@@ -142,18 +136,6 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 			}
 			body.PluginConfId = plugin.UUID
 		}
-		switch t {
-		case s:
-			if body.SerialConnection == nil {
-				body.SerialConnection = &model.SerialConnection{}
-			}
-			body.SerialConnection.UUID = utils.MakeTopicUUID(model.TransType.Serial)
-		case host:
-			if body.IpConnection == nil {
-				body.IpConnection = &model.IpConnection{}
-			}
-			body.IpConnection.UUID = utils.MakeTopicUUID(model.TransType.IP)
-		}
 	} else {
 		return nil, errors.New("provide a plugin name ie: system, lora, modbus, lorawan, bacnet")
 	}
@@ -166,15 +148,9 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
 	var networkModel *model.Network
-	query := d.DB.Where("uuid = ?", uuid).Preload(serial).Preload(ip).Find(&networkModel)
+	query := d.DB.Where("uuid = ?", uuid).Find(&networkModel)
 	if query.Error != nil {
 		return nil, query.Error
-	}
-	switch networkModel.TransportType {
-	case model.TransType.Serial:
-		d.DB.Model(&networkModel.SerialConnection).Updates(body.SerialConnection)
-	case model.TransType.IP:
-		d.DB.Model(&networkModel.IpConnection).Updates(body.IpConnection)
 	}
 	if len(body.Tags) > 0 {
 		if err := d.updateTags(&networkModel, body.Tags); err != nil {

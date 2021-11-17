@@ -52,8 +52,6 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 	var writerClone []model.WriterClone
 	var integration []model.Integration
 	var mqttConnection []model.MqttConnection
-	var serialConnection []model.SerialConnection
-	var ipConnection []model.IpConnection
 	var schedule []model.Schedule
 	var tags []model.Tag
 	var blocks []model.Block
@@ -89,8 +87,6 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 		&writerClone,
 		&integration,
 		&mqttConnection,
-		&serialConnection,
-		&ipConnection,
 		&schedule,
 		&tags,
 		&blocks,

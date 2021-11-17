@@ -109,14 +109,16 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 		return
 	}
 	if err := c.Manager.SetPluginEnabled(uuid, body.Enabled); err == plugin.ErrAlreadyEnabledOrDisabled {
-		reposeHandler("err:", err, ctx)
+		reposeHandler("", err, ctx)
+		return
 	} else if err != nil {
-		reposeHandler("err:", err, ctx)
+		reposeHandler("", err, ctx)
+		return
 	}
 	if body.Enabled {
-		reposeHandler("enabled", err, ctx)
+		reposeHandler(map[string]string{"state": "enabled"}, err, ctx)
 	} else {
-		reposeHandler("disabled", err, ctx)
+		reposeHandler(map[string]string{"state": "disabled"}, err, ctx)
 	}
 }
 

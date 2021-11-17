@@ -86,7 +86,7 @@ func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier No
 }
 
 // ErrAlreadyEnabledOrDisabled is returned on SetPluginEnabled call when a plugin is already enabled or disabled.
-var ErrAlreadyEnabledOrDisabled = errors.New("config is already enabled/disabled")
+var ErrAlreadyEnabledOrDisabled = errors.New("config is already on your state")
 
 // SetPluginEnabled sets the plugins enabled state.
 func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {

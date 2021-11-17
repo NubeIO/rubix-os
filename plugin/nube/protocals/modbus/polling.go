@@ -63,8 +63,6 @@ func (i *Instance) PollingTCP(p polling) error {
 	var arg api.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
-	arg.WithSerialConnection = true
-	arg.WithIpConnection = true
 	f := func() (bool, error) {
 		nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, arg)
 		if err != nil {
@@ -83,10 +81,13 @@ func (i *Instance) PollingTCP(p polling) error {
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
 					if net.TransportType == model.TransType.Serial {
-						client.SerialPort = net.SerialConnection.SerialPort
-						client.BaudRate = net.SerialConnection.BaudRate
-						client.DataBits = net.SerialConnection.DataBits
-						client.StopBits = net.SerialConnection.StopBits
+						if net.SerialPort != nil || net.SerialBaudRate != nil || net.SerialDataBits != nil || net.SerialStopBits != nil {
+							return true, errors.New("no serial connection details")
+						}
+						client.SerialPort = *net.SerialPort
+						client.BaudRate = *net.SerialBaudRate
+						client.DataBits = *net.SerialDataBits
+						client.StopBits = *net.SerialStopBits
 						err = i.setClient(client, net.UUID, true, true)
 						if err != nil {
 							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)

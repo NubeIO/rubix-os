@@ -137,12 +137,6 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 	if args.WithPoints {
 		query = query.Preload("Devices.Points").Preload("Devices.Points.Priority")
 	}
-	if args.WithIpConnection {
-		query = query.Preload("IpConnection")
-	}
-	if args.WithSerialConnection {
-		query = query.Preload("SerialConnection")
-	}
 	if args.WithTags {
 		query = query.Preload("Tags")
 	}

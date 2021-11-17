@@ -59,31 +59,3 @@ var SerialParity = struct {
 	Odd:  "odd",
 	Even: "even",
 }
-
-type SerialConnection struct {
-	CommonUUID
-	CommonEnable
-	SerialPort  string `json:"serial_port" gorm:"type:varchar(255);unique"`
-	BaudRate    uint   `json:"baud_rate"` //9600
-	StopBits    uint   `json:"stop_bits"`
-	Parity      string `json:"parity"`
-	DataBits    uint   `json:"data_bits"`
-	Timeout     int    `json:"timeout"`
-	Connected   bool   `json:"connected"`
-	Error       bool   `json:"error"`
-	NetworkUUID string `json:"network_uuid" gorm:"TYPE:varchar(255) REFERENCES networks"`
-}
-
-type IpConnection struct {
-	CommonUUID
-	Host        string `json:"host"`
-	Port        int    `json:"port"`
-	NetworkUUID string `json:"network_uuid" gorm:"TYPE:varchar(255) REFERENCES networks"`
-}
-
-type TransportBody struct {
-	NetworkType      string           `json:"network_type"`
-	TransportType    string           `json:"transport_type"`
-	IpConnection     IpConnection     `json:"ip_connection"`
-	SerialConnection SerialConnection `json:"serial_connection"`
-}

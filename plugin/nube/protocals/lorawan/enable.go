@@ -11,9 +11,7 @@ func (i *Instance) Enable() error {
 	i.enabled = true
 	i.setUUID()
 	i.BusServ()
-	var arg api.Args
-	arg.WithIpConnection = true
-	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
+	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, api.Args{})
 	if q != nil {
 		i.networkUUID = q.UUID
 	} else {

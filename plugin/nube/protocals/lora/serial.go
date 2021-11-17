@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-
 	"github.com/NubeDev/flow-framework/api"
 	"github.com/NubeDev/flow-framework/plugin/nube/protocals/lora/decoder"
 	log "github.com/sirupsen/logrus"
@@ -23,20 +22,18 @@ type SerialSetting struct {
 	I              Instance
 }
 
-// SerialOpen open serial port
 func (i *Instance) SerialOpen() error {
 	s := new(SerialSetting)
 	var arg api.Args
-	arg.WithSerialConnection = true
 	net, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
 	if err != nil {
 		return err
 	}
-	if net.SerialConnection == nil {
+	if net.SerialPort == nil || net.SerialBaudRate == nil {
 		return err
 	}
-	s.SerialPort = net.SerialConnection.SerialPort
-	s.BaudRate = int(net.SerialConnection.BaudRate)
+	s.SerialPort = *net.SerialPort
+	s.BaudRate = int(*net.SerialBaudRate)
 	connected := false
 	go func() error {
 		sc := New(s)
@@ -51,7 +48,6 @@ func (i *Instance) SerialOpen() error {
 
 }
 
-// SerialClose close serial port
 func (i *Instance) SerialClose() error {
 	err := Disconnect()
 	if err != nil {

@@ -100,8 +100,6 @@ func (i *Instance) backNetworks() error {
 	var arg api.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
-	arg.WithSerialConnection = true
-	arg.WithIpConnection = true
 
 	nets, err := i.db.GetNetworks(arg)
 	if err != nil {

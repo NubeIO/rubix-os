@@ -39,23 +39,17 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"serial"`
 	} `json:"transport_type"`
-	SerialConnection struct {
-		Type     string `json:"type" default:"object"`
+	SerialPort struct {
+		Type     string `json:"type" default:"string"`
 		Required bool   `json:"required" default:"true"`
-		Object   struct {
-			SerialPort struct {
-				Type     string `json:"type" default:"string"`
-				Required bool   `json:"required" default:"true"`
-				Min      int    `json:"min" default:"3"`
-				Max      int    `json:"max" default:"20"`
-			} `json:"serial_port"`
-			BaudRate struct {
-				Type     string `json:"type" default:"int"`
-				Required bool   `json:"required" default:"true"`
-				Default  int    `json:"default" default:"9600"`
-			} `json:"baud_rate"`
-		} `json:"object"`
-	} `json:"serial_connection"`
+		Min      int    `json:"min" default:"3"`
+		Max      int    `json:"max" default:"20"`
+	} `json:"serial_port"`
+	BaudRate struct {
+		Type     string `json:"type" default:"int"`
+		Required bool   `json:"required" default:"true"`
+		Default  int    `json:"default" default:"9600"`
+	} `json:"baud_rate"`
 }
 
 func GetNetworkSchema() *Network {
