@@ -107,7 +107,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	dbGroup.SyncTopics()
 	//for the custom plugin endpoints you need to use the plugin token
 	//http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/api/plugins/api/:uuid"), streamHandler)
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/api/plugins/api"), streamHandler)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)

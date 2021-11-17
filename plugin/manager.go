@@ -249,7 +249,7 @@ func (m *Manager) initializePlugin(p compat.Plugin) error {
 	if compat.HasSupport(instance, compat.Webhooker) {
 		uuid := pluginConf.UUID
 		path := pluginConf.ModulePath
-		g := m.mux.Group("/", requirePluginEnabled(uuid, m.db))
+		g := m.mux.Group("/"+path, requirePluginEnabled(uuid, m.db))
 		instance.RegisterWebhook(strings.Replace(g.BasePath(), ":id", path, 1), g) //change path to uuid if we want the url to register as uuid
 	}
 	if pluginConf.Enabled {
