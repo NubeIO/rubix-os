@@ -1,4 +1,4 @@
-module github.com/NubeDev/flow-framework
+module github.com/NubeIO/flow-framework
 
 require (
 	github.com/NubeDev/configor v0.0.2
