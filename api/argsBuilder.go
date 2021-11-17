@@ -163,8 +163,6 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	var aDefault = ArgsDefault
 	args.WithDevices, _ = toBool(ctx.DefaultQuery(aType.WithDevices, aDefault.WithDevices))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
-	args.WithIpConnection, _ = toBool(ctx.DefaultQuery(aType.WithIpConnection, aDefault.WithIpConnection))
-	args.WithSerialConnection, _ = toBool(ctx.DefaultQuery(aType.WithSerialConnection, aDefault.WithSerialConnection))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	return args
 }
@@ -174,8 +172,6 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	var aType = ArgsType
 	var aDefault = ArgsDefault
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
-	args.WithIpConnection, _ = toBool(ctx.DefaultQuery(aType.WithIpConnection, aDefault.WithIpConnection))
-	args.WithSerialConnection, _ = toBool(ctx.DefaultQuery(aType.WithSerialConnection, aDefault.WithSerialConnection))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	return args
 }

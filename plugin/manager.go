@@ -86,7 +86,7 @@ func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier No
 }
 
 // ErrAlreadyEnabledOrDisabled is returned on SetPluginEnabled call when a plugin is already enabled or disabled.
-var ErrAlreadyEnabledOrDisabled = errors.New("config is already enabled/disabled")
+var ErrAlreadyEnabledOrDisabled = errors.New("config is already on your state")
 
 // SetPluginEnabled sets the plugins enabled state.
 func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
@@ -249,7 +249,7 @@ func (m *Manager) initializePlugin(p compat.Plugin) error {
 	if compat.HasSupport(instance, compat.Webhooker) {
 		uuid := pluginConf.UUID
 		path := pluginConf.ModulePath
-		g := m.mux.Group("/", requirePluginEnabled(uuid, m.db))
+		g := m.mux.Group("/"+path, requirePluginEnabled(uuid, m.db))
 		instance.RegisterWebhook(strings.Replace(g.BasePath(), ":id", path, 1), g) //change path to uuid if we want the url to register as uuid
 	}
 	if pluginConf.Enabled {
@@ -302,6 +302,7 @@ func (m *Manager) createPluginConf(instance compat.PluginInstance, info compat.I
 	pluginConf := &model.PluginConf{
 		Name:       info.Name,
 		ModulePath: info.ModulePath,
+		HasNetwork: info.HasNetwork,
 	}
 	if compat.HasSupport(instance, compat.Configurer) {
 		pluginConf.Config, _ = yaml.Marshal(instance.DefaultConfig())

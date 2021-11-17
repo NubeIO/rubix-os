@@ -1,7 +1,8 @@
-package pkgmodel
+package model
 
 import (
 	"github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/plugin/defaults"
 )
 
 type ServerPing struct {
@@ -57,4 +58,51 @@ type BacnetPoint struct {
 	UseNextAvailableAddr bool            `json:"use_next_available_address,omitempty"`
 	COV                  float64         `json:"cov,omitempty"`
 	Priority             *model.Priority `json:"priority_array_write,omitempty"`
+}
+
+type NameStruct struct {
+	Type     string `json:"type" default:"string"`
+	Required bool   `json:"required" default:"true"`
+	Min      int    `json:"min" default:"3"`
+	Max      int    `json:"max" default:"20"`
+}
+
+type DescriptionStruct struct {
+	Type     string `json:"type" default:"string"`
+	Required bool   `json:"required" default:"false"`
+	Min      int    `json:"min" default:"0"`
+	Max      int    `json:"max" default:"80"`
+}
+
+type Network struct {
+	Name        NameStruct        `json:"name"`
+	Description DescriptionStruct `json:"description"`
+}
+
+type Device struct {
+	Name        NameStruct        `json:"name"`
+	Description DescriptionStruct `json:"description"`
+}
+
+type Point struct {
+	Name        NameStruct        `json:"name"`
+	Description DescriptionStruct `json:"description"`
+}
+
+func GetNetworkSchema() *Network {
+	network := &Network{}
+	defaults.Set(network)
+	return network
+}
+
+func GetDeviceSchema() *Device {
+	device := &Device{}
+	defaults.Set(device)
+	return device
+}
+
+func GetPointSchema() *Point {
+	point := &Point{}
+	defaults.Set(point)
+	return point
 }

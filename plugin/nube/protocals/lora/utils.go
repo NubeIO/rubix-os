@@ -22,15 +22,12 @@ func (i *Instance) wizardSerial(body wizard) (string, error) {
 	if body.SensorType != "" {
 		st = body.SensorType
 	}
-	var ser model.SerialConnection
-	ser.SerialPort = sp
-	ser.BaudRate = 38400
-
 	var net model.Network
 	net.Name = model.TransProtocol.Lora
 	net.TransportType = model.TransType.Serial
 	net.PluginPath = model.TransProtocol.Lora
-	net.SerialConnection = &ser
+	net.SerialPort = utils.NewStringAddress(sp)
+	net.SerialBaudRate = utils.NewUint(38400)
 
 	var dev model.Device
 	dev.Name = model.TransProtocol.Lora

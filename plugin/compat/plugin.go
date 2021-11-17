@@ -16,6 +16,7 @@ type Info struct {
 	Description string
 	License     string
 	ModulePath  string
+	HasNetwork  bool
 }
 
 func (c Info) String() string {

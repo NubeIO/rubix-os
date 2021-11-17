@@ -1,11 +1,20 @@
 package main
 
 import (
-	"github.com/NubeDev/flow-framework/model"
+	baseModel "github.com/NubeDev/flow-framework/model"
+	"github.com/NubeDev/flow-framework/plugin/nube/protocals/modbus/model"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+)
+
+const (
+	help          = "/help"
+	listSerial    = "/list/serial"
+	schemaNetwork = "/schema/network"
+	schemaDevice  = "/schema/device"
+	schemaPoint   = "/schema/point"
 )
 
 type Scan struct {
@@ -61,31 +70,26 @@ type T2 struct {
 //supportedObjects return all objects that are not bacnet
 func supportedObjects() *utils.Array {
 	out := utils.NewArray()
-	objs := utils.ArrayValues(model.ObjectTypes)
+	objs := utils.ArrayValues(baseModel.ObjectTypes)
 	for _, obj := range objs {
 		switch obj {
-		case model.ObjectTypes.AnalogInput:
+		case baseModel.ObjectTypes.AnalogInput:
 			out.Add(obj)
-		case model.ObjectTypes.AnalogOutput:
+		case baseModel.ObjectTypes.AnalogOutput:
 			out.Add(obj)
-		case model.ObjectTypes.AnalogValue:
+		case baseModel.ObjectTypes.AnalogValue:
 			out.Add(obj)
-		case model.ObjectTypes.BinaryInput:
+		case baseModel.ObjectTypes.BinaryInput:
 			out.Add(obj)
-		case model.ObjectTypes.BinaryOutput:
+		case baseModel.ObjectTypes.BinaryOutput:
 			out.Add(obj)
-		case model.ObjectTypes.BinaryValue:
+		case baseModel.ObjectTypes.BinaryValue:
 			out.Add(obj)
 		default:
 		}
 	}
 	return out
 }
-
-const (
-	help       = "/modbus/help"
-	listSerial = "/modbus/list/serial"
-)
 
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
@@ -184,4 +188,15 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 
+	mux.GET(schemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, model.GetNetworkSchema())
+	})
+
+	mux.GET(schemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, model.GetDeviceSchema())
+	})
+
+	mux.GET(schemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, model.GetPointSchema())
+	})
 }

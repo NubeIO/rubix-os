@@ -101,8 +101,6 @@ func (i *Instance) polling(p polling) error {
 	var arg api.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
-	arg.WithSerialConnection = true
-	arg.WithIpConnection = true
 	f := func() (bool, error) {
 		nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, arg)
 		if err != nil {

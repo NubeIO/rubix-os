@@ -67,7 +67,6 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 //wizard make a network/dev/pnt
 func (i *Instance) wizardSerial(body wizard) (string, error) {
 
-	var s model.SerialConnection
 	sp := "/dev/ttyUSB0"
 	if body.SerialPort != "" {
 		sp = body.SerialPort
@@ -76,14 +75,13 @@ func (i *Instance) wizardSerial(body wizard) (string, error) {
 	if body.BaudRate != 0 {
 		br = int(body.BaudRate)
 	}
-	s.SerialPort = sp
-	s.BaudRate = uint(br)
 
 	var net model.Network
 	net.Name = "modbus"
 	net.TransportType = model.TransType.Serial
 	net.PluginPath = "modbus"
-	net.SerialConnection = &s
+	net.SerialPort = &sp
+	net.SerialBaudRate = utils.NewUint(uint(br))
 
 	da := 1
 	if body.DeviceAddr != 0 {

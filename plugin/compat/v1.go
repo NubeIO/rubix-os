@@ -31,6 +31,7 @@ func (c PluginV1) PluginInfo() Info {
 		Description: c.Info.Description,
 		License:     c.Info.License,
 		ModulePath:  c.Info.ModulePath,
+		HasNetwork:  c.Info.HasNetwork,
 	}
 }
 

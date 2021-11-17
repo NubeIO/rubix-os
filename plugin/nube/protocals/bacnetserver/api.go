@@ -1,20 +1,26 @@
 package main
 
 import (
-	pkgmodel "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
-	plgrest "github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/restclient"
+	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/model"
+	"github.com/NubeDev/flow-framework/plugin/nube/protocals/bacnetserver/plgrest"
 	"github.com/NubeDev/flow-framework/utils"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
-func getBODYNetwork(ctx *gin.Context) (dto *pkgmodel.Server, err error) {
+const (
+	schemaNetwork = "/schema/network"
+	schemaDevice  = "/schema/device"
+	schemaPoint   = "/schema/point"
+)
+
+func getBODYNetwork(ctx *gin.Context) (dto *model.Server, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
 
-func getBODYPoints(ctx *gin.Context) (dto *pkgmodel.BacnetPoint, err error) {
+func getBODYPoints(ctx *gin.Context) (dto *model.BacnetPoint, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -121,5 +127,17 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else {
 			ctx.JSON(http.StatusOK, wizard)
 		}
+	})
+
+	mux.GET(schemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, model.GetNetworkSchema())
+	})
+
+	mux.GET(schemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, model.GetDeviceSchema())
+	})
+
+	mux.GET(schemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, model.GetPointSchema())
 	})
 }

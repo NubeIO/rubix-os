@@ -1,14 +1,19 @@
-package model
+package system_model
 
 import (
-	"github.com/NubeDev/flow-framework/plugin/plugin-api"
+	"github.com/NubeDev/flow-framework/plugin/defaults"
 )
 
-// Message is a message wrapper with the channel, sender and recipient.
-type Message struct {
-	Sender      plugin.UserContext
-	Receiver    plugin.UserContext
-	Msg         plugin.Message
-	ChannelName string
-	IsSend      bool
+type Point struct {
+	ObjectType struct {
+		Options  []string `json:"options" default:"[\"analogInput\",\"analogOutput\",\"analogValue\",\"binaryInput\",\"binaryOutput\",\"binaryValue\"]"`
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"true"`
+	} `json:"object_type"`
+}
+
+func GetPointSchema() *Point {
+	point := &Point{}
+	defaults.Set(point)
+	return point
 }

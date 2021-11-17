@@ -57,8 +57,6 @@ type Args struct {
 	WithDevices          bool
 	WithPoints           bool
 	WithPriority         bool
-	WithIpConnection     bool
-	WithSerialConnection bool
 	WithTags             bool
 	NetworkName          string
 	DeviceName           string
@@ -113,8 +111,6 @@ var ArgsType = struct {
 	WithDevices          string
 	WithPoints           string
 	WithPriority         string
-	WithIpConnection     string
-	WithSerialConnection string
 	WithTags             string
 	NetworkName          string
 	DeviceName           string
@@ -167,8 +163,6 @@ var ArgsType = struct {
 	WithDevices:          "with_devices",
 	WithPoints:           "with_points",
 	WithPriority:         "with_priority",
-	WithIpConnection:     "with_ip_connection",
-	WithSerialConnection: "with_serial_connection",
 	WithTags:             "with_tags",
 	NetworkName:          "network_name",
 	DeviceName:           "device_name",
@@ -177,86 +171,82 @@ var ArgsType = struct {
 }
 
 var ArgsDefault = struct {
-	Sort                 string
-	Order                string
-	Offset               string
-	Limit                string
-	Search               string
-	AskRefresh           string
-	AskResponse          string
-	Write                string
-	ThingType            string
-	FlowNetworkUUID      string
-	Field                string
-	Value                string
-	UpdateProducer       string
-	CompactPayload       string
-	CompactWithName      string
-	FlowUUID             string
-	StreamUUID           string
-	ProducerUUID         string
-	ConsumerUUID         string
-	WriterUUID           string
-	AddToParent          string
-	PluginName           string
-	WithFlowNetworks     string
-	WithStreams          string
-	WithStreamClones     string
-	WithProducers        string
-	WithConsumers        string
-	WithCommandGroups    string
-	WithWriters          string
-	WithWriterClones     string
-	WithNetworks         string
-	WithDevices          string
-	WithPoints           string
-	WithPriority         string
-	WithIpConnection     string
-	WithSerialConnection string
-	WithTags             string
-	NetworkName          string
-	DeviceName           string
-	PointName            string
+	Sort              string
+	Order             string
+	Offset            string
+	Limit             string
+	Search            string
+	AskRefresh        string
+	AskResponse       string
+	Write             string
+	ThingType         string
+	FlowNetworkUUID   string
+	Field             string
+	Value             string
+	UpdateProducer    string
+	CompactPayload    string
+	CompactWithName   string
+	FlowUUID          string
+	StreamUUID        string
+	ProducerUUID      string
+	ConsumerUUID      string
+	WriterUUID        string
+	AddToParent       string
+	PluginName        string
+	WithFlowNetworks  string
+	WithStreams       string
+	WithStreamClones  string
+	WithProducers     string
+	WithConsumers     string
+	WithCommandGroups string
+	WithWriters       string
+	WithWriterClones  string
+	WithNetworks      string
+	WithDevices       string
+	WithPoints        string
+	WithPriority      string
+	WithTags          string
+	NetworkName       string
+	DeviceName        string
+	PointName         string
 }{
-	Sort:                 "ID",
-	Order:                "DESC", //ASC or DESC
-	Offset:               "0",
-	Limit:                "25",
-	Search:               "",
-	AskRefresh:           "false",
-	AskResponse:          "false",
-	Write:                "false",
-	ThingType:            "point",
-	FlowNetworkUUID:      "",
-	Field:                "name",
-	Value:                "",
-	UpdateProducer:       "false",
-	CompactPayload:       "false",
-	CompactWithName:      "false",
-	FlowUUID:             "",
-	ProducerUUID:         "",
-	ConsumerUUID:         "",
-	WriterUUID:           "",
-	AddToParent:          "",
-	PluginName:           "false",
-	WithFlowNetworks:     "false",
-	WithStreams:          "false",
-	WithStreamClones:     "false",
-	WithProducers:        "false",
-	WithConsumers:        "false",
-	WithCommandGroups:    "false",
-	WithWriters:          "false",
-	WithWriterClones:     "false",
-	WithNetworks:         "false",
-	WithDevices:          "false",
-	WithPoints:           "false",
-	WithPriority:         "false",
-	WithIpConnection:     "false",
-	WithSerialConnection: "false",
-	WithTags:             "false",
-	NetworkName:          "",
-	DeviceName:           "",
-	PointName:            "",
+	Sort:              "ID",
+	Order:             "DESC", //ASC or DESC
+	Offset:            "0",
+	Limit:             "25",
+	Search:            "",
+	AskRefresh:        "false",
+	AskResponse:       "false",
+	Write:             "false",
+	ThingType:         "point",
+	FlowNetworkUUID:   "",
+	Field:             "name",
+	Value:             "",
+	UpdateProducer:    "false",
+	CompactPayload:    "false",
+	CompactWithName:   "false",
+	FlowUUID:          "",
+	ProducerUUID:      "",
+	ConsumerUUID:      "",
+	WriterUUID:        "",
+	AddToParent:       "",
+	PluginName:        "false",
+	WithFlowNetworks:  "false",
+	WithStreams:       "false",
+	WithStreamClones:  "false",
+	WithProducers:     "false",
+	WithConsumers:     "false",
+	WithCommandGroups: "false",
+	WithWriters:       "false",
+	WithWriterClones:  "false",
+	WithNetworks:      "false",
+	WithDevices:       "false",
+	WithPoints:        "false",
+	WithPriority:      "false",
+	WithTags:          "false",
+	NetworkName:       "",
+	DeviceName:        "",
+	PointName:         "",
 }
 
 type Message struct {
