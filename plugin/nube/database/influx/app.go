@@ -32,7 +32,8 @@ func (i *Instance) syncInflux() (bool, error) {
 		}
 		historyCount := len(histories)
 		if historyCount > 0 {
-			_, err := i.db.UpdateHistoryLogLastSyncId(histories[historyCount-1].ID)
+			// TODO: Enju
+			//_, err := i.db.UpdateHistoryLogLastSyncId(histories[historyCount-1].ID)
 			if err != nil {
 				return false, err
 			}
