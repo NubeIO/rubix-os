@@ -19,28 +19,28 @@ type TagAPI struct {
 func (j *TagAPI) GetTags(ctx *gin.Context) {
 	args := buildTagArgs(ctx)
 	q, err := j.DB.GetTags(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *TagAPI) GetTag(ctx *gin.Context) {
 	args := buildTagArgs(ctx)
 	tag := getTagParam(ctx)
 	q, err := j.DB.GetTag(tag, args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *TagAPI) CreateTag(ctx *gin.Context) {
 	body, err := getBodyTag(ctx)
 	if err != nil {
-		reposeHandler(nil, err, ctx)
+		responseHandler(nil, err, ctx)
 	} else {
 		q, e := j.DB.CreateTag(body)
-		reposeHandler(q, e, ctx)
+		responseHandler(q, e, ctx)
 	}
 }
 
 func (j *TagAPI) DeleteTag(ctx *gin.Context) {
 	tag := getTagParam(ctx)
 	q, err := j.DB.DeleteTag(tag)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }

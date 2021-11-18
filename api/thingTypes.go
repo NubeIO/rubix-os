@@ -11,13 +11,13 @@ type ThingAPI struct {
 }
 
 func (t *ThingAPI) ThingClass(ctx *gin.Context) {
-	reposeHandler(model.ThingClass, nil, ctx)
+	responseHandler(model.ThingClass, nil, ctx)
 }
 
 func (t *ThingAPI) WriterActions(ctx *gin.Context) {
-	reposeHandler(model.WriterActions, nil, ctx)
+	responseHandler(model.WriterActions, nil, ctx)
 }
 
 func (t *ThingAPI) ThingUnits(ctx *gin.Context) {
-	reposeHandler(unit.UnitsMap, nil, ctx)
+	responseHandler(unit.UnitsMap, nil, ctx)
 }

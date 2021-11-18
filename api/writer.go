@@ -26,41 +26,41 @@ type WriterAPI struct {
 func (j *WriterAPI) GetWriter(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetWriter(uuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *WriterAPI) GetWriters(ctx *gin.Context) {
 	args := buildWriterArgs(ctx)
 	q, err := j.DB.GetWriters(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *WriterAPI) CreateWriter(ctx *gin.Context) {
 	body, _ := getBODYWriter(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
-		reposeHandler(nil, err, ctx)
+		responseHandler(nil, err, ctx)
 	}
 	q, err := j.DB.CreateWriter(body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *WriterAPI) UpdateWriter(ctx *gin.Context) {
 	body, _ := getBODYWriter(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.UpdateWriter(uuid, body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *WriterAPI) DeleteWriter(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteWriter(uuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *WriterAPI) DropWriters(ctx *gin.Context) {
 	q, err := j.DB.DropWriters()
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 //WriterAction get or update a producer value by using the writer uuid
@@ -68,14 +68,14 @@ func (j *WriterAPI) WriterAction(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	body, _ := getBODYWriterBody(ctx)
 	q, err := j.DB.WriterAction(uuid, body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 //WriterBulkAction get or update a producer value by using the writer uuid
 func (j *WriterAPI) WriterBulkAction(ctx *gin.Context) {
 	body, _ := getBODYWriterBulk(ctx)
 	q, err := j.DB.WriterBulkAction(body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func getBODYWriterWizard(ctx *gin.Context) (dto *WriterWizard, err error) {
@@ -93,8 +93,8 @@ func (j *WriterAPI) CreateWriterWizard(ctx *gin.Context) {
 	body, _ := getBODYWriterWizard(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
-		reposeHandler(nil, err, ctx)
+		responseHandler(nil, err, ctx)
 	}
 	q, err := j.DB.CreateWriterWizard(body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }

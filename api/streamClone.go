@@ -18,18 +18,18 @@ type StreamCloneAPI struct {
 func (j *StreamCloneAPI) GetStreamClones(ctx *gin.Context) {
 	args := buildStreamCloneArgs(ctx)
 	q, err := j.DB.GetStreamClones(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *StreamCloneAPI) GetStreamClone(ctx *gin.Context) {
 	args := buildStreamCloneArgs(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetStreamClone(uuid, args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *StreamCloneAPI) DeleteStreamClone(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	err := j.DB.DeleteStreamClone(uuid)
-	reposeHandler("", err, ctx)
+	responseHandler(nil, err, ctx)
 }

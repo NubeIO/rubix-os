@@ -46,40 +46,40 @@ type ProducerAPI struct {
 func (j *ProducerAPI) GetProducers(ctx *gin.Context) {
 	args := buildProducerArgs(ctx)
 	q, err := j.DB.GetProducers(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *ProducerAPI) GetProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildProducerArgs(ctx)
 	q, err := j.DB.GetProducer(uuid, args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *ProducerAPI) CreateProducer(ctx *gin.Context) {
 	body, _ := getBODYProducer(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
-		reposeHandler(nil, err, ctx)
+		responseHandler(nil, err, ctx)
 	}
 	body, err = j.DB.CreateProducer(body)
-	reposeHandler(body, err, ctx)
+	responseHandler(body, err, ctx)
 }
 
 func (j *ProducerAPI) UpdateProducer(ctx *gin.Context) {
 	body, _ := getBODYProducer(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.UpdateProducer(uuid, body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *ProducerAPI) DeleteProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteProducer(uuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *ProducerAPI) DropProducers(ctx *gin.Context) {
 	q, err := j.DB.DropProducers()
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }

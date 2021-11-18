@@ -16,5 +16,5 @@ type SyncWriterAPI struct {
 func (a *SyncWriterAPI) SyncWriter(ctx *gin.Context) {
 	body, _ := getBodySyncWriter(ctx)
 	q, err := a.DB.SyncWriter(body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }

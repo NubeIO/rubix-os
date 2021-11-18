@@ -22,23 +22,23 @@ type WriterCloneAPI struct {
 func (j *WriterCloneAPI) GetWriterClone(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetWriterClone(uuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *WriterCloneAPI) GetWriterClones(ctx *gin.Context) {
 	args := buildWriterCloneArgs(ctx)
 	q, err := j.DB.GetWriterClones(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *WriterCloneAPI) CreateWriterClone(ctx *gin.Context) {
 	body, _ := getBODYWriterClone(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
-		reposeHandler(nil, err, ctx)
+		responseHandler(nil, err, ctx)
 	}
 	q, err := j.DB.CreateWriterClone(body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *WriterCloneAPI) UpdateWriterClone(ctx *gin.Context) {
@@ -46,16 +46,16 @@ func (j *WriterCloneAPI) UpdateWriterClone(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	_, _, _, updateProducer := withConsumerArgs(ctx)
 	q, err := j.DB.UpdateWriterClone(uuid, body, updateProducer)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *WriterCloneAPI) DeleteWriterClone(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteWriterClone(uuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (j *WriterCloneAPI) DropWriterClone(ctx *gin.Context) {
 	q, err := j.DB.DropWriterClone()
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }

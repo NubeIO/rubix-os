@@ -23,44 +23,44 @@ type HistoriesAPI struct {
 func (a *HistoriesAPI) GetProducerHistories(ctx *gin.Context) {
 	args := buildProducerHistoryArgs(ctx)
 	q, err := a.DB.GetProducerHistories(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) GetProducerHistoriesByProducerUUID(ctx *gin.Context) {
 	pUuid := resolveProducerUUID(ctx)
 	args := buildProducerHistoryArgs(ctx)
 	q, _, err := a.DB.GetProducerHistoriesByProducerUUID(pUuid, args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) GetLatestProducerHistoryByProducerUUID(ctx *gin.Context) {
 	pUuid := resolveProducerUUID(ctx)
 	q, err := a.DB.GetLatestProducerHistoryByProducerUUID(pUuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) GetProducerHistoriesPoints(ctx *gin.Context) {
 	args := buildProducerHistoryArgs(ctx)
 	q, err := a.DB.GetProducerHistoriesPoints(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) CreateProducerHistory(ctx *gin.Context) {
 	body, _ := getBodyHistory(ctx)
 	q, err := a.DB.CreateProducerHistory(body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) CreateBulkProducerHistory(ctx *gin.Context) {
 	body, _ := getBodyBulkHistory(ctx)
 	q, err := a.DB.CreateBulkProducerHistory(body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) DeleteAllProducerHistories(ctx *gin.Context) {
 	args := buildProducerHistoryArgs(ctx)
 	q, err := a.DB.DeleteAllProducerHistories(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 
 }
 
@@ -68,5 +68,5 @@ func (a *HistoriesAPI) DeleteProducerHistoriesByProducerUUID(ctx *gin.Context) {
 	pUuid := resolveProducerUUID(ctx)
 	args := buildProducerHistoryArgs(ctx)
 	q, err := a.DB.DeleteProducerHistoriesByProducerUUID(pUuid, args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }

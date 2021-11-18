@@ -253,13 +253,9 @@ type Message struct {
 	Message string `json:"message"`
 }
 
-func reposeHandler(body interface{}, err error, ctx *gin.Context) {
+func responseHandler(body interface{}, err error, ctx *gin.Context) {
 	if err != nil {
-		if body == nil {
-			ctx.JSON(404, Message{Message: "unknown error"})
-		} else {
-			ctx.JSON(404, Message{Message: err.Error()})
-		}
+		ctx.JSON(404, Message{Message: err.Error()})
 	} else {
 		ctx.JSON(200, body)
 	}

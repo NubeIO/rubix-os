@@ -16,5 +16,5 @@ type SyncStreamAPI struct {
 func (a *SyncStreamAPI) SyncStream(ctx *gin.Context) {
 	body, _ := getBodySyncStream(ctx)
 	q, err := a.DB.SyncStream(body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
