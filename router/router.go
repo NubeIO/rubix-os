@@ -336,8 +336,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			consumerWriterRoutes := consumerRoutes.Group("/writers")
 			{
 				consumerWriterRoutes.GET("", writerHandler.GetWriters)
-				consumerWriterRoutes.POST("wizard", writerHandler.CreateWriterWizard)
 				consumerWriterRoutes.POST("", writerHandler.CreateWriter)
+				consumerWriterRoutes.POST("wizard", writerHandler.CreateWriterWizard)
 				consumerWriterRoutes.GET("/:uuid", writerHandler.GetWriter)
 				consumerWriterRoutes.PATCH("/:uuid", writerHandler.UpdateWriter)
 				consumerWriterRoutes.DELETE("/:uuid", writerHandler.DeleteWriter)

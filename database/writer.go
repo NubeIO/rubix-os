@@ -26,23 +26,27 @@ func (d *GormDatabase) GetWriters(args api.Args) ([]*model.Writer, error) {
 }
 
 func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
+	name := ""
 	switch body.WriterThingClass {
 	case model.ThingClass.Point:
-		_, err := d.GetPoint(body.WriterThingUUID, api.Args{})
+		point, err := d.GetPoint(body.WriterThingUUID, api.Args{})
 		if err != nil {
 			return nil, errors.New("point not found, please supply a valid point writer_thing_uuid")
 		}
+		name = point.Name
 	case model.ThingClass.Schedule:
 		fmt.Println(body.WriterThingUUID)
-		_, err := d.GetSchedule(body.WriterThingUUID)
+		schedule, err := d.GetSchedule(body.WriterThingUUID)
 		if err != nil {
 			return nil, errors.New("schedule not found, please supply a valid point writer_thing_uuid")
 		}
+		name = schedule.Name
 	default:
 		return nil, errors.New("we are not supporting writer_thing_uuid other than point for now")
 	}
 
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Writer)
+	body.WriterThingName = name
 	body.SyncUUID, _ = utils.MakeUUID()
 	query := d.DB.Create(body)
 	if query.Error != nil {
