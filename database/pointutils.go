@@ -46,15 +46,15 @@ func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Poin
 	return pointModel, true
 }
 
-func pointUnits(pointModel *model.Point) (value float64, displayValue string, ok bool, err error) {
+func pointUnits(pointModel *model.Point) (value float64, ok bool, err error) {
 	if pointModel.Unit != "" {
 		_, res, err := unit.Process(*pointModel.PresentValue, pointModel.Unit, pointModel.UnitTo)
 		if err != nil {
-			return 0, "", false, err
+			return 0, false, err
 		}
-		return res.AsFloat(), res.String(), true, err
+		return res.AsFloat(), true, err
 	} else {
-		return 0, "", false, nil
+		return 0, false, nil
 	}
 }
 
@@ -80,12 +80,12 @@ func pointScale(presentValue *float64, scaleInMin, scaleInMax, scaleOutMin, scal
 	return presentValue
 }
 
-func pointEval(presentValue, valueOriginal *float64, evalMode, evalString string) (value *float64, err error) {
+func pointEval(presentValue, originalValue *float64, evalMode, evalString string) (value *float64, err error) {
 	var val *float64
 	if evalMode == model.EvalMode.CalcAfterScale || evalMode == model.EvalMode.Enable {
 		val = presentValue
-	} else if evalMode == model.EvalMode.CalcOnValueOriginal {
-		val = valueOriginal
+	} else if evalMode == model.EvalMode.CalcOnOriginalValue {
+		val = originalValue
 	} else {
 		val = presentValue
 	}

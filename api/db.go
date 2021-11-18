@@ -20,7 +20,7 @@ type DatabaseAPI struct {
 
 func (a *DatabaseAPI) DropAllFlow(ctx *gin.Context) {
 	q, err := a.DB.DropAllFlow()
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *DatabaseAPI) SyncTopics() {
@@ -30,22 +30,22 @@ func (a *DatabaseAPI) SyncTopics() {
 func (a *DatabaseAPI) WizardP2PMapping(ctx *gin.Context) {
 	body, _ := getP2PBody(ctx)
 	mapping, err := a.DB.WizardP2PMapping(body)
-	reposeHandler(mapping, err, ctx)
+	responseHandler(mapping, err, ctx)
 }
 
 func (a *DatabaseAPI) WizardMasterSlavePointMapping(ctx *gin.Context) {
 	mapping, err := a.DB.WizardMasterSlavePointMapping()
-	reposeHandler(mapping, err, ctx)
+	responseHandler(mapping, err, ctx)
 }
 
 func (a *DatabaseAPI) WizardMasterSlavePointMappingOnConsumerSideByProducerSide(ctx *gin.Context) {
 	globalUUID := resolveGlobalUUID(ctx)
 	sch, err := a.DB.WizardMasterSlavePointMappingOnConsumerSideByProducerSide(globalUUID)
-	reposeHandler(sch, err, ctx)
+	responseHandler(sch, err, ctx)
 }
 
 func (a *DatabaseAPI) WizardP2PMappingOnConsumerSideByProducerSide(ctx *gin.Context) {
 	globalUUID := resolveGlobalUUID(ctx)
 	sch, err := a.DB.WizardP2PMappingOnConsumerSideByProducerSide(globalUUID)
-	reposeHandler(sch, err, ctx)
+	responseHandler(sch, err, ctx)
 }

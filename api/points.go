@@ -29,59 +29,59 @@ type PointAPI struct {
 func (a *PointAPI) GetPoints(ctx *gin.Context) {
 	args := buildPointArgs(ctx)
 	q, err := a.DB.GetPoints(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetPoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildPointArgs(ctx)
 	q, err := a.DB.GetPoint(uuid, args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetPointsByNetworkPluginName(ctx *gin.Context) {
 	name := resolveName(ctx)
 	q, err := a.DB.GetPointsByNetworkPluginName(name)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetPointsByNetworkUUID(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.GetPointsByNetworkUUID(uuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdatePoint(uuid, body, false)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) PointWrite(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.PointWrite(uuid, body, false)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetPointByName(ctx *gin.Context) {
 	networkName, deviceName, pointName := networkDevicePointNames(ctx)
 	q, err := a.DB.GetPointByName(networkName, deviceName, pointName)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetPointByField(ctx *gin.Context) {
 	field, value := withFieldsArgs(ctx)
 	q, err := a.DB.GetPointByField(field, value)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) PointWriteByName(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	networkName, deviceName, pointName := networkDevicePointNames(ctx)
 	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body, false)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) UpdatePointByFieldAndUnit(ctx *gin.Context) {
@@ -89,23 +89,23 @@ func (a *PointAPI) UpdatePointByFieldAndUnit(ctx *gin.Context) {
 	field, value := withFieldsArgs(ctx)
 	_, _, writeValue, _ := withConsumerArgs(ctx)
 	q, err := a.DB.UpdatePointByFieldAndUnit(field, value, body, writeValue)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) CreatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	addToParent := parentArgs(ctx) //flowUUID
 	q, err := a.DB.CreatePoint(body, addToParent)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) DeletePoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeletePoint(uuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) DropPoints(ctx *gin.Context) {
 	q, err := a.DB.DropPoints()
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }

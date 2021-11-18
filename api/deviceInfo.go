@@ -19,45 +19,45 @@ type DeviceInfoAPI struct {
 
 func (a *DeviceInfoAPI) GetDeviceInfo(ctx *gin.Context) {
 	q, err := a.DB.GetDeviceInfo()
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *DeviceInfoAPI) GetSystemTime(ctx *gin.Context) {
 	t := utilstime.SystemTime()
-	reposeHandler(t, nil, ctx)
+	responseHandler(t, nil, ctx)
 }
 
 func (a *DeviceInfoAPI) GetExternalIP(ctx *gin.Context) {
 	t, err := networking.ExternalIPV4()
-	reposeHandler(t, err, ctx)
+	responseHandler(t, err, ctx)
 }
 
 func (a *DeviceInfoAPI) GetNetworks(ctx *gin.Context) {
 	_, _, all, err := networking.IpAddresses()
-	reposeHandler(all, err, ctx)
+	responseHandler(all, err, ctx)
 }
 
 func (a *DeviceInfoAPI) GetInterfacesNames(ctx *gin.Context) {
 	t, err := networking.GetInterfacesNames()
-	reposeHandler(t, err, ctx)
+	responseHandler(t, err, ctx)
 }
 
 func (a *DeviceInfoAPI) GetInternetStatus(ctx *gin.Context) {
 	t, err := networking.CheckInternetStatus()
-	reposeHandler(t, err, ctx)
+	responseHandler(t, err, ctx)
 }
 
 func (a *DeviceInfoAPI) GetOSDetails(ctx *gin.Context) {
 	out := host.GetCombinationData(false)
-	reposeHandler(out, nil, ctx)
+	responseHandler(out, nil, ctx)
 }
 
 func (a *DeviceInfoAPI) GetTZoneList(ctx *gin.Context) {
 	out, err := utilstime.GetTimeZoneList()
-	reposeHandler(out, err, ctx)
+	responseHandler(out, err, ctx)
 }
 
 func (a *DeviceInfoAPI) FirewallStatus(ctx *gin.Context) {
 	out, err := ufw.FirewallStatus()
-	reposeHandler(out, err, ctx)
+	responseHandler(out, err, ctx)
 }

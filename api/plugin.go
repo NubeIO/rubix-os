@@ -31,13 +31,13 @@ type PluginAPI struct {
 func (c *PluginAPI) GetPlugin(ctx *gin.Context) {
 	uuid := c.buildUUID(ctx)
 	q, err := c.DB.GetPlugin(uuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (c *PluginAPI) GetPluginByPath(ctx *gin.Context) {
 	path := resolvePath(ctx)
 	q, err := c.DB.GetPluginByPath(path)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 // GetPlugins returns all plugins a user has.
@@ -63,7 +63,7 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 			})
 		}
 	}
-	reposeHandler(result, err, ctx)
+	responseHandler(result, err, ctx)
 }
 
 //buildUUID a way to query a plugin by its name or uuid
@@ -74,7 +74,7 @@ func (c *PluginAPI) buildUUID(ctx *gin.Context) string {
 	if args.PluginName {
 		path, err := c.DB.GetPluginByPath(nameOrUUID)
 		if err != nil {
-			reposeHandler("err: no plugin with that name was found", nil, ctx)
+			responseHandler("err: no plugin with that name was found", nil, ctx)
 			return ""
 		}
 		uuid = path.UUID
@@ -82,7 +82,7 @@ func (c *PluginAPI) buildUUID(ctx *gin.Context) string {
 		uuid = resolveID(ctx)
 	}
 	if uuid == "" {
-		reposeHandler("err: no valid uuid found", nil, ctx)
+		responseHandler("err: no valid uuid found", nil, ctx)
 		return ""
 	}
 	return uuid
@@ -93,32 +93,32 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 	uuid := c.buildUUID(ctx)
 	body, err := getBODYPlugin(ctx)
 	if err != nil {
-		reposeHandler("error on body", err, ctx)
+		responseHandler("error on body", err, ctx)
 	}
 	conf, err := c.DB.GetPlugin(uuid)
 	if success := successOrAbort(ctx, 500, err); !success {
 		return
 	}
 	if conf == nil {
-		reposeHandler("unknown plugin", err, ctx)
+		responseHandler("unknown plugin", err, ctx)
 		return
 	}
 	_, err = c.Manager.Instance(uuid)
 	if err != nil {
-		reposeHandler("plugin not found", err, ctx)
+		responseHandler("plugin not found", err, ctx)
 		return
 	}
 	if err := c.Manager.SetPluginEnabled(uuid, body.Enabled); err == plugin.ErrAlreadyEnabledOrDisabled {
-		reposeHandler("", err, ctx)
+		responseHandler(nil, err, ctx)
 		return
 	} else if err != nil {
-		reposeHandler("", err, ctx)
+		responseHandler(nil, err, ctx)
 		return
 	}
 	if body.Enabled {
-		reposeHandler(map[string]string{"state": "enabled"}, err, ctx)
+		responseHandler(map[string]string{"state": "enabled"}, err, ctx)
 	} else {
-		reposeHandler(map[string]string{"state": "disabled"}, err, ctx)
+		responseHandler(map[string]string{"state": "disabled"}, err, ctx)
 	}
 }
 
@@ -130,20 +130,20 @@ func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
 		return
 	}
 	if conf == nil {
-		reposeHandler("unknown plugin", err, ctx)
+		responseHandler("unknown plugin", err, ctx)
 		return
 	}
 	_, err = c.Manager.Instance(uuid)
 	if err != nil {
-		reposeHandler("plugin not found", err, ctx)
+		responseHandler("plugin not found", err, ctx)
 		return
 	}
 	if res, err := c.Manager.RestartPlugin(uuid); err == plugin.ErrAlreadyEnabledOrDisabled {
-		reposeHandler(res, err, ctx)
+		responseHandler(res, err, ctx)
 	} else if err != nil {
-		reposeHandler(res, nil, ctx)
+		responseHandler(res, nil, ctx)
 	}
-	reposeHandler("plugin restart ok", err, ctx)
+	responseHandler("plugin restart ok", err, ctx)
 
 }
 

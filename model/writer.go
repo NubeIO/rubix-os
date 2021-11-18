@@ -8,6 +8,7 @@ type CommonWriter struct {
 	WriterThingClass string         `json:"writer_thing_class,omitempty"`
 	WriterThingType  string         `json:"writer_thing_type,omitempty"`
 	WriterThingUUID  string         `json:"writer_thing_uuid,omitempty"`
+	WriterThingName  string         `json:"writer_thing_name,omitempty"`
 	DataStore        datatypes.JSON `json:"data_store,omitempty"`
 	CommonCreated
 }

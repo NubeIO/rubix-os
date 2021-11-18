@@ -28,6 +28,14 @@ func (d *GormDatabase) GetFlowNetworkClone(uuid string, args api.Args) (*model.F
 	return flowNetworkCloneModel, nil
 }
 
+func (d *GormDatabase) DeleteFlowNetworkClone(uuid string) error {
+	var flowNetworkCloneModel *model.FlowNetworkClone
+	if err := d.DB.Where("uuid = ? ", uuid).Delete(&flowNetworkCloneModel).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (d *GormDatabase) GetOneFlowNetworkCloneByArgs(args api.Args) (*model.FlowNetworkClone, error) {
 	var flowNetworkCloneModel *model.FlowNetworkClone
 	query := d.buildFlowNetworkCloneQuery(args)

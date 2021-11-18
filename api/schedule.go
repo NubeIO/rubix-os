@@ -22,40 +22,40 @@ type ScheduleAPI struct {
 func (a *ScheduleAPI) GetSchedule(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.GetSchedule(uuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *ScheduleAPI) GetScheduleByField(ctx *gin.Context) {
 	field, value := withFieldsArgs(ctx)
 	q, err := a.DB.GetScheduleByField(field, value)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *ScheduleAPI) GetSchedules(ctx *gin.Context) {
 	q, err := a.DB.GetSchedules()
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *ScheduleAPI) UpdateSchedule(ctx *gin.Context) {
 	body, _ := getBODYSchedule(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdateSchedule(uuid, body)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *ScheduleAPI) CreateSchedule(ctx *gin.Context) {
 	body, _ := getBODYSchedule(ctx)
 	q, err := a.DB.CreateSchedule(body)
-	reposeHandler(q, err, ctx) //TODO
+	responseHandler(q, err, ctx) //TODO
 }
 
 func (a *ScheduleAPI) DeleteSchedule(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteSchedule(uuid)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *ScheduleAPI) DropSchedules(ctx *gin.Context) {
 	q, err := a.DB.DropSchedules()
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }

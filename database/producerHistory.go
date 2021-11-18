@@ -50,10 +50,15 @@ func (d *GormDatabase) GetProducerHistoriesPoints(args api.Args) ([]*model.Histo
 		return nil, query.Error
 	}
 	for _, pHis := range proHistoriesModel {
-		pri := new(model.Priority)
-		_ = json.Unmarshal(pHis.DataStore, &pri)
+		priority := new(model.Priority)
+		_ = json.Unmarshal(pHis.DataStore, &priority)
+		highestPriorityValue := priority.GetHighestPriorityValue()
+		value := 0.0
+		if highestPriorityValue != nil {
+			value = *highestPriorityValue
+		}
 		historiesModel = append(historiesModel,
-			&model.History{ID: pHis.ID, UUID: pHis.ProducerUUID, Value: pri.GetHighestPriority(), Timestamp: pHis.Timestamp})
+			&model.History{ID: pHis.ID, UUID: pHis.ProducerUUID, Value: value, Timestamp: pHis.Timestamp})
 	}
 	return historiesModel, nil
 }
@@ -103,7 +108,26 @@ func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (bo
 	if err != nil {
 		return false, err
 	}
-	d.DB.Model(&model.Producer{}).Where("uuid = ?", history.ProducerUUID).Update("current_writer_uuid", ph.CurrentWriterUUID)
+	var producer model.Producer
+	if err := d.DB.Where("uuid = ?", history.ProducerUUID).Find(&producer).Error; err != nil {
+		return false, err
+	}
+	if err = d.DB.Model(producer).Update("current_writer_uuid", ph.CurrentWriterUUID).Error; err != nil {
+		return false, err
+	}
+	if producer.ProducerThingClass == model.ThingClass.Point {
+		priority := new(model.Priority)
+		_ = json.Unmarshal(history.DataStore, &priority)
+		highestPriorityValue := priority.GetHighestPriorityValue()
+		print("here>>>")
+		d.DB.Model(&model.Point{}).Where("uuid = ?", producer.ProducerThingUUID).
+			Updates(map[string]interface{}{
+				"present_value":  highestPriorityValue,
+				"original_value": highestPriorityValue,
+			})
+	} else {
+		// TODO: for schedule and others
+	}
 	return true, nil
 }
 

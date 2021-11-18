@@ -8,6 +8,7 @@ import (
 type FlowNetworkCloneDatabase interface {
 	GetFlowNetworkClones(args Args) ([]*model.FlowNetworkClone, error)
 	GetFlowNetworkClone(uuid string, args Args) (*model.FlowNetworkClone, error)
+	DeleteFlowNetworkClone(uuid string) error
 	GetOneFlowNetworkCloneByArgs(args Args) (*model.FlowNetworkClone, error)
 	RefreshFlowNetworkClonesConnections() (*bool, error)
 }
@@ -19,23 +20,29 @@ type FlowNetworkClonesAPI struct {
 func (a *FlowNetworkClonesAPI) GetFlowNetworkClones(ctx *gin.Context) {
 	args := buildFlowNetworkCloneArgs(ctx)
 	q, err := a.DB.GetFlowNetworkClones(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *FlowNetworkClonesAPI) GetFlowNetworkClone(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildFlowNetworkCloneArgs(ctx)
 	q, err := a.DB.GetFlowNetworkClone(uuid, args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
+}
+
+func (a *FlowNetworkClonesAPI) DeleteFlowNetworkClone(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	err := a.DB.DeleteFlowNetworkClone(uuid)
+	responseHandler(nil, err, ctx)
 }
 
 func (a *FlowNetworkClonesAPI) GetOneFlowNetworkCloneByArgs(ctx *gin.Context) {
 	args := buildFlowNetworkCloneArgs(ctx)
 	q, err := a.DB.GetOneFlowNetworkCloneByArgs(args)
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
 
 func (a *FlowNetworkClonesAPI) RefreshFlowNetworkClonesConnections(ctx *gin.Context) {
 	q, err := a.DB.RefreshFlowNetworkClonesConnections()
-	reposeHandler(q, err, ctx)
+	responseHandler(q, err, ctx)
 }
