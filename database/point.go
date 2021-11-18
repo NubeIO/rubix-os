@@ -295,17 +295,17 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 		presentValueIsNil = false
 		presentValue = body.PresentValue
 		_v := utils.Float64IsNil(presentValue)
-		body.ValueOriginal = &_v
+		body.OriginalValue = &_v
 	} else if pointModel.PresentValue != nil {
 		presentValue = pointModel.PresentValue
 		_v := utils.Float64IsNil(presentValue)
-		body.ValueOriginal = &_v
+		body.OriginalValue = &_v
 	} else {
 		presentValueIsNil = true
 	}
 
 	value := utils.Float64IsNil(body.PresentValue)
-	body.ValueOriginal = &value
+	body.OriginalValue = &value
 	var limitMin *float64
 	if body.LimitMin == nil {
 		if pointModel.LimitMin != nil {
@@ -388,28 +388,27 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 				_pv := v
 				presentValue = &_pv
 				_v := utils.Float64IsNil(presentValue)
-				body.ValueOriginal = &_v
+				body.OriginalValue = &_v
 			}
 		}
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
 	}
 	presentValue = pointScale(presentValue, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax)
 	presentValue = pointRange(presentValue, limitMin, limitMax)
-	eval, err := pointEval(presentValue, body.ValueOriginal, pointModel.EvalMode, pointModel.Eval)
+	eval, err := pointEval(presentValue, body.OriginalValue, pointModel.EvalMode, pointModel.Eval)
 	if err != nil {
 		log.Errorf("ERROR on point invalid point unit")
 		return nil, err
 	} else {
 		pointModel.PresentValue = eval
 	}
-	vv, display, ok, err := pointUnits(pointModel)
+	vv, ok, err := pointUnits(pointModel)
 	if err != nil {
 		log.Errorf("ERROR on point invalid point unit")
 		return nil, err
 	}
 	if ok {
 		presentValue = &vv
-		body.ValueDisplay = display
 	}
 	if !utils.Unit32NilCheck(pointModel.Decimal) {
 		val := utils.RoundTo(*presentValue, *pointModel.Decimal)

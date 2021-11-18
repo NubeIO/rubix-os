@@ -148,7 +148,7 @@ func (i *Instance) PollingTCP(p polling) error {
 									_pnt.UUID = pnt.UUID
 									_pnt.PresentValue = &ops.WriteValue //update point value
 									cov := utils.Float64IsNil(pnt.COV)
-									covEvent, _ := utils.COV(ops.WriteValue, utils.Float64IsNil(pnt.ValueOriginal), cov)
+									covEvent, _ := utils.COV(ops.WriteValue, utils.Float64IsNil(pnt.OriginalValue), cov)
 									if covEvent {
 										log.Infof("modbus: MODBUS WRITE COV EVENT: COV value is %v\n", cov)
 										if err != nil {
@@ -203,7 +203,7 @@ func (i *Instance) PollingTCP(p polling) error {
 									rs := responseValue
 									_pnt.PresentValue = &rs //update point value
 									cov := utils.Float64IsNil(pnt.COV)
-									covEvent, _ := utils.COV(ops.WriteValue, utils.Float64IsNil(pnt.ValueOriginal), cov)
+									covEvent, _ := utils.COV(ops.WriteValue, utils.Float64IsNil(pnt.OriginalValue), cov)
 									if covEvent {
 										_, err = i.pointUpdate(pnt.UUID, &_pnt)
 										i.store.Set(pnt.UUID, _pnt, -1) //store point in cache

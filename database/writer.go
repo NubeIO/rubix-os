@@ -268,6 +268,18 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 	if askRefresh {
 		writer.DataStore = pHistory.DataStore
 		consumer.CurrentWriterUUID = writer.UUID
+		if writer.WriterThingClass == model.ThingClass.Point {
+			priority := new(model.Priority)
+			_ = json.Unmarshal(writer.DataStore, &priority)
+			highestPriorityValue := priority.GetHighestPriorityValue()
+			d.DB.Model(&model.Point{}).Where("uuid = ?", writer.WriterThingUUID).
+				Updates(map[string]interface{}{
+					"present_value":  highestPriorityValue,
+					"original_value": highestPriorityValue,
+				})
+		} else {
+			// TODO: for schedule and others
+		}
 		d.DB.Model(&writer).Updates(writer)
 		d.DB.Model(&consumer).Updates(consumer)
 	}
