@@ -15,7 +15,7 @@ func (i *Instance) syncInflux() (bool, error) {
 	}
 	for _, integration := range integrations {
 		influxSetting := new(InfluxSetting)
-		influxSetting.ServerURL = integration.IP + ":" + integration.PORT
+		influxSetting.ServerURL = "http://" + integration.IP + ":" + integration.PORT
 		influxSetting.AuthToken = integration.Token
 		isc := New(influxSetting)
 		histories, err := i.db.GetHistoriesForSync()
@@ -32,8 +32,7 @@ func (i *Instance) syncInflux() (bool, error) {
 		}
 		historyCount := len(histories)
 		if historyCount > 0 {
-			// TODO: Enju
-			//_, err := i.db.UpdateHistoryLogLastSyncId(histories[historyCount-1].ID)
+			_, err := i.db.UpdateHistoryInfluxLogLastSyncId(histories[historyCount-1].ID)
 			if err != nil {
 				return false, err
 			}
