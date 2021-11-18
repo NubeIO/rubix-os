@@ -228,6 +228,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		{
 			flowNetworkCloneRoutes.GET("", flowNetworkCloneHandler.GetFlowNetworkClones)
 			flowNetworkCloneRoutes.GET("/:uuid", flowNetworkCloneHandler.GetFlowNetworkClone)
+			flowNetworkCloneRoutes.DELETE("/:uuid", flowNetworkCloneHandler.DeleteFlowNetworkClone)
 			flowNetworkCloneRoutes.GET("/one/args", flowNetworkCloneHandler.GetOneFlowNetworkCloneByArgs)
 			flowNetworkCloneRoutes.GET("/refresh_connections", flowNetworkCloneHandler.RefreshFlowNetworkClonesConnections)
 		}
@@ -247,6 +248,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		{
 			streamCloneRoutes.GET("", streamCloneHandler.GetStreamClones)
 			streamCloneRoutes.GET("/:uuid", streamCloneHandler.GetStreamClone)
+			streamCloneRoutes.DELETE("/:uuid", streamCloneHandler.DeleteStreamClone)
 		}
 
 		networkRoutes := apiRoutes.Group("/networks")

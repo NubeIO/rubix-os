@@ -8,6 +8,7 @@ import (
 type StreamCloneDatabase interface {
 	GetStreamClones(args Args) ([]*model.StreamClone, error)
 	GetStreamClone(uuid string, args Args) (*model.StreamClone, error)
+	DeleteStreamClone(uuid string) error
 }
 
 type StreamCloneAPI struct {
@@ -25,4 +26,10 @@ func (j *StreamCloneAPI) GetStreamClone(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetStreamClone(uuid, args)
 	reposeHandler(q, err, ctx)
+}
+
+func (j *StreamCloneAPI) DeleteStreamClone(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	err := j.DB.DeleteStreamClone(uuid)
+	reposeHandler("", err, ctx)
 }
