@@ -64,6 +64,7 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 	var links []model.Link
 	var history []model.History
 	var historyLog []model.HistoryLog
+	var historyInfluxLog []model.HistoryInfluxLog
 	var models = []interface{}{
 		&localStorageFlowNetwork,
 		&alerts,
@@ -99,6 +100,7 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 		&links,
 		&history,
 		&historyLog,
+		&historyInfluxLog,
 	}
 
 	for _, v := range models {

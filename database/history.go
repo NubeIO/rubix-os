@@ -20,7 +20,8 @@ func (d *GormDatabase) GetHistories(args api.Args) ([]*model.History, error) {
 // GetHistoriesForSync returns all histories after id.
 func (d *GormDatabase) GetHistoriesForSync(args api.Args) ([]*model.History, error) {
 	var historiesModel []*model.History
-	query := d.DB.Where("id > (?)", d.DB.Table("history_logs").Select("IFNULL(MAX(last_sync_id),0)"))
+	query := d.DB.Where("id > (?)", d.DB.Table("history_influx_logs").
+		Select("IFNULL(MAX(last_sync_id),0)"))
 	query.Order("id ASC").Find(&historiesModel)
 	if query.Error != nil {
 		return nil, query.Error
