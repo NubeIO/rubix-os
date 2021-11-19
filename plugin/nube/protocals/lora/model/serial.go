@@ -53,10 +53,9 @@ type Network struct {
 }
 
 type Device struct {
-	Name          NameStruct          `json:"name"`
-	Description   DescriptionStruct   `json:"description"`
-	Enable        EnableStruct        `json:"enable"`
-	TransportType TransportTypeStruct `json:"transport_type"`
+	Name        NameStruct        `json:"name"`
+	Description DescriptionStruct `json:"description"`
+	Enable      EnableStruct      `json:"enable"`
 }
 
 type Point struct {

@@ -70,11 +70,6 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Device)
 	networkUUID := body.NetworkUUID
 	body.Name = nameIsNil(body.Name)
-	transport, err := checkTransport(body.TransportType) //set to ip by default
-	if err != nil {
-		return nil, err
-	}
-	body.TransportType = transport
 	query := d.DB.Where("uuid = ? ", networkUUID).First(&net)
 	if query.Error != nil {
 		return nil, query.Error
@@ -97,7 +92,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	}
 	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, nModel.PluginConfId, body.UUID)
 	d.Bus.RegisterTopic(t)
-	err = d.Bus.Emit(eventbus.CTX(), t, body)
+	err := d.Bus.Emit(eventbus.CTX(), t, body)
 	if err != nil {
 		return nil, errors.New("error on device eventbus")
 	}
@@ -117,11 +112,6 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 			return nil, errors.New(eMsg)
 		}
 	}
-	transport, err := checkTransport(body.TransportType)
-	if err != nil {
-		return nil, err
-	}
-	body.TransportType = transport
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -129,7 +119,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 		body.CommonEnable.Enable = utils.NewTrue()
 	}
 	if len(body.Tags) > 0 {
-		if err = d.updateTags(&deviceModel, body.Tags); err != nil {
+		if err := d.updateTags(&deviceModel, body.Tags); err != nil {
 			return nil, err
 		}
 	}
@@ -142,7 +132,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	}
 	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, nModel.PluginConfId, uuid)
 	d.Bus.RegisterTopic(t)
-	err = d.Bus.Emit(eventbus.CTX(), t, deviceModel)
+	err := d.Bus.Emit(eventbus.CTX(), t, deviceModel)
 	if err != nil {
 		return nil, errors.New("error on device eventbus")
 	}
