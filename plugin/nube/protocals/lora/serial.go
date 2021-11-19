@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
 	log "github.com/sirupsen/logrus"
@@ -30,7 +31,7 @@ func (i *Instance) SerialOpen() error {
 		return err
 	}
 	if net.SerialPort == nil || net.SerialBaudRate == nil {
-		return err
+		return errors.New("serial_port & serial_baud_rate needs to be inserted")
 	}
 	s.SerialPort = *net.SerialPort
 	s.BaudRate = int(*net.SerialBaudRate)

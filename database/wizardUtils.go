@@ -16,7 +16,6 @@ func (d *GormDatabase) WizardNewNetworkDevicePoint(plugin string, network *model
 	}
 	if device == nil {
 		device = &model.Device{}
-		device.TransportType = "ip"
 	}
 	if point == nil {
 		point = &model.Point{

@@ -44,35 +44,39 @@ type Network struct {
 		Min      int    `json:"min" default:"3"`
 		Max      int    `json:"max" default:"20"`
 	} `json:"serial_port"`
-	BaudRate struct {
+	SerialBaudRate struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"true"`
 		Default  int    `json:"default" default:"9600"`
-	} `json:"baud_rate"`
+	} `json:"serial_baud_rate"`
 }
 
 type Device struct {
-	Name          NameStruct          `json:"name"`
-	Description   DescriptionStruct   `json:"description"`
-	Enable        EnableStruct        `json:"enable"`
-	TransportType TransportTypeStruct `json:"transport_type"`
+	Name        NameStruct        `json:"name"`
+	Description DescriptionStruct `json:"description"`
+	Enable      EnableStruct      `json:"enable"`
 }
 
 type Point struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
-	Address     struct {
-		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"true"`
-		Min      int    `json:"min" default:"8"`
-		Max      int    `json:"max" default:"8"`
-	} `json:"address"`
+	AddressUUID struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Min         int    `json:"min" default:"8"`
+		Max         int    `json:"max" default:"8"`
+		DisplayName string `json:"display_name" default:"Address UUID"`
+	} `json:"address_uuid"`
 	IoId struct {
-		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"true"`
-		Min      int    `json:"min" default:"3"`
-		Max      int    `json:"max" default:"20"`
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"true"`
+		Options  []string `json:"options" default:"[\"DI1\",\"UI1\",\"AO1\",\"temp\",\"pulse\",\"motion\",\"light\"]"`
 	} `json:"io_id"`
+	IoType struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[\"0-10dc\",\"0-40ma\",\"thermistor\"]"`
+	} `json:"io_type"`
 	ThingClass struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`

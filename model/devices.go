@@ -10,8 +10,6 @@ type CommonDevice struct {
 	PollDelayPointsMS time.Duration `json:"poll_delay_points_ms"`
 	AddressUUID       string        `json:"address_uuid" gorm:"type:varchar(255)"` // AAB1213
 	CommonIP
-	TransportType string `json:"transport_type,omitempty"  gorm:"type:varchar(255);not null"` //serial, ip
-
 }
 
 type Device struct {
