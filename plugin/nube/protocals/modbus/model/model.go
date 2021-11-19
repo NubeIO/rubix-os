@@ -41,6 +41,11 @@ type DescriptionStruct struct {
 type Network struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
+	PluginName  struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"true"`
+		Default  string `json:"default" default:"modbus"`
+	} `json:"plugin_name"`
 }
 
 type Device struct {

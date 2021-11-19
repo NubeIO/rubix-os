@@ -9,6 +9,7 @@ type NameStruct struct {
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"3"`
 	Max      int    `json:"max" default:"20"`
+	//DisplayName string `json:"display_name" default:"Name"` // we can have display name as well
 }
 
 type DescriptionStruct struct {
