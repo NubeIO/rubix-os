@@ -91,6 +91,7 @@ func (i *Instance) PollingTCP(p polling) error {
 						err = i.setClient(client, net.UUID, true, true)
 						if err != nil {
 							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
+							break
 						}
 					} else {
 						dCheck.client = client
@@ -99,16 +100,22 @@ func (i *Instance) PollingTCP(p polling) error {
 						err = i.setClient(client, net.UUID, true, false)
 						if err != nil {
 							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
+							break
 						}
 					}
 					validDev, err := checkDevValid(dCheck)
 					if err != nil {
 						log.Errorf("modbus: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
+						break
 					}
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
 					if validDev {
 						cli := getClient()
+						if dev.AddressId == 0 {
+							log.Errorf("modbus: AddressId=0 is not valid")
+							break
+						}
 						err := cli.SetUnitId(uint8(dev.AddressId))
 						if err != nil {
 							log.Errorf("modbus: failed to vaildate SetUnitId %v %d\n", err, dev.AddressId)
@@ -234,6 +241,7 @@ func (i *Instance) PollingTCP(p polling) error {
 					}
 				}
 			}
+			time.Sleep(1 * time.Second)
 		}
 		if !p.enable { //TODO the disable of the polling isn't working
 			return true, nil
