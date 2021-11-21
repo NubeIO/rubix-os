@@ -35,6 +35,13 @@ func resolveName(ctx *gin.Context) string {
 }
 
 const (
+	schemaNetwork = "/schema/network"
+	schemaDevice  = "/schema/device"
+	schemaPoint   = "/schema/point"
+)
+
+
+const (
 	rubix    = "rubix"
 	users    = "users"
 	apps     = "apps"
@@ -97,6 +104,18 @@ var endPoints = struct {
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
+
+	mux.GET(schemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, rubixmodel.GetNetworkSchema())
+	})
+
+	mux.GET(schemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, rubixmodel.GetDeviceSchema())
+	})
+
+	mux.GET(schemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, rubixmodel.GetPointSchema())
+	})
 
 	mux.GET(endPoints.Users, func(ctx *gin.Context) {
 		cli := rubixapi.New()
