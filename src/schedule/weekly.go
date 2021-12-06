@@ -1,78 +1,22 @@
 package schedule
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/src/utilstime"
-	"gorm.io/datatypes"
 	"strconv"
 	"strings"
 	"time"
 )
 
-type SchTypes struct {
-	Weekly  TypeWeekly
-	Events  interface{}
-	Holiday interface{}
-}
-
-type TypeWeekly map[string]WeeklyScheduleEntry
-
-type WeeklyScheduleEntry struct {
-	Name     string
-	Days     []string
-	DaysNums []DaysOfTheWeek
-	Start    string
-	End      string
-	Timezone string
-	Value    float64
-	Colour   string
-}
-
-type DaysOfTheWeek int
-
-const (
-	sunday    DaysOfTheWeek = iota // 0
-	monday                         // 1
-	tuesday                        // 2
-	wednesday                      // 3
-	thursday                       // 4
-	friday                         // 5
-	saturday                       // 6
-)
-
-var DaysMap = map[string]DaysOfTheWeek{
-	"sunday":    0,
-	"monday":    1,
-	"tuesday":   2,
-	"wednesday": 3,
-	"thursday":  4,
-	"friday":    5,
-	"saturday":  6,
-}
-
-type WeeklyScheduleCheckerResult struct {
-	IsActive     bool     `json:"is_active"`
-	Payload      float64  `json:"payload"`
-	PeriodStart  int64    `json:"period_start"` //unix timestamp in seconds
-	PeriodStop   int64    `json:"period_stop"`  //unix timestamp in seconds
-	NextStart    int64    `json:"next_start"`   //unix timestamp in seconds.  Start time for the following scheduled period.
-	NextStop     int64    `json:"next_stop"`    //unix timestamp in seconds   End time for the following scheduled period.
-	CheckTime    int64    `json:"check_time"`   //unix timestamp in seconds
-	ErrorFlag    bool     `json:"error_flag"`
-	AlertFlag    bool     `json:"alert_flag"`
-	ErrorStrings []string `json:"error_strings"`
-}
-
 //CheckWeeklyScheduleEntryWithEntryTimezone checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period ignores entry.Timezone and uses Local timezone.
-func CheckWeeklyScheduleEntryWithEntryTimezone(entry WeeklyScheduleEntry) WeeklyScheduleCheckerResult {
+func CheckWeeklyScheduleEntryWithEntryTimezone(entry WeeklyScheduleEntry) ScheduleCheckerResult {
 	return CheckWeeklyScheduleEntry(entry, entry.Timezone)
 }
 
 //CheckWeeklyScheduleEntry checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period.
-func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) WeeklyScheduleCheckerResult {
-	result := WeeklyScheduleCheckerResult{}
+func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) ScheduleCheckerResult {
+	result := ScheduleCheckerResult{}
 	result.Payload = entry.Value
 	result.IsActive = false
 
@@ -157,134 +101,14 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) W
 	return result
 }
 
-//CombineWeeklyScheduleCheckerResults checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period.
-func CombineWeeklyScheduleCheckerResults(current WeeklyScheduleCheckerResult, new WeeklyScheduleCheckerResult, nextStopStartRequired bool) WeeklyScheduleCheckerResult {
-	//log.Println("CombineWeeklyScheduleCheckerResults()")
-	result := WeeklyScheduleCheckerResult{}
-
-	//AlertFlag & ErrorFlag & ErrorStrings
-	if new.ErrorFlag {
-		return current
-	}
-	if current.ErrorFlag {
-		return new
-	}
-	result.AlertFlag = current.AlertFlag || new.AlertFlag
-	result.ErrorStrings = append(current.ErrorStrings, new.ErrorStrings...)
-
-	//Check if schedule periods overlap
-	overlap := false
-	if (new.PeriodStart >= current.PeriodStart && new.PeriodStart <= current.PeriodStop) || (new.PeriodStop >= current.PeriodStart && new.PeriodStop <= current.PeriodStop) {
-		overlap = true
-	}
-	//log.Println("overlap: ", overlap)
-
-	//IsActive
-	result.IsActive = current.IsActive || new.IsActive
-
-	//CheckTime
-	if current.CheckTime < new.CheckTime {
-		result.CheckTime = current.CheckTime
-	} else {
-		result.CheckTime = new.CheckTime
-	}
-
-	//PeriodStart
-	if current.PeriodStart <= new.PeriodStart && current.PeriodStart != 0 {
-		result.PeriodStart = current.PeriodStart
-	} else {
-		result.PeriodStart = new.PeriodStart
-	}
-
-	//PeriodStop
-	if overlap {
-		if current.PeriodStop >= new.PeriodStop {
-			result.PeriodStop = current.PeriodStop
-		} else {
-			result.PeriodStop = new.PeriodStop
-		}
-	} else { // no overlap so find which period is first
-		if current.PeriodStart < new.PeriodStart && current.PeriodStart != 0 {
-			result.PeriodStop = current.PeriodStop
-		} else {
-			result.PeriodStop = new.PeriodStop
-		}
-	}
-
-	//Payload
-	if current.PeriodStart < new.PeriodStart && current.PeriodStart != 0 {
-		result.Payload = current.Payload
-	} else {
-		result.Payload = new.Payload
-	}
-	if (current.IsActive && new.IsActive) && (current.Payload != 0 && new.Payload != 0) {
-		result.AlertFlag = true
-		result.ErrorStrings = append(result.ErrorStrings, "Multiple Payload Values For Active Schedule Period")
-	}
-
-	if !nextStopStartRequired {
-		return result
-	} else {
-		//NextStart and NextStop
-		var currentNextStartTime int64
-		var newNextStartTime int64
-		var currentNextStopTime int64
-		var newNextStopTime int64
-
-		if current.IsActive {
-			currentNextStartTime = current.NextStart
-			currentNextStopTime = current.NextStop
-		} else {
-			currentNextStartTime = current.PeriodStart
-			currentNextStopTime = current.PeriodStop
-		}
-
-		if new.IsActive {
-			newNextStartTime = new.NextStart
-			newNextStopTime = new.NextStop
-		} else {
-			newNextStartTime = new.PeriodStart
-			newNextStopTime = new.PeriodStop
-		}
-
-		//select NextStart
-		if currentNextStartTime <= newNextStartTime && current.PeriodStart != 0 {
-			result.NextStart = currentNextStartTime
-		} else {
-			result.NextStart = newNextStartTime
-		}
-
-		//Check if next periods overlap
-		nextOverlap := false
-		if (newNextStartTime >= currentNextStartTime && newNextStartTime <= currentNextStopTime) || (newNextStopTime >= currentNextStartTime && newNextStopTime <= currentNextStopTime) {
-			nextOverlap = true
-		}
-		//log.Println("nextOverlap: ", nextOverlap)
-
-		if nextOverlap {
-			if currentNextStopTime >= newNextStopTime {
-				result.NextStop = currentNextStopTime
-			} else {
-				result.NextStop = newNextStopTime
-			}
-		} else { // no overlap so find which period is first
-			if currentNextStartTime < newNextStartTime && currentNextStartTime != 0 {
-				result.NextStop = currentNextStopTime
-			} else {
-				result.NextStop = newNextStopTime
-			}
-		}
-	}
-	return result
-}
-
 //CheckWeeklyScheduleCollection checks if there is a WeeklyScheduleEntry in the provided WeeklyScheduleCollection that matches the specified schedule Name and is currently within the scheduled period.
-func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) WeeklyScheduleCheckerResult {
-	finalResult := WeeklyScheduleCheckerResult{}
-	var singleResult WeeklyScheduleCheckerResult
+func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) ScheduleCheckerResult {
+	finalResult := ScheduleCheckerResult{}
+	var singleResult ScheduleCheckerResult
 	count := 0
+	var err error
 	for _, scheduleEntry := range scheduleMap {
-		if scheduleEntry.Name == scheduleName {
+		if scheduleName == "ANY" || scheduleEntry.Name == scheduleName {
 			scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
 			//fmt.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
 			if scheduleEntry.Timezone == "" { // If timezone field is not assigned, get timezone from System Time
@@ -303,7 +127,7 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) 
 			if count == 0 {
 				finalResult = singleResult
 			} else {
-				finalResult = CombineWeeklyScheduleCheckerResults(finalResult, singleResult, true)
+				finalResult, err = CombineScheduleCheckerResults(finalResult, singleResult, true)
 			}
 			//fmt.Println("finalResult ", finalResult)
 			count++
@@ -375,8 +199,8 @@ func ConvertDaysStringsToInt(weeklyScheduleEntry WeeklyScheduleEntry) WeeklySche
 	return weeklyScheduleEntry
 }
 
-//GetNextStartStop gets the next start and stop times from a single WeeklyScheduleCheckerResult
-func GetNextStartStop(weeklyResultObj WeeklyScheduleCheckerResult) (nextStart int64, nextStop int64) {
+//GetNextStartStop gets the next start and stop times from a single ScheduleCheckerResult
+func GetNextStartStop(weeklyResultObj ScheduleCheckerResult) (nextStart int64, nextStop int64) {
 	var start, stop int64
 	if weeklyResultObj.IsActive {
 		stop = weeklyResultObj.PeriodStop
@@ -388,17 +212,7 @@ func GetNextStartStop(weeklyResultObj WeeklyScheduleCheckerResult) (nextStart in
 	return start, stop
 }
 
-func DecodeSchedule(schedules datatypes.JSON) (SchTypes, error) {
-	var AllSchedules SchTypes
-	err := json.Unmarshal(schedules, &AllSchedules)
-	if err != nil {
-		//log.Println("Unexpected error parsing json")
-		return SchTypes{}, err
-	}
-	return AllSchedules, nil
-}
-
-func WeeklyCheck(weekly TypeWeekly, scheduleName string) (WeeklyScheduleCheckerResult, error) {
+func WeeklyCheck(weekly TypeWeekly, scheduleName string) (ScheduleCheckerResult, error) {
 	results := CheckWeeklyScheduleCollection(weekly, scheduleName)
 	return results, nil
 }
