@@ -110,7 +110,7 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) 
 	count := 0
 	var err error
 	for _, scheduleEntry := range scheduleMap {
-		if scheduleName == "ANY" || scheduleEntry.Name == scheduleName {
+		if scheduleName == "ANY" || scheduleName == "ALL" || scheduleEntry.Name == scheduleName {
 			scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
 			//fmt.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
 			if scheduleEntry.Timezone == "" { // If timezone field is not assigned, get timezone from System Time

@@ -4,6 +4,8 @@ import (
 	"errors"
 )
 
+//TODO: Known Issue 1) If exception event has passed, it will not be included in the exception ScheduleCheckerResults, and therefore if a schedule period start was before the exception period, the final result will not show the correct PeriodStart
+
 //ExceptionCheck checks all Exception Schedules in the payload for active periods. It returns a combined ScheduleCheckerResult of all Exception Schedules.
 func ExceptionCheck(exceptions TypeEvents, scheduleName string) (ScheduleCheckerResult, error) {
 	//treat Exception schedules as Event schedules until the final step.
@@ -75,7 +77,7 @@ func ApplyExceptionSchedule(current ScheduleCheckerResult, exception ScheduleChe
 	//If the current period starts first, and the periods overlap, then the result start time is the current period start, and the stop time is the exception start time.
 	if currentPeriod == 1 {
 		result.PeriodStart = current.PeriodStart
-		result.PeriodStop = exception.PeriodStop
+		result.PeriodStop = exception.PeriodStart
 	} else { //exception period is first
 		if exception.PeriodStop < current.PeriodStop {
 			result.PeriodStart = exception.PeriodStop
@@ -86,11 +88,21 @@ func ApplyExceptionSchedule(current ScheduleCheckerResult, exception ScheduleChe
 		}
 	}
 
+	//Payload
+	result.Payload = current.Payload
+
 	//CheckTime
 	if current.CheckTime < exception.CheckTime {
 		result.CheckTime = current.CheckTime
 	} else {
 		result.CheckTime = exception.CheckTime
+	}
+
+	//Check if period has already passed
+	if result.PeriodStop <= result.CheckTime {
+		result.PeriodStart = 0
+		result.PeriodStop = 0
+		result.Payload = 0
 	}
 
 	//IsActive
@@ -99,9 +111,6 @@ func ApplyExceptionSchedule(current ScheduleCheckerResult, exception ScheduleChe
 	} else {
 		result.IsActive = false
 	}
-
-	//Payload
-	result.Payload = current.Payload
 
 	return result, nil
 }

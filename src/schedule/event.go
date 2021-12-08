@@ -63,7 +63,7 @@ func CheckEventScheduleEntry(entry EventScheduleEntry) (ScheduleCheckerResult, e
 func CheckEventScheduleCollection(scheduleMap TypeEvents, scheduleName string) ScheduleCheckerResult {
 	finalResult := ScheduleCheckerResult{}
 	for _, scheduleEntry := range scheduleMap {
-		if scheduleName == "ANY" || scheduleEntry.Name == scheduleName {
+		if scheduleName == "ANY" || scheduleName == "ALL" || scheduleEntry.Name == scheduleName {
 			//fmt.Println("EVENT SCHEDULE ", i, ": ", scheduleEntry)
 			singleResult, err := CheckEventScheduleEntry(scheduleEntry)
 			//fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)

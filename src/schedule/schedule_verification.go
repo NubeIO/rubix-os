@@ -7,7 +7,7 @@ import (
 )
 
 func ScheduleTest() {
-	json, err := ioutil.ReadFile("/home/user/Documents/Nube/Flow_Framework/flow-framework/src/schedule/old/schTest3.json")
+	json, err := ioutil.ReadFile("/home/user/Documents/Nube/Flow_Framework/flow-framework/src/schedule/old/schTest4.json")
 	if err != nil {
 		log.Errorf("ReadFile %v\n", err)
 	}
@@ -57,4 +57,6 @@ func ScheduleTest() {
 	}
 	fmt.Println("finalResult")
 	fmt.Printf("%+v\n", finalResult)
+
+	fmt.Println("schedule is ", finalResult.IsActive)
 }
