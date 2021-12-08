@@ -8,9 +8,9 @@ import (
 )
 
 type SchTypes struct {
-	Weekly     TypeWeekly
-	Events     interface{}
-	Exceptions interface{}
+	Weekly     TypeWeekly `json:"weekly"`
+	Events     TypeEvents `json:"events"`
+	Exceptions TypeEvents `json:"holiday"`
 }
 
 type TypeWeekly map[string]WeeklyScheduleEntry
@@ -18,28 +18,26 @@ type TypeWeekly map[string]WeeklyScheduleEntry
 type TypeEvents map[string]EventScheduleEntry
 
 type WeeklyScheduleEntry struct {
-	Name     string
-	Days     []string
+	Name     string   `json:"name"`
+	Days     []string `json:"days"`
 	DaysNums []DaysOfTheWeek
-	Start    string
-	End      string
-	Timezone string
-	Value    float64
-	Colour   string
+	Start    string  `json:"start"`
+	End      string  `json:"end"`
+	Timezone string  `json:"timezone"`
+	Value    float64 `json:"value"`
+	Colour   string  `json:"color"`
 }
 
 type EventScheduleEntry struct {
-	Name   string
-	Dates  []EventStartStopTimestamps
-	Start  string
-	End    string
-	Value  float64
-	Colour string
+	Name   string                     `json:"name"`
+	Dates  []EventStartStopTimestamps `json:"dates"`
+	Value  float64                    `json:"value"`
+	Colour string                     `json:"color"`
 }
 
 type EventStartStopTimestamps struct {
-	Start string
-	End   string
+	Start string `json:"start"`
+	End   string `json:"end"`
 }
 
 type DaysOfTheWeek int
@@ -77,6 +75,7 @@ type ScheduleCheckerResult struct {
 	CheckTime    int64    `json:"check_time"`   //unix timestamp in seconds
 	ErrorFlag    bool     `json:"error_flag"`
 	AlertFlag    bool     `json:"alert_flag"`
+	IsException  bool     `json:"is_exception"`
 	ErrorStrings []string `json:"error_strings"`
 }
 
@@ -90,6 +89,10 @@ func (existing ScheduleCheckerResult) CheckIfEquals(other ScheduleCheckerResult)
 	return reflect.DeepEqual(existing, other)
 }
 
+func (schedule ScheduleCheckerResult) CheckIfEmpty() bool {
+	return schedule.PeriodStart == 0 && schedule.PeriodStop == 0 && schedule.NextStart == 0 && schedule.NextStop == 0
+}
+
 func DecodeSchedule(schedules datatypes.JSON) (SchTypes, error) {
 	var AllSchedules SchTypes
 	err := json.Unmarshal(schedules, &AllSchedules)
@@ -100,10 +103,116 @@ func DecodeSchedule(schedules datatypes.JSON) (SchTypes, error) {
 	return AllSchedules, nil
 }
 
-// THE FOLLOWING FUNCTION NEEDS REVIEW AND TESTING
+//CombineScheduleCheckerResults Combines 2 ScheduleCheckerResults into a single ScheduleCheckerResult, calculating PeriodStart, and PeriodStop times of the combined ScheduleCheckerResult.
+func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCheckerResult) (ScheduleCheckerResult, error) {
+	//log.Println("CombineScheduleCheckerResults()")
+	result := ScheduleCheckerResult{}
+	var err error
 
-//CombineScheduleCheckerResults Combines 2 ScheduleCheckerResults into a single ScheduleCheckerResult, calculating PeriodStart, PeriodStop, NextStart, and NextStop times of the combined ScheduleCheckerResult.
-func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCheckerResult, nextStopStartRequired bool) (ScheduleCheckerResult, error) {
+	//Check for Exception Schedules
+	if current.IsException || new.IsException {
+		err = errors.New("CombineScheduleCheckerResults function is not valid for Exception Schedules")
+		return result, err
+	}
+
+	//Check for empty ScheduleCheckerResult periods
+	currentEmptyPeriod := false
+	newEmptyPeriod := false
+	if current.PeriodStart == 0 || current.PeriodStop == 0 {
+		currentEmptyPeriod = true
+	}
+	if new.PeriodStart == 0 || new.PeriodStop == 0 {
+		newEmptyPeriod = true
+	}
+	if currentEmptyPeriod && newEmptyPeriod {
+		return result, err
+	} else if currentEmptyPeriod { //return the valid (new) ScheduleCheckerResult
+		return new, err
+	} else if newEmptyPeriod { //return the valid (current) ScheduleCheckerResult
+		return current, err
+	}
+
+	//AlertFlag & ErrorFlag & ErrorStrings
+	if new.ErrorFlag {
+		err = errors.New("`new` ScheduleCheckerResult has an ErrorFlag, cannot combine")
+		return current, err
+	}
+	if current.ErrorFlag {
+		err = errors.New("`current` ScheduleCheckerResult has an ErrorFlag, cannot combine")
+		return new, err
+	}
+	result.AlertFlag = current.AlertFlag || new.AlertFlag
+	result.ErrorStrings = append(current.ErrorStrings, new.ErrorStrings...)
+
+	//Find order of periods
+	currentPeriod := 0
+	newPeriod := 0
+	//Find which Period is first
+	if current.PeriodStart <= new.PeriodStart {
+		currentPeriod = 1
+		newPeriod = 2
+	} else {
+		newPeriod = 1
+		currentPeriod = 2
+	}
+
+	//Check if the periods overlap.
+	overlap := false
+	if currentPeriod == 1 && new.PeriodStart < current.PeriodStop {
+		overlap = true
+	} else if newPeriod == 1 && current.PeriodStart < new.PeriodStop {
+		overlap = true
+	}
+
+	//IsActive
+	result.IsActive = current.IsActive || new.IsActive
+
+	//CheckTime
+	if current.CheckTime < new.CheckTime {
+		result.CheckTime = current.CheckTime
+	} else {
+		result.CheckTime = new.CheckTime
+	}
+
+	//PeriodStart
+	if currentPeriod == 1 {
+		result.PeriodStart = current.PeriodStart
+	} else {
+		result.PeriodStart = new.PeriodStart
+	}
+
+	//PeriodStop
+	if overlap {
+		if current.PeriodStop >= new.PeriodStop {
+			result.PeriodStop = current.PeriodStop
+		} else {
+			result.PeriodStop = new.PeriodStop
+		}
+	} else { // no overlap so find which period is first
+		if currentPeriod == 1 {
+			result.PeriodStop = current.PeriodStop
+		} else {
+			result.PeriodStop = new.PeriodStop
+		}
+	}
+
+	//Payload
+	if currentPeriod == 1 {
+		result.Payload = current.Payload
+	} else {
+		result.Payload = new.Payload
+	}
+	if (current.IsActive && new.IsActive) && (current.Payload != 0 && new.Payload != 0) {
+		result.AlertFlag = true
+		result.ErrorStrings = append(result.ErrorStrings, "Multiple Payload Values For Active Schedule Period")
+	}
+
+	return result, nil
+}
+
+/*
+//CombineScheduleCheckerResultsWithNextTimes Combines 2 ScheduleCheckerResults into a single ScheduleCheckerResult, calculating PeriodStart, PeriodStop, NextStart, and NextStop times of the combined ScheduleCheckerResult.
+func CombineScheduleCheckerResultsWithNextTimes(current ScheduleCheckerResult, new ScheduleCheckerResult) (ScheduleCheckerResult, error) {
 	//log.Println("CombineScheduleCheckerResults()")
 	result := ScheduleCheckerResult{}
 	var err error = nil
@@ -264,7 +373,7 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 	}
 
 	if !nextStopStartRequired {
-		return result
+		return result, nil
 	} else {
 		//NextStart and NextStop
 		var currentNextStartTime int64
@@ -284,7 +393,8 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 				}
 			}
 
-		*/
+*/
+/*
 
 		if current.IsActive {
 			currentNextStartTime = current.NextStart
@@ -330,6 +440,6 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 			}
 		}
 	}
-	return result
+	return result, nil
 }
-}
+*/

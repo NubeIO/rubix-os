@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/src/utilstime"
+	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 	"time"
@@ -19,6 +20,7 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) S
 	result := ScheduleCheckerResult{}
 	result.Payload = entry.Value
 	result.IsActive = false
+	result.IsException = false
 
 	//get time.Location for entry timezone and check timezone
 	location, err := time.LoadLocation(checkTimezone)
@@ -127,7 +129,10 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) 
 			if count == 0 {
 				finalResult = singleResult
 			} else {
-				finalResult, err = CombineScheduleCheckerResults(finalResult, singleResult, true)
+				finalResult, err = CombineScheduleCheckerResults(finalResult, singleResult)
+				if err != nil {
+					log.Errorf("CheckEventScheduleEntry %v\n", err)
+				}
 			}
 			//fmt.Println("finalResult ", finalResult)
 			count++
@@ -212,6 +217,7 @@ func GetNextStartStop(weeklyResultObj ScheduleCheckerResult) (nextStart int64, n
 	return start, stop
 }
 
+//WeeklyCheck checks all Weekly Schedules in the payload for active periods. It returns a combined ScheduleCheckerResult of all Weekly Schedules.
 func WeeklyCheck(weekly TypeWeekly, scheduleName string) (ScheduleCheckerResult, error) {
 	results := CheckWeeklyScheduleCollection(weekly, scheduleName)
 	return results, nil
