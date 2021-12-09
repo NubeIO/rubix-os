@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
+
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
 	log "github.com/sirupsen/logrus"
@@ -31,14 +32,13 @@ func (i *Instance) SerialOpen() error {
 		return err
 	}
 	if net.SerialPort == nil || net.SerialBaudRate == nil {
-		return errors.New("serial_port & serial_baud_rate needs to be inserted")
+		return errors.New("serial_port & serial_baud_rate required to open")
 	}
 	s.SerialPort = *net.SerialPort
 	s.BaudRate = int(*net.SerialBaudRate)
-	connected := false
 	go func() error {
 		sc := New(s)
-		connected, err = sc.NewSerialConnection()
+		_, err = sc.NewSerialConnection()
 		if err != nil {
 			log.Errorf("lora: issue on SerialOpenAndRead: %v\n", err)
 		}
@@ -87,7 +87,7 @@ func (s *SerialSetting) NewSerialConnection() (connected bool, err error) {
 			return false, err
 		}
 	}
-	log.Info("LORA: try and connect to:", portName)
+	log.Info("LORA: connecting to port:", portName)
 	m := &serial.Mode{
 		BaudRate: baudRate,
 		Parity:   parity,
@@ -97,7 +97,6 @@ func (s *SerialSetting) NewSerialConnection() (connected bool, err error) {
 
 	ports, err := serial.GetPortsList()
 	s.ActivePortList = ports
-	log.Info("LORA: ports: ", ports)
 
 	port, err := serial.Open(portName, m)
 	if err != nil {
@@ -122,7 +121,7 @@ func (s *SerialSetting) Loop() {
 		if decoder.CheckPayloadLength(data) {
 			count = count + 1
 			commonData, fullData := decoder.DecodePayload(data)
-			s.I.publishSensor(commonData, fullData)
+			s.I.updateDevicePointValues(commonData, fullData)
 		} else {
 			log.Printf("LORA: serial messsage size %d", len(data))
 		}

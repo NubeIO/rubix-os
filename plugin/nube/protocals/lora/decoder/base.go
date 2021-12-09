@@ -1,69 +1,20 @@
 package decoder
 
 import (
-	log "github.com/sirupsen/logrus"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 )
 
-type TSensorType string
-
-const (
-	ME   TSensorType = "ME"
-	TH   TSensorType = "TH"
-	THL  TSensorType = "THL"
-	THLM TSensorType = "THLM"
-	ZHT  TSensorType = "ZHT"
-)
-
-type TSensorCode string
-
-const (
-	MicroAA       TSensorCode = "AA"
-	DropletAB     TSensorCode = "AB"
-	DropletB0     TSensorCode = "B0"
-	DropletB1     TSensorCode = "B1"
-	DropletB2     TSensorCode = "B2"
-	ZipHydrotapD1 TSensorCode = "D1"
-)
-
-func GetSensorType(data string) TSensorType {
-	sensor := data[2:4]
-	switch sensor {
-	case string(MicroAA):
-		return ME
-	case string(DropletAB):
-		return THLM
-	case string(DropletB0):
-		return TH
-	case string(DropletB1):
-		return THL
-	case string(DropletB2):
-		return THLM
-	case string(ZipHydrotapD1):
-		return ZHT
-	default:
-		return "None"
-	}
+type CommonValues struct {
+	Sensor string `json:"sensor"`
+	Id     string `json:"id"`
+	Rssi   int    `json:"rssi"`
 }
 
-func GetSensorCode(data string) TSensorCode {
-	sensor := data[2:4]
-	switch sensor {
-	case string(MicroAA):
-		fallthrough
-	case string(DropletAB):
-		fallthrough
-	case string(DropletB0):
-		fallthrough
-	case string(DropletB1):
-		fallthrough
-	case string(DropletB2):
-		fallthrough
-	case string(ZipHydrotapD1):
-		return TSensorCode(sensor)
-	default:
-		return "None"
-	}
+func getDeviceDescriptionFromPayload(data string) *LoRaDeviceDescription {
+	sensorCode := data[2:4]
+	return GetLoRaDeviceDescription(sensorCode)
 }
 
 func CheckPayloadLength(data string) bool {
@@ -75,75 +26,28 @@ func CheckPayloadLength(data string) bool {
 	if data == "!\r\n" || data == "!\n" {
 		return false
 	}
-	switch id := GetSensorCode(data); id {
-	case MicroAA:
-		fallthrough
-	case DropletAB:
-		fallthrough
-	case DropletB0:
-		fallthrough
-	case DropletB1:
-		fallthrough
-	case DropletB2:
-		return dl == 36 || dl == 32 || dl == 44
-	case ZipHydrotapD1:
-		return ZHtCheckPayloadLength(data)
-	default:
+	dev := getDeviceDescriptionFromPayload(data)
+	if dev == &NilLoRaDeviceDescription {
 		return false
 	}
+	return dev.CheckLength(data)
 }
 
-func DecodePayload(data string) (CommonValues, interface{}) {
-	s := GetSensorType(data)
-	var payload interface{} = nil
-	var common *CommonValues = nil
-	switch s {
-	case ME:
-		payloadFull := MicroEdge(data, ME)
-		common = &payloadFull.CommonValues
-		payload = payloadFull
-	case TH:
-		payloadFull := DropletTH(data, TH)
-		common = &payloadFull.CommonValues
-		payload = payloadFull
-	case THL:
-		payloadFull := DropletTHL(data, THL)
-		common = &payloadFull.CommonValues
-		payload = payloadFull
-	case THLM:
-		payloadFull := DropletTHLM(data, THLM)
-		common = &payloadFull.CommonValues
-		payload = payloadFull
-	case ZHT:
-		base, payloadFull := ZipHydrotap(data, ZHT)
-		common = &base.CommonValues
-		payload = payloadFull
-	default:
-		log.Printf("ERROR! No decoder for sensor type: %s", s)
-		return CommonValues{}, nil
+func DecodePayload(data string) (*CommonValues, interface{}) {
+	devDesc := getDeviceDescriptionFromPayload(data)
+	if devDesc == &NilLoRaDeviceDescription {
+		return &CommonValues{}, nil
 	}
-	return *common, payload
+
+	cmn, payload := devDesc.Decode(data, devDesc)
+	common(cmn, data, devDesc.Model)
+	return cmn, payload
 }
 
-type CommonValues struct {
-	Sensor string `json:"sensor"`
-	Id     string `json:"id"`
-	Rssi   int    `json:"rssi"`
-}
-
-func Common(data string, sensor TSensorType) CommonValues {
-	_id := decodeID(data)
-	_rssi := rssi(data)
-	_v := CommonValues{
-		Sensor: string(sensor),
-		Id:     _id,
-		Rssi:   _rssi,
-	}
-	return _v
-}
-
-func DataLength(data string) int {
-	return len(data)
+func common(payload *CommonValues, data string, sensor string) {
+	payload.Sensor = sensor
+	payload.Id = decodeID(data)
+	payload.Rssi = rssi(data)
 }
 
 func decodeID(data string) string {
@@ -151,8 +55,8 @@ func decodeID(data string) string {
 }
 
 func rssi(data string) int {
-	_len := DataLength(data)
-	v, _ := strconv.ParseInt(data[_len-4:_len-2], 16, 0)
+	dataLen := len(data)
+	v, _ := strconv.ParseInt(data[dataLen-4:dataLen-2], 16, 0)
 	v = v * -1
 	return int(v)
 }

@@ -1,10 +1,15 @@
 package decoder
 
 import (
-	"github.com/NubeIO/flow-framework/model"
 	"math"
 	"strconv"
+
+	"github.com/NubeIO/flow-framework/model"
 )
+
+const MEDeviceName = "MicroEdge"
+const MEModel = "MicroEdge"
+const MESensorCode = "AA"
 
 type TMicroEdge struct {
 	CommonValues
@@ -15,22 +20,25 @@ type TMicroEdge struct {
 	AI3     float64 `json:"ai_3"`
 }
 
-func MicroEdge(data string, sensor TSensorType) TMicroEdge {
-	d := Common(data, sensor)
+func CheckPayloadLengthME(data string) bool {
+	dl := len(data)
+	return dl == 36 || dl == 32 || dl == 44
+}
+
+func DecodeME(data string, devDesc *LoRaDeviceDescription) (*CommonValues, interface{}) {
 	p := pulse(data)
 	a1 := ai1(data)
 	a2 := ai2(data)
 	a3 := ai3(data)
 	vol := voltage(data)
 	v := TMicroEdge{
-		CommonValues: d,
-		Voltage:      vol,
-		Pulse:        p,
-		AI1:          a1,
-		AI2:          a2,
-		AI3:          a3,
+		Voltage: vol,
+		Pulse:   p,
+		AI1:     a1,
+		AI2:     a2,
+		AI3:     a3,
 	}
-	return v
+	return &v.CommonValues, v
 }
 
 func pulse(data string) int {
