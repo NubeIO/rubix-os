@@ -17,7 +17,7 @@ type FlowClient struct {
 func GetFlowToken(ip string, port int, username string, password string) (*string, error) {
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%d", ip, port)
+	url := fmt.Sprintf("%s://%s:%d", getSchema(port), ip, port)
 	client.SetHostURL(url)
 	client.SetError(&Error{})
 	cli := &FlowClient{client: client}
@@ -43,7 +43,7 @@ func NewFlowClientCli(ip *string, port *int, token *string, isMasterSlave *bool,
 func newSessionWithToken(ip string, port int, token string) *FlowClient {
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%d/ff", ip, port)
+	url := fmt.Sprintf("%s://%s:%d/ff", getSchema(port), ip, port)
 	client.SetHostURL(url)
 	client.SetError(&Error{})
 	client.SetHeader("Authorization", token)
@@ -70,4 +70,11 @@ func newSlaveToMasterCallSession() *FlowClient {
 	client.SetError(&Error{})
 	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
 	return &FlowClient{client: client}
+}
+
+func getSchema(port int) string {
+	if port == 443 {
+		return "https"
+	}
+	return "http"
 }
