@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/NubeIO/flow-framework/model"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
 	"github.com/NubeIO/flow-framework/utils"
 	"go.bug.st/serial"
 )
@@ -60,12 +59,6 @@ func BoolToFloat(b bool) float64 {
 		return 1
 	}
 	return 0
-}
-
-func getDevicePointList(device *model.Device) []string {
-	// TODO: finish
-	devDesc := decoder.GetLoRaDeviceDescription(device.AddressUUID)
-	return nil
 }
 
 // TODO: move this to a more global project utils file

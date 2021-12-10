@@ -8,14 +8,13 @@ import (
 	"strconv"
 )
 
-type TZipHydrotapBase struct {
+type TZHTBase struct {
 	CommonValues
 	PayloadType     string `json:"payload_type"`
 	ProtocolVersion uint8  `json:"protocol_version"`
 }
 
-type TZipHydrotapStatic struct {
-	TZipHydrotapBase
+type TZHTStaticMin struct {
 	LoRaFirmwareMajor       uint8  `json:"lora_firmware_major"`
 	LoRaFirmwareMinor       uint8  `json:"lora_firmware_minor"`
 	LoRaBuildMajor          uint8  `json:"lora_build_major"`
@@ -32,39 +31,47 @@ type TZipHydrotapStatic struct {
 	FilterLogLitresExternal int    `json:"filter_log_litres_external"`
 }
 
+type TZHTStatic struct {
+	TZHTBase
+	TZHTStaticMin
+}
+
 const ZipHTTimerLength = 7
 
-type TZipHydrotapTimer struct {
+type TZHTTimer struct {
 	TimeStart   int  `json:"time_start"`
 	TimeStop    int  `json:"time_stop"`
 	EnableStart bool `json:"enable_start"`
 	EnableStop  bool `json:"enable_stop"`
 }
 
-type TZipHydrotapWrite struct {
-	TZipHydrotapBase
-	Time                         string                              `json:"time"`
-	DispenseTimeBoiling          int                                 `json:"dispense_time_boiling"`
-	DispenseTimeChilled          int                                 `json:"dispense_time_chilled"`
-	DispenseTimeSparkling        int                                 `json:"dispense_time_sparkling"`
-	TemperatureSPBoiling         float32                             `json:"temperature_sp_boiling"`
-	TemperatureSPChilled         float32                             `json:"temperature_sp_chilled"`
-	TemperatureSPSparkling       float32                             `json:"temperature_sp_sparkling"`
-	SleepModeSetting             int                                 `json:"sleep_mode_setting"`
-	FilterInfoLifeLitresInternal int                                 `json:"filter_info_life_litres_internal"`
-	FilterInfoLifeMonthsInternal int                                 `json:"filter_info_life_months_internal"`
-	FilterInfoLifeLitresExternal int                                 `json:"filter_info_life_litres_external"`
-	FilterInfoLifeMonthsExternal int                                 `json:"filter_info_life_months_external"`
-	SafetyAllowTapChanges        bool                                `json:"safety_allow_tap_changes"`
-	SafetyLock                   bool                                `json:"safety_lock"`
-	SafetyHotIsolation           bool                                `json:"safety_hot_isolation"`
-	SecurityEnable               bool                                `json:"security_enable"`
-	SecurityPin                  string                              `json:"security_pin"`
-	Timers                       [ZipHTTimerLength]TZipHydrotapTimer `json:"timers"`
+type TZHTWriteMin struct {
+	Time                         string                      `json:"time"`
+	DispenseTimeBoiling          int                         `json:"dispense_time_boiling"`
+	DispenseTimeChilled          int                         `json:"dispense_time_chilled"`
+	DispenseTimeSparkling        int                         `json:"dispense_time_sparkling"`
+	TemperatureSPBoiling         float32                     `json:"temperature_sp_boiling"`
+	TemperatureSPChilled         float32                     `json:"temperature_sp_chilled"`
+	TemperatureSPSparkling       float32                     `json:"temperature_sp_sparkling"`
+	SleepModeSetting             int                         `json:"sleep_mode_setting"`
+	FilterInfoLifeLitresInternal int                         `json:"filter_info_life_litres_internal"`
+	FilterInfoLifeMonthsInternal int                         `json:"filter_info_life_months_internal"`
+	FilterInfoLifeLitresExternal int                         `json:"filter_info_life_litres_external"`
+	FilterInfoLifeMonthsExternal int                         `json:"filter_info_life_months_external"`
+	SafetyAllowTapChanges        bool                        `json:"safety_allow_tap_changes"`
+	SafetyLock                   bool                        `json:"safety_lock"`
+	SafetyHotIsolation           bool                        `json:"safety_hot_isolation"`
+	SecurityEnable               bool                        `json:"security_enable"`
+	SecurityPin                  string                      `json:"security_pin"`
+	Timers                       [ZipHTTimerLength]TZHTTimer `json:"timers"`
 }
 
-type TZipHydrotapPoll struct {
-	TZipHydrotapBase
+type TZHTWrite struct {
+	TZHTBase
+	TZHTWriteMin
+}
+
+type TZHTPollMin struct {
 	Rebooted                          bool    `json:"rebooted"`
 	StaticCOVFlag                     bool    `json:"static_cov_flag"`
 	WriteCOVFlag                      bool    `json:"write_cov_flag"`
@@ -92,6 +99,22 @@ type TZipHydrotapPoll struct {
 	FilterInfoUsageDaysExternal       int     `json:"filter_info_usage_days_external"`
 }
 
+type TZHTPoll struct {
+	TZHTBase
+	TZHTPollMin
+}
+
+var ZHTFullPointsStruct struct {
+	TZHTBase
+	TZHTStaticMin
+	TZHTWriteMin
+	TZHTPollMin
+}
+
+func GetPointsStructZHT() interface{} {
+	return ZHTFullPointsStruct
+}
+
 type TZHTPayloadType int
 
 const (
@@ -103,7 +126,7 @@ const (
 
 const ZHT_HEX_STR_DATA_START = 14
 
-func DecodeZHT(data string, devDecs *LoRaDeviceDescription) (*CommonValues, interface{}) {
+func DecodeZHT(data string, _ *LoRaDeviceDescription) (*CommonValues, interface{}) {
 	bytes := getPayloadBytes(data)
 	protocolVersion := getProtocolVersion(data)
 
@@ -171,7 +194,7 @@ func bytesToDate(bytes []byte) string {
 	return fmt.Sprintf("%d/%d/%d", bytes[0], bytes[1], bytes[2])
 }
 
-func staticPayloadDecoder(data []byte) TZipHydrotapStatic {
+func staticPayloadDecoder(data []byte) TZHTStatic {
 	index := 1
 	fwMa := data[index]
 	index += 1
@@ -201,25 +224,27 @@ func staticPayloadDecoder(data []byte) TZipHydrotapStatic {
 	index += 3
 	filtLogLitresExt := int(binary.LittleEndian.Uint16(data[index : index+2]))
 	index += 2
-	return TZipHydrotapStatic{
-		LoRaFirmwareMajor:       fwMa,
-		LoRaFirmwareMinor:       fwMi,
-		LoRaBuildMajor:          buildMa,
-		LoRaBuildMinor:          buildMi,
-		SerialNumber:            sn,
-		ModelNumber:             mn,
-		ProductNumber:           pn,
-		FirmwareVersion:         fw,
-		CalibrationDate:         calDate,
-		First50LitresData:       f50lDate,
-		FilterLogDateInternal:   filtLogDateInt,
-		FilterLogLitresInternal: filtLogLitresInt,
-		FilterLogDateExternal:   filtLogDateExt,
-		FilterLogLitresExternal: filtLogLitresExt,
+	return TZHTStatic{
+		TZHTStaticMin: TZHTStaticMin{
+			LoRaFirmwareMajor:       fwMa,
+			LoRaFirmwareMinor:       fwMi,
+			LoRaBuildMajor:          buildMa,
+			LoRaBuildMinor:          buildMi,
+			SerialNumber:            sn,
+			ModelNumber:             mn,
+			ProductNumber:           pn,
+			FirmwareVersion:         fw,
+			CalibrationDate:         calDate,
+			First50LitresData:       f50lDate,
+			FilterLogDateInternal:   filtLogDateInt,
+			FilterLogLitresInternal: filtLogLitresInt,
+			FilterLogDateExternal:   filtLogDateExt,
+			FilterLogLitresExternal: filtLogLitresExt,
+		},
 	}
 }
 
-func writePayloadDecoder(data []byte) TZipHydrotapWrite {
+func writePayloadDecoder(data []byte) TZHTWrite {
 	index := 1
 	time := fmt.Sprintf("%d", binary.LittleEndian.Uint32(data[index:index+4]))
 	index += 4
@@ -254,7 +279,7 @@ func writePayloadDecoder(data []byte) TZipHydrotapWrite {
 	secPin := fmt.Sprintf("%.4d", (secUI16 % 10000))
 	index += 2
 
-	var timers [ZipHTTimerLength]TZipHydrotapTimer
+	var timers [ZipHTTimerLength]TZHTTimer
 	var u16 uint16
 	for i := 0; i < ZipHTTimerLength; i++ {
 		u16 = binary.LittleEndian.Uint16(data[index : index+2])
@@ -267,29 +292,31 @@ func writePayloadDecoder(data []byte) TZipHydrotapWrite {
 		index += 2
 	}
 
-	return TZipHydrotapWrite{
-		Time:                         time,
-		DispenseTimeBoiling:          dispB,
-		DispenseTimeChilled:          dispC,
-		DispenseTimeSparkling:        dispS,
-		TemperatureSPBoiling:         tempSpB,
-		TemperatureSPChilled:         tempSpC,
-		TemperatureSPSparkling:       tempSpS,
-		SleepModeSetting:             sm,
-		FilterInfoLifeLitresInternal: int(filLyfLtrInt),
-		FilterInfoLifeMonthsInternal: filLyfMnthInt,
-		FilterInfoLifeLitresExternal: int(filLyfLtrExt),
-		FilterInfoLifeMonthsExternal: filLyfMnthExt,
-		SafetyAllowTapChanges:        sfTap,
-		SafetyLock:                   sfL,
-		SafetyHotIsolation:           sfHi,
-		SecurityEnable:               secEn,
-		SecurityPin:                  secPin,
-		Timers:                       timers,
+	return TZHTWrite{
+		TZHTWriteMin: TZHTWriteMin{
+			Time:                         time,
+			DispenseTimeBoiling:          dispB,
+			DispenseTimeChilled:          dispC,
+			DispenseTimeSparkling:        dispS,
+			TemperatureSPBoiling:         tempSpB,
+			TemperatureSPChilled:         tempSpC,
+			TemperatureSPSparkling:       tempSpS,
+			SleepModeSetting:             sm,
+			FilterInfoLifeLitresInternal: int(filLyfLtrInt),
+			FilterInfoLifeMonthsInternal: filLyfMnthInt,
+			FilterInfoLifeLitresExternal: int(filLyfLtrExt),
+			FilterInfoLifeMonthsExternal: filLyfMnthExt,
+			SafetyAllowTapChanges:        sfTap,
+			SafetyLock:                   sfL,
+			SafetyHotIsolation:           sfHi,
+			SecurityEnable:               secEn,
+			SecurityPin:                  secPin,
+			Timers:                       timers,
+		},
 	}
 }
 
-func pollPayloadDecoder(data []byte) TZipHydrotapPoll {
+func pollPayloadDecoder(data []byte) TZHTPoll {
 	index := 1
 	rebooted := (data[index]>>5)&1 == 1
 	sCov := (data[index]>>6)&1 == 1
@@ -338,31 +365,33 @@ func pollPayloadDecoder(data []byte) TZipHydrotapPoll {
 	fltrNfoUseDayExt := binary.LittleEndian.Uint16(data[index : index+2])
 	index += 2
 
-	return TZipHydrotapPoll{
-		Rebooted:                          rebooted,
-		StaticCOVFlag:                     sCov,
-		WriteCOVFlag:                      wCov,
-		SleepModeStatus:                   sms,
-		TemperatureNTCBoiling:             tempB,
-		TemperatureNTCChilled:             tempC,
-		TemperatureNTCStream:              tempS,
-		TemperatureNTCCondensor:           tempCond,
-		UsageEnergyKWh:                    kwh,
-		UsageWaterDeltaDispensesBoiling:   int(dltDispB),
-		UsageWaterDeltaDispensesChilled:   int(dltDispC),
-		UsageWaterDeltaDispensesSparkling: int(dltDispS),
-		UsageWaterDeltaLitresBoiling:      dltLtrB,
-		UsageWaterDeltaLitresChilled:      dltLtrC,
-		UsageWaterDeltaLitresSparkling:    dltLtrS,
-		Fault1:                            f1,
-		Fault2:                            f2,
-		Fault3:                            f3,
-		Fault4:                            f4,
-		FilterWarningInternal:             fltrWrnInt,
-		FilterWarningExternal:             fltrWrnExt,
-		FilterInfoUsageLitresInternal:     int(fltrNfoUseLtrInt),
-		FilterInfoUsageDaysInternal:       int(fltrNfoUseDayInt),
-		FilterInfoUsageLitresExternal:     int(fltrNfoUseLtrExt),
-		FilterInfoUsageDaysExternal:       int(fltrNfoUseDayExt),
+	return TZHTPoll{
+		TZHTPollMin: TZHTPollMin{
+			Rebooted:                          rebooted,
+			StaticCOVFlag:                     sCov,
+			WriteCOVFlag:                      wCov,
+			SleepModeStatus:                   sms,
+			TemperatureNTCBoiling:             tempB,
+			TemperatureNTCChilled:             tempC,
+			TemperatureNTCStream:              tempS,
+			TemperatureNTCCondensor:           tempCond,
+			UsageEnergyKWh:                    kwh,
+			UsageWaterDeltaDispensesBoiling:   int(dltDispB),
+			UsageWaterDeltaDispensesChilled:   int(dltDispC),
+			UsageWaterDeltaDispensesSparkling: int(dltDispS),
+			UsageWaterDeltaLitresBoiling:      dltLtrB,
+			UsageWaterDeltaLitresChilled:      dltLtrC,
+			UsageWaterDeltaLitresSparkling:    dltLtrS,
+			Fault1:                            f1,
+			Fault2:                            f2,
+			Fault3:                            f3,
+			Fault4:                            f4,
+			FilterWarningInternal:             fltrWrnInt,
+			FilterWarningExternal:             fltrWrnExt,
+			FilterInfoUsageLitresInternal:     int(fltrNfoUseLtrInt),
+			FilterInfoUsageDaysInternal:       int(fltrNfoUseDayInt),
+			FilterInfoUsageLitresExternal:     int(fltrNfoUseLtrExt),
+			FilterInfoUsageDaysExternal:       int(fltrNfoUseDayExt),
+		},
 	}
 }

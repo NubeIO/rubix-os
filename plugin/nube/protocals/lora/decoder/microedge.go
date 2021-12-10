@@ -20,6 +20,10 @@ type TMicroEdge struct {
 	AI3     float64 `json:"ai_3"`
 }
 
+func GetPointsStructME() interface{} {
+	return TMicroEdge{}
+}
+
 func CheckPayloadLengthME(data string) bool {
 	dl := len(data)
 	return dl == 36 || dl == 32 || dl == 44

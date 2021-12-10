@@ -22,12 +22,24 @@ type TDropletTHLM struct {
 	Motion bool `json:"motion"`
 }
 
+func GetPointsStructTH() interface{} {
+	return TDropletTH{}
+}
+
+func GetPointsStructTHL() interface{} {
+	return TDropletTHL{}
+}
+
+func GetPointsStructTHLM() interface{} {
+	return TDropletTHLM{}
+}
+
 func CheckPayloadLengthDroplet(data string) bool {
 	dl := len(data)
 	return dl == 36 || dl == 32 || dl == 44
 }
 
-func DecodeDropletTH(data string, devDesc *LoRaDeviceDescription) (*CommonValues, interface{}) {
+func DecodeDropletTH(data string, _ *LoRaDeviceDescription) (*CommonValues, interface{}) {
 	temperature := dropletTemp(data)
 	pressure := dropletPressure(data)
 	humidity := dropletHumidity(data)

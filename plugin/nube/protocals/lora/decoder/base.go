@@ -8,7 +8,7 @@ import (
 
 type CommonValues struct {
 	Sensor string `json:"sensor"`
-	Id     string `json:"id"`
+	ID     string `json:"id"`
 	Rssi   int    `json:"rssi"`
 }
 
@@ -46,7 +46,7 @@ func DecodePayload(data string) (*CommonValues, interface{}) {
 
 func common(payload *CommonValues, data string, sensor string) {
 	payload.Sensor = sensor
-	payload.Id = decodeID(data)
+	payload.ID = decodeID(data)
 	payload.Rssi = rssi(data)
 }
 

@@ -1,13 +1,14 @@
 package decoder
 
-// TODO: load from JSON file or something foolish
+import "github.com/NubeIO/flow-framework/model"
 
 type LoRaDeviceDescription struct {
-	DeviceName  string
-	Model       string
-	SensorCode  string
-	CheckLength func(data string) bool
-	Decode      func(data string, devDesc *LoRaDeviceDescription) (*CommonValues, interface{})
+	DeviceName      string
+	Model           string
+	SensorCode      string
+	CheckLength     func(data string) bool
+	Decode          func(data string, devDesc *LoRaDeviceDescription) (*CommonValues, interface{})
+	GetPointsStruct func() interface{}
 }
 
 var NilLoRaDeviceDescription LoRaDeviceDescription = LoRaDeviceDescription{
@@ -18,46 +19,52 @@ var NilLoRaDeviceDescription LoRaDeviceDescription = LoRaDeviceDescription{
 
 var LoRaDeviceDescriptions = [...]LoRaDeviceDescription{
 	{
-		DeviceName:  "MicroEdge",
-		Model:       "MicroEdge",
-		SensorCode:  "AA",
-		CheckLength: CheckPayloadLengthME,
-		Decode:      DecodeME,
+		DeviceName:      "MicroEdge",
+		Model:           "MicroEdge",
+		SensorCode:      "AA",
+		CheckLength:     CheckPayloadLengthME,
+		Decode:          DecodeME,
+		GetPointsStruct: GetPointsStructME,
 	},
 	{
-		DeviceName:  "Droplet",
-		Model:       "THLM",
-		SensorCode:  "AB",
-		CheckLength: CheckPayloadLengthDroplet,
-		Decode:      DecodeDropletTHLM,
+		DeviceName:      "Droplet",
+		Model:           "THLM",
+		SensorCode:      "AB",
+		CheckLength:     CheckPayloadLengthDroplet,
+		Decode:          DecodeDropletTHLM,
+		GetPointsStruct: GetPointsStructTHLM,
 	},
 	{
-		DeviceName:  "Droplet",
-		Model:       "TH",
-		SensorCode:  "B0",
-		CheckLength: CheckPayloadLengthDroplet,
-		Decode:      DecodeDropletTH,
+		DeviceName:      "Droplet",
+		Model:           "TH",
+		SensorCode:      "B0",
+		CheckLength:     CheckPayloadLengthDroplet,
+		Decode:          DecodeDropletTH,
+		GetPointsStruct: GetPointsStructTH,
 	},
 	{
-		DeviceName:  "Droplet",
-		Model:       "THL",
-		SensorCode:  "B1",
-		CheckLength: CheckPayloadLengthDroplet,
-		Decode:      DecodeDropletTHL,
+		DeviceName:      "Droplet",
+		Model:           "THL",
+		SensorCode:      "B1",
+		CheckLength:     CheckPayloadLengthDroplet,
+		Decode:          DecodeDropletTHL,
+		GetPointsStruct: GetPointsStructTHL,
 	},
 	{
-		DeviceName:  "Droplet",
-		Model:       "THLM",
-		SensorCode:  "B2",
-		CheckLength: CheckPayloadLengthDroplet,
-		Decode:      DecodeDropletTHLM,
+		DeviceName:      "Droplet",
+		Model:           "THLM",
+		SensorCode:      "B2",
+		CheckLength:     CheckPayloadLengthDroplet,
+		Decode:          DecodeDropletTHLM,
+		GetPointsStruct: GetPointsStructTHLM,
 	},
 	{
-		DeviceName:  "ZipHydroTap",
-		Model:       "ZipHydroTap",
-		SensorCode:  "D1",
-		CheckLength: CheckPayloadLengthZHT,
-		Decode:      DecodeZHT,
+		DeviceName:      "ZipHydroTap",
+		Model:           "ZipHydroTap",
+		SensorCode:      "D1",
+		CheckLength:     CheckPayloadLengthZHT,
+		Decode:          DecodeZHT,
+		GetPointsStruct: GetPointsStructZHT,
 	},
 }
 
@@ -72,4 +79,8 @@ func GetLoRaDeviceDescription(sensorCode string) *LoRaDeviceDescription {
 		}
 	}
 	return &NilLoRaDeviceDescription
+}
+
+func GetDevicePointsStruct(device *model.Device) interface{} {
+	return GetLoRaDeviceDescription(device.AddressUUID).GetPointsStruct()
 }
