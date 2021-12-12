@@ -156,6 +156,7 @@ type Point struct {
 	CommonName
 	CommonDescription
 	CommonEnable
+	CommonCreated
 	PresentValue         *float64 `json:"present_value"` //point value, read only
 	OriginalValue        *float64 `json:"original_value"`
 	CurrentPriority      *int     `json:"current_priority,omitempty"`
