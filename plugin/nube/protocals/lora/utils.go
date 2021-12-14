@@ -10,7 +10,7 @@ import (
 )
 
 //wizard make a network/dev/pnt
-func (i *Instance) wizardSerial(body wizard) (string, error) {
+func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	sp := "/dev/ttyACM0"
 	if body.SerialPort != "" {
 		sp = body.SerialPort
@@ -36,8 +36,7 @@ func (i *Instance) wizardSerial(body wizard) (string, error) {
 	dev.Manufacture = model.CommonNaming.NubeIO
 	dev.Model = st
 
-	var pnt model.Point
-	_, err = i.db.WizardNewNetworkDevicePoint("lora", &net, &dev, &pnt)
+	_, err = inst.db.WizardNewNetworkDevicePoint("lora", &net, &dev, nil)
 	if err != nil {
 		return "error: on flow-framework add lora serial network wizard", err
 	}
@@ -45,7 +44,7 @@ func (i *Instance) wizardSerial(body wizard) (string, error) {
 }
 
 //listSerialPorts list all serial ports on host
-func (i *Instance) listSerialPorts() (*utils.Array, error) {
+func (inst *Instance) listSerialPorts() (*utils.Array, error) {
 	ports, err := serial.GetPortsList()
 	p := utils.NewArray()
 	for _, port := range ports {
@@ -93,5 +92,4 @@ func getReflectFieldJSONName(field reflect.StructField) string {
 		}
 		return name
 	}
-	return fieldName
 }

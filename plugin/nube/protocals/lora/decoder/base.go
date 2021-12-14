@@ -17,7 +17,7 @@ func getDeviceDescriptionFromPayload(data string) *LoRaDeviceDescription {
 	return GetLoRaDeviceDescription(sensorCode)
 }
 
-func CheckPayloadLength(data string) bool {
+func checkPayloadLength(data string, dev *LoRaDeviceDescription) bool {
 	log.Println(data)
 	dl := len(data)
 	if dl <= 4 {
@@ -26,7 +26,6 @@ func CheckPayloadLength(data string) bool {
 	if data == "!\r\n" || data == "!\n" {
 		return false
 	}
-	dev := getDeviceDescriptionFromPayload(data)
 	if dev == &NilLoRaDeviceDescription {
 		return false
 	}
@@ -38,23 +37,26 @@ func DecodePayload(data string) (*CommonValues, interface{}) {
 	if devDesc == &NilLoRaDeviceDescription {
 		return &CommonValues{}, nil
 	}
+	if !checkPayloadLength(data, devDesc) {
+		return &CommonValues{}, nil
+	}
 
 	cmn, payload := devDesc.Decode(data, devDesc)
-	common(cmn, data, devDesc.Model)
+	decodeCommonValues(cmn, data, devDesc.Model)
 	return cmn, payload
 }
 
-func common(payload *CommonValues, data string, sensor string) {
+func decodeCommonValues(payload *CommonValues, data string, sensor string) {
 	payload.Sensor = sensor
 	payload.ID = decodeID(data)
-	payload.Rssi = rssi(data)
+	payload.Rssi = decodeRSSI(data)
 }
 
 func decodeID(data string) string {
 	return data[0:8]
 }
 
-func rssi(data string) int {
+func decodeRSSI(data string) int {
 	dataLen := len(data)
 	v, _ := strconv.ParseInt(data[dataLen-4:dataLen-2], 16, 0)
 	v = v * -1

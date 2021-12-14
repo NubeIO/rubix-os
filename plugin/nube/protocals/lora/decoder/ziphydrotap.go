@@ -24,7 +24,7 @@ type TZHTStaticMin struct {
 	ProductNumber           string `json:"product_number"`
 	FirmwareVersion         string `json:"firmware_version"`
 	CalibrationDate         string `json:"calibration_date"`
-	First50LitresData       string `json:"first_50_litres_data"`
+	First50LitresDate       string `json:"first_50_litres_date"`
 	FilterLogDateInternal   string `json:"filter_log_date_internal"`
 	FilterLogLitresInternal int    `json:"filter_log_litres_internal"`
 	FilterLogDateExternal   string `json:"filter_log_date_external"`
@@ -235,7 +235,7 @@ func staticPayloadDecoder(data []byte) TZHTStatic {
 			ProductNumber:           pn,
 			FirmwareVersion:         fw,
 			CalibrationDate:         calDate,
-			First50LitresData:       f50lDate,
+			First50LitresDate:       f50lDate,
 			FilterLogDateInternal:   filtLogDateInt,
 			FilterLogLitresInternal: filtLogLitresInt,
 			FilterLogDateExternal:   filtLogDateExt,

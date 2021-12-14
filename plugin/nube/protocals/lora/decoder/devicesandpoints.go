@@ -1,6 +1,8 @@
 package decoder
 
-import "github.com/NubeIO/flow-framework/model"
+import (
+	"github.com/NubeIO/flow-framework/model"
+)
 
 type LoRaDeviceDescription struct {
 	DeviceName      string
@@ -12,9 +14,24 @@ type LoRaDeviceDescription struct {
 }
 
 var NilLoRaDeviceDescription LoRaDeviceDescription = LoRaDeviceDescription{
-	DeviceName: "",
-	Model:      "",
-	SensorCode: "",
+	DeviceName:      "",
+	Model:           "",
+	SensorCode:      "",
+	CheckLength:     NilLoRaDeviceDescriptionCheckLength,
+	Decode:          NilLoRaDeviceDescriptionDecode,
+	GetPointsStruct: NilLoRaDeviceDescriptionGetPointsStruct,
+}
+
+func NilLoRaDeviceDescriptionCheckLength(data string) bool {
+	return false
+}
+
+func NilLoRaDeviceDescriptionDecode(data string, devDesc *LoRaDeviceDescription) (*CommonValues, interface{}) {
+	return &CommonValues{}, struct{}{}
+}
+
+func NilLoRaDeviceDescriptionGetPointsStruct() interface{} {
+	return struct{}{}
 }
 
 var LoRaDeviceDescriptions = [...]LoRaDeviceDescription{
@@ -82,5 +99,5 @@ func GetLoRaDeviceDescription(sensorCode string) *LoRaDeviceDescription {
 }
 
 func GetDevicePointsStruct(device *model.Device) interface{} {
-	return GetLoRaDeviceDescription(device.AddressUUID).GetPointsStruct()
+	return getDeviceDescriptionFromPayload(device.AddressUUID).GetPointsStruct()
 }

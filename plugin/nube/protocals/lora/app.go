@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"time"
@@ -20,6 +21,10 @@ var err error
 // addDevicePoints add all points related to a device
 func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 	points := decoder.GetDevicePointsStruct(deviceBody)
+	// TODO: should check this before the device is even added in the wizard
+	if points == struct{}{} {
+		return errors.New("no device description or points found for this device")
+	}
 	pointsRefl := reflect.ValueOf(points)
 
 	// kinda poor repeating this but oh well
@@ -40,10 +45,10 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 
 	for i := 0; i < pointsRefl.NumField(); i++ {
 		if pointsRefl.Field(i).Kind() == reflect.Struct {
-			if _, ok := pointsRefl.Field(i).Interface().(decoder.CommonValues); ok {
-				continue
+			if _, ok := pointsRefl.Field(i).Interface().(decoder.CommonValues); !ok {
+				inst.addPointsFromStruct(deviceBody, pointsRefl.Field(i))
 			}
-			inst.addPointsFromStruct(deviceBody, pointsRefl.Field(i))
+			continue
 		}
 
 		pointName := getReflectFieldJSONName(pointsRefl.Type().Field(i))
@@ -98,29 +103,31 @@ func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
 
 // TODO: update to make more efficient for updating just the value (incl fault etc.)
 func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
-	addr := body.AddressUUID
-	pnt, err := inst.db.GetPointByFieldAndIOID("address_uuid", addr, body)
+	// TODO: fix this so don't need to request the point for the UUID before hand
+	pnt, err := inst.db.GetPointByFieldAndIOID("address_uuid", body.AddressUUID, body)
 	if err != nil {
 		log.Errorf("lora: issue on failed to find point: %v\n", err)
 		return err
 	}
 
-	pnt.PresentValue = &value
-	pnt.CommonFault.InFault = false
-	pnt.CommonFault.MessageLevel = model.MessageLevel.Info
-	pnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
-	pnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
-	pnt.CommonFault.LastOk = time.Now().UTC()
+	body.PresentValue = &value
+	body.CommonFault.InFault = false
+	body.CommonFault.MessageLevel = model.MessageLevel.Info
+	body.CommonFault.MessageCode = model.CommonFaultCode.Ok
+	body.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
+	body.CommonFault.LastOk = time.Now().UTC()
 
 	// TODO: fix this for all points if they need conversion
 	if pnt.IoType != "" && pnt.IoType != string(model.IOType.RAW) {
 		*body.PresentValue = decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue)
 	}
 
+	log.Infof("lora: attempt updatePointValue { AddressUUID: %s, value: %v, IoID: %s }\n", body.AddressUUID, *body.PresentValue, body.IoID)
+	// TODO: fix this so don't need to request the point for the UUID before hand
+	// TODO: this should be inst.db.updatePointValue ???????????
 	_, err = inst.db.UpdatePoint(pnt.UUID, body, true)
-	log.Infof("lora UpdatePoint { AddressUUID: %s value:%v IoID:%s }\n", addr, *body.PresentValue, body.IoID)
 	if err != nil {
-		log.Errorf("lora: issue on UpdatePoint: %v\n", err)
+		log.Errorf("lora: issue on updatePointValue : %v\n", err)
 		return err
 	}
 
@@ -128,19 +135,18 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 }
 
 // updateDevicePointValues update all points under a device within commonSensorData and sensorStruct
-func (inst *Instance) updateDevicePointValues(commonSensorData *decoder.CommonValues, sensorStruct interface{}) {
-
+func (inst *Instance) updateDevicePointValues(commonValues *decoder.CommonValues, sensorStruct interface{}) {
 	// manually update rssi + any other CommonValues
 	pnt := new(model.Point)
-	pnt.AddressUUID = commonSensorData.ID
+	pnt.AddressUUID = commonValues.ID
 	pnt.IoID = getStructFieldJSONNameByName(sensorStruct, "Rssi")
-	err := inst.updatePointValue(pnt, float64(commonSensorData.Rssi))
+	err := inst.updatePointValue(pnt, float64(commonValues.Rssi))
 	if err != nil {
 		return
 	}
 
 	// update all other fields in sensorStruct
-	inst.updateDevicePointValuesStruct(commonSensorData.ID, sensorStruct)
+	inst.updateDevicePointValuesStruct(commonValues.ID, sensorStruct)
 }
 
 func (inst *Instance) updateDevicePointValuesStruct(deviceID string, sensorStruct interface{}) {
@@ -167,10 +173,10 @@ func (inst *Instance) updateDevicePointValuesStruct(deviceID string, sensorStruc
 		case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint:
 			value = float64(sensorRefl.Field(i).Uint())
 		case reflect.Struct:
-			if _, ok := sensorRefl.Field(i).Interface().(decoder.CommonValues); ok {
-				continue
+			if _, ok := sensorRefl.Field(i).Interface().(decoder.CommonValues); !ok {
+				inst.updateDevicePointValuesStruct(deviceID, sensorRefl.Field(i).Interface())
 			}
-			inst.updateDevicePointValuesStruct(deviceID, sensorRefl.Field(i).Interface())
+			continue
 		}
 
 		err := inst.updatePointValue(pnt, value)

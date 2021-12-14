@@ -3,13 +3,14 @@ package database
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"time"
+
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
-	"reflect"
-	"time"
 )
 
 func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {

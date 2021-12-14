@@ -24,10 +24,10 @@ type SerialSetting struct {
 	I              Instance
 }
 
-func (i *Instance) SerialOpen() error {
+func (inst *Instance) SerialOpen() error {
 	s := new(SerialSetting)
 	var arg api.Args
-	net, err := i.db.GetNetworkByPlugin(i.pluginUUID, arg)
+	net, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, arg)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (i *Instance) SerialOpen() error {
 
 }
 
-func (i *Instance) SerialClose() error {
+func (inst *Instance) SerialClose() error {
 	err := Disconnect()
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ func (s *SerialSetting) NewSerialConnection() (connected bool, err error) {
 		StopBits: stopBits,
 	}
 
-	ports, err := serial.GetPortsList()
+	ports, _ := serial.GetPortsList()
 	s.ActivePortList = ports
 
 	port, err := serial.Open(portName, m)
@@ -114,13 +114,11 @@ func (s *SerialSetting) Loop() {
 	if s.Error || !s.Connected || Port == nil {
 		return
 	}
-	count := 0
 	scanner := bufio.NewScanner(Port)
 	for scanner.Scan() {
 		var data = scanner.Text()
-		if decoder.CheckPayloadLength(data) {
-			count = count + 1
-			commonData, fullData := decoder.DecodePayload(data)
+		commonData, fullData := decoder.DecodePayload(data)
+		if fullData != nil {
 			s.I.updateDevicePointValues(commonData, fullData)
 		} else {
 			log.Printf("LORA: serial messsage size %d", len(data))
