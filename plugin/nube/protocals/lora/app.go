@@ -15,6 +15,13 @@ import (
 
 var err error
 
+func (inst *Instance) handleSerialPayload(data string) {
+	commonData, fullData := decoder.DecodePayload(data)
+	if fullData != nil {
+		inst.updateDevicePointValues(commonData, fullData)
+	}
+}
+
 // TODO: need better way to add/update CommonValues points instead of
 //    adding/updating the rssi point manually in each func
 

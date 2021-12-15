@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
 	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
 )
@@ -24,55 +23,41 @@ type SerialSetting struct {
 	I              Instance
 }
 
-func (inst *Instance) SerialOpen() error {
-	s := new(SerialSetting)
+var Port serial.Port
+
+func (inst *Instance) SerialOpen() (SerialSetting, error) {
+	s := SerialSetting{}
 	var arg api.Args
 	net, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, arg)
 	if err != nil {
-		return err
+		return s, err
 	}
 	if net.SerialPort == nil || net.SerialBaudRate == nil {
-		return errors.New("serial_port & serial_baud_rate required to open")
+		return s, errors.New("serial_port & serial_baud_rate required to open")
 	}
 	s.SerialPort = *net.SerialPort
 	s.BaudRate = int(*net.SerialBaudRate)
-	go func() error {
-		sc := New(s)
-		_, err = sc.NewSerialConnection()
-		if err != nil {
-			log.Errorf("lora: issue on SerialOpenAndRead: %v\n", err)
-		}
-		sc.Loop()
-		return nil
-	}()
-	return nil
 
+	_, err = s.open()
+	if err != nil {
+		log.Errorf("lora: issue on SerialOpenAndRead: %v\n", err)
+	}
+	return s, err
 }
 
 func (inst *Instance) SerialClose() error {
-	err := Disconnect()
-	if err != nil {
-		return err
-	}
-	return nil
+	return disconnect()
 }
 
-func New(s *SerialSetting) *SerialSetting {
-	if s.SerialPort == "" {
-		s.SerialPort = "/dev/ttyACM0"
+func (s *SerialSetting) Loop(plChan chan<- string, errChan chan<- error) {
+	scanner := bufio.NewScanner(Port)
+	for scanner.Scan() {
+		plChan <- scanner.Text()
 	}
-	if s.BaudRate == 0 {
-		s.BaudRate = 38400
-	}
-	return &SerialSetting{
-		SerialPort: s.SerialPort,
-		BaudRate:   s.BaudRate,
-	}
+	errChan <- scanner.Err()
 }
 
-var Port serial.Port
-
-func (s *SerialSetting) NewSerialConnection() (connected bool, err error) {
+func (s *SerialSetting) open() (connected bool, err error) {
 	portName := s.SerialPort
 	baudRate := s.BaudRate
 	parity := s.Parity
@@ -80,7 +65,7 @@ func (s *SerialSetting) NewSerialConnection() (connected bool, err error) {
 	dataBits := s.DataBits
 	if s.Connected {
 		log.Info("Existing serial port connection by this app is open So! close existing connection")
-		err := Disconnect()
+		err := disconnect()
 		if err != nil {
 			log.Info(err)
 			s.Error = true
@@ -110,22 +95,7 @@ func (s *SerialSetting) NewSerialConnection() (connected bool, err error) {
 	return s.Connected, nil
 }
 
-func (s *SerialSetting) Loop() {
-	if s.Error || !s.Connected || Port == nil {
-		return
-	}
-	scanner := bufio.NewScanner(Port)
-	for scanner.Scan() {
-		var data = scanner.Text()
-		commonData, fullData := decoder.DecodePayload(data)
-		if fullData != nil {
-			s.I.updateDevicePointValues(commonData, fullData)
-		} else {
-			log.Printf("LORA: serial messsage size %d", len(data))
-		}
-	}
-}
-func Disconnect() error {
+func disconnect() error {
 	if Port != nil {
 		err := Port.Close()
 		if err != nil {

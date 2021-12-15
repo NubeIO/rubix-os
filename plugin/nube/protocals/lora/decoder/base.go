@@ -1,3 +1,4 @@
+// Package decoder contains all device specific payload decoding and checks
 package decoder
 
 import (

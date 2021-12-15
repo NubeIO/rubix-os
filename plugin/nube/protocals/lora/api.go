@@ -40,11 +40,11 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 	mux.POST(restartSerial, func(ctx *gin.Context) {
-		err := inst.SerialClose()
+		err := inst.Disable()
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
-			err := inst.SerialOpen()
+			err := inst.Enable()
 			if err != nil {
 				ctx.JSON(http.StatusBadRequest, err)
 			} else {
@@ -61,7 +61,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 	mux.POST(wizardSerial, func(ctx *gin.Context) {
-		body, err := bodyWizard(ctx)
+		body, _ := bodyWizard(ctx)
 		serial, err := inst.wizardSerial(body)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)

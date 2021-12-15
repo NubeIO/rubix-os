@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/labstack/gommon/log"
 )
 
 // Enable implements plugin.Plugin
@@ -18,10 +17,8 @@ func (inst *Instance) Enable() error {
 	}
 	if err == nil {
 		inst.networkUUID = q.UUID
-		err = inst.SerialOpen()
-		if err != nil {
-			log.Error("error on enable lora-plugin")
-		}
+		inst.interruptChan = make(chan struct{}, 1)
+		go inst.run()
 	}
 	return nil
 }
@@ -29,9 +26,9 @@ func (inst *Instance) Enable() error {
 // Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
 	inst.enabled = false
-	err := inst.SerialClose()
-	if err != nil {
-		return err
+	select {
+	case inst.interruptChan <- struct{}{}:
+	default:
 	}
 	return nil
 }

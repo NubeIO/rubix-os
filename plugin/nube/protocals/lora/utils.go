@@ -40,6 +40,9 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	if err != nil {
 		return "error: on flow-framework add lora serial network wizard", err
 	}
+
+	inst.Disable()
+	inst.Enable()
 	return "pass: added network and points", err
 }
 
