@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/utils"
 )
@@ -61,7 +62,7 @@ func (i *Instance) wizard(body wizard) (string, error) {
 		pnt.Name = pName
 		pnt.Description = pName
 		pnt.IoID = e
-		pnt.IoType = model.IOType.RAW
+		pnt.IoType = string(model.IOTypeRAW)
 		pnt.COV = utils.NewFloat64(0.5)
 		point, err := i.db.CreatePoint(&pnt)
 		if err != nil {
