@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.1.9](https://github.com/NubeIO/flow-framework/tree/v0.1.9) (2021-12-16)
+- Remove: rubix plugins
+
 ## [v0.1.8](https://github.com/NubeIO/flow-framework/tree/v0.1.71) (2021-11-23)
 - Fix: get config on sessions
 
