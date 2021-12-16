@@ -121,11 +121,12 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 		eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
 		return nil, errors.New(eMsg)
 	}
+
 	obj, err := checkObjectType(body.ObjectType)
 	if err != nil {
 		return nil, err
 	}
-	body.ObjectType = obj
+	body.ObjectType = string(obj)
 	query := d.DB.Where("uuid = ? ", deviceUUID).First(&deviceModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -194,7 +195,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	}
 	body.InSync = utils.NewFalse()
 	body.WriteValueOnceSync = utils.NewFalse()
-	query = d.DB.Model(&pointModel).Updates(&body)
+	_ = d.DB.Model(&pointModel).Updates(&body)
 	pnt, err := d.UpdatePointValue(uuid, pointModel, false)
 	if err != nil {
 		return nil, err
@@ -425,7 +426,7 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 		}
 	}
 	body.PresentValue = presentValue
-	query = d.DB.Model(&pointModel).Updates(&body)
+	_ = d.DB.Model(&pointModel).Updates(&body)
 	if !fromPlugin { //stop looping
 		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)
 		if err != nil {
@@ -455,7 +456,7 @@ func (d *GormDatabase) GetPointByField(field string, value string) (*model.Point
 // PointAndQuery will do an SQL AND
 func (d *GormDatabase) PointAndQuery(value1 string, value2 string) (*model.Point, error) {
 	var pointModel *model.Point
-	f := fmt.Sprintf("object_type = ? AND address_id = ?")
+	f := "object_type = ? AND address_id = ?"
 	query := d.DB.Where(f, value1, value2).Preload("Priority").First(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error

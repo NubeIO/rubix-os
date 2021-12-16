@@ -29,7 +29,7 @@ func CheckPayloadLengthME(data string) bool {
 	return dl == 36 || dl == 32 || dl == 44
 }
 
-func DecodeME(data string, devDesc *LoRaDeviceDescription) (*CommonValues, interface{}) {
+func DecodeME(data string, _ *LoRaDeviceDescription) (*CommonValues, interface{}) {
 	p := pulse(data)
 	a1 := ai1(data)
 	a2 := ai2(data)
@@ -71,17 +71,17 @@ func voltage(data string) float64 {
 	return v_
 }
 
-func MicroEdgePointType(sensorType string, value float64) float64 {
-	switch sensorType {
-	case model.IOType.RAW:
+func MicroEdgePointType(pointType string, value float64) float64 {
+	switch model.IOType(pointType) {
+	case model.IOTypeRAW:
 		return value
-	case model.IOType.Digital:
+	case model.IOTypeDigital:
 		if value == 0 || value >= 1000 {
 			return 0
 		} else {
 			return 1
 		}
-	case model.IOType.Thermistor10K:
+	case model.IOTypeThermistor10K:
 		vlt := 3.34
 		v := (value / 1024) * vlt
 		R0 := 10000.0
@@ -93,7 +93,7 @@ func MicroEdgePointType(sensorType string, value float64) float64 {
 		T := 1.0 / (1.0/t0 + (1.0/b)*ml)
 		output := T - 273.15
 		return output
-	case model.IOType.VoltageDC:
+	case model.IOTypeVoltageDC:
 		output := (value / 1024) * 10
 		return output
 	default:

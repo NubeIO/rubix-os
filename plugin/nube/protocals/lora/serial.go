@@ -39,9 +39,6 @@ func (inst *Instance) SerialOpen() (SerialSetting, error) {
 	s.BaudRate = int(*net.SerialBaudRate)
 
 	_, err = s.open()
-	if err != nil {
-		log.Errorf("lora: issue on SerialOpenAndRead: %v\n", err)
-	}
 	return s, err
 }
 
@@ -72,7 +69,7 @@ func (s *SerialSetting) open() (connected bool, err error) {
 			return false, err
 		}
 	}
-	log.Info("LORA: connecting to port:", portName)
+	log.Info("LORA: connecting to port: ", portName)
 	m := &serial.Mode{
 		BaudRate: baudRate,
 		Parity:   parity,
@@ -86,7 +83,6 @@ func (s *SerialSetting) open() (connected bool, err error) {
 	port, err := serial.Open(portName, m)
 	if err != nil {
 		s.Error = true
-		log.Error("LORA: error on open port", " ", err)
 		return false, err
 	}
 	Port = port

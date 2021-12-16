@@ -125,7 +125,7 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 	body.CommonFault.LastOk = time.Now().UTC()
 
 	// TODO: fix this for all points if they need conversion
-	if pnt.IoType != "" && pnt.IoType != string(model.IOType.RAW) {
+	if pnt.IoType != "" && pnt.IoType != string(model.IOTypeRAW) {
 		*body.PresentValue = decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue)
 	}
 
