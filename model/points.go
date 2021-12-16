@@ -119,6 +119,7 @@ type Point struct {
 	CommonName
 	CommonDescription
 	CommonEnable
+	CommonCreated
 	CommonThingClass
 	CommonThingRef
 	CommonThingType
