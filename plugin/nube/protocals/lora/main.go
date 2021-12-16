@@ -70,7 +70,7 @@ func (inst *Instance) run() {
 	for {
 		sc, err := inst.SerialOpen()
 		if err != nil {
-			log.Error("lora: error opening serial", err)
+			log.Error("lora: error opening serial ", err)
 			time.Sleep(5 * time.Second)
 			continue
 		}
@@ -79,14 +79,16 @@ func (inst *Instance) run() {
 		serialCloseChan := make(chan error, 1)
 		go sc.Loop(serialPayloadChan, serialCloseChan)
 
+	readLoop:
 		for {
 			select {
 			case <-inst.interruptChan:
 				log.Info("lora: interrupt received on run")
 				return
 			case err := <-serialCloseChan:
-				log.Error("lora: serial connection error", err)
-				return
+				log.Error("lora: serial connection error: ", err)
+				log.Info("lora: serial connection attempting to reconnect...")
+				break readLoop
 			case data := <-serialPayloadChan:
 				inst.handleSerialPayload(data)
 			}
