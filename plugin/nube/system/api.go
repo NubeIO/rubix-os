@@ -13,6 +13,12 @@ func resolveName(ctx *gin.Context) string {
 	return ctx.Param("name")
 }
 
+const (
+	schemaNetwork = "/schema/network"
+	schemaDevice  = "/schema/device"
+	schemaPoint   = "/schema/point"
+)
+
 //markdown guide
 const helpText = `
 # LoRa Help Guide
@@ -67,9 +73,8 @@ func supportedObjects() *utils.Array {
 }
 
 const (
-	help        = "/help"
-	helpHTML    = "/help/guide"
-	schemaPoint = "/schema/point"
+	help     = "/help"
+	helpHTML = "/help/guide"
 )
 
 var Supports = struct {
@@ -83,6 +88,19 @@ var Supports = struct {
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
+
+	mux.GET(schemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, system_model.GetNetworkSchema())
+	})
+
+	mux.GET(schemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, system_model.GetDeviceSchema())
+	})
+
+	mux.GET(schemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, system_model.GetPointSchema())
+	})
+
 	mux.GET(help, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, Supports)
 	})
@@ -90,10 +108,6 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		md := []byte(helpText)
 		output := markdown.ToHTML(md, nil, nil)
 		ctx.Writer.Write(output)
-	})
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		point := system_model.GetPointSchema()
-		ctx.JSON(http.StatusOK, point)
 	})
 	mux.GET("/system/schedule/store/:name", func(ctx *gin.Context) {
 		obj, ok := i.store.Get(resolveName(ctx))

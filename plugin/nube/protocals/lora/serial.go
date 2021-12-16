@@ -46,7 +46,6 @@ func (i *Instance) SerialOpen() error {
 		return nil
 	}()
 	return nil
-
 }
 
 func (i *Instance) SerialClose() error {
