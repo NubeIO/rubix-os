@@ -49,6 +49,13 @@ func ApplyExceptionSchedule(current ScheduleCheckerResult, exception ScheduleChe
 	result.AlertFlag = current.AlertFlag || exception.AlertFlag
 	result.ErrorStrings = append(current.ErrorStrings, exception.ErrorStrings...)
 
+	//Name
+	if current.Name != exception.Name {
+		result.Name = "ANY"
+	} else {
+		result.Name = current.Name
+	}
+
 	//Find order of periods
 	currentPeriod := 0
 	exceptionPeriod := 0

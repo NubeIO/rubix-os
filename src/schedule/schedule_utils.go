@@ -66,6 +66,7 @@ var DaysMap = map[string]DaysOfTheWeek{
 //The `Period` is the first scheduled period, and the `Next` is the following scheduled period; these 2 periods cannot overlap.
 //If ScheduleCheckerResults are combined and their scheduled periods overlap, they will be combined and the unnecessary timestamps dropped.
 type ScheduleCheckerResult struct {
+	Name         string   `json:"name"`
 	IsActive     bool     `json:"is_active"`
 	Payload      float64  `json:"payload"`
 	PeriodStart  int64    `json:"period_start"` //unix timestamp in seconds
@@ -143,6 +144,13 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 	}
 	result.AlertFlag = current.AlertFlag || new.AlertFlag
 	result.ErrorStrings = append(current.ErrorStrings, new.ErrorStrings...)
+
+	//Name
+	if current.Name != new.Name {
+		result.Name = "ANY"
+	} else {
+		result.Name = current.Name
+	}
 
 	//Find order of periods
 	currentPeriod := 0

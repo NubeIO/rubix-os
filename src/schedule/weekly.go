@@ -46,6 +46,7 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) S
 	if n != 2 || m != 2 || err1 != nil || err2 != nil {
 		result.ErrorFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Critical: Invalid Start/Stop Time")
+		return result
 	}
 	//log.Println("entryStartHour: ", entryStartHour, "entryStartMins: ", entryStartMins, "entryStopHour: ", entryStopHour, "entryStopMins: ", entryStopMins)
 
@@ -69,6 +70,7 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) S
 	if err != nil {
 		result.ErrorFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Critical: Scheduled Days are Invalid")
+		return result
 	}
 	nextDayDuration := getDurationTillNextScheduleDay(nowDayOfWeek, nextDay)
 	//log.Println("nextDay: ", nextDay, "nextDayDuration: ", nextDayDuration)
@@ -94,6 +96,7 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) S
 		if err != nil {
 			result.ErrorFlag = true
 			result.ErrorStrings = append(result.ErrorStrings, "Critical: Scheduled Days are Invalid")
+			return result
 		}
 		nextNextDayDuration := getDurationTillNextScheduleDay(nextDay, nextNextDay)
 		result.NextStart = startTimestamp.Add(nextDayDuration).Add(nextNextDayDuration).Unix()
@@ -125,6 +128,7 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) 
 			}
 			//singleResult = CheckWeeklyScheduleEntry(scheduleEntry, "Australia/Sydney")
 			singleResult = CheckWeeklyScheduleEntryWithEntryTimezone(scheduleEntry)
+			singleResult.Name = scheduleName
 			//fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)
 			if count == 0 {
 				finalResult = singleResult

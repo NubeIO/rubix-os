@@ -66,6 +66,7 @@ func CheckEventScheduleCollection(scheduleMap TypeEvents, scheduleName string) S
 		if scheduleName == "ANY" || scheduleName == "ALL" || scheduleEntry.Name == scheduleName {
 			//fmt.Println("EVENT SCHEDULE ", i, ": ", scheduleEntry)
 			singleResult, err := CheckEventScheduleEntry(scheduleEntry)
+			singleResult.Name = scheduleName
 			//fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)
 			if err != nil {
 				log.Errorf("CheckEventScheduleEntry %v\n", err)
