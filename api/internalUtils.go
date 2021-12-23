@@ -274,11 +274,6 @@ func getBODYSchedule(ctx *gin.Context) (dto *model.Schedule, err error) {
 	return dto, err
 }
 
-func getBODYSchedules(ctx *gin.Context) (dto *model.Schedules, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
 func getBodyLocalStorageFlowNetwork(ctx *gin.Context) (dto *model.LocalStorageFlowNetwork, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
