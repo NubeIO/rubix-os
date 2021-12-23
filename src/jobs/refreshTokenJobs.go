@@ -1,6 +1,6 @@
 package jobs
 
-import "fmt"
+import log "github.com/sirupsen/logrus"
 
 func (j *Jobs) RefreshTokenJobAdd() error {
 	_, err := cron.Every(1).Hour().Tag("refreshToken").Do(j.refreshToken)
@@ -11,11 +11,17 @@ func (j *Jobs) RefreshTokenJobAdd() error {
 }
 
 func (j *Jobs) refreshToken() {
-	fmt.Println("REFRESH TOKEN RUN")
+	log.Info("REFRESH TOKEN RUN")
 	_, err := j.db.RefreshLocalStorageFlowToken()
+	if err != nil {
+		log.Error(err)
+	}
 	_, err = j.db.RefreshFlowNetworksConnections()
+	if err != nil {
+		log.Error(err)
+	}
 	_, err = j.db.RefreshFlowNetworkClonesConnections()
 	if err != nil {
-		//TODO FIX ERROR
+		log.Error(err)
 	}
 }
