@@ -62,6 +62,27 @@ func (i *Instance) wizard(body wizard) (string, error) {
 		pnt.Name = pName
 		pnt.Description = pName
 		pnt.IoID = e
+
+		pnt.Fallback = utils.NewFloat64(0)
+		if pnt.IoID == "UO1" || pnt.IoID == "UO2" {
+			pnt.IoType = UOTypes.DIGITAL
+		} else if pnt.IoID == "UO3" || pnt.IoID == "UO4" {
+			pnt.IoType = UOTypes.VOLTSDC
+		} else if pnt.IoID == "UO5" || pnt.IoID == "UO6" || pnt.IoID == "UO7" {
+			pnt.IoType = UOTypes.PERCENT
+		} else if pnt.IoID == "UI1" || pnt.IoID == "UI2" {
+			pnt.IoType = UITypes.DIGITAL
+		} else if pnt.IoID == "UI3" || pnt.IoID == "UI4" {
+			pnt.IoType = UITypes.PERCENT
+		} else if pnt.IoID == "UI5" {
+			pnt.IoType = UITypes.VOLTSDC
+		} else if pnt.IoID == "UI6" {
+			pnt.IoType = UITypes.RESISTANCE
+		} else if pnt.IoID == "UI7" {
+			pnt.IoType = UITypes.THERMISTOR10KT2
+		} else {
+			pnt.IoType = UITypes.DIGITAL
+		}
 		pnt.IoType = string(model.IOTypeRAW)
 		pnt.COV = utils.NewFloat64(0.5)
 		point, err := i.db.CreatePoint(&pnt)

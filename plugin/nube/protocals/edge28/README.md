@@ -43,3 +43,8 @@ http://192.168.15.101:5000/api/1.1/read/all/di
 ``` 
 localhost:5000/api/1.1/write/do/lc/0/16
 ```
+
+### RAW to Resistance Calculation (thermistor reading based on RAW 0-1)
+```
+T= (8.65943*((RAW/0.5555)/0.1774))/(9.89649 - (RAW/0.5555/0.1774))*1000
+```
