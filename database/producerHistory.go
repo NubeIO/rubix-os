@@ -133,14 +133,22 @@ func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (bo
 		priority := new(model.Priority)
 		_ = json.Unmarshal(history.DataStore, &priority)
 		highestPriorityValue := priority.GetHighestPriorityValue()
-		print("here>>>")
 		d.DB.Model(&model.Point{}).Where("uuid = ?", producer.ProducerThingUUID).
 			Updates(map[string]interface{}{
 				"present_value":  highestPriorityValue,
 				"original_value": highestPriorityValue,
 			})
 	} else {
-		// TODO: for schedule and others
+		scheduleWriter := new(model.ScheduleWriterBody)
+		_ = json.Unmarshal(history.DataStore, &scheduleWriter)
+		schedules, err := json.Marshal(scheduleWriter.Schedules)
+		if err != nil {
+			return false, err
+		}
+		d.DB.Model(&model.Schedule{}).Where("uuid = ?", producer.ProducerThingUUID).
+			Updates(map[string]interface{}{
+				"schedules": &schedules,
+			})
 	}
 	return true, nil
 }

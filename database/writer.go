@@ -265,7 +265,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 					"original_value": highestPriorityValue,
 				})
 		} else if writer.WriterThingClass == model.ThingClass.Schedule {
-			scheduleWriter := model.ScheduleWriterBody{}
+			scheduleWriter := new(model.ScheduleWriterBody)
 			_ = json.Unmarshal(writer.DataStore, &scheduleWriter)
 			schedules, err := json.Marshal(scheduleWriter.Schedules)
 			if err != nil {
