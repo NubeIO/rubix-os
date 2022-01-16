@@ -265,8 +265,16 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 					"original_value": highestPriorityValue,
 				})
 		} else if writer.WriterThingClass == model.ThingClass.Schedule {
-			log.Println("IS SCH", writer.WriterThingUUID)
-			// TODO: for schedule and others
+			scheduleWriter := model.ScheduleWriterBody{}
+			_ = json.Unmarshal(writer.DataStore, &scheduleWriter)
+			schedules, err := json.Marshal(scheduleWriter.Schedules)
+			if err != nil {
+				return nil, err
+			}
+			d.DB.Model(&model.Schedule{}).Where("uuid = ?", writer.WriterThingUUID).
+				Updates(map[string]interface{}{
+					"schedules": &schedules,
+				})
 		}
 		d.DB.Model(&writer).Updates(writer)
 		d.DB.Model(&consumer).Updates(consumer)
@@ -316,7 +324,7 @@ func (d *GormDatabase) validateWriterBody(thingClass string, body *model.WriterB
 		}
 	} else if thingClass == model.ThingClass.Schedule {
 		if body.Action == model.WriterActions.Write {
-			b, err := json.Marshal(body.Schedule.Schedules)
+			b, err := json.Marshal(body.Schedule)
 			if err != nil {
 				return nil, body.Action, errors.New("error: failed to marshal schedule on write body")
 			}
