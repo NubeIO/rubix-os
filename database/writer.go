@@ -45,6 +45,7 @@ func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Writer)
 	body.WriterThingName = name
+	body.DataStore = nil
 	body.SyncUUID, _ = utils.MakeUUID()
 	query := d.DB.Create(body)
 	if query.Error != nil {
@@ -88,6 +89,7 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 
 func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
 	var writerModel *model.Writer
+	body.DataStore = nil
 	query := d.DB.Where("uuid = ?", uuid).Find(&writerModel)
 	if query.Error != nil {
 		return nil, query.Error
