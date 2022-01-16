@@ -16,7 +16,6 @@ type WriterDatabase interface {
 	DropWriters() (bool, error)
 	WriterAction(uuid string, body *model.WriterBody) (*model.ProducerHistory, error)
 	WriterBulkAction(body []*model.WriterBulk) (*utils.Array, error)
-	CreateWriterWizard(*WriterWizard) (bool, error)
 }
 
 type WriterAPI struct {
@@ -63,7 +62,6 @@ func (j *WriterAPI) DropWriters(ctx *gin.Context) {
 	responseHandler(q, err, ctx)
 }
 
-//WriterAction get or update a producer value by using the writer uuid
 func (j *WriterAPI) WriterAction(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	body, _ := getBODYWriterBody(ctx)
@@ -71,30 +69,14 @@ func (j *WriterAPI) WriterAction(ctx *gin.Context) {
 	responseHandler(q, err, ctx)
 }
 
-//WriterBulkAction get or update a producer value by using the writer uuid
 func (j *WriterAPI) WriterBulkAction(ctx *gin.Context) {
 	body, _ := getBODYWriterBulk(ctx)
 	q, err := j.DB.WriterBulkAction(body)
 	responseHandler(q, err, ctx)
 }
 
-func getBODYWriterWizard(ctx *gin.Context) (dto *WriterWizard, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
 type WriterWizard struct {
 	ConsumerFlowUUID   string `json:"consumer_side_flow_uuid"`
 	ConsumerStreamUUID string `json:"consumer_side_stream_uuid"`
 	ProducerUUID       string `json:"remote_producer_uuid"`
-}
-
-func (j *WriterAPI) CreateWriterWizard(ctx *gin.Context) {
-	body, _ := getBODYWriterWizard(ctx)
-	_, err := govalidator.ValidateStruct(body)
-	if err != nil {
-		responseHandler(nil, err, ctx)
-	}
-	q, err := j.DB.CreateWriterWizard(body)
-	responseHandler(q, err, ctx)
 }

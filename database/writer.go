@@ -54,7 +54,6 @@ func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 	return body, nil
 }
 
-// GetWriter get it
 func (d *GormDatabase) GetWriter(uuid string) (*model.Writer, error) {
 	var writerModel *model.Writer
 	query := d.DB.Where("uuid = ? ", uuid).First(&writerModel)
@@ -64,7 +63,6 @@ func (d *GormDatabase) GetWriter(uuid string) (*model.Writer, error) {
 	return writerModel, nil
 }
 
-// GetWriterByThing get it by its thing uuid
 func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer, error) {
 	var writerModel *model.Writer
 	query := d.DB.Where("producer_thing_uuid = ? ", producerThingUUID).First(&writerModel)
@@ -74,7 +72,6 @@ func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer
 	return writerModel, nil
 }
 
-// DeleteWriter deletes it
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	var writerModel *model.Writer
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&writerModel)
@@ -89,7 +86,6 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	}
 }
 
-// UpdateWriter  update it
 func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
 	var writerModel *model.Writer
 	query := d.DB.Where("uuid = ?", uuid).Find(&writerModel)
@@ -105,7 +101,6 @@ func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Wri
 
 }
 
-// DropWriters delete all.
 func (d *GormDatabase) DropWriters() (bool, error) {
 	var writerModel *model.Writer
 	query := d.DB.Where("1 = 1").Delete(&writerModel)
@@ -118,96 +113,6 @@ func (d *GormDatabase) DropWriters() (bool, error) {
 	} else {
 		return true, nil
 	}
-}
-
-// CreateWriterWizard add a new consumer to an existing producer and add a new writer and writer clone
-// use the flow-network UUID
-func (d *GormDatabase) CreateWriterWizard(body *api.WriterWizard) (bool, error) {
-	/*TODO: Binod
-	var consumerModel model.Consumer
-	var writerModel model.Writer
-	var writerCloneModel model.WriterClone
-	var session *client.FlowClient
-	producer := new(model.Producer)
-	flow, err := d.GetFlowNetwork(body.ConsumerFlowUUID, api.Args{})
-	if err != nil {
-		return false, err
-	}
-	isRemote := utils.BoolIsNil(flow.IsRemote)
-	if isRemote {
-		session = client.NewSessionWithToken("", flow.FlowIP, flow.FlowPort)
-		pro, err := session.GetProducer(body.ProducerUUID)
-		if err != nil {
-			return false, errors.New("CREATE-WRITER: failed to remote GetProducer")
-		}
-		producer.UUID = pro.UUID
-		producer.ProducerThingClass = pro.ProducerThingClass
-		producer.ProducerThingType = pro.ProducerThingType
-		producer.ProducerThingName = pro.ProducerThingName
-		producer.ProducerThingUUID = pro.ProducerThingUUID
-	} else {
-		pro, err := d.GetProducer(body.ProducerUUID, api.Args{})
-		if err != nil {
-			return false, errors.New("CREATE-WRITER: failed to local GetProducer")
-		}
-		producer.UUID = pro.UUID
-		producer.ProducerThingClass = pro.ProducerThingClass
-		producer.ProducerThingType = pro.ProducerThingType
-		producer.ProducerThingName = pro.ProducerThingName
-		producer.ProducerThingUUID = pro.ProducerThingUUID
-
-	}
-
-	consumerModel.StreamUUID = body.ConsumerStreamUUID
-	consumerModel.Name = "consumer stream"
-	consumerModel.ProducerUUID = producer.UUID
-	consumerModel.ProducerThingClass = producer.ProducerThingClass
-	consumerModel.ProducerThingType = producer.ProducerThingType
-	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
-	consumerModel.ProducerThingUUID = producer.ProducerThingUUID
-	consumerModel.ProducerThingName = producer.ProducerThingName
-	_, err = d.CreateConsumer(&consumerModel)
-	if err != nil {
-		log.Errorf("wizard:  CreateConsumer: %v\n", err)
-		return false, errors.New("CREATE-WRITER: failed to local CreateConsumer")
-	}
-	//// writer
-	writerModel.ConsumerUUID = consumerModel.UUID
-	writerModel.ConsumerThingUUID = consumerModel.UUID
-	writerModel.WriterThingClass = model.ThingClass.Point
-	writerModel.WriterThingType = model.ThingClass.API
-	writer, err := d.CreateWriter(&writerModel)
-	if err != nil {
-		return false, errors.New("CREATE-WRITER: failed to local CreateWriter")
-	}
-	// add consumer to the writerClone
-	writerCloneModel.ProducerUUID = body.ProducerUUID
-	writerCloneModel.WriterUUID = writer.UUID
-	writerModel.WriterThingClass = model.ThingClass.Point
-	writerModel.WriterThingType = model.ThingClass.API
-	if !isRemote {
-		writerClone, err := d.CreateWriterClone(&writerCloneModel)
-		if err != nil {
-			return false, errors.New("CREATE-WRITER: failed to local CreateWriterClone")
-		}
-		writerModel.CloneUUID = writerClone.UUID
-		_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
-		if err != nil {
-			return false, errors.New("CREATE-WRITER: failed to local UpdateWriter")
-		}
-	} else {
-		clone, err := session.CreateWriterClone(writerCloneModel)
-		if err != nil {
-			return false, errors.New("CREATE-WRITER: failed to remote CreateWriterClone")
-		}
-		writerModel.CloneUUID = clone.UUID
-		writerModel.CloneUUID = clone.UUID
-		_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
-		if err != nil {
-			return false, errors.New("CREATE-WRITER: failed to local UpdateWriter")
-		}
-	}*/
-	return true, nil
 }
 
 /*
@@ -296,13 +201,6 @@ func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) (*utils.Array,
 	}
 	return arr, nil
 
-}
-
-func consumerRefresh(producerFeedback *model.ProducerHistory) (*model.Consumer, error) {
-	updateConsumer := new(model.Consumer)
-	updateConsumer.DataStore = producerFeedback.DataStore
-	updateConsumer.CurrentWriterUUID = producerFeedback.CurrentWriterUUID
-	return updateConsumer, nil
 }
 
 func (d *GormDatabase) validateWriterBody(thingClass string, body *model.WriterBody) ([]byte, string, error) {
