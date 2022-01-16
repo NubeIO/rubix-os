@@ -1,4 +1,13 @@
 # CHANGELOG
+## [v0.2.3](https://github.com/NubeIO/flow-framework/tree/v0.2.3) (2022-01-16)
+- Add schedule config
+- Sync schedules values on the producer side
+- Remove CreateWriterWizard
+- Datastore is nil for updating writers (datastore update is only from write actions)
+- Add sync on patch (#326)
+- Marc/edge28 plugin scaling (#314)
+- Merge pull request #325 from NubeIO/improvement/return-appropriate-status-code
+
 ## [v0.2.2](https://github.com/NubeIO/flow-framework/tree/v0.2.2) (2021-12-23)
 - Improvement on schedule APIs
 - Add scheduler for refreshing token
