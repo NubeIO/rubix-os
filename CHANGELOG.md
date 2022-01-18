@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.2.4](https://github.com/NubeIO/flow-framework/tree/v0.2.4) (2022-01-19)
+- Update to mqtt broker plugin
+
 ## [v0.2.3](https://github.com/NubeIO/flow-framework/tree/v0.2.3) (2022-01-16)
 - Add schedule config
 - Sync schedules values on the producer side
