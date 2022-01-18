@@ -25,11 +25,15 @@ func (i *Instance) Disable() error {
 }
 
 func (i *Instance) enableBroker() {
-	port := "1882"
+	port := "1883"
 	if i.config.Port != "" {
 		port = i.config.Port
 	}
-	os.Args = []string{"-port", port}
+	HttpPort := "8099"
+	if i.config.HttpPort != "" {
+		HttpPort = i.config.HttpPort
+	}
+	os.Args = []string{"-port", port, "-httpport", HttpPort}
 	config, err := broker.ConfigureConfig(os.Args)
 	if err != nil {
 		log.Error("configure broker config error: ", err)
