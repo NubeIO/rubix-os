@@ -166,9 +166,9 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 			priority := new(model.Priority)
 			_ = json.Unmarshal(writer.DataStore, &priority)
 			highestPriorityValue := priority.GetHighestPriorityValue()
+			d.DB.Model(&model.Priority{}).Where("point_uuid = ?", writer.WriterThingUUID).Updates(priority)
 			d.DB.Model(&model.Point{}).Where("uuid = ?", writer.WriterThingUUID).
 				Updates(map[string]interface{}{
-					"priority":       &priority,
 					"present_value":  highestPriorityValue,
 					"original_value": highestPriorityValue,
 				})

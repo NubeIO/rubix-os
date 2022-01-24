@@ -133,9 +133,9 @@ func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (bo
 		priority := new(model.Priority)
 		_ = json.Unmarshal(history.DataStore, &priority)
 		highestPriorityValue := priority.GetHighestPriorityValue()
+		d.DB.Model(&model.Priority{}).Where("point_uuid = ?", producer.ProducerThingUUID).Updates(priority)
 		d.DB.Model(&model.Point{}).Where("uuid = ?", producer.ProducerThingUUID).
 			Updates(map[string]interface{}{
-				"priority":       &priority,
 				"present_value":  highestPriorityValue,
 				"original_value": highestPriorityValue,
 			})
