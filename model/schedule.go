@@ -11,10 +11,15 @@ type Schedule struct {
 	CommonEnable
 	CommonThingClass
 	CommonThingType
-	IsActive  *bool          `json:"is_active"`
-	IsGlobal  *bool          `json:"is_global"`
-	Schedules datatypes.JSON `json:"schedules"`
+	IsActive *bool          `json:"is_active"`
+	IsGlobal *bool          `json:"is_global"`
+	Schedule datatypes.JSON `json:"schedule"`
 	CommonCreated
+}
+
+type ScheduleData struct {
+	Schedules Schedules      `json:"schedules,omitempty"`
+	Config    datatypes.JSON `json:"config,omitempty"`
 }
 
 type Schedules struct {

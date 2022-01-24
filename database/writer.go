@@ -168,19 +168,14 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model
 			highestPriorityValue := priority.GetHighestPriorityValue()
 			d.DB.Model(&model.Point{}).Where("uuid = ?", writer.WriterThingUUID).
 				Updates(map[string]interface{}{
+					"priority":       &priority,
 					"present_value":  highestPriorityValue,
 					"original_value": highestPriorityValue,
 				})
 		} else if writer.WriterThingClass == model.ThingClass.Schedule {
-			scheduleWriter := new(model.ScheduleWriterBody)
-			_ = json.Unmarshal(writer.DataStore, &scheduleWriter)
-			schedules, err := json.Marshal(scheduleWriter.Schedules)
-			if err != nil {
-				return nil, err
-			}
 			d.DB.Model(&model.Schedule{}).Where("uuid = ?", writer.WriterThingUUID).
 				Updates(map[string]interface{}{
-					"schedules": &schedules,
+					"schedule": &writer.DataStore,
 				})
 		}
 		d.DB.Model(&writer).Updates(writer)
