@@ -52,6 +52,9 @@ func (d *GormDatabase) CreateSchedule(body *model.Schedule) (*model.Schedule, er
 }
 
 func (d *GormDatabase) validateSchedule(schedule *model.Schedule) ([]byte, error) {
+	if schedule.Schedule == nil {
+		return nil, nil
+	}
 	scheduleDataModel := new(model.ScheduleData)
 	err := json.Unmarshal(schedule.Schedule, &scheduleDataModel)
 	if err != nil {

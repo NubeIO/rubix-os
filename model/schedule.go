@@ -2,7 +2,6 @@ package model
 
 import (
 	"gorm.io/datatypes"
-	"time"
 )
 
 type Schedule struct {
@@ -31,8 +30,8 @@ type Schedules struct {
 type Events struct {
 	Name  string `json:"name"`
 	Dates []struct {
-		Start time.Time `json:"start"`
-		End   time.Time `json:"end"`
+		Start string `json:"start"`
+		End   string `json:"end"`
 	} `json:"dates"`
 	Value int    `json:"value"`
 	Color string `json:"color"`
@@ -48,9 +47,11 @@ type Weekly struct {
 }
 
 type Exception struct {
-	Id    string `json:"id"`
 	Name  string `json:"name"`
-	Color string `json:"color"`
-	Date  string `json:"date"`
+	Dates []struct {
+		Start string `json:"start"`
+		End   string `json:"end"`
+	} `json:"dates"`
 	Value int    `json:"value"`
+	Color string `json:"color"`
 }
