@@ -44,7 +44,7 @@ func (d *GormDatabase) CreateSchedule(body *model.Schedule) (*model.Schedule, er
 	if err != nil {
 		return nil, err
 	}
-	body.Schedules = validSchedule
+	body.Schedule = validSchedule
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
@@ -52,12 +52,15 @@ func (d *GormDatabase) CreateSchedule(body *model.Schedule) (*model.Schedule, er
 }
 
 func (d *GormDatabase) validateSchedule(schedule *model.Schedule) ([]byte, error) {
-	scheduleModel := new(model.Schedules)
-	err := json.Unmarshal(schedule.Schedules, &scheduleModel)
+	if schedule.Schedule == nil {
+		return nil, nil
+	}
+	scheduleDataModel := new(model.ScheduleData)
+	err := json.Unmarshal(schedule.Schedule, &scheduleDataModel)
 	if err != nil {
 		return nil, err
 	}
-	validSchedule, err := json.Marshal(scheduleModel)
+	validSchedule, err := json.Marshal(scheduleDataModel)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +73,7 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	if err != nil {
 		return nil, err
 	}
-	body.Schedules = validSchedule
+	body.Schedule = validSchedule
 	body.ThingClass = model.ThingClass.Schedule
 	body.ThingType = model.ThingClass.Schedule
 	query := d.DB.Where("uuid = ?", uuid).Find(&scheduleModel)

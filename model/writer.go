@@ -33,15 +33,10 @@ type SyncWriter struct {
 
 //WriterBody could be a local network, job or alarm and so on
 type WriterBody struct {
-	Action     string             `json:"action,omitempty"` //read, write and so on
-	AskRefresh bool               `json:"ask_refresh,omitempty"`
-	Priority   Priority           `json:"priority,omitempty"`
-	Schedule   ScheduleWriterBody `json:"schedule,omitempty"`
-}
-
-type ScheduleWriterBody struct {
-	Schedules Schedules      `json:"schedules,omitempty"`
-	Config    datatypes.JSON `json:"config,omitempty"`
+	Action     string       `json:"action,omitempty"` //read, write and so on
+	AskRefresh bool         `json:"ask_refresh,omitempty"`
+	Priority   Priority     `json:"priority,omitempty"`
+	Schedule   ScheduleData `json:"schedule,omitempty"`
 }
 
 //WriterBulk could be a local network, job or alarm and so on

@@ -2,7 +2,6 @@ package model
 
 import (
 	"gorm.io/datatypes"
-	"time"
 )
 
 type Schedule struct {
@@ -11,10 +10,15 @@ type Schedule struct {
 	CommonEnable
 	CommonThingClass
 	CommonThingType
-	IsActive  *bool          `json:"is_active"`
-	IsGlobal  *bool          `json:"is_global"`
-	Schedules datatypes.JSON `json:"schedules"`
+	IsActive *bool          `json:"is_active"`
+	IsGlobal *bool          `json:"is_global"`
+	Schedule datatypes.JSON `json:"schedule"`
 	CommonCreated
+}
+
+type ScheduleData struct {
+	Schedules Schedules      `json:"schedules,omitempty"`
+	Config    datatypes.JSON `json:"config,omitempty"`
 }
 
 type Schedules struct {
@@ -26,8 +30,8 @@ type Schedules struct {
 type Events struct {
 	Name  string `json:"name"`
 	Dates []struct {
-		Start time.Time `json:"start"`
-		End   time.Time `json:"end"`
+		Start string `json:"start"`
+		End   string `json:"end"`
 	} `json:"dates"`
 	Value int    `json:"value"`
 	Color string `json:"color"`
@@ -43,9 +47,11 @@ type Weekly struct {
 }
 
 type Exception struct {
-	Id    string `json:"id"`
 	Name  string `json:"name"`
-	Color string `json:"color"`
-	Date  string `json:"date"`
+	Dates []struct {
+		Start string `json:"start"`
+		End   string `json:"end"`
+	} `json:"dates"`
 	Value int    `json:"value"`
+	Color string `json:"color"`
 }
