@@ -291,50 +291,8 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 	if err := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Error; err != nil {
 		return nil, err
 	}
+
 	var presentValue *float64
-	var limitMin *float64
-	var limitMax *float64
-	var scaleInMin *float64
-	var scaleInMax *float64
-	var scaleOutMin *float64
-	var scaleOutMax *float64
-
-	if body.LimitMin == nil {
-		limitMin = pointModel.LimitMin
-	} else {
-		limitMin = body.LimitMin
-	}
-
-	if body.LimitMax == nil {
-		limitMax = pointModel.LimitMax
-	} else {
-		limitMax = body.LimitMax
-	}
-
-	if body.ScaleInMin == nil {
-		scaleInMin = pointModel.ScaleInMin
-	} else {
-		scaleInMin = body.ScaleInMin
-	}
-
-	if body.ScaleInMax == nil {
-		scaleInMax = pointModel.ScaleInMax
-	} else {
-		scaleInMax = body.ScaleInMax
-	}
-
-	if body.ScaleOutMin == nil {
-		scaleOutMin = pointModel.ScaleOutMin
-	} else {
-		scaleOutMin = body.ScaleOutMin
-	}
-
-	if body.ScaleOutMax == nil {
-		scaleOutMax = pointModel.ScaleOutMax
-	} else {
-		scaleOutMax = body.ScaleOutMax
-	}
-
 	if body.Priority != nil {
 		priority := map[string]interface{}{}
 		priorityValue := reflect.ValueOf(*body.Priority)
@@ -364,7 +322,6 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 			presentValue = &highestValue //process the units as in temperature conversion
 		} else if !utils.FloatIsNilCheck(body.Fallback) {
 			body.Priority.P16 = utils.NewFloat64(*body.Fallback)
-			body.OriginalValue = utils.NewFloat64(*body.Fallback)
 			body.CurrentPriority = utils.NewInt(16)
 			presentValue = utils.NewFloat64(*body.Fallback)
 			log.Debug("UpdatePointValue() - FloatIsNilCheck(body.Fallback):", body.Priority.P16, body.OriginalValue, body.CurrentPriority, presentValue)
@@ -374,6 +331,13 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 
 	ov := utils.Float64IsNil(presentValue)
 	body.OriginalValue = &ov
+
+	limitMin := utils.FirstNotNilFloat(body.LimitMin, pointModel.LimitMin)
+	limitMax := utils.FirstNotNilFloat(body.LimitMax, pointModel.LimitMax)
+	scaleInMin := utils.FirstNotNilFloat(body.ScaleInMin, pointModel.ScaleInMin)
+	scaleInMax := utils.FirstNotNilFloat(body.ScaleInMax, pointModel.ScaleInMax)
+	scaleOutMin := utils.FirstNotNilFloat(body.ScaleOutMin, pointModel.ScaleOutMin)
+	scaleOutMax := utils.FirstNotNilFloat(body.ScaleOutMax, pointModel.ScaleOutMax)
 	if presentValue != nil {
 		log.Debug("UpdatePointValue() - *presentValue1: ", *presentValue)
 	}
