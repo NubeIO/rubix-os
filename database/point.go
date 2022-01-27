@@ -281,83 +281,87 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 	return point, nil
 }
 
-// UpdatePointValue returns the device for the given id or nil.
 func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
 	//TODO add in a check to make sure user doesn't set the addressID and the ObjectType the same as another point
-	//check if there is an existing device with this address code
 	_, err := checkObjectType(body.ObjectType)
 	if err != nil {
 		return nil, err
 	}
-	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
-	if query.Error != nil {
-		return nil, query.Error
+	if err := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel).Error; err != nil {
+		return nil, err
 	}
 	var presentValue *float64
-
 	var limitMin *float64
+	var limitMax *float64
+	var scaleInMin *float64
+	var scaleInMax *float64
+	var scaleOutMin *float64
+	var scaleOutMax *float64
+
 	if body.LimitMin == nil {
-		if pointModel.LimitMin != nil {
-			limitMin = pointModel.LimitMin
-		} else {
-			limitMin = body.LimitMin
-		}
+		limitMin = pointModel.LimitMin
 	} else {
 		limitMin = body.LimitMin
 	}
-	var limitMax *float64
+
 	if body.LimitMax == nil {
 		limitMax = pointModel.LimitMax
+	} else {
+		limitMax = body.LimitMax
 	}
-	var scaleInMin *float64
+
 	if body.ScaleInMin == nil {
 		scaleInMin = pointModel.ScaleInMin
+	} else {
+		scaleInMin = body.ScaleInMin
 	}
-	var scaleInMax *float64
+
 	if body.ScaleInMax == nil {
 		scaleInMax = pointModel.ScaleInMax
+	} else {
+		scaleInMax = body.ScaleInMax
 	}
-	var scaleOutMin *float64
+
 	if body.ScaleOutMin == nil {
 		scaleOutMin = pointModel.ScaleOutMin
+	} else {
+		scaleOutMin = body.ScaleOutMin
 	}
-	var scaleOutMax *float64
+
 	if body.ScaleOutMax == nil {
 		scaleOutMax = pointModel.ScaleOutMax
+	} else {
+		scaleOutMax = body.ScaleOutMax
 	}
+
 	if body.Priority != nil {
 		priority := map[string]interface{}{}
 		priorityValue := reflect.ValueOf(*body.Priority)
 		typeOfPriority := priorityValue.Type()
-		highestPri := utils.NewArray()
-		highestValue := utils.NewMap()
+		highestValue := 0.0
+		currentPriority := 0
+		isEntered := false
 		for i := 0; i < priorityValue.NumField(); i++ {
 			if priorityValue.Field(i).Type().Kind().String() == "ptr" {
 				val := priorityValue.Field(i).Interface().(*float64)
 				if val == nil {
 					priority[typeOfPriority.Field(i).Name] = nil
 				} else {
+					if !isEntered {
+						currentPriority = i
+						highestValue = *val
+					}
 					log.Debug("UpdatePointValue() - i, val: ", typeOfPriority.Field(i).Name, *val)
-					highestPri.Add(i)
-					highestValue.Set(i, *val)
 					priority[typeOfPriority.Field(i).Name] = *val
+					isEntered = true
 				}
 			}
 		}
-		notNil := false
-		for _, v := range priority { //check if there is a value in priority array
-			if v != nil {
-				notNil = true
-			}
-		}
 		log.Debug("UpdatePointValue() - body.Fallback: ", body.Fallback)
-		if notNil {
-			min, _ := highestPri.MinMaxInt() //get the highest priority
-			val := highestValue.Get(min)     //get the highest priority value
-			body.CurrentPriority = &min      //TODO check conversion
-			v := val.(float64)
-			presentValue = &v //process the units as in temperature conversion
+		if isEntered {
+			body.CurrentPriority = &currentPriority
+			presentValue = &highestValue //process the units as in temperature conversion
 		} else if !utils.FloatIsNilCheck(body.Fallback) {
 			body.Priority.P16 = utils.NewFloat64(*body.Fallback)
 			body.OriginalValue = utils.NewFloat64(*body.Fallback)
@@ -367,6 +371,7 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 		}
 		d.DB.Model(&pointModel.Priority).Updates(&priority)
 	}
+
 	ov := utils.Float64IsNil(presentValue)
 	body.OriginalValue = &ov
 	if presentValue != nil {
@@ -396,6 +401,7 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 	} else {
 		pointModel.PresentValue = eval
 	}
+
 	vv, ok, err := pointUnits(pointModel)
 	if err != nil {
 		log.Errorf("ERROR on point invalid point unit")
@@ -404,10 +410,12 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 	if ok {
 		presentValue = &vv
 	}
+
 	if !utils.Unit32NilCheck(pointModel.Decimal) {
 		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
+
 	if pointModel.IsProducer == nil && body.IsProducer == nil {
 		if compare(pointModel, body) {
 			_, err := d.ProducerWrite("point", pointModel)
@@ -417,8 +425,10 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 			}
 		}
 	}
+
 	body.PresentValue = presentValue
 	_ = d.DB.Model(&pointModel).Updates(&body)
+
 	if !fromPlugin { //stop looping
 		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)
 		if err != nil {
@@ -431,6 +441,7 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 			return nil, errors.New("ERROR on device eventbus")
 		}
 	}
+
 	return pointModel, nil
 }
 
