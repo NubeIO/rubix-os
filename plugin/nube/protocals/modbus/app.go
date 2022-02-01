@@ -55,7 +55,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 	pnt.Name = "modbus"
 	pnt.Description = "modbus"
 	pnt.AddressID = utils.NewInt(1) //TODO check conversion
-	pnt.ObjectType = string(model.ObjTypeWriteSingleFloat32)
+	pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 
 	_, err = i.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 	if err != nil {

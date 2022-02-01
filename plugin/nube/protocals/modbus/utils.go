@@ -39,9 +39,9 @@ func isWrite(t string) bool {
 		return true
 	case model.ObjTypeWriteHolding, model.ObjTypeWriteHoldings:
 		return true
-	case model.ObjTypeWriteSingleInt16, model.ObjTypeWriteSingleUint16:
+	case model.ObjTypeWriteInt16, model.ObjTypeWriteUint16:
 		return true
-	case model.ObjTypeWriteSingleFloat32, model.ObjTypeWriteSingleFloat64:
+	case model.ObjTypeWriteFloat32:
 		return true
 	}
 	return false
@@ -51,7 +51,7 @@ var err error
 
 type Operation struct {
 	UnitId       uint8  `json:"unit_id"`     //device addr
-	ObjectType   string `json:"object_type"` //readCoil
+	ObjectType   string `json:"object_type"` //read_coil
 	op           uint
 	Addr         uint16  `json:"addr"`
 	ZeroMode     bool    `json:"zero_mode"`
@@ -84,7 +84,7 @@ func setRequest(body Operation) (Operation, error) {
 
 func parseRequest(body Operation) (Operation, error) {
 	set, _ := setRequest(body)
-	opsObjT := utils.NewString(body.ObjectType).ToCamelCase() //eg: readCoil, read_coil, writeCoil
+	opsObjT := utils.NewString(body.ObjectType).ToSnakeCase() //eg: readCoil, read_coil, writeCoil
 	ops := model.ObjectType(utils.LcFirst(opsObjT))
 	switch ops {
 	case model.ObjTypeReadCoil, model.ObjTypeReadCoils, model.ObjTypeReadDiscreteInput, model.ObjTypeReadDiscreteInputs:
@@ -101,14 +101,44 @@ func parseRequest(body Operation) (Operation, error) {
 	case model.ObjTypeReadRegister, model.ObjTypeReadRegisters, model.ObjTypeReadHolding, model.ObjTypeReadHoldings:
 		set.op = readInt16
 		return set, err
-	case model.ObjTypeReadFloat32, model.ObjTypeReadSingleFloat32:
+	case model.ObjTypeReadInt16:
+		set.IsHoldingReg = false
+		if body.IsHoldingReg {
+			set.IsHoldingReg = true
+		}
+		set.op = readInt16
+		return set, err
+	case model.ObjTypeReadUint16:
+		set.IsHoldingReg = false
+		if body.IsHoldingReg {
+			set.IsHoldingReg = true
+		}
+		set.op = readUint16
+		return set, err
+	case model.ObjTypeWriteInt16:
+		set.IsHoldingReg = false
+		if body.IsHoldingReg {
+			set.IsHoldingReg = true
+		}
+		set.op = writeInt16
+		set.u16 = uint16(body.WriteValue)
+		return set, err
+	case model.ObjTypeWriteUint16:
+		set.IsHoldingReg = false
+		if body.IsHoldingReg {
+			set.IsHoldingReg = true
+		}
+		set.op = writeUint16
+		set.u16 = uint16(body.WriteValue)
+		return set, err
+	case model.ObjTypeReadFloat32:
 		set.IsHoldingReg = false
 		if body.IsHoldingReg {
 			set.IsHoldingReg = true
 		}
 		set.op = readFloat32
 		return set, err
-	case model.ObjTypeWriteSingleFloat32:
+	case model.ObjTypeWriteFloat32:
 		set.IsHoldingReg = true
 		set.op = writeFloat32
 		set.f32 = float32(body.WriteValue)
@@ -132,7 +162,7 @@ func zeroMode(addr uint16, mode bool) uint16 {
 
 func networkRequest(client *modbus.ModbusClient, o Operation) (response interface{}, responseValue float64, err error) {
 	o.Addr = zeroMode(o.Addr, o.ZeroMode)
-	sel := utils.NewString(o.Encoding).ToCamelCase() //eg: LEB_BEW, lebBew
+	sel := utils.NewString(o.Encoding).ToSnakeCase() //eg: LEB_BEW, lebBew
 	selBO := model.ByteOrder(utils.LcFirst(sel))
 	switch selBO {
 	case model.ByteOrderLebBew:
@@ -149,6 +179,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 	if o.Length <= 0 { //make sure length is > 0
 		o.Length = 1
 	}
+	log.Infof("modbus: WRITE ObjectType: %s  Addr: %d WriteValue: %v\n", o.ObjectType, o.Addr, o.WriteValue)
 	switch o.op {
 	case readBool:
 		var res []bool
@@ -191,7 +222,6 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 				}
 				return res, float64(res[0]), err
 			}
-
 		}
 	case readUint32, readInt32:
 		var res []uint32
@@ -208,12 +238,12 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		}
 	case readFloat32:
 		var res []float32
-		if model.ObjectType(o.ObjectType) == model.ObjTypeReadSingleFloat32 {
+		if model.ObjectType(o.ObjectType) == model.ObjTypeReadFloat32 {
 			o.Length = 1
 		}
 		if o.IsHoldingReg {
 			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
-			if model.ObjectType(o.ObjectType) == model.ObjTypeReadSingleFloat32 {
+			if model.ObjectType(o.ObjectType) == model.ObjTypeReadFloat32 {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 					return nil, 0, err
@@ -228,7 +258,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 			}
 		} else {
 			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.INPUT_REGISTER)
-			if model.ObjectType(o.ObjectType) == model.ObjTypeReadSingleFloat32 {
+			if model.ObjectType(o.ObjectType) == model.ObjTypeReadFloat32 {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
 				}
@@ -300,6 +330,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		} else {
 			log.Infof("modbus: wrote %v at register address 0x%04x\n",
 				o.u16, o.Addr)
+			return o.u16, float64(o.u16), err
 		}
 	case writeInt16:
 		err = client.WriteRegister(o.Addr, o.u16)
@@ -309,6 +340,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		} else {
 			log.Infof("modbus: wrote %v at register address 0x%04x\n",
 				int16(o.u16), o.Addr)
+			return o.u16, float64(o.u16), err
 		}
 	case writeUint32:
 		err = client.WriteUint32(o.Addr, o.u32)

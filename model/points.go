@@ -40,23 +40,15 @@ const (
 	ObjTypeWriteHolding       ObjectType = "write_holding"
 	ObjTypeWriteHoldings      ObjectType = "write_holdings"
 	ObjTypeReadInt16          ObjectType = "read_int_16"
-	ObjTypeReadSingleInt16    ObjectType = "read_single_int_16"
-	ObjTypeWriteSingleInt16   ObjectType = "write_single_int_16"
+	ObjTypeWriteInt16         ObjectType = "write_int_16"
 	ObjTypeReadUint16         ObjectType = "read_uint_16"
-	ObjTypeReadSingleUint16   ObjectType = "read_single_uint_16"
-	ObjTypeWriteSingleUint16  ObjectType = "write_single_uint_16"
+	ObjTypeWriteUint16        ObjectType = "write_uint_16"
 	ObjTypeReadInt32          ObjectType = "read_int_32"
-	ObjTypeReadSingleInt32    ObjectType = "read_single_int_32"
-	ObjTypeWriteSingleInt32   ObjectType = "write_single_int_32"
 	ObjTypeReadUint32         ObjectType = "read_uint_32"
-	ObjTypeReadSingleUint32   ObjectType = "read_single_uint_32"
-	ObjTypeWriteSingleUint32  ObjectType = "write_single_uint_32"
 	ObjTypeReadFloat32        ObjectType = "read_float_32"
-	ObjTypeReadSingleFloat32  ObjectType = "read_single_float_32"
-	ObjTypeWriteSingleFloat32 ObjectType = "write_single_float_32"
+	ObjTypeWriteFloat32       ObjectType = "write_float_32"
 	ObjTypeReadFloat64        ObjectType = "read_float_64"
-	ObjTypeReadSingleFloat64  ObjectType = "read_single_float_64"
-	ObjTypeWriteSingleFloat64 ObjectType = "write_single_float_64"
+	ObjTypeWriteFloat64       ObjectType = "write_float_64"
 )
 
 var ObjectTypesMap = map[ObjectType]int8{
@@ -67,12 +59,12 @@ var ObjectTypesMap = map[ObjectType]int8{
 	ObjTypeReadDiscreteInputs: 0, ObjTypeWriteCoil: 0, ObjTypeWriteCoils: 0,
 	ObjTypeReadRegister: 0, ObjTypeReadRegisters: 0, ObjTypeReadHolding: 0,
 	ObjTypeReadHoldings: 0, ObjTypeWriteHolding: 0, ObjTypeWriteHoldings: 0,
-	ObjTypeReadInt16: 0, ObjTypeReadSingleInt16: 0, ObjTypeWriteSingleInt16: 0,
-	ObjTypeReadUint16: 0, ObjTypeReadSingleUint16: 0, ObjTypeWriteSingleUint16: 0,
-	ObjTypeReadInt32: 0, ObjTypeReadSingleInt32: 0, ObjTypeWriteSingleInt32: 0,
-	ObjTypeReadUint32: 0, ObjTypeReadSingleUint32: 0, ObjTypeWriteSingleUint32: 0,
-	ObjTypeReadFloat32: 0, ObjTypeReadSingleFloat32: 0, ObjTypeWriteSingleFloat32: 0,
-	ObjTypeReadFloat64: 0, ObjTypeReadSingleFloat64: 0, ObjTypeWriteSingleFloat64: 0,
+	ObjTypeReadInt16: 0, ObjTypeWriteInt16: 0,
+	ObjTypeReadUint16: 0, ObjTypeWriteUint16: 0,
+	ObjTypeReadInt32:   0,
+	ObjTypeReadUint32:  0,
+	ObjTypeReadFloat32: 0, ObjTypeWriteFloat32: 0,
+	ObjTypeReadFloat64: 0, ObjTypeWriteFloat64: 0,
 }
 
 type ByteOrder string

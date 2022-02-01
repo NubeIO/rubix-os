@@ -67,6 +67,6 @@ func main() {
 
 	client.SetEncoding(modbus.BIG_ENDIAN, modbus.LOW_WORD_FIRST)
 
-	err = client.WriteFloat32(0, 0)
+	err = client.WriteFloat32(0, 1)
 	fmt.Println(err)
 }
