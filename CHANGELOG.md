@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.2.5](https://github.com/NubeIO/flow-framework/tree/v0.2.5) (2022-02-01)
+- small fixes to modbus #337
+- Improvements on schedule #334
+
 ## [v0.2.4](https://github.com/NubeIO/flow-framework/tree/v0.2.4) (2022-01-19)
 - Update to mqtt broker plugin
 
