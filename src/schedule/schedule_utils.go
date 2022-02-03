@@ -10,7 +10,8 @@ import (
 type SchTypes struct {
 	Weekly     TypeWeekly `json:"weekly"`
 	Events     TypeEvents `json:"events"`
-	Exceptions TypeEvents `json:"holiday"`
+	Exceptions TypeEvents `json:"exceptions"`
+	Config     TypeConfig `json:"config"`
 }
 
 type TypeWeekly map[string]WeeklyScheduleEntry
@@ -21,11 +22,15 @@ type WeeklyScheduleEntry struct {
 	Name     string   `json:"name"`
 	Days     []string `json:"days"`
 	DaysNums []DaysOfTheWeek
-	Start    string  `json:"start"`
-	End      string  `json:"end"`
-	Timezone string  `json:"timezone"`
-	Value    float64 `json:"value"`
-	Colour   string  `json:"color"`
+	Start    string `json:"start"`
+	End      string `json:"end"`
+	//Timezone string  `json:"timezone"`
+	Value  float64 `json:"value"`
+	Colour string  `json:"color"`
+}
+
+type TypeConfig struct {
+	Names
 }
 
 type EventScheduleEntry struct {
