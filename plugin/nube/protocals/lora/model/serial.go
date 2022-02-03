@@ -54,7 +54,22 @@ type Network struct {
 type Device struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
-	Enable      EnableStruct      `json:"enable"`
+
+	AddressUUID struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Min         int    `json:"min" default:"8"`
+		Max         int    `json:"max" default:"8"`
+		DisplayName string `json:"display_name" default:"Address UUID"`
+	} `json:"address_uuid"`
+	Model struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Min         int    `json:"min" default:"4"`
+		Max         int    `json:"max" default:"6"`
+		DisplayName string `json:"display_name" default:"THLM"`
+	} `json:"model"`
+	Enable EnableStruct `json:"enable"`
 }
 
 type Point struct {

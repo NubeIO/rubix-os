@@ -380,9 +380,10 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 		log.Debug("UpdatePointValue() - *scaleOutMax:", *scaleOutMax)
 	}
 	presentValue = pointScale(presentValue, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax)
-	log.Debug("UpdatePointValue() - presentValue2: ", *presentValue)
+	if presentValue != nil {
+		log.Debug("UpdatePointValue() - presentValue2: ", *presentValue)
+	}
 	presentValue = pointRange(presentValue, limitMin, limitMax)
-	log.Debug("UpdatePointValue() - presentValue3: ", *presentValue)
 	eval, err := pointEval(presentValue, body.OriginalValue, pointModel.EvalMode, pointModel.Eval)
 	if err != nil {
 		log.Errorf("ERROR on point invalid point unit")
