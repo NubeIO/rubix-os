@@ -1,0 +1,53 @@
+{
+  "schedules": {
+    "events": {
+      "59201e03": {
+        "name": "HVAC",
+        "dates": [
+          {
+            "start": "2022-02-04T07:00",
+            "end": "2022-02-05T15:00"
+          }
+        ],
+        "value": 20,
+        "color": "#d0021b"
+      }
+    },
+    "weekly": {
+      "919d7b4c": {
+        "name": "HVAC",
+        "days": [
+          "monday",
+          "tuesday",
+          "wednesday",
+          "thursday",
+          "friday"
+        ],
+        "start": "09:30",
+        "end": "13:00",
+        "value": 20,
+        "color": "#4a90e2"
+      }
+    },
+    "exceptions": {
+      "34501ab2": {
+        "name": "HVAC",
+        "dates": [
+          {
+            "start": "2022-12-25T00:00",
+            "end": "2022-12-26T00:00"
+          }
+        ],
+        "value": 20,
+        "color": "#d0021b"
+      }
+    }
+  },
+  "config": {
+    "names": [
+      "HVAC",
+      "FANS"
+    ],
+    "timezone": "Australia/Sydney"
+  }
+}

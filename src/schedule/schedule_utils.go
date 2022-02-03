@@ -7,11 +7,21 @@ import (
 	"reflect"
 )
 
+type SchJSON struct {
+	Schedules SchTypes  `json:"schedules"`
+	Config    SchConfig `json:"config"`
+}
+
 type SchTypes struct {
 	Weekly     TypeWeekly `json:"weekly"`
 	Events     TypeEvents `json:"events"`
 	Exceptions TypeEvents `json:"exceptions"`
-	Config     TypeConfig `json:"config"`
+	Config     SchConfig  `json:"config"`
+}
+
+type SchConfig struct {
+	ScheduleNames []string `json:"names"`
+	TimeZone      string   `json:"timezone"`
 }
 
 type TypeWeekly map[string]WeeklyScheduleEntry
@@ -27,10 +37,6 @@ type WeeklyScheduleEntry struct {
 	//Timezone string  `json:"timezone"`
 	Value  float64 `json:"value"`
 	Colour string  `json:"color"`
-}
-
-type TypeConfig struct {
-	Names
 }
 
 type EventScheduleEntry struct {
@@ -99,14 +105,14 @@ func (schedule ScheduleCheckerResult) CheckIfEmpty() bool {
 	return schedule.PeriodStart == 0 && schedule.PeriodStop == 0 && schedule.NextStart == 0 && schedule.NextStop == 0
 }
 
-func DecodeSchedule(schedules datatypes.JSON) (SchTypes, error) {
-	var AllSchedules SchTypes
-	err := json.Unmarshal(schedules, &AllSchedules)
+func DecodeSchedule(scheduleJsonInput datatypes.JSON) (SchJSON, error) {
+	var ScheduleJSON SchJSON
+	err := json.Unmarshal(scheduleJsonInput, &ScheduleJSON)
 	if err != nil {
 		//log.Println("Unexpected error parsing json")
-		return SchTypes{}, err
+		return SchJSON{}, err
 	}
-	return AllSchedules, nil
+	return ScheduleJSON, nil
 }
 
 //CombineScheduleCheckerResults Combines 2 ScheduleCheckerResults into a single ScheduleCheckerResult, calculating PeriodStart, and PeriodStop times of the combined ScheduleCheckerResult.

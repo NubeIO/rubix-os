@@ -3,17 +3,11 @@ package schedule
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/src/utilstime"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 	"time"
 )
-
-//CheckWeeklyScheduleEntryWithEntryTimezone checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period ignores entry.Timezone and uses Local timezone.
-func CheckWeeklyScheduleEntryWithEntryTimezone(entry WeeklyScheduleEntry) ScheduleCheckerResult {
-	return CheckWeeklyScheduleEntry(entry, entry.Timezone)
-}
 
 //CheckWeeklyScheduleEntry checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period.
 func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) ScheduleCheckerResult {
@@ -107,7 +101,7 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) S
 }
 
 //CheckWeeklyScheduleCollection checks if there is a WeeklyScheduleEntry in the provided WeeklyScheduleCollection that matches the specified schedule Name and is currently within the scheduled period.
-func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) ScheduleCheckerResult {
+func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName, timezone string) ScheduleCheckerResult {
 	finalResult := ScheduleCheckerResult{}
 	var singleResult ScheduleCheckerResult
 	count := 0
@@ -116,18 +110,7 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) 
 		if scheduleName == "ANY" || scheduleName == "ALL" || scheduleEntry.Name == scheduleName {
 			scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
 			//fmt.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
-			if scheduleEntry.Timezone == "" { // If timezone field is not assigned, get timezone from System Time
-				systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
-				//fmt.Println("systemTimezone 2: ", systemTimezone)
-				if systemTimezone == "" {
-					zone, _ := utilstime.GetHardwareTZ()
-					scheduleEntry.Timezone = zone
-				} else {
-					scheduleEntry.Timezone = systemTimezone
-				}
-			}
-			//singleResult = CheckWeeklyScheduleEntry(scheduleEntry, "Australia/Sydney")
-			singleResult = CheckWeeklyScheduleEntryWithEntryTimezone(scheduleEntry)
+			singleResult = CheckWeeklyScheduleEntry(scheduleEntry, timezone)
 			singleResult.Name = scheduleName
 			//fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)
 			if count == 0 {
@@ -222,7 +205,7 @@ func GetNextStartStop(weeklyResultObj ScheduleCheckerResult) (nextStart int64, n
 }
 
 //WeeklyCheck checks all Weekly Schedules in the payload for active periods. It returns a combined ScheduleCheckerResult of all Weekly Schedules.
-func WeeklyCheck(weekly TypeWeekly, scheduleName string) (ScheduleCheckerResult, error) {
-	results := CheckWeeklyScheduleCollection(weekly, scheduleName)
+func WeeklyCheck(weekly TypeWeekly, scheduleName, timezone string) (ScheduleCheckerResult, error) {
+	results := CheckWeeklyScheduleCollection(weekly, scheduleName, timezone)
 	return results, nil
 }

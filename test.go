@@ -14,6 +14,6 @@ func main() {
 	}
 	fmt.Println(tz, err)
 
-	//schedule.ScheduleTest()
-	schedule.ModbusScheduleTest()
+	schedule.ScheduleTest()
+	//schedule.ModbusScheduleTest()
 }

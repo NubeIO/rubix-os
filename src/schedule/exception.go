@@ -7,9 +7,9 @@ import (
 //TODO: Known Issue 1) If exception event has passed, it will not be included in the exception ScheduleCheckerResults, and therefore if a schedule period start was before the exception period, the final result will not show the correct PeriodStart
 
 //ExceptionCheck checks all Exception Schedules in the payload for active periods. It returns a combined ScheduleCheckerResult of all Exception Schedules.
-func ExceptionCheck(exceptions TypeEvents, scheduleName string) (ScheduleCheckerResult, error) {
+func ExceptionCheck(exceptions TypeEvents, scheduleName, timezone string) (ScheduleCheckerResult, error) {
 	//treat Exception schedules as Event schedules until the final step.
-	results := CheckEventScheduleCollection(exceptions, scheduleName)
+	results := CheckEventScheduleCollection(exceptions, scheduleName, timezone)
 
 	//once the ScheduleCheckerResult has been computed (as an Event type schedule) then set the IsException flag.  This result should later be combined with Event and Weekly schedules.
 	results.IsException = true
@@ -51,7 +51,7 @@ func ApplyExceptionSchedule(current ScheduleCheckerResult, exception ScheduleChe
 
 	//Name
 	if current.Name != exception.Name {
-		result.Name = "ANY"
+		result.Name = "ANY" //If "ANY" or "ALL" was used as a schedule-name-to-check-for, then the names may not match.
 	} else {
 		result.Name = current.Name
 	}
