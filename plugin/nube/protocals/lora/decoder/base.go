@@ -14,8 +14,16 @@ type CommonValues struct {
 }
 
 func getDeviceDescriptionFromPayload(data string) *LoRaDeviceDescription {
-	sensorCode := data[2:4]
-	return GetLoRaDeviceDescription(sensorCode)
+	if data == "!" {
+		return nil
+	}
+	if len(data) >= 2 {
+		sensorCode := data[2:4]
+		return GetLoRaDeviceDescription(sensorCode)
+	} else {
+		return nil
+	}
+
 }
 
 func checkPayloadLength(data string, dev *LoRaDeviceDescription) bool {
@@ -54,7 +62,9 @@ func decodeCommonValues(payload *CommonValues, data string, sensor string) {
 }
 
 func decodeID(data string) string {
-	return data[0:8]
+	id := data[0:8]
+	log.Println(id)
+	return id
 }
 
 func decodeRSSI(data string) int {
