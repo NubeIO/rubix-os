@@ -11,7 +11,7 @@ import (
 )
 
 func (i *Instance) BusServ() {
-	handlerCreated := bus.Handler{
+	handlerCreated := bus.Handler{ //CREATED
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				//try and match is network
@@ -64,7 +64,7 @@ func (i *Instance) BusServ() {
 	u, _ := utils.MakeUUID()
 	key := fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerCreated)
-	handlerUpdated := bus.Handler{
+	handlerUpdated := bus.Handler{ //UPDATED
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				//try and match is network
@@ -98,7 +98,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if pnt != nil {
-					//_, err = i.pointPatch(pnt)
+					_, err = i.pointPatch(pnt)
 					log.Info("BACNET BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return
@@ -112,7 +112,7 @@ func (i *Instance) BusServ() {
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerUpdated)
-	handlerDeleted := bus.Handler{
+	handlerDeleted := bus.Handler{ //DELETED
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				log.Info("BACNET BUS DELETED NEW MSG", " ", e.Topic)
@@ -162,7 +162,7 @@ func (i *Instance) BusServ() {
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerDeleted)
-	handlerMQTT := bus.Handler{
+	handlerMQTT := bus.Handler{ //MQTT UPDATE (got as msg over from bacnet stack)
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				p, _ := e.Data.(mqtt.Message)

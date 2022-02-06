@@ -6,7 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/mqttclient"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"log"
+	log "github.com/sirupsen/logrus"
 )
 
 func publishMQTT(sensorStruct model.ProducerBody) {
@@ -15,22 +15,22 @@ func publishMQTT(sensorStruct model.ProducerBody) {
 	})
 	err := a.Connect()
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	topic := fmt.Sprintf("rubix/%s", sensorStruct.ProducerUUID)
 	data, err := json.Marshal(sensorStruct)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 	err = a.Publish(topic, mqttclient.AtMostOnce, false, string(data))
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
 	}
 }
 
 //used for getting data into the plugins
 var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-	log.Println(msg.Topic(), " ", "NEW MQTT MES")
+	log.Println("NEW MQTT MES", msg.Topic(), " ", string(msg.Payload()))
 	GetService().RegisterTopic(MQTTUpdated)
 	err := GetService().Emit(CTX(), MQTTUpdated, msg)
 	if err != nil {
