@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"math/rand"
 
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/utils"
@@ -33,12 +34,16 @@ func (i *Instance) wizard() (string, error) {
 		return "", errors.New("failed to create a new device")
 	}
 
+	min := 1
+	max := 1000
+	a := rand.Intn(max-min) + min
+
 	var pnt model.Point
 	pnt.DeviceUUID = device.UUID
 	pName := utils.NameIsNil()
 	pnt.Name = pName
 	pnt.Description = pName
-	pnt.AddressID = utils.NewInt(1)
+	pnt.AddressID = utils.NewInt(a)
 	pnt.ObjectType = "analogValue"
 	pnt.COV = utils.NewFloat64(0.5)
 	pnt.Fallback = utils.NewFloat64(1)

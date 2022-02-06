@@ -26,6 +26,13 @@ const (
 	ObjTypeBinaryInput  ObjectType = "binary_input"
 	ObjTypeBinaryOutput ObjectType = "binary_output"
 	ObjTypeBinaryValue  ObjectType = "binary_value"
+	ObjAnalogInput      ObjectType = "analogInput"
+	ObjAnalogOutput     ObjectType = "analogOutput"
+	ObjAnalogValue      ObjectType = "analogValue"
+	ObjBinaryInput      ObjectType = "binaryInput"
+	ObjBinaryOutput     ObjectType = "binaryOutput"
+	ObjBinaryValue      ObjectType = "binaryValue"
+
 	//modbus
 	ObjTypeReadCoil           ObjectType = "read_coil"
 	ObjTypeReadCoils          ObjectType = "read_coils"
@@ -52,8 +59,11 @@ const (
 )
 
 var ObjectTypesMap = map[ObjectType]int8{
-	ObjTypeAnalogInput: 0, ObjTypeAnalogOutput: 0, ObjTypeAnalogValue: 2,
+	//bacnet
+	ObjTypeAnalogInput: 0, ObjTypeAnalogOutput: 0, ObjTypeAnalogValue: 0,
 	ObjTypeBinaryInput: 0, ObjTypeBinaryOutput: 0, ObjTypeBinaryValue: 0,
+	ObjAnalogInput: 0, ObjAnalogOutput: 0, ObjAnalogValue: 0,
+	ObjBinaryInput: 0, ObjBinaryOutput: 0, ObjBinaryValue: 0,
 	//modbus
 	ObjTypeReadCoil: 0, ObjTypeReadCoils: 0, ObjTypeReadDiscreteInput: 0,
 	ObjTypeReadDiscreteInputs: 0, ObjTypeWriteCoil: 0, ObjTypeWriteCoils: 0,

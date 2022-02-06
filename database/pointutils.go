@@ -48,6 +48,9 @@ func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Poin
 }
 
 func pointUnits(pointModel *model.Point) (value float64, ok bool, err error) {
+	if pointModel.Unit == "noUnits" {
+		return 0, false, nil
+	}
 	if pointModel.Unit != "" {
 		_, res, err := unit.Process(*pointModel.PresentValue, pointModel.Unit, pointModel.UnitTo)
 		if err != nil {

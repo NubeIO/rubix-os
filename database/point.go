@@ -386,7 +386,7 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 	presentValue = pointRange(presentValue, limitMin, limitMax)
 	eval, err := pointEval(presentValue, body.OriginalValue, pointModel.EvalMode, pointModel.Eval)
 	if err != nil {
-		log.Errorf("ERROR on point invalid point unit")
+		log.Errorf("ERROR on point invalid point pointEval")
 		return nil, err
 	} else {
 		pointModel.PresentValue = eval

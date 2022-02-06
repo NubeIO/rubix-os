@@ -6,10 +6,13 @@ GREEN="\033[32m"
 RED="\033[31m"
 
 PRODUCTION=false
-SYSTEM=true
+SYSTEM=false
 EDGE28=false
 MODBUS=false
 LORA=false
+BACNET=false
+BROKER=false
+LORAWAN=false
 
 help() {
     echo "Service commands:"
@@ -37,6 +40,15 @@ parseCommand() {
           ;;
         --lora)
             LORA=true
+          ;;
+        --bacnet)
+            BACNET=true
+          ;;
+        --broker)
+            BROKER=true
+          ;;
+        --lorawan)
+            LORAWAN=true
           ;;
         *)
             echo -e "${RED}Unknown options ${i}  (-h, --help for help)${DEFAULT}"
@@ -82,6 +94,21 @@ if [ ${LORA} == true ]; then
     cd $dir/plugin/nube/protocals/lora
     go build -buildmode=plugin -o lora.so *.go  && cp lora.so $pluginDir
     echo -e "${GREEN}BUILD LORA"
+fi
+if [ ${BACNET} == true ]; then
+    cd $dir/plugin/nube/protocals/bacnetserver
+    go build -buildmode=plugin -o bacnetserver.so *.go  && cp bacnetserver.so $pluginDir
+    echo -e "${GREEN}BUILD BACNET"
+fi
+if [ ${BROKER} == true ]; then
+    cd $dir/plugin/nube/protocals/broker
+    go build -buildmode=plugin -o broker.so *.go  && cp broker.so $pluginDir
+    echo -e "${GREEN}BUILD BROKER"
+fi
+if [ ${LORAWAN} == true ]; then
+    cd $dir/plugin/nube/protocals/lorawan
+    go build -buildmode=plugin -o lorawan.so *.go  && cp lorawan.so $pluginDir
+    echo -e "${GREEN}BUILD LORAWAN"
 fi
 
 
