@@ -13,6 +13,7 @@ LORA=false
 BACNET=false
 BROKER=false
 LORAWAN=false
+BACNET_MASTER=false
 
 help() {
     echo "Service commands:"
@@ -49,6 +50,9 @@ parseCommand() {
           ;;
         --lorawan)
             LORAWAN=true
+          ;;
+        --bacnet-master)
+            BACNET_MASTER=true
           ;;
         *)
             echo -e "${RED}Unknown options ${i}  (-h, --help for help)${DEFAULT}"
@@ -109,6 +113,11 @@ if [ ${LORAWAN} == true ]; then
     cd $dir/plugin/nube/protocals/lorawan
     go build -buildmode=plugin -o lorawan.so *.go  && cp lorawan.so $pluginDir
     echo -e "${GREEN}BUILD LORAWAN"
+fi
+if [ ${BACNET_MASTER} == true ]; then
+    cd $dir/plugin/nube/protocals/bacnetmaster
+    go build -buildmode=plugin -o bacnetmaster.so *.go  && cp bacnetmaster.so $pluginDir
+    echo -e "${GREEN}BUILD BACNET_MASTER"
 fi
 
 
