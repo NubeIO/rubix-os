@@ -22,21 +22,23 @@ func (i *Instance) run() {
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on DecodeSchedule %v\n", err)
 	}
-	schUUID := class.CurrentWriterUUID
-	log.Printf("system-plugin-schedule: sch %v\n", class)
 
-	getSch, err := i.db.GetSchedule(schUUID)
+	writer, err := i.db.GetWriter(class.CurrentWriterUUID)
+	if err != nil {
+		log.Errorf("system-plugin-schedule: issue on GetWriter %v\n", err)
+	}
+	log.Printf("system-plugin-schedule: sch %v\n", class)
+	getSch, err := i.db.GetSchedule(writer.UUID)
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on GetSchedule %v\n", err)
 	}
 
-	//scheduleNameToCheck :=  //TODO: we need a way to specify the schedule name that is being checked for.
-	scheduleNameToCheck := "ALL"
+	scheduleNameToCheck := "ALL" //TODO: we need a way to specify the schedule name that is being checked for.
 
 	timezone := ScheduleJSON.Config.TimeZone
 	_, err = time.LoadLocation(timezone)
 	if err != nil || timezone == "" { // If timezone field is not assigned or invalid, get timezone from System Time
-		log.Error("CheckWeeklyScheduleCollection(): invalid schedule timezone. checking with system time.")
+		log.Error("system-plugin-schedule: CheckWeeklyScheduleCollection(): invalid schedule timezone. checking with system time.")
 		systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
 		//fmt.Println("systemTimezone 2: ", systemTimezone)
 		if systemTimezone == "" {
@@ -65,15 +67,14 @@ func (i *Instance) run() {
 		log.Errorf("system-plugin-schedule: issue on ExceptionCheck %v\n", err)
 	}
 	if exceptionResult.CheckIfEmpty() {
-		log.Println("Exception schedule is empty")
+		log.Println("system-plugin-schedule: Exception schedule is empty")
 	}
 
 	finalResult, err := schedule.ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult) //This applies the exception schedule to mask the combined weekly and event schedules.
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on ApplyExceptionSchedule %v\n", err)
 	}
-	log.Println("finalResult")
-	log.Printf("%+v\n", finalResult.IsActive)
+	log.Printf("system-plugin-schedule: finalResult: %+v\n", finalResult.IsActive)
 	i.store.Set(finalResult.Name, finalResult, -1)
 	s := new(model.Schedule)
 	if finalResult.IsActive {
