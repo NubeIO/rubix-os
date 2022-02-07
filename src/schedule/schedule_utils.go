@@ -15,7 +15,7 @@ type SchJSON struct {
 type SchTypes struct {
 	Weekly     TypeWeekly `json:"weekly"`
 	Events     TypeEvents `json:"events"`
-	Exceptions TypeEvents `json:"exceptions"`
+	Exceptions TypeEvents `json:"exception"`
 	Config     SchConfig  `json:"config"`
 }
 
