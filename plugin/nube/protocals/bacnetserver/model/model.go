@@ -92,6 +92,17 @@ type Device struct {
 type Point struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
+	ObjectType  struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"true"`
+		Options  []string `json:"options" default:"[\"analogValue\",\"analogOutput\"]"`
+		Default  string   `json:"default" default:"analogValue"`
+	} `json:"object_type"`
+	AddressID struct {
+		Type     string `json:"type" default:"int"`
+		Required bool   `json:"required" default:"true"`
+		Default  int    `json:"default" default:"1"`
+	} `json:"address_id"`
 }
 
 func GetNetworkSchema() *Network {
