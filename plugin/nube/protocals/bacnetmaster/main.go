@@ -8,9 +8,9 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
 )
 
-const path = "bacnetserver" //must be unique across all plugins
-const name = "bacnetserver" //must be unique across all plugins
-const description = "bacnet server api to nube bacnet stack"
+const path = "bacnetmaster" //must be unique across all plugins
+const name = "bacnetmaster" //must be unique across all plugins
+const description = "bacnet master api to nube bacnet stack"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"

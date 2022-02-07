@@ -1,6 +1,8 @@
 package mqttclient
 
-import "fmt"
+import (
+	log "github.com/sirupsen/logrus"
+)
 
 var m *Client
 
@@ -11,10 +13,10 @@ func InternalMQTT(ip string) (bool, error) {
 		Servers: []string{ip},
 	})
 	if err != nil {
-		fmt.Println(err, "CONNECT to broker")
+		log.Println(err, "CONNECT to broker")
 		return false, err
 	}
-	fmt.Println(err, "CONNECT to broker")
+	log.Println(err, "CONNECT to broker")
 	m = c
 	err = c.Connect()
 	if err != nil {

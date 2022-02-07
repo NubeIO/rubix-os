@@ -11,26 +11,40 @@ import (
 	"github.com/PaesslerAG/gval"
 )
 
-func (d *GormDatabase) pointNameExists(pnt *model.Point, body *model.Point) bool {
+func (d *GormDatabase) pointNameExists(body *model.Point) (nameExist, addressIDExist bool) {
 	var arg api.Args
 	arg.WithPoints = true
-	device, err := d.GetDevice(pnt.DeviceUUID, arg)
+	device, err := d.GetDevice(body.DeviceUUID, arg)
 	if err != nil {
-		return false
+		return false, false
 	}
-	if pnt.UUID == "" && body.UUID == "" {
-		return false
-	}
-	for _, p := range device.Points {
-		if p.Name == body.Name {
-			if p.UUID == pnt.UUID {
-				return false
+
+	nameExist = false
+	addressIDExist = false
+
+	for _, pnt := range device.Points {
+		if pnt.Name == body.Name {
+			if pnt.UUID == body.UUID {
+				nameExist = false
 			} else {
-				return true
+				nameExist = true
 			}
 		}
 	}
-	return false
+
+	//check body with existing devices that a point with the same objectType do not have the same addrID
+	for _, pnt := range device.Points {
+		if pnt.ObjectType == body.ObjectType {
+			if utils.IntIsNil(pnt.AddressID) == utils.IntIsNil(body.AddressID) {
+				if pnt.UUID == body.UUID {
+					addressIDExist = false
+				} else {
+					addressIDExist = true
+				}
+			}
+		}
+	}
+	return nameExist, addressIDExist
 }
 
 // PointDeviceByAddressID will query by device_uuid = ? AND object_type = ? AND address_id = ?
@@ -48,6 +62,9 @@ func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Poin
 }
 
 func pointUnits(pointModel *model.Point) (value float64, ok bool, err error) {
+	if pointModel.Unit == "noUnits" {
+		return 0, false, nil
+	}
 	if pointModel.Unit != "" {
 		_, res, err := unit.Process(*pointModel.PresentValue, pointModel.Unit, pointModel.UnitTo)
 		if err != nil {
