@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/src/schedule"
 	"github.com/NubeIO/flow-framework/src/utilstime"
@@ -28,7 +27,7 @@ func (i *Instance) run() {
 		log.Errorf("system-plugin-schedule: issue on GetWriter %v\n", err)
 	}
 	log.Printf("system-plugin-schedule: sch %v\n", class)
-	getSch, err := i.db.GetSchedule(writer.UUID)
+	getSch, err := i.db.GetSchedule(writer.WriterThingUUID)
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on GetSchedule %v\n", err)
 	}
@@ -74,16 +73,17 @@ func (i *Instance) run() {
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on ApplyExceptionSchedule %v\n", err)
 	}
+
 	log.Printf("system-plugin-schedule: finalResult: %+v\n", finalResult.IsActive)
-	i.store.Set(finalResult.Name, finalResult, -1)
-	s := new(model.Schedule)
-	if finalResult.IsActive {
-		s.IsActive = utils.NewTrue()
-	} else {
-		s.IsActive = utils.NewFalse()
-	}
+
 	if getSch != nil {
-		fmt.Println(utils.IsTrue(s.IsActive), utils.IsTrue(getSch.IsActive))
+		i.store.Set(getSch.Name, finalResult, -1)
+		s := new(model.Schedule)
+		if finalResult.IsActive {
+			s.IsActive = utils.NewTrue()
+		} else {
+			s.IsActive = utils.NewFalse()
+		}
 		if utils.IsTrue(s.IsActive) != utils.IsTrue(getSch.IsActive) {
 			log.Printf("system-plugin-schedule: UPDATE SCHEDULE IN DB %v\n", getSch.Name)
 			_, err = i.db.UpdateSchedule(getSch.UUID, s)
