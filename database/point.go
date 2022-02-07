@@ -116,12 +116,15 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	deviceUUID := body.DeviceUUID
 	body.Name = nameIsNil(body.Name)
-	existing := d.pointNameExists(body, body)
-	if existing {
+	existingName, existingAddrID := d.pointNameExists(body)
+	if existingName {
 		eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
 		return nil, errors.New(eMsg)
 	}
-
+	if existingAddrID {
+		eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", utils.IntIsNil(body.AddressID))
+		return nil, errors.New(eMsg)
+	}
 	obj, err := checkObjectType(body.ObjectType)
 	if err != nil {
 		return nil, err
@@ -181,12 +184,14 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if body.Name != "" {
-		existing := d.pointNameExists(pointModel, body)
-		if existing {
-			eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
-			return nil, errors.New(eMsg)
-		}
+	existingName, existingAddrID := d.pointNameExists(body)
+	if existingName {
+		eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
+		return nil, errors.New(eMsg)
+	}
+	if existingAddrID {
+		eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", utils.IntIsNil(body.AddressID))
+		return nil, errors.New(eMsg)
 	}
 	if len(body.Tags) > 0 {
 		if err := d.updateTags(&pointModel, body.Tags); err != nil {
