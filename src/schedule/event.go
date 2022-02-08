@@ -62,6 +62,7 @@ func CheckEventScheduleEntry(entry EventScheduleEntry, timezone string) (Schedul
 			}
 		}
 	}
+	AddHumanReadableDatetimes(&result)
 	return result, nil
 }
 
@@ -85,6 +86,7 @@ func CheckEventScheduleCollection(scheduleMap TypeEvents, scheduleName, timezone
 			}
 		}
 	}
+	AddHumanReadableDatetimes(&finalResult)
 	return finalResult
 }
 

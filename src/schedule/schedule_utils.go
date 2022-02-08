@@ -5,6 +5,7 @@ import (
 	"errors"
 	"gorm.io/datatypes"
 	"reflect"
+	"time"
 )
 
 type SchJSON struct {
@@ -77,18 +78,37 @@ var DaysMap = map[string]DaysOfTheWeek{
 //The `Period` is the first scheduled period, and the `Next` is the following scheduled period; these 2 periods cannot overlap.
 //If ScheduleCheckerResults are combined and their scheduled periods overlap, they will be combined and the unnecessary timestamps dropped.
 type ScheduleCheckerResult struct {
-	Name         string   `json:"name"`
-	IsActive     bool     `json:"is_active"`
-	Payload      float64  `json:"payload"`
-	PeriodStart  int64    `json:"period_start"` //unix timestamp in seconds
-	PeriodStop   int64    `json:"period_stop"`  //unix timestamp in seconds
-	NextStart    int64    `json:"next_start"`   //unix timestamp in seconds.  Start time for the following scheduled period.
-	NextStop     int64    `json:"next_stop"`    //unix timestamp in seconds   End time for the following scheduled period.
-	CheckTime    int64    `json:"check_time"`   //unix timestamp in seconds
-	ErrorFlag    bool     `json:"error_flag"`
-	AlertFlag    bool     `json:"alert_flag"`
-	IsException  bool     `json:"is_exception"`
-	ErrorStrings []string `json:"error_strings"`
+	Name              string   `json:"name"`
+	IsActive          bool     `json:"is_active"`
+	Payload           float64  `json:"payload"`
+	PeriodStart       int64    `json:"period_start"`        //unix timestamp in seconds
+	PeriodStartString string   `json:"period_start_string"` //human readable timestamp
+	PeriodStop        int64    `json:"period_stop"`         //unix timestamp in seconds
+	PeriodStopString  string   `json:"period_stop_string"`  //human readable timestamp
+	NextStart         int64    `json:"next_start"`          //unix timestamp in seconds.  Start time for the following scheduled period.
+	NextStartString   string   `json:"next_start_string"`   //human readable timestamp
+	NextStop          int64    `json:"next_stop"`           //unix timestamp in seconds   End time for the following scheduled period.
+	NextStopString    string   `json:"next_stop_string"`    //human readable timestamp
+	CheckTime         int64    `json:"check_time"`          //unix timestamp in seconds
+	CheckTimeString   string   `json:"check_time_string"`   //human readable timestamp
+	ErrorFlag         bool     `json:"error_flag"`
+	AlertFlag         bool     `json:"alert_flag"`
+	IsException       bool     `json:"is_exception"`
+	ErrorStrings      []string `json:"error_strings"`
+}
+
+func AddHumanReadableDatetimes(existing *ScheduleCheckerResult) {
+	existing.ErrorStrings = make([]string, len(existing.ErrorStrings))
+	existing.PeriodStartString = ConvertToHumanDatetime(existing.PeriodStart)
+	existing.PeriodStopString = ConvertToHumanDatetime(existing.PeriodStop)
+	existing.NextStartString = ConvertToHumanDatetime(existing.NextStart)
+	existing.NextStopString = ConvertToHumanDatetime(existing.NextStop)
+	existing.CheckTimeString = ConvertToHumanDatetime(existing.CheckTime)
+}
+
+func ConvertToHumanDatetime(unixTime int64) string {
+	result := time.Unix(unixTime, int64(0)).String()
+	return result
 }
 
 func (existing ScheduleCheckerResult) CopyScheduleCheckerResult() ScheduleCheckerResult {
@@ -225,7 +245,7 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 		result.AlertFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Multiple Payload Values For Active Schedule Period")
 	}
-
+	AddHumanReadableDatetimes(&result)
 	return result, nil
 }
 

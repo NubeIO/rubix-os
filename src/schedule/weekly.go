@@ -96,7 +96,8 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) S
 		result.NextStart = startTimestamp.Add(nextDayDuration).Add(nextNextDayDuration).Unix()
 		result.NextStop = stopTimestamp.Add(nextDayDuration).Add(nextNextDayDuration).Unix()
 	}
-	//log.Println("CheckWeeklyScheduleEntry RETURN: ", result)
+	fmt.Println("CheckWeeklyScheduleEntry RETURN: ", result)
+	AddHumanReadableDatetimes(&result)
 	return result
 }
 
@@ -125,6 +126,7 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName, timezon
 			count++
 		}
 	}
+	AddHumanReadableDatetimes(&finalResult)
 	return finalResult
 }
 

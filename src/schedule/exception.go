@@ -118,6 +118,6 @@ func ApplyExceptionSchedule(current ScheduleCheckerResult, exception ScheduleChe
 	} else {
 		result.IsActive = false
 	}
-
+	AddHumanReadableDatetimes(&result)
 	return result, nil
 }
