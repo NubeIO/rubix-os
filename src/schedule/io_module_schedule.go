@@ -34,21 +34,49 @@ func ModbusScheduleTest() {
 	if err != nil {
 		log.Errorf("ReadFile %v\n", err)
 	}
-	decodeSchedule, err := DecodeSchedule(json)
-	log.Println("decodeSchedule: ", decodeSchedule)
+	ScheduleJSON, err := DecodeSchedule(json)
+	log.Println("decodeSchedule: ", ScheduleJSON)
 
 	scheduleNameToCheck := "HVAC" //TODO: we need a way to specify the schedule name that is being checked for.
 
-	modbusScheduleResult := ConvertScheduleJsonToModbusSchedule(decodeSchedule, scheduleNameToCheck, true)
+	timezone := ScheduleJSON.Config.TimeZone
+	_, err = time.LoadLocation(timezone)
+	if err != nil || timezone == "" { // If timezone field is not assigned or invalid, get timezone from System Time
+		log.Error("CheckWeeklyScheduleCollection(): invalid schedule timezone. checking with system time.")
+		systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
+		//fmt.Println("systemTimezone 2: ", systemTimezone)
+		if systemTimezone == "" {
+			zone, _ := utilstime.GetHardwareTZ()
+			timezone = zone
+		} else {
+			timezone = systemTimezone
+		}
+	}
+
+	modbusScheduleResult := ConvertScheduleJsonToModbusSchedule(ScheduleJSON.Schedules, scheduleNameToCheck, timezone, true)
 
 	fmt.Println("modbusScheduleResult")
 	fmt.Printf("%+v\n", modbusScheduleResult)
 
 }
 
-func ConvertScheduleJsonToModbusSchedule(scheduleJSON SchTypes, scheduleName string, includeEventSchedules bool) ScheduleCheckerModbusResult {
+func ConvertScheduleJsonToModbusSchedule(scheduleJSON SchTypes, scheduleName, timezone string, includeEventSchedules bool) ScheduleCheckerModbusResult {
+
+	_, err := time.LoadLocation(timezone)
+	if err != nil || timezone == "" { // If timezone field is not assigned or invalid, get timezone from System Time
+		log.Error("CheckWeeklyScheduleCollection(): invalid schedule timezone. checking with system time.")
+		systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
+		//fmt.Println("systemTimezone 2: ", systemTimezone)
+		if systemTimezone == "" {
+			zone, _ := utilstime.GetHardwareTZ()
+			timezone = zone
+		} else {
+			timezone = systemTimezone
+		}
+	}
+
 	// CONVERT WEEKLY SCHEDULES
-	result := GetWeeklyPeriodsFromWeeklyScheduleCollection(scheduleJSON.Weekly, scheduleName)
+	result := GetWeeklyPeriodsFromWeeklyScheduleCollection(scheduleJSON.Weekly, scheduleName, timezone)
 	/*
 		if err != nil {
 			log.Errorf("system-plugin-modbus-schedule: issue on GetWeeklyPeriodsFromWeeklyScheduleCollection %v\n", err)
@@ -61,7 +89,7 @@ func ConvertScheduleJsonToModbusSchedule(scheduleJSON SchTypes, scheduleName str
 	}
 
 	// CHECK EVENT SCHEDULES
-	eventResult, err := EventCheck(scheduleJSON.Events, scheduleName) //This will check for any active schedules with defined name.
+	eventResult, err := EventCheck(scheduleJSON.Events, scheduleName, timezone) //This will check for any active schedules with defined name.
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on EventCheck %v\n", err)
 	}
@@ -72,7 +100,7 @@ func ConvertScheduleJsonToModbusSchedule(scheduleJSON SchTypes, scheduleName str
 
 	// CHECK EXCEPTION SCHEDULES
 	//exceptionResult, err := schedule.ExceptionCheck(decodeSchedule.Exceptions, "ANY")  //This will check for any active schedules with any name
-	exceptionResult, err := ExceptionCheck(scheduleJSON.Exceptions, scheduleName) //This will check for any active schedules with defined name.
+	exceptionResult, err := ExceptionCheck(scheduleJSON.Exceptions, scheduleName, timezone) //This will check for any active schedules with defined name.
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on ExceptionCheck %v\n", err)
 	}
@@ -90,21 +118,27 @@ func ConvertScheduleJsonToModbusSchedule(scheduleJSON SchTypes, scheduleName str
 }
 
 //GetWeeklyPeriodsFromWeeklySchedule Converts a single WeeklyScheduleEntry into the scheduled periods to values to be sent via modbus.
-func GetWeeklyPeriodsFromWeeklySchedule(entry WeeklyScheduleEntry) ScheduleCheckerModbusResult {
+func GetWeeklyPeriodsFromWeeklySchedule(entry WeeklyScheduleEntry, timezone string) ScheduleCheckerModbusResult {
 	result := ScheduleCheckerModbusResult{}
 
 	//Get current time in schedule timezone or system timezone
-	if entry.Timezone == "" { // If timezone field is not assigned, get timezone from System Time
+	if timezone == "" { // If timezone field is not assigned, get timezone from System Time
 		systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
 		//fmt.Println("systemTimezone 2: ", systemTimezone)
 		if systemTimezone == "" {
 			zone, _ := utilstime.GetHardwareTZ()
-			entry.Timezone = zone
+			timezone = zone
 		} else {
-			entry.Timezone = systemTimezone
+			timezone = systemTimezone
 		}
 	}
-	location, _ := time.LoadLocation(entry.Timezone)
+
+	//get time.Location for entry timezone and check timezone
+	location, err := time.LoadLocation(timezone)
+	if err != nil {
+		result.AlertFlag = true
+		result.ErrorStrings = append(result.ErrorStrings, "Warning: Invalid Timezone on Modbus Schedules")
+	}
 	now := time.Now().In(location)
 	result.CheckTime = now.Unix()
 
@@ -178,7 +212,7 @@ func CombineScheduleCheckerWeeklyModbusResult(current, new ScheduleCheckerModbus
 }
 
 //GetWeeklyPeriodsFromWeeklyScheduleCollection checks if there is a WeeklyScheduleEntry in the provided WeeklyScheduleCollection that matches the specified schedule Name.  If so it will convert the scheduled periods to values to be sent via modbus.
-func GetWeeklyPeriodsFromWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName string) ScheduleCheckerModbusResult {
+func GetWeeklyPeriodsFromWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName, timezone string) ScheduleCheckerModbusResult {
 	finalResult := ScheduleCheckerModbusResult{}
 	var singleResult ScheduleCheckerModbusResult
 	count := 0
@@ -195,7 +229,7 @@ func GetWeeklyPeriodsFromWeeklyScheduleCollection(scheduleMap TypeWeekly, schedu
 			scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
 			//fmt.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
 
-			singleResult = GetWeeklyPeriodsFromWeeklySchedule(scheduleEntry)
+			singleResult = GetWeeklyPeriodsFromWeeklySchedule(scheduleEntry, timezone)
 			singleResult.Name = scheduleName
 
 			//fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)

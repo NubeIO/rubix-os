@@ -2,23 +2,39 @@ package schedule
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/src/utilstime"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
+	"strings"
+	"time"
 )
 
 func ScheduleTest() {
-	json, err := ioutil.ReadFile("/home/user/Documents/Nube/Flow_Framework/flow-framework/src/schedule/old/schTest4.json")
+	json, err := ioutil.ReadFile("/home/user/Documents/Nube/Flow_Framework/flow-framework/src/schedule/schTestNewJSON1.json")
 	if err != nil {
 		log.Errorf("ReadFile %v\n", err)
 	}
-	decodeSchedule, err := DecodeSchedule(json)
-	log.Println("decodeSchedule: ", decodeSchedule)
+	ScheduleJSON, err := DecodeSchedule(json)
+	log.Println("decodeSchedule: ", ScheduleJSON)
 
-	scheduleNameToCheck := "HVAC" //TODO: we need a way to specify the schedule name that is being checked for.
+	//scheduleNameToCheck :=  //TODO: we need a way to specify the schedule name that is being checked for.
+	scheduleNameToCheck := "HVAC"
 
-	// CHECK WEEKLY SCHEDULES
-	//result, err := schedule.WeeklyCheck(decodeSchedule.Weekly, "ANY")  //This will check for any active schedules with any name
-	weeklyResult, err := WeeklyCheck(decodeSchedule.Weekly, scheduleNameToCheck) //This will check for any active schedules with defined name.
+	timezone := ScheduleJSON.Config.TimeZone
+	_, err = time.LoadLocation(timezone)
+	if err != nil || timezone == "" { // If timezone field is not assigned or invalid, get timezone from System Time
+		log.Error("CheckWeeklyScheduleCollection(): invalid schedule timezone. checking with system time.")
+		systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
+		//fmt.Println("systemTimezone 2: ", systemTimezone)
+		if systemTimezone == "" {
+			zone, _ := utilstime.GetHardwareTZ()
+			timezone = zone
+		} else {
+			timezone = systemTimezone
+		}
+	}
+
+	weeklyResult, err := WeeklyCheck(ScheduleJSON.Schedules.Weekly, scheduleNameToCheck, timezone) //This will check for any active schedules with defined name.
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on WeeklyCheck %v\n", err)
 	}
@@ -27,7 +43,7 @@ func ScheduleTest() {
 
 	// CHECK EVENT SCHEDULES
 	//eventResult, err := schedule.EventCheck(decodeSchedule.Events, "ANY")  //This will check for any active schedules with any name
-	eventResult, err := EventCheck(decodeSchedule.Events, scheduleNameToCheck) //This will check for any active schedules with defined name.
+	eventResult, err := EventCheck(ScheduleJSON.Schedules.Events, scheduleNameToCheck, timezone) //This will check for any active schedules with defined name.
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on EventCheck %v\n", err)
 	}
@@ -41,7 +57,7 @@ func ScheduleTest() {
 
 	// CHECK EXCEPTION SCHEDULES
 	//exceptionResult, err := schedule.ExceptionCheck(decodeSchedule.Exceptions, "ANY")  //This will check for any active schedules with any name
-	exceptionResult, err := ExceptionCheck(decodeSchedule.Exceptions, scheduleNameToCheck) //This will check for any active schedules with defined name.
+	exceptionResult, err := ExceptionCheck(ScheduleJSON.Schedules.Exceptions, scheduleNameToCheck, timezone) //This will check for any active schedules with defined name.
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on ExceptionCheck %v\n", err)
 	}

@@ -14,6 +14,8 @@ func main() {
 	}
 	fmt.Println(tz, err)
 
-	//schedule.ScheduleTest()
-	schedule.ModbusScheduleTest()
+	schedule.ScheduleTest()
+
+	fmt.Println(schedule.ConvertToHumanDatetime(int64(1644359400)))
+	//schedule.ModbusScheduleTest()
 }
