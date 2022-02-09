@@ -515,10 +515,10 @@ var app = app || {};
         _renderBuffers: function() {
             // this is getting into the weeds of optimization, but the
             // state.dirty flag batches renders into 16.667ms frames so that we
-            // don't encounter a situation where our model fires renders faster
+            // don't encounter a situation where our bacnet_model fires renders faster
             // than 60fps.
             //
-            // for example: it's possible for model updates to occur much
+            // for example: it's possible for bacnet_model updates to occur much
             // faster than 60fps. in the case of a large import, or a single
             // event causing multiple renders, our CanvasGraphComponent may
             // receive events that are less than 16.667 apart. this can lock
@@ -531,7 +531,7 @@ var app = app || {};
             //
             // TODO: a potential optimization, to maybe save some battery and
             // ultimately the planet earth, would be to make it so that a
-            // model update triggers a span of time, like 60 frames, until
+            // bacnet_model update triggers a span of time, like 60 frames, until
             // requestAnimationFrame clears itself. each render would tick
             // down some of the "dirty time" until we reach  0, when we clear
             // requestAnimationFrame, effectively debouncing render events

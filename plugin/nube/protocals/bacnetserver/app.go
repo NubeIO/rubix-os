@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	baseModel "github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/mqttclient"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -17,15 +17,15 @@ import (
 
 //bacnetUpdate listen on mqtt and then update the point in flow-framework
 func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
-	payload := new(model.MqttPayload)
+	payload := new(bacnet_model.MqttPayload)
 	err := json.Unmarshal(body.Payload(), &payload)
 	t, _ := mqttclient.TopicParts(body.Topic())
 	const objectType = 10
 	top := t.Get(objectType)
 	tt := top.(string)
 	objType, addr := getPointAddr(tt)
-	var point baseModel.Point
-	var pri baseModel.Priority
+	var point model.Point
+	var pri model.Priority
 	pri.P16 = payload.Value
 	point.Priority = &pri
 	pnt, _ := i.db.PointAndQuery(objType, addr) //TODO check conversion if existing exists, as in the same addr
@@ -34,9 +34,9 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 		return nil, err
 	}
 	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = baseModel.MessageLevel.Info
-	point.CommonFault.MessageCode = baseModel.CommonFaultCode.Ok
-	point.CommonFault.Message = baseModel.CommonFaultMessage.NetworkMessage
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
+	point.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 	point.CommonFault.LastOk = time.Now().UTC()
 	if pnt == nil {
 		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
@@ -51,8 +51,8 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 }
 
 //addPoint from rest api
-func (i *Instance) addPoint(body *baseModel.Point) (*model.Point, error) {
-	var point model.BacnetPoint
+func (i *Instance) addPoint(body *model.Point) (*bacnet_model.Point, error) {
+	var point bacnet_model.BacnetPoint
 	point.ObjectName = body.Name
 	point.Enable = true
 	point.Description = body.Description
@@ -88,9 +88,9 @@ func (i *Instance) addPoint(body *baseModel.Point) (*model.Point, error) {
 }
 
 //pointPatch from rest
-func (i *Instance) pointPatch(body *baseModel.Point) (*model.Point, error) {
-	point := new(model.BacnetPoint)
-	point.Priority = new(baseModel.Priority)
+func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
+	point := new(bacnet_model.BacnetPoint)
+	point.Priority = new(model.Priority)
 	if (*body.Priority).P16 != nil {
 		(*point.Priority).P16 = (*body.Priority).P16
 	}
@@ -113,7 +113,7 @@ func (i *Instance) pointPatch(body *baseModel.Point) (*model.Point, error) {
 }
 
 //deletePoint point make sure
-func (i *Instance) deletePoint(body *baseModel.Point) (bool, error) {
+func (i *Instance) deletePoint(body *model.Point) (bool, error) {
 	rt.Method = nrest.DELETE
 	rt.Path = fmt.Sprintf("/api/bacnet/points/uuid/%s", body.AddressUUID)
 	_, _, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
@@ -125,7 +125,7 @@ func (i *Instance) deletePoint(body *baseModel.Point) (bool, error) {
 }
 
 //bacnetServerDeletePoint point make sure
-func (i *Instance) bacnetServerDeletePoint(body *model.BacnetPoint) (bool, error) {
+func (i *Instance) bacnetServerDeletePoint(body *bacnet_model.BacnetPoint) (bool, error) {
 	//cli := plgrest.NewNoAuth(ip, port)
 	//_, err := cli.DeletePoint(body.ObjectType, body.Address)
 	//if err != nil {

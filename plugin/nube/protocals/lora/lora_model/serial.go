@@ -1,4 +1,4 @@
-package model
+package lora_model
 
 import (
 	"github.com/NubeIO/flow-framework/plugin/defaults"
@@ -68,7 +68,7 @@ type Device struct {
 		Min         int    `json:"min" default:"4"`
 		Max         int    `json:"max" default:"6"`
 		DisplayName string `json:"display_name" default:"THLM"`
-	} `json:"model"`
+	} `json:"bacnet_model"`
 	Enable EnableStruct `json:"enable"`
 }
 

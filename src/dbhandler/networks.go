@@ -13,6 +13,14 @@ func (h *Handler) CreateNetwork(body *model.Network) (*model.Network, error) {
 	return q, nil
 }
 
+func (h *Handler) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
+	q, err := getDb().UpdateNetwork(uuid, body)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
 func (h *Handler) GetNetworkByPlugin(pluginUUID string, args api.Args) (*model.Network, error) {
 	q, err := getDb().GetNetworkByPlugin(pluginUUID, args)
 	if err != nil {

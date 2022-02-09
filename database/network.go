@@ -139,9 +139,14 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	} else {
 		return nil, errors.New("provide a plugin name ie: system, lora, modbus, lorawan, bacnet")
 	}
-
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
+	}
+	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, body.PluginConfId, body.UUID)
+	d.Bus.RegisterTopic(t)
+	err = d.Bus.Emit(eventbus.CTX(), t, body)
+	if err != nil {
+		return nil, errors.New("error on device eventbus")
 	}
 	return body, nil
 }

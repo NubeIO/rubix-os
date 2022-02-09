@@ -4,7 +4,7 @@ package model
 //
 // The Paging holds information about the limit and making requests to the next page.
 //
-// swagger:model Paging
+// swagger:bacnet_model Paging
 type Paging struct {
 	// The request url for the next page. Empty/Null when no next page is available.
 	Next string `json:"next,omitempty"`
@@ -20,7 +20,7 @@ type Paging struct {
 //
 // Wrapper for the paging and the messages
 //
-// swagger:model PagedMessages
+// swagger:bacnet_model PagedMessages
 type PagedMessages struct {
 	// The paging of the messages.
 	Paging Paging `json:"paging"`

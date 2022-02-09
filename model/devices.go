@@ -3,9 +3,9 @@ package model
 import "time"
 
 type CommonDevice struct {
-	Manufacture       string        `json:"manufacture,omitempty"` // nube
-	Model             string        `json:"model,omitempty"`       // thml
-	AddressId         int           `json:"address_id,omitempty"`  // for example a modbus address or bacnet address
+	Manufacture       string        `json:"manufacture,omitempty"`  // nube
+	Model             string        `json:"bacnet_model,omitempty"` // thml
+	AddressId         int           `json:"address_id,omitempty"`   // for example a modbus address or bacnet address
 	ZeroMode          *bool         `json:"zero_mode,omitempty"`
 	PollDelayPointsMS time.Duration `json:"poll_delay_points_ms"`
 	AddressUUID       string        `json:"address_uuid" gorm:"type:varchar(255)"` // AAB1213
