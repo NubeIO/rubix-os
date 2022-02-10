@@ -24,7 +24,7 @@ func (i *Instance) wizard(network *Network) (string, error) {
 		network.NetworkIp = _net.IP
 		network.NetworkMask = _net.NetMaskLength
 	} else {
-		net.NetworkIP = network.NetworkIp
+		net.IP = network.NetworkIp
 		net.Port = nums.NewInt(network.NetworkPort)
 		net.NetworkMask = nums.NewInt(network.NetworkMask)
 	}
@@ -39,11 +39,11 @@ func (i *Instance) wizard(network *Network) (string, error) {
 	dev.NetworkUUID = _network.UUID
 	dev.Name = "bacnet"
 
-	device, err := i.db.CreateDevice(&dev)
+	d, err := i.db.CreateDevice(&dev)
 	if err != nil {
 		return "", err
 	}
-	if device.UUID == "" {
+	if d.UUID == "" {
 		return "", errors.New("failed to create a new device")
 	}
 
@@ -52,7 +52,7 @@ func (i *Instance) wizard(network *Network) (string, error) {
 	a := rand.Intn(max-min) + min
 
 	var pnt model.Point
-	pnt.DeviceUUID = device.UUID
+	pnt.DeviceUUID = d.UUID
 	pName := utils.NameIsNil()
 	pnt.Name = pName
 	pnt.Description = pName

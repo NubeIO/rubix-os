@@ -20,7 +20,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if net != nil {
-					log.Info("BACNET-MASTER BUS PluginsUpdated IsPoint", " ", net.UUID)
+					log.Info("BACNET-MASTER BUS PluginsUpdated isNetwork", " ", net.UUID)
 					_, err = i.addNetwork(net)
 					log.Info("BACNET-MASTER BUS PluginsCreated isNetwork", " ", net.UUID)
 					if err != nil {
@@ -43,12 +43,11 @@ func (i *Instance) BusServ() {
 				}
 				//try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
-				fmt.Println("BACNET-MASTER ADD POINT ON BUS")
 				if err != nil {
 					return
 				}
 				if pnt != nil {
-					log.Info("BACNET-MASTER BUS PluginsCreated IsPoint", " ", dev.UUID)
+					log.Info("BACNET-MASTER BUS PluginsCreated IsPoint", " ", pnt.UUID)
 					_, err = i.addPoint(pnt)
 					if err != nil {
 						return

@@ -27,6 +27,7 @@ type Networks struct {
 }
 
 type Device struct {
+	DeviceUUID     string `json:"device_uuid"`
 	DeviceName     string `json:"device_name"`
 	DeviceIp       string `json:"device_ip"`
 	DeviceEnable   bool   `json:"device_enable"`
@@ -93,12 +94,16 @@ const (
 	wizard         = "/wizard"
 	ping           = "/ping"
 	pingBacnet     = "/api/system/ping"
-	point          = "/points"
-	pointBacnet    = "/api/bm/points"
+	point          = "/point"
+	pointBacnet    = "/api/bm/point"
+	points         = "/points"
+	pointsBacnet   = "/api/bm/points"
 	network        = "/network"
 	networkBacnet  = "/api/bm/network"
 	networks       = "/networks"
 	networksBacnet = "/api/bm/networks/true"
+	device         = "/device"
+	deviceBacnet   = "/api/bm/device"
 )
 
 func getBODYAddNetwork(ctx *gin.Context) (dto *Network, err error) {
@@ -140,9 +145,9 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			return
 		}
 	})
-	mux.GET(point, func(ctx *gin.Context) {
+	mux.GET(points, func(ctx *gin.Context) {
 		rt.Method = nrest.GET
-		rt.Path = pointBacnet
+		rt.Path = pointsBacnet
 		res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
 		if err != nil {
 			ctx.JSON(code, err)

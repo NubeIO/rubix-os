@@ -21,6 +21,14 @@ func (h *Handler) UpdateNetwork(uuid string, body *model.Network) (*model.Networ
 	return q, nil
 }
 
+func (h *Handler) GetNetwork(uuid string, args api.Args) (*model.Network, error) {
+	q, err := getDb().GetNetwork(uuid, args)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
 func (h *Handler) GetNetworkByPlugin(pluginUUID string, args api.Args) (*model.Network, error) {
 	q, err := getDb().GetNetworkByPlugin(pluginUUID, args)
 	if err != nil {
