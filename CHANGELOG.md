@@ -1,20 +1,15 @@
 # CHANGELOG
-## [v2.2.6](https://github.com/NubeIO/flow-framework/tree/v2.2.6) (2022-02-10)
+## [v0.3.0](https://github.com/NubeIO/flow-framework/tree/v0.3.0) (2022-02-10)
+- Add schedule writer POC
+- Add with_priority option on device query builder
 - Improvements on gorm migration #347
 - added bacnetmaster plugin #346
 - make sure if pnt is same the addrID is not same #345
 - clean up of bacnet-server #343
 - Update/schedule checker to new schedule json schema #342
-
-
-## [v0.2.5](https://github.com/NubeIO/flow-framework/tree/v0.2.5) (2022-02-01)
 - small fixes to modbus #337
 - Improvements on schedule #334
-
-## [v0.2.4](https://github.com/NubeIO/flow-framework/tree/v0.2.4) (2022-01-19)
 - Update to mqtt broker plugin
-
-## [v0.2.3](https://github.com/NubeIO/flow-framework/tree/v0.2.3) (2022-01-16)
 - Add schedule config
 - Sync schedules values on the producer side
 - Remove CreateWriterWizard
