@@ -87,6 +87,16 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	return scheduleModel, nil
 }
 
+func (d *GormDatabase) ScheduleWrite(uuid string, body *model.ScheduleData) error {
+	scheduleData, err := json.Marshal(body)
+	schedule := map[string]interface{}{}
+	schedule["schedule"] = scheduleData
+	if err != nil {
+		return err
+	}
+	return d.DB.Model(model.Schedule{}).Where("uuid = ?", uuid).Updates(schedule).Error
+}
+
 func (d *GormDatabase) DeleteSchedule(uuid string) (bool, error) {
 	var schModel *model.Schedule
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&schModel)

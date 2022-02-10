@@ -171,6 +171,7 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
+	args.WithPriority, _ = toBool(ctx.DefaultQuery(aType.WithPriority, aDefault.WithPriority))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	return args
