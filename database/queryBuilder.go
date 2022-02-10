@@ -151,6 +151,9 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	if args.WithTags {
 		query = query.Preload("Tags")
 	}
+	if args.WithPriority {
+		query = query.Preload("Points.Priority")
+	}
 	return query
 }
 
