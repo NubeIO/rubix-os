@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.3.1](https://github.com/NubeIO/flow-framework/tree/v0.3.1) (2022-02-10)
+- small bug fix to schedule small fix to stop sch crashing #351
+
 ## [v0.3.0](https://github.com/NubeIO/flow-framework/tree/v0.3.0) (2022-02-10)
 - Add schedule writer POC
 - Add with_priority option on device query builder
