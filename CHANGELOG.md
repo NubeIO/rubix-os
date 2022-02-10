@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.3.2](https://github.com/NubeIO/flow-framework/tree/v0.3.2) (2022-02-10)
+- small bug fix to schedule small fix to stop sch crashing #352
+
 ## [v0.3.1](https://github.com/NubeIO/flow-framework/tree/v0.3.1) (2022-02-10)
 - small bug fix to schedule small fix to stop sch crashing #351
 
