@@ -1,4 +1,12 @@
 # CHANGELOG
+## [v2.2.6](https://github.com/NubeIO/flow-framework/tree/v2.2.6) (2022-02-10)
+- Improvements on gorm migration #347
+- added bacnetmaster plugin #346
+- make sure if pnt is same the addrID is not same #345
+- clean up of bacnet-server #343
+- Update/schedule checker to new schedule json schema #342
+
+
 ## [v0.2.5](https://github.com/NubeIO/flow-framework/tree/v0.2.5) (2022-02-01)
 - small fixes to modbus #337
 - Improvements on schedule #334
