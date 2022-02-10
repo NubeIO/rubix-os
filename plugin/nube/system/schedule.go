@@ -13,23 +13,26 @@ import (
 func (i *Instance) run() {
 
 	class, err := i.db.GetLatestProducerHistoryByProducerName("HVAC")
-	if err != nil {
+	if err != nil || class == nil {
 		log.Errorf("system-plugin-schedule: issue on GetLatestProducerHistoryByProducerName %v\n", err)
 		return
 	}
 	ScheduleJSON, err := schedule.DecodeSchedule(class.DataStore)
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on DecodeSchedule %v\n", err)
+		return
 	}
 
 	writer, err := i.db.GetWriter(class.CurrentWriterUUID)
-	if err != nil {
+	if err != nil || writer == nil {
 		log.Errorf("system-plugin-schedule: issue on GetWriter %v\n", err)
+		return
 	}
 	log.Printf("system-plugin-schedule: sch %v\n", class)
 	getSch, err := i.db.GetSchedule(writer.WriterThingUUID)
-	if err != nil {
+	if err != nil || getSch == nil {
 		log.Errorf("system-plugin-schedule: issue on GetSchedule %v\n", err)
+		return
 	}
 
 	scheduleNameToCheck := "ALL" //TODO: we need a way to specify the schedule name that is being checked for.
