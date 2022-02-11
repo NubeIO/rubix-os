@@ -23,6 +23,7 @@ func (d *GormDatabase) SyncWriter(body *model.SyncWriter) (*model.WriterClone, e
 	}
 	writerClone.ProducerUUID = body.ProducerUUID
 	writerClone.SourceUUID = body.Writer.UUID
+	writerClone.FlowFrameworkUUID = body.FlowFrameworkUUID
 	var writerCloneModel []*model.WriterClone
 	if err = d.DB.Where("source_uuid = ? ", writerClone.SourceUUID).Find(&writerCloneModel).Error; err != nil {
 		return nil, err
@@ -39,4 +40,30 @@ func (d *GormDatabase) SyncWriter(body *model.SyncWriter) (*model.WriterClone, e
 		}
 	}
 	return &writerClone, nil
+}
+
+func (d *GormDatabase) SyncWriterCOV(body *model.SyncWriterCOV) error {
+	writer, err := d.GetWriter(body.WriterUUID)
+	if err != nil {
+		return err
+	}
+	if writer.WriterThingClass == model.ThingClass.Point {
+		err = d.updatePointFromCOV(writer.WriterThingUUID, body)
+	}
+	return err
+}
+
+func (d *GormDatabase) updatePointFromCOV(writerThingUUID string, body *model.SyncWriterCOV) error {
+	var pointModel *model.Point
+	priorityMap, _, _, _ := d.parsePriority(body.Priority)
+	query := d.DB.Where("uuid = ?", writerThingUUID).Preload("Priority").Find(&pointModel)
+	if query.Error != nil {
+		return query.Error
+	}
+	d.DB.Model(&pointModel.Priority).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMap)
+	pointModel.OriginalValue = body.OriginalValue
+	pointModel.PresentValue = body.PresentValue
+	pointModel.CurrentPriority = body.CurrentPriority
+	d.DB.Model(&pointModel).Updates(pointModel)
+	return nil
 }

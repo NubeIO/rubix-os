@@ -170,6 +170,9 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
 	query := d.DB
+	if args.ConsumerUUID != nil {
+		query = query.Where("consumer_uuid = ?", *args.ConsumerUUID)
+	}
 	if args.WriterThingClass != nil {
 		query = query.Where("writer_thing_class = ?", *args.WriterThingClass)
 	}
@@ -178,6 +181,9 @@ func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildWriterCloneQuery(args api.Args) *gorm.DB {
 	query := d.DB
+	if args.ProducerUUID != nil {
+		query = query.Where("producer_uuid = ?", *args.ProducerUUID)
+	}
 	if args.WriterThingClass != nil {
 		query = query.Where("writer_thing_class = ?", *args.WriterThingClass)
 	}

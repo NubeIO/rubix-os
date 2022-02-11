@@ -239,8 +239,9 @@ func (d *GormDatabase) syncAfterCreateUpdateWriter(body *model.Writer) {
 	fn, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
 	syncWriterBody := model.SyncWriter{
-		Writer:       *body,
-		ProducerUUID: consumer.ProducerUUID,
+		Writer:            *body,
+		ProducerUUID:      consumer.ProducerUUID,
+		FlowFrameworkUUID: fn.SourceUUID,
 	}
 	_, err := cli.SyncWriter(&syncWriterBody)
 	if err != nil {

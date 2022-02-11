@@ -113,12 +113,8 @@ func (d *GormDatabase) CreateBulkProducerHistory(histories []*model.ProducerHist
 }
 
 func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (bool, error) {
-	ph := new(model.ProducerHistory)
-	ph.ProducerUUID = history.ProducerUUID
-	ph.CurrentWriterUUID = history.CurrentWriterUUID
-	ph.DataStore = history.DataStore
-	ph.Timestamp = time.Now().UTC()
-	_, err := d.AppendProducerHistory(ph)
+	history.Timestamp = time.Now().UTC()
+	_, err := d.AppendProducerHistory(history)
 	if err != nil {
 		return false, err
 	}
@@ -126,7 +122,7 @@ func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (bo
 	if err := d.DB.Where("uuid = ?", history.ProducerUUID).Find(&producer).Error; err != nil {
 		return false, err
 	}
-	if err = d.DB.Model(producer).Update("current_writer_uuid", ph.CurrentWriterUUID).Error; err != nil {
+	if err = d.DB.Model(producer).Update("current_writer_uuid", history.CurrentWriterUUID).Error; err != nil {
 		return false, err
 	}
 	if producer.ProducerThingClass == model.ThingClass.Point {

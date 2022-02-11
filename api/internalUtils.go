@@ -34,8 +34,8 @@ type Args struct {
 	CompactWithName      string
 	FlowUUID             string
 	StreamUUID           *string
-	ProducerUUID         string
-	ConsumerUUID         string
+	ProducerUUID         *string
+	ConsumerUUID         *string
 	WriterUUID           string
 	AddToParent          string
 	GlobalUUID           *string
@@ -353,6 +353,11 @@ func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
 }
 
 func getBodySyncWriter(ctx *gin.Context) (dto *model.SyncWriter, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodySyncWriterCOV(ctx *gin.Context) (dto *model.SyncWriterCOV, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

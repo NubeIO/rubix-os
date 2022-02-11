@@ -22,13 +22,15 @@ type Writer struct {
 //WriterClone list of all the consumers
 type WriterClone struct { //TODO the WriterClone needs to publish a COV event as for example we have 2x mqtt broker then the cov for a point maybe different when not going over the internet
 	CommonWriter
-	ProducerUUID string `json:"producer_uuid" gorm:"TYPE:string REFERENCES producers;not null;default:null"`
+	ProducerUUID      string `json:"producer_uuid" gorm:"TYPE:string REFERENCES producers;not null;default:null"`
+	FlowFrameworkUUID string `json:"flow_framework_uuid,omitempty"`
 	CommonSourceUUID
 }
 
 type SyncWriter struct {
-	Writer       Writer
-	ProducerUUID string
+	Writer            Writer
+	ProducerUUID      string
+	FlowFrameworkUUID string
 }
 
 //WriterBody could be a local network, job or alarm and so on
@@ -46,4 +48,13 @@ type WriterBulk struct {
 	AskRefresh  bool        `json:"ask_refresh,omitempty"`
 	CommonValue CommonValue `json:"common_value,omitempty"`
 	Priority    Priority    `json:"priority,omitempty"`
+}
+
+type SyncWriterCOV struct {
+	WriterUUID      string
+	OriginalValue   *float64
+	PresentValue    *float64
+	CurrentPriority *int
+	Priority        *Priority
+	Schedule        *datatypes.JSON
 }

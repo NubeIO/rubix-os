@@ -42,23 +42,28 @@ func (h *Handler) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (
 }
 
 func (h *Handler) UpdatePointValue(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
-	q, err := getDb().UpdatePointValue(uuid, body, fromPlugin)
+	var pointModel *model.Point
+	query := getDb().DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	_ = getDb().DB.Model(&pointModel).Updates(&body)
+	// Don't update point value if priority array on body is nil
+	if body.Priority == nil {
+		return pointModel, nil
+	} else {
+		pointModel.Priority = body.Priority
+	}
+	pointModel.Priority = body.Priority
+	p, err := getDb().UpdatePointValue(pointModel, fromPlugin)
 	if err != nil {
 		return nil, err
 	}
-	return q, nil
+	return p, nil
 }
 
 func (h *Handler) GetPointByField(field string, value string) (*model.Point, error) {
 	q, err := getDb().GetPointByField(field, value)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
-}
-
-func (h *Handler) UpdatePointByFieldAndUnit(field string, value string, body *model.Point) (*model.Point, error) {
-	q, err := getDb().UpdatePointByFieldAndUnit(field, value, body, false)
 	if err != nil {
 		return nil, err
 	}

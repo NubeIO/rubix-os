@@ -5,12 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/datatypes"
-	"time"
 )
 
 type Producer struct {
@@ -122,12 +121,10 @@ type Point struct {
 	Priority model.Priority `json:"priority"`
 }
 
-// ProducerWriteHist  update it
 func (d *GormDatabase) ProducerWriteHist(uuid string, writeData datatypes.JSON) (*model.ProducerHistory, error) {
 	ph := new(model.ProducerHistory)
 	ph.ProducerUUID = uuid
 	ph.DataStore = writeData
-	ph.Timestamp = time.Now().UTC()
 	_, err := d.CreateProducerHistory(ph)
 	if err != nil {
 		return nil, err
@@ -135,71 +132,77 @@ func (d *GormDatabase) ProducerWriteHist(uuid string, writeData datatypes.JSON) 
 	return ph, nil
 }
 
-// ProducerWrite  update it
-func (d *GormDatabase) ProducerWrite(thingType string, payload interface{}) (string, error) {
-	var producerModel model.Producer
-	p, err := eventbus.DecodeBody(thingType, payload)
+func (d *GormDatabase) ProducerWrite(point model.Point) error {
+	producerModel := new(model.Producer)
+	producerModel.CurrentWriterUUID = point.UUID
+	// TODO: replace GetProducerByField by GetOneProducerByArgs
+	producer, err := d.GetProducerByField("producer_thing_uuid", point.UUID)
 	if err != nil {
-		return "", err
+		return errors.New("producer doesn't exist for this point")
 	}
-	if thingType == model.ThingClass.Point {
-		point := p.(*model.Point)
-		producerModel.CurrentWriterUUID = point.UUID
-		pointUUID := point.UUID
-		pro, err := d.GetProducerByField("producer_thing_uuid", pointUUID)
-		if err != nil {
-			return "", errors.New("no point for this producer was not found")
-		}
-		_, err = d.UpdateProducer(pro.UUID, &producerModel)
-		if err != nil {
-			log.Errorf("producer: issue on update producer err: %v\n", err)
-			return "", errors.New("issue on update producer")
-		}
-		value := point.PresentValue
-		point.Priority.P16 = value
-		b, err := json.Marshal(point)
-		if err != nil {
-			log.Errorf("producer: on update write history for point err: %v\n", err)
-			return "", errors.New("issue on update write history for point")
-		}
-		_, err = d.ProducerWriteHist(pro.UUID, b)
-		if err != nil {
-			log.Errorf("producer: issue on write history ProducerWriteHist: %v\n", err)
-			return "", errors.New("issue on write history for point")
-		}
-		var proBody model.ProducerBody
-		proBody.StreamUUID = pro.StreamUUID
-		proBody.ProducerUUID = pro.UUID
-		proBody.ThingType = pro.ProducerThingType
-		proBody.ThingType = point.ThingType
-		proBody.Payload = point
-		err = d.producerBroadcast(proBody)
-		if err != nil {
-			return "", errors.New("issue on producer broadcast")
-		}
-		return pro.UUID, err
+	producerModel, err = d.UpdateProducer(producer.UUID, producerModel)
+	if err != nil {
+		log.Errorf("producer: issue on update producer err: %v\n", err)
+		return errors.New("issue on update producer")
 	}
-	return "", err
+
+	syncWriterCOV := model.SyncWriterCOV{
+		OriginalValue:   point.OriginalValue,
+		PresentValue:    point.PresentValue,
+		CurrentPriority: point.CurrentPriority,
+		Priority:        point.Priority,
+	}
+	err = d.TriggerCOVToWriterClone(producerModel, syncWriterCOV)
+	if err != nil {
+		return err
+	}
+
+	ph := new(model.ProducerHistory)
+	ph.ProducerUUID = producer.UUID
+	b, err := json.Marshal(point.Priority)
+	if err != nil {
+		log.Errorf("producer: on update write history for point err: %v\n", err)
+		return errors.New("issue on update write history for point")
+	}
+	ph.DataStore = b
+	_, err = d.CreateProducerHistory(ph)
+	if err != nil {
+		log.Errorf("producer: issue on write history ProducerWriteHist: %v\n", err)
+		return errors.New("issue on write history for point")
+	}
+	return nil
+}
+
+func (d *GormDatabase) TriggerCOVToWriterClone(producer *model.Producer, body model.SyncWriterCOV) error {
+	wcs, err := d.GetWriterClones(api.Args{ProducerUUID: utils.NewStringAddress(producer.UUID)})
+	if err != nil {
+		return errors.New("error on getting writer clones from producer_uuid")
+	}
+	for _, wc := range wcs {
+		_ = d.TriggerCOVFromWriterCloneToWriter(producer, *wc, body)
+	}
+	return nil
+}
+
+func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Producer, wc model.WriterClone, body model.SyncWriterCOV) error {
+	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
+	body.WriterUUID = wc.SourceUUID
+	for _, fn := range stream.FlowNetworks {
+		// TODO: wc.FlowFrameworkUUID == "" remove from condition; it's here coz old deployment doesn't used to have that value
+		if wc.FlowFrameworkUUID == "" || fn.UUID == wc.FlowFrameworkUUID {
+			cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
+			_ = cli.SyncWriterCOV(&body)
+		}
+	}
+	return nil
 }
 
 // GetProducerByField returns the point for the given field ie name or nil.
-//for example get a producer by its producer_thing_uuid
+// For example get a producer by its producer_thing_uuid
 func (d *GormDatabase) GetProducerByField(field string, value string) (*model.Producer, error) {
 	var producerModel *model.Producer
 	f := fmt.Sprintf("%s = ? ", field)
 	query := d.DB.Where(f, value).First(&producerModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return producerModel, nil
-}
-
-// UpdateProducerByField get by field and update.
-//for example update a producer by its producer_thing_uuid
-func (d *GormDatabase) UpdateProducerByField(field string, value string, body *model.Producer, updateHist bool) (*model.Producer, error) {
-	var producerModel *model.Producer
-	f := fmt.Sprintf("%s = ? ", field)
-	query := d.DB.Where(f, value).Find(&producerModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
 	}

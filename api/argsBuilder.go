@@ -4,19 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// TODO: REMOVE
-func streamFieldsArgs(ctx *gin.Context) (flowUUID string, streamUUID string, producerUUID string, consumerUUID string, writerUUID string) {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.FlowUUID = ctx.DefaultQuery(aType.FlowUUID, aDefault.FlowUUID)
-	//args.StreamUUID = ctx.DefaultQuery(aType.StreamUUID, aDefault.StreamUUID)
-	args.ProducerUUID = ctx.DefaultQuery(aType.ProducerUUID, aDefault.ProducerUUID)
-	args.ConsumerUUID = ctx.DefaultQuery(aType.ConsumerUUID, aDefault.ConsumerUUID)
-	args.WriterUUID = ctx.DefaultQuery(aType.WriterUUID, aDefault.WriterUUID)
-	return args.FlowUUID, "todo remove", args.ProducerUUID, args.ConsumerUUID, args.WriterUUID
-}
-
 //withFieldsArgs
 func withFieldsArgs(ctx *gin.Context) (field string, value string) {
 	var args Args
