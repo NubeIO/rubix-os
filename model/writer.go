@@ -28,8 +28,8 @@ type WriterClone struct { //TODO the WriterClone needs to publish a COV event as
 }
 
 type SyncWriter struct {
-	Writer            Writer
 	ProducerUUID      string
+	WriterUUID        string
 	FlowFrameworkUUID string
 }
 
