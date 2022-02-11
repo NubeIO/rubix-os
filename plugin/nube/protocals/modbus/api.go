@@ -86,7 +86,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.GET(help, func(ctx *gin.Context) {
 
 		var h T2
-		//h.Enabled = bacnet_model.CommonNaming
+		//h.Enabled = model.CommonNaming
 		//a1 := []string{fmt.Sprintf("http://0.0.0.0:1660/api/plugins/api/%s%s" ,name, help), "GET", "POST", "PATCH"}
 		//a1 := []string{fmt.Sprintf("http://0.0.0.0:1660/api/plugins/api/%s%s" ,name, help), "GET", "POST", "PATCH"}
 		//h.Capabilities.Help = a1

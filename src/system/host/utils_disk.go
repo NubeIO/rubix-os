@@ -35,7 +35,7 @@ func getDiskInfoDetail(debug bool) DiskInfoDetail {
 		disk.Label = strings.Split(string(res), ":")[1]
 	}
 
-	sh = "fdisk -l|grep 'bacnet_model'"
+	sh = "fdisk -l|grep 'model'"
 	res, e = CMDRun(sh, debug)
 	if e != nil {
 		disk.Model = "unknown"

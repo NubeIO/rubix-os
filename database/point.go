@@ -111,7 +111,7 @@ func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName strin
 }
 
 // CreatePoint creates an object.
-func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model.Point, error) {
+func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string, fromPlugin bool) (*model.Point, error) {
 	var deviceModel *model.Device
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	deviceUUID := body.DeviceUUID
@@ -168,9 +168,11 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string) (*model
 	if err != nil {
 		return nil, errors.New("ERROR failed to get plugin uuid")
 	}
-	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, plug.PluginConfId, body.UUID)
-	d.Bus.RegisterTopic(t)
-	err = d.Bus.Emit(eventbus.CTX(), t, body)
+	if fromPlugin {
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, plug.PluginConfId, body.UUID)
+		d.Bus.RegisterTopic(t)
+		err = d.Bus.Emit(eventbus.CTX(), t, body)
+	}
 	if err != nil {
 		return nil, errors.New("ERROR on device eventbus")
 	}
@@ -201,9 +203,11 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	body.InSync = utils.NewFalse()
 	body.WriteValueOnceSync = utils.NewFalse()
 	_ = d.DB.Model(&pointModel).Updates(&body)
-	pnt, err := d.UpdatePointValue(uuid, pointModel, false)
-	if err != nil {
-		return nil, err
+	if body.Priority != nil {
+		_, err := d.UpdatePointValue(uuid, pointModel, false)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if !fromPlugin { //stop looping
 		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)
@@ -217,7 +221,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, errors.New("ERROR on device eventbus")
 		}
 	}
-	return pnt, nil
+	return pointModel, nil
 }
 
 // PointWrite returns the device for the given id or nil.
@@ -408,13 +412,11 @@ func (d *GormDatabase) UpdatePointValue(uuid string, body *model.Point, fromPlug
 		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
-	if pointModel.IsProducer == nil && body.IsProducer == nil {
-		if compare(pointModel, body) {
-			_, err := d.ProducerWrite("point", pointModel)
-			if err != nil {
-				log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
-				return nil, err
-			}
+	if utils.BoolIsNil(pointModel.IsProducer) {
+		_, err := d.ProducerWrite("point", pointModel)
+		if err != nil {
+			log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
+			return nil, err
 		}
 	}
 	body.PresentValue = presentValue

@@ -109,7 +109,7 @@ func (d *GormDatabase) GetNetworkByName(name string, args api.Args) (*model.Netw
 }
 
 // CreateNetwork creates a device.
-func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
+func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*model.Network, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Network)
 	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Network
@@ -142,9 +142,11 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
-	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, body.PluginConfId, body.UUID)
-	d.Bus.RegisterTopic(t)
-	err = d.Bus.Emit(eventbus.CTX(), t, body)
+	if !fromPlugin {
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, body.PluginConfId, body.UUID)
+		d.Bus.RegisterTopic(t)
+		err = d.Bus.Emit(eventbus.CTX(), t, body)
+	}
 	if err != nil {
 		return nil, errors.New("error on device eventbus")
 	}

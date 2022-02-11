@@ -1,4 +1,4 @@
-// Package bacnet_model contains all models used across the flow-framework
+// Package model contains all models used across the flow-framework
 package model
 
 import (

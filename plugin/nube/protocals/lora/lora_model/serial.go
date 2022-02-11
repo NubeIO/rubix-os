@@ -68,7 +68,7 @@ type Device struct {
 		Min         int    `json:"min" default:"4"`
 		Max         int    `json:"max" default:"6"`
 		DisplayName string `json:"display_name" default:"THLM"`
-	} `json:"bacnet_model"`
+	} `json:"model"`
 	Enable EnableStruct `json:"enable"`
 }
 

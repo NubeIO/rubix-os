@@ -28,7 +28,7 @@ func (i *Instance) wizard(network *Network) (string, error) {
 		net.Port = nums.NewInt(network.NetworkPort)
 		net.NetworkMask = nums.NewInt(network.NetworkMask)
 	}
-	_network, err := i.db.CreateNetwork(&net)
+	_network, err := i.db.CreateNetwork(&net, false)
 	if err != nil {
 		return "", err
 	}
@@ -64,7 +64,7 @@ func (i *Instance) wizard(network *Network) (string, error) {
 	pnt.Unit = "noUnits"
 	pnt.Priority = new(model.Priority)
 	(*pnt.Priority).P16 = nums.NewFloat64(1)
-	point, err := i.db.CreatePoint(&pnt)
+	point, err := i.db.CreatePoint(&pnt, false, false)
 	if err != nil {
 		return "", err
 	}

@@ -12,7 +12,7 @@ type CommandGroup struct {
 	WriteValue         string `json:"write_value,omitempty"`
 	WritePriority      string `json:"write_priority,omitempty"`       //TODO maybe remove this and just use the writeJSON as we need things like Schedules aswell
 	WritePriorityArray string `json:"write_priority_array,omitempty"` //TODO maybe remove this and just use the writeJSON as we need things like Schedules aswell
-	WriteJSON          string `json:"write_json,omitempty"`           //TODO add data bacnet_model in later
+	WriteJSON          string `json:"write_json,omitempty"`           //TODO add data model in later
 	StartDate          string `json:"start_date,omitempty"`           // START at 25:11:2021:13:00
 	EndDate            string `json:"end_date,omitempty"`             // START at 25:11:2021:13:30
 	Value              string `json:"value,omitempty"`

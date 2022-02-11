@@ -146,7 +146,7 @@ func (i *Instance) run() {
 //			log.Println("finalResult")
 //			log.Printf("%+v\n", finalResult.IsActive)
 //			i.store.Set(finalResult.Name, finalResult, -1)
-//			s := new(bacnet_model.Schedule)
+//			s := new(model.Schedule)
 //			if finalResult.IsActive {
 //				s.IsActive = utils.NewTrue()
 //			} else {

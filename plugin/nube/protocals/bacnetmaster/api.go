@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/system/networking"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"net/http"
@@ -39,15 +38,16 @@ type Device struct {
 	TypeMstp       bool   `json:"type_mstp"`
 	SupportsRpm    bool   `json:"supports_rpm"`
 	SupportsWpm    bool   `json:"supports_wpm"`
-	NetworkUuid    string `json:"network_uuid"`
+	NetworkUUID    string `json:"network_uuid"`
 }
 
 type Point struct {
+	PointUUID       string `json:"point_uuid"`
 	PointName       string `json:"point_name"`
 	PointEnable     bool   `json:"point_enable"`
 	PointObjectId   int    `json:"point_object_id"`
 	PointObjectType string `json:"point_object_type"`
-	DeviceUuid      string `json:"device_uuid"`
+	DeviceUUID      string `json:"device_uuid"`
 }
 
 type Whois struct {
@@ -103,10 +103,22 @@ const (
 	networks       = "/networks"
 	networksBacnet = "/api/bm/networks/true"
 	device         = "/device"
+	devices        = "/devices"
 	deviceBacnet   = "/api/bm/device"
+	devicesBacnet  = "/api/bm/devices"
 )
 
 func getBODYAddNetwork(ctx *gin.Context) (dto *Network, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBODYAddDevice(ctx *gin.Context) (dto *Device, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBODYAddPoint(ctx *gin.Context) (dto *Point, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -117,6 +129,10 @@ func resolveObject(ctx *gin.Context) string {
 
 func resolveAddress(ctx *gin.Context) string {
 	return ctx.Param("address")
+}
+
+func resolveUUID(ctx *gin.Context) string {
+	return ctx.Param("uuid")
 }
 
 // RegisterWebhook implements plugin.Webhooker
@@ -136,6 +152,18 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.GET(ping, func(ctx *gin.Context) {
 		rt.Method = nrest.GET
 		rt.Path = pingBacnet
+		res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
+		if err != nil {
+			ctx.JSON(code, err)
+			return
+		} else {
+			ctx.JSON(code, res.AsJsonNoErr())
+			return
+		}
+	})
+	mux.GET(devices, func(ctx *gin.Context) {
+		rt.Method = nrest.GET
+		rt.Path = devicesBacnet + "/true"
 		res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
 		if err != nil {
 			ctx.JSON(code, err)
@@ -171,23 +199,103 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.POST(network, func(ctx *gin.Context) {
 		body, _ := getBODYAddNetwork(ctx)
-		if body.InterfaceName != "" {
-			_net, _ := networking.GetInterfaceByName(body.InterfaceName)
-			if _net == nil {
-				ctx.JSON(http.StatusBadRequest, errors.New("failed to find interface"))
-				return
-			}
-			body.NetworkIp = _net.IP
-			body.NetworkMask = _net.NetMaskLength
-		}
-		rt.Method = nrest.PUT
-		rt.Path = networkBacnet
-		res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{Json: body})
+		add, err := i.addNetwork(body)
 		if err != nil {
-			ctx.JSON(code, res.AsJsonNoErr())
+			ctx.JSON(http.StatusBadRequest, err)
 			return
 		} else {
-			ctx.JSON(code, res.AsJsonNoErr())
+			ctx.JSON(http.StatusOK, add)
+			return
+		}
+	})
+	mux.POST(device, func(ctx *gin.Context) {
+		body, _ := getBODYAddDevice(ctx)
+		add, err := i.addDevice(body)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		} else {
+			ctx.JSON(http.StatusOK, add)
+			return
+		}
+	})
+	mux.POST(point, func(ctx *gin.Context) {
+		body, _ := getBODYAddPoint(ctx)
+		add, err := i.addPoint(body)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, add)
+			return
+		}
+	})
+	mux.PATCH("network/:uuid", func(ctx *gin.Context) {
+		body, _ := getBODYAddPoint(ctx)
+		uuid := resolveUUID(ctx)
+		add, err := i.patchPoint(body, uuid)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, add)
+			return
+		}
+	})
+	mux.PATCH("device/:uuid", func(ctx *gin.Context) {
+		body, _ := getBODYAddDevice(ctx)
+		uuid := resolveUUID(ctx)
+		add, err := i.patchDevice(body, uuid)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, add)
+			return
+		}
+	})
+	mux.PATCH("point/:uuid", func(ctx *gin.Context) {
+		body, _ := getBODYAddPoint(ctx)
+		uuid := resolveUUID(ctx)
+		add, err := i.patchPoint(body, uuid)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, add)
+			return
+		}
+	})
+	mux.DELETE("network/:uuid", func(ctx *gin.Context) {
+		uuid := resolveUUID(ctx)
+		add, err := i.deleteNetwork(uuid)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, add)
+			return
+		}
+	})
+	mux.DELETE("device/:uuid", func(ctx *gin.Context) {
+		uuid := resolveUUID(ctx)
+		add, err := i.deleteDevice(uuid)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, add)
+			return
+		}
+	})
+	mux.DELETE("point/:uuid", func(ctx *gin.Context) {
+		uuid := resolveUUID(ctx)
+		add, err := i.deletePoint(uuid)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, add)
 			return
 		}
 	})

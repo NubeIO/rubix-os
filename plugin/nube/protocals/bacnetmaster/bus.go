@@ -21,7 +21,7 @@ func (i *Instance) BusServ() {
 				}
 				if net != nil {
 					log.Info("BACNET-MASTER BUS PluginsUpdated isNetwork", " ", net.UUID)
-					_, err = i.addNetwork(net)
+					//_, err = i.addNetwork(net)
 					log.Info("BACNET-MASTER BUS PluginsCreated isNetwork", " ", net.UUID)
 					if err != nil {
 						return
@@ -35,7 +35,7 @@ func (i *Instance) BusServ() {
 				}
 				if dev != nil {
 					log.Info("BACNET-MASTER BUS PluginsCreated IsDevice", " ", dev.UUID)
-					_, err = i.addDevice(dev)
+					//_, err = i.addDevice(dev)
 					if err != nil {
 						return
 					}
@@ -48,7 +48,7 @@ func (i *Instance) BusServ() {
 				}
 				if pnt != nil {
 					log.Info("BACNET-MASTER BUS PluginsCreated IsPoint", " ", pnt.UUID)
-					_, err = i.addPoint(pnt)
+					//_, err = i.addPoint(pnt)
 					if err != nil {
 						return
 					}
@@ -102,7 +102,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if pnt != nil {
-					_, err = i.pointPatch(pnt)
+					//_, err = i.pointPatch(pnt)
 					log.Info("BACNET-MASTER BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return
@@ -152,8 +152,8 @@ func (i *Instance) BusServ() {
 				}
 				log.Info("BACNET-MASTER BUS DELETED IsPoint", " ")
 				if pnt != nil {
-					p, err := i.deletePoint(pnt)
-					log.Info("BACNET-MASTER BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", p)
+					//p, err := i.deletePoint(pnt)
+					//log.Info("BACNET-MASTER BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", p)
 					if err != nil {
 						return
 					}

@@ -9,7 +9,7 @@ import (
 /*
 
 add producer
-- user needs to pass a valid producer uuid (for example a point uuid) and type bacnet_model.ProducerType (Point, Job, Alarm) and  bacnet_model.ProducerApplication (Plugin, Remote, Local)
+- user needs to pass a valid producer uuid (for example a point uuid) and type model.ProducerType (Point, Job, Alarm) and  model.ProducerApplication (Plugin, Remote, Local)
 
 example for workflow for a point (Point 1 Has a Consumer to Point 2):
 Point 1

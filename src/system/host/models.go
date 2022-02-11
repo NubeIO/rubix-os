@@ -116,6 +116,6 @@ type DiskInfo struct {
 
 type DiskInfoDetail struct {
 	Label string              `json:"label"`
-	Model string              `json:"bacnet_model"`
+	Model string              `json:"model"`
 	List  []map[string]string `json:"list"`
 }

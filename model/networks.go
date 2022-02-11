@@ -24,7 +24,7 @@ type Network struct {
 	CommonFault
 	CommonCreated
 	Manufacture      string `json:"manufacture,omitempty"`
-	Model            string `json:"bacnet_model,omitempty"`
+	Model            string `json:"model,omitempty"`
 	WriteableNetwork bool   `json:"writeable_network,omitempty"` //is this a network that supports write or its read only like lora
 	CommonThingClass
 	CommonThingRef
