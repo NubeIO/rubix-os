@@ -1,7 +1,6 @@
 package database
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
@@ -9,20 +8,18 @@ import (
 )
 
 func (d *GormDatabase) SyncWriter(body *model.SyncWriter) (*model.WriterClone, error) {
-	mWriter, err := json.Marshal(body.Writer)
-	if err != nil {
-		return nil, err
-	}
 	writerClone := model.WriterClone{}
-	if err = json.Unmarshal(mWriter, &writerClone); err != nil {
-		return nil, err
-	}
-	_, err = d.GetProducer(body.ProducerUUID, api.Args{})
+	producer, err := d.GetProducer(body.ProducerUUID, api.Args{})
 	if err != nil {
 		return nil, errors.New("producer does not exist")
 	}
+	writerClone.WriterThingName = producer.ProducerThingName
+	writerClone.WriterThingUUID = producer.ProducerThingUUID
+	writerClone.WriterThingClass = producer.ProducerThingClass
+	writerClone.WriterThingType = producer.ProducerThingType
 	writerClone.ProducerUUID = body.ProducerUUID
-	writerClone.SourceUUID = body.Writer.UUID
+	writerClone.SourceUUID = body.WriterUUID
+	writerClone.FlowFrameworkUUID = body.FlowFrameworkUUID
 	var writerCloneModel []*model.WriterClone
 	if err = d.DB.Where("source_uuid = ? ", writerClone.SourceUUID).Find(&writerCloneModel).Error; err != nil {
 		return nil, err
@@ -39,4 +36,30 @@ func (d *GormDatabase) SyncWriter(body *model.SyncWriter) (*model.WriterClone, e
 		}
 	}
 	return &writerClone, nil
+}
+
+func (d *GormDatabase) SyncWriterCOV(body *model.SyncWriterCOV) error {
+	writer, err := d.GetWriter(body.WriterUUID)
+	if err != nil {
+		return err
+	}
+	if writer.WriterThingClass == model.ThingClass.Point {
+		err = d.updatePointFromCOV(writer.WriterThingUUID, body)
+	}
+	return err
+}
+
+func (d *GormDatabase) updatePointFromCOV(writerThingUUID string, body *model.SyncWriterCOV) error {
+	var pointModel *model.Point
+	priorityMap, _, _, _ := d.parsePriority(body.Priority)
+	query := d.DB.Where("uuid = ?", writerThingUUID).Preload("Priority").Find(&pointModel)
+	if query.Error != nil {
+		return query.Error
+	}
+	d.DB.Model(&pointModel.Priority).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMap)
+	pointModel.OriginalValue = body.OriginalValue
+	pointModel.PresentValue = body.PresentValue
+	pointModel.CurrentPriority = body.CurrentPriority
+	d.DB.Model(&pointModel).Updates(pointModel)
+	return nil
 }

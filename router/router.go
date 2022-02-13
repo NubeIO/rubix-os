@@ -290,7 +290,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			pointRoutes.GET("/name", pointHandler.GetPointByName)
 			pointRoutes.PATCH("/name", pointHandler.PointWriteByName)
 			pointRoutes.GET("/field/:uuid", pointHandler.GetPointByField)
-			pointRoutes.PATCH("/field/:uuid", pointHandler.UpdatePointByFieldAndUnit)
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
 			pointRoutes.DELETE("/drop", pointHandler.DropPoints)
 		}
@@ -318,7 +317,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				producerWriterCloneRoutes.GET("", writerCloneHandler.GetWriterClones)
 				producerWriterCloneRoutes.POST("", writerCloneHandler.CreateWriterClone)
 				producerWriterCloneRoutes.GET("/:uuid", writerCloneHandler.GetWriterClone)
-				producerWriterCloneRoutes.PATCH("/:uuid", writerCloneHandler.UpdateWriterClone)
 				producerWriterCloneRoutes.DELETE("/:uuid", writerCloneHandler.DeleteWriterClone)
 				producerWriterCloneRoutes.DELETE("/drop", writerCloneHandler.DropWriterClone)
 			}
@@ -328,7 +326,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		{
 			consumerRoutes.GET("", consumerHandler.GetConsumers)
 			consumerRoutes.POST("", consumerHandler.CreateConsumer)
-			consumerRoutes.POST("/wizard", consumerHandler.AddConsumerWizard)
 			consumerRoutes.GET("/:uuid", consumerHandler.GetConsumer)
 			consumerRoutes.PATCH("/:uuid", consumerHandler.UpdateConsumer)
 			consumerRoutes.DELETE("/:uuid", consumerHandler.DeleteConsumer)
@@ -343,16 +340,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				consumerWriterRoutes.DELETE("/:uuid", writerHandler.DeleteWriter)
 				consumerWriterRoutes.DELETE("/drop", writerHandler.DropWriters)
 			}
-
 		}
 
 		//action's writers
 		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)
 		apiRoutes.POST("/writers/action/bulk", writerHandler.WriterBulkAction)
-
-		//action's writers clones
-		apiRoutes.GET("/writers/clone/:uuid", writerCloneHandler.GetWriterClone)
-		apiRoutes.PATCH("/writers/clone/:uuid", writerCloneHandler.UpdateWriterClone)
 
 		jobRoutes := apiRoutes.Group("/jobs")
 		{
@@ -428,6 +420,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			syncRoutes.POST("/flow_network", syncFlowNetworkHandler.SyncFlowNetwork)
 			syncRoutes.POST("/stream", syncStreamHandler.SyncStream)
 			syncRoutes.POST("/writer", syncWriterHandler.SyncWriter)
+			syncRoutes.POST("/writer_cov", syncWriterHandler.SyncWriterCOV)
 		}
 	}
 

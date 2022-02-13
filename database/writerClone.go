@@ -1,7 +1,6 @@
 package database
 
 import (
-	"encoding/json"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/utils"
@@ -52,47 +51,6 @@ func (d *GormDatabase) DeleteWriterClone(uuid string) (bool, error) {
 		return true, nil
 	}
 
-}
-
-func (d *GormDatabase) UpdateWriterClone(uuid string, body *model.WriterClone, updateProducer bool) (*model.WriterClone, error) {
-	var wcm *model.WriterClone
-	query := d.DB.Where("uuid = ?", uuid).Find(&wcm)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	query = d.DB.Model(&wcm).Updates(body)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	if updateProducer {
-		pro := new(model.Producer)
-		proUUID := wcm.ProducerUUID
-		pro.CurrentWriterUUID = uuid
-		p, err := d.UpdateProducer(proUUID, pro)
-		if err != nil {
-			return nil, err
-		}
-		if body.DataStore != nil {
-			_, err := d.ProducerWriteHist(proUUID, wcm.DataStore)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if p.ProducerThingClass == model.ThingClass.Point {
-			pnt := new(model.Point)
-			pri := new(model.Priority)
-			err := json.Unmarshal(body.DataStore, &pri)
-			if err != nil {
-				return nil, err
-			}
-			pnt.Priority = pri
-			_, err = d.UpdatePointValue(p.ProducerThingUUID, pnt, false)
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return wcm, nil
 }
 
 func (d *GormDatabase) DropWriterClone() (bool, error) {
