@@ -243,18 +243,18 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		presentValue = eval
 	}
 
-	val, err := pointUnits(*presentValue, pointModel.Unit, pointModel.UnitTo)
+	val, err := pointUnits(presentValue, pointModel.Unit, pointModel.UnitTo)
 	if err != nil {
 		log.Errorf("ERROR on point invalid point unit")
 		return nil, err
 	}
-	presentValue = &val
+	presentValue = val
 
-	if !utils.Unit32NilCheck(pointModel.Decimal) {
+	if !utils.Unit32NilCheck(pointModel.Decimal) && presentValue != nil {
 		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
-	isChange := pointModel.PresentValue == nil || *pointModel.PresentValue != *presentValue
+	isChange := pointModel.PresentValue != presentValue
 	pointModel.PresentValue = presentValue
 	_ = d.DB.Model(&pointModel).Updates(&pointModel)
 
