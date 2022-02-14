@@ -132,13 +132,15 @@ func (d *GormDatabase) ProducerWriteHist(uuid string, writeData datatypes.JSON) 
 	return ph, nil
 }
 
-func (d *GormDatabase) ProducerWrite(point model.Point) error {
+func (d *GormDatabase) ProducerWrite(point *model.Point) error {
 	producerModel := new(model.Producer)
 	producerModel.CurrentWriterUUID = point.UUID
 	// TODO: replace GetProducerByField by GetOneProducerByArgs
+	// TODO: point can have more producers
 	producer, err := d.GetProducerByField("producer_thing_uuid", point.UUID)
 	if err != nil {
-		return errors.New("producer doesn't exist for this point")
+		log.Info("producer doesn't exist for this point")
+		return nil
 	}
 	producerModel, err = d.UpdateProducer(producer.UUID, producerModel)
 	if err != nil {
@@ -146,13 +148,8 @@ func (d *GormDatabase) ProducerWrite(point model.Point) error {
 		return errors.New("issue on update producer")
 	}
 
-	syncWriterCOV := model.SyncWriterCOV{
-		OriginalValue:   point.OriginalValue,
-		PresentValue:    point.PresentValue,
-		CurrentPriority: point.CurrentPriority,
-		Priority:        point.Priority,
-	}
-	err = d.TriggerCOVToWriterClone(producerModel, syncWriterCOV)
+	syncWriterCOV := model.SyncWriterCOV{Priority: point.Priority}
+	err = d.TriggerCOVToWriterClone(producerModel, &syncWriterCOV)
 	if err != nil {
 		return err
 	}
@@ -165,6 +162,7 @@ func (d *GormDatabase) ProducerWrite(point model.Point) error {
 		return errors.New("issue on update write history for point")
 	}
 	ph.DataStore = b
+	// TODO: create producer history update
 	_, err = d.CreateProducerHistory(ph)
 	if err != nil {
 		log.Errorf("producer: issue on write history ProducerWriteHist: %v\n", err)
@@ -173,25 +171,25 @@ func (d *GormDatabase) ProducerWrite(point model.Point) error {
 	return nil
 }
 
-func (d *GormDatabase) TriggerCOVToWriterClone(producer *model.Producer, body model.SyncWriterCOV) error {
+func (d *GormDatabase) TriggerCOVToWriterClone(producer *model.Producer, body *model.SyncWriterCOV) error {
 	wcs, err := d.GetWriterClones(api.Args{ProducerUUID: utils.NewStringAddress(producer.UUID)})
 	if err != nil {
 		return errors.New("error on getting writer clones from producer_uuid")
 	}
 	for _, wc := range wcs {
-		_ = d.TriggerCOVFromWriterCloneToWriter(producer, *wc, body)
+		_ = d.TriggerCOVFromWriterCloneToWriter(producer, wc, body)
 	}
 	return nil
 }
 
-func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Producer, wc model.WriterClone, body model.SyncWriterCOV) error {
+func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Producer, wc *model.WriterClone, body *model.SyncWriterCOV) error {
 	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
 	body.WriterUUID = wc.SourceUUID
 	for _, fn := range stream.FlowNetworks {
 		// TODO: wc.FlowFrameworkUUID == "" remove from condition; it's here coz old deployment doesn't used to have that value
 		if wc.FlowFrameworkUUID == "" || fn.UUID == wc.FlowFrameworkUUID {
 			cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
-			_ = cli.SyncWriterCOV(&body)
+			_ = cli.SyncWriterCOV(body)
 		}
 	}
 	return nil

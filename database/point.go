@@ -259,7 +259,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 	_ = d.DB.Model(&pointModel).Updates(&pointModel)
 
 	if isChange == true {
-		err = d.ProducerWrite(*pointModel)
+		err = d.ProducerWrite(pointModel)
 		if err != nil {
 			return nil, err
 		}
@@ -292,7 +292,7 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point) (*model.Point, *f
 			pointModel.CurrentPriority = utils.NewInt(16)
 			presentValue = utils.NewFloat64(*pointModel.Fallback)
 		}
-		d.DB.Model(&pointModel.Priority).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMap)
+		d.DB.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMap)
 	}
 	return pointModel, presentValue
 }
