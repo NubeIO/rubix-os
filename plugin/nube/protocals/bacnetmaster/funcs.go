@@ -8,9 +8,10 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nums"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/system/networking"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
-func (i *Instance) addNetwork(bacNet *Network) (*model.Network, error) {
+func (i *Instance) addNetwork(bacNet *Network) (*model.Network, interface{}, int, error) {
 	var ffNetwork model.Network
 	ffNetwork.Name = bacNet.NetworkName
 	ffNetwork.TransportType = model.TransType.IP
@@ -18,7 +19,7 @@ func (i *Instance) addNetwork(bacNet *Network) (*model.Network, error) {
 	if bacNet.InterfaceName != "" {
 		_net, _ := networking.GetInterfaceByName(bacNet.InterfaceName)
 		if _net == nil {
-			return nil, errors.New("failed to find a valid network interface")
+			return nil, nil, http.StatusBadRequest, errors.New("failed to find a valid network interface")
 		}
 		bacNet.NetworkIp = _net.IP
 		bacNet.NetworkMask = _net.NetMaskLength
@@ -32,29 +33,32 @@ func (i *Instance) addNetwork(bacNet *Network) (*model.Network, error) {
 	rt.Path = networkBacnet
 	res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{Json: bacNet})
 	if err != nil {
-		log.Error("bacnet-master-plugin: ERROR added network over rest response-code:", code)
-		return nil, err
+		errMsg := fmt.Sprintf("bacnet-master-plugin: ERROR added network over rest response-code:%d", code)
+		log.Error(errMsg)
+		return nil, res.AsJsonNoErr(), http.StatusBadRequest, errors.New(errMsg)
 	}
 
 	res.ToInterfaceNoErr(bacNet)
 	ffNetwork.AddressUUID = bacNet.NetworkUUID
 	if bacNet.NetworkUUID == "" {
-		log.Error("bacnet-master-plugin: ERROR no bacnet-server network uuid provided")
-		return nil, err
+		errMsg := fmt.Sprintf("bacnet-master-plugin: ERROR no bacnet-server network uuid provided")
+		log.Error(errMsg)
+		return nil, nil, http.StatusBadRequest, errors.New(errMsg)
 	}
 	_network, err := i.db.CreateNetwork(&ffNetwork, true)
 	if err != nil || _network.UUID == "" {
 		log.Error("bacnet-master-plugin: ERROR added network: err", err)
 		rt.Method = nrest.DELETE
 		rt.Path = fmt.Sprintf("%s/%s", networkBacnet, bacNet.NetworkUUID)
-		_, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{Json: bacNet})
+		res, code, err = nrest.DoHTTPReq(rt, &nrest.ReqOpt{Json: bacNet})
 		if err != nil {
-			log.Error("bacnet-master-plugin: ERROR delete network over rest response-code:", code)
-			return nil, err
+			errMsg := fmt.Sprintf("bacnet-master-plugin: ERROR delete network over rest response-code:%d", code)
+			log.Error(errMsg)
+			return nil, res.AsJsonNoErr(), code, nil
 		}
-		return nil, err
+		return nil, nil, http.StatusBadRequest, err
 	}
-	return _network, nil
+	return _network, nil, http.StatusOK, nil
 }
 
 func (i *Instance) addDevice(bacDevice *Device) (*model.Device, error) {
@@ -107,8 +111,6 @@ func (i *Instance) addPoint(bacPoint *Point) (*model.Point, error) {
 	ffPoint.Name = bacPoint.PointName
 	ffPoint.ObjectType = bacPoint.PointObjectType
 	ffPoint.AddressID = nums.NewInt(bacPoint.PointObjectId)
-
-	fmt.Println(bacPoint.DeviceUUID)
 
 	rt.Method = nrest.PUT
 	rt.Path = pointBacnet

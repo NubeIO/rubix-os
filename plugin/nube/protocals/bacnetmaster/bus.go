@@ -170,10 +170,8 @@ func (i *Instance) BusServ() {
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				p, _ := e.Data.(mqtt.Message)
-				_, err := i.bacnetUpdate(p)
-				if err != nil {
-					return
-				}
+				i.bacnetUpdate(p)
+
 			}()
 		},
 		Matcher: eventbus.MQTTUpdated,

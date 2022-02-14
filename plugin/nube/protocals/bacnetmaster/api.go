@@ -199,12 +199,17 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.POST(network, func(ctx *gin.Context) {
 		body, _ := getBODYAddNetwork(ctx)
-		add, err := i.addNetwork(body)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
+		net, res, code, err := i.addNetwork(body)
+		if net != nil {
+			ctx.JSON(code, err)
 			return
-		} else {
-			ctx.JSON(http.StatusOK, add)
+		}
+		if res != nil {
+			ctx.JSON(code, res)
+			return
+		}
+		if err != nil {
+			ctx.JSON(code, err)
 			return
 		}
 	})
