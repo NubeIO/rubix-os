@@ -51,10 +51,7 @@ type WriterBulk struct {
 }
 
 type SyncWriterCOV struct {
-	WriterUUID      string
-	OriginalValue   *float64
-	PresentValue    *float64
-	CurrentPriority *int
-	Priority        *Priority
-	Schedule        *datatypes.JSON
+	WriterUUID string
+	Priority   *Priority
+	Schedule   *datatypes.JSON
 }
