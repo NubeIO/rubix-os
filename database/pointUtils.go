@@ -61,15 +61,15 @@ func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Poin
 	return pointModel, true
 }
 
-func pointUnits(presentValue float64, unitFrom, unitTo *string) (value float64, err error) {
-	if unitFrom == nil || unitTo == nil || *unitFrom == "" || *unitTo == "" {
+func pointUnits(presentValue *float64, unitFrom, unitTo *string) (value *float64, err error) {
+	if presentValue == nil || unitFrom == nil || unitTo == nil || *unitFrom == "" || *unitTo == "" {
 		return presentValue, nil
 	}
-	_, res, err := unit.Process(presentValue, *unitFrom, *unitTo)
+	_, res, err := unit.Process(*presentValue, *unitFrom, *unitTo)
 	if err != nil {
-		return 0, err
+		return utils.NewFloat64(0), err
 	}
-	return res.AsFloat(), err
+	return utils.NewFloat64(res.AsFloat()), err
 }
 
 func pointRange(presentValue, limitMin, limitMax *float64) (value *float64) {

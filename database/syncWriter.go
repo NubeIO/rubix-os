@@ -26,7 +26,7 @@ func (d *GormDatabase) SyncWriter(body *model.SyncWriter) (*model.WriterClone, e
 	}
 	if len(writerCloneModel) == 0 {
 		writerClone.UUID = utils.MakeTopicUUID(model.CommonNaming.WriterClone)
-		if err = d.DB.Create(writerClone).Error; err != nil {
+		if err = d.DB.Create(&writerClone).Error; err != nil {
 			return nil, err
 		}
 	} else {

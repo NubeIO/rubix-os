@@ -138,14 +138,8 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 		}
 		body.FlowToken = accessToken
 	}
-	fnb.GlobalUUID = deviceInfo.GlobalUUID
-	fnb.ClientId = deviceInfo.ClientId
-	fnb.ClientName = deviceInfo.ClientName
-	fnb.SiteId = deviceInfo.SiteId
-	fnb.SiteName = deviceInfo.SiteName
-	fnb.DeviceId = deviceInfo.DeviceId
-	fnb.DeviceName = deviceInfo.DeviceName
-	if err := d.syncAfterCreateUpdateFlowNetwork(&fnb); err != nil {
+	body, err = d.syncAfterCreateUpdateFlowNetwork(&fnb)
+	if err != nil {
 		if isRemote {
 			tx.Rollback()
 		}
@@ -154,6 +148,7 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	if isRemote {
 		tx.Commit()
 	}
+	d.DB.Model(&body).Updates(body)
 	return body, nil
 }
 
@@ -170,9 +165,11 @@ func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (
 	if err := d.DB.Model(&flowNetworkModel).Updates(body).Error; err != nil {
 		return nil, err
 	}
-	if err := d.syncAfterCreateUpdateFlowNetwork(flowNetworkModel); err != nil {
+	body, err := d.syncAfterCreateUpdateFlowNetwork(flowNetworkModel)
+	if err != nil {
 		return nil, err
 	}
+	d.DB.Model(&flowNetworkModel).Updates(body)
 	return flowNetworkModel, nil
 }
 
@@ -227,11 +224,22 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 	return utils.NewTrue(), nil
 }
 
-func (d *GormDatabase) syncAfterCreateUpdateFlowNetwork(body *model.FlowNetwork) error {
+func (d *GormDatabase) syncAfterCreateUpdateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
+	deviceInfo, err := d.GetDeviceInfo()
+	if err != nil {
+		return nil, err
+	}
+	body.GlobalUUID = deviceInfo.GlobalUUID
+	body.ClientId = deviceInfo.ClientId
+	body.ClientName = deviceInfo.ClientName
+	body.SiteId = deviceInfo.SiteId
+	body.SiteName = deviceInfo.SiteName
+	body.DeviceId = deviceInfo.DeviceId
+	body.DeviceName = deviceInfo.DeviceName
 	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
 	res, err := cli.SyncFlowNetwork(body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	body.SyncUUID = res.SyncUUID
 	body.GlobalUUID = res.GlobalUUID
@@ -241,8 +249,5 @@ func (d *GormDatabase) syncAfterCreateUpdateFlowNetwork(body *model.FlowNetwork)
 	body.SiteName = res.SiteName
 	body.DeviceId = res.DeviceId
 	body.DeviceName = res.DeviceName
-	if err := d.DB.Model(&body).Updates(body).Error; err != nil {
-		return err
-	}
-	return nil
+	return body, nil
 }
