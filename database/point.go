@@ -254,7 +254,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
-	isChange := *pointModel.PresentValue != *presentValue
+	isChange := pointModel.PresentValue == nil || *pointModel.PresentValue != *presentValue
 	pointModel.PresentValue = presentValue
 	_ = d.DB.Model(&pointModel).Updates(&pointModel)
 
