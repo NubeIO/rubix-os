@@ -259,7 +259,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 	_ = d.DB.Model(&pointModel).Updates(&pointModel)
 
 	if isChange == true {
-		err = d.ProducerWrite(pointModel)
+		err = d.ProducersPointWrite(pointModel)
 		if err != nil {
 			return nil, err
 		}

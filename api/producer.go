@@ -7,7 +7,6 @@ import (
 )
 
 /*
-
 add producer
 - user needs to pass a valid producer uuid (for example a point uuid) and type model.ProducerType (Point, Job, Alarm) and  model.ProducerApplication (Plugin, Remote, Local)
 
@@ -27,13 +26,12 @@ remote point will subscribe to cov events
 remote producer
 - required: rubix-uuid
 - optional: point uuid (required network_name and device_name and point_name)
-
 */
 
-// The ProducerDatabase interface for encapsulating database access.
 type ProducerDatabase interface {
 	GetProducers(args Args) ([]*model.Producer, error)
 	GetProducer(uuid string, args Args) (*model.Producer, error)
+	GetOneProducerByArgs(args Args) (*model.Producer, error)
 	CreateProducer(body *model.Producer) (*model.Producer, error)
 	UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error)
 	DeleteProducer(uuid string) (bool, error)
@@ -53,6 +51,12 @@ func (j *ProducerAPI) GetProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildProducerArgs(ctx)
 	q, err := j.DB.GetProducer(uuid, args)
+	responseHandler(q, err, ctx)
+}
+
+func (j *ProducerAPI) GetOneProducerByArgs(ctx *gin.Context) {
+	args := buildProducerArgs(ctx)
+	q, err := j.DB.GetOneProducerByArgs(args)
 	responseHandler(q, err, ctx)
 }
 

@@ -20,15 +20,6 @@ func (d *GormDatabase) GetWriterClones(args api.Args) ([]*model.WriterClone, err
 	return writerClones, nil
 }
 
-func (d *GormDatabase) CreateWriterClone(body *model.WriterClone) (*model.WriterClone, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.WriterClone)
-	query := d.DB.Create(body)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return body, nil
-}
-
 func (d *GormDatabase) GetWriterClone(uuid string) (*model.WriterClone, error) {
 	var wcm *model.WriterClone
 	query := d.DB.Where("uuid = ? ", uuid).First(&wcm)
@@ -36,6 +27,24 @@ func (d *GormDatabase) GetWriterClone(uuid string) (*model.WriterClone, error) {
 		return nil, query.Error
 	}
 	return wcm, nil
+}
+
+func (d *GormDatabase) GetOneWriterCloneByArgs(args api.Args) (*model.WriterClone, error) {
+	var wcm *model.WriterClone
+	query := d.buildWriterCloneQuery(args)
+	if err := query.First(&wcm).Error; err != nil {
+		return nil, query.Error
+	}
+	return wcm, nil
+}
+
+func (d *GormDatabase) CreateWriterClone(body *model.WriterClone) (*model.WriterClone, error) {
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.WriterClone)
+	query := d.DB.Create(body)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return body, nil
 }
 
 func (d *GormDatabase) DeleteWriterClone(uuid string) (bool, error) {
@@ -65,4 +74,12 @@ func (d *GormDatabase) DropWriterClone() (bool, error) {
 	} else {
 		return true, nil
 	}
+}
+
+func (d *GormDatabase) UpdateWriterClone(writerClone *model.WriterClone, body *model.WriterClone) error {
+	query := d.DB.Model(&writerClone).Updates(body)
+	if query.Error != nil {
+		return query.Error
+	}
+	return nil
 }

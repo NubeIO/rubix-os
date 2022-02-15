@@ -208,7 +208,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			historyProducerRoutes.GET("/:producer_uuid/one", historyHandler.GetLatestProducerHistoryByProducerUUID)
 			historyProducerRoutes.GET("/points", historyHandler.GetProducerHistoriesPoints)
 			historyProducerRoutes.POST("", historyHandler.CreateProducerHistory)
-			historyProducerRoutes.POST("/bulk", historyHandler.CreateBulkProducerHistory)
 			historyProducerRoutes.DELETE("/all", historyHandler.DeleteAllProducerHistories)
 			historyProducerRoutes.DELETE("/:producer_uuid", historyHandler.DeleteProducerHistoriesByProducerUUID)
 		}
@@ -311,6 +310,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			producerRoutes.PATCH("/:uuid", producerHandler.UpdateProducer)
 			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
 			producerRoutes.DELETE("/drop", producerHandler.DropProducers)
+			producerRoutes.GET("/one/args", producerHandler.GetOneProducerByArgs)
 
 			producerWriterCloneRoutes := producerRoutes.Group("/writer_clones")
 			{
@@ -420,7 +420,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			syncRoutes.POST("/flow_network", syncFlowNetworkHandler.SyncFlowNetwork)
 			syncRoutes.POST("/stream", syncStreamHandler.SyncStream)
 			syncRoutes.POST("/writer", syncWriterHandler.SyncWriter)
-			syncRoutes.POST("/writer_cov", syncWriterHandler.SyncWriterCOV)
+			syncRoutes.POST("/cov", syncWriterHandler.SyncCOV) // clone ---> source side
+			syncRoutes.POST("/writer_action", syncWriterHandler.SyncWriterAction)
 		}
 	}
 

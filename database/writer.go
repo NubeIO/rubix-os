@@ -100,7 +100,6 @@ func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Wri
 	}
 	d.syncAfterCreateUpdateWriter(writerModel)
 	return writerModel, nil
-
 }
 
 func (d *GormDatabase) DropWriters() (bool, error) {
@@ -117,120 +116,62 @@ func (d *GormDatabase) DropWriters() (bool, error) {
 	}
 }
 
-/*
-WriterAction read or write a value to the writer and onto the writer clone
-1. update writer
-2. write to writerClone
-3. producer to decide if it's a valid cov
-3. producer to write to history
-4. return to consumer and update as required if it's a valid cov (update the writerConeUUID, this could be from another flow-framework instance)
-*/
-func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) (*model.ProducerHistory, error) {
-	askRefresh := body.AskRefresh
+func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) error {
 	writer, err := d.GetWriter(uuid)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	data, action, err := d.validateWriterBody(writer.WriterThingClass, body)
+	bytes, err := d.validateWriterBody(writer.WriterThingClass, body)
 	if err != nil {
-		return nil, err
+		return err
 	}
+	writer.DataStore = bytes
+	d.DB.Model(&writer).Updates(writer)
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
-	producerUUID := consumer.ProducerUUID
 	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-	var pHistory *model.ProducerHistory
-	if action == model.CommonNaming.Write {
-		pHistoryModel := model.ProducerHistory{
-			ProducerUUID: producerUUID,
-			CommonCurrentWriterUUID: model.CommonCurrentWriterUUID{
-				CurrentWriterUUID: writer.UUID,
-			},
-			DataStore: data,
-		}
-		if _, e := cli.AddProducerHistory(pHistoryModel); e != nil {
-			return nil, e
-		}
-		pHistory = &pHistoryModel
-	} else {
-		pHistory, err = cli.GetProducerHistory(producerUUID)
-		if err != nil {
-			return nil, err
-		}
+	syncWriterAction := model.SyncWriterAction{
+		WriterUUID: uuid,
+		Priority:   body.Priority,
+		Schedule:   body.Schedule,
 	}
-	if askRefresh {
-		writer.DataStore = pHistory.DataStore
-		consumer.CurrentWriterUUID = writer.UUID
-		if writer.WriterThingClass == model.ThingClass.Point {
-			priority := new(model.Priority)
-			_ = json.Unmarshal(writer.DataStore, &priority)
-			highestPriorityValue := priority.GetHighestPriorityValue()
-			d.DB.Model(&model.Priority{}).Where("point_uuid = ?", writer.WriterThingUUID).Updates(priority)
-			d.DB.Model(&model.Point{}).Where("uuid = ?", writer.WriterThingUUID).
-				Updates(map[string]interface{}{
-					"present_value":  highestPriorityValue,
-					"original_value": highestPriorityValue,
-				})
-		} else if writer.WriterThingClass == model.ThingClass.Schedule {
-			d.DB.Model(&model.Schedule{}).Where("uuid = ?", writer.WriterThingUUID).
-				Updates(map[string]interface{}{
-					"schedule": &writer.DataStore,
-				})
-		}
-		d.DB.Model(&writer).Updates(writer)
-		d.DB.Model(&consumer).Updates(consumer)
-	}
-	return pHistory, nil
+	return cli.SyncWriterAction(&syncWriterAction)
 }
 
-func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) (*utils.Array, error) {
+func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) *utils.Array {
 	arr := utils.NewArray()
 	for _, wri := range body {
 		b := new(model.WriterBody)
-		b.Action = wri.Action
-		b.AskRefresh = wri.AskRefresh
 		b.Priority = wri.Priority
-		action, err := d.WriterAction(wri.WriterUUID, b)
+		err := d.WriterAction(wri.WriterUUID, b)
 		if err == nil {
-			arr.Add(action)
+			arr.Add(err)
 		}
 	}
-	return arr, nil
-
+	return arr
 }
 
-func (d *GormDatabase) validateWriterBody(thingClass string, body *model.WriterBody) ([]byte, string, error) {
+func (d *GormDatabase) validateWriterBody(thingClass string, body *model.WriterBody) ([]byte, error) {
 	if thingClass == model.ThingClass.Point {
-		var bk model.WriterBody
-		if body.Action == model.WriterActions.Write {
-			if body.Priority == bk.Priority {
-				return nil, body.Action, errors.New("error: invalid json on writer body")
-			}
-			b, err := json.Marshal(body.Priority)
-			if err != nil {
-				return nil, body.Action, errors.New("error: failed to marshal priority on write body")
-			}
-			return b, body.Action, err
-		} else if body.Action == model.WriterActions.Read {
-			return nil, body.Action, nil
-		} else {
-			return nil, body.Action, errors.New("error: invalid action, try read or write")
+		if body.Priority == nil {
+			return nil, errors.New("error: invalid json on writer body")
 		}
-	} else if thingClass == model.ThingClass.Schedule {
-		if body.Action == model.WriterActions.Write {
-			b, err := json.Marshal(body.Schedule)
-			if err != nil {
-				return nil, body.Action, errors.New("error: failed to marshal schedule on write body")
-			}
-			return b, body.Action, err
-		} else if body.Action == model.WriterActions.Read {
-			return nil, body.Action, nil
-		} else {
-			return nil, body.Action, errors.New("error: invalid action, try read or write")
+		b, err := json.Marshal(body.Priority)
+		if err != nil {
+			return nil, errors.New("error: failed to marshal priority on write body")
 		}
+		return b, err
+	} else {
+		if body.Schedule == nil {
+			return nil, errors.New("error: invalid json on writer body")
+		}
+		b, err := json.Marshal(body.Schedule)
+		if err != nil {
+			return nil, errors.New("error: failed to marshal schedule on write body")
+		}
+		return b, err
 	}
-	return nil, body.Action, errors.New("error: invalid data type on writer body, i.e. type could be a point")
 }
 
 func (d *GormDatabase) syncAfterCreateUpdateWriter(body *model.Writer) {

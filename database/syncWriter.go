@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
@@ -38,22 +39,48 @@ func (d *GormDatabase) SyncWriter(body *model.SyncWriter) (*model.WriterClone, e
 	return &writerClone, nil
 }
 
-func (d *GormDatabase) SyncWriterCOV(body *model.SyncWriterCOV) error {
+func (d *GormDatabase) SyncCOV(body *model.SyncCOV) error {
 	writer, err := d.GetWriter(body.WriterUUID)
 	if err != nil {
 		return err
 	}
+	uuid := writer.WriterThingUUID
 	if writer.WriterThingClass == model.ThingClass.Point {
-		err = d.updatePointFromCOV(writer.WriterThingUUID, body)
+		pointModel := model.Point{
+			CommonUUID: model.CommonUUID{UUID: uuid},
+			Priority:   body.Priority,
+		}
+		_, err = d.PointWrite(uuid, &pointModel, false)
+		return err
+	} else {
+		return d.ScheduleWrite(writer.WriterThingUUID, body.Schedule)
 	}
-	return err
 }
 
-func (d *GormDatabase) updatePointFromCOV(pointUUID string, body *model.SyncWriterCOV) error {
-	pointModel := model.Point{
-		CommonUUID: model.CommonUUID{UUID: pointUUID},
-		Priority:   body.Priority,
+func (d *GormDatabase) SyncWriterAction(body *model.SyncWriterAction) error {
+	writerClone, err := d.GetOneWriterCloneByArgs(api.Args{SourceUUID: &body.WriterUUID})
+	if err != nil {
+		return err
 	}
-	_, err := d.PointWrite(pointUUID, &pointModel, false)
+	if writerClone.WriterThingClass == model.ThingClass.Point {
+		data, _ := json.Marshal(body.Priority)
+		writerCloneBody := model.WriterClone{CommonWriter: model.CommonWriter{DataStore: data}}
+		err = d.UpdateWriterClone(writerClone, &writerCloneBody)
+		if err != nil {
+			return nil
+		}
+		point := model.Point{Priority: body.Priority}
+		_, _ = d.PointWrite(writerClone.WriterThingUUID, &point, true)
+	} else if writerClone.WriterThingClass == model.ThingClass.Schedule {
+		data, _ := json.Marshal(body.Schedule)
+		writerCloneBody := model.WriterClone{CommonWriter: model.CommonWriter{DataStore: data}}
+		err = d.UpdateWriterClone(writerClone, &writerCloneBody)
+		if err != nil {
+			return nil
+		}
+		_ = d.ScheduleWrite(writerClone.WriterThingUUID, body.Schedule)
+	} else {
+		return errors.New("no match writer thing class")
+	}
 	return err
 }
