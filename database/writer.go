@@ -121,10 +121,12 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) error {
 	if err != nil {
 		return err
 	}
-	_, err = d.validateWriterBody(writer.WriterThingClass, body)
+	bytes, err := d.validateWriterBody(writer.WriterThingClass, body)
 	if err != nil {
 		return err
 	}
+	writer.DataStore = bytes
+	d.DB.Model(&writer).Updates(writer)
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
@@ -160,7 +162,7 @@ func (d *GormDatabase) validateWriterBody(thingClass string, body *model.WriterB
 			return nil, errors.New("error: failed to marshal priority on write body")
 		}
 		return b, err
-	} else if thingClass == model.ThingClass.Schedule {
+	} else {
 		if body.Schedule == nil {
 			return nil, errors.New("error: invalid json on writer body")
 		}
@@ -170,7 +172,6 @@ func (d *GormDatabase) validateWriterBody(thingClass string, body *model.WriterB
 		}
 		return b, err
 	}
-	return nil, errors.New("error: invalid data type on writer body, i.e. type could be a point")
 }
 
 func (d *GormDatabase) syncAfterCreateUpdateWriter(body *model.Writer) {

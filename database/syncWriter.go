@@ -44,10 +44,17 @@ func (d *GormDatabase) SyncCOV(body *model.SyncCOV) error {
 	if err != nil {
 		return err
 	}
+	uuid := writer.WriterThingUUID
 	if writer.WriterThingClass == model.ThingClass.Point {
-		err = d.updatePointFromCOV(writer.WriterThingUUID, body)
+		pointModel := model.Point{
+			CommonUUID: model.CommonUUID{UUID: uuid},
+			Priority:   body.Priority,
+		}
+		_, err = d.PointWrite(uuid, &pointModel, false)
+		return err
+	} else {
+		return d.ScheduleWrite(writer.WriterThingUUID, body.Schedule)
 	}
-	return err
 }
 
 func (d *GormDatabase) SyncWriterAction(body *model.SyncWriterAction) error {
@@ -75,14 +82,5 @@ func (d *GormDatabase) SyncWriterAction(body *model.SyncWriterAction) error {
 	} else {
 		return errors.New("no match writer thing class")
 	}
-	return err
-}
-
-func (d *GormDatabase) updatePointFromCOV(pointUUID string, body *model.SyncCOV) error {
-	pointModel := model.Point{
-		CommonUUID: model.CommonUUID{UUID: pointUUID},
-		Priority:   body.Priority,
-	}
-	_, err := d.PointWrite(pointUUID, &pointModel, false)
 	return err
 }
