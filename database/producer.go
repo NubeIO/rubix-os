@@ -8,7 +8,6 @@ import (
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/datatypes"
 )
 
 type Producer struct {
@@ -129,17 +128,6 @@ type Point struct {
 	Priority model.Priority `json:"priority"`
 }
 
-func (d *GormDatabase) ProducerWriteHist(uuid string, writeData datatypes.JSON) (*model.ProducerHistory, error) {
-	ph := new(model.ProducerHistory)
-	ph.ProducerUUID = uuid
-	ph.DataStore = writeData
-	_, err := d.CreateProducerHistory(ph)
-	if err != nil {
-		return nil, err
-	}
-	return ph, nil
-}
-
 func (d *GormDatabase) ProducersWrite(point *model.Point) error {
 	producerModel := new(model.Producer)
 	producerModel.CurrentWriterUUID = point.UUID
@@ -166,15 +154,10 @@ func (d *GormDatabase) producerWrite(point *model.Point, producerModel *model.Pr
 		return err
 	}
 
+	data, _ := json.Marshal(point.Priority)
 	ph := new(model.ProducerHistory)
 	ph.ProducerUUID = producer.UUID
-	b, err := json.Marshal(point.Priority)
-	if err != nil {
-		log.Errorf("producer: on update write history for point err: %v\n", err)
-		return errors.New("issue on update write history for point")
-	}
-	ph.DataStore = b
-	// TODO: create producer history update
+	ph.DataStore = data
 	_, err = d.CreateProducerHistory(ph)
 	if err != nil {
 		log.Errorf("producer: issue on write history ProducerWriteHist: %v\n", err)

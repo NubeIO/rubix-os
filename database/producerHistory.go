@@ -77,71 +77,9 @@ func (d *GormDatabase) GetProducerHistoriesPoints(args api.Args) ([]*model.Histo
 	return historiesModel, nil
 }
 
-func (d *GormDatabase) AppendProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
-	var limit = 10
-	var count int64
-	//TODO add in the limit as a field in the producer
-	subQuery := d.DB.Model(&model.ProducerHistory{}).Select("id").
-		Where("producer_uuid = ?", body.ProducerUUID).Order("timestamp desc").Limit(limit - 1)
-	subQuery.Count(&count)
-	if count >= int64(limit) {
-		query := d.DB.Where("producer_uuid = ?", body.ProducerUUID).Where("id not in (?)", subQuery).
-			Delete(&model.ProducerHistory{})
-		if query.Error != nil {
-			return nil, query.Error
-		}
-	}
-	if err := d.DB.Create(&body).Error; err != nil {
-		return nil, err
-	}
-	return body, nil
-}
-
-func (d *GormDatabase) CreateBulkProducerHistory(histories []*model.ProducerHistory) (bool, error) {
-	for _, history := range histories {
-		ph := new(model.ProducerHistory)
-		ph.ProducerUUID = history.ProducerUUID
-		ph.DataStore = history.DataStore
-		ph.Timestamp = time.Now().UTC()
-		_, err := d.AppendProducerHistory(ph)
-		if err != nil {
-			return false, err
-		}
-		d.DB.Model(&model.Producer{}).Where("uuid = ?").Update("current_writer_uuid", ph.CurrentWriterUUID)
-	}
-	return true, nil
-}
-
-func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (bool, error) {
+func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (*model.ProducerHistory, error) {
 	history.Timestamp = time.Now().UTC()
-	_, err := d.AppendProducerHistory(history)
-	if err != nil {
-		return false, err
-	}
-	var producer model.Producer
-	if err := d.DB.Where("uuid = ?", history.ProducerUUID).Find(&producer).Error; err != nil {
-		return false, err
-	}
-	if err = d.DB.Model(producer).Update("current_writer_uuid", history.CurrentWriterUUID).Error; err != nil {
-		return false, err
-	}
-	if producer.ProducerThingClass == model.ThingClass.Point {
-		priority := new(model.Priority)
-		_ = json.Unmarshal(history.DataStore, &priority)
-		highestPriorityValue := priority.GetHighestPriorityValue()
-		d.DB.Model(&model.Priority{}).Where("point_uuid = ?", producer.ProducerThingUUID).Updates(priority)
-		d.DB.Model(&model.Point{}).Where("uuid = ?", producer.ProducerThingUUID).
-			Updates(map[string]interface{}{
-				"present_value":  highestPriorityValue,
-				"original_value": highestPriorityValue,
-			})
-	} else {
-		d.DB.Model(&model.Schedule{}).Where("uuid = ?", producer.ProducerThingUUID).
-			Updates(map[string]interface{}{
-				"schedule": &history.DataStore,
-			})
-	}
-	return true, nil
+	return d.AppendProducerHistory(history)
 }
 
 // DeleteProducerHistoriesByProducerUUID delete all history for given producer_uuid.
@@ -150,20 +88,6 @@ func (d *GormDatabase) DeleteProducerHistoriesByProducerUUID(pUuid string, args 
 	query := d.buildProducerHistoryQuery(args)
 	query = query.Where("producer_uuid = ? ", pUuid)
 	query.Delete(&historyModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	}
-	return true, nil
-}
-
-// DeleteProducerHistory delete a history for given id
-func (d *GormDatabase) DeleteProducerHistory(id int) (bool, error) {
-	var historyModel *model.ProducerHistory
-	query := d.DB.Where("id = ? ", id).Delete(&historyModel)
 	if query.Error != nil {
 		return false, query.Error
 	}
@@ -188,4 +112,28 @@ func (d *GormDatabase) DeleteAllProducerHistories(args api.Args) (bool, error) {
 		return false, nil
 	}
 	return true, nil
+}
+
+func (d *GormDatabase) AppendProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
+	var limit = 100 // TODO add in the limit as a field in the producer
+	var count int64
+	ids := d.DB.Model(&model.ProducerHistory{}).
+		Select("id").
+		Where("producer_uuid = ?", body.ProducerUUID).
+		Order("timestamp desc").
+		Limit(limit - 1)
+	ids.Count(&count)
+	if count >= int64(limit) {
+		query := d.DB.
+			Where("producer_uuid = ?", body.ProducerUUID).
+			Where("id not in (?)", ids).
+			Delete(&model.ProducerHistory{})
+		if query.Error != nil {
+			return nil, query.Error
+		}
+	}
+	if err := d.DB.Create(&body).Error; err != nil {
+		return nil, err
+	}
+	return body, nil
 }
