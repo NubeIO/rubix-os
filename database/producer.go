@@ -148,8 +148,8 @@ func (d *GormDatabase) producerWrite(point *model.Point, producerModel *model.Pr
 		return errors.New("issue on update producer")
 	}
 
-	syncWriterCOV := model.SyncWriterCOV{Priority: point.Priority}
-	err = d.TriggerCOVToWriterClone(producerModel, &syncWriterCOV)
+	syncCOV := model.SyncCOV{Priority: point.Priority}
+	err = d.TriggerCOVToWriterClone(producerModel, &syncCOV)
 	if err != nil {
 		return err
 	}
@@ -166,7 +166,7 @@ func (d *GormDatabase) producerWrite(point *model.Point, producerModel *model.Pr
 	return nil
 }
 
-func (d *GormDatabase) TriggerCOVToWriterClone(producer *model.Producer, body *model.SyncWriterCOV) error {
+func (d *GormDatabase) TriggerCOVToWriterClone(producer *model.Producer, body *model.SyncCOV) error {
 	wcs, err := d.GetWriterClones(api.Args{ProducerUUID: utils.NewStringAddress(producer.UUID)})
 	if err != nil {
 		return errors.New("error on getting writer clones from producer_uuid")
@@ -177,14 +177,14 @@ func (d *GormDatabase) TriggerCOVToWriterClone(producer *model.Producer, body *m
 	return nil
 }
 
-func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Producer, wc *model.WriterClone, body *model.SyncWriterCOV) error {
+func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Producer, wc *model.WriterClone, body *model.SyncCOV) error {
 	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
 	body.WriterUUID = wc.SourceUUID
 	for _, fn := range stream.FlowNetworks {
 		// TODO: wc.FlowFrameworkUUID == "" remove from condition; it's here coz old deployment doesn't used to have that value
 		if wc.FlowFrameworkUUID == "" || fn.UUID == wc.FlowFrameworkUUID {
 			cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
-			_ = cli.SyncWriterCOV(body)
+			_ = cli.SyncCOV(body)
 		}
 	}
 	return nil

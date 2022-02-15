@@ -420,7 +420,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			syncRoutes.POST("/flow_network", syncFlowNetworkHandler.SyncFlowNetwork)
 			syncRoutes.POST("/stream", syncStreamHandler.SyncStream)
 			syncRoutes.POST("/writer", syncWriterHandler.SyncWriter)
-			syncRoutes.POST("/writer_cov", syncWriterHandler.SyncWriterCOV)
+			syncRoutes.POST("/cov", syncWriterHandler.SyncCOV) // clone ---> source side
+			syncRoutes.POST("/writer_action", syncWriterHandler.SyncWriterAction)
 		}
 	}
 

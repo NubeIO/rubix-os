@@ -363,7 +363,12 @@ func getBodySyncWriter(ctx *gin.Context) (dto *model.SyncWriter, err error) {
 	return dto, err
 }
 
-func getBodySyncWriterCOV(ctx *gin.Context) (dto *model.SyncWriterCOV, err error) {
+func getBodySyncCOV(ctx *gin.Context) (dto *model.SyncCOV, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodySyncWriterAction(ctx *gin.Context) (dto *model.SyncWriterAction, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

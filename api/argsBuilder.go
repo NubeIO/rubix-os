@@ -166,8 +166,14 @@ func buildPointArgs(ctx *gin.Context) Args {
 func buildWriterArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
+	if value, ok := ctx.GetQuery(aType.ProducerUUID); ok {
+		args.ProducerUUID = &value
+	}
 	if value, ok := ctx.GetQuery(aType.WriterThingClass); ok {
 		args.WriterThingClass = &value
+	}
+	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
+		args.SourceUUID = &value
 	}
 	return args
 }

@@ -193,6 +193,9 @@ func (d *GormDatabase) buildWriterCloneQuery(args api.Args) *gorm.DB {
 	if args.WriterThingClass != nil {
 		query = query.Where("writer_thing_class = ?", *args.WriterThingClass)
 	}
+	if args.SourceUUID != nil {
+		query = query.Where("source_uuid = ?", *args.SourceUUID)
+	}
 	return query
 }
 

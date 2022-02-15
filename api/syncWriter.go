@@ -7,7 +7,8 @@ import (
 
 type SyncWriterDatabase interface {
 	SyncWriter(body *model.SyncWriter) (*model.WriterClone, error)
-	SyncWriterCOV(body *model.SyncWriterCOV) error
+	SyncCOV(body *model.SyncCOV) error
+	SyncWriterAction(body *model.SyncWriterAction) error
 }
 
 type SyncWriterAPI struct {
@@ -20,8 +21,14 @@ func (a *SyncWriterAPI) SyncWriter(ctx *gin.Context) {
 	responseHandler(q, err, ctx)
 }
 
-func (a *SyncWriterAPI) SyncWriterCOV(ctx *gin.Context) {
-	body, _ := getBodySyncWriterCOV(ctx)
-	err := a.DB.SyncWriterCOV(body)
+func (a *SyncWriterAPI) SyncCOV(ctx *gin.Context) {
+	body, _ := getBodySyncCOV(ctx)
+	err := a.DB.SyncCOV(body)
+	responseHandler(nil, err, ctx)
+}
+
+func (a *SyncWriterAPI) SyncWriterAction(ctx *gin.Context) {
+	body, _ := getBodySyncWriterAction(ctx)
+	err := a.DB.SyncWriterAction(body)
 	responseHandler(nil, err, ctx)
 }

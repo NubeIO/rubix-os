@@ -13,13 +13,11 @@ type CommonWriter struct {
 	CommonCreated
 }
 
-//Writer could be a local network, job or alarm and so on...
 type Writer struct {
 	CommonWriter
 	ConsumerUUID string `json:"consumer_uuid,omitempty" gorm:"TYPE:string REFERENCES consumers;not null;default:null"`
 }
 
-//WriterClone list of all the consumers
 type WriterClone struct { //TODO the WriterClone needs to publish a COV event as for example we have 2x mqtt broker then the cov for a point maybe different when not going over the internet
 	CommonWriter
 	ProducerUUID      string `json:"producer_uuid" gorm:"TYPE:string REFERENCES producers;not null;default:null"`
@@ -33,25 +31,25 @@ type SyncWriter struct {
 	FlowFrameworkUUID string
 }
 
-//WriterBody could be a local network, job or alarm and so on
 type WriterBody struct {
-	Action     string       `json:"action,omitempty"` //read, write and so on
-	AskRefresh bool         `json:"ask_refresh,omitempty"`
-	Priority   Priority     `json:"priority,omitempty"`
-	Schedule   ScheduleData `json:"schedule,omitempty"`
+	Priority *Priority     `json:"priority,omitempty"`
+	Schedule *ScheduleData `json:"schedule,omitempty"`
 }
 
-//WriterBulk could be a local network, job or alarm and so on
 type WriterBulk struct {
 	WriterUUID  string      `json:"writer_uuid,omitempty"`
-	Action      string      `json:"action,omitempty"` //read, write and so on
-	AskRefresh  bool        `json:"ask_refresh,omitempty"`
 	CommonValue CommonValue `json:"common_value,omitempty"`
-	Priority    Priority    `json:"priority,omitempty"`
+	Priority    *Priority   `json:"priority,omitempty"`
 }
 
-type SyncWriterCOV struct {
+type SyncCOV struct {
 	WriterUUID string
 	Priority   *Priority
-	Schedule   *datatypes.JSON
+	Schedule   *ScheduleData
+}
+
+type SyncWriterAction struct {
+	WriterUUID string
+	Priority   *Priority
+	Schedule   *ScheduleData
 }

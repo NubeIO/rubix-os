@@ -8,8 +8,9 @@ import (
 
 // The WriterCloneDatabase interface for encapsulating database access.
 type WriterCloneDatabase interface {
-	GetWriterClone(uuid string) (*model.WriterClone, error)
 	GetWriterClones(args Args) ([]*model.WriterClone, error)
+	GetWriterClone(uuid string) (*model.WriterClone, error)
+	GetOneWriterCloneByArgs(args Args) (*model.WriterClone, error)
 	CreateWriterClone(body *model.WriterClone) (*model.WriterClone, error)
 	DeleteWriterClone(uuid string) (bool, error)
 	DropWriterClone() (bool, error)

@@ -20,15 +20,29 @@ func (a *FlowClient) SyncWriter(body *model.SyncWriter) (*model.WriterClone, err
 	return resp.Result().(*model.WriterClone), nil
 }
 
-func (a *FlowClient) SyncWriterCOV(body *model.SyncWriterCOV) error {
+func (a *FlowClient) SyncCOV(body *model.SyncCOV) error {
 	resp, err := a.client.R().
 		SetBody(body).
-		Post("/api/sync/writer_cov")
+		Post("/api/sync/cov")
 	if err != nil {
 		if resp == nil || resp.String() == "" {
-			return fmt.Errorf("SyncWriterCOV: %s", err)
+			return fmt.Errorf("SyncCOV: %s", err)
 		} else {
-			return fmt.Errorf("SyncWriterCOV: %s", resp)
+			return fmt.Errorf("SyncCOV: %s", resp)
+		}
+	}
+	return nil
+}
+
+func (a *FlowClient) SyncWriterAction(body *model.SyncWriterAction) error {
+	resp, err := a.client.R().
+		SetBody(body).
+		Post("/api/sync/writer_action")
+	if err != nil {
+		if resp == nil || resp.String() == "" {
+			return fmt.Errorf("SyncWriterAction: %s", err)
+		} else {
+			return fmt.Errorf("SyncWriterAction: %s", resp)
 		}
 	}
 	return nil
