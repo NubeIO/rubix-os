@@ -33,6 +33,7 @@ type Args struct {
 	CompactPayload       string
 	CompactWithName      string
 	FlowUUID             string
+	Name                 *string
 	StreamUUID           *string
 	ProducerUUID         *string
 	ConsumerUUID         *string
@@ -44,6 +45,7 @@ type Args struct {
 	DeviceId             *string
 	WriterThingClass     *string
 	SourceUUID           *string
+	ProducerThingUUID    *string
 	PluginName           bool
 	TimestampGt          *string
 	TimestampLt          *string
@@ -82,6 +84,7 @@ var ArgsType = struct {
 	WriteHistory         string
 	WriteConsumer        string
 	Field                string
+	Name                 string
 	Value                string
 	UpdateProducer       string
 	CompactPayload       string //for a point would be presentValue
@@ -98,6 +101,7 @@ var ArgsType = struct {
 	DeviceId             string
 	WriterThingClass     string
 	SourceUUID           string
+	ProducerThingUUID    string
 	PluginName           string
 	TimestampGt          string
 	TimestampLt          string
@@ -134,6 +138,7 @@ var ArgsType = struct {
 	WriteHistory:         "write_history",
 	WriteConsumer:        "write_consumer",
 	Field:                "field",
+	Name:                 "name",
 	Value:                "value",
 	UpdateProducer:       "update_producer",
 	CompactPayload:       "compact_payload",
@@ -150,6 +155,7 @@ var ArgsType = struct {
 	DeviceId:             "device_id",
 	WriterThingClass:     "writer_thing_class",
 	SourceUUID:           "source_uuid",
+	ProducerThingUUID:    "producer_thing_uuid",
 	PluginName:           "by_plugin_name",
 	TimestampGt:          "timestamp_gt",
 	TimestampLt:          "timestamp_lt",

@@ -126,6 +126,12 @@ func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 	if args.StreamUUID != nil {
 		query = query.Where("stream_uuid = ?", *args.StreamUUID)
 	}
+	if args.ProducerThingUUID != nil {
+		query = query.Where("producer_thing_uuid = ?", *args.ProducerThingUUID)
+	}
+	if args.Name != nil {
+		query = query.Where("name = ?", *args.Name)
+	}
 	return query
 }
 

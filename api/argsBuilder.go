@@ -34,22 +34,6 @@ func parentArgs(ctx *gin.Context) (AddToParent string) {
 	return args.AddToParent
 }
 
-//withConsumerArgs
-func withConsumerArgs(ctx *gin.Context) (askResponse bool, askRefresh bool, write bool, updateProducer bool) {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.AskRefresh = ctx.DefaultQuery(aType.AskRefresh, aDefault.AskRefresh)
-	args.AskResponse = ctx.DefaultQuery(aType.AskResponse, aDefault.AskResponse)
-	args.Write = ctx.DefaultQuery(aType.Write, aDefault.Write)
-	args.UpdateProducer = ctx.DefaultQuery(aType.UpdateProducer, aDefault.UpdateProducer)
-	askRefresh, _ = toBool(args.AskRefresh)
-	askResponse, _ = toBool(args.AskResponse)
-	write, _ = toBool(args.Write)
-	updateProducer, _ = toBool(args.UpdateProducer)
-	return askRefresh, askResponse, write, updateProducer
-}
-
 func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
@@ -140,6 +124,12 @@ func buildProducerArgs(ctx *gin.Context) Args {
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	if value, ok := ctx.GetQuery(aType.StreamUUID); ok {
 		args.StreamUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.Name); ok {
+		args.Name = &value
+	}
+	if value, ok := ctx.GetQuery(aType.ProducerThingUUID); ok {
+		args.ProducerThingUUID = &value
 	}
 	return args
 }

@@ -3,7 +3,6 @@ package database
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/src/client"
@@ -30,6 +29,15 @@ func (d *GormDatabase) GetProducer(uuid string, args api.Args) (*model.Producer,
 	query := d.buildProducerQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&producerModel).Error; err != nil {
 		return nil, err
+	}
+	return producerModel, nil
+}
+
+func (d *GormDatabase) GetOneProducerByArgs(args api.Args) (*model.Producer, error) {
+	var producerModel *model.Producer
+	query := d.buildProducerQuery(args)
+	if err := query.First(&producerModel).Error; err != nil {
+		return nil, query.Error
 	}
 	return producerModel, nil
 }
@@ -132,17 +140,21 @@ func (d *GormDatabase) ProducerWriteHist(uuid string, writeData datatypes.JSON) 
 	return ph, nil
 }
 
-func (d *GormDatabase) ProducerWrite(point *model.Point) error {
+func (d *GormDatabase) ProducersWrite(point *model.Point) error {
 	producerModel := new(model.Producer)
 	producerModel.CurrentWriterUUID = point.UUID
-	// TODO: replace GetProducerByField by GetOneProducerByArgs
-	// TODO: point can have more producers
-	producer, err := d.GetProducerByField("producer_thing_uuid", point.UUID)
-	if err != nil {
-		log.Info("producer doesn't exist for this point")
-		return nil
+	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &point.UUID})
+	for _, producer := range producers {
+		err := d.producerWrite(point, producerModel, producer)
+		if err != nil {
+			return err
+		}
 	}
-	producerModel, err = d.UpdateProducer(producer.UUID, producerModel)
+	return nil
+}
+
+func (d *GormDatabase) producerWrite(point *model.Point, producerModel *model.Producer, producer *model.Producer) error {
+	producerModel, err := d.UpdateProducer(producer.UUID, producerModel)
 	if err != nil {
 		log.Errorf("producer: issue on update producer err: %v\n", err)
 		return errors.New("issue on update producer")
@@ -193,16 +205,4 @@ func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Produce
 		}
 	}
 	return nil
-}
-
-// GetProducerByField returns the point for the given field ie name or nil.
-// For example get a producer by its producer_thing_uuid
-func (d *GormDatabase) GetProducerByField(field string, value string) (*model.Producer, error) {
-	var producerModel *model.Producer
-	f := fmt.Sprintf("%s = ? ", field)
-	query := d.DB.Where(f, value).First(&producerModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return producerModel, nil
 }

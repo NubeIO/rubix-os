@@ -311,6 +311,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			producerRoutes.PATCH("/:uuid", producerHandler.UpdateProducer)
 			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
 			producerRoutes.DELETE("/drop", producerHandler.DropProducers)
+			producerRoutes.GET("/one/args", producerHandler.GetOneProducerByArgs)
 
 			producerWriterCloneRoutes := producerRoutes.Group("/writer_clones")
 			{
