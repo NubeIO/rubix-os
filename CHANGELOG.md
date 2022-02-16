@@ -1,4 +1,13 @@
 # CHANGELOG
+## [v0.3.5](https://github.com/NubeIO/flow-framework/tree/v0.3.5) (2022-02-16)
+- Improvement: support multiple producers on a single point
+- Improvement on producer history
+- Writer action updates its own side thing
+- Make schedule write actions working
+- Fix: FlowNetwork creation issue for HTTP
+- Make FlowNetwork update working
+- Fix: float pointer values comparison for COV
+
 ## [v0.3.4](https://github.com/NubeIO/flow-framework/tree/v0.3.4) (2022-02-10)
 - Sync value on COV of point
 - Fix: point.present_value comparison issue
