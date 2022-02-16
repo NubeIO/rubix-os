@@ -80,7 +80,7 @@ func (inst *Instance) setnewPointFields(deviceBody *model.Device, pointBody *mod
 
 // addPoint add a pnt
 func (inst *Instance) addPoint(body *model.Point) error {
-	_, err := inst.db.CreatePoint(body)
+	_, err := inst.db.CreatePoint(body, true)
 	if err != nil {
 		log.Errorf("lora: issue on CreatePoint: %v\n", err)
 		return err

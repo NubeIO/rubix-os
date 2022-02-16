@@ -32,7 +32,7 @@ func (i *Instance) wizard(body wizard) (string, error) {
 	net.TransportType = model.TransType.IP
 	net.PluginPath = "edge28"
 
-	network, err := i.db.CreateNetwork(&net)
+	network, err := i.db.CreateNetwork(&net, false)
 	if err != nil {
 		return "", err
 	}
@@ -85,7 +85,7 @@ func (i *Instance) wizard(body wizard) (string, error) {
 		}
 		pnt.IoType = string(model.IOTypeRAW)
 		pnt.COV = utils.NewFloat64(0.5)
-		point, err := i.db.CreatePoint(&pnt)
+		point, err := i.db.CreatePoint(&pnt, false, false)
 		if err != nil {
 			return "", err
 		}

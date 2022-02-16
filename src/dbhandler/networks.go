@@ -5,8 +5,24 @@ import (
 	"github.com/NubeIO/flow-framework/model"
 )
 
-func (h *Handler) CreateNetwork(body *model.Network) (*model.Network, error) {
-	q, err := getDb().CreateNetwork(body)
+func (h *Handler) CreateNetwork(body *model.Network, fromPlugin bool) (*model.Network, error) {
+	q, err := getDb().CreateNetwork(body, fromPlugin)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
+func (h *Handler) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
+	q, err := getDb().UpdateNetwork(uuid, body)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
+func (h *Handler) GetNetwork(uuid string, args api.Args) (*model.Network, error) {
+	q, err := getDb().GetNetwork(uuid, args)
 	if err != nil {
 		return nil, err
 	}
@@ -51,4 +67,12 @@ func (h *Handler) GetNetworkByField(field string, value string, withDevices bool
 		return nil, err
 	}
 	return q, nil
+}
+
+func (h *Handler) DeleteNetwork(uuid string) (bool, error) {
+	_, err := getDb().DeleteNetwork(uuid)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

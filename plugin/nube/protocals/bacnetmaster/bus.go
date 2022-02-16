@@ -20,7 +20,9 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if net != nil {
-					log.Info("BACNET BUS PluginsCreated isNetwork", " ", net.UUID)
+					log.Info("BACNET-MASTER BUS PluginsUpdated isNetwork", " ", net.UUID)
+					//_, err = i.addNetwork(net)
+					log.Info("BACNET-MASTER BUS PluginsCreated isNetwork", " ", net.UUID)
 					if err != nil {
 						return
 					}
@@ -32,8 +34,8 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if dev != nil {
-					log.Info("BACNET BUS PluginsCreated IsDevice", " ", dev.UUID)
-					//_, err = i.addPoints(dev)
+					log.Info("BACNET-MASTER BUS PluginsCreated IsDevice", " ", dev.UUID)
+					//_, err = i.addDevice(dev)
 					if err != nil {
 						return
 					}
@@ -41,22 +43,24 @@ func (i *Instance) BusServ() {
 				}
 				//try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
-				fmt.Println("BACNET ADD POINT ON BUS")
 				if err != nil {
-					return
-				}
-				_, err = i.addPoint(pnt)
-				if err != nil {
-					log.Error("BACNET ADD POINT BUS issue on add rest")
 					return
 				}
 				if pnt != nil {
-					log.Info("BACNET BUS PluginsCreated IsPoint", " ", pnt.UUID)
+					log.Info("BACNET-MASTER BUS PluginsCreated IsPoint", " ", pnt.UUID)
+					//_, err = i.addPoint(pnt)
 					if err != nil {
 						return
 					}
-					return
+					if pnt != nil {
+						log.Info("BACNET-MASTER BUS PluginsCreated IsPoint", " ", pnt.UUID)
+						if err != nil {
+							return
+						}
+						return
+					}
 				}
+
 			}()
 		},
 		Matcher: eventbus.PluginsCreated,
@@ -73,7 +77,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if net != nil {
-					log.Info("BACNET BUS PluginsUpdated isNetwork", " ", net.UUID)
+					log.Info("BACNET-MASTER BUS PluginsUpdated isNetwork", " ", net.UUID)
 					if err != nil {
 						return
 					}
@@ -86,7 +90,7 @@ func (i *Instance) BusServ() {
 				}
 				if dev != nil {
 					//_, err = i.addPoints(dev)
-					log.Info("BACNET BUS PluginsUpdated IsDevice", " ", dev.UUID)
+					log.Info("BACNET-MASTER BUS PluginsUpdated IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
 					}
@@ -98,8 +102,8 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if pnt != nil {
-					_, err = i.pointPatch(pnt)
-					log.Info("BACNET BUS PluginsUpdated IsPoint", " ", pnt.UUID)
+					//_, err = i.pointPatch(pnt)
+					log.Info("BACNET-MASTER BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return
 					}
@@ -115,14 +119,14 @@ func (i *Instance) BusServ() {
 	handlerDeleted := bus.Handler{ //DELETED
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
-				log.Info("BACNET BUS DELETED NEW MSG", " ", e.Topic)
+				log.Info("BACNET-MASTER BUS DELETED NEW MSG", " ", e.Topic)
 				//try and match is network
 				net, err := eventbus.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
 				}
 				if net != nil {
-					log.Info("BACNET BUS DELETED isNetwork", " ", net.UUID)
+					log.Info("BACNET-MASTER BUS DELETED isNetwork", " ", net.UUID)
 					if err != nil {
 						return
 					}
@@ -135,7 +139,7 @@ func (i *Instance) BusServ() {
 				}
 				if dev != nil {
 					//_, err = i.addPoints(dev)
-					log.Info("BACNET BUS DELETED IsDevice", " ", dev.UUID)
+					log.Info("BACNET-MASTER BUS DELETED IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
 					}
@@ -146,10 +150,10 @@ func (i *Instance) BusServ() {
 				if err != nil {
 					return
 				}
-				log.Info("BACNET BUS DELETED IsPoint", " ")
+				log.Info("BACNET-MASTER BUS DELETED IsPoint", " ")
 				if pnt != nil {
-					p, err := i.deletePoint(pnt)
-					log.Info("BACNET BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", p)
+					//p, err := i.deletePoint(pnt)
+					//log.Info("BACNET-MASTER BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", p)
 					if err != nil {
 						return
 					}
@@ -166,10 +170,8 @@ func (i *Instance) BusServ() {
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				p, _ := e.Data.(mqtt.Message)
-				_, err := i.bacnetUpdate(p)
-				if err != nil {
-					return
-				}
+				i.bacnetUpdate(p)
+
 			}()
 		},
 		Matcher: eventbus.MQTTUpdated,

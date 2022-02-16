@@ -22,7 +22,7 @@ const maxAllowedNetworks = 1
 const networkType = "bacnet"
 const transportType = "ip" //serial, ip
 const ip = "0.0.0.0"
-const port = 1717
+const port = 1718
 
 var rt = &nrest.ReqType{
 	BaseUri: ip,

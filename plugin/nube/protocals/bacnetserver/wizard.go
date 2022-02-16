@@ -15,7 +15,7 @@ func (i *Instance) wizard() (string, error) {
 	net.TransportType = model.TransType.IP
 	net.PluginPath = "bacnetserver"
 
-	network, err := i.db.CreateNetwork(&net)
+	network, err := i.db.CreateNetwork(&net, false)
 	if err != nil {
 		return "", err
 	}
@@ -51,7 +51,7 @@ func (i *Instance) wizard() (string, error) {
 	pnt.Unit = utils.NewStringAddress("noUnits")
 	pnt.Priority = new(model.Priority)
 	(*pnt.Priority).P16 = utils.NewFloat64(1)
-	point, err := i.db.CreatePoint(&pnt)
+	point, err := i.db.CreatePoint(&pnt, false, false)
 	if err != nil {
 		return "", err
 	}

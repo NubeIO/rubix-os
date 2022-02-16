@@ -1,4 +1,4 @@
-package model
+package lora_model
 
 import (
 	"github.com/NubeIO/flow-framework/plugin/defaults"

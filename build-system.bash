@@ -51,7 +51,7 @@ parseCommand() {
         --lorawan)
             LORAWAN=true
           ;;
-        --bacnet-master)
+        --bacnetmaster)
             BACNET_MASTER=true
           ;;
         *)

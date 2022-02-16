@@ -12,7 +12,7 @@ type PointDatabase interface {
 	GetPoint(uuid string, args Args) (*model.Point, error)
 	GetPointsByNetworkPluginName(networkUUID string) (*utils.Array, error)
 	GetPointsByNetworkUUID(networkUUID string) (*utils.Array, error)
-	CreatePoint(body *model.Point, addToParent string) (*model.Point, error)
+	CreatePoint(body *model.Point, addToParent string, fromPlugin bool) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
 	PointWrite(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
 	GetPointByName(networkName, deviceName, pointName string) (*model.Point, error)
@@ -86,7 +86,7 @@ func (a *PointAPI) PointWriteByName(ctx *gin.Context) {
 func (a *PointAPI) CreatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	addToParent := parentArgs(ctx) //flowUUID
-	q, err := a.DB.CreatePoint(body, addToParent)
+	q, err := a.DB.CreatePoint(body, addToParent, false)
 	responseHandler(q, err, ctx)
 }
 

@@ -2,35 +2,48 @@ package main
 
 import (
 	"errors"
-	"math/rand"
-
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nums"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/system/networking"
+	"math/rand"
 )
 
 //wizard make a network/dev/pnt
-func (i *Instance) wizard() (string, error) {
+func (i *Instance) wizard(network *Network) (string, error) {
 	var net model.Network
-	net.Name = "bacnet"
+	net.Name = network.NetworkName
 	net.TransportType = model.TransType.IP
-	net.PluginPath = "bacnetserver"
+	net.PluginPath = "bacnetmaster"
 
-	network, err := i.db.CreateNetwork(&net)
+	if network.InterfaceName != "" {
+		_net, _ := networking.GetInterfaceByName(network.InterfaceName)
+		if _net == nil {
+			return "", errors.New("failed to find a valid network interface")
+		}
+		network.NetworkIp = _net.IP
+		network.NetworkMask = _net.NetMaskLength
+	} else {
+		net.IP = network.NetworkIp
+		net.Port = nums.NewInt(network.NetworkPort)
+		net.NetworkMask = nums.NewInt(network.NetworkMask)
+	}
+	_network, err := i.db.CreateNetwork(&net, false)
 	if err != nil {
 		return "", err
 	}
-	if network.UUID == "" {
+	if _network.UUID == "" {
 		return "", errors.New("failed to create a new network")
 	}
 	var dev model.Device
-	dev.NetworkUUID = network.UUID
+	dev.NetworkUUID = _network.UUID
 	dev.Name = "bacnet"
 
-	device, err := i.db.CreateDevice(&dev)
+	d, err := i.db.CreateDevice(&dev)
 	if err != nil {
 		return "", err
 	}
-	if device.UUID == "" {
+	if d.UUID == "" {
 		return "", errors.New("failed to create a new device")
 	}
 
@@ -39,19 +52,19 @@ func (i *Instance) wizard() (string, error) {
 	a := rand.Intn(max-min) + min
 
 	var pnt model.Point
-	pnt.DeviceUUID = device.UUID
+	pnt.DeviceUUID = d.UUID
 	pName := utils.NameIsNil()
 	pnt.Name = pName
 	pnt.Description = pName
-	pnt.AddressID = utils.NewInt(a)
+	pnt.AddressID = nums.NewInt(a)
 	pnt.ObjectType = "analogValue"
-	pnt.COV = utils.NewFloat64(0.5)
-	pnt.Fallback = utils.NewFloat64(1)
+	pnt.COV = nums.NewFloat64(0.5)
+	pnt.Fallback = nums.NewFloat64(1)
 	pnt.MessageCode = "normal"
 	pnt.Unit = utils.NewStringAddress("noUnits")
 	pnt.Priority = new(model.Priority)
-	(*pnt.Priority).P16 = utils.NewFloat64(1)
-	point, err := i.db.CreatePoint(&pnt)
+	(*pnt.Priority).P16 = nums.NewFloat64(1)
+	point, err := i.db.CreatePoint(&pnt, false, false)
 	if err != nil {
 		return "", err
 	}

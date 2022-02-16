@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	baseModel "github.com/NubeIO/flow-framework/model"
-	bacnetServerModel "github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/model"
-	model "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/model"
+	bacnetServerModel "github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
+	model "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lorawan_model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 

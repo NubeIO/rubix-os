@@ -36,3 +36,11 @@ func (h *Handler) UpdateDevice(uuid string, body *model.Device) (*model.Device, 
 	}
 	return q, nil
 }
+
+func (h *Handler) DeleteDevice(uuid string) (bool, error) {
+	_, err := getDb().DeleteDevice(uuid)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}

@@ -8,7 +8,7 @@ type CommonDevice struct {
 	AddressId         int           `json:"address_id,omitempty"`  // for example a modbus address or bacnet address
 	ZeroMode          *bool         `json:"zero_mode,omitempty"`
 	PollDelayPointsMS time.Duration `json:"poll_delay_points_ms"`
-	AddressUUID       string        `json:"address_uuid" gorm:"type:varchar(255)"` // AAB1213
+	AddressUUID       string        `json:"address_uuid" gorm:"type:varchar(255);unique"` // AAB1213
 	CommonIP
 }
 
@@ -23,7 +23,14 @@ type Device struct {
 	CommonThingRef
 	CommonThingType
 	CommonDevice
-	NetworkUUID string   `json:"network_uuid,omitempty" gorm:"TYPE:varchar(255) REFERENCES networks;not null;default:null"`
-	Points      []*Point `json:"points,omitempty" gorm:"constraint:OnDelete:CASCADE"`
-	Tags        []*Tag   `json:"tags,omitempty" gorm:"many2many:devices_tags;constraint:OnDelete:CASCADE"`
+	DeviceMac      *int     `json:"device_mac,omitempty"`
+	DeviceObjectId *int     `json:"device_object_id,omitempty"`
+	NetworkNumber  *int     `json:"network_number,omitempty"` //bacnet network number
+	DeviceMask     *int     `json:"device_mask,omitempty"`
+	TypeSerial     *bool    `json:"type_serial,omitempty"`
+	SupportsRpm    *bool    `json:"supports_rpm,omitempty"` //bacnet support read property multiple
+	SupportsWpm    *bool    `json:"supports_wpm,omitempty"` //bacnet support write property multiple
+	NetworkUUID    string   `json:"network_uuid,omitempty" gorm:"TYPE:varchar(255) REFERENCES networks;not null;default:null"`
+	Points         []*Point `json:"points,omitempty" gorm:"constraint:OnDelete:CASCADE"`
+	Tags           []*Tag   `json:"tags,omitempty" gorm:"many2many:devices_tags;constraint:OnDelete:CASCADE"`
 }
