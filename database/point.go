@@ -109,7 +109,6 @@ func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName strin
 	return write, nil
 }
 
-
 func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string, fromPlugin bool) (*model.Point, error) {
 	var deviceModel *model.Device
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
@@ -167,14 +166,15 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string, fromPlu
 	if err != nil {
 		return nil, errors.New("ERROR failed to get plugin uuid")
 	}
-	if fromPlugin {
+	if !fromPlugin {
 		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, plug.PluginConfId, body.UUID)
 		d.Bus.RegisterTopic(t)
 		err = d.Bus.Emit(eventbus.CTX(), t, body)
+		if err != nil {
+			return nil, errors.New("ERROR on device eventbus")
+		}
 	}
-	if err != nil {
-		return nil, errors.New("ERROR on device eventbus")
-	}
+
 	return body, query.Error
 }
 
@@ -260,11 +260,6 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
-
-	if utils.BoolIsNil(pointModel.IsProducer) {
-		_, err := d.ProducerWrite("point", pointModel)
-		if err != nil {
-			log.Errorf("ERROR ProducerPointCOV at func UpdatePointByFieldAndType")
 	isChange := !utils.CompareFloatPtr(pointModel.PresentValue, presentValue)
 	pointModel.PresentValue = presentValue
 	if presentValue == nil {
