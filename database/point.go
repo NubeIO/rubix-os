@@ -254,8 +254,12 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
-	isChange := pointModel.PresentValue != presentValue
+	isChange := !utils.CompareFloatPtr(pointModel.PresentValue, presentValue)
 	pointModel.PresentValue = presentValue
+	if presentValue == nil {
+		// nil is ignored on GORM, so we are pushing forcefully because isChange comparison will fail on `null` write
+		d.DB.Model(&pointModel).Update("present_value", nil)
+	}
 	_ = d.DB.Model(&pointModel).Updates(&pointModel)
 
 	if isChange == true {
