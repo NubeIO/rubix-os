@@ -7,6 +7,7 @@ type NameStruct struct {
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"3"`
 	Max      int    `json:"max" default:"20"`
+	Default  string `json:"default" default:"a"`
 }
 
 type DescriptionStruct struct {
@@ -14,6 +15,7 @@ type DescriptionStruct struct {
 	Required bool   `json:"required" default:"false"`
 	Min      int    `json:"min" default:"0"`
 	Max      int    `json:"max" default:"80"`
+	Default  string `json:"default" default:"na"`
 }
 
 type Network struct {
@@ -34,6 +36,17 @@ type Device struct {
 type Point struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
+	//ObjectType  struct {
+	//	Type     string   `json:"type" default:"array"`
+	//	Required bool     `json:"required" default:"true"`
+	//	Options  []string `json:"options" default:"[\"analogValue\",\"analogOutput\"]"`
+	//	Default  string   `json:"default" default:"analogValue"`
+	//} `json:"object_type"`
+	//AddressID struct {
+	//	Type     string `json:"type" default:"int"`
+	//	Required bool   `json:"required" default:"true"`
+	//	Default  int    `json:"default" default:"1"`
+	//} `json:"address_id"`
 }
 
 func GetNetworkSchema() *Network {

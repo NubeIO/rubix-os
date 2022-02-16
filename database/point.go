@@ -186,9 +186,12 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
 		return nil, errors.New(eMsg)
 	}
-	if existingAddrID {
-		eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", utils.IntIsNil(body.AddressID))
-		return nil, errors.New(eMsg)
+
+	if !utils.IntNilCheck(body.AddressID) {
+		if existingAddrID {
+			eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", utils.IntIsNil(body.AddressID))
+			return nil, errors.New(eMsg)
+		}
 	}
 	if len(body.Tags) > 0 {
 		if err := d.updateTags(&pointModel, body.Tags); err != nil {
