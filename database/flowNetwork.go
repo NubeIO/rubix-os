@@ -55,55 +55,10 @@ CreateFlowNetwork
 - Update sync_uuid with FlowNetworkClone's sync_uuid
 */
 func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
-	body.Name = nameIsNil(body.Name)
-	body.SyncUUID, _ = utils.MakeUUID()
-	body.IsRemote = utils.NewTrue()
-	isMasterSlave := utils.IsTrue(body.IsMasterSlave)
-	deviceInfo, err := d.GetDeviceInfo()
+	isMasterSlave, cli, err := d.editFlowNetworkBody(body)
 	if err != nil {
 		return nil, err
 	}
-	if isMasterSlave {
-		body.FlowHTTPS = nil
-		body.FlowIP = nil
-		body.FlowPort = nil
-		body.FlowToken = nil
-		cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
-		remoteDeviceInfo, err := cli.DeviceInfo()
-		if err != nil {
-			return nil, err
-		} else {
-			if deviceInfo.GlobalUUID == remoteDeviceInfo.GlobalUUID {
-				body.IsRemote = utils.NewFalse()
-			}
-		}
-	} else {
-		conf := config.Get()
-		if body.FlowIP == nil {
-			body.FlowIP = &conf.Server.ListenAddr
-		}
-		if body.FlowPort == nil {
-			body.FlowPort = &conf.Server.Port
-		}
-		if body.FlowUsername == nil {
-			return nil, errors.New("FlowUsername can't be null when we it's not master/slave flow network")
-		}
-		if body.FlowPassword == nil {
-			return nil, errors.New("FlowPassword can't be null when we it's not master/slave flow network")
-		}
-		if *body.FlowIP == "0.0.0.0" || *body.FlowIP == "127.0.0.0" || *body.FlowIP == "localhost" {
-			body.FlowHTTPS = utils.NewFalse()
-			body.FlowIP = utils.NewStringAddress("0.0.0.0")
-			body.IsRemote = utils.NewFalse()
-		}
-		accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
-		if err != nil {
-			return nil, err
-		}
-		body.FlowToken = accessToken
-	}
-
 	isRemote := utils.IsTrue(body.IsRemote)
 	//rollback is needed only when flow-network is remote,
 	//if we make it true in local it blocks the next transaction of clone creation which leads deadlock
@@ -117,39 +72,7 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 		}
 		return nil, err
 	}
-	fnb := *body
-	if !isMasterSlave {
-		var localStorageFlowNetwork *model.LocalStorageFlowNetwork
-		if err := d.DB.First(&localStorageFlowNetwork).Error; err != nil {
-			if isRemote {
-				tx.Rollback()
-			}
-			return nil, err
-		}
-		fnb.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
-		fnb.FlowIP = utils.NewStringAddress(localStorageFlowNetwork.FlowIP)
-		fnb.FlowPort = utils.NewInt(localStorageFlowNetwork.FlowPort)
-		fnb.FlowUsername = utils.NewStringAddress(localStorageFlowNetwork.FlowUsername)
-		fnb.FlowPassword = utils.NewStringAddress(localStorageFlowNetwork.FlowPassword)
-		fnb.FlowToken = utils.NewStringAddress(localStorageFlowNetwork.FlowToken)
-		accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
-		if err != nil {
-			return nil, err
-		}
-		body.FlowToken = accessToken
-	}
-	body, err = d.syncAfterCreateUpdateFlowNetwork(&fnb)
-	if err != nil {
-		if isRemote {
-			tx.Rollback()
-		}
-		return nil, err
-	}
-	if isRemote {
-		tx.Commit()
-	}
-	d.DB.Model(&body).Updates(body)
-	return body, nil
+	return d.afterCreateUpdateFlowNetwork(body, isMasterSlave, cli, isRemote, tx)
 }
 
 func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (*model.FlowNetwork, error) {
@@ -165,12 +88,24 @@ func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (
 	if err := d.DB.Model(&flowNetworkModel).Updates(body).Error; err != nil {
 		return nil, err
 	}
-	body, err := d.syncAfterCreateUpdateFlowNetwork(flowNetworkModel)
+	isMasterSlave, cli, err := d.editFlowNetworkBody(body)
 	if err != nil {
 		return nil, err
 	}
-	d.DB.Model(&flowNetworkModel).Updates(body)
-	return flowNetworkModel, nil
+	isRemote := utils.IsTrue(body.IsRemote)
+	//rollback is needed only when flow-network is remote,
+	//if we make it true in local it blocks the next transaction of clone creation which leads deadlock
+	var tx *gorm.DB
+	if tx = d.DB; isRemote {
+		tx = d.DB.Begin()
+	}
+	if err := tx.Model(&flowNetworkModel).Updates(&body).Error; err != nil {
+		if isRemote {
+			tx.Rollback()
+		}
+		return nil, err
+	}
+	return d.afterCreateUpdateFlowNetwork(body, isMasterSlave, cli, isRemote, tx)
 }
 
 func (d *GormDatabase) DeleteFlowNetwork(uuid string) (bool, error) {
@@ -224,20 +159,108 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 	return utils.NewTrue(), nil
 }
 
-func (d *GormDatabase) syncAfterCreateUpdateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
+func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *client.FlowClient, error) {
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
+	body.Name = nameIsNil(body.Name)
+	body.SyncUUID, _ = utils.MakeUUID()
+	body.IsRemote = utils.NewTrue()
+	isMasterSlave := utils.IsTrue(body.IsMasterSlave)
+	deviceInfo, err := d.GetDeviceInfo()
+	if err != nil {
+		return false, nil, err
+	}
+	if isMasterSlave {
+		body.FlowHTTPS = nil
+		body.FlowIP = nil
+		body.FlowPort = nil
+		body.FlowToken = nil
+	} else {
+		conf := config.Get()
+		if body.FlowIP == nil {
+			body.FlowIP = &conf.Server.ListenAddr
+		}
+		if body.FlowPort == nil {
+			body.FlowPort = &conf.Server.Port
+		}
+		if body.FlowUsername == nil {
+			return false, nil, errors.New("FlowUsername can't be null when we it's not master/slave flow network")
+		}
+		if body.FlowPassword == nil {
+			return false, nil, errors.New("FlowPassword can't be null when we it's not master/slave flow network")
+		}
+		accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
+		if err != nil {
+			return false, nil, err
+		}
+		body.FlowToken = accessToken
+	}
+
+	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
+	remoteDeviceInfo, err := cli.DeviceInfo()
+	if err != nil {
+		return false, nil, err
+	} else {
+		if deviceInfo.GlobalUUID == remoteDeviceInfo.GlobalUUID {
+			body.IsRemote = utils.NewFalse()
+			if !isMasterSlave {
+				body.FlowHTTPS = utils.NewFalse()
+				body.FlowIP = utils.NewStringAddress("0.0.0.0")
+				body.IsRemote = utils.NewFalse()
+			}
+		}
+	}
+	return isMasterSlave, cli, nil
+}
+
+func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isMasterSlave bool, cli *client.FlowClient, isRemote bool, tx *gorm.DB) (*model.FlowNetwork, error) {
+	bodyToSync := *body
+	if !isMasterSlave {
+		var localStorageFlowNetwork *model.LocalStorageFlowNetwork
+		if err := d.DB.First(&localStorageFlowNetwork).Error; err != nil {
+			if isRemote {
+				tx.Rollback()
+			}
+			return nil, err
+		}
+		bodyToSync.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
+		bodyToSync.FlowIP = utils.NewStringAddress(localStorageFlowNetwork.FlowIP)
+		bodyToSync.FlowPort = utils.NewInt(localStorageFlowNetwork.FlowPort)
+		bodyToSync.FlowUsername = utils.NewStringAddress(localStorageFlowNetwork.FlowUsername)
+		bodyToSync.FlowPassword = utils.NewStringAddress(localStorageFlowNetwork.FlowPassword)
+		bodyToSync.FlowToken = utils.NewStringAddress(localStorageFlowNetwork.FlowToken)
+		accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
+		if err != nil {
+			return nil, err
+		}
+		body.FlowToken = accessToken
+	}
+	body, err := d.syncFlowNetwork(cli, body, &bodyToSync)
+	if err != nil {
+		if isRemote {
+			tx.Rollback()
+		}
+		return nil, err
+	}
+	if isRemote {
+		tx.Commit()
+	}
+	d.DB.Model(&body).Updates(body)
+	return body, nil
+}
+
+func (d *GormDatabase) syncFlowNetwork(cli *client.FlowClient, body *model.FlowNetwork, bodyToSync *model.FlowNetwork) (*model.FlowNetwork, error) {
 	deviceInfo, err := d.GetDeviceInfo()
 	if err != nil {
 		return nil, err
 	}
-	body.GlobalUUID = deviceInfo.GlobalUUID
-	body.ClientId = deviceInfo.ClientId
-	body.ClientName = deviceInfo.ClientName
-	body.SiteId = deviceInfo.SiteId
-	body.SiteName = deviceInfo.SiteName
-	body.DeviceId = deviceInfo.DeviceId
-	body.DeviceName = deviceInfo.DeviceName
-	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
-	res, err := cli.SyncFlowNetwork(body)
+	bodyToSync.GlobalUUID = deviceInfo.GlobalUUID
+	bodyToSync.ClientId = deviceInfo.ClientId
+	bodyToSync.ClientName = deviceInfo.ClientName
+	bodyToSync.SiteId = deviceInfo.SiteId
+	bodyToSync.SiteName = deviceInfo.SiteName
+	bodyToSync.DeviceId = deviceInfo.DeviceId
+	bodyToSync.DeviceName = deviceInfo.DeviceName
+	res, err := cli.SyncFlowNetwork(bodyToSync)
 	if err != nil {
 		return nil, err
 	}
