@@ -42,17 +42,6 @@ func (j *ConsumersAPI) CreateConsumer(ctx *gin.Context) {
 	responseHandler(q, err, ctx)
 }
 
-func (j *ConsumersAPI) AddConsumerWizard(ctx *gin.Context) {
-	body, _ := getBODYConsumer(ctx)
-	_, streamUUID, producerUUID, _, _ := streamFieldsArgs(ctx)
-	_, err := govalidator.ValidateStruct(body)
-	if err != nil {
-		responseHandler(nil, err, ctx)
-	}
-	q, err := j.DB.AddConsumerWizard(streamUUID, producerUUID, body)
-	responseHandler(q, err, ctx)
-}
-
 func (j *ConsumersAPI) UpdateConsumer(ctx *gin.Context) {
 	body, _ := getBODYConsumer(ctx)
 	uuid := resolveID(ctx)

@@ -1,12 +1,38 @@
 # CHANGELOG
-## [v0.2.5](https://github.com/NubeIO/flow-framework/tree/v0.2.5) (2022-02-01)
+## [v0.3.5](https://github.com/NubeIO/flow-framework/tree/v0.3.5) (2022-02-16)
+- Improvement: support multiple producers on a single point
+- Improvement on producer history
+- Writer action updates its own side thing
+- Make schedule write actions working
+- Fix: FlowNetwork creation issue for HTTP
+- Make FlowNetwork update working
+- Fix: float pointer values comparison for COV
+
+## [v0.3.4](https://github.com/NubeIO/flow-framework/tree/v0.3.4) (2022-02-10)
+- Sync value on COV of point
+- Fix: point.present_value comparison issue
+- Fix: database lock issue
+
+## [v0.3.3](https://github.com/NubeIO/flow-framework/tree/v0.3.3) (2022-02-10)
+- Fix: schedule
+
+## [v0.3.2](https://github.com/NubeIO/flow-framework/tree/v0.3.2) (2022-02-10)
+- small bug fix to schedule small fix to stop sch crashing #352
+
+## [v0.3.1](https://github.com/NubeIO/flow-framework/tree/v0.3.1) (2022-02-10)
+- small bug fix to schedule small fix to stop sch crashing #351
+
+## [v0.3.0](https://github.com/NubeIO/flow-framework/tree/v0.3.0) (2022-02-10)
+- Add schedule writer POC
+- Add with_priority option on device query builder
+- Improvements on gorm migration #347
+- added bacnetmaster plugin #346
+- make sure if pnt is same the addrID is not same #345
+- clean up of bacnet-server #343
+- Update/schedule checker to new schedule json schema #342
 - small fixes to modbus #337
 - Improvements on schedule #334
-
-## [v0.2.4](https://github.com/NubeIO/flow-framework/tree/v0.2.4) (2022-01-19)
 - Update to mqtt broker plugin
-
-## [v0.2.3](https://github.com/NubeIO/flow-framework/tree/v0.2.3) (2022-01-16)
 - Add schedule config
 - Sync schedules values on the producer side
 - Remove CreateWriterWizard

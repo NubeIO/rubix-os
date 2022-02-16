@@ -61,19 +61,15 @@ func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Poin
 	return pointModel, true
 }
 
-func pointUnits(pointModel *model.Point) (value float64, ok bool, err error) {
-	if pointModel.Unit == "noUnits" {
-		return 0, false, nil
+func pointUnits(presentValue *float64, unitFrom, unitTo *string) (value *float64, err error) {
+	if presentValue == nil || unitFrom == nil || unitTo == nil || *unitFrom == "" || *unitTo == "" {
+		return presentValue, nil
 	}
-	if pointModel.Unit != "" {
-		_, res, err := unit.Process(*pointModel.PresentValue, pointModel.Unit, pointModel.UnitTo)
-		if err != nil {
-			return 0, false, err
-		}
-		return res.AsFloat(), true, err
-	} else {
-		return 0, false, nil
+	_, res, err := unit.Process(*presentValue, *unitFrom, *unitTo)
+	if err != nil {
+		return utils.NewFloat64(0), err
 	}
+	return utils.NewFloat64(res.AsFloat()), err
 }
 
 func pointRange(presentValue, limitMin, limitMax *float64) (value *float64) {
@@ -99,19 +95,14 @@ func pointScale(presentValue, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax *
 }
 
 func pointEval(presentValue, originalValue *float64, evalMode, evalString string) (value *float64, err error) {
-
-	var val *float64
-	if model.EvalMode(evalMode) == model.EvalModeCalcAfterScale || model.EvalMode(evalMode) == model.EvalModeEnable {
-		val = presentValue
-	} else if model.EvalMode(evalMode) == model.EvalModeCalcOnOriginalValue {
+	val := presentValue
+	if model.EvalMode(evalMode) == model.EvalModeCalcOnOriginalValue {
 		val = originalValue
-	} else {
-		val = presentValue
 	}
 	exp := evalString
 	if evalString != "" && model.EvalMode(evalMode) != model.EvalModeDisabled {
 		eval, err := gval.Full().NewEvaluable(exp)
-		if err != nil && val != nil {
+		if err != nil || val == nil {
 			return nil, err
 		}
 		v, err := eval.EvalFloat64(context.Background(), map[string]interface{}{"x": *val})

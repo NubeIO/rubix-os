@@ -8,10 +8,10 @@ import (
 
 // The WriterCloneDatabase interface for encapsulating database access.
 type WriterCloneDatabase interface {
-	GetWriterClone(uuid string) (*model.WriterClone, error)
 	GetWriterClones(args Args) ([]*model.WriterClone, error)
+	GetWriterClone(uuid string) (*model.WriterClone, error)
+	GetOneWriterCloneByArgs(args Args) (*model.WriterClone, error)
 	CreateWriterClone(body *model.WriterClone) (*model.WriterClone, error)
-	UpdateWriterClone(uuid string, body *model.WriterClone, updateProducer bool) (*model.WriterClone, error)
 	DeleteWriterClone(uuid string) (bool, error)
 	DropWriterClone() (bool, error)
 }
@@ -38,14 +38,6 @@ func (j *WriterCloneAPI) CreateWriterClone(ctx *gin.Context) {
 		responseHandler(nil, err, ctx)
 	}
 	q, err := j.DB.CreateWriterClone(body)
-	responseHandler(q, err, ctx)
-}
-
-func (j *WriterCloneAPI) UpdateWriterClone(ctx *gin.Context) {
-	body, _ := getBODYWriterClone(ctx)
-	uuid := resolveID(ctx)
-	_, _, _, updateProducer := withConsumerArgs(ctx)
-	q, err := j.DB.UpdateWriterClone(uuid, body, updateProducer)
 	responseHandler(q, err, ctx)
 }
 

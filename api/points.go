@@ -18,7 +18,6 @@ type PointDatabase interface {
 	GetPointByName(networkName, deviceName, pointName string) (*model.Point, error)
 	GetPointByField(field string, value string) (*model.Point, error)
 	PointWriteByName(networkName, deviceName, pointName string, body *model.Point, fromPlugin bool) (*model.Point, error)
-	UpdatePointByFieldAndUnit(field string, value string, body *model.Point, writeValue bool) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
 	DropPoints() (bool, error)
 }
@@ -81,14 +80,6 @@ func (a *PointAPI) PointWriteByName(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	networkName, deviceName, pointName := networkDevicePointNames(ctx)
 	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body, false)
-	responseHandler(q, err, ctx)
-}
-
-func (a *PointAPI) UpdatePointByFieldAndUnit(ctx *gin.Context) {
-	body, _ := getBODYPoint(ctx)
-	field, value := withFieldsArgs(ctx)
-	_, _, writeValue, _ := withConsumerArgs(ctx)
-	q, err := a.DB.UpdatePointByFieldAndUnit(field, value, body, writeValue)
 	responseHandler(q, err, ctx)
 }
 

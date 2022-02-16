@@ -21,8 +21,8 @@ type SchTypes struct {
 }
 
 type SchConfig struct {
-	ScheduleNames []string `json:"names"`
-	TimeZone      string   `json:"timezone"`
+	ScheduleNames datatypes.JSON `json:"names"`
+	TimeZone      string         `json:"timezone"`
 }
 
 type TypeWeekly map[string]WeeklyScheduleEntry

@@ -37,7 +37,6 @@ require (
 require (
 	github.com/PaesslerAG/gval v1.1.1
 	github.com/fhmq/hmq v0.0.0-20210810024638-1d6979189a22
-	github.com/go-gormigrate/gormigrate/v2 v2.0.0
 	github.com/gomarkdown/markdown v0.0.0-20210918233619-6c1113f12c4a
 	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1

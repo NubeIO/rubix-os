@@ -87,6 +87,20 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	return scheduleModel, nil
 }
 
+func (d *GormDatabase) ScheduleWrite(uuid string, body *model.ScheduleData) error {
+	scheduleData, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+	schedule := map[string]interface{}{}
+	schedule["schedule"] = scheduleData
+	err = d.DB.Model(model.Schedule{}).Where("uuid = ?", uuid).Updates(schedule).Error
+	if err != nil {
+		return err
+	}
+	return d.ProducersScheduleWrite(uuid, body)
+}
+
 func (d *GormDatabase) DeleteSchedule(uuid string) (bool, error) {
 	var schModel *model.Schedule
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&schModel)
@@ -99,7 +113,6 @@ func (d *GormDatabase) DeleteSchedule(uuid string) (bool, error) {
 	} else {
 		return true, nil
 	}
-
 }
 
 func (d *GormDatabase) DropSchedules() (bool, error) {

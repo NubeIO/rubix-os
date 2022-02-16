@@ -61,7 +61,7 @@ func (i *Instance) wizard(network *Network) (string, error) {
 	pnt.COV = nums.NewFloat64(0.5)
 	pnt.Fallback = nums.NewFloat64(1)
 	pnt.MessageCode = "normal"
-	pnt.Unit = "noUnits"
+	pnt.Unit = utils.NewStringAddress("noUnits")
 	pnt.Priority = new(model.Priority)
 	(*pnt.Priority).P16 = nums.NewFloat64(1)
 	point, err := i.db.CreatePoint(&pnt, false, false)

@@ -33,9 +33,10 @@ type Args struct {
 	CompactPayload       string
 	CompactWithName      string
 	FlowUUID             string
+	Name                 *string
 	StreamUUID           *string
-	ProducerUUID         string
-	ConsumerUUID         string
+	ProducerUUID         *string
+	ConsumerUUID         *string
 	WriterUUID           string
 	AddToParent          string
 	GlobalUUID           *string
@@ -44,6 +45,7 @@ type Args struct {
 	DeviceId             *string
 	WriterThingClass     *string
 	SourceUUID           *string
+	ProducerThingUUID    *string
 	PluginName           bool
 	TimestampGt          *string
 	TimestampLt          *string
@@ -82,6 +84,7 @@ var ArgsType = struct {
 	WriteHistory         string
 	WriteConsumer        string
 	Field                string
+	Name                 string
 	Value                string
 	UpdateProducer       string
 	CompactPayload       string //for a point would be presentValue
@@ -98,6 +101,7 @@ var ArgsType = struct {
 	DeviceId             string
 	WriterThingClass     string
 	SourceUUID           string
+	ProducerThingUUID    string
 	PluginName           string
 	TimestampGt          string
 	TimestampLt          string
@@ -134,6 +138,7 @@ var ArgsType = struct {
 	WriteHistory:         "write_history",
 	WriteConsumer:        "write_consumer",
 	Field:                "field",
+	Name:                 "name",
 	Value:                "value",
 	UpdateProducer:       "update_producer",
 	CompactPayload:       "compact_payload",
@@ -150,6 +155,7 @@ var ArgsType = struct {
 	DeviceId:             "device_id",
 	WriterThingClass:     "writer_thing_class",
 	SourceUUID:           "source_uuid",
+	ProducerThingUUID:    "producer_thing_uuid",
 	PluginName:           "by_plugin_name",
 	TimestampGt:          "timestamp_gt",
 	TimestampLt:          "timestamp_lt",
@@ -297,6 +303,11 @@ func getBODYSchedule(ctx *gin.Context) (dto *model.Schedule, err error) {
 	return dto, err
 }
 
+func getBODYScheduleData(ctx *gin.Context) (dto *model.ScheduleData, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBodyLocalStorageFlowNetwork(ctx *gin.Context) (dto *model.LocalStorageFlowNetwork, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -348,6 +359,16 @@ func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
 }
 
 func getBodySyncWriter(ctx *gin.Context) (dto *model.SyncWriter, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodySyncCOV(ctx *gin.Context) (dto *model.SyncCOV, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodySyncWriterAction(ctx *gin.Context) (dto *model.SyncWriterAction, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

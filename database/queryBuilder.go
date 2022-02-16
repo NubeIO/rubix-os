@@ -126,6 +126,12 @@ func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 	if args.StreamUUID != nil {
 		query = query.Where("stream_uuid = ?", *args.StreamUUID)
 	}
+	if args.ProducerThingUUID != nil {
+		query = query.Where("producer_thing_uuid = ?", *args.ProducerThingUUID)
+	}
+	if args.Name != nil {
+		query = query.Where("name = ?", *args.Name)
+	}
 	return query
 }
 
@@ -151,6 +157,9 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	if args.WithTags {
 		query = query.Preload("Tags")
 	}
+	if args.WithPriority {
+		query = query.Preload("Points.Priority")
+	}
 	return query
 }
 
@@ -167,6 +176,9 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
 	query := d.DB
+	if args.ConsumerUUID != nil {
+		query = query.Where("consumer_uuid = ?", *args.ConsumerUUID)
+	}
 	if args.WriterThingClass != nil {
 		query = query.Where("writer_thing_class = ?", *args.WriterThingClass)
 	}
@@ -175,8 +187,14 @@ func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
 
 func (d *GormDatabase) buildWriterCloneQuery(args api.Args) *gorm.DB {
 	query := d.DB
+	if args.ProducerUUID != nil {
+		query = query.Where("producer_uuid = ?", *args.ProducerUUID)
+	}
 	if args.WriterThingClass != nil {
 		query = query.Where("writer_thing_class = ?", *args.WriterThingClass)
+	}
+	if args.SourceUUID != nil {
+		query = query.Where("source_uuid = ?", *args.SourceUUID)
 	}
 	return query
 }

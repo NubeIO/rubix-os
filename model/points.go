@@ -155,9 +155,9 @@ type Point struct {
 	ScaleInMax           *float64  `json:"scale_in_max"`
 	ScaleOutMin          *float64  `json:"scale_out_min"`
 	ScaleOutMax          *float64  `json:"scale_out_max"`
-	UnitType             string    `json:"unit_type,omitempty"` //temperature
-	Unit                 string    `json:"unit,omitempty"`
-	UnitTo               string    `json:"unit_to,omitempty"` //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
+	UnitType             *string   `json:"unit_type,omitempty"` //temperature
+	Unit                 *string   `json:"unit,omitempty"`
+	UnitTo               *string   `json:"unit_to,omitempty"` //with take the unit and convert to, this would affect the presentValue and the original value will be stored in the raw
 	IsProducer           *bool     `json:"is_producer,omitempty"`
 	IsConsumer           *bool     `json:"is_consumer,omitempty"`
 	ValueRaw             string    `json:"value_raw,omitempty"`
