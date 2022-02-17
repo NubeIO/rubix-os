@@ -80,7 +80,7 @@ func (inst *Instance) setnewPointFields(deviceBody *model.Device, pointBody *mod
 
 // addPoint add a pnt
 func (inst *Instance) addPoint(body *model.Point) error {
-	_, err := inst.db.CreatePoint(body, true)
+	_, err := inst.db.CreatePoint(body, false, true)
 	if err != nil {
 		log.Errorf("lora: issue on CreatePoint: %v\n", err)
 		return err
@@ -162,7 +162,7 @@ func (inst *Instance) updateDevicePointValuesStruct(deviceID string, sensorStruc
 	sensorRefl := reflect.ValueOf(sensorStruct)
 
 	for i := 0; i < sensorRefl.NumField(); i++ {
-		var value float64 = 0.0
+		value := 0.0
 
 		// TODO: check if this is needed
 		pnt.IoID = getReflectFieldJSONName(sensorRefl.Type().Field(i))
