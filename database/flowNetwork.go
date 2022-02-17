@@ -55,6 +55,7 @@ CreateFlowNetwork
 - Update sync_uuid with FlowNetworkClone's sync_uuid
 */
 func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
+	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
 	isMasterSlave, cli, err := d.editFlowNetworkBody(body)
 	if err != nil {
 		return nil, err
@@ -160,7 +161,6 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 }
 
 func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *client.FlowClient, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = utils.MakeUUID()
 	body.IsRemote = utils.NewTrue()
