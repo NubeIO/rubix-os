@@ -24,24 +24,26 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 	if remoteDeviceInfo.GlobalUUID != body.GlobalUUID {
 		return nil, errors.New("please check your flow_ip, flow_port, it's pointing different device")
 	}
-	mfn, err := json.Marshal(body)
+	fn, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	fnc := model.FlowNetworkClone{}
-	if err = json.Unmarshal(mfn, &fnc); err != nil {
+	if err = json.Unmarshal(fn, &fnc); err != nil {
 		return nil, err
 	}
 	fnc.SourceUUID = body.UUID
 	fnc.SyncUUID, _ = utils.MakeUUID()
+	if !utils.IsTrue(fnc.IsRemote) {
+		fnc.FlowHTTPS = utils.NewFalse()
+		fnc.FlowIP = utils.NewStringAddress("0.0.0.0")
+	}
 	deviceInfo, err := d.GetDeviceInfo()
 	if err != nil {
 		return nil, err
 	}
 	var flowNetworkClonesModel []*model.FlowNetworkClone
-	if err = d.DB.Where("global_uuid = ? ", body.GlobalUUID).Find(&flowNetworkClonesModel).Error; err != nil {
-		return nil, err
-	}
+	d.DB.Where("global_uuid = ? ", body.GlobalUUID).Find(&flowNetworkClonesModel)
 	if len(flowNetworkClonesModel) == 0 {
 		fnc.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetworkClone)
 		if err = d.DB.Create(fnc).Error; err != nil {
