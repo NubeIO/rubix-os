@@ -6,7 +6,7 @@ type CommonDevice struct {
 	Manufacture       string        `json:"manufacture,omitempty"` // nube
 	Model             string        `json:"model,omitempty"`       // thml
 	AddressId         int           `json:"address_id,omitempty"`  // for example a modbus address or bacnet address
-	ZeroMode          *bool         `json:"zero_mode,omitempty"`
+	ZeroMode          *bool         `json:"zero_mode,omitempty"`   //if true means read from address 0 if false will read at 1
 	PollDelayPointsMS time.Duration `json:"poll_delay_points_ms"`
 	AddressUUID       string        `json:"address_uuid" gorm:"type:varchar(255);unique"` // AAB1213
 	CommonIP

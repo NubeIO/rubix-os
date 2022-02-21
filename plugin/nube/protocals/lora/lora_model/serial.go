@@ -9,6 +9,7 @@ type NameStruct struct {
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"3"`
 	Max      int    `json:"max" default:"20"`
+	Default  string `json:"default" default:"lora"`
 }
 
 type DescriptionStruct struct {
@@ -43,11 +44,12 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Min      int    `json:"min" default:"3"`
 		Max      int    `json:"max" default:"20"`
+		Default  string `json:"default" default:"/dev/ttyAMA0"`
 	} `json:"serial_port"`
 	SerialBaudRate struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"true"`
-		Default  int    `json:"default" default:"9600"`
+		Default  int    `json:"default" default:"38400"`
 	} `json:"serial_baud_rate"`
 }
 
