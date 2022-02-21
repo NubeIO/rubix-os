@@ -40,9 +40,9 @@ type Network struct {
 	AddressUUID      string    `json:"address_uuid"`
 	SerialPort       *string   `json:"serial_port,omitempty" gorm:"type:varchar(255);unique"`
 	SerialBaudRate   *uint     `json:"serial_baud_rate,omitempty"` //9600
-	SerialStopBits   *uint     `json:"serial_stop_bits,omitempty"`
-	SerialParity     *string   `json:"serial_parity,omitempty"`
-	SerialDataBits   *uint     `json:"serial_data_bits,omitempty"`
+	SerialStopBits   *uint     `json:"serial_stop_bits,omitempty"` //1 or 2
+	SerialParity     *string   `json:"serial_parity,omitempty"`    //odd, even, none
+	SerialDataBits   *uint     `json:"serial_data_bits,omitempty"` //7 or 8
 	SerialTimeout    *int      `json:"serial_timeout,omitempty"`
 	SerialConnected  *bool     `json:"serial_connected,omitempty"`
 	Host             *string   `json:"host,omitempty"`

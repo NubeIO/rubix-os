@@ -68,6 +68,24 @@ type Network struct {
 		Options  []int  `json:"options" default:"[9600, 38400]"`
 		Default  int    `json:"default" default:"38400"`
 	} `json:"serial_baud_rate"`
+	SerialParity struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[\"odd\",\"even\",\"none\"]"`
+		Default  string   `json:"default" default:"none"`
+	} `json:"serial_parity"`
+	SerialStopBits struct {
+		Type     string `json:"type" default:"array"`
+		Required bool   `json:"required" default:"false"`
+		Options  []int  `json:"options" default:"[1, 2]"`
+		Default  int    `json:"default" default:"1"`
+	} `json:"serial_stop_bits"`
+	SerialDataBits struct {
+		Type     string `json:"type" default:"array"`
+		Required bool   `json:"required" default:"false"`
+		Options  []int  `json:"options" default:"[7, 8]"`
+		Default  int    `json:"default" default:"8"`
+	} `json:"serial_data_bits"`
 }
 
 type Device struct {
@@ -127,6 +145,12 @@ type Point struct {
 		Options  []string `json:"options" default:"[\"leb_lew\",\"leb_lew\",\"beb_lew\",\"beb_bew\"]"`
 		Default  string   `json:"default" default:"beb_lew"`
 	} `json:"object_encoding"`
+	IsOutput struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  bool   `json:"default" default:"false"`
+	} `json:"is_output"`
 }
 
 func GetNetworkSchema() *Network {

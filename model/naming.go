@@ -116,12 +116,14 @@ var CommonFaultCode = struct {
 	PluginNotEnabled string
 	Offline          string
 	Ok               string
+	PointError       string
 }{
 	ConfigError:      "configError",
 	SystemError:      "systemError",
 	PluginNotEnabled: "pluginNotEnabled",
 	Offline:          "offline",
 	Ok:               "ok",
+	PointError:       "point error",
 }
 
 var CommonFaultMessage = struct {

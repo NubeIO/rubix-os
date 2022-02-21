@@ -66,11 +66,8 @@ func (i *Instance) PollingTCP(p polling) error {
 	arg.WithPoints = true
 	f := func() (bool, error) {
 		nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, arg)
-		if err != nil {
-			return false, err
-		}
 		if len(nets) == 0 {
-			time.Sleep(15000 * time.Millisecond)
+			time.Sleep(2 * time.Second)
 			log.Info("modbus: NO MODBUS NETWORKS FOUND")
 		}
 		for _, net := range nets { //NETWORKS
@@ -82,13 +79,31 @@ func (i *Instance) PollingTCP(p polling) error {
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
 					if net.TransportType == model.TransType.Serial {
-						if net.SerialPort != nil || net.SerialBaudRate != nil || net.SerialDataBits != nil || net.SerialStopBits != nil {
-							return true, errors.New("no serial connection details")
+						if net.SerialPort == nil {
+							log.Errorln("invalid serial connection details", "SerialPort")
+							break
+						}
+						if net.SerialBaudRate == nil {
+							log.Errorln("invalid serial connection details", "SerialBaudRate")
+							break
+						}
+						if net.SerialDataBits == nil {
+							log.Errorln("invalid serial connection details", "SerialDataBits")
+							break
+						}
+						if net.SerialStopBits == nil {
+							log.Errorln("invalid serial connection details", "SerialStopBits")
+							break
+						}
+						if net.SerialParity == nil {
+							log.Errorln("invalid serial connection details", "SerialParity")
+							break
 						}
 						client.SerialPort = *net.SerialPort
 						client.BaudRate = *net.SerialBaudRate
 						client.DataBits = *net.SerialDataBits
 						client.StopBits = *net.SerialStopBits
+						client.Parity = *net.SerialParity
 						err = i.setClient(client, net.UUID, true, true)
 						if err != nil {
 							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
@@ -144,24 +159,27 @@ func (i *Instance) PollingTCP(p polling) error {
 									if pnt.Priority != nil {
 										if (*pnt.Priority).P16 != nil {
 											ops.WriteValue = *pnt.Priority.P16
-											log.Infof("modbus: WRITE ObjectType: %s  Addr: %d WriteValue: %v\n", ops.ObjectType, ops.Addr, ops.WriteValue)
+											log.Infof("modbus-write: WRITE ObjectType: %s  Addr: %d WriteValue: %v\n", ops.ObjectType, ops.Addr, ops.WriteValue)
 										}
 									}
 									request, err := parseRequest(ops)
 									if err != nil {
-										log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
+										log.Errorf("modbus-write: failed to read holding/input registers: %v\n", err)
+										break
 									}
 									responseRaw, responseValue, err := networkRequest(cli, request)
-									log.Infof("modbus: ObjectType: %s  Addr: %d ARRAY: %v\n", ops.ObjectType, ops.Addr, responseRaw)
+									log.Infof("modbus-write: ObjectType: %s  Addr: %d ARRAY: %v\n", ops.ObjectType, ops.Addr, responseRaw)
 									_pnt.UUID = pnt.UUID
 									_pnt.PresentValue = &ops.WriteValue //update point value
 									cov := utils.Float64IsNil(pnt.COV)
 									covEvent, _ := utils.COV(ops.WriteValue, utils.Float64IsNil(pnt.OriginalValue), cov)
 									if covEvent {
-										log.Infof("modbus: MODBUS WRITE COV EVENT: COV value is %v\n", cov)
 										if err != nil {
 											log.Errorf("modbus-write-cov: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+											_, err = i.pointUpdateErr(pnt.UUID, &_pnt, err)
+											break
 										} else {
+											log.Infof("modbus-write: MODBUS WRITE COV EVENT: COV value is %v\n", cov)
 											_pnt.InSync = utils.NewTrue()
 											if utils.BoolIsNil(pnt.WriteValueOnce) {
 												_pnt.WriteValueOnceSync = utils.NewTrue()
@@ -171,11 +189,12 @@ func (i *Instance) PollingTCP(p polling) error {
 										}
 									} else {
 										if !utils.BoolIsNil(pnt.InSync) {
-											log.Infof("modbus: MODBUS WRITE SYNC POINT")
+											log.Infof("modbus-write: MODBUS WRITE SYNC POINT")
 											_pnt.UUID = pnt.UUID
 											_pnt.PresentValue = &ops.WriteValue //update point value
 											if err != nil {
 												log.Errorf("modbus-write-sync: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+												break
 											} else {
 												_pnt.InSync = utils.NewTrue()
 												if utils.BoolIsNil(pnt.WriteValueOnce) {
@@ -191,6 +210,7 @@ func (i *Instance) PollingTCP(p polling) error {
 											_pnt.PresentValue = &ops.WriteValue //update point value
 											if err != nil {
 												log.Errorf("modbus-write-start-sync: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+												break
 											} else {
 												_pnt.InSync = utils.NewTrue()
 												if utils.BoolIsNil(pnt.WriteValueOnce) {
@@ -204,9 +224,15 @@ func (i *Instance) PollingTCP(p polling) error {
 								} else if !_isWrite { //READ
 									request, err := parseRequest(ops)
 									if err != nil {
-										log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
+										log.Errorf("modbus-read: failed to read holding/input registers: %v\n", err)
+										break
 									}
 									_, responseValue, err := networkRequest(cli, request)
+									if err != nil {
+										log.Errorf("modbus-read: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+										_, err = i.pointUpdateErr(pnt.UUID, &_pnt, err)
+										break
+									}
 									_pnt.UUID = pnt.UUID
 									rs := responseValue
 									_pnt.PresentValue = &rs //update point value
@@ -216,10 +242,12 @@ func (i *Instance) PollingTCP(p polling) error {
 										_, err = i.pointUpdate(pnt.UUID, &_pnt)
 										i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
 										if err != nil {
-											log.Errorf("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+											log.Errorf("modbus-read: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+											break
 										} else {
 											_pnt.InSync = utils.NewTrue()
-											log.Infof("modbus: ObjectType---------: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+											log.Infof("modbus-read: ObjectType---------: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+
 										}
 									} else {
 										_pnt.UUID = pnt.UUID
@@ -229,10 +257,11 @@ func (i *Instance) PollingTCP(p polling) error {
 										_, err = i.pointUpdate(pnt.UUID, &_pnt)
 										i.store.Set(pnt.UUID, _pnt, -1) //store point in cache
 										if err != nil {
-											log.Errorf("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+											log.Errorf("modbus:-read ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+											break
 										} else {
 											_pnt.InSync = utils.NewTrue()
-											log.Infof("modbus: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
+											log.Infof("modbus-read: ObjectType: %s  Addr: %d Response: %v\n", ops.ObjectType, ops.Addr, responseValue)
 										}
 									}
 								}

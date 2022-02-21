@@ -14,6 +14,10 @@ func Float64IsNil(b *float64) float64 {
 	}
 }
 
+func NewStr(value string) *string {
+	return &value
+}
+
 func NewUint(value uint) *uint {
 	return &value
 }
