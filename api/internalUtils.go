@@ -393,7 +393,7 @@ func getBODYWriterBody(ctx *gin.Context) (dto *model.WriterBody, err error) {
 	return dto, err
 }
 
-func getBODYWriterBulk(ctx *gin.Context) (dto []*model.WriterBulk, err error) {
+func getBODYWriterBulk(ctx *gin.Context) (dto []*model.WriterBulkBody, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
