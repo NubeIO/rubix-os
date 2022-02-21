@@ -221,11 +221,6 @@ func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isM
 		bodyToSync.FlowUsername = utils.NewStringAddress(localStorageFlowNetwork.FlowUsername)
 		bodyToSync.FlowPassword = utils.NewStringAddress(localStorageFlowNetwork.FlowPassword)
 		bodyToSync.FlowToken = utils.NewStringAddress(localStorageFlowNetwork.FlowToken)
-		accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
-		if err != nil {
-			return nil, err
-		}
-		body.FlowToken = accessToken
 	}
 	err := d.syncAndEditFlowNetwork(cli, body, &bodyToSync)
 	if err != nil {
