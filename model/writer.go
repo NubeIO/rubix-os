@@ -32,6 +32,7 @@ type SyncWriter struct {
 }
 
 type WriterBody struct {
+	Action   string        `json:"action,omitempty"`
 	Priority *Priority     `json:"priority,omitempty"`
 	Schedule *ScheduleData `json:"schedule,omitempty"`
 }
@@ -43,13 +44,11 @@ type WriterBulk struct {
 }
 
 type SyncCOV struct {
-	WriterUUID string
-	Priority   *Priority
-	Schedule   *ScheduleData
+	Priority *Priority
+	Schedule *ScheduleData
 }
 
 type SyncWriterAction struct {
-	WriterUUID string
-	Priority   *Priority
-	Schedule   *ScheduleData
+	Priority *Priority
+	Schedule *ScheduleData
 }

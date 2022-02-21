@@ -121,22 +121,25 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) error {
 	if err != nil {
 		return err
 	}
-	bytes, err := d.validateWriterBody(writer.WriterThingClass, body)
-	if err != nil {
-		return err
-	}
-	writer.DataStore = bytes
-	d.DB.Model(&writer).Updates(writer)
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-	syncWriterAction := model.SyncWriterAction{
-		WriterUUID: uuid,
-		Priority:   body.Priority,
-		Schedule:   body.Schedule,
+	if body.Action == model.CommonNaming.Read {
+		return cli.SyncWriterReadAction(uuid)
+	} else {
+		bytes, err := d.validateWriterWriteBody(writer.WriterThingClass, body)
+		if err != nil {
+			return err
+		}
+		writer.DataStore = bytes
+		d.DB.Model(&writer).Updates(writer)
+		syncWriterAction := model.SyncWriterAction{
+			Priority: body.Priority,
+			Schedule: body.Schedule,
+		}
+		return cli.SyncWriterWriteAction(uuid, &syncWriterAction)
 	}
-	return cli.SyncWriterAction(&syncWriterAction)
 }
 
 func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) *utils.Array {
@@ -152,7 +155,7 @@ func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) *utils.Array {
 	return arr
 }
 
-func (d *GormDatabase) validateWriterBody(thingClass string, body *model.WriterBody) ([]byte, error) {
+func (d *GormDatabase) validateWriterWriteBody(thingClass string, body *model.WriterBody) ([]byte, error) {
 	if thingClass == model.ThingClass.Point {
 		if body.Priority == nil {
 			return nil, errors.New("error: invalid json on writer body")

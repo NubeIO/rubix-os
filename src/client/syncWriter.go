@@ -20,10 +20,10 @@ func (a *FlowClient) SyncWriter(body *model.SyncWriter) (*model.WriterClone, err
 	return resp.Result().(*model.WriterClone), nil
 }
 
-func (a *FlowClient) SyncCOV(body *model.SyncCOV) error {
+func (a *FlowClient) SyncCOV(writerUUID string, body *model.SyncCOV) error {
 	resp, err := a.client.R().
 		SetBody(body).
-		Post("/api/sync/cov")
+		Post(fmt.Sprintf("/api/sync/cov/%s", writerUUID))
 	if err != nil {
 		if resp == nil || resp.String() == "" {
 			return fmt.Errorf("SyncCOV: %s", err)
@@ -34,15 +34,27 @@ func (a *FlowClient) SyncCOV(body *model.SyncCOV) error {
 	return nil
 }
 
-func (a *FlowClient) SyncWriterAction(body *model.SyncWriterAction) error {
+func (a *FlowClient) SyncWriterWriteAction(sourceUUID string, body *model.SyncWriterAction) error {
 	resp, err := a.client.R().
 		SetBody(body).
-		Post("/api/sync/writer_action")
+		Post(fmt.Sprintf("/api/sync/writer/write/%s", sourceUUID))
 	if err != nil {
 		if resp == nil || resp.String() == "" {
-			return fmt.Errorf("SyncWriterAction: %s", err)
+			return fmt.Errorf("SyncWriterWriteAction: %s", err)
 		} else {
-			return fmt.Errorf("SyncWriterAction: %s", resp)
+			return fmt.Errorf("SyncWriterWriteAction: %s", resp)
+		}
+	}
+	return nil
+}
+
+func (a *FlowClient) SyncWriterReadAction(sourceUUID string) error {
+	resp, err := a.client.R().Get(fmt.Sprintf("/api/sync/writer/read/%s", sourceUUID))
+	if err != nil {
+		if resp == nil || resp.String() == "" {
+			return fmt.Errorf("SyncWriterReadAction: %s", err)
+		} else {
+			return fmt.Errorf("SyncWriterReadAction: %s", resp)
 		}
 	}
 	return nil
