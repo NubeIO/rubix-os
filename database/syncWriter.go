@@ -39,8 +39,8 @@ func (d *GormDatabase) SyncWriter(body *model.SyncWriter) (*model.WriterClone, e
 	return &writerClone, nil
 }
 
-func (d *GormDatabase) SyncCOV(body *model.SyncCOV) error {
-	writer, err := d.GetWriter(body.WriterUUID)
+func (d *GormDatabase) SyncCOV(writerUUID string, body *model.SyncCOV) error {
+	writer, err := d.GetWriter(writerUUID)
 	if err != nil {
 		return err
 	}
@@ -50,6 +50,7 @@ func (d *GormDatabase) SyncCOV(body *model.SyncCOV) error {
 			CommonUUID: model.CommonUUID{UUID: uuid},
 			Priority:   body.Priority,
 		}
+		println("writing...")
 		_, err = d.PointWrite(uuid, &pointModel, false)
 		return err
 	} else {
@@ -57,8 +58,8 @@ func (d *GormDatabase) SyncCOV(body *model.SyncCOV) error {
 	}
 }
 
-func (d *GormDatabase) SyncWriterAction(body *model.SyncWriterAction) error {
-	writerClone, err := d.GetOneWriterCloneByArgs(api.Args{SourceUUID: &body.WriterUUID})
+func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.SyncWriterAction) error {
+	writerClone, err := d.GetOneWriterCloneByArgs(api.Args{SourceUUID: &sourceUUID})
 	if err != nil {
 		return err
 	}
@@ -83,4 +84,35 @@ func (d *GormDatabase) SyncWriterAction(body *model.SyncWriterAction) error {
 		return errors.New("no match writer thing class")
 	}
 	return err
+}
+
+func (d *GormDatabase) SyncWriterReadAction(sourceUUID string) error {
+	writerClone, err := d.GetOneWriterCloneByArgs(api.Args{SourceUUID: &sourceUUID})
+	if err != nil {
+		return nil
+	}
+	producer, err := d.GetProducer(writerClone.ProducerUUID, api.Args{})
+	if err != nil {
+		return nil
+	}
+	syncCOV := model.SyncCOV{}
+	if writerClone.WriterThingClass == model.ThingClass.Point {
+		point, err := d.GetPoint(writerClone.WriterThingUUID, api.Args{WithPriority: true})
+		if err != nil {
+			return err
+		}
+		syncCOV.Priority = point.Priority
+	} else {
+		schedule, err := d.GetSchedule(writerClone.WriterThingUUID)
+		if err != nil {
+			return err
+		}
+		var scheduleData *model.ScheduleData
+		err = json.Unmarshal(schedule.Schedule, scheduleData)
+		if err != nil {
+			return nil
+		}
+		syncCOV.Schedule = scheduleData
+	}
+	return d.TriggerCOVFromWriterCloneToWriter(producer, writerClone, &syncCOV)
 }

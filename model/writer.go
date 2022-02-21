@@ -32,24 +32,30 @@ type SyncWriter struct {
 }
 
 type WriterBody struct {
+	Action   string        `json:"action,omitempty"`
 	Priority *Priority     `json:"priority,omitempty"`
 	Schedule *ScheduleData `json:"schedule,omitempty"`
 }
 
-type WriterBulk struct {
-	WriterUUID  string      `json:"writer_uuid,omitempty"`
-	CommonValue CommonValue `json:"common_value,omitempty"`
-	Priority    *Priority   `json:"priority,omitempty"`
+type WriterBulkBody struct {
+	WriterUUID string `json:"writer_uuid,omitempty"`
+	WriterBody
+}
+
+type WriterActionOutput struct {
+	UUID      string          `json:"uuid"`
+	Action    string          `json:"action"`
+	IsError   bool            `json:"is_error"`
+	Message   *string         `json:"message,omitempty"`
+	DataStore *datatypes.JSON `json:"data_store,omitempty"`
 }
 
 type SyncCOV struct {
-	WriterUUID string
-	Priority   *Priority
-	Schedule   *ScheduleData
+	Priority *Priority
+	Schedule *ScheduleData
 }
 
 type SyncWriterAction struct {
-	WriterUUID string
-	Priority   *Priority
-	Schedule   *ScheduleData
+	Priority *Priority
+	Schedule *ScheduleData
 }

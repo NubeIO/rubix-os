@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/src/client"
-	log "github.com/sirupsen/logrus"
-
 	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 type Writer struct {
@@ -116,43 +115,64 @@ func (d *GormDatabase) DropWriters() (bool, error) {
 	}
 }
 
-func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) error {
+func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.WriterActionOutput {
 	writer, err := d.GetWriter(uuid)
+	output := &model.WriterActionOutput{IsError: false}
+	output.UUID = uuid
+	output.Action = body.Action
 	if err != nil {
-		return err
+		output.IsError = true
+		output.Message = utils.NewStringAddress(err.Error())
+		return output
 	}
-	bytes, err := d.validateWriterBody(writer.WriterThingClass, body)
-	if err != nil {
-		return err
-	}
-	writer.DataStore = bytes
-	d.DB.Model(&writer).Updates(writer)
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-	syncWriterAction := model.SyncWriterAction{
-		WriterUUID: uuid,
-		Priority:   body.Priority,
-		Schedule:   body.Schedule,
+	if body.Action == model.CommonNaming.Read {
+		err = cli.SyncWriterReadAction(uuid)
+		if err != nil {
+			output.IsError = true
+			output.Message = utils.NewStringAddress(err.Error())
+		}
+		return output
+	} else {
+		bytes, err := d.validateWriterWriteBody(writer.WriterThingClass, body)
+		if err != nil {
+			output.IsError = true
+			output.Message = utils.NewStringAddress(err.Error())
+			return output
+		}
+		writer.DataStore = bytes
+		d.DB.Model(&writer).Updates(writer)
+		syncWriterAction := model.SyncWriterAction{
+			Priority: body.Priority,
+			Schedule: body.Schedule,
+		}
+		err = cli.SyncWriterWriteAction(uuid, &syncWriterAction)
+		if err != nil {
+			output.IsError = true
+			output.Message = utils.NewStringAddress(err.Error())
+			return output
+		}
+		output.DataStore = &writer.DataStore
+		return output
 	}
-	return cli.SyncWriterAction(&syncWriterAction)
 }
 
-func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulk) *utils.Array {
-	arr := utils.NewArray()
-	for _, wri := range body {
-		b := new(model.WriterBody)
-		b.Priority = wri.Priority
-		err := d.WriterAction(wri.WriterUUID, b)
-		if err == nil {
-			arr.Add(err)
-		}
+func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulkBody) []*model.WriterActionOutput {
+	arr := make([]*model.WriterActionOutput, len(body))
+	for index, singleWriterBulkBody := range body {
+		writerBody := &model.WriterBody{}
+		writerBodyBytes, _ := json.Marshal(singleWriterBulkBody)
+		_ = json.Unmarshal(writerBodyBytes, &writerBody)
+		out := d.WriterAction(singleWriterBulkBody.WriterUUID, writerBody)
+		arr[index] = out
 	}
 	return arr
 }
 
-func (d *GormDatabase) validateWriterBody(thingClass string, body *model.WriterBody) ([]byte, error) {
+func (d *GormDatabase) validateWriterWriteBody(thingClass string, body *model.WriterBody) ([]byte, error) {
 	if thingClass == model.ThingClass.Point {
 		if body.Priority == nil {
 			return nil, errors.New("error: invalid json on writer body")

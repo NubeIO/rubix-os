@@ -60,9 +60,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	consumerHandler := api.ConsumersAPI{
 		DB: db,
 	}
-	writerHandler := api.WriterAPI{
-		DB: db,
-	}
 	writerCloneHandler := api.WriterCloneAPI{
 		DB: db,
 	}
@@ -93,6 +90,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		DB: db,
 	}
 	deviceInfoHandler := api.DeviceInfoAPI{
+		DB: db,
+	}
+	writerHandler := api.WriterAPI{
 		DB: db,
 	}
 	syncFlowNetworkHandler := api.SyncFlowNetworkAPI{
@@ -342,10 +342,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			}
 		}
 
-		//action's writers
-		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)
-		apiRoutes.POST("/writers/action/bulk", writerHandler.WriterBulkAction)
-
 		jobRoutes := apiRoutes.Group("/jobs")
 		{
 			jobRoutes.GET("", jobHandler.GetJobs)
@@ -412,16 +408,19 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			deviceInfoRoutes.GET("/ip/interfaces", deviceInfoHandler.GetInterfacesNames)
 			deviceInfoRoutes.GET("/ip/internet/connection", deviceInfoHandler.GetInternetStatus)
 			deviceInfoRoutes.GET("/firewall/status", deviceInfoHandler.FirewallStatus)
-
 		}
+
+		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)
+		apiRoutes.POST("/writers/action/bulk", writerHandler.WriterBulkAction)
 
 		syncRoutes := apiRoutes.Group("/sync")
 		{
 			syncRoutes.POST("/flow_network", syncFlowNetworkHandler.SyncFlowNetwork)
 			syncRoutes.POST("/stream", syncStreamHandler.SyncStream)
 			syncRoutes.POST("/writer", syncWriterHandler.SyncWriter)
-			syncRoutes.POST("/cov", syncWriterHandler.SyncCOV) // clone ---> source side
-			syncRoutes.POST("/writer_action", syncWriterHandler.SyncWriterAction)
+			syncRoutes.POST("/cov/:writer_uuid", syncWriterHandler.SyncCOV) // clone ---> source side
+			syncRoutes.POST("/writer/write/:source_uuid", syncWriterHandler.SyncWriterWriteAction)
+			syncRoutes.GET("/writer/read/:source_uuid", syncWriterHandler.SyncWriterReadAction)
 		}
 	}
 

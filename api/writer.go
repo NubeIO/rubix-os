@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/NubeIO/flow-framework/model"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 )
@@ -14,8 +13,8 @@ type WriterDatabase interface {
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
 	DropWriters() (bool, error)
-	WriterAction(uuid string, body *model.WriterBody) error
-	WriterBulkAction(body []*model.WriterBulk) *utils.Array
+	WriterAction(uuid string, body *model.WriterBody) *model.WriterActionOutput
+	WriterBulkAction(body []*model.WriterBulkBody) []*model.WriterActionOutput
 }
 
 type WriterAPI struct {
@@ -65,8 +64,8 @@ func (j *WriterAPI) DropWriters(ctx *gin.Context) {
 func (j *WriterAPI) WriterAction(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	body, _ := getBODYWriterBody(ctx)
-	err := j.DB.WriterAction(uuid, body)
-	responseHandler(nil, err, ctx)
+	q := j.DB.WriterAction(uuid, body)
+	responseHandler(q, nil, ctx)
 }
 
 func (j *WriterAPI) WriterBulkAction(ctx *gin.Context) {

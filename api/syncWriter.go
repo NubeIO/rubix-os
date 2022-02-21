@@ -7,8 +7,9 @@ import (
 
 type SyncWriterDatabase interface {
 	SyncWriter(body *model.SyncWriter) (*model.WriterClone, error)
-	SyncCOV(body *model.SyncCOV) error
-	SyncWriterAction(body *model.SyncWriterAction) error
+	SyncCOV(writerUUID string, body *model.SyncCOV) error
+	SyncWriterWriteAction(sourceUUID string, body *model.SyncWriterAction) error
+	SyncWriterReadAction(sourceUUID string) error
 }
 
 type SyncWriterAPI struct {
@@ -22,13 +23,21 @@ func (a *SyncWriterAPI) SyncWriter(ctx *gin.Context) {
 }
 
 func (a *SyncWriterAPI) SyncCOV(ctx *gin.Context) {
+	writerUUID := resolveWriterUUID(ctx)
 	body, _ := getBodySyncCOV(ctx)
-	err := a.DB.SyncCOV(body)
+	err := a.DB.SyncCOV(writerUUID, body)
 	responseHandler(nil, err, ctx)
 }
 
-func (a *SyncWriterAPI) SyncWriterAction(ctx *gin.Context) {
+func (a *SyncWriterAPI) SyncWriterWriteAction(ctx *gin.Context) {
+	sourceUUID := resolveSourceUUID(ctx)
 	body, _ := getBodySyncWriterAction(ctx)
-	err := a.DB.SyncWriterAction(body)
+	err := a.DB.SyncWriterWriteAction(sourceUUID, body)
+	responseHandler(nil, err, ctx)
+}
+
+func (a *SyncWriterAPI) SyncWriterReadAction(ctx *gin.Context) {
+	sourceUUID := resolveSourceUUID(ctx)
+	err := a.DB.SyncWriterReadAction(sourceUUID)
 	responseHandler(nil, err, ctx)
 }

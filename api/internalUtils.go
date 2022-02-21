@@ -393,7 +393,7 @@ func getBODYWriterBody(ctx *gin.Context) (dto *model.WriterBody, err error) {
 	return dto, err
 }
 
-func getBODYWriterBulk(ctx *gin.Context) (dto []*model.WriterBulk, err error) {
+func getBODYWriterBulk(ctx *gin.Context) (dto []*model.WriterBulkBody, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -444,6 +444,14 @@ func resolveGlobalUUID(ctx *gin.Context) string {
 
 func resolveID(ctx *gin.Context) string {
 	return ctx.Param("uuid")
+}
+
+func resolveWriterUUID(ctx *gin.Context) string {
+	return ctx.Param("writer_uuid")
+}
+
+func resolveSourceUUID(ctx *gin.Context) string {
+	return ctx.Param("source_uuid")
 }
 
 func resolveWriterThingClass(ctx *gin.Context) string {
