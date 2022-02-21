@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/NubeIO/flow-framework/model"
@@ -149,13 +148,16 @@ func parseRequest(body Operation) (Operation, error) {
 
 //zeroMode will subtract 1 from the register address, so address 1 will be address 0 if set to true
 func zeroMode(addr uint16, mode bool) uint16 {
-	if mode {
+	if !mode {
 		if addr <= 0 {
 			return 0
 		} else {
 			return addr - 1
 		}
 	} else {
+		if addr <= 0 {
+			return 0
+		}
 		return addr
 	}
 }
@@ -179,7 +181,12 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 	if o.Length <= 0 { //make sure length is > 0
 		o.Length = 1
 	}
-	log.Infof("modbus: WRITE ObjectType: %s  Addr: %d WriteValue: %v\n", o.ObjectType, o.Addr, o.WriteValue)
+	if o.IsHoldingReg {
+		log.Infof("modbus-write: ObjectType: %s  Addr: %d WriteValue: %v\n", o.ObjectType, o.Addr, o.WriteValue)
+	} else {
+		log.Infof("modbus-read: ObjectType: %s  Addr: %d", o.ObjectType, o.Addr)
+	}
+
 	switch o.op {
 	case readBool:
 		var res []bool
@@ -239,7 +246,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 	case readFloat32:
 		var res []float32
 		if model.ObjectType(o.ObjectType) == model.ObjTypeReadFloat32 {
-			o.Length = 1
+			o.Length = 2
 		}
 		if o.IsHoldingReg {
 			res, err = client.ReadFloat32s(o.Addr, o.Length, modbus.HOLDING_REGISTER)
@@ -261,6 +268,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 			if model.ObjectType(o.ObjectType) == model.ObjTypeReadFloat32 {
 				if err != nil {
 					log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
+					return nil, 0, err
 				}
 				return res[0], 0, err
 			} else {
@@ -303,6 +311,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		}
 		if err != nil {
 			log.Errorf("modbus: failed to read holding/input registers: %v\n", err)
+			return nil, 0, err
 		} else {
 			for idx := range res {
 				log.Infof("modbus: 0x%04x\t%-5v : %f\n",
@@ -327,6 +336,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		if err != nil {
 			log.Errorf("modbus: failed to write %v at register address 0x%04x: %v\n",
 				o.u16, o.Addr, err)
+			return nil, 0, err
 		} else {
 			log.Infof("modbus: wrote %v at register address 0x%04x\n",
 				o.u16, o.Addr)
@@ -337,6 +347,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		if err != nil {
 			log.Infof("modbus: failed to write %v at register address 0x%04x: %v\n",
 				int16(o.u16), o.Addr, err)
+			return nil, 0, err
 		} else {
 			log.Infof("modbus: wrote %v at register address 0x%04x\n",
 				int16(o.u16), o.Addr)
@@ -347,6 +358,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		if err != nil {
 			log.Errorf("modbus: failed to write %v at address 0x%04x: %v\n",
 				o.u32, o.Addr, err)
+			return nil, 0, err
 		} else {
 			log.Infof("modbus: wrote %v at address 0x%04x\n",
 				o.u32, o.Addr)
@@ -356,6 +368,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		if err != nil {
 			log.Infof("modbus: failed to write %v at address 0x%04x: %v\n",
 				int32(o.u32), o.Addr, err)
+			return nil, 0, err
 		} else {
 			log.Infof("modbus: wrote %v at address 0x%04x\n",
 				int32(o.u32), o.Addr)
@@ -365,6 +378,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		if err != nil {
 			log.Errorf("modbus: failed to write %f at address 0x%04x: %v\n",
 				o.f32, o.Addr, err)
+			return nil, 0, err
 		} else {
 			log.Infof("modbus: wrote %f at address 0x%04x\n", o.f32, o.Addr)
 			return o.f32, float64(o.f32), err
@@ -374,6 +388,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		if err != nil {
 			log.Errorf("modbus: failed to write %v at address 0x%04x: %v\n",
 				o.u64, o.Addr, err)
+			return nil, 0, err
 		} else {
 			log.Infof("modbus: wrote %v at address 0x%04x\n",
 				o.u64, o.Addr)
@@ -383,6 +398,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		if err != nil {
 			log.Errorf("modbus: failed to write %v at address 0x%04x: %v\n",
 				int64(o.u64), o.Addr, err)
+			return nil, 0, err
 		} else {
 			log.Infof("modbus: wrote %v at address 0x%04x\n",
 				int64(o.u64), o.Addr)
@@ -392,6 +408,7 @@ func networkRequest(client *modbus.ModbusClient, o Operation) (response interfac
 		if err != nil {
 			log.Errorf("modbus: failed to write %f at address 0x%04x: %v\n",
 				o.f64, o.Addr, err)
+			return nil, 0, err
 		} else {
 			log.Infof("modbus: wrote %f at address 0x%04x\n",
 				o.f64, o.Addr)
@@ -424,8 +441,8 @@ func performBoolScan(client *modbus.ModbusClient, isCoil bool, start uint32, cou
 	} else {
 		regType = "discrete input"
 	}
-	fmt.Printf("starting %s scan\n", regType)
-	fmt.Println(start, count)
+	log.Printf("starting %s scan\n", regType)
+	log.Println(start, count)
 	for addr = start; addr <= count; addr++ {
 		if isCoil {
 			val, err = client.ReadCoil(uint16(addr))
@@ -436,15 +453,15 @@ func performBoolScan(client *modbus.ModbusClient, isCoil bool, start uint32, cou
 			// the register does not exist
 			continue
 		} else if err != nil {
-			fmt.Printf("failed to read %s at address 0x%04x: %v\n",
+			log.Printf("failed to read %s at address 0x%04x: %v\n",
 				regType, addr, err)
 		} else {
 			// we found a coil: display its address and value
-			fmt.Printf("0x%04x\t%-5v : %v\n", addr, addr, val)
+			log.Printf("0x%04x\t%-5v : %v\n", addr, addr, val)
 			countFound++
-			fmt.Println(countFound)
+			log.Println(countFound)
 		}
 	}
-	fmt.Printf("found %v %ss\n", countFound, regType)
+	log.Printf("found %v %ss\n", countFound, regType)
 	return countFound, regType
 }
