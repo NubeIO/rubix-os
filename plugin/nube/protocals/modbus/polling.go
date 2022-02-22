@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"time"
 
 	"github.com/NubeIO/flow-framework/api"
@@ -78,57 +80,55 @@ func (i *Instance) PollingTCP(p polling) error {
 					var mbClient smod.ModbusClient
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
-					mbClient, err = i.setClient(net, true)
+					mbClient, err = i.setClient(net, dev, true)
 					if err != nil {
 						log.Errorf("modbus: failed to set client %v %s\n", err, net.Name)
 						break
 					}
-					validDev, err := checkDevValid(dCheck)
-					if err != nil {
-						log.Errorf("modbus: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
+					if net.TransportType == model.TransType.Serial {
+						mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
+					} else if dev.TransportType == model.TransType.IP {
+						url, err := uurl.JoinIpPort(dev.Host, dev.Port)
+						if err != nil {
+							log.Errorf("modbus: failed to validate device IP %s\n", url)
+							break
+						}
+						mbClient.TCPClientHandler.Address = url
+						mbClient.TCPClientHandler.SlaveID = byte(dev.AddressId)
+					} else {
+						log.Errorf("modbus: failed to validate device and network %v %s\n", err, dev.Name)
 						break
 					}
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
-					if validDev {
-						if dev.AddressId == 0 {
-							log.Errorf("modbus: AddressId=0 is not valid")
-							break
+					for _, pnt := range dev.Points { //POINTS
+						dPnt := dev.PollDelayPointsMS
+						if dPnt <= 0 {
+							dPnt = 100
 						}
-						mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
-						mbClient.DeviceZeroMode = utils.BoolIsNil(dev.ZeroMode)
-						if err != nil {
-							log.Errorf("modbus: failed to vaildate SetUnitId %v %d\n", err, dev.AddressId)
-						}
-						for _, pnt := range dev.Points { //POINTS
-							dPnt := dev.PollDelayPointsMS
-							if dPnt <= 0 {
-								dPnt = 100
+						write := isWrite(pnt.ObjectType)
+						if write && !utils.BoolIsNil(pnt.WriteValueOnceSync) { //IS WRITE
+							_, responseValue, err := networkRequest(mbClient, pnt)
+							if err != nil {
+								_, err = i.pointUpdateErr(pnt.UUID, pnt, err)
+								break
 							}
-							write := isWrite(pnt.ObjectType)
-							if write && !utils.BoolIsNil(pnt.WriteValueOnceSync) { //IS WRITE
-								_, responseValue, err := networkRequest(mbClient, pnt)
-								if err != nil {
-									_, err = i.pointUpdateErr(pnt.UUID, pnt, err)
-									break
-								}
-								pnt.PresentValue = &responseValue
-								_, err = i.pointUpdate(pnt.UUID, pnt)
-							} else { //READ
-								_, responseValue, err := networkRequest(mbClient, pnt)
-								if err != nil {
-									_, err = i.pointUpdateErr(pnt.UUID, pnt, err)
-									break
-								}
-								pnt.PresentValue = &responseValue
-								_, err = i.pointUpdate(pnt.UUID, pnt)
-								if err != nil {
-									break
-								}
+							_, err = i.pointUpdate(pnt, responseValue)
+						} else { //READ
+							_, responseValue, err := networkRequest(mbClient, pnt)
+							if err != nil {
+								_, err = i.pointUpdateErr(pnt.UUID, pnt, err)
+								break
 							}
-							time.Sleep(dPnt * time.Millisecond)
+							pnt.PresentValue = &responseValue
+							_, err = i.pointUpdate(pnt, responseValue)
+							if err != nil {
+								break
+							}
 						}
+						time.Sleep(dPnt * time.Millisecond)
 					}
+
 				}
 			}
 			time.Sleep(1 * time.Second)

@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/grid-x/modbus"
-	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -23,33 +22,34 @@ type Client struct {
 
 var connected bool
 
-func (i *Instance) setClient(network *model.Network, cacheClient bool) (mbClient smod.ModbusClient, err error) {
+func (i *Instance) setClient(network *model.Network, device *model.Device, cacheClient bool) (mbClient smod.ModbusClient, err error) {
 
 	if network.TransportType == model.TransType.Serial {
+		serialPort := "/dev/ttyUSB0"
+		baudRate := 38400
+		stopBits := 1
+		dataBits := 8
+		parity := "N"
 		if network.SerialPort == nil {
-			log.Errorln("invalid serial connection details", "SerialPort")
-
+			serialPort = nils.StringIsNil(network.SerialPort)
 		}
-		if network.SerialBaudRate == nil {
-			log.Errorln("invalid serial connection details", "SerialBaudRate")
-
+		if network.SerialBaudRate != nil {
+			baudRate = int(nils.UnitIsNil(network.SerialBaudRate))
 		}
-		if network.SerialDataBits == nil {
-			log.Errorln("invalid serial connection details", "SerialDataBits")
-
+		if network.SerialDataBits != nil {
+			dataBits = int(nils.UnitIsNil(network.SerialDataBits))
 		}
-		if network.SerialStopBits == nil {
-			log.Errorln("invalid serial connection details", "SerialStopBits")
-
+		if network.SerialStopBits != nil {
+			stopBits = int(nils.UnitIsNil(network.SerialStopBits))
 		}
-		if network.SerialParity == nil {
-			log.Errorln("invalid serial connection details", "SerialParity")
+		if network.SerialParity != nil {
+			parity = nils.StringIsNil(network.SerialParity)
 		}
-		handler := modbus.NewRTUClientHandler(*network.SerialPort)
-		handler.BaudRate = int(*network.SerialBaudRate)
-		handler.DataBits = int(*network.SerialDataBits)
-		handler.Parity = setParity(*network.SerialParity)
-		handler.StopBits = int(*network.SerialStopBits)
+		handler := modbus.NewRTUClientHandler(serialPort)
+		handler.BaudRate = baudRate
+		handler.DataBits = dataBits
+		handler.Parity = setParity(parity)
+		handler.StopBits = stopBits
 		handler.Timeout = 5 * time.Second
 
 		handler.Connect()
@@ -63,22 +63,10 @@ func (i *Instance) setClient(network *model.Network, cacheClient bool) (mbClient
 
 	} else {
 
-		if network.Host == nil {
-			log.Errorln("invalid ip connection details", "Host")
-
-		}
-		if network.Port == nil {
-			log.Errorln("invalid serial connection details", "Port")
-
-		}
-
-		url, err := utils.JoinIPPort(cli)
-
-		handler := modbus.NewTCPClientHandler("localhost:502")
+		handler := modbus.NewTCPClientHandler("localhost:11502")
 		handler.Connect()
 		defer handler.Close()
 		mc := modbus.NewClient(handler)
-
 		mbClient.TCPClientHandler = handler
 		mbClient.Client = mc
 		connected = true
