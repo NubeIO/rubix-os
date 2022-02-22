@@ -174,7 +174,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string, fromPlu
 			return nil, errors.New("ERROR on device eventbus")
 		}
 	}
-
 	return body, query.Error
 }
 
@@ -260,6 +259,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
+
 	isChange := !utils.CompareFloatPtr(pointModel.PresentValue, presentValue)
 	pointModel.PresentValue = presentValue
 	if presentValue == nil {
@@ -267,7 +267,6 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		d.DB.Model(&pointModel).Update("present_value", nil)
 	}
 	_ = d.DB.Model(&pointModel).Updates(&pointModel)
-
 	if isChange == true {
 		err = d.ProducersPointWrite(pointModel)
 		if err != nil {

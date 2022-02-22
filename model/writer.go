@@ -43,11 +43,12 @@ type WriterBulkBody struct {
 }
 
 type WriterActionOutput struct {
-	UUID      string          `json:"uuid"`
-	Action    string          `json:"action"`
-	IsError   bool            `json:"is_error"`
-	Message   *string         `json:"message,omitempty"`
-	DataStore *datatypes.JSON `json:"data_store,omitempty"`
+	UUID         string          `json:"uuid"`
+	Action       string          `json:"action"`
+	IsError      bool            `json:"is_error"`
+	Message      *string         `json:"message,omitempty"`
+	PresentValue *float64        `json:"present_value,omitempty"`
+	DataStore    *datatypes.JSON `json:"data_store,omitempty"`
 }
 
 type SyncCOV struct {
