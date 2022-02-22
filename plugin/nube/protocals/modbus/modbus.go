@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
+	"github.com/NubeIO/flow-framework/utils"
 	"github.com/grid-x/modbus"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -62,11 +63,27 @@ func (i *Instance) setClient(network *model.Network, cacheClient bool) (mbClient
 
 	} else {
 
+		if network.Host == nil {
+			log.Errorln("invalid ip connection details", "Host")
+
+		}
+		if network.Port == nil {
+			log.Errorln("invalid serial connection details", "Port")
+
+		}
+
+		url, err := utils.JoinIPPort(cli)
+
 		handler := modbus.NewTCPClientHandler("localhost:502")
+		handler.Connect()
+		defer handler.Close()
+		mc := modbus.NewClient(handler)
 
+		mbClient.TCPClientHandler = handler
+		mbClient.Client = mc
+		connected = true
+		return mbClient, nil
 	}
-
-	return mbClient, nil
 
 }
 
