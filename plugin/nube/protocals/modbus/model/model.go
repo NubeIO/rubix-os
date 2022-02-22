@@ -57,7 +57,7 @@ type Network struct {
 	TransportType TransportTypeStruct `json:"transport_type"`
 	SerialPort    struct {
 		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"true"`
+		Required bool   `json:"required" default:"false"`
 		Min      int    `json:"min" default:"3"`
 		Max      int    `json:"max" default:"20"`
 		Default  string `json:"default" default:"/dev/ttyAMA0"`

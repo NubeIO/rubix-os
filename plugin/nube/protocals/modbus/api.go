@@ -7,7 +7,6 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/model"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -108,40 +107,40 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, serial)
 		}
 	})
-	mux.POST("/modbus/point/operation", func(ctx *gin.Context) {
-		body, _ := bodyClient(ctx)
-		err := i.setClient(body.Client, "", false, body.IsSerial)
-		if err != nil {
-			log.Info(err, "ERROR ON set modbus client")
-			ctx.JSON(http.StatusBadRequest, err)
-		}
-		cli := getClient()
-		if !isConnected() {
-			ctx.JSON(http.StatusBadRequest, "modbus not enabled")
-		} else {
-			err := cli.SetUnitId(body.DeviceAddress)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, "request was invalid, failed to SetUnitId")
-				return
-			}
-			request, err := parseRequest(body.Operation)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, "request was invalid, try read_roil or write_coil")
-				return
-			}
-			rArray, responseValue, err := networkRequest(cli, request)
-			if err != nil {
-				ctx.JSON(http.StatusBadRequest, err)
-			} else {
-				if body.ReturnArray {
-					log.Info(responseValue)
-					ctx.JSON(http.StatusOK, rArray)
-				} else {
-					ctx.JSON(http.StatusOK, responseValue)
-				}
-			}
-		}
-	})
+	//mux.POST("/modbus/point/operation", func(ctx *gin.Context) {
+	//	body, _ := bodyClient(ctx)
+	//	err := i.setClient(body.Client, "", false, body.IsSerial)
+	//	if err != nil {
+	//		log.Info(err, "ERROR ON set modbus client")
+	//		ctx.JSON(http.StatusBadRequest, err)
+	//	}
+	//	cli := getClient()
+	//	if !isConnected() {
+	//		ctx.JSON(http.StatusBadRequest, "modbus not enabled")
+	//	} else {
+	//		err := cli.SetUnitId(body.DeviceAddress)
+	//		if err != nil {
+	//			ctx.JSON(http.StatusBadRequest, "request was invalid, failed to SetUnitId")
+	//			return
+	//		}
+	//		request, err := parseRequest(body.Operation)
+	//		if err != nil {
+	//			ctx.JSON(http.StatusBadRequest, "request was invalid, try read_roil or write_coil")
+	//			return
+	//		}
+	//		rArray, responseValue, err := networkRequest(cli, request)
+	//		if err != nil {
+	//			ctx.JSON(http.StatusBadRequest, err)
+	//		} else {
+	//			if body.ReturnArray {
+	//				log.Info(responseValue)
+	//				ctx.JSON(http.StatusOK, rArray)
+	//			} else {
+	//				ctx.JSON(http.StatusOK, responseValue)
+	//			}
+	//		}
+	//	}
+	//})
 	mux.POST("/modbus/wizard/tcp", func(ctx *gin.Context) {
 		body, _ := bodyWizard(ctx)
 		n, err := i.wizardTCP(body)
@@ -159,21 +158,6 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else {
 
 			ctx.JSON(http.StatusOK, serial)
-		}
-	})
-	mux.POST("/scan/bool", func(ctx *gin.Context) {
-		body, _ := bodyClient(ctx)
-		err := i.setClient(body.Client, "", false, false)
-		if err != nil {
-			log.Info(err, "ERROR ON set modbus client")
-			ctx.JSON(http.StatusBadRequest, err)
-		}
-		cli := getClient()
-		if !isConnected() {
-			ctx.JSON(http.StatusBadRequest, "modbus not enabled")
-		} else {
-			found, _ := performBoolScan(cli, body.Scan.IsCoil, body.Scan.Start, body.Scan.Count)
-			ctx.JSON(http.StatusOK, found)
 		}
 	})
 
