@@ -8,6 +8,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/datatypes"
 )
 
 type Writer struct {
@@ -129,12 +130,28 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-	if body.Action == model.CommonNaming.Read {
+	if body.Action == model.CommonNaming.Sync {
 		err = cli.SyncWriterReadAction(uuid)
 		if err != nil {
 			output.IsError = true
 			output.Message = utils.NewStringAddress(err.Error())
 		}
+		dataStore, presentValue, err := d.getDataStoreAndPresentValues(writer)
+		if err != nil {
+			output.IsError = true
+			output.Message = utils.NewStringAddress(err.Error())
+		}
+		output.DataStore = dataStore
+		output.PresentValue = presentValue
+		return output
+	} else if body.Action == model.CommonNaming.Read {
+		dataStore, presentValue, err := d.getDataStoreAndPresentValues(writer)
+		if err != nil {
+			output.IsError = true
+			output.Message = utils.NewStringAddress(err.Error())
+		}
+		output.DataStore = dataStore
+		output.PresentValue = presentValue
 		return output
 	} else {
 		bytes, err := d.validateWriterWriteBody(writer.WriterThingClass, body)
@@ -155,7 +172,13 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 			output.Message = utils.NewStringAddress(err.Error())
 			return output
 		}
-		output.DataStore = &writer.DataStore
+		dataStore, presentValue, err := d.getDataStoreAndPresentValues(writer)
+		if err != nil {
+			output.IsError = true
+			output.Message = utils.NewStringAddress(err.Error())
+		}
+		output.DataStore = dataStore
+		output.PresentValue = presentValue
 		return output
 	}
 }
@@ -207,5 +230,28 @@ func (d *GormDatabase) syncAfterCreateUpdateWriter(body *model.Writer) {
 	_, err := cli.SyncWriter(&syncWriterBody)
 	if err != nil {
 		log.Error(err)
+	}
+}
+
+func (d *GormDatabase) getDataStoreAndPresentValues(writer *model.Writer) (*datatypes.JSON, *float64, error) {
+	if writer.WriterThingClass == model.ThingClass.Point {
+		point, err := d.GetPoint(writer.WriterThingUUID, api.Args{WithPriority: true})
+		if err != nil {
+			return nil, nil, err
+		}
+		priorityBytes, _ := json.Marshal(point.Priority)
+		priorities := &model.Priorities{}
+		_ = json.Unmarshal(priorityBytes, priorities)
+		prioritiesBytes, _ := json.Marshal(priorities)
+		prioritiesJSON := (datatypes.JSON)(prioritiesBytes)
+		return &prioritiesJSON, point.PresentValue, nil
+	} else {
+		schedule, err := d.GetSchedule(writer.WriterThingUUID)
+		if err != nil {
+			return nil, nil, err
+		}
+		scheduleBytes, _ := json.Marshal(schedule.Schedule)
+		scheduleJSON := (datatypes.JSON)(scheduleBytes)
+		return &scheduleJSON, nil, nil
 	}
 }

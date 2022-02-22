@@ -50,7 +50,6 @@ func (d *GormDatabase) SyncCOV(writerUUID string, body *model.SyncCOV) error {
 			CommonUUID: model.CommonUUID{UUID: uuid},
 			Priority:   body.Priority,
 		}
-		println("writing...")
 		_, err = d.PointWrite(uuid, &pointModel, false)
 		return err
 	} else {

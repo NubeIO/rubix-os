@@ -5,6 +5,7 @@ var CommonNaming = struct {
 	Plugin           string
 	Read             string
 	Write            string
+	Sync             string
 	Stream           string
 	StreamClone      string
 	StreamList       string
@@ -30,6 +31,7 @@ var CommonNaming = struct {
 	Plugin:           "plugin",
 	Read:             "read",
 	Write:            "write",
+	Sync:             "sync",
 	Stream:           "stream",
 	StreamClone:      "stream_clone",
 	StreamList:       "stream_list",
