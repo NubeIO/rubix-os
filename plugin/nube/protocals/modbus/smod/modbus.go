@@ -57,6 +57,7 @@ const (
 type ModbusClient struct {
 	Client           modbus.Client
 	RTUClientHandler *modbus.RTUClientHandler
+	TCPClientHandler *modbus.TCPClientHandler
 	Endianness       Endianness
 	WordOrder        WordOrder
 	RegType          RegType

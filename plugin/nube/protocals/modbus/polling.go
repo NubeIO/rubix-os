@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
@@ -79,38 +78,10 @@ func (i *Instance) PollingTCP(p polling) error {
 					var mbClient smod.ModbusClient
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
-					if net.TransportType == model.TransType.Serial {
-						if net.SerialPort == nil {
-							log.Errorln("invalid serial connection details", "SerialPort")
-							break
-						}
-						if net.SerialBaudRate == nil {
-							log.Errorln("invalid serial connection details", "SerialBaudRate")
-							break
-						}
-						if net.SerialDataBits == nil {
-							log.Errorln("invalid serial connection details", "SerialDataBits")
-							break
-						}
-						if net.SerialStopBits == nil {
-							log.Errorln("invalid serial connection details", "SerialStopBits")
-							break
-						}
-						if net.SerialParity == nil {
-							log.Errorln("invalid serial connection details", "SerialParity")
-							break
-						}
-						mbClient, err = i.setClient(net, true, true)
-						if err != nil {
-							log.Errorf("modbus: failed to set client %v %s\n", err, *net.SerialPort)
-							break
-						}
-					} else {
-						mbClient, err = i.setClient(net, true, false)
-						if err != nil {
-							log.Errorf("modbus: failed to set client %v %s\n", err, dev.CommonIP.Host)
-							break
-						}
+					mbClient, err = i.setClient(net, true)
+					if err != nil {
+						log.Errorf("modbus: failed to set client %v %s\n", err, net.Name)
+						break
 					}
 					validDev, err := checkDevValid(dCheck)
 					if err != nil {
@@ -143,7 +114,6 @@ func (i *Instance) PollingTCP(p polling) error {
 								}
 								pnt.PresentValue = &responseValue
 								_, err = i.pointUpdate(pnt.UUID, pnt)
-
 							} else { //READ
 								_, responseValue, err := networkRequest(mbClient, pnt)
 								if err != nil {
@@ -157,7 +127,6 @@ func (i *Instance) PollingTCP(p polling) error {
 								}
 							}
 							time.Sleep(dPnt * time.Millisecond)
-
 						}
 					}
 				}

@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
 	"github.com/grid-x/modbus"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -21,34 +22,51 @@ type Client struct {
 
 var connected bool
 
-func (i *Instance) setClient(network *model.Network, cacheClient, isSerial bool) (mbClient smod.ModbusClient, err error) {
+func (i *Instance) setClient(network *model.Network, cacheClient bool) (mbClient smod.ModbusClient, err error) {
 
-	handler := modbus.NewRTUClientHandler("/dev/ttyUSB0")
-	handler.BaudRate = 38400
-	handler.DataBits = 8
-	handler.Parity = "N"
-	handler.StopBits = 1
-	handler.SlaveID = 1
-	handler.Timeout = 5 * time.Second
+	if network.TransportType == model.TransType.Serial {
+		if network.SerialPort == nil {
+			log.Errorln("invalid serial connection details", "SerialPort")
 
-	//client.SerialPort = *network.SerialPort
-	//client.BaudRate = *network.SerialBaudRate
-	//client.DataBits = *network.SerialDataBits
-	//client.StopBits = *network.SerialStopBits
-	//client.Parity = *network.SerialParity
+		}
+		if network.SerialBaudRate == nil {
+			log.Errorln("invalid serial connection details", "SerialBaudRate")
 
-	handler.Connect()
-	defer handler.Close()
+		}
+		if network.SerialDataBits == nil {
+			log.Errorln("invalid serial connection details", "SerialDataBits")
 
-	mc := modbus.NewClient(handler)
-	var c smod.ModbusClient
-	c.RTUClientHandler = handler
-	c.Client = mc
-	connected = true
-	return c, nil
-	//c.RegType = smod.HoldingRegister
-	//c.Endianness = smod.BigEndian
-	//c.WordOrder = smod.LowWordFirst
+		}
+		if network.SerialStopBits == nil {
+			log.Errorln("invalid serial connection details", "SerialStopBits")
+
+		}
+		if network.SerialParity == nil {
+			log.Errorln("invalid serial connection details", "SerialParity")
+		}
+		handler := modbus.NewRTUClientHandler(*network.SerialPort)
+		handler.BaudRate = int(*network.SerialBaudRate)
+		handler.DataBits = int(*network.SerialDataBits)
+		handler.Parity = setParity(*network.SerialParity)
+		handler.StopBits = int(*network.SerialStopBits)
+		handler.Timeout = 5 * time.Second
+
+		handler.Connect()
+		defer handler.Close()
+		mc := modbus.NewClient(handler)
+
+		mbClient.RTUClientHandler = handler
+		mbClient.Client = mc
+		connected = true
+		return mbClient, nil
+
+	} else {
+
+		handler := modbus.NewTCPClientHandler("localhost:502")
+
+	}
+
+	return mbClient, nil
 
 }
 
@@ -115,15 +133,15 @@ func isConnected() bool {
 	return connected
 }
 
-func setParity(in string) uint {
+func setParity(in string) string {
 	if in == model.SerialParity.None {
-		return smod.ParityNone
+		return "N"
 	} else if in == model.SerialParity.Odd {
-		return smod.ParityOdd
+		return "O"
 	} else if in == model.SerialParity.Even {
-		return smod.ParityEven
+		return "E"
 	} else {
-		return smod.ParityNone
+		return "N"
 	}
 }
 
