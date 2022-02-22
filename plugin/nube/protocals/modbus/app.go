@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/NubeIO/flow-framework/model"
@@ -19,6 +20,7 @@ func (i *Instance) pointUpdate(point *model.Point, value float64) (*model.Point,
 	var pri model.Priority
 	pri.P16 = &value
 	point.Priority = &pri
+	fmt.Println()
 	_, _ = i.db.UpdatePointValue(point.UUID, point, true)
 	if err != nil {
 		log.Error("MODBUS UPDATE POINT issue on message from mqtt update point", err)

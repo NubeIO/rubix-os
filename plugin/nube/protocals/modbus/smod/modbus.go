@@ -189,7 +189,11 @@ func (mc *ModbusClient) WriteCoil(addr uint16, value uint16) (values []byte, out
 		log.Errorf("modbus-function: failed to WriteCoil: %v\n", err)
 		return
 	}
-	out = float64(values[0])
+	if value == 0 {
+		out = 0
+	} else {
+		out = 1
+	}
 	return
 }
 

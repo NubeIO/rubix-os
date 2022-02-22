@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
@@ -108,11 +109,13 @@ func (i *Instance) PollingTCP(p polling) error {
 						}
 						write := isWrite(pnt.ObjectType)
 						if write && !utils.BoolIsNil(pnt.WriteValueOnceSync) { //IS WRITE
+							fmt.Println("WRITE", *pnt.Priority.P16)
 							_, responseValue, err := networkRequest(mbClient, pnt)
 							if err != nil {
 								_, err = i.pointUpdateErr(pnt.UUID, pnt, err)
 								break
 							}
+							fmt.Println("WRITE responseValue", responseValue)
 							_, err = i.pointUpdate(pnt, responseValue)
 						} else { //READ
 							_, responseValue, err := networkRequest(mbClient, pnt)
@@ -131,7 +134,7 @@ func (i *Instance) PollingTCP(p polling) error {
 
 				}
 			}
-			time.Sleep(1 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 		if !p.enable { //TODO the disable of the polling isn't working
 			return true, nil
