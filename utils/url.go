@@ -40,16 +40,26 @@ func JoinURL(u URLParts) (url string, err error) {
 	t := u.Transport
 	h := u.Host
 	p := u.Port
-	//if !IsTCP(t) {
-	//	return "",  errors.New("in valid url prefix try ie: tcp://")
-	//}
 	if !ValidIP4(h) {
 		return "", errors.New("in valid url try ie: 192.168.1.1")
 	}
 	if !ValidPort(p) {
 		return "", errors.New("in valid url try ie: 8080 as a string")
 	}
-	ip := fmt.Sprintf("%s://%s:%s", t, h, p)
+	ip := fmt.Sprintf("%s:%s", t, h, p)
+	return ip, nil
+}
+
+func JoinIPPort(u URLParts) (url string, err error) {
+	h := u.Host
+	p := u.Port
+	if !ValidIP4(h) {
+		return "", errors.New("in valid url try ie: 192.168.1.1")
+	}
+	if !ValidPort(p) {
+		return "", errors.New("in valid url try ie: 8080 as a string")
+	}
+	ip := fmt.Sprintf("%s:%s", h, p)
 	return ip, nil
 }
 

@@ -57,34 +57,34 @@ type Network struct {
 	TransportType TransportTypeStruct `json:"transport_type"`
 	SerialPort    struct {
 		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"true"`
+		Required bool   `json:"required" default:"false"`
 		Min      int    `json:"min" default:"3"`
 		Max      int    `json:"max" default:"20"`
-		Default  string `json:"default" default:"/dev/ttyAMA0"`
+		Default  string `json:"default" default:""`
 	} `json:"serial_port"`
 	SerialBaudRate struct {
 		Type     string `json:"type" default:"array"`
 		Required bool   `json:"required" default:"false"`
 		Options  []int  `json:"options" default:"[9600, 38400]"`
-		Default  int    `json:"default" default:"38400"`
+		Default  int    `json:"default" default:""`
 	} `json:"serial_baud_rate"`
 	SerialParity struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
 		Options  []string `json:"options" default:"[\"odd\",\"even\",\"none\"]"`
-		Default  string   `json:"default" default:"none"`
+		Default  string   `json:"default" default:""`
 	} `json:"serial_parity"`
 	SerialStopBits struct {
 		Type     string `json:"type" default:"array"`
 		Required bool   `json:"required" default:"false"`
 		Options  []int  `json:"options" default:"[1, 2]"`
-		Default  int    `json:"default" default:"1"`
+		Default  int    `json:"default" default:""`
 	} `json:"serial_stop_bits"`
 	SerialDataBits struct {
 		Type     string `json:"type" default:"array"`
 		Required bool   `json:"required" default:"false"`
 		Options  []int  `json:"options" default:"[7, 8]"`
-		Default  int    `json:"default" default:"8"`
+		Default  int    `json:"default" default:""`
 	} `json:"serial_data_bits"`
 }
 
@@ -102,13 +102,13 @@ type Device struct {
 		Type     string `json:"type" default:"string"`
 		Required bool   `json:"required" default:"false"`
 		Options  string `json:"options" default:"192.168.15.10"`
-		Default  string `json:"default" default:"192.168.15.10"`
+		Default  string `json:"default" default:""`
 	} `json:"host"`
 	Port struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"false"`
 		Options  int    `json:"options" default:"502"`
-		Default  int    `json:"default" default:"502"`
+		Default  int    `json:"default" default:""`
 	} `json:"port"`
 	ZeroMode struct {
 		Type     string `json:"type" default:"bool"`

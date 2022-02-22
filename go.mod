@@ -5,7 +5,7 @@ module github.com/NubeIO/flow-framework
 require (
 	github.com/NubeDev/configor v0.0.2
 	github.com/NubeDev/location v0.0.2
-	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.1.5
+	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.1.6
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -39,11 +39,13 @@ require (
 	github.com/fhmq/hmq v0.0.0-20210810024638-1d6979189a22
 	github.com/gomarkdown/markdown v0.0.0-20210918233619-6c1113f12c4a
 	github.com/gorilla/mux v1.8.0
+	github.com/grid-x/modbus v0.0.0-20220210093200-c7b3bba92b40
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
 	github.com/labstack/gommon v0.3.0
 	github.com/martinlindhe/unit v0.0.0-20210313160520-19b60e03648d
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/oleiade/lane v1.0.1
+	github.com/pkg/errors v0.9.1
 	github.com/thejerf/suture v4.0.1+incompatible
 	github.com/tidwall/gjson v1.6.8
 	golang.org/x/net v0.0.0-20220127074510-2fabfed7e28f
@@ -52,7 +54,6 @@ require (
 
 require (
 	github.com/golang/protobuf v1.4.3 // indirect
-	github.com/google/go-cmp v0.5.5 // indirect
 	golang.org/x/tools v0.0.0-20201224043029-2b0845dc783e // indirect
 )
 
@@ -81,6 +82,7 @@ require (
 	github.com/goburrow/serial v0.1.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.1.1 // indirect
+	github.com/grid-x/serial v0.0.0-20191104121038-e24bc9bf6f08 // indirect
 	github.com/hashicorp/go-uuid v1.0.1 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
@@ -101,7 +103,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pierrec/lz4 v0.0.0-20190327172049-315a67e90e41 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect

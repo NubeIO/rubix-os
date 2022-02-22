@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/NubeIO/flow-framework/model"
@@ -10,15 +11,19 @@ import (
 )
 
 //pointUpdate update point present value
-func (i *Instance) pointUpdate(uuid string, point *model.Point) (*model.Point, error) {
+func (i *Instance) pointUpdate(point *model.Point, value float64) (*model.Point, error) {
 	point.CommonFault.InFault = false
 	point.CommonFault.MessageLevel = model.MessageLevel.Info
 	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	point.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 	point.CommonFault.LastOk = time.Now().UTC()
-	_, _ = i.db.UpdatePointValue(uuid, point, true)
+	var pri model.Priority
+	pri.P16 = &value
+	point.Priority = &pri
+	fmt.Println()
+	_, _ = i.db.UpdatePointValue(point.UUID, point, true)
 	if err != nil {
-		log.Error("MODBUS UPDATE POINT issue on message from mqtt update point")
+		log.Error("MODBUS UPDATE POINT issue on message from mqtt update point", err)
 		return nil, err
 	}
 	return nil, nil
@@ -33,7 +38,7 @@ func (i *Instance) pointUpdateErr(uuid string, point *model.Point, err error) (*
 	point.CommonFault.LastFail = time.Now().UTC()
 	_, _ = i.db.UpdatePoint(uuid, point, true)
 	if err != nil {
-		log.Error("MODBUS UPDATE POINT issue on message from mqtt update point")
+		log.Error("MODBUS UPDATE POINT issue on message from mqtt update point", err)
 		return nil, err
 	}
 	return nil, nil
