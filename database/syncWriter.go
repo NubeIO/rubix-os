@@ -72,9 +72,10 @@ func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.Sync
 		point := model.Point{Priority: body.Priority}
 		// TODO: change into below commented section
 		producer, _ := d.GetProducer(writerClone.ProducerUUID, api.Args{})
-		_, _ = d.PointWrite(producer.ProducerThingUUID, &point, true)
+		_, err = d.PointWrite(producer.ProducerThingUUID, &point, true)
 		// Currently, writerClone.WriterThingUUID has not valid `WriterThingUUID` on old deployments
-		// _, _ = d.PointWrite(writerClone.WriterThingUUID, &point, true)
+		// _, err = d.PointWrite(writerClone.WriterThingUUID, &point, true)
+		return err
 	} else if writerClone.WriterThingClass == model.ThingClass.Schedule {
 		data, _ := json.Marshal(body.Schedule)
 		writerCloneBody := model.WriterClone{CommonWriter: model.CommonWriter{DataStore: data}}
@@ -82,11 +83,11 @@ func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.Sync
 		if err != nil {
 			return nil
 		}
-		_ = d.ScheduleWrite(writerClone.WriterThingUUID, body.Schedule)
+		err = d.ScheduleWrite(writerClone.WriterThingUUID, body.Schedule)
+		return err
 	} else {
 		return errors.New("no match writer thing class")
 	}
-	return err
 }
 
 func (d *GormDatabase) SyncWriterReadAction(sourceUUID string) error {

@@ -38,12 +38,15 @@ func (a *FlowClient) SyncWriterWriteAction(sourceUUID string, body *model.SyncWr
 	resp, err := a.client.R().
 		SetBody(body).
 		Post(fmt.Sprintf("/api/sync/writer/write/%s", sourceUUID))
+	// TODO: this block needs to be re-written; same constant thing on all places
 	if err != nil {
 		if resp == nil || resp.String() == "" {
 			return fmt.Errorf("SyncWriterWriteAction: %s", err)
 		} else {
 			return fmt.Errorf("SyncWriterWriteAction: %s", resp)
 		}
+	} else if !(resp.StatusCode() >= 200 && resp.StatusCode() < 300) {
+		return fmt.Errorf("SyncWriterWriteAction: %s", resp)
 	}
 	return nil
 }

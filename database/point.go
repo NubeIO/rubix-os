@@ -219,7 +219,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 
 func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
+	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -266,8 +266,8 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		// nil is ignored on GORM, so we are pushing forcefully because isChange comparison will fail on `null` write
 		d.DB.Model(&pointModel).Update("present_value", nil)
 	}
-	_ = d.DB.Model(&pointModel).Updates(&pointModel)
 	if isChange == true {
+		_ = d.DB.Model(&pointModel).Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel)
 		if err != nil {
 			return nil, err
