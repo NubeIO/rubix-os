@@ -262,6 +262,7 @@ type Message struct {
 }
 
 func responseHandler(body interface{}, err error, ctx *gin.Context) {
+	// TODO: add other custom errors
 	if err == nil {
 		ctx.JSON(http.StatusOK, body)
 	} else {
