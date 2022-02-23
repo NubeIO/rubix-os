@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/NubeIO/flow-framework/model"
@@ -11,7 +10,8 @@ import (
 )
 
 //pointUpdate update point present value
-func (i *Instance) pointUpdate(point *model.Point, value float64) (*model.Point, error) {
+func (i *Instance) pointUpdate(uuid string, value float64) (*model.Point, error) {
+	var point model.Point
 	point.CommonFault.InFault = false
 	point.CommonFault.MessageLevel = model.MessageLevel.Info
 	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
@@ -20,25 +20,26 @@ func (i *Instance) pointUpdate(point *model.Point, value float64) (*model.Point,
 	var pri model.Priority
 	pri.P16 = &value
 	point.Priority = &pri
-	fmt.Println()
-	_, _ = i.db.UpdatePointValue(point.UUID, point, true)
+	point.InSync = utils.NewTrue()
+	_, _ = i.db.UpdatePointValue(uuid, &point, true)
 	if err != nil {
-		log.Error("MODBUS UPDATE POINT issue on message from mqtt update point", err)
+		log.Error("MODBUS UPDATE POINT UpdatePointValue()", err)
 		return nil, err
 	}
 	return nil, nil
 }
 
 //pointUpdate update point present value
-func (i *Instance) pointUpdateErr(uuid string, point *model.Point, err error) (*model.Point, error) {
+func (i *Instance) pointUpdateErr(uuid string, err error) (*model.Point, error) {
+	var point model.Point
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = model.MessageLevel.Fail
 	point.CommonFault.MessageCode = model.CommonFaultCode.PointError
 	point.CommonFault.Message = err.Error()
 	point.CommonFault.LastFail = time.Now().UTC()
-	_, _ = i.db.UpdatePoint(uuid, point, true)
+	_, _ = i.db.UpdatePoint(uuid, &point, true)
 	if err != nil {
-		log.Error("MODBUS UPDATE POINT issue on message from mqtt update point", err)
+		log.Error("MODBUS UPDATE POINT pointUpdateErr()", err)
 		return nil, err
 	}
 	return nil, nil

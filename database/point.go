@@ -200,7 +200,10 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, err
 		}
 	}
-	body.InSync = utils.NewFalse()
+	//example modbus: if user changes the data type then do a new read of the point on the modbus network
+	if !fromPlugin {
+		pointModel.InSync = utils.NewFalse()
+	}
 	body.WriteValueOnceSync = utils.NewFalse()
 	query = d.DB.Model(&pointModel).Updates(&body)
 	// Don't update point value if priority array on body is nil
@@ -255,6 +258,10 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 	}
 	presentValue = val
 
+	//example for wires and modbus: if a new value is written from  wires then set this to false so the modbus knows on the next poll to write a new value to the modbus point
+	if !fromPlugin {
+		pointModel.InSync = utils.NewFalse()
+	}
 	if !utils.Unit32NilCheck(pointModel.Decimal) && presentValue != nil {
 		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val

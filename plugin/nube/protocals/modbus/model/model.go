@@ -74,18 +74,18 @@ type Network struct {
 		Options  []string `json:"options" default:"[\"odd\",\"even\",\"none\"]"`
 		Default  string   `json:"default" default:""`
 	} `json:"serial_parity"`
-	SerialStopBits struct {
-		Type     string `json:"type" default:"array"`
-		Required bool   `json:"required" default:"false"`
-		Options  []int  `json:"options" default:"[1, 2]"`
-		Default  int    `json:"default" default:""`
-	} `json:"serial_stop_bits"`
 	SerialDataBits struct {
 		Type     string `json:"type" default:"array"`
 		Required bool   `json:"required" default:"false"`
 		Options  []int  `json:"options" default:"[7, 8]"`
 		Default  int    `json:"default" default:""`
 	} `json:"serial_data_bits"`
+	SerialStopBits struct {
+		Type     string `json:"type" default:"array"`
+		Required bool   `json:"required" default:"false"`
+		Options  []int  `json:"options" default:"[1, 2]"`
+		Default  int    `json:"default" default:""`
+	} `json:"serial_stop_bits"`
 }
 
 type Device struct {
@@ -121,7 +121,14 @@ type Device struct {
 type Point struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
-	AddressId   struct {
+	ObjectType  struct {
+		Type     string `json:"type" default:"array"`
+		Required bool   `json:"required" default:"false"`
+		//Options  []string `json:"options" default:"[\"read_coil\",\"read_coils\",\"read_discrete_input\",\"read_discrete_inputs\",\"write_coil\",\"read_registers\",\"read_holding\",\"read_holdings\",\"write_holding\",\"write_holdings\",\"read_int_16\",\"write_int_16\",\"read_uint_16\",\"write_uint_16\",\"read_int_32\",\"write_int_32\",\"read_uint_32\",\"write_uint_32\",\"read_float_32\",\"write_float_32\",\"read_float_64\",\"write_float_64\"]"`
+		Options []string `json:"options" default:"[\"read_coil\",\"read_discrete_input\",\"write_coil\",\"read_register\",\"read_holding\",\"write_holding\"]"`
+		Default string   `json:"default" default:"read_coils"`
+	} `json:"object_type"`
+	AddressId struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"true"`
 		Options  int    `json:"options" default:"1"`
@@ -133,12 +140,12 @@ type Point struct {
 		Options  int    `json:"options" default:"1"`
 		Default  int    `json:"default" default:"1"`
 	} `json:"address_length"`
-	ObjectType struct {
+	DataType struct {
 		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[\"read_coil\",\"read_coils\",\"read_discrete_input\",\"read_discrete_inputs\",\"write_coil\",\"read_registers\",\"read_holding\",\"read_holdings\",\"write_holding\",\"write_holdings\",\"read_int_16\",\"write_int_16\",\"read_uint_16\",\"write_uint_16\",\"read_int_32\",\"write_int_32\",\"read_uint_32\",\"write_uint_32\",\"read_float_32\",\"write_float_32\",\"read_float_64\",\"write_float_64\"]"`
-		Default  string   `json:"default" default:"read_coil"`
-	} `json:"object_type"`
+		Required bool     `json:"required" default:"true"`
+		Options  []string `json:"options" default:"[\"uint16\",\"int16\",\"uint32\",\"int32\",\"uint64\",\"int64\",\"float32\",\"float64\"]"`
+		Default  string   `json:"default" default:"uint16"`
+	} `json:"data_type"`
 	ObjectEncoding struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
