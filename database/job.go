@@ -38,7 +38,7 @@ func (d *GormDatabase) GetJob(uuid string) (*model.Job, error) {
 
 func (d *GormDatabase) GetJobByPluginConfId(pcId string) (*model.Job, error) {
 	var jobModel *model.Job
-	query := d.DB.Where("plugin_conf_id = ?", pcId).Find(&jobModel)
+	query := d.DB.Where("plugin_conf_id = ?", pcId).First(&jobModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -64,7 +64,7 @@ func (d *GormDatabase) DeleteJob(uuid string) (bool, error) {
 // UpdateJob  returns the device for the given id or nil.
 func (d *GormDatabase) UpdateJob(uuid string, body *model.Job) (*model.Job, error) {
 	var jobModel *model.Job
-	query := d.DB.Where("uuid = ?", uuid).Find(&jobModel)
+	query := d.DB.Where("uuid = ?", uuid).First(&jobModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

@@ -4,36 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//withFieldsArgs
-func withFieldsArgs(ctx *gin.Context) (field string, value string) {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.Field = ctx.DefaultQuery(aType.Field, aDefault.Field)
-	args.Value = ctx.DefaultQuery(aType.Value, aDefault.Value)
-	return args.Field, args.Value
-}
-
-//withFieldsArgs
-func networkDevicePointNames(ctx *gin.Context) (networkName, deviceName, pointName string) {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.NetworkName = ctx.DefaultQuery(aType.NetworkName, aDefault.NetworkName)
-	args.DeviceName = ctx.DefaultQuery(aType.DeviceName, aDefault.DeviceName)
-	args.PointName = ctx.DefaultQuery(aType.PointName, aDefault.PointName)
-	return args.NetworkName, args.DeviceName, args.PointName
-}
-
-//parentArgs
-func parentArgs(ctx *gin.Context) (AddToParent string) {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.AddToParent = ctx.DefaultQuery(aType.AddToParent, aDefault.AddToParent)
-	return args.AddToParent
-}
-
 func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
@@ -151,6 +121,9 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	args.WithPriority, _ = toBool(ctx.DefaultQuery(aType.WithPriority, aDefault.WithPriority))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	if value, ok := ctx.GetQuery(aType.AddressUUID); ok {
+		args.AddressUUID = &value
+	}
 	return args
 }
 
@@ -160,6 +133,18 @@ func buildPointArgs(ctx *gin.Context) Args {
 	var aDefault = ArgsDefault
 	args.WithPriority, _ = toBool(ctx.DefaultQuery(aType.WithPriority, aDefault.WithPriority))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	if value, ok := ctx.GetQuery(aType.AddressUUID); ok {
+		args.AddressUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.IoId); ok {
+		args.IoId = &value
+	}
+	if value, ok := ctx.GetQuery(aType.AddressID); ok {
+		args.AddressID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.ObjectType); ok {
+		args.ObjectType = &value
+	}
 	return args
 }
 
@@ -222,6 +207,15 @@ func buildProducerHistoryArgs(ctx *gin.Context) Args {
 	}
 	if order, ok := ctx.GetQuery(aType.Order); ok {
 		args.Order = order
+	}
+	return args
+}
+
+func buildScheduleArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	if value, ok := ctx.GetQuery(aType.Name); ok {
+		args.Name = &value
 	}
 	return args
 }

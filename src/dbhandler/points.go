@@ -22,7 +22,7 @@ func (h *Handler) GetPoint(uuid string) (*model.Point, error) {
 }
 
 func (h *Handler) CreatePoint(body *model.Point, fromPlugin, updatePoint bool) (*model.Point, error) {
-	pnt, err := getDb().CreatePoint(body, "", fromPlugin)
+	pnt, err := getDb().CreatePoint(body, fromPlugin)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (h *Handler) UpdatePointPresentValue(body *model.Point, fromPlugin bool) (*
 
 func (h *Handler) UpdatePointValue(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
-	query := getDb().DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
+	query := getDb().DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -73,36 +73,8 @@ func (h *Handler) UpdatePointValue(uuid string, body *model.Point, fromPlugin bo
 	return p, nil
 }
 
-func (h *Handler) GetPointByField(field string, value string) (*model.Point, error) {
-	q, err := getDb().GetPointByField(field, value)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
-}
-
-func (h *Handler) GetPointByFieldAndIOID(field string, value string, body *model.Point) (*model.Point, error) {
-	q, err := getDb().GetPointByFieldAndIOID(field, value, body)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
-}
-
-func (h *Handler) GetPointByFieldAndThingType(field string, value string, body *model.Point) (*model.Point, error) {
-	q, err := getDb().GetPointByFieldAndThingType(field, value, body)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
-}
-
-func (h *Handler) PointAndQuery(value1, value2 string) (*model.Point, error) {
-	q, err := getDb().PointAndQuery(value1, value2)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
+func (h *Handler) GetOnePointByArgs(args api.Args) (*model.Point, error) {
+	return getDb().GetOnePointByArgs(args)
 }
 
 func (h *Handler) DeletePoint(uuid string) (bool, error) {

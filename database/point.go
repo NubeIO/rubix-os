@@ -31,85 +31,16 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 	return pointModel, nil
 }
 
-// GetPointsByNetworkUUID get all points by a networkUUID, will return all the points under a network
-func (d *GormDatabase) GetPointsByNetworkUUID(networkUUID string) (*utils.Array, error) {
-	var arg api.Args
-	arg.WithDevices = true
-	arg.WithPoints = true
-	network, err := d.GetNetwork(networkUUID, arg)
-	if err != nil {
-		return nil, err
-	}
-	p := utils.NewArray()
-	for _, dev := range network.Devices {
-		for _, pnt := range dev.Points {
-			p.Add(pnt)
-		}
-	}
-	return p, nil
-}
-
-// GetPointsByNetworkPluginName get all points by a network plugin name, will return all the points under a network
-func (d *GormDatabase) GetPointsByNetworkPluginName(name string) (*utils.Array, error) {
-	var arg api.Args
-	arg.WithDevices = true
-	arg.WithPoints = true
-	network, err := d.GetNetworkByPluginName(name, arg)
-	if err != nil {
-		return nil, err
-	}
-	points, err := d.GetPointsByNetworkUUID(network.UUID)
-	if err != nil {
-		return nil, err
-	}
-	return points, nil
-}
-
-func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string) (*model.Point, error) {
-	var args api.Args
-	args.WithDevices = true
-	args.WithPoints = true
+func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	var pointModel *model.Point
-	net, err := d.GetNetworkByName(networkName, args)
-	if err != nil {
-		return nil, errors.New("failed to find a network with that name")
-	}
-	foundDev := false
-	foundPnt := false
-	for _, dev := range net.Devices {
-		if dev.Name == deviceName {
-			foundDev = true
-			for _, pnt := range dev.Points {
-				if pnt.Name == pointName {
-					foundPnt = true
-					pointModel = pnt
-				}
-			}
-		}
-	}
-	if !foundDev {
-		return nil, errors.New("failed to find a device with that name")
-	}
-	if !foundPnt {
-		return nil, errors.New("found device but failed to find a point with that name")
+	query := d.buildPointQuery(args)
+	if err := query.First(&pointModel).Error; err != nil {
+		return nil, query.Error
 	}
 	return pointModel, nil
 }
 
-//PointWriteByName get point by name and update its priority or present value
-func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.Point, fromPlugin bool) (*model.Point, error) {
-	getPnt, err := d.GetPointByName(networkName, deviceName, pointName)
-	if err != nil {
-		return nil, err
-	}
-	write, err := d.PointWrite(getPnt.UUID, body, fromPlugin)
-	if err != nil {
-		return nil, err
-	}
-	return write, nil
-}
-
-func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string, fromPlugin bool) (*model.Point, error) {
+func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
 	var deviceModel *model.Device
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	deviceUUID := body.DeviceUUID
@@ -151,17 +82,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string, fromPlu
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, query.Error
 	}
-	if streamUUID != "" {
-		producerModel := new(model.Producer)
-		producerModel.StreamUUID = streamUUID
-		producerModel.ProducerThingUUID = body.UUID
-		producerModel.ProducerThingClass = model.ThingClass.Point
-		producerModel.ProducerThingType = model.ThingClass.Point
-		_, err := d.CreateProducer(producerModel)
-		if err != nil {
-			return nil, errors.New("ERROR on create new producer to an existing stream")
-		}
-	}
 	plug, err := d.GetPluginIDFromDevice(deviceUUID)
 	if err != nil {
 		return nil, errors.New("ERROR failed to get plugin uuid")
@@ -179,7 +99,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, streamUUID string, fromPlu
 
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
+	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -274,7 +194,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		}
 	}
 
-	if !fromPlugin { //stop looping
+	if !fromPlugin { // stop looping
 		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)
 		if err != nil {
 			return nil, errors.New("ERROR failed to get plugin uuid")
@@ -331,47 +251,6 @@ func (d *GormDatabase) parsePriority(priority *model.Priority) (map[string]inter
 	return priorityMap, highestValue, currentPriority, isPriorityExist
 }
 
-func (d *GormDatabase) GetPointByField(field string, value string) (*model.Point, error) {
-	var pointModel *model.Point
-	f := fmt.Sprintf("%s = ? ", field)
-	query := d.DB.Where(f, value).Preload("Priority").First(&pointModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return pointModel, nil
-}
-
-// PointAndQuery will do an SQL AND
-func (d *GormDatabase) PointAndQuery(value1 string, value2 string) (*model.Point, error) {
-	var pointModel *model.Point
-	f := "object_type = ? AND address_id = ?"
-	query := d.DB.Where(f, value1, value2).Preload("Priority").First(&pointModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return pointModel, nil
-}
-
-func (d *GormDatabase) GetPointByFieldAndIOID(field string, value string, body *model.Point) (*model.Point, error) {
-	var pointModel *model.Point
-	f := fmt.Sprintf("%s = ? AND io_id = ?", field)
-	query := d.DB.Where(f, value, body.IoID).First(&pointModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return pointModel, nil
-}
-
-func (d *GormDatabase) GetPointByFieldAndThingType(field string, value string, body *model.Point) (*model.Point, error) {
-	var pointModel *model.Point
-	f := fmt.Sprintf("%s = ? AND thing_type = ?", field)
-	query := d.DB.Where(f, value, body.ThingType).First(&pointModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return pointModel, nil
-}
-
 func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	var pointModel *model.Point
 	point, err := d.GetPoint(uuid, api.Args{})
@@ -398,7 +277,6 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 		}
 		return true, nil
 	}
-
 }
 
 func (d *GormDatabase) DropPoints() (bool, error) {

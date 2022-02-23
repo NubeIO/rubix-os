@@ -111,7 +111,7 @@ func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
 // TODO: update to make more efficient for updating just the value (incl fault etc.)
 func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 	// TODO: fix this so don't need to request the point for the UUID before hand
-	pnt, err := inst.db.GetPointByFieldAndIOID("address_uuid", body.AddressUUID, body)
+	pnt, err := inst.db.GetOnePointByArgs(api.Args{AddressUUID: &body.AddressUUID, IoId: &body.IoID})
 	if err != nil {
 		log.Errorf("lora: issue on failed to find point: %v\n", err)
 		return err

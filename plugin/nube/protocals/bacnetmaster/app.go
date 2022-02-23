@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
@@ -22,8 +23,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) {
 	if t.Size() >= pointUUID {
 		pUUID := t.Get(pointUUID)
 		_pUUID := pUUID.(string)
-
-		getPnt, err := i.db.GetPointByField("address_uuid", _pUUID)
+		getPnt, err := i.db.GetOnePointByArgs(api.Args{AddressUUID: &_pUUID})
 		if err != nil || getPnt.UUID == "" {
 			log.Error("bacnet-master-plugin: ERROR on get GetPointByField() failed to find point", err, _pUUID)
 			return
@@ -36,12 +36,11 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) {
 		getPnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
 		getPnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 		getPnt.CommonFault.LastOk = time.Now().UTC()
-		_, _ = i.db.UpdatePointValue(getPnt.UUID, getPnt, true)
+		_, err = i.db.UpdatePointValue(getPnt.UUID, getPnt, true)
 		if err != nil {
 			log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 			return
 		}
 		return
 	}
-
 }

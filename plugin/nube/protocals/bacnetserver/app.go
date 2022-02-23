@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
@@ -28,7 +29,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	var pri model.Priority
 	pri.P16 = payload.Value
 	point.Priority = &pri
-	pnt, _ := i.db.PointAndQuery(objType, addr) //TODO check conversion if existing exists, as in the same addr
+	pnt, _ := i.db.GetOnePointByArgs(api.Args{ObjectType: &objType, AddressID: &addr}) //TODO check conversion if existing exists, as in the same addr
 	if err != nil {
 		log.Error("BACNET UPDATE POINT PointAndQuery")
 		return nil, err
@@ -42,7 +43,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 		return nil, err
 	}
-	_, _ = i.db.UpdatePointValue(pnt.UUID, &point, true)
+	_, err = i.db.UpdatePointValue(pnt.UUID, &point, true)
 	if err != nil {
 		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 		return nil, err

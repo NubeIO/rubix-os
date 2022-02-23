@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/src/schedule"
 	"github.com/NubeIO/flow-framework/src/utilstime"
@@ -11,7 +12,7 @@ import (
 )
 
 func (i *Instance) run() {
-	getSch, err := i.db.GetScheduleByName("HVAC")
+	getSch, err := i.db.GetOneScheduleByArgs(api.Args{Name: utils.NewStringAddress("HVAC")})
 	if err != nil || getSch == nil {
 		log.Errorf("system-plugin-schedule: issue on GetLatestProducerHistoryByProducerName %v\n", err)
 		return

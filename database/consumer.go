@@ -1,7 +1,6 @@
 package database
 
 import (
-	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/src/client"
@@ -80,7 +79,7 @@ func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
 
 func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error) {
 	var consumerModel *model.Consumer
-	if err := d.DB.Where("uuid = ?", uuid).Find(&consumerModel).Error; err != nil {
+	if err := d.DB.Where("uuid = ?", uuid).First(&consumerModel).Error; err != nil {
 		return nil, err
 	}
 	if len(body.Tags) > 0 {
@@ -107,107 +106,4 @@ func (d *GormDatabase) DropConsumers() (bool, error) {
 	} else {
 		return true, nil
 	}
-}
-
-/*
-add new consumer auto add, writer and writer clone for a remote network and local
-body
--- consumerStreamUUID
--- producerUUID
-
-- get the streamUUID from the producerUUID
-- from the consumerStreamUUID get the flowUUID
-- first make sure that the producer device is online and the streamUUID is valid
-- work out if the producer is local or remote
-- add the new consumer, writer and writerClone
-*/
-
-func (d *GormDatabase) AddConsumerWizard(consumerStreamUUID, producerUUID string, consumerModel *model.Consumer) (*model.Consumer, error) {
-	streamUUID := consumerStreamUUID
-	var writerModel model.Writer
-	var writerCloneModel model.WriterClone
-
-	if producerUUID == "" {
-		return nil, errors.New("error: no producer uuid provided")
-	}
-	if consumerStreamUUID == "" {
-		return nil, errors.New("error: no stream uuid provided")
-	}
-	stream, flow, err := d.GetFlowUUID(streamUUID)
-	if err != nil || stream.UUID == "" {
-		return nil, errors.New("error: invalid stream UUID")
-	}
-	isRemote := utils.BoolIsNil(flow.IsRemote)
-
-	var producer *model.Producer
-	if isRemote {
-		cli := client.NewFlowClientCli(flow.FlowIP, flow.FlowPort, flow.FlowToken, flow.IsMasterSlave, flow.GlobalUUID, model.IsFNCreator(flow))
-		p, err := cli.GetProducer(producerUUID)
-		if err != nil {
-			return nil, errors.New("error: issue on get producer over rest client")
-		}
-		producer = p
-	} else {
-		p, err := d.GetProducer(producerUUID, api.Args{})
-		if err != nil {
-			return nil, errors.New("error: issue on get producer")
-		}
-		producer = p
-	}
-
-	if producer.UUID == "" {
-		return nil, errors.New("error: no producer producer found with that UUID")
-	}
-
-	consumerModel.StreamCloneUUID = stream.UUID // TODO: BIOND
-	consumerModel.ProducerUUID = producer.UUID
-	consumerModel.ProducerThingName = producer.ProducerThingName
-	consumerModel.ProducerThingUUID = producer.ProducerThingUUID
-	consumerModel.ProducerThingClass = producer.ProducerThingClass
-	consumerModel.ProducerThingType = producer.ProducerThingType
-
-	consumerModel.ConsumerApplication = model.CommonNaming.Mapping
-	consumer, err := d.CreateConsumer(consumerModel)
-	if err != nil {
-		return nil, errors.New("error: issue on create consumer")
-	}
-	// writer
-	writerModel.ConsumerUUID = consumer.UUID
-	//writerModel.ConsumerThingUUID = consumerModel.UUID //TODO: BINOD
-	writerModel.WriterThingClass = model.ThingClass.Point
-	writerModel.WriterThingType = model.ThingClass.API
-	writer, err := d.CreateWriter(&writerModel)
-	if err != nil {
-		return nil, errors.New("error: issue on create writer")
-	}
-	// add consumer to the writerClone
-	writerCloneModel.ProducerUUID = producer.UUID
-	writerCloneModel.SourceUUID = writer.UUID
-	writerModel.WriterThingClass = model.ThingClass.Point
-	writerModel.WriterThingType = model.ThingClass.API
-
-	if !isRemote {
-		_, err := d.CreateWriterClone(&writerCloneModel)
-		if err != nil {
-			return nil, errors.New("error: issue on create writer clone over rest")
-		}
-		//update writerCloneUUID to writer
-		//writerModel.CloneUUID = writerClone.UUID //TODO: Binod
-		_, err = d.UpdateWriter(writerModel.UUID, &writerModel)
-		if err != nil {
-			return nil, errors.New("error: issue on update writer over rest")
-		}
-	} else {
-		cli := client.NewFlowClientCli(flow.FlowIP, flow.FlowPort, flow.FlowToken, flow.IsMasterSlave, flow.GlobalUUID, model.IsFNCreator(flow))
-		_, err := cli.CreateWriterClone(writerCloneModel)
-		if err != nil {
-			return nil, errors.New("error: issue on create writer clone")
-		}
-		//writerModel.CloneUUID = clone.UUID //TODO: Binod
-		_, err = cli.EditWriter(writerModel.UUID, writerModel, false)
-		if err != nil {
-			return nil, errors.New("error: issue on update writer")
-		}
-	}
-	return consumerModel, nil
 }

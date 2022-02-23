@@ -39,7 +39,7 @@ func (d *GormDatabase) WizardNewNetworkDevicePoint(plugin string, network *model
 
 	if point != nil {
 		point.DeviceUUID = dev.UUID
-		_, err = d.CreatePoint(point, "", false)
+		_, err = d.CreatePoint(point, false)
 		if err != nil {
 			return nil, fmt.Errorf("consumer point creation failure: %s", err)
 		}

@@ -58,7 +58,7 @@ func (d *GormDatabase) DeleteMqttConnection(uuid string) (bool, error) {
 // UpdateMqttConnection  update it
 func (d *GormDatabase) UpdateMqttConnection(uuid string, body *model.MqttConnection) (*model.MqttConnection, error) {
 	var wcm *model.MqttConnection
-	query := d.DB.Where("uuid = ?", uuid).Find(&wcm)
+	query := d.DB.Where("uuid = ?", uuid).First(&wcm)
 	if query.Error != nil {
 		return nil, query.Error
 	}

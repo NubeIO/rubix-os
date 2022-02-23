@@ -1,6 +1,7 @@
 package dbhandler
 
 import (
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 )
 
@@ -20,12 +21,8 @@ func (h *Handler) GetSchedule(uuid string) (*model.Schedule, error) {
 	return q, nil
 }
 
-func (h *Handler) GetScheduleByName(name string) (*model.Schedule, error) {
-	q, err := getDb().GetScheduleByField("name", name)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
+func (h *Handler) GetOneScheduleByArgs(args api.Args) (*model.Schedule, error) {
+	return getDb().GetOneScheduleByArgs(args)
 }
 
 func (h *Handler) UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error) {

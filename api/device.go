@@ -8,12 +8,11 @@ import (
 type DeviceDatabase interface {
 	GetDevices(args Args) ([]*model.Device, error)
 	GetDevice(uuid string, args Args) (*model.Device, error)
+	GetOneDeviceByArgs(args Args) (*model.Device, error)
 	CreateDevice(body *model.Device) (*model.Device, error)
 	UpdateDevice(uuid string, body *model.Device) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
 	DropDevices() (bool, error)
-	GetDeviceByField(field string, value string, withPoints bool) (*model.Device, error)
-	UpdateDeviceByField(field string, value string, body *model.Device) (*model.Device, error)
 }
 type DeviceAPI struct {
 	DB DeviceDatabase
@@ -32,16 +31,9 @@ func (a *DeviceAPI) GetDevice(ctx *gin.Context) {
 	responseHandler(q, err, ctx)
 }
 
-func (a *DeviceAPI) GetDeviceByField(ctx *gin.Context) {
-	field, value := withFieldsArgs(ctx)
-	q, err := a.DB.GetDeviceByField(field, value, false)
-	responseHandler(q, err, ctx)
-}
-
-func (a *DeviceAPI) UpdateDeviceByField(ctx *gin.Context) {
-	body, _ := getBODYDevice(ctx)
-	field, value := withFieldsArgs(ctx)
-	q, err := a.DB.UpdateDeviceByField(field, value, body)
+func (a *DeviceAPI) GetOneDeviceByArgs(ctx *gin.Context) {
+	args := buildDeviceArgs(ctx)
+	q, err := a.DB.GetOneDeviceByArgs(args)
 	responseHandler(q, err, ctx)
 }
 

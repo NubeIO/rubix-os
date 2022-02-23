@@ -20,7 +20,7 @@ func (d *GormDatabase) GetMessages() ([]*model.Message, error) {
 
 func (d *GormDatabase) GetMessageByID(id uint) (*model.Message, error) {
 	msg := new(model.Message)
-	err := d.DB.Find(msg, id).Error
+	err := d.DB.First(msg, id).Error
 	if err == gorm.ErrRecordNotFound {
 		err = nil
 	}

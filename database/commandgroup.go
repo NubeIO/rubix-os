@@ -5,7 +5,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils"
 )
 
-// GetCommandGroups returns all objects.
 func (d *GormDatabase) GetCommandGroups() ([]*model.CommandGroup, error) {
 	var commandGroup []*model.CommandGroup
 	query := d.DB.Find(&commandGroup)
@@ -15,7 +14,6 @@ func (d *GormDatabase) GetCommandGroups() ([]*model.CommandGroup, error) {
 	return commandGroup, nil
 }
 
-// GetCommandGroup returns object.
 func (d *GormDatabase) GetCommandGroup(uuid string) (*model.CommandGroup, error) {
 	var commandGroup *model.CommandGroup
 	query := d.DB.Where("uuid = ? ", uuid).First(&commandGroup)
@@ -25,7 +23,6 @@ func (d *GormDatabase) GetCommandGroup(uuid string) (*model.CommandGroup, error)
 	return commandGroup, nil
 }
 
-// CreateCommandGroup creates an object.
 func (d *GormDatabase) CreateCommandGroup(body *model.CommandGroup) (*model.CommandGroup, error) {
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.CommandGroup)
 	if err := d.DB.Create(&body).Error; err != nil {
@@ -34,10 +31,9 @@ func (d *GormDatabase) CreateCommandGroup(body *model.CommandGroup) (*model.Comm
 	return body, nil
 }
 
-// UpdateCommandGroup update it.
 func (d *GormDatabase) UpdateCommandGroup(uuid string, body *model.CommandGroup) (*model.CommandGroup, error) {
 	var commandGroup *model.CommandGroup
-	query := d.DB.Where("uuid = ?", uuid).Find(&commandGroup)
+	query := d.DB.Where("uuid = ?", uuid).First(&commandGroup)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -46,10 +42,8 @@ func (d *GormDatabase) UpdateCommandGroup(uuid string, body *model.CommandGroup)
 		return nil, query.Error
 	}
 	return commandGroup, nil
-
 }
 
-// DeleteCommandGroup delete an object.
 func (d *GormDatabase) DeleteCommandGroup(uuid string) (bool, error) {
 	var commandGroup *model.CommandGroup
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&commandGroup)
@@ -62,10 +56,8 @@ func (d *GormDatabase) DeleteCommandGroup(uuid string) (bool, error) {
 	} else {
 		return true, nil
 	}
-
 }
 
-// DropCommandGroups delete all.
 func (d *GormDatabase) DropCommandGroups() (bool, error) {
 	var commandGroup *model.CommandGroup
 	query := d.DB.Where("1 = 1").Delete(&commandGroup)
@@ -78,5 +70,4 @@ func (d *GormDatabase) DropCommandGroups() (bool, error) {
 	} else {
 		return true, nil
 	}
-
 }

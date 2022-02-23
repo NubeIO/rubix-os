@@ -64,25 +64,25 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 		}
 		producerThingName = sch.Name
 	default:
-		return nil, errors.New("we are not supporting producer_thing_class other than point for now")
+		return nil, errors.New("we are not supporting producer_thing_class other than point & schedule")
 	}
 	_, err := d.GetStream(body.StreamUUID, api.Args{})
 	if err != nil {
-		return nil, newError("GetStream", "error on trying to get validate the gateway UUID")
+		return nil, err
 	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Producer)
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = utils.MakeUUID()
 	body.ProducerThingName = nameIsNil(producerThingName)
 	if err = d.DB.Create(&body).Error; err != nil {
-		return nil, newError("CreateProducer", "error on trying to add a new Producer")
+		return nil, err
 	}
 	return body, nil
 }
 
 func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error) {
 	var producerModel *model.Producer
-	if err := d.DB.Where("uuid = ?", uuid).Find(&producerModel).Error; err != nil {
+	if err := d.DB.Where("uuid = ?", uuid).First(&producerModel).Error; err != nil {
 		return nil, err
 	}
 	if len(body.Tags) > 0 {
