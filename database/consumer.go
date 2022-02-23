@@ -80,7 +80,7 @@ func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
 
 func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error) {
 	var consumerModel *model.Consumer
-	if err := d.DB.Where("uuid = ?", uuid).Find(&consumerModel).Error; err != nil {
+	if err := d.DB.Where("uuid = ?", uuid).First(&consumerModel).Error; err != nil {
 		return nil, err
 	}
 	if len(body.Tags) > 0 {

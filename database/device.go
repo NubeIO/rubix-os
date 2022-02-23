@@ -28,23 +28,13 @@ func (d *GormDatabase) GetDevice(uuid string, args api.Args) (*model.Device, err
 	return deviceModel, nil
 }
 
-// GetDeviceByField returns the device for the given field ie name or nil.
-func (d *GormDatabase) GetDeviceByField(field string, value string, withPoints bool) (*model.Device, error) {
+func (d *GormDatabase) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
 	var deviceModel *model.Device
-	f := fmt.Sprintf("%s = ? ", field)
-	if withPoints { // drop child to reduce json size
-		query := d.DB.Where(f, value).Preload("Points").First(&deviceModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return deviceModel, nil
-	} else {
-		query := d.DB.Where(f, value).First(&deviceModel)
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		return deviceModel, nil
+	query := d.buildDeviceQuery(args)
+	if err := query.First(&deviceModel).Error; err != nil {
+		return nil, err
 	}
+	return deviceModel, nil
 }
 
 // GetPluginIDFromDevice returns the pluginUUID by using the deviceUUID to query the network.
@@ -86,7 +76,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 		return nil, query.Error
 	}
 	var nModel *model.Network
-	query = d.DB.Where("uuid = ?", body.NetworkUUID).Find(&nModel)
+	query = d.DB.Where("uuid = ?", body.NetworkUUID).First(&nModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -101,7 +91,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 
 func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
 	var deviceModel *model.Device
-	query := d.DB.Where("uuid = ?", uuid).Find(&deviceModel)
+	query := d.DB.Where("uuid = ?", uuid).First(&deviceModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -126,7 +116,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	query = d.DB.Model(&deviceModel).Updates(body)
 
 	var nModel *model.Network
-	query = d.DB.Where("uuid = ?", deviceModel.NetworkUUID).Find(&nModel)
+	query = d.DB.Where("uuid = ?", deviceModel.NetworkUUID).First(&nModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -135,21 +125,6 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	err := d.Bus.Emit(eventbus.CTX(), t, deviceModel)
 	if err != nil {
 		return nil, errors.New("error on device eventbus")
-	}
-	return deviceModel, nil
-}
-
-// UpdateDeviceByField get by field and update.
-func (d *GormDatabase) UpdateDeviceByField(field string, value string, body *model.Device) (*model.Device, error) {
-	var deviceModel *model.Device
-	f := fmt.Sprintf("%s = ? ", field)
-	query := d.DB.Where(f, value).Find(&deviceModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	query = d.DB.Model(&deviceModel).Updates(body)
-	if query.Error != nil {
-		return nil, query.Error
 	}
 	return deviceModel, nil
 }

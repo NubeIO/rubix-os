@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nums"
@@ -127,7 +128,7 @@ func (i *Instance) addPoint(bacPoint *Point) (*model.Point, error) {
 		return nil, err
 	}
 
-	getDev, err := i.db.GetDeviceByField("address_uuid", bacPoint.DeviceUUID, false)
+	getDev, err := i.db.GetOneDeviceByArgs(api.Args{AddressUUID: &bacPoint.DeviceUUID})
 	if err != nil || getDev.UUID == "" {
 		log.Error("bacnet-master-plugin: ERROR on get GetDeviceByField() failed to find device", err)
 		return nil, err
@@ -234,7 +235,7 @@ func (i *Instance) patchDevice(bacDevice *Device, uuid string) (*model.Device, e
 		return nil, err
 	}
 
-	getDev, err := i.db.GetDeviceByField("address_uuid", bacDevice.DeviceUUID, false)
+	getDev, err := i.db.GetOneDeviceByArgs(api.Args{AddressUUID: &bacDevice.DeviceUUID})
 	if err != nil || getDev.UUID == "" {
 		log.Error("bacnet-master-plugin: ERROR on get GetDeviceByField() failed to find device", err)
 		return nil, err
@@ -281,7 +282,7 @@ func (i *Instance) patchPoint(bacPoint *Point, uuid string) (*model.Point, error
 		return nil, err
 	}
 
-	getPnt, err := i.db.GetPointByField("address_uuid", uuid)
+	getPnt, err := i.db.GetOnePointByArgs(api.Args{AddressUUID: &uuid})
 	if err != nil || getPnt.UUID == "" {
 		log.Error("bacnet-master-plugin: ERROR on get GetPointByField() failed to find point", err, uuid)
 		return nil, err
@@ -333,7 +334,7 @@ func (i *Instance) deleteDevice(uuid string) (bool, error) {
 		return false, nil
 	}
 
-	getDev, err := i.db.GetDeviceByField("address_uuid", uuid, false)
+	getDev, err := i.db.GetOneDeviceByArgs(api.Args{AddressUUID: &uuid})
 	if err != nil || getDev.UUID == "" {
 		log.Error("bacnet-master-plugin: ERROR on get GetDeviceByField() failed to find device", err)
 		return false, err
@@ -356,7 +357,7 @@ func (i *Instance) deletePoint(uuid string) (bool, error) {
 		return false, nil
 	}
 
-	getPnt, err := i.db.GetPointByField("address_uuid", uuid)
+	getPnt, err := i.db.GetOnePointByArgs(api.Args{AddressUUID: &uuid})
 	if err != nil || getPnt.UUID == "" {
 		log.Error("bacnet-master-plugin: ERROR on get GetPointByField() failed to find point", err)
 		return false, err

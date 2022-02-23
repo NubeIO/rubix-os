@@ -160,6 +160,9 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	if args.WithPriority {
 		query = query.Preload("Points.Priority")
 	}
+	if args.AddressUUID != nil {
+		query = query.Where("address_uuid = ?", *args.AddressUUID)
+	}
 	return query
 }
 
@@ -170,6 +173,18 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	}
 	if args.WithTags {
 		query = query.Preload("Tags")
+	}
+	if args.AddressUUID != nil {
+		query = query.Where("address_uuid = ?", *args.AddressUUID)
+	}
+	if args.IoId != nil {
+		query = query.Where("io_id = ?", *args.IoId)
+	}
+	if args.AddressID != nil {
+		query = query.Where("address_id = ?", *args.AddressID)
+	}
+	if args.ObjectType != nil {
+		query = query.Where("object_type = ?", *args.ObjectType)
 	}
 	return query
 }
@@ -257,6 +272,14 @@ func (d *GormDatabase) buildHistoryQuery(args api.Args) *gorm.DB {
 			args.Order = "DESC"
 		}
 		query = query.Order("timestamp " + args.Order)
+	}
+	return query
+}
+
+func (d *GormDatabase) buildScheduleQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.Name != nil {
+		query = query.Where("name = ?", *args.Name)
 	}
 	return query
 }

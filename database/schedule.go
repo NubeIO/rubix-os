@@ -2,7 +2,7 @@ package database
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/utils"
 )
@@ -25,11 +25,10 @@ func (d *GormDatabase) GetSchedule(uuid string) (*model.Schedule, error) {
 	return scheduleModel, nil
 }
 
-func (d *GormDatabase) GetScheduleByField(field string, value string) (*model.Schedule, error) {
+func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, error) {
 	var scheduleModel *model.Schedule
-	f := fmt.Sprintf("%s = ? ", field)
-	query := d.DB.Where(f, value).First(&scheduleModel)
-	if query.Error != nil {
+	query := d.buildScheduleQuery(args)
+	if err := query.First(&scheduleModel).Error; err != nil {
 		return nil, query.Error
 	}
 	return scheduleModel, nil

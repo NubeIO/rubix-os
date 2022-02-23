@@ -5,17 +5,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// The ScheduleDatabase interface for encapsulating database access.
 type ScheduleDatabase interface {
-	GetSchedule(uuid string) (*model.Schedule, error)
-	GetScheduleByField(field, value string) (*model.Schedule, error)
 	GetSchedules() ([]*model.Schedule, error)
+	GetSchedule(uuid string) (*model.Schedule, error)
+	GetOneScheduleByArgs(Args) (*model.Schedule, error)
 	CreateSchedule(body *model.Schedule) (*model.Schedule, error)
 	UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error)
 	ScheduleWrite(uuid string, body *model.ScheduleData) error
 	DeleteSchedule(uuid string) (bool, error)
 	DropSchedules() (bool, error)
 }
+
 type ScheduleAPI struct {
 	DB ScheduleDatabase
 }
@@ -26,9 +26,9 @@ func (a *ScheduleAPI) GetSchedule(ctx *gin.Context) {
 	responseHandler(q, err, ctx)
 }
 
-func (a *ScheduleAPI) GetScheduleByField(ctx *gin.Context) {
-	field, value := withFieldsArgs(ctx)
-	q, err := a.DB.GetScheduleByField(field, value)
+func (a *ScheduleAPI) GetOneScheduleByArgs(ctx *gin.Context) {
+	args := buildScheduleArgs(ctx)
+	q, err := a.DB.GetOneScheduleByArgs(args)
 	responseHandler(q, err, ctx)
 }
 

@@ -13,12 +13,8 @@ func (h *Handler) GetDevice(uuid string, args api.Args) (*model.Device, error) {
 	return q, nil
 }
 
-func (h *Handler) GetDeviceByField(field string, value string, withPoints bool) (*model.Device, error) {
-	q, err := getDb().GetDeviceByField(field, value, withPoints)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
+func (h *Handler) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
+	return getDb().GetOneDeviceByArgs(args)
 }
 
 func (h *Handler) CreateDevice(body *model.Device) (*model.Device, error) {

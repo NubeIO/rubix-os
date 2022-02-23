@@ -62,9 +62,13 @@ type Args struct {
 	WithPoints           bool
 	WithPriority         bool
 	WithTags             bool
-	NetworkName          string
-	DeviceName           string
-	PointName            string
+	NetworkName          *string
+	DeviceName           *string
+	PointName            *string
+	AddressUUID          *string
+	AddressID            *string
+	ObjectType           *string
+	IoId                 *string
 	IdGt                 *string
 }
 
@@ -121,6 +125,10 @@ var ArgsType = struct {
 	NetworkName          string
 	DeviceName           string
 	PointName            string
+	AddressUUID          string
+	AddressID            string
+	ObjectType           string
+	IoId                 string
 	IdGt                 string
 }{
 	Sort:                 "sort",
@@ -175,6 +183,10 @@ var ArgsType = struct {
 	NetworkName:          "network_name",
 	DeviceName:           "device_name",
 	PointName:            "point_name",
+	AddressUUID:          "address_uuid",
+	AddressID:            "address_id",
+	ObjectType:           "object_type",
+	IoId:                 "io_id",
 	IdGt:                 "id_gt",
 }
 
