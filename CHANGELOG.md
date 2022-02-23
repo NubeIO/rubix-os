@@ -1,4 +1,12 @@
 # CHANGELOG
+## [v0.3.7](https://github.com/NubeIO/flow-framework/tree/v0.3.7) (2022-02-24)
+- Improvements/misc #384
+- Improvement/stream sync #383
+- updates to modbus #382
+- Improvement/point value update #381
+- Replace modubs lib #379
+
+
 ## [v0.3.6](https://github.com/NubeIO/flow-framework/tree/v0.3.6) (2022-02-22)
 - Merge pull request #358 from NubeIO/bac-master-1
 - Fix: edit flow-network issue
