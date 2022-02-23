@@ -70,23 +70,21 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 }
 
 func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (*model.FlowNetwork, error) {
-	var flowNetworkModel *model.FlowNetwork
-	if err := d.DB.Where("uuid = ?", uuid).Find(&flowNetworkModel).Error; err != nil {
+	var fn *model.FlowNetwork
+	if err := d.DB.Where("uuid = ?", uuid).First(&fn).Error; err != nil {
 		return nil, err
 	}
 	if len(body.Streams) > 0 {
-		if err := d.DB.Model(&flowNetworkModel).Association("Streams").Replace(body.Streams); err != nil {
-			return nil, err
-		}
+		return d.updateStreamsOnFlowNetwork(fn, body.Streams) // normally we just either edit flow_network or assign stream
 	}
-	if err := d.DB.Model(&flowNetworkModel).Updates(body).Error; err != nil {
+	if err := d.DB.Model(&fn).Updates(body).Error; err != nil {
 		return nil, err
 	}
 	isMasterSlave, cli, isRemote, tx, err := d.editFlowNetworkBody(body)
 	if err != nil {
 		return nil, err
 	}
-	if err := tx.Model(&flowNetworkModel).Updates(&body).Error; err != nil {
+	if err := tx.Model(&fn).Updates(&body).Error; err != nil {
 		if isRemote {
 			tx.Rollback()
 		}
@@ -261,4 +259,18 @@ func (d *GormDatabase) syncAndEditFlowNetwork(cli *client.FlowClient, body *mode
 	body.DeviceId = res.DeviceId
 	body.DeviceName = res.DeviceName
 	return nil
+}
+
+func (d *GormDatabase) updateStreamsOnFlowNetwork(fn *model.FlowNetwork, streams []*model.Stream) (*model.FlowNetwork, error) {
+	if err := d.DB.Model(&fn).Association("Streams").Replace(streams); err != nil {
+		return nil, err
+	}
+	deviceInfo, err := d.GetDeviceInfo()
+	if err != nil {
+		return nil, err
+	}
+	for _, stream := range fn.Streams {
+		_ = d.SyncStreamFunction(fn, stream, deviceInfo)
+	}
+	return fn, nil
 }

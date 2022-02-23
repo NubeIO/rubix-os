@@ -10,7 +10,6 @@ type StreamDatabase interface {
 	GetStream(uuid string, args Args) (*model.Stream, error)
 	CreateStream(body *model.Stream) (*model.Stream, error)
 	UpdateStream(uuid string, body *model.Stream) (*model.Stream, error)
-	GetStreamByField(field string, value string, args Args) (*model.Stream, error)
 	DeleteStream(uuid string) (bool, error)
 	DropStreams() (bool, error)
 }
@@ -29,13 +28,6 @@ func (j *StreamAPI) GetStream(ctx *gin.Context) {
 	args := buildStreamArgs(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetStream(uuid, args)
-	responseHandler(q, err, ctx)
-}
-
-func (j *StreamAPI) GetStreamByField(ctx *gin.Context) {
-	field, value := withFieldsArgs(ctx)
-	args := buildStreamArgs(ctx)
-	q, err := j.DB.GetStreamByField(field, value, args)
 	responseHandler(q, err, ctx)
 }
 

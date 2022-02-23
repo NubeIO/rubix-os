@@ -105,8 +105,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 		DB: db,
 	}
 	dbGroup.SyncTopics()
-	//for the custom plugin endpoints you need to use the plugin token
-	//http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
+	// for the custom plugin endpoints you need to use the plugin token
+	// http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
 	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/api/plugins/api"), streamHandler)
 	if err != nil {
 		fmt.Println(err)
@@ -122,7 +122,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	engine.GET("/api/system/ping", healthHandler.Health)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
 	engine.Use(func(ctx *gin.Context) {
-		ctx.Header("Content-Type", "application/json") //if you comment it out it will detected as text on proxy-handlers
+		ctx.Header("Content-Type", "application/json") // if you comment it out it will detected as text on proxy-handlers
 		for header, value := range conf.Server.ResponseHeaders {
 			ctx.Header(header, value)
 		}
@@ -182,7 +182,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 		databaseRoutes := apiRoutes.Group("/database")
 		{
-			//delete all networks, gateways, commandGroup, consumers, jobs and children.
+			// delete all networks, gateways, commandGroup, consumers, jobs and children
 			databaseRoutes.DELETE("/flows/drop", dbGroup.DropAllFlow)
 			databaseWizard := databaseRoutes.Group("wizard")
 			{
@@ -238,7 +238,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			streamRoutes.GET("/", gatewayHandler.GetStreams)
 			streamRoutes.POST("/", gatewayHandler.CreateStream)
 			streamRoutes.GET("/:uuid", gatewayHandler.GetStream)
-			streamRoutes.GET("/field/:uuid", gatewayHandler.GetStreamByField)
 			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
 			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
 			streamRoutes.DELETE("/drop", gatewayHandler.DropStreams)
