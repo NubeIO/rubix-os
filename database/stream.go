@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/src/client"
@@ -117,18 +116,6 @@ func (d *GormDatabase) GetFlowUUID(uuid string) (*model.Stream, *model.FlowNetwo
 		return nil, nil, err
 	}
 	return stream, flow, nil
-}
-
-// GetStreamByField ie: get stream by its name as an example
-func (d *GormDatabase) GetStreamByField(field string, value string, args api.Args) (*model.Stream, error) {
-	var streamModel *model.Stream
-	f := fmt.Sprintf("%s = ? ", field)
-	query := d.buildStreamQuery(args)
-	query = query.Where(f, value).First(&streamModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return streamModel, nil
 }
 
 func (d *GormDatabase) syncAfterCreateUpdateStream(body *model.Stream) error {
