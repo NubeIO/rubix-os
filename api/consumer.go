@@ -10,7 +10,6 @@ type ConsumersDatabase interface {
 	GetConsumers(args Args) ([]*model.Consumer, error)
 	GetConsumer(uuid string, args Args) (*model.Consumer, error)
 	CreateConsumer(body *model.Consumer) (*model.Consumer, error)
-	AddConsumerWizard(consumerStreamUUID, producerUUID string, body *model.Consumer) (*model.Consumer, error)
 	UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error)
 	DeleteConsumer(uuid string) (bool, error)
 	DropConsumers() (bool, error)
