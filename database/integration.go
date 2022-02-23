@@ -87,7 +87,7 @@ func (d *GormDatabase) DeleteIntegration(uuid string) (bool, error) {
 // UpdateIntegration  update it
 func (d *GormDatabase) UpdateIntegration(uuid string, body *model.Integration) (*model.Integration, error) {
 	var integration *model.Integration
-	query := d.DB.Where("uuid = ?", uuid).Find(&integration)
+	query := d.DB.Where("uuid = ?", uuid).First(&integration)
 	if query.Error != nil {
 		return nil, query.Error
 	}

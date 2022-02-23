@@ -102,7 +102,7 @@ func (d *GormDatabase) GetNetworksByName(name string, args api.Args) ([]*model.N
 func (d *GormDatabase) GetNetworkByName(name string, args api.Args) (*model.Network, error) {
 	var networksModel *model.Network
 	query := d.buildNetworkQuery(args)
-	if err := query.Where("name = ? ", name).Find(&networksModel).Error; err != nil {
+	if err := query.Where("name = ? ", name).First(&networksModel).Error; err != nil {
 		return nil, err
 	}
 	return networksModel, nil
@@ -155,7 +155,7 @@ func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*mod
 
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
 	var networkModel *model.Network
-	query := d.DB.Where("uuid = ?", uuid).Find(&networkModel)
+	query := d.DB.Where("uuid = ?", uuid).First(&networkModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -208,7 +208,7 @@ func (d *GormDatabase) DropNetworks() (bool, error) {
 
 func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	var pluginConf *model.PluginConf
-	query := d.DB.Where("uuid = ?", body.PluginConfId).Find(&pluginConf)
+	query := d.DB.Where("uuid = ?", body.PluginConfId).First(&pluginConf)
 	if query.Error != nil {
 		return compat.Info{}
 	}

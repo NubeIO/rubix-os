@@ -53,7 +53,7 @@ func (h *Handler) UpdatePointPresentValue(body *model.Point, fromPlugin bool) (*
 
 func (h *Handler) UpdatePointValue(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
-	query := getDb().DB.Where("uuid = ?", uuid).Preload("Priority").Find(&pointModel)
+	query := getDb().DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

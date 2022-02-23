@@ -67,7 +67,7 @@ func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
 
 func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Stream, error) {
 	var streamModel *model.Stream
-	if err := d.DB.Preload("FlowNetworks").Where("uuid = ?", uuid).Find(&streamModel).Error; err != nil {
+	if err := d.DB.Preload("FlowNetworks").Where("uuid = ?", uuid).First(&streamModel).Error; err != nil {
 		return nil, err
 	}
 	if len(body.FlowNetworks) > 0 {

@@ -90,7 +90,7 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
 	var writerModel *model.Writer
 	body.DataStore = nil
-	query := d.DB.Where("uuid = ?", uuid).Find(&writerModel)
+	query := d.DB.Where("uuid = ?", uuid).First(&writerModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

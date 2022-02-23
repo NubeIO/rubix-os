@@ -75,7 +75,7 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	body.Schedule = validSchedule
 	body.ThingClass = model.ThingClass.Schedule
 	body.ThingType = model.ThingClass.Schedule
-	query := d.DB.Where("uuid = ?", uuid).Find(&scheduleModel)
+	query := d.DB.Where("uuid = ?", uuid).First(&scheduleModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

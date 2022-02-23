@@ -82,7 +82,7 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 
 func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error) {
 	var producerModel *model.Producer
-	if err := d.DB.Where("uuid = ?", uuid).Find(&producerModel).Error; err != nil {
+	if err := d.DB.Where("uuid = ?", uuid).First(&producerModel).Error; err != nil {
 		return nil, err
 	}
 	if len(body.Tags) > 0 {

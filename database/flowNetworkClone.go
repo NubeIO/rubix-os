@@ -13,7 +13,6 @@ func (d *GormDatabase) GetFlowNetworkClones(args api.Args) ([]*model.FlowNetwork
 	query := d.buildFlowNetworkCloneQuery(args)
 	if err := query.Find(&flowNetworkClonesModel).Error; err != nil {
 		return nil, query.Error
-
 	}
 	return flowNetworkClonesModel, nil
 }
