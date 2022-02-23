@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *GormDatabase) GetStreams(args api.Args) ([]*model.Stream, error) {
@@ -36,7 +35,7 @@ func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
-	d.syncAfterCreateUpdateStream(body)
+	_ = d.syncAfterCreateUpdateStream(body)
 	return body, nil
 }
 
@@ -44,9 +43,11 @@ func (d *GormDatabase) GetFlowNetworksFromStreamUUID(streamUUID string) (*[]mode
 	var flowNetworks *[]model.FlowNetwork
 	err := d.DB.
 		Joins("JOIN flow_networks_streams ON flow_networks_streams.flow_network_uuid = flow_networks.uuid").
-		Where("flow_networks_streams.stream_uuid IN (?)", streamUUID).Find(&flowNetworks).Error
+		Where("flow_networks_streams.stream_uuid IN (?)", streamUUID).
+		Find(&flowNetworks).
+		Error
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	return flowNetworks, nil
 }
@@ -83,7 +84,7 @@ func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Str
 	if err := d.DB.Model(&streamModel).Updates(body).Error; err != nil {
 		return nil, err
 	}
-	d.syncAfterCreateUpdateStream(streamModel)
+	_ = d.syncAfterCreateUpdateStream(streamModel)
 	return streamModel, nil
 }
 
@@ -130,27 +131,32 @@ func (d *GormDatabase) GetStreamByField(field string, value string, args api.Arg
 	return streamModel, nil
 }
 
-func (d *GormDatabase) syncAfterCreateUpdateStream(body *model.Stream) {
+func (d *GormDatabase) syncAfterCreateUpdateStream(body *model.Stream) error {
 	flowNetworks, err := d.GetFlowNetworksFromStreamUUID(body.UUID)
 	if err != nil {
-		return
+		return err
+	} else if len(*flowNetworks) == 0 {
+		return nil
 	}
 	deviceInfo, err := d.GetDeviceInfo()
 	if err != nil {
-		return
-	}
-	if flowNetworks == nil {
-		return
+		return err
 	}
 	for _, fn := range *flowNetworks {
-		cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
-		syncStreamBody := model.SyncStream{
-			GlobalUUID: deviceInfo.GlobalUUID,
-			Stream:     body,
-		}
-		_, err = cli.SyncStream(&syncStreamBody)
-		if err != nil {
-			log.Error(err)
-		}
+		_ = d.SyncStreamFunction(&fn, body, deviceInfo)
 	}
+	return nil
+}
+
+func (d *GormDatabase) SyncStreamFunction(fn *model.FlowNetwork, stream *model.Stream, deviceInfo *model.DeviceInfo) error {
+	cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
+	syncStreamBody := model.SyncStream{
+		GlobalUUID: deviceInfo.GlobalUUID,
+		Stream:     stream,
+	}
+	_, err := cli.SyncStream(&syncStreamBody)
+	if err != nil {
+		return err
+	}
+	return nil
 }

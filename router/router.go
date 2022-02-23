@@ -238,7 +238,7 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			streamRoutes.GET("/", gatewayHandler.GetStreams)
 			streamRoutes.POST("/", gatewayHandler.CreateStream)
 			streamRoutes.GET("/:uuid", gatewayHandler.GetStream)
-			streamRoutes.GET("/field/:uuid", gatewayHandler.GetStreamByField)
+			streamRoutes.GET("/field/:uuid", gatewayHandler.GetStreamByField) //TODO: remove
 			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
 			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
 			streamRoutes.DELETE("/drop", gatewayHandler.DropStreams)
