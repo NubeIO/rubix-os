@@ -266,8 +266,8 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		// nil is ignored on GORM, so we are pushing forcefully because isChange comparison will fail on `null` write
 		d.DB.Model(&pointModel).Update("present_value", nil)
 	}
-	_ = d.DB.Model(&pointModel).Updates(&pointModel)
 	if isChange == true {
+		_ = d.DB.Model(&pointModel).Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel)
 		if err != nil {
 			return nil, err
