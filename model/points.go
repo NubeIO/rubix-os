@@ -77,6 +77,19 @@ var ObjectTypesMap = map[ObjectType]int8{
 	ObjTypeReadFloat64: 0, ObjTypeWriteFloat64: 0,
 }
 
+type DataType string
+
+const (
+	TypeInt16   DataType = "int16"
+	TypeUint16  DataType = "uint16"
+	TypeInt32   DataType = "int32"
+	TypeUint32  DataType = "uint32"
+	TypeInt64   DataType = "int64"
+	TypeUint64  DataType = "uint64"
+	TypeFloat32 DataType = "float32"
+	TypeFloat64 DataType = "float64"
+)
+
 type ByteOrder string
 
 const (
@@ -129,7 +142,7 @@ type Point struct {
 	PresentValue         *float64  `json:"present_value"` //point value, read only
 	OriginalValue        *float64  `json:"original_value"`
 	CurrentPriority      *int      `json:"current_priority,omitempty"`
-	InSync               *bool     `json:"in_sync"`                    //if user edits the point it will disable the COV for one time
+	InSync               *bool     `json:"in_sync"`                    //is set to false when a new value is written from the user example: if its false then modbus would write the new value. if user edits the point it will disable the COV for one time
 	WriteValueOnce       *bool     `json:"write_value_once,omitempty"` //when point is used for polling and if it's a writeable point and WriteValueOnce is true then on a successful write it will set the WriteValueOnceSync to true and on the next poll cycle it will not send the write value
 	WriteValueOnceSync   *bool     `json:"write_value_once_sync,omitempty"`
 	Fallback             *float64  `json:"fallback"`
@@ -141,6 +154,7 @@ type Point struct {
 	EvalExample          string    `json:"eval_example,omitempty"`
 	COV                  *float64  `json:"cov"`
 	ObjectType           string    `json:"object_type,omitempty"`     //binaryInput, coil, if type os input don't return the priority array
+	DataType             string    `json:"data_type,omitempty"`       //int16, uint16, float32
 	ObjectEncoding       string    `json:"object_encoding,omitempty"` //BEB_LEW bebLew
 	IoID                 string    `json:"io_id,omitempty"`           //DI1,UI1,AO1, temp, pulse, motion
 	IoType               string    `json:"io_type,omitempty"`         //0-10dc, 0-40ma, thermistor

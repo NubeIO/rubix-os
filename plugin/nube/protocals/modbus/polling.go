@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
@@ -16,7 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const defaultInterval = 1000 * time.Millisecond
+const defaultInterval = 100 * time.Millisecond
 
 type polling struct {
 	enable        bool
@@ -30,22 +28,6 @@ type polling struct {
 type devCheck struct {
 	devUUID string
 	client  Client
-}
-
-func checkDevValid(d devCheck) (bool, error) {
-	if d.devUUID == "" {
-		log.Errorf("modbus: device id is null \n")
-		return false, errors.New("modbus: failed to set client")
-	}
-	return true, nil
-}
-
-func valueRaw(responseRaw interface{}) []byte {
-	j, err := json.Marshal(responseRaw)
-	if err != nil {
-		log.Fatalf("Error occured during marshaling. Error: %s", err.Error())
-	}
-	return j
 }
 
 var poll poller.Poller
@@ -75,9 +57,19 @@ func (i *Instance) PollingTCP(p polling) error {
 		}
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
-				log.Infof("modbus: LOOP COUNT: %v\n", counter)
 				counter++
+				if !utils.BoolIsNil(net.Enable) {
+					log.Infof("modbus: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
+					break
+				} else {
+					log.Infof("modbus: LOOP COUNT: %v\n", counter)
+				}
+
 				for _, dev := range net.Devices { //DEVICES
+					if !utils.BoolIsNil(net.Enable) {
+						log.Infof("modbus-device: DEVICE DISABLED: NAME: %s\n", dev.Name)
+						break
+					}
 					var mbClient smod.ModbusClient
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
@@ -103,45 +95,52 @@ func (i *Instance) PollingTCP(p polling) error {
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
 					for _, pnt := range dev.Points { //POINTS
+						if !utils.BoolIsNil(pnt.Enable) {
+							log.Infof("modbus-point: POINT DISABLED: NAME: %s\n", pnt.Name)
+							break
+						}
 						dPnt := dev.PollDelayPointsMS
 						if dPnt <= 0 {
 							dPnt = 100
 						}
 						write := isWrite(pnt.ObjectType)
-						if write && !utils.BoolIsNil(pnt.WriteValueOnceSync) { //IS WRITE
-							fmt.Println("WRITE", *pnt.Priority.P16)
-							_, responseValue, err := networkRequest(mbClient, pnt)
-							if err != nil {
-								_, err = i.pointUpdateErr(pnt.UUID, pnt, err)
-								break
+						if write { //IS WRITE
+							//get existing
+							if !utils.BoolIsNil(pnt.InSync) {
+								fmt.Println("WRITE", pnt.Name)
+								_, responseValue, err := networkRequest(mbClient, pnt, true)
+								if err != nil {
+									_, err = i.pointUpdateErr(pnt.UUID, err)
+									break
+								}
+								_, err = i.pointUpdate(pnt.UUID, responseValue)
 							}
-							fmt.Println("WRITE responseValue", responseValue)
-							_, err = i.pointUpdate(pnt, responseValue)
 						} else { //READ
-							_, responseValue, err := networkRequest(mbClient, pnt)
+							_, responseValue, err := networkRequest(mbClient, pnt, false)
 							if err != nil {
-								_, err = i.pointUpdateErr(pnt.UUID, pnt, err)
+								_, err = i.pointUpdateErr(pnt.UUID, err)
 								break
 							}
-							pnt.PresentValue = &responseValue
-							_, err = i.pointUpdate(pnt, responseValue)
-							if err != nil {
-								break
+							//simple cov
+							isChange := !utils.CompareFloatPtr(pnt.PresentValue, &responseValue)
+							if isChange {
+								_, err = i.pointUpdate(pnt.UUID, responseValue)
+								if err != nil {
+									break
+								}
 							}
 						}
 						time.Sleep(dPnt * time.Millisecond)
 					}
-
 				}
 			}
-			time.Sleep(5 * time.Second)
+			time.Sleep(100 * time.Millisecond)
 		}
 		if !p.enable { //TODO the disable of the polling isn't working
 			return true, nil
 		} else {
 			return false, nil
 		}
-
 	}
 	err := poll.Poll(context.Background(), f)
 	if err != nil {
