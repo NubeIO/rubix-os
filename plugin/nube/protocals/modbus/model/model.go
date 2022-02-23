@@ -86,6 +86,11 @@ type Network struct {
 		Options  []int  `json:"options" default:"[1, 2]"`
 		Default  int    `json:"default" default:""`
 	} `json:"serial_stop_bits"`
+	Enable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+	} `json:"enable"`
 }
 
 type Device struct {
@@ -114,8 +119,12 @@ type Device struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
 		Options  bool   `json:"options" default:"false"`
-		Default  bool   `json:"default" default:"false"`
 	} `json:"zero_mode"`
+	Enable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+	} `json:"enable"`
 }
 
 type Point struct {
@@ -149,15 +158,19 @@ type Point struct {
 	ObjectEncoding struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[\"leb_lew\",\"leb_lew\",\"beb_lew\",\"beb_bew\"]"`
+		Options  []string `json:"options" default:"[\"leb_lew\",\"leb_bew\",\"beb_lew\",\"beb_bew\"]"`
 		Default  string   `json:"default" default:"beb_lew"`
 	} `json:"object_encoding"`
 	IsOutput struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
 		Options  bool   `json:"options" default:"false"`
-		Default  bool   `json:"default" default:"false"`
 	} `json:"is_output"`
+	Enable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+	} `json:"enable"`
 }
 
 func GetNetworkSchema() *Network {

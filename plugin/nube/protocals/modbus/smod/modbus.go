@@ -130,7 +130,11 @@ func (mc *ModbusClient) ReadInputRegisters(addr uint16, quantity uint16) (raw []
 		log.Errorf("modbus-function: failed to ReadInputRegisters: %v\n", err)
 		return
 	}
-	out = float64(raw[0])
+	// decode payload bytes as uint16s
+	decode := bytesToUint16s(mc.Endianness, raw)
+	if len(decode) >= 0 {
+		out = float64(decode[0])
+	}
 	return
 }
 
@@ -141,8 +145,10 @@ func (mc *ModbusClient) ReadHoldingRegisters(addr uint16, quantity uint16) (raw 
 		log.Errorf("modbus-function: failed to ReadHoldingRegisters: %v\n", err)
 		return
 	}
-	if len(raw) >= 1 {
-		out = float64(raw[1])
+	// decode payload bytes as uint16s
+	decode := bytesToUint16s(mc.Endianness, raw)
+	if len(decode) >= 0 {
+		out = float64(decode[0])
 	}
 	return
 }
@@ -164,7 +170,6 @@ func (mc *ModbusClient) ReadFloat32s(addr uint16, quantity uint16, regType RegTy
 	}
 	// decode payload bytes as float32s
 	raw = bytesToFloat32s(mc.Endianness, mc.WordOrder, mbPayload)
-
 	return
 }
 

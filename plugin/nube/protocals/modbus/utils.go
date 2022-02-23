@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
 
 	"github.com/NubeIO/flow-framework/model"
@@ -178,7 +177,6 @@ func networkRequest(mbClient smod.ModbusClient, pnt *model.Point, doWrite bool) 
 		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
 			return mbClient.WriteSingleRegister(address, uint16(writeValue))
 		} else if dataType == string(model.TypeFloat32) || dataType == string(model.TypeFloat32) {
-			fmt.Println(111111)
 			return mbClient.WriteFloat32(address, writeValue)
 		} else if dataType == string(model.TypeFloat64) || dataType == string(model.TypeFloat64) {
 			return mbClient.WriteFloat32(address, writeValue)

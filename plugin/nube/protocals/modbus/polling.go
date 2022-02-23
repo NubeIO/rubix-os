@@ -57,9 +57,19 @@ func (i *Instance) PollingTCP(p polling) error {
 		}
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
-				log.Infof("modbus: LOOP COUNT: %v\n", counter)
 				counter++
+				if !utils.BoolIsNil(net.Enable) {
+					log.Infof("modbus: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
+					break
+				} else {
+					log.Infof("modbus: LOOP COUNT: %v\n", counter)
+				}
+
 				for _, dev := range net.Devices { //DEVICES
+					if !utils.BoolIsNil(net.Enable) {
+						log.Infof("modbus-device: DEVICE DISABLED: NAME: %s\n", dev.Name)
+						break
+					}
 					var mbClient smod.ModbusClient
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
@@ -85,6 +95,10 @@ func (i *Instance) PollingTCP(p polling) error {
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
 					for _, pnt := range dev.Points { //POINTS
+						if !utils.BoolIsNil(pnt.Enable) {
+							log.Infof("modbus-point: POINT DISABLED: NAME: %s\n", pnt.Name)
+							break
+						}
 						dPnt := dev.PollDelayPointsMS
 						if dPnt <= 0 {
 							dPnt = 100
