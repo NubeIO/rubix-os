@@ -75,7 +75,7 @@ func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (
 		return nil, err
 	}
 	if len(body.Streams) > 0 {
-		return d.updateStreamOnFlowNetwork(fn, body) // normally we just either edit flow_network or assign stream
+		return d.updateStreamsOnFlowNetwork(fn, body.Streams) // normally we just either edit flow_network or assign stream
 	}
 	if err := d.DB.Model(&fn).Updates(body).Error; err != nil {
 		return nil, err
@@ -261,8 +261,8 @@ func (d *GormDatabase) syncAndEditFlowNetwork(cli *client.FlowClient, body *mode
 	return nil
 }
 
-func (d *GormDatabase) updateStreamOnFlowNetwork(fn *model.FlowNetwork, body *model.FlowNetwork) (*model.FlowNetwork, error) {
-	if err := d.DB.Model(&fn).Association("Streams").Replace(body.Streams); err != nil {
+func (d *GormDatabase) updateStreamsOnFlowNetwork(fn *model.FlowNetwork, streams []*model.Stream) (*model.FlowNetwork, error) {
+	if err := d.DB.Model(&fn).Association("Streams").Replace(streams); err != nil {
 		return nil, err
 	}
 	deviceInfo, err := d.GetDeviceInfo()
