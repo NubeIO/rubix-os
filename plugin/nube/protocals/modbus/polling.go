@@ -132,7 +132,6 @@ func (i *Instance) PollingTCP(p polling) error {
 								continue
 							}
 							//simple cov
-							fmt.Println(pnt.Name, *pnt.PresentValue, responseValue)
 							isChange := !utils.CompareFloatPtr(pnt.PresentValue, &responseValue)
 							if isChange {
 								_, err = i.pointUpdate(pnt.UUID, responseValue)
