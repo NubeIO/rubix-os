@@ -1,11 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/grid-x/modbus"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -20,17 +21,14 @@ type Client struct {
 	Timeout    time.Duration `json:"device_timeout_in_ms"`
 }
 
-var connected bool
-
 func (i *Instance) setClient(network *model.Network, device *model.Device, cacheClient bool) (mbClient smod.ModbusClient, err error) {
-
-	if network.TransportType == model.TransType.Serial {
+	if network.TransportType == model.TransType.Serial || network.TransportType == model.TransType.LoRa {
 		serialPort := "/dev/ttyUSB0"
 		baudRate := 38400
 		stopBits := 1
 		dataBits := 8
 		parity := "N"
-		if network.SerialPort == nil {
+		if network.SerialPort != nil {
 			serialPort = nils.StringIsNil(network.SerialPort)
 		}
 		if network.SerialBaudRate != nil {
@@ -51,91 +49,33 @@ func (i *Instance) setClient(network *model.Network, device *model.Device, cache
 		handler.Parity = setParity(parity)
 		handler.StopBits = stopBits
 		handler.Timeout = 5 * time.Second
-
-		handler.Connect()
+		err := handler.Connect()
+		if err != nil {
+			return smod.ModbusClient{}, err
+		}
 		defer handler.Close()
 		mc := modbus.NewClient(handler)
-
 		mbClient.RTUClientHandler = handler
 		mbClient.Client = mc
-		connected = true
 		return mbClient, nil
 
 	} else {
-
-		handler := modbus.NewTCPClientHandler("localhost:11502")
-		handler.Connect()
+		url, err := uurl.JoinIpPort(device.Host, device.Port)
+		if err != nil {
+			log.Errorf("modbus: failed to validate device IP %s\n", url)
+			return smod.ModbusClient{}, err
+		}
+		handler := modbus.NewTCPClientHandler(url)
+		err = handler.Connect()
+		if err != nil {
+			return smod.ModbusClient{}, err
+		}
 		defer handler.Close()
 		mc := modbus.NewClient(handler)
 		mbClient.TCPClientHandler = handler
 		mbClient.Client = mc
-		connected = true
 		return mbClient, nil
 	}
-
-}
-
-//func (i *Instance) setClient(client Client, networkUUID string, cacheClient, isSerial bool) error {
-//	var c *modbus.ModbusClient
-//	if isSerial {
-//		parity := setParity(client.Parity)
-//		serialPort := setSerial(client.SerialPort)
-//		if client.Timeout < 10 {
-//			client.Timeout = 500
-//		}
-//		//TODO add in a check if client with same details exists
-//		c, err = modbus.NewClient(&modbus.ClientConfiguration{
-//			URL:      serialPort,
-//			Speed:    client.BaudRate,
-//			DataBits: client.DataBits,
-//			Parity:   parity,
-//			StopBits: client.StopBits,
-//			Timeout:  client.Timeout * time.Millisecond,
-//		})
-//	} else {
-//		var cli utils.URLParts
-//		cli.Transport = "tcp"
-//		cli.Host = client.Host
-//		cli.Port = client.Port
-//		url, err := utils.JoinURL(cli)
-//		if err != nil {
-//			connected = false
-//			return err
-//		}
-//		if client.Timeout < 10 {
-//			client.Timeout = 500
-//		}
-//		//TODO add in a check if client with same details exists
-//		c, err = modbus.NewClient(&modbus.ClientConfiguration{
-//			URL:     url,
-//			Timeout: client.Timeout * time.Millisecond,
-//		})
-//		if err != nil {
-//			connected = false
-//			return err
-//		}
-//	}
-//	var getC interface{}
-//	if cacheClient { //store modbus client in cache to reuse the instance
-//		getC, _ = i.store.Get(networkUUID)
-//		if getC == nil {
-//			i.store.Set(networkUUID, c, -1)
-//		} else {
-//			c = getC.(*modbus.ModbusClient)
-//		}
-//	}
-//	err = c.Open()
-//	connected = true
-//	restMB = c
-//	if err != nil {
-//		connected = false
-//		return err
-//	}
-//	return nil
-//}
-
-func isConnected() bool {
-	return connected
 }
 
 func setParity(in string) string {
@@ -148,9 +88,4 @@ func setParity(in string) string {
 	} else {
 		return "N"
 	}
-}
-
-func setSerial(port string) string {
-	p := fmt.Sprintf("rtu:///%s", port)
-	return p
 }

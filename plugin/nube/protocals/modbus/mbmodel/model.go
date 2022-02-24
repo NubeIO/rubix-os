@@ -1,4 +1,4 @@
-package model
+package mbmodel
 
 import (
 	"github.com/NubeIO/flow-framework/plugin/defaults"
@@ -42,7 +42,7 @@ type DescriptionStruct struct {
 type TransportTypeStruct struct {
 	Type     string   `json:"type" default:"array"`
 	Required bool     `json:"required" default:"true"`
-	Options  []string `json:"options" default:"[\"serial\",\"ip\"]"`
+	Options  []string `json:"options" default:"[\"serial\",\"ip\",\"LoRa\"]"`
 	Default  string   `json:"default" default:"serial"`
 }
 

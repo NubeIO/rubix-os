@@ -161,9 +161,11 @@ var MessageLevel = struct {
 var TransType = struct {
 	Serial string `json:"serial"`
 	IP     string `json:"ip"`
+	LoRa   string `json:"LoRa"`
 }{
 	Serial: "serial",
 	IP:     "ip",
+	LoRa:   "LoRa",
 }
 
 var TransClient = struct {

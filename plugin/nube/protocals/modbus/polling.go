@@ -3,15 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
-	"time"
-
-	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 const defaultInterval = 100 * time.Millisecond
@@ -28,6 +27,18 @@ type polling struct {
 type devCheck struct {
 	devUUID string
 	client  Client
+}
+
+func delays(networkType string) (networkDelay, deviceDelay, pointDelay time.Duration) {
+	networkDelay = 100 * time.Millisecond
+	deviceDelay = 100 * time.Millisecond
+	pointDelay = 100 * time.Millisecond
+	if networkType == model.TransType.LoRa {
+		networkDelay = 100 * time.Millisecond
+		deviceDelay = 100 * time.Millisecond
+		pointDelay = 6000 * time.Millisecond
+	}
+	return
 }
 
 var poll poller.Poller
@@ -55,53 +66,52 @@ func (i *Instance) PollingTCP(p polling) error {
 			time.Sleep(2 * time.Second)
 			log.Info("modbus: NO MODBUS NETWORKS FOUND")
 		}
+		networkDelay, _, _ := delays("")
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
+				_, deviceDelay, pointDelay := delays(net.TransportType)
 				counter++
 				if !utils.BoolIsNil(net.Enable) {
 					log.Infof("modbus: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
-					break
+					continue
 				} else {
 					log.Infof("modbus: LOOP COUNT: %v\n", counter)
 				}
-
 				for _, dev := range net.Devices { //DEVICES
-					if !utils.BoolIsNil(net.Enable) {
+					if !utils.BoolIsNil(dev.Enable) {
 						log.Infof("modbus-device: DEVICE DISABLED: NAME: %s\n", dev.Name)
-						break
+						continue
 					}
 					var mbClient smod.ModbusClient
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
 					mbClient, err = i.setClient(net, dev, true)
 					if err != nil {
-						log.Errorf("modbus: failed to set client %v %s\n", err, net.Name)
-						break
+						log.Errorf("modbus: failed to set client error: %v network name:%s\n", err, net.Name)
+						continue
 					}
-					if net.TransportType == model.TransType.Serial {
-						mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
+					//log.Infof("modbus-device: DEVICE DISABLED: NAME: %s\n", mbClient.RTUClientHandler.Address)
+					if net.TransportType == model.TransType.Serial || net.TransportType == model.TransType.LoRa {
+						if dev.AddressId >= 1 {
+							mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
+						}
 					} else if dev.TransportType == model.TransType.IP {
 						url, err := uurl.JoinIpPort(dev.Host, dev.Port)
 						if err != nil {
 							log.Errorf("modbus: failed to validate device IP %s\n", url)
-							break
+							continue
 						}
 						mbClient.TCPClientHandler.Address = url
 						mbClient.TCPClientHandler.SlaveID = byte(dev.AddressId)
 					} else {
 						log.Errorf("modbus: failed to validate device and network %v %s\n", err, dev.Name)
-						break
+						continue
 					}
-					dNet := p.delayNetworks
-					time.Sleep(dNet)
+					time.Sleep(deviceDelay)          //DELAY between devices
 					for _, pnt := range dev.Points { //POINTS
 						if !utils.BoolIsNil(pnt.Enable) {
 							log.Infof("modbus-point: POINT DISABLED: NAME: %s\n", pnt.Name)
-							break
-						}
-						dPnt := dev.PollDelayPointsMS
-						if dPnt <= 0 {
-							dPnt = 100
+							continue
 						}
 						write := isWrite(pnt.ObjectType)
 						if write { //IS WRITE
@@ -111,7 +121,7 @@ func (i *Instance) PollingTCP(p polling) error {
 								_, responseValue, err := networkRequest(mbClient, pnt, true)
 								if err != nil {
 									_, err = i.pointUpdateErr(pnt.UUID, err)
-									break
+									continue
 								}
 								_, err = i.pointUpdate(pnt.UUID, responseValue)
 							}
@@ -119,24 +129,24 @@ func (i *Instance) PollingTCP(p polling) error {
 							_, responseValue, err := networkRequest(mbClient, pnt, false)
 							if err != nil {
 								_, err = i.pointUpdateErr(pnt.UUID, err)
-								break
+								continue
 							}
 							//simple cov
 							isChange := !utils.CompareFloatPtr(pnt.PresentValue, &responseValue)
 							if isChange {
 								_, err = i.pointUpdate(pnt.UUID, responseValue)
 								if err != nil {
-									break
+									continue
 								}
 							}
 						}
-						time.Sleep(dPnt * time.Millisecond)
+						time.Sleep(pointDelay) //DELAY between points
 					}
 				}
 			}
-			time.Sleep(100 * time.Millisecond)
 		}
-		if !p.enable { //TODO the disable of the polling isn't working
+		time.Sleep(networkDelay) //DELAY between networks
+		if !p.enable {           //TODO the disable of the polling isn't working
 			return true, nil
 		} else {
 			return false, nil
