@@ -151,6 +151,7 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 	} else {
 		pointModel.Priority = body.Priority
 	}
+	pointModel.InSync = utils.NewFalse()
 	point, err := d.UpdatePointValue(pointModel, fromPlugin)
 	return point, err
 }

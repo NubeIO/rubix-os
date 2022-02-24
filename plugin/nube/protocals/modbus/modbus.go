@@ -4,7 +4,9 @@ import (
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/grid-x/modbus"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -19,7 +21,7 @@ type Client struct {
 	Timeout    time.Duration `json:"device_timeout_in_ms"`
 }
 
-func (i *Instance) setClient(network *model.Network, cacheClient bool) (mbClient smod.ModbusClient, err error) {
+func (i *Instance) setClient(network *model.Network, device *model.Device, cacheClient bool) (mbClient smod.ModbusClient, err error) {
 	if network.TransportType == model.TransType.Serial || network.TransportType == model.TransType.LoRa {
 		serialPort := "/dev/ttyUSB0"
 		baudRate := 38400
@@ -58,8 +60,13 @@ func (i *Instance) setClient(network *model.Network, cacheClient bool) (mbClient
 		return mbClient, nil
 
 	} else {
-		handler := modbus.NewTCPClientHandler("localhost:11502")
-		err := handler.Connect()
+		url, err := uurl.JoinIpPort(device.Host, device.Port)
+		if err != nil {
+			log.Errorf("modbus: failed to validate device IP %s\n", url)
+			return smod.ModbusClient{}, err
+		}
+		handler := modbus.NewTCPClientHandler(url)
+		err = handler.Connect()
 		if err != nil {
 			return smod.ModbusClient{}, err
 		}

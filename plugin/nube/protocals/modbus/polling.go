@@ -85,7 +85,7 @@ func (i *Instance) PollingTCP(p polling) error {
 					var mbClient smod.ModbusClient
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
-					mbClient, err = i.setClient(net, true)
+					mbClient, err = i.setClient(net, dev, true)
 					if err != nil {
 						log.Errorf("modbus: failed to set client error: %v network name:%s\n", err, net.Name)
 						continue
@@ -94,8 +94,6 @@ func (i *Instance) PollingTCP(p polling) error {
 					if net.TransportType == model.TransType.Serial || net.TransportType == model.TransType.LoRa {
 						if dev.AddressId >= 1 {
 							mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
-						} else {
-							continue
 						}
 					} else if dev.TransportType == model.TransType.IP {
 						url, err := uurl.JoinIpPort(dev.Host, dev.Port)
@@ -134,6 +132,7 @@ func (i *Instance) PollingTCP(p polling) error {
 								continue
 							}
 							//simple cov
+							fmt.Println(pnt.Name, *pnt.PresentValue, responseValue)
 							isChange := !utils.CompareFloatPtr(pnt.PresentValue, &responseValue)
 							if isChange {
 								_, err = i.pointUpdate(pnt.UUID, responseValue)
