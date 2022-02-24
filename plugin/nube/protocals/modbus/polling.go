@@ -13,8 +13,6 @@ import (
 	"time"
 )
 
-const defaultInterval = 100 * time.Millisecond
-
 type polling struct {
 	enable        bool
 	loopDelay     time.Duration
@@ -29,13 +27,11 @@ type devCheck struct {
 	client  Client
 }
 
-func delays(networkType string) (networkDelay, deviceDelay, pointDelay time.Duration) {
-	networkDelay = 100 * time.Millisecond
-	deviceDelay = 100 * time.Millisecond
-	pointDelay = 100 * time.Millisecond
+func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
+	deviceDelay = 80 * time.Millisecond
+	pointDelay = 80 * time.Millisecond
 	if networkType == model.TransType.LoRa {
-		networkDelay = 100 * time.Millisecond
-		deviceDelay = 100 * time.Millisecond
+		deviceDelay = 80 * time.Millisecond
 		pointDelay = 6000 * time.Millisecond
 	}
 	return
@@ -44,15 +40,6 @@ func delays(networkType string) (networkDelay, deviceDelay, pointDelay time.Dura
 var poll poller.Poller
 
 func (i *Instance) PollingTCP(p polling) error {
-	if p.delayNetworks <= 0 {
-		p.delayNetworks = defaultInterval
-	}
-	if p.delayDevices <= 0 {
-		p.delayDevices = defaultInterval
-	}
-	if p.delayPoints <= 0 {
-		p.delayPoints = defaultInterval
-	}
 	if p.enable {
 		poll = poller.New()
 	}
@@ -66,16 +53,16 @@ func (i *Instance) PollingTCP(p polling) error {
 			time.Sleep(2 * time.Second)
 			log.Info("modbus: NO MODBUS NETWORKS FOUND")
 		}
-		networkDelay, _, _ := delays("")
+
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
-				_, deviceDelay, pointDelay := delays(net.TransportType)
+				timeStart := time.Now()
+				deviceDelay, pointDelay := delays(net.TransportType)
 				counter++
+				log.Infof("modbus-poll: POLL START: NAME: %s\n", net.Name)
 				if !utils.BoolIsNil(net.Enable) {
 					log.Infof("modbus: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
 					continue
-				} else {
-					log.Infof("modbus: LOOP COUNT: %v\n", counter)
 				}
 				for _, dev := range net.Devices { //DEVICES
 					if !utils.BoolIsNil(dev.Enable) {
@@ -90,7 +77,6 @@ func (i *Instance) PollingTCP(p polling) error {
 						log.Errorf("modbus: failed to set client error: %v network name:%s\n", err, net.Name)
 						continue
 					}
-					//log.Infof("modbus-device: DEVICE DISABLED: NAME: %s\n", mbClient.RTUClientHandler.Address)
 					if net.TransportType == model.TransType.Serial || net.TransportType == model.TransType.LoRa {
 						if dev.AddressId >= 1 {
 							mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
@@ -114,6 +100,7 @@ func (i *Instance) PollingTCP(p polling) error {
 							continue
 						}
 						write := isWrite(pnt.ObjectType)
+						skipDelay := false
 						if write { //IS WRITE
 							//get existing
 							if !utils.BoolIsNil(pnt.InSync) {
@@ -124,6 +111,8 @@ func (i *Instance) PollingTCP(p polling) error {
 									continue
 								}
 								_, err = i.pointUpdate(pnt.UUID, responseValue)
+							} else {
+								skipDelay = true
 							}
 						} else { //READ
 							_, responseValue, err := networkRequest(mbClient, pnt, false)
@@ -140,13 +129,18 @@ func (i *Instance) PollingTCP(p polling) error {
 								}
 							}
 						}
-						time.Sleep(pointDelay) //DELAY between points
+						if !skipDelay {
+							time.Sleep(pointDelay) //DELAY between points
+						}
 					}
+					timeEnd := time.Now()
+					diff := timeEnd.Sub(timeStart)
+					out := time.Time{}.Add(diff)
+					log.Infof("modbus-poll-loop: NETWORK-NAME:%s POLL-DURATION: %s  POLL-COUNT: %d\n", net.Name, out.Format("15:04:05.000"), counter)
 				}
 			}
 		}
-		time.Sleep(networkDelay) //DELAY between networks
-		if !p.enable {           //TODO the disable of the polling isn't working
+		if !p.enable { //TODO the disable of the polling isn't working
 			return true, nil
 		} else {
 			return false, nil
