@@ -24,7 +24,7 @@ var connected bool
 
 func (i *Instance) setClient(network *model.Network, device *model.Device, cacheClient bool) (mbClient smod.ModbusClient, err error) {
 
-	if network.TransportType == model.TransType.Serial {
+	if network.TransportType == model.TransType.Serial || network.TransportType == model.TransType.LoRa {
 		serialPort := "/dev/ttyUSB0"
 		baudRate := 38400
 		stopBits := 1
@@ -52,19 +52,23 @@ func (i *Instance) setClient(network *model.Network, device *model.Device, cache
 		handler.StopBits = stopBits
 		handler.Timeout = 5 * time.Second
 
-		handler.Connect()
+		err := handler.Connect()
+		if err != nil {
+			return smod.ModbusClient{}, err
+		}
 		defer handler.Close()
 		mc := modbus.NewClient(handler)
-
 		mbClient.RTUClientHandler = handler
 		mbClient.Client = mc
 		connected = true
 		return mbClient, nil
 
 	} else {
-
 		handler := modbus.NewTCPClientHandler("localhost:11502")
-		handler.Connect()
+		err := handler.Connect()
+		if err != nil {
+			return smod.ModbusClient{}, err
+		}
 		defer handler.Close()
 		mc := modbus.NewClient(handler)
 		mbClient.TCPClientHandler = handler

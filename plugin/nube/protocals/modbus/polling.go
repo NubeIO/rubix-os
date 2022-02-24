@@ -30,6 +30,28 @@ type devCheck struct {
 	client  Client
 }
 
+func delays(networkType string) (networkDelay, deviceDelay, pointDelay time.Duration) {
+	networkDelay = 100 * time.Millisecond
+	deviceDelay = 100 * time.Millisecond
+	pointDelay = 100 * time.Millisecond
+	if networkType == model.TransType.LoRa {
+		networkDelay = 100 * time.Millisecond
+		deviceDelay = 100 * time.Millisecond
+		pointDelay = 6000 * time.Millisecond
+	}
+	if networkType == model.TransType.Serial {
+		networkDelay = 100 * time.Millisecond
+		deviceDelay = 100 * time.Millisecond
+		pointDelay = 100 * time.Millisecond
+	}
+	if networkType == model.TransType.IP {
+		networkDelay = 100 * time.Millisecond
+		deviceDelay = 100 * time.Millisecond
+		pointDelay = 100 * time.Millisecond
+	}
+	return
+}
+
 var poll poller.Poller
 
 func (i *Instance) PollingTCP(p polling) error {
@@ -55,8 +77,10 @@ func (i *Instance) PollingTCP(p polling) error {
 			time.Sleep(2 * time.Second)
 			log.Info("modbus: NO MODBUS NETWORKS FOUND")
 		}
+		networkDelay, _, _ := delays("")
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
+				_, deviceDelay, pointDelay := delays(net.TransportType)
 				counter++
 				if !utils.BoolIsNil(net.Enable) {
 					log.Infof("modbus: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
@@ -66,7 +90,7 @@ func (i *Instance) PollingTCP(p polling) error {
 				}
 
 				for _, dev := range net.Devices { //DEVICES
-					if !utils.BoolIsNil(net.Enable) {
+					if !utils.BoolIsNil(dev.Enable) {
 						log.Infof("modbus-device: DEVICE DISABLED: NAME: %s\n", dev.Name)
 						break
 					}
@@ -78,8 +102,12 @@ func (i *Instance) PollingTCP(p polling) error {
 						log.Errorf("modbus: failed to set client %v %s\n", err, net.Name)
 						break
 					}
-					if net.TransportType == model.TransType.Serial {
-						mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
+					if net.TransportType == model.TransType.Serial || net.TransportType == model.TransType.LoRa {
+						if dev.AddressId >= 1 {
+							mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
+						} else {
+							break
+						}
 					} else if dev.TransportType == model.TransType.IP {
 						url, err := uurl.JoinIpPort(dev.Host, dev.Port)
 						if err != nil {
@@ -92,16 +120,11 @@ func (i *Instance) PollingTCP(p polling) error {
 						log.Errorf("modbus: failed to validate device and network %v %s\n", err, dev.Name)
 						break
 					}
-					dNet := p.delayNetworks
-					time.Sleep(dNet)
+					time.Sleep(deviceDelay)          //DELAY between devices
 					for _, pnt := range dev.Points { //POINTS
 						if !utils.BoolIsNil(pnt.Enable) {
 							log.Infof("modbus-point: POINT DISABLED: NAME: %s\n", pnt.Name)
 							break
-						}
-						dPnt := dev.PollDelayPointsMS
-						if dPnt <= 0 {
-							dPnt = 100
 						}
 						write := isWrite(pnt.ObjectType)
 						if write { //IS WRITE
@@ -130,11 +153,11 @@ func (i *Instance) PollingTCP(p polling) error {
 								}
 							}
 						}
-						time.Sleep(dPnt * time.Millisecond)
+						time.Sleep(pointDelay) //DELAY between points
 					}
 				}
 			}
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(networkDelay) //DELAY between networks
 		}
 		if !p.enable { //TODO the disable of the polling isn't working
 			return true, nil
