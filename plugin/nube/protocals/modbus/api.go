@@ -1,12 +1,14 @@
 package main
 
 import (
-	"net/http"
-
-	baseModel "github.com/NubeIO/flow-framework/model"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/model"
+	"fmt"
+	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/mbmodel"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+	"net/http"
 )
 
 const (
@@ -24,6 +26,9 @@ type Scan struct {
 }
 
 type Body struct {
+	Network       *model.Network
+	Device        *model.Device
+	Point         *model.Point
 	Client        `json:"client"`
 	Operation     `json:"request_body"`
 	Scan          `json:"scan"`
@@ -70,12 +75,12 @@ type T2 struct {
 //supportedObjects return all objects that are not bacnet
 func supportedObjects() *utils.Array {
 	out := utils.NewArray()
-	out.Add(baseModel.ObjTypeAnalogInput)
-	out.Add(baseModel.ObjTypeAnalogOutput)
-	out.Add(baseModel.ObjTypeAnalogValue)
-	out.Add(baseModel.ObjTypeBinaryInput)
-	out.Add(baseModel.ObjTypeBinaryOutput)
-	out.Add(baseModel.ObjTypeBinaryValue)
+	out.Add(model.ObjTypeAnalogInput)
+	out.Add(model.ObjTypeAnalogOutput)
+	out.Add(model.ObjTypeAnalogValue)
+	out.Add(model.ObjTypeBinaryInput)
+	out.Add(model.ObjTypeBinaryOutput)
+	out.Add(model.ObjTypeBinaryValue)
 	return out
 }
 
@@ -83,7 +88,6 @@ func supportedObjects() *utils.Array {
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
 	mux.GET(help, func(ctx *gin.Context) {
-
 		var h T2
 		//h.Enabled = model.CommonNaming
 		//a1 := []string{fmt.Sprintf("http://0.0.0.0:1660/api/plugins/api/%s%s" ,name, help), "GET", "POST", "PATCH"}
@@ -92,62 +96,65 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		h.ObjectType.Options = supportedObjects()
 		h.ObjectType.Type = "array"
 		h.ObjectType.Required = true
-
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
+			return
 		} else {
 			ctx.JSON(http.StatusOK, h)
+			return
 		}
 	})
 	mux.GET(listSerial, func(ctx *gin.Context) {
 		serial, err := i.listSerialPorts()
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
+			return
 		} else {
 			ctx.JSON(http.StatusOK, serial)
+			return
 		}
 	})
-	//mux.POST("/modbus/point/operation", func(ctx *gin.Context) {
-	//	body, _ := bodyClient(ctx)
-	//	err := i.setClient(body.Client, "", false, body.IsSerial)
-	//	if err != nil {
-	//		log.Info(err, "ERROR ON set modbus client")
-	//		ctx.JSON(http.StatusBadRequest, err)
-	//	}
-	//	cli := getClient()
-	//	if !isConnected() {
-	//		ctx.JSON(http.StatusBadRequest, "modbus not enabled")
-	//	} else {
-	//		err := cli.SetUnitId(body.DeviceAddress)
-	//		if err != nil {
-	//			ctx.JSON(http.StatusBadRequest, "request was invalid, failed to SetUnitId")
-	//			return
-	//		}
-	//		request, err := parseRequest(body.Operation)
-	//		if err != nil {
-	//			ctx.JSON(http.StatusBadRequest, "request was invalid, try read_roil or write_coil")
-	//			return
-	//		}
-	//		rArray, responseValue, err := networkRequest(cli, request)
-	//		if err != nil {
-	//			ctx.JSON(http.StatusBadRequest, err)
-	//		} else {
-	//			if body.ReturnArray {
-	//				log.Info(responseValue)
-	//				ctx.JSON(http.StatusOK, rArray)
-	//			} else {
-	//				ctx.JSON(http.StatusOK, responseValue)
-	//			}
-	//		}
-	//	}
-	//})
+	mux.POST("/modbus/point/operation", func(ctx *gin.Context) {
+		body, err := bodyClient(ctx)
+		netType := body.Network.TransportType
+		mbClient, err := i.setClient(body.Network, false)
+		if err != nil {
+			log.Errorln(err, "ERROR ON set modbus client")
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+		if netType == model.TransType.Serial || netType == model.TransType.LoRa {
+			if body.Device.AddressId >= 1 {
+				mbClient.RTUClientHandler.SlaveID = byte(body.Device.AddressId)
+			}
+		} else if netType == model.TransType.IP {
+			url, err := uurl.JoinIpPort(body.Device.Host, body.Device.Port)
+			if err != nil {
+				log.Errorf("modbus: failed to validate device IP %s\n", url)
+				ctx.JSON(http.StatusBadRequest, err.Error())
+				return
+			}
+			mbClient.TCPClientHandler.Address = url
+			mbClient.TCPClientHandler.SlaveID = byte(body.Device.AddressId)
+		}
+		_, responseValue, err := networkRequest(mbClient, body.Point, false)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+		fmt.Println("responseValue", responseValue)
+		ctx.JSON(http.StatusOK, responseValue)
+		return
+	})
 	mux.POST("/modbus/wizard/tcp", func(ctx *gin.Context) {
 		body, _ := bodyWizard(ctx)
 		n, err := i.wizardTCP(body)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
+			return
 		} else {
 			ctx.JSON(http.StatusOK, n)
+			return
 		}
 	})
 	mux.POST("/modbus/wizard/serial", func(ctx *gin.Context) {
@@ -155,21 +162,19 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		serial, err := i.wizardSerial(body)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
+			return
 		} else {
-
 			ctx.JSON(http.StatusOK, serial)
+			return
 		}
 	})
-
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, model.GetNetworkSchema())
+		ctx.JSON(http.StatusOK, mbmodel.GetNetworkSchema())
 	})
-
 	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, model.GetDeviceSchema())
+		ctx.JSON(http.StatusOK, mbmodel.GetDeviceSchema())
 	})
-
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, model.GetPointSchema())
+		ctx.JSON(http.StatusOK, mbmodel.GetPointSchema())
 	})
 }

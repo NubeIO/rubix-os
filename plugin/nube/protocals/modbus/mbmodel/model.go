@@ -1,4 +1,4 @@
-package model
+package mbmodel
 
 import (
 	"github.com/NubeIO/flow-framework/plugin/defaults"

@@ -62,6 +62,7 @@ type ModbusClient struct {
 	WordOrder        WordOrder
 	RegType          RegType
 	DeviceZeroMode   bool
+	Debug            bool
 }
 
 func byteArrayToBoolArray(ba []byte) []bool {

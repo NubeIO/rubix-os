@@ -103,7 +103,7 @@ func pointAddress(pnt *model.Point, zeroMode bool) (out uint16, err error) {
 }
 
 func networkRequest(mbClient smod.ModbusClient, pnt *model.Point, doWrite bool) (response interface{}, responseValue float64, err error) {
-
+	mbClient.Debug = true
 	objectEncoding := pnt.ObjectEncoding                        //beb_lew
 	objectType := utils.NewString(pnt.ObjectType).ToSnakeCase() //eg: readCoil, read_coil, writeCoil
 	dataType := utils.NewString(pnt.DataType).ToSnakeCase()     //eg: int16, uint16
@@ -126,11 +126,13 @@ func networkRequest(mbClient smod.ModbusClient, pnt *model.Point, doWrite bool) 
 		length = 1
 	}
 	var writeValue float64
-	if doWrite {
-		writeValue = pointWrite(pnt)
-		log.Infof("modbus-write: ObjectType: %s  Addr: %d WriteValue: %v\n", objectType, address, writeValue)
-	} else {
-		log.Infof("modbus-read: ObjectType: %s  Addr: %d", objectType, address)
+	if mbClient.Debug {
+		if doWrite {
+			writeValue = pointWrite(pnt)
+			log.Infof("modbus-write: ObjectType: %s  Addr: %d WriteValue: %v\n", objectType, address, writeValue)
+		} else {
+			log.Infof("modbus-read: ObjectType: %s  Addr: %d", objectType, address)
+		}
 	}
 
 	switch objectType {
