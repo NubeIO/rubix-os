@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.3.8](https://github.com/NubeIO/flow-framework/tree/v0.3.8) (2022-02-24)
+- Improvements/misc #385
+
 ## [v0.3.7](https://github.com/NubeIO/flow-framework/tree/v0.3.7) (2022-02-24)
 - Improvements/misc #384
 - Improvement/stream sync #383
