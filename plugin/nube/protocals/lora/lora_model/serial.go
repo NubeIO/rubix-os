@@ -87,7 +87,7 @@ type Point struct {
 	IoId struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"DI1\",\"UI1\",\"AO1\",\"temp\",\"pulse\",\"motion\",\"light\"]"`
+		Options  []string `json:"options" default:"[\"UI1\",\"UI2\",\"UI3\",\"temp\",\"pulse\",\"motion\",\"light\",\"voltage\"]"`
 	} `json:"io_id"`
 	IoType struct {
 		Type     string   `json:"type" default:"array"`

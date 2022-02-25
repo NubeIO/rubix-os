@@ -113,31 +113,28 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 	// TODO: fix this so don't need to request the point for the UUID before hand
 	pnt, err := inst.db.GetOnePointByArgs(api.Args{AddressUUID: &body.AddressUUID, IoId: &body.IoID})
 	if err != nil {
-		log.Errorf("lora: issue on failed to find point: %v\n", err)
+		log.Errorf("lora: issue on failed to find point: %v name: %s IO-ID:%s\n", err, body.AddressUUID, body.IoID)
 		return err
 	}
-
-	body.PresentValue = &value
 	body.CommonFault.InFault = false
 	body.CommonFault.MessageLevel = model.MessageLevel.Info
 	body.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	body.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 	body.CommonFault.LastOk = time.Now().UTC()
 
-	// TODO: fix this for all points if they need conversion
+	var pri model.Priority
+	pri.P16 = &value
+	body.Priority = &pri
+	body.InSync = utils.NewTrue()
+	fmt.Println(body)
 	if pnt.IoType != "" && pnt.IoType != string(model.IOTypeRAW) {
-		*body.PresentValue = decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue)
+		*pri.P16 = decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue)
 	}
-
-	log.Infof("lora: attempt updatePointValue { AddressUUID: %s, value: %v, IoID: %s }\n", body.AddressUUID, *body.PresentValue, body.IoID)
-	// TODO: fix this so don't need to request the point for the UUID before hand
-	// TODO: this should be inst.db.updatePointValue ???????????
-	_, err = inst.db.UpdatePoint(pnt.UUID, body, true)
+	_, _ = inst.db.UpdatePointValue(pnt.UUID, body, true)
 	if err != nil {
-		log.Errorf("lora: issue on updatePointValue : %v\n", err)
+		log.Error("lora: UpdatePointValue()", err)
 		return err
 	}
-
 	return nil
 }
 
