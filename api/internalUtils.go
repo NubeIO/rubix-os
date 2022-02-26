@@ -68,7 +68,7 @@ type Args struct {
 	AddressUUID          *string
 	AddressID            *string
 	ObjectType           *string
-	IoId                 *string
+	IoNumber                 *string
 	IdGt                 *string
 }
 
@@ -128,7 +128,7 @@ var ArgsType = struct {
 	AddressUUID          string
 	AddressID            string
 	ObjectType           string
-	IoId                 string
+	IoNumber                 string
 	IdGt                 string
 }{
 	Sort:                 "sort",
@@ -186,7 +186,7 @@ var ArgsType = struct {
 	AddressUUID:          "address_uuid",
 	AddressID:            "address_id",
 	ObjectType:           "object_type",
-	IoId:                 "io_id",
+	IoNumber:                 "io_number",
 	IdGt:                 "id_gt",
 }
 

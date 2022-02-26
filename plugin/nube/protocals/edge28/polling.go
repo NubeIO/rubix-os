@@ -38,15 +38,15 @@ func (i *Instance) processWrite(pnt *model.Point, value float64, rest *edgerest.
 	//!utils.BoolIsNil(pnt.WriteValueOnceSync)
 	var err error
 	if isUO {
-		_, err = rest.WriteUO(pnt.IoID, value)
+		_, err = rest.WriteUO(pnt.IoNumber, value)
 	} else {
-		_, err = rest.WriteDO(pnt.IoID, value)
+		_, err = rest.WriteDO(pnt.IoNumber, value)
 	}
 	if err != nil {
-		log.Errorf("edge-28: failed to write IO %s:  value:%f error:%v\n", pnt.IoID, value, err)
+		log.Errorf("edge-28: failed to write IO %s:  value:%f error:%v\n", pnt.IoNumber, value, err)
 		return 0, err
 	} else {
-		log.Infof("edge-28: wrote IO %s: %v\n", pnt.IoID, value)
+		log.Infof("edge-28: wrote IO %s: %v\n", pnt.IoNumber, value)
 		return value, err
 	}
 }
@@ -59,13 +59,13 @@ func (i *Instance) processRead(pnt *model.Point, value float64, pollCount float6
 		pnt.Priority.P16 = utils.NewFloat64(value)
 		_, err := i.db.UpdatePointValue(pnt.UUID, pnt, false)
 		if err != nil {
-			log.Errorf("edge-28: READ UPDATE POINT %s: %v\n", pnt.IoID, value)
+			log.Errorf("edge-28: READ UPDATE POINT %s: %v\n", pnt.IoNumber, value)
 			return value, err
 		}
 		if utils.BoolIsNil(pnt.InSync) {
-			log.Infof("edge-28: READ POINT SYNC %s: %v\n", pnt.IoID, value)
+			log.Infof("edge-28: READ POINT SYNC %s: %v\n", pnt.IoNumber, value)
 		} else {
-			log.Infof("edge-28: READ ON START %s: %v\n", pnt.IoID, value)
+			log.Infof("edge-28: READ ON START %s: %v\n", pnt.IoNumber, value)
 		}
 	} else if covEvent {
 		pnt.InSync = utils.NewTrue()
@@ -77,10 +77,10 @@ func (i *Instance) processRead(pnt *model.Point, value float64, pollCount float6
 		fmt.Println("pnt.Priority.P16 - 2", *(pnt.Priority.P16))
 		_, err := i.db.UpdatePointValue(pnt.UUID, pnt, true)
 		if err != nil {
-			log.Errorf("edge-28: READ UPDATE POINT %s: %v\n", pnt.IoID, value)
+			log.Errorf("edge-28: READ UPDATE POINT %s: %v\n", pnt.IoNumber, value)
 			return value, err
 		} else {
-			log.Infof("edge-28: READ ON START %s: %v\n", pnt.IoID, value)
+			log.Infof("edge-28: READ ON START %s: %v\n", pnt.IoNumber, value)
 		}
 	}
 	return value, nil
@@ -122,6 +122,7 @@ func (i *Instance) polling(p polling) error {
 					if err != nil {
 						log.Errorf("edge-28: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
 					}
+					fmt.Println(dev.CommonIP.Host, dev.CommonIP.Port)
 					rest := edgerest.NewNoAuth(dev.CommonIP.Host, dev.CommonIP.Port)
 					getUI, err = rest.GetUIs()
 					getDI, err = rest.GetDIs()
@@ -133,8 +134,8 @@ func (i *Instance) polling(p polling) error {
 						var readValStruct interface{}
 						var readValType string
 						var wv float64
-						fmt.Println(pnt.IoID)
-						switch pnt.IoID {
+						fmt.Println(pnt.IoNumber)
+						switch pnt.IoNumber {
 						//OUTPUTS
 						case pointList.R1, pointList.R2, pointList.DO1, pointList.DO2, pointList.DO3, pointList.DO4, pointList.DO5:
 							//_, err := i.db.UpdatePointValue(pnt.UUID, pnt, false)  //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
@@ -170,12 +171,12 @@ func (i *Instance) polling(p polling) error {
 							if getDI == nil {
 								continue
 							}
-							readValStruct, readValType, err = utils.GetStructFieldByString(getDI.Val, pnt.IoID)
+							readValStruct, readValType, err = utils.GetStructFieldByString(getDI.Val, pnt.IoNumber)
 							if err != nil {
 								log.Error(err)
 								continue
 							} else if readValType != "struct" {
-								log.Error("edge-28: IoID does not match any points from Edge28")
+								log.Error("edge-28: IoNumber does not match any points from Edge28")
 								continue
 							}
 							rv = reflect.ValueOf(readValStruct).FieldByName("Val").Float()
@@ -192,7 +193,7 @@ func (i *Instance) polling(p polling) error {
 							}
 							fmt.Println("POINT")
 							fmt.Printf("%+v\n", *(pnt))
-							readValStruct, readValType, err = utils.GetStructFieldByString(getUI.Val, pnt.IoID)
+							readValStruct, readValType, err = utils.GetStructFieldByString(getUI.Val, pnt.IoNumber)
 							fmt.Println("readValStruct", readValStruct)
 							fmt.Println("readValType", readValType)
 							//fmt.Printf("%+v\n", *(pnt))
@@ -200,7 +201,7 @@ func (i *Instance) polling(p polling) error {
 								log.Error(err)
 								continue
 							} else if readValType != "struct" {
-								log.Error("edge-28: IoID does not match any points from Edge28")
+								log.Error("edge-28: IoNumber does not match any points from Edge28")
 								continue
 							}
 							rv = reflect.ValueOf(readValStruct).FieldByName("Val").Float()
@@ -235,7 +236,7 @@ func GetGPIOValueForUOByType(point *model.Point) (float64, error) {
 	var err error
 	var result float64
 	if !utils.ExistsInStrut(UOTypes, point.IoType) {
-		err = errors.New(fmt.Sprintf("edge-28: skipping %v, IoType %v not recognized.", point.IoID, point.IoType))
+		err = errors.New(fmt.Sprintf("edge-28: skipping %v, IoType %v not recognized.", point.IoNumber, point.IoType))
 		return 0, err
 	}
 	//fmt.Println("point")
@@ -274,7 +275,7 @@ func GetValueFromGPIOForUIByType(point *model.Point, value float64) (float64, er
 	var result float64
 
 	if !utils.ExistsInStrut(UITypes, point.IoType) {
-		err = errors.New(fmt.Sprintf("edge-28: skipping %v, IoType %v not recognized.", point.IoID, point.IoType))
+		err = errors.New(fmt.Sprintf("edge-28: skipping %v, IoType %v not recognized.", point.IoNumber, point.IoType))
 		return 0, err
 	}
 	switch point.IoType {

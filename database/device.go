@@ -89,7 +89,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	return body, query.Error
 }
 
-func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
+func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device, fromPlugin bool) (*model.Device, error) {
 	var deviceModel *model.Device
 	query := d.DB.Where("uuid = ?", uuid).First(&deviceModel)
 	if query.Error != nil {
@@ -120,12 +120,15 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, nModel.PluginConfId, uuid)
-	d.Bus.RegisterTopic(t)
-	err := d.Bus.Emit(eventbus.CTX(), t, deviceModel)
-	if err != nil {
-		return nil, errors.New("error on device eventbus")
+	if !fromPlugin {
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, nModel.PluginConfId, uuid)
+		d.Bus.RegisterTopic(t)
+		err := d.Bus.Emit(eventbus.CTX(), t, deviceModel)
+		if err != nil {
+			return nil, errors.New("error on device eventbus")
+		}
 	}
+
 	return deviceModel, nil
 }
 

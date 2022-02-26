@@ -10,7 +10,7 @@ type DeviceDatabase interface {
 	GetDevice(uuid string, args Args) (*model.Device, error)
 	GetOneDeviceByArgs(args Args) (*model.Device, error)
 	CreateDevice(body *model.Device) (*model.Device, error)
-	UpdateDevice(uuid string, body *model.Device) (*model.Device, error)
+	UpdateDevice(uuid string, body *model.Device, fromPlugin bool) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
 	DropDevices() (bool, error)
 }
@@ -40,7 +40,7 @@ func (a *DeviceAPI) GetOneDeviceByArgs(ctx *gin.Context) {
 func (a *DeviceAPI) UpdateDevice(ctx *gin.Context) {
 	body, _ := getBODYDevice(ctx)
 	uuid := resolveID(ctx)
-	q, err := a.DB.UpdateDevice(uuid, body)
+	q, err := a.DB.UpdateDevice(uuid, body, false)
 	responseHandler(q, err, ctx)
 }
 

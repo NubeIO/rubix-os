@@ -45,7 +45,11 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	deviceUUID := body.DeviceUUID
 	body.Name = nameIsNil(body.Name)
-	existingName, existingAddrID := d.pointNameExists(body)
+	existingAddrID := false
+	existingName, _ := d.pointNameExists(body)
+	if body.AddressID != nil {
+		_, existingAddrID = d.pointNameExists(body)
+	}
 	if existingName {
 		eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
 		return nil, errors.New(eMsg)

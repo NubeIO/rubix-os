@@ -22,18 +22,40 @@ type Network struct {
 	PluginName  struct {
 		Type     string `json:"type" default:"string"`
 		Required bool   `json:"required" default:"true"`
-		Default  string `json:"default" default:"rubix"`
+		Default  string `json:"default" default:"edge28"`
 	} `json:"plugin_name"`
 }
 
 type Device struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
+	Host        struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"false"`
+		Options  string `json:"options" default:"192.168.15.10"`
+		Default  string `json:"default" default:"192.168.15.10"`
+	} `json:"host"`
+	Port struct {
+		Type     string `json:"type" default:"int"`
+		Required bool   `json:"required" default:"false"`
+		Options  int    `json:"options" default:"5000"`
+		Default  int    `json:"default" default:"5000"`
+	} `json:"port"`
 }
 
 type Point struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
+	IoNumber        struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"true"`
+		Options  []string `json:"options" default:"[\"UI1\",\"UI2\",\"UI3\",\"temp\",\"pulse\",\"motion\",\"light\",\"voltage\"]"`
+	} `json:"io_number"`
+	IoType struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"true"`
+		Options  []string `json:"options" default:"[\"THERMISTOR_10K_TYPE2\",\"UI2\",\"UI3\",\"temp\",\"pulse\",\"motion\",\"light\",\"voltage\"]"`
+	} `json:"io_type"`
 }
 
 func GetNetworkSchema() *Network {

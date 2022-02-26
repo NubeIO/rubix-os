@@ -17,7 +17,7 @@ func getDeviceDescriptionFromPayload(data string) *LoRaDeviceDescription {
 	if data == "!" {
 		return nil
 	}
-	if len(data) >= 2 {
+	if len(data) >= 4 {
 		sensorCode := data[2:4]
 		return GetLoRaDeviceDescription(sensorCode)
 	} else {
@@ -27,7 +27,7 @@ func getDeviceDescriptionFromPayload(data string) *LoRaDeviceDescription {
 }
 
 func checkPayloadLength(data string, dev *LoRaDeviceDescription) bool {
-	log.Println(data)
+	log.Println("lora-decoder:", data)
 	dl := len(data)
 	if dl <= 4 {
 		return false
@@ -63,7 +63,7 @@ func decodeCommonValues(payload *CommonValues, data string, sensor string) {
 
 func decodeID(data string) string {
 	id := data[0:8]
-	log.Println(id)
+	log.Println("lora-decoder:", id)
 	return id
 }
 

@@ -38,7 +38,7 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 
 	_, err = inst.db.WizardNewNetworkDevicePoint("lora", &net, &dev, nil)
 	if err != nil {
-		return "error: on flow-framework add lora serial network wizard", err
+		return "error: add lora serial network wizard", err
 	}
 
 	inst.Disable()

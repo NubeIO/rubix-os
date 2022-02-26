@@ -13,8 +13,8 @@ func (h *Handler) CreateNetwork(body *model.Network, fromPlugin bool) (*model.Ne
 	return q, nil
 }
 
-func (h *Handler) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
-	q, err := getDb().UpdateNetwork(uuid, body)
+func (h *Handler) UpdateNetwork(uuid string, body *model.Network, fromPlugin bool) (*model.Network, error) {
+	q, err := getDb().UpdateNetwork(uuid, body, fromPlugin)
 	if err != nil {
 		return nil, err
 	}

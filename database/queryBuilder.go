@@ -177,8 +177,8 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	if args.AddressUUID != nil {
 		query = query.Where("address_uuid = ?", *args.AddressUUID)
 	}
-	if args.IoId != nil {
-		query = query.Where("io_id = ?", *args.IoId)
+	if args.IoNumber != nil {
+		query = query.Where("io_number = ?", *args.IoNumber)
 	}
 	if args.AddressID != nil {
 		query = query.Where("address_id = ?", *args.AddressID)

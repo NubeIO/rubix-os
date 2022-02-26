@@ -15,10 +15,10 @@ const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
 
 const pluginType = "protocol"
-const allowConfigWrite = false
-const isNetwork = false
+const allowConfigWrite = true
+const isNetwork = true
 const maxAllowedNetworks = 1
-const networkType = "ip"
+const networkType = "edge28"
 const transportType = "ip" //serial, ip
 
 // Instance is plugin instance

@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"errors"
-
 	"github.com/NubeIO/flow-framework/api"
 	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
@@ -33,12 +32,18 @@ func (inst *Instance) SerialOpen() (SerialSetting, error) {
 		return s, err
 	}
 	if net.SerialPort == nil || net.SerialBaudRate == nil {
-		return s, errors.New("serial_port & serial_baud_rate required to open")
+		return s, errors.New("lora-serial: serial_port & serial_baud_rate required to open")
 	}
 	s.SerialPort = *net.SerialPort
 	s.BaudRate = int(*net.SerialBaudRate)
 
 	_, err = s.open()
+	if err != nil {
+		inst.networkUpdateErr(net.UUID, s.SerialPort, err)
+	} else {
+		inst.networkUpdate(net.UUID)
+	}
+
 	return s, err
 }
 
@@ -69,7 +74,7 @@ func (s *SerialSetting) open() (connected bool, err error) {
 			return false, err
 		}
 	}
-	log.Info("LORA: connecting to port: ", portName)
+	log.Info("lora-serial: connecting to port: ", portName)
 	m := &serial.Mode{
 		BaudRate: baudRate,
 		Parity:   parity,
@@ -87,7 +92,7 @@ func (s *SerialSetting) open() (connected bool, err error) {
 	}
 	Port = port
 	s.Connected = true
-	log.Info("LORA: Connected to serial port: ", " ", portName, " ", "connected: ", " ", s.Connected)
+	log.Info("lora-serial: Connected to serial port: ", " ", portName, " ", "connected: ", " ", s.Connected)
 	return s.Connected, nil
 }
 
@@ -95,7 +100,7 @@ func disconnect() error {
 	if Port != nil {
 		err := Port.Close()
 		if err != nil {
-			log.Error("LORA: err on trying to close the port")
+			log.Error("lora-serial: err on trying to close the port")
 			return err
 		}
 	}
