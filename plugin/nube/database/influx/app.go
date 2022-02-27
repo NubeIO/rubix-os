@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	influxmodel "github.com/NubeIO/flow-framework/plugin/nube/database/influx/model"
+	"github.com/NubeIO/flow-framework/model"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -13,36 +13,49 @@ func (i *Instance) syncInflux() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	for _, integration := range integrations {
-		influxSetting := new(InfluxSetting)
-		influxSetting.ServerURL = "http://" + integration.IP + ":" + integration.PORT
-		influxSetting.AuthToken = integration.Token
-		isc := New(influxSetting)
-		histories, err := i.db.GetHistoriesForSync()
-		if err != nil {
-			return false, err
+	if len(integrations) == 0 {
+		log.Info("InfluxDB can't be registered, integration details missing.")
+		return true, nil
+	}
+	histories, err := i.db.GetHistoriesForSync()
+	if err != nil {
+		return false, err
+	}
+	lastSyncId := 0
+	producerUuid := ""
+	var historyTags []*model.HistoryInfluxTag
+	for _, history := range histories {
+		if lastSyncId < history.ID {
+			lastSyncId = history.ID
 		}
-		for _, h := range histories {
-			var hist influxmodel.HistPayload
-			hist.ID = h.ID
-			hist.UUID = h.UUID
-			hist.Timestamp = h.Timestamp
-			hist.Value = h.Value
-			isc.WriteHist(hist)
-		}
-		historyCount := len(histories)
-		if historyCount > 0 {
-			_, err := i.db.UpdateHistoryInfluxLogLastSyncId(histories[historyCount-1].ID)
+		if producerUuid != history.UUID {
+			producerUuid = history.UUID
+			historyTags, err = i.db.GetHistoryInfluxTags(producerUuid)
 			if err != nil {
 				return false, err
 			}
-			log.Info(fmt.Sprintf("Stored %v rows on %v", historyCount, path))
-		} else {
-			log.Info("Nothing to store, no new records")
+		}
+		for _, historyTag := range historyTags {
+			tags := tagsHistory(historyTag)
+			fields := fieldsHistory(history)
+			for _, integration := range integrations {
+				influxSetting := new(InfluxSetting)
+				influxSetting.ServerURL = fmt.Sprintf("http://%s:%s", integration.IP, integration.PORT)
+				influxSetting.AuthToken = integration.Token
+				isc := New(influxSetting)
+				isc.WriteHistories(tags, fields, history.Timestamp)
+			}
 		}
 	}
-	if len(integrations) == 0 {
-		log.Info("InfluxDB can't be registered, integration details missing.")
+	historyCount := len(histories)
+	if historyCount > 0 {
+		_, err := i.db.UpdateHistoryInfluxLogLastSyncId(lastSyncId)
+		if err != nil {
+			return false, err
+		}
+		log.Info(fmt.Sprintf("Stored %v rows on %v", historyCount, path))
+	} else {
+		log.Info("Nothing to store, no new records")
 	}
 	return true, nil
 }

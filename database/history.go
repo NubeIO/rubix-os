@@ -22,7 +22,7 @@ func (d *GormDatabase) GetHistoriesForSync(args api.Args) ([]*model.History, err
 	var historiesModel []*model.History
 	query := d.DB.Where("id > (?)", d.DB.Table("history_influx_logs").
 		Select("IFNULL(MAX(last_sync_id),0)"))
-	query.Order("id ASC").Find(&historiesModel)
+	query.Order("uuid ASC").Find(&historiesModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

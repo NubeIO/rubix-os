@@ -4,16 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	influxmodel "github.com/NubeIO/flow-framework/plugin/nube/database/influx/model"
+	"github.com/NubeIO/flow-framework/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/sirupsen/logrus"
+	"time"
 )
 
 type InfluxSetting struct {
-	Org       string
-	Bucket    string
-	ServerURL string
-	AuthToken string
+	Org         string
+	Bucket      string
+	ServerURL   string
+	AuthToken   string
+	Measurement string
 }
 
 func New(s *InfluxSetting) *InfluxSetting {
@@ -26,24 +28,28 @@ func New(s *InfluxSetting) *InfluxSetting {
 	if s.ServerURL == "" {
 		s.ServerURL = "http://localhost:8086"
 	}
+	if s.Measurement == "" {
+		s.Measurement = "points"
+	}
 	return &InfluxSetting{
-		Org:       s.Org,
-		Bucket:    s.Bucket,
-		ServerURL: s.ServerURL,
-		AuthToken: s.AuthToken,
+		Org:         s.Org,
+		Bucket:      s.Bucket,
+		ServerURL:   s.ServerURL,
+		AuthToken:   s.AuthToken,
+		Measurement: s.Measurement,
 	}
 }
 
-// WriteHist function writes histories
-func (i *InfluxSetting) WriteHist(t influxmodel.HistPayload) {
+// WriteHistories function writes histories
+func (i *InfluxSetting) WriteHistories(tags map[string]string, fields map[string]interface{}, ts time.Time) {
 	client := influxdb2.NewClient(i.ServerURL, i.AuthToken)
 	writeAPI := client.WriteAPI(i.Org, i.Bucket)
-	p := influxdb2.NewPoint(
-		measurementHist(),
-		tagsHist(t),
-		fieldsHist(t),
-		t.Timestamp)
-	writeAPI.WritePoint(p)
+	point := influxdb2.NewPoint(
+		i.Measurement,
+		tags,
+		fields,
+		ts)
+	writeAPI.WritePoint(point)
 	writeAPI.Flush()
 	client.Close()
 }
@@ -71,18 +77,26 @@ func (i *InfluxSetting) Read(measurement string) [][]byte {
 	return temperaturesArray
 }
 
-func tagsHist(t influxmodel.HistPayload) map[string]string {
+func tagsHistory(ht *model.HistoryInfluxTag) map[string]string {
 	newMap := make(map[string]string)
-	newMap["uuid"] = t.UUID
+	newMap["clint_id"] = ht.ClientId
+	newMap["client_name"] = ht.ClientName
+	newMap["site_id"] = ht.SiteId
+	newMap["site_name"] = ht.SiteName
+	newMap["device_id"] = ht.DeviceId
+	newMap["device_name"] = ht.DeviceName
+	newMap["rubix_point_uuid"] = ht.RubixPointUUID
+	newMap["rubix_point_name"] = ht.RubixPointName
+	newMap["rubix_device_uuid"] = ht.RubixDeviceUUID
+	newMap["rubix_device_name"] = ht.RubixDeviceName
+	newMap["rubix_network_uuid"] = ht.RubixNetworkUUID
+	newMap["rubix_network_name"] = ht.RubixNetworkName
 	return newMap
 }
 
-func fieldsHist(t influxmodel.HistPayload) map[string]interface{} {
+func fieldsHistory(t *model.History) map[string]interface{} {
 	newMap := make(map[string]interface{})
+	newMap["id"] = t.ID
 	newMap["value"] = t.Value
 	return newMap
-}
-
-func measurementHist() string {
-	return "hist"
 }
