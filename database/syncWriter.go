@@ -70,7 +70,7 @@ func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.Sync
 			return nil
 		}
 		point := model.Point{Priority: body.Priority}
-		// TODO: change into below commented section
+		// TODO: change this section by below commented section
 		producer, _ := d.GetProducer(writerClone.ProducerUUID, api.Args{})
 		_, err = d.PointWrite(producer.ProducerThingUUID, &point, true)
 		// Currently, writerClone.WriterThingUUID has not valid `WriterThingUUID` on old deployments
@@ -83,7 +83,11 @@ func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.Sync
 		if err != nil {
 			return nil
 		}
-		err = d.ScheduleWrite(writerClone.WriterThingUUID, body.Schedule)
+		// TODO: change this section by below commented section
+		producer, _ := d.GetProducer(writerClone.ProducerUUID, api.Args{})
+		err = d.ScheduleWrite(producer.ProducerThingUUID, body.Schedule)
+		// Currently, writerClone.WriterThingUUID has not valid `WriterThingUUID` on old deployments
+		// err = d.ScheduleWrite(writerClone.WriterThingUUID, body.Schedule)
 		return err
 	} else {
 		return errors.New("no match writer thing class")
