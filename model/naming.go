@@ -119,13 +119,17 @@ var CommonFaultCode = struct {
 	Offline          string
 	Ok               string
 	PointError       string
+	NetworkError     string
+	DeviceError      string
 }{
 	ConfigError:      "configError",
 	SystemError:      "systemError",
 	PluginNotEnabled: "pluginNotEnabled",
 	Offline:          "offline",
 	Ok:               "ok",
-	PointError:       "point error",
+	PointError:       "pointError",
+	NetworkError:     "NetworkError",
+	DeviceError:      "DeviceError",
 }
 
 var CommonFaultMessage = struct {

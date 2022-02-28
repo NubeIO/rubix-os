@@ -156,7 +156,7 @@ type Point struct {
 	ObjectType           string    `json:"object_type,omitempty"`     //binaryInput, coil, if type os input don't return the priority array
 	DataType             string    `json:"data_type,omitempty"`       //int16, uint16, float32
 	ObjectEncoding       string    `json:"object_encoding,omitempty"` //BEB_LEW bebLew
-	IoID                 string    `json:"io_id,omitempty"`           //DI1,UI1,AO1, temp, pulse, motion
+	IoNumber             string    `json:"io_number,omitempty"`       //DI1,UI1,AO1, temp, pulse, motion
 	IoType               string    `json:"io_type,omitempty"`         //0-10dc, 0-40ma, thermistor
 	AddressID            *int      `json:"address_id"`                // for example a modbus address or bacnet address
 	AddressLength        *int      `json:"address_length"`            // for example a modbus address offset

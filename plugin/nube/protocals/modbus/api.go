@@ -87,23 +87,6 @@ func supportedObjects() *utils.Array {
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
-	mux.GET(help, func(ctx *gin.Context) {
-		var h T2
-		//h.Enabled = model.CommonNaming
-		//a1 := []string{fmt.Sprintf("http://0.0.0.0:1660/api/plugins/api/%s%s" ,name, help), "GET", "POST", "PATCH"}
-		//a1 := []string{fmt.Sprintf("http://0.0.0.0:1660/api/plugins/api/%s%s" ,name, help), "GET", "POST", "PATCH"}
-		//h.Capabilities.Help = a1
-		h.ObjectType.Options = supportedObjects()
-		h.ObjectType.Type = "array"
-		h.ObjectType.Required = true
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		} else {
-			ctx.JSON(http.StatusOK, h)
-			return
-		}
-	})
 	mux.GET(listSerial, func(ctx *gin.Context) {
 		serial, err := i.listSerialPorts()
 		if err != nil {

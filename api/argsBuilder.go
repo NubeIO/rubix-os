@@ -136,8 +136,8 @@ func buildPointArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.AddressUUID); ok {
 		args.AddressUUID = &value
 	}
-	if value, ok := ctx.GetQuery(aType.IoId); ok {
-		args.IoId = &value
+	if value, ok := ctx.GetQuery(aType.IoNumber); ok {
+		args.IoNumber = &value
 	}
 	if value, ok := ctx.GetQuery(aType.AddressID); ok {
 		args.AddressID = &value

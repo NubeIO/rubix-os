@@ -25,8 +25,8 @@ func (h *Handler) CreateDevice(body *model.Device) (*model.Device, error) {
 	return q, nil
 }
 
-func (h *Handler) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
-	q, err := getDb().UpdateDevice(uuid, body)
+func (h *Handler) UpdateDevice(uuid string, body *model.Device, fromPlugin bool) (*model.Device, error) {
+	q, err := getDb().UpdateDevice(uuid, body, fromPlugin)
 	if err != nil {
 		return nil, err
 	}

@@ -42,8 +42,10 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		if err != nil {
 			log.Info(err, "ERROR ON ping server")
 			ctx.JSON(http.StatusBadRequest, err)
+			return
 		} else {
 			ctx.JSON(http.StatusOK, p)
+			return
 		}
 	})
 	mux.GET("/edge/read/ui/all", func(ctx *gin.Context) {
@@ -53,8 +55,10 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		if err != nil {
 			log.Info(err, "ERROR ON ping server")
 			ctx.JSON(http.StatusBadRequest, err)
+			return
 		} else {
 			ctx.JSON(http.StatusOK, p)
+			return
 		}
 	})
 	mux.GET("/edge/read/di/all", func(ctx *gin.Context) {

@@ -153,7 +153,7 @@ func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*mod
 	return body, nil
 }
 
-func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
+func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugin bool) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.DB.Where("uuid = ?", uuid).First(&networkModel)
 	if query.Error != nil {
@@ -168,11 +168,13 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, networkModel.PluginConfId, networkModel.UUID)
-	d.Bus.RegisterTopic(t)
-	err := d.Bus.Emit(eventbus.CTX(), t, networkModel)
-	if err != nil {
-		return nil, errors.New("error on network eventbus")
+	if !fromPlugin {
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, networkModel.PluginConfId, networkModel.UUID)
+		d.Bus.RegisterTopic(t)
+		err := d.Bus.Emit(eventbus.CTX(), t, networkModel)
+		if err != nil {
+			return nil, errors.New("error on network eventbus")
+		}
 	}
 	return networkModel, nil
 

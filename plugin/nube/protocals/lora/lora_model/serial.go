@@ -20,9 +20,10 @@ type DescriptionStruct struct {
 }
 
 type TransportTypeStruct struct {
-	Type     string `json:"type" default:"string"`
-	Required bool   `json:"required" default:"true"`
-	Default  string `json:"default" default:"serial"`
+	Type     string   `json:"type" default:"array"`
+	Required bool     `json:"required" default:"true"`
+	Options  []string `json:"options" default:"[\"serial\"]"`
+	Default  string   `json:"default" default:"serial"`
 }
 
 type EnableStruct struct {
@@ -40,15 +41,15 @@ type Network struct {
 	} `json:"plugin_name"`
 	TransportType TransportTypeStruct `json:"transport_type"`
 	SerialPort    struct {
-		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"true"`
-		Min      int    `json:"min" default:"3"`
-		Max      int    `json:"max" default:"20"`
-		Default  string `json:"default" default:"/dev/ttyAMA0"`
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"true"`
+		Options  []string `json:"options" default:"[\"/dev/ttyAMA0\",\"/dev/ttyUSB0\"]"`
+		Default  string   `json:"default" default:"/dev/ttyAMA0"`
 	} `json:"serial_port"`
 	SerialBaudRate struct {
-		Type     string `json:"type" default:"int"`
+		Type     string `json:"type" default:"array"`
 		Required bool   `json:"required" default:"true"`
+		Options  []int  `json:"options" default:"[38400]"`
 		Default  int    `json:"default" default:"38400"`
 	} `json:"serial_baud_rate"`
 }
@@ -56,7 +57,6 @@ type Network struct {
 type Device struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
-
 	AddressUUID struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"true"`
@@ -65,11 +65,10 @@ type Device struct {
 		DisplayName string `json:"display_name" default:"Address UUID"`
 	} `json:"address_uuid"`
 	Model struct {
-		Type        string `json:"type" default:"string"`
-		Required    bool   `json:"required" default:"true"`
-		Min         int    `json:"min" default:"4"`
-		Max         int    `json:"max" default:"6"`
-		DisplayName string `json:"display_name" default:"THLM"`
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"true"`
+		Options  []string `json:"options" default:"[\"THLM\",\"THL\",\"TH\",\"MicroEdge\",\"ZipHydroTap\"]"`
+		Default  string   `json:"default" default:"THLM"`
 	} `json:"model"`
 	Enable EnableStruct `json:"enable"`
 }
@@ -84,11 +83,10 @@ type Point struct {
 		Max         int    `json:"max" default:"8"`
 		DisplayName string `json:"display_name" default:"Address UUID"`
 	} `json:"address_uuid"`
-	IoId struct {
-		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"DI1\",\"UI1\",\"AO1\",\"temp\",\"pulse\",\"motion\",\"light\"]"`
-	} `json:"io_id"`
+	IoNumber struct {
+		Type     string `json:"type" default:"array"`
+		Required bool   `json:"required" default:"true"`
+	} `json:"io_number"`
 	IoType struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
