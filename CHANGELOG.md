@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.4.0](https://github.com/NubeIO/flow-framework/tree/v0.4.0) (2022-02-28)
+- Supporting older schedule deployment
+
 ## [v0.3.9](https://github.com/NubeIO/flow-framework/tree/v0.3.9) (2022-02-28)
 - Added back GET/PATCH by point's name
 
