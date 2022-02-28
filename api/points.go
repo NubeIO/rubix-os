@@ -14,6 +14,8 @@ type PointDatabase interface {
 	GetOnePointByArgs(args Args) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
 	DropPoints() (bool, error)
+	GetPointByName(networkName, deviceName, pointName string) (*model.Point, error)
+	PointWriteByName(networkName, deviceName, pointName string, body *model.Point, fromPlugin bool) (*model.Point, error)
 }
 type PointAPI struct {
 	DB PointDatabase
@@ -67,4 +69,26 @@ func (a *PointAPI) DeletePoint(ctx *gin.Context) {
 func (a *PointAPI) DropPoints(ctx *gin.Context) {
 	q, err := a.DB.DropPoints()
 	responseHandler(q, err, ctx)
+}
+
+func (a *PointAPI) GetPointByName(ctx *gin.Context) {
+	networkName, deviceName, pointName := networkDevicePointNames(ctx)
+	q, err := a.DB.GetPointByName(networkName, deviceName, pointName)
+	responseHandler(q, err, ctx)
+}
+
+func (a *PointAPI) PointWriteByName(ctx *gin.Context) {
+	body, _ := getBODYPoint(ctx)
+	networkName, deviceName, pointName := networkDevicePointNames(ctx)
+	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body, false)
+	responseHandler(q, err, ctx)
+}
+
+func networkDevicePointNames(ctx *gin.Context) (networkName, deviceName, pointName string) {
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	networkName = ctx.DefaultQuery(aType.NetworkName, aDefault.NetworkName)
+	deviceName = ctx.DefaultQuery(aType.DeviceName, aDefault.DeviceName)
+	pointName = ctx.DefaultQuery(aType.PointName, aDefault.PointName)
+	return networkName, deviceName, pointName
 }
