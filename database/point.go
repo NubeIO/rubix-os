@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"reflect"
 	"time"
 
@@ -58,6 +59,10 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", utils.IntIsNil(body.AddressID))
 		return nil, errors.New(eMsg)
 	}
+	if body.Decimal == nil {
+		body.Decimal = nils.NewUint32(2)
+	}
+
 	obj, err := checkObjectType(body.ObjectType)
 	if err != nil {
 		return nil, err

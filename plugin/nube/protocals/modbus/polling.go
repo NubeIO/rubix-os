@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
@@ -104,7 +103,6 @@ func (i *Instance) PollingTCP(p polling) error {
 						if write { //IS WRITE
 							//get existing
 							if !utils.BoolIsNil(pnt.InSync) {
-								fmt.Println("WRITE", pnt.Name)
 								_, responseValue, err := networkRequest(mbClient, pnt, true)
 								if err != nil {
 									_, err = i.pointUpdateErr(pnt.UUID, err)

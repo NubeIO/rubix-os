@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/bugs"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/utilstime"
 	"reflect"
@@ -25,9 +26,9 @@ func (inst *Instance) networkUpdate(uuid string) (*model.Point, error) {
 	network.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	network.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 	network.CommonFault.LastOk = time.Now().UTC()
-	_, _ = inst.db.UpdateNetwork(uuid, &network, true)
+	_, err = inst.db.UpdateNetwork(uuid, &network, true)
 	if err != nil {
-		log.Error("lora-app networkUpdate()", err)
+		log.Error(bugs.DebugPrint(name, inst.networkUpdate, err))
 		return nil, err
 	}
 	return nil, nil
@@ -41,9 +42,9 @@ func (inst *Instance) networkUpdateErr(uuid, port string, err error) (*model.Poi
 	network.CommonFault.MessageCode = model.CommonFaultCode.NetworkError
 	network.CommonFault.Message = fmt.Sprintf(" port: %s message: %s", port, err.Error())
 	network.CommonFault.LastFail = time.Now().UTC()
-	_, _ = inst.db.UpdateNetwork(uuid, &network, true)
+	_, err = inst.db.UpdateNetwork(uuid, &network, true)
 	if err != nil {
-		log.Error("lora-app networkUpdateErr()", err)
+		log.Error(bugs.DebugPrint(name, inst.networkUpdate, err))
 		return nil, err
 	}
 	return nil, nil
@@ -57,7 +58,7 @@ func (inst *Instance) deviceUpdate(uuid string) (*model.Point, error) {
 	device.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	device.CommonFault.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
 	device.CommonFault.LastFail = time.Now().UTC()
-	_, _ = inst.db.UpdateDevice(uuid, &device, true)
+	_, err = inst.db.UpdateDevice(uuid, &device, true)
 	if err != nil {
 		log.Error("lora-app deviceUpdateErr()", err)
 		return nil, err
@@ -73,7 +74,7 @@ func (inst *Instance) deviceUpdateErr(uuid, addressUUID string, err error) (*mod
 	device.CommonFault.MessageCode = model.CommonFaultCode.DeviceError
 	device.CommonFault.Message = fmt.Sprintf(" error: %s", err.Error())
 	device.CommonFault.LastFail = time.Now().UTC()
-	_, _ = inst.db.UpdateDevice(uuid, &device, true)
+	_, err = inst.db.UpdateDevice(uuid, &device, true)
 	if err != nil {
 		log.Error("lora-app deviceUpdateErr()", err)
 		return nil, err

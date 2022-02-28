@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/utilstime"
 	"time"
 
 	"github.com/NubeIO/flow-framework/model"
@@ -15,13 +17,13 @@ func (i *Instance) pointUpdate(uuid string, value float64) (*model.Point, error)
 	point.CommonFault.InFault = false
 	point.CommonFault.MessageLevel = model.MessageLevel.Info
 	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
-	point.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
+	point.CommonFault.Message = fmt.Sprintf("last-update: %s", utilstime.TimeStamp())
 	point.CommonFault.LastOk = time.Now().UTC()
 	var pri model.Priority
 	pri.P16 = &value
 	point.Priority = &pri
 	point.InSync = utils.NewTrue()
-	_, _ = i.db.UpdatePointValue(uuid, &point, true)
+	_, err = i.db.UpdatePointValue(uuid, &point, true)
 	if err != nil {
 		log.Error("MODBUS UPDATE POINT UpdatePointValue()", err)
 		return nil, err
@@ -37,7 +39,7 @@ func (i *Instance) pointUpdateErr(uuid string, err error) (*model.Point, error) 
 	point.CommonFault.MessageCode = model.CommonFaultCode.PointError
 	point.CommonFault.Message = err.Error()
 	point.CommonFault.LastFail = time.Now().UTC()
-	_, _ = i.db.UpdatePoint(uuid, &point, true)
+	_, err = i.db.UpdatePoint(uuid, &point, true)
 	if err != nil {
 		log.Error("MODBUS UPDATE POINT pointUpdateErr()", err)
 		return nil, err

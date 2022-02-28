@@ -19,6 +19,7 @@ import (
 )
 
 const defaultInterval = 2500 * time.Millisecond //default polling is 2.5 sec
+const pollName = "polling"
 
 type polling struct {
 	enable        bool
@@ -34,56 +35,65 @@ var getUI *edgerest.UI
 var getDI *edgerest.DI
 
 //TODO add COV WriteValueOnceSync and InSync
-func (i *Instance) processWrite(pnt *model.Point, value float64, rest *edgerest.RestClient, pollCount float64, isUO bool) (float64, error) {
-	//!utils.BoolIsNil(pnt.WriteValueOnceSync)
+func (i *Instance) processWrite(pnt *model.Point, value float64, rest *edgerest.RestClient, pollCount uint64, isUO bool) (float64, error) {
+	rsyncWrite := pollCount % 10
+	//rsyncWrite is just a way to make sure the outputs on the device are not out of sync
+	// and rsync on first poll loop
 	var err error
-	if isUO {
-		_, err = rest.WriteUO(pnt.IoNumber, value)
+	if !utils.BoolIsNil(pnt.InSync) || rsyncWrite == 0 || pollCount == 1 {
+		if pollCount == 1 {
+			log.Infof("edge28-polling: SYNC on first poll wrote IO %s: %v\n", pnt.IoNumber, value)
+		}
+		if rsyncWrite == 0 {
+			log.Infof("edge28-polling: rsyncWrite wrote IO %s: %v\n", pnt.IoNumber, value)
+		}
+		if isUO {
+			_, err = rest.WriteUO(pnt.IoNumber, value)
+			_, err = i.pointUpdateValue(pnt.UUID, value)
+		} else {
+			_, err = rest.WriteDO(pnt.IoNumber, value)
+			_, err = i.pointUpdateValue(pnt.UUID, value)
+		}
+		if err != nil {
+			log.Errorf("edge28-polling: failed to write IO %s:  value:%f error:%v\n", pnt.IoNumber, value, err)
+			_, err := i.pointUpdateErr(pnt.UUID, err)
+			return 0, err
+		} else {
+			log.Infof("edge28-polling: wrote IO %s: %v\n", pnt.IoNumber, value)
+			return value, err
+		}
 	} else {
-		_, err = rest.WriteDO(pnt.IoNumber, value)
-	}
-	if err != nil {
-		log.Errorf("edge-28: failed to write IO %s:  value:%f error:%v\n", pnt.IoNumber, value, err)
-		return 0, err
-	} else {
-		log.Infof("edge-28: wrote IO %s: %v\n", pnt.IoNumber, value)
+		log.Infof("edge28-polling: point is in sync %s: %v\n", pnt.IoNumber, value)
 		return value, err
 	}
+
 }
 
-func (i *Instance) processRead(pnt *model.Point, value float64, pollCount float64) (float64, error) {
-	cov := utils.Float64IsNil(pnt.COV) //TODO add in point scaling to get COV to work correct (as in scale temp or 0-10)
-	covEvent, _ := utils.COV(value, utils.Float64IsNil(pnt.PresentValue), cov)
+func (i *Instance) processRead(pnt *model.Point, readValue float64, pollCount float64) (float64, error) {
+	covEvent, _ := utils.COV(readValue, utils.Float64IsNil(pnt.PresentValue), 0) //Remove this as it's done in the main point db file
 	if pollCount == 1 || !utils.BoolIsNil(pnt.InSync) {
-		pnt.InSync = utils.NewTrue()
-		pnt.Priority.P16 = utils.NewFloat64(value)
-		_, err := i.db.UpdatePointValue(pnt.UUID, pnt, false)
+		_, err := i.pointUpdateValue(pnt.UUID, readValue)
 		if err != nil {
-			log.Errorf("edge-28: READ UPDATE POINT %s: %v\n", pnt.IoNumber, value)
-			return value, err
+			log.Errorf("edge28-polling: READ UPDATE POINT %s: %v\n", pnt.IoNumber, readValue)
+			_, err := i.pointUpdateErr(pnt.UUID, err)
+			return readValue, err
 		}
 		if utils.BoolIsNil(pnt.InSync) {
-			log.Infof("edge-28: READ POINT SYNC %s: %v\n", pnt.IoNumber, value)
+			log.Infof("edge28-polling: READ POINT SYNC %s: %v\n", pnt.IoNumber, readValue)
 		} else {
-			log.Infof("edge-28: READ ON START %s: %v\n", pnt.IoNumber, value)
+			log.Infof("edge28-polling: READ ON START %s: %v\n", pnt.IoNumber, readValue)
 		}
 	} else if covEvent {
-		pnt.InSync = utils.NewTrue()
-		fmt.Println("processRead()  value:", value)
-		fmt.Println("pnt.Priority.P16 - 1", *(pnt.Priority.P16))
-		pnt.Priority.P16 = utils.NewFloat64(value)
-		fmt.Printf("%+v\n", pnt)
-		fmt.Printf("%+v\n", pnt.Priority.P16)
-		fmt.Println("pnt.Priority.P16 - 2", *(pnt.Priority.P16))
-		_, err := i.db.UpdatePointValue(pnt.UUID, pnt, true)
+		_, err := i.pointUpdateValue(pnt.UUID, readValue)
 		if err != nil {
-			log.Errorf("edge-28: READ UPDATE POINT %s: %v\n", pnt.IoNumber, value)
-			return value, err
+			log.Errorf("edge28-polling READ UPDATE POINT %s: %v\n", pnt.IoNumber, readValue)
+			_, err := i.pointUpdateErr(pnt.UUID, err)
+			return readValue, err
 		} else {
-			log.Infof("edge-28: READ ON START %s: %v\n", pnt.IoNumber, value)
+			log.Infof("edge28-polling: READ ON START %s: %v\n", pnt.IoNumber, readValue)
 		}
 	}
-	return value, nil
+	return readValue, nil
 }
 
 func (i *Instance) polling(p polling) error {
@@ -110,31 +120,27 @@ func (i *Instance) polling(p polling) error {
 		}
 		if len(nets) == 0 {
 			time.Sleep(15000 * time.Millisecond)
-			log.Info("edge-28: NO NETWORKS FOUND")
+			log.Info("edge28-polling: NO NETWORKS FOUND")
 		}
-
+		//log.Error(bugs.DebugPrint(name+pollName, i.polling, err, "hey", "whats", "up"))
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
-				log.Infof("edge-28: LOOP COUNT: %v\n", counter)
+				log.Infof("edge28-polling: LOOP COUNT: %v\n", counter)
 				counter++
-
 				for _, dev := range net.Devices { //DEVICES
 					if err != nil {
-						log.Errorf("edge-28: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
+						log.Errorf("edge28-polling: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
 					}
-					fmt.Println(dev.CommonIP.Host, dev.CommonIP.Port)
 					rest := edgerest.NewNoAuth(dev.CommonIP.Host, dev.CommonIP.Port)
 					getUI, err = rest.GetUIs()
 					getDI, err = rest.GetDIs()
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
-
 					for _, pnt := range dev.Points { //POINTS
 						var rv float64
 						var readValStruct interface{}
 						var readValType string
 						var wv float64
-						fmt.Println(pnt.IoNumber)
 						switch pnt.IoNumber {
 						//OUTPUTS
 						case pointList.R1, pointList.R2, pointList.DO1, pointList.DO2, pointList.DO3, pointList.DO4, pointList.DO5:
@@ -142,16 +148,12 @@ func (i *Instance) polling(p polling) error {
 							if pnt.PresentValue != nil {
 								wv, err = DigitalToGPIOValue(*(pnt.PresentValue), false)
 								if err != nil {
-									log.Errorf("edge-28: invalid input to  DigitalToGPIOValue")
+									log.Errorf("edge28-polling: invalid input to  DigitalToGPIOValue")
 									continue
 								}
-								fmt.Println("Relay/DO to processWrite():", wv)
-								_, err = i.processWrite(pnt, wv, rest, counter, false)
+								_, err = i.processWrite(pnt, wv, rest, uint64(counter), false)
 							}
-
 						case pointList.UO1, pointList.UO2, pointList.UO3, pointList.UO4, pointList.UO5, pointList.UO6, pointList.UO7:
-							//fmt.Println(*(pnt))
-							//fmt.Printf("%+v\n", *(pnt))
 							//_, err := i.db.UpdatePointValue(pnt.UUID, pnt, false) //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
 							if pnt.PresentValue != nil {
 								wv, err = GetGPIOValueForUOByType(pnt)
@@ -159,13 +161,12 @@ func (i *Instance) polling(p polling) error {
 									log.Error(err)
 									continue
 								}
-								_, err = i.processWrite(pnt, wv, rest, counter, true)
+								_, err = i.processWrite(pnt, wv, rest, uint64(counter), true)
 								if err != nil {
 									log.Error(err)
 									continue
 								}
 							}
-
 						//INPUTS
 						case pointList.DI1, pointList.DI2, pointList.DI3, pointList.DI4, pointList.DI5, pointList.DI6, pointList.DI7:
 							if getDI == nil {
@@ -173,16 +174,16 @@ func (i *Instance) polling(p polling) error {
 							}
 							readValStruct, readValType, err = utils.GetStructFieldByString(getDI.Val, pnt.IoNumber)
 							if err != nil {
-								log.Error(err)
+								log.Error("edge28-polling: ", err)
 								continue
 							} else if readValType != "struct" {
-								log.Error("edge-28: IoNumber does not match any points from Edge28")
+								log.Error("edge28-polling: IoNumber does not match any points from Edge28")
 								continue
 							}
 							rv = reflect.ValueOf(readValStruct).FieldByName("Val").Float()
 							rv, err = GetValueFromGPIOForUIByType(pnt, rv)
 							if err != nil {
-								log.Error(err)
+								log.Error("edge28-polling: ", err)
 								continue
 							}
 							_, err = i.processRead(pnt, rv, counter)
@@ -191,23 +192,16 @@ func (i *Instance) polling(p polling) error {
 							if getUI == nil {
 								continue
 							}
-							fmt.Println("POINT")
-							fmt.Printf("%+v\n", *(pnt))
 							readValStruct, readValType, err = utils.GetStructFieldByString(getUI.Val, pnt.IoNumber)
-							fmt.Println("readValStruct", readValStruct)
-							fmt.Println("readValType", readValType)
-							//fmt.Printf("%+v\n", *(pnt))
 							if err != nil {
 								log.Error(err)
 								continue
 							} else if readValType != "struct" {
-								log.Error("edge-28: IoNumber does not match any points from Edge28")
+								log.Error("edge28-polling: IoNumber does not match any points from Edge28")
 								continue
 							}
 							rv = reflect.ValueOf(readValStruct).FieldByName("Val").Float()
-							fmt.Println("rv1", rv)
 							rv, err = GetValueFromGPIOForUIByType(pnt, rv)
-							fmt.Println("rv2", rv)
 							if err != nil {
 								log.Error(err)
 								continue
@@ -239,15 +233,9 @@ func GetGPIOValueForUOByType(point *model.Point) (float64, error) {
 		err = errors.New(fmt.Sprintf("edge-28: skipping %v, IoType %v not recognized.", point.IoNumber, point.IoType))
 		return 0, err
 	}
-	//fmt.Println("point")
-	//fmt.Printf("%+v\n", point)
-	//fmt.Println("point.Priority")
-	//fmt.Printf("%+v\n", point.Priority)
-	//fmt.Println("point.Priority.P16")
-	//fmt.Printf("%+v\n", point.Priority.P16)
 	//wv = *(point.PresentValue)   //TODO: use PresentValue instead of Priority 16 value
 	if numbers.Float64PointerIsNil(point.PresentValue) {
-		return 0, errors.New("no value to write.")
+		return 0, errors.New("edge28-polling: no value to write")
 	} else {
 		result = *(point.PresentValue)
 	}
@@ -260,7 +248,7 @@ func GetGPIOValueForUOByType(point *model.Point) (float64, error) {
 	case UOTypes.VOLTSDC:
 		result = edge28.VoltageToGPIOValue(result)
 	default:
-		err = errors.New("UO IoType is not a recognized type")
+		err = errors.New("edge28-polling: UO IoType is not a recognized type")
 	}
 	if err != nil {
 		return 0, err
@@ -275,7 +263,7 @@ func GetValueFromGPIOForUIByType(point *model.Point, value float64) (float64, er
 	var result float64
 
 	if !utils.ExistsInStrut(UITypes, point.IoType) {
-		err = errors.New(fmt.Sprintf("edge-28: skipping %v, IoType %v not recognized.", point.IoNumber, point.IoType))
+		err = errors.New(fmt.Sprintf("edge28-polling: skipping %v, IoType %v not recognized.", point.IoNumber, point.IoType))
 		return 0, err
 	}
 	switch point.IoType {
@@ -307,15 +295,13 @@ func GetValueFromGPIOForUIByType(point *model.Point, value float64) (float64, er
 		resistance := edge28.ScaleGPIOValueToResistance(value)
 		result, err = thermistor.ResistanceToTemperature(resistance, thermistor.PT1000)
 	default:
-		err = errors.New("UI IoType is not a recognized type")
+		err = errors.New("edge28-polling: UI IoType is not a recognized type")
 		return 0, err
 	}
-	fmt.Println("result", result)
 	return result, nil
 }
 
-//TODO: update this function in Edge28 helpers
-//DigitalToRelayGPIO converts true/false values (all basic types allowed) to BBB GPIO 0/1 ON/OFF (FOR DOs/Relays) and to 100/0 (FOR UOs).  Note that the GPIO value for digital points is inverted.
+//DigitalToGPIOValue converts true/false values (all basic types allowed) to BBB GPIO 0/1 ON/OFF (FOR DOs/Relays) and to 100/0 (FOR UOs).  Note that the GPIO value for digital points is inverted.
 func DigitalToGPIOValue(input interface{}, isUO bool) (float64, error) {
 	var inputAsBool bool
 	var err error = nil
@@ -329,7 +315,7 @@ func DigitalToGPIOValue(input interface{}, isUO bool) (float64, error) {
 	case bool:
 		inputAsBool = reflect.ValueOf(input).Bool()
 	default:
-		err = errors.New("input is not a recognized type")
+		err = errors.New("edge28-polling: input is not a recognized type")
 	}
 	if err != nil {
 		return 0, err

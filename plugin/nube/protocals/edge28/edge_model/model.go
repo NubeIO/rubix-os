@@ -46,15 +46,15 @@ type Device struct {
 type Point struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
-	IoNumber        struct {
+	IoNumber    struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"UI1\",\"UI2\",\"UI3\",\"temp\",\"pulse\",\"motion\",\"light\",\"voltage\"]"`
+		Options  []string `json:"options" default:"[\"UI1\",\"UI2\",\"UI3\",\"UI4\",\"UI5\",\"UI6\",\"UI7\",\"DI1\",\"DI2\",\"DI3\",\"DI4\",\"DI5\",\"DI6\",\"DI7\",\"R1\",\"R2\",\"DO1\",\"DO2\",\"DO3\",\"DO4\",\"DO5\",\"UO1\",\"UO2\",\"UO3\",\"UO4\",\"UO5\",\"UO6\",\"UO6\"]"`
 	} `json:"io_number"`
 	IoType struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"THERMISTOR_10K_TYPE2\",\"UI2\",\"UI3\",\"temp\",\"pulse\",\"motion\",\"light\",\"voltage\"]"`
+		Options  []string `json:"options" default:"[\"THERMISTOR_10K_TYPE2\",\"DIGITAL\",\"PERCENT\",\"0-10VDC\",\"4-20mA\",\"RESISTANCE\",\"light\",\"voltage\"]"`
 	} `json:"io_type"`
 }
 
