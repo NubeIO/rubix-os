@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.3.9](https://github.com/NubeIO/flow-framework/tree/v0.3.9) (2022-02-28)
+- Added back GET/PATCH by point's name
+
 ## [v0.3.8](https://github.com/NubeIO/flow-framework/tree/v0.3.8) (2022-02-24)
 - Improvements/misc #385
 
@@ -7,8 +10,7 @@
 - Improvement/stream sync #383
 - updates to modbus #382
 - Improvement/point value update #381
-- Replace modubs lib #379
-
+- Replace modbus lib #379
 
 ## [v0.3.6](https://github.com/NubeIO/flow-framework/tree/v0.3.6) (2022-02-22)
 - Merge pull request #358 from NubeIO/bac-master-1
