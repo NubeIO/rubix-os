@@ -300,3 +300,44 @@ func (d *GormDatabase) DropPoints() (bool, error) {
 		return true, nil
 	}
 }
+
+func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string) (*model.Point, error) {
+	var pointModel *model.Point
+	net, err := d.GetNetworkByName(networkName, api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return nil, errors.New("failed to find a network with that name")
+	}
+	deviceExist := false
+	pointExist := false
+	for _, device := range net.Devices {
+		if device.Name == deviceName {
+			deviceExist = true
+			for _, p := range device.Points {
+				if p.Name == pointName {
+					pointExist = true
+					pointModel = p
+					break
+				}
+			}
+		}
+	}
+	if !deviceExist {
+		return nil, errors.New("failed to find a device with that name")
+	}
+	if !pointExist {
+		return nil, errors.New("found device but failed to find a point with that name")
+	}
+	return pointModel, nil
+}
+
+func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.Point, fromPlugin bool) (*model.Point, error) {
+	point, err := d.GetPointByName(networkName, deviceName, pointName)
+	if err != nil {
+		return nil, err
+	}
+	write, err := d.PointWrite(point.UUID, body, fromPlugin)
+	if err != nil {
+		return nil, err
+	}
+	return write, nil
+}

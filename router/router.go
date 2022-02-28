@@ -285,6 +285,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			pointRoutes.GET("/one/args", pointHandler.GetOnePointByArgs)
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
 			pointRoutes.DELETE("/drop", pointHandler.DropPoints)
+			pointRoutes.GET("/name", pointHandler.GetPointByName)
+			pointRoutes.PATCH("/name", pointHandler.PointWriteByName)
 		}
 
 		commandRoutes := apiRoutes.Group("/commands")
