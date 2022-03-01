@@ -13,6 +13,7 @@ import (
 )
 
 func (i *Instance) addNetwork(bacNet *Network) (*model.Network, interface{}, int, error) {
+	
 	var ffNetwork model.Network
 	ffNetwork.Name = bacNet.NetworkName
 	ffNetwork.TransportType = model.TransType.IP
@@ -192,7 +193,7 @@ func (i *Instance) patchNetwork(bacNet *Network, uuid string) (*model.Network, e
 		return nil, err
 	}
 
-	updateNetwork, err := i.db.UpdateNetwork(getNetwork.UUID, &ffNetwork)
+	updateNetwork, err := i.db.UpdateNetwork(getNetwork.UUID, &ffNetwork, true)
 	if err != nil {
 		rt.Method = nrest.PATCH
 		rt.Path = fmt.Sprintf("%s/%s", deviceBacnet, uuid)
@@ -241,7 +242,7 @@ func (i *Instance) patchDevice(bacDevice *Device, uuid string) (*model.Device, e
 		return nil, err
 	}
 
-	updateDevice, err := i.db.UpdateDevice(getDev.UUID, &ffDevice)
+	updateDevice, err := i.db.UpdateDevice(getDev.UUID, &ffDevice, true)
 	if err != nil {
 		rt.Method = nrest.PATCH
 		rt.Path = fmt.Sprintf("%s/%s", deviceBacnet, uuid)
