@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"gorm.io/gorm"
 	"strings"
@@ -24,13 +25,16 @@ func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
 	}
 	if args.ClientId != nil {
-		query = query.Where("client_id = ?", *args.ClientId)
+		values := strings.Split(*args.ClientId, ",")
+		query = query.Where(fmt.Sprintf(`client_id IN ( '%s' )`, strings.Join(values, "', '")))
 	}
 	if args.SiteId != nil {
-		query = query.Where("site_id = ?", *args.SiteId)
+		values := strings.Split(*args.SiteId, ",")
+		query = query.Where(fmt.Sprintf(`site_id IN ( '%s' )`, strings.Join(values, "', '")))
 	}
 	if args.DeviceId != nil {
-		query = query.Where("device_id = ?", *args.DeviceId)
+		values := strings.Split(*args.DeviceId, ",")
+		query = query.Where(fmt.Sprintf(`device_id IN ( '%s' )`, strings.Join(values, "', '")))
 	}
 	return query
 }
@@ -50,13 +54,16 @@ func (d *GormDatabase) buildFlowNetworkCloneQuery(args api.Args) *gorm.DB {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
 	}
 	if args.ClientId != nil {
-		query = query.Where("client_id = ?", *args.ClientId)
+		values := strings.Split(*args.ClientId, ",")
+		query = query.Where(fmt.Sprintf(`client_id IN ( '%s' )`, strings.Join(values, "', '")))
 	}
 	if args.SiteId != nil {
-		query = query.Where("site_id = ?", *args.SiteId)
+		values := strings.Split(*args.SiteId, ",")
+		query = query.Where(fmt.Sprintf(`site_id IN ( '%s' )`, strings.Join(values, "', '")))
 	}
 	if args.DeviceId != nil {
-		query = query.Where("device_id = ?", *args.DeviceId)
+		values := strings.Split(*args.DeviceId, ",")
+		query = query.Where(fmt.Sprintf(`device_id IN ( '%s' )`, strings.Join(values, "', '")))
 	}
 	if args.UUID != nil {
 		query = query.Where("uuid = ?", *args.UUID)
