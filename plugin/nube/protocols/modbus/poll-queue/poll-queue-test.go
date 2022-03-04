@@ -2,10 +2,8 @@ package pollqueue
 
 /*
 func PollQueueTest() {
-	h := &dbhandler.Handler{}
-	dbhandler.Init(h)
 	var arg api.Args
-	net, err := h.DB.GetNetworkByPluginName("modbus", arg)
+	net, err := pm.DBHandlerRef.GetNetworkByPluginName("modbus", arg)
 	if err != nil {
 		fmt.Printf("PollQueueTest: no modbus networks found.\n")
 	}

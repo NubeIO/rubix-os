@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocols/modbus/smod"
@@ -43,6 +44,8 @@ func (i *Instance) ModbusPolling() error {
 	poll = poller.New()
 	var counter int
 	f := func() (bool, error) {
+		counter++
+		log.Infof("modbus: LOOP COUNT: %v\n", counter)
 		var netArg api.Args
 		/*
 			nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, netArg)
@@ -55,13 +58,19 @@ func (i *Instance) ModbusPolling() error {
 			//time.Sleep(15000 * time.Millisecond) //WHAT DOES THIS LINE DO?
 			log.Info("modbus: NO MODBUS NETWORKS FOUND\n")
 		}
+		fmt.Println("i.NetworkPollManagers")
+		fmt.Printf("%+v\n", i.NetworkPollManagers)
 		for _, netPollMan := range i.NetworkPollManagers { //LOOP THROUGH AND POLL NEXT POINTS IN EACH NETWORK QUEUE
-			log.Infof("modbus: LOOP COUNT: %v\n", counter)
-			counter++
 
 			//Check that network exists
+			fmt.Println("netPollMan")
+			fmt.Printf("%+v\n", netPollMan)
 			net, err := i.db.GetNetwork(netPollMan.FFNetworkUUID, netArg)
-			if err != nil || net == nil || net.PluginConfId == i.pluginUUID {
+			fmt.Println("net")
+			fmt.Printf("%+v\n", net)
+			fmt.Println("err")
+			fmt.Printf("%+v\n", err)
+			if err != nil || net == nil || net.PluginConfId != i.pluginUUID {
 				log.Info("modbus: MODBUS NETWORK NOT FOUND\n")
 				continue
 			}
@@ -72,7 +81,8 @@ func (i *Instance) ModbusPolling() error {
 				continue
 			}
 
-			pp, callback := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
+			//pp, callback := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
+			pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			if pp == nil {
 				log.Infof("modbus: No PollingPoint available in Network %s]n", net.UUID)
 				continue
@@ -216,9 +226,10 @@ func (i *Instance) ModbusPolling() error {
 			*/
 
 			// This callback function triggers the PollManager to evaluate whether the point should be re-added to the PollQueue (Never, Immediately, or after the Poll Rate Delay)
-			writeSuccess, readSuccess := true, true
-			callback(pp, writeSuccess, readSuccess)
+			//writeSuccess, readSuccess := true, true
+			//callback(pp, writeSuccess, readSuccess)
 		}
+		time.Sleep(2 * time.Second)
 		return false, nil
 	}
 

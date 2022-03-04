@@ -2,8 +2,9 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocols/modbus/poll_queue"
+	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocols/modbus/poll-queue"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,6 +19,8 @@ func (i *Instance) Enable() error {
 	} else {
 		i.networks = nil
 	}
+	fmt.Println("Instance")
+	fmt.Printf("%+v\n", i)
 	if i.config.EnablePolling {
 		if !i.pollingEnabled {
 			var arg polling
@@ -25,15 +28,19 @@ func (i *Instance) Enable() error {
 			arg.enable = true
 			i.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0) //This will delete any existing NetworkPollManagers (if enable is called multiple times, it will rebuild the queues).
 			for _, net := range nets {                                       //Create a new Poll Manager for each network in the plugin.
-				pollManager := pollqueue.NewPollManager(net.UUID, i.pluginUUID)
+				pollManager := pollqueue.NewPollManager(&i.db, net.UUID, i.pluginUUID)
+				fmt.Println("net")
+				fmt.Printf("%+v\n", net)
+				fmt.Println("pollManager")
+				fmt.Printf("%+v\n", pollManager)
 				pollManager.StartPolling()
 				i.NetworkPollManagers = append(i.NetworkPollManagers, pollManager)
 			}
 
 			//TODO: CHECK IMPLEMENTATION OF POLLING ROUTINES
 			go func() error {
-				err := i.PollingTCP(arg)
-				//err := i.ModbusPolling()
+				//err := i.PollingTCP(arg)
+				err := i.ModbusPolling()
 				if err != nil {
 					log.Errorf("modbus: POLLING ERROR on routine: %v\n", err)
 				}

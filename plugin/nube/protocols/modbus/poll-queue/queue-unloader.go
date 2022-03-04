@@ -2,6 +2,7 @@ package pollqueue
 
 import (
 	"time"
+	//log "github.com/sirupsen/logrus"
 )
 
 // LOOK AT USING:
@@ -37,7 +38,9 @@ func (pm *NetworkPollManager) StartQueueUnloader() {
 }
 
 func (pm *NetworkPollManager) StopQueueUnloader() {
-	pm.PluginQueueUnloader.NextUnloadTimer.Stop()
+	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextUnloadTimer != nil {
+		pm.PluginQueueUnloader.NextUnloadTimer.Stop() //TODO: this line is causing errors, and I don't know why
+	}
 	pm.PluginQueueUnloader = nil
 }
 
@@ -54,7 +57,7 @@ func (pm *NetworkPollManager) GetNextPollingPoint() (pp *PollingPoint, callback 
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint != nil {
 		pp := pm.PluginQueueUnloader.NextPollPoint
 		pm.PluginQueueUnloader.NextPollPoint = nil
-		pm.PluginQueueUnloader.NextUnloadTimer = time.AfterFunc(*pm.MaxPollRate, pm.postNextPointCallback)
+		pm.PluginQueueUnloader.NextUnloadTimer = time.AfterFunc(pm.MaxPollRate, pm.postNextPointCallback)
 		return pp, pm.PollingPointCompleteNotification
 	}
 	return nil, nil
