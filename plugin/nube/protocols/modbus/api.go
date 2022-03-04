@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/mbmodel"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocols/modbus/mbmodel"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/gin-gonic/gin"

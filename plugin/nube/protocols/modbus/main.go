@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/model"
+	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocols/modbus/poll_queue"
 	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
@@ -25,15 +27,17 @@ const transportType = "ip" //serial, ip
 
 // Instance is plugin instance
 type Instance struct {
-	config         *Config
-	enabled        bool
-	basePath       string
-	db             dbhandler.Handler
-	store          cachestore.Handler
-	bus            eventbus.BusService
-	pluginUUID     string
-	networkUUID    string
-	pollingEnabled bool
+	config              *Config
+	enabled             bool
+	basePath            string
+	db                  dbhandler.Handler
+	store               cachestore.Handler
+	bus                 eventbus.BusService
+	pluginUUID          string
+	networks            []*model.Network
+	pollingEnabled      bool
+	pollingCancel       func()
+	NetworkPollManagers []*pollqueue.NetworkPollManager
 }
 
 // GetFlowPluginInfo returns plugin info.

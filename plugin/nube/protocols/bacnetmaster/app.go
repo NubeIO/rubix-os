@@ -5,7 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/mqttclient"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocols/bacnetserver/bacnet_model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 	"time"

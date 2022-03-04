@@ -3,7 +3,7 @@ package plgrest
 import (
 	"fmt"
 	baseModel "github.com/NubeIO/flow-framework/model"
-	model "github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
+	model "github.com/NubeIO/flow-framework/plugin/nube/protocols/bacnetserver/bacnet_model"
 	"strconv"
 )
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/model"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocols/modbus/smod"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/grid-x/modbus"

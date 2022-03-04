@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
-	edgerest "github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/restclient"
+	edgerest "github.com/NubeIO/flow-framework/plugin/nube/protocols/edge28/restclient"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/edge28"

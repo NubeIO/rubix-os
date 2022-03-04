@@ -1,8 +1,8 @@
 package main
 
 import (
-	model "github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/edge_model"
-	edgerest "github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/restclient"
+	model "github.com/NubeIO/flow-framework/plugin/nube/protocols/edge28/edge_model"
+	edgerest "github.com/NubeIO/flow-framework/plugin/nube/protocols/edge28/restclient"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"

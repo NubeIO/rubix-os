@@ -11,7 +11,7 @@ import (
 
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocols/lora/decoder"
 	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 )
