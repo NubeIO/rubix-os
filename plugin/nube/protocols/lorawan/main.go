@@ -6,27 +6,29 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
-	"github.com/NubeIO/flow-framework/src/jobs"
 	"github.com/patrickmn/go-cache"
 )
 
-const path = "history" //must be unique across all plugins
-const name = "history" //must be unique across all plugins
-const description = "history"
+const path = "lorawan" //must be unique across all plugins
+const name = "lorawan" //must be unique across all plugins
+const description = "lorawan api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
 const DefaultExpiration = cache.DefaultExpiration
 
-const pluginType = "database"
+const pluginType = "protocol"
 const allowConfigWrite = false
-const isNetwork = false
-const maxAllowedNetworks = 0
-const networkType = "na"
-const transportType = "na"
+const isNetwork = true
+const maxAllowedNetworks = 1
+const networkType = "lorawan"
+const transportType = "ip" //serial, ip
+const ip = "0.0.0.0"
+const port = "8080"
 
 // Instance is plugin instance
 type Instance struct {
+	config      *Config
 	enabled     bool
 	basePath    string
 	db          dbhandler.Handler
@@ -35,7 +37,6 @@ type Instance struct {
 	pluginUUID  string
 	networkUUID string
 	REST        *lwrest.RestClient
-	jobs        jobs.Jobs
 }
 
 // GetFlowPluginInfo returns plugin info.

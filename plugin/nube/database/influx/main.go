@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
-	lwrest "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/restclient"
+	lwrest "github.com/NubeIO/flow-framework/plugin/nube/protocols/lorawan/restclient"
 	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"

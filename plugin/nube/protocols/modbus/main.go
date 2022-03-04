@@ -2,40 +2,42 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
-	lwrest "github.com/NubeIO/flow-framework/plugin/nube/protocols/lorawan/restclient"
+	"github.com/NubeIO/flow-framework/model"
+	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocols/modbus/poll_queue"
 	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
-	"github.com/NubeIO/flow-framework/src/jobs"
 	"github.com/patrickmn/go-cache"
 )
 
-const path = "history" //must be unique across all plugins
-const name = "history" //must be unique across all plugins
-const description = "history"
+const path = "modbus" //must be unique across all plugins
+const name = "modbus" //must be unique across all plugins
+const description = "modbus api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
 const DefaultExpiration = cache.DefaultExpiration
 
-const pluginType = "database"
+const pluginType = "protocol"
 const allowConfigWrite = false
-const isNetwork = false
-const maxAllowedNetworks = 0
-const networkType = "na"
-const transportType = "na"
+const isNetwork = true
+const maxAllowedNetworks = 1
+const networkType = "modbus"
+const transportType = "ip" //serial, ip
 
 // Instance is plugin instance
 type Instance struct {
-	enabled     bool
-	basePath    string
-	db          dbhandler.Handler
-	store       cachestore.Handler
-	bus         eventbus.BusService
-	pluginUUID  string
-	networkUUID string
-	REST        *lwrest.RestClient
-	jobs        jobs.Jobs
+	config              *Config
+	enabled             bool
+	basePath            string
+	db                  dbhandler.Handler
+	store               cachestore.Handler
+	bus                 eventbus.BusService
+	pluginUUID          string
+	networks            []*model.Network
+	pollingEnabled      bool
+	pollingCancel       func()
+	NetworkPollManagers []*pollqueue.NetworkPollManager
 }
 
 // GetFlowPluginInfo returns plugin info.
@@ -46,6 +48,7 @@ func GetFlowPluginInfo() plugin.Info {
 		Description:  description,
 		Author:       author,
 		Website:      webSite,
+		HasNetwork:   true,
 		ProtocolType: protocolType,
 	}
 }
