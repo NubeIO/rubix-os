@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -25,21 +24,20 @@ import (
 // NEXT FETCH THE FF POINT AND use time.AfterFunc(DURATION, )
 //dbhandler.GormDatabase.GetPoint(pp.FFPointUUID)
 
+//func (pm *NetworkPollManager) RebuildPollingQueue() error {
 func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	//TODO: STOP ANY OTHER QUEUE LOADERS
 	pm.EmptyQueue()
 	wasRunning := pm.PluginQueueUnloader != nil
 	pm.StopQueueUnloader()
-	h := &dbhandler.Handler{}
-	dbhandler.Init(h)
 	var arg api.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
-	nets, err := h.DB.GetNetwork(pm.FFNetworkUUID, arg)
-	if err != nil || len(nets.Devices) == 0 {
+	net, err := pm.DBHandlerRef.GetNetwork(pm.FFNetworkUUID, arg)
+	if err != nil || len(net.Devices) == 0 {
 		return errors.New(fmt.Sprintf("NetworkPollManager.RebuildPollingQueue: couldn't find any devices for the network %s/n", pm.FFNetworkUUID))
 	}
-	devs := nets.Devices
+	devs := net.Devices
 	for _, dev := range devs { //DEVICES
 		if dev.NetworkUUID == pm.FFNetworkUUID && utils.BoolIsNil(dev.Enable) {
 			for _, pnt := range dev.Points { //POINTS

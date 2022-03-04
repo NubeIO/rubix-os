@@ -28,8 +28,10 @@ import (
 //dbhandler.GormDatabase.GetPoint(pp.FFPointUUID)
 
 type NetworkPollManager struct {
+	DBHandlerRef *dbhandler.Handler
+
 	Enable              bool
-	MaxPollRate         *time.Duration
+	MaxPollRate         time.Duration
 	PollQueue           *NetworkPriorityPollQueue
 	PluginQueueUnloader *QueueUnloader
 
@@ -86,23 +88,26 @@ func (pm *NetworkPollManager) EmptyQueue() {
 	pm.PollQueue.EmptyQueue()
 }
 
-func NewPollManager(FFNetworkUUID, FFPluginUUID string) *NetworkPollManager {
+func NewPollManager(dbHandler *dbhandler.Handler, FFNetworkUUID, FFPluginUUID string) *NetworkPollManager {
 	queue := make([]*PollingPoint, 0)
 	pq := &PriorityPollQueue{false, queue}
 	heap.Init(pq)
+	npq := &NetworkPriorityPollQueue{pq, FFPluginUUID, FFNetworkUUID}
+	pqu := &QueueUnloader{nil, nil}
 	pm := new(NetworkPollManager)
+	pm.PollQueue = npq
+	pm.PluginQueueUnloader = pqu
+	pm.DBHandlerRef = dbHandler
 	maxpollrate := 1000 * time.Millisecond
-	pm.MaxPollRate = &maxpollrate //TODO: MaxPollRate should come from a network property,but I can't find it
+	pm.MaxPollRate = maxpollrate //TODO: MaxPollRate should come from a network property,but I can't find it
 	pm.FFNetworkUUID = FFNetworkUUID
 	pm.FFPluginUUID = FFPluginUUID
 	return pm
 }
 
 func (pm *NetworkPollManager) GetPollRateDuration(rate poller.PollRate, deviceUUID string) time.Duration {
-	h := &dbhandler.Handler{}
-	dbhandler.Init(h)
 	var arg api.Args
-	device, err := h.DB.GetDevice(deviceUUID, arg)
+	device, err := pm.DBHandlerRef.GetDevice(deviceUUID, arg)
 	if err != nil {
 		fmt.Printf("NetworkPollManager.GetPollRateDuration(): couldn't find device %s/n", deviceUUID)
 	}
