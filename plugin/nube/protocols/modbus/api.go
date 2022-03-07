@@ -44,11 +44,12 @@ func bodyClient(ctx *gin.Context) (dto Body, err error) {
 
 // serialWizard
 type wizard struct {
-	IP         string `json:"ip"`
-	Port       int    `json:"port"`
-	SerialPort string `json:"serial_port"`
-	BaudRate   uint   `json:"baud_rate"`
-	DeviceAddr uint   `json:"device_addr"`
+	IP            string `json:"ip"`
+	Port          int    `json:"port"`
+	SerialPort    string `json:"serial_port"`
+	BaudRate      uint   `json:"baud_rate"`
+	DeviceAddr    uint   `json:"device_addr"`
+	WizardVersion uint   `json:"wizard_version"`
 }
 
 func bodyWizard(ctx *gin.Context) (dto wizard, err error) {
