@@ -13,7 +13,7 @@ import (
 )
 
 func (i *Instance) addNetwork(bacNet *Network) (*model.Network, interface{}, int, error) {
-	
+
 	var ffNetwork model.Network
 	ffNetwork.Name = bacNet.NetworkName
 	ffNetwork.TransportType = model.TransType.IP
@@ -79,7 +79,7 @@ func (i *Instance) addDevice(bacDevice *Device) (*model.Device, error) {
 		return nil, err
 	}
 	res.ToInterfaceNoErr(bacDevice)
-	ffDevice.AddressUUID = bacDevice.DeviceUUID
+	ffDevice.AddressUUID = &bacDevice.DeviceUUID
 
 	if bacDevice.DeviceUUID == "" {
 		log.Error("bacnet-master-plugin: ERROR no bacnet-server device uuid provided")
@@ -122,7 +122,7 @@ func (i *Instance) addPoint(bacPoint *Point) (*model.Point, error) {
 		return nil, err
 	}
 	res.ToInterfaceNoErr(bacPoint)
-	ffPoint.AddressUUID = bacPoint.DeviceUUID
+	ffPoint.AddressUUID = &bacPoint.DeviceUUID
 
 	if bacPoint.DeviceUUID == "" {
 		log.Error("bacnet-master-plugin: ERROR no bacnet-server point uuid provided")
@@ -146,7 +146,7 @@ func (i *Instance) addPoint(bacPoint *Point) (*model.Point, error) {
 		}
 		return nil, err
 	}
-	pnt.AddressUUID = bacPoint.PointUUID
+	pnt.AddressUUID = &bacPoint.PointUUID
 	pnt, err = i.db.UpdatePoint(pnt.UUID, &ffPoint, false)
 	if err != nil {
 		log.Error("bacnet-master-plugin: ERROR on update point with bacnet point_uuid to address_uuid", code)

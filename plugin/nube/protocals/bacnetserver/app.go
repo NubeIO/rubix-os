@@ -78,7 +78,7 @@ func (i *Instance) addPoint(body *model.Point) (*bacnet_model.Point, error) {
 		return nil, err
 	}
 	bacPntUUID := gjson.Get(string(addPoint.Body), "uuid").String()
-	body.AddressUUID = bacPntUUID
+	body.AddressUUID = &bacPntUUID
 	_, err = i.db.UpdatePoint(body.UUID, body, true)
 	if err != nil {
 		log.Error("BACNET UPDATE POINT issue on update point when getting bacnet point uuid")
@@ -90,6 +90,9 @@ func (i *Instance) addPoint(body *model.Point) (*bacnet_model.Point, error) {
 
 //pointPatch from rest
 func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
+	if body.AddressUUID == nil {
+		return nil, errors.New("no address_uuid")
+	}
 	point := new(bacnet_model.BacnetPoint)
 	point.Priority = new(model.Priority)
 	if (*body.Priority).P16 != nil {
@@ -102,7 +105,7 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 	point.Description = body.Description
 
 	rt.Method = nrest.PATCH
-	rt.Path = fmt.Sprintf("/api/bacnet/points/uuid/%s", body.AddressUUID)
+	rt.Path = fmt.Sprintf("/api/bacnet/points/uuid/%s", *body.AddressUUID)
 	_, _, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{Json: point})
 
 	if err != nil {
@@ -115,8 +118,11 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 
 //deletePoint point make sure
 func (i *Instance) deletePoint(body *model.Point) (bool, error) {
+	if body.AddressUUID == nil {
+		return false, errors.New("no address_uuid")
+	}
 	rt.Method = nrest.DELETE
-	rt.Path = fmt.Sprintf("/api/bacnet/points/uuid/%s", body.AddressUUID)
+	rt.Path = fmt.Sprintf("/api/bacnet/points/uuid/%s", *body.AddressUUID)
 	_, _, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
 	if err != nil {
 		log.Errorf("BACNET: DELETE POINT issue on add rest: %v\n", err)

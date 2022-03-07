@@ -32,7 +32,7 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 
 	var dev model.Device
 	dev.Name = model.TransProtocol.Lora
-	dev.AddressUUID = id
+	dev.AddressUUID = &id
 	dev.Manufacture = model.CommonNaming.NubeIO
 	dev.Model = st
 
