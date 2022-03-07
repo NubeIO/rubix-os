@@ -13,17 +13,19 @@ type CommonValues struct {
 	Rssi   int    `json:"rssi"`
 }
 
-func getDeviceDescriptionFromPayload(data string) *LoRaDeviceDescription {
-	if data == "!" {
+func getDeviceDescriptionFromPayload(data *string) *LoRaDeviceDescription {
+	if data == nil {
 		return nil
 	}
-	if len(data) >= 4 {
-		sensorCode := data[2:4]
+	if *data == "!" {
+		return nil
+	}
+	if len(*data) >= 4 {
+		sensorCode := (*data)[2:4]
 		return GetLoRaDeviceDescription(sensorCode)
 	} else {
 		return nil
 	}
-
 }
 
 func checkPayloadLength(data string, dev *LoRaDeviceDescription) bool {
@@ -42,7 +44,7 @@ func checkPayloadLength(data string, dev *LoRaDeviceDescription) bool {
 }
 
 func DecodePayload(data string) (*CommonValues, interface{}) {
-	devDesc := getDeviceDescriptionFromPayload(data)
+	devDesc := getDeviceDescriptionFromPayload(&data)
 	if devDesc == &NilLoRaDeviceDescription {
 		return &CommonValues{}, nil
 	}

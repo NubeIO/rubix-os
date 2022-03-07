@@ -160,7 +160,7 @@ type Point struct {
 	IoType               string    `json:"io_type,omitempty"`         //0-10dc, 0-40ma, thermistor
 	AddressID            *int      `json:"address_id"`                // for example a modbus address or bacnet address
 	AddressLength        *int      `json:"address_length"`            // for example a modbus address offset
-	AddressUUID          string    `json:"address_uuid,omitempty"`    // for example a droplet id (so a string)
+	AddressUUID          *string   `json:"address_uuid,omitempty"`    // for example a droplet id (so a string)
 	NextAvailableAddress *bool     `json:"use_next_available_address,omitempty"`
 	Decimal              *uint32   `json:"decimal,omitempty"`
 	LimitMin             *float64  `json:"limit_min"`
