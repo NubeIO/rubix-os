@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocols/modbus/poll-queue"
