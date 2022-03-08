@@ -90,7 +90,7 @@ func (pm *NetworkPollManager) EmptyQueue() {
 
 func NewPollManager(dbHandler *dbhandler.Handler, FFNetworkUUID, FFPluginUUID string) *NetworkPollManager {
 	queue := make([]*PollingPoint, 0)
-	pq := &PriorityPollQueue{false, queue}
+	pq := &PriorityPollQueue{queue}
 	heap.Init(pq)
 	npq := &NetworkPriorityPollQueue{pq, FFPluginUUID, FFNetworkUUID}
 	pqu := &QueueUnloader{nil, nil}

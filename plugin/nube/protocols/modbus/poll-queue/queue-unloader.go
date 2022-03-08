@@ -1,6 +1,7 @@
 package pollqueue
 
 import (
+	"fmt"
 	"time"
 	//log "github.com/sirupsen/logrus"
 )
@@ -27,9 +28,13 @@ type QueueUnloader struct {
 }
 
 func (pm *NetworkPollManager) StartQueueUnloader() {
+	fmt.Println("StartQueueUnloader() 1")
+	pm.StopQueueUnloader()
+	fmt.Println("StartQueueUnloader() 2")
 	ql := &QueueUnloader{nil, nil}
 	pm.PluginQueueUnloader = ql
 	if pm.PluginQueueUnloader.NextPollPoint == nil {
+		fmt.Println("StartQueueUnloader() pm.PluginQueueUnloader.NextPollPoint == nil")
 		pp, err := pm.PollQueue.GetNextPollingPoint()
 		if pp != nil && err == nil {
 			pm.PluginQueueUnloader.NextPollPoint = pp
@@ -38,27 +43,33 @@ func (pm *NetworkPollManager) StartQueueUnloader() {
 }
 
 func (pm *NetworkPollManager) StopQueueUnloader() {
+	fmt.Println("StopQueueUnloader()")
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextUnloadTimer != nil {
 		pm.PluginQueueUnloader.NextUnloadTimer.Stop() //TODO: this line is causing errors, and I don't know why
 	}
 	pm.PluginQueueUnloader = nil
 }
 
-func (pm *NetworkPollManager) postNextPointCallback() {
-	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint != nil {
-		pp, err := pm.PollQueue.GetNextPollingPoint()
-		if pp != nil && err == nil {
-			pm.PluginQueueUnloader.NextPollPoint = pp
-		}
-	}
-}
-
+//This function should be called from the Polling service. It will start a timer that posts the next polling point.
 func (pm *NetworkPollManager) GetNextPollingPoint() (pp *PollingPoint, callback func(pp *PollingPoint, writeSuccess, readSuccess bool)) {
+	fmt.Println("GetNextPollingPoint()")
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint != nil {
 		pp := pm.PluginQueueUnloader.NextPollPoint
 		pm.PluginQueueUnloader.NextPollPoint = nil
 		pm.PluginQueueUnloader.NextUnloadTimer = time.AfterFunc(pm.MaxPollRate, pm.postNextPointCallback)
 		return pp, pm.PollingPointCompleteNotification
 	}
+	fmt.Println("GetNextPollingPoint(): No pollingPoint available")
 	return nil, nil
+}
+
+//This is the callback function that is called by the timer made in (pm *NetworkPollManager) GetNextPollingPoint().
+func (pm *NetworkPollManager) postNextPointCallback() {
+	fmt.Println("postNextPointCallback()")
+	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint == nil {
+		pp, err := pm.PollQueue.GetNextPollingPoint()
+		if pp != nil && err == nil {
+			pm.PluginQueueUnloader.NextPollPoint = pp
+		}
+	}
 }

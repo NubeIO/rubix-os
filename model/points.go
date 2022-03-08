@@ -186,7 +186,7 @@ type Point struct {
 	ReadPollRequired     *bool               `json:"read_required"`
 	PollPriority         poller.PollPriority `json:"poll_priority"`
 	PollRate             poller.PollRate     `json:"poll_rate"`
-	//PollTimer            *time.Timer         `json:"poll_timer"`
+	//PollTimer            *time.Timer          `json:"poll_timer"`
 }
 
 type Priorities struct {

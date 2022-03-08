@@ -73,21 +73,22 @@ func (nq *NetworkPriorityPollQueue) UpdatePollingPointByPointUUID(pointUUID stri
 	return true
 }
 func (nq *NetworkPriorityPollQueue) GetNextPollingPoint() (*PollingPoint, error) {
-	if nq.PriorityQueue.Enable {
-		pp, err := nq.PriorityQueue.GetNextPollingPoint()
-		if err != nil {
-			log.Errorf("NetworkPriorityPollQueue.GetNextPollingPoint: no PollingPoints in queue. FFNetworkUUID: %s \n", nq.FFNetworkUUID)
-			return nil, errors.New(fmt.Sprintf("NetworkPriorityPollQueue.GetNextPollingPoint: no PollingPoints in queue"))
-		}
-		return pp, nil
+	//if nq.PriorityQueue.Enable {
+	pp, err := nq.PriorityQueue.GetNextPollingPoint()
+	if err != nil {
+		log.Errorf("NetworkPriorityPollQueue.GetNextPollingPoint: no PollingPoints in queue. FFNetworkUUID: %s \n", nq.FFNetworkUUID)
+		return nil, errors.New(fmt.Sprintf("NetworkPriorityPollQueue.GetNextPollingPoint: no PollingPoints in queue"))
 	}
+	return pp, nil
+	//}
+	fmt.Println("(nq *NetworkPriorityPollQueue) GetNextPollingPoint(): nq.PriorityQueue.Enable is false ")
 	return nil, errors.New(fmt.Sprintf("NetworkPriorityPollQueue %s is not enabled.", nq.FFNetworkUUID))
 }
 func (nq *NetworkPriorityPollQueue) Start() {
-	nq.PriorityQueue.Start()
+	//nq.PriorityQueue.Start()
 }
 func (nq *NetworkPriorityPollQueue) Stop() {
-	nq.PriorityQueue.Stop()
+	//nq.PriorityQueue.Stop()
 	nq.EmptyQueue()
 }
 func (nq *NetworkPriorityPollQueue) EmptyQueue() {
@@ -96,7 +97,7 @@ func (nq *NetworkPriorityPollQueue) EmptyQueue() {
 
 // THIS IS THE BASE PriorityPollQueue Type and defines the base methods used to implement the `heap` library.  https://pkg.go.dev/container/heap
 type PriorityPollQueue struct {
-	Enable        bool
+	//Enable        bool
 	PriorityQueue []*PollingPoint
 }
 
@@ -168,8 +169,9 @@ func (q *PriorityPollQueue) UpdatePollingPointByPointUUID(pointUUID string, newP
 	}
 	return false
 }
-func (q *PriorityPollQueue) Start() { q.Enable = true }  //TODO: add queue startup code
-func (q *PriorityPollQueue) Stop()  { q.Enable = false } //TODO: add queue stop code
+
+//func (q *PriorityPollQueue) Start() { q.Enable = true }  //TODO: add queue startup code
+//func (q *PriorityPollQueue) Stop()  { q.Enable = false } //TODO: add queue stop code
 func (q *PriorityPollQueue) EmptyQueue() {
 	for q.Len() > 0 {
 		heap.Pop(q)

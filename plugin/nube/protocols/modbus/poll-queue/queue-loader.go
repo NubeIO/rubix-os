@@ -24,12 +24,11 @@ import (
 // NEXT FETCH THE FF POINT AND use time.AfterFunc(DURATION, )
 //dbhandler.GormDatabase.GetPoint(pp.FFPointUUID)
 
-//func (pm *NetworkPollManager) RebuildPollingQueue() error {
 func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	//TODO: STOP ANY OTHER QUEUE LOADERS
-	pm.EmptyQueue()
+	fmt.Println("RebuildPollingQueue()")
 	wasRunning := pm.PluginQueueUnloader != nil
-	pm.StopQueueUnloader()
+	pm.EmptyQueue()
 	var arg api.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
@@ -44,6 +43,8 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 				if pnt.DeviceUUID == dev.UUID && utils.BoolIsNil(pnt.Enable) {
 					pp := NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, pm.FFPluginUUID)
 					pp.PollPriority = pnt.PollPriority
+					fmt.Println("RebuildPollingQueue() pp:")
+					fmt.Printf("%+v\n", pp)
 					pm.PollQueue.AddPollingPoint(pp)
 				} else {
 					log.Info(fmt.Sprintf("NetworkPollManager.RebuildPollingQueue: Point (%s) is not enabled./n", pnt.UUID))
@@ -58,23 +59,32 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 		pm.StartQueueUnloader()
 	}
 	//TODO: START ANY OTHER REQUIRED QUEUE LOADERS/OPTIMIZERS
+	pm.PrintPollQueuePointUUIDs()
 	return nil
 }
 
-func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool) {
-	log.Infof("modbus-poll: PollingPointCompleteNotification Point UUID: %s", pp.FFPointUUID)
+func (pm *NetworkPollManager) PrintPollQueuePointUUIDs() {
+	fmt.Println("PrintPollQueuePointUUIDs")
+	fmt.Println("NextPollPoint: ")
+	fmt.Printf("%+v\n", pm.PluginQueueUnloader.NextPollPoint)
+	for _, pp := range pm.PollQueue.PriorityQueue.PriorityQueue {
+		fmt.Print(pp.FFPointUUID, ",  ")
+	}
+	fmt.Println("")
+}
 
+func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool) {
+	log.Infof("modbus-poll: PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t", pp.FFPointUUID, writeSuccess, readSuccess)
 	/*
-		h := &dbhandler.Handler{}
-		dbhandler.Init(h)
 		var arg api.Args
-		point, err := h.DB.GetPoint(pp.FFPointUUID, arg)
+		point, err := pm.DBHandlerRef.DB.GetPoint(pp.FFPointUUID, arg)
 		if err != nil {
 			fmt.Printf("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s/n", pp.FFPointUUID)
 		}
+		fmt.Printf("NetworkPollManager.PollingPointCompleteNotification(): writeMode: %s/n", point.WriteMode)
 
-		switch *point.WriteMode {
-		case ReadOnce: //ReadOnce          If read_successful then don't re-add.
+		switch point.WriteMode {
+		case poller.ReadOnce: //ReadOnce          If read_successful then don't re-add.
 			point.WritePollRequired = utils.NewFalse()
 			if readSuccess {
 				point.ReadPollRequired = utils.NewFalse()
@@ -82,17 +92,17 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 				point.ReadPollRequired = utils.NewTrue()
 				pm.PollQueue.AddPollingPoint(pp)
 			}
-		case ReadOnly: //ReadOnly          Re-add with ReadPollRequired true, WritePollRequired false.
+		case poller.ReadOnly: //ReadOnly          Re-add with ReadPollRequired true, WritePollRequired false.
 			point.WritePollRequired = utils.NewFalse()
 			if readSuccess {
 				point.ReadPollRequired = utils.NewFalse()
 				// This line sets a timer to re-add the point to the poll queue after the PollRate time.
-				point.PollTimer = time.AfterFunc(pm.GetPollRateDuration(*point.PollRate, pp.FFDeviceUUID), pm.MakePollingPointRepollCallback(pp))
+				point.PollTimer = time.AfterFunc(pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID), pm.MakePollingPointRepollCallback(pp))
 			} else {
 				point.ReadPollRequired = utils.NewTrue()
 				pm.PollQueue.AddPollingPoint(pp) //re-add to poll queue immediately
 			}
-		case WriteOnce: //WriteOnce         If write_successful then don't re-add.
+		case poller.WriteOnce: //WriteOnce         If write_successful then don't re-add.
 			point.ReadPollRequired = utils.NewFalse()
 			if writeSuccess {
 				point.WritePollRequired = utils.NewFalse()
@@ -100,7 +110,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 				point.WritePollRequired = utils.NewTrue()
 				pm.PollQueue.AddPollingPoint(pp) //re-add to poll queue immediately
 			}
-		case WriteOnceReadOnce: //WriteOnceReadOnce     If write_successful and read_success then don't re-add.
+		case poller.WriteOnceReadOnce: //WriteOnceReadOnce     If write_successful and read_success then don't re-add.
 			if writeSuccess {
 				point.WritePollRequired = utils.NewFalse()
 			} else {
@@ -113,16 +123,16 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 				point.ReadPollRequired = utils.NewTrue()
 				pm.PollQueue.AddPollingPoint(pp) //re-add to poll queue immediately
 			}
-		case WriteAlways: //WriteAlways       Re-add with ReadPollRequired false, WritePollRequired true. confirm that a successful write ensures the value is set to the write value.
+		case poller.WriteAlways: //WriteAlways       Re-add with ReadPollRequired false, WritePollRequired true. confirm that a successful write ensures the value is set to the write value.
 			point.ReadPollRequired = utils.NewFalse()
 			point.WritePollRequired = utils.NewTrue()
 			if writeSuccess {
 				// This line sets a timer to re-add the point to the poll queue after the PollRate time.
-				point.PollTimer = time.AfterFunc(pm.GetPollRateDuration(*point.PollRate, pp.FFDeviceUUID), pm.MakePollingPointRepollCallback(pp))
+				point.PollTimer = time.AfterFunc(pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID), pm.MakePollingPointRepollCallback(pp))
 			} else {
 				pm.PollQueue.AddPollingPoint(pp) //re-add to poll queue immediately
 			}
-		case WriteOnceThenRead: //WriteOnceThenRead     If write_successful: Re-add with ReadPollRequired true, WritePollRequired false.
+		case poller.WriteOnceThenRead: //WriteOnceThenRead     If write_successful: Re-add with ReadPollRequired true, WritePollRequired false.
 			point.ReadPollRequired = utils.NewTrue()
 			if writeSuccess {
 				point.WritePollRequired = utils.NewFalse()
@@ -132,11 +142,11 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 			}
 			if readSuccess {
 				// This line sets a timer to re-add the point to the poll queue after the PollRate time.
-				point.PollTimer = time.AfterFunc(pm.GetPollRateDuration(*point.PollRate, pp.FFDeviceUUID), pm.MakePollingPointRepollCallback(pp))
+				point.PollTimer = time.AfterFunc(pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID), pm.MakePollingPointRepollCallback(pp))
 			} else {
 				pm.PollQueue.AddPollingPoint(pp) //re-add to poll queue immediately
 			}
-		case WriteAndMaintain: //WriteAndMaintain    If write_successful: Re-add with ReadPollRequired true, WritePollRequired false.  Need to check that write value matches present value after each read poll.
+		case poller.WriteAndMaintain: //WriteAndMaintain    If write_successful: Re-add with ReadPollRequired true, WritePollRequired false.  Need to check that write value matches present value after each read poll.
 			point.ReadPollRequired = utils.NewTrue()
 			writeValue := *point.Priority.GetHighestPriorityValue()
 			presentValue := *point.PresentValue
@@ -146,11 +156,12 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 			} else {
 				point.WritePollRequired = utils.NewFalse()
 				// This line sets a timer to re-add the point to the poll queue after the PollRate time.
-				point.PollTimer = time.AfterFunc(pm.GetPollRateDuration(*point.PollRate, pp.FFDeviceUUID), pm.MakePollingPointRepollCallback(pp))
+				point.PollTimer = time.AfterFunc(pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID), pm.MakePollingPointRepollCallback(pp))
 			}
 		}
 
 	*/
+
 }
 
 func (pm *NetworkPollManager) MakePollingPointRepollCallback(pp *PollingPoint) func() {

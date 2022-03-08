@@ -42,7 +42,7 @@ var poll poller.Poller
 //TODO: currently Polling loops through each network, grabs one point, and polls it.  Could be improved by having a seperate client/go routine for each of the networks.
 func (i *Instance) ModbusPolling() error {
 	poll = poller.New()
-	var counter int
+	var counter = 0
 	f := func() (bool, error) {
 		counter++
 		log.Infof("modbus: LOOP COUNT: %v\n", counter)
@@ -80,7 +80,9 @@ func (i *Instance) ModbusPolling() error {
 				log.Infof("modbus: NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
 				continue
 			}
-
+			netPollMan.PrintPollQueuePointUUIDs()
+			fmt.Println("ModbusPolling() current QueueUnloader")
+			fmt.Printf("%+v\n", netPollMan.PluginQueueUnloader.NextPollPoint)
 			//pp, callback := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			if pp == nil {
@@ -91,6 +93,8 @@ func (i *Instance) ModbusPolling() error {
 				log.Info("modbus: PollingPoint FFNetworkUUID does not match the Network UUID\n")
 				continue
 			}
+			fmt.Println("ModbusPolling() pp")
+			fmt.Printf("%+v\n", pp)
 
 			var devArg api.Args
 			dev, err := i.db.GetDevice(pp.FFDeviceUUID, devArg)
@@ -109,7 +113,10 @@ func (i *Instance) ModbusPolling() error {
 				continue
 			}
 
-			log.Infof("modbus: Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s \n", net.UUID, dev.UUID, pnt.UUID, dev.AddressId, pnt.AddressID, pnt.ObjectType)
+			log.Infof("MODBUS POLL! : Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s \n", net.UUID, dev.UUID, pnt.UUID, dev.AddressId, pnt.AddressID, pnt.ObjectType)
+
+			fmt.Println("POLLING COMPLETE CALLBACK")
+			//callback(pp, true, true)
 
 			/*
 				var client Client

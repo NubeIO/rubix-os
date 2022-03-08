@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils"
 	log "github.com/sirupsen/logrus"
 	"strconv"
@@ -89,6 +90,9 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 			pnt.AddressID = utils.NewInt(j) //TODO check conversion
 			pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 			pnt.DeviceUUID = dev.UUID
+			pnt.PollPriority = poller.PRIORITY_NORMAL
+			pnt.PollRate = poller.RATE_NORMAL
+			pnt.WriteMode = poller.ReadOnly
 			_, err = i.db.CreatePoint(&pnt, false, true)
 			if err != nil {
 				fmt.Errorf("consumer point creation failure: %s", err)
