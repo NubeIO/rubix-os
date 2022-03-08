@@ -93,7 +93,7 @@ func NewPollManager(dbHandler *dbhandler.Handler, FFNetworkUUID, FFPluginUUID st
 	pq := &PriorityPollQueue{queue}
 	heap.Init(pq)
 	npq := &NetworkPriorityPollQueue{pq, FFPluginUUID, FFNetworkUUID}
-	pqu := &QueueUnloader{nil, nil}
+	pqu := &QueueUnloader{nil, nil, nil}
 	pm := new(NetworkPollManager)
 	pm.PollQueue = npq
 	pm.PluginQueueUnloader = pqu
@@ -106,6 +106,7 @@ func NewPollManager(dbHandler *dbhandler.Handler, FFNetworkUUID, FFPluginUUID st
 }
 
 func (pm *NetworkPollManager) GetPollRateDuration(rate poller.PollRate, deviceUUID string) time.Duration {
+	fmt.Println("GetPollRateDuration()")
 	var arg api.Args
 	device, err := pm.DBHandlerRef.GetDevice(deviceUUID, arg)
 	if err != nil {
@@ -115,14 +116,31 @@ func (pm *NetworkPollManager) GetPollRateDuration(rate poller.PollRate, deviceUU
 	var duration time.Duration
 	switch rate {
 	case poller.RATE_FAST:
-		duration = *device.FastPollRate
+		if device.FastPollRate == nil {
+			duration = 60 * time.Second
+		} else {
+			duration = *device.FastPollRate
+		}
 	case poller.RATE_NORMAL:
-		duration = *device.NormalPollRate
+		if device.NormalPollRate == nil {
+			duration = 10 * time.Second
+		} else {
+			duration = *device.NormalPollRate
+		}
 	case poller.RATE_SLOW:
-		duration = *device.SlowPollRate
+		if device.SlowPollRate == nil {
+			duration = 60 * time.Second
+		} else {
+			duration = *device.SlowPollRate
+		}
 	default:
-		duration = *device.NormalPollRate
+		if device.NormalPollRate == nil {
+			duration = 60 * time.Second
+		} else {
+			duration = *device.NormalPollRate
+		}
 	}
+
 	if duration.Milliseconds() <= 100 {
 		duration = 60 * time.Second
 		log.Info("NetworkPollManager.GetPollRateDuration: invalid PollRate duration. Set to 60 seconds/n")

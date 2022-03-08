@@ -83,8 +83,8 @@ func (i *Instance) ModbusPolling() error {
 			netPollMan.PrintPollQueuePointUUIDs()
 			fmt.Println("ModbusPolling() current QueueUnloader")
 			fmt.Printf("%+v\n", netPollMan.PluginQueueUnloader.NextPollPoint)
-			//pp, callback := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
-			pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
+			pp, callback := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
+			//pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			if pp == nil {
 				log.Infof("modbus: No PollingPoint available in Network %s]n", net.UUID)
 				continue
@@ -116,7 +116,7 @@ func (i *Instance) ModbusPolling() error {
 			log.Infof("MODBUS POLL! : Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s \n", net.UUID, dev.UUID, pnt.UUID, dev.AddressId, pnt.AddressID, pnt.ObjectType)
 
 			fmt.Println("POLLING COMPLETE CALLBACK")
-			//callback(pp, true, true)
+			callback(pp, true, true)
 
 			/*
 				var client Client

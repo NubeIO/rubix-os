@@ -23,15 +23,17 @@ import (
 //dbhandler.GormDatabase.GetPoint(pp.FFPointUUID)
 
 type QueueUnloader struct {
-	NextPollPoint   *PollingPoint
-	NextUnloadTimer *time.Timer
+	NextPollPoint *PollingPoint
+	//NextUnloadTimer 		*time.Timer
+	NextUnloadTimer *time.Ticker
+	CancelChannel   chan bool
 }
 
 func (pm *NetworkPollManager) StartQueueUnloader() {
 	fmt.Println("StartQueueUnloader() 1")
 	pm.StopQueueUnloader()
 	fmt.Println("StartQueueUnloader() 2")
-	ql := &QueueUnloader{nil, nil}
+	ql := &QueueUnloader{nil, nil, nil}
 	pm.PluginQueueUnloader = ql
 	if pm.PluginQueueUnloader.NextPollPoint == nil {
 		fmt.Println("StartQueueUnloader() pm.PluginQueueUnloader.NextPollPoint == nil")
@@ -40,12 +42,33 @@ func (pm *NetworkPollManager) StartQueueUnloader() {
 			pm.PluginQueueUnloader.NextPollPoint = pp
 		}
 	}
+	refreshRate := 2 * time.Second
+	if pm.MaxPollRate > 0*time.Second {
+		refreshRate = pm.MaxPollRate
+	}
+	ticker := time.NewTicker(refreshRate)
+	pm.PluginQueueUnloader.NextUnloadTimer = ticker
+	done := make(chan bool)
+	pm.PluginQueueUnloader.CancelChannel = done
+
+	go func() {
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				fmt.Println("RELOAD QUEUE TICKER")
+				pm.postNextPointCallback()
+			}
+		}
+	}()
 }
 
 func (pm *NetworkPollManager) StopQueueUnloader() {
 	fmt.Println("StopQueueUnloader()")
-	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextUnloadTimer != nil {
-		pm.PluginQueueUnloader.NextUnloadTimer.Stop() //TODO: this line is causing errors, and I don't know why
+	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextUnloadTimer != nil && pm.PluginQueueUnloader.CancelChannel != nil {
+		pm.PluginQueueUnloader.NextUnloadTimer.Stop()
+		pm.PluginQueueUnloader.CancelChannel <- true
 	}
 	pm.PluginQueueUnloader = nil
 }
@@ -56,7 +79,8 @@ func (pm *NetworkPollManager) GetNextPollingPoint() (pp *PollingPoint, callback 
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint != nil {
 		pp := pm.PluginQueueUnloader.NextPollPoint
 		pm.PluginQueueUnloader.NextPollPoint = nil
-		pm.PluginQueueUnloader.NextUnloadTimer = time.AfterFunc(pm.MaxPollRate, pm.postNextPointCallback)
+		//Moving the line below to a reoccurring timer instead.
+		//pm.PluginQueueUnloader.NextUnloadTimer = time.AfterFunc(pm.MaxPollRate, pm.postNextPointCallback)
 		return pp, pm.PollingPointCompleteNotification
 	}
 	fmt.Println("GetNextPollingPoint(): No pollingPoint available")
