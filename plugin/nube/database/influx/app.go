@@ -24,7 +24,6 @@ func (i *Instance) syncInflux() (bool, error) {
 	producerUuid := ""
 	var historyTags []*model.HistoryInfluxTag
 
-	// TODO: what we do if this execution happens in middle of the history sync from edge > cloud
 	for _, history := range histories {
 		if lastSyncId < history.ID {
 			lastSyncId = history.ID

@@ -58,7 +58,7 @@ func NewFlowPluginInstance() plugin.Plugin {
 	return &Instance{}
 }
 
-//main will not let main run
+// main will not let main run
 func main() {
 	panic("this should be built as plugin")
 }
