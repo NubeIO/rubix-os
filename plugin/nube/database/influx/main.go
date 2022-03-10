@@ -10,10 +10,10 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-const path = "influx" //must be unique across all plugins
-const name = "influx" //must be unique across all plugins
-const description = "influx db v2 api"
-const author = "ap"
+const path = "influx" // must be unique across all plugins
+const name = "influx" // must be unique across all plugins
+const description = "InfluxDB2 DataSource"
+const author = "NubeiO"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
 const DefaultExpiration = cache.DefaultExpiration
@@ -22,8 +22,8 @@ const pluginType = "database"
 const allowConfigWrite = false
 const isNetwork = false
 const maxAllowedNetworks = 0
-const networkType = "na"
-const transportType = "na"
+const networkType = "N/A"
+const transportType = "N/A"
 const ip = "0.0.0.0"
 const port = "8080"
 
@@ -58,7 +58,7 @@ func NewFlowPluginInstance() plugin.Plugin {
 	return &Instance{}
 }
 
-//main will not let main run
+// main will not let main run
 func main() {
 	panic("this should be built as plugin")
 }

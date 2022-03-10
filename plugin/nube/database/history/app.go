@@ -21,7 +21,7 @@ func (i *Instance) syncHistory() (bool, error) {
 			return false, err
 		}
 		cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-		pHistories, err := cli.GetProducerHistoriesPoints(fnc.UUID, hisLog.LastSyncID)
+		pHistories, err := cli.GetProducerHistoriesPoints(hisLog.LastSyncID)
 		if err != nil {
 			return false, err
 		}

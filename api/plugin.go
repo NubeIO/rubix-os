@@ -75,15 +75,14 @@ func (c *PluginAPI) buildUUID(ctx *gin.Context) string {
 		path, err := c.DB.GetPluginByPath(nameOrUUID)
 		if err != nil {
 			responseHandler("err: no plugin with that name was found", nil, ctx)
-			return ""
+		} else {
+			uuid = path.UUID
 		}
-		uuid = path.UUID
 	} else {
 		uuid = resolveID(ctx)
 	}
 	if uuid == "" {
 		responseHandler("err: no valid uuid found", nil, ctx)
-		return ""
 	}
 	return uuid
 }

@@ -1,8 +1,10 @@
 package database
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -18,7 +20,9 @@ func (d *GormDatabase) GetHistories(args api.Args) ([]*model.History, error) {
 }
 
 // GetHistoriesForSync returns all histories after id.
-func (d *GormDatabase) GetHistoriesForSync(args api.Args) ([]*model.History, error) {
+// We order by `uuid` i.e. `producer_uuid`, so all similar data comes on same block which helps to reduce data query
+// for fetching the data from points, devices, networks etc.
+func (d *GormDatabase) GetHistoriesForSync() ([]*model.History, error) {
 	var historiesModel []*model.History
 	query := d.DB.Where("id > (?)", d.DB.Table("history_influx_logs").
 		Select("IFNULL(MAX(last_sync_id),0)"))
@@ -49,17 +53,19 @@ func (d *GormDatabase) CreateHistory(body *model.History) (*model.History, error
 }
 
 // CreateBulkHistory bulk creates a thing.
-func (d *GormDatabase) CreateBulkHistory(history []*model.History) (bool, error) {
-	for _, hist := range history {
+func (d *GormDatabase) CreateBulkHistory(histories []*model.History) (bool, error) {
+	tx := d.DB.Begin() // for restricting the access by data source while bulk history creation is still to complete
+	for _, history := range histories {
 		ph := new(model.History)
-		ph.UUID = hist.UUID
-		ph.Value = hist.Value
+		ph.UUID = history.UUID
+		ph.Value = history.Value
 		ph.Timestamp = time.Now().UTC()
 		_, err := d.CreateHistory(ph)
 		if err != nil {
-			return false, err
+			log.Error(fmt.Sprintf("Issue on creating history.id = %d, producer_uuid = %s", history.ID, history.UUID))
 		}
 	}
+	tx.Commit()
 	return true, nil
 }
 
