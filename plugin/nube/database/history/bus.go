@@ -6,15 +6,18 @@ import (
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/mustafaturan/bus/v3"
+	"strings"
 )
 
 func (i *Instance) BusServ() {
 	handlerJobs := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
-				_, err := i.syncHistory()
-				if err != nil {
-					return
+				if strings.Split(e.Topic, ".")[2] == path {
+					_, err := i.syncHistory()
+					if err != nil {
+						return
+					}
 				}
 			}()
 		},
@@ -23,5 +26,4 @@ func (i *Instance) BusServ() {
 	u, _ := utils.MakeUUID()
 	key := fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerJobs)
-
 }

@@ -13,7 +13,7 @@ func (i *Instance) syncInflux() (bool, error) {
 		return false, err
 	}
 	if len(integrations) == 0 {
-		log.Info("InfluxDB can't be registered, integration details missing.")
+		log.Warn("InfluxDB sync failure: integration details missing")
 		return true, nil
 	}
 	histories, err := i.db.GetHistoriesForSync()

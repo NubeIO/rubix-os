@@ -2,7 +2,7 @@ package main
 
 // Config is user plugin configuration
 type Config struct {
-	OrganizationID string `yaml:"organization_id"`
+	OrganizationID string `yaml:"Nube iO"`
 }
 
 // DefaultConfig implements plugin.Configurer

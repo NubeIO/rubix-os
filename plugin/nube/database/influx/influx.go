@@ -50,6 +50,7 @@ func (i *InfluxSetting) WriteHistories(tags map[string]string, fields map[string
 	client.Close()
 }
 
+// TODO: see on this in future
 // Read functions reads all the histories saved inside of InfluxDB and returns them as array
 func (i *InfluxSetting) Read(measurement string) [][]byte {
 	client := influxdb2.NewClient(i.ServerURL, i.AuthToken)

@@ -10,10 +10,10 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-const path = "history" //must be unique across all plugins
-const name = "history" //must be unique across all plugins
+const path = "history" // must be unique across all plugins
+const name = "history" // must be unique across all plugins
 const description = "history"
-const author = "ap"
+const author = "Nube iO"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
 const DefaultExpiration = cache.DefaultExpiration
@@ -22,8 +22,8 @@ const pluginType = "database"
 const allowConfigWrite = false
 const isNetwork = false
 const maxAllowedNetworks = 0
-const networkType = "na"
-const transportType = "na"
+const networkType = "N/A"
+const transportType = "N/A"
 
 // Instance is plugin instance
 type Instance struct {
