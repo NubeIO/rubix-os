@@ -3,6 +3,7 @@ package database
 import "github.com/NubeIO/flow-framework/model"
 
 func (d *GormDatabase) GetHistoryInfluxTags(producerUuid string) ([]*model.HistoryInfluxTag, error) {
+	// TODO: do we need to convert point_uuid to rubix_point_uuid or not?
 	var influxHistoryTags []*model.HistoryInfluxTag
 	d.DB.Table("flow_network_clones").
 		Select("flow_network_clones.client_id, flow_network_clones.client_name, flow_network_clones.site_id, "+

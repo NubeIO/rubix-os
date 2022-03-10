@@ -6,7 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//syncInflux
 func (i *Instance) syncInflux() (bool, error) {
 	log.Info("InfluxDB sync has is been called")
 	integrations, err := i.db.GetEnabledIntegrationByPluginConfId(i.pluginUUID)
@@ -24,6 +23,8 @@ func (i *Instance) syncInflux() (bool, error) {
 	lastSyncId := 0
 	producerUuid := ""
 	var historyTags []*model.HistoryInfluxTag
+
+	// TODO: what we do if this execution happens in middle of the history sync from edge > cloud
 	for _, history := range histories {
 		if lastSyncId < history.ID {
 			lastSyncId = history.ID
@@ -32,7 +33,7 @@ func (i *Instance) syncInflux() (bool, error) {
 			producerUuid = history.UUID
 			historyTags, err = i.db.GetHistoryInfluxTags(producerUuid)
 			if err != nil {
-				return false, err
+				log.Error(fmt.Sprintf("We unable to get the producer_uuid = %s details!", producerUuid))
 			}
 		}
 		for _, historyTag := range historyTags {
@@ -40,7 +41,11 @@ func (i *Instance) syncInflux() (bool, error) {
 			fields := fieldsHistory(history)
 			for _, integration := range integrations {
 				influxSetting := new(InfluxSetting)
-				influxSetting.ServerURL = fmt.Sprintf("http://%s:%s", integration.IP, integration.PORT)
+				schema := "http"
+				if integration.PORT == 443 {
+					schema = "https"
+				}
+				influxSetting.ServerURL = fmt.Sprintf("%s://%s:%d", schema, integration.IP, integration.PORT)
 				influxSetting.AuthToken = integration.Token
 				isc := New(influxSetting)
 				isc.WriteHistories(tags, fields, history.Timestamp)

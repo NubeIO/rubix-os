@@ -20,10 +20,10 @@ type InfluxSetting struct {
 
 func New(s *InfluxSetting) *InfluxSetting {
 	if s.Org == "" {
-		s.Org = "mydb"
+		s.Org = "nube_db"
 	}
 	if s.Bucket == "" {
-		s.Bucket = "mydb"
+		s.Bucket = "nube_db"
 	}
 	if s.ServerURL == "" {
 		s.ServerURL = "http://localhost:8086"
@@ -44,11 +44,7 @@ func New(s *InfluxSetting) *InfluxSetting {
 func (i *InfluxSetting) WriteHistories(tags map[string]string, fields map[string]interface{}, ts time.Time) {
 	client := influxdb2.NewClient(i.ServerURL, i.AuthToken)
 	writeAPI := client.WriteAPI(i.Org, i.Bucket)
-	point := influxdb2.NewPoint(
-		i.Measurement,
-		tags,
-		fields,
-		ts)
+	point := influxdb2.NewPoint(i.Measurement, tags, fields, ts)
 	writeAPI.WritePoint(point)
 	writeAPI.Flush()
 	client.Close()
