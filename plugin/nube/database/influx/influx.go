@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -20,16 +20,16 @@ type InfluxSetting struct {
 
 func New(s *InfluxSetting) *InfluxSetting {
 	if s.Org == "" {
-		s.Org = "nube_db"
+		s.Org = "nube-org"
 	}
 	if s.Bucket == "" {
-		s.Bucket = "nube_db"
-	}
-	if s.ServerURL == "" {
-		s.ServerURL = "http://localhost:8086"
+		s.Bucket = "nube-bucket"
 	}
 	if s.Measurement == "" {
 		s.Measurement = "points"
+	}
+	if s.ServerURL == "" {
+		s.ServerURL = "http://localhost:8086"
 	}
 	return &InfluxSetting{
 		Org:         s.Org,
@@ -56,10 +56,10 @@ func (i *InfluxSetting) Read(measurement string) [][]byte {
 	client := influxdb2.NewClient(i.ServerURL, i.AuthToken)
 	queryAPI := client.QueryAPI(i.Org)
 	fluxQuery := fmt.Sprintf(`from(bucket:"%v") |> range(start:-5) |> filter(fn:(r) => r._measurement == "%v")`, i.Bucket, measurement)
-	logrus.Infof("FLUX QUERY: %v", fluxQuery)
+	log.Infof("FLUX QUERY: %v", fluxQuery)
 	result, err := queryAPI.Query(context.Background(), fluxQuery)
 	if err != nil {
-		logrus.Errorf("Error :%v", err)
+		log.Errorf("Error :%v", err)
 		panic(err)
 	}
 	var temperaturesArray [][]byte
