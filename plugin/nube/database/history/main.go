@@ -27,6 +27,7 @@ const transportType = "N/A"
 
 // Instance is plugin instance
 type Instance struct {
+	config      *Config
 	enabled     bool
 	basePath    string
 	db          dbhandler.Handler
