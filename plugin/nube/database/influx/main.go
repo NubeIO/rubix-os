@@ -13,7 +13,7 @@ import (
 const path = "influx" // must be unique across all plugins
 const name = "influx" // must be unique across all plugins
 const description = "InfluxDB2 DataSource"
-const author = "NubeiO"
+const author = "Nube iO"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
 const DefaultExpiration = cache.DefaultExpiration

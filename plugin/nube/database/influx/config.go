@@ -1,18 +1,30 @@
 package main
 
-// Config is user plugin configuration
 type Config struct {
-	OrganizationID string `yaml:"Nube iO"`
+	Influx Influx `yaml:"influx"`
 }
 
-// DefaultConfig implements plugin.Configurer
+type Influx struct {
+	Host  string  `yaml:"host"`
+	Port  int     `yaml:"port"`
+	Token *string `yaml:"token"`
+}
+
 func (i *Instance) DefaultConfig() interface{} {
+	influx := Influx{
+		Host:  "localhost",
+		Port:  8086,
+		Token: nil,
+	}
 	return &Config{
-		OrganizationID: "1",
+		Influx: influx,
 	}
 }
 
-// ValidateAndSetConfig implements plugin.Configurer
+func (i *Instance) GetConfig() interface{} {
+	return i.config
+}
+
 func (i *Instance) ValidateAndSetConfig(config interface{}) error {
 	newConfig := config.(*Config)
 	i.config = newConfig
