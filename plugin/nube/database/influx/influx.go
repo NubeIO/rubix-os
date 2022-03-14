@@ -11,31 +11,19 @@ import (
 )
 
 type InfluxSetting struct {
-	Org         string
-	Bucket      string
 	ServerURL   string
 	AuthToken   string
+	Org         string
+	Bucket      string
 	Measurement string
 }
 
 func New(s *InfluxSetting) *InfluxSetting {
-	if s.Org == "" {
-		s.Org = "nube-org"
-	}
-	if s.Bucket == "" {
-		s.Bucket = "nube-bucket"
-	}
-	if s.Measurement == "" {
-		s.Measurement = "points"
-	}
-	if s.ServerURL == "" {
-		s.ServerURL = "http://localhost:8086"
-	}
 	return &InfluxSetting{
-		Org:         s.Org,
-		Bucket:      s.Bucket,
 		ServerURL:   s.ServerURL,
 		AuthToken:   s.AuthToken,
+		Org:         s.Org,
+		Bucket:      s.Bucket,
 		Measurement: s.Measurement,
 	}
 }

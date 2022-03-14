@@ -7,12 +7,9 @@ import (
 )
 
 func (i *Instance) syncInflux() (bool, error) {
-	log.Info("InfluxDB sync has is been called")
-	integrations, err := i.db.GetEnabledIntegrationByPluginConfId(i.pluginUUID)
-	if err != nil {
-		return false, err
-	}
-	if len(integrations) == 0 {
+	log.Info("InfluxDB sync has is been called...")
+	influxConnections := i.config.Influx
+	if len(influxConnections) == 0 {
 		log.Warn("InfluxDB sync failure: integration details missing")
 		return true, nil
 	}
@@ -38,14 +35,21 @@ func (i *Instance) syncInflux() (bool, error) {
 		for _, historyTag := range historyTags {
 			tags := tagsHistory(historyTag)
 			fields := fieldsHistory(history)
-			for _, integration := range integrations {
+			for _, influx := range influxConnections {
 				influxSetting := new(InfluxSetting)
 				schema := "http"
-				if integration.PORT == 443 {
+				if influx.Port == 443 {
 					schema = "https"
 				}
-				influxSetting.ServerURL = fmt.Sprintf("%s://%s:%d", schema, integration.IP, integration.PORT)
-				influxSetting.AuthToken = integration.Token
+				influxSetting.ServerURL = fmt.Sprintf("%s://%s:%d", schema, influx.Host, influx.Port)
+				if influx.Token == nil {
+					log.Warn("Token is null, please update it")
+					continue
+				}
+				influxSetting.AuthToken = *influx.Token
+				influxSetting.Org = influx.Org
+				influxSetting.Bucket = influx.Bucket
+				influxSetting.Measurement = influx.Measurement
 				isc := New(influxSetting)
 				isc.WriteHistories(tags, fields, history.Timestamp)
 			}
