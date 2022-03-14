@@ -20,6 +20,7 @@ func (i *Instance) syncInflux() (bool, error) {
 	lastSyncId := 0
 	producerUuid := ""
 	var historyTags []*model.HistoryInfluxTag
+	var influxSettings []*InfluxSetting
 
 	for _, history := range histories {
 		if lastSyncId < history.ID {
@@ -52,8 +53,13 @@ func (i *Instance) syncInflux() (bool, error) {
 				influxSetting.Measurement = influx.Measurement
 				isc := New(influxSetting)
 				isc.WriteHistories(tags, fields, history.Timestamp)
+				influxSettings = append(influxSettings, isc)
 			}
 		}
+	}
+	// forcing to push bulk writes
+	for _, influxSetting := range influxSettings {
+		influxSetting.getInfluxConnectionInstance().writeAPI.Flush()
 	}
 	historyCount := len(histories)
 	if historyCount > 0 {

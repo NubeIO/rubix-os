@@ -26,5 +26,8 @@ func (i *Instance) Enable() error {
 func (i *Instance) Disable() error {
 	i.enabled = false
 	cron.Clear()
+	for _, influxConnectionInstance := range influxConnectionInstances {
+		influxConnectionInstance.client.Close()
+	}
 	return nil
 }
