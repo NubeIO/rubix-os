@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
+	log "github.com/sirupsen/logrus"
 	"sync"
 	"time"
 )
@@ -51,6 +54,30 @@ func (i *InfluxSetting) WriteHistories(tags map[string]string, fields map[string
 	influxConnectionInstance := i.getInfluxConnectionInstance()
 	point := influxdb2.NewPoint(i.Measurement, tags, fields, ts)
 	influxConnectionInstance.writeAPI.WritePoint(point)
+}
+
+func (i *InfluxSetting) ReadMaxId() (value int, isError bool) {
+	client := i.getInfluxConnectionInstance().client
+	queryAPI := client.QueryAPI(i.Org)
+	fluxQuery := fmt.Sprintf(
+		`from(bucket: "%v")
+				  |> range(start:-1)
+				  |> filter(fn: (r) => r["_measurement"] == "%v")
+				  |> filter(fn: (r) => r["_field"] == "id")
+				  |> aggregateWindow(every: 1d, fn: max, createEmpty: false)
+				  |> yield(name: "max")`, i.Bucket, i.Measurement)
+	log.Debugf("Flux Query: %s", fluxQuery)
+	result, err := queryAPI.Query(context.Background(), fluxQuery)
+	if err != nil {
+		log.Errorf("Error :%v", err)
+		return 0, true
+	}
+	for result.Next() {
+		values := result.Record().Values()
+		value := values["_value"]
+		return int(value.(int64)), false
+	}
+	return 0, false
 }
 
 func tagsHistory(ht *model.HistoryInfluxTag) map[string]string {

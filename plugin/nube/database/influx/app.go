@@ -1,31 +1,83 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	log "github.com/sirupsen/logrus"
 )
 
-func (i *Instance) syncInflux() (bool, error) {
-	log.Info("InfluxDB sync has is been called...")
+type InfluxDetail struct {
+	InfluxSetting *InfluxSetting
+	MaxId         int
+	Records       int
+	IsError       bool
+}
+
+func (i *Instance) initializeInfluxSettings() []*InfluxSetting {
+	var influxSettings []*InfluxSetting
 	influxConnections := i.config.Influx
-	if len(influxConnections) == 0 {
-		log.Warn("InfluxDB sync failure: integration details missing")
-		return true, nil
+	for _, influx := range influxConnections {
+		influxSetting := new(InfluxSetting)
+		schema := "http"
+		if influx.Port == 443 {
+			schema = "https"
+		}
+		influxSetting.ServerURL = fmt.Sprintf("%s://%s:%d", schema, influx.Host, influx.Port)
+		if influx.Token == nil {
+			log.Warn("Token is null, please update it")
+			continue
+		}
+		influxSetting.AuthToken = *influx.Token
+		influxSetting.Org = influx.Org
+		influxSetting.Bucket = influx.Bucket
+		influxSetting.Measurement = influx.Measurement
+		influxSettings = append(influxSettings, influxSetting)
 	}
-	histories, err := i.db.GetHistoriesForSync()
+	return influxSettings
+}
+
+func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
+	log.Info("InfluxDB sync has is been called...")
+	if len(influxSettings) == 0 {
+		err := "InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
+		log.Warn(err)
+		return false, errors.New(err)
+	}
+
+	leastMaxId := 0
+	var influxDetails []InfluxDetail
+	allError := true
+	for _, influxSetting := range influxSettings {
+		maxId, isError := influxSetting.ReadMaxId()
+		influxDetail := InfluxDetail{
+			InfluxSetting: influxSetting,
+			MaxId:         maxId,
+			Records:       0,
+			IsError:       isError,
+		}
+		if !isError {
+			allError = false
+		}
+		if leastMaxId > maxId && !isError {
+			leastMaxId = maxId
+		}
+		influxDetails = append(influxDetails, influxDetail)
+	}
+
+	if allError {
+		err := "no connections are valid"
+		log.Warn(err)
+		return false, errors.New(err)
+	}
+	histories, err := i.db.GetHistoriesForSync(leastMaxId)
 	if err != nil {
 		return false, err
 	}
-	lastSyncId := 0
+
 	producerUuid := ""
 	var historyTags []*model.HistoryInfluxTag
-	var influxSettings []*InfluxSetting
-
 	for _, history := range histories {
-		if lastSyncId < history.ID {
-			lastSyncId = history.ID
-		}
 		if producerUuid != history.UUID {
 			producerUuid = history.UUID
 			historyTags, err = i.db.GetHistoryInfluxTags(producerUuid)
@@ -36,40 +88,23 @@ func (i *Instance) syncInflux() (bool, error) {
 		for _, historyTag := range historyTags {
 			tags := tagsHistory(historyTag)
 			fields := fieldsHistory(history)
-			for _, influx := range influxConnections {
-				influxSetting := new(InfluxSetting)
-				schema := "http"
-				if influx.Port == 443 {
-					schema = "https"
+			for i, influxDetail := range influxDetails {
+				if influxDetail.MaxId < history.ID {
+					influxDetail.InfluxSetting.WriteHistories(tags, fields, history.Timestamp)
+					influxDetails[i].Records += 1 // directly updating to reflect value
 				}
-				influxSetting.ServerURL = fmt.Sprintf("%s://%s:%d", schema, influx.Host, influx.Port)
-				if influx.Token == nil {
-					log.Warn("Token is null, please update it")
-					continue
-				}
-				influxSetting.AuthToken = *influx.Token
-				influxSetting.Org = influx.Org
-				influxSetting.Bucket = influx.Bucket
-				influxSetting.Measurement = influx.Measurement
-				isc := New(influxSetting)
-				isc.WriteHistories(tags, fields, history.Timestamp)
-				influxSettings = append(influxSettings, isc)
 			}
 		}
 	}
+
 	// forcing to push bulk writes
-	for _, influxSetting := range influxSettings {
-		influxSetting.getInfluxConnectionInstance().writeAPI.Flush()
-	}
-	historyCount := len(histories)
-	if historyCount > 0 {
-		_, err := i.db.UpdateHistoryInfluxLogLastSyncId(lastSyncId)
-		if err != nil {
-			return false, err
+	for _, influxDetail := range influxDetails {
+		influxDetail.InfluxSetting.getInfluxConnectionInstance().writeAPI.Flush()
+		if influxDetail.Records > 0 {
+			log.Info(fmt.Sprintf("Stored %v rows on %v", influxDetail.Records, path))
+		} else {
+			log.Info("Nothing to store, no new records")
 		}
-		log.Info(fmt.Sprintf("Stored %v rows on %v", historyCount, path))
-	} else {
-		log.Info("Nothing to store, no new records")
 	}
 	return true, nil
 }
