@@ -45,22 +45,22 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 		return false, errors.New(err)
 	}
 
-	leastMaxId := 0
+	leastLastSyncId := 0
 	var influxDetails []InfluxDetail
 	allError := true
 	for _, influxSetting := range influxSettings {
-		maxId, isError := influxSetting.ReadMaxId()
+		lastSyncId, isError := influxSetting.GetLastSyncId()
 		influxDetail := InfluxDetail{
 			InfluxSetting: influxSetting,
-			MaxId:         maxId,
+			MaxId:         lastSyncId,
 			Records:       0,
 			IsError:       isError,
 		}
 		if !isError {
 			allError = false
 		}
-		if leastMaxId > maxId && !isError {
-			leastMaxId = maxId
+		if leastLastSyncId > lastSyncId && !isError {
+			leastLastSyncId = lastSyncId
 		}
 		influxDetails = append(influxDetails, influxDetail)
 	}
@@ -70,7 +70,7 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 		log.Warn(err)
 		return false, errors.New(err)
 	}
-	histories, err := i.db.GetHistoriesForSync(leastMaxId)
+	histories, err := i.db.GetHistoriesForSync(leastLastSyncId)
 	if err != nil {
 		return false, err
 	}

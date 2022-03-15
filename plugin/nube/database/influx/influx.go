@@ -56,7 +56,7 @@ func (i *InfluxSetting) WriteHistories(tags map[string]string, fields map[string
 	influxConnectionInstance.writeAPI.WritePoint(point)
 }
 
-func (i *InfluxSetting) ReadMaxId() (value int, isError bool) {
+func (i *InfluxSetting) GetLastSyncId() (value int, isError bool) {
 	client := i.getInfluxConnectionInstance().client
 	queryAPI := client.QueryAPI(i.Org)
 	fluxQuery := fmt.Sprintf(
@@ -64,7 +64,7 @@ func (i *InfluxSetting) ReadMaxId() (value int, isError bool) {
 				  |> range(start:-1)
 				  |> filter(fn: (r) => r["_measurement"] == "%v")
 				  |> filter(fn: (r) => r["_field"] == "id")
-				  |> aggregateWindow(every: 1d, fn: max, createEmpty: false)
+				  |> aggregateWindow(every: 1y, fn: max, createEmpty: false)
 				  |> yield(name: "max")`, i.Bucket, i.Measurement)
 	log.Debugf("Flux Query: %s", fluxQuery)
 	result, err := queryAPI.Query(context.Background(), fluxQuery)
@@ -72,12 +72,12 @@ func (i *InfluxSetting) ReadMaxId() (value int, isError bool) {
 		log.Errorf("Error :%v", err)
 		return 0, true
 	}
+	value = 0
 	for result.Next() {
 		values := result.Record().Values()
-		value := values["_value"]
-		return int(value.(int64)), false
+		value = int(values["_value"].(int64))
 	}
-	return 0, false
+	return value, false
 }
 
 func tagsHistory(ht *model.HistoryInfluxTag) map[string]string {
