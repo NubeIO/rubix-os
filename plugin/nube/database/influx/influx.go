@@ -94,6 +94,7 @@ func tagsHistory(ht *model.HistoryInfluxTag) map[string]string {
 	newMap["rubix_device_name"] = ht.RubixDeviceName
 	newMap["rubix_network_uuid"] = ht.RubixNetworkUUID
 	newMap["rubix_network_name"] = ht.RubixNetworkName
+	newMap["uniq"] = ht.RubixPointUUID
 	return newMap
 }
 

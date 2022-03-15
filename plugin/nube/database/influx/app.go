@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	log "github.com/sirupsen/logrus"
+	"math"
 )
 
 type InfluxDetail struct {
@@ -45,7 +46,7 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 		return false, errors.New(err)
 	}
 
-	leastLastSyncId := 0
+	leastLastSyncId := math.MaxInt64
 	var influxDetails []InfluxDetail
 	allError := true
 	for _, influxSetting := range influxSettings {
@@ -81,8 +82,9 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 		if producerUuid != history.UUID {
 			producerUuid = history.UUID
 			historyTags, err = i.db.GetHistoryInfluxTags(producerUuid)
-			if err != nil {
+			if err != nil || len(historyTags) == 0 {
 				log.Error(fmt.Sprintf("We unable to get the producer_uuid = %s details!", producerUuid))
+				continue
 			}
 		}
 		for _, historyTag := range historyTags {
