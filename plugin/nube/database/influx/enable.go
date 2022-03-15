@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/go-co-op/gocron"
+	"sync"
 	"time"
 )
 
@@ -11,6 +12,7 @@ func (i *Instance) Enable() error {
 	i.enabled = true
 	i.setUUID()
 	i.BusServ()
+	once = sync.Once{}
 	cron = gocron.NewScheduler(time.UTC)
 	influxDetails := i.initializeInfluxSettings()
 	_, _ = cron.Every(i.config.Job.Frequency).Tag("SyncInflux").Do(i.syncInflux, influxDetails)
