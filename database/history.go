@@ -22,10 +22,9 @@ func (d *GormDatabase) GetHistories(args api.Args) ([]*model.History, error) {
 // GetHistoriesForSync returns all histories after id.
 // We order by `uuid` i.e. `producer_uuid`, so all similar data comes on same block which helps to reduce data query
 // for fetching the data from points, devices, networks etc.
-func (d *GormDatabase) GetHistoriesForSync() ([]*model.History, error) {
+func (d *GormDatabase) GetHistoriesForSync(lastSyncId int) ([]*model.History, error) {
 	var historiesModel []*model.History
-	query := d.DB.Where("id > (?)", d.DB.Table("history_influx_logs").
-		Select("IFNULL(MAX(last_sync_id),0)"))
+	query := d.DB.Where("id > (?)", lastSyncId)
 	query.Order("uuid ASC").Find(&historiesModel)
 	if query.Error != nil {
 		return nil, query.Error

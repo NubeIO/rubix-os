@@ -9,7 +9,7 @@ import (
 )
 
 func (i *Instance) syncHistory() (bool, error) {
-	log.Info("History sync has is been called")
+	log.Info("History sync has is been called...")
 	fnClones, err := i.db.GetFlowNetworkClones()
 	if err != nil {
 		return false, err

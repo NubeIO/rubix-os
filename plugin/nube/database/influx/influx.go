@@ -2,76 +2,82 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api"
 	log "github.com/sirupsen/logrus"
+	"sync"
 	"time"
 )
 
+var influxConnectionInstance *InfluxConnection
+var influxConnectionInstances []*InfluxConnection
+var once sync.Once
+
 type InfluxSetting struct {
-	Org         string
-	Bucket      string
 	ServerURL   string
 	AuthToken   string
+	Org         string
+	Bucket      string
 	Measurement string
 }
 
+type InfluxConnection struct {
+	client   influxdb2.Client
+	writeAPI api.WriteAPI
+}
+
 func New(s *InfluxSetting) *InfluxSetting {
-	if s.Org == "" {
-		s.Org = "nube-org"
-	}
-	if s.Bucket == "" {
-		s.Bucket = "nube-bucket"
-	}
-	if s.Measurement == "" {
-		s.Measurement = "points"
-	}
-	if s.ServerURL == "" {
-		s.ServerURL = "http://localhost:8086"
-	}
 	return &InfluxSetting{
-		Org:         s.Org,
-		Bucket:      s.Bucket,
 		ServerURL:   s.ServerURL,
 		AuthToken:   s.AuthToken,
+		Org:         s.Org,
+		Bucket:      s.Bucket,
 		Measurement: s.Measurement,
 	}
 }
 
-// WriteHistories function writes histories
-func (i *InfluxSetting) WriteHistories(tags map[string]string, fields map[string]interface{}, ts time.Time) {
-	client := influxdb2.NewClient(i.ServerURL, i.AuthToken)
-	writeAPI := client.WriteAPI(i.Org, i.Bucket)
-	point := influxdb2.NewPoint(i.Measurement, tags, fields, ts)
-	writeAPI.WritePoint(point)
-	writeAPI.Flush()
-	client.Close()
+func (i *InfluxSetting) getInfluxConnectionInstance() *InfluxConnection {
+	once.Do(func() {
+		client := influxdb2.NewClient(i.ServerURL, i.AuthToken)
+		influxConnectionInstance = &InfluxConnection{
+			client:   client,
+			writeAPI: client.WriteAPI(i.Org, i.Bucket),
+		}
+		influxConnectionInstances = append(influxConnectionInstances, influxConnectionInstance)
+	})
+	return influxConnectionInstance
 }
 
-// TODO: see on this in future
-// Read functions reads all the histories saved inside of InfluxDB and returns them as array
-func (i *InfluxSetting) Read(measurement string) [][]byte {
-	client := influxdb2.NewClient(i.ServerURL, i.AuthToken)
+func (i *InfluxSetting) WriteHistories(tags map[string]string, fields map[string]interface{}, ts time.Time) {
+	influxConnectionInstance := i.getInfluxConnectionInstance()
+	point := influxdb2.NewPoint(i.Measurement, tags, fields, ts)
+	influxConnectionInstance.writeAPI.WritePoint(point)
+}
+
+func (i *InfluxSetting) GetLastSyncId() (value int, isError bool) {
+	client := i.getInfluxConnectionInstance().client
 	queryAPI := client.QueryAPI(i.Org)
-	fluxQuery := fmt.Sprintf(`from(bucket:"%v") |> range(start:-5) |> filter(fn:(r) => r._measurement == "%v")`, i.Bucket, measurement)
-	log.Infof("FLUX QUERY: %v", fluxQuery)
+	fluxQuery := fmt.Sprintf(
+		`from(bucket: "%v")
+				  |> range(start:-1)
+				  |> filter(fn: (r) => r["_measurement"] == "%v")
+				  |> filter(fn: (r) => r["_field"] == "id")
+				  |> aggregateWindow(every: 1y, fn: max, createEmpty: false)
+				  |> yield(name: "max")`, i.Bucket, i.Measurement)
+	log.Debugf("Flux Query: %s", fluxQuery)
 	result, err := queryAPI.Query(context.Background(), fluxQuery)
 	if err != nil {
 		log.Errorf("Error :%v", err)
-		panic(err)
+		return 0, true
 	}
-	var temperaturesArray [][]byte
+	value = 0
 	for result.Next() {
-		j, err := json.Marshal(result.Record().Values())
-		if err != nil {
-			panic(err)
-		}
-		temperaturesArray = append(temperaturesArray, j)
+		values := result.Record().Values()
+		value = int(values["_value"].(int64))
 	}
-	client.Close()
-	return temperaturesArray
+	return value, false
 }
 
 func tagsHistory(ht *model.HistoryInfluxTag) map[string]string {
