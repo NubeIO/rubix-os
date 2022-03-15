@@ -1,12 +1,19 @@
 package main
 
+type Job struct {
+	Frequency string `yaml:"frequency"`
+}
+
 type Config struct {
-	MagicString string `yaml:"magic_string"`
+	Job Job `yaml:"job"`
 }
 
 func (i *Instance) DefaultConfig() interface{} {
+	job := Job{
+		Frequency: "1m",
+	}
 	return &Config{
-		MagicString: "N/A",
+		Job: job,
 	}
 }
 
