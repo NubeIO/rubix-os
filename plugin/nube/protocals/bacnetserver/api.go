@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/plgrest"
 	"github.com/NubeIO/flow-framework/utils"
@@ -20,7 +21,12 @@ func getBODYNetwork(ctx *gin.Context) (dto *bacnet_model.Server, err error) {
 	return dto, err
 }
 
-func getBODYPoints(ctx *gin.Context) (dto *bacnet_model.BacnetPoint, err error) {
+func getBODYPoints(ctx *gin.Context) (dto *model.Point, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBODYPointsBacnet(ctx *gin.Context) (dto *bacnet_model.BacnetPoint, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -34,8 +40,24 @@ func resolveAddress(ctx *gin.Context) string {
 }
 
 // RegisterWebhook implements plugin.Webhooker
-func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
-	i.basePath = basePath
+func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
+	inst.basePath = basePath
+	mux.POST("/points", func(ctx *gin.Context) {
+		body, _ := getBODYPoints(ctx)
+		point, httpRes, err := inst.addPoint(body)
+		if httpRes != nil {
+			ctx.JSON(httpRes.StatusCode, httpRes.AsJsonNoErr())
+			return
+		}
+		if err != nil {
+			log.Error(err, "ERROR ON PingServer")
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, point)
+		}
+	})
+
 	mux.GET("/bacnet/ping", func(ctx *gin.Context) {
 		cli := plgrest.NewNoAuth(ip, string(port))
 		p, err := cli.PingServer()
@@ -79,7 +101,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 	mux.POST("/bacnet/points", func(ctx *gin.Context) {
-		body, _ := getBODYPoints(ctx)
+		body, _ := getBODYPointsBacnet(ctx)
 		cli := plgrest.NewNoAuth(ip, string(port))
 		p, err := cli.AddPoint(*body)
 		if err != nil {
@@ -90,7 +112,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 	mux.PATCH("/bacnet/points/:object/:address", func(ctx *gin.Context) {
-		body, _ := getBODYPoints(ctx)
+		body, _ := getBODYPointsBacnet(ctx)
 		obj := resolveObject(ctx)
 		addr := resolveAddress(ctx)
 		cli := plgrest.NewNoAuth(ip, string(port))
@@ -107,7 +129,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		cli := plgrest.NewNoAuth(ip, string(port))
 		p, err := cli.GetPoints()
 		for _, pnt := range *p {
-			_, err := i.bacnetServerDeletePoint(&pnt)
+			_, err := inst.bacnetServerDeletePoint(&pnt)
 			if err != nil {
 				return
 			}
@@ -120,7 +142,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 	mux.POST("/bacnet/wizard", func(ctx *gin.Context) {
-		wizard, err := i.wizard()
+		wizard, err := inst.wizard()
 		if err != nil {
 			log.Error(err, "ERROR ON wizard")
 			ctx.JSON(http.StatusBadRequest, err)

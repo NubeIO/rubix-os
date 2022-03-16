@@ -31,7 +31,7 @@ type Network struct {
 	CommonThingType
 	TransportType    string    `json:"transport_type,omitempty"  gorm:"type:varchar(255);not null"` //serial
 	PluginConfId     string    `json:"plugin_conf_id,omitempty" gorm:"TYPE:varchar(255) REFERENCES plugin_confs;not null;default:null"`
-	PluginPath       string    `json:"plugin_name,omitempty"`
+	PluginPath       string    `json:"plugin_name,omitempty"` //plugin_name
 	NetworkInterface string    `json:"network_interface"`
 	IP               string    `json:"ip"`
 	Port             *int      `json:"port"`
