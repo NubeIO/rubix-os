@@ -90,12 +90,12 @@ func (inst *Instance) handleSerialPayload(data string) {
 		if err != nil {
 			errMsg := fmt.Sprintf("lora: issue on failed to find device: %v id: %s\n", err.Error(), deviceUUID)
 			log.Errorf(errMsg)
-			if dev.UUID != "" {
+			if dev != nil {
 				inst.deviceUpdateErr(dev.UUID, deviceUUID, errors.New(errMsg))
 			}
 			return
 		}
-		if dev.UUID != "" {
+		if dev != nil {
 			inst.deviceUpdate(dev.UUID)
 		}
 	}
