@@ -91,14 +91,18 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	//POINTS
 	mux.GET("/bacnet/points", func(ctx *gin.Context) {
-		cli := plgrest.NewNoAuth(ip, string(port))
-		p, err := cli.GetPoints()
-		if err != nil {
-			log.Error(err, "ERROR ON GetPoints")
-			ctx.JSON(http.StatusBadRequest, err)
-		} else {
-			ctx.JSON(http.StatusOK, p)
-		}
+		//points, res := inst.restClient.GetPoints()
+		//statusCode := res.Reply.StatusCode
+		//if res.IsError {
+		//	ctx.JSON(statusCode, res.Reply.Err)
+		//	return
+		//} else if res.IsError {
+		//	//ctx.JSON(statusCode, res.Response)
+		//	return
+		//} else {
+		//	ctx.JSON(statusCode, points)
+		//}
+
 	})
 	mux.POST("/bacnet/points", func(ctx *gin.Context) {
 		body, _ := getBODYPointsBacnet(ctx)

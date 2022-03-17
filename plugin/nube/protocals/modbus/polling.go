@@ -27,8 +27,8 @@ type devCheck struct {
 }
 
 func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
-	deviceDelay = 80 * time.Millisecond
-	pointDelay = 80 * time.Millisecond
+	deviceDelay = 250 * time.Millisecond
+	pointDelay = 100 * time.Millisecond
 	if networkType == model.TransType.LoRa {
 		deviceDelay = 80 * time.Millisecond
 		pointDelay = 6000 * time.Millisecond

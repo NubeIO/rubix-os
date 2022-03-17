@@ -66,6 +66,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, httpRes *
 	bacPoint.Units = "noUnits"
 	bacPoint.RelinquishDefault = utils.Float64IsNil(body.Fallback)
 
+
 	rt.Method = nrest.POST
 	rt.Path = "/api/bacnet/points"
 
