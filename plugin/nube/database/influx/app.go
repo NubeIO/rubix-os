@@ -46,7 +46,7 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 		return false, errors.New(err)
 	}
 
-	leastLastSyncId := math.MaxInt64
+	leastLastSyncId := math.MinInt16
 	var influxDetails []InfluxDetail
 	allError := true
 	for _, influxSetting := range influxSettings {
