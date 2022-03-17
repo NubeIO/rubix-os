@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"reflect"
 	"time"
@@ -41,8 +42,40 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	return pointModel, nil
 }
 
+func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point, err error) {
+
+	device, err := d.GetDevice(body.DeviceUUID, api.Args{})
+	if err != nil {
+		return nil, err
+	}
+	if device == nil {
+		errMsg := fmt.Sprintf("model.points failed to find a device with uuid:%s", body.DeviceUUID)
+		log.Errorf(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	network, err := d.GetNetwork(device.NetworkUUID, api.Args{})
+	if network == nil {
+		errMsg := fmt.Sprintf("model.points failed to find a network with uuid:%s", device.NetworkUUID)
+		log.Errorf(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	pluginName := network.PluginPath
+	if pluginName == "system" {
+		point, err = d.CreatePoint(body, false)
+		if err != nil {
+			return nil, err
+		}
+	}
+	//if plugin like bacnet then call the api direct on the plugin as the plugin knows best how to add a point to keep things in sync
+	cli := client.NewLocalClient()
+	point, err = cli.CreatePointPlugin(body, pluginName)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
 func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
-	var deviceModel *model.Device
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	deviceUUID := body.DeviceUUID
 	body.Name = nameIsNil(body.Name)
@@ -68,10 +101,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		return nil, err
 	}
 	body.ObjectType = string(obj)
-	query := d.DB.Where("uuid = ? ", deviceUUID).First(&deviceModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
 	if body.Description == "" {
 		body.Description = "na"
 	}
@@ -89,7 +118,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		body.Priority = &model.Priority{}
 	}
 	if err := d.DB.Create(&body).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 	}
 	plug, err := d.GetPluginIDFromDevice(deviceUUID)
 	if err != nil {
@@ -103,7 +132,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 			return nil, errors.New("ERROR on device eventbus")
 		}
 	}
-	return body, query.Error
+	return body, err
 }
 
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {

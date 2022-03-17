@@ -40,23 +40,23 @@ func (inst *Instance) BusServ() {
 					return
 				}
 				//try and match is point
-				pnt, err := eventbus.IsPoint(e.Topic, e)
+				//pnt, err := eventbus.IsPoint(e.Topic, e)
 				fmt.Println("BACNET ADD POINT ON BUS")
-				if err != nil {
-					return
-				}
-				_, err = inst.addPoint(pnt)
-				if err != nil {
-					log.Error("BACNET ADD POINT BUS issue on add rest")
-					return
-				}
-				if pnt != nil {
-					log.Info("BACNET BUS PluginsCreated IsPoint", " ", pnt.UUID)
-					if err != nil {
-						return
-					}
-					return
-				}
+				//if err != nil {
+				//	return
+				//}
+				//_, err = inst.addPoint(pnt)
+				//if err != nil {
+				//	log.Error("BACNET ADD POINT BUS issue on add rest")
+				//	return
+				//}
+				//if pnt != nil {
+				//	log.Info("BACNET BUS PluginsCreated IsPoint", " ", pnt.UUID)
+				//	if err != nil {
+				//		return
+				//	}
+				//	return
+				//}
 			}()
 		},
 		Matcher: eventbus.PluginsCreated,

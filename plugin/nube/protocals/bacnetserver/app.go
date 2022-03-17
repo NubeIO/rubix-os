@@ -52,39 +52,53 @@ func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 }
 
 //addPoint from rest api
-func (inst *Instance) addPoint(body *model.Point) (*bacnet_model.Point, error) {
-	var point bacnet_model.BacnetPoint
-	point.ObjectName = body.Name
-	point.Enable = true
-	point.Description = body.Description
-	point.Address = utils.IntIsNil(body.AddressID)
-	point.ObjectType = body.ObjectType
-	point.COV = utils.Float64IsNil(body.COV)
-	point.EventState = "normal"
-	point.Units = "noUnits"
-	point.RelinquishDefault = utils.Float64IsNil(body.Fallback)
+func (inst *Instance) addPoint(body *model.Point) (point *model.Point, httpRes *nrest.Reply, err error) {
+	var bacPoint bacnet_model.BacnetPoint
+	if body.Description == "" {
+		bacPoint.Description = "na"
+	}
+	bacPoint.ObjectName = body.Name
+	bacPoint.Enable = true
+	bacPoint.Address = utils.IntIsNil(body.AddressID)
+	bacPoint.ObjectType = body.ObjectType
+	bacPoint.COV = utils.Float64IsNil(body.COV)
+	bacPoint.EventState = "normal"
+	bacPoint.Units = "noUnits"
+	bacPoint.RelinquishDefault = utils.Float64IsNil(body.Fallback)
+
 
 	rt.Method = nrest.POST
 	rt.Path = "/api/bacnet/points"
 
-	addPoint, _, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{Json: point})
+	httpRes, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{Json: bacPoint})
+	if code != 200 {
+		return nil, httpRes, nil
+	}
+	bacPntUUID := gjson.Get(string(httpRes.Body), "uuid").String()
+	if bacPntUUID == "" {
+		errMsg := fmt.Sprintf("bacnet-server: failed to parse point uuid from bacnet-server-app")
+		log.Errorf(errMsg)
+		return nil, nil, errors.New(errMsg)
+	}
 
-	if &point == nil {
-		log.Error("BACNET ADD POINT issue on add")
-		return nil, errors.New("BACNET ADD POINT issue on add")
-	}
-	if err != nil {
-		log.Errorf("BACNET: ADD POINT issue on add rest: %v\n", err)
-		return nil, err
-	}
-	bacPntUUID := gjson.Get(string(addPoint.Body), "uuid").String()
 	body.AddressUUID = &bacPntUUID
-	_, err = inst.db.UpdatePoint(body.UUID, body, true)
+	point, err = inst.db.CreatePoint(body, true, false)
 	if err != nil {
-		log.Error("BACNET UPDATE POINT issue on update point when getting bacnet point uuid")
-		return nil, err
+		//if ail to add a new point in FF then delete it in the bacnet stack
+		rt.Method = nrest.DELETE
+		url := fmt.Sprintf("/api/bacnet/points/uuid/%s", bacPntUUID)
+		rt.Path = url
+		httpRes, code, err = nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
+		if code != 204 {
+			errMsg := fmt.Sprintf("bacnet-server: failed to add new point in bacnet stack, failed to remove the newly added point from bacnet-server-app")
+			log.Errorf(errMsg)
+			return nil, httpRes, errors.New(errMsg)
+		}
+		errMsg := fmt.Sprintf("bacnet-server: failed to add new point in bacnet stack, point was removed from the bacnet-server-app")
+		log.Errorf(errMsg)
+		return nil, nil, errors.New(errMsg)
 	}
-	return nil, nil
+	return point, nil, nil
 
 }
 

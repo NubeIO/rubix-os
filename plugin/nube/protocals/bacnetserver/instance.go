@@ -7,8 +7,6 @@ func (inst *Instance) setUUID() {
 	}
 	inst.pluginUUID = q.UUID
 	//nrest_bacnet_server.NewClient(rt)
-
 	//aa := nrest_bacnet_server.RestClient{}
 	//nrest_bacnet_server.BacnetPoint{}
-
 }
