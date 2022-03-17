@@ -17,7 +17,7 @@ import (
 )
 
 //bacnetUpdate listen on mqtt and then update the point in flow-framework
-func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
+func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	payload := new(bacnet_model.MqttPayload)
 	err := json.Unmarshal(body.Payload(), &payload)
 	t, _ := mqttclient.TopicParts(body.Topic())
@@ -29,7 +29,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	var pri model.Priority
 	pri.P16 = payload.Value
 	point.Priority = &pri
-	pnt, _ := i.db.GetOnePointByArgs(api.Args{ObjectType: &objType, AddressID: &addr}) //TODO check conversion if existing exists, as in the same addr
+	pnt, _ := inst.db.GetOnePointByArgs(api.Args{ObjectType: &objType, AddressID: &addr}) //TODO check conversion if existing exists, as in the same addr
 	if err != nil {
 		log.Error("BACNET UPDATE POINT PointAndQuery")
 		return nil, err
@@ -43,7 +43,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 		return nil, err
 	}
-	_, err = i.db.UpdatePointValue(pnt.UUID, &point, true)
+	_, err = inst.db.UpdatePointValue(pnt.UUID, &point, true)
 	if err != nil {
 		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 		return nil, err
@@ -52,7 +52,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 }
 
 //addPoint from rest api
-func (i *Instance) addPoint(body *model.Point) (*bacnet_model.Point, error) {
+func (inst *Instance) addPoint(body *model.Point) (*bacnet_model.Point, error) {
 	var point bacnet_model.BacnetPoint
 	point.ObjectName = body.Name
 	point.Enable = true
@@ -79,7 +79,7 @@ func (i *Instance) addPoint(body *model.Point) (*bacnet_model.Point, error) {
 	}
 	bacPntUUID := gjson.Get(string(addPoint.Body), "uuid").String()
 	body.AddressUUID = &bacPntUUID
-	_, err = i.db.UpdatePoint(body.UUID, body, true)
+	_, err = inst.db.UpdatePoint(body.UUID, body, true)
 	if err != nil {
 		log.Error("BACNET UPDATE POINT issue on update point when getting bacnet point uuid")
 		return nil, err
@@ -89,7 +89,7 @@ func (i *Instance) addPoint(body *model.Point) (*bacnet_model.Point, error) {
 }
 
 //pointPatch from rest
-func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
+func (inst *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 	if body.AddressUUID == nil {
 		return nil, errors.New("no address_uuid")
 	}
@@ -117,7 +117,7 @@ func (i *Instance) pointPatch(body *model.Point) (*model.Point, error) {
 }
 
 //deletePoint point make sure
-func (i *Instance) deletePoint(body *model.Point) (bool, error) {
+func (inst *Instance) deletePoint(body *model.Point) (bool, error) {
 	if body.AddressUUID == nil {
 		return false, errors.New("no address_uuid")
 	}
@@ -132,7 +132,7 @@ func (i *Instance) deletePoint(body *model.Point) (bool, error) {
 }
 
 //bacnetServerDeletePoint point make sure
-func (i *Instance) bacnetServerDeletePoint(body *bacnet_model.BacnetPoint) (bool, error) {
+func (inst *Instance) bacnetServerDeletePoint(body *bacnet_model.BacnetPoint) (bool, error) {
 	//cli := plgrest.NewNoAuth(ip, port)
 	//_, err := cli.DeletePoint(body.ObjectType, body.Address)
 	//if err != nil {

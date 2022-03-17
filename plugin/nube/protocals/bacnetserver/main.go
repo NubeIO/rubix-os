@@ -40,6 +40,7 @@ type Instance struct {
 	bus         eventbus.BusService
 	pluginUUID  string
 	networkUUID string
+	//restClient  nrest_bacnet_server.RestClient
 }
 
 // GetFlowPluginInfo returns plugin info.
