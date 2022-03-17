@@ -92,6 +92,12 @@ type Point struct {
 		Required bool     `json:"required" default:"false"`
 		Options  []string `json:"options" default:"[\"0-10dc\",\"0-40ma\",\"thermistor\"]"`
 	} `json:"io_type"`
+	Eval struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"false"`
+		Default     string `json:"default" default:"(x + 0) + 0"`
+		DisplayName string `json:"display_name" default:"math expression"`
+	} `json:"eval_expression"`
 	ThingClass struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
