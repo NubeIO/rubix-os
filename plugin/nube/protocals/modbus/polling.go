@@ -38,7 +38,7 @@ func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
 
 var poll poller.Poller
 
-func (i *Instance) PollingTCP(p polling) error {
+func (inst *Instance) PollingTCP(p polling) error {
 	if p.enable {
 		poll = poller.New()
 	}
@@ -47,14 +47,14 @@ func (i *Instance) PollingTCP(p polling) error {
 	arg.WithDevices = true
 	arg.WithPoints = true
 	f := func() (bool, error) {
-		nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, arg)
+		nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, arg)
 		if len(nets) == 0 {
 			time.Sleep(2 * time.Second)
 			log.Info("modbus: NO MODBUS NETWORKS FOUND")
 		}
 
 		for _, net := range nets { //NETWORKS
-			if net.UUID != "" && net.PluginConfId == i.pluginUUID {
+			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 				timeStart := time.Now()
 				deviceDelay, pointDelay := delays(net.TransportType)
 				counter++
@@ -71,7 +71,7 @@ func (i *Instance) PollingTCP(p polling) error {
 					var mbClient smod.ModbusClient
 					var dCheck devCheck
 					dCheck.devUUID = dev.UUID
-					mbClient, err = i.setClient(net, dev, true)
+					mbClient, err = inst.setClient(net, dev, true)
 					if err != nil {
 						log.Errorf("modbus: failed to set client error: %v network name:%s\n", err, net.Name)
 						continue
@@ -105,23 +105,23 @@ func (i *Instance) PollingTCP(p polling) error {
 							if !utils.BoolIsNil(pnt.InSync) {
 								_, responseValue, err := networkRequest(mbClient, pnt, true)
 								if err != nil {
-									_, err = i.pointUpdateErr(pnt.UUID, err)
+									_, err = inst.pointUpdateErr(pnt.UUID, err)
 									continue
 								}
-								_, err = i.pointUpdate(pnt.UUID, responseValue)
+								_, err = inst.pointUpdate(pnt.UUID, responseValue)
 							} else {
 								skipDelay = true
 							}
 						} else { //READ
 							_, responseValue, err := networkRequest(mbClient, pnt, false)
 							if err != nil {
-								_, err = i.pointUpdateErr(pnt.UUID, err)
+								_, err = inst.pointUpdateErr(pnt.UUID, err)
 								continue
 							}
 							//simple cov
 							isChange := !utils.CompareFloatPtr(pnt.PresentValue, &responseValue)
 							if isChange {
-								_, err = i.pointUpdate(pnt.UUID, responseValue)
+								_, err = inst.pointUpdate(pnt.UUID, responseValue)
 								if err != nil {
 									continue
 								}

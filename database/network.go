@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/compat"
+	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
 	"time"
 )
@@ -106,6 +107,23 @@ func (d *GormDatabase) GetNetworkByName(name string, args api.Args) (*model.Netw
 		return nil, err
 	}
 	return networksModel, nil
+}
+
+func (d *GormDatabase) CreateNetworkPlugin(body *model.Network) (network *model.Network, err error) {
+	pluginName := body.PluginPath
+	if pluginName == "system" {
+		network, err = d.CreateNetwork(body, false)
+		if err != nil {
+			return nil, err
+		}
+	}
+	//if plugin like bacnet then call the api direct on the plugin as the plugin knows best how to add a point to keep things in sync
+	cli := client.NewLocalClient()
+	network, err = cli.CreateNetworkPlugin(body, pluginName)
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
 // CreateNetwork creates a device.

@@ -3,20 +3,46 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/bugs"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/utilstime"
-	"reflect"
-	"time"
-
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/bugs"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/utilstime"
 	log "github.com/sirupsen/logrus"
+	"reflect"
+	"time"
 )
 
 var err error
+
+//addDevice add network
+func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
+	network, err = inst.db.CreateNetwork(body, false)
+	if err != nil {
+		return nil, err
+	}
+	return network, nil
+}
+
+//addDevice add device
+func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
+	device, err = inst.db.CreateDevice(body)
+	if err != nil {
+		return nil, err
+	}
+	return device, nil
+}
+
+//addPoint add point
+func (inst *Instance) addPoint(body *model.Point) (err error) {
+	_, err = inst.db.CreatePoint(body, false, false)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 //networkUpdate update network
 func (inst *Instance) networkUpdate(uuid string) (*model.Point, error) {
@@ -162,16 +188,6 @@ func (inst *Instance) setnewPointFields(deviceBody *model.Device, pointBody *mod
 	pointBody.IsOutput = utils.NewFalse()
 	pointBody.Name = fmt.Sprintf("%s", name)
 	pointBody.IoNumber = name
-}
-
-// addPoint add a pnt
-func (inst *Instance) addPoint(body *model.Point) error {
-	_, err := inst.db.CreatePoint(body, false, true)
-	if err != nil {
-		log.Errorf("lora: issue on CreatePoint: %v\n", err)
-		return err
-	}
-	return nil
 }
 
 // updateDevicePointsAddress by its lora id and type as in temp or lux
