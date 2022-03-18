@@ -11,8 +11,35 @@ import (
 	"go.bug.st/serial"
 )
 
+//addDevice add network
+func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
+	network, err = inst.db.CreateNetwork(body, false)
+	if err != nil {
+		return nil, err
+	}
+	return network, nil
+}
+
+//addDevice add device
+func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
+	device, err = inst.db.CreateDevice(body)
+	if err != nil {
+		return nil, err
+	}
+	return device, nil
+}
+
+//addPoint add point
+func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
+	point, err = inst.db.CreatePoint(body, false, false)
+	if err != nil {
+		return nil, err
+	}
+	return point, nil
+}
+
 //pointUpdate update point present value
-func (i *Instance) pointUpdate(uuid string, value float64) (*model.Point, error) {
+func (inst *Instance) pointUpdate(uuid string, value float64) (*model.Point, error) {
 	var point model.Point
 	point.CommonFault.InFault = false
 	point.CommonFault.MessageLevel = model.MessageLevel.Info
@@ -23,7 +50,7 @@ func (i *Instance) pointUpdate(uuid string, value float64) (*model.Point, error)
 	pri.P16 = &value
 	point.Priority = &pri
 	point.InSync = utils.NewTrue()
-	_, err = i.db.UpdatePointValue(uuid, &point, true)
+	_, err = inst.db.UpdatePointValue(uuid, &point, true)
 	if err != nil {
 		log.Error("MODBUS UPDATE POINT UpdatePointValue()", err)
 		return nil, err
@@ -32,14 +59,14 @@ func (i *Instance) pointUpdate(uuid string, value float64) (*model.Point, error)
 }
 
 //pointUpdate update point present value
-func (i *Instance) pointUpdateErr(uuid string, err error) (*model.Point, error) {
+func (inst *Instance) pointUpdateErr(uuid string, err error) (*model.Point, error) {
 	var point model.Point
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = model.MessageLevel.Fail
 	point.CommonFault.MessageCode = model.CommonFaultCode.PointError
 	point.CommonFault.Message = err.Error()
 	point.CommonFault.LastFail = time.Now().UTC()
-	_, err = i.db.UpdatePoint(uuid, &point, true)
+	_, err = inst.db.UpdatePoint(uuid, &point, true)
 	if err != nil {
 		log.Error("MODBUS UPDATE POINT pointUpdateErr()", err)
 		return nil, err
@@ -48,7 +75,7 @@ func (i *Instance) pointUpdateErr(uuid string, err error) (*model.Point, error) 
 }
 
 //listSerialPorts list all serial ports on host
-func (i *Instance) listSerialPorts() (*utils.Array, error) {
+func (inst *Instance) listSerialPorts() (*utils.Array, error) {
 	ports, err := serial.GetPortsList()
 	p := utils.NewArray()
 	for _, port := range ports {

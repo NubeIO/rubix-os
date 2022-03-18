@@ -7,7 +7,7 @@ import (
 )
 
 //wizard make a network/dev/pnt
-func (i *Instance) wizardTCP(body wizard) (string, error) {
+func (inst *Instance) wizardTCP(body wizard) (string, error) {
 	ip := "192.168.15.202"
 	if body.IP != "" {
 		ip = body.IP
@@ -39,7 +39,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 	pnt.AddressID = utils.NewInt(1) //TODO check conversion
 	pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 
-	_, err = i.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
+	_, err = inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 	if err != nil {
 		return "error: on flow-framework add modbus TCP network wizard", err
 	}
@@ -48,7 +48,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 }
 
 //wizard make a network/dev/pnt
-func (i *Instance) wizardSerial(body wizard) (string, error) {
+func (inst *Instance) wizardSerial(body wizard) (string, error) {
 
 	sp := "/dev/ttyUSB0"
 	if body.SerialPort != "" {
@@ -86,7 +86,7 @@ func (i *Instance) wizardSerial(body wizard) (string, error) {
 	pnt.AddressID = utils.NewInt(1) //TODO check conversion
 	pnt.ObjectType = string(model.ObjTypeWriteCoil)
 
-	pntRet, err := i.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
+	pntRet, err := inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 	if err != nil {
 		return "error: on flow-framework add modbus serial network wizard", err
 	}

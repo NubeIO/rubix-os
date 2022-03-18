@@ -6,7 +6,9 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -48,6 +50,24 @@ func (d *GormDatabase) GetPluginIDFromDevice(uuid string) (*model.Network, error
 		return nil, err
 	}
 	return network, err
+}
+
+func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Device, err error) {
+	fmt.Println(body, body.NetworkUUID)
+	network, err := d.GetNetwork(body.NetworkUUID, api.Args{})
+	if network == nil {
+		errMsg := fmt.Sprintf("model.device failed to find a network with uuid:%s", body.NetworkUUID)
+		log.Errorf(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	pluginName := network.PluginPath
+	fmt.Println(pluginName, 11111)
+	cli := client.NewLocalClient()
+	device, err = cli.CreateDevicePlugin(body, pluginName)
+	if err != nil {
+		return nil, err
+	}
+	return
 }
 
 func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
