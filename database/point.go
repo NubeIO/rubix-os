@@ -202,21 +202,19 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 
 	presentValue = pointScale(presentValue, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax)
 	presentValue = pointRange(presentValue, pointModel.LimitMin, pointModel.LimitMax)
-	eval, err := pointEval(presentValue, pointModel.OriginalValue, pointModel.EvalMode, pointModel.Eval)
+	eval, err := pointEval(presentValue, pointModel.MathOnPresentValue)
 	if err != nil {
-		log.Errorf("ERROR on point invalid eval")
+		log.Errorln("point.db UpdatePointValue() error on run point MathOnPresentValue error:", err)
 		return nil, err
 	} else {
 		presentValue = eval
 	}
-
 	val, err := pointUnits(presentValue, pointModel.Unit, pointModel.UnitTo)
 	if err != nil {
 		log.Errorf("ERROR on point invalid point unit")
 		return nil, err
 	}
 	presentValue = val
-
 	//example for wires and modbus: if a new value is written from  wires then set this to false so the modbus knows on the next poll to write a new value to the modbus point
 	if !fromPlugin {
 		pointModel.InSync = utils.NewFalse()
@@ -264,7 +262,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 func (d *GormDatabase) updatePriority(pointModel *model.Point) (*model.Point, *float64) {
 	var presentValue *float64
 	if pointModel.Priority != nil {
-		priorityMap, highestValue, currentPriority, isPriorityExist := d.parsePriority(pointModel.Priority)
+		priorityMap, highestValue, currentPriority, isPriorityExist := d.parsePriority(pointModel.Priority, pointModel)
 		if isPriorityExist {
 			pointModel.CurrentPriority = &currentPriority
 			presentValue = &highestValue
@@ -273,12 +271,14 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point) (*model.Point, *f
 			pointModel.CurrentPriority = utils.NewInt(16)
 			presentValue = utils.NewFloat64(*pointModel.Fallback)
 		}
+		//writeValue := utils.Float64IsNil(pointModel.WriteValue)
+		d.DB.Model(&model.Point{}).Where("uuid = ?", pointModel.UUID).Update("write_value", pointModel.WriteValue)
 		d.DB.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMap)
 	}
 	return pointModel, presentValue
 }
 
-func (d *GormDatabase) parsePriority(priority *model.Priority) (map[string]interface{}, float64, int, bool) {
+func (d *GormDatabase) parsePriority(priority *model.Priority, pointModel *model.Point) (map[string]interface{}, float64, int, bool) {
 	priorityMap := map[string]interface{}{}
 	priorityValue := reflect.ValueOf(*priority)
 	typeOfPriority := priorityValue.Type()
@@ -294,6 +294,13 @@ func (d *GormDatabase) parsePriority(priority *model.Priority) (map[string]inter
 				if !isPriorityExist {
 					currentPriority = i
 					highestValue = *val
+					writeValue, err := pointEval(val, pointModel.MathOnWriteValue)
+					if err != nil {
+						log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
+						//return nil, 0, 0, false
+					}
+					pointModel.WriteValue = writeValue
+					pointModel.WriteValueOriginal = val
 				}
 				priorityMap[typeOfPriority.Field(i).Name] = *val
 				isPriorityExist = true

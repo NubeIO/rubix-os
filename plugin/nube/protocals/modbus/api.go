@@ -97,7 +97,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		point, err := inst.addPoint(body)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
+			ctx.JSON(http.StatusBadRequest, err.Error())
 			return
 		} else {
 			ctx.JSON(http.StatusOK, point)

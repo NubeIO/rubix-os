@@ -161,12 +161,18 @@ type Point struct {
 		Options  []string `json:"options" default:"[\"leb_lew\",\"leb_bew\",\"beb_lew\",\"beb_bew\"]"`
 		Default  string   `json:"default" default:"beb_lew"`
 	} `json:"object_encoding"`
-	Eval struct {
+	MathOnPresentValue struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"false"`
 		Default     string `json:"default" default:"(x + 0) + 0"`
-		DisplayName string `json:"display_name" default:"math expression"`
-	} `json:"eval_expression"`
+		DisplayName string `json:"display_name" default:"math expression on present value"`
+	} `json:"math_on_present_value"`
+	MathOnWriteValue struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"false"`
+		Default     string `json:"default" default:"(x + 0) + 0"`
+		DisplayName string `json:"display_name" default:"math expression on write value"`
+	} `json:"math_on_write_value"`
 	IsOutput struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
