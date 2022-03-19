@@ -28,7 +28,7 @@ type devCheck struct {
 
 func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
 	deviceDelay = 250 * time.Millisecond
-	pointDelay = 100 * time.Millisecond
+	pointDelay = 1000 * time.Millisecond
 	if networkType == model.TransType.LoRa {
 		deviceDelay = 80 * time.Millisecond
 		pointDelay = 6000 * time.Millisecond
@@ -54,6 +54,9 @@ func (inst *Instance) PollingTCP(p polling) error {
 		}
 
 		for _, net := range nets { //NETWORKS
+			if !inst.pollingEnabled {
+				break
+			}
 			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 				timeStart := time.Now()
 				deviceDelay, pointDelay := delays(net.TransportType)
@@ -99,7 +102,6 @@ func (inst *Instance) PollingTCP(p polling) error {
 							continue
 						}
 						write := isWrite(pnt.ObjectType)
-						skipDelay := false
 						if write { //IS WRITE
 							//get existing
 							if !utils.BoolIsNil(pnt.InSync) {
@@ -108,9 +110,8 @@ func (inst *Instance) PollingTCP(p polling) error {
 									_, err = inst.pointUpdateErr(pnt.UUID, err)
 									continue
 								}
+								responseValue = utils.Float64IsNil(pnt.WriteValueOriginal) //feedback in the WriteValue
 								_, err = inst.pointUpdate(pnt.UUID, responseValue)
-							} else {
-								skipDelay = true
 							}
 						} else { //READ
 							_, responseValue, err := networkRequest(mbClient, pnt, false)
@@ -127,9 +128,7 @@ func (inst *Instance) PollingTCP(p polling) error {
 								}
 							}
 						}
-						if !skipDelay {
-							time.Sleep(pointDelay) //DELAY between points
-						}
+						time.Sleep(pointDelay) //DELAY between points
 					}
 					timeEnd := time.Now()
 					diff := timeEnd.Sub(timeStart)

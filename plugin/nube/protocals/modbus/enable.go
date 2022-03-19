@@ -25,7 +25,7 @@ func (inst *Instance) Enable() error {
 			go func() error {
 				err := inst.PollingTCP(arg)
 				if err != nil {
-					log.Errorf("modbus: POLLING ERROR on routine: %v\n", err)
+					log.Errorf("modbus:  PLUGIN Enable POLLING ERROR: %v\n", err)
 				}
 				return nil
 			}()
@@ -47,7 +47,7 @@ func (inst *Instance) Disable() error {
 		go func() {
 			err := inst.PollingTCP(arg)
 			if err != nil {
-
+				log.Errorf("modbus:  PLUGIN Disable POLLING ERROR: %v\n", err)
 			}
 		}()
 		if err != nil {
