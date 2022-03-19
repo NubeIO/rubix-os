@@ -3,16 +3,15 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
-	"reflect"
-	"time"
-
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	log "github.com/sirupsen/logrus"
+	"reflect"
+	"time"
 )
 
 func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
@@ -65,7 +64,14 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 		if err != nil {
 			return nil, err
 		}
+		return
 	}
+	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
+	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
+	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
+	body.CommonFault.LastFail = time.Now().UTC()
+	body.CommonFault.LastOk = time.Now().UTC()
+	body.CommonFault.InFault = true
 	//if plugin like bacnet then call the api direct on the plugin as the plugin knows best how to add a point to keep things in sync
 	cli := client.NewLocalClient()
 	point, err = cli.CreatePointPlugin(body, pluginName)
@@ -106,12 +112,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	}
 	body.ThingClass = model.ThingClass.Point
 	body.CommonEnable.Enable = utils.NewTrue()
-	body.CommonFault.InFault = true
-	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
-	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
-	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
-	body.CommonFault.LastFail = time.Now().UTC()
-	body.CommonFault.LastOk = time.Now().UTC()
 	body.InSync = utils.NewFalse()
 	body.WriteValueOnceSync = utils.NewFalse()
 	if body.Priority == nil {
