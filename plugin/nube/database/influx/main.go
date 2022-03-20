@@ -2,12 +2,9 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
-	lwrest "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/restclient"
 	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
-	"github.com/NubeIO/flow-framework/src/jobs"
-	"github.com/patrickmn/go-cache"
 )
 
 const path = "influx" // must be unique across all plugins
@@ -16,7 +13,6 @@ const description = "InfluxDB2 DataSource"
 const author = "Nube iO"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
-const DefaultExpiration = cache.DefaultExpiration
 
 const pluginType = "database"
 const allowConfigWrite = false
@@ -24,21 +20,16 @@ const isNetwork = false
 const maxAllowedNetworks = 0
 const networkType = "N/A"
 const transportType = "N/A"
-const ip = "0.0.0.0"
-const port = "8080"
 
 // Instance is plugin instance
 type Instance struct {
-	config      *Config
-	enabled     bool
-	basePath    string
-	db          dbhandler.Handler
-	store       cachestore.Handler
-	bus         eventbus.BusService
-	pluginUUID  string
-	networkUUID string
-	REST        *lwrest.RestClient
-	jobs        jobs.Jobs
+	config     *Config
+	enabled    bool
+	basePath   string
+	db         dbhandler.Handler
+	store      cachestore.Handler
+	bus        eventbus.BusService
+	pluginUUID string
 }
 
 // GetFlowPluginInfo returns plugin info.
