@@ -83,7 +83,7 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 			producerUuid = history.UUID
 			historyTags, err = i.db.GetHistoryInfluxTags(producerUuid)
 			if err != nil || len(historyTags) == 0 {
-				log.Error(fmt.Sprintf("We unable to get the producer_uuid = %s details!", producerUuid))
+				log.Warn(fmt.Sprintf("We unable to get the producer_uuid = %s details!", producerUuid))
 				continue
 			}
 		}
