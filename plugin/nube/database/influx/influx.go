@@ -11,16 +11,16 @@ import (
 	"time"
 )
 
-var influxConnectionInstance *InfluxConnection
 var influxConnectionInstances []*InfluxConnection
-var once sync.Once
 
 type InfluxSetting struct {
-	ServerURL   string
-	AuthToken   string
-	Org         string
-	Bucket      string
-	Measurement string
+	ServerURL                string
+	AuthToken                string
+	Org                      string
+	Bucket                   string
+	Measurement              string
+	once                     sync.Once
+	influxConnectionInstance *InfluxConnection
 }
 
 type InfluxConnection struct {
@@ -30,24 +30,26 @@ type InfluxConnection struct {
 
 func New(s *InfluxSetting) *InfluxSetting {
 	return &InfluxSetting{
-		ServerURL:   s.ServerURL,
-		AuthToken:   s.AuthToken,
-		Org:         s.Org,
-		Bucket:      s.Bucket,
-		Measurement: s.Measurement,
+		ServerURL:                s.ServerURL,
+		AuthToken:                s.AuthToken,
+		Org:                      s.Org,
+		Bucket:                   s.Bucket,
+		Measurement:              s.Measurement,
+		once:                     sync.Once{},
+		influxConnectionInstance: nil,
 	}
 }
 
 func (i *InfluxSetting) getInfluxConnectionInstance() *InfluxConnection {
-	once.Do(func() {
+	i.once.Do(func() {
 		client := influxdb2.NewClient(i.ServerURL, i.AuthToken)
-		influxConnectionInstance = &InfluxConnection{
+		i.influxConnectionInstance = &InfluxConnection{
 			client:   client,
 			writeAPI: client.WriteAPI(i.Org, i.Bucket),
 		}
-		influxConnectionInstances = append(influxConnectionInstances, influxConnectionInstance)
+		influxConnectionInstances = append(influxConnectionInstances, i.influxConnectionInstance)
 	})
-	return influxConnectionInstance
+	return i.influxConnectionInstance
 }
 
 func (i *InfluxSetting) WriteHistories(tags map[string]string, fields map[string]interface{}, ts time.Time) {
