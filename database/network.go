@@ -116,7 +116,14 @@ func (d *GormDatabase) CreateNetworkPlugin(body *model.Network) (network *model.
 		if err != nil {
 			return nil, err
 		}
+		return
 	}
+	body.CommonFault.InFault = true
+	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
+	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
+	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
+	body.CommonFault.LastFail = time.Now().UTC()
+	body.CommonFault.LastOk = time.Now().UTC()
 	//if plugin like bacnet then call the api direct on the plugin as the plugin knows best how to add a point to keep things in sync
 	cli := client.NewLocalClient()
 	network, err = cli.CreateNetworkPlugin(body, pluginName)
@@ -132,12 +139,6 @@ func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*mod
 	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Network
 	body.CommonEnable.Enable = utils.NewTrue()
-	body.CommonFault.InFault = true
-	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
-	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
-	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
-	body.CommonFault.LastFail = time.Now().UTC()
-	body.CommonFault.LastOk = time.Now().UTC()
 	transport, err := checkTransport(body.TransportType) //set to ip by default
 	if err != nil {
 		return nil, err

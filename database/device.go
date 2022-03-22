@@ -61,7 +61,20 @@ func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Dev
 		return nil, errors.New(errMsg)
 	}
 	pluginName := network.PluginPath
-	fmt.Println(pluginName, 11111)
+
+	if pluginName == "system" {
+		device, err = d.CreateDevice(body)
+		if err != nil {
+			return nil, err
+		}
+		return
+	}
+	body.CommonFault.InFault = true
+	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
+	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
+	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
+	body.CommonFault.LastFail = time.Now().UTC()
+	body.CommonFault.LastOk = time.Now().UTC()
 	cli := client.NewLocalClient()
 	device, err = cli.CreateDevicePlugin(body, pluginName)
 	if err != nil {
@@ -86,12 +99,6 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	}
 	body.ThingClass = model.ThingClass.Device
 	body.CommonEnable.Enable = utils.NewTrue()
-	body.CommonFault.InFault = true
-	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
-	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
-	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
-	body.CommonFault.LastFail = time.Now().UTC()
-	body.CommonFault.LastOk = time.Now().UTC()
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, query.Error
 	}

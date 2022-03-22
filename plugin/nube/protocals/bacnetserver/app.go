@@ -10,6 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
+	nube_api_bacnetserver "github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube_api/bacnetserver"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
@@ -66,7 +67,6 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, httpRes *
 	bacPoint.Units = "noUnits"
 	bacPoint.RelinquishDefault = utils.Float64IsNil(body.Fallback)
 
-
 	rt.Method = nrest.POST
 	rt.Path = "/api/bacnet/points"
 
@@ -99,6 +99,32 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, httpRes *
 		return nil, nil, errors.New(errMsg)
 	}
 	return point, nil, nil
+
+}
+
+//pointPatch from rest
+func (inst *Instance) pointPatch2(body *model.Point) (bacnetPoint nube_api_bacnetserver.BacnetPoint, err error) {
+	//if body.AddressUUID == nil {
+	//	return nil, errors.New("no address_uuid")
+	//}
+
+	//bacnetPoint.Priority = new(nube_api_bacnetserver.Priority)
+	//if (*body.Priority).P16 != nil {
+	//	(*bacnetPoint.Priority).P16 = (*body.Priority).P16
+	//}
+	//bacnetPoint.ObjectName = body.Name
+	//bacnetPoint.Address = utils.IntIsNil(body.AddressID)
+	//bacnetPoint.ObjectType = body.ObjectType
+	//point.Units = body.Unit
+
+	if !utils.IntNilCheck(body.AddressID) {
+		//bacnetPoint.Address = utils.IntIsNil(body.AddressID)
+		bacnetPoint.UseNextAvailableAddr = false
+	}
+
+	bacnetPoint.Description = body.Description
+
+	return bacnetPoint, nil
 
 }
 
