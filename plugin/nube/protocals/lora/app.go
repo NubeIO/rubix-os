@@ -122,6 +122,7 @@ func (inst *Instance) handleSerialPayload(data string) {
 			return
 		}
 		if dev != nil {
+			log.Println("lora: sensor-found", deviceUUID, "sensor rssi:", commonData.Rssi)
 			inst.deviceUpdate(dev.UUID)
 		}
 	}
@@ -137,10 +138,21 @@ func (inst *Instance) handleSerialPayload(data string) {
 
 // addDevicePoints add all points related to a device
 func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
+	network, err := inst.db.GetNetwork(deviceBody.NetworkUUID, api.Args{})
+	if err != nil {
+		log.Errorln("lora: addDevicePoints(), get network", err)
+		return err
+	}
+	if network.PluginPath != "lora" {
+		log.Errorln("lora: incorrect network plugin type, must be lora, network was:", network.PluginPath)
+		return errors.New("lora: incorrect network plugin type, must be lora")
+	}
+
 	points := decoder.GetDevicePointsStruct(deviceBody)
 	// TODO: should check this before the device is even added in the wizard
 	if points == struct{}{} {
-		return errors.New("no device description or points found for this device")
+		log.Errorln("lora: addDevicePoints() incorrect device model, try THLM", err)
+		return errors.New("lora: addDevicePoints() no device description or points found for this device")
 	}
 	pointsRefl := reflect.ValueOf(points)
 
@@ -159,9 +171,7 @@ func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 }
 
 func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl reflect.Value) error {
-
 	point := new(model.Point)
-
 	for i := 0; i < pointsRefl.NumField(); i++ {
 		if pointsRefl.Field(i).Kind() == reflect.Struct {
 			if _, ok := pointsRefl.Field(i).Interface().(decoder.CommonValues); !ok {
@@ -169,7 +179,6 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 			}
 			continue
 		}
-
 		pointName := getReflectFieldJSONName(pointsRefl.Type().Field(i))
 		inst.setnewPointFields(deviceBody, point, pointName)
 		if inst.addPoint(point) != nil {
