@@ -28,7 +28,7 @@ type NameStruct struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
-	Max      int    `json:"max" default:"20"`
+	Max      int    `json:"max" default:"100"`
 	Default  string `json:"default" default:"mb"`
 }
 
@@ -59,7 +59,7 @@ type Network struct {
 		Type     string `json:"type" default:"string"`
 		Required bool   `json:"required" default:"false"`
 		Min      int    `json:"min" default:"0"`
-		Max      int    `json:"max" default:"20"`
+		Max      int    `json:"max" default:"100"`
 		Default  string `json:"default" default:""`
 	} `json:"serial_port"`
 	SerialBaudRate struct {
@@ -173,11 +173,6 @@ type Point struct {
 		Default     string `json:"default" default:"(x + 0) + 0"`
 		DisplayName string `json:"display_name" default:"math expression on write value"`
 	} `json:"math_on_write_value"`
-	IsOutput struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"false"`
-	} `json:"is_output"`
 	Enable struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
