@@ -1,4 +1,12 @@
 # CHANGELOG
+## [v0.4.2](https://github.com/NubeIO/flow-framework/tree/v0.4.2) (2022-03-23)
+- Plugin/testing #417
+- Improvement/database plugins #415
+- small updates to system plugin #414
+- added point math func on point write value #413
+- updates to modbus, lora and bacnet #412
+- updates to lora and bacnet #411
+
 ## [v0.4.1](https://github.com/NubeIO/flow-framework/tree/v0.4.1) (2022-03-17)
 - Feature: add present_value on writer #405
 - small updates to lora #404
