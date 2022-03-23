@@ -98,9 +98,6 @@ jobs:
           cd ../../../plugin/nube/utils/backup
           go build -buildmode=plugin -o backup-amd64.so *.go  && cp backup-amd64.so ../../../../
 
-          cd ../../../../plugin/nube/utils/mqttapi
-          go build -buildmode=plugin -o mqttapi-amd64.so *.go  && cp mqttapi-amd64.so ../../../../
-
           cd ../../../../plugin/nube/utils/git
           go build -buildmode=plugin -o git-amd64.so *.go  && cp git-amd64.so ../../../../
 
@@ -144,9 +141,6 @@ jobs:
 
           cd ../../../plugin/nube/utils/backup
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o backup-armv7.so *.go  && cp backup-armv7.so ../../../../
-
-          cd ../../../../plugin/nube/utils/mqttapi
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o mqttapi-armv7.so *.go  && cp mqttapi-armv7.so ../../../../
 
           cd ../../../../plugin/nube/utils/git
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o git-armv7.so *.go  && cp git-armv7.so ../../../../
@@ -196,11 +190,6 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./backup-amd64.so
           artifact=backup-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./backup-armv7.so
-
-          artifact=mqttapi-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./mqttapi-amd64.so
-          artifact=mqttapi-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./mqttapi-armv7.so
 
           artifact=git-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./git-amd64.so
