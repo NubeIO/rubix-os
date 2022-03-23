@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin"
 	edgerest "github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/restclient"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/edge28"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/numbers"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/thermistor"
 	log "github.com/sirupsen/logrus"
 	"reflect"
@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const defaultInterval = 2500 * time.Millisecond //default polling is 2.5 sec
+const defaultInterval = 1000 * time.Millisecond //default polling is 2.5 sec
 const pollName = "polling"
 
 type polling struct {
@@ -39,27 +39,30 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 	rsyncWrite := pollCount % 10
 	//rsyncWrite is just a way to make sure the outputs on the device are not out of sync
 	// and rsync on first poll loop
+	writeValue := utils.Float64IsNil(pnt.WriteValue)
 	var err error
 	if !utils.BoolIsNil(pnt.InSync) || rsyncWrite == 0 || pollCount == 1 {
 		if pollCount == 1 {
-			log.Infof("edge28-polling: SYNC on first poll wrote IO %s: %v\n", pnt.IoNumber, value)
+			log.Infof("edge28-polling: processWrite() SYNC on first poll wrote IO %s: %v\n", pnt.IoNumber, value)
 		}
 		if rsyncWrite == 0 {
-			log.Infof("edge28-polling: rsyncWrite wrote IO %s: %v\n", pnt.IoNumber, value)
+			log.Infof("edge28-polling: processWrite() rsyncWrite wrote IO %s: %v\n", pnt.IoNumber, value)
 		}
 		if isUO {
+			log.Infof("edge28-polling: processWrite() WRITE UO %s as type:%s  value:%v\n", pnt.IoNumber, pnt.IoType, value)
 			_, err = rest.WriteUO(pnt.IoNumber, value)
-			_, err = inst.pointUpdateValue(pnt.UUID, value)
+			_, err = inst.pointUpdateValue(pnt.UUID, writeValue)
 		} else {
+			log.Infof("edge28-polling: processWrite() WRITE DO %s as type:%s  value:%v\n", pnt.IoNumber, pnt.IoType, value)
 			_, err = rest.WriteDO(pnt.IoNumber, value)
-			_, err = inst.pointUpdateValue(pnt.UUID, value)
+			_, err = inst.pointUpdateValue(pnt.UUID, writeValue)
 		}
 		if err != nil {
-			log.Errorf("edge28-polling: failed to write IO %s:  value:%f error:%v\n", pnt.IoNumber, value, err)
+			log.Errorf("edge28-polling: processWrite() failed to write IO %s:  value:%f error:%v\n", pnt.IoNumber, value, err)
 			_, err := inst.pointUpdateErr(pnt.UUID, err)
 			return 0, err
 		} else {
-			log.Infof("edge28-polling: wrote IO %s: %v\n", pnt.IoNumber, value)
+			//log.Infof("edge28-polling: wrote IO %s: %v\n", pnt.IoNumber, value)
 			return value, err
 		}
 	} else {
@@ -122,7 +125,6 @@ func (inst *Instance) polling(p polling) error {
 			time.Sleep(15000 * time.Millisecond)
 			log.Info("edge28-polling: NO NETWORKS FOUND")
 		}
-		//log.Error(bugs.DebugPrint(name+pollName, i.polling, err, "hey", "whats", "up"))
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 				log.Infof("edge28-polling: LOOP COUNT: %v\n", counter)
@@ -145,8 +147,9 @@ func (inst *Instance) polling(p polling) error {
 						//OUTPUTS
 						case pointList.R1, pointList.R2, pointList.DO1, pointList.DO2, pointList.DO3, pointList.DO4, pointList.DO5:
 							//_, err := i.db.UpdatePointValue(pnt.UUID, pnt, false)  //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
-							if pnt.PresentValue != nil {
-								wv, err = DigitalToGPIOValue(*(pnt.PresentValue), false)
+							if pnt.WriteValue != nil {
+								writeValue := plugin.PointWrite(pnt)
+								wv, err = DigitalToGPIOValue(writeValue, false)
 								if err != nil {
 									log.Errorf("edge28-polling: invalid input to  DigitalToGPIOValue")
 									continue
@@ -155,7 +158,7 @@ func (inst *Instance) polling(p polling) error {
 							}
 						case pointList.UO1, pointList.UO2, pointList.UO3, pointList.UO4, pointList.UO5, pointList.UO6, pointList.UO7:
 							//_, err := i.db.UpdatePointValue(pnt.UUID, pnt, false) //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
-							if pnt.PresentValue != nil {
+							if pnt.WriteValue != nil {
 								wv, err = GetGPIOValueForUOByType(pnt)
 								if err != nil {
 									log.Error(err)
@@ -233,12 +236,7 @@ func GetGPIOValueForUOByType(point *model.Point) (float64, error) {
 		err = errors.New(fmt.Sprintf("edge-28: skipping %v, IoType %v not recognized.", point.IoNumber, point.IoType))
 		return 0, err
 	}
-	//wv = *(point.PresentValue)   //TODO: use PresentValue instead of Priority 16 value
-	if numbers.Float64PointerIsNil(point.PresentValue) {
-		return 0, errors.New("edge28-polling: no value to write")
-	} else {
-		result = *(point.PresentValue)
-	}
+	result = plugin.PointWrite(point)
 
 	switch point.IoType {
 	case UOTypes.DIGITAL:
