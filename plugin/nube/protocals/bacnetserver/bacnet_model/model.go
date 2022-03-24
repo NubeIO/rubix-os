@@ -63,8 +63,9 @@ type BacnetPoint struct {
 type NameStruct struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
-	Min      int    `json:"min" default:"3"`
-	Max      int    `json:"max" default:"20"`
+	Min      int    `json:"min" default:"2"`
+	Max      int    `json:"max" default:"100"`
+	Default  string `json:"default" default:"bacnet"`
 }
 
 type DescriptionStruct struct {
@@ -95,7 +96,7 @@ type Point struct {
 	ObjectType  struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"analogValue\",\"analogOutput\"]"`
+		Options  []string `json:"options" default:"[\"analogValue\",\"analogOutput\",\"binaryValue\",\"binaryOutput\"]"`
 		Default  string   `json:"default" default:"analogValue"`
 	} `json:"object_type"`
 	AddressID struct {

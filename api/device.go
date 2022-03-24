@@ -13,6 +13,7 @@ type DeviceDatabase interface {
 	CreateDevicePlugin(body *model.Device) (*model.Device, error)
 	UpdateDevice(uuid string, body *model.Device, fromPlugin bool) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
+	DeleteDevicePlugin(uuid string) (bool, error)
 	DropDevices() (bool, error)
 }
 type DeviceAPI struct {
@@ -53,7 +54,7 @@ func (a *DeviceAPI) CreateDevice(ctx *gin.Context) {
 
 func (a *DeviceAPI) DeleteDevice(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.DeleteDevice(uuid)
+	q, err := a.DB.DeleteDevicePlugin(uuid)
 	responseHandler(q, err, ctx)
 }
 

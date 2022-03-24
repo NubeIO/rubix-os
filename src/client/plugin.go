@@ -51,6 +51,52 @@ func (a *FlowClient) CreateNetworkPlugin(body *model.Network, pluginName string)
 	return resp.Result().(*model.Network), nil
 }
 
+// DeleteNetworkPlugin delete an object
+func (a *FlowClient) DeleteNetworkPlugin(pluginName string) (ok bool, err error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/networks", pluginName)
+	resp, err := a.client.R().
+		Delete(url)
+	if err != nil {
+		if resp == nil || resp.String() == "" {
+			return false, fmt.Errorf("delete-network: %s", err)
+		} else {
+			return false, fmt.Errorf("delete-network: %s", resp)
+		}
+	}
+	return true, err
+}
+
+// DeleteDevicePlugin delete an object
+func (a *FlowClient) DeleteDevicePlugin(pluginName string) (ok bool, err error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/devices", pluginName)
+	resp, err := a.client.R().
+		Delete(url)
+	if err != nil {
+		if resp == nil || resp.String() == "" {
+			return false, fmt.Errorf("delete-device: %s", err)
+		} else {
+			return false, fmt.Errorf("delete-device: %s", resp)
+		}
+	}
+	return true, err
+}
+
+// DeletePointPlugin delete an object
+func (a *FlowClient) DeletePointPlugin(body *model.Point, pluginName string) (ok bool, err error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/points", pluginName)
+	resp, err := a.client.R().
+		SetBody(body).
+		Delete(url)
+	if err != nil {
+		if resp == nil || resp.String() == "" {
+			return false, fmt.Errorf("delete-points: %s", err)
+		} else {
+			return false, fmt.Errorf("delete-points: %s", resp)
+		}
+	}
+	return true, err
+}
+
 // CreateDevicePlugin an object
 func (a *FlowClient) CreateDevicePlugin(body *model.Device, pluginName string) (*model.Device, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/devices", pluginName)

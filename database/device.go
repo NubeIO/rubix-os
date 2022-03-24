@@ -53,7 +53,6 @@ func (d *GormDatabase) GetPluginIDFromDevice(uuid string) (*model.Network, error
 }
 
 func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Device, err error) {
-	fmt.Println(body, body.NetworkUUID)
 	network, err := d.GetNetwork(body.NetworkUUID, api.Args{})
 	if network == nil {
 		errMsg := fmt.Sprintf("model.device failed to find a network with uuid:%s", body.NetworkUUID)
@@ -79,6 +78,35 @@ func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Dev
 	device, err = cli.CreateDevicePlugin(body, pluginName)
 	if err != nil {
 		return nil, err
+	}
+	return
+}
+
+func (d *GormDatabase) DeleteDevicePlugin(uuid string) (ok bool, err error) {
+	getDevice, err := d.GetDevice(uuid, api.Args{})
+	if err != nil {
+		return false, err
+	}
+	getNetwork, err := d.GetNetwork(getDevice.NetworkUUID, api.Args{})
+	if err != nil {
+		return false, err
+	}
+	pluginName := getNetwork.PluginPath
+	if pluginName == "system" {
+		ok, err = d.DeleteDevice(uuid)
+		if err != nil {
+			return ok, err
+		}
+		return
+	}
+	cli := client.NewLocalClient()
+	ok, err = cli.DeleteDevicePlugin(pluginName)
+	if err != nil {
+		return ok, err
+	}
+	ok, err = d.DeleteDevice(uuid)
+	if err != nil {
+		return ok, err
 	}
 	return
 }

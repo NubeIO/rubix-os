@@ -133,6 +133,31 @@ func (d *GormDatabase) CreateNetworkPlugin(body *model.Network) (network *model.
 	return
 }
 
+func (d *GormDatabase) DeleteNetworkPlugin(uuid string) (ok bool, err error) {
+	getNetwork, err := d.GetNetwork(uuid, api.Args{})
+	if err != nil {
+		return false, err
+	}
+	pluginName := getNetwork.PluginPath
+	if pluginName == "system" {
+		ok, err = d.DeleteNetwork(uuid)
+		if err != nil {
+			return ok, err
+		}
+		return
+	}
+	cli := client.NewLocalClient()
+	ok, err = cli.DeleteNetworkPlugin(pluginName)
+	if err != nil {
+		return ok, err
+	}
+	ok, err = d.DeleteNetwork(uuid)
+	if err != nil {
+		return false, err
+	}
+	return
+}
+
 // CreateNetwork creates a device.
 func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*model.Network, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Network)
@@ -199,7 +224,7 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugi
 
 }
 
-func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
+func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
 	var networkModel *model.Network
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&networkModel)
 	if query.Error != nil {

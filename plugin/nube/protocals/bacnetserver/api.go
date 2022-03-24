@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/plgrest"
 	"github.com/NubeIO/flow-framework/utils"
@@ -51,8 +52,63 @@ func resolveAddress(ctx *gin.Context) string {
 // RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
-	mux.POST("/points", func(ctx *gin.Context) {
-
+	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYNetwork(ctx)
+		network, err := inst.addNetwork(body)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, network)
+		}
+	})
+	mux.DELETE(plugin.NetworksURL, func(ctx *gin.Context) {
+		network, err := inst.deleteNetwork()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, network)
+		}
+	})
+	mux.DELETE(plugin.DevicesURL, func(ctx *gin.Context) {
+		ok, err := inst.deleteDevice()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, ok)
+		}
+	})
+	mux.DELETE(plugin.PointsURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYPoint(ctx)
+		ok, err := inst.deletePoint(body)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, ok)
+		}
+	})
+	mux.POST(plugin.DevicesURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYDevice(ctx)
+		device, err := inst.addDevice(body)
+		fmt.Println(err)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+			return
+		} else {
+			ctx.JSON(http.StatusOK, device)
+		}
+	})
+	mux.POST(plugin.PointsURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYPoint(ctx)
+		p, err := inst.addPoint(body)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err.Error())
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
 	})
 
 	mux.GET("/bacnet/ping", func(ctx *gin.Context) {
@@ -209,17 +265,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			return
 		}
 
-	})
-	mux.POST("/bacnet/wizard", func(ctx *gin.Context) {
-		wizard, err := inst.wizard()
-		if err != nil {
-			log.Error(err, "ERROR ON wizard")
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		} else {
-			ctx.JSON(http.StatusOK, wizard)
-			return
-		}
 	})
 
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {

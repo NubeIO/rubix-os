@@ -9,13 +9,78 @@ import (
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube_api"
 	nube_api_bacnetserver "github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube_api/bacnetserver"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
-	"github.com/tidwall/gjson"
 	"time"
 )
+
+//addNetwork add network
+func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
+	nets, err := inst.db.GetNetworksByName(body.PluginPath, api.Args{})
+	if err != nil {
+		return nil, err
+	}
+	for _, net := range nets {
+		if net != nil {
+			errMsg := fmt.Sprintf("bacnet-server: only max one network is allowed with bacnet-server")
+			log.Errorf(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
+	network, err = inst.db.CreateNetwork(body, false)
+	if err != nil {
+		return nil, err
+	}
+	return network, nil
+}
+
+//deleteNetwork network
+func (inst *Instance) deleteNetwork() (ok bool, err error) {
+	err = inst.dropPoints()
+	if err != nil {
+		return ok, err
+	}
+	ok = true
+	return ok, nil
+}
+
+//deleteNetwork device
+func (inst *Instance) deleteDevice() (ok bool, err error) {
+	err = inst.dropPoints()
+	if err != nil {
+		return ok, err
+	}
+	ok = true
+	return ok, nil
+}
+
+func (inst *Instance) dropPoints() (err error) {
+	r := bacnetClient.DropPoints()
+	err = errorMsg(r.Response)
+	return
+}
+
+//addDevice add device
+func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
+	network, err := inst.db.GetNetwork(body.NetworkUUID, api.Args{WithDevices: true})
+	if err != nil {
+		return nil, err
+	}
+	if len(network.Devices) >= 1 {
+		errMsg := fmt.Sprintf("bacnet-server: only max one device is allowed with bacnet-server")
+		log.Errorf(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	device, err = inst.db.CreateDevice(body)
+	if err != nil {
+		return nil, err
+	}
+	return device, nil
+}
 
 //bacnetUpdate listen on mqtt and then update the point in flow-framework
 func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
@@ -52,9 +117,19 @@ func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	return nil, nil
 }
 
+func errorMsg(response nube_api.Response) (err error) {
+	appName := reqType.Path
+	msg := response.Message
+	if response.BadRequest {
+		err = fmt.Errorf("%s:  msg:%s", appName, msg)
+	}
+	return
+
+}
+
 //addPoint from rest api
-func (inst *Instance) addPoint(body *model.Point) (point *model.Point, httpRes *nrest.Reply, err error) {
-	var bacPoint bacnet_model.BacnetPoint
+func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
+	bacPoint := nube_api_bacnetserver.BacnetPoint{}
 	if body.Description == "" {
 		bacPoint.Description = "na"
 	}
@@ -67,39 +142,25 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, httpRes *
 	bacPoint.Units = "noUnits"
 	bacPoint.RelinquishDefault = utils.Float64IsNil(body.Fallback)
 
-	rt.Method = nrest.POST
-	rt.Path = "/api/bacnet/points"
-
-	httpRes, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{Json: bacPoint})
-	if code != 200 {
-		return nil, httpRes, nil
+	bacPoint, r := bacnetClient.AddPoint(bacPoint)
+	err = errorMsg(r.Response)
+	if err != nil {
+		return nil, err
 	}
-	bacPntUUID := gjson.Get(string(httpRes.Body), "uuid").String()
-	if bacPntUUID == "" {
-		errMsg := fmt.Sprintf("bacnet-server: failed to parse point uuid from bacnet-server-app")
-		log.Errorf(errMsg)
-		return nil, nil, errors.New(errMsg)
-	}
-
-	body.AddressUUID = &bacPntUUID
+	bacnetUUID := bacPoint.UUID
+	body.AddressUUID = nils.NewString(bacnetUUID)
 	point, err = inst.db.CreatePoint(body, true, false)
 	if err != nil {
 		//if ail to add a new point in FF then delete it in the bacnet stack
-		rt.Method = nrest.DELETE
-		url := fmt.Sprintf("/api/bacnet/points/uuid/%s", bacPntUUID)
-		rt.Path = url
-		httpRes, code, err = nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
-		if code != 204 {
-			errMsg := fmt.Sprintf("bacnet-server: failed to add new point in bacnet stack, failed to remove the newly added point from bacnet-server-app")
+		bacnetClient.DeletePoint(bacnetUUID)
+		err = errorMsg(r.Response)
+		if err != nil {
+			errMsg := fmt.Sprintf("bacnet-server: failed to add new point in bacnet stack, failed to remove the newly added point from bacnet-server-app error: %s", err.Error())
 			log.Errorf(errMsg)
-			return nil, httpRes, errors.New(errMsg)
+			return nil, err
 		}
-		errMsg := fmt.Sprintf("bacnet-server: failed to add new point in bacnet stack, point was removed from the bacnet-server-app")
-		log.Errorf(errMsg)
-		return nil, nil, errors.New(errMsg)
 	}
-	return point, nil, nil
-
+	return body, err
 }
 
 //pointPatch from rest

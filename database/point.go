@@ -42,7 +42,6 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 }
 
 func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point, err error) {
-
 	device, err := d.GetDevice(body.DeviceUUID, api.Args{})
 	if err != nil {
 		return nil, err
@@ -77,6 +76,39 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 	point, err = cli.CreatePointPlugin(body, pluginName)
 	if err != nil {
 		return nil, err
+	}
+	return
+}
+
+func (d *GormDatabase) DeletePointPlugin(uuid string) (ok bool, err error) {
+	getPoint, err := d.GetPoint(uuid, api.Args{})
+	if err != nil {
+		return false, err
+	}
+	getDevice, err := d.GetDevice(getPoint.DeviceUUID, api.Args{})
+	if err != nil {
+		return false, err
+	}
+	getNetwork, err := d.GetNetwork(getDevice.NetworkUUID, api.Args{})
+	if err != nil {
+		return false, err
+	}
+	pluginName := getNetwork.PluginPath
+	if pluginName == "system" {
+		ok, err = d.DeletePoint(uuid)
+		if err != nil {
+			return ok, err
+		}
+		return
+	}
+	cli := client.NewLocalClient()
+	ok, err = cli.DeletePointPlugin(getPoint, pluginName)
+	if err != nil {
+		return ok, err
+	}
+	ok, err = d.DeletePoint(uuid)
+	if err != nil {
+		return true, err
 	}
 	return
 }

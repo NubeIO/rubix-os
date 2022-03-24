@@ -98,7 +98,7 @@ func (inst *Instance) BusServ() {
 					return
 				}
 				if pnt != nil {
-					_, err = inst.pointPatch(pnt)
+					//_, err = inst.pointPatch(pnt)
 					log.Info("BACNET BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return
@@ -148,8 +148,8 @@ func (inst *Instance) BusServ() {
 				}
 				log.Info("BACNET BUS DELETED IsPoint", " ")
 				if pnt != nil {
-					p, err := inst.deletePoint(pnt)
-					log.Info("BACNET BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", p)
+					//p, err := inst.deletePoint(pnt)
+					log.Info("BACNET BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED")
 					if err != nil {
 						return
 					}
