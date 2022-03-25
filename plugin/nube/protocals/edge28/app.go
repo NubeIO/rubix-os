@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/utilstime"
@@ -11,6 +13,17 @@ import (
 
 //addDevice add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
+	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
+	if err != nil {
+		return nil, err
+	}
+	for _, net := range nets {
+		if net != nil {
+			errMsg := fmt.Sprintf("edge-28-network: only max one network is allowed with edge-28-network")
+			log.Errorf(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
 	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err
@@ -74,7 +87,7 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 
 //deleteNetwork delete device
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
-	ok, err = inst.db.DeleteNetwork(body.UUID)
+	ok, err = inst.db.DeleteDevice(body.UUID)
 	if err != nil {
 		return false, err
 	}

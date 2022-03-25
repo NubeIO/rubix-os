@@ -19,7 +19,7 @@ var err error
 
 //addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	nets, err := inst.db.GetNetworksByName(body.PluginPath, api.Args{})
+	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
 	if err != nil {
 		return nil, err
 	}
