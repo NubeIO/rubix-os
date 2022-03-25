@@ -5,7 +5,7 @@ module github.com/NubeIO/flow-framework
 require (
 	github.com/NubeDev/configor v0.0.2
 	github.com/NubeDev/location v0.0.2
-	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.1.9
+	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.0
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -27,12 +27,7 @@ require (
 	gorm.io/gorm v1.21.13
 )
 
-require github.com/NubeIO/null v4.0.1+incompatible
-
-require (
-	github.com/simonvetter/modbus v1.3.0
-	go.bug.st/serial v1.3.2
-)
+require go.bug.st/serial v1.3.2
 
 require (
 	github.com/PaesslerAG/gval v1.1.1
@@ -47,7 +42,6 @@ require (
 	github.com/oleiade/lane v1.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/thejerf/suture v4.0.1+incompatible
-	github.com/tidwall/gjson v1.6.8
 	golang.org/x/net v0.0.0-20220127074510-2fabfed7e28f
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e
 )
@@ -79,7 +73,6 @@ require (
 	github.com/gobuffalo/envy v1.7.1 // indirect
 	github.com/gobuffalo/logger v1.0.1 // indirect
 	github.com/gobuffalo/packd v0.3.0 // indirect
-	github.com/goburrow/serial v0.1.0 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/grid-x/serial v0.0.0-20191104121038-e24bc9bf6f08 // indirect
@@ -111,6 +104,7 @@ require (
 	github.com/segmentio/fasthash v1.0.3 // indirect
 	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/spf13/pflag v1.0.3 // indirect
+	github.com/tidwall/gjson v1.6.8 // indirect
 	github.com/tidwall/match v1.0.3 // indirect
 	github.com/tidwall/pretty v1.0.2 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
