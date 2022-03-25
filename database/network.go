@@ -7,9 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/plugin/compat"
-	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
-	"time"
 )
 
 func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
@@ -47,90 +45,6 @@ func (d *GormDatabase) GetNetworkByField(field string, value string, withDevices
 		}
 		return networkModel, nil
 	}
-}
-
-// GetNetworkByPluginName returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworkByPluginName(name string, args api.Args) (*model.Network, error) {
-	var networkModel *model.Network
-	query := d.buildNetworkQuery(args)
-	if err := query.Where("plugin_path = ? ", name).First(&networkModel).Error; err != nil {
-		return nil, err
-	}
-	return networkModel, nil
-}
-
-// GetNetworksByPluginName returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworksByPluginName(name string, args api.Args) ([]*model.Network, error) {
-	var networksModel []*model.Network
-	query := d.buildNetworkQuery(args)
-	if err := query.Where("plugin_path = ? ", name).Find(&networksModel).Error; err != nil {
-		return nil, err
-	}
-	return networksModel, nil
-}
-
-// GetNetworkByPlugin returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, args api.Args) (*model.Network, error) {
-	var networkModel *model.Network
-	query := d.buildNetworkQuery(args)
-	if err := query.Where("plugin_conf_id = ? ", pluginUUID).First(&networkModel).Error; err != nil {
-		return nil, err
-	}
-	return networkModel, nil
-}
-
-// GetNetworksByPlugin returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworksByPlugin(pluginUUID string, args api.Args) ([]*model.Network, error) {
-	var networksModel []*model.Network
-	query := d.buildNetworkQuery(args)
-	if err := query.Where("plugin_conf_id = ? ", pluginUUID).Find(&networksModel).Error; err != nil {
-		return nil, err
-	}
-	return networksModel, nil
-}
-
-// GetNetworksByName returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworksByName(name string, args api.Args) ([]*model.Network, error) {
-	var networksModel []*model.Network
-	query := d.buildNetworkQuery(args)
-	if err := query.Find(&networksModel).Where("name = ? ", name).Error; err != nil {
-		return nil, err
-	}
-	return networksModel, nil
-}
-
-// GetNetworkByName returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworkByName(name string, args api.Args) (*model.Network, error) {
-	var networksModel *model.Network
-	query := d.buildNetworkQuery(args)
-	if err := query.Where("name = ? ", name).First(&networksModel).Error; err != nil {
-		return nil, err
-	}
-	return networksModel, nil
-}
-
-func (d *GormDatabase) CreateNetworkPlugin(body *model.Network) (network *model.Network, err error) {
-	pluginName := body.PluginPath
-	if pluginName == "system" {
-		network, err = d.CreateNetwork(body, false)
-		if err != nil {
-			return nil, err
-		}
-		return
-	}
-	body.CommonFault.InFault = true
-	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
-	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
-	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
-	body.CommonFault.LastFail = time.Now().UTC()
-	body.CommonFault.LastOk = time.Now().UTC()
-	//if plugin like bacnet then call the api direct on the plugin as the plugin knows best how to add a point to keep things in sync
-	cli := client.NewLocalClient()
-	network, err = cli.CreateNetworkPlugin(body, pluginName)
-	if err != nil {
-		return nil, err
-	}
-	return
 }
 
 // CreateNetwork creates a device.
@@ -199,7 +113,7 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugi
 
 }
 
-func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
+func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
 	var networkModel *model.Network
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&networkModel)
 	if query.Error != nil {

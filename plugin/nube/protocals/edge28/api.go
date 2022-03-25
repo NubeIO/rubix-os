@@ -31,35 +31,50 @@ var err error
 // RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
-	mux.POST(networks, func(ctx *gin.Context) {
+	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
 		network, err := inst.addNetwork(body)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		} else {
-			ctx.JSON(http.StatusOK, network)
-		}
+		plugin.ResponseHandler(network, err, 0, ctx)
 	})
-	mux.POST(devices, func(ctx *gin.Context) {
+	mux.POST(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
 		device, err := inst.addDevice(body)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		} else {
-			ctx.JSON(http.StatusOK, device)
-		}
+		plugin.ResponseHandler(device, err, 0, ctx)
 	})
-	mux.POST(points, func(ctx *gin.Context) {
+	mux.POST(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		point, err := inst.addPoint(body)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		} else {
-			ctx.JSON(http.StatusOK, point)
-		}
+		plugin.ResponseHandler(point, err, 0, ctx)
+	})
+	mux.PATCH(plugin.NetworksURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYNetwork(ctx)
+		network, err := inst.updateNetwork(body)
+		plugin.ResponseHandler(network, err, 0, ctx)
+	})
+	mux.PATCH(plugin.DevicesURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYDevice(ctx)
+		device, err := inst.updateDevice(body)
+		plugin.ResponseHandler(device, err, 0, ctx)
+	})
+	mux.PATCH(plugin.PointsURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYPoint(ctx)
+		point, err := inst.updatePoint(body)
+		plugin.ResponseHandler(point, err, 0, ctx)
+	})
+	mux.DELETE(plugin.NetworksURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYNetwork(ctx)
+		ok, err := inst.deleteNetwork(body)
+		plugin.ResponseHandler(ok, err, 0, ctx)
+	})
+	mux.DELETE(plugin.DevicesURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYDevice(ctx)
+		ok, err := inst.deleteDevice(body)
+		plugin.ResponseHandler(ok, err, 0, ctx)
+	})
+	mux.DELETE(plugin.PointsURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYPoint(ctx)
+		ok, err := inst.deletePoint(body)
+		plugin.ResponseHandler(ok, err, 0, ctx)
 	})
 
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {

@@ -3,6 +3,8 @@ package client
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
+	"github.com/go-resty/resty/v2"
 )
 
 // ClientGetPlugins an object
@@ -10,11 +12,9 @@ func (a *FlowClient) ClientGetPlugins() (*ResponsePlugins, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponsePlugins{}).
 		Get("/plugins")
-	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return nil, failResponse
 	}
 	return resp.Result().(*ResponsePlugins), nil
 }
@@ -25,13 +25,25 @@ func (a *FlowClient) ClientGetPlugin(uuid string) (*ResponseBody, error) {
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/plugins/{uuid}")
-	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return nil, failResponse
 	}
 	return resp.Result().(*ResponseBody), nil
+}
+
+func failedResponse(err error, resp *resty.Response) error {
+	if err != nil {
+		return fmt.Errorf("%s failed", err)
+	}
+	if resp.Error() != nil {
+		return getAPIError(resp)
+	}
+	if nrest.StatusCodesAllBad(resp.StatusCode()) {
+		return getAPIError(resp)
+	}
+	return nil
+
 }
 
 // CreateNetworkPlugin an object
@@ -41,14 +53,50 @@ func (a *FlowClient) CreateNetworkPlugin(body *model.Network, pluginName string)
 		SetResult(&model.Network{}).
 		SetBody(body).
 		Post(url)
-	if err != nil {
-		if resp == nil || resp.String() == "" {
-			return nil, fmt.Errorf("add-network: %s", err)
-		} else {
-			return nil, fmt.Errorf("add-network: %s", resp)
-		}
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return nil, failResponse
 	}
 	return resp.Result().(*model.Network), nil
+}
+
+// DeleteNetworkPlugin delete an object
+func (a *FlowClient) DeleteNetworkPlugin(body *model.Network, pluginName string) (ok bool, err error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/networks", pluginName)
+	resp, err := a.client.R().
+		SetBody(body).
+		Delete(url)
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return false, failResponse
+	}
+	return true, err
+}
+
+// DeleteDevicePlugin delete an object
+func (a *FlowClient) DeleteDevicePlugin(body *model.Device, pluginName string) (ok bool, err error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/devices", pluginName)
+	resp, err := a.client.R().
+		SetBody(body).
+		Delete(url)
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return false, failResponse
+	}
+	return true, err
+}
+
+// DeletePointPlugin delete an object
+func (a *FlowClient) DeletePointPlugin(body *model.Point, pluginName string) (ok bool, err error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/points", pluginName)
+	resp, err := a.client.R().
+		SetBody(body).
+		Delete(url)
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return false, failResponse
+	}
+	return true, err
 }
 
 // CreateDevicePlugin an object
@@ -58,12 +106,9 @@ func (a *FlowClient) CreateDevicePlugin(body *model.Device, pluginName string) (
 		SetResult(&model.Device{}).
 		SetBody(body).
 		Post(url)
-	if err != nil {
-		if resp == nil || resp.String() == "" {
-			return nil, fmt.Errorf("add-device: %s", err)
-		} else {
-			return nil, fmt.Errorf("add-device: %s", resp)
-		}
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return nil, failResponse
 	}
 	return resp.Result().(*model.Device), nil
 }
@@ -75,12 +120,51 @@ func (a *FlowClient) CreatePointPlugin(body *model.Point, pluginName string) (*m
 		SetResult(&model.Point{}).
 		SetBody(body).
 		Post(url)
-	if err != nil {
-		if resp == nil || resp.String() == "" {
-			return nil, fmt.Errorf("add-point: %s", err)
-		} else {
-			return nil, fmt.Errorf("add-point: %s", resp)
-		}
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return nil, failResponse
+	}
+	return resp.Result().(*model.Point), nil
+}
+
+// UpdateNetworkPlugin update an object
+func (a *FlowClient) UpdateNetworkPlugin(body *model.Network, pluginName string) (*model.Network, error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/networks", pluginName)
+	resp, err := a.client.R().
+		SetResult(&model.Network{}).
+		SetBody(body).
+		Patch(url)
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return nil, failResponse
+	}
+	return resp.Result().(*model.Network), nil
+}
+
+// UpdateDevicePlugin update an object
+func (a *FlowClient) UpdateDevicePlugin(body *model.Device, pluginName string) (*model.Device, error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/devices", pluginName)
+	resp, err := a.client.R().
+		SetResult(&model.Device{}).
+		SetBody(body).
+		Patch(url)
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return nil, failResponse
+	}
+	return resp.Result().(*model.Device), nil
+}
+
+// UpdatePointPlugin update an object
+func (a *FlowClient) UpdatePointPlugin(body *model.Point, pluginName string) (*model.Point, error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/points", pluginName)
+	resp, err := a.client.R().
+		SetResult(&model.Point{}).
+		SetBody(body).
+		Patch(url)
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return nil, failResponse
 	}
 	return resp.Result().(*model.Point), nil
 }

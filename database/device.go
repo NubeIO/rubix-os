@@ -6,10 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/model"
-	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
-	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 func (d *GormDatabase) GetDevices(args api.Args) ([]*model.Device, error) {
@@ -28,59 +25,6 @@ func (d *GormDatabase) GetDevice(uuid string, args api.Args) (*model.Device, err
 		return nil, err
 	}
 	return deviceModel, nil
-}
-
-func (d *GormDatabase) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
-	var deviceModel *model.Device
-	query := d.buildDeviceQuery(args)
-	if err := query.First(&deviceModel).Error; err != nil {
-		return nil, err
-	}
-	return deviceModel, nil
-}
-
-// GetPluginIDFromDevice returns the pluginUUID by using the deviceUUID to query the network.
-func (d *GormDatabase) GetPluginIDFromDevice(uuid string) (*model.Network, error) {
-	device, err := d.GetDevice(uuid, api.Args{})
-	if err != nil {
-		return nil, err
-	}
-	network, err := d.GetNetwork(device.NetworkUUID, api.Args{})
-	if err != nil {
-		return nil, err
-	}
-	return network, err
-}
-
-func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Device, err error) {
-	fmt.Println(body, body.NetworkUUID)
-	network, err := d.GetNetwork(body.NetworkUUID, api.Args{})
-	if network == nil {
-		errMsg := fmt.Sprintf("model.device failed to find a network with uuid:%s", body.NetworkUUID)
-		log.Errorf(errMsg)
-		return nil, errors.New(errMsg)
-	}
-	pluginName := network.PluginPath
-
-	if pluginName == "system" {
-		device, err = d.CreateDevice(body)
-		if err != nil {
-			return nil, err
-		}
-		return
-	}
-	body.CommonFault.InFault = true
-	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
-	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
-	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
-	body.CommonFault.LastFail = time.Now().UTC()
-	body.CommonFault.LastOk = time.Now().UTC()
-	cli := client.NewLocalClient()
-	device, err = cli.CreateDevicePlugin(body, pluginName)
-	if err != nil {
-		return nil, err
-	}
-	return
 }
 
 func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {

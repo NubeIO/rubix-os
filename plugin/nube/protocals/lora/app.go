@@ -17,18 +17,39 @@ import (
 
 var err error
 
-//addDevice add network
+//addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	network, err = inst.db.CreateNetwork(body, false)
+	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
 	if err != nil {
 		return nil, err
 	}
-	return network, nil
+	for _, net := range nets {
+		if net != nil {
+			errMsg := fmt.Sprintf("lora: only max one network is allowed with lora")
+			log.Errorf(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
+	network, err = inst.db.CreateNetwork(body, true)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }
 
 //addDevice add device
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
+	device, _ = inst.db.GetOneDeviceByArgs(api.Args{AddressUUID: body.AddressUUID})
+	if device != nil {
+		errMsg := fmt.Sprintf("lora: the lora ID (address_uuid) must be unique: %s", nils.StringIsNil(body.AddressUUID))
+		log.Errorf(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	device, err = inst.db.CreateDevice(body)
+	if err != nil {
+		return nil, err
+	}
+	err = inst.addDevicePoints(device)
 	if err != nil {
 		return nil, err
 	}
@@ -36,12 +57,71 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 }
 
 //addPoint add point
-func (inst *Instance) addPoint(body *model.Point) (err error) {
-	_, err = inst.db.CreatePoint(body, false, false)
+func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
+	point, err = inst.db.CreatePoint(body, true, true)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return point, nil
+}
+
+//updateNetwork update network
+func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
+	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
+	if err != nil {
+		return nil, err
+	}
+	return network, nil
+}
+
+//updateDevice update device
+func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
+	device, err = inst.db.UpdateDevice(body.UUID, body, true)
+	if err != nil {
+		return nil, err
+	}
+	err = inst.updateDevicePointsAddress(device)
+	if err != nil {
+		return nil, err
+	}
+
+	return device, nil
+}
+
+//updatePoint update point
+func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
+	point, err = inst.db.UpdatePoint(body.UUID, body, true)
+	if err != nil {
+		return nil, err
+	}
+	return point, nil
+}
+
+//deleteNetwork delete network
+func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
+	ok, err = inst.db.DeleteNetwork(body.UUID)
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
+}
+
+//deleteNetwork delete device
+func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
+	ok, err = inst.db.DeleteDevice(body.UUID)
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
+}
+
+//deletePoint delete point
+func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
+	ok, err = inst.db.DeletePoint(body.UUID)
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
 }
 
 //networkUpdate update network
@@ -160,13 +240,12 @@ func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 	pointName := getStructFieldJSONNameByName(decoder.CommonValues{}, "Rssi")
 	point := new(model.Point)
 
-	inst.setnewPointFields(deviceBody, point, pointName)
-
-	if inst.addPoint(point) != nil {
+	inst.setNewPointFields(deviceBody, point, pointName)
+	_, err = inst.addPoint(point)
+	if err != nil {
 		log.Errorf("lora: issue on addPoint: %v\n", err)
 		return err
 	}
-
 	return inst.addPointsFromStruct(deviceBody, pointsRefl)
 }
 
@@ -180,8 +259,9 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 			continue
 		}
 		pointName := getReflectFieldJSONName(pointsRefl.Type().Field(i))
-		inst.setnewPointFields(deviceBody, point, pointName)
-		if inst.addPoint(point) != nil {
+		inst.setNewPointFields(deviceBody, point, pointName)
+		_, err = inst.addPoint(point)
+		if err != nil {
 			log.Errorf("lora: issue on addPoint: %v\n", err)
 			return err
 		}
@@ -189,7 +269,7 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 	return nil
 }
 
-func (inst *Instance) setnewPointFields(deviceBody *model.Device, pointBody *model.Point, name string) {
+func (inst *Instance) setNewPointFields(deviceBody *model.Device, pointBody *model.Point, name string) {
 	pointBody.DeviceUUID = deviceBody.UUID
 	pointBody.AddressUUID = deviceBody.AddressUUID
 	pointBody.IsProducer = utils.NewFalse()
@@ -203,16 +283,14 @@ func (inst *Instance) setnewPointFields(deviceBody *model.Device, pointBody *mod
 func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
 	var pnt model.Point
 	pnt.AddressUUID = body.AddressUUID
-	var arg api.Args
-	arg.WithPoints = true
-	dev, err := inst.db.GetDevice(body.UUID, arg)
+	dev, err := inst.db.GetDevice(body.UUID, api.Args{WithPoints: true})
 	if err != nil {
 		return err
 	}
 	for _, pt := range dev.Points {
 		_, err = inst.db.UpdatePoint(pt.UUID, &pnt, true)
 		if err != nil {
-			log.Errorf("lora: issue on UpdatePoint: %v\n", err)
+			log.Errorf("lora: issue on UpdatePoint updateDevicePointsAddress(): %v\n", err)
 			return err
 		}
 	}

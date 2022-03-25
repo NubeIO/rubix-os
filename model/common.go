@@ -3,8 +3,6 @@ package model
 
 import (
 	"time"
-
-	"github.com/NubeIO/null"
 )
 
 type CommonDescription struct {
@@ -97,11 +95,6 @@ type CommonHistory struct {
 	EnableHistory *bool `json:"history_enable,omitempty"`
 }
 
-type CommonValue struct {
-	Value    null.Float `json:"value,omitempty"`
-	ValueRaw string     `json:"value_raw,omitempty"`
-}
-
 type CommonFault struct {
 	InFault      bool      `json:"fault,omitempty"`
 	MessageLevel string    `json:"message_level,omitempty"`
@@ -109,11 +102,6 @@ type CommonFault struct {
 	Message      string    `json:"message,omitempty"`
 	LastOk       time.Time `json:"last_ok,omitempty"`
 	LastFail     time.Time `json:"last_fail,omitempty"`
-}
-
-type CommonStore struct {
-	CommonValue
-	CommonFault
 }
 
 type CommonProducerPermissions struct {

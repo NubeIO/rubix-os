@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/utilstime"
@@ -11,7 +13,18 @@ import (
 
 //addDevice add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	network, err = inst.db.CreateNetwork(body, false)
+	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
+	if err != nil {
+		return nil, err
+	}
+	for _, net := range nets {
+		if net != nil {
+			errMsg := fmt.Sprintf("edge-28-network: only max one network is allowed with edge-28-network")
+			log.Errorf(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
+	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err
 	}
@@ -29,11 +42,65 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 
 //addPoint add point
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
-	point, err = inst.db.CreatePoint(body, false, false)
+	point, err = inst.db.CreatePoint(body, true, true)
 	if err != nil {
 		return nil, err
 	}
 	return point, nil
+}
+
+//updateNetwork update network
+func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
+	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
+	if err != nil {
+		return nil, err
+	}
+	return network, nil
+}
+
+//updateDevice update device
+func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
+	device, err = inst.db.UpdateDevice(body.UUID, body, true)
+	if err != nil {
+		return nil, err
+	}
+	return device, nil
+}
+
+//updatePoint update point
+func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
+	point, err = inst.db.UpdatePoint(body.UUID, body, true)
+	if err != nil {
+		return nil, err
+	}
+	return point, nil
+}
+
+//deleteNetwork delete network
+func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
+	ok, err = inst.db.DeleteNetwork(body.UUID)
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
+}
+
+//deleteNetwork delete device
+func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
+	ok, err = inst.db.DeleteDevice(body.UUID)
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
+}
+
+//deletePoint delete point
+func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
+	ok, err = inst.db.DeletePoint(body.UUID)
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
 }
 
 //pointUpdate update point present value
