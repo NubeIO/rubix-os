@@ -1,7 +1,6 @@
 package lorawan_model
 
 import (
-	"github.com/NubeIO/null"
 	"time"
 )
 
@@ -194,6 +193,5 @@ type Server struct {
 
 // MqttPayload payload from the bacnet server
 type MqttPayload struct {
-	Value    null.Float
 	Priority int
 }

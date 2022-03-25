@@ -4,6 +4,8 @@ import (
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"net/http"
 )
 
 const (
@@ -29,12 +31,47 @@ func GetBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 
 func PointWrite(pnt *model.Point) (out float64) {
 	out = utils.Float64IsNil(pnt.WriteValue)
-	//log.Infof("modbus-write: pointWrite() ObjectType: %s  Addr: %d WriteValue: %v\n", pnt.ObjectType, utils.IntIsNil(pnt.AddressID), out)
-	//if pnt.Priority != nil {
-	//	if (*pnt.Priority).P16 != nil {
-	//		out = *pnt.Priority.P16
-	//		//log.Infof("modbus-write: pointWrite() ObjectType: %s  Addr: %d WriteValue: %v\n", pnt.ObjectType, utils.IntIsNil(pnt.AddressID), out)
-	//	}
-	//}
 	return
+}
+
+type Message struct {
+	Message string `json:"message"`
+}
+
+func SetStatusCode(code, defaultCode int) int {
+	if code == 0 {
+		return defaultCode
+	} else {
+		return code
+	}
+}
+
+func ResponseHandler(body interface{}, err error, statusCode int, ctx *gin.Context) {
+	if err == nil {
+		ctx.JSON(SetStatusCode(statusCode, http.StatusOK), body)
+	} else {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(SetStatusCode(statusCode, http.StatusNotFound), Message{Message: err.Error()})
+		case gorm.ErrInvalidTransaction,
+			gorm.ErrNotImplemented,
+			gorm.ErrMissingWhereClause,
+			gorm.ErrUnsupportedRelation,
+			gorm.ErrPrimaryKeyRequired,
+			gorm.ErrModelValueRequired,
+			gorm.ErrInvalidData,
+			gorm.ErrUnsupportedDriver,
+			gorm.ErrRegistered,
+			gorm.ErrInvalidField,
+			gorm.ErrEmptySlice,
+			gorm.ErrDryRunModeUnsupported,
+			gorm.ErrInvalidDB,
+			gorm.ErrInvalidValue,
+			gorm.ErrInvalidValueOfLength:
+			ctx.JSON(SetStatusCode(statusCode, http.StatusInternalServerError), Message{Message: err.Error()})
+		default:
+			ctx.JSON(SetStatusCode(statusCode, http.StatusBadRequest), Message{Message: err.Error()})
+		}
+	}
+	//return nil
 }

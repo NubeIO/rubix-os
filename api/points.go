@@ -9,15 +9,17 @@ type PointDatabase interface {
 	GetPoints(args Args) ([]*model.Point, error)
 	GetPoint(uuid string, args Args) (*model.Point, error)
 	CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error)
-	CreatePointPlugin(body *model.Point) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
 	PointWrite(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
 	GetOnePointByArgs(args Args) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
-	DeletePointPlugin(uuid string) (bool, error)
 	DropPoints() (bool, error)
 	GetPointByName(networkName, deviceName, pointName string) (*model.Point, error)
 	PointWriteByName(networkName, deviceName, pointName string, body *model.Point, fromPlugin bool) (*model.Point, error)
+
+	CreatePointPlugin(body *model.Point) (*model.Point, error)
+	UpdatePointPlugin(uuid string, body *model.Point) (*model.Point, error)
+	DeletePointPlugin(uuid string) (bool, error)
 }
 type PointAPI struct {
 	DB PointDatabase
@@ -39,7 +41,7 @@ func (a *PointAPI) GetPoint(ctx *gin.Context) {
 func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	uuid := resolveID(ctx)
-	q, err := a.DB.UpdatePoint(uuid, body, false)
+	q, err := a.DB.UpdatePointPlugin(uuid, body)
 	responseHandler(q, err, ctx)
 }
 

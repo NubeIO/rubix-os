@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+//getPointAddr will get the bacnet object type and address from the mqtt topic example: analogValue-11 will return [analogValue, 11]
 func getPointAddr(s string) (objType, addr string) {
 	mArr := utils.NewArray()
 	ss := strings.Split(s, "-")

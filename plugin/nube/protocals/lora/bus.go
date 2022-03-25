@@ -33,7 +33,7 @@ func (inst *Instance) BusServ() {
 				}
 				if dev != nil {
 					log.Info("lora: BUS PluginsCreated IsDevice", " ", dev.UUID)
-					err = inst.addDevicePoints(dev)
+					//err = inst.addDevicePoints(dev)
 					if err != nil {
 						return
 					}
@@ -79,7 +79,7 @@ func (inst *Instance) BusServ() {
 					return
 				}
 				if dev != nil {
-					err = inst.updateDevicePointsAddress(dev)
+					//err = inst.updateDevicePointsAddress(dev)
 					log.Info("lora: BUS PluginsUpdated IsDevice", " ", dev.UUID)
 					if err != nil {
 						return

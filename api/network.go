@@ -14,11 +14,13 @@ type NetworkDatabase interface {
 	GetNetworks(args Args) ([]*model.Network, error)
 	GetNetwork(uuid string, args Args) (*model.Network, error)
 	CreateNetwork(network *model.Network, fromPlugin bool) (*model.Network, error)
-	CreateNetworkPlugin(network *model.Network) (*model.Network, error)
 	UpdateNetwork(uuid string, body *model.Network, fromPlugin bool) (*model.Network, error)
 	DeleteNetwork(uuid string) (bool, error)
-	DeleteNetworkPlugin(uuid string) (bool, error)
 	DropNetworks() (bool, error)
+
+	CreateNetworkPlugin(network *model.Network) (*model.Network, error)
+	UpdateNetworkPlugin(uuid string, body *model.Network) (*model.Network, error)
+	DeleteNetworkPlugin(uuid string) (bool, error)
 }
 type NetworksAPI struct {
 	DB  NetworkDatabase
@@ -75,7 +77,7 @@ func (a *NetworksAPI) CreateNetwork(ctx *gin.Context) {
 func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
 	body, _ := getBODYNetwork(ctx)
 	uuid := resolveID(ctx)
-	q, err := a.DB.UpdateNetwork(uuid, body, false)
+	q, err := a.DB.UpdateNetworkPlugin(uuid, body)
 	responseHandler(q, err, ctx)
 }
 
