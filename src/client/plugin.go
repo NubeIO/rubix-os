@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/nrest"
 	"github.com/go-resty/resty/v2"
 )
 

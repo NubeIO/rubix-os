@@ -6,7 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/utils"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/utilstime"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	log "github.com/sirupsen/logrus"
 	"time"
 )

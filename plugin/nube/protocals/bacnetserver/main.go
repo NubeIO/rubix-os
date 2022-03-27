@@ -5,9 +5,9 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube_api"
-	nube_api_bacnetserver "github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube_api/bacnetserver"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/nrest"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/nube_api"
+	nube_api_bacnetserver "github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/nube_api/bacnetserver"
 )
 
 const path = "bacnetserver" //must be unique across all plugins

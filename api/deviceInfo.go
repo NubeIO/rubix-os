@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/system/networking"
 	"github.com/NubeIO/flow-framework/src/system/ufw"
 	"github.com/NubeIO/flow-framework/src/utilstime"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/networking/portscanner"
 	"github.com/gin-gonic/gin"
 )
 
@@ -60,4 +61,16 @@ func (a *DeviceInfoAPI) GetTZoneList(ctx *gin.Context) {
 func (a *DeviceInfoAPI) FirewallStatus(ctx *gin.Context) {
 	out, err := ufw.FirewallStatus()
 	responseHandler(out, err, ctx)
+}
+
+func (a *DeviceInfoAPI) RubixNetworkPing(ctx *gin.Context) {
+	ports := []string{"80", "1414", "1883", "1660"}
+
+	// IP sequence is defined by a '-' between first and last IP address .
+	ipsSequence := []string{"192.168.15.1-254"}
+
+	// result returns a map with open ports for each IP address.
+	results := portscanner.IPScanner(ipsSequence, ports, true)
+
+	responseHandler(results, nil, ctx)
 }
