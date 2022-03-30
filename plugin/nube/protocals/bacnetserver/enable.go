@@ -2,9 +2,11 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube_api"
-	nube_api_bacnetserver "github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube_api/bacnetserver"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/nrest"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/nube_api"
+	nube_api_bacnetserver "github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/nube_api/bacnetserver"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/nube_apps"
+
 	"github.com/labstack/gommon/log"
 	"time"
 )
@@ -14,7 +16,7 @@ var reqType = &nrest.ReqType{
 	BaseUri: nube_api.BaseURL,
 	Service: "bacnet-server",
 	LogPath: "helpers.nrest.bacnet.server",
-	Port:    nube_api.DefaultPortBacnet,
+	Port:    nube_apps.Services.BacnetServer.Port,
 }
 
 //api options
@@ -29,7 +31,7 @@ var options = &nrest.ReqOpt{
 //inc nube rest client
 var nubeApi = &nube_api.NubeRest{
 	Rest:          reqType,
-	RubixPort:     nube_api.DefaultRubixService,
+	RubixPort:     nube_apps.Services.RubixService.Port,
 	RubixUsername: "",
 	RubixPassword: "",
 	UseRubixProxy: false,

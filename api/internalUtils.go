@@ -68,7 +68,7 @@ type Args struct {
 	AddressUUID          *string
 	AddressID            *string
 	ObjectType           *string
-	IoNumber                 *string
+	IoNumber             *string
 	IdGt                 *string
 }
 
@@ -128,7 +128,7 @@ var ArgsType = struct {
 	AddressUUID          string
 	AddressID            string
 	ObjectType           string
-	IoNumber                 string
+	IoNumber             string
 	IdGt                 string
 }{
 	Sort:                 "sort",
@@ -186,7 +186,7 @@ var ArgsType = struct {
 	AddressUUID:          "address_uuid",
 	AddressID:            "address_id",
 	ObjectType:           "object_type",
-	IoNumber:                 "io_number",
+	IoNumber:             "io_number",
 	IdGt:                 "id_gt",
 }
 
@@ -493,6 +493,11 @@ func resolveName(ctx *gin.Context) string {
 
 func resolvePluginName(ctx *gin.Context) string {
 	return ctx.Param("plugin_name")
+}
+
+func getRubixPingDevice(ctx *gin.Context) (dto *Ping, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
 }
 
 func toBool(value string) (bool, error) {

@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/auth"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/floweng/server"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/networking/networking"
 	"github.com/gin-contrib/cors"
 	"time"
 
@@ -89,8 +90,10 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	tagHandler := api.TagAPI{
 		DB: db,
 	}
+	nets := networking.NewNets()
 	deviceInfoHandler := api.DeviceInfoAPI{
-		DB: db,
+		DB:   db,
+		Nets: nets,
 	}
 	writerHandler := api.WriterAPI{
 		DB: db,
@@ -403,8 +406,8 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			deviceInfoRoutes.GET("/ip/internal", deviceInfoHandler.GetNetworks)
 			deviceInfoRoutes.GET("/ip/external", deviceInfoHandler.GetExternalIP)
 			deviceInfoRoutes.GET("/ip/interfaces", deviceInfoHandler.GetInterfacesNames)
-			deviceInfoRoutes.GET("/ip/internet/connection", deviceInfoHandler.GetInternetStatus)
 			deviceInfoRoutes.GET("/firewall/status", deviceInfoHandler.FirewallStatus)
+			deviceInfoRoutes.POST("/discover", deviceInfoHandler.RubixNetworkPing)
 		}
 
 		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)

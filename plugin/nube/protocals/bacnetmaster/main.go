@@ -5,7 +5,6 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
 )
 
 const path = "bacnetmaster" //must be unique across all plugins
@@ -23,12 +22,6 @@ const networkType = "bacnet"
 const transportType = "ip" //serial, ip
 const ip = "0.0.0.0"
 const port = 1718
-
-var rt = &nrest.ReqType{
-	BaseUri: ip,
-	Port:    port,
-	Debug:   true,
-}
 
 // Instance is plugin instance
 type Instance struct {

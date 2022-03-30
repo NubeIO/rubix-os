@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nrest"
 	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 	"net/http"
 )
 
@@ -149,181 +146,181 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			return
 		}
 	})
-	mux.GET(ping, func(ctx *gin.Context) {
-		rt.Method = nrest.GET
-		rt.Path = pingBacnet
-		res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
-		if err != nil {
-			ctx.JSON(code, err)
-			return
-		} else {
-			ctx.JSON(code, res.AsJsonNoErr())
-			return
-		}
-	})
-	mux.GET(devices, func(ctx *gin.Context) {
-		rt.Method = nrest.GET
-		rt.Path = devicesBacnet + "/true"
-		res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
-		if err != nil {
-			ctx.JSON(code, err)
-			return
-		} else {
-			ctx.JSON(code, res.AsJsonNoErr())
-			return
-		}
-	})
-	mux.GET(points, func(ctx *gin.Context) {
-		rt.Method = nrest.GET
-		rt.Path = pointsBacnet
-		res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
-		if err != nil {
-			ctx.JSON(code, err)
-			return
-		} else {
-			ctx.JSON(code, res.AsJsonNoErr())
-			return
-		}
-	})
-	mux.GET(networks, func(ctx *gin.Context) {
-		rt.Method = nrest.GET
-		rt.Path = networksBacnet
-		res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
-		if err != nil {
-			ctx.JSON(code, err)
-			return
-		} else {
-			ctx.JSON(code, res.AsJsonNoErr())
-			return
-		}
-	})
-	mux.POST(network, func(ctx *gin.Context) {
-		body, _ := getBODYAddNetwork(ctx)
-		net, res, code, err := i.addNetwork(body)
-		if net != nil {
-			ctx.JSON(code, err)
-			return
-		}
-		if res != nil {
-			ctx.JSON(code, res)
-			return
-		}
-		if err != nil {
-			ctx.JSON(code, err)
-			return
-		}
-	})
-	mux.POST(device, func(ctx *gin.Context) {
-		body, _ := getBODYAddDevice(ctx)
-		add, err := i.addDevice(body)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		} else {
-			ctx.JSON(http.StatusOK, add)
-			return
-		}
-	})
-	mux.POST(point, func(ctx *gin.Context) {
-		body, _ := getBODYAddPoint(ctx)
-		add, err := i.addPoint(body)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err.Error())
-			return
-		} else {
-			ctx.JSON(http.StatusOK, add)
-			return
-		}
-	})
-	mux.PATCH("network/:uuid", func(ctx *gin.Context) {
-		body, _ := getBODYAddPoint(ctx)
-		uuid := resolveUUID(ctx)
-		add, err := i.patchPoint(body, uuid)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err.Error())
-			return
-		} else {
-			ctx.JSON(http.StatusOK, add)
-			return
-		}
-	})
-	mux.PATCH("device/:uuid", func(ctx *gin.Context) {
-		body, _ := getBODYAddDevice(ctx)
-		uuid := resolveUUID(ctx)
-		add, err := i.patchDevice(body, uuid)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err.Error())
-			return
-		} else {
-			ctx.JSON(http.StatusOK, add)
-			return
-		}
-	})
-	mux.PATCH("point/:uuid", func(ctx *gin.Context) {
-		body, _ := getBODYAddPoint(ctx)
-		uuid := resolveUUID(ctx)
-		add, err := i.patchPoint(body, uuid)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err.Error())
-			return
-		} else {
-			ctx.JSON(http.StatusOK, add)
-			return
-		}
-	})
-	mux.DELETE("network/:uuid", func(ctx *gin.Context) {
-		uuid := resolveUUID(ctx)
-		add, err := i.deleteNetwork(uuid)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err.Error())
-			return
-		} else {
-			ctx.JSON(http.StatusOK, add)
-			return
-		}
-	})
-	mux.DELETE("device/:uuid", func(ctx *gin.Context) {
-		uuid := resolveUUID(ctx)
-		add, err := i.deleteDevice(uuid)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err.Error())
-			return
-		} else {
-			ctx.JSON(http.StatusOK, add)
-			return
-		}
-	})
-	mux.DELETE("point/:uuid", func(ctx *gin.Context) {
-		uuid := resolveUUID(ctx)
-		add, err := i.deletePoint(uuid)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err.Error())
-			return
-		} else {
-			ctx.JSON(http.StatusOK, add)
-			return
-		}
-	})
+	//mux.GET(ping, func(ctx *gin.Context) {
+	//	rt.Method = nrest.GET
+	//	rt.Path = pingBacnet
+	//	res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
+	//	if err != nil {
+	//		ctx.JSON(code, err)
+	//		return
+	//	} else {
+	//		ctx.JSON(code, res.AsJsonNoErr())
+	//		return
+	//	}
+	//})
+	//mux.GET(devices, func(ctx *gin.Context) {
+	//	rt.Method = nrest.GET
+	//	rt.Path = devicesBacnet + "/true"
+	//	res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
+	//	if err != nil {
+	//		ctx.JSON(code, err)
+	//		return
+	//	} else {
+	//		ctx.JSON(code, res.AsJsonNoErr())
+	//		return
+	//	}
+	//})
+	//mux.GET(points, func(ctx *gin.Context) {
+	//	rt.Method = nrest.GET
+	//	rt.Path = pointsBacnet
+	//	res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
+	//	if err != nil {
+	//		ctx.JSON(code, err)
+	//		return
+	//	} else {
+	//		ctx.JSON(code, res.AsJsonNoErr())
+	//		return
+	//	}
+	//})
+	//mux.GET(networks, func(ctx *gin.Context) {
+	//	rt.Method = nrest.GET
+	//	rt.Path = networksBacnet
+	//	res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
+	//	if err != nil {
+	//		ctx.JSON(code, err)
+	//		return
+	//	} else {
+	//		ctx.JSON(code, res.AsJsonNoErr())
+	//		return
+	//	}
+	//})
+	//mux.POST(network, func(ctx *gin.Context) {
+	//	body, _ := getBODYAddNetwork(ctx)
+	//	net, res, code, err := i.addNetwork(body)
+	//	if net != nil {
+	//		ctx.JSON(code, err)
+	//		return
+	//	}
+	//	if res != nil {
+	//		ctx.JSON(code, res)
+	//		return
+	//	}
+	//	if err != nil {
+	//		ctx.JSON(code, err)
+	//		return
+	//	}
+	//})
+	//mux.POST(device, func(ctx *gin.Context) {
+	//	body, _ := getBODYAddDevice(ctx)
+	//	add, err := i.addDevice(body)
+	//	if err != nil {
+	//		ctx.JSON(http.StatusBadRequest, err)
+	//		return
+	//	} else {
+	//		ctx.JSON(http.StatusOK, add)
+	//		return
+	//	}
+	//})
+	//mux.POST(point, func(ctx *gin.Context) {
+	//	body, _ := getBODYAddPoint(ctx)
+	//	add, err := i.addPoint(body)
+	//	if err != nil {
+	//		ctx.JSON(http.StatusBadRequest, err.Error())
+	//		return
+	//	} else {
+	//		ctx.JSON(http.StatusOK, add)
+	//		return
+	//	}
+	//})
+	//mux.PATCH("network/:uuid", func(ctx *gin.Context) {
+	//	body, _ := getBODYAddPoint(ctx)
+	//	uuid := resolveUUID(ctx)
+	//	add, err := i.patchPoint(body, uuid)
+	//	if err != nil {
+	//		ctx.JSON(http.StatusBadRequest, err.Error())
+	//		return
+	//	} else {
+	//		ctx.JSON(http.StatusOK, add)
+	//		return
+	//	}
+	//})
+	//mux.PATCH("device/:uuid", func(ctx *gin.Context) {
+	//	body, _ := getBODYAddDevice(ctx)
+	//	uuid := resolveUUID(ctx)
+	//	add, err := i.patchDevice(body, uuid)
+	//	if err != nil {
+	//		ctx.JSON(http.StatusBadRequest, err.Error())
+	//		return
+	//	} else {
+	//		ctx.JSON(http.StatusOK, add)
+	//		return
+	//	}
+	//})
+	//mux.PATCH("point/:uuid", func(ctx *gin.Context) {
+	//	body, _ := getBODYAddPoint(ctx)
+	//	uuid := resolveUUID(ctx)
+	//	add, err := i.patchPoint(body, uuid)
+	//	if err != nil {
+	//		ctx.JSON(http.StatusBadRequest, err.Error())
+	//		return
+	//	} else {
+	//		ctx.JSON(http.StatusOK, add)
+	//		return
+	//	}
+	//})
+	//mux.DELETE("network/:uuid", func(ctx *gin.Context) {
+	//	uuid := resolveUUID(ctx)
+	//	add, err := i.deleteNetwork(uuid)
+	//	if err != nil {
+	//		ctx.JSON(http.StatusBadRequest, err.Error())
+	//		return
+	//	} else {
+	//		ctx.JSON(http.StatusOK, add)
+	//		return
+	//	}
+	//})
+	//mux.DELETE("device/:uuid", func(ctx *gin.Context) {
+	//	uuid := resolveUUID(ctx)
+	//	add, err := i.deleteDevice(uuid)
+	//	if err != nil {
+	//		ctx.JSON(http.StatusBadRequest, err.Error())
+	//		return
+	//	} else {
+	//		ctx.JSON(http.StatusOK, add)
+	//		return
+	//	}
+	//})
+	//mux.DELETE("point/:uuid", func(ctx *gin.Context) {
+	//	uuid := resolveUUID(ctx)
+	//	add, err := i.deletePoint(uuid)
+	//	if err != nil {
+	//		ctx.JSON(http.StatusBadRequest, err.Error())
+	//		return
+	//	} else {
+	//		ctx.JSON(http.StatusOK, add)
+	//		return
+	//	}
+	//})
 	mux.DELETE(networks, func(ctx *gin.Context) {
 		//getNetworks
-		rt.Method = nrest.GET
-		rt.Path = networksBacnet
-		res, _, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
-		nets := new(Networks)
-		err = res.ToInterface(nets)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, errors.New("failed to find get networks"))
-		}
-		count := 0
-		for _, a := range nets.Networks {
-			rt.Method = nrest.DELETE
-			rt.Path = networkBacnet + "/" + a.NetworkUuid
-			fmt.Println(rt.Path)
-			count++
-			nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
-
-		}
-		r := fmt.Sprintf("deleted %d number of networks", count)
-		ctx.JSON(http.StatusOK, r)
+		//rt.Method = nrest.GET
+		//rt.Path = networksBacnet
+		//res, _, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
+		//nets := new(Networks)
+		//err = res.ToInterface(nets)
+		//if err != nil {
+		//	ctx.JSON(http.StatusBadRequest, errors.New("failed to find get networks"))
+		//}
+		//count := 0
+		//for _, a := range nets.Networks {
+		//	rt.Method = nrest.DELETE
+		//	rt.Path = networkBacnet + "/" + a.NetworkUuid
+		//	fmt.Println(rt.Path)
+		//	count++
+		//	nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
+		//
+		//}
+		//r := fmt.Sprintf("deleted %d number of networks", count)
+		//ctx.JSON(http.StatusOK, r)
 	})
 }
