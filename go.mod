@@ -5,7 +5,7 @@ module github.com/NubeIO/flow-framework
 require (
 	github.com/NubeDev/configor v0.0.2
 	github.com/NubeDev/location v0.0.2
-	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.0
+	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.1
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -40,7 +40,6 @@ require (
 	github.com/martinlindhe/unit v0.0.0-20210313160520-19b60e03648d
 	github.com/minio/minio-go/v7 v7.0.14
 	github.com/oleiade/lane v1.0.1
-	github.com/pkg/errors v0.9.1
 	github.com/thejerf/suture v4.0.1+incompatible
 	golang.org/x/net v0.0.0-20220127074510-2fabfed7e28f
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e
@@ -96,6 +95,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pierrec/lz4 v0.0.0-20190327172049-315a67e90e41 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20181016184325-3113b8401b8a // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
