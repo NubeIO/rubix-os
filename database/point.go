@@ -58,6 +58,9 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	if body.Description == "" {
 		body.Description = "na"
 	}
+	if body.PointPriorityArrayMode == "" {
+		body.PointPriorityArrayMode = model.PriorityArrayToPresentValue //sets default priority array mode.
+	}
 	body.ThingClass = model.ThingClass.Point
 	body.CommonEnable.Enable = utils.NewTrue()
 	body.InSync = utils.NewFalse()
@@ -149,6 +152,7 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 		return nil, errors.New("no priority value is been sent")
 	} else {
 		pointModel.Priority = body.Priority
+		pointModel.ValueUpdatedFlag = utils.NewTrue()
 	}
 	pointModel.InSync = utils.NewFalse()
 	point, err := d.UpdatePointValue(pointModel, fromPlugin)
@@ -194,7 +198,8 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 			Where("writer_thing_uuid = ?", pointModel.UUID).
 			Update("present_value", nil)
 	}
-	if isChange == true {
+	if isChange == true || utils.BoolIsNil(pointModel.ValueUpdatedFlag) { //added ValueUpdatedFlag check for points where presentValue isn't updated from priority array
+		pointModel.ValueUpdatedFlag = utils.NewFalse()
 		_ = d.DB.Model(&pointModel).Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel)
 		if err != nil {
