@@ -3,6 +3,7 @@ package schedule
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/model"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
@@ -10,14 +11,14 @@ import (
 )
 
 //CheckWeeklyScheduleEntry checks if there is a WeeklyScheduleEntry that matches the specified schedule Name and is currently within the scheduled period.
-func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) ScheduleCheckerResult {
+func CheckWeeklyScheduleEntry(entry model.Weekly, timezone string) ScheduleCheckerResult {
 	result := ScheduleCheckerResult{}
 	result.Payload = entry.Value
 	result.IsActive = false
 	result.IsException = false
 
 	//get time.Location for entry timezone and check timezone
-	location, err := time.LoadLocation(checkTimezone)
+	location, err := time.LoadLocation(timezone)
 	if err != nil {
 		result.ErrorFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Critical: Invalid Timezone")
@@ -27,47 +28,42 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) S
 	now := time.Now().In(location)
 	result.CheckTime = now.Unix()
 	//get day of week and compare with entry.DaysNums
-	//nowHour, nowMinute, nowSecond := now.Clock()
 	nowYear, nowMonth, nowDate := now.Date()
-	//log.Println("nowYear: ", nowYear, "nowMonth: ", nowMonth, "nowDate: ", nowDate)
 	nowDayOfWeek := DaysOfTheWeek(now.Weekday())
-	//nowDayOfWeekString := now.String()
 
 	//parse start and stop times
-	var entryStartHour, entryStartMins, entryStopHour, entryStopMins int
-	n, err1 := fmt.Sscanf(entry.Start, "%d:%d", &entryStartHour, &entryStartMins)
-	m, err2 := fmt.Sscanf(entry.End, "%d:%d", &entryStopHour, &entryStopMins)
+	var entryStartHour, entryStartMinute, entryStopHour, entryStopMinutes int
+	n, err1 := fmt.Sscanf(entry.Start, "%d:%d", &entryStartHour, &entryStartMinute)
+	m, err2 := fmt.Sscanf(entry.End, "%d:%d", &entryStopHour, &entryStopMinutes)
 	if n != 2 || m != 2 || err1 != nil || err2 != nil {
 		result.ErrorFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Critical: Invalid Start/Stop Time")
 		return result
 	}
-	//log.Println("entryStartHour: ", entryStartHour, "entryStartMins: ", entryStartMins, "entryStopHour: ", entryStopHour, "entryStopMins: ", entryStopMins)
 
 	//parse start and end time into current day timestamps
-	startTimestamp := time.Date(nowYear, nowMonth, nowDate, entryStartHour, entryStartMins, 0, 0, location)
-	stopTimestamp := time.Date(nowYear, nowMonth, nowDate, entryStopHour, entryStopMins, 59, 0, location)
+	startTimestamp := time.Date(nowYear, nowMonth, nowDate, entryStartHour, entryStartMinute, 0, 0, location)
+	stopTimestamp := time.Date(nowYear, nowMonth, nowDate, entryStopHour, entryStopMinutes, 59, 0, location)
 
 	//Check if the schedule is active today
 	scheduleActiveToday := false
-	for _, day := range entry.DaysNums {
+	dayStringsToIntegers := GetDaysStringsToIntegers(entry)
+	for _, day := range dayStringsToIntegers {
 		if day == nowDayOfWeek {
 			scheduleActiveToday = true
 			break
 		}
 	}
-	//log.Println("scheduleActiveToday: ", scheduleActiveToday)
 
 	//find the next active schedule day
-	//log.Println("nowDayOfWeek: ", nowDayOfWeek, "entry.DaysNums: ", entry.DaysNums)
-	nextDay, err := getNextScheduleDay(nowDayOfWeek, entry.DaysNums)
+	nextDay, err := getNextScheduleDay(nowDayOfWeek, dayStringsToIntegers)
 	if err != nil {
 		result.ErrorFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Critical: Scheduled Days are Invalid")
 		return result
 	}
+
 	nextDayDuration := getDurationTillNextScheduleDay(nowDayOfWeek, nextDay)
-	//log.Println("nextDay: ", nextDay, "nextDayDuration: ", nextDayDuration)
 
 	if scheduleActiveToday && now.Before(stopTimestamp) { //scheduled today and hasn't finished yet
 		//check if today's schedule is currently active
@@ -86,7 +82,7 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) S
 		result.PeriodStop = stopTimestamp.Add(nextDayDuration).Unix()
 		//NextStartStop
 		//next scheduled day is being used for PeriodStart and PeriodStop, so get the NEXT next scheduled day for NextStart and NextStop
-		nextNextDay, err := getNextScheduleDay(nextDay, entry.DaysNums)
+		nextNextDay, err := getNextScheduleDay(nextDay, dayStringsToIntegers)
 		if err != nil {
 			result.ErrorFlag = true
 			result.ErrorStrings = append(result.ErrorStrings, "Critical: Scheduled Days are Invalid")
@@ -102,18 +98,15 @@ func CheckWeeklyScheduleEntry(entry WeeklyScheduleEntry, checkTimezone string) S
 }
 
 //CheckWeeklyScheduleCollection checks if there is a WeeklyScheduleEntry in the provided WeeklyScheduleCollection that matches the specified schedule Name and is currently within the scheduled period.
-func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName, timezone string) ScheduleCheckerResult {
+func CheckWeeklyScheduleCollection(weeklySchedulesMap model.WeeklyMap, scheduleName, timezone string) ScheduleCheckerResult {
 	finalResult := ScheduleCheckerResult{}
 	var singleResult ScheduleCheckerResult
 	count := 0
 	var err error
-	for _, scheduleEntry := range scheduleMap {
-		if scheduleName == "ANY" || scheduleName == "ALL" || scheduleEntry.Name == scheduleName {
-			scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
-			//fmt.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
-			singleResult = CheckWeeklyScheduleEntry(scheduleEntry, timezone)
+	for _, weeklySchedule := range weeklySchedulesMap {
+		if scheduleName == "ANY" || scheduleName == "ALL" || weeklySchedule.Name == scheduleName {
+			singleResult = CheckWeeklyScheduleEntry(weeklySchedule, timezone)
 			singleResult.Name = scheduleName
-			//fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)
 			if count == 0 {
 				finalResult = singleResult
 			} else {
@@ -122,7 +115,6 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName, timezon
 					log.Errorf("CheckEventScheduleEntry %v\n", err)
 				}
 			}
-			//fmt.Println("finalResult ", finalResult)
 			count++
 		}
 	}
@@ -177,37 +169,24 @@ func getDurationTillNextScheduleDay(today DaysOfTheWeek, nextDay DaysOfTheWeek) 
 		//rest of the week, plus the next day as integer
 		daysTillNext = (7 - int(today)) + int(nextDay)
 	}
-	//log.Println("daysTillNext: ", daysTillNext, "strconv.Itoa(daysTillNext): ", strconv.Itoa(daysTillNext))
 	tillNextDayDuration, _ := time.ParseDuration(strconv.Itoa(daysTillNext*24) + "h")
 	return tillNextDayDuration
 }
 
-//ConvertDaysStringsToInt converts strings of weekdays to integers
-func ConvertDaysStringsToInt(weeklyScheduleEntry WeeklyScheduleEntry) WeeklyScheduleEntry {
+//GetDaysStringsToIntegers returns strings of weekdays to integers
+func GetDaysStringsToIntegers(weekly model.Weekly) []DaysOfTheWeek {
+	var result []DaysOfTheWeek
 	var lowerCaseStringDay string
-	for _, v := range weeklyScheduleEntry.Days {
+	for _, v := range weekly.Days {
 		lowerCaseStringDay = strings.ToLower(v)
 		dayInt := DaysMap[lowerCaseStringDay]
-		weeklyScheduleEntry.DaysNums = append(weeklyScheduleEntry.DaysNums, dayInt)
+		result = append(result, dayInt)
 	}
-	return weeklyScheduleEntry
-}
-
-//GetNextStartStop gets the next start and stop times from a single ScheduleCheckerResult
-func GetNextStartStop(weeklyResultObj ScheduleCheckerResult) (nextStart int64, nextStop int64) {
-	var start, stop int64
-	if weeklyResultObj.IsActive {
-		stop = weeklyResultObj.PeriodStop
-		start = weeklyResultObj.NextStart
-	} else {
-		stop = weeklyResultObj.PeriodStop
-		start = weeklyResultObj.PeriodStart
-	}
-	return start, stop
+	return result
 }
 
 //WeeklyCheck checks all Weekly Schedules in the payload for active periods. It returns a combined ScheduleCheckerResult of all Weekly Schedules.
-func WeeklyCheck(weekly TypeWeekly, scheduleName, timezone string) (ScheduleCheckerResult, error) {
+func WeeklyCheck(weekly model.WeeklyMap, scheduleName, timezone string) (ScheduleCheckerResult, error) {
 	results := CheckWeeklyScheduleCollection(weekly, scheduleName, timezone)
 	return results, nil
 }

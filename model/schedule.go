@@ -21,10 +21,24 @@ type ScheduleData struct {
 	Config    datatypes.JSON `json:"config,omitempty"`
 }
 
+type ScheduleDataWithConfig struct {
+	Schedules Schedules      `json:"schedules,omitempty"`
+	Config    ScheduleConfig `json:"config,omitempty"`
+}
+
+type ScheduleConfig struct {
+	ScheduleNames datatypes.JSON `json:"names"`
+	TimeZone      string         `json:"timezone"`
+}
+
+type WeeklyMap map[string]Weekly
+type EventsMap map[string]Events
+type ExceptionMap map[string]Exception
+
 type Schedules struct {
-	Events    map[string]Events    `json:"events"`
-	Weekly    map[string]Weekly    `json:"weekly"`
-	Exception map[string]Exception `json:"exception"`
+	Events    EventsMap    `json:"events"`
+	Weekly    WeeklyMap    `json:"weekly"`
+	Exception ExceptionMap `json:"exception"`
 }
 
 type Events struct {
@@ -33,8 +47,8 @@ type Events struct {
 		Start string `json:"start"`
 		End   string `json:"end"`
 	} `json:"dates"`
-	Value int    `json:"value"`
-	Color string `json:"color"`
+	Value float64 `json:"value"`
+	Color string  `json:"color"`
 }
 
 type Weekly struct {
@@ -42,7 +56,7 @@ type Weekly struct {
 	Days  []string `json:"days"`
 	Start string   `json:"start"`
 	End   string   `json:"end"`
-	Value int      `json:"value"`
+	Value float64  `json:"value"`
 	Color string   `json:"color"`
 }
 
@@ -52,6 +66,6 @@ type Exception struct {
 		Start string `json:"start"`
 		End   string `json:"end"`
 	} `json:"dates"`
-	Value int    `json:"value"`
-	Color string `json:"color"`
+	Value float64 `json:"value"`
+	Color string  `json:"color"`
 }

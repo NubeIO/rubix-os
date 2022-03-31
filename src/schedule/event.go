@@ -1,12 +1,13 @@
 package schedule
 
 import (
+	"github.com/NubeIO/flow-framework/model"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
 //CheckEventScheduleEntry checks if there is a EventScheduleEntry that matches the specified schedule Name and is currently within the scheduled period.
-func CheckEventScheduleEntry(entry EventScheduleEntry, timezone string) (ScheduleCheckerResult, error) {
+func CheckEventScheduleEntry(entry model.Events, timezone string) (ScheduleCheckerResult, error) {
 	result := ScheduleCheckerResult{}
 	result.Payload = entry.Value
 	result.IsActive = false
@@ -67,12 +68,12 @@ func CheckEventScheduleEntry(entry EventScheduleEntry, timezone string) (Schedul
 }
 
 //CheckEventScheduleCollection checks if there is a EventScheduleEntry in the provided EventScheduleCollection that matches the specified schedule Name and is currently within the scheduled period.
-func CheckEventScheduleCollection(scheduleMap TypeEvents, scheduleName, timezone string) ScheduleCheckerResult {
+func CheckEventScheduleCollection(events model.EventsMap, scheduleName, timezone string) ScheduleCheckerResult {
 	finalResult := ScheduleCheckerResult{}
-	for _, scheduleEntry := range scheduleMap {
-		if scheduleName == "ANY" || scheduleName == "ALL" || scheduleEntry.Name == scheduleName {
+	for _, event := range events {
+		if scheduleName == "ANY" || scheduleName == "ALL" || event.Name == scheduleName {
 			//fmt.Println("EVENT SCHEDULE ", i, ": ", scheduleEntry)
-			singleResult, err := CheckEventScheduleEntry(scheduleEntry, timezone)
+			singleResult, err := CheckEventScheduleEntry(event, timezone)
 			singleResult.Name = scheduleName
 			//fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)
 			if err != nil {
@@ -91,7 +92,7 @@ func CheckEventScheduleCollection(scheduleMap TypeEvents, scheduleName, timezone
 }
 
 //EventCheck checks all Event Schedules in the payload for active periods. It returns a combined ScheduleCheckerResult of all Event Schedules.
-func EventCheck(events TypeEvents, scheduleName, timezone string) (ScheduleCheckerResult, error) {
+func EventCheck(events model.EventsMap, scheduleName, timezone string) (ScheduleCheckerResult, error) {
 	results := CheckEventScheduleCollection(events, scheduleName, timezone)
 	return results, nil
 }

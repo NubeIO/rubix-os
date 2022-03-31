@@ -3,6 +3,7 @@ package schedule
 import (
 	"encoding/json"
 	"errors"
+	"github.com/NubeIO/flow-framework/model"
 	"gorm.io/datatypes"
 	"reflect"
 	"time"
@@ -125,14 +126,13 @@ func (schedule ScheduleCheckerResult) CheckIfEmpty() bool {
 	return schedule.PeriodStart == 0 && schedule.PeriodStop == 0 && schedule.NextStart == 0 && schedule.NextStop == 0
 }
 
-func DecodeSchedule(scheduleJsonInput datatypes.JSON) (SchJSON, error) {
-	var ScheduleJSON SchJSON
-	err := json.Unmarshal(scheduleJsonInput, &ScheduleJSON)
+func DecodeSchedule(scheduleJsonInput datatypes.JSON) (*model.ScheduleDataWithConfig, error) {
+	var scheduleJSON *model.ScheduleDataWithConfig
+	err := json.Unmarshal(scheduleJsonInput, scheduleJSON)
 	if err != nil {
-		//log.Println("Unexpected error parsing json")
-		return SchJSON{}, err
+		return nil, err
 	}
-	return ScheduleJSON, nil
+	return scheduleJSON, nil
 }
 
 //CombineScheduleCheckerResults Combines 2 ScheduleCheckerResults into a single ScheduleCheckerResult, calculating PeriodStart, and PeriodStop times of the combined ScheduleCheckerResult.
