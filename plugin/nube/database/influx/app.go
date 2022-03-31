@@ -26,7 +26,7 @@ func (i *Instance) initializeInfluxSettings() []*InfluxSetting {
 		}
 		influxSetting.ServerURL = fmt.Sprintf("%s://%s:%d", schema, influx.Host, influx.Port)
 		if influx.Token == nil {
-			log.Warn("Token is null, please update it")
+			log.Warn("influx: Token is null, please update it")
 			continue
 		}
 		influxSetting.AuthToken = *influx.Token
@@ -41,7 +41,7 @@ func (i *Instance) initializeInfluxSettings() []*InfluxSetting {
 func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 	log.Info("InfluxDB sync has is been called...")
 	if len(influxSettings) == 0 {
-		err := "InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
+		err := "influx: InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
 		log.Warn(err)
 		return false, errors.New(err)
 	}
@@ -67,7 +67,7 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 	}
 
 	if allError {
-		err := "no connections are valid"
+		err := "influx: no connections are valid"
 		log.Warn(err)
 		return false, errors.New(err)
 	}
@@ -83,7 +83,7 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 			producerUuid = history.UUID
 			historyTags, err = i.db.GetHistoryInfluxTags(producerUuid)
 			if err != nil || len(historyTags) == 0 {
-				log.Warn(fmt.Sprintf("We unable to get the producer_uuid = %s details!", producerUuid))
+				log.Warn(fmt.Sprintf("influx: We unable to get the producer_uuid = %s details!", producerUuid))
 				continue
 			}
 		}
@@ -105,7 +105,7 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 		if influxDetail.Records > 0 {
 			log.Info(fmt.Sprintf("Stored %v rows on %v", influxDetail.Records, path))
 		} else {
-			log.Info("Nothing to store, no new records")
+			log.Info("influx: Nothing to store, no new records")
 		}
 	}
 	return true, nil
