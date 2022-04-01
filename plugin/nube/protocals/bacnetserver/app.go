@@ -10,8 +10,8 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/nube_api"
-	nube_api_bacnetserver "github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/nube_api/bacnetserver"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/bacnetserver/v1/bsrest"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/common/v1/iorest"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -57,7 +57,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 
 //addPoint from rest api
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
-	bacnetPoint := nube_api_bacnetserver.BacnetPoint{}
+	bacnetPoint := bsrest.BacnetPoint{}
 	if body.Description == "" {
 		bacnetPoint.Description = "na"
 	}
@@ -71,7 +71,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	bacnetPoint.RelinquishDefault = utils.Float64IsNil(body.Fallback)
 
 	bacPoint, r := bacnetClient.AddPoint(bacnetPoint)
-	err = errorMsg(r.Response)
+	err = r.GetError()
 	if err != nil {
 		return nil, err
 	}
@@ -80,9 +80,9 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	point, err = inst.db.CreatePoint(body, true, false)
 	if err != nil {
 		//if ail to add a new point in FF then delete it in the bacnet stack
-		bacnetClient.DeletePoint(bacnetUUID)
-		reDeleteErr := errorMsg(r.Response)
-		if reDeleteErr != nil {
+		r, notFound, deleteOk := bacnetClient.DeletePoint(bacnetUUID)
+		fmt.Println(notFound, deleteOk)
+		if r.GetError() != nil {
 			errMsg := fmt.Sprintf("bacnet-server: failed to add new point in bacnet stack, failed to remove the newly added point from bacnet-server-app error: %s", err.Error())
 			log.Errorf(errMsg)
 			return nil, err
@@ -119,19 +119,44 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	if bacnetPointUUID == "" {
 		return nil, errors.New("no address_uuid")
 	}
-	bacnetPoint := nube_api_bacnetserver.BacnetPoint{}
+	bacnetPoint := bsrest.BacnetPoint{}
 	bacnetPoint.ObjectName = body.Name
 	bacnetPoint.ObjectType = body.ObjectType
 	if !utils.IntNilCheck(body.AddressID) {
 		bacnetPoint.Address = utils.IntIsNil(body.AddressID)
 	}
 	bacnetPoint, r := bacnetClient.UpdatePoint(bacnetPointUUID, bacnetPoint)
-	err = errorMsg(r.Response)
+	err = errorMsg(r)
 	if err != nil {
 		return nil, err
 	}
 	return body, err
 
+}
+
+//updatePointValue update point present value
+func (inst *Instance) updatePointValue(body *model.Point) (*model.Point, error) {
+
+	bacnetPoint := bsrest.BacnetPoint{}
+	bacnetPoint.Priority = new(bsrest.Priority)
+	if (*body.Priority).P16 != nil {
+		(*bacnetPoint.Priority).P16 = (*body.Priority).P16
+	}
+	bacnetPointUUID := nils.StringIsNil(body.AddressUUID)
+	if !utils.IntNilCheck(body.AddressID) {
+		bacnetPoint.Address = utils.IntIsNil(body.AddressID)
+	}
+
+	point, r := bacnetClient.UpdatePointValue(bacnetPointUUID, bacnetPoint)
+
+	if r.GetError() != nil {
+		log.Errorln("bacnet-server: updatePointValue() point-name:", point.ObjectName)
+		log.Errorln("bacnet-server: updatePointValue() err:", r.GetError())
+	} else {
+		log.Println("bacnet-server: updatePointValue() point-name:", point.ObjectName)
+	}
+
+	return nil, nil
 }
 
 //deleteNetwork network
@@ -175,16 +200,18 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 		ok = true
 		return ok, nil
 	} else {
-		err = errorMsg(r.Response)
+		err = r.GetError()
 		return ok, err
 	}
 }
 
 func (inst *Instance) dropPoints() (err error) {
 	r := bacnetClient.DropPoints()
-	err = errorMsg(r.Response)
+	err = r.GetError()
 	return
 }
+
+//
 
 //bacnetUpdate listen on mqtt and then update the point in flow-framework
 func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
@@ -201,7 +228,7 @@ func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	point.Priority = &pri
 	pnt, err := inst.db.GetOnePointByArgs(api.Args{ObjectType: &objType, AddressID: &addr})
 	if err != nil {
-		log.Error("BACNET UPDATE POINT PointAndQuery", err)
+		log.Error("bacnet-server: GetOnePointByArgs() issue on message from mqtt update point", err)
 		return nil, err
 	}
 	point.CommonFault.InFault = false
@@ -210,22 +237,21 @@ func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	point.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 	point.CommonFault.LastOk = time.Now().UTC()
 	if pnt == nil {
-		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
+		log.Error("bacnet-server: issue on message from mqtt update point")
 		return nil, err
 	}
 	_, err = inst.db.UpdatePointValue(pnt.UUID, &point, true)
 	if err != nil {
-		log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
+		log.Error("bacnet-server: UpdatePointValue() issue on message from mqtt update point")
 		return nil, err
 	}
 	return nil, nil
 }
 
-func errorMsg(response nube_api.Response) (err error) {
-	appName := reqType.Path
+func errorMsg(response *iorest.RestResponse) (err error) {
 	msg := response.Message
 	if response.BadRequest {
-		err = fmt.Errorf("%s:  msg:%s", appName, msg)
+		err = fmt.Errorf("%s:  msg:%s", "bacnet-server", msg)
 	}
 	return
 

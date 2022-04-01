@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/model"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/nrest"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/rest/v1/rest"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -39,7 +39,7 @@ func failedResponse(err error, resp *resty.Response) error {
 	if resp.Error() != nil {
 		return getAPIError(resp)
 	}
-	if nrest.StatusCodesAllBad(resp.StatusCode()) {
+	if rest.StatusCodesAllBad(resp.StatusCode()) {
 		return getAPIError(resp)
 	}
 	return nil

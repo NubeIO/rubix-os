@@ -5,7 +5,7 @@ module github.com/NubeIO/flow-framework
 require (
 	github.com/NubeDev/configor v0.0.2
 	github.com/NubeDev/location v0.0.2
-	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.1
+	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.2
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -53,10 +53,7 @@ require (
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/DataDog/zstd v1.3.6-0.20190409195224-796139022798 // indirect
-	github.com/PuerkitoBio/purell v1.1.1 // indirect
-	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/Shopify/sarama v1.23.0 // indirect
-	github.com/THREATINT/go-net v1.2.10 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/creack/goselect v0.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -88,7 +85,6 @@ require (
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-sqlite3 v1.14.5 // indirect
-	github.com/mcnijman/go-emailaddress v1.1.0 // indirect
 	github.com/minio/md5-simd v1.1.0 // indirect
 	github.com/minio/sha256-simd v0.1.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
