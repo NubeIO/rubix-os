@@ -19,9 +19,7 @@ func (i *Instance) BusServ() {
 				if err != nil {
 					return
 				}
-				if net != nil {
-					log.Info("BACNET-MASTER BUS PluginsUpdated isNetwork", " ", net.UUID)
-					//_, err = i.addNetwork(net)
+				if net != nil { //_, err = i.addNetwork(net)
 					log.Info("BACNET-MASTER BUS PluginsCreated isNetwork", " ", net.UUID)
 					if err != nil {
 						return
@@ -166,6 +164,7 @@ func (i *Instance) BusServ() {
 	u, _ = utils.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerDeleted)
+
 	handlerMQTT := bus.Handler{ //MQTT UPDATE (got as msg over from bacnet stack)
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
