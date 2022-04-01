@@ -31,7 +31,7 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 
 func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
-	deviceUUID := body.DeviceUUID
+	deviceUUID := body.DeviceUUID // Should there be a check to ensure that the DeviceUUID is sent with body?
 	body.Name = nameIsNil(body.Name)
 	existingAddrID := false
 	existingName, _ := d.pointNameExists(body)
