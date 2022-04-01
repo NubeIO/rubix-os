@@ -21,6 +21,7 @@ func (inst *Instance) Enable() error {
 		if !inst.pollingEnabled {
 			var arg polling
 			inst.pollingEnabled = true
+			inst.PointWriteModeTest()
 			arg.enable = true
 			go func() error {
 				err := inst.PollingTCP(arg)
