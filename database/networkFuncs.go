@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 // GetNetworkByPluginName returns the network for the given id or nil.

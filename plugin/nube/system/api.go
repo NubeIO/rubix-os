@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	system_model "github.com/NubeIO/flow-framework/plugin/nube/system/model"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/gin-gonic/gin"

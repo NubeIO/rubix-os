@@ -2,7 +2,7 @@ package migration
 
 import (
 	"github.com/NubeIO/flow-framework/migration/versions"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )

@@ -3,7 +3,7 @@ package database
 import (
 	"encoding/json"
 	"github.com/NubeIO/flow-framework/config"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"

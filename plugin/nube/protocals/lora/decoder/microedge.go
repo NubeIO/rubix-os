@@ -4,7 +4,7 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 const MEDeviceName = "MicroEdge"

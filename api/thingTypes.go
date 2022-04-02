@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	unit "github.com/NubeIO/flow-framework/src/units"
 	"github.com/gin-gonic/gin"
 )

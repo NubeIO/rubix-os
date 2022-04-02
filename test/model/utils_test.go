@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

@@ -1,6 +1,6 @@
 package client
 
-import "github.com/NubeIO/flow-framework/model"
+import "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 
 type Token struct {
 	ID    int    `json:"id"`

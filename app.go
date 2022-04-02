@@ -15,9 +15,9 @@ import (
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/floweng"
 	"github.com/NubeIO/flow-framework/logger"
-	"github.com/NubeIO/flow-framework/model"
 	"github.com/NubeIO/flow-framework/router"
 	"github.com/NubeIO/flow-framework/runner"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
 )
