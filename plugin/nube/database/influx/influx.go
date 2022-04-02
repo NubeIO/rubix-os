@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
 	log "github.com/sirupsen/logrus"

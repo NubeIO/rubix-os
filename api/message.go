@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/NubeDev/location"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )

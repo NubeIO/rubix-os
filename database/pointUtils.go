@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	unit "github.com/NubeIO/flow-framework/src/units"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/PaesslerAG/gval"

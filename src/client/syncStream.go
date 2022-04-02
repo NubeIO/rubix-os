@@ -2,7 +2,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 func (a *FlowClient) SyncStream(body *model.SyncStream) (*model.StreamClone, error) {

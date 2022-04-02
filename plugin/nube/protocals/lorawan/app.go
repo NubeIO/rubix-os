@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	baseModel "github.com/NubeIO/flow-framework/model"
+	baseModel "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	bacnetServerModel "github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
 	model "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lorawan_model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"

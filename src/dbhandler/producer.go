@@ -1,6 +1,6 @@
 package dbhandler
 
-import "github.com/NubeIO/flow-framework/model"
+import "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 
 func (h *Handler) GetLatestProducerHistoryByProducerName(name string) (*model.ProducerHistory, error) {
 	q, err := getDb().GetLatestProducerHistoryByProducerName(name)

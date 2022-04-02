@@ -2,7 +2,7 @@ package api
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/flow-framework/src/system/host"
 	"github.com/NubeIO/flow-framework/src/system/ufw"
 	"github.com/NubeIO/flow-framework/src/utilstime"

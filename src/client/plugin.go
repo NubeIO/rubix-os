@@ -2,7 +2,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/rest/v1/rest"
 	"github.com/go-resty/resty/v2"
 )

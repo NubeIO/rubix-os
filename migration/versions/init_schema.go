@@ -1,6 +1,6 @@
 package versions
 
-import "github.com/NubeIO/flow-framework/model"
+import "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 
 func GetInitInterfaces() []interface{} {
 	return []interface{}{

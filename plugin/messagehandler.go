@@ -3,7 +3,7 @@ package plugin
 import (
 	"time"
 
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/flow-framework/plugin/compat"
 )
 

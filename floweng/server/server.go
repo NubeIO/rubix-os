@@ -6,7 +6,7 @@ import (
 
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/floweng/core"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 const (

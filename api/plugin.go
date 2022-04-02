@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 
 	"github.com/NubeDev/location"
-	"github.com/NubeIO/flow-framework/model"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/compat"
 	"github.com/gin-gonic/gin"
