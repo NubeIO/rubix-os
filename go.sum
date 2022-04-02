@@ -14,6 +14,8 @@ github.com/NubeDev/location v0.0.2 h1:EkXOIx6g6i6DRaDPWQzTH+qjgHnJYsUlBASL/p0OPF
 github.com/NubeDev/location v0.0.2/go.mod h1:wvL1deOEefQrsTv+nojlMOKbwpos4xUbEGSHQ4AKERs=
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.2 h1:rcqNrP1XNk6/EIVlBWkC8u+v8wAyNSuQlxaPX0ii0j4=
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.2/go.mod h1:CKkG6wbC7TOSXSCY/+RBtplsh9sOaYO3Zgit4Y7cHO4=
+github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.0 h1:tvcJHb4aBfr+SsI97Dbyz1dfC4rCQc9cGRCs2Z/NLUc=
+github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.0/go.mod h1:A1BPuc3UpE1EF3ugdf+8QIIKTT8s3eK+pfUcheJX2JM=
 github.com/PaesslerAG/gval v1.1.1 h1:4d7pprU9876+m3rc08X33UjGip8oV1kkm8Gh5GBuTss=
 github.com/PaesslerAG/gval v1.1.1/go.mod h1:Fa8gfkCmUsELXgayr8sfL/sw+VzCVoa03dcOcR/if2w=
 github.com/PaesslerAG/jsonpath v0.1.0 h1:gADYeifvlqK3R3i2cR5B4DGgxLXIPb3TRTH1mGi0jPI=
