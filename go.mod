@@ -35,15 +35,11 @@ require (
 	github.com/PaesslerAG/gval v1.1.1
 	github.com/fhmq/hmq v0.0.0-20210810024638-1d6979189a22
 	github.com/gomarkdown/markdown v0.0.0-20210918233619-6c1113f12c4a
-	github.com/gorilla/mux v1.8.0
 	github.com/grid-x/modbus v0.0.0-20220210093200-c7b3bba92b40
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
 	github.com/labstack/gommon v0.3.0
 	github.com/martinlindhe/unit v0.0.0-20210313160520-19b60e03648d
 	github.com/minio/minio-go/v7 v7.0.14
-	github.com/oleiade/lane v1.0.1
-	github.com/thejerf/suture v4.0.1+incompatible
-	golang.org/x/net v0.0.0-20220127074510-2fabfed7e28f
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e
 )
 
@@ -113,6 +109,7 @@ require (
 	go.uber.org/multierr v1.5.0 // indirect
 	go.uber.org/zap v1.13.0 // indirect
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de // indirect
+	golang.org/x/net v0.0.0-20220127074510-2fabfed7e28f // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
