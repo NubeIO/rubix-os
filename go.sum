@@ -12,10 +12,6 @@ github.com/NubeDev/configor v0.0.2 h1:DYFf3OMA3LgBmWs4lGTNGu7B6sVvL0BPfalkleccMY
 github.com/NubeDev/configor v0.0.2/go.mod h1:DVm+MnCPzqO2oqCzf27MolZw8qSoK5yqHk1sgG3PFHc=
 github.com/NubeDev/location v0.0.2 h1:EkXOIx6g6i6DRaDPWQzTH+qjgHnJYsUlBASL/p0OPFQ=
 github.com/NubeDev/location v0.0.2/go.mod h1:wvL1deOEefQrsTv+nojlMOKbwpos4xUbEGSHQ4AKERs=
-github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.2 h1:rcqNrP1XNk6/EIVlBWkC8u+v8wAyNSuQlxaPX0ii0j4=
-github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.2/go.mod h1:CKkG6wbC7TOSXSCY/+RBtplsh9sOaYO3Zgit4Y7cHO4=
-github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.0 h1:tvcJHb4aBfr+SsI97Dbyz1dfC4rCQc9cGRCs2Z/NLUc=
-github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.0/go.mod h1:A1BPuc3UpE1EF3ugdf+8QIIKTT8s3eK+pfUcheJX2JM=
 github.com/PaesslerAG/gval v1.1.1 h1:4d7pprU9876+m3rc08X33UjGip8oV1kkm8Gh5GBuTss=
 github.com/PaesslerAG/gval v1.1.1/go.mod h1:Fa8gfkCmUsELXgayr8sfL/sw+VzCVoa03dcOcR/if2w=
 github.com/PaesslerAG/jsonpath v0.1.0 h1:gADYeifvlqK3R3i2cR5B4DGgxLXIPb3TRTH1mGi0jPI=
@@ -155,7 +151,6 @@ github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
 github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1 h1:EGx4pi6eqNxGaHF6qqu48+N2wcFQ5qg5FXgOdqsJ5d8=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
-github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
 github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=
 github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
@@ -303,8 +298,6 @@ github.com/mustafaturan/bus/v3 v3.0.3 h1:PMEUVKpfI9FOUw32o3wAHRaBS1XGxh6cFCy/VHk
 github.com/mustafaturan/bus/v3 v3.0.3/go.mod h1:JVCyq6Pb6S/IGI6LrzKH5vlBZ9ifsd1Js+wd4Y2+7Xg=
 github.com/mustafaturan/monoton/v2 v2.0.2 h1:EXP4B2u6Cf/g02AV8G1yFdQsXlOyB9LWe8Gd8FhKViE=
 github.com/mustafaturan/monoton/v2 v2.0.2/go.mod h1:7OBzqOo357EfbHBL+g11SuPZ0lRcjC7L3E+ftWNOVN4=
-github.com/oleiade/lane v1.0.1 h1:hXofkn7GEOubzTwNpeL9MaNy8WxolCYb9cInAIeqShU=
-github.com/oleiade/lane v1.0.1/go.mod h1:IyTkraa4maLfjq/GmHR+Dxb4kCMtEGeb+qmhlrQ5Mk4=
 github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
@@ -365,8 +358,6 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/thejerf/suture v4.0.1+incompatible h1:LTfgYphYG8ebxe0QWjvKD2k4tk4NtC5xwxDI/qeF3Mg=
-github.com/thejerf/suture v4.0.1+incompatible/go.mod h1:ibKwrVj+Uzf3XZdAiNWUouPaAbSoemxOHLmJmwheEMc=
 github.com/tidwall/gjson v1.6.8 h1:CTmXMClGYPAmln7652e69B7OLXfTi5ABcPPwjIWUv7w=
 github.com/tidwall/gjson v1.6.8/go.mod h1:zeFuBCIqD4sN/gmqBzZ4j7Jd6UcA2Fc56x7QFsv+8fI=
 github.com/tidwall/match v1.0.3 h1:FQUVvBImDutD8wJLN6c5eMzWtjgONK9MwIBCOrUJKeE=

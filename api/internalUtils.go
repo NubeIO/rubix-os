@@ -2,8 +2,8 @@ package api
 
 import (
 	"errors"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/bools"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm"
 	"math/bits"
 	"net/http"
