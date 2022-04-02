@@ -13,7 +13,6 @@ import (
 
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/database"
-	"github.com/NubeIO/flow-framework/floweng"
 	"github.com/NubeIO/flow-framework/logger"
 	"github.com/NubeIO/flow-framework/router"
 	"github.com/NubeIO/flow-framework/runner"
@@ -70,7 +69,6 @@ func main() {
 		panic(err)
 	}
 	intHandler(db)
-	floweng.EngStart(db)
 	defer db.Close()
 	engine, closeable := router.Create(db, vInfo, conf)
 	defer closeable()
