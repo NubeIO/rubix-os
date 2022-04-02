@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/auth"
 	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/floweng/server"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/networking/networking"
 	"github.com/gin-contrib/cors"
 	"time"
@@ -16,8 +15,8 @@ import (
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/error"
 	"github.com/NubeIO/flow-framework/logger"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/flow-framework/plugin"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
 
@@ -423,8 +422,5 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			syncRoutes.GET("/writer/read/:source_uuid", syncWriterHandler.SyncWriterReadAction)
 		}
 	}
-
-	server.NewRouter(engine, apiRoutes)
-
 	return engine, streamHandler.Close
 }
