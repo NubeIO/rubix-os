@@ -52,8 +52,6 @@ go build -buildmode=plugin -o system.so *.go  && cp system.so  $pluginDir
 cd $dir/plugin/nube/utils/backup
 go build -buildmode=plugin -o backup.so *.go  && cp backup.so  $pluginDir
 
-cd $dir/plugin/nube/utils/git
-go build -buildmode=plugin -o git.so *.go  && cp git.so  $pluginDir
 
 cd $dir/plugin/nube/protocals/edge28
 go build -buildmode=plugin -o edge28.so *.go  && cp edge28.so $pluginDir
