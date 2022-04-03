@@ -1,4 +1,4 @@
-package edge_model
+package edgemodel
 
 import "github.com/NubeIO/flow-framework/plugin/defaults"
 

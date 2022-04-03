@@ -1,4 +1,4 @@
-package lorawan_model
+package lwmodel
 
 import (
 	"time"

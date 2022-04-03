@@ -2,15 +2,16 @@ package plgrest
 
 import (
 	"fmt"
-	model "github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnetmodel"
+	model "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwmodel"
 	baseModel "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 )
 
 // GetPoints all points
-func (a *RestClient) GetPoints() (*[]model.BacnetPoint, error) {
+func (a *RestClient) GetPoints() (*[]bacnetmodel.BacnetPoint, error) {
 	resp, err := a.client.R().
-		SetResult([]model.BacnetPoint{}).
+		SetResult([]bacnetmodel.BacnetPoint{}).
 		Get("/api/bacnet/points")
 	if err != nil {
 		return nil, fmt.Errorf("fetch name for name %s failed", err)
@@ -18,14 +19,14 @@ func (a *RestClient) GetPoints() (*[]model.BacnetPoint, error) {
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*[]model.BacnetPoint), nil
+	return resp.Result().(*[]bacnetmodel.BacnetPoint), nil
 }
 
 // AddPoint an object
-func (a *RestClient) AddPoint(body model.BacnetPoint) (*model.BacnetPoint, error) {
+func (a *RestClient) AddPoint(body bacnetmodel.BacnetPoint) (*bacnetmodel.BacnetPoint, error) {
 	fmt.Println("ADD POINT ON IN BACNET REST CALL", body)
 	resp, err := a.client.R().
-		SetResult(&model.BacnetPoint{}).
+		SetResult(&bacnetmodel.BacnetPoint{}).
 		SetBody(body).
 		Post("/api/bacnet/points")
 	if err != nil {
@@ -34,7 +35,7 @@ func (a *RestClient) AddPoint(body model.BacnetPoint) (*model.BacnetPoint, error
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*model.BacnetPoint), nil
+	return resp.Result().(*bacnetmodel.BacnetPoint), nil
 }
 
 type PriorityWriter struct {
@@ -42,11 +43,11 @@ type PriorityWriter struct {
 }
 
 // EditPoint an object
-func (a *RestClient) EditPoint(body model.BacnetPoint, obj string, addr int) (*model.BacnetPoint, error) {
+func (a *RestClient) EditPoint(body bacnetmodel.BacnetPoint, obj string, addr int) (*bacnetmodel.BacnetPoint, error) {
 	priorityWriter := new(PriorityWriter)
 	priorityWriter.PriorityArrayWrite = *body.Priority
 	resp, err := a.client.R().
-		SetResult(&model.BacnetPoint{}).
+		SetResult(&bacnetmodel.BacnetPoint{}).
 		SetBody(priorityWriter).
 		SetPathParams(map[string]string{"obj": obj, "addr": strconv.Itoa(addr)}).
 		Patch("/api/bacnet/points/obj/{obj}/{addr}")
@@ -56,7 +57,7 @@ func (a *RestClient) EditPoint(body model.BacnetPoint, obj string, addr int) (*m
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*model.BacnetPoint), nil
+	return resp.Result().(*bacnetmodel.BacnetPoint), nil
 }
 
 // DeletePoint an object
@@ -74,9 +75,9 @@ func (a *RestClient) DeletePoint(obj string, addr int) (bool, error) {
 }
 
 // PingServer all points
-func (a *RestClient) PingServer() (*model.ServerPing, error) {
+func (a *RestClient) PingServer() (*bacnetmodel.ServerPing, error) {
 	resp, err := a.client.R().
-		SetResult(&model.ServerPing{}).
+		SetResult(&bacnetmodel.ServerPing{}).
 		Get("/api/system/ping")
 	if err != nil {
 		return nil, fmt.Errorf("error geting server %s failed", err)
@@ -84,7 +85,7 @@ func (a *RestClient) PingServer() (*model.ServerPing, error) {
 	if resp.Error() != nil {
 		return nil, getAPIError(resp)
 	}
-	return resp.Result().(*model.ServerPing), nil
+	return resp.Result().(*bacnetmodel.ServerPing), nil
 }
 
 // GetServer all points

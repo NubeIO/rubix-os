@@ -1,4 +1,4 @@
-package lorawan_model
+package lwmodel
 
 type BasePayload struct {
 	ApplicationID   string `json:"applicationID"`

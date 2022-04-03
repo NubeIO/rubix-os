@@ -4,7 +4,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin"
 	"net/http"
 
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/lora_model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/loramodel"
 	"github.com/gin-gonic/gin"
 )
 
@@ -110,14 +110,14 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, lora_model.GetNetworkSchema())
+		ctx.JSON(http.StatusOK, loramodel.GetNetworkSchema())
 	})
 
 	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, lora_model.GetDeviceSchema())
+		ctx.JSON(http.StatusOK, loramodel.GetDeviceSchema())
 	})
 
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, lora_model.GetPointSchema())
+		ctx.JSON(http.StatusOK, loramodel.GetPointSchema())
 	})
 }

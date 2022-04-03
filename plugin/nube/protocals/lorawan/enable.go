@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/api"
-	rest "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/restclient"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwrest"
 	"github.com/labstack/gommon/log"
 )
 
@@ -20,7 +20,7 @@ func (i *Instance) Enable() error {
 	if err != nil {
 		log.Error("error on enable lora-plugin")
 	}
-	i.REST = rest.NewChirp(chirpName, chirpPass, ip, port)
+	i.REST = lwrest.NewChirp(chirpName, chirpPass, ip, port)
 	return nil
 }
 

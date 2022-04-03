@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/mqttclient"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnetmodel"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/bacnetserver/v1/bsrest"
@@ -211,11 +211,9 @@ func (inst *Instance) dropPoints() (err error) {
 	return
 }
 
-//
-
 //bacnetUpdate listen on mqtt and then update the point in flow-framework
 func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
-	payload := new(bacnet_model.MqttPayload)
+	payload := new(bacnetmodel.MqttPayload)
 	err := json.Unmarshal(body.Payload(), &payload)
 	t, _ := mqttclient.TopicParts(body.Topic())
 	const objectType = 10
@@ -254,5 +252,4 @@ func errorMsg(response *iorest.RestResponse) (err error) {
 		err = fmt.Errorf("%s:  msg:%s", "bacnet-server", msg)
 	}
 	return
-
 }

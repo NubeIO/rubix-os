@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
-	edgerest "github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/restclient"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/edgerest"
 	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"

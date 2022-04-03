@@ -13,7 +13,7 @@ type LoRaDeviceDescription struct {
 	GetPointsStruct func() interface{}
 }
 
-var NilLoRaDeviceDescription LoRaDeviceDescription = LoRaDeviceDescription{
+var NilLoRaDeviceDescription = LoRaDeviceDescription{
 	DeviceName:      "",
 	Model:           "",
 	SensorCode:      "",

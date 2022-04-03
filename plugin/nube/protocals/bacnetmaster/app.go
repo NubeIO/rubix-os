@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/mqttclient"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetmaster/bmmodel"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -13,7 +13,7 @@ import (
 
 //bacnetUpdate listen on mqtt and then update the point in flow-framework
 func (i *Instance) bacnetUpdate(body mqtt.Message) {
-	payload := new(bacnet_model.MqttPayload)
+	payload := new(bmmodel.MqttPayload)
 	err := json.Unmarshal(body.Payload(), &payload)
 	if err != nil {
 		return
