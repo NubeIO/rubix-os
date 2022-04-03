@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwrest"
-	"github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/patrickmn/go-cache"
@@ -40,8 +40,8 @@ type Instance struct {
 }
 
 // GetFlowPluginInfo returns plugin info.
-func GetFlowPluginInfo() plugin.Info {
-	return plugin.Info{
+func GetFlowPluginInfo() pluginapi.Info {
+	return pluginapi.Info{
 		ModulePath:   path,
 		Name:         name,
 		Description:  description,
@@ -52,7 +52,7 @@ func GetFlowPluginInfo() plugin.Info {
 }
 
 // NewFlowPluginInstance creates a plugin instance for a user context.
-func NewFlowPluginInstance() plugin.Plugin {
+func NewFlowPluginInstance() pluginapi.Plugin {
 	return &Instance{}
 }
 

@@ -1,5 +1,4 @@
-package plugin
-
+package pluginapi
 
 // StorageHandler consists callbacks used to perform read/writes to the persistent storage for plugins.
 type StorageHandler interface {

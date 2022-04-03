@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 )
 
 const path = "system"
@@ -11,8 +11,8 @@ const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
 
 // GetFlowPluginInfo returns plugin info.
-func GetFlowPluginInfo() plugin.Info {
-	return plugin.Info{
+func GetFlowPluginInfo() pluginapi.Info {
+	return pluginapi.Info{
 		ModulePath:  path,
 		Name:        name,
 		Description: description,
@@ -22,7 +22,7 @@ func GetFlowPluginInfo() plugin.Info {
 }
 
 // NewFlowPluginInstance creates a plugin instance for a user context.
-func NewFlowPluginInstance() plugin.Plugin {
+func NewFlowPluginInstance() pluginapi.Plugin {
 	p := &PluginTest{}
 	return p
 }

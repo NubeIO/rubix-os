@@ -1,4 +1,4 @@
-package plugin
+package pluginapi
 
 // Plugin is the interface every plugin need to implement
 type Plugin interface {

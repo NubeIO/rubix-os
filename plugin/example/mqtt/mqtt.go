@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gin-gonic/gin"
 	"log"
@@ -17,8 +17,8 @@ var (
 )
 
 // GetFlowPluginInfo returns Flow plugin info
-func GetFlowPluginInfo() plugin.Info {
-	return plugin.Info{
+func GetFlowPluginInfo() pluginapi.Info {
+	return pluginapi.Info{
 		Name:       "MQTT",
 		ModulePath: "Flow-mqttClient",
 		Author:     "ap",
@@ -39,7 +39,7 @@ type Config struct {
 
 // Plugin is plugin instance
 type Plugin struct {
-	msgHandler plugin.MessageHandler
+	msgHandler pluginapi.MessageHandler
 	config     *Config
 	clients    []mqtt.Client
 	enabled    bool
@@ -55,7 +55,7 @@ func (p *Plugin) GetNetwork(id string) error {
 
 // SetMessageHandler implements plugin.Messenger
 // Invoked during initialization
-func (p *Plugin) SetMessageHandler(h plugin.MessageHandler) {
+func (p *Plugin) SetMessageHandler(h pluginapi.MessageHandler) {
 	p.msgHandler = h
 }
 
@@ -152,7 +152,7 @@ func (p *Plugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 				log.Println("send a message")
 				msg := fmt.Sprintf("hello from MQTT %s time", time.Now().Format(time.RFC850))
 				a.Publish("topic", 1, false, msg)
-				err := p.msgHandler.SendMessage(plugin.Message{
+				err := p.msgHandler.SendMessage(pluginapi.Message{
 					Title:    "mqttClient-message",
 					Message:  fmt.Sprintf("hello from rest %s time", time.Now().Format(time.RFC850)),
 					Priority: 2,
@@ -176,7 +176,7 @@ func (p *Plugin) RegisterWebhook(baseURL string, g *gin.RouterGroup) {
 func (p *Plugin) handleMessage(client mqtt.Client, message mqtt.Message) {
 	payload := message.Payload()
 
-	var outgoingMessage plugin.Message
+	var outgoingMessage pluginapi.Message
 
 	if payload[0] == '{' {
 		if err := json.Unmarshal(payload, &outgoingMessage); err != nil {
@@ -218,7 +218,7 @@ func (p *Plugin) newClient(serverConfig Server) (mqtt.Client, error) {
 }
 
 // NewFlowPluginInstance creates a plugin instance for a user context.
-func NewFlowPluginInstance() plugin.Plugin {
+func NewFlowPluginInstance() pluginapi.Plugin {
 	//return &Plugin{}
 	return &Plugin{
 		clients: make([]mqtt.Client, 0),

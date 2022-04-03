@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"net/url"
 )
 
 // GetDisplay implements public.Displayer
-func (c *PluginTest) GetDisplay(baseURL *url.URL) plugin.Response {
+func (c *PluginTest) GetDisplay(baseURL *url.URL) pluginapi.Response {
 	baseURL.Path = c.basePath
-	messageURL := plugin.Response{
-		Details: plugin.Help{
+	messageURL := pluginapi.Response{
+		Details: pluginapi.Help{
 			Name: "System",
 		},
 	}

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"net/url"
 )
 
 // GetDisplay implements public.Displayer
-func (i *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
+func (i *Instance) GetDisplay(baseURL *url.URL) pluginapi.Response {
 	loc := &url.URL{
 		Path: i.basePath,
 	}
@@ -14,7 +14,7 @@ func (i *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
 		Path: "restart",
 	})
 	baseURL.Path = i.basePath
-	m := plugin.Help{
+	m := pluginapi.Help{
 		Name:               name,
 		PluginType:         pluginType,
 		AllowConfigWrite:   allowConfigWrite,
@@ -23,7 +23,7 @@ func (i *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
 		NetworkType:        networkType,
 		TransportType:      transportType,
 	}
-	messageURL := plugin.Response{
+	messageURL := pluginapi.Response{
 		Details: m,
 	}
 	return messageURL

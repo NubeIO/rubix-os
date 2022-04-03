@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +18,7 @@ func (c *PluginTest) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.GET("/message", func(ctx *gin.Context) {
 		msg := new(message)
 		if err := ctx.Bind(msg); err == nil {
-			err := c.msgHandler.SendMessage(plugin.Message{
+			err := c.msgHandler.SendMessage(pluginapi.Message{
 				Message:  msg.Message,
 				Title:    msg.Title,
 				Priority: msg.Priority,

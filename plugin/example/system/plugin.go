@@ -1,15 +1,15 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/flow-framework/plugin/plugin-api"
 )
 
 // PluginTest is plugin instance
 type PluginTest struct {
 	config     *Config
 	enabled    bool
-	msgHandler plugin.MessageHandler
+	msgHandler pluginapi.MessageHandler
 	basePath   string
 }
 
@@ -34,6 +34,6 @@ func (c *PluginTest) Disable() error {
 }
 
 // SetMessageHandler implements plugin.Messenger
-func (c *PluginTest) SetMessageHandler(h plugin.MessageHandler) {
+func (c *PluginTest) SetMessageHandler(h pluginapi.MessageHandler) {
 	c.msgHandler = h
 }

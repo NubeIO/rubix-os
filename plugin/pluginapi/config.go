@@ -1,4 +1,4 @@
-package plugin
+package pluginapi
 
 // Configurer is the interface plugins should implement in order to provide configuration interface to the user
 type Configurer interface {

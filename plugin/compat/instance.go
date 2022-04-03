@@ -1,7 +1,7 @@
 package compat
 
 import (
-	"github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/gin-gonic/gin"
 	"net/url"
 )
@@ -28,7 +28,7 @@ type PluginInstance interface {
 	Disable() error
 
 	// GetDisplay see Displayer
-	GetDisplay(location *url.URL) plugin.Response
+	GetDisplay(location *url.URL) pluginapi.Response
 
 	// DefaultConfig see Configurer
 	DefaultConfig() interface{}

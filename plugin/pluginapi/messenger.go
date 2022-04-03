@@ -1,12 +1,12 @@
-package plugin
+package pluginapi
 
 // Message describes a message to be send by MessageHandler#SendMessage
 
 type Message struct {
-	Message  		string
-	Title    		string
-	Priority 		int
-	Extras   		map[string]interface{}
+	Message  string
+	Title    string
+	Priority int
+	Extras   map[string]interface{}
 }
 
 // MessageHandler consists of message callbacks to be used by plugins.
