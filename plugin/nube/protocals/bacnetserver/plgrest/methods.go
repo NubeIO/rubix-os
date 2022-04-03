@@ -2,8 +2,8 @@ package plgrest
 
 import (
 	"fmt"
-	baseModel "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	model "github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnet_model"
+	baseModel "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 )
 
