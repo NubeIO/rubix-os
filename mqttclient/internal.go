@@ -6,8 +6,8 @@ import (
 
 var m *Client
 
-//InternalMQTT internal non-secure mqtt connection
-// for plugins use the plugin path as the topi
+// InternalMQTT internal non-secure mqtt connection
+// for plugins use the plugin path as the topic
 func InternalMQTT(ip string) (bool, error) {
 	c, err := NewClient(ClientOptions{
 		Servers: []string{ip},

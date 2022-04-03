@@ -1,19 +1,15 @@
 package compat
 
 import (
-	"github.com/NubeIO/flow-framework/plugin/plugin-api"
-
-	//papiv1 "github.com/NubeIO/flow-framework/plugin/plugin-api"
-
-	"net/url"
-	//papiv1 "github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/gin-gonic/gin"
+	"net/url"
 )
 
 // PluginV1 is an abstraction of a plugin written in the v1 plugin API. Exported for testing purposes only.
 type PluginV1 struct {
-	Info        plugin.Info
-	Constructor func() plugin.Plugin
+	Info        pluginapi.Info
+	Constructor func() pluginapi.Plugin
 }
 
 // APIVersion returns the API version.
@@ -43,23 +39,23 @@ func (c PluginV1) NewPluginInstance() PluginInstance {
 		instance: instance,
 	}
 
-	if displayer, ok := instance.(plugin.Displayer); ok {
+	if displayer, ok := instance.(pluginapi.Displayer); ok {
 		compat.displayer = displayer
 	}
 
-	if messenger, ok := instance.(plugin.Messenger); ok {
+	if messenger, ok := instance.(pluginapi.Messenger); ok {
 		compat.messenger = messenger
 	}
 
-	if configurer, ok := instance.(plugin.Configurer); ok {
+	if configurer, ok := instance.(pluginapi.Configurer); ok {
 		compat.configurer = configurer
 	}
 
-	if storager, ok := instance.(plugin.Storager); ok {
+	if storager, ok := instance.(pluginapi.Storager); ok {
 		compat.storager = storager
 	}
 
-	if webhooker, ok := instance.(plugin.Webhooker); ok {
+	if webhooker, ok := instance.(pluginapi.Webhooker); ok {
 		compat.webhooker = webhooker
 	}
 
@@ -68,12 +64,12 @@ func (c PluginV1) NewPluginInstance() PluginInstance {
 
 // PluginV1Instance is an adapter for plugin using v1 API.
 type PluginV1Instance struct {
-	instance   plugin.Plugin
-	messenger  plugin.Messenger
-	configurer plugin.Configurer
-	storager   plugin.Storager
-	webhooker  plugin.Webhooker
-	displayer  plugin.Displayer
+	instance   pluginapi.Plugin
+	messenger  pluginapi.Messenger
+	configurer pluginapi.Configurer
+	storager   pluginapi.Storager
+	webhooker  pluginapi.Webhooker
+	displayer  pluginapi.Displayer
 }
 
 // DefaultConfig see papiv1.Configurer.
@@ -100,15 +96,15 @@ func (c *PluginV1Instance) ValidateAndSetConfig(config interface{}) error {
 }
 
 // GetDisplay see papiv1.Displayer.
-func (c *PluginV1Instance) GetDisplay(location *url.URL) plugin.Response {
+func (c *PluginV1Instance) GetDisplay(location *url.URL) pluginapi.Response {
 	if c.displayer != nil {
 		return c.displayer.GetDisplay(location)
 	}
-	m := plugin.Help{
+	m := pluginapi.Help{
 		Name:      "name",
 		IsNetwork: false,
 	}
-	r := plugin.Response{
+	r := pluginapi.Response{
 		Details: m,
 	}
 	return r
@@ -162,7 +158,7 @@ type PluginV1MessageHandler struct {
 }
 
 // SendMessage implements papiv1.MessageHandler.
-func (c *PluginV1MessageHandler) SendMessage(msg plugin.Message) error {
+func (c *PluginV1MessageHandler) SendMessage(msg pluginapi.Message) error {
 	return c.WrapperHandler.SendMessage(Message{
 		Message:  msg.Message,
 		Priority: msg.Priority,

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 //supportedObjects return all objects that are not bacnet
@@ -22,7 +22,7 @@ func supportedObjects() *utils.Array {
 }
 
 // GetDisplay implements public.Displayer
-func (i *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
+func (i *Instance) GetDisplay(baseURL *url.URL) pluginapi.Response {
 	loc := &url.URL{
 		Path: i.basePath,
 	}
@@ -32,7 +32,7 @@ func (i *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
 	fmt.Println(loc) //can show the ui the custom endpoints
 
 	baseURL.Path = i.basePath
-	m := plugin.Help{
+	m := pluginapi.Help{
 		Name:               name,
 		PluginType:         pluginType,
 		AllowConfigWrite:   allowConfigWrite,
@@ -41,7 +41,7 @@ func (i *Instance) GetDisplay(baseURL *url.URL) plugin.Response {
 		NetworkType:        networkType,
 		TransportType:      transportType,
 	}
-	messageURL := plugin.Response{
+	messageURL := pluginapi.Response{
 		Details: m,
 	}
 	return messageURL

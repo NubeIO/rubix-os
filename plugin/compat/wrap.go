@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"plugin"
 
-	papiv1 "github.com/NubeIO/flow-framework/plugin/plugin-api"
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 )
 
 // Wrap wraps around a raw go plugin to provide typesafe access.
@@ -15,7 +15,7 @@ func Wrap(p *plugin.Plugin) (Plugin, error) {
 		return nil, errors.New("missing GetFlowPluginInfo symbol")
 	}
 	switch getInfoHandle := getInfoHandle.(type) {
-	case func() papiv1.Info:
+	case func() pluginapi.Info:
 		v1 := PluginV1{}
 
 		v1.Info = getInfoHandle()
@@ -23,7 +23,7 @@ func Wrap(p *plugin.Plugin) (Plugin, error) {
 		if err != nil {
 			return nil, errors.New("missing NewFlowPluginInstance symbol")
 		}
-		constructor, ok := newInstanceHandle.(func() papiv1.Plugin)
+		constructor, ok := newInstanceHandle.(func() pluginapi.Plugin)
 		if !ok {
 			return nil, fmt.Errorf("NewFlowPluginInstance signature mismatch, func() plugin.Plugin expected, got %T", newInstanceHandle)
 		}

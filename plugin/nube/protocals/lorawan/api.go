@@ -1,8 +1,8 @@
 package main
 
 import (
-	lwmodel "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lorawan_model"
-	rest "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/restclient"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwmodel"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwrest"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -23,7 +23,7 @@ const chirpPass = "admin"
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
-	cli := rest.NewChirp(chirpName, chirpPass, ip, port)
+	cli := lwrest.NewChirp(chirpName, chirpPass, ip, port)
 
 	mux.GET("/lorawan/organizations", func(ctx *gin.Context) {
 		p, err := cli.GetOrganizations()
