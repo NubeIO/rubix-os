@@ -69,6 +69,9 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	flowNetwork := api.FlowNetworksAPI{
 		DB: db,
 	}
+	mapping := api.MappingAPI{
+		DB: db,
+	}
 	flowNetworkCloneHandler := api.FlowNetworkClonesAPI{
 		DB: db,
 	}
@@ -243,6 +246,11 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
 			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
 			streamRoutes.DELETE("/drop", gatewayHandler.DropStreams)
+		}
+
+		mappingRoutes := apiRoutes.Group("/mapping")
+		{
+			mappingRoutes.POST("/points", mapping.CreatePointMapping)
 		}
 
 		streamCloneRoutes := apiRoutes.Group("/stream_clones")

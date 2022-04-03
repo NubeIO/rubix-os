@@ -36,6 +36,9 @@ func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 		values := strings.Split(*args.DeviceId, ",")
 		query = query.Where(fmt.Sprintf(`device_id IN ( '%s' )`, strings.Join(values, "', '")))
 	}
+	if args.Name != nil {
+		query = query.Where("name = ?", *args.Name)
+	}
 	return query
 }
 
@@ -87,6 +90,9 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	}
 	if args.WithTags {
 		query = query.Preload("Tags")
+	}
+	if args.Name != nil {
+		query = query.Where("name = ?", *args.Name)
 	}
 	return query
 }

@@ -47,6 +47,21 @@ func (d *GormDatabase) pointNameExists(body *model.Point) (nameExist, addressIDE
 	return nameExist, addressIDExist
 }
 
+func (d *GormDatabase) pointNameExistsInDevice(pointName, deviceUUID string) (existing bool) {
+	device, err := d.GetDevice(deviceUUID, api.Args{WithPoints: true})
+	if err != nil {
+		return false
+	}
+	for _, pnt := range device.Points {
+		fmt.Println(pnt.UUID)
+		fmt.Println(pnt.Name, pointName)
+		if pnt.Name == pointName {
+			return true
+		}
+	}
+	return false
+}
+
 // PointDeviceByAddressID will query by device_uuid = ? AND object_type = ? AND address_id = ?
 func (d *GormDatabase) PointDeviceByAddressID(pointUUID string, body *model.Point) (*model.Point, bool) {
 	var pointModel *model.Point

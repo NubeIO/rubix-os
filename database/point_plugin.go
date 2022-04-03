@@ -4,11 +4,12 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
 func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point, err error) {
-	network, err := d.GetNetworkByPointUUID(body)
+	network, err := d.GetNetworkByPointUUID(body, api.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -17,6 +18,18 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 		point, err = d.CreatePoint(body, false)
 		if err != nil {
 			return nil, err
+		}
+		//check for mapping
+		if network.AutoMappingNetworks != "" {
+			pointMapping := &model.PointMapping{}
+			pointMapping.Point = point
+			pointMapping.PluginsList = []string{network.AutoMappingNetworks}
+			pointMapping, err := d.CreatePointMapping(pointMapping)
+			if err != nil {
+				log.Errorln("pointsPlugin.db.CreatePointPlugin() failed to make auto point mapping")
+			} else {
+				log.Println("pointsPlugin.db.CreatePointPlugin() added point new mapping")
+			}
 		}
 		return
 	}
@@ -32,11 +45,24 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 	if err != nil {
 		return nil, err
 	}
+	//check for mapping
+	if network.AutoMappingNetworks != "" {
+		pointMapping := &model.PointMapping{}
+		pointMapping.Point = point
+		pointMapping.PluginsList = []string{network.AutoMappingNetworks}
+		pointMapping, err := d.CreatePointMapping(pointMapping)
+		if err != nil {
+			log.Errorln("pointsPlugin.db.CreatePointPlugin() failed to make auto point mapping")
+		} else {
+			log.Println("pointsPlugin.db.CreatePointPlugin() added point new mapping")
+		}
+	}
+
 	return
 }
 
 func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point *model.Point, err error) {
-	network, err := d.GetNetworkByPointUUID(body)
+	network, err := d.GetNetworkByPointUUID(body, api.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +87,7 @@ func (d *GormDatabase) DeletePointPlugin(uuid string) (ok bool, err error) {
 	if err != nil {
 		return ok, err
 	}
-	network, err := d.GetNetworkByPointUUID(point)
+	network, err := d.GetNetworkByPointUUID(point, api.Args{})
 	if err != nil {
 		return ok, err
 	}

@@ -1,9 +1,11 @@
 package database
 
 import (
+	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -27,7 +29,20 @@ func (d *GormDatabase) GetStream(uuid string, args api.Args) (*model.Stream, err
 	return streamModel, nil
 }
 
+func (d *GormDatabase) GetStreamByArgs(args api.Args) (*model.Stream, error) {
+	var streamModel *model.Stream
+	query := d.buildStreamQuery(args)
+	if err := query.First(&streamModel).Error; err != nil {
+		return nil, query.Error
+	}
+	return streamModel, nil
+}
+
 func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
+	stream, _ := d.GetStreamByArgs(api.Args{Name: nils.NewString(body.Name)})
+	if stream != nil {
+		return stream, errors.New("an existing stream with this name exists")
+	}
 	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = utils.MakeUUID()
