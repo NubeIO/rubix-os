@@ -22,7 +22,6 @@ func TestConfigEnv(t *testing.T) {
 	os.Setenv("FLOW_SERVER_STREAM_ALLOWEDORIGINS", "- \".+.example.com\"\n- \"otherdomain.com\"")
 	conf := config.CreateApp()
 	assert.Equal(t, 1660, conf.Server.Port, "should use defaults")
-	assert.Equal(t, "jmattheis", conf.DefaultUser.Name, "should not use default but env var")
 	assert.Equal(t, "*", conf.Server.ResponseHeaders["Access-Control-Allow-Origin"])
 	assert.Equal(t, "GET,POST", conf.Server.ResponseHeaders["Access-Control-Allow-Methods"])
 	assert.Equal(t, []string{".+.example.com", "otherdomain.com"}, conf.Server.Cors.AllowOrigins)
