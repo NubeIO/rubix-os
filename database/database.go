@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/NubeIO/flow-framework/logger"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/flow-framework/plugin"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )

@@ -3,8 +3,8 @@ package database
 import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"reflect"
 )
