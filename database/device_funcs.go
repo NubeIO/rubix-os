@@ -46,5 +46,6 @@ func (d *GormDatabase) deviceNameExistsInNetwork(deviceName, networkUUID string)
 			return dev, true
 		}
 	}
+
 	return nil, false
 }
