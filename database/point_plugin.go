@@ -8,7 +8,7 @@ import (
 )
 
 func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point, err error) {
-	network, err := d.GetNetworkByPointUUID(body)
+	network, err := d.GetNetworkByPointUUID(body, api.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 }
 
 func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point *model.Point, err error) {
-	network, err := d.GetNetworkByPointUUID(body)
+	network, err := d.GetNetworkByPointUUID(body, api.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (d *GormDatabase) DeletePointPlugin(uuid string) (ok bool, err error) {
 	if err != nil {
 		return ok, err
 	}
-	network, err := d.GetNetworkByPointUUID(point)
+	network, err := d.GetNetworkByPointUUID(point, api.Args{})
 	if err != nil {
 		return ok, err
 	}

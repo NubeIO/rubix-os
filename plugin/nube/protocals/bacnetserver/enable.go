@@ -4,6 +4,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/bacnetserver/v1/bsrest"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/common/v1/iorest"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/rest/v1/rest"
 	"github.com/labstack/gommon/log"
 )
 
@@ -24,15 +25,18 @@ func (inst *Instance) Enable() error {
 		log.Error("error on enable bacnetserver-plugin")
 	}
 
-	commonClient := new(iorest.NubeRest)
-	commonClient.UseRubixProxy = true
+	restService := &rest.Service{}
+	restService.Port = 1717
+	options := &rest.Options{}
+	restService.Options = options
+	restService = rest.New(restService)
+
+	commonClient := &iorest.NubeRest{}
+	commonClient.UseRubixProxy = false
 	commonClient.RubixUsername = "admin"
 	commonClient.RubixPassword = "N00BWires"
-	commonClient = iorest.New(commonClient)
-	//bacnetClient.Url = "0.0.0.0"
-	//bacnetClient.Port = 1717
-	//bacnetClient.IoRest = commonClient
-	bacnetClient = bsrest.New(&bsrest.BacnetClient{Url: "0.0.0.0", Port: 1717, IoRest: commonClient})
+	commonClient = iorest.New(commonClient, restService)
+	bacnetClient = bsrest.New(&bsrest.BacnetClient{IoRest: commonClient})
 
 	return nil
 }

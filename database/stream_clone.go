@@ -15,6 +15,16 @@ func (d *GormDatabase) GetStreamClones(args api.Args) ([]*model.StreamClone, err
 	return streamClonesModel, nil
 }
 
+func (d *GormDatabase) GetStreamCloneByArg(args api.Args) (*model.StreamClone, error) {
+	var streamClonesModel *model.StreamClone
+	query := d.buildStreamCloneQuery(args)
+	query.Find(&streamClonesModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return streamClonesModel, nil
+}
+
 func (d *GormDatabase) GetStreamClone(uuid string, args api.Args) (*model.StreamClone, error) {
 	var streamCloneModel *model.StreamClone
 	query := d.buildStreamCloneQuery(args)

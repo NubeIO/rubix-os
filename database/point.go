@@ -80,6 +80,19 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 			return nil, errors.New("ERROR on device eventbus")
 		}
 	}
+	//check for mapping
+	network, err := d.GetNetworkByPointUUID(body, api.Args{})
+	if network.AutoMappingNetworks != "" {
+		pointMapping := &model.PointMapping{}
+		pointMapping.Point = body
+		pointMapping.PluginsList = []string{network.AutoMappingNetworks}
+		pointMapping, err := d.CreatePointMapping(pointMapping)
+		if err != nil {
+			log.Errorln("points.db.CreatePointPlugin() failed to make auto point mapping")
+		} else {
+			log.Println("points.db.CreatePointPlugin() added point new mapping")
+		}
+	}
 	return body, err
 }
 

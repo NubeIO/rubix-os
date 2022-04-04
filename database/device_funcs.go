@@ -35,3 +35,17 @@ func (d *GormDatabase) GetPluginIDFromDevice(uuid string) (*model.Network, error
 	}
 	return network, err
 }
+
+func (d *GormDatabase) deviceNameExistsInNetwork(deviceName, networkUUID string) (device *model.Device, existing bool) {
+	network, err := d.GetNetwork(networkUUID, api.Args{WithDevices: true})
+	if err != nil {
+		return nil, false
+	}
+	for _, dev := range network.Devices {
+		if dev.Name == deviceName {
+			return dev, true
+		}
+	}
+
+	return nil, false
+}
