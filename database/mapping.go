@@ -11,29 +11,6 @@ import (
 
 func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.PointMapping, error) {
 
-	//pass in networks
-	//for each
-
-	//select the local flow-network
-
-	//make a new stream with the network_name_device_name
-	//add each point for the device under this stream
-
-	//example map from modbus to system and bacnet
-	//for _, plugin := range body.PluginsToMap {
-	//	network, err := d.GetNetworksByPluginName(plugin, api.Args{})
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//
-	//}
-
-	//body.Point
-	//network, err := d.GetNetworkByPointUUID(body.Point, api.Args{WithDevices: true})
-	//if err != nil {
-	//	return nil, err
-	//}
-
 	device, err := d.GetDevice(body.Point.DeviceUUID, api.Args{})
 	if err != nil {
 		return nil, err
@@ -54,11 +31,10 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 	streamModel.Name = fmt.Sprintf("%s_%s", network.Name, device.Name)
 	log.Info("Try and make stream: ", streamModel.Name)
-	//d.GetStreams()
 
 	stream, _ := d.CreateStream(streamModel)
 	if stream != nil {
-		log.Info("mapping.db.CreatePointMapping(): an existing stream with this name exists name:", stream.Name)
+		log.Warning("mapping.db.CreatePointMapping(): an existing stream with this name exists name:", stream.Name)
 	} else {
 		log.Info("Stream is created successfully: ", stream)
 	}
@@ -78,50 +54,82 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 				return nil, errors.New("failed to add a new network for auto mapping")
 			}
 			networkDidExist = true
+			log.Info("mapping.db.CreatePointMapping(): an new network was made with name:", network.Name, "for plugin:", network.PluginPath)
+		} else {
+			log.Info("mapping.db.CreatePointMapping(): an existing network with this name exists name:", network.Name, "for plugin:", network.PluginPath)
 		}
 		if networkDidExist {
 
 		}
+		deviceName := device.Name //
 		//Make a new device, check if device exits and if not make a new one
 		device, existing := d.deviceNameExistsInNetwork(device.Name, network.UUID)
-		deviceUUID := device.UUID
+		deviceUUID := ""
 		if !existing {
 			newDevice := &model.Device{}
-			newDevice.Name = device.Name
+			newDevice.Name = deviceName
 			newDevice.NetworkUUID = network.UUID
 			device, err = d.CreateDevice(newDevice)
 			if err != nil {
 				log.Errorln("mapping.db.CreatePointMapping(): failed to add new device:", newDevice.Name)
 			}
 			deviceUUID = device.UUID
+			log.Info("mapping.db.CreatePointMapping(): an new device was added name::", deviceName, "for network_uuid:", network.UUID)
+
+		} else {
+			deviceUUID = device.UUID
+			log.Info("mapping.db.CreatePointMapping(): an existing device with this name exists name:", deviceName, "for network_uuid:", network.UUID)
 		}
 		//make pnt, first check
 		point := &model.Point{}
 		point.Name = body.Point.Name
 		point.DeviceUUID = deviceUUID
-		fmt.Println(99999, point.Name, deviceUUID)
-		point, err = d.CreatePoint(point, false)
+		point, err = d.CreatePointPlugin(point)
 		if err != nil {
 			log.Errorln("mapping.db.CreatePointMapping(): failed to add point for point name:", body.Point.Name)
 			return nil, errors.New("failed to add a new point for auto mapping")
 		}
 
-		//fmt.Println(existing, "existing point", pointName)
-		//if !existing {
-		//	point := &model.Point{}
-		//	point.Name = body.Point.Name
-		//	point.DeviceUUID = device.UUID
-		//	point, err = d.CreatePoint(point, false)
-		//} else {
-		//	log.Errorln("mapping.db.CreatePointMapping(): failed to create a new point as an existing point with the same name exists", pointName)
-		//	return nil, errors.New("failed to create a new point as a point with same name exists")
-		//}
-		//
-		//fmt.Println(network)
+		//make a producer
+		producer := &model.Producer{}
+		producer.Name = fmt.Sprintf("%s_%s", device.Name, body.Point.Name)
+		producer.StreamUUID = stream.UUID
+		producer.ProducerThingUUID = body.Point.UUID
+		producer.ProducerThingClass = "point"
+		producer.ProducerApplication = "mapping"
+		producer, err := d.CreateProducer(producer)
+		if err != nil {
+			return nil, fmt.Errorf("producer creation failure: %s", err)
+		}
+		log.Info("Producer point is created successfully: ", producer)
 
-		fmt.Println(333)
-		fmt.Println(network, err)
-		fmt.Println(444)
+		streamClone, err := d.GetStreamCloneByArg(api.Args{SourceUUID: nils.NewString(stream.UUID)})
+		if err != nil {
+			log.Errorln("mapping.db.CreatePointMapping(): failed to find stream clone with source uuid:", stream.UUID)
+			return nil, fmt.Errorf("failed to get stream-clone: %s", err)
+		}
+
+		consumer := &model.Consumer{}
+		consumer.Name = producer.Name
+		consumer.ProducerUUID = producer.UUID
+		consumer.ConsumerApplication = "mapping"
+		consumer.StreamCloneUUID = streamClone.UUID
+		consumer, err = d.CreateConsumer(consumer)
+		if err != nil {
+			return nil, fmt.Errorf("point consumer creation failure: %s", err)
+		}
+		log.Info("Point consumer is created successfully: ", consumer.Name)
+
+		writer := &model.Writer{}
+		writer.ConsumerUUID = consumer.UUID
+		writer.WriterThingClass = "point"
+		writer.WriterThingType = "temp"
+		writer.WriterThingUUID = point.UUID
+		writer, err = d.CreateWriter(writer)
+		if err != nil {
+			return nil, fmt.Errorf("writer creation failure: %s", err)
+		}
+		log.Info("Writer is created successfully: ", writer.WriterThingName)
 
 	}
 

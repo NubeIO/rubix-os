@@ -52,6 +52,12 @@ type Network struct {
 		Options  []int  `json:"options" default:"[38400]"`
 		Default  int    `json:"default" default:"38400"`
 	} `json:"serial_baud_rate"`
+	AutoMappingNetworks struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"true"`
+		Options  []string `json:"options" default:"[\"bacnetserver\",\"system\",\"modbus\"]"`
+		Default  string   `json:"default" default:""`
+	} `json:"auto_mapping_networks"`
 }
 
 type Device struct {

@@ -57,24 +57,35 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 
 //addPoint from rest api
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
-	bacnetPoint := bsrest.BacnetPoint{}
+	bacnetPoint := &bsrest.BacnetPoint{}
 	if body.Description == "" {
 		bacnetPoint.Description = "na"
 	}
+	if nils.IntNilCheck(body.AddressID) {
+		bacnetPoint.UseNextAvailableAddr = true
+	} else {
+		bacnetPoint.Address = nils.IntIsNil(body.AddressID)
+	}
+	if body.ObjectType == "" {
+		bacnetPoint.ObjectType = "analogValue"
+	} else {
+		bacnetPoint.ObjectType = body.ObjectType
+	}
 	bacnetPoint.ObjectName = body.Name
 	bacnetPoint.Enable = true
-	bacnetPoint.Address = utils.IntIsNil(body.AddressID)
-	bacnetPoint.ObjectType = body.ObjectType
-	bacnetPoint.COV = utils.Float64IsNil(body.COV)
+	bacnetPoint.COV = nils.Float64IsNil(body.COV)
 	bacnetPoint.EventState = "normal"
 	bacnetPoint.Units = "noUnits"
-	bacnetPoint.RelinquishDefault = utils.Float64IsNil(body.Fallback)
-
+	bacnetPoint.RelinquishDefault = nils.Float64IsNil(body.Fallback)
 	bacPoint, r := bacnetClient.AddPoint(bacnetPoint)
 	err = r.GetError()
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println(r.GetStatusCode())
+	fmt.Println(r.GetError())
+	fmt.Println(bacPoint)
+	fmt.Println(r.GetStatusCode())
 	bacnetUUID := bacPoint.UUID
 	body.AddressUUID = nils.NewString(bacnetUUID)
 	point, err = inst.db.CreatePoint(body, true, false)
@@ -146,9 +157,7 @@ func (inst *Instance) updatePointValue(body *model.Point) (*model.Point, error) 
 	if !utils.IntNilCheck(body.AddressID) {
 		bacnetPoint.Address = utils.IntIsNil(body.AddressID)
 	}
-
 	point, r := bacnetClient.UpdatePointValue(bacnetPointUUID, bacnetPoint)
-
 	if r.GetError() != nil {
 		log.Errorln("bacnet-server: updatePointValue() point-name:", point.ObjectName)
 		log.Errorln("bacnet-server: updatePointValue() err:", r.GetError())
@@ -187,10 +196,11 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 
 //deletePoint point make sure
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
-	if body.AddressUUID == nil {
-		return false, errors.New("no provided address_uuid")
+	if !nils.StringNilCheck(body.AddressUUID) {
+		log.Errorln("bacnet-server.app.deletePoint() no address_uuid provided")
 	}
 	r, notFound, deletedOk := bacnetClient.DeletePoint(nils.StringIsNil(body.AddressUUID))
+	log.Infoln("bacnet-server.app.deletePoint() statusCode:", r.StatusCode, "notFound", notFound, "deletedOk", deletedOk)
 	//if point not found lets still delete from FF
 	if notFound || deletedOk {
 		ok, err = inst.db.DeletePoint(body.UUID)
