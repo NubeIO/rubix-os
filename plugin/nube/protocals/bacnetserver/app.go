@@ -30,6 +30,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 			return nil, errors.New(errMsg)
 		}
 	}
+	body.NumberOfNetworksPermitted = nils.NewInt(1)
 	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err
@@ -48,6 +49,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		log.Errorf(errMsg)
 		return nil, errors.New(errMsg)
 	}
+	body.NumberOfDevicesPermitted = nils.NewInt(1)
 	device, err = inst.db.CreateDevice(body)
 	if err != nil {
 		return nil, err
