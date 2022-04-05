@@ -84,17 +84,13 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(r.GetStatusCode())
-	fmt.Println(r.GetError())
-	fmt.Println(bacPoint)
-	fmt.Println(r.GetStatusCode())
 	bacnetUUID := bacPoint.UUID
 	body.AddressUUID = nils.NewString(bacnetUUID)
 	point, err = inst.db.CreatePoint(body, true, false)
 	if err != nil {
 		//if ail to add a new point in FF then delete it in the bacnet stack
 		r, notFound, deleteOk := bacnetClient.DeletePoint(bacnetUUID)
-		fmt.Println(notFound, deleteOk)
+		log.Infoln("bacnet-server.app.addPoint() delete the point if fail on add point in FF delete -> notFound:", notFound, "delete -> deleteOk:", deleteOk)
 		if r.GetError() != nil {
 			errMsg := fmt.Sprintf("bacnet-server: failed to add new point in bacnet stack, failed to remove the newly added point from bacnet-server-app error: %s", err.Error())
 			log.Errorf(errMsg)

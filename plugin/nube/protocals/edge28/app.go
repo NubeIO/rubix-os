@@ -42,6 +42,13 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 
 //addPoint add point
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
+	if body.IoNumber == "" {
+		body.IoNumber = pointList.UI1
+	}
+
+	if body.IoType == "" {
+		body.IoType = UITypes.DIGITAL
+	}
 	point, err = inst.db.CreatePoint(body, true, true)
 	if err != nil {
 		return nil, err
