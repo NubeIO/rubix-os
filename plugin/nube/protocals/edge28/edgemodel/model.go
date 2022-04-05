@@ -25,6 +25,26 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"edge28"`
 	} `json:"plugin_name"`
+	AutoMappingNetworksSelection struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"true"`
+		Options  []string `json:"options" default:"[\"edge28-to-bacnetserver\"]"`
+		Default  string   `json:"default" default:""`
+	} `json:"auto_mapping_networks_selection"`
+	AutoMappingFlowNetworkName struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"200"`
+		Default  string `json:"default" default:"local"`
+	} `json:"auto_mapping_flow_network_name"`
+	AutoMappingFlowNetworkUUID struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"200"`
+		Default  string `json:"default" default:""`
+	} `json:"auto_mapping_flow_network_uuid"`
 }
 
 type Device struct {

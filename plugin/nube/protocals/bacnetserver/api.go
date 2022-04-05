@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnetmodel"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,33 +12,6 @@ const (
 	schemaDevice  = "/schema/device"
 	schemaPoint   = "/schema/point"
 )
-
-func getBODYNetwork(ctx *gin.Context) (dto *bacnetmodel.Server, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBODYPoints(ctx *gin.Context) (dto *model.Point, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBODYPointsBacnet(ctx *gin.Context) (dto *bacnetmodel.BacnetPoint, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func resolveUUID(ctx *gin.Context) string {
-	return ctx.Param("uuid")
-}
-
-func resolveObject(ctx *gin.Context) string {
-	return ctx.Param("object")
-}
-
-func resolveAddress(ctx *gin.Context) string {
-	return ctx.Param("address")
-}
 
 // RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {

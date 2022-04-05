@@ -52,12 +52,26 @@ type Network struct {
 		Options  []int  `json:"options" default:"[38400]"`
 		Default  int    `json:"default" default:"38400"`
 	} `json:"serial_baud_rate"`
-	AutoMappingNetworks struct {
+	AutoMappingNetworksSelection struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"bacnetserver\",\"system\",\"modbus\"]"`
+		Options  []string `json:"options" default:"[\"lora-to-bacnetserver\"]"`
 		Default  string   `json:"default" default:""`
-	} `json:"auto_mapping_networks"`
+	} `json:"auto_mapping_networks_selection"`
+	AutoMappingFlowNetworkName struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"200"`
+		Default  string `json:"default" default:"local"`
+	} `json:"auto_mapping_flow_network_name"`
+	AutoMappingFlowNetworkUUID struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"200"`
+		Default  string `json:"default" default:""`
+	} `json:"auto_mapping_flow_network_uuid"`
 }
 
 type Device struct {
