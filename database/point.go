@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
@@ -31,7 +32,6 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 
 func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
-	deviceUUID := body.DeviceUUID
 	body.Name = nameIsNil(body.Name)
 	existingAddrID := false
 	existingName, _ := d.pointNameExists(body)
@@ -58,16 +58,19 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	if body.Description == "" {
 		body.Description = "na"
 	}
+	if body.PointPriorityArrayMode == "" {
+		body.PointPriorityArrayMode = model.PriorityArrayToPresentValue //sets default priority array mode.
+	}
 	body.ThingClass = model.ThingClass.Point
 	body.CommonEnable.Enable = utils.NewTrue()
 	body.InSync = utils.NewFalse()
-	body.WriteValueOnceSync = utils.NewFalse()
 	if body.Priority == nil {
 		body.Priority = &model.Priority{}
 	}
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
+	deviceUUID := body.DeviceUUID // TODO: Should there be a check to ensure that the DeviceUUID is sent with body?
 	plug, err := d.GetPluginIDFromDevice(deviceUUID)
 	if err != nil {
 		return nil, errors.New("ERROR failed to get plugin uuid")
@@ -126,7 +129,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	if !fromPlugin {
 		pointModel.InSync = utils.NewFalse()
 	}
-	body.WriteValueOnceSync = utils.NewFalse()
 	query = d.DB.Model(&pointModel).Updates(&body)
 	// Don't update point value if priority array on body is nil
 	if body.Priority == nil {
@@ -152,6 +154,7 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 		return nil, errors.New("no priority value is been sent")
 	} else {
 		pointModel.Priority = body.Priority
+		pointModel.ValueUpdatedFlag = utils.NewTrue()
 	}
 	pointModel.InSync = utils.NewFalse()
 	point, err := d.UpdatePointValue(pointModel, fromPlugin)
@@ -160,25 +163,37 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 
 func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool) (*model.Point, error) {
 	pointModel, presentValue := d.updatePriority(pointModel)
-
+	//presentValue will be OriginalValue if PointPriorityArrayMode is PriorityArrayToWriteValue or ReadOnlyNoPriorityArrayRequired. OriginalValue will have been updated by plugin on successful read.
 	ov := utils.Float64IsNil(presentValue)
 	pointModel.OriginalValue = &ov
 
+	presentValueTransformFault := false
 	presentValue = pointScale(presentValue, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax)
 	presentValue = pointRange(presentValue, pointModel.LimitMin, pointModel.LimitMax)
 	eval, err := pointEval(presentValue, pointModel.MathOnPresentValue)
 	if err != nil {
 		log.Errorln("point.db UpdatePointValue() error on run point MathOnPresentValue error:", err)
-		return nil, err
+		pointModel.CommonFault.InFault = true
+		pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
+		pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
+		pointModel.CommonFault.Message = fmt.Sprint("point.db UpdatePointValue() error on run point MathOnPresentValue error:", err)
+		pointModel.CommonFault.LastFail = time.Now().UTC()
+		presentValueTransformFault = true
 	} else {
 		presentValue = eval
 	}
 	val, err := pointUnits(presentValue, pointModel.Unit, pointModel.UnitTo)
 	if err != nil {
-		log.Errorf("ERROR on point invalid point unit")
-		return nil, err
+		log.Errorln("ERROR on point invalid point unit")
+		pointModel.CommonFault.InFault = true
+		pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
+		pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
+		pointModel.CommonFault.Message = fmt.Sprint("point.db UpdatePointValue() invalid point units. error:", err)
+		pointModel.CommonFault.LastFail = time.Now().UTC()
+		presentValueTransformFault = true
+	} else {
+		presentValue = val
 	}
-	presentValue = val
 	//example for wires and modbus: if a new value is written from  wires then set this to false so the modbus knows on the next poll to write a new value to the modbus point
 	if !fromPlugin {
 		pointModel.InSync = utils.NewFalse()
@@ -188,8 +203,25 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		presentValue = &val
 	}
 
-	isChange := !utils.CompareFloatPtr(pointModel.PresentValue, presentValue)
-	pointModel.PresentValue = presentValue
+	//TODO: I think this whole section can be deleted; Unless the overhead of d.ProducersPointWrite(pointModel) is too high.
+	DbUpdateRequired := false
+	switch pointModel.PointPriorityArrayMode {
+	case model.PriorityArrayToPresentValue:
+		//Priority array has already been pushed to DB so only need to update if PresentValue has changed or if there is a value transform error.
+		DbUpdateRequired = !utils.CompareFloatPtr(pointModel.PresentValue, presentValue) || presentValueTransformFault
+
+	case model.PriorityArrayToWriteValue:
+		// Currently there isn't a good comparison to decide if a DB update is required, so just do it.  This could be added, but it would require a bunch of rework to the above functions.
+		DbUpdateRequired = true
+
+	case model.ReadOnlyNoPriorityArrayRequired:
+		DbUpdateRequired = !utils.CompareFloatPtr(pointModel.PresentValue, presentValue) || presentValueTransformFault
+	}
+
+	// If the present value tranformations have resulted in an error, DB needs to be updated with the errors, but PresentValue should not change.
+	if !presentValueTransformFault {
+		pointModel.PresentValue = presentValue
+	}
 	if presentValue == nil {
 		// nil is ignored on GORM, so we are pushing forcefully because isChange comparison will fail on `null` write
 		d.DB.Model(&pointModel).Update("present_value", nil)
@@ -197,7 +229,8 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 			Where("writer_thing_uuid = ?", pointModel.UUID).
 			Update("present_value", nil)
 	}
-	if isChange == true {
+
+	if DbUpdateRequired {
 		_ = d.DB.Model(&pointModel).Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel)
 		if err != nil {

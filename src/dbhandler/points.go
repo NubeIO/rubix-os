@@ -58,12 +58,6 @@ func (h *Handler) UpdatePointValue(uuid string, body *model.Point, fromPlugin bo
 		return nil, query.Error
 	}
 	_ = getDb().DB.Model(&pointModel).Updates(&body)
-	// Don't update point value if priority array on body is nil
-	if body.Priority == nil {
-		return pointModel, nil
-	} else {
-		pointModel.Priority = body.Priority
-	}
 	pointModel.Priority = body.Priority
 	p, err := getDb().UpdatePointValue(pointModel, fromPlugin)
 	if err != nil {

@@ -61,19 +61,41 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 
 func (d *GormDatabase) updatePriority(pointModel *model.Point) (*model.Point, *float64) {
 	var presentValue *float64
+	presentValueFromPriority := pointModel.PointPriorityArrayMode != model.ReadOnlyNoPriorityArrayRequired && pointModel.PointPriorityArrayMode != model.PriorityArrayToWriteValue
 	if pointModel.Priority != nil {
 		priorityMap, highestValue, currentPriority, isPriorityExist := d.parsePriority(pointModel.Priority, pointModel)
 		if isPriorityExist {
 			pointModel.CurrentPriority = &currentPriority
-			presentValue = &highestValue
+			pointModel.WriteValueOriginal = utils.NewFloat64(highestValue)
+			writeValue, err := pointEval(&highestValue, pointModel.MathOnWriteValue)
+			if err != nil {
+				log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
+			} else {
+				pointModel.WriteValue = writeValue
+			}
+			if presentValueFromPriority { // only update presentValue if required by PointPriorityArrayMode
+				presentValue = &highestValue
+			}
 		} else if !utils.FloatIsNilCheck(pointModel.Fallback) {
 			pointModel.Priority.P16 = utils.NewFloat64(*pointModel.Fallback)
 			pointModel.CurrentPriority = utils.NewInt(16)
-			presentValue = utils.NewFloat64(*pointModel.Fallback)
+			pointModel.WriteValueOriginal = utils.NewFloat64(*pointModel.Priority.P16)
+			writeValue, err := pointEval(pointModel.Priority.P16, pointModel.MathOnWriteValue)
+			if err != nil {
+				log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
+			} else {
+				pointModel.WriteValue = writeValue
+			}
+			if presentValueFromPriority {
+				presentValue = utils.NewFloat64(*pointModel.Fallback) // only update presentValue if required by PointPriorityArrayMode
+			}
 		}
 		//writeValue := utils.Float64IsNil(pointModel.WriteValue)
-		d.DB.Model(&model.Point{}).Where("uuid = ?", pointModel.UUID).Update("write_value", pointModel.WriteValue)
+		d.DB.Model(&model.Point{}).Where("uuid = ?", pointModel.UUID).Update("write_value", pointModel.WriteValue) // TODO: is this neccesary here, should be included in the db call in UpdatePointValue()?
 		d.DB.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMap)
+	}
+	if !presentValueFromPriority { // if presentValue doesn't come from priority array, update with the existing value (before math exp is applied)
+		presentValue = pointModel.OriginalValue
 	}
 	return pointModel, presentValue
 }
