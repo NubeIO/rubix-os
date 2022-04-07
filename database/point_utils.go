@@ -53,8 +53,6 @@ func (d *GormDatabase) pointNameExistsInDevice(pointName, deviceUUID string) (ex
 		return false
 	}
 	for _, pnt := range device.Points {
-		fmt.Println(pnt.UUID)
-		fmt.Println(pnt.Name, pointName)
 		if pnt.Name == pointName {
 			return true
 		}

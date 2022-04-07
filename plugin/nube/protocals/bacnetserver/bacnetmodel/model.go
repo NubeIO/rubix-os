@@ -46,13 +46,13 @@ type Point struct {
 	ObjectType  struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"analogValue\",\"analogOutput\",\"binaryValue\",\"binaryOutput\"]"`
+		Options  []string `json:"options" default:"[\"analog_value\",\"analog_output\",\"binary_value\",\"binary_output\"]"`
 		Default  string   `json:"default" default:"analogValue"`
 	} `json:"object_type"`
 	AddressID struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"true"`
-		Default  int    `json:"default" default:"1"`
+		Default  int    `json:"default" default:"0"`
 	} `json:"address_id"`
 }
 

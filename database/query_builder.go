@@ -56,6 +56,9 @@ func (d *GormDatabase) buildFlowNetworkCloneQuery(args api.Args) *gorm.DB {
 	if args.GlobalUUID != nil {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
 	}
+	if args.SourceUUID != nil {
+		query = query.Where("source_uuid = ?", *args.SourceUUID)
+	}
 	if args.ClientId != nil {
 		values := strings.Split(*args.ClientId, ",")
 		query = query.Where(fmt.Sprintf(`client_id IN ( '%s' )`, strings.Join(values, "', '")))
