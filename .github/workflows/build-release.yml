@@ -122,9 +122,6 @@ jobs:
           cd ../../../../plugin/nube/database/history
           go build -buildmode=plugin -o history-amd64.so *.go  && cp history-amd64.so ../../../../
 
-          cd ../../../../plugin/nube/protocals/broker
-          go build -buildmode=plugin -o broker-amd64.so *.go  && cp broker-amd64.so ../../../../
-
 
       - name: Build armv7
         if: ${{ needs.context.outputs.isRelease == 'true' }}
@@ -162,9 +159,6 @@ jobs:
 
           cd ../../../../plugin/nube/database/history
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o history-armv7.so *.go  && cp history-armv7.so ../../../../
-
-          cd ../../../../plugin/nube/protocals/broker
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o broker-armv7.so *.go  && cp broker-armv7.so ../../../../
 
       - name: Zip artifacts
         if: ${{ needs.context.outputs.isRelease == 'true' }}
@@ -226,10 +220,6 @@ jobs:
           artifact=history-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./history-armv7.so
 
-          artifact=broker-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./broker-amd64.so
-          artifact=broker-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./broker-armv7.so
 
       - name: Create Release
         if: ${{ needs.context.outputs.isRelease == 'true' }}
