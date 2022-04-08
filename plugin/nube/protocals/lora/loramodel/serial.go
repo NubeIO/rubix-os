@@ -54,8 +54,8 @@ type Network struct {
 	} `json:"serial_baud_rate"`
 	AutoMappingNetworksSelection struct {
 		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"lora-to-bacnetserver\"]"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[\"disable\",\"lora-to-bacnetserver\"]"`
 		Default  string   `json:"default" default:""`
 	} `json:"auto_mapping_networks_selection"`
 	AutoMappingFlowNetworkName struct {
