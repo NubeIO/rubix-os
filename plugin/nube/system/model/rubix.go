@@ -23,15 +23,24 @@ type Network struct {
 	Description         DescriptionStruct `json:"description"`
 	AutoMappingNetworks struct {
 		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"bacnetserver\",\"lora\",\"modbus\"]"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[\"disable\"]"`
 		Default  string   `json:"default" default:""`
 	} `json:"auto_mapping_networks"`
-	PluginName struct {
+	AutoMappingFlowNetworkName struct {
 		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"true"`
-		Default  string `json:"default" default:"system"`
-	} `json:"plugin_name"`
+		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"200"`
+		Default  string `json:"default" default:"local"`
+	} `json:"auto_mapping_flow_network_name"`
+	AutoMappingFlowNetworkUUID struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"200"`
+		Default  string `json:"default" default:""`
+	} `json:"auto_mapping_flow_network_uuid"`
 }
 
 type Device struct {
