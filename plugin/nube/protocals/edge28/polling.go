@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const defaultInterval = 500 * time.Millisecond //default polling is 2.5 sec
+const defaultInterval = 10000 * time.Millisecond //default polling is 2.5 sec
 const pollName = "polling"
 
 type polling struct {

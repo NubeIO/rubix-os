@@ -2,9 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	bacnetServerModel "github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnetmodel"
 	model "github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwmodel"
-	baseModel "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	bm "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
@@ -13,7 +12,7 @@ const (
 )
 
 //mqttUpdate listen on mqtt and then update the point in flow-framework
-func (i *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*baseModel.Point, error) {
+func (i *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*bm.Point, error) {
 	//do an api call to chirpstack to get the device profile
 	//decode the mqtt payload based of the device profile
 	//if deviceProfileName
@@ -38,17 +37,17 @@ func (i *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*baseMod
 }
 
 //addPoint from rest api
-func (i *Instance) addPoint(body *baseModel.Point) (*baseModel.Point, error) {
+func (i *Instance) addPoint(body *bm.Point) (*bm.Point, error) {
 	return nil, nil
 }
 
 //pointPatch from rest
-func (i *Instance) pointPatch(body *baseModel.Point) (*baseModel.Point, error) {
+func (i *Instance) pointPatch(body *bm.Point) (*bm.Point, error) {
 	return nil, nil
 }
 
 //delete point make sure
-func (i *Instance) deletePoint(body *baseModel.Point) (bool, error) {
+func (i *Instance) deletePoint(body *bm.Point) (bool, error) {
 	return true, nil
 }
 
@@ -69,6 +68,6 @@ func (i *Instance) DropDevices() (bool, error) {
 }
 
 //delete point make sure
-func (i *Instance) serverDeletePoint(body *bacnetServerModel.BacnetPoint) (bool, error) {
+func (i *Instance) serverDeletePoint(body *bm.Point) (bool, error) {
 	return true, nil
 }

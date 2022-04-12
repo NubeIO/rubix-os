@@ -25,7 +25,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) {
 		_pUUID := pUUID.(string)
 		getPnt, err := i.db.GetOnePointByArgs(api.Args{AddressUUID: &_pUUID})
 		if err != nil || getPnt.UUID == "" {
-			log.Error("bacnet-master-plugin: ERROR on get GetPointByField() failed to find point", err, _pUUID)
+			log.Error("bacnet-master-plugin: ERROR on get bacnetUpdate() failed to find point", err, _pUUID)
 			return
 		}
 		var pri model.Priority

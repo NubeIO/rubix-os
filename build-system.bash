@@ -11,7 +11,6 @@ EDGE28=false
 MODBUS=false
 LORA=false
 BACNET=false
-BROKER=false
 LORAWAN=false
 BACNET_MASTER=false
 HISTORY=false
@@ -46,9 +45,6 @@ parseCommand() {
           ;;
         --bacnet)
             BACNET=true
-          ;;
-        --broker)
-            BROKER=true
           ;;
         --lorawan)
             LORAWAN=true
@@ -111,11 +107,6 @@ if [ ${BACNET} == true ]; then
     cd $dir/plugin/nube/protocals/bacnetserver
     go build -buildmode=plugin -o bacnetserver.so *.go  && cp bacnetserver.so $pluginDir
     echo -e "${GREEN}BUILD BACNET"
-fi
-if [ ${BROKER} == true ]; then
-    cd $dir/plugin/nube/protocals/broker
-    go build -buildmode=plugin -o broker.so *.go  && cp broker.so $pluginDir
-    echo -e "${GREEN}BUILD BROKER"
 fi
 if [ ${LORAWAN} == true ]; then
     cd $dir/plugin/nube/protocals/lorawan

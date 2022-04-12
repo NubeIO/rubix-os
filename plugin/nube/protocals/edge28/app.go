@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -13,17 +14,6 @@ import (
 
 //addDevice add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
-	if err != nil {
-		return nil, err
-	}
-	for _, net := range nets {
-		if net != nil {
-			errMsg := fmt.Sprintf("edge-28-network: only max one network is allowed with edge-28-network")
-			log.Errorf(errMsg)
-			return nil, errors.New(errMsg)
-		}
-	}
 	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err
@@ -33,6 +23,15 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 
 //addDevice add device
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
+	network, err := inst.db.GetNetwork(body.NetworkUUID, api.Args{WithDevices: true})
+	if err != nil {
+		return nil, err
+	}
+	if len(network.Devices) >= 1 {
+		errMsg := fmt.Sprintf("edge-28: only one device is allowed per network")
+		log.Errorf(errMsg)
+		return nil, errors.New(errMsg)
+	}
 	device, err = inst.db.CreateDevice(body)
 	if err != nil {
 		return nil, err
@@ -40,15 +39,48 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	return device, nil
 }
 
+func selectObjectType(selectedPlugin string) (objectType string, isOutput, isTypeBool bool) {
+	isOutput = false
+	isOutput = false
+	switch selectedPlugin {
+	case PointsList.R1.IoNumber, PointsList.R2.IoNumber:
+		objectType = PointsList.R1.ObjectType
+		isOutput = true
+		isTypeBool = true
+	case PointsList.UO1.IoNumber:
+		objectType = PointsList.UO1.ObjectType
+		isOutput = true
+	case PointsList.DO1.IoNumber:
+		objectType = PointsList.DO1.ObjectType
+		isOutput = true
+		isTypeBool = true
+	case PointsList.UI1.IoNumber:
+		objectType = PointsList.UI1.ObjectType
+	case PointsList.DI1.IoNumber:
+		objectType = PointsList.DI1.ObjectType
+		isTypeBool = true
+	}
+	return
+
+}
+
 //addPoint add point
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	if body.IoNumber == "" {
 		body.IoNumber = pointList.UI1
 	}
-
 	if body.IoType == "" {
 		body.IoType = UITypes.DIGITAL
 	}
+	objectType, isOutput, isTypeBool := selectObjectType(body.IoNumber)
+	body.ObjectType = objectType
+	if objectType == "" {
+		errMsg := fmt.Sprintf("edge28: point object type can not be empty")
+		log.Errorf(errMsg)
+		return nil, errors.New(errMsg)
+	}
+	body.IsOutput = nils.NewBool(isOutput)
+	body.IsTypeBool = nils.NewBool(isTypeBool)
 	point, err = inst.db.CreatePoint(body, true, true)
 	if err != nil {
 		return nil, err
@@ -167,6 +199,73 @@ var DOs = []string{"DO1", "DO2", "DO3", "DO4", "DO5"}
 var UOs = []string{"UO1", "UO2", "UO3", "UO4", "UO5", "UO6", "UO7"}
 var UIs = []string{"UI1", "UI2", "UI3", "UI4", "UI5", "UI6", "UI7"}
 var DIs = []string{"DI1", "DI2", "DI3", "DI4", "DI5", "DI6", "DI7"}
+
+type Point struct {
+	IoNumber   string //R1
+	ObjectType string //binary_output
+	IsOutput   *bool
+	IsTypeBool *bool
+}
+
+var PointsList = struct {
+	R1  Point  `json:"R1"`
+	R2  Point  `json:"R2"`
+	DO1 Point  `json:"DO1"`
+	DO2 string `json:"DO2"`
+	DO3 string `json:"DO3"`
+	DO4 string `json:"DO4"`
+	DO5 string `json:"DO5"`
+	UO1 Point  `json:"UO1"`
+	UO2 Point  `json:"UO2"`
+	UO3 string `json:"UO3"`
+	UO4 string `json:"UO4"`
+	UO5 string `json:"UO5"`
+	UO6 string `json:"UO6"`
+	UO7 string `json:"UO7"`
+	UI1 Point  `json:"UI1"`
+	UI2 string `json:"UI2"`
+	UI3 string `json:"UI3"`
+	UI4 string `json:"UI4"`
+	UI5 string `json:"UI5"`
+	UI6 string `json:"UI6"`
+	UI7 string `json:"UI7"`
+	DI1 Point  `json:"DI1"`
+	DI2 string `json:"DI2"`
+	DI3 string `json:"DI3"`
+	DI4 string `json:"DI4"`
+	DI5 string `json:"DI5"`
+	DI6 string `json:"DI6"`
+	DI7 string `json:"DI7"`
+}{
+	R1:  Point{IoNumber: "RI", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	R2:  Point{IoNumber: "R2", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	DO1: Point{IoNumber: "RI", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	DO2: "DO2",
+	DO3: "DO3",
+	DO4: "DO4",
+	DO5: "DO5",
+	UO1: Point{IoNumber: "UO1", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	UO2: Point{IoNumber: "UO2", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	UO3: "UO3",
+	UO4: "UO4",
+	UO5: "UO5",
+	UO6: "UO6",
+	UO7: "UO7",
+	UI1: Point{IoNumber: "UI1", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI2: "UI2",
+	UI3: "UI3",
+	UI4: "UI4",
+	UI5: "UI5",
+	UI6: "UI6",
+	UI7: "UI7",
+	DI1: Point{IoNumber: "DI1", ObjectType: "binary_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	DI2: "DI2",
+	DI3: "DI3",
+	DI4: "DI4",
+	DI5: "DI5",
+	DI6: "DI6",
+	DI7: "DI7",
+}
 
 var pointList = struct {
 	R1  string `json:"R1"`

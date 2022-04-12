@@ -33,19 +33,19 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	body.Name = nameIsNil(body.Name)
-	existingAddrID := false
-	existingName, _ := d.pointNameExists(body)
+	//existingAddrID := false
+	//existingName, _ := d.pointNameExists(body)
 	if body.AddressID != nil {
-		_, existingAddrID = d.pointNameExists(body)
+		//_, existingAddrID = d.pointNameExists(body)
 	}
-	if existingName {
-		eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
-		return nil, errors.New(eMsg)
-	}
-	if existingAddrID {
-		eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", utils.IntIsNil(body.AddressID))
-		return nil, errors.New(eMsg)
-	}
+	//if existingName {
+	//	eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
+	//	return nil, errors.New(eMsg)
+	//}
+	//if existingAddrID {
+	//	eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", utils.IntIsNil(body.AddressID))
+	//	return nil, errors.New(eMsg)
+	//}
 	if body.Decimal == nil {
 		body.Decimal = nils.NewUint32(2)
 	}
