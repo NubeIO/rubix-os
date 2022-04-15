@@ -162,6 +162,9 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 }
 
 func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool) (*model.Point, error) {
+	if pointModel.PointPriorityArrayMode == "" {
+		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue //sets default priority array mode.
+	}
 	pointModel, presentValue := d.updatePriority(pointModel)
 	//presentValue will be OriginalValue if PointPriorityArrayMode is PriorityArrayToWriteValue or ReadOnlyNoPriorityArrayRequired. OriginalValue will have been updated by plugin on successful read.
 	ov := utils.Float64IsNil(presentValue)
