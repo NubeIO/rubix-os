@@ -42,8 +42,19 @@ type Configuration struct {
 		AuthDataDir          string `default:"/data/rubix-service"`
 		RelativeAuthDataFile string `default:"/data/internal_token.txt"`
 	}
-	Prod bool `default:"false"`
-	Auth bool `default:"false"`
+	Prod            bool `default:"false"`
+	Auth            bool `default:"false"`
+	ProducerHistory struct {
+		Cleaner struct {
+			Enable              bool `default:"false"`
+			Frequency           int  `default:"10"`
+			DataPersistingHours int  `default:"24"`
+		}
+		SyncInterval struct {
+			Enable     bool `default:"false"`
+			SyncPeriod int  `default:"5"`
+		}
+	}
 }
 
 var config *Configuration = nil

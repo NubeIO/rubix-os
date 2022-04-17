@@ -38,6 +38,15 @@ location:
 
 auth: false
 
+producerhistory:
+  cleaner:
+    enable: false
+    frequency: 10
+    datapersistinghours: 24
+  syncinterval:
+    enable: false
+    syncperiod: 5
+
 pointbuilder:
   TotalWaterConsumption:
     thingClass: point
