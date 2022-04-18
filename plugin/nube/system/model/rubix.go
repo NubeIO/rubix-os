@@ -19,8 +19,13 @@ type DescriptionStruct struct {
 }
 
 type Network struct {
-	Name                NameStruct        `json:"name"`
-	Description         DescriptionStruct `json:"description"`
+	Name        NameStruct        `json:"name"`
+	Description DescriptionStruct `json:"description"`
+	PluginName  struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"true"`
+		Default  string `json:"default" default:"system"`
+	} `json:"plugin_name"`
 	AutoMappingNetworks struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
