@@ -12,12 +12,11 @@ import (
 	"github.com/NubeIO/flow-framework/logger"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/networking/networking"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Configuration) *gin.Engine {
+func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	engine := gin.New()
 	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), error.Handler(), location.Default())
 	engine.NoRoute(error.NotFound())
@@ -132,10 +131,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 	apiRoutes := engine.Group("/api")
 	{
-		apiRoutes.GET("/version", func(ctx *gin.Context) {
-			ctx.JSON(200, vInfo)
-		})
-
 		fnProxy := apiRoutes.Group("/fn")
 		{
 			fnProxy.GET("/*any", proxyHandler.GetProxy(true))
