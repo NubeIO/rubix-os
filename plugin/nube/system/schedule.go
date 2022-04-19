@@ -21,7 +21,10 @@ func (i *Instance) runSchedule() {
 			log.Errorf("system-plugin-schedule: issue on DecodeSchedule %v\n", err)
 			return
 		}
-
+		if !utils.IsTrue(sch.Enable) {
+			log.Infoln("system-plugin-schedule: runSchedule() sch is not enabled so skip logic name:", sch.Name)
+			continue
+		}
 		scheduleNameToCheck := "ALL" //TODO: we need a way to specify the schedule name that is being checked for.
 
 		timezone := ScheduleJSON.Config.TimeZone
