@@ -1,30 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/logger"
 	"github.com/NubeIO/flow-framework/mqttclient"
+	"github.com/NubeIO/flow-framework/router"
+	"github.com/NubeIO/flow-framework/runner"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/NubeIO/flow-framework/src/jobs"
+	"github.com/patrickmn/go-cache"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"path"
 	"time"
-
-	"github.com/NubeIO/flow-framework/config"
-	"github.com/NubeIO/flow-framework/database"
-	"github.com/NubeIO/flow-framework/logger"
-	"github.com/NubeIO/flow-framework/router"
-	"github.com/NubeIO/flow-framework/runner"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/patrickmn/go-cache"
-	log "github.com/sirupsen/logrus"
-)
-
-var (
-	Version   = "<version>"
-	Commit    = "<commit>"
-	BuildDate = "<build_date>"
 )
 
 func intHandler(db *database.GormDatabase) {
@@ -47,8 +38,6 @@ func main() {
 	conf := config.CreateApp()
 	logger.SetLogger(conf.LogLevel)
 	logger.SetGinMode(conf.LogLevel)
-	vInfo := &model.VersionInfo{Version: Version, Commit: Commit, BuildDate: BuildDate}
-	log.Info("Info Starting version:", vInfo.Version+"-"+vInfo.Commit+"@"+vInfo.BuildDate)
 	if err := os.MkdirAll(conf.GetAbsPluginDir(), 0755); err != nil {
 		panic(err)
 	}
@@ -59,10 +48,9 @@ func main() {
 	localBroker := "tcp://0.0.0.0:1883" //TODO add to config, this is meant to be an unsecure broker
 	connected, err := mqttclient.InternalMQTT(localBroker)
 	if err != nil {
-		fmt.Println(err)
+		log.Errorln(err)
 	}
-
-	fmt.Println("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
+	log.Infoln("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
 	eventbus.Init()
 	db, err := database.New(conf.Database.Dialect, connection, conf.Database.LogLevel)
 	if err != nil {
@@ -70,7 +58,7 @@ func main() {
 	}
 	intHandler(db)
 	defer db.Close()
-	engine := router.Create(db, vInfo, conf)
+	engine := router.Create(db, conf)
 	eventbus.RegisterMQTTBus()
 	runner.Run(engine, conf)
 }
