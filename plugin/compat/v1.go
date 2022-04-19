@@ -43,10 +43,6 @@ func (c PluginV1) NewPluginInstance() PluginInstance {
 		compat.displayer = displayer
 	}
 
-	if messenger, ok := instance.(pluginapi.Messenger); ok {
-		compat.messenger = messenger
-	}
-
 	if configurer, ok := instance.(pluginapi.Configurer); ok {
 		compat.configurer = configurer
 	}
@@ -65,7 +61,6 @@ func (c PluginV1) NewPluginInstance() PluginInstance {
 // PluginV1Instance is an adapter for plugin using v1 API.
 type PluginV1Instance struct {
 	instance   pluginapi.Plugin
-	messenger  pluginapi.Messenger
 	configurer pluginapi.Configurer
 	storager   pluginapi.Storager
 	webhooker  pluginapi.Webhooker
@@ -110,13 +105,6 @@ func (c *PluginV1Instance) GetDisplay(location *url.URL) pluginapi.Response {
 	return r
 }
 
-// SetMessageHandler see papiv1.Messenger.
-func (c *PluginV1Instance) SetMessageHandler(h MessageHandler) {
-	if c.messenger != nil {
-		c.messenger.SetMessageHandler(&PluginV1MessageHandler{WrapperHandler: h})
-	}
-}
-
 // RegisterWebhook see papiv1.Webhooker.
 func (c *PluginV1Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	if c.webhooker != nil {
@@ -140,9 +128,6 @@ func (c *PluginV1Instance) Supports() Capabilities {
 	if c.displayer != nil {
 		modules = append(modules, Displayer)
 	}
-	if c.messenger != nil {
-		modules = append(modules, Messenger)
-	}
 	if c.storager != nil {
 		modules = append(modules, Storager)
 	}
@@ -150,21 +135,6 @@ func (c *PluginV1Instance) Supports() Capabilities {
 		modules = append(modules, Webhooker)
 	}
 	return modules
-}
-
-// PluginV1MessageHandler is an adapter for messenger plugin handler using v1 API.
-type PluginV1MessageHandler struct {
-	WrapperHandler MessageHandler
-}
-
-// SendMessage implements papiv1.MessageHandler.
-func (c *PluginV1MessageHandler) SendMessage(msg pluginapi.Message) error {
-	return c.WrapperHandler.SendMessage(Message{
-		Message:  msg.Message,
-		Priority: msg.Priority,
-		Title:    msg.Title,
-		Extras:   msg.Extras,
-	})
 }
 
 // Enable implements wrapper.Plugin.

@@ -3,7 +3,6 @@ package plugin
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -14,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/flow-framework/plugin/compat"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
 )
@@ -29,53 +28,24 @@ type Database interface {
 	UpdatePluginConf(p *model.PluginConf) error
 }
 
-// Notifier notifies when a new message was created.
-type Notifier interface {
-	Notify(message *model.MessageExternal)
-}
-
 // Manager is an encapsulating layer for plugins and manages all plugins and its instances.
 type Manager struct {
 	mutex     *sync.RWMutex
 	instances map[string]compat.PluginInstance
 	plugins   map[string]compat.Plugin
-	messages  chan model.MessageExternal
 	db        Database
 	mux       *gin.RouterGroup
 }
 
 // NewManager created a Manager from configurations.
-func NewManager(db Database, directory string, mux *gin.RouterGroup, notifier Notifier) (*Manager, error) {
+func NewManager(db Database, directory string, mux *gin.RouterGroup) (*Manager, error) {
 	manager := &Manager{
 		mutex:     &sync.RWMutex{},
 		instances: map[string]compat.PluginInstance{},
 		plugins:   map[string]compat.Plugin{},
-		messages:  make(chan model.MessageExternal),
 		db:        db,
 		mux:       mux,
 	}
-	go func() {
-		for {
-			message := <-manager.messages
-			internalMsg := &model.Message{
-				Title:    message.Title,
-				Priority: message.Priority,
-				Date:     message.Date,
-				Message:  message.Message,
-			}
-
-			if message.Extras != nil {
-				internalMsg.Extras, _ = json.Marshal(message.Extras)
-			}
-			err := db.CreateMessage(internalMsg)
-			if err != nil {
-				log.Println("error on send message", internalMsg.Title)
-			}
-			message.ID = internalMsg.ID
-			notifier.Notify(&message)
-		}
-	}()
-
 	if err := manager.loadPlugins(directory); err != nil {
 		return nil, err
 	}

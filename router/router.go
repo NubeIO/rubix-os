@@ -2,31 +2,26 @@ package router
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/auth"
-	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/networking/networking"
-	"github.com/gin-contrib/cors"
-	"time"
-
 	"github.com/NubeDev/location"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/api/stream"
+	"github.com/NubeIO/flow-framework/auth"
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/error"
+	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/logger"
 	"github.com/NubeIO/flow-framework/plugin"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/networking/networking"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
-func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Configuration) (*gin.Engine, func()) {
+func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Configuration) *gin.Engine {
 	engine := gin.New()
 	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), error.Handler(), location.Default())
 	engine.NoRoute(error.NotFound())
 	eventBus := eventbus.NewService(eventbus.GetBus())
-	streamHandler := stream.New(time.Duration(conf.Server.Stream.PingPeriodSeconds)*time.Second, 15*time.Second, conf.Server.Stream.AllowedOrigins, conf.Prod)
-	messageHandler := api.MessageAPI{Notifier: streamHandler, DB: db}
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
 	localStorageFlowNetworkHandler := api.LocalStorageFlowNetworkAPI{
@@ -112,16 +107,15 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 	dbGroup.SyncTopics()
 	// for the custom plugin endpoints you need to use the plugin token
 	// http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/api/plugins/api"), streamHandler)
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/api/plugins/api"))
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
 	db.PluginManager = pluginManager
 	pluginHandler := api.PluginAPI{
-		Manager:  pluginManager,
-		Notifier: streamHandler,
-		DB:       db,
+		Manager: pluginManager,
+		DB:      db,
 	}
 
 	engine.GET("/api/system/ping", healthHandler.Health)
@@ -135,8 +129,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 
 	engine.Use(cors.New(auth.CorsConfig(conf)))
 	engine.OPTIONS("/*any")
-
-	engine.GET("/stream", streamHandler.Handle)
 
 	apiRoutes := engine.Group("/api")
 	{
@@ -174,14 +166,6 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 				plugins.POST("/enable/:uuid", pluginHandler.EnablePluginByUUID)
 				plugins.POST("/restart/:uuid", pluginHandler.RestartPlugin)
 				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
-			}
-
-			messageRoutes := requireClientsGroupRoutes.Group("/messages")
-			{
-				messageRoutes.POST("", messageHandler.CreateMessage)
-				messageRoutes.GET("", messageHandler.GetMessages)
-				messageRoutes.DELETE("", messageHandler.DeleteMessages)
-				messageRoutes.DELETE("/:id", messageHandler.DeleteMessage)
 			}
 		}
 
@@ -430,5 +414,5 @@ func Create(db *database.GormDatabase, vInfo *model.VersionInfo, conf *config.Co
 			syncRoutes.GET("/writer/read/:source_uuid", syncWriterHandler.SyncWriterReadAction)
 		}
 	}
-	return engine, streamHandler.Close
+	return engine
 }
