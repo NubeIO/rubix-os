@@ -7,9 +7,9 @@ import (
 	"io/ioutil"
 
 	"github.com/NubeDev/location"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/compat"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
 )
@@ -24,9 +24,8 @@ type PluginDatabase interface {
 
 // The PluginAPI provides handlers for managing plugins.
 type PluginAPI struct {
-	Notifier Notifier
-	Manager  *plugin.Manager
-	DB       PluginDatabase
+	Manager *plugin.Manager
+	DB      PluginDatabase
 }
 
 func (c *PluginAPI) GetPlugin(ctx *gin.Context) {

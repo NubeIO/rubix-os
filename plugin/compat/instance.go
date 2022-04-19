@@ -10,8 +10,6 @@ import (
 type Capability string
 
 const (
-	// Messenger sends notifications.
-	Messenger = Capability("messenger")
 	// Configurer are consigurables.
 	Configurer = Capability("configurer")
 	// Storager stores data.
@@ -26,19 +24,14 @@ const (
 type PluginInstance interface {
 	Enable() error
 	Disable() error
-
 	// GetDisplay see Displayer
 	GetDisplay(location *url.URL) pluginapi.Response
-
 	// DefaultConfig see Configurer
 	DefaultConfig() interface{}
 	// GetConfig see Configurer
 	GetConfig() interface{}
 	// ValidateAndSetConfig see Configurer
 	ValidateAndSetConfig(c interface{}) error
-
-	// SetMessageHandler see Messenger#SetMessageHandler
-	SetMessageHandler(h MessageHandler)
 
 	// RegisterWebhook see Webhooker#RegisterWebhook
 	RegisterWebhook(basePath string, mux *gin.RouterGroup)
@@ -72,22 +65,8 @@ func (m Capabilities) Strings() []string {
 	return result
 }
 
-// MessageHandler see plugin.MessageHandler.
-type MessageHandler interface {
-	// SendMessage see plugin.MessageHandler
-	SendMessage(msg Message) error
-}
-
 // StorageHandler see plugin.StorageHandler.
 type StorageHandler interface {
 	Save(b []byte) error
 	Load() ([]byte, error)
-}
-
-// Message describes a message to be sent by MessageHandler#SendMessage.
-type Message struct {
-	Message  string
-	Title    string
-	Priority int
-	Extras   map[string]interface{}
 }

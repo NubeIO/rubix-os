@@ -70,8 +70,7 @@ func main() {
 	}
 	intHandler(db)
 	defer db.Close()
-	engine, closeable := router.Create(db, vInfo, conf)
-	defer closeable()
+	engine := router.Create(db, vInfo, conf)
 	eventbus.RegisterMQTTBus()
 	runner.Run(engine, conf)
 }
