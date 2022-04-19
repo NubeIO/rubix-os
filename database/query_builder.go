@@ -39,6 +39,9 @@ func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
 	}
+	if args.FlowNetworkParentUUID != nil {
+		query = query.Where("flow_network_parent_uuid = ?", *args.FlowNetworkParentUUID)
+	}
 	return query
 }
 

@@ -7,6 +7,8 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
+//local is used for peer-to-peer
+
 func (d *GormDatabase) GetLocalStorageFlowNetwork() (*model.LocalStorageFlowNetwork, error) {
 	var localStorageFlowNetwork *model.LocalStorageFlowNetwork
 	if err := d.DB.First(&localStorageFlowNetwork).Error; err != nil {
