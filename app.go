@@ -4,6 +4,7 @@ import (
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/history"
 	"github.com/NubeIO/flow-framework/logger"
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/router"
@@ -34,6 +35,18 @@ func intHandler(db *database.GormDatabase) {
 	}
 }
 
+func initHistory(db *database.GormDatabase, conf *config.Configuration) {
+	h := new(history.History)
+	h.DB = db
+	if conf.ProducerHistory.Cleaner.Enable {
+		h.InitProducerHistoryCleaner(conf.ProducerHistory.Cleaner.Frequency, conf.ProducerHistory.Cleaner.
+			DataPersistingHours)
+	}
+	if conf.ProducerHistory.SyncInterval.Enable {
+		h.InitProducerHistorySyncInterval(conf.ProducerHistory.SyncInterval.SyncPeriod)
+	}
+}
+
 func main() {
 	conf := config.CreateApp()
 	logger.SetLogger(conf.LogLevel)
@@ -60,5 +73,6 @@ func main() {
 	defer db.Close()
 	engine := router.Create(db, conf)
 	eventbus.RegisterMQTTBus()
+	initHistory(db, conf)
 	runner.Run(engine, conf)
 }

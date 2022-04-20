@@ -62,3 +62,25 @@ func checkObjectType(t string) (model.ObjectType, error) {
 	}
 	return objType, nil
 }
+
+func checkHistoryType(t string) (model.HistoryType, error) {
+	if t == "" {
+		return model.HistoryTypeInterval, nil
+	}
+	historyType := model.HistoryType(t)
+	if _, ok := model.HistoryTypeMap[historyType]; !ok {
+		return "", errors.New("please provide a valid history type ie: COV , INTERVAL or COV_AND_INTERVAL")
+	}
+	return historyType, nil
+}
+
+func checkHistoryCovType(t string) bool {
+	if t == "" {
+		return false
+	}
+	historyType := model.HistoryType(t)
+	if _, ok := model.HistoryTypeCovMap[historyType]; !ok {
+		return false
+	}
+	return true
+}

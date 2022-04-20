@@ -8,6 +8,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 type Producer struct {
@@ -49,6 +50,11 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 		return nil, errors.New("please pass in a producer_thing_class i.e. point, job etc")
 	}
 	producerThingName := ""
+	historyType, err := checkHistoryType(string(body.HistoryType))
+	if err != nil {
+		return nil, err
+	}
+	body.HistoryType = historyType
 
 	switch body.ProducerThingClass {
 	case model.ThingClass.Point:
@@ -66,7 +72,7 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	default:
 		return nil, errors.New("we are not supporting producer_thing_class other than point & schedule")
 	}
-	_, err := d.GetStream(body.StreamUUID, api.Args{})
+	_, err = d.GetStream(body.StreamUUID, api.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -148,20 +154,23 @@ func (d *GormDatabase) producerPointWrite(uuid string, point *model.Point, produ
 		return errors.New("issue on update producer")
 	}
 
-	syncCOV := model.SyncCOV{Priority: point.Priority}
-	err = d.TriggerCOVToWriterClone(producerModel, &syncCOV)
-	if err != nil {
-		return err
-	}
+	if *producerModel.EnableHistory && checkHistoryCovType(string(producerModel.HistoryType)) {
+		syncCOV := model.SyncCOV{Priority: point.Priority}
+		err = d.TriggerCOVToWriterClone(producerModel, &syncCOV)
+		if err != nil {
+			return err
+		}
 
-	data, _ := json.Marshal(point.Priority)
-	ph := new(model.ProducerHistory)
-	ph.ProducerUUID = uuid
-	ph.DataStore = data
-	_, err = d.CreateProducerHistory(ph)
-	if err != nil {
-		log.Errorf("producer: issue on write history ProducerWriteHist: %v\n", err)
-		return errors.New("issue on write history for point")
+		data, _ := json.Marshal(point.Priority)
+		ph := new(model.ProducerHistory)
+		ph.ProducerUUID = uuid
+		ph.DataStore = data
+		ph.Timestamp = time.Now().UTC()
+		_, err = d.CreateProducerHistory(ph)
+		if err != nil {
+			log.Errorf("producer: issue on write history ProducerWriteHist: %v\n", err)
+			return errors.New("issue on write history for point")
+		}
 	}
 	return nil
 }
@@ -215,4 +224,14 @@ func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Produce
 		}
 	}
 	return nil
+}
+
+func (d *GormDatabase) GetProducersForCreateInterval() ([]*model.Producer, error) {
+	var historyModel []*model.Producer
+	query := d.DB.Where("enable_history = ? AND history_type != ?", true, model.HistoryTypeCov).
+		Find(&historyModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return historyModel, nil
 }
