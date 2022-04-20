@@ -24,37 +24,27 @@ func (h *History) syncProducerHistoryInterval() {
 	}
 	currentDate := time.Now().UTC()
 	for _, producer := range producers {
-		if producer.HistoryInterval == nil {
+		if producer.HistoryInterval == nil || *producer.HistoryInterval < 1 {
 			continue
 		}
 		if producer.ProducerThingClass != "point" { // TODO: CreateProducerHistory for ProducerThingClass == "schedule"
 			continue
 		}
 		latestPH, _ := h.DB.GetLatestProducerHistoryByProducerUUID(producer.UUID)
-		if latestPH == nil {
-			// Minutes is placing such a way if 15, then it will store values on 0, 15, 30, 45
+		if latestPH == nil || currentDate.Sub(latestPH.Timestamp).Seconds() >= float64(*producer.HistoryInterval*60) {
 			latestPH = new(model.ProducerHistory)
-			latestPH.ProducerUUID = producer.UUID
+			// Minutes is placing such a way if 15, then it will store values on 0, 15, 30, 45
 			minute := (currentDate.Minute() / *producer.HistoryInterval) * *producer.HistoryInterval
+			latestPH.ProducerUUID = producer.UUID
 			latestPH.Timestamp = time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(),
 				currentDate.Hour(), minute, 0, 0, time.UTC)
 			point, _ := h.DB.GetPoint(producer.ProducerThingUUID, api.Args{WithPriority: true})
 			if point != nil {
 				latestPH.DataStore, _ = json.Marshal(point.Priority)
-				_, err = h.DB.CreateProducerHistory(latestPH)
+				_, err := h.DB.CreateProducerHistory(latestPH)
 				if err != nil {
 					log.Error(err)
 				}
-			}
-		} else if currentDate.Sub(latestPH.Timestamp).Seconds() >= float64(*producer.HistoryInterval*60) {
-			//Minutes is placing such a way if 15, then it will store values on 0, 15, 30, 45
-			latestPH.ID = 0
-			minute := (currentDate.Minute() / *producer.HistoryInterval) * *producer.HistoryInterval
-			latestPH.Timestamp = time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(),
-				currentDate.Hour(), minute, 0, 0, time.UTC)
-			_, err = h.DB.CreateProducerHistory(latestPH)
-			if err != nil {
-				log.Error(err)
 			}
 		}
 	}
