@@ -65,12 +65,21 @@ func (d *GormDatabase) GetNetworkByName(name string, args api.Args) (*model.Netw
 	return networksModel, nil
 }
 
-// GetNetworkByPointUUID returns a network by passing in the pointUUID.
+// GetNetworkByPointUUID returns a network by passing in the point UUID.
 func (d *GormDatabase) GetNetworkByPointUUID(point *model.Point, args api.Args) (network *model.Network, err error) {
 	device, err := d.GetDeviceByPointUUID(point)
 	if err != nil {
 		return nil, err
 	}
+	network, err = d.GetNetwork(device.NetworkUUID, args)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+// GetNetworkByDeviceUUID returns a network by passing in the device UUID.
+func (d *GormDatabase) GetNetworkByDeviceUUID(device *model.Device, args api.Args) (network *model.Network, err error) {
 	network, err = d.GetNetwork(device.NetworkUUID, args)
 	if err != nil {
 		return nil, err

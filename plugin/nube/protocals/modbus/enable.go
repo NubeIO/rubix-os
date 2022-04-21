@@ -1,36 +1,42 @@
 package main
 
 import (
-	"errors"
 	"github.com/NubeIO/flow-framework/api"
-	log "github.com/sirupsen/logrus"
+	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
 )
 
 // Enable implements plugin.Plugin
-func (inst *Instance) Enable() error {
-	inst.enabled = true
-	inst.setUUID()
-	inst.BusServ()
-	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
-	if q != nil {
-		inst.networkUUID = q.UUID
-	} else {
-		inst.networkUUID = "NA"
+func (i *Instance) Enable() error {
+	modbusDebugMsg("MODBUS Enable()")
+	i.enabled = true
+	i.setUUID()
+	i.BusServ()
+	nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, api.Args{})
+	if nets != nil {
+		i.networks = nets
+	} else if nets == nil || err != nil {
+		i.networks = nil
 	}
-	if inst.config.EnablePolling {
-		if !inst.pollingEnabled {
+	if i.config.EnablePolling {
+		if !i.pollingEnabled {
 			var arg polling
-			inst.pollingEnabled = true
+			i.pollingEnabled = true
 			arg.enable = true
-			go func() error {
-				err := inst.PollingTCP(arg)
-				if err != nil {
-					log.Errorf("modbus:  PLUGIN Enable POLLING ERROR: %v\n", err)
-				}
-				return nil
-			}()
+			i.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0) //This will delete any existing NetworkPollManagers (if enable is called multiple times, it will rebuild the queues).
+			for _, net := range nets {                                       //Create a new Poll Manager for each network in the plugin.
+				pollManager := pollqueue.NewPollManager(&i.db, net.UUID, i.pluginUUID)
+				//modbusDebugMsg("net")
+				//modbusDebugMsg("%+v\n", net)
+				//modbusDebugMsg("pollManager")
+				//modbusDebugMsg("%+v\n", pollManager)
+				pollManager.StartPolling()
+				i.NetworkPollManagers = append(i.NetworkPollManagers, pollManager)
+			}
+
+			//TODO: VERIFY POLLING WITHOUT GO ROUTINE WRAPPER
+			err := i.ModbusPolling()
 			if err != nil {
-				log.Errorf("modbus: POLLING ERROR: %v\n", err)
+				modbusErrorMsg("POLLING ERROR on routine: %v\n", err)
 			}
 		}
 	}
@@ -38,21 +44,19 @@ func (inst *Instance) Enable() error {
 }
 
 // Disable implements plugin.Disable
-func (inst *Instance) Disable() error {
-	inst.enabled = false
-	if inst.pollingEnabled {
+func (i *Instance) Disable() error {
+	modbusDebugMsg("MODBUS Disable()")
+	i.enabled = false
+	if i.pollingEnabled {
 		var arg polling
-		inst.pollingEnabled = false
+		i.pollingEnabled = false
 		arg.enable = false
-		go func() {
-			err := inst.PollingTCP(arg)
-			if err != nil {
-				log.Errorf("modbus:  PLUGIN Disable POLLING ERROR: %v\n", err)
-			}
-		}()
-		if err != nil {
-			return errors.New("error on starting polling")
+		i.pollingCancel()
+		i.pollingCancel = nil
+		for _, pollMan := range i.NetworkPollManagers {
+			pollMan.StopPolling()
 		}
+		i.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0)
 	}
 	return nil
 }

@@ -2,10 +2,13 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
+	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/patrickmn/go-cache"
+	log "github.com/sirupsen/logrus"
 )
 
 const path = "modbus" //must be unique across all plugins
@@ -25,15 +28,17 @@ const transportType = "ip" //serial, ip
 
 // Instance is plugin instance
 type Instance struct {
-	config         *Config
-	enabled        bool
-	basePath       string
-	db             dbhandler.Handler
-	store          cachestore.Handler
-	bus            eventbus.BusService
-	pluginUUID     string
-	networkUUID    string
-	pollingEnabled bool
+	config              *Config
+	enabled             bool
+	basePath            string
+	db                  dbhandler.Handler
+	store               cachestore.Handler
+	bus                 eventbus.BusService
+	pluginUUID          string
+	networks            []*model.Network
+	pollingEnabled      bool
+	pollingCancel       func()
+	NetworkPollManagers []*pollqueue.NetworkPollManager
 }
 
 // GetFlowPluginInfo returns plugin info.
@@ -57,4 +62,20 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 //main will not let main run
 func main() {
 	panic("this should be built as plugin")
+}
+
+func modbusDebugMsg(args ...interface{}) {
+	debugMsgEnable := false
+	if debugMsgEnable {
+		prefix := "Modbus: "
+		log.Info(prefix, args)
+	}
+}
+
+func modbusErrorMsg(args ...interface{}) {
+	debugMsgEnable := true
+	if debugMsgEnable {
+		prefix := "Modbus: "
+		log.Error(prefix, args)
+	}
 }

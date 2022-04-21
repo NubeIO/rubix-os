@@ -129,6 +129,13 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	if !fromPlugin {
 		pointModel.InSync = utils.NewFalse()
 	}
+	// TODO: ARE THESE REQUIRED? OR ARE THEY DONE WITH THE FOLLOWING DB CALL?
+	pointModel.WritePollRequired = body.WritePollRequired
+	pointModel.ReadPollRequired = body.ReadPollRequired
+	pointModel.WriteMode = body.WriteMode
+	pointModel.PollPriority = body.PollPriority
+	pointModel.PollRate = body.PollRate
+
 	query = d.DB.Model(&pointModel).Updates(&body)
 	// Don't update point value if priority array on body is nil
 	if body.Priority == nil {

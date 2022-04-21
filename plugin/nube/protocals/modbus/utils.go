@@ -1,8 +1,9 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
-
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -132,12 +133,10 @@ func networkRequest(mbClient smod.ModbusClient, pnt *model.Point, doWrite bool) 
 		writeValue = pointWrite(pnt)
 	}
 
-	if mbClient.Debug {
-		if doWrite {
-			log.Infof("modbus-write: ObjectType: %s  Addr: %d WriteValue: %v\n", objectType, address, writeValue)
-		} else {
-			log.Infof("modbus-read: ObjectType: %s  Addr: %d", objectType, address)
-		}
+	if doWrite {
+		modbusDebugMsg("modbus-write: ObjectType: %s  Addr: %d WriteValue: %v\n", objectType, address, writeValue)
+	} else {
+		modbusDebugMsg("modbus-read: ObjectType: %s  Addr: %d", objectType, address)
 	}
 
 	switch objectType {
@@ -192,4 +191,135 @@ func networkRequest(mbClient smod.ModbusClient, pnt *model.Point, doWrite bool) 
 	}
 
 	return nil, 0, nil
+}
+
+func networkWrite(mbClient smod.ModbusClient, pnt *model.Point) (response interface{}, responseValue float64, err error) {
+	mbClient.Debug = true
+	objectEncoding := pnt.ObjectEncoding                        //beb_lew
+	objectType := utils.NewString(pnt.ObjectType).ToSnakeCase() //eg: readCoil, read_coil, writeCoil
+	dataType := utils.NewString(pnt.DataType).ToSnakeCase()     //eg: int16, uint16
+	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)  //register address
+	length := utils.IntIsNil(pnt.AddressLength)                 //modbus register length
+
+	switch objectEncoding {
+	case string(model.ByteOrderLebBew):
+		err = mbClient.SetEncoding(smod.LittleEndian, smod.HighWordFirst)
+	case string(model.ByteOrderLebLew):
+		err = mbClient.SetEncoding(smod.LittleEndian, smod.LowWordFirst)
+	case string(model.ByteOrderBebLew):
+		err = mbClient.SetEncoding(smod.BigEndian, smod.LowWordFirst)
+	case string(model.ByteOrderBebBew):
+		err = mbClient.SetEncoding(smod.BigEndian, smod.HighWordFirst)
+	default:
+		err = mbClient.SetEncoding(smod.BigEndian, smod.LowWordFirst)
+	}
+	if length <= 0 { //make sure length is > 0
+		length = 1
+	}
+
+	writeValue := utils.Float64IsNil(pnt.Priority.GetHighestPriorityValue())
+
+	modbusDebugMsg(fmt.Sprintf("modbus-write: ObjectType: %s  Addr: %d WriteValue: %v\n", objectType, address, writeValue))
+
+	switch objectType {
+	//WRITE COILS
+	case string(model.ObjTypeWriteCoil), string(model.ObjTypeWriteCoils):
+		return mbClient.WriteCoil(address, writeCoilPayload(writeValue))
+
+	//WRITE HOLDINGS
+	case string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings):
+		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
+			return mbClient.WriteSingleRegister(address, uint16(writeValue))
+		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
+			return mbClient.WriteSingleRegister(address, uint16(writeValue))
+		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
+			return mbClient.WriteSingleRegister(address, uint16(writeValue))
+		} else if dataType == string(model.TypeFloat32) || dataType == string(model.TypeFloat32) {
+			return mbClient.WriteFloat32(address, writeValue)
+		} else if dataType == string(model.TypeFloat64) || dataType == string(model.TypeFloat64) {
+			return mbClient.WriteFloat32(address, writeValue)
+		}
+	}
+
+	return nil, 0, errors.New("modbus-write: dataType is not recognized")
+}
+
+func networkRead(mbClient smod.ModbusClient, pnt *model.Point) (response interface{}, responseValue float64, err error) {
+	mbClient.Debug = true
+	objectEncoding := pnt.ObjectEncoding                        //beb_lew
+	objectType := utils.NewString(pnt.ObjectType).ToSnakeCase() //eg: readCoil, read_coil, writeCoil
+	dataType := utils.NewString(pnt.DataType).ToSnakeCase()     //eg: int16, uint16
+	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)  //register address
+	length := utils.IntIsNil(pnt.AddressLength)                 //modbus register length
+
+	switch objectEncoding {
+	case string(model.ByteOrderLebBew):
+		err = mbClient.SetEncoding(smod.LittleEndian, smod.HighWordFirst)
+	case string(model.ByteOrderLebLew):
+		err = mbClient.SetEncoding(smod.LittleEndian, smod.LowWordFirst)
+	case string(model.ByteOrderBebLew):
+		err = mbClient.SetEncoding(smod.BigEndian, smod.LowWordFirst)
+	case string(model.ByteOrderBebBew):
+		err = mbClient.SetEncoding(smod.BigEndian, smod.HighWordFirst)
+	default:
+		err = mbClient.SetEncoding(smod.BigEndian, smod.LowWordFirst)
+	}
+	if length <= 0 { //make sure length is > 0
+		length = 1
+	}
+
+	modbusDebugMsg(fmt.Sprintf("modbus-read: ObjectType: %s  Addr: %d", objectType, address))
+
+	switch objectType {
+	//COILS
+	case string(model.ObjTypeReadCoil), string(model.ObjTypeReadCoils), string(model.ObjTypeWriteCoil), string(model.ObjTypeWriteCoils):
+		return mbClient.ReadCoils(address, uint16(length))
+
+	//READ DISCRETE INPUTS
+	case string(model.ObjTypeReadDiscreteInput), string(model.ObjTypeReadDiscreteInputs):
+		return mbClient.ReadDiscreteInputs(address, uint16(length))
+
+	//READ INPUT REGISTERS
+	case string(model.ObjTypeReadRegister), string(model.ObjTypeReadRegisters):
+		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
+			return mbClient.ReadInputRegisters(address, uint16(length))
+		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
+			return mbClient.ReadInputRegisters(address, uint16(length))
+		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
+			return mbClient.ReadInputRegisters(address, uint16(length))
+		} else if dataType == string(model.TypeFloat32) {
+			return mbClient.ReadFloat32(address, smod.InputRegister)
+		} else if dataType == string(model.TypeFloat64) {
+			return mbClient.ReadFloat32(address, smod.InputRegister)
+		}
+
+	//READ HOLDINGS
+	case string(model.ObjTypeReadHolding), string(model.ObjTypeReadHoldings), string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings):
+		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
+			return mbClient.ReadHoldingRegisters(address, uint16(length))
+		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
+			return mbClient.ReadHoldingRegisters(address, uint16(length))
+		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
+			return mbClient.ReadHoldingRegisters(address, uint16(length))
+		} else if dataType == string(model.TypeFloat32) || dataType == string(model.TypeFloat32) {
+			return mbClient.ReadFloat32(address, smod.HoldingRegister)
+		} else if dataType == string(model.TypeFloat64) || dataType == string(model.TypeFloat64) {
+			return mbClient.ReadFloat32(address, smod.HoldingRegister)
+		}
+
+	}
+
+	return nil, 0, errors.New("modbus-read: dataType is not recognized")
+}
+
+func SetPriorityArrayModeBasedOnWriteMode(pnt *model.Point) bool {
+	switch pnt.WriteMode {
+	case model.ReadOnce, model.ReadOnly:
+		pnt.PointPriorityArrayMode = model.ReadOnlyNoPriorityArrayRequired
+		return true
+	case model.WriteOnce, model.WriteOnceReadOnce, model.WriteAlways, model.WriteOnceThenRead, model.WriteAndMaintain:
+		pnt.PointPriorityArrayMode = model.PriorityArrayToWriteValue
+		return true
+	}
+	return false
 }

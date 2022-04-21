@@ -7,7 +7,7 @@ require (
 	github.com/NubeDev/configor v0.0.2
 	github.com/NubeDev/location v0.0.2
 	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.4
-	github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.5
+	github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.7
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -15,7 +15,6 @@ require (
 	github.com/go-co-op/gocron v1.7.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/gorilla/websocket v1.4.2
 	github.com/mustafaturan/bus/v3 v3.0.3
 	github.com/mustafaturan/monoton/v2 v2.0.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -55,6 +54,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
 	github.com/google/uuid v1.1.1 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grid-x/serial v0.0.0-20191104121038-e24bc9bf6f08 // indirect
 	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
