@@ -38,11 +38,12 @@ func intHandler(db *database.GormDatabase) {
 func initHistory(db *database.GormDatabase, conf *config.Configuration) {
 	h := new(history.History)
 	h.DB = db
-	if conf.ProducerHistory.Cleaner.Enable {
-		h.InitProducerHistoryCleaner(conf.ProducerHistory.Cleaner.Frequency, conf.ProducerHistory.Cleaner.
-			DataPersistingHours)
+	if *conf.ProducerHistory.Cleaner.Enable {
+		h.InitProducerHistoryCleaner(
+			conf.ProducerHistory.Cleaner.Frequency,
+			conf.ProducerHistory.Cleaner.DataPersistingHours)
 	}
-	if conf.ProducerHistory.SyncInterval.Enable {
+	if *conf.ProducerHistory.SyncInterval.Enable {
 		h.InitProducerHistorySyncInterval(conf.ProducerHistory.SyncInterval.SyncPeriod)
 	}
 }

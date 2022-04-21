@@ -4,8 +4,8 @@ module github.com/NubeIO/flow-framework
 //replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/nubeio-rubix-lib-models-go
 
 require (
-	github.com/NubeDev/configor v0.0.2
 	github.com/NubeDev/location v0.0.2
+	github.com/NubeIO/configor v0.0.3
 	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.4
 	github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.6
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
@@ -15,12 +15,12 @@ require (
 	github.com/go-co-op/gocron v1.7.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-resty/resty/v2 v2.7.0
-	github.com/gorilla/websocket v1.4.2
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/mustafaturan/bus/v3 v3.0.3
 	github.com/mustafaturan/monoton/v2 v2.0.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/datatypes v1.0.6
