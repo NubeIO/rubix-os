@@ -2,7 +2,7 @@ package config
 
 import (
 	"flag"
-	"github.com/NubeDev/configor"
+	"github.com/NubeIO/configor"
 	"path"
 )
 
@@ -46,13 +46,13 @@ type Configuration struct {
 	Auth            bool `default:"false"`
 	ProducerHistory struct {
 		Cleaner struct {
-			Enable              bool `default:"false"`
-			Frequency           int  `default:"10"`
-			DataPersistingHours int  `default:"24"`
+			Enable              *bool `default:"true"`
+			Frequency           int   `default:"600"`
+			DataPersistingHours int   `default:"24"`
 		}
 		SyncInterval struct {
-			Enable     bool `default:"false"`
-			SyncPeriod int  `default:"5"`
+			Enable     *bool `default:"true"`
+			SyncPeriod int   `default:"10"`
 		}
 	}
 }
