@@ -6,7 +6,7 @@ type NameStruct struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"3"`
-	Max      int    `json:"max" default:"20"`
+	Max      int    `json:"max" default:"100"`
 	Default  string `json:"default" default:"net"`
 }
 
