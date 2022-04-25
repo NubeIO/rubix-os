@@ -46,16 +46,30 @@ func selectMappingNetwork(selectedPlugin string) (pluginName string) {
 
 }
 
+/*
+CreatePointMapping
+Example mapping for self mapping
+- user when making a new network selects "self-mapping"
+- when they add a new point, make a new producer as type point and select the newly made point
+- make a new consumer as type point and select the newly made point and newly made producer
+- add a writer to the producer
+*/
 func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.PointMapping, error) {
+
+	network := &model.Network{}
+	device := &model.Device{}
+	point := &model.Point{}
+
 	log.Infoln("points.db.CreatePointMapping() try and make a new mapping pointMapping:", "AutoMappingFlowNetworkName:", body.AutoMappingFlowNetworkName, "AutoMappingFlowNetworkUUID:", body.AutoMappingFlowNetworkUUID)
 	device, err := d.GetDevice(body.Point.DeviceUUID, api.Args{})
 	if err != nil {
 		return nil, err
 	}
-	network, err := d.GetNetwork(device.NetworkUUID, api.Args{})
+	network, err = d.GetNetwork(device.NetworkUUID, api.Args{})
 	if err != nil {
 		return nil, err
 	}
+
 	flowNetwork, err := d.selectFlowNetwork(body.AutoMappingFlowNetworkName, body.AutoMappingFlowNetworkUUID)
 	if err != nil {
 		return nil, err
@@ -73,17 +87,7 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 	}
 
 	for _, plugin := range body.AutoMappingNetworksSelection { //j njjk,liunmjj code comment from my daughter lenny-j 3-apr-2022  //DONT DELETE its her first one :)
-		//make the new network
-		network, err = d.createPointMappingNetwork(plugin)
-		if err != nil {
-			return nil, err
-		}
 
-		////Make a new device, check if device exits and if not make a new one
-		device, err = d.createPointMappingDevice(device.Name, network.UUID)
-		if err != nil {
-			return nil, err
-		}
 		streamClone, err := d.GetStreamCloneByArg(api.Args{SourceUUID: nils.NewString(stream.UUID)})
 		if err != nil {
 			log.Errorln("mapping.db.CreatePointMapping(): failed to find stream clone with source uuid:", stream.UUID)
@@ -93,9 +97,25 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		objectType := body.Point.ObjectType
 		isOutput := body.Point.IsOutput
 
-		point, err := d.createPointMappingPoint(objectType, body.Point.Name, device.UUID)
-		if err != nil {
-			return nil, err
+		if plugin != "self-mapping" {
+			//make the new network
+			network, err = d.createPointMappingNetwork(plugin)
+			if err != nil {
+				return nil, err
+			}
+			////Make a new device, check if device exits and if not make a new one
+			device, err = d.createPointMappingDevice(device.Name, network.UUID)
+			if err != nil {
+				return nil, err
+			}
+
+			point, err = d.createPointMappingPoint(objectType, body.Point.Name, device.UUID)
+			if err != nil {
+				return nil, err
+			}
+
+		} else {
+			point = body.Point
 		}
 
 		//example user wants to make edge-28 mapping to bacnet: if the source point is an output from the edge-28 then we need to make the bacnet point the producer so the edge-28 can be commanded over bacnet
