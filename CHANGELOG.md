@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.4.2](https://github.com/NubeIO/flow-framework/tree/v0.4.3) (2022-04-26)
+- many updates since last build :)
+
 ## [v0.4.2](https://github.com/NubeIO/flow-framework/tree/v0.4.2) (2022-03-23)
 - Plugin/testing #417
 - Improvement/database plugins #415
