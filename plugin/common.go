@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	NetworksURL = "/networks"
-	DevicesURL  = "/devices"
-	PointsURL   = "/points"
+	NetworksURL    = "/networks"
+	DevicesURL     = "/devices"
+	PointsURL      = "/points"
+	PointsWriteURL = "/write"
 )
 
 func GetBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {

@@ -163,6 +163,8 @@ func (i *Instance) ModbusPolling() error {
 			var mbClient smod.ModbusClient
 			//var dCheck devCheck
 			//dCheck.devUUID = dev.UUID
+			modbusDebugMsg(fmt.Sprintf("ModbusPolling() net: %+v", net))
+			modbusDebugMsg(fmt.Sprintf("ModbusPolling() dev: %+v", dev))
 			mbClient, err = i.setClient(net, dev, true)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("failed to set client error: %v network name:%s", err, net.Name))

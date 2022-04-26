@@ -74,15 +74,16 @@ func (i *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 
 	modbusDebugMsg(fmt.Sprintf("Instance(): %+v\n", i))
 
-	net, err := i.db.DB.GetNetworkByDeviceUUID(point.DeviceUUID, api.Args{})
-	if err != nil || net == nil {
-		modbusErrorMsg("addPoint(): bad response from GetNetworkByPointUUID()")
+	//net, err := i.db.DB.GetNetworkByDeviceUUID(point.DeviceUUID, api.Args{})
+	dev, err := i.db.GetDevice(point.DeviceUUID, api.Args{})
+	if err != nil || dev == nil {
+		modbusErrorMsg("addPoint(): bad response from GetDevice()")
 		return nil, err
 	}
 
-	netPollMan, err := i.getNetworkPollManagerByUUID(net.UUID)
+	netPollMan, err := i.getNetworkPollManagerByUUID(dev.NetworkUUID)
 	if netPollMan == nil || err != nil {
-		modbusErrorMsg("addPoint(): cannot find NetworkPollManager for network: ", net.UUID)
+		modbusErrorMsg("addPoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
 		return
 	}
 
@@ -90,7 +91,7 @@ func (i *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 		//DO POLLING ENABLE ACTIONS FOR POINT
 		//TODO: review these steps to check that UpdatePollingPointByUUID might work better?
-		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, net.UUID, netPollMan.FFPluginUUID)
+		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
 		pp.PollPriority = point.PollPriority
 		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 		//netPollMan.PollQueue.AddPollingPoint(pp)
@@ -185,25 +186,38 @@ func (i *Instance) updatePoint(body *model.Point) (point *model.Point, err error
 		return
 	}
 
-	net, err := i.db.DB.GetNetworkByPointUUID(body, api.Args{})
-	if err != nil || net == nil {
-		modbusErrorMsg("addPoint(): bad response from GetNetworkByPointUUID()")
+	/*
+		pnt, err := i.db.GetPoint(body.UUID, api.Args{WithPriority: true})
+		if pnt == nil || err != nil {
+			modbusErrorMsg("could not find pointID: ", pp.FFPointUUID)
+			netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
+			continue
+		}
+
+	*/
+
+	modbusDebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
+	modbusDebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
+
+	dev, err := i.db.GetDevice(body.DeviceUUID, api.Args{})
+	if err != nil || dev == nil {
+		modbusErrorMsg("updatePoint(): bad response from GetDevice()")
 		return nil, err
 	}
 
-	netPollMan, err := i.getNetworkPollManagerByUUID(net.UUID)
+	netPollMan, err := i.getNetworkPollManagerByUUID(dev.NetworkUUID)
 	if netPollMan == nil || err != nil {
-		modbusErrorMsg("addPoint(): cannot find NetworkPollManager for network: ", net.UUID)
+		modbusErrorMsg("updatePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
 		i.pointUpdateErr(body, err)
 		return
 	}
 
 	if utils.BoolIsNil(body.Enable) {
-		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
+		netPollMan.PollQueue.RemovePollingPointByPointUUID(body.UUID)
 		//DO POLLING ENABLE ACTIONS FOR POINT
 		//TODO: review these steps to check that UpdatePollingPointByUUID might work better?
-		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, net.UUID, netPollMan.FFPluginUUID)
-		pp.PollPriority = point.PollPriority
+		pp := pollqueue.NewPollingPoint(body.UUID, body.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
+		pp.PollPriority = body.PollPriority
 		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 		//netPollMan.PollQueue.AddPollingPoint(pp)
 		//netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
@@ -213,6 +227,63 @@ func (i *Instance) updatePoint(body *model.Point) (point *model.Point, err error
 	}
 
 	point, err = i.db.UpdatePoint(body.UUID, body, true)
+	if err != nil || point == nil {
+		modbusErrorMsg("updatePoint(): bad response from UpdatePoint()")
+		return nil, err
+	}
+	return point, nil
+}
+
+//writePoint update point. Called via API call.
+func (i *Instance) writePoint(body *model.Point) (point *model.Point, err error) {
+
+	//TODO: check for PointWriteByName calls that might not flow through the plugin.
+
+	modbusDebugMsg("writePoint(): ", body.UUID)
+	if body == nil {
+		modbusErrorMsg("writePoint(): nil point object")
+		return
+	}
+
+	modbusDebugMsg(fmt.Sprintf("writePoint() body: %+v\n", body))
+	modbusDebugMsg(fmt.Sprintf("writePoint() priority: %+v\n", body.Priority))
+
+	point, err = i.db.WritePoint(body.UUID, body, true)
+	if err != nil || point == nil {
+		modbusErrorMsg("updatePoint(): bad response from WritePoint()")
+		return nil, err
+	}
+
+	/*  TODO: THIS SECTION MIGHT BE USEFUL IF WE ADD ASAP PRIORITY FOR IMMEDIATE POINT WRITES
+	dev, err := i.db.GetDevice(body.DeviceUUID, api.Args{})
+	if err != nil || dev == nil {
+		modbusErrorMsg("writePoint(): bad response from GetDevice()")
+		return nil, err
+	}
+
+	netPollMan, err := i.getNetworkPollManagerByUUID(dev.NetworkUUID)
+	if netPollMan == nil || err != nil {
+		modbusErrorMsg("writePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
+		i.pointUpdateErr(body, err)
+		return
+	}
+
+	if utils.BoolIsNil(body.Enable) {
+		netPollMan.PollQueue.RemovePollingPointByPointUUID(body.UUID)
+		//DO POLLING ENABLE ACTIONS FOR POINT
+		//TODO: review these steps to check that UpdatePollingPointByUUID might work better?
+		pp := pollqueue.NewPollingPoint(body.UUID, body.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
+		pp.PollPriority = body.PollPriority
+		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+		//netPollMan.PollQueue.AddPollingPoint(pp)
+		//netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
+	} else {
+		//DO POLLING DISABLE ACTIONS FOR POINT
+		netPollMan.PollQueue.RemovePollingPointByPointUUID(body.UUID)
+	}
+	*/
+
+	point, err = i.db.WritePoint(body.UUID, body, true)
 	if err != nil || point == nil {
 		modbusErrorMsg("updatePoint(): bad response from UpdatePoint()")
 		return nil, err
@@ -276,15 +347,16 @@ func (i *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 		return
 	}
 
-	net, err := i.db.DB.GetNetworkByPointUUID(body, api.Args{})
-	if err != nil || net == nil {
-		modbusErrorMsg("deletePoint(): bad response from GetNetworkByPointUUID()")
+	dev, err := i.db.GetDevice(body.DeviceUUID, api.Args{})
+	if err != nil || dev == nil {
+		modbusErrorMsg("addPoint(): bad response from GetDevice()")
 		return false, err
 	}
 
-	netPollMan, err := i.getNetworkPollManagerByUUID(net.UUID)
+	netPollMan, err := i.getNetworkPollManagerByUUID(dev.NetworkUUID)
+
 	if netPollMan == nil || err != nil {
-		modbusErrorMsg("addPoint(): cannot find NetworkPollManager for network: ", net.UUID)
+		modbusErrorMsg("addPoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
 		i.pointUpdateErr(body, err)
 		return
 	}

@@ -24,12 +24,15 @@ type Client struct {
 func (i *Instance) setClient(network *model.Network, device *model.Device, cacheClient bool) (mbClient smod.ModbusClient, err error) {
 	if network.TransportType == model.TransType.Serial || network.TransportType == model.TransType.LoRa {
 		serialPort := "/dev/ttyUSB0"
+		modbusDebugMsg(fmt.Sprintf("setClient() serialPort: %s\n", serialPort))
 		baudRate := 38400
 		stopBits := 1
 		dataBits := 8
 		parity := "N"
 		if network.SerialPort != nil {
-			serialPort = nils.StringIsNil(network.SerialPort)
+			if *network.SerialPort != "" {
+				serialPort = nils.StringIsNil(network.SerialPort)
+			}
 		}
 		if network.SerialBaudRate != nil {
 			baudRate = int(nils.UnitIsNil(network.SerialBaudRate))
@@ -43,13 +46,17 @@ func (i *Instance) setClient(network *model.Network, device *model.Device, cache
 		if network.SerialParity != nil {
 			parity = nils.StringIsNil(network.SerialParity)
 		}
+		modbusDebugMsg(fmt.Sprintf("setClient() serialPort: %s\n", serialPort))
 		handler := modbus.NewRTUClientHandler(serialPort)
 		handler.BaudRate = baudRate
 		handler.DataBits = dataBits
 		handler.Parity = setParity(parity)
 		handler.StopBits = stopBits
 		handler.Timeout = 5 * time.Second
+		modbusDebugMsg(fmt.Sprintf("setClient() handler: %+v\n", handler))
+
 		err := handler.Connect()
+		modbusDebugMsg(fmt.Sprintf("setClient() err: %+v\n", err))
 		if err != nil {
 			return smod.ModbusClient{}, err
 		}
