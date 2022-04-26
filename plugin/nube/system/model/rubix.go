@@ -6,7 +6,7 @@ type NameStruct struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"3"`
-	Max      int    `json:"max" default:"20"`
+	Max      int    `json:"max" default:"100"`
 	Default  string `json:"default" default:"net"`
 }
 
@@ -26,12 +26,12 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"system"`
 	} `json:"plugin_name"`
-	AutoMappingNetworks struct {
+	AutoMappingNetworksSelection struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[\"disable\"]"`
+		Options  []string `json:"options" default:"[\"disable\",\"self-mapping\"]"`
 		Default  string   `json:"default" default:""`
-	} `json:"auto_mapping_networks"`
+	} `json:"auto_mapping_networks_selection"`
 	AutoMappingFlowNetworkName struct {
 		Type     string `json:"type" default:"string"`
 		Required bool   `json:"required" default:"false"`

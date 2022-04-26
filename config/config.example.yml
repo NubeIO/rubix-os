@@ -12,8 +12,8 @@ server:
   stream:
     pingperiodseconds: 45 # the interval in which websocket pings will be sent. Only change this value if you know what you are doing.
     allowedorigins: # allowed origins for websocket connections (same origin is always allowed)
-  #      - ".+.example.com"
-  #      - "otherdomain.com"
+    #      - ".+.example.com"
+    #      - "otherdomain.com"
 
   cors: # Sets cors headers only when needed and provides support for multiple allowed origins. Overrides Access-Control-* Headers in response headers.
     alloworigins:
@@ -23,8 +23,8 @@ server:
     #      - "GET"
     #      - "POST"
     allowheaders:
-#      - "Authorization"
-#      - "content-type"
+    #      - "Authorization"
+    #      - "content-type"
 
 database: # for database see (configure database section)
   dialect: sqlite3
@@ -37,6 +37,15 @@ location:
   authdatadir: '/data/rubix-service' # for local when auth: true, it needs to be: `/<rubix_service_parent_dir>/data/rubix-service/out/rubix-service`
 
 auth: false
+
+producerhistory:
+  cleaner:
+    enable: true
+    frequency: 600
+    datapersistinghours: 24
+  syncinterval:
+    enable: true
+    syncperiod: 10
 
 pointbuilder:
   TotalWaterConsumption:

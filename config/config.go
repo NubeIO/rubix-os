@@ -2,7 +2,7 @@ package config
 
 import (
 	"flag"
-	"github.com/NubeDev/configor"
+	"github.com/NubeIO/configor"
 	"path"
 )
 
@@ -42,8 +42,19 @@ type Configuration struct {
 		AuthDataDir          string `default:"/data/rubix-service"`
 		RelativeAuthDataFile string `default:"/data/internal_token.txt"`
 	}
-	Prod bool `default:"false"`
-	Auth bool `default:"false"`
+	Prod            bool `default:"false"`
+	Auth            bool `default:"false"`
+	ProducerHistory struct {
+		Cleaner struct {
+			Enable              *bool `default:"true"`
+			Frequency           int   `default:"600"`
+			DataPersistingHours int   `default:"24"`
+		}
+		SyncInterval struct {
+			Enable     *bool `default:"true"`
+			SyncPeriod int   `default:"10"`
+		}
+	}
 }
 
 var config *Configuration = nil

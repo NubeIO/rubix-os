@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 // The ProducerHistoryDatabase interface for encapsulating database access.
@@ -53,6 +54,7 @@ func (a *HistoriesAPI) GetProducerHistoriesPoints(ctx *gin.Context) {
 
 func (a *HistoriesAPI) CreateProducerHistory(ctx *gin.Context) {
 	body, _ := getBodyHistory(ctx)
+	body.Timestamp = time.Now().UTC()
 	q, err := a.DB.CreateProducerHistory(body)
 	responseHandler(q, err, ctx)
 }

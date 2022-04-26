@@ -4,8 +4,8 @@ module github.com/NubeIO/flow-framework
 //replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/nubeio-rubix-lib-models-go
 
 require (
-	github.com/NubeDev/configor v0.0.2
 	github.com/NubeDev/location v0.0.2
+	github.com/NubeIO/configor v0.0.3
 	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.4
 	github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.7
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
@@ -15,11 +15,12 @@ require (
 	github.com/go-co-op/gocron v1.7.0
 	github.com/go-playground/validator/v10 v10.4.1
 	github.com/go-resty/resty/v2 v2.7.0
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/mustafaturan/bus/v3 v3.0.3
 	github.com/mustafaturan/monoton/v2 v2.0.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/datatypes v1.0.6
@@ -54,7 +55,6 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
 	github.com/google/uuid v1.1.1 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/grid-x/serial v0.0.0-20191104121038-e24bc9bf6f08 // indirect
 	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect

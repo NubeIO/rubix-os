@@ -6,10 +6,10 @@ github.com/BurntSushi/toml v0.3.0/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
-github.com/NubeDev/configor v0.0.2 h1:DYFf3OMA3LgBmWs4lGTNGu7B6sVvL0BPfalkleccMYg=
-github.com/NubeDev/configor v0.0.2/go.mod h1:DVm+MnCPzqO2oqCzf27MolZw8qSoK5yqHk1sgG3PFHc=
 github.com/NubeDev/location v0.0.2 h1:EkXOIx6g6i6DRaDPWQzTH+qjgHnJYsUlBASL/p0OPFQ=
 github.com/NubeDev/location v0.0.2/go.mod h1:wvL1deOEefQrsTv+nojlMOKbwpos4xUbEGSHQ4AKERs=
+github.com/NubeIO/configor v0.0.3 h1:VyfZexLZ2cvKftGqLLUg4Ym7N5gVWHU2cWheVQZGNGE=
+github.com/NubeIO/configor v0.0.3/go.mod h1:HGAnJTAwAntKAi5EGMQUQHWE4o4fMYKyByWXXqFJUTA=
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.4 h1:ylOUykceZO0eu0q/Cm66Le+jsG1bJovVBOxVrJ8qlT8=
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.4/go.mod h1:iDKguImeSi6yhQlBKynEnOIKPOM6E9hPuxq2CnFHbpg=
 github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.4/go.mod h1:A1BPuc3UpE1EF3ugdf+8QIIKTT8s3eK+pfUcheJX2JM=
@@ -291,8 +291,9 @@ github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UV
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
+github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/ugorji/go v1.1.7 h1:/68gy2h+1mWMrwZFeD1kQialdSzAb432dtpeJ42ovdo=
 github.com/ugorji/go v1.1.7/go.mod h1:kZn38zHttfInRq0xu/PH0az30d+z6vm202qpg1oXVMw=
 github.com/ugorji/go/codec v1.1.7 h1:2SvQaVZ1ouYrrKKwoSk2pzd4A9evlKJb9oTL+OaLUSs=

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"time"
 )
 
 // GetProducerHistories returns all histories.
@@ -78,7 +77,6 @@ func (d *GormDatabase) GetProducerHistoriesPoints(args api.Args) ([]*model.Histo
 }
 
 func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (*model.ProducerHistory, error) {
-	history.Timestamp = time.Now().UTC()
 	return d.AppendProducerHistory(history)
 }
 
@@ -136,4 +134,19 @@ func (d *GormDatabase) AppendProducerHistory(body *model.ProducerHistory) (*mode
 		return nil, err
 	}
 	return body, nil
+}
+
+// DeleteProducerHistoriesBeforeTimestamp delete producer histories before timestamp
+func (d *GormDatabase) DeleteProducerHistoriesBeforeTimestamp(ts string) (bool, error) {
+	var historyModel *model.ProducerHistory
+	query := d.DB.Where("timestamp < datetime(?)", ts)
+	query.Delete(&historyModel)
+	if query.Error != nil {
+		return false, query.Error
+	}
+	r := query.RowsAffected
+	if r == 0 {
+		return false, nil
+	}
+	return true, nil
 }
