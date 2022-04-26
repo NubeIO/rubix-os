@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -8,7 +9,10 @@ import (
 )
 
 func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point, err error) {
-	network, err := d.GetNetworkByPointUUID(body, api.Args{})
+	fmt.Printf("%+v\n", body)
+	network, err := d.GetPluginIDFromDevice(body.DeviceUUID)
+	fmt.Printf("err: %+v\n", err)
+	fmt.Printf("network: %+v\n", network)
 	if err != nil {
 		return nil, err
 	}

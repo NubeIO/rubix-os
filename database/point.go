@@ -71,12 +71,16 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		return nil, err
 	}
 	deviceUUID := body.DeviceUUID // TODO: Should there be a check to ensure that the DeviceUUID is sent with body?
-	plug, err := d.GetPluginIDFromDevice(deviceUUID)
+	network, err := d.GetPluginIDFromDevice(deviceUUID)
+	fmt.Printf("network: %+v\n", network)
 	if err != nil {
 		return nil, errors.New("ERROR failed to get plugin uuid")
 	}
+	if network == nil {
+		return nil, errors.New("ERROR failed to get network")
+	}
 	if !fromPlugin {
-		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, plug.PluginConfId, body.UUID)
+		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, network.PluginConfId, body.UUID)
 		d.Bus.RegisterTopic(t)
 		err = d.Bus.Emit(eventbus.CTX(), t, body)
 		if err != nil {
@@ -84,7 +88,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		}
 	}
 	//check for mapping
-	network, err := d.GetNetworkByPointUUID(body, api.Args{})
 	if network.AutoMappingNetworksSelection != "" {
 		pointMapping := &model.PointMapping{}
 		pointMapping.Point = body

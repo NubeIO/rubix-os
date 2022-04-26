@@ -72,6 +72,7 @@ func supportedObjects() *utils.Array {
 // RegisterWebhook implements plugin.Webhooker
 func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	i.basePath = basePath
+	modbusDebugMsg(fmt.Sprintf("RegisterWebhook(): %+v\n", i))
 	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
 		network, err := i.addNetwork(body)

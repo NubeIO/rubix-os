@@ -1,32 +1,37 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
-	"time"
-
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
+	"time"
 )
 
 //THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
 //addDevice add network. Called via API call.
 func (i *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	modbusDebugMsg("addNetwork(): ", body.UUID)
 	if body == nil {
 		modbusErrorMsg("addNetwork(): nil network object")
-		return
+		return nil, errors.New("empty network body, no network created")
 	}
+	modbusDebugMsg("addNetwork(): ", body.Name)
+	network, err = i.db.CreateNetwork(body, true)
+	if network == nil || err != nil {
+		modbusErrorMsg("addNetwork(): failed to create modbus network: ", body.Name)
+		return nil, errors.New("failed to create modbus network")
+	}
+
 	if utils.BoolIsNil(body.Enable) {
-		pollManager := pollqueue.NewPollManager(&i.db, body.UUID, i.pluginUUID)
+		pollManager := pollqueue.NewPollManager(&i.db, network.UUID, i.pluginUUID)
 		pollManager.StartPolling()
 		i.NetworkPollManagers = append(i.NetworkPollManagers, pollManager)
 	}
 
-	network, err = i.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err
 	}
@@ -35,34 +40,39 @@ func (i *Instance) addNetwork(body *model.Network) (network *model.Network, err 
 
 //addDevice add device. Called via API call.
 func (i *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
-	modbusDebugMsg("addDevice(): ", body.UUID)
 	if body == nil {
 		modbusErrorMsg("addDevice(): nil device object")
-		return
+		return nil, errors.New("empty device body, no device created")
 	}
-	//NOTHING TO DO ON DEVICE CREATED
+	modbusDebugMsg("addDevice(): ", body.Name)
 	device, err = i.db.CreateDevice(body)
-	if err != nil {
-		return nil, err
+	if device == nil || err != nil {
+		modbusErrorMsg("addDevice(): failed to create modbus device: ", body.Name)
+		return nil, errors.New("failed to create modbus device")
 	}
+
+	modbusDebugMsg("addDevice(): ", body.UUID)
+	//NOTHING TO DO ON DEVICE CREATED
 	return device, nil
 }
 
 //addPoint add point. Called via API call.
 func (i *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
-	modbusDebugMsg("addPoint(): ", body.UUID)
 	if body == nil {
 		modbusErrorMsg("addPoint(): nil point object")
-		return
+		return nil, errors.New("empty point body, no point created")
 	}
-
+	modbusDebugMsg("addPoint(): ", body.Name)
 	point, err = i.db.CreatePoint(body, true, false)
-	if err != nil || point == nil {
-		modbusErrorMsg("addPoint(): bad response from CreatePoint()")
-		return nil, err
+	if point == nil || err != nil {
+		modbusErrorMsg("addPoint(): failed to create modbus point: ", body.Name)
+		return nil, errors.New("failed to create modbus point")
 	}
+	modbusDebugMsg(fmt.Sprintf("addPoint(): %+v\n", point))
 
-	net, err := i.db.DB.GetNetworkByPointUUID(point, api.Args{})
+	modbusDebugMsg(fmt.Sprintf("addPoint(): %+v\n", i))
+
+	net, err := i.db.DB.GetNetworkByDeviceUUID(point.DeviceUUID, api.Args{})
 	if err != nil || net == nil {
 		modbusErrorMsg("addPoint(): bad response from GetNetworkByPointUUID()")
 		return nil, err
@@ -84,8 +94,8 @@ func (i *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 		//netPollMan.PollQueue.AddPollingPoint(pp)
 		//netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
 	}
-
 	return point, nil
+
 }
 
 //updateNetwork update network. Called via API call.

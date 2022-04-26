@@ -105,19 +105,19 @@ type Device struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"true"`
 		Options  int    `json:"options" default:"1"`
-		Default  int    `json:"default" default:"5"`
+		Default  int    `json:"default" default:"5000000000"`
 	} `json:"fast_poll_rate"`
 	NormalPollRate struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"true"`
 		Options  int    `json:"options" default:"1"`
-		Default  int    `json:"default" default:"30"`
+		Default  int    `json:"default" default:"30000000000"`
 	} `json:"normal_poll_rate"`
 	SlowPollRate struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"true"`
 		Options  int    `json:"options" default:"1"`
-		Default  int    `json:"default" default:"120"`
+		Default  int    `json:"default" default:"120000000000"`
 	} `json:"slow_poll_rate"`
 	ZeroMode struct {
 		Type     string `json:"type" default:"bool"`
@@ -138,7 +138,7 @@ type Point struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
 		Options  []string `json:"options" default:"[\"read_coil\",\"write_coil\",\"read_discrete_input\",\"read_register\",\"read_holding\",\"write_holding\"]"`
-		Default  string   `json:"default" default:"read_coils"`
+		Default  string   `json:"default" default:"read_holding"`
 	} `json:"object_type"`
 	AddressId struct {
 		Type     string `json:"type" default:"int"`
