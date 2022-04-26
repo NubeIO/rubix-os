@@ -43,6 +43,14 @@ func (h *Handler) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (
 	return q, nil
 }
 
+func (h *Handler) WritePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
+	q, err := getDb().PointWrite(uuid, body, fromPlugin)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
 func (h *Handler) UpdatePointPresentValue(body *model.Point, fromPlugin bool) (*model.Point, error) {
 	p, err := getDb().UpdatePointValue(body, fromPlugin)
 	if err != nil {

@@ -65,6 +65,15 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	return point, nil
 }
 
+//writePoint write point
+func (inst *Instance) writePoint(body *model.Point) (point *model.Point, err error) {
+	point, err = inst.db.WritePoint(body.UUID, body, true)
+	if err != nil {
+		return nil, err
+	}
+	return point, nil
+}
+
 //deleteNetwork delete network
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	ok, err = inst.db.DeleteNetwork(body.UUID)
