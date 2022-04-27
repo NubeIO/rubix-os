@@ -177,7 +177,6 @@ func (a *FlowClient) WritePointPlugin(pointUUID string, body *model.Point, plugi
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": pointUUID}).
 		Patch(url)
-	fmt.Println(fmt.Sprintf("WritePointPlugin %+v", resp))
 	failResponse := failedResponse(err, resp)
 	if failResponse != nil {
 		return nil, failResponse

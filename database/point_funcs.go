@@ -38,6 +38,7 @@ func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string)
 	return pointModel, nil
 }
 
+//TODO: functions calling  d.PointWrite(point.UUID, body, fromPlugin) should be routed via plugin!!
 func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	point, err := d.GetPointByName(networkName, deviceName, pointName)
 	if err != nil {

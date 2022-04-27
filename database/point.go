@@ -71,7 +71,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		return nil, err
 	}
 	deviceUUID := body.DeviceUUID // TODO: Should there be a check to ensure that the DeviceUUID is sent with body?
-	network, err := d.GetPluginIDFromDevice(deviceUUID)
+	network, err := d.GetNetworkByDeviceUUID(deviceUUID, api.Args{})
 	fmt.Printf("network: %+v\n", network)
 	if err != nil {
 		return nil, errors.New("ERROR failed to get plugin uuid")
@@ -88,7 +88,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		}
 	}
 	//check for mapping
-	network, err := d.GetNetworkByPoint(body, api.Args{})
 	if network.AutoMappingNetworksSelection != "" {
 		pointMapping := &model.PointMapping{}
 		pointMapping.Point = body
@@ -155,6 +154,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	return pnt, nil
 }
 
+//TODO: functions calling PointWrite should be routed via plugin!!
 func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
@@ -168,7 +168,11 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 		pointModel.ValueUpdatedFlag = utils.NewTrue()
 	}
 	pointModel.InSync = utils.NewFalse()
+	pointModel.WritePollRequired = utils.NewTrue()
+	fmt.Println(fmt.Sprintf("PointWrite pointModel %+v", pointModel))
 	point, err := d.UpdatePointValue(pointModel, fromPlugin)
+	fmt.Println(fmt.Sprintf("PointWrite err %+v", err))
+	fmt.Println(fmt.Sprintf("PointWrite point %+v", point))
 	return point, err
 }
 
@@ -225,7 +229,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 		DbUpdateRequired = !utils.CompareFloatPtr(pointModel.PresentValue, presentValue) || presentValueTransformFault
 
 	case model.PriorityArrayToWriteValue:
-		// Currently there isn't a good comparison to decide if a DB update is required, so just do it.  This could be added, but it would require a bunch of rework to the above functions.
+		// TODO: Currently there isn't a good comparison to decide if a DB update is required, so just do it.  This could be added, but it would require a bunch of rework to the above functions.
 		DbUpdateRequired = true
 
 	case model.ReadOnlyNoPriorityArrayRequired:
@@ -256,7 +260,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 	}
 
 	if !fromPlugin { // stop looping
-		plug, err := d.GetPluginIDFromDevice(pointModel.DeviceUUID)
+		plug, err := d.GetNetworkByDeviceUUID(pointModel.DeviceUUID, api.Args{})
 		if err != nil {
 			return nil, errors.New("ERROR failed to get plugin uuid")
 		}
@@ -284,7 +288,7 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	if r == 0 {
 		return false, nil
 	} else {
-		plug, err := d.GetPluginIDFromDevice(point.DeviceUUID)
+		plug, err := d.GetNetworkByDeviceUUID(point.DeviceUUID, api.Args{})
 		if err != nil {
 			return false, errors.New("ERROR failed to get plugin uuid")
 		}

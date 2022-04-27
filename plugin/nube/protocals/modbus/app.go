@@ -235,11 +235,11 @@ func (i *Instance) updatePoint(body *model.Point) (point *model.Point, err error
 }
 
 //writePoint update point. Called via API call.
-func (i *Instance) writePoint(body *model.Point) (point *model.Point, err error) {
+func (i *Instance) writePoint(pntUUID string, body *model.Point) (point *model.Point, err error) {
 
 	//TODO: check for PointWriteByName calls that might not flow through the plugin.
 
-	modbusDebugMsg("writePoint(): ", body.UUID)
+	modbusDebugMsg("writePoint(): ", pntUUID)
 	if body == nil {
 		modbusErrorMsg("writePoint(): nil point object")
 		return
@@ -248,9 +248,26 @@ func (i *Instance) writePoint(body *model.Point) (point *model.Point, err error)
 	modbusDebugMsg(fmt.Sprintf("writePoint() body: %+v\n", body))
 	modbusDebugMsg(fmt.Sprintf("writePoint() priority: %+v\n", body.Priority))
 
-	point, err = i.db.WritePoint(body.UUID, body, true)
+	/* TODO: ONLY NEEDED IF THE WRITE VALUE IS WRITTEN ON COV (CURRENTLY IT IS WRITTEN ANYTIME THERE IS A WRITE COMMAND).
+	point, err = i.db.GetPoint(pntUUID, api.Args{})
 	if err != nil || point == nil {
-		modbusErrorMsg("updatePoint(): bad response from WritePoint()")
+		modbusErrorMsg("writePoint(): bad response from GetPoint(), ", err)
+		return nil, err
+	}
+
+	previousWriteVal := -1.11
+	if isWriteable(point.WriteMode) {
+		previousWriteVal = utils.Float64IsNil(point.WriteValue)
+	}
+	*/
+
+	body.WritePollRequired = utils.NewTrue()
+
+	point, err = i.db.WritePoint(pntUUID, body, true)
+	fmt.Println(fmt.Sprintf("writePoint err %+v", err))
+	fmt.Println(fmt.Sprintf("writePoint point %+v", point))
+	if err != nil || point == nil {
+		modbusErrorMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err
 	}
 
@@ -283,20 +300,6 @@ func (i *Instance) writePoint(body *model.Point) (point *model.Point, err error)
 	}
 	*/
 
-	point, err = i.db.WritePoint(body.UUID, body, true)
-	if err != nil || point == nil {
-		modbusErrorMsg("updatePoint(): bad response from UpdatePoint()")
-		return nil, err
-	}
-	return point, nil
-}
-
-//writePoint write point
-func (inst *Instance) writePoint(pointUUID string, body *model.Point) (point *model.Point, err error) {
-	point, err = inst.db.WritePoint(pointUUID, body, true)
-	if err != nil {
-		return nil, err
-	}
 	return point, nil
 }
 
@@ -396,12 +399,9 @@ func (i *Instance) pointUpdate(point *model.Point, value float64, writeSuccess, 
 		if value != utils.Float64IsNil(point.OriginalValue) {
 			point.ValueUpdatedFlag = utils.NewTrue() //Flag so that UpdatePointValue() will broadcast new value to producers. TODO: MAY NOT BE NEEDED.
 		}
-		modbusDebugMsg("pointUpdate() value: ", value)
 		point.OriginalValue = utils.NewFloat64(value)
 	}
 	point.InSync = utils.NewTrue() //TODO: MAY NOT BE NEEDED.
-
-	modbusDebugMsg("pointUpdate(): AFTER READ AND BEFORE DB UPDATE")
 
 	_, err = i.db.UpdatePoint(point.UUID, point, true)
 	if err != nil {

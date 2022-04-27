@@ -57,7 +57,6 @@ func (i *Instance) ModbusPolling() error {
 		counter++
 		//fmt.Println("\n \n")
 		modbusDebugMsg("LOOP COUNT: ", counter)
-		modbusDebugMsg(fmt.Sprintf("ModbusPolling(): %+v\n", i))
 		var netArg api.Args
 		/*
 			nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, netArg)
@@ -105,8 +104,7 @@ func (i *Instance) ModbusPolling() error {
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
-			modbusDebugMsg("ModbusPolling() pp")
-			modbusDebugMsg(fmt.Sprintf("%+v\n", pp))
+			printPollingPointDebugInfo(pp)
 
 			var devArg api.Args
 			dev, err := i.db.GetDevice(pp.FFDeviceUUID, devArg)
@@ -132,15 +130,13 @@ func (i *Instance) ModbusPolling() error {
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
-			modbusDebugMsg("ModbusPolling: point")
-			modbusDebugMsg(fmt.Sprintf("%+v\n", pnt))
+
+			//TODO: REPLACE WITH FUNCTION THAT PRINTS IMPORTANT POLLING INFORMATION
+			printPointDebugInfo(pnt)
 
 			if pnt.Priority == nil {
 				modbusErrorMsg("ModbusPolling: HAD TO ADD PRIORITY ARRAY")
 				pnt.Priority = &model.Priority{}
-			} else {
-				modbusDebugMsg("ModbusPolling: point PRIORITY")
-				modbusDebugMsg(fmt.Sprintf("%+v\n", pnt.Priority))
 			}
 
 			if !utils.BoolIsNil(pnt.Enable) {
@@ -149,7 +145,7 @@ func (i *Instance) ModbusPolling() error {
 				continue
 			}
 
-			modbusDebugMsg(fmt.Sprintf("MODBUS POLL! : Priority: %s, Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s, WriteRequired: %t, ReadRequired: %t \n", pp.PollPriority, net.UUID, dev.UUID, pnt.UUID, dev.AddressId, *pnt.AddressID, pnt.ObjectType, utils.BoolIsNil(pnt.WritePollRequired), utils.BoolIsNil(pnt.ReadPollRequired)))
+			modbusDebugMsg(fmt.Sprintf("MODBUS POLL! : Priority: %s, Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s, WriteRequired: %t, ReadRequired: %t", pp.PollPriority, net.UUID, dev.UUID, pnt.UUID, dev.AddressId, *pnt.AddressID, pnt.ObjectType, utils.BoolIsNil(pnt.WritePollRequired), utils.BoolIsNil(pnt.ReadPollRequired)))
 
 			if !utils.BoolIsNil(pnt.WritePollRequired) && !utils.BoolIsNil(pnt.ReadPollRequired) {
 				modbusDebugMsg("polling not required on this point")
@@ -163,8 +159,6 @@ func (i *Instance) ModbusPolling() error {
 			var mbClient smod.ModbusClient
 			//var dCheck devCheck
 			//dCheck.devUUID = dev.UUID
-			modbusDebugMsg(fmt.Sprintf("ModbusPolling() net: %+v", net))
-			modbusDebugMsg(fmt.Sprintf("ModbusPolling() dev: %+v", dev))
 			mbClient, err = i.setClient(net, dev, true)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("failed to set client error: %v network name:%s", err, net.Name))
@@ -194,7 +188,7 @@ func (i *Instance) ModbusPolling() error {
 			var response interface{}
 			var writeValuePointer *float64
 			writeSuccess := false
-			if utils.BoolIsNil(pnt.WritePollRequired) { //DO WRITE IF REQUIRED
+			if isWriteable(pnt.WriteMode) && utils.BoolIsNil(pnt.WritePollRequired) { //DO WRITE IF REQUIRED
 				modbusDebugMsg("modbus write point:")
 				modbusDebugMsg("%+v\n", pnt)
 				//pnt.PrintPointValues()

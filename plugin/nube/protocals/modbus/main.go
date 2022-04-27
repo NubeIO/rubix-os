@@ -8,7 +8,6 @@ import (
 	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/patrickmn/go-cache"
-	log "github.com/sirupsen/logrus"
 )
 
 const path = "modbus" //must be unique across all plugins
@@ -62,20 +61,4 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 //main will not let main run
 func main() {
 	panic("this should be built as plugin")
-}
-
-func modbusDebugMsg(args ...interface{}) {
-	debugMsgEnable := true
-	if debugMsgEnable {
-		prefix := "Modbus: "
-		log.Info(prefix, args)
-	}
-}
-
-func modbusErrorMsg(args ...interface{}) {
-	debugMsgEnable := true
-	if debugMsgEnable {
-		prefix := "Modbus: "
-		log.Error(prefix, args)
-	}
 }

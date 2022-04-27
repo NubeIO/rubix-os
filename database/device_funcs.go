@@ -37,19 +37,6 @@ func (d *GormDatabase) GetOneDeviceByArgs(args api.Args) (*model.Device, error) 
 	return deviceModel, nil
 }
 
-// GetPluginIDFromDevice returns the pluginUUID by using the deviceUUID to query the network.
-func (d *GormDatabase) GetPluginIDFromDevice(uuid string) (*model.Network, error) {
-	device, err := d.GetDevice(uuid, api.Args{})
-	if err != nil {
-		return nil, err
-	}
-	network, err := d.GetNetwork(device.NetworkUUID, api.Args{})
-	if err != nil {
-		return nil, err
-	}
-	return network, err
-}
-
 func (d *GormDatabase) deviceNameExistsInNetwork(deviceName, networkUUID string) (device *model.Device, existing bool) {
 	network, err := d.GetNetwork(networkUUID, api.Args{WithDevices: true})
 	if err != nil {

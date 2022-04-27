@@ -73,7 +73,6 @@ func (d *GormDatabase) WritePointPlugin(uuid string, body *model.Point) (point *
 	}
 
 	cli := client.NewLocalClient()
-	fmt.Println(fmt.Sprintf("WritePointPlugin %+v", body))
 	point, err = cli.WritePointPlugin(uuid, body, pluginName)
 	if err != nil {
 		return nil, err

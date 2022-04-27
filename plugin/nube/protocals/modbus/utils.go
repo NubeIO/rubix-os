@@ -323,3 +323,15 @@ func SetPriorityArrayModeBasedOnWriteMode(pnt *model.Point) bool {
 	}
 	return false
 }
+
+func isWriteable(writeMode model.WriteMode) bool {
+	switch writeMode {
+	case model.ReadOnce, model.ReadOnly:
+		return false
+	case model.WriteOnce, model.WriteOnceReadOnce, model.WriteAlways, model.WriteOnceThenRead, model.WriteAndMaintain:
+		return true
+	default:
+		return false
+	}
+	return false
+}
