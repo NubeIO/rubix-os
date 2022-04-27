@@ -51,6 +51,7 @@ func (a *PointAPI) PointWrite(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	uuid := resolveID(ctx)
 	fmt.Println(fmt.Sprintf("PointWrite %+v", body))
+	fmt.Println(fmt.Sprintf("PointWrite ctx %+v", ctx))
 	q, err := a.DB.WritePointPlugin(uuid, body)
 	responseHandler(q, err, ctx)
 }

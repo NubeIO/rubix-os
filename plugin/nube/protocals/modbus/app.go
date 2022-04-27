@@ -66,8 +66,8 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 }
 
 //writePoint write point
-func (inst *Instance) writePoint(body *model.Point) (point *model.Point, err error) {
-	point, err = inst.db.WritePoint(body.UUID, body, true)
+func (inst *Instance) writePoint(pointUUID string, body *model.Point) (point *model.Point, err error) {
+	point, err = inst.db.WritePoint(pointUUID, body, true)
 	if err != nil {
 		return nil, err
 	}

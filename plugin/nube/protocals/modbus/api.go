@@ -104,7 +104,10 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
-		point, err := inst.writePoint(body)
+		uuid := plugin.ResolveID(ctx)
+		fmt.Println(fmt.Sprintf("PointsWriteURL %+v", body))
+		fmt.Println(fmt.Sprintf("PointsWriteURL ctx %+v", ctx))
+		point, err := inst.writePoint(uuid, body)
 		plugin.ResponseHandler(point, err, 0, ctx)
 	})
 	mux.DELETE(plugin.NetworksURL, func(ctx *gin.Context) {

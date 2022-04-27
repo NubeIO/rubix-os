@@ -84,7 +84,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		}
 	}
 	//check for mapping
-	network, err := d.GetNetworkByPointUUID(body, api.Args{})
+	network, err := d.GetNetworkByPoint(body, api.Args{})
 	if network.AutoMappingNetworksSelection != "" {
 		pointMapping := &model.PointMapping{}
 		pointMapping.Point = body
