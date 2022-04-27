@@ -9,10 +9,7 @@ import (
 )
 
 func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point, err error) {
-	fmt.Printf("%+v\n", body)
-	network, err := d.GetPluginIDFromDevice(body.DeviceUUID)
-	fmt.Printf("err: %+v\n", err)
-	fmt.Printf("network: %+v\n", network)
+	network, err := d.GetNetworkByPoint(body, api.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +37,7 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 }
 
 func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point *model.Point, err error) {
-	network, err := d.GetNetworkByPointUUID(body, api.Args{})
+	network, err := d.GetNetworkByPoint(body, api.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -61,8 +58,9 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 }
 
 func (d *GormDatabase) WritePointPlugin(uuid string, body *model.Point) (point *model.Point, err error) {
-	network, err := d.GetNetworkByPointUUID(body, api.Args{})
-	if err != nil {
+	network, err := d.GetNetworkByPointUUID(uuid, api.Args{})
+	fmt.Println(fmt.Sprintf("WritePointPlugin network %+v", network))
+	if err != nil || network == nil {
 		return nil, err
 	}
 	pluginName := network.PluginPath
@@ -73,8 +71,10 @@ func (d *GormDatabase) WritePointPlugin(uuid string, body *model.Point) (point *
 		}
 		return
 	}
+
 	cli := client.NewLocalClient()
-	point, err = cli.WritePointPlugin(body, pluginName)
+	fmt.Println(fmt.Sprintf("WritePointPlugin %+v", body))
+	point, err = cli.WritePointPlugin(uuid, body, pluginName)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (d *GormDatabase) DeletePointPlugin(uuid string) (ok bool, err error) {
 	if err != nil {
 		return ok, err
 	}
-	network, err := d.GetNetworkByPointUUID(point, api.Args{})
+	network, err := d.GetNetworkByPoint(point, api.Args{})
 	if err != nil {
 		return ok, err
 	}

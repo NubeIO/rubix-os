@@ -291,6 +291,15 @@ func (i *Instance) writePoint(body *model.Point) (point *model.Point, err error)
 	return point, nil
 }
 
+//writePoint write point
+func (inst *Instance) writePoint(pointUUID string, body *model.Point) (point *model.Point, err error) {
+	point, err = inst.db.WritePoint(pointUUID, body, true)
+	if err != nil {
+		return nil, err
+	}
+	return point, nil
+}
+
 //deleteNetwork delete network. Called via API call.
 func (i *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	modbusDebugMsg("deleteNetwork(): ", body.UUID)

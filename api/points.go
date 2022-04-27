@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
@@ -49,7 +48,6 @@ func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 
 func (a *PointAPI) PointWrite(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
-	fmt.Sprintf(" API PointWrite%+v", body)
 	uuid := resolveID(ctx)
 	q, err := a.DB.WritePointPlugin(uuid, body)
 	responseHandler(q, err, ctx)

@@ -12,7 +12,7 @@ const (
 	NetworksURL    = "/networks"
 	DevicesURL     = "/devices"
 	PointsURL      = "/points"
-	PointsWriteURL = "/write"
+	PointsWriteURL = "/points/write/:uuid"
 )
 
 func GetBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
@@ -28,6 +28,10 @@ func GetBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
 func GetBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
+}
+
+func ResolveID(ctx *gin.Context) string {
+	return ctx.Param("uuid")
 }
 
 func PointWrite(pnt *model.Point) (out float64) {

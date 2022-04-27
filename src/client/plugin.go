@@ -170,12 +170,14 @@ func (a *FlowClient) UpdatePointPlugin(body *model.Point, pluginName string) (*m
 }
 
 // WritePointPlugin update an object
-func (a *FlowClient) WritePointPlugin(body *model.Point, pluginName string) (*model.Point, error) {
-	url := fmt.Sprintf("/api/plugins/api/%s/points", pluginName)
+func (a *FlowClient) WritePointPlugin(pointUUID string, body *model.Point, pluginName string) (*model.Point, error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/points/write/{uuid}", pluginName)
 	resp, err := a.client.R().
 		SetResult(&model.Point{}).
 		SetBody(body).
+		SetPathParams(map[string]string{"uuid": pointUUID}).
 		Patch(url)
+	fmt.Println(fmt.Sprintf("WritePointPlugin %+v", resp))
 	failResponse := failedResponse(err, resp)
 	if failResponse != nil {
 		return nil, failResponse
