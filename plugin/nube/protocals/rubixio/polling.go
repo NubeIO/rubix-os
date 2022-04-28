@@ -85,7 +85,7 @@ func (inst *Instance) syncOutputs(dev *model.Device) (bulk []rubixio.BulkWrite) 
 		case "UO5":
 			uo5 = int(nils.Float64IsNil(pnt.WriteValue))
 		case "UO6":
-			uo2 = int(nils.Float64IsNil(pnt.WriteValue))
+			uo6 = int(nils.Float64IsNil(pnt.WriteValue))
 		case "DO1":
 			do1 = int(nils.Float64IsNil(pnt.WriteValue))
 		case "DO2":
@@ -138,7 +138,6 @@ func (inst *Instance) getInputs() *rubixio.Inputs {
 	restOptions := &rest.Options{}
 	restService.Options = restOptions
 	restService = rest.New(restService)
-
 	nubeProxy := &rest.NubeProxy{}
 	restService.NubeProxy = nubeProxy
 
@@ -160,7 +159,6 @@ func (inst *Instance) writeOutput(dev *model.Device) {
 	nubeProxy := &rest.NubeProxy{}
 	restService.NubeProxy = nubeProxy
 	client := rubixio.New(restService)
-
 	bulk := inst.syncOutputs(dev)
 	outs, resp := client.UpdatePointValueBulk(bulk)
 	if resp.GetError() != nil || outs == nil {
@@ -211,13 +209,6 @@ func (inst *Instance) polling(p polling) error {
 					inputs := inst.getInputs()
 					inst.syncInputs(dev, inputs)
 					inst.writeOutput(dev)
-					for _, pnt := range dev.Points { //POINTS
-						if nils.BoolIsNil(pnt.IsOutput) {
-
-						} else {
-							//inst.syncInputs(pnt, inputs)
-						}
-					}
 				}
 			}
 
