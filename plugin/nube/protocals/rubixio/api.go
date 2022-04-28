@@ -7,11 +7,6 @@ import (
 	"net/http"
 )
 
-func bodyWizard(ctx *gin.Context) (dto wizard, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
 const (
 	schemaNetwork = "/schema/network"
 	schemaDevice  = "/schema/device"

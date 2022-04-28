@@ -12,7 +12,6 @@ import (
 	"time"
 )
 
-const defaultInterval = 2000 * time.Millisecond //default polling is 2.5 sec
 const pollName = "polling"
 
 type polling struct {
@@ -26,7 +25,7 @@ type polling struct {
 
 var poll poller.Poller
 
-func (inst *Instance) syncInputs(pnt *model.Point, inputs *rubixio.Inputs) {
+func (inst *Instance) updateInputs(pnt *model.Point, inputs *rubixio.Inputs) {
 	if inputs == nil {
 		return
 	}
@@ -58,6 +57,79 @@ func (inst *Instance) syncInputs(pnt *model.Point, inputs *rubixio.Inputs) {
 
 }
 
+func (inst *Instance) syncInputs(dev *model.Device, inputs *rubixio.Inputs) {
+	for _, pnt := range dev.Points {
+		inst.updateInputs(pnt, inputs)
+	}
+}
+
+func (inst *Instance) syncOutputs(dev *model.Device) (bulk []rubixio.BulkWrite) {
+	uo1 := 0
+	uo2 := 0
+	uo3 := 0
+	uo4 := 0
+	uo5 := 0
+	uo6 := 0
+	do1 := 0
+	do2 := 0
+	for _, pnt := range dev.Points {
+		switch pnt.IoNumber {
+		case "UO1":
+			uo1 = int(nils.Float64IsNil(pnt.WriteValue))
+		case "UO2":
+			uo2 = int(nils.Float64IsNil(pnt.WriteValue))
+		case "UO3":
+			uo3 = int(nils.Float64IsNil(pnt.WriteValue))
+		case "UO4":
+			uo4 = int(nils.Float64IsNil(pnt.WriteValue))
+		case "UO5":
+			uo5 = int(nils.Float64IsNil(pnt.WriteValue))
+		case "UO6":
+			uo2 = int(nils.Float64IsNil(pnt.WriteValue))
+		case "DO1":
+			do1 = int(nils.Float64IsNil(pnt.WriteValue))
+		case "DO2":
+			do2 = int(nils.Float64IsNil(pnt.WriteValue))
+		}
+	}
+	//todo add in if point is disabled
+	bulk = []rubixio.BulkWrite{
+		{
+			IONum: "UO1",
+			Value: uo1,
+		},
+		{
+			IONum: "UO2",
+			Value: uo2,
+		},
+		{
+			IONum: "UO3",
+			Value: uo3,
+		},
+		{
+			IONum: "UO4",
+			Value: uo4,
+		},
+		{
+			IONum: "UO5",
+			Value: uo5,
+		},
+		{
+			IONum: "UO6",
+			Value: uo6,
+		},
+		{
+			IONum: "DO1",
+			Value: do1,
+		},
+		{
+			IONum: "DO2",
+			Value: do2,
+		},
+	}
+	return
+}
+
 func (inst *Instance) getInputs() *rubixio.Inputs {
 
 	restService := &rest.Service{}
@@ -78,7 +150,7 @@ func (inst *Instance) getInputs() *rubixio.Inputs {
 	return inputs
 }
 
-func (inst *Instance) writeOutput(pnt *model.Point) {
+func (inst *Instance) writeOutput(dev *model.Device) {
 	restService := &rest.Service{}
 	restService.Url = inst.config.Ip
 	restService.Port = 5001
@@ -87,17 +159,20 @@ func (inst *Instance) writeOutput(pnt *model.Point) {
 	restService = rest.New(restService)
 	nubeProxy := &rest.NubeProxy{}
 	restService.NubeProxy = nubeProxy
-	bacnetClient := rubixio.New(restService)
-	IoNumber := pnt.IoNumber //UO1
+	client := rubixio.New(restService)
 
-	_, res := bacnetClient.UpdatePointValue(IoNumber, int(nils.Float64IsNil(pnt.WriteValue)))
-	if res.GetError() != nil {
+	bulk := inst.syncOutputs(dev)
+	outs, resp := client.UpdatePointValueBulk(bulk)
+	if resp.GetError() != nil || outs == nil {
 		log.Errorln("rubixio.polling.writeOutput() failed to do rest-api call err:", err)
+		return
 	}
 
 }
 
 func (inst *Instance) polling(p polling) error {
+	var defaultInterval = time.Duration(inst.config.PollingTimeInMs) * time.Millisecond //default polling is 2.5 sec
+
 	if p.delayNetworks <= 0 {
 		p.delayNetworks = defaultInterval
 	}
@@ -134,19 +209,20 @@ func (inst *Instance) polling(p polling) error {
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
 					inputs := inst.getInputs()
+					inst.syncInputs(dev, inputs)
+					inst.writeOutput(dev)
 					for _, pnt := range dev.Points { //POINTS
 						if nils.BoolIsNil(pnt.IsOutput) {
-							inst.writeOutput(pnt)
-						} else {
-							inst.syncInputs(pnt, inputs)
-						}
 
+						} else {
+							//inst.syncInputs(pnt, inputs)
+						}
 					}
 				}
 			}
 
 		}
-		if !p.enable { //TODO the disable of the polling isn't working
+		if !p.enable { //TODO to disable of the polling isn't working
 			return true, nil
 		} else {
 			return false, nil
