@@ -64,6 +64,8 @@ type Device struct {
 	} `json:"port"`
 }
 
+//for io-type see model.IOType
+
 type Point struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
@@ -75,7 +77,7 @@ type Point struct {
 	IoType struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"THERMISTOR_10K_TYPE2\",\"DIGITAL\",\"PERCENT\",\"0-10VDC\",\"4-20mA\",\"RESISTANCE\",\"light\",\"voltage\"]"`
+		Options  []string `json:"options" default:"[\"digital\",\"voltage_dc\",\"thermistor_10k_type_2\",\"current\",\"raw\"]"`
 	} `json:"io_type"`
 }
 

@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/poller"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/nubeio-rubix-lib-rest-go/pkg/nube/rubixio"
 	"github.com/NubeIO/nubeio-rubix-lib-rest-go/pkg/rest"
@@ -30,25 +30,38 @@ func (inst *Instance) syncInputs(pnt *model.Point, inputs *rubixio.Inputs) {
 	if inputs == nil {
 		return
 	}
-	IoNumber := pnt.IoNumber
-	pntType := pnt.IoType //10k
-
-	if IoNumber == inputs.UI1.IoNum {
-		temp := inputs.UI1.Temp10K
-		_, err := inst.pointUpdateValue(pnt.UUID, temp)
-		if err != nil {
-			//return
+	IoNumber := pnt.IoNumber //UI1
+	pntType := pnt.IoType    //10k
+	found, temp, voltage, current, raw, digital, err := rubixio.GetInputValues(inputs, IoNumber)
+	if err != nil {
+		return
+	}
+	var pointValue float64
+	if found {
+		switch pntType {
+		case string(model.IOTypeThermistor10K):
+			pointValue = temp
+		case string(model.IOTypeVoltageDC):
+			pointValue = voltage
+		case string(model.IOTypeCurrent):
+			pointValue = current
+		case string(model.IOTypeDigital):
+			pointValue = float64(digital)
+		case string(model.IOTypeRAW):
+			pointValue = raw
 		}
-
-		fmt.Println(pntType, temp)
-
+		_, err = inst.pointUpdateValue(pnt.UUID, pointValue)
+		if err != nil {
+			log.Errorln("rubixio.polling.syncInputs() failed to update point value")
+		}
 	}
 
 }
 
 func (inst *Instance) getInputs() *rubixio.Inputs {
+
 	restService := &rest.Service{}
-	restService.Url = "192.168.15.194"
+	restService.Url = inst.config.Ip
 	restService.Port = 5001
 	restOptions := &rest.Options{}
 	restService.Options = restOptions
@@ -58,11 +71,29 @@ func (inst *Instance) getInputs() *rubixio.Inputs {
 	restService.NubeProxy = nubeProxy
 
 	bacnetClient := rubixio.New(restService)
-	inputs, err := bacnetClient.GetInputs()
-	//inputs
-
-	fmt.Println(inputs, err)
+	inputs, res := bacnetClient.GetInputs()
+	if res.GetError() != nil {
+		log.Errorln("rubixio.polling.getInputs() failed to do rest-api call err:", err)
+	}
 	return inputs
+}
+
+func (inst *Instance) writeOutput(pnt *model.Point) {
+	restService := &rest.Service{}
+	restService.Url = inst.config.Ip
+	restService.Port = 5001
+	restOptions := &rest.Options{}
+	restService.Options = restOptions
+	restService = rest.New(restService)
+	nubeProxy := &rest.NubeProxy{}
+	restService.NubeProxy = nubeProxy
+	bacnetClient := rubixio.New(restService)
+	IoNumber := pnt.IoNumber //UO1
+
+	_, res := bacnetClient.UpdatePointValue(IoNumber, int(nils.Float64IsNil(pnt.WriteValue)))
+	if res.GetError() != nil {
+		log.Errorln("rubixio.polling.writeOutput() failed to do rest-api call err:", err)
+	}
 
 }
 
@@ -104,7 +135,11 @@ func (inst *Instance) polling(p polling) error {
 					time.Sleep(dNet)
 					inputs := inst.getInputs()
 					for _, pnt := range dev.Points { //POINTS
-						inst.syncInputs(pnt, inputs)
+						if nils.BoolIsNil(pnt.IsOutput) {
+							inst.writeOutput(pnt)
+						} else {
+							inst.syncInputs(pnt, inputs)
+						}
 
 					}
 				}
