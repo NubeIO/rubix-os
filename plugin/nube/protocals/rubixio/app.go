@@ -12,13 +12,25 @@ import (
 	"time"
 )
 
-//addDevice add network
+//addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
+	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
+	if err != nil {
+		return nil, err
+	}
+	for _, net := range nets {
+		if net != nil {
+			errMsg := fmt.Sprintf("rubix-io: only max one network is allowed")
+			log.Errorf(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
+	body.NumberOfNetworksPermitted = nils.NewInt(1)
 	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err
 	}
-	return network, nil
+	return body, nil
 }
 
 //addDevice add device
@@ -28,33 +40,16 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		return nil, err
 	}
 	if len(network.Devices) >= 1 {
-		errMsg := fmt.Sprintf("edge-28: only one device is allowed per network")
+		errMsg := fmt.Sprintf("rubix-ior: only max one device is allowed")
 		log.Errorf(errMsg)
 		return nil, errors.New(errMsg)
 	}
+	body.NumberOfDevicesPermitted = nils.NewInt(1)
 	device, err = inst.db.CreateDevice(body)
 	if err != nil {
 		return nil, err
 	}
 	return device, nil
-}
-
-func selectObjectType(selectedPlugin string) (objectType string, isOutput, isTypeBool bool) {
-	isOutput = false
-	isOutput = false
-	switch selectedPlugin {
-	case PointsList.DO1.IoNumber, PointsList.DO2.IoNumber:
-		objectType = PointsList.DO1.ObjectType
-		isOutput = true
-		isTypeBool = true
-	case PointsList.UO1.IoNumber, PointsList.UO2.IoNumber, PointsList.UO3.IoNumber, PointsList.UO4.IoNumber, PointsList.UO5.IoNumber, PointsList.UO6.IoNumber:
-		objectType = PointsList.UO1.ObjectType
-		isOutput = true
-	case PointsList.UI1.IoNumber, PointsList.UI2.IoNumber, PointsList.UI3.IoNumber, PointsList.UI4.IoNumber, PointsList.UI5.IoNumber, PointsList.UI6.IoNumber, PointsList.UI7.IoNumber, PointsList.UI8.IoNumber:
-		objectType = PointsList.UI1.ObjectType
-	}
-	return
-
 }
 
 //addPoint add point
@@ -185,6 +180,24 @@ func (inst *Instance) pointUpdateErr(uuid string, err error) (*model.Point, erro
 		return nil, err
 	}
 	return nil, nil
+}
+
+func selectObjectType(selectedPlugin string) (objectType string, isOutput, isTypeBool bool) {
+	isOutput = false
+	isOutput = false
+	switch selectedPlugin {
+	case PointsList.DO1.IoNumber, PointsList.DO2.IoNumber:
+		objectType = PointsList.DO1.ObjectType
+		isOutput = true
+		isTypeBool = true
+	case PointsList.UO1.IoNumber, PointsList.UO2.IoNumber, PointsList.UO3.IoNumber, PointsList.UO4.IoNumber, PointsList.UO5.IoNumber, PointsList.UO6.IoNumber:
+		objectType = PointsList.UO1.ObjectType
+		isOutput = true
+	case PointsList.UI1.IoNumber, PointsList.UI2.IoNumber, PointsList.UI3.IoNumber, PointsList.UI4.IoNumber, PointsList.UI5.IoNumber, PointsList.UI6.IoNumber, PointsList.UI7.IoNumber, PointsList.UI8.IoNumber:
+		objectType = PointsList.UI1.ObjectType
+	}
+	return
+
 }
 
 type Point struct {

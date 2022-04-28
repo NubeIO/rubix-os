@@ -12,8 +12,6 @@ func (inst *Instance) Enable() error {
 	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
 	if q != nil {
 		inst.networkUUID = q.UUID
-	} else {
-		inst.networkUUID = "NA"
 	}
 	if inst.config.EnablePolling {
 		if !inst.pollingEnabled {
@@ -23,12 +21,12 @@ func (inst *Instance) Enable() error {
 			go func() error {
 				err := inst.polling(arg)
 				if err != nil {
-					log.Errorf("edge28-enable: POLLING ERROR on routine: %v\n", err)
+					log.Errorf("rubix-io.enable: POLLING ERROR on routine: %v\n", err)
 				}
 				return nil
 			}()
 			if err != nil {
-				log.Errorf("edge28-enable: POLLING ERROR: %v\n", err)
+				log.Errorf("rubix-io.enable: POLLING ERROR: %v\n", err)
 			}
 		}
 	}
