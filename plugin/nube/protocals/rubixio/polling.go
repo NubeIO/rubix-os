@@ -200,6 +200,9 @@ func (inst *Instance) polling(p polling) error {
 			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 				log.Infof("rubixio-polling: LOOP COUNT: %v\n", counter)
 				counter++
+				if !nils.BoolIsNil(net.Enable) {
+					continue
+				}
 				for _, dev := range net.Devices { //DEVICES
 					if err != nil {
 						log.Errorf("rubixio-polling: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
