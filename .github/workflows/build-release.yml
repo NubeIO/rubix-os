@@ -115,6 +115,9 @@ jobs:
           
           cd ../../../../plugin/nube/protocals/bacnetmaster
           go build -buildmode=plugin -o bacnetmaster-amd64.so *.go  && cp bacnetmaster-amd64.so ../../../../
+          
+          cd ../../../../plugin/nube/protocals/rubixio
+          go build -buildmode=plugin -o rubixio-amd64.so *.go  && cp rubixio-amd64.so ../../../../
 
           cd ../../../../plugin/nube/database/influx
           go build -buildmode=plugin -o influx-amd64.so *.go  && cp influx-amd64.so ../../../../
@@ -153,6 +156,9 @@ jobs:
           
           cd ../../../../plugin/nube/protocals/bacnetmaster
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o bacnetmaster-armv7.so *.go  && cp bacnetmaster-armv7.so ../../../../
+
+          cd ../../../../plugin/nube/protocals/rubixio
+          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o rubixio-armv7.so *.go  && cp rubixio-armv7.so ../../../../
 
           cd ../../../../plugin/nube/database/influx
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o influx-armv7.so *.go  && cp influx-armv7.so ../../../../
@@ -209,6 +215,11 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./bacnetmaster-amd64.so
           artifact=bacnetmaster-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./bacnetmaster-armv7.so
+          
+          artifact=rubixio-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+          zip -r /tmp/zip/$artifact.zip ./rubixio-amd64.so
+          artifact=rubixio-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+          zip -r /tmp/zip/$artifact.zip ./rubixio-armv7.so
 
           artifact=influx-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./influx-amd64.so
