@@ -1,5 +1,8 @@
 # CHANGELOG
-## [v0.4.2](https://github.com/NubeIO/flow-framework/tree/v0.4.3) (2022-04-26)
+## [v0.4.4](https://github.com/NubeIO/flow-framework/tree/v0.4.4) (2022-04-29)
+- add new plugin for the rubix-io
+
+## [v0.4.3](https://github.com/NubeIO/flow-framework/tree/v0.4.3) (2022-04-26)
 - many updates since last build :)
 
 ## [v0.4.2](https://github.com/NubeIO/flow-framework/tree/v0.4.2) (2022-03-23)
