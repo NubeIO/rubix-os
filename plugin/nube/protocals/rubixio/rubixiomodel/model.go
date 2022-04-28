@@ -17,6 +17,11 @@ type DescriptionStruct struct {
 	Max      int    `json:"max" default:"80"`
 }
 
+type EnableStruct struct {
+	Type     string `json:"type" default:"bool"`
+	Required bool   `json:"required" default:"true"`
+}
+
 type Network struct {
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
@@ -45,6 +50,7 @@ type Network struct {
 		Max      int    `json:"max" default:"200"`
 		Default  string `json:"default" default:""`
 	} `json:"auto_mapping_flow_network_uuid"`
+	Enable EnableStruct `json:"enable"`
 }
 
 type Device struct {
