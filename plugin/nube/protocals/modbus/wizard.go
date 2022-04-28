@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
@@ -246,6 +247,430 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 		}
 		return "modbus wizard 4: added a network, 1 device, and 4 points", err
 
+	case 5:
+		if body.NameArg != "" && body.AddArg > 0 {
+			networkName := "CliniMix-TMV"
+			net, err := i.db.GetNetworkByName(networkName, api.Args{})
+			if err != nil || net == nil {
+				if net == nil {
+					net = &model.Network{}
+				}
+				net.Name = "CliniMix-TMV"
+				net.TransportType = model.TransType.Serial
+				net.PluginPath = "modbus"
+				net.MaxPollRate = 100 * time.Millisecond
+				net.PluginConfId = i.pluginUUID
+				net, err = i.db.CreateNetwork(net, false)
+				if err != nil {
+					modbusErrorMsg(fmt.Sprintf("network creation failure: %s", err))
+					modbusDebugMsg("Created a Network")
+				}
+			} else {
+				modbusDebugMsg("Network already exists")
+			}
+
+			dev, exists := i.db.DeviceNameExistsInNetwork(body.NameArg, net.UUID)
+			if err != nil || dev == nil || !exists {
+				if dev == nil {
+					dev = &model.Device{}
+				}
+				dev.Name = body.NameArg
+				dev.CommonIP.Host = "0.0.0.0"
+				dev.CommonIP.Port = p
+				dev.AddressId = int(body.AddArg)
+				dev.ZeroMode = utils.NewTrue()
+				dev.PollDelayPointsMS = 1000
+				dev.NetworkUUID = net.UUID
+				fastDuration, err := time.ParseDuration("5s")
+				dev.FastPollRate = fastDuration
+				normalDuration, err := time.ParseDuration("30s")
+				dev.NormalPollRate = normalDuration
+				slowDuration, err := time.ParseDuration("120s")
+				dev.SlowPollRate = slowDuration
+				_, err = i.db.CreateDevice(dev)
+				if err != nil {
+					modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
+				}
+				modbusDebugMsg("Created a Device: ", dev)
+
+			} else {
+				modbusDebugMsg("Device already exists")
+			}
+
+			type tmvPoint struct {
+				AddressID              int
+				Name                   string
+				Description            string
+				ObjectType             model.ObjectType
+				DataType               model.DataType
+				WriteMode              model.WriteMode
+				PollPriority           model.PollPriority
+				PollRate               model.PollRate
+				PointPriorityArrayMode model.PointPriorityArrayMode
+				Fallback               float64
+			}
+
+			pointsArray := [28]tmvPoint{
+				{
+					AddressID:              101,
+					Name:                   "ENABLE",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeWriteCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.WriteAndMaintain,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.PriorityArrayToWriteValue,
+					Fallback:               1,
+				},
+				{
+					AddressID:              102,
+					Name:                   "RESET_ALL",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeWriteCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.WriteAndMaintain,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.PriorityArrayToWriteValue,
+					Fallback:               0,
+				},
+				{
+					AddressID:              103,
+					Name:                   "SOLENOID_ALLOW",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeWriteCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.WriteAndMaintain,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.PriorityArrayToWriteValue,
+					Fallback:               0,
+				},
+				{
+					AddressID:              104,
+					Name:                   "APP_FAULT",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_LOW,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              105,
+					Name:                   "FLOW_STATUS",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_NORMAL,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              106,
+					Name:                   "OVER_TEMPERATURE_WARN",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_NORMAL,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              107,
+					Name:                   "OVER_TEMPERATURE_ALERT",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_NORMAL,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              108,
+					Name:                   "ONE_DAY_LOW_FLOW_ALERT",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_NORMAL,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              109,
+					Name:                   "FIVE_DAY_LOW_FLOW_ALERT",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_NORMAL,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              110,
+					Name:                   "MONTHLY_HOT_FLUSH_STATUS",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_NORMAL,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              111,
+					Name:                   "SOLENOID_STATUS",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadCoil,
+					DataType:               model.TypeDigital,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_NORMAL,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              401,
+					Name:                   "TEMPERATURE_SP",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeWriteHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.WriteAndMaintain,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.PriorityArrayToWriteValue,
+					Fallback:               40,
+				},
+				{
+					AddressID:              403,
+					Name:                   "OVER_TEMPERATURE_OFFSET",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeWriteHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.WriteAndMaintain,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.PriorityArrayToWriteValue,
+					Fallback:               4,
+				},
+				{
+					AddressID:              405,
+					Name:                   "LOW_FLOW_THRESHOLD",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeWriteHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.WriteAndMaintain,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.PriorityArrayToWriteValue,
+					Fallback:               120,
+				},
+				{
+					AddressID:              407,
+					Name:                   "HOT_FLUSH_SP",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeWriteHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.WriteAndMaintain,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.PriorityArrayToWriteValue,
+					Fallback:               60,
+				},
+				{
+					AddressID:              409,
+					Name:                   "HOT_FLUSH_DELAY",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeWriteHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.WriteAndMaintain,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.PriorityArrayToWriteValue,
+					Fallback:               300,
+				},
+				{
+					AddressID:              411,
+					Name:                   "OVERTEMP_ALERT_DURATION_SP",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeWriteHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.WriteAndMaintain,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.PriorityArrayToWriteValue,
+					Fallback:               600,
+				},
+				{
+					AddressID:              413,
+					Name:                   "TEMP_CALIBRATION_OFFSET",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeWriteHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.WriteAndMaintain,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.PriorityArrayToWriteValue,
+					Fallback:               0,
+				},
+				{
+					AddressID:              415,
+					Name:                   "FLOW_TEMPERATURE",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              417,
+					Name:                   "DAILY_TEMP_TEST_1",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               -1,
+				},
+				{
+					AddressID:              419,
+					Name:                   "DAILY_TEMP_TEST_2",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               -1,
+				},
+				{
+					AddressID:              421,
+					Name:                   "DAILY_TEMP_TEST_3",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               -1,
+				},
+				{
+					AddressID:              423,
+					Name:                   "MONTHLY_MEAN_TEMP_TEST",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               -1,
+				},
+				{
+					AddressID:              425,
+					Name:                   "TOTAL_FLOW_ACCUMULATION",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              427,
+					Name:                   "ONE_DAY_LOW_FLOW_ACCUMULATION",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              429,
+					Name:                   "DAYS_OF_LOW_FLOW",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              431,
+					Name:                   "OVER_TEMPERATURE_WARN_COUNT",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+				{
+					AddressID:              433,
+					Name:                   "OVER_TEMPERATURE_ALERT_COUNT",
+					Description:            "modbus",
+					ObjectType:             model.ObjTypeReadHolding,
+					DataType:               model.TypeFloat32,
+					WriteMode:              model.ReadOnly,
+					PollPriority:           model.PRIORITY_NORMAL,
+					PollRate:               model.RATE_SLOW,
+					PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+					Fallback:               0,
+				},
+			}
+
+			for _, point := range pointsArray {
+				var pnt model.Point
+				pnt.Name = point.Name
+				pnt.Description = point.Description
+				pnt.AddressID = utils.NewInt(point.AddressID)
+				pnt.ObjectType = string(point.ObjectType)
+				pnt.DataType = string(point.DataType)
+				pnt.DeviceUUID = dev.UUID
+				pnt.PollPriority = point.PollPriority
+				pnt.PollRate = point.PollRate
+				pnt.WriteMode = point.WriteMode
+				pnt.Fallback = utils.NewFloat64(point.Fallback)
+				pnt.PointPriorityArrayMode = point.PointPriorityArrayMode
+				_, err = i.db.CreatePoint(&pnt, false, true)
+				if err != nil {
+					modbusErrorMsg(fmt.Sprintf("consumer point creation failure: %s", err))
+				}
+				modbusDebugMsg("Created a Point for Consumer", pnt)
+			}
+			return "modbus wizard 5: added a network, 1 device, and 4 points", err
+		}
+		return "modbus wizard 5: no device name specified in 'arg1'", err
 	}
 	return "modbus wizard error: unknown wizard version", err
 }

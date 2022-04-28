@@ -24,7 +24,7 @@ func (d *GormDatabase) GetMessageByID(id uint) (*model.Message, error) {
 	if err == gorm.ErrRecordNotFound {
 		err = nil
 	}
-	if msg.ID == id {
+	if msg.UUID == string(id) {
 		return msg, err
 	}
 	return nil, err

@@ -15,7 +15,6 @@ import (
 //THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
 //addDevice add network. Called via API call.
 func (i *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	modbusDebugMsg(fmt.Sprintf("Instance(): %+v\n", i))
 	if body == nil {
 		modbusErrorMsg("addNetwork(): nil network object")
 		return nil, errors.New("empty network body, no network created")
@@ -59,12 +58,19 @@ func (i *Instance) addDevice(body *model.Device) (device *model.Device, err erro
 
 //addPoint add point. Called via API call.
 func (i *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
-	modbusDebugMsg(fmt.Sprintf("Instance(): %+v\n", i))
 	if body == nil {
 		modbusErrorMsg("addPoint(): nil point object")
 		return nil, errors.New("empty point body, no point created")
 	}
 	modbusDebugMsg("addPoint(): ", body.Name)
+
+	if isWriteable(body.WriteMode) {
+		body.WritePollRequired = utils.NewTrue()
+	} else {
+		body.WritePollRequired = utils.NewFalse()
+	}
+	body.ReadPollRequired = utils.NewTrue()
+
 	point, err = i.db.CreatePoint(body, true, false)
 	if point == nil || err != nil {
 		modbusErrorMsg("addPoint(): failed to create modbus point: ", body.Name)

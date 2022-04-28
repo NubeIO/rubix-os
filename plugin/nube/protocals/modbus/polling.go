@@ -56,7 +56,7 @@ func (i *Instance) ModbusPolling() error {
 	f := func() (bool, error) {
 		counter++
 		//fmt.Println("\n \n")
-		modbusDebugMsg("LOOP COUNT: ", counter)
+		//modbusDebugMsg("LOOP COUNT: ", counter)
 		var netArg api.Args
 		/*
 			nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, netArg)
@@ -66,13 +66,12 @@ func (i *Instance) ModbusPolling() error {
 		*/
 
 		if len(i.NetworkPollManagers) == 0 {
-			//time.Sleep(15000 * time.Millisecond) //WHAT DOES THIS LINE DO?
 			modbusDebugMsg("NO MODBUS NETWORKS FOUND")
 		}
 		//modbusDebugMsg("i.NetworkPollManagers")
 		//modbusDebugMsg("%+v\n", i.NetworkPollManagers)
 		for _, netPollMan := range i.NetworkPollManagers { //LOOP THROUGH AND POLL NEXT POINTS IN EACH NETWORK QUEUE
-			modbusDebugMsg("ModbusPolling: netPollMan ", netPollMan.FFNetworkUUID)
+			//modbusDebugMsg("ModbusPolling: netPollMan ", netPollMan.FFNetworkUUID)
 			pollStartTime := time.Now()
 			//Check that network exists
 			//modbusDebugMsg("netPollMan")
@@ -96,7 +95,7 @@ func (i *Instance) ModbusPolling() error {
 			pp, callback := netPollMan.GetNextPollingPoint() //callback function is called once polling is completed.
 			//pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			if pp == nil {
-				modbusDebugMsg("No PollingPoint available in Network ", net.UUID)
+				//modbusDebugMsg("No PollingPoint available in Network ", net.UUID)
 				continue
 			}
 			if pp.FFNetworkUUID != net.UUID {
@@ -190,7 +189,7 @@ func (i *Instance) ModbusPolling() error {
 			writeSuccess := false
 			if isWriteable(pnt.WriteMode) && utils.BoolIsNil(pnt.WritePollRequired) { //DO WRITE IF REQUIRED
 				modbusDebugMsg("modbus write point:")
-				modbusDebugMsg("%+v\n", pnt)
+				modbusDebugMsg("%+v", pnt)
 				//pnt.PrintPointValues()
 				writeValuePointer = pnt.Priority.GetHighestPriorityValue()
 				if writeValuePointer != nil {
@@ -253,7 +252,6 @@ func (i *Instance) ModbusPolling() error {
 			netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, callback)
 
 		}
-		time.Sleep(2 * time.Second)
 		return false, nil
 	}
 

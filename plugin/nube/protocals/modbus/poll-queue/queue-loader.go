@@ -305,11 +305,18 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 
 	case model.WriteAndMaintain: //WriteAndMaintain    If write_successful: Re-add with ReadPollRequired true, WritePollRequired false.  Need to check that write value matches present value after each read poll.
 		point.ReadPollRequired = utils.NewTrue()
+		fmt.Printf("WriteAndMaintain point %+v\n", point)
 		writeValuePointer := point.Priority.GetHighestPriorityValue()
+		fmt.Printf("WriteAndMaintain writeValuePointer %+v\n", *writeValuePointer)
 		if writeValuePointer != nil {
 			writeValue := *writeValuePointer
-			presentValue := *point.PresentValue
-			if presentValue != writeValue {
+			noPV := true
+			var presentValue float64
+			if point.PresentValue != nil {
+				noPV = false
+				presentValue = *point.PresentValue
+			}
+			if noPV || presentValue != writeValue {
 				if pp.RepollTimer != nil {
 					pp.RepollTimer.Stop()
 					pp.RepollTimer = nil

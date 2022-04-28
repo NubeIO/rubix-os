@@ -50,6 +50,8 @@ type wizard struct {
 	BaudRate      uint   `json:"baud_rate"`
 	DeviceAddr    uint   `json:"device_addr"`
 	WizardVersion uint   `json:"wizard_version"`
+	NameArg       string `json:"name_arg"`
+	AddArg        uint   `json:"add_arg"`
 }
 
 func bodyWizard(ctx *gin.Context) (dto wizard, err error) {

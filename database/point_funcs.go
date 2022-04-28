@@ -101,6 +101,7 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point) (*model.Point, *f
 			}
 		} else if !utils.FloatIsNilCheck(pointModel.Fallback) {
 			pointModel.Priority.P16 = utils.NewFloat64(*pointModel.Fallback)
+			priorityMap["P16"] = *pointModel.Fallback
 			pointModel.CurrentPriority = utils.NewInt(16)
 			pointModel.WriteValueOriginal = utils.NewFloat64(*pointModel.Priority.P16)
 			writeValue, err := pointEval(pointModel.Priority.P16, pointModel.MathOnWriteValue)
