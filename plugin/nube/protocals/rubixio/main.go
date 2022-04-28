@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/rubixio/rubixiorest"
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
@@ -31,7 +30,6 @@ type Instance struct {
 	bus            eventbus.BusService
 	pluginUUID     string
 	networkUUID    string
-	rest           *rubixiorest.RestClient
 	pollingEnabled bool
 }
 

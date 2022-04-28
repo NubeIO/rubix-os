@@ -70,7 +70,7 @@ type Point struct {
 	IoNumber    struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"UI1\",\"UI2\",\"UI3\",\"UI4\",\"UI5\",\"UI6\",\"UI7\",\"DI1\",\"DI2\",\"DI3\",\"DI4\",\"DI5\",\"DI6\",\"DI7\",\"R1\",\"R2\",\"DO1\",\"DO2\",\"DO3\",\"DO4\",\"DO5\",\"UO1\",\"UO2\",\"UO3\",\"UO4\",\"UO5\",\"UO6\",\"UO7\"]"`
+		Options  []string `json:"options" default:"[\"UI1\",\"UI2\",\"UI3\",\"UI4\",\"UI5\",\"UI6\",\"UI7\",\"UI8\",\"UO1\",\"UO2\",\"UO3\",\"UO4\",\"UO5\",\"UO6\",\"DO1\",\"DO2\"]"`
 	} `json:"io_number"`
 	IoType struct {
 		Type     string   `json:"type" default:"array"`
