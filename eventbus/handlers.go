@@ -6,6 +6,19 @@ import (
 	"strings"
 )
 
+//IsThisPlugin check if this is the correct plugin
+func IsThisPlugin(topic, pluginUUID string) (this bool) {
+	s := strings.Split(topic, ".")
+	if len(s) > 2 {
+		if strings.Contains(s[2], "plg") {
+			if s[2] == pluginUUID {
+				return true
+			}
+		}
+	}
+	return
+}
+
 //GetTopicPart will split the topics
 func GetTopicPart(topic string, index int, contains string) string {
 	s := strings.Split(topic, ".")
