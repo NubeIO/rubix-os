@@ -14,6 +14,11 @@ func (inst *Instance) BusServ() {
 	handlerCreated := bus.Handler{ //PLUGIN CREATED BUS
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
+
+				isThis := eventbus.IsThisPlugin(e.Topic, inst.pluginUUID)
+				if !isThis {
+					return
+				}
 				//try and match is network
 				net, err := eventbus.IsNetwork(e.Topic, e)
 				if err != nil {
