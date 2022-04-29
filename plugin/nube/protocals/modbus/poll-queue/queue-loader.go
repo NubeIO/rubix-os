@@ -44,8 +44,7 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 				if pnt.DeviceUUID == dev.UUID && utils.BoolIsNil(pnt.Enable) {
 					pp := NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, pm.FFPluginUUID)
 					pp.PollPriority = pnt.PollPriority
-					pollQueueDebugMsg("RebuildPollingQueue() pp:")
-					pollQueueDebugMsg("%+v\n", pp)
+					pollQueueDebugMsg(fmt.Sprintf("RebuildPollingQueue() pp: %+v", pp))
 					pp.LockupAlertTimer = pm.MakeLockupTimerFunc(pp.PollPriority) //starts a countdown for queue lockup alerts.
 					pm.PollQueue.AddPollingPoint(pp)
 				} else {
@@ -84,6 +83,99 @@ func (pm *NetworkPollManager) PrintPollQueuePointUUIDs() {
 		fmt.Print(pp.FFPointUUID, " - ", pp.PollPriority, ", repoll timer:", pp.RepollTimer != nil, "; ")
 	}
 	fmt.Println("\n \n")
+}
+
+func printPointDebugInfo(pnt *model.Point) {
+	printString := "\n\n"
+	if pnt != nil {
+		printString += fmt.Sprint("Point: ", pnt.UUID, " ", pnt.Name, "\n")
+		printString += fmt.Sprint("WriteMode: ", pnt.WriteMode, "\n")
+		if pnt.WritePollRequired != nil {
+			printString += fmt.Sprint("WritePollRequired: ", *pnt.WritePollRequired, "\n")
+		}
+		if pnt.ReadPollRequired != nil {
+			printString += fmt.Sprint("ReadPollRequired: ", *pnt.ReadPollRequired, "\n")
+		}
+		if pnt.WriteValue == nil {
+			printString += fmt.Sprint("WriteValue: nil", "\n")
+		} else {
+			printString += fmt.Sprint("WriteValue: ", *pnt.WriteValue, "\n")
+		}
+		if pnt.OriginalValue == nil {
+			printString += fmt.Sprint("OriginalValue: nil", "\n")
+		} else {
+			printString += fmt.Sprint("OriginalValue: ", *pnt.OriginalValue, "\n")
+		}
+		if pnt.PresentValue == nil {
+			printString += fmt.Sprint("PresentValue: nil", "\n")
+		} else {
+			printString += fmt.Sprint("PresentValue: ", *pnt.PresentValue, "\n")
+		}
+		if pnt.CurrentPriority == nil {
+			printString += fmt.Sprint("CurrentPriority: nil", "\n")
+		} else {
+			printString += fmt.Sprint("CurrentPriority: ", *pnt.CurrentPriority, "\n")
+		}
+		if pnt.Priority != nil {
+			if pnt.Priority.P1 != nil {
+				printString += fmt.Sprint("_1: ", *pnt.Priority.P1, "\n")
+			}
+			if pnt.Priority.P2 != nil {
+				printString += fmt.Sprint("_2: ", *pnt.Priority.P2, "\n")
+			}
+			if pnt.Priority.P3 != nil {
+				printString += fmt.Sprint("_3: ", *pnt.Priority.P3, "\n")
+			}
+			if pnt.Priority.P4 != nil {
+				printString += fmt.Sprint("_4: ", *pnt.Priority.P4, "\n")
+			}
+			if pnt.Priority.P5 != nil {
+				printString += fmt.Sprint("_5: ", *pnt.Priority.P5, "\n")
+			}
+			if pnt.Priority.P6 != nil {
+				printString += fmt.Sprint("_6: ", *pnt.Priority.P6, "\n")
+			}
+			if pnt.Priority.P7 != nil {
+				printString += fmt.Sprint("_7: ", *pnt.Priority.P7, "\n")
+			}
+			if pnt.Priority.P8 != nil {
+				printString += fmt.Sprint("_8: ", *pnt.Priority.P8, "\n")
+			}
+			if pnt.Priority.P9 != nil {
+				printString += fmt.Sprint("_9: ", *pnt.Priority.P9, "\n")
+			}
+			if pnt.Priority.P10 != nil {
+				printString += fmt.Sprint("_10: ", *pnt.Priority.P10, "\n")
+			}
+			if pnt.Priority.P11 != nil {
+				printString += fmt.Sprint("_11: ", *pnt.Priority.P11, "\n")
+			}
+			if pnt.Priority.P12 != nil {
+				printString += fmt.Sprint("_12: ", *pnt.Priority.P12, "\n")
+			}
+			if pnt.Priority.P13 != nil {
+				printString += fmt.Sprint("_13: ", *pnt.Priority.P13, "\n")
+			}
+			if pnt.Priority.P14 != nil {
+				printString += fmt.Sprint("_14: ", *pnt.Priority.P14, "\n")
+			}
+			if pnt.Priority.P15 != nil {
+				printString += fmt.Sprint("_15: ", *pnt.Priority.P15, "\n")
+			}
+			if pnt.Priority.P16 != nil {
+				printString += fmt.Sprint("_16: ", *pnt.Priority.P16, "\n")
+			}
+		}
+		pollQueueDebugMsg(printString)
+		return
+	}
+	pollQueueDebugMsg("ERROR: INVALID POINT")
+}
+
+func printPollingPointDebugInfo(pp *PollingPoint) {
+	if pp != nil {
+		pollQueueDebugMsg(fmt.Sprintf("ModbusPolling() pp %+v", pp))
+	}
 }
 
 func (pm *NetworkPollManager) PollCompleteStatsUpdate(pp *PollingPoint, pollTimeSecs float64) {
@@ -136,7 +228,7 @@ func (pm *NetworkPollManager) PollCompleteStatsUpdate(pp *PollingPoint, pollTime
 }
 
 func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate bool) {
-	pollQueueDebugMsg("PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, pollTimeSecs)
+	pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, pollTimeSecs))
 
 	if !pointUpdate {
 		pm.PollCompleteStatsUpdate(pp, pollTimeSecs) // This will update the relevant PollManager statistics.
@@ -147,9 +239,11 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		fmt.Printf("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s /n", pp.FFPointUUID)
 		return
 	}
+	//TODO: potentially only required on writeSuccess (but possibility of lockup on a bad point)
+	//Reset poll priority to set value (in cases where pp has been escalated to ASAP).
+	pp.PollPriority = point.PollPriority
 
-	pollQueueDebugMsg("PollingPointCompleteNotification: point")
-	pollQueueDebugMsg("%+v\n", point)
+	pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification: point %+v", point))
 	//point.PrintPointValues()
 
 	//If the device was deleted while this point was being polled, discard the PollingPoint
@@ -191,7 +285,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		} else {
 			pollQueueDebugMsg("PollingPointCompleteNotification: NOT readSuccess")
 			point.ReadPollRequired = utils.NewTrue()
-			pp.LockupAlertTimer = pm.MakeLockupTimerFunc(pp.PollPriority) //starts a countdown for queue lockup alerts.
+			pp.LockupAlertTimer = pm.MakeLockupTimerFunc(pp.PollPriority) //starts a countdown for queue lockup alerts.  TODO: This might conflict with pausing polling on PortUnavailable
 			pollQueueDebugMsg("PollingPointCompleteNotification: ABOUT TO ADD POINT")
 			pm.PollQueue.AddPollingPoint(pp) //re-add to poll queue immediately
 		}
@@ -305,10 +399,10 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 
 	case model.WriteAndMaintain: //WriteAndMaintain    If write_successful: Re-add with ReadPollRequired true, WritePollRequired false.  Need to check that write value matches present value after each read poll.
 		point.ReadPollRequired = utils.NewTrue()
-		fmt.Printf("WriteAndMaintain point %+v\n", point)
+		pollQueueDebugMsg(fmt.Sprintf("WriteAndMaintain point %+v\n", point))
 		writeValuePointer := point.Priority.GetHighestPriorityValue()
-		fmt.Printf("WriteAndMaintain writeValuePointer %+v\n", *writeValuePointer)
 		if writeValuePointer != nil {
+			pollQueueDebugMsg(fmt.Sprintf("WriteAndMaintain writeValuePointer %+v\n", *writeValuePointer))
 			writeValue := *writeValuePointer
 			noPV := true
 			var presentValue float64
@@ -338,18 +432,18 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		}
 	}
 
-	pollQueueDebugMsg("PollingPointCompleteNotification AFTER (ABOUT TO DB UPDATE): point")
-	pollQueueDebugMsg("%+v\n", point)
+	pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification (ABOUT TO DB UPDATE): point  %+v", point))
 	//point.PrintPointValues()
-	//TODO: DONT KNOW WHY THIS WAS HERE, REMOVED TO TEST.  CHECK IF IT CAN BE DONE VIA PointUpdate() in app.go
-	pm.DBHandlerRef.UpdatePoint(point.UUID, point, true)
+	//TODO: WOULD BE GOOD IF THIS COULD BE MOVED TO app.go
+	point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point, true)
+	//printPointDebugInfo(point)
+
 }
 
 func (pm *NetworkPollManager) MakePollingPointRepollCallback(pp *PollingPoint, writeMode model.WriteMode) func() {
 	//log.Info("MakePollingPointRepollCallback()")
 	f := func() {
-		pollQueueDebugMsg("CALL PollingPointRepollCallback func() pp:")
-		pollQueueDebugMsg("%+v\n", pp)
+		pollQueueDebugMsg(fmt.Sprintf("CALL PollingPointRepollCallback func() pp: %+v", pp))
 		pp.RepollTimer = nil
 		removeSuccess := pm.PollQueue.StandbyPollingPoints.RemovePollingPointByPointUUID(pp.FFPointUUID)
 		if !removeSuccess {
@@ -358,7 +452,7 @@ func (pm *NetworkPollManager) MakePollingPointRepollCallback(pp *PollingPoint, w
 
 		point, err := pm.DBHandlerRef.GetPoint(pp.FFPointUUID, api.Args{})
 		if point == nil || err != nil {
-			pollQueueDebugMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s /n", pp.FFPointUUID)
+			pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s", pp.FFPointUUID))
 			return
 		}
 
@@ -392,6 +486,16 @@ func (pm *NetworkPollManager) MakePollingPointRepollCallback(pp *PollingPoint, w
 		//Now add the polling point back to the polling queue
 		pp.LockupAlertTimer = pm.MakeLockupTimerFunc(pp.PollPriority) //starts a countdown for queue lockup alerts.
 		pm.PollQueue.AddPollingPoint(pp)
+
+		//TODO: WOULD BE GOOD IF THIS COULD BE MOVED TO app.go
+		pollQueueDebugMsg(fmt.Sprintf("pm.DBHandlerRef: %+v", pm.DBHandlerRef))
+		point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point, true)
+		if err != nil || point == nil {
+			pollQueueErrorMsg(fmt.Sprintf("point DB UPDATE FAILED Err: %+v", err))
+			return
+		}
+		pollQueueDebugMsg(fmt.Sprintf("point after DB UPDATE: %+v", point))
+		//printPointDebugInfo(point)
 	}
 	return f
 }

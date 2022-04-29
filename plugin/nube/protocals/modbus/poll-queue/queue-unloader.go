@@ -1,6 +1,7 @@
 package pollqueue
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"time"
 	//log "github.com/sirupsen/logrus"
@@ -45,10 +46,10 @@ func (pm *NetworkPollManager) StartQueueUnloader() {
 	var netArg api.Args
 	net, err := pm.DBHandlerRef.GetNetwork(pm.FFNetworkUUID, netArg)
 	if err != nil {
-		pollQueueDebugMsg("NetworkPollManager.StartQueueUnloader(): couldn't find network %s \n", pm.FFNetworkUUID)
+		pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.StartQueueUnloader(): couldn't find network %s", pm.FFNetworkUUID))
 		return
 	}
-	pollQueueDebugMsg("NetworkPollManager.StartQueueUnloader(): net.MaxPollRate %d \n", net.MaxPollRate)
+	pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.StartQueueUnloader(): net.MaxPollRate %d ", net.MaxPollRate))
 	refreshRate := net.MaxPollRate
 	if pm.MaxPollRate <= 0*time.Second {
 		refreshRate = 1 * time.Second
@@ -77,6 +78,7 @@ func (pm *NetworkPollManager) StopQueueUnloader() {
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextUnloadTimer != nil && pm.PluginQueueUnloader.CancelChannel != nil {
 		pm.PluginQueueUnloader.NextUnloadTimer.Stop()
 		pm.PluginQueueUnloader.CancelChannel <- true
+		pollQueueDebugMsg("StopQueueUnloader() NextUnloadTimer stopped and CancelChannel closed")
 	}
 	pm.PluginQueueUnloader = nil
 }

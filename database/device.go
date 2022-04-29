@@ -76,7 +76,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device, fromPlugin 
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if body.CommonEnable.Enable != nil {
+	if body.CommonEnable.Enable == nil {
 		body.CommonEnable.Enable = utils.NewTrue()
 	}
 	if len(body.Tags) > 0 {

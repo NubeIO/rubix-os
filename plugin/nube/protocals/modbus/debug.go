@@ -8,7 +8,7 @@ import (
 )
 
 func modbusDebugMsg(args ...interface{}) {
-	debugMsgEnable := true
+	debugMsgEnable := false
 	if debugMsgEnable {
 		prefix := "Modbus: "
 		log.Info(prefix, args)

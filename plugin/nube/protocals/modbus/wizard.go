@@ -260,7 +260,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 				net.PluginPath = "modbus"
 				net.MaxPollRate = 100 * time.Millisecond
 				net.PluginConfId = i.pluginUUID
-				net, err = i.db.CreateNetwork(net, false)
+				net, err = i.addNetwork(net)
 				if err != nil {
 					modbusErrorMsg(fmt.Sprintf("network creation failure: %s", err))
 					modbusDebugMsg("Created a Network")
@@ -287,7 +287,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 				dev.NormalPollRate = normalDuration
 				slowDuration, err := time.ParseDuration("120s")
 				dev.SlowPollRate = slowDuration
-				_, err = i.db.CreateDevice(dev)
+				_, err = i.addDevice(dev)
 				if err != nil {
 					modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
 				}
@@ -650,7 +650,8 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 			}
 
 			for _, point := range pointsArray {
-				var pnt model.Point
+				time.Sleep(1 * time.Second)
+				pnt := &model.Point{}
 				pnt.Name = point.Name
 				pnt.Description = point.Description
 				pnt.AddressID = utils.NewInt(point.AddressID)
@@ -662,9 +663,9 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 				pnt.WriteMode = point.WriteMode
 				pnt.Fallback = utils.NewFloat64(point.Fallback)
 				pnt.PointPriorityArrayMode = point.PointPriorityArrayMode
-				_, err = i.db.CreatePoint(&pnt, false, true)
+				_, err = i.addPoint(pnt)
 				if err != nil {
-					modbusErrorMsg(fmt.Sprintf("consumer point creation failure: %s", err))
+					modbusErrorMsg(fmt.Sprintf("point creation failure: %s", err))
 				}
 				modbusDebugMsg("Created a Point for Consumer", pnt)
 			}

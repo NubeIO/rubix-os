@@ -63,6 +63,7 @@ type ModbusClient struct {
 	RegType          RegType
 	DeviceZeroMode   bool
 	Debug            bool
+	PortUnavailable  bool
 }
 
 func byteArrayToBoolArray(ba []byte) []bool {

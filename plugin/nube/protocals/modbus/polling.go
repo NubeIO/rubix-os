@@ -72,6 +72,10 @@ func (i *Instance) ModbusPolling() error {
 		//modbusDebugMsg("%+v\n", i.NetworkPollManagers)
 		for _, netPollMan := range i.NetworkPollManagers { //LOOP THROUGH AND POLL NEXT POINTS IN EACH NETWORK QUEUE
 			//modbusDebugMsg("ModbusPolling: netPollMan ", netPollMan.FFNetworkUUID)
+			if netPollMan.PortUnavailableTimeout != nil {
+				modbusErrorMsg("ModbusPolling: modbus port unavailable. polling paused.")
+				continue
+			}
 			pollStartTime := time.Now()
 			//Check that network exists
 			//modbusDebugMsg("netPollMan")
@@ -88,22 +92,24 @@ func (i *Instance) ModbusPolling() error {
 			//modbusDebugMsg(fmt.Sprintf("modbus-poll: POLL START: NAME: %s\n", net.Name))
 
 			if !utils.BoolIsNil(net.Enable) {
-				modbusDebugMsg(fmt.Sprintf("NETWORK DISABLED: COUNT %v NAME: %s", counter, net.Name))
+				modbusDebugMsg(fmt.Sprintf("NETWORK DISABLED: NAME: %s", net.Name))
 				continue
 			}
-			//netPollMan.PrintPollQueuePointUUIDs()
+
 			pp, callback := netPollMan.GetNextPollingPoint() //callback function is called once polling is completed.
 			//pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			if pp == nil {
 				//modbusDebugMsg("No PollingPoint available in Network ", net.UUID)
 				continue
 			}
+
 			if pp.FFNetworkUUID != net.UUID {
 				modbusErrorMsg("PollingPoint FFNetworkUUID does not match the Network UUID")
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
-			printPollingPointDebugInfo(pp)
+			//netPollMan.PrintPollQueuePointUUIDs()
+			//printPollingPointDebugInfo(pp)
 
 			var devArg api.Args
 			dev, err := i.db.GetDevice(pp.FFDeviceUUID, devArg)
@@ -130,7 +136,6 @@ func (i *Instance) ModbusPolling() error {
 				continue
 			}
 
-			//TODO: REPLACE WITH FUNCTION THAT PRINTS IMPORTANT POLLING INFORMATION
 			printPointDebugInfo(pnt)
 
 			if pnt.Priority == nil {
@@ -160,7 +165,14 @@ func (i *Instance) ModbusPolling() error {
 			//dCheck.devUUID = dev.UUID
 			mbClient, err = i.setClient(net, dev, true)
 			if err != nil {
-				modbusErrorMsg(fmt.Sprintf("failed to set client error: %v network name:%s", err, net.Name))
+				modbusErrorMsg(fmt.Sprintf("failed to set client error: %v. network name:%s", err, net.Name))
+				if mbClient.PortUnavailable {
+					netPollMan.PausePolling()
+					unpauseFunc := func() {
+						netPollMan.UnpausePolling()
+					}
+					netPollMan.PortUnavailableTimeout = time.AfterFunc(10*time.Second, unpauseFunc)
+				}
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
@@ -188,8 +200,7 @@ func (i *Instance) ModbusPolling() error {
 			var writeValuePointer *float64
 			writeSuccess := false
 			if isWriteable(pnt.WriteMode) && utils.BoolIsNil(pnt.WritePollRequired) { //DO WRITE IF REQUIRED
-				modbusDebugMsg("modbus write point:")
-				modbusDebugMsg("%+v", pnt)
+				modbusDebugMsg(fmt.Sprintf("modbus write point: %+v", pnt))
 				//pnt.PrintPointValues()
 				writeValuePointer = pnt.Priority.GetHighestPriorityValue()
 				if writeValuePointer != nil {

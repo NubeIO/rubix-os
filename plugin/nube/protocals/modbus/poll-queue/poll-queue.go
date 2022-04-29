@@ -74,6 +74,7 @@ func (nq *NetworkPriorityPollQueue) AddPollingPoint(pp *PollingPoint) bool {
 	nq.AddDeviceToActiveDevicesList(pp.FFDeviceUUID)
 	return true
 }
+
 func (nq *NetworkPriorityPollQueue) RemovePollingPointByPointUUID(pointUUID string) bool {
 	pollQueueDebugMsg("RemovePollingPointByPointUUID(): ", pointUUID)
 	if nq.QueueUnloader != nil && nq.QueueUnloader.NextPollPoint != nil && nq.QueueUnloader.NextPollPoint.FFPointUUID == pointUUID {
@@ -95,6 +96,20 @@ func (nq *NetworkPriorityPollQueue) UpdatePollingPointByPointUUID(pointUUID stri
 	nq.StandbyPollingPoints.UpdatePollingPointByPointUUID(pointUUID, newPriority)
 	return true
 }
+func (nq *NetworkPriorityPollQueue) GetPollingPointByPointUUID(pointUUID string) (*PollingPoint, error) {
+	pollQueueDebugMsg("NetworkPriorityPollQueue GetPollingPointByPointUUID(): ", pointUUID)
+	pollQueueIndex := nq.PriorityQueue.GetPollingPointIndexByPointUUID(pointUUID)
+	if pollQueueIndex != -1 {
+		return nq.PriorityQueue.PriorityQueue[pollQueueIndex], nil
+	}
+	standbyIndex := nq.StandbyPollingPoints.GetPollingPointIndexByPointUUID(pointUUID)
+	if standbyIndex != -1 {
+		return nq.StandbyPollingPoints.PriorityQueue[standbyIndex], nil
+	}
+
+	return nil, errors.New(fmt.Sprint("couldn't find point: ", pointUUID))
+}
+
 func (nq *NetworkPriorityPollQueue) GetNextPollingPoint() (*PollingPoint, error) {
 	pp, err := nq.PriorityQueue.GetNextPollingPoint()
 	if err != nil {

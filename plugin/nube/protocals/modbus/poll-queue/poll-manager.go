@@ -30,11 +30,12 @@ import (
 type NetworkPollManager struct {
 	DBHandlerRef *dbhandler.Handler
 
-	Enable              bool
-	MaxPollRate         time.Duration
-	PollQueue           *NetworkPriorityPollQueue
-	PluginQueueUnloader *QueueUnloader
-	StatsCalcTimer      time.Ticker
+	Enable                 bool
+	MaxPollRate            time.Duration
+	PollQueue              *NetworkPriorityPollQueue
+	PluginQueueUnloader    *QueueUnloader
+	StatsCalcTimer         *time.Ticker
+	PortUnavailableTimeout *time.Timer
 
 	//References
 	FFNetworkUUID string
@@ -104,13 +105,14 @@ func (pm *NetworkPollManager) PausePolling() { //POLLING SHOULD NOT BE PAUSED FO
 	var nextPP *PollingPoint = nil
 	if pm.PluginQueueUnloader.NextPollPoint != nil {
 		nextPP = pm.PluginQueueUnloader.NextPollPoint
+		pm.PollQueue.AddPollingPoint(nextPP) //add the next point back into the queue
 	}
 	pm.StopQueueUnloader()
-	pm.PollQueue.AddPollingPoint(nextPP) //add the next point back into the queue
 }
 
 func (pm *NetworkPollManager) UnpausePolling() {
 	pm.Enable = true
+	pm.PortUnavailableTimeout = nil
 	pm.StartQueueUnloader()
 }
 

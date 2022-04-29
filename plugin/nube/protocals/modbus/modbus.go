@@ -51,10 +51,11 @@ func (i *Instance) setClient(network *model.Network, device *model.Device, cache
 		handler.Timeout = 5 * time.Second
 
 		err := handler.Connect()
-		if err != nil {
-			return smod.ModbusClient{}, err
-		}
 		defer handler.Close()
+		if err != nil {
+			modbusErrorMsg(fmt.Sprintf("setClient:  %v. port:%s", err, serialPort))
+			return smod.ModbusClient{PortUnavailable: true}, err
+		}
 		mc := modbus.NewClient(handler)
 		mbClient.RTUClientHandler = handler
 		mbClient.Client = mc
@@ -68,10 +69,11 @@ func (i *Instance) setClient(network *model.Network, device *model.Device, cache
 		}
 		handler := modbus.NewTCPClientHandler(url)
 		err = handler.Connect()
-		if err != nil {
-			return smod.ModbusClient{}, err
-		}
 		defer handler.Close()
+		if err != nil {
+			modbusErrorMsg(fmt.Sprintf("setClient:  %v. port:%s", err, url))
+			return smod.ModbusClient{PortUnavailable: true}, err
+		}
 		mc := modbus.NewClient(handler)
 		mbClient.TCPClientHandler = handler
 		mbClient.Client = mc
