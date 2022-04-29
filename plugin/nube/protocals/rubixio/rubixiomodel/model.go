@@ -7,7 +7,7 @@ type NameStruct struct {
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
 	Max      int    `json:"max" default:"20"`
-	Default  string `json:"default" default:"edge"`
+	Default  string `json:"default" default:"rubix-io"`
 }
 
 type DescriptionStruct struct {
@@ -33,7 +33,7 @@ type Network struct {
 	AutoMappingNetworksSelection struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[\"disable\",\"edge28-to-bacnetserver\"]"`
+		Options  []string `json:"options" default:"[\"disable\",\"self-mapping\",\"rubix-io-to-bacnetserver\"]"`
 		Default  string   `json:"default" default:""`
 	} `json:"auto_mapping_networks_selection"`
 	AutoMappingFlowNetworkName struct {
@@ -65,8 +65,8 @@ type Device struct {
 	Port struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"false"`
-		Options  int    `json:"options" default:"5000"`
-		Default  int    `json:"default" default:"5000"`
+		Options  int    `json:"options" default:"5001"`
+		Default  int    `json:"default" default:"5001"`
 	} `json:"port"`
 }
 
