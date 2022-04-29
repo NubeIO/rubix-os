@@ -153,14 +153,12 @@ func (d *GormDatabase) producerPointWrite(uuid string, point *model.Point, produ
 		log.Errorf("producer: issue on update producer err: %v\n", err)
 		return errors.New("issue on update producer")
 	}
-
+	syncCOV := model.SyncCOV{Priority: point.Priority}
+	err = d.TriggerCOVToWriterClone(producerModel, &syncCOV)
+	if err != nil {
+		return err
+	}
 	if utils.BoolIsNil(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
-		syncCOV := model.SyncCOV{Priority: point.Priority}
-		err = d.TriggerCOVToWriterClone(producerModel, &syncCOV)
-		if err != nil {
-			return err
-		}
-
 		data, _ := json.Marshal(point.Priority)
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = uuid
