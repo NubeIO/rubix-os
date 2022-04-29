@@ -2,11 +2,12 @@ module github.com/NubeIO/flow-framework
 
 //replace github.com/NubeIO/nubeio-rubix-lib-helpers-go => /home/aidan/code/go/nube/nubeio-rubix-lib-helpers-go
 //replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/nubeio-rubix-lib-models-go
+//replace github.com/NubeIO/nubeio-rubix-lib-rest-go => /home/aidan/code/go/nube/nubeio-rubix-lib-rest-go
 
 require (
 	github.com/NubeDev/location v0.0.2
 	github.com/NubeIO/configor v0.0.3
-	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.4
+	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.6
 	github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.9
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
@@ -31,6 +32,7 @@ require (
 require go.bug.st/serial v1.3.2
 
 require (
+	github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.4
 	github.com/PaesslerAG/gval v1.1.1
 	github.com/gomarkdown/markdown v0.0.0-20210918233619-6c1113f12c4a
 	github.com/grid-x/modbus v0.0.0-20220210093200-c7b3bba92b40

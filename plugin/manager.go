@@ -24,7 +24,6 @@ type Database interface {
 	GetPlugin(id string) (*model.PluginConf, error)
 	GetPluginByPath(path string) (*model.PluginConf, error)
 	CreatePlugin(p *model.PluginConf) error
-	CreateMessage(message *model.Message) error
 	UpdatePluginConf(p *model.PluginConf) error
 }
 
