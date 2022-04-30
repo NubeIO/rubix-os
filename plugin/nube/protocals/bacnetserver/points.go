@@ -134,7 +134,7 @@ func (inst *Instance) updatePointValue(body *model.Point) (*model.Point, error) 
 		(*bacnetPoint.Priority).P16 = (*body.Priority).P16
 	}
 	//if !utils.IntNilCheck(body.AddressID) {
-	//	bacnetPoint.Address = utils.IntIsNil(body.AddressID)
+	//	bacnetPoint.Address = utils.IntIsNil(body.Add1234ressID)
 	//}
 	point, r := bacnetClient.UpdatePointValue(bacnetPointUUID, bacnetPoint)
 	if r.GetError() != nil || point == nil {
