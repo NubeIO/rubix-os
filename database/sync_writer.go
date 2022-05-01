@@ -72,7 +72,7 @@ func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.Sync
 		point := model.Point{Priority: body.Priority}
 		// TODO: change this section by below commented section
 		producer, _ := d.GetProducer(writerClone.ProducerUUID, api.Args{})
-		_, err = d.PointWrite(producer.ProducerThingUUID, &point, true)
+		_, err = d.PointWrite(producer.ProducerThingUUID, &point, false)
 		// Currently, writerClone.WriterThingUUID has not valid `WriterThingUUID` on old deployments
 		// _, err = d.PointWrite(writerClone.WriterThingUUID, &point, true)
 		return err

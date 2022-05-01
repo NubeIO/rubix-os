@@ -12,8 +12,6 @@ import (
 	"time"
 )
 
-const pollName = "polling"
-
 type polling struct {
 	enable        bool
 	loopDelay     time.Duration
@@ -64,14 +62,7 @@ func (inst *Instance) syncInputs(dev *model.Device, inputs *rubixio.Inputs) {
 }
 
 func (inst *Instance) syncOutputs(dev *model.Device) (bulk []rubixio.BulkWrite) {
-	uo1 := 0
-	uo2 := 0
-	uo3 := 0
-	uo4 := 0
-	uo5 := 0
-	uo6 := 0
-	do1 := 0
-	do2 := 0
+	var uo1, uo2, uo3, uo4, uo5, uo6, do1, do2 int
 	for _, pnt := range dev.Points {
 		switch pnt.IoNumber {
 		case "UO1":
@@ -198,7 +189,6 @@ func (inst *Instance) polling(p polling) error {
 		}
 		for _, net := range nets { //NETWORKS
 			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
-				log.Infof("rubixio-polling: LOOP COUNT: %v\n", counter)
 				counter++
 				if !nils.BoolIsNil(net.Enable) {
 					continue
@@ -214,7 +204,6 @@ func (inst *Instance) polling(p polling) error {
 					inst.writeOutput(dev)
 				}
 			}
-
 		}
 		if !p.enable { //TODO to disable of the polling isn't working
 			return true, nil

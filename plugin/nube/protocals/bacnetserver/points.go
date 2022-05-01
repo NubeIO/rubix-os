@@ -10,7 +10,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/bacnetserver/v1/bsrest"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/numbers/nums"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/str"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -30,7 +29,6 @@ func setObjectType(objectType string) (objType string) {
 		objType = "binaryOutput"
 	}
 	return
-
 }
 
 //addPoint from rest api
@@ -40,8 +38,8 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		bacnetPoint.Description = "na"
 	}
 	if nils.IntNilCheck(body.AddressID) || nils.IntIsNil(body.AddressID) == 0 {
-		//bacnetPoint.UseNextAvailableAddr = true
-		bacnetPoint.Address = nums.RandInt(1, 65000)
+		bacnetPoint.UseNextAvailableAddr = true
+		//bacnetPoint.Address = nums.RandInt(1, 65000)
 	} else {
 		bacnetPoint.Address = nils.IntIsNil(body.AddressID)
 	}
@@ -59,6 +57,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	bacnetPoint.ObjectType = object
 	bacnetPoint.ObjectName = body.Name
 	bacnetPoint.Enable = true
+
 	bacnetPoint.COV = nils.Float64IsNil(body.COV) + 0.1
 	bacnetPoint.EventState = "normal"
 	bacnetPoint.Units = "noUnits"
@@ -132,19 +131,17 @@ func (inst *Instance) updatePointValue(body *model.Point) (*model.Point, error) 
 	bacnetPoint := &bsrest.BacnetPoint{}
 	bacnetPoint.Priority = new(bsrest.Priority)
 	if (*body.Priority).P16 != nil {
-
 		(*bacnetPoint.Priority).P16 = (*body.Priority).P16
 	}
-	if !utils.IntNilCheck(body.AddressID) {
-		bacnetPoint.Address = utils.IntIsNil(body.AddressID)
-	}
+	//if !utils.IntNilCheck(body.AddressID) {
+	//	bacnetPoint.Address = utils.IntIsNil(body.Add1234ressID)
+	//}
 	point, r := bacnetClient.UpdatePointValue(bacnetPointUUID, bacnetPoint)
 	if r.GetError() != nil || point == nil {
 		log.Errorln("bacnet-server: updatePointValue() body back from rest was nil or err:", r.GetError())
 	} else {
 		log.Println("bacnet-server: updatePointValue() point-name:", point.ObjectName)
 	}
-
 	return nil, nil
 }
 

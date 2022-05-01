@@ -15,14 +15,19 @@ func (inst *Instance) BusServ() {
 	handlerUpdated := bus.Handler{ //UPDATED
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
+
+				isThis := eventbus.IsThisPlugin(e.Topic, inst.pluginUUID)
+				if !isThis {
+					return
+				}
 				//try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
 				if err != nil {
 					return
 				}
 				if pnt != nil {
-					_, err = inst.updatePointValue(pnt)
 					log.Info("BACNET-SERVER BUS PluginsUpdated IsPoint", " ", pnt.UUID)
+					_, err = inst.updatePointValue(pnt)
 					if err != nil {
 						return
 					}

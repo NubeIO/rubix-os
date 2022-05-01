@@ -17,8 +17,9 @@ modbus to bacnet >> many to one
 */
 
 const (
-	edge28Bacnet = "edge28-to-bacnetserver"
-	loRaToBACnet = "lora-to-bacnetserver"
+	edge28Bacnet  = "edge28-to-bacnetserver"
+	loRaToBACnet  = "lora-to-bacnetserver"
+	rubixIOBACnet = "rubix-io-to-bacnetserver"
 )
 
 type MappingNetwork struct {
@@ -28,11 +29,13 @@ type MappingNetwork struct {
 }
 
 var MappingNetworks = struct {
-	Edge28Bacnet MappingNetwork
-	LoRaToBACnet MappingNetwork
+	Edge28Bacnet  MappingNetwork
+	LoRaToBACnet  MappingNetwork
+	RubixIOBACnet MappingNetwork
 }{
-	Edge28Bacnet: MappingNetwork{Name: edge28Bacnet, FromNetwork: model.PluginsNames.Edge28.PluginName, ToNetwork: model.PluginsNames.BACnetServer.PluginName},
-	LoRaToBACnet: MappingNetwork{Name: loRaToBACnet, FromNetwork: model.PluginsNames.LoRa.PluginName, ToNetwork: model.PluginsNames.BACnetServer.PluginName},
+	Edge28Bacnet:  MappingNetwork{Name: edge28Bacnet, FromNetwork: model.PluginsNames.Edge28.PluginName, ToNetwork: model.PluginsNames.BACnetServer.PluginName},
+	LoRaToBACnet:  MappingNetwork{Name: loRaToBACnet, FromNetwork: model.PluginsNames.LoRa.PluginName, ToNetwork: model.PluginsNames.BACnetServer.PluginName},
+	RubixIOBACnet: MappingNetwork{Name: rubixIOBACnet, FromNetwork: model.PluginsNames.RubixIO.PluginName, ToNetwork: model.PluginsNames.BACnetServer.PluginName},
 }
 
 func selectMappingNetwork(selectedPlugin string) (pluginName string) {
@@ -41,6 +44,8 @@ func selectMappingNetwork(selectedPlugin string) (pluginName string) {
 		pluginName = MappingNetworks.Edge28Bacnet.ToNetwork
 	case MappingNetworks.LoRaToBACnet.Name:
 		pluginName = MappingNetworks.LoRaToBACnet.ToNetwork
+	case MappingNetworks.RubixIOBACnet.Name:
+		pluginName = MappingNetworks.RubixIOBACnet.ToNetwork
 	}
 	return
 
@@ -48,6 +53,13 @@ func selectMappingNetwork(selectedPlugin string) (pluginName string) {
 
 /*
 CreatePointMapping
+
+Producer:
+In our world a producer would be a lora temp sensor or a bacnet output
+
+Consumer:
+A consumer would be a bacnet point from the lora temp sensor or an edge-28 output as it needs to be written to from bacnet
+
 Example mapping for self mapping
 - user when making a new network selects "self-mapping"
 - when they add a new point, make a new producer as type point and select the newly made point
@@ -80,23 +92,20 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		log.Errorln("mapping.db.selectFlowNetwork(): missing flow network clone")
 		return nil, errors.New(fmt.Sprintf("missing flow network clone"))
 	}
-
+	//create a new stream or use existing
 	stream, err := d.createPointMappingStream(device.Name, network.Name, flowNetwork)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, plugin := range body.AutoMappingNetworksSelection { //j njjk,liunmjj code comment from my daughter lenny-j 3-apr-2022  //DONT DELETE its her first one :)
-
 		streamClone, err := d.GetStreamCloneByArg(api.Args{SourceUUID: nils.NewString(stream.UUID)})
 		if err != nil {
 			log.Errorln("mapping.db.CreatePointMapping(): failed to find stream clone with source uuid:", stream.UUID)
 			return nil, fmt.Errorf("stream-clone is missing please re-save the stream")
 		}
-
 		objectType := body.Point.ObjectType
 		isOutput := body.Point.IsOutput
-
 		if plugin != "self-mapping" {
 			//make the new network
 			network, err = d.createPointMappingNetwork(plugin)
@@ -216,13 +225,11 @@ func (d *GormDatabase) createPointMappingStreamClone(deviceName, networkName str
 }
 
 func (d *GormDatabase) createPointMappingPoint(pointObjectType, pointName, deviceUUID string) (point *model.Point, err error) {
-
 	point = &model.Point{}
 	//make pnt, first check
 	point.Name = pointName
 	point.ObjectType = pointObjectType
 	point.DeviceUUID = deviceUUID
-
 	point, err = d.CreatePointPlugin(point)
 	if err != nil {
 		log.Errorln("mapping.db.CreatePointMapping(): failed to add point for point name:", pointName)
@@ -233,6 +240,10 @@ func (d *GormDatabase) createPointMappingPoint(pointObjectType, pointName, devic
 
 func (d *GormDatabase) createPointMappingNetwork(plugin string) (network *model.Network, err error) {
 	plugin = selectMappingNetwork(plugin)
+	if plugin == "" {
+		log.Errorln("mapping.db.CreatePointMapping(): no valid plugin selection, try lora-to-bacnetserver")
+		return nil, errors.New("no valid mapping selecting between 2x networks")
+	}
 	network = &model.Network{}
 	network, err = d.GetNetworkByPluginName(plugin, api.Args{})
 	if network == nil {

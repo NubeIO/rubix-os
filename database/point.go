@@ -180,6 +180,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue //sets default priority array mode.
 	}
+
 	pointModel, presentValue := d.updatePriority(pointModel)
 	//presentValue will be OriginalValue if PointPriorityArrayMode is PriorityArrayToWriteValue or ReadOnlyNoPriorityArrayRequired. OriginalValue will have been updated by plugin on successful read.
 	ov := utils.Float64IsNil(presentValue)
@@ -258,7 +259,6 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 			Where("writer_thing_uuid = ?", pointModel.UUID).
 			Update("present_value", pointModel.PresentValue)
 	}
-
 	if !fromPlugin { // stop looping
 		plug, err := d.GetNetworkByDeviceUUID(pointModel.DeviceUUID, api.Args{})
 		if err != nil {
