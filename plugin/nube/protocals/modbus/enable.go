@@ -6,35 +6,35 @@ import (
 )
 
 // Enable implements plugin.Plugin
-func (i *Instance) Enable() error {
+func (inst *Instance) Enable() error {
 	modbusDebugMsg("MODBUS Enable()")
-	i.enabled = true
-	i.setUUID()
-	i.BusServ()
-	nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, api.Args{})
+	inst.enabled = true
+	inst.setUUID()
+	inst.BusServ()
+	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
 	if nets != nil {
-		i.networks = nets
+		inst.networks = nets
 	} else if nets == nil || err != nil {
-		i.networks = nil
+		inst.networks = nil
 	}
-	if i.config.EnablePolling {
-		if !i.pollingEnabled {
+	if inst.config.EnablePolling {
+		if !inst.pollingEnabled {
 			var arg polling
-			i.pollingEnabled = true
+			inst.pollingEnabled = true
 			arg.enable = true
-			i.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0) //This will delete any existing NetworkPollManagers (if enable is called multiple times, it will rebuild the queues).
-			for _, net := range nets {                                       //Create a new Poll Manager for each network in the plugin.
-				pollManager := pollqueue.NewPollManager(&i.db, net.UUID, i.pluginUUID)
+			inst.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0) //This will delete any existing NetworkPollManagers (if enable is called multiple times, it will rebuild the queues).
+			for _, net := range nets {                                          //Create a new Poll Manager for each network in the plugin.
+				pollManager := pollqueue.NewPollManager(&inst.db, net.UUID, inst.pluginUUID)
 				//modbusDebugMsg("net")
 				//modbusDebugMsg("%+v\n", net)
 				//modbusDebugMsg("pollManager")
 				//modbusDebugMsg("%+v\n", pollManager)
 				pollManager.StartPolling()
-				i.NetworkPollManagers = append(i.NetworkPollManagers, pollManager)
+				inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
 			}
 
 			//TODO: VERIFY POLLING WITHOUT GO ROUTINE WRAPPER
-			err := i.ModbusPolling()
+			err := inst.ModbusPolling()
 			if err != nil {
 				modbusErrorMsg("POLLING ERROR on routine: %v\n", err)
 			}
@@ -44,19 +44,19 @@ func (i *Instance) Enable() error {
 }
 
 // Disable implements plugin.Disable
-func (i *Instance) Disable() error {
+func (inst *Instance) Disable() error {
 	modbusDebugMsg("MODBUS Disable()")
-	i.enabled = false
-	if i.pollingEnabled {
+	inst.enabled = false
+	if inst.pollingEnabled {
 		var arg polling
-		i.pollingEnabled = false
+		inst.pollingEnabled = false
 		arg.enable = false
-		i.pollingCancel()
-		i.pollingCancel = nil
-		for _, pollMan := range i.NetworkPollManagers {
+		inst.pollingCancel()
+		inst.pollingCancel = nil
+		for _, pollMan := range inst.NetworkPollManagers {
 			pollMan.StopPolling()
 		}
-		i.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0)
+		inst.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0)
 	}
 	return nil
 }

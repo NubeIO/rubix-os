@@ -72,63 +72,63 @@ func supportedObjects() *utils.Array {
 }
 
 // RegisterWebhook implements plugin.Webhooker
-func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
-	i.basePath = basePath
-	modbusDebugMsg(fmt.Sprintf("RegisterWebhook(): %+v\n", i))
+func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
+	inst.basePath = basePath
+	modbusDebugMsg(fmt.Sprintf("RegisterWebhook(): %+v\n", inst))
 	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
-		network, err := i.addNetwork(body)
+		network, err := inst.addNetwork(body)
 		plugin.ResponseHandler(network, err, 0, ctx)
 	})
 	mux.POST(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
-		device, err := i.addDevice(body)
+		device, err := inst.addDevice(body)
 		plugin.ResponseHandler(device, err, 0, ctx)
 	})
 	mux.POST(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
-		point, err := i.addPoint(body)
+		point, err := inst.addPoint(body)
 		plugin.ResponseHandler(point, err, 0, ctx)
 	})
 	mux.PATCH(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
-		network, err := i.updateNetwork(body)
+		network, err := inst.updateNetwork(body)
 		plugin.ResponseHandler(network, err, 0, ctx)
 	})
 	mux.PATCH(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
-		device, err := i.updateDevice(body)
+		device, err := inst.updateDevice(body)
 		plugin.ResponseHandler(device, err, 0, ctx)
 	})
 	mux.PATCH(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
-		point, err := i.updatePoint(body)
+		point, err := inst.updatePoint(body)
 		plugin.ResponseHandler(point, err, 0, ctx)
 	})
 	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		uuid := plugin.ResolveID(ctx)
-		point, err := i.writePoint(uuid, body)
+		point, err := inst.writePoint(uuid, body)
 		plugin.ResponseHandler(point, err, 0, ctx)
 	})
 	mux.DELETE(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
-		ok, err := i.deleteNetwork(body)
+		ok, err := inst.deleteNetwork(body)
 		plugin.ResponseHandler(ok, err, 0, ctx)
 	})
 	mux.DELETE(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
-		ok, err := i.deleteDevice(body)
+		ok, err := inst.deleteDevice(body)
 		plugin.ResponseHandler(ok, err, 0, ctx)
 	})
 	mux.DELETE(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
-		ok, err := i.deletePoint(body)
+		ok, err := inst.deletePoint(body)
 		plugin.ResponseHandler(ok, err, 0, ctx)
 	})
 
 	mux.GET(listSerial, func(ctx *gin.Context) {
-		serial, err := i.listSerialPorts()
+		serial, err := inst.listSerialPorts()
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 			return
@@ -140,7 +140,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.POST("/modbus/point/operation", func(ctx *gin.Context) {
 		body, err := bodyClient(ctx)
 		netType := body.Network.TransportType
-		mbClient, err := i.setClient(body.Network, body.Device, false)
+		mbClient, err := inst.setClient(body.Network, body.Device, false)
 		if err != nil {
 			modbusErrorMsg(err, "ERROR ON set modbus client")
 			ctx.JSON(http.StatusBadRequest, err.Error())
@@ -171,7 +171,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.POST("/modbus/wizard/tcp", func(ctx *gin.Context) {
 		body, _ := bodyWizard(ctx)
-		n, err := i.wizardTCP(body)
+		n, err := inst.wizardTCP(body)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 			return
@@ -182,7 +182,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.POST("/modbus/wizard/serial", func(ctx *gin.Context) {
 		body, _ := bodyWizard(ctx)
-		serial, err := i.wizardSerial(body)
+		serial, err := inst.wizardSerial(body)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 			return

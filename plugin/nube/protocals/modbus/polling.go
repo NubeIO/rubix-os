@@ -38,8 +38,8 @@ func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
 	return
 }
 
-func (i *Instance) getNetworkPollManagerByUUID(netUUID string) (*pollqueue.NetworkPollManager, error) {
-	for _, netPollMan := range i.NetworkPollManagers {
+func (inst *Instance) getNetworkPollManagerByUUID(netUUID string) (*pollqueue.NetworkPollManager, error) {
+	for _, netPollMan := range inst.NetworkPollManagers {
 		if netPollMan.FFNetworkUUID == netUUID {
 			return netPollMan, nil
 		}
@@ -50,7 +50,7 @@ func (i *Instance) getNetworkPollManagerByUUID(netUUID string) (*pollqueue.Netwo
 var poll poller.Poller
 
 //TODO: currently Polling loops through each network, grabs one point, and polls it.  Could be improved by having a seperate client/go routine for each of the networks.
-func (i *Instance) ModbusPolling() error {
+func (inst *Instance) ModbusPolling() error {
 	poll = poller.New()
 	var counter = 0
 	f := func() (bool, error) {
@@ -59,18 +59,18 @@ func (i *Instance) ModbusPolling() error {
 		//modbusDebugMsg("LOOP COUNT: ", counter)
 		var netArg api.Args
 		/*
-			nets, err := i.db.GetNetworksByPlugin(i.pluginUUID, netArg)
+			nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, netArg)
 			if err != nil {
 				return false, err
 			}
 		*/
 
-		if len(i.NetworkPollManagers) == 0 {
+		if len(inst.NetworkPollManagers) == 0 {
 			modbusDebugMsg("NO MODBUS NETWORKS FOUND")
 		}
-		//modbusDebugMsg("i.NetworkPollManagers")
-		//modbusDebugMsg("%+v\n", i.NetworkPollManagers)
-		for _, netPollMan := range i.NetworkPollManagers { //LOOP THROUGH AND POLL NEXT POINTS IN EACH NETWORK QUEUE
+		//modbusDebugMsg("inst.NetworkPollManagers")
+		//modbusDebugMsg("%+v\n", inst.NetworkPollManagers)
+		for _, netPollMan := range inst.NetworkPollManagers { //LOOP THROUGH AND POLL NEXT POINTS IN EACH NETWORK QUEUE
 			//modbusDebugMsg("ModbusPolling: netPollMan ", netPollMan.FFNetworkUUID)
 			if netPollMan.PortUnavailableTimeout != nil {
 				modbusErrorMsg("ModbusPolling: modbus port unavailable. polling paused.")
@@ -80,12 +80,12 @@ func (i *Instance) ModbusPolling() error {
 			//Check that network exists
 			//modbusDebugMsg("netPollMan")
 			//modbusDebugMsg("%+v\n", netPollMan)
-			net, err := i.db.GetNetwork(netPollMan.FFNetworkUUID, netArg)
+			net, err := inst.db.GetNetwork(netPollMan.FFNetworkUUID, netArg)
 			//modbusDebugMsg("net")
 			//modbusDebugMsg("%+v\n", net)
 			//modbusDebugMsg("err")
 			//modbusDebugMsg("%+v\n", err)
-			if err != nil || net == nil || net.PluginConfId != i.pluginUUID {
+			if err != nil || net == nil || net.PluginConfId != inst.pluginUUID {
 				modbusErrorMsg("MODBUS NETWORK NOT FOUND")
 				continue
 			}
@@ -112,7 +112,7 @@ func (i *Instance) ModbusPolling() error {
 			//printPollingPointDebugInfo(pp)
 
 			var devArg api.Args
-			dev, err := i.db.GetDevice(pp.FFDeviceUUID, devArg)
+			dev, err := inst.db.GetDevice(pp.FFDeviceUUID, devArg)
 			if dev == nil || err != nil {
 				modbusErrorMsg("could not find deviceID:", pp.FFDeviceUUID)
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
@@ -129,7 +129,7 @@ func (i *Instance) ModbusPolling() error {
 				continue
 			}
 
-			pnt, err := i.db.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
+			pnt, err := inst.db.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
 			if pnt == nil || err != nil {
 				modbusErrorMsg("could not find pointID: ", pp.FFPointUUID)
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
@@ -163,7 +163,7 @@ func (i *Instance) ModbusPolling() error {
 			var mbClient smod.ModbusClient
 			//var dCheck devCheck
 			//dCheck.devUUID = dev.UUID
-			mbClient, err = i.setClient(net, dev, true)
+			mbClient, err = inst.setClient(net, dev, true)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("failed to set client error: %v. network name:%s", err, net.Name))
 				if mbClient.PortUnavailable {
@@ -206,7 +206,7 @@ func (i *Instance) ModbusPolling() error {
 				if writeValuePointer != nil {
 					response, responseValue, err = networkWrite(mbClient, pnt)
 					if err != nil {
-						_, err = i.pointUpdateErr(pnt, err)
+						_, err = inst.pointUpdateErr(pnt, err)
 						netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 						continue
 					}
@@ -222,7 +222,7 @@ func (i *Instance) ModbusPolling() error {
 			if utils.BoolIsNil(pnt.ReadPollRequired) { //DO READ IF REQUIRED
 				response, responseValue, err = networkRead(mbClient, pnt)
 				if err != nil {
-					_, err = i.pointUpdateErr(pnt, err)
+					_, err = inst.pointUpdateErr(pnt, err)
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 					continue
 				}
@@ -248,12 +248,12 @@ func (i *Instance) ModbusPolling() error {
 					//fmt.Println("ModbusPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
 					readSuccess = true
 				}
-				_, err = i.pointUpdate(pnt, responseValue, writeSuccess, readSuccess, true)
+				_, err = inst.pointUpdate(pnt, responseValue, writeSuccess, readSuccess, true)
 			}
 
 			/*
 				//JUST FOR TESTING
-				pnt, err = i.db.GetPoint(pp.FFPointUUID)
+				pnt, err = inst.db.GetPoint(pp.FFPointUUID)
 				if pnt == nil || err != nil {
 					log.Errorf("modbus: AFTER... could not find pointID : %s\n", pp.FFPointUUID)
 				}
@@ -267,7 +267,7 @@ func (i *Instance) ModbusPolling() error {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	i.pollingCancel = cancel
+	inst.pollingCancel = cancel
 	go poll.GoPoll(ctx, f)
 	return nil
 }

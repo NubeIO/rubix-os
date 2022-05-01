@@ -21,8 +21,8 @@ const chirpName = "admin"
 const chirpPass = "admin"
 
 // RegisterWebhook implements plugin.Webhooker
-func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
-	i.basePath = basePath
+func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
+	inst.basePath = basePath
 	cli := lwrest.NewChirp(chirpName, chirpPass, ip, port)
 
 	mux.GET("/lorawan/organizations", func(ctx *gin.Context) {
@@ -104,7 +104,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	mux.DELETE("/lorawan/devices/drop", func(ctx *gin.Context) {
-		_, err := i.DropDevices()
+		_, err := inst.DropDevices()
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {

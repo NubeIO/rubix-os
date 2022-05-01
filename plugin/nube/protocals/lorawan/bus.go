@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (i *Instance) BusServ() {
+func (inst *Instance) BusServ() {
 	handlerCreated := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
@@ -34,7 +34,7 @@ func (i *Instance) BusServ() {
 				}
 				if dev != nil {
 					log.Info("BACNET BUS PluginsCreated IsDevice", " ", dev.UUID)
-					//_, err = i.addPoints(dev)
+					//_, err = inst.addPoints(dev)
 					if err != nil {
 						return
 					}
@@ -46,7 +46,7 @@ func (i *Instance) BusServ() {
 				if err != nil {
 					return
 				}
-				//_, err = i.addPoint(pnt)
+				//_, err = inst.addPoint(pnt)
 				if err != nil {
 					return
 				}
@@ -85,7 +85,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if dev != nil {
-					//_, err = i.addPoints(dev)
+					//_, err = inst.addPoints(dev)
 					log.Info("BACNET BUS PluginsUpdated IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
@@ -98,7 +98,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if pnt != nil {
-					//_, err = i.pointPatch(pnt)
+					//_, err = inst.pointPatch(pnt)
 					log.Info("BACNET BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return
@@ -134,7 +134,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if dev != nil {
-					//_, err = i.addPoints(dev)
+					//_, err = inst.addPoints(dev)
 					log.Info("BACNET BUS DELETED IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
@@ -148,7 +148,7 @@ func (i *Instance) BusServ() {
 				}
 				log.Info("BACNET BUS DELETED IsPoint", " ")
 				if pnt != nil {
-					//p, err := i.deletePoint(pnt)
+					//p, err := inst.deletePoint(pnt)
 					log.Info("BACNET BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", "p")
 					if err != nil {
 						return
@@ -168,7 +168,7 @@ func (i *Instance) BusServ() {
 				p, _ := e.Data.(mqtt.Message)
 				devEUI, appID, valid := decodeMQTT(p.Topic())
 				if valid {
-					_, err := i.mqttUpdate(p, devEUI, appID)
+					_, err := inst.mqttUpdate(p, devEUI, appID)
 					if err != nil {
 						return
 					}

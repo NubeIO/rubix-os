@@ -6,14 +6,14 @@ import (
 )
 
 // GetDisplay implements public.Displayer
-func (i *Instance) GetDisplay(baseURL *url.URL) pluginapi.Response {
+func (inst *Instance) GetDisplay(baseURL *url.URL) pluginapi.Response {
 	loc := &url.URL{
-		Path: i.basePath,
+		Path: inst.basePath,
 	}
 	loc = loc.ResolveReference(&url.URL{
 		Path: "restart",
 	})
-	baseURL.Path = i.basePath
+	baseURL.Path = inst.basePath
 	m := pluginapi.Help{
 		Name:               name,
 		PluginType:         pluginType,

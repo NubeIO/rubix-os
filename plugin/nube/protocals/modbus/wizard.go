@@ -10,7 +10,7 @@ import (
 )
 
 //wizard make a network/dev/pnt
-func (i *Instance) wizardTCP(body wizard) (string, error) {
+func (inst *Instance) wizardTCP(body wizard) (string, error) {
 	ip := "192.168.15.202"
 	if body.IP != "" {
 		ip = body.IP
@@ -49,7 +49,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 		pnt.AddressID = utils.NewInt(1) //TODO check conversion
 		pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 
-		_, err = i.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
+		_, err = inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 		if err != nil {
 			return "modbus wizard 0 error: on flow-framework add modbus TCP network wizard", err
 		}
@@ -62,8 +62,8 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 		net.TransportType = model.TransType.IP
 		net.PluginPath = "modbus"
 
-		net.PluginConfId = i.pluginUUID
-		_, err := i.db.CreateNetwork(&net, false)
+		net.PluginConfId = inst.pluginUUID
+		_, err := inst.db.CreateNetwork(&net, false)
 		if err != nil {
 			modbusErrorMsg(fmt.Sprintf("network creation failure: %s", err))
 		}
@@ -78,7 +78,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 			dev.ZeroMode = utils.NewTrue()
 			dev.PollDelayPointsMS = 5000
 			dev.NetworkUUID = net.UUID
-			_, err := i.db.CreateDevice(&dev)
+			_, err := inst.db.CreateDevice(&dev)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
 			}
@@ -93,7 +93,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 			pnt.PollPriority = model.PRIORITY_NORMAL
 			pnt.PollRate = model.RATE_NORMAL
 			pnt.WriteMode = model.ReadOnly
-			_, err = i.db.CreatePoint(&pnt, false, true)
+			_, err = inst.db.CreatePoint(&pnt, false, true)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("consumer point creation failure: %s", err))
 			}
@@ -124,7 +124,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 			pnt.AddressID = utils.NewInt(j) //TODO check conversion
 			pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 
-			_, err = i.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
+			_, err = inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 			if err != nil {
 				return "modbus wizard 1: on flow-framework add modbus TCP network wizard", err
 			}
@@ -137,8 +137,8 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 		net.TransportType = model.TransType.Serial
 		net.PluginPath = "modbus"
 
-		net.PluginConfId = i.pluginUUID
-		_, err := i.db.CreateNetwork(&net, false)
+		net.PluginConfId = inst.pluginUUID
+		_, err := inst.db.CreateNetwork(&net, false)
 		if err != nil {
 			modbusErrorMsg(fmt.Sprintf("network creation failure: %s", err))
 		}
@@ -160,7 +160,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 			dev.NormalPollRate = normalDuration
 			slowDuration, err := time.ParseDuration("120s")
 			dev.SlowPollRate = slowDuration
-			_, err = i.db.CreateDevice(&dev)
+			_, err = inst.db.CreateDevice(&dev)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
 			}
@@ -180,7 +180,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 					pnt.PollPriority = model.PRIORITY_HIGH
 				}
 				pnt.WriteMode = model.ReadOnly
-				_, err = i.db.CreatePoint(&pnt, false, true)
+				_, err = inst.db.CreatePoint(&pnt, false, true)
 				if err != nil {
 					modbusErrorMsg(fmt.Sprintf("consumer point creation failure: %s", err))
 				}
@@ -196,8 +196,8 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 		net.PluginPath = "modbus"
 		net.MaxPollRate = 2 * time.Second
 
-		net.PluginConfId = i.pluginUUID
-		_, err := i.db.CreateNetwork(&net, false)
+		net.PluginConfId = inst.pluginUUID
+		_, err := inst.db.CreateNetwork(&net, false)
 		if err != nil {
 			modbusErrorMsg(fmt.Sprintf("network creation failure: %s", err))
 		}
@@ -219,7 +219,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 			dev.NormalPollRate = normalDuration
 			slowDuration, err := time.ParseDuration("120s")
 			dev.SlowPollRate = slowDuration
-			_, err = i.db.CreateDevice(&dev)
+			_, err = inst.db.CreateDevice(&dev)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
 			}
@@ -238,7 +238,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 				pnt.PollRate = model.RATE_NORMAL
 				pnt.WriteMode = model.ReadOnly
 				pnt.PointPriorityArrayMode = model.ReadOnlyNoPriorityArrayRequired
-				_, err = i.db.CreatePoint(&pnt, false, true)
+				_, err = inst.db.CreatePoint(&pnt, false, true)
 				if err != nil {
 					modbusErrorMsg(fmt.Sprintf("consumer point creation failure: %s", err))
 				}
@@ -250,7 +250,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 	case 5:
 		if body.NameArg != "" && body.AddArg > 0 {
 			networkName := "CliniMix-TMV"
-			net, err := i.db.GetNetworkByName(networkName, api.Args{})
+			net, err := inst.db.GetNetworkByName(networkName, api.Args{})
 			if err != nil || net == nil {
 				if net == nil {
 					net = &model.Network{}
@@ -259,8 +259,8 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 				net.TransportType = model.TransType.Serial
 				net.PluginPath = "modbus"
 				net.MaxPollRate = 100 * time.Millisecond
-				net.PluginConfId = i.pluginUUID
-				net, err = i.addNetwork(net)
+				net.PluginConfId = inst.pluginUUID
+				net, err = inst.addNetwork(net)
 				if err != nil {
 					modbusErrorMsg(fmt.Sprintf("network creation failure: %s", err))
 					modbusDebugMsg("Created a Network")
@@ -269,7 +269,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 				modbusDebugMsg("Network already exists")
 			}
 
-			dev, exists := i.db.DeviceNameExistsInNetwork(body.NameArg, net.UUID)
+			dev, exists := inst.db.DeviceNameExistsInNetwork(body.NameArg, net.UUID)
 			if err != nil || dev == nil || !exists {
 				if dev == nil {
 					dev = &model.Device{}
@@ -287,7 +287,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 				dev.NormalPollRate = normalDuration
 				slowDuration, err := time.ParseDuration("120s")
 				dev.SlowPollRate = slowDuration
-				_, err = i.addDevice(dev)
+				_, err = inst.addDevice(dev)
 				if err != nil {
 					modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
 				}
@@ -663,7 +663,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 				pnt.WriteMode = point.WriteMode
 				pnt.Fallback = utils.NewFloat64(point.Fallback)
 				pnt.PointPriorityArrayMode = point.PointPriorityArrayMode
-				_, err = i.addPoint(pnt)
+				_, err = inst.addPoint(pnt)
 				if err != nil {
 					modbusErrorMsg(fmt.Sprintf("point creation failure: %s", err))
 				}
@@ -677,7 +677,7 @@ func (i *Instance) wizardTCP(body wizard) (string, error) {
 }
 
 //wizard make a network/dev/pnt
-func (i *Instance) wizardSerial(body wizard) (string, error) {
+func (inst *Instance) wizardSerial(body wizard) (string, error) {
 
 	sp := "/dev/ttyUSB0"
 	if body.SerialPort != "" {
@@ -715,7 +715,7 @@ func (i *Instance) wizardSerial(body wizard) (string, error) {
 	pnt.AddressID = utils.NewInt(1) //TODO check conversion
 	pnt.ObjectType = string(model.ObjTypeWriteCoil)
 
-	pntRet, err := i.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
+	pntRet, err := inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 	if err != nil {
 		return "error: on flow-framework add modbus serial network wizard", err
 	}

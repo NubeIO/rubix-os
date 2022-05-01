@@ -8,15 +8,15 @@ import (
 	"time"
 )
 
-func (i *Instance) syncHistory() (bool, error) {
+func (inst *Instance) syncHistory() (bool, error) {
 	log.Info("History sync has is been called...")
-	fnClones, err := i.db.GetFlowNetworkClones()
+	fnClones, err := inst.db.GetFlowNetworkClones()
 	if err != nil {
 		return false, err
 	}
 	var histories []*model.History
 	for _, fnc := range fnClones {
-		hisLog, err := i.db.GetHistoryLogByFlowNetworkCloneUUID(fnc.UUID)
+		hisLog, err := inst.db.GetHistoryLogByFlowNetworkCloneUUID(fnc.UUID)
 		if err != nil {
 			return false, err
 		}
@@ -32,7 +32,7 @@ func (i *Instance) syncHistory() (bool, error) {
 				hisLog.FlowNetworkCloneUUID = fnc.UUID
 				hisLog.LastSyncID = h.ID
 				hisLog.Timestamp = time.Now()
-				_, err = i.db.UpdateHistoryLog(hisLog)
+				_, err = inst.db.UpdateHistoryLog(hisLog)
 				if err != nil {
 					return false, err
 				}
@@ -40,7 +40,7 @@ func (i *Instance) syncHistory() (bool, error) {
 		}
 	}
 	if len(histories) > 0 {
-		_, err = i.db.CreateBulkHistory(histories)
+		_, err = inst.db.CreateBulkHistory(histories)
 		if err != nil {
 			return false, err
 		}

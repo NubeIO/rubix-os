@@ -15,9 +15,9 @@ type InfluxDetail struct {
 	IsError       bool
 }
 
-func (i *Instance) initializeInfluxSettings() []*InfluxSetting {
+func (inst *Instance) initializeInfluxSettings() []*InfluxSetting {
 	var influxSettings []*InfluxSetting
-	influxConnections := i.config.Influx
+	influxConnections := inst.config.Influx
 	for _, influx := range influxConnections {
 		influxSetting := new(InfluxSetting)
 		schema := "http"
@@ -38,7 +38,7 @@ func (i *Instance) initializeInfluxSettings() []*InfluxSetting {
 	return influxSettings
 }
 
-func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
+func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 	log.Info("InfluxDB sync has is been called...")
 	if len(influxSettings) == 0 {
 		err := "influx: InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
@@ -71,7 +71,7 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 		log.Warn(err)
 		return false, errors.New(err)
 	}
-	histories, err := i.db.GetHistoriesForSync(leastLastSyncId)
+	histories, err := inst.db.GetHistoriesForSync(leastLastSyncId)
 	if err != nil {
 		return false, err
 	}
@@ -81,7 +81,7 @@ func (i *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
 	for _, history := range histories {
 		if producerUuid != history.UUID {
 			producerUuid = history.UUID
-			historyTags, err = i.db.GetHistoryInfluxTags(producerUuid)
+			historyTags, err = inst.db.GetHistoryInfluxTags(producerUuid)
 			if err != nil || len(historyTags) == 0 {
 				log.Warn(fmt.Sprintf("influx: We unable to get the producer_uuid = %s details!", producerUuid))
 				continue
