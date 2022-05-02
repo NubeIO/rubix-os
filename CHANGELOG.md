@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v0.4.5](https://github.com/NubeIO/flow-framework/tree/v0.4.5) (2022-05-02)
+- get bacnet auto mapping working to rubix-io
+- fix bug on rubix-io plugin
+- fix bug on flow-network sync
+
 ## [v0.4.4](https://github.com/NubeIO/flow-framework/tree/v0.4.4) (2022-04-29)
 - add new plugin for the rubix-io
 
