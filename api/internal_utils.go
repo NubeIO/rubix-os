@@ -441,6 +441,11 @@ func getBODYPointMapping(ctx *gin.Context) (dto *model.PointMapping, err error) 
 	return dto, err
 }
 
+func getBODYBulkPoints(ctx *gin.Context) (dto []*model.Point, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err

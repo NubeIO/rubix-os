@@ -267,6 +267,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		pointRoutes := apiRoutes.Group("/points")
 		{
 			pointRoutes.GET("", pointHandler.GetPoints)
+			pointRoutes.POST("/bulk", pointHandler.GetPointsBulk)
 			pointRoutes.POST("", pointHandler.CreatePoint)
 			pointRoutes.GET("/:uuid", pointHandler.GetPoint)
 			pointRoutes.PATCH("/:uuid", pointHandler.UpdatePoint)
