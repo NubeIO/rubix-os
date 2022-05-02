@@ -21,6 +21,24 @@ func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
 	return pointsModel, nil
 }
 
+func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point, error) {
+	var pointsModel []*model.Point
+	points, err := d.GetPoints(api.Args{WithPriority: true})
+	if err != nil {
+		return nil, err
+	}
+	for _, pnt := range points {
+		for _, search := range bulkPoints {
+			if pnt.UUID == search.UUID {
+				pointsModel = append(pointsModel, pnt)
+			}
+
+		}
+	}
+
+	return pointsModel, nil
+}
+
 func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)
