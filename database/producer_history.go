@@ -76,6 +76,37 @@ func (d *GormDatabase) GetProducerHistoriesPoints(args api.Args) ([]*model.Histo
 	return historiesModel, nil
 }
 
+// GetProducerHistoriesPointsForSync returns point histories of producer histories
+func (d *GormDatabase) GetProducerHistoriesPointsForSync(id string, timeStamp string) ([]*model.History, error) {
+	var historiesModel []*model.History
+	var proHistoriesModel []*model.ProducerHistory
+	query := d.DB.Where("id = ?", id).Where("datetime(timestamp) = datetime(?)", timeStamp).
+		Find(&proHistoriesModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	if len(proHistoriesModel) == 0 {
+		id = "0"
+	}
+	subQuery := d.DB.Model(&model.Producer{}).Select("uuid").Where("producer_thing_class = ?", "point")
+	query = d.DB.Where("id > ?", id).Where("producer_uuid in (?)", subQuery).Find(&proHistoriesModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	for _, pHis := range proHistoriesModel {
+		priority := new(model.Priority)
+		_ = json.Unmarshal(pHis.DataStore, &priority)
+		highestPriorityValue := priority.GetHighestPriorityValue()
+		value := 0.0
+		if highestPriorityValue != nil {
+			value = *highestPriorityValue
+		}
+		historiesModel = append(historiesModel,
+			&model.History{ID: pHis.ID, UUID: pHis.ProducerUUID, Value: value, Timestamp: pHis.Timestamp})
+	}
+	return historiesModel, nil
+}
+
 func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (*model.ProducerHistory, error) {
 	return d.AppendProducerHistory(history)
 }

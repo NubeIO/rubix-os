@@ -5,7 +5,6 @@ import (
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 func (i *Instance) syncHistory() (bool, error) {
@@ -18,12 +17,12 @@ func (i *Instance) syncHistory() (bool, error) {
 	for _, fnc := range fnClones {
 		hisLog, err := i.db.GetHistoryLogByFlowNetworkCloneUUID(fnc.UUID)
 		if err != nil {
-			return false, err
+			continue
 		}
 		cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
-		pHistories, err := cli.GetProducerHistoriesPoints(hisLog.LastSyncID)
+		pHistories, err := cli.GetProducerHistoriesPointsForSync(hisLog.LastSyncID, hisLog.Timestamp)
 		if err != nil {
-			return false, err
+			continue
 		}
 		for k, h := range *pHistories {
 			h := h // more: https://medium.com/swlh/use-pointer-of-for-range-loop-variable-in-go-3d3481f7ffc9
@@ -31,10 +30,10 @@ func (i *Instance) syncHistory() (bool, error) {
 			if k == len(*pHistories)-1 { // Update History Log
 				hisLog.FlowNetworkCloneUUID = fnc.UUID
 				hisLog.LastSyncID = h.ID
-				hisLog.Timestamp = time.Now()
+				hisLog.Timestamp = h.Timestamp
 				_, err = i.db.UpdateHistoryLog(hisLog)
 				if err != nil {
-					return false, err
+					continue
 				}
 			}
 		}
