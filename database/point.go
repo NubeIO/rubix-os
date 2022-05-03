@@ -187,10 +187,7 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 	}
 	pointModel.InSync = utils.NewFalse()
 	pointModel.WritePollRequired = utils.NewTrue()
-	fmt.Println(fmt.Sprintf("PointWrite pointModel %+v", pointModel))
 	point, err := d.UpdatePointValue(pointModel, fromPlugin)
-	fmt.Println(fmt.Sprintf("PointWrite err %+v", err))
-	fmt.Println(fmt.Sprintf("PointWrite point %+v", point))
 	return point, err
 }
 
@@ -241,18 +238,18 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 	}
 
 	//TODO: I think this whole section can be deleted; Unless the overhead of d.ProducersPointWrite(pointModel) is too high.
-	DbUpdateRequired := false
+	dbUpdateRequired := false
 	switch pointModel.PointPriorityArrayMode {
 	case model.PriorityArrayToPresentValue:
 		//Priority array has already been pushed to DB so only need to update if PresentValue has changed or if there is a value transform error.
-		DbUpdateRequired = !utils.CompareFloatPtr(pointModel.PresentValue, presentValue) || presentValueTransformFault
+		dbUpdateRequired = !utils.CompareFloatPtr(pointModel.PresentValue, presentValue) || presentValueTransformFault
 
 	case model.PriorityArrayToWriteValue:
 		// TODO: Currently there isn't a good comparison to decide if a DB update is required, so just do it.  This could be added, but it would require a bunch of rework to the above functions.
-		DbUpdateRequired = true
+		dbUpdateRequired = true
 
 	case model.ReadOnlyNoPriorityArrayRequired:
-		DbUpdateRequired = !utils.CompareFloatPtr(pointModel.PresentValue, presentValue) || presentValueTransformFault
+		dbUpdateRequired = !utils.CompareFloatPtr(pointModel.PresentValue, presentValue) || presentValueTransformFault
 	}
 
 	// If the present value tranformations have resulted in an error, DB needs to be updated with the errors, but PresentValue should not change.
@@ -267,7 +264,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 			Update("present_value", nil)
 	}
 
-	if DbUpdateRequired {
+	if dbUpdateRequired {
 		_ = d.DB.Model(&pointModel).Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel)
 		if err != nil {

@@ -143,10 +143,10 @@ func NewPollManager(dbHandler *dbhandler.Handler, FFNetworkUUID, FFPluginUUID st
 	// Make the main priority polling queue
 	queue := make([]*PollingPoint, 0)
 	pq := &PriorityPollQueue{queue}
-	heap.Init(pq) //Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
-	// Make the reference slice that contains points that are not in the current polling queue.
-	refQueue := make([]*PollingPoint, 0)
+	heap.Init(pq)                        //Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
+	refQueue := make([]*PollingPoint, 0) // Make the reference slice that contains points that are not in the current polling queue.
 	rq := &PriorityPollQueue{refQueue}
+	heap.Init(rq) //Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
 	adl := make([]string, 0)
 	pqu := &QueueUnloader{nil, nil, nil}
 	npq := &NetworkPriorityPollQueue{pq, rq, pqu, FFPluginUUID, FFNetworkUUID, adl}
