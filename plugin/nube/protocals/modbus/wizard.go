@@ -154,12 +154,9 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			dev.ZeroMode = utils.NewTrue()
 			dev.PollDelayPointsMS = 5000
 			dev.NetworkUUID = net.UUID
-			fastDuration := 5.0
-			dev.FastPollRate = utils.NewFloat64(fastDuration)
-			normalDuration := 30.0
-			dev.NormalPollRate = utils.NewFloat64(normalDuration)
-			slowDuration := 120.0
-			dev.SlowPollRate = utils.NewFloat64(slowDuration)
+			dev.FastPollRate = 5 * time.Second
+			dev.NormalPollRate = 30 * time.Second
+			dev.SlowPollRate = 120 * time.Second
 			_, err = inst.db.CreateDevice(&dev)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
@@ -194,7 +191,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 		net.Name = "Modbus Net"
 		net.TransportType = model.TransType.Serial
 		net.PluginPath = "modbus"
-		net.MaxPollRate = utils.NewFloat64(2)
+		net.MaxPollRate = 2 * time.Second
 
 		net.PluginConfId = inst.pluginUUID
 		_, err := inst.db.CreateNetwork(&net, false)
@@ -213,12 +210,9 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			dev.ZeroMode = utils.NewTrue()
 			dev.PollDelayPointsMS = 5000
 			dev.NetworkUUID = net.UUID
-			fastDuration := 5.0
-			dev.FastPollRate = utils.NewFloat64(fastDuration)
-			normalDuration := 30.0
-			dev.NormalPollRate = utils.NewFloat64(normalDuration)
-			slowDuration := 120.0
-			dev.SlowPollRate = utils.NewFloat64(slowDuration)
+			dev.FastPollRate = 5 * time.Second
+			dev.NormalPollRate = 30 * time.Second
+			dev.SlowPollRate = 120 * time.Second
 			_, err = inst.db.CreateDevice(&dev)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
@@ -258,7 +252,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				net.Name = "CliniMix-TMV"
 				net.TransportType = model.TransType.Serial
 				net.PluginPath = "modbus"
-				net.MaxPollRate = utils.NewFloat64(0.1)
+				net.MaxPollRate = 100 * time.Millisecond
 				net.PluginConfId = inst.pluginUUID
 				net, err = inst.addNetwork(net)
 				if err != nil {
@@ -281,12 +275,9 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				dev.ZeroMode = utils.NewTrue()
 				dev.PollDelayPointsMS = 1000
 				dev.NetworkUUID = net.UUID
-				fastDuration := 5.0
-				dev.FastPollRate = utils.NewFloat64(fastDuration)
-				normalDuration := 30.0
-				dev.NormalPollRate = utils.NewFloat64(normalDuration)
-				slowDuration := 120.0
-				dev.SlowPollRate = utils.NewFloat64(slowDuration)
+				dev.FastPollRate = 5 * time.Second
+				dev.NormalPollRate = 30 * time.Second
+				dev.SlowPollRate = 120 * time.Second
 				_, err = inst.addDevice(dev)
 				if err != nil {
 					modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
