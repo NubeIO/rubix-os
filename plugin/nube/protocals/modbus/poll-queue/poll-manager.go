@@ -172,37 +172,54 @@ func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUI
 	if err != nil {
 		pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.GetPollRateDuration(): couldn't find device %s/n", deviceUUID))
 	}
-	pollQueueDebugMsg("GetPollRateDuration() device poll times: ", device.FastPollRate, device.NormalPollRate, device.SlowPollRate)
+	pollQueueDebugMsg("GetPollRateDuration() device poll times: ", *device.FastPollRate, *device.NormalPollRate, *device.SlowPollRate)
 
 	var duration time.Duration
 	switch rate {
 	case model.RATE_FAST:
 		pollQueueDebugMsg("GetPollRateDuration(): FAST")
-		if device.FastPollRate <= 0 {
-			duration = 60 * time.Second
+		if device.FastPollRate != nil {
+			if *device.FastPollRate <= 0 {
+				duration = 10 * time.Second
+			} else {
+				duration = time.Duration(*device.FastPollRate) * time.Second
+			}
 		} else {
-			duration = device.FastPollRate
+			duration = 10 * time.Second
 		}
+
 	case model.RATE_NORMAL:
 		pollQueueDebugMsg("GetPollRateDuration(): NORMAL")
-		if device.NormalPollRate <= 0 {
-			duration = 10 * time.Second
+		if device.NormalPollRate != nil {
+			if *device.NormalPollRate <= 0 {
+				duration = 30 * time.Second
+			} else {
+				duration = time.Duration(*device.NormalPollRate) * time.Second
+			}
 		} else {
-			duration = device.NormalPollRate
+			duration = 30 * time.Second
 		}
 	case model.RATE_SLOW:
 		pollQueueDebugMsg("GetPollRateDuration(): SLOW")
-		if device.SlowPollRate <= 0 {
-			duration = 60 * time.Second
+		if device.SlowPollRate != nil {
+			if *device.SlowPollRate <= 0 {
+				duration = 30 * time.Second
+			} else {
+				duration = time.Duration(*device.SlowPollRate) * time.Second
+			}
 		} else {
-			duration = device.SlowPollRate
+			duration = 30 * time.Second
 		}
 	default:
 		pollQueueDebugMsg("GetPollRateDuration(): UNKNOWN")
-		if device.NormalPollRate <= 0 {
-			duration = 60 * time.Second
+		if device.NormalPollRate != nil {
+			if *device.NormalPollRate <= 0 {
+				duration = 30 * time.Second
+			} else {
+				duration = time.Duration(*device.NormalPollRate) * time.Second
+			}
 		} else {
-			duration = device.NormalPollRate
+			duration = 30 * time.Second
 		}
 	}
 
