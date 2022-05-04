@@ -211,6 +211,18 @@ func buildProducerHistoryArgs(ctx *gin.Context) Args {
 	return args
 }
 
+func buildProducerHistoryPointsSyncArgs(ctx *gin.Context) (string, string) {
+	id := ""
+	timeStamp := ""
+	if value, ok := ctx.GetQuery("id"); ok {
+		id = value
+	}
+	if value, ok := ctx.GetQuery("timestamp"); ok {
+		timeStamp = value
+	}
+	return id, timeStamp
+}
+
 func buildScheduleArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
