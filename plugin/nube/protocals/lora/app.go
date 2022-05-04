@@ -97,6 +97,19 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	return point, nil
 }
 
+//writePoint update point. Called via API call.
+func (inst *Instance) writePoint(pntUUID string, body *model.Point) (point *model.Point, err error) {
+	//TODO: check for PointWriteByName calls that might not flow through the plugin.
+	if body == nil {
+		return
+	}
+	point, err = inst.db.WritePoint(pntUUID, body, true)
+	if err != nil || point == nil {
+		return nil, err
+	}
+	return point, nil
+}
+
 //deleteNetwork delete network
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	ok, err = inst.db.DeleteNetwork(body.UUID)

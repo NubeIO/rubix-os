@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -145,6 +146,12 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, "ok")
 			return
 		}
+	})
+	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYPoint(ctx)
+		uuid := plugin.ResolveID(ctx)
+		point, err := inst.writePoint(uuid, body)
+		plugin.ResponseHandler(point, err, 0, ctx)
 	})
 	//mux.GET(ping, func(ctx *gin.Context) {
 	//	rt.Method = nrest.GET
