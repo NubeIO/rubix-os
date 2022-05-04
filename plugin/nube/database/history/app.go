@@ -31,7 +31,7 @@ func (inst *Instance) syncHistory() (bool, error) {
 				hisLog.FlowNetworkCloneUUID = fnc.UUID
 				hisLog.LastSyncID = h.ID
 				hisLog.Timestamp = h.Timestamp
-				_, err = i.db.UpdateHistoryLog(hisLog)
+				_, err = inst.db.UpdateHistoryLog(hisLog)
 				if err != nil {
 					continue
 				}
