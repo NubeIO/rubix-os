@@ -144,7 +144,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {
-		body, _ := plugin.GetBODYPoint(ctx)
+		body, _ := plugin.GetBodyPointWriter(ctx)
 		uuid := plugin.ResolveID(ctx)
 		point, err := inst.writePoint(uuid, body)
 		plugin.ResponseHandler(point, err, 0, ctx)

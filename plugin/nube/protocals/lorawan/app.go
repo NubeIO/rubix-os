@@ -47,7 +47,7 @@ func (inst *Instance) pointPatch(body *bm.Point) (*bm.Point, error) {
 }
 
 //writePoint update point. Called via API call.
-func (inst *Instance) writePoint(pntUUID string, body *bm.Point) (point *bm.Point, err error) {
+func (inst *Instance) writePoint(pntUUID string, body *bm.PointWriter) (point *bm.Point, err error) {
 	//TODO: check for PointWriteByName calls that might not flow through the plugin.
 	if body == nil {
 		return

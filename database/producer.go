@@ -133,12 +133,12 @@ type Point struct {
 	Priority model.Priority `json:"priority"`
 }
 
-func (d *GormDatabase) ProducersPointWrite(point *model.Point) error {
+func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*float64, presentValue *float64) error {
 	producerModelBody := new(model.Producer)
-	producerModelBody.CurrentWriterUUID = point.UUID // TODO: check current_writer_uuid is needed or not
-	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &point.UUID})
+	producerModelBody.CurrentWriterUUID = uuid // TODO: check current_writer_uuid is needed or not
+	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &uuid})
 	for _, producer := range producers {
-		err := d.producerPointWrite(producer.UUID, point, producerModelBody)
+		err := d.producerPointWrite(producer.UUID, priority, presentValue, producerModelBody)
 		if err != nil {
 			return err
 		}
@@ -146,13 +146,13 @@ func (d *GormDatabase) ProducersPointWrite(point *model.Point) error {
 	return nil
 }
 
-func (d *GormDatabase) producerPointWrite(uuid string, point *model.Point, producerModelBody *model.Producer) error {
+func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*float64, presentValue *float64, producerModelBody *model.Producer) error {
 	producerModel, err := d.UpdateProducer(uuid, producerModelBody) // TODO: check current_writer_uuid is needed or not
 	if err != nil {
 		log.Errorf("producer: issue on update producer err: %v\n", err)
 		return errors.New("issue on update producer")
 	}
-	syncCOV := model.SyncCOV{Priority: point.Priority}
+	syncCOV := model.SyncCOV{Priority: priority}
 	err = d.TriggerCOVToWriterClone(producerModel, &syncCOV)
 	if err != nil {
 		return err
@@ -160,7 +160,7 @@ func (d *GormDatabase) producerPointWrite(uuid string, point *model.Point, produ
 	if utils.BoolIsNil(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = uuid
-		ph.PresentValue = point.PresentValue
+		ph.PresentValue = presentValue
 		ph.Timestamp = time.Now().UTC()
 		_, err = d.CreateProducerHistory(ph)
 		if err != nil {

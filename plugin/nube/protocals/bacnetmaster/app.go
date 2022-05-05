@@ -23,20 +23,18 @@ func (inst *Instance) bacnetUpdate(body mqtt.Message) {
 	if t.Size() >= pointUUID {
 		pUUID := t.Get(pointUUID)
 		_pUUID := pUUID.(string)
-		getPnt, err := inst.db.GetOnePointByArgs(api.Args{AddressUUID: &_pUUID})
-		if err != nil || getPnt.UUID == "" {
+		point, err := inst.db.GetOnePointByArgs(api.Args{AddressUUID: &_pUUID})
+		if err != nil || point.UUID == "" {
 			log.Error("bacnet-master-plugin: ERROR on get bacnetUpdate() failed to find point", err, _pUUID)
 			return
 		}
-		var pri model.Priority
-		pri.P16 = payload.Value
-		getPnt.Priority = &pri
-		getPnt.CommonFault.InFault = false
-		getPnt.CommonFault.MessageLevel = model.MessageLevel.Info
-		getPnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
-		getPnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
-		getPnt.CommonFault.LastOk = time.Now().UTC()
-		_, err = inst.db.UpdatePointValue(getPnt.UUID, getPnt, true)
+		priority := map[string]*float64{"_16": payload.Value}
+		point.CommonFault.InFault = false
+		point.CommonFault.MessageLevel = model.MessageLevel.Info
+		point.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		point.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
+		point.CommonFault.LastOk = time.Now().UTC()
+		_, err = inst.db.UpdatePointValue(point.UUID, point, &priority, true)
 		if err != nil {
 			log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 			return
@@ -46,7 +44,7 @@ func (inst *Instance) bacnetUpdate(body mqtt.Message) {
 }
 
 //writePoint update point. Called via API call.
-func (inst *Instance) writePoint(pntUUID string, body *model.Point) (point *model.Point, err error) {
+func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
 	//TODO: check for PointWriteByName calls that might not flow through the plugin.
 	if body == nil {
 		return

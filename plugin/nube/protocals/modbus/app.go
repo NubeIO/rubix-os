@@ -253,7 +253,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 }
 
 //writePoint update point. Called via API call.
-func (inst *Instance) writePoint(pntUUID string, body *model.Point) (point *model.Point, err error) {
+func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
 
 	//TODO: check for PointWriteByName calls that might not flow through the plugin.
 
@@ -279,7 +279,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.Point) (point *mode
 	}
 	*/
 
-	body.WritePollRequired = utils.NewTrue()
+	//body.WritePollRequired = utils.NewTrue() // TODO: commented out this section, seems like useless
 
 	point, err = inst.db.WritePoint(pntUUID, body, true)
 	if err != nil || point == nil {
@@ -324,7 +324,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.Point) (point *mode
 		*/
 	} else {
 		//DO POLLING DISABLE ACTIONS FOR POINT
-		netPollMan.PollQueue.RemovePollingPointByPointUUID(body.UUID)
+		netPollMan.PollQueue.RemovePollingPointByPointUUID(pntUUID)
 	}
 	return point, nil
 }

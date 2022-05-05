@@ -46,9 +46,8 @@ func (d *GormDatabase) SyncCOV(writerUUID string, body *model.SyncCOV) error {
 	}
 	uuid := writer.WriterThingUUID
 	if writer.WriterThingClass == model.ThingClass.Point {
-		pointModel := model.Point{
-			CommonUUID: model.CommonUUID{UUID: uuid},
-			Priority:   body.Priority,
+		pointModel := model.PointWriter{
+			Priority: body.Priority,
 		}
 		_, err = d.PointWrite(uuid, &pointModel, false)
 		return err
@@ -69,10 +68,10 @@ func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.Sync
 		if err != nil {
 			return nil
 		}
-		point := model.Point{Priority: body.Priority}
+		pointWriter := model.PointWriter{Priority: body.Priority}
 		// TODO: change this section by below commented section
 		producer, _ := d.GetProducer(writerClone.ProducerUUID, api.Args{})
-		_, err = d.PointWrite(producer.ProducerThingUUID, &point, false)
+		_, err = d.PointWrite(producer.ProducerThingUUID, &pointWriter, false)
 		// Currently, writerClone.WriterThingUUID has not valid `WriterThingUUID` on old deployments
 		// _, err = d.PointWrite(writerClone.WriterThingUUID, &point, true)
 		return err
@@ -105,11 +104,12 @@ func (d *GormDatabase) SyncWriterReadAction(sourceUUID string) error {
 	}
 	syncCOV := model.SyncCOV{}
 	if writerClone.WriterThingClass == model.ThingClass.Point {
-		point, err := d.GetPoint(writerClone.WriterThingUUID, api.Args{WithPriority: true})
-		if err != nil {
-			return err
-		}
-		syncCOV.Priority = point.Priority
+		// TODO >>>
+		//point, err := d.GetPoint(writerClone.WriterThingUUID, api.Args{WithPriority: true})
+		//if err != nil {
+		//	return err
+		//}
+		//syncCOV.Priority = point.Priority
 	} else {
 		schedule, err := d.GetSchedule(writerClone.WriterThingUUID)
 		if err != nil {

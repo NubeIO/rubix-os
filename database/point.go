@@ -159,21 +159,21 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 
 	query = d.DB.Model(&pointModel).Updates(&body)
 	// Don't update point value if priority array on body is nil
-	if body.Priority == nil {
-		return pointModel, nil
-	} else {
-		pointModel.Priority = body.Priority
-	}
-
-	pnt, err := d.UpdatePointValue(pointModel, fromPlugin)
-	if err != nil {
-		return nil, err
-	}
-	return pnt, nil
+	//if body.Priority == nil {
+	//	return pointModel, nil
+	//} else {
+	//	pointModel.Priority = body.Priority
+	//}
+	//
+	//pnt, err := d.UpdatePointValue(pointModel, fromPlugin)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//return pnt, nil
+	return pointModel, nil
 }
 
-//TODO: functions calling PointWrite should be routed via plugin!!
-func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
+func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
 	if query.Error != nil {
@@ -182,16 +182,15 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.Point, fromPlugin boo
 	if body.Priority == nil {
 		return nil, errors.New("no priority value is been sent")
 	} else {
-		pointModel.Priority = body.Priority
 		pointModel.ValueUpdatedFlag = utils.NewTrue()
 	}
 	pointModel.InSync = utils.NewFalse()
 	pointModel.WritePollRequired = utils.NewTrue()
-	point, err := d.UpdatePointValue(pointModel, fromPlugin)
+	point, err := d.UpdatePointValue(pointModel, body.Priority, fromPlugin)
 	return point, err
 }
 
-func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool) (*model.Point, error) {
+func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool) (*model.Point, error) {
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue //sets default priority array mode.
 	}
@@ -266,7 +265,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, fromPlugin bool
 
 	if dbUpdateRequired {
 		_ = d.DB.Model(&pointModel).Updates(&pointModel)
-		err = d.ProducersPointWrite(pointModel)
+		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue)
 		if err != nil {
 			return nil, err
 		}

@@ -98,7 +98,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 }
 
 //writePoint update point. Called via API call.
-func (inst *Instance) writePoint(pntUUID string, body *model.Point) (point *model.Point, err error) {
+func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
 	//TODO: check for PointWriteByName calls that might not flow through the plugin.
 	if body == nil {
 		return
@@ -324,14 +324,12 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 	body.CommonFault.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
 	body.CommonFault.LastOk = time.Now().UTC()
 
-	var pri model.Priority
-	pri.P16 = &value
-	body.Priority = &pri
+	priority := map[string]*float64{"_16": &value}
 	body.InSync = utils.NewTrue()
 	if pnt.IoType != "" && pnt.IoType != string(model.IOTypeRAW) {
-		*pri.P16 = decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue)
+		priority["_16"] = utils.NewFloat64(decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue))
 	}
-	_, _ = inst.db.UpdatePointValue(pnt.UUID, body, true)
+	_, err = inst.db.UpdatePointValue(pnt.UUID, body, &priority, true)
 	if err != nil {
 		log.Error("lora: UpdatePointValue()", err)
 		return err

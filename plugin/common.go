@@ -30,6 +30,11 @@ func GetBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 	return dto, err
 }
 
+func GetBodyPointWriter(ctx *gin.Context) (dto *model.PointWriter, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func ResolveID(ctx *gin.Context) string {
 	return ctx.Param("uuid")
 }
