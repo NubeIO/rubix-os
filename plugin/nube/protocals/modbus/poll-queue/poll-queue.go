@@ -9,31 +9,9 @@ import (
 	"time"
 )
 
-// LOOK AT USING:
+// REFS:
 //  - GOLANG HEAP https://pkg.go.dev/container/heap
 //  - Worker Queue tutorial: https://www.opsdash.com/blog/job-queues-in-go.html
-
-//Priority Polling Summary:
-//  - Diagram Summary: https://docs.google.com/drawings/d/1priwsaQ6EryRBx1kLQd91REJvHzFyxz7cOHYYXyBNFE/edit?usp=sharing
-//  - Protocol client runs as a worker go routine, pulls jobs from the ProtocolPriorityPollQueue.  Rate is dictated by the availability of the protocol client.
-//  - ProtocolPriorityPollQueue is fed by the (multiple) NetworkPriorityPollQueue. One feeder queue for each network, should respect the network polling delays (etc).
-//  - Device priority queues are fed by points using `time.Ticker` triggers on each point (configured based on push rate setting).
-//  - Device priority queues check that the device priority queues don't already have that point in them.  Or they have a flag that is reset when they are polled.
-//  - In all priority queues the most significant (lowest int) priority is selected first.
-
-//Questions:
-// - at what level should we specify the fast, normal, and slow poll rates?  Plugin? Network? Device?  I'm thinking Device level
-// - Are there device poll rate limitations? Rather than setting at the network level.
-// - Should write values should be given a higher priority in the poll queue.  I think probably.  High Priority Writes -> High Priority Reads -> Normal Priority Writes -> Normal Priority Reads -> etc
-// - How do I get FF Points by UUID?
-// - Are FF Points shared by multiple plugins?
-//     - Can I store a Timer as a new property in FF Points?
-//     - Can I store a PollRate and PollPriority in FF Points?
-
-// TODO: Add in special PollPoints that are for bundled operations.  Should support multiple protocals (maybe the bundle properties are dependent on the plugin?)
-//There should be a function in Modbus(or other protocals) that submits the polling point to the protocol client, then when the poll is completed, it starts a timeout to add the polling point to the queue again.
-// NEXT FETCH THE FF POINT AND use time.AfterFunc(DURATION, )
-//dbhandler.GormDatabase.GetPoint(pp.FFPointUUID)
 
 type NetworkPriorityPollQueue struct {
 	PriorityQueue        *PriorityPollQueue //This is the queue that is polling points are drawn from
@@ -285,14 +263,14 @@ type PollingPoint struct {
 	LockupAlertTimer *time.Timer
 }
 
-func NewPollingPoint(FFPointUUID, FFDeviceUUID, FFNetworkUUID, FFPluginUUID string) *PollingPoint {
-	pp := &PollingPoint{model.PRIORITY_NORMAL, FFPointUUID, FFDeviceUUID, FFNetworkUUID, FFPluginUUID, nil, 0, nil}
+func NewPollingPoint(ffPointUUID, ffDeviceUUID, ffNetworkUUID, ffPluginUUID string) *PollingPoint {
+	pp := &PollingPoint{model.PRIORITY_NORMAL, ffPointUUID, ffDeviceUUID, ffNetworkUUID, ffPluginUUID, nil, 0, nil}
 	//WHATEVER FUNCTION CALLS NewPollingPoint NEEDS TO SET THE PRIORITY
 	return pp
 }
 
-func NewPollingPointWithPriority(FFPointUUID, FFDeviceUUID, FFNetworkUUID, FFPluginUUID string, priority model.PollPriority) *PollingPoint {
-	pp := &PollingPoint{priority, FFPointUUID, FFDeviceUUID, FFNetworkUUID, FFPluginUUID, nil, 0, nil}
+func NewPollingPointWithPriority(ffPointUUID, ffDeviceUUID, ffNetworkUUID, ffPluginUUID string, priority model.PollPriority) *PollingPoint {
+	pp := &PollingPoint{priority, ffPointUUID, ffDeviceUUID, ffNetworkUUID, ffPluginUUID, nil, 0, nil}
 	return pp
 }
 

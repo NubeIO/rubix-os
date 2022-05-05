@@ -10,20 +10,9 @@ import (
 	"time"
 )
 
-// LOOK AT USING:
+// REFS:
 //  - GOLANG HEAP https://pkg.go.dev/container/heap
 //  - Worker Queue tutorial: https://www.opsdash.com/blog/job-queues-in-go.html
-
-// Polling Manager Summary:
-//  - Diagram Summary: https://docs.google.com/drawings/d/1priwsaQ6EryRBx1kLQd91REJvHzFyxz7cOHYYXyBNFE/edit?usp=sharing
-//  - The QueueLoader puts PollPoints into the Queue
-
-//Questions:
-// -
-
-//There should be a function in Modbus(or other protocals) that submits the polling point to the protocol client, then when the poll is completed, it starts a timeout to add the polling point to the queue again.
-// NEXT FETCH THE FF POINT AND use time.AfterFunc(DURATION, )
-//dbhandler.GormDatabase.GetPoint(pp.FFPointUUID)
 
 func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	//TODO: STOP ANY OTHER QUEUE LOADERS

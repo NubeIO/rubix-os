@@ -10,22 +10,9 @@ import (
 	"time"
 )
 
-// LOOK AT USING:
+// REFS:
 //  - GOLANG HEAP https://pkg.go.dev/container/heap
 //  - Worker Queue tutorial: https://www.opsdash.com/blog/job-queues-in-go.html
-
-// Polling Manager Summary:
-//  - Diagram Summary: https://docs.google.com/drawings/d/1priwsaQ6EryRBx1kLQd91REJvHzFyxz7cOHYYXyBNFE/edit?usp=sharing
-//  - The PollManager Inserts, Removes, and Updates PollingPoints from the PriorityPollQueue based on the settings of the point.  It considers the Network/Device/Point Enables, Point Write-Modes, etc.
-//  - When a ProtocolPollWorker finishes a poll, it will start a timer on the FF Point (based on poll rate) that will re-trigger the PollManager to create a PollingPoint if necessary.
-//  -
-
-//Questions:
-// -
-
-//There should be a function in Modbus(or other protocals) that submits the polling point to the protocol client, then when the poll is completed, it starts a timeout to add the polling point to the queue again.
-// NEXT FETCH THE FF POINT AND use time.AfterFunc(DURATION, )
-//dbhandler.GormDatabase.GetPoint(pp.FFPointUUID)
 
 type NetworkPollManager struct {
 	DBHandlerRef *dbhandler.Handler
@@ -139,7 +126,7 @@ func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { //This is trig
 	}
 }
 
-func NewPollManager(dbHandler *dbhandler.Handler, FFNetworkUUID, FFPluginUUID string) *NetworkPollManager {
+func NewPollManager(dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID string) *NetworkPollManager {
 	// Make the main priority polling queue
 	queue := make([]*PollingPoint, 0)
 	pq := &PriorityPollQueue{queue}
@@ -149,15 +136,15 @@ func NewPollManager(dbHandler *dbhandler.Handler, FFNetworkUUID, FFPluginUUID st
 	heap.Init(rq) //Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
 	adl := make([]string, 0)
 	pqu := &QueueUnloader{nil, nil, nil}
-	npq := &NetworkPriorityPollQueue{pq, rq, pqu, FFPluginUUID, FFNetworkUUID, adl}
+	npq := &NetworkPriorityPollQueue{pq, rq, pqu, ffPluginUUID, ffNetworkUUID, adl}
 	pm := new(NetworkPollManager)
 	pm.PollQueue = npq
 	pm.PluginQueueUnloader = pqu
 	pm.DBHandlerRef = dbHandler
 	maxpollrate := 1000 * time.Millisecond
 	pm.MaxPollRate = maxpollrate //TODO: MaxPollRate should come from a network property,but I can't find it. Also kinda implemented in StartQueueUnloader().
-	pm.FFNetworkUUID = FFNetworkUUID
-	pm.FFPluginUUID = FFPluginUUID
+	pm.FFNetworkUUID = ffNetworkUUID
+	pm.FFPluginUUID = ffPluginUUID
 	pm.ASAPPriorityMaxCycleTime, _ = time.ParseDuration("2m")
 	pm.HighPriorityMaxCycleTime, _ = time.ParseDuration("5m")
 	pm.NormalPriorityMaxCycleTime, _ = time.ParseDuration("15m")
