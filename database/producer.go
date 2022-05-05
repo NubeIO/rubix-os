@@ -1,7 +1,6 @@
 package database
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
@@ -159,10 +158,9 @@ func (d *GormDatabase) producerPointWrite(uuid string, point *model.Point, produ
 		return err
 	}
 	if utils.BoolIsNil(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
-		data, _ := json.Marshal(point.Priority)
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = uuid
-		ph.DataStore = data
+		ph.PresentValue = point.PresentValue
 		ph.Timestamp = time.Now().UTC()
 		_, err = d.CreateProducerHistory(ph)
 		if err != nil {

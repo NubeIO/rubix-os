@@ -1,7 +1,6 @@
 package history
 
 import (
-	"encoding/json"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/go-co-op/gocron"
@@ -38,9 +37,9 @@ func (h *History) syncProducerHistoryInterval() {
 			latestPH.ProducerUUID = producer.UUID
 			latestPH.Timestamp = time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(),
 				currentDate.Hour(), minute, 0, 0, time.UTC)
-			point, _ := h.DB.GetPoint(producer.ProducerThingUUID, api.Args{WithPriority: true})
+			point, _ := h.DB.GetPoint(producer.ProducerThingUUID, api.Args{})
 			if point != nil {
-				latestPH.DataStore, _ = json.Marshal(point.Priority)
+				latestPH.PresentValue = point.PresentValue
 				_, err := h.DB.CreateProducerHistory(latestPH)
 				if err != nil {
 					log.Error(err)
