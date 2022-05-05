@@ -63,7 +63,7 @@ func (d *GormDatabase) WritePointPlugin(uuid string, body *model.Point) (point *
 	}
 	pluginName := network.PluginPath
 	if pluginName == "system" {
-		point, err = d.PointWrite(body.UUID, body, false)
+		point, err = d.PointWrite(uuid, body, false)
 		if err != nil {
 			return nil, err
 		}
