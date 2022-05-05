@@ -146,7 +146,7 @@ func (inst *Instance) polling(p polling) error {
 						switch pnt.IoNumber {
 						//OUTPUTS
 						case pointList.R1, pointList.R2, pointList.DO1, pointList.DO2, pointList.DO3, pointList.DO4, pointList.DO5:
-							//_, err := i.db.UpdatePointValue(pnt.UUID, pnt, false)  //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
+							//_, err := inst.db.UpdatePointValue(pnt.UUID, pnt, false)  //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
 							if pnt.WriteValue != nil {
 								writeValue := plugin.PointWrite(pnt)
 								wv, err = DigitalToGPIOValue(writeValue, false)
@@ -157,7 +157,7 @@ func (inst *Instance) polling(p polling) error {
 								_, err = inst.processWrite(pnt, wv, rest, uint64(counter), false)
 							}
 						case pointList.UO1, pointList.UO2, pointList.UO3, pointList.UO4, pointList.UO5, pointList.UO6, pointList.UO7:
-							//_, err := i.db.UpdatePointValue(pnt.UUID, pnt, false) //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
+							//_, err := inst.db.UpdatePointValue(pnt.UUID, pnt, false) //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
 							if pnt.WriteValue != nil {
 								wv, err = GetGPIOValueForUOByType(pnt)
 								if err != nil {

@@ -6,15 +6,15 @@ import (
 )
 
 // Enable implements plugin.Plugin
-func (i *Instance) Enable() error {
-	i.enabled = true
-	i.setUUID()
-	i.BusServ()
-	q, err := i.db.GetNetworkByPlugin(i.pluginUUID, api.Args{})
+func (inst *Instance) Enable() error {
+	inst.enabled = true
+	inst.setUUID()
+	inst.BusServ()
+	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
 	if q != nil {
-		i.networkUUID = q.UUID
+		inst.networkUUID = q.UUID
 	} else {
-		i.networkUUID = "NA"
+		inst.networkUUID = "NA"
 	}
 	if err != nil {
 		log.Error("error on enable bacnetserver-plugin")
@@ -23,7 +23,7 @@ func (i *Instance) Enable() error {
 }
 
 // Disable implements plugin.Disable
-func (i *Instance) Disable() error {
-	i.enabled = false
+func (inst *Instance) Disable() error {
+	inst.enabled = false
 	return nil
 }

@@ -7,19 +7,19 @@ import (
 
 var cron *gocron.Scheduler
 
-func (i *Instance) Enable() error {
-	i.enabled = true
-	i.setUUID()
-	i.BusServ()
+func (inst *Instance) Enable() error {
+	inst.enabled = true
+	inst.setUUID()
+	inst.BusServ()
 	cron = gocron.NewScheduler(time.UTC)
-	influxDetails := i.initializeInfluxSettings()
-	_, _ = cron.Every(i.config.Job.Frequency).Tag("SyncInflux").Do(i.syncInflux, influxDetails)
+	influxDetails := inst.initializeInfluxSettings()
+	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncInflux").Do(inst.syncInflux, influxDetails)
 	cron.StartAsync()
 	return nil
 }
 
-func (i *Instance) Disable() error {
-	i.enabled = false
+func (inst *Instance) Disable() error {
+	inst.enabled = false
 	cron.Clear()
 	for _, influxConnectionInstance := range influxConnectionInstances {
 		influxConnectionInstance.client.Close()

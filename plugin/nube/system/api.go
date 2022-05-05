@@ -3,9 +3,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	system_model "github.com/NubeIO/flow-framework/plugin/nube/system/model"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"github.com/gomarkdown/markdown"
 )
@@ -75,8 +75,8 @@ var Supports = struct {
 }
 
 // RegisterWebhook implements plugin.Webhooker
-func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
-	i.basePath = basePath
+func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
+	inst.basePath = basePath
 
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, system_model.GetNetworkSchema())
@@ -99,7 +99,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.Writer.Write(output)
 	})
 	mux.GET("/system/schedule/store/:name", func(ctx *gin.Context) {
-		obj, ok := i.store.Get(resolveName(ctx))
+		obj, ok := inst.store.Get(resolveName(ctx))
 		if ok != true {
 			ctx.JSON(http.StatusBadRequest, "no schedule exists")
 		} else {

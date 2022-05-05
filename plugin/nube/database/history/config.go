@@ -8,7 +8,7 @@ type Config struct {
 	Job Job `yaml:"job"`
 }
 
-func (i *Instance) DefaultConfig() interface{} {
+func (inst *Instance) DefaultConfig() interface{} {
 	job := Job{
 		Frequency: "1m",
 	}
@@ -17,12 +17,12 @@ func (i *Instance) DefaultConfig() interface{} {
 	}
 }
 
-func (i *Instance) GetConfig() interface{} {
-	return i.config
+func (inst *Instance) GetConfig() interface{} {
+	return inst.config
 }
 
-func (i *Instance) ValidateAndSetConfig(config interface{}) error {
+func (inst *Instance) ValidateAndSetConfig(config interface{}) error {
 	newConfig := config.(*Config)
-	i.config = newConfig
+	inst.config = newConfig
 	return nil
 }

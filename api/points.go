@@ -20,6 +20,7 @@ type PointDatabase interface {
 
 	CreatePointPlugin(body *model.Point) (*model.Point, error)
 	UpdatePointPlugin(uuid string, body *model.Point) (*model.Point, error)
+	WritePointPlugin(uuid string, body *model.Point) (*model.Point, error)
 	DeletePointPlugin(uuid string) (bool, error)
 }
 type PointAPI struct {
@@ -55,7 +56,7 @@ func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 func (a *PointAPI) PointWrite(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	uuid := resolveID(ctx)
-	q, err := a.DB.PointWrite(uuid, body, false)
+	q, err := a.DB.WritePointPlugin(uuid, body)
 	responseHandler(q, err, ctx)
 }
 

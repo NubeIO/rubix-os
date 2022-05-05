@@ -1,6 +1,6 @@
 package main
 
-//func (i *Instance) addNetwork(bacNet *Network) (*model.Network, interface{}, int, error) {
+//func (inst *Instance) addNetwork(bacNet *Network) (*model.Network, interface{}, int, error) {
 //
 //	var ffNetwork model.Network
 //	ffNetwork.Name = bacNet.NetworkName
@@ -35,7 +35,7 @@ package main
 //		log.Error(errMsg)
 //		return nil, nil, http.StatusBadRequest, errors.New(errMsg)
 //	}
-//	_network, err := i.db.CreateNetwork(&ffNetwork, true)
+//	_network, err := inst.db.CreateNetwork(&ffNetwork, true)
 //	if err != nil || _network.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR added network: err", err)
 //		rt.Method = nrest.DELETE
@@ -51,7 +51,7 @@ package main
 //	return _network, nil, http.StatusOK, nil
 //}
 //
-//func (i *Instance) addDevice(bacDevice *Device) (*model.Device, error) {
+//func (inst *Instance) addDevice(bacDevice *Device) (*model.Device, error) {
 //	var ffDevice model.Device
 //	ffDevice.Name = bacDevice.DeviceName
 //	ffDevice.CommonIP.Host = bacDevice.DeviceIp
@@ -74,14 +74,14 @@ package main
 //		return nil, err
 //	}
 //
-//	getNet, err := i.db.GetNetworkByField("address_uuid", bacDevice.NetworkUUID, false)
+//	getNet, err := inst.db.GetNetworkByField("address_uuid", bacDevice.NetworkUUID, false)
 //	if err != nil || getNet.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR on get GetNetworkByField() failed to find network", err)
 //		return nil, err
 //	}
 //
 //	ffDevice.NetworkUUID = getNet.UUID
-//	dev, err := i.db.CreateDevice(&ffDevice)
+//	dev, err := inst.db.CreateDevice(&ffDevice)
 //	if err != nil || dev.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR added device: err", err)
 //		rt.Method = nrest.DELETE
@@ -96,7 +96,7 @@ package main
 //	return dev, nil
 //}
 //
-//func (i *Instance) addPoint(bacPoint *Point) (*model.Point, error) {
+//func (inst *Instance) addPoint(bacPoint *Point) (*model.Point, error) {
 //	var ffPoint model.Point
 //	ffPoint.Name = bacPoint.PointName
 //	ffPoint.ObjectType = bacPoint.PointObjectType
@@ -117,13 +117,13 @@ package main
 //		return nil, err
 //	}
 //
-//	getDev, err := i.db.GetOneDeviceByArgs(api.Args{AddressUUID: &bacPoint.DeviceUUID})
+//	getDev, err := inst.db.GetOneDeviceByArgs(api.Args{AddressUUID: &bacPoint.DeviceUUID})
 //	if err != nil || getDev.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR on get GetDeviceByField() failed to find device", err)
 //		return nil, err
 //	}
 //	ffPoint.DeviceUUID = getDev.UUID
-//	pnt, err := i.db.CreatePoint(&ffPoint, false, false)
+//	pnt, err := inst.db.CreatePoint(&ffPoint, false, false)
 //	if err != nil || pnt.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR added device: err", err)
 //		rt.Method = nrest.DELETE
@@ -135,7 +135,7 @@ package main
 //		return nil, err
 //	}
 //	pnt.AddressUUID = &bacPoint.PointUUID
-//	pnt, err = i.db.UpdatePoint(pnt.UUID, &ffPoint, false)
+//	pnt, err = inst.db.UpdatePoint(pnt.UUID, &ffPoint, false)
 //	if err != nil {
 //		log.Error("bacnet-master-plugin: ERROR on update point with bacnet point_uuid to address_uuid", code)
 //		return nil, err
@@ -143,7 +143,7 @@ package main
 //	return pnt, nil
 //}
 //
-//func (i *Instance) patchNetwork(bacNet *Network, uuid string) (*model.Network, error) {
+//func (inst *Instance) patchNetwork(bacNet *Network, uuid string) (*model.Network, error) {
 //	var ffNetwork model.Network
 //	ffNetwork.Name = bacNet.NetworkName
 //	ffNetwork.TransportType = model.TransType.IP
@@ -175,13 +175,13 @@ package main
 //		return nil, err
 //	}
 //
-//	getNetwork, err := i.db.GetNetworkByField("address_uuid", bacNet.NetworkUUID, false)
+//	getNetwork, err := inst.db.GetNetworkByField("address_uuid", bacNet.NetworkUUID, false)
 //	if err != nil || getNetwork.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR on get GetNetworkByField() failed to find network", err)
 //		return nil, err
 //	}
 //
-//	updateNetwork, err := i.db.UpdateNetwork(getNetwork.UUID, &ffNetwork, true)
+//	updateNetwork, err := inst.db.UpdateNetwork(getNetwork.UUID, &ffNetwork, true)
 //	if err != nil {
 //		rt.Method = nrest.PATCH
 //		rt.Path = fmt.Sprintf("%s/%s", deviceBacnet, uuid)
@@ -192,7 +192,7 @@ package main
 //	return updateNetwork, nil
 //}
 //
-//func (i *Instance) patchDevice(bacDevice *Device, uuid string) (*model.Device, error) {
+//func (inst *Instance) patchDevice(bacDevice *Device, uuid string) (*model.Device, error) {
 //	var ffDevice model.Device
 //	ffDevice.Name = bacDevice.DeviceName
 //	ffDevice.CommonIP.Host = bacDevice.DeviceIp
@@ -224,13 +224,13 @@ package main
 //		return nil, err
 //	}
 //
-//	getDev, err := i.db.GetOneDeviceByArgs(api.Args{AddressUUID: &bacDevice.DeviceUUID})
+//	getDev, err := inst.db.GetOneDeviceByArgs(api.Args{AddressUUID: &bacDevice.DeviceUUID})
 //	if err != nil || getDev.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR on get GetDeviceByField() failed to find device", err)
 //		return nil, err
 //	}
 //
-//	updateDevice, err := i.db.UpdateDevice(getDev.UUID, &ffDevice, true)
+//	updateDevice, err := inst.db.UpdateDevice(getDev.UUID, &ffDevice, true)
 //	if err != nil {
 //		rt.Method = nrest.PATCH
 //		rt.Path = fmt.Sprintf("%s/%s", deviceBacnet, uuid)
@@ -242,7 +242,7 @@ package main
 //	return updateDevice, nil
 //}
 //
-//func (i *Instance) patchPoint(bacPoint *Point, uuid string) (*model.Point, error) {
+//func (inst *Instance) patchPoint(bacPoint *Point, uuid string) (*model.Point, error) {
 //	var ffPoint model.Point
 //	ffPoint.Name = bacPoint.PointName
 //	ffPoint.ObjectType = bacPoint.PointObjectType
@@ -271,13 +271,13 @@ package main
 //		return nil, err
 //	}
 //
-//	getPnt, err := i.db.GetOnePointByArgs(api.Args{AddressUUID: &uuid})
+//	getPnt, err := inst.db.GetOnePointByArgs(api.Args{AddressUUID: &uuid})
 //	if err != nil || getPnt.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR on get GetPointByField() failed to find point", err, uuid)
 //		return nil, err
 //	}
 //
-//	updatePoint, err := i.db.UpdatePoint(getPnt.UUID, &ffPoint, true)
+//	updatePoint, err := inst.db.UpdatePoint(getPnt.UUID, &ffPoint, true)
 //	if err != nil {
 //		rt.Method = nrest.PATCH
 //		rt.Path = fmt.Sprintf("%s/%s", pointBacnet, uuid)
@@ -289,7 +289,7 @@ package main
 //	return updatePoint, nil
 //}
 //
-//func (i *Instance) deleteNetwork(uuid string) (bool, error) {
+//func (inst *Instance) deleteNetwork(uuid string) (bool, error) {
 //
 //	rt.Method = nrest.DELETE
 //	rt.Path = fmt.Sprintf("%s/%s", networkBacnet, uuid)
@@ -299,13 +299,13 @@ package main
 //		return false, nil
 //	}
 //
-//	getNetwork, err := i.db.GetNetworkByField("address_uuid", uuid, false)
+//	getNetwork, err := inst.db.GetNetworkByField("address_uuid", uuid, false)
 //	if err != nil || getNetwork.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR on get GetNetworkByField() failed to find network", err)
 //		return false, err
 //	}
 //
-//	_, err = i.db.DeleteNetwork(getNetwork.UUID)
+//	_, err = inst.db.DeleteNetwork(getNetwork.UUID)
 //	if err != nil {
 //		return false, err
 //	}
@@ -314,7 +314,7 @@ package main
 //
 //}
 //
-//func (i *Instance) deleteDevice(uuid string) (bool, error) {
+//func (inst *Instance) deleteDevice(uuid string) (bool, error) {
 //	rt.Method = nrest.DELETE
 //	rt.Path = fmt.Sprintf("%s/%s", deviceBacnet, uuid)
 //	res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
@@ -323,13 +323,13 @@ package main
 //		return false, nil
 //	}
 //
-//	getDev, err := i.db.GetOneDeviceByArgs(api.Args{AddressUUID: &uuid})
+//	getDev, err := inst.db.GetOneDeviceByArgs(api.Args{AddressUUID: &uuid})
 //	if err != nil || getDev.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR on get GetDeviceByField() failed to find device", err)
 //		return false, err
 //	}
 //
-//	_, err = i.db.DeleteDevice(getDev.UUID)
+//	_, err = inst.db.DeleteDevice(getDev.UUID)
 //	if err != nil {
 //		return false, err
 //	}
@@ -337,7 +337,7 @@ package main
 //	return true, nil
 //}
 //
-//func (i *Instance) deletePoint(uuid string) (bool, error) {
+//func (inst *Instance) deletePoint(uuid string) (bool, error) {
 //	rt.Method = nrest.DELETE
 //	rt.Path = fmt.Sprintf("%s/%s", pointBacnet, uuid)
 //	res, code, err := nrest.DoHTTPReq(rt, &nrest.ReqOpt{})
@@ -346,13 +346,13 @@ package main
 //		return false, nil
 //	}
 //
-//	getPnt, err := i.db.GetOnePointByArgs(api.Args{AddressUUID: &uuid})
+//	getPnt, err := inst.db.GetOnePointByArgs(api.Args{AddressUUID: &uuid})
 //	if err != nil || getPnt.UUID == "" {
 //		log.Error("bacnet-master-plugin: ERROR on get GetPointByField() failed to find point", err)
 //		return false, err
 //	}
 //
-//	_, err = i.db.DeletePoint(getPnt.UUID)
+//	_, err = inst.db.DeletePoint(getPnt.UUID)
 //	if err != nil {
 //		return false, err
 //	}

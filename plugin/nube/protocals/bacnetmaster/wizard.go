@@ -7,7 +7,7 @@ import (
 )
 
 //wizard make a network/dev/pnt
-func (i *Instance) wizard(network *Network) (string, error) {
+func (inst *Instance) wizard(network *Network) (string, error) {
 	var net model.Network
 	net.Name = network.NetworkName
 	net.TransportType = model.TransType.IP
@@ -25,7 +25,7 @@ func (i *Instance) wizard(network *Network) (string, error) {
 	//	net.Port = nums.NewInt(network.NetworkPort)
 	//	net.NetworkMask = nums.NewInt(network.NetworkMask)
 	//}
-	_network, err := i.db.CreateNetwork(&net, false)
+	_network, err := inst.db.CreateNetwork(&net, false)
 	if err != nil {
 		return "", err
 	}
@@ -36,7 +36,7 @@ func (i *Instance) wizard(network *Network) (string, error) {
 	dev.NetworkUUID = _network.UUID
 	dev.Name = "bacnet"
 
-	d, err := i.db.CreateDevice(&dev)
+	d, err := inst.db.CreateDevice(&dev)
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +61,7 @@ func (i *Instance) wizard(network *Network) (string, error) {
 	//pnt.Unit = utils.NewStringAddress("noUnits")
 	//pnt.Priority = new(model.Priority)
 	//(*pnt.Priority).P16 = nums.NewFloat64(1)
-	point, err := i.db.CreatePoint(&pnt, false, false)
+	point, err := inst.db.CreatePoint(&pnt, false, false)
 	if err != nil {
 		return "", err
 	}

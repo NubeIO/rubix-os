@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -133,11 +134,11 @@ func resolveUUID(ctx *gin.Context) string {
 }
 
 // RegisterWebhook implements plugin.Webhooker
-func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
-	i.basePath = basePath
+func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
+	inst.basePath = basePath
 	mux.POST(wizard, func(ctx *gin.Context) {
 		body, err := getBODYAddNetwork(ctx)
-		_, err = i.wizard(body)
+		_, err = inst.wizard(body)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 			return
@@ -145,6 +146,12 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, "ok")
 			return
 		}
+	})
+	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYPoint(ctx)
+		uuid := plugin.ResolveID(ctx)
+		point, err := inst.writePoint(uuid, body)
+		plugin.ResponseHandler(point, err, 0, ctx)
 	})
 	//mux.GET(ping, func(ctx *gin.Context) {
 	//	rt.Method = nrest.GET
@@ -196,7 +203,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	//})
 	//mux.POST(network, func(ctx *gin.Context) {
 	//	body, _ := getBODYAddNetwork(ctx)
-	//	net, res, code, err := i.addNetwork(body)
+	//	net, res, code, err := inst.addNetwork(body)
 	//	if net != nil {
 	//		ctx.JSON(code, err)
 	//		return
@@ -212,7 +219,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	//})
 	//mux.POST(device, func(ctx *gin.Context) {
 	//	body, _ := getBODYAddDevice(ctx)
-	//	add, err := i.addDevice(body)
+	//	add, err := inst.addDevice(body)
 	//	if err != nil {
 	//		ctx.JSON(http.StatusBadRequest, err)
 	//		return
@@ -223,7 +230,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	//})
 	//mux.POST(point, func(ctx *gin.Context) {
 	//	body, _ := getBODYAddPoint(ctx)
-	//	add, err := i.addPoint(body)
+	//	add, err := inst.addPoint(body)
 	//	if err != nil {
 	//		ctx.JSON(http.StatusBadRequest, err.Error())
 	//		return
@@ -235,7 +242,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	//mux.PATCH("network/:uuid", func(ctx *gin.Context) {
 	//	body, _ := getBODYAddPoint(ctx)
 	//	uuid := resolveUUID(ctx)
-	//	add, err := i.patchPoint(body, uuid)
+	//	add, err := inst.patchPoint(body, uuid)
 	//	if err != nil {
 	//		ctx.JSON(http.StatusBadRequest, err.Error())
 	//		return
@@ -247,7 +254,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	//mux.PATCH("device/:uuid", func(ctx *gin.Context) {
 	//	body, _ := getBODYAddDevice(ctx)
 	//	uuid := resolveUUID(ctx)
-	//	add, err := i.patchDevice(body, uuid)
+	//	add, err := inst.patchDevice(body, uuid)
 	//	if err != nil {
 	//		ctx.JSON(http.StatusBadRequest, err.Error())
 	//		return
@@ -259,7 +266,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	//mux.PATCH("point/:uuid", func(ctx *gin.Context) {
 	//	body, _ := getBODYAddPoint(ctx)
 	//	uuid := resolveUUID(ctx)
-	//	add, err := i.patchPoint(body, uuid)
+	//	add, err := inst.patchPoint(body, uuid)
 	//	if err != nil {
 	//		ctx.JSON(http.StatusBadRequest, err.Error())
 	//		return
@@ -270,7 +277,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	//})
 	//mux.DELETE("network/:uuid", func(ctx *gin.Context) {
 	//	uuid := resolveUUID(ctx)
-	//	add, err := i.deleteNetwork(uuid)
+	//	add, err := inst.deleteNetwork(uuid)
 	//	if err != nil {
 	//		ctx.JSON(http.StatusBadRequest, err.Error())
 	//		return
@@ -281,7 +288,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	//})
 	//mux.DELETE("device/:uuid", func(ctx *gin.Context) {
 	//	uuid := resolveUUID(ctx)
-	//	add, err := i.deleteDevice(uuid)
+	//	add, err := inst.deleteDevice(uuid)
 	//	if err != nil {
 	//		ctx.JSON(http.StatusBadRequest, err.Error())
 	//		return
@@ -292,7 +299,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	//})
 	//mux.DELETE("point/:uuid", func(ctx *gin.Context) {
 	//	uuid := resolveUUID(ctx)
-	//	add, err := i.deletePoint(uuid)
+	//	add, err := inst.deletePoint(uuid)
 	//	if err != nil {
 	//		ctx.JSON(http.StatusBadRequest, err.Error())
 	//		return

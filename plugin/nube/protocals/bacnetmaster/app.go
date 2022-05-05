@@ -12,7 +12,7 @@ import (
 )
 
 //bacnetUpdate listen on mqtt and then update the point in flow-framework
-func (i *Instance) bacnetUpdate(body mqtt.Message) {
+func (inst *Instance) bacnetUpdate(body mqtt.Message) {
 	payload := new(bmmodel.MqttPayload)
 	err := json.Unmarshal(body.Payload(), &payload)
 	if err != nil {
@@ -23,7 +23,7 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) {
 	if t.Size() >= pointUUID {
 		pUUID := t.Get(pointUUID)
 		_pUUID := pUUID.(string)
-		getPnt, err := i.db.GetOnePointByArgs(api.Args{AddressUUID: &_pUUID})
+		getPnt, err := inst.db.GetOnePointByArgs(api.Args{AddressUUID: &_pUUID})
 		if err != nil || getPnt.UUID == "" {
 			log.Error("bacnet-master-plugin: ERROR on get bacnetUpdate() failed to find point", err, _pUUID)
 			return
@@ -36,11 +36,24 @@ func (i *Instance) bacnetUpdate(body mqtt.Message) {
 		getPnt.CommonFault.MessageCode = model.CommonFaultCode.Ok
 		getPnt.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 		getPnt.CommonFault.LastOk = time.Now().UTC()
-		_, err = i.db.UpdatePointValue(getPnt.UUID, getPnt, true)
+		_, err = inst.db.UpdatePointValue(getPnt.UUID, getPnt, true)
 		if err != nil {
 			log.Error("BACNET UPDATE POINT issue on message from mqtt update point")
 			return
 		}
 		return
 	}
+}
+
+//writePoint update point. Called via API call.
+func (inst *Instance) writePoint(pntUUID string, body *model.Point) (point *model.Point, err error) {
+	//TODO: check for PointWriteByName calls that might not flow through the plugin.
+	if body == nil {
+		return
+	}
+	point, err = inst.db.WritePoint(pntUUID, body, true)
+	if err != nil || point == nil {
+		return nil, err
+	}
+	return point, nil
 }

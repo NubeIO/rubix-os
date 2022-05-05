@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwmodel"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwrest"
 	"github.com/gin-gonic/gin"
@@ -21,8 +22,8 @@ const chirpName = "admin"
 const chirpPass = "admin"
 
 // RegisterWebhook implements plugin.Webhooker
-func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
-	i.basePath = basePath
+func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
+	inst.basePath = basePath
 	cli := lwrest.NewChirp(chirpName, chirpPass, ip, port)
 
 	mux.GET("/lorawan/organizations", func(ctx *gin.Context) {
@@ -104,7 +105,7 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	mux.DELETE("/lorawan/devices/drop", func(ctx *gin.Context) {
-		_, err := i.DropDevices()
+		_, err := inst.DropDevices()
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
@@ -140,6 +141,13 @@ func (i *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else {
 			ctx.JSON(http.StatusOK, p)
 		}
+	})
+
+	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYPoint(ctx)
+		uuid := plugin.ResolveID(ctx)
+		point, err := inst.writePoint(uuid, body)
+		plugin.ResponseHandler(point, err, 0, ctx)
 	})
 
 }

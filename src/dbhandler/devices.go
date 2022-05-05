@@ -17,6 +17,19 @@ func (h *Handler) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
 	return getDb().GetOneDeviceByArgs(args)
 }
 
+func (h *Handler) DeviceNameExistsInNetwork(deviceName, networkUUID string) (device *model.Device, existing bool) {
+	network, err := getDb().GetNetwork(networkUUID, api.Args{WithDevices: true})
+	if err != nil {
+		return nil, false
+	}
+	for _, dev := range network.Devices {
+		if dev.Name == deviceName {
+			return dev, true
+		}
+	}
+	return nil, false
+}
+
 func (h *Handler) CreateDevice(body *model.Device) (*model.Device, error) {
 	q, err := getDb().CreateDevice(body)
 	if err != nil {

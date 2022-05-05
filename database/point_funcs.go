@@ -38,6 +38,7 @@ func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string)
 	return pointModel, nil
 }
 
+//TODO: functions calling  d.PointWrite(point.UUID, body, fromPlugin) should be routed via plugin!!
 func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	point, err := d.GetPointByName(networkName, deviceName, pointName)
 	if err != nil {
@@ -100,6 +101,7 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point) (*model.Point, *f
 			}
 		} else if !utils.FloatIsNilCheck(pointModel.Fallback) {
 			pointModel.Priority.P16 = utils.NewFloat64(*pointModel.Fallback)
+			priorityMap["P16"] = *pointModel.Fallback
 			pointModel.CurrentPriority = utils.NewInt(16)
 			pointModel.WriteValueOriginal = utils.NewFloat64(*pointModel.Priority.P16)
 			writeValue, err := pointEval(pointModel.Priority.P16, pointModel.MathOnWriteValue)

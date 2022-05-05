@@ -1,12 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/grid-x/modbus"
-	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -28,7 +28,7 @@ func (inst *Instance) setClient(network *model.Network, device *model.Device, ca
 		stopBits := 1
 		dataBits := 8
 		parity := "N"
-		if network.SerialPort != nil {
+		if network.SerialPort != nil && *network.SerialPort != "" {
 			serialPort = nils.StringIsNil(network.SerialPort)
 		}
 		if network.SerialBaudRate != nil {
@@ -49,11 +49,13 @@ func (inst *Instance) setClient(network *model.Network, device *model.Device, ca
 		handler.Parity = setParity(parity)
 		handler.StopBits = stopBits
 		handler.Timeout = 5 * time.Second
+
 		err := handler.Connect()
-		if err != nil {
-			return smod.ModbusClient{}, err
-		}
 		defer handler.Close()
+		if err != nil {
+			modbusErrorMsg(fmt.Sprintf("setClient:  %v. port:%s", err, serialPort))
+			return smod.ModbusClient{PortUnavailable: true}, err
+		}
 		mc := modbus.NewClient(handler)
 		mbClient.RTUClientHandler = handler
 		mbClient.Client = mc
@@ -62,15 +64,16 @@ func (inst *Instance) setClient(network *model.Network, device *model.Device, ca
 	} else {
 		url, err := uurl.JoinIpPort(device.Host, device.Port)
 		if err != nil {
-			log.Errorf("modbus: failed to validate device IP %s\n", url)
+			modbusErrorMsg(fmt.Sprintf("modbus: failed to validate device IP %s\n", url))
 			return smod.ModbusClient{}, err
 		}
 		handler := modbus.NewTCPClientHandler(url)
 		err = handler.Connect()
-		if err != nil {
-			return smod.ModbusClient{}, err
-		}
 		defer handler.Close()
+		if err != nil {
+			modbusErrorMsg(fmt.Sprintf("setClient:  %v. port:%s", err, url))
+			return smod.ModbusClient{PortUnavailable: true}, err
+		}
 		mc := modbus.NewClient(handler)
 		mbClient.TCPClientHandler = handler
 		mbClient.Client = mc

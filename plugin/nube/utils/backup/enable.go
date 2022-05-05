@@ -1,15 +1,15 @@
 package main
 
 // Enable implements plugin.Plugin
-func (i *Instance) Enable() error {
-	i.enabled = true
-	i.setUUID()
-	i.networkUUID = "NA"
+func (inst *Instance) Enable() error {
+	inst.enabled = true
+	inst.setUUID()
+	inst.networkUUID = "NA"
 	return nil
 }
 
 // Disable implements plugin.Disable
-func (i *Instance) Disable() error {
-	i.enabled = false
+func (inst *Instance) Disable() error {
+	inst.enabled = false
 	return nil
 }

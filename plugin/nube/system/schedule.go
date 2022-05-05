@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-func (i *Instance) runSchedule() {
-	schedules, err := i.db.GetSchedules()
+func (inst *Instance) runSchedule() {
+	schedules, err := inst.db.GetSchedules()
 	if err != nil {
 		return
 	}
@@ -70,7 +70,7 @@ func (i *Instance) runSchedule() {
 		log.Printf("system-plugin-schedule: finalResult: %+v\n", finalResult.IsActive)
 
 		if sch != nil {
-			i.store.Set(sch.Name, finalResult, -1)
+			inst.store.Set(sch.Name, finalResult, -1)
 			s := new(model.Schedule)
 			if finalResult.IsActive {
 				s.IsActive = utils.NewTrue()
@@ -79,7 +79,7 @@ func (i *Instance) runSchedule() {
 			}
 			if utils.IsTrue(s.IsActive) != utils.IsTrue(sch.IsActive) {
 				log.Printf("system-plugin-schedule: UPDATE SCHEDULE IN DB %v\n", sch.Name)
-				_, err = i.db.UpdateSchedule(sch.UUID, s)
+				_, err = inst.db.UpdateSchedule(sch.UUID, s)
 				if err != nil {
 					log.Errorf("system-plugin-schedule: issue on UpdateSchedule %v\n", sch.UUID)
 				}

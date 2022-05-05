@@ -2,8 +2,8 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/rest/v1/rest"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -161,6 +161,21 @@ func (a *FlowClient) UpdatePointPlugin(body *model.Point, pluginName string) (*m
 	resp, err := a.client.R().
 		SetResult(&model.Point{}).
 		SetBody(body).
+		Patch(url)
+	failResponse := failedResponse(err, resp)
+	if failResponse != nil {
+		return nil, failResponse
+	}
+	return resp.Result().(*model.Point), nil
+}
+
+// WritePointPlugin update an object
+func (a *FlowClient) WritePointPlugin(pointUUID string, body *model.Point, pluginName string) (*model.Point, error) {
+	url := fmt.Sprintf("/api/plugins/api/%s/points/write/{uuid}", pluginName)
+	resp, err := a.client.R().
+		SetResult(&model.Point{}).
+		SetBody(body).
+		SetPathParams(map[string]string{"uuid": pointUUID}).
 		Patch(url)
 	failResponse := failedResponse(err, resp)
 	if failResponse != nil {

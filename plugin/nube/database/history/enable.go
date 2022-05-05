@@ -7,18 +7,18 @@ import (
 
 var cron *gocron.Scheduler
 
-func (i *Instance) Enable() error {
-	i.enabled = true
-	i.setUUID()
-	i.BusServ()
+func (inst *Instance) Enable() error {
+	inst.enabled = true
+	inst.setUUID()
+	inst.BusServ()
 	cron = gocron.NewScheduler(time.UTC)
-	_, _ = cron.Every(i.config.Job.Frequency).Tag("SyncHistory").Do(i.syncHistory)
+	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncHistory").Do(inst.syncHistory)
 	cron.StartAsync()
 	return nil
 }
 
-func (i *Instance) Disable() error {
-	i.enabled = false
+func (inst *Instance) Disable() error {
+	inst.enabled = false
 	cron.Clear()
 	return nil
 }

@@ -5,10 +5,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (i *Instance) schedule() {
+func (inst *Instance) schedule() {
 	j, ok := jobs.GetJobService()
 	if ok {
-		_, err := j.Every(60).Second().Do(i.runSchedule)
+		_, err := j.Every(60).Second().Do(inst.runSchedule)
 		if err != nil {
 			log.Infof("system-plugin-schedule: error on create job %v\n", err)
 		}

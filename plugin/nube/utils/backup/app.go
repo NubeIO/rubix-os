@@ -10,18 +10,18 @@ import (
 	"time"
 )
 
-func (i *Instance) connection() error {
+func (inst *Instance) connection() error {
 	host := "127.0.0.1:9000"
-	if i.config.Host != "" {
-		host = i.config.Host
+	if inst.config.Host != "" {
+		host = inst.config.Host
 	}
 	accessKeyID := "12345678"
-	if i.config.AccessKeyID != "" {
-		accessKeyID = i.config.AccessKeyID
+	if inst.config.AccessKeyID != "" {
+		accessKeyID = inst.config.AccessKeyID
 	}
 	secretAccessKey := "12345678"
-	if i.config.SecretAccessKey != "" {
-		secretAccessKey = i.config.SecretAccessKey
+	if inst.config.SecretAccessKey != "" {
+		secretAccessKey = inst.config.SecretAccessKey
 	}
 	conf := min.Configuration{
 		Host:            host,
@@ -31,13 +31,13 @@ func (i *Instance) connection() error {
 	if err := min.NewConnection(conf); err != nil {
 		return err
 	}
-	i.minioClient = min.GetClient()
+	inst.minioClient = min.GetClient()
 	return nil
 }
 
 const dir = "flow-framework-tmp"
 
-func (i *Instance) makeDir() (path string, err error) {
+func (inst *Instance) makeDir() (path string, err error) {
 	homeDir, err := utils.GetUserHomeDir()
 	if err != nil {
 		return "", err
@@ -47,13 +47,13 @@ func (i *Instance) makeDir() (path string, err error) {
 	return path, err
 }
 
-func (i *Instance) bucketName() string {
+func (inst *Instance) bucketName() string {
 
 	bucketName := "flowframework"
-	if i.config.BucketName != "" {
-		bucketName = i.config.BucketName
+	if inst.config.BucketName != "" {
+		bucketName = inst.config.BucketName
 	}
-	info, err := i.db.GetDeviceInfo()
+	info, err := inst.db.GetDeviceInfo()
 	if err != nil {
 		return ""
 	}
@@ -69,9 +69,9 @@ func (i *Instance) bucketName() string {
 	return nn
 }
 
-func (i *Instance) makeJson(data interface{}, objectName string) error {
-	bucketName := i.bucketName()
-	dirName, err := i.makeDir()
+func (inst *Instance) makeJson(data interface{}, objectName string) error {
+	bucketName := inst.bucketName()
+	dirName, err := inst.makeDir()
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (i *Instance) makeJson(data interface{}, objectName string) error {
 		fmt.Println(err)
 		return err
 	}
-	err = i.minioClient.UploadObject(o, true)
+	err = inst.minioClient.UploadObject(o, true)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -95,19 +95,19 @@ func (i *Instance) makeJson(data interface{}, objectName string) error {
 	return err
 }
 
-func (i *Instance) backNetworks() error {
+func (inst *Instance) backNetworks() error {
 
 	var arg api.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
 
-	nets, err := i.db.GetNetworks(arg)
+	nets, err := inst.db.GetNetworks(arg)
 	if err != nil {
 		return err
 	}
 	t := time.Now()
 	file := fmt.Sprintf("networks_%s.json", t.Format("20060102150405"))
-	err = i.makeJson(nets, file)
+	err = inst.makeJson(nets, file)
 	if err != nil {
 		return err
 	}

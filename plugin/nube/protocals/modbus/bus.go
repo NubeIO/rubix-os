@@ -32,7 +32,7 @@ func (inst *Instance) BusServ() {
 				}
 				if dev != nil {
 					log.Info("MODBUS BUS PluginsCreated IsDevice", " ", dev.UUID)
-					//_, err = i.addPoints(dev)
+					//_, err = inst.addPoints(dev)
 					if err != nil {
 						return
 					}
@@ -44,7 +44,7 @@ func (inst *Instance) BusServ() {
 				if err != nil {
 					return
 				}
-				//_, err = i.addPoint(pnt)
+				//_, err = inst.addPoint(pnt)
 				if err != nil {
 					return
 				}
@@ -83,7 +83,7 @@ func (inst *Instance) BusServ() {
 					return
 				}
 				if dev != nil {
-					//_, err = i.addPoints(dev)
+					//_, err = inst.addPoints(dev)
 					log.Info("MODBUS BUS PluginsUpdated IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
@@ -96,7 +96,7 @@ func (inst *Instance) BusServ() {
 					return
 				}
 				if pnt != nil {
-					//_, err = i.pointPatch(pnt)
+					//_, err = inst.pointPatch(pnt)
 					log.Info("MODBUS BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return
@@ -132,7 +132,7 @@ func (inst *Instance) BusServ() {
 					return
 				}
 				if dev != nil {
-					//_, err = i.addPoints(dev)
+					//_, err = inst.addPoints(dev)
 					log.Info("MODBUS BUS DELETED IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
@@ -146,7 +146,7 @@ func (inst *Instance) BusServ() {
 				}
 				log.Info("MODBUS BUS DELETED IsPoint", " ")
 				if pnt != nil {
-					//p, err := i.deletePoint(pnt)
+					//p, err := inst.deletePoint(pnt)
 					log.Info("MODBUS BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", "p")
 					if err != nil {
 						return

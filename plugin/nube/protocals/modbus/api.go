@@ -8,7 +8,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -45,11 +44,14 @@ func bodyClient(ctx *gin.Context) (dto Body, err error) {
 
 // serialWizard
 type wizard struct {
-	IP         string `json:"ip"`
-	Port       int    `json:"port"`
-	SerialPort string `json:"serial_port"`
-	BaudRate   uint   `json:"baud_rate"`
-	DeviceAddr uint   `json:"device_addr"`
+	IP            string `json:"ip"`
+	Port          int    `json:"port"`
+	SerialPort    string `json:"serial_port"`
+	BaudRate      uint   `json:"baud_rate"`
+	DeviceAddr    uint   `json:"device_addr"`
+	WizardVersion uint   `json:"wizard_version"`
+	NameArg       string `json:"name_arg"`
+	AddArg        uint   `json:"add_arg"`
 }
 
 func bodyWizard(ctx *gin.Context) (dto wizard, err error) {
@@ -72,6 +74,7 @@ func supportedObjects() *utils.Array {
 // RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
+	modbusDebugMsg(fmt.Sprintf("RegisterWebhook(): %+v\n", inst))
 	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
 		network, err := inst.addNetwork(body)
@@ -100,6 +103,12 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.PATCH(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		point, err := inst.updatePoint(body)
+		plugin.ResponseHandler(point, err, 0, ctx)
+	})
+	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYPoint(ctx)
+		uuid := plugin.ResolveID(ctx)
+		point, err := inst.writePoint(uuid, body)
 		plugin.ResponseHandler(point, err, 0, ctx)
 	})
 	mux.DELETE(plugin.NetworksURL, func(ctx *gin.Context) {
@@ -133,7 +142,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		netType := body.Network.TransportType
 		mbClient, err := inst.setClient(body.Network, body.Device, false)
 		if err != nil {
-			log.Errorln(err, "ERROR ON set modbus client")
+			modbusErrorMsg(err, "ERROR ON set modbus client")
 			ctx.JSON(http.StatusBadRequest, err.Error())
 			return
 		}
@@ -144,7 +153,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else if netType == model.TransType.IP {
 			url, err := uurl.JoinIpPort(body.Device.Host, body.Device.Port)
 			if err != nil {
-				log.Errorf("modbus: failed to validate device IP %s\n", url)
+				modbusErrorMsg(fmt.Sprintf("failed to validate device IP %s\n", url))
 				ctx.JSON(http.StatusBadRequest, err.Error())
 				return
 			}
@@ -156,7 +165,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusBadRequest, err.Error())
 			return
 		}
-		fmt.Println("responseValue", responseValue)
+		modbusDebugMsg("responseValue", responseValue)
 		ctx.JSON(http.StatusOK, responseValue)
 		return
 	})

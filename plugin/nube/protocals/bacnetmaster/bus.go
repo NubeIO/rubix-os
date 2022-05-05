@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (i *Instance) BusServ() {
+func (inst *Instance) BusServ() {
 	handlerCreated := bus.Handler{ //CREATED
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
@@ -19,7 +19,7 @@ func (i *Instance) BusServ() {
 				if err != nil {
 					return
 				}
-				if net != nil { //_, err = i.addNetwork(net)
+				if net != nil { //_, err = inst.addNetwork(net)
 					log.Info("BACNET-MASTER BUS PluginsCreated isNetwork", " ", net.UUID)
 					if err != nil {
 						return
@@ -33,7 +33,7 @@ func (i *Instance) BusServ() {
 				}
 				if dev != nil {
 					log.Info("BACNET-MASTER BUS PluginsCreated IsDevice", " ", dev.UUID)
-					//_, err = i.addDevice(dev)
+					//_, err = inst.addDevice(dev)
 					if err != nil {
 						return
 					}
@@ -46,7 +46,7 @@ func (i *Instance) BusServ() {
 				}
 				if pnt != nil {
 					log.Info("BACNET-MASTER BUS PluginsCreated IsPoint", " ", pnt.UUID)
-					//_, err = i.addPoint(pnt)
+					//_, err = inst.addPoint(pnt)
 					if err != nil {
 						return
 					}
@@ -87,7 +87,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if dev != nil {
-					//_, err = i.addPoints(dev)
+					//_, err = inst.addPoints(dev)
 					log.Info("BACNET-MASTER BUS PluginsUpdated IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
@@ -100,7 +100,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if pnt != nil {
-					//_, err = i.pointPatch(pnt)
+					//_, err = inst.pointPatch(pnt)
 					log.Info("BACNET-MASTER BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return
@@ -136,7 +136,7 @@ func (i *Instance) BusServ() {
 					return
 				}
 				if dev != nil {
-					//_, err = i.addPoints(dev)
+					//_, err = inst.addPoints(dev)
 					log.Info("BACNET-MASTER BUS DELETED IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
@@ -150,7 +150,7 @@ func (i *Instance) BusServ() {
 				}
 				log.Info("BACNET-MASTER BUS DELETED IsPoint", " ")
 				if pnt != nil {
-					//p, err := i.deletePoint(pnt)
+					//p, err := inst.deletePoint(pnt)
 					//log.Info("BACNET-MASTER BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", p)
 					if err != nil {
 						return
@@ -169,7 +169,7 @@ func (i *Instance) BusServ() {
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				p, _ := e.Data.(mqtt.Message)
-				i.bacnetUpdate(p)
+				inst.bacnetUpdate(p)
 
 			}()
 		},

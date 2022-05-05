@@ -1,3 +1,3 @@
 package main
 
-func (i *Instance) BusServ() {}
+func (inst *Instance) BusServ() {}

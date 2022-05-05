@@ -65,12 +65,39 @@ func (d *GormDatabase) GetNetworkByName(name string, args api.Args) (*model.Netw
 	return networksModel, nil
 }
 
-// GetNetworkByPointUUID returns a network by passing in the pointUUID.
-func (d *GormDatabase) GetNetworkByPointUUID(point *model.Point, args api.Args) (network *model.Network, err error) {
-	device, err := d.GetDeviceByPointUUID(point)
+// GetNetworkByPoint returns a network by passing in the pointUUID.
+func (d *GormDatabase) GetNetworkByPoint(point *model.Point, args api.Args) (network *model.Network, err error) {
+	device, err := d.GetDeviceByPoint(point)
 	if err != nil {
 		return nil, err
 	}
+	network, err = d.GetNetwork(device.NetworkUUID, args)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+// GetNetworkByPointUUID returns a network by passing in the pointUUID.
+func (d *GormDatabase) GetNetworkByPointUUID(pntUUID string, args api.Args) (network *model.Network, err error) {
+	device, err := d.GetDeviceByPointUUID(pntUUID)
+	if err != nil {
+		return nil, err
+	}
+	network, err = d.GetNetwork(device.NetworkUUID, args)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+// GetNetworkByDeviceUUID returns a network by passing in the device UUID.
+func (d *GormDatabase) GetNetworkByDeviceUUID(devUUID string, args api.Args) (network *model.Network, err error) {
+	device, err := d.GetDevice(devUUID, args)
+	if err != nil && device == nil {
+		return nil, err
+	}
+
 	network, err = d.GetNetwork(device.NetworkUUID, args)
 	if err != nil {
 		return nil, err
