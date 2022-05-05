@@ -1,7 +1,6 @@
 package database
 
 import (
-	"encoding/json"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -63,15 +62,11 @@ func (d *GormDatabase) GetProducerHistoriesPoints(args api.Args) ([]*model.Histo
 		return nil, query.Error
 	}
 	for _, pHis := range proHistoriesModel {
-		priority := new(model.Priority)
-		_ = json.Unmarshal(pHis.DataStore, &priority)
-		highestPriorityValue := priority.GetHighestPriorityValue()
-		value := 0.0
-		if highestPriorityValue != nil {
-			value = *highestPriorityValue
+		if pHis.PresentValue == nil {
+			continue
 		}
 		historiesModel = append(historiesModel,
-			&model.History{ID: pHis.ID, UUID: pHis.ProducerUUID, Value: value, Timestamp: pHis.Timestamp})
+			&model.History{ID: pHis.ID, UUID: pHis.ProducerUUID, Value: *pHis.PresentValue, Timestamp: pHis.Timestamp})
 	}
 	return historiesModel, nil
 }
@@ -94,15 +89,11 @@ func (d *GormDatabase) GetProducerHistoriesPointsForSync(id string, timeStamp st
 		return nil, query.Error
 	}
 	for _, pHis := range proHistoriesModel {
-		priority := new(model.Priority)
-		_ = json.Unmarshal(pHis.DataStore, &priority)
-		highestPriorityValue := priority.GetHighestPriorityValue()
-		value := 0.0
-		if highestPriorityValue != nil {
-			value = *highestPriorityValue
+		if pHis.PresentValue == nil {
+			continue
 		}
 		historiesModel = append(historiesModel,
-			&model.History{ID: pHis.ID, UUID: pHis.ProducerUUID, Value: value, Timestamp: pHis.Timestamp})
+			&model.History{ID: pHis.ID, UUID: pHis.ProducerUUID, Value: *pHis.PresentValue, Timestamp: pHis.Timestamp})
 	}
 	return historiesModel, nil
 }
