@@ -32,10 +32,8 @@ func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point,
 			if pnt.UUID == search.UUID {
 				pointsModel = append(pointsModel, pnt)
 			}
-
 		}
 	}
-
 	return pointsModel, nil
 }
 
@@ -51,19 +49,7 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
 	body.Name = nameIsNil(body.Name)
-	//existingAddrID := false
-	//existingName, _ := d.pointNameExists(body)
-	if body.AddressID != nil {
-		//_, existingAddrID = d.pointNameExists(body)
-	}
-	//if existingName {
-	//	eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
-	//	return nil, errors.New(eMsg)
-	//}
-	//if existingAddrID {
-	//	eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", utils.IntIsNil(body.AddressID))
-	//	return nil, errors.New(eMsg)
-	//}
+
 	if body.Decimal == nil {
 		body.Decimal = nils.NewUint32(2)
 	}
@@ -88,9 +74,8 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
-	deviceUUID := body.DeviceUUID // TODO: Should there be a check to ensure that the DeviceUUID is sent with body?
-	network, err := d.GetNetworkByDeviceUUID(deviceUUID, api.Args{})
-	fmt.Printf("network: %+v\n", network)
+	network, err := d.GetNetworkByDeviceUUID(body.DeviceUUID, api.Args{})
+	log.Infof("network: %+v\n", network)
 	if err != nil {
 		return nil, errors.New("ERROR failed to get plugin uuid")
 	}
@@ -105,7 +90,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 			return nil, errors.New("ERROR on device eventbus")
 		}
 	}
-	//check for mapping
+	// check for mapping
 	if network.AutoMappingNetworksSelection != "" {
 		pointMapping := &model.PointMapping{}
 		pointMapping.Point = body
@@ -146,7 +131,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, err
 		}
 	}
-	//example modbus: if user changes the data type then do a new read of the point on the modbus network
+	// example modbus: if user changes the data type then do a new read of the point on the modbus network
 	if !fromPlugin {
 		pointModel.InSync = utils.NewFalse()
 	}
@@ -158,18 +143,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	pointModel.PollRate = body.PollRate
 
 	query = d.DB.Model(&pointModel).Updates(&body)
-	// Don't update point value if priority array on body is nil
-	//if body.Priority == nil {
-	//	return pointModel, nil
-	//} else {
-	//	pointModel.Priority = body.Priority
-	//}
-	//
-	//pnt, err := d.UpdatePointValue(pointModel, fromPlugin)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//return pnt, nil
 	return pointModel, nil
 }
 
@@ -192,11 +165,10 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlug
 
 func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool) (*model.Point, error) {
 	if pointModel.PointPriorityArrayMode == "" {
-		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue //sets default priority array mode.
+		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
 
-	pointModel, presentValue := d.updatePriority(pointModel)
-	//presentValue will be OriginalValue if PointPriorityArrayMode is PriorityArrayToWriteValue or ReadOnlyNoPriorityArrayRequired. OriginalValue will have been updated by plugin on successful read.
+	pointModel, priority, presentValue := d.updatePriority(pointModel, priority)
 	ov := utils.Float64IsNil(presentValue)
 	pointModel.OriginalValue = &ov
 
@@ -227,7 +199,9 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	} else {
 		presentValue = val
 	}
-	//example for wires and modbus: if a new value is written from  wires then set this to false so the modbus knows on the next poll to write a new value to the modbus point
+	// example for wires and modbus:
+	// if a new value is written from wires then set this to false so the modbus knows on the next poll to write a new
+	// value to the modbus point
 	if !fromPlugin {
 		pointModel.InSync = utils.NewFalse()
 	}
@@ -236,22 +210,8 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 		presentValue = &val
 	}
 
-	//TODO: I think this whole section can be deleted; Unless the overhead of d.ProducersPointWrite(pointModel) is too high.
-	dbUpdateRequired := false
-	switch pointModel.PointPriorityArrayMode {
-	case model.PriorityArrayToPresentValue:
-		//Priority array has already been pushed to DB so only need to update if PresentValue has changed or if there is a value transform error.
-		dbUpdateRequired = !utils.CompareFloatPtr(pointModel.PresentValue, presentValue) || presentValueTransformFault
-
-	case model.PriorityArrayToWriteValue:
-		// TODO: Currently there isn't a good comparison to decide if a DB update is required, so just do it.  This could be added, but it would require a bunch of rework to the above functions.
-		dbUpdateRequired = true
-
-	case model.ReadOnlyNoPriorityArrayRequired:
-		dbUpdateRequired = !utils.CompareFloatPtr(pointModel.PresentValue, presentValue) || presentValueTransformFault
-	}
-
-	// If the present value tranformations have resulted in an error, DB needs to be updated with the errors, but PresentValue should not change.
+	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
+	// but PresentValue should not change
 	if !presentValueTransformFault {
 		pointModel.PresentValue = presentValue
 	}
@@ -263,16 +223,16 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 			Update("present_value", nil)
 	}
 
-	if dbUpdateRequired {
-		_ = d.DB.Model(&pointModel).Updates(&pointModel)
-		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue)
-		if err != nil {
-			return nil, err
-		}
-		d.DB.Model(&model.Writer{}).
-			Where("writer_thing_uuid = ?", pointModel.UUID).
-			Update("present_value", pointModel.PresentValue)
+	// TODO: may be we can have a control mechanism for restricting frequent producer writes
+	_ = d.DB.Model(&pointModel).Updates(&pointModel)
+	err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue)
+	if err != nil {
+		return nil, err
 	}
+	d.DB.Model(&model.Writer{}).
+		Where("writer_thing_uuid = ?", pointModel.UUID).
+		Update("present_value", pointModel.PresentValue)
+
 	if !fromPlugin { // stop looping
 		plug, err := d.GetNetworkByDeviceUUID(pointModel.DeviceUUID, api.Args{})
 		if err != nil {

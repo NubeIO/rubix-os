@@ -71,7 +71,7 @@ func (d *GormDatabase) WritePointPlugin(uuid string, body *model.PointWriter) (p
 	}
 
 	cli := client.NewLocalClient()
-	point, err = cli.WritePointPlugin(uuid, body.Priority, pluginName)
+	point, err = cli.WritePointPlugin(uuid, body, pluginName)
 	if err != nil {
 		return nil, err
 	}

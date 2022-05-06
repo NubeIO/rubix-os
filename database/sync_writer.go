@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -104,12 +105,12 @@ func (d *GormDatabase) SyncWriterReadAction(sourceUUID string) error {
 	}
 	syncCOV := model.SyncCOV{}
 	if writerClone.WriterThingClass == model.ThingClass.Point {
-		// TODO >>>
-		//point, err := d.GetPoint(writerClone.WriterThingUUID, api.Args{WithPriority: true})
-		//if err != nil {
-		//	return err
-		//}
-		//syncCOV.Priority = point.Priority
+		point, err := d.GetPoint(writerClone.WriterThingUUID, api.Args{WithPriority: true})
+		if err != nil {
+			return err
+		}
+		priorityMap := priorityarray.ConvertToMap(*point.Priority)
+		syncCOV.Priority = &priorityMap
 	} else {
 		schedule, err := d.GetSchedule(writerClone.WriterThingUUID)
 		if err != nil {

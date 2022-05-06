@@ -2,11 +2,13 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
-	"reflect"
+	"strings"
 )
 
 func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string) (*model.Point, error) {
@@ -38,7 +40,7 @@ func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string)
 	return pointModel, nil
 }
 
-//TODO: functions calling  d.PointWrite(point.UUID, body, fromPlugin) should be routed via plugin!!
+// PointWriteByName TODO: functions calling  d.PointWrite(point.UUID, body, fromPlugin) should be routed via plugin!!
 func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter, fromPlugin bool) (*model.Point, error) {
 	point, err := d.GetPointByName(networkName, deviceName, pointName)
 	if err != nil {
@@ -60,14 +62,18 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	return pointModel, nil
 }
 
-func (d *GormDatabase) updatePriority(pointModel *model.Point) (*model.Point, *float64) {
+// updatePriority it updates priority array of point model
+// it attaches the point model fields values for updating it on it's parent function
+func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64) (*model.Point, *map[string]*float64, *float64) {
 	var presentValue *float64
+	priorityMap := priority
 	presentValueFromPriority := pointModel.PointPriorityArrayMode != model.ReadOnlyNoPriorityArrayRequired && pointModel.PointPriorityArrayMode != model.PriorityArrayToWriteValue
-	// THESE VALUES ARE NOT REQUIRED FOR model.ReadOnlyNoPriorityArrayRequired
+	// These values are not required for model.ReadOnlyNoPriorityArrayRequired
 	if pointModel.PointPriorityArrayMode == model.ReadOnlyNoPriorityArrayRequired {
 		pointModel.CurrentPriority = nil
 		pointModel.WriteValue = nil
 		pointModel.WriteValueOriginal = nil
+
 		pointModel.Priority.P1 = nil
 		pointModel.Priority.P2 = nil
 		pointModel.Priority.P3 = nil
@@ -84,74 +90,55 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point) (*model.Point, *f
 		pointModel.Priority.P14 = nil
 		pointModel.Priority.P15 = nil
 		pointModel.Priority.P16 = nil
+		d.DB.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&pointModel.Priority)
 	}
-	if pointModel.Priority != nil {
-		priorityMap, highestValue, currentPriority, isPriorityExist := d.parsePriority(pointModel.Priority, pointModel)
-		if isPriorityExist {
-			pointModel.CurrentPriority = &currentPriority
-			pointModel.WriteValueOriginal = utils.NewFloat64(highestValue)
-			writeValue, err := pointEval(&highestValue, pointModel.MathOnWriteValue)
-			if err != nil {
-				log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
-			} else {
-				pointModel.WriteValue = writeValue
-			}
-			if presentValueFromPriority { // only update presentValue if required by PointPriorityArrayMode
-				presentValue = &highestValue
-			}
-		} else if !utils.FloatIsNilCheck(pointModel.Fallback) {
-			pointModel.Priority.P16 = utils.NewFloat64(*pointModel.Fallback)
-			priorityMap["P16"] = *pointModel.Fallback
-			pointModel.CurrentPriority = utils.NewInt(16)
-			pointModel.WriteValueOriginal = utils.NewFloat64(*pointModel.Priority.P16)
-			writeValue, err := pointEval(pointModel.Priority.P16, pointModel.MathOnWriteValue)
-			if err != nil {
-				log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
-			} else {
-				pointModel.WriteValue = writeValue
-			}
-			if presentValueFromPriority {
-				presentValue = utils.NewFloat64(*pointModel.Fallback) // only update presentValue if required by PointPriorityArrayMode
+
+	if priority != nil {
+		// override priorityMap
+		priorityMap, highestValue, currentPriority, doesPriorityExist := priorityarray.ParsePriority(pointModel.Priority, priority)
+		if doesPriorityExist {
+			if priorityMap != nil {
+				pointModel.CurrentPriority = currentPriority
+				pointModel.WriteValueOriginal = highestValue
+				writeValue, err := pointEval(highestValue, pointModel.MathOnWriteValue)
+				if err != nil {
+					log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
+				} else {
+					pointModel.WriteValue = writeValue
+				}
+				presentValue = highestValue
+			} else if !utils.FloatIsNilCheck(pointModel.Fallback) || currentPriority == nil {
+				pointModel.Priority.P16 = utils.NewFloat64(*pointModel.Fallback)
+				priorityMapTemp := map[string]*float64{"_16": pointModel.Fallback}
+				priorityMap = &priorityMapTemp
+				pointModel.CurrentPriority = utils.NewInt(16)
+				pointModel.WriteValueOriginal = utils.NewFloat64(*pointModel.Priority.P16)
+				writeValue, err := pointEval(pointModel.Priority.P16, pointModel.MathOnWriteValue)
+				if err != nil {
+					log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
+				} else {
+					pointModel.WriteValue = writeValue
+				}
+				presentValue = pointModel.Fallback // only update presentValue if required by PointPriorityArrayMode
 			}
 		}
-		//writeValue := utils.Float64IsNil(pointModel.WriteValue)
-		d.DB.Model(&model.Point{}).Where("uuid = ?", pointModel.UUID).Update("write_value", pointModel.WriteValue) // TODO: is this neccesary here, should be included in the db call in UpdatePointValue()?
-		d.DB.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMap)
+		priorityMapToPatch := d.priorityMapToPatch(priorityMap)
+		d.DB.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMapToPatch)
 	}
-	if !presentValueFromPriority { // if presentValue doesn't come from priority array, update with the existing value (before math exp is applied)
+	if !presentValueFromPriority {
+		// presentValue will be OriginalValue if PointPriorityArrayMode is PriorityArrayToWriteValue or
+		// ReadOnlyNoPriorityArrayRequired
 		presentValue = pointModel.OriginalValue
 	}
-	return pointModel, presentValue
+	return pointModel, priorityMap, presentValue
 }
 
-func (d *GormDatabase) parsePriority(priority *model.Priority, pointModel *model.Point) (map[string]interface{}, float64, int, bool) {
-	priorityMap := map[string]interface{}{}
-	priorityValue := reflect.ValueOf(*priority)
-	typeOfPriority := priorityValue.Type()
-	highestValue := 0.0
-	currentPriority := 0
-	isPriorityExist := false
-	for i := 0; i < priorityValue.NumField(); i++ {
-		if priorityValue.Field(i).Type().Kind().String() == "ptr" {
-			val := priorityValue.Field(i).Interface().(*float64)
-			if val == nil {
-				priorityMap[typeOfPriority.Field(i).Name] = nil
-			} else {
-				if !isPriorityExist {
-					currentPriority = i
-					highestValue = *val
-					writeValue, err := pointEval(val, pointModel.MathOnWriteValue)
-					if err != nil {
-						log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
-						//return nil, 0, 0, false
-					}
-					pointModel.WriteValue = writeValue
-					pointModel.WriteValueOriginal = val
-				}
-				priorityMap[typeOfPriority.Field(i).Name] = *val
-				isPriorityExist = true
-			}
+func (d *GormDatabase) priorityMapToPatch(priorityMap *map[string]*float64) map[string]interface{} {
+	priorityMapToPatch := map[string]interface{}{}
+	if priorityMap != nil {
+		for k, v := range *priorityMap {
+			priorityMapToPatch[fmt.Sprintf("P%s", strings.Replace(k, "_", "", -1))] = v
 		}
 	}
-	return priorityMap, highestValue, currentPriority, isPriorityExist
+	return priorityMapToPatch
 }
