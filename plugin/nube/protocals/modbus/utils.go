@@ -6,7 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
-	"github.com/NubeIO/flow-framework/utils/str"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -109,11 +109,11 @@ func pointAddress(pnt *model.Point, zeroMode bool) (out uint16, err error) {
 
 func networkRequest(mbClient smod.ModbusClient, pnt *model.Point, doWrite bool) (response interface{}, responseValue float64, err error) {
 	mbClient.Debug = true
-	objectEncoding := pnt.ObjectEncoding                       //beb_lew
-	objectType := str.NewString(pnt.ObjectType).ToSnakeCase()  //eg: readCoil, read_coil, writeCoil
-	dataType := str.NewString(pnt.DataType).ToSnakeCase()      //eg: int16, uint16
-	address, err := pointAddress(pnt, mbClient.DeviceZeroMode) //register address
-	length := integer.NonNil(pnt.AddressLength)                //modbus register length
+	objectEncoding := pnt.ObjectEncoding                          //beb_lew
+	objectType := nstring.NewString(pnt.ObjectType).ToSnakeCase() //eg: readCoil, read_coil, writeCoil
+	dataType := nstring.NewString(pnt.DataType).ToSnakeCase()     //eg: int16, uint16
+	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)    //register address
+	length := integer.NonNil(pnt.AddressLength)                   //modbus register length
 
 	switch objectEncoding {
 	case string(model.ByteOrderLebBew):
@@ -197,11 +197,11 @@ func networkRequest(mbClient smod.ModbusClient, pnt *model.Point, doWrite bool) 
 
 func networkWrite(mbClient smod.ModbusClient, pnt *model.Point) (response interface{}, responseValue float64, err error) {
 	mbClient.Debug = true
-	objectEncoding := pnt.ObjectEncoding                       //beb_lew
-	objectType := str.NewString(pnt.ObjectType).ToSnakeCase()  //eg: readCoil, read_coil, writeCoil
-	dataType := str.NewString(pnt.DataType).ToSnakeCase()      //eg: int16, uint16
-	address, err := pointAddress(pnt, mbClient.DeviceZeroMode) //register address
-	length := integer.NonNil(pnt.AddressLength)                //modbus register length
+	objectEncoding := pnt.ObjectEncoding                          //beb_lew
+	objectType := nstring.NewString(pnt.ObjectType).ToSnakeCase() //eg: readCoil, read_coil, writeCoil
+	dataType := nstring.NewString(pnt.DataType).ToSnakeCase()     //eg: int16, uint16
+	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)    //register address
+	length := integer.NonNil(pnt.AddressLength)                   //modbus register length
 
 	switch objectEncoding {
 	case string(model.ByteOrderLebBew):
@@ -248,11 +248,11 @@ func networkWrite(mbClient smod.ModbusClient, pnt *model.Point) (response interf
 
 func networkRead(mbClient smod.ModbusClient, pnt *model.Point) (response interface{}, responseValue float64, err error) {
 	mbClient.Debug = true
-	objectEncoding := pnt.ObjectEncoding                       //beb_lew
-	objectType := str.NewString(pnt.ObjectType).ToSnakeCase()  //eg: readCoil, read_coil, writeCoil
-	dataType := str.NewString(pnt.DataType).ToSnakeCase()      //eg: int16, uint16
-	address, err := pointAddress(pnt, mbClient.DeviceZeroMode) //register address
-	length := integer.NonNil(pnt.AddressLength)                //modbus register length
+	objectEncoding := pnt.ObjectEncoding                          //beb_lew
+	objectType := nstring.NewString(pnt.ObjectType).ToSnakeCase() //eg: readCoil, read_coil, writeCoil
+	dataType := nstring.NewString(pnt.DataType).ToSnakeCase()     //eg: int16, uint16
+	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)    //register address
+	length := integer.NonNil(pnt.AddressLength)                   //modbus register length
 
 	switch objectEncoding {
 	case string(model.ByteOrderLebBew):

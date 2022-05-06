@@ -4,7 +4,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/str"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -53,7 +53,7 @@ func (d *GormDatabase) RefreshFlowNetworkClonesConnections() (*bool, error) {
 		fncModel := model.FlowNetworkClone{}
 		if err != nil {
 			fncModel.IsError = boolean.NewTrue()
-			fncModel.ErrorMsg = str.NewStringAddress(err.Error())
+			fncModel.ErrorMsg = nstring.NewStringAddress(err.Error())
 			fncModel.FlowToken = fnc.FlowToken
 		} else {
 			fncModel.IsError = boolean.NewFalse()

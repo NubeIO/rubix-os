@@ -6,7 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
-	"github.com/NubeIO/flow-framework/utils/str"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 	"time"
@@ -688,7 +688,7 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	net.PluginPath = "modbus"
 	net.SerialPort = &sp
 	net.SerialBaudRate = integer.NewUint(uint(br))
-	net.SerialParity = str.New("none")
+	net.SerialParity = nstring.New("none")
 	net.SerialDataBits = integer.NewUint(1)
 	net.SerialStopBits = integer.NewUint(1)
 

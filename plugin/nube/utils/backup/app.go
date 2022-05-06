@@ -6,7 +6,7 @@ import (
 	min "github.com/NubeIO/flow-framework/plugin/nube/utils/backup/minio"
 	"github.com/NubeIO/flow-framework/utils/directory"
 	"github.com/NubeIO/flow-framework/utils/file"
-	"github.com/NubeIO/flow-framework/utils/str"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"reflect"
 	"strings"
 	"time"
@@ -65,7 +65,7 @@ func (inst *Instance) bucketName() string {
 	}
 	noDashes := strings.Replace(bucketName, "_", " ", -1)
 	noSpaceString := strings.ReplaceAll(noDashes, " ", "")
-	n := str.NewString(noSpaceString)
+	n := nstring.NewString(noSpaceString)
 	nn := n.RemoveSpecialCharacter()
 	nn = n.ToLower()
 	return nn
