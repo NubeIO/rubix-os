@@ -8,7 +8,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nmath"
 
 	"github.com/NubeIO/flow-framework/api"
-	unit "github.com/NubeIO/flow-framework/src/units"
+	"github.com/NubeIO/flow-framework/src/units"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/PaesslerAG/gval"
 )
@@ -80,7 +80,7 @@ func pointUnits(presentValue *float64, unitFrom, unitTo *string) (value *float64
 	if presentValue == nil || unitFrom == nil || unitTo == nil || *unitFrom == "" || *unitTo == "" {
 		return presentValue, nil
 	}
-	_, res, err := unit.Process(*presentValue, *unitFrom, *unitTo)
+	_, res, err := units.Process(*presentValue, *unitFrom, *unitTo)
 	if err != nil {
 		return float.New(0), err
 	}

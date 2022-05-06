@@ -1,7 +1,7 @@
 package api
 
 import (
-	unit "github.com/NubeIO/flow-framework/src/units"
+	"github.com/NubeIO/flow-framework/src/units"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
@@ -19,5 +19,5 @@ func (t *ThingAPI) WriterActions(ctx *gin.Context) {
 }
 
 func (t *ThingAPI) ThingUnits(ctx *gin.Context) {
-	responseHandler(unit.UnitsMap, nil, ctx)
+	responseHandler(units.UnitsMap, nil, ctx)
 }
