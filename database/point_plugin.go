@@ -42,7 +42,7 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 	}
 	pluginName := network.PluginPath
 	if pluginName == "system" {
-		point, err = d.UpdatePoint(body.UUID, body, false)
+		point, err = d.UpdatePoint(uuid, body, false)
 		if err != nil {
 			return nil, err
 		}
@@ -56,7 +56,7 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 	return
 }
 
-func (d *GormDatabase) WritePointPlugin(uuid string, body *model.Point) (point *model.Point, err error) {
+func (d *GormDatabase) WritePointPlugin(uuid string, body *model.PointWriter) (point *model.Point, err error) {
 	network, err := d.GetNetworkByPointUUID(uuid, api.Args{})
 	if err != nil || network == nil {
 		return nil, err

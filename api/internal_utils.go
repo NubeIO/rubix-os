@@ -451,6 +451,11 @@ func getBODYPoint(ctx *gin.Context) (dto *model.Point, err error) {
 	return dto, err
 }
 
+func getBODYPointWriter(ctx *gin.Context) (dto *model.PointWriter, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBodyTag(ctx *gin.Context) (dto *model.Tag, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err

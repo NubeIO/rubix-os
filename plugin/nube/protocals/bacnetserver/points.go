@@ -181,9 +181,7 @@ func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	tt := top.(string)
 	objType, addr := getPointAddr(tt)
 	var point model.Point
-	var pri model.Priority
-	pri.P16 = payload.Value
-	point.Priority = &pri
+	priority := map[string]*float64{"_16": payload.Value}
 	addressID := addr
 
 	object := str.NewString(objType).ToSnakeCase()
@@ -202,7 +200,7 @@ func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 		log.Error("bacnet-server: issue on message from mqtt update point")
 		return nil, err
 	}
-	_, err = inst.db.UpdatePointValue(pnt.UUID, &point, true)
+	_, err = inst.db.UpdatePointValue(pnt.UUID, &point, &priority, true)
 	if err != nil {
 		log.Error("bacnet-server: UpdatePointValue() issue on message from mqtt update point")
 		return nil, err

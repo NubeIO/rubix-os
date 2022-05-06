@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -46,9 +47,8 @@ func (d *GormDatabase) SyncCOV(writerUUID string, body *model.SyncCOV) error {
 	}
 	uuid := writer.WriterThingUUID
 	if writer.WriterThingClass == model.ThingClass.Point {
-		pointModel := model.Point{
-			CommonUUID: model.CommonUUID{UUID: uuid},
-			Priority:   body.Priority,
+		pointModel := model.PointWriter{
+			Priority: body.Priority,
 		}
 		_, err = d.PointWrite(uuid, &pointModel, false)
 		return err
@@ -69,10 +69,10 @@ func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.Sync
 		if err != nil {
 			return nil
 		}
-		point := model.Point{Priority: body.Priority}
+		pointWriter := model.PointWriter{Priority: body.Priority}
 		// TODO: change this section by below commented section
 		producer, _ := d.GetProducer(writerClone.ProducerUUID, api.Args{})
-		_, err = d.PointWrite(producer.ProducerThingUUID, &point, false)
+		_, err = d.PointWrite(producer.ProducerThingUUID, &pointWriter, false)
 		// Currently, writerClone.WriterThingUUID has not valid `WriterThingUUID` on old deployments
 		// _, err = d.PointWrite(writerClone.WriterThingUUID, &point, true)
 		return err
@@ -109,7 +109,8 @@ func (d *GormDatabase) SyncWriterReadAction(sourceUUID string) error {
 		if err != nil {
 			return err
 		}
-		syncCOV.Priority = point.Priority
+		priorityMap := priorityarray.ConvertToMap(*point.Priority)
+		syncCOV.Priority = &priorityMap
 	} else {
 		schedule, err := d.GetSchedule(writerClone.WriterThingUUID)
 		if err != nil {

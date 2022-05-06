@@ -113,7 +113,7 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 }
 
 //writePoint update point. Called via API call.
-func (inst *Instance) writePoint(pntUUID string, body *model.Point) (point *model.Point, err error) {
+func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
 	//TODO: check for PointWriteByName calls that might not flow through the plugin.
 	if body == nil {
 		return
@@ -167,11 +167,9 @@ func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point
 	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	point.CommonFault.Message = fmt.Sprintf("last-update: %s", utilstime.TimeStamp())
 	point.CommonFault.LastOk = time.Now().UTC()
-	var pri model.Priority
-	pri.P16 = &value
-	point.Priority = &pri
+	priority := map[string]*float64{"_16": &value}
 	point.InSync = utils.NewTrue()
-	_, err := inst.db.UpdatePointValue(uuid, &point, true)
+	_, err := inst.db.UpdatePointValue(uuid, &point, &priority, true)
 	if err != nil {
 		log.Error("edge28-app: pointUpdateValue()", err)
 		return nil, err
