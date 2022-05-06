@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	min "github.com/NubeIO/flow-framework/plugin/nube/utils/backup/minio"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/directory"
 	"reflect"
 	"strings"
 	"time"
@@ -38,12 +39,12 @@ func (inst *Instance) connection() error {
 const dir = "flow-framework-tmp"
 
 func (inst *Instance) makeDir() (path string, err error) {
-	homeDir, err := utils.GetUserHomeDir()
+	homeDir, err := directory.GetUserHomeDir()
 	if err != nil {
 		return "", err
 	}
 	path = fmt.Sprintf("%s/%s", homeDir, dir)
-	err = utils.MakeDirIfNotExists(path)
+	err = directory.MakeDirIfNotExists(path)
 	return path, err
 }
 
