@@ -1,4 +1,4 @@
-package utils
+package float
 
 import (
 	"github.com/NubeIO/flow-framework/utils"
@@ -11,10 +11,10 @@ func TestFirstNotNilTest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	var a *float64 = nil
 	b := utils.NewFloat64(2.3)
-	result := utils.FirstNotNilFloat(a, b)
+	result := FirstNotNilFloat(a, b)
 	assert.Equal(t, 2.3, *result)
 
 	var c *float64 = nil
-	result2 := utils.FirstNotNilFloat(a, c)
+	result2 := FirstNotNilFloat(a, c)
 	assert.Nil(t, result2)
 }

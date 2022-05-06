@@ -10,6 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 	"time"
@@ -227,8 +228,7 @@ func (inst *Instance) ModbusPolling() error {
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 					continue
 				}
-				//check cov
-				isChange := !utils.CompareFloatPtr(pnt.PresentValue, &responseValue)
+				isChange := !float.CompareFloatPtr(pnt.PresentValue, &responseValue)
 				if isChange {
 					if err != nil {
 						netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, callback)
