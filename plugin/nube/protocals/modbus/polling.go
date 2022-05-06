@@ -10,7 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
-	"github.com/NubeIO/flow-framework/utils/url"
+	"github.com/NubeIO/flow-framework/utils/nurl"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 	"time"
@@ -183,13 +183,13 @@ func (inst *Instance) ModbusPolling() error {
 					mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
 				}
 			} else if dev.TransportType == model.TransType.IP {
-				url_, err := url.JoinIPPort(url.Parts{Host: dev.Host, Port: strconv.Itoa(dev.Port)})
+				url, err := nurl.JoinIPPort(nurl.Parts{Host: dev.Host, Port: strconv.Itoa(dev.Port)})
 				if err != nil {
-					modbusErrorMsg("failed to validate device IP", url_)
+					modbusErrorMsg("failed to validate device IP", url)
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 					continue
 				}
-				mbClient.TCPClientHandler.Address = url_
+				mbClient.TCPClientHandler.Address = url
 				mbClient.TCPClientHandler.SlaveID = byte(dev.AddressId)
 			} else {
 				modbusDebugMsg(fmt.Sprintf("failed to validate device and network %v %s", err, dev.Name))
