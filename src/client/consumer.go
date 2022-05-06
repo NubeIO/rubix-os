@@ -2,12 +2,12 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 )
 
 // ClientAddConsumer an object
 func (a *FlowClient) ClientAddConsumer(body Consumer) (*ResponseBody, error) {
-	name, _ := utils.MakeUUID()
+	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("sub_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
@@ -40,7 +40,7 @@ func (a *FlowClient) ClientGetConsumer(uuid string) (*ResponseBody, error) {
 
 // ClientEditConsumer edit an object
 func (a *FlowClient) ClientEditConsumer(uuid string) (*ResponseBody, error) {
-	name, _ := utils.MakeUUID()
+	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("sub_new_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).

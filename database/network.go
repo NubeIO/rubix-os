@@ -6,8 +6,8 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/plugin/compat"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -50,7 +50,7 @@ func (d *GormDatabase) GetNetworkByField(field string, value string, withDevices
 
 // CreateNetwork creates a device.
 func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*model.Network, error) {
-	body.UUID = utils.MakeTopicUUID(model.ThingClass.Network)
+	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Network)
 	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Network
 	body.CommonEnable.Enable = boolean.NewTrue()

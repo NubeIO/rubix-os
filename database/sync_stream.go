@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -28,7 +28,7 @@ func (d *GormDatabase) SyncStream(body *model.SyncStream) (*model.StreamClone, e
 		return nil, err
 	}
 	if len(streamClonesModel) == 0 {
-		streamClone.UUID = utils.MakeTopicUUID(model.CommonNaming.StreamClone)
+		streamClone.UUID = nuuid.MakeTopicUUID(model.CommonNaming.StreamClone)
 		if err = d.DB.Create(&streamClone).Error; err != nil {
 			return nil, err
 		}

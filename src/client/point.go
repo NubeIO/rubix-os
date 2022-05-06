@@ -2,13 +2,13 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/flow-framework/utils"
 )
 
 // ClientAddPoint an object
 func (a *FlowClient) ClientAddPoint(deviceUUID string) (*model.Point, error) {
-	name, _ := utils.MakeUUID()
+	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("pnt_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&model.Point{}).

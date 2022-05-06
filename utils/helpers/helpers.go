@@ -2,7 +2,7 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 )
 
 func truncateString(str string, num int) string {
@@ -17,6 +17,6 @@ func truncateString(str string, num int) string {
 }
 
 func NameIsNil() string {
-	uuid := utils.MakeTopicUUID("")
+	uuid := nuuid.MakeTopicUUID("")
 	return fmt.Sprintf("n_%s", truncateString(uuid, 8))
 }

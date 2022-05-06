@@ -2,12 +2,12 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 )
 
 // ClientAddDevice an object
 func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) {
-	name, _ := utils.MakeUUID()
+	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("dev_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).
@@ -39,7 +39,7 @@ func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
 
 // ClientEditDevice edit an object
 func (a *FlowClient) ClientEditDevice(uuid string) (*ResponseBody, error) {
-	name, _ := utils.MakeUUID()
+	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("dev_new_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/math"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -51,7 +51,7 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 }
 
 func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
-	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
+	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
 	body.Name = nameIsNil(body.Name)
 
 	if body.Decimal == nil {

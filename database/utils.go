@@ -3,9 +3,9 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/flow-framework/utils/structs"
 
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -36,7 +36,7 @@ func pluginIsNil(name string) string {
 
 func nameIsNil(name string) string {
 	if name == "" {
-		uuid := utils.MakeTopicUUID("")
+		uuid := nuuid.MakeTopicUUID("")
 		return fmt.Sprintf("n_%s", truncateString(uuid, 8))
 	}
 	return name

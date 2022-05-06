@@ -5,9 +5,9 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/flow-framework/utils/str"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -58,7 +58,7 @@ CreateFlowNetwork
 - Update sync_uuid with FlowNetworkClone's sync_uuid
 */
 func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
+	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.FlowNetwork)
 	isMasterSlave, cli, isRemote, tx, err := d.editFlowNetworkBody(body)
 	if err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 
 func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *client.FlowClient, bool, *gorm.DB, error) {
 	body.Name = nameIsNil(body.Name)
-	body.SyncUUID, _ = utils.MakeUUID()
+	body.SyncUUID, _ = nuuid.MakeUUID()
 	body.IsRemote = boolean.NewTrue()
 	isMasterSlave := boolean.IsTrue(body.IsMasterSlave)
 	deviceInfo, err := d.GetDeviceInfo()

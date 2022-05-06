@@ -3,8 +3,8 @@ package database
 import (
 	"encoding/json"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/flow-framework/utils"
 )
 
 func (d *GormDatabase) GetSchedules() ([]*model.Schedule, error) {
@@ -35,7 +35,7 @@ func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, err
 }
 
 func (d *GormDatabase) CreateSchedule(body *model.Schedule) (*model.Schedule, error) {
-	body.UUID = utils.MakeTopicUUID(model.ThingClass.Schedule)
+	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Schedule)
 	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Schedule
 	body.ThingType = model.ThingClass.Schedule

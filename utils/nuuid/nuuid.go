@@ -1,20 +1,10 @@
-package utils
+package nuuid
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uuid"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
-
-func GenerateToken(length int) string {
-	b := make([]byte, length)
-	if _, err := rand.Read(b); err != nil {
-		return ""
-	}
-	return hex.EncodeToString(b)
-}
 
 func MakeUUID() (string, error) {
 	return uuid.MakeUUID()
@@ -24,29 +14,29 @@ func MakeTopicUUID(attribute string) string {
 	u, _ := uuid.MakeUUID()
 	divider := "_"
 
-	fln := "fln" //flow network
-	str := "str" //stream
-	stc := "stc" //stream clone
-	pro := "pro" //producers
-	prh := "prh" //producer history
-	wrc := "wrc" //writerClone
-	con := "con" //consumers
-	wri := "wri" //writer
+	fln := "fln" // flow network
+	str := "str" // stream
+	stc := "stc" // stream clone
+	pro := "pro" // producers
+	prh := "prh" // producer history
+	wrc := "wrc" // writerClone
+	con := "con" // consumers
+	wri := "wri" // writer
 
-	fnc := "rfn" //flow network clone
-	plg := "plg" //plugin
-	net := "net" //network
-	dev := "dev" //device
-	pnt := "pnt" //point
-	job := "job" //job
-	sch := "sch" //schedule
-	ing := "ing" //integration
+	fnc := "rfn" // flow network clone
+	plg := "plg" // plugin
+	net := "net" // network
+	dev := "dev" // device
+	pnt := "pnt" // point
+	job := "job" // job
+	sch := "sch" // schedule
+	ing := "ing" // integration
 
-	stl := "stl" //list of flow network gateway
-	alt := "alt" //alerts
-	cmd := "cmd" //command
-	rub := "rbx" //rubix uuid
-	rxg := "rxg" //rubix global uuid
+	stl := "stl" // list of flow network gateway
+	alt := "alt" // alerts
+	cmd := "cmd" // command
+	rub := "rbx" // rubix uuid
+	rxg := "rxg" // rubix global uuid
 
 	switch attribute {
 	case model.CommonNaming.Plugin:
@@ -91,7 +81,6 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", rub, divider, u)
 	case model.CommonNaming.RubixGlobal:
 		return fmt.Sprintf("%s%s%s", rxg, divider, u)
-
 	}
 	return u
 }

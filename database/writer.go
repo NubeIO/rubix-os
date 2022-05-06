@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/flow-framework/utils/str"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -44,10 +44,10 @@ func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 		return nil, errors.New("we are not supporting writer_thing_uuid other than point for now")
 	}
 
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Writer)
+	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Writer)
 	body.WriterThingName = name
 	body.DataStore = nil
-	body.SyncUUID, _ = utils.MakeUUID()
+	body.SyncUUID, _ = nuuid.MakeUUID()
 	query := d.DB.Create(body)
 	if query.Error != nil {
 		return nil, query.Error

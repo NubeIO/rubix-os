@@ -2,7 +2,7 @@ package database
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -22,7 +22,7 @@ func (d *GormDatabase) GetIntegrations() ([]*model.Integration, error) {
 
 // CreateIntegration make it
 func (d *GormDatabase) CreateIntegration(body *model.Integration) (*model.Integration, error) {
-	body.UUID = utils.MakeTopicUUID(model.ThingClass.Integration)
+	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Integration)
 	body.Name = nameIsNil(body.Name)
 	body.PluginName = pluginIsNil(body.PluginName)
 	body.IntegrationType = typeIsNil(body.IntegrationType, "mqtt")

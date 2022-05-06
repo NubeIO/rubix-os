@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/mustafaturan/bus/v3"
 	log "github.com/sirupsen/logrus"
 )
@@ -59,7 +59,7 @@ func (inst *Instance) BusServ() {
 		},
 		Matcher: eventbus.PluginsCreated,
 	}
-	u, _ := utils.MakeUUID()
+	u, _ := nuuid.MakeUUID()
 	key := fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerCreated)
 	handlerUpdated := bus.Handler{
@@ -107,7 +107,7 @@ func (inst *Instance) BusServ() {
 		},
 		Matcher: eventbus.PluginsUpdated,
 	}
-	u, _ = utils.MakeUUID()
+	u, _ = nuuid.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerUpdated)
 	handlerDeleted := bus.Handler{
@@ -157,7 +157,7 @@ func (inst *Instance) BusServ() {
 		},
 		Matcher: eventbus.PluginsDeleted,
 	}
-	u, _ = utils.MakeUUID()
+	u, _ = nuuid.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerDeleted)
 

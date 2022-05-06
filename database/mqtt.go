@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -21,7 +21,7 @@ func (d *GormDatabase) GetMqttConnectionsList() ([]*model.MqttConnection, error)
 
 // CreateMqttConnection make it
 func (d *GormDatabase) CreateMqttConnection(body *model.MqttConnection) (*model.MqttConnection, error) {
-	body.UUID = utils.MakeTopicUUID("")
+	body.UUID = nuuid.MakeTopicUUID("")
 	body.Name = nameIsNil(body.Name)
 	query := d.DB.Create(body)
 	if query.Error != nil {

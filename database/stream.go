@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -43,9 +43,9 @@ func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
 	if stream != nil {
 		return stream, errors.New("an existing stream with this name exists")
 	}
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Stream)
+	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Stream)
 	body.Name = nameIsNil(body.Name)
-	body.SyncUUID, _ = utils.MakeUUID()
+	body.SyncUUID, _ = nuuid.MakeUUID()
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}

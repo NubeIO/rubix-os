@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/flow-framework/utils/str"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -35,7 +35,7 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 		return nil, err
 	}
 	fnc.SourceUUID = body.UUID
-	fnc.SyncUUID, _ = utils.MakeUUID()
+	fnc.SyncUUID, _ = nuuid.MakeUUID()
 	if !boolean.IsTrue(fnc.IsRemote) {
 		fnc.FlowHTTPS = boolean.NewFalse()
 		fnc.FlowIP = str.NewStringAddress("0.0.0.0")
@@ -47,7 +47,7 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 	var flowNetworkClonesModel []*model.FlowNetworkClone
 	d.DB.Where("global_uuid = ? ", body.GlobalUUID).Find(&flowNetworkClonesModel)
 	if len(flowNetworkClonesModel) == 0 {
-		fnc.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetworkClone)
+		fnc.UUID = nuuid.MakeTopicUUID(model.CommonNaming.FlowNetworkClone)
 		if err = d.DB.Create(fnc).Error; err != nil {
 			return nil, err
 		}
