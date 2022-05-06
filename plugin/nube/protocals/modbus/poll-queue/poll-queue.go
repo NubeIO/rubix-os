@@ -159,7 +159,35 @@ type PriorityPollQueue struct {
 
 func (q *PriorityPollQueue) Len() int { return len(q.PriorityQueue) }
 func (q *PriorityPollQueue) Less(i, j int) bool {
-	return q.PriorityQueue[i].PollPriority < q.PriorityQueue[j].PollPriority
+	if len(q.PriorityQueue) <= i && len(q.PriorityQueue) <= j {
+		return false
+	}
+	iPriority := q.PriorityQueue[i].PollPriority
+	iPriorityNum := 0
+	switch iPriority {
+	case model.PRIORITY_ASAP:
+		iPriorityNum = 0
+	case model.PRIORITY_HIGH:
+		iPriorityNum = 1
+	case model.PRIORITY_NORMAL:
+		iPriorityNum = 2
+	case model.PRIORITY_LOW:
+		iPriorityNum = 3
+	}
+	jPriority := q.PriorityQueue[j].PollPriority
+	jPriorityNum := 0
+	switch jPriority {
+	case model.PRIORITY_ASAP:
+		jPriorityNum = 0
+	case model.PRIORITY_HIGH:
+		jPriorityNum = 1
+	case model.PRIORITY_NORMAL:
+		jPriorityNum = 2
+	case model.PRIORITY_LOW:
+		jPriorityNum = 3
+	}
+
+	return iPriorityNum < jPriorityNum
 }
 func (q *PriorityPollQueue) Swap(i, j int) {
 	q.PriorityQueue[i], q.PriorityQueue[j] = q.PriorityQueue[j], q.PriorityQueue[i]
