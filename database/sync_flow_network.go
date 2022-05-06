@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/str"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -37,7 +38,7 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 	fnc.SyncUUID, _ = utils.MakeUUID()
 	if !boolean.IsTrue(fnc.IsRemote) {
 		fnc.FlowHTTPS = boolean.NewFalse()
-		fnc.FlowIP = utils.NewStringAddress("0.0.0.0")
+		fnc.FlowIP = str.NewStringAddress("0.0.0.0")
 	}
 	deviceInfo, err := d.GetDeviceInfo()
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/str"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -201,7 +202,7 @@ func (d *GormDatabase) producerScheduleWrite(uuid string, scheduleData *model.Sc
 }
 
 func (d *GormDatabase) TriggerCOVToWriterClone(producer *model.Producer, body *model.SyncCOV) error {
-	wcs, err := d.GetWriterClones(api.Args{ProducerUUID: utils.NewStringAddress(producer.UUID)})
+	wcs, err := d.GetWriterClones(api.Args{ProducerUUID: str.NewStringAddress(producer.UUID)})
 	if err != nil {
 		return errors.New("error on getting writer clones from producer_uuid")
 	}

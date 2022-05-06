@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/utils/array"
+	"github.com/NubeIO/flow-framework/utils/str"
 	"reflect"
 	"strings"
 
@@ -28,7 +29,7 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	net.Name = model.TransProtocol.Lora
 	net.TransportType = model.TransType.Serial
 	net.PluginPath = model.TransProtocol.Lora
-	net.SerialPort = utils.NewStringAddress(sp)
+	net.SerialPort = str.NewStringAddress(sp)
 	net.SerialBaudRate = utils.NewUint(38400)
 
 	var dev model.Device

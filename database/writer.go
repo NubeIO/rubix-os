@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/str"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/datatypes"
@@ -123,7 +124,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 	output.Action = body.Action
 	if err != nil {
 		output.IsError = true
-		output.Message = utils.NewStringAddress(err.Error())
+		output.Message = str.NewStringAddress(err.Error())
 		return output
 	}
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
@@ -134,12 +135,12 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 		err = cli.SyncWriterReadAction(uuid)
 		if err != nil {
 			output.IsError = true
-			output.Message = utils.NewStringAddress(err.Error())
+			output.Message = str.NewStringAddress(err.Error())
 		}
 		dataStore, presentValue, err := d.getDataStoreAndPresentValues(writer)
 		if err != nil {
 			output.IsError = true
-			output.Message = utils.NewStringAddress(err.Error())
+			output.Message = str.NewStringAddress(err.Error())
 		}
 		output.DataStore = dataStore
 		output.PresentValue = presentValue
@@ -148,7 +149,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 		dataStore, presentValue, err := d.getDataStoreAndPresentValues(writer)
 		if err != nil {
 			output.IsError = true
-			output.Message = utils.NewStringAddress(err.Error())
+			output.Message = str.NewStringAddress(err.Error())
 		}
 		output.DataStore = dataStore
 		output.PresentValue = presentValue
@@ -157,7 +158,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 		bytes, err := d.validateWriterWriteBody(writer.WriterThingClass, body)
 		if err != nil {
 			output.IsError = true
-			output.Message = utils.NewStringAddress(err.Error())
+			output.Message = str.NewStringAddress(err.Error())
 			return output
 		}
 		writer.DataStore = bytes
@@ -169,13 +170,13 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 		err = cli.SyncWriterWriteAction(uuid, &syncWriterAction)
 		if err != nil {
 			output.IsError = true
-			output.Message = utils.NewStringAddress(err.Error())
+			output.Message = str.NewStringAddress(err.Error())
 			return output
 		}
 		dataStore, presentValue, err := d.getDataStoreAndPresentValues(writer)
 		if err != nil {
 			output.IsError = true
-			output.Message = utils.NewStringAddress(err.Error())
+			output.Message = str.NewStringAddress(err.Error())
 		}
 		output.DataStore = dataStore
 		output.PresentValue = presentValue

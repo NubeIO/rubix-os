@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/str"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -130,7 +131,7 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 		fnModel := model.FlowNetworkClone{}
 		if err != nil {
 			fnModel.IsError = boolean.NewTrue()
-			fnModel.ErrorMsg = utils.NewStringAddress(err.Error())
+			fnModel.ErrorMsg = str.NewStringAddress(err.Error())
 			fnModel.FlowToken = fn.FlowToken
 		} else {
 			fnModel.IsError = boolean.NewFalse()
@@ -189,7 +190,7 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 			body.IsRemote = boolean.NewFalse()
 			if !isMasterSlave {
 				body.FlowHTTPS = boolean.NewFalse()
-				body.FlowIP = utils.NewStringAddress("0.0.0.0")
+				body.FlowIP = str.NewStringAddress("0.0.0.0")
 				body.IsRemote = boolean.NewFalse()
 			}
 		}
@@ -215,11 +216,11 @@ func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isM
 			return nil, err
 		}
 		bodyToSync.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
-		bodyToSync.FlowIP = utils.NewStringAddress(localStorageFlowNetwork.FlowIP)
+		bodyToSync.FlowIP = str.NewStringAddress(localStorageFlowNetwork.FlowIP)
 		bodyToSync.FlowPort = utils.NewInt(localStorageFlowNetwork.FlowPort)
-		bodyToSync.FlowUsername = utils.NewStringAddress(localStorageFlowNetwork.FlowUsername)
-		bodyToSync.FlowPassword = utils.NewStringAddress(localStorageFlowNetwork.FlowPassword)
-		bodyToSync.FlowToken = utils.NewStringAddress(localStorageFlowNetwork.FlowToken)
+		bodyToSync.FlowUsername = str.NewStringAddress(localStorageFlowNetwork.FlowUsername)
+		bodyToSync.FlowPassword = str.NewStringAddress(localStorageFlowNetwork.FlowPassword)
+		bodyToSync.FlowToken = str.NewStringAddress(localStorageFlowNetwork.FlowToken)
 	}
 	err := d.syncAndEditFlowNetwork(cli, body, &bodyToSync)
 	if err != nil {
