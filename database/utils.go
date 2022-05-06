@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/structs"
 
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -45,8 +46,8 @@ func checkTransport(t string) (string, error) {
 	if t == "" {
 		return model.TransType.IP, nil
 	}
-	i := utils.ArrayValues(model.TransType)
-	if !utils.ArrayContains(i, t) {
+	i := structs.ArrayValues(model.TransType)
+	if !structs.ArrayContains(i, t) {
 		return "", errors.New("please provide a valid transport type ie: ip or serial")
 	}
 	return t, nil

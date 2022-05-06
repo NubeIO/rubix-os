@@ -8,10 +8,10 @@ import (
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/edgerest"
 	"github.com/NubeIO/flow-framework/src/poller"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/math"
+	"github.com/NubeIO/flow-framework/utils/structs"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/edge28"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/thermistor"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -178,7 +178,7 @@ func (inst *Instance) polling(p polling) error {
 							if getDI == nil {
 								continue
 							}
-							readValStruct, readValType, err = utils.GetStructFieldByString(getDI.Val, pnt.IoNumber)
+							readValStruct, readValType, err = structs.GetStructFieldByString(getDI.Val, pnt.IoNumber)
 							if err != nil {
 								log.Error("edge28-polling: ", err)
 								continue
@@ -198,7 +198,7 @@ func (inst *Instance) polling(p polling) error {
 							if getUI == nil {
 								continue
 							}
-							readValStruct, readValType, err = utils.GetStructFieldByString(getUI.Val, pnt.IoNumber)
+							readValStruct, readValType, err = structs.GetStructFieldByString(getUI.Val, pnt.IoNumber)
 							if err != nil {
 								log.Error(err)
 								continue
@@ -235,7 +235,7 @@ func (inst *Instance) polling(p polling) error {
 func GetGPIOValueForUOByType(point *model.Point) (float64, error) {
 	var err error
 	var result float64
-	if !utils.ExistsInStrut(UOTypes, point.IoType) {
+	if !structs.ExistsInStrut(UOTypes, point.IoType) {
 		err = errors.New(fmt.Sprintf("edge-28: skipping %v, IoType %v not recognized.", point.IoNumber, point.IoType))
 		return 0, err
 	}
@@ -263,7 +263,7 @@ func GetValueFromGPIOForUIByType(point *model.Point, value float64) (float64, er
 	var err error
 	var result float64
 
-	if !utils.ExistsInStrut(UITypes, point.IoType) {
+	if !structs.ExistsInStrut(UITypes, point.IoType) {
 		err = errors.New(fmt.Sprintf("edge28-polling: skipping %v, IoType %v not recognized.", point.IoNumber, point.IoType))
 		return 0, err
 	}
