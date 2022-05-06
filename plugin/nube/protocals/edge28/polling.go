@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/math"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/edge28"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/thermistor"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -75,7 +76,7 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 }
 
 func (inst *Instance) processRead(pnt *model.Point, readValue float64, pollCount float64) (float64, error) {
-	covEvent, _ := utils.COV(readValue, float.NonNil(pnt.PresentValue), 0) //Remove this as it's done in the main point db file
+	covEvent, _ := math.Cov(readValue, float.NonNil(pnt.PresentValue), 0) //Remove this as it's done in the main point db file
 	if pollCount == 1 || !boolean.BoolIsNil(pnt.InSync) {
 		_, err := inst.pointUpdateValue(pnt.UUID, readValue)
 		if err != nil {
