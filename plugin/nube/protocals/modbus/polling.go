@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/pollqueue"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"

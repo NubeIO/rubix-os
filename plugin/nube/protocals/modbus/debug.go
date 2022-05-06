@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/pollqueue"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )

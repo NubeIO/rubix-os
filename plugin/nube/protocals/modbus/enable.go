@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/api"
-	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/pollqueue"
 )
 
 // Enable implements plugin.Plugin

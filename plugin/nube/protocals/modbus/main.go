@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
-	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/pollqueue"
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
