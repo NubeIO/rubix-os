@@ -6,6 +6,7 @@ import (
 	min "github.com/NubeIO/flow-framework/plugin/nube/utils/backup/minio"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/directory"
+	"github.com/NubeIO/flow-framework/utils/file"
 	"reflect"
 	"strings"
 	"time"
@@ -76,14 +77,14 @@ func (inst *Instance) makeJson(data interface{}, objectName string) error {
 	if err != nil {
 		return err
 	}
-	file := fmt.Sprintf("%s/tmp.json", dirName)
+	f := fmt.Sprintf("%s/tmp.json", dirName)
 	var o min.ObjectArgs
 	o.BucketName = bucketName
 	o.ObjectName = objectName
-	o.FilePath = file
+	o.FilePath = f
 
 	d := reflect.ValueOf(data).Interface().(interface{})
-	_, err = utils.WriteDataToFileAsJSON(d, file)
+	_, err = file.WriteDataToFileAsJSON(d, f)
 	if err != nil {
 		fmt.Println(err)
 		return err
