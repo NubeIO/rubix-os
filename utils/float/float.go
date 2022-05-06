@@ -1,8 +1,12 @@
 package float
 
-import "math"
+import (
+	"math"
+	"math/rand"
+	"time"
+)
 
-func FirstNotNilFloat(values ...*float64) *float64 {
+func FirstNotNil(values ...*float64) *float64 {
 	for _, n := range values {
 		if n != nil {
 			return n
@@ -11,13 +15,57 @@ func FirstNotNilFloat(values ...*float64) *float64 {
 	return nil
 }
 
-func CompareFloatPtr(value1 *float64, value2 *float64) bool {
-	return FloatPtrToFloat(value1) == FloatPtrToFloat(value2)
+func ComparePtrValues(value1 *float64, value2 *float64) bool {
+	return NonNilMax(value1) == NonNilMax(value2)
 }
 
-func FloatPtrToFloat(value *float64) float64 {
+func NonNilMax(value *float64) float64 {
 	if value == nil {
 		return math.MaxFloat64
 	}
 	return *value
+}
+
+func New(value float64) *float64 {
+	return &value
+}
+
+func NonNil(b *float64) float64 {
+	if b == nil {
+		return 0
+	}
+	return *b
+}
+
+func IsNilCheck(b *float64) bool {
+	if b == nil {
+		return true
+	} else {
+		return false
+	}
+}
+
+func Copy(b *float64) *float64 {
+	if b == nil {
+		return nil
+	}
+	out := *b
+	return &out
+}
+
+// RandFloat returns a random float64 within the specified range.
+func RandFloat(range1, range2 float64) float64 {
+	if range1 == range2 {
+		return range1
+	}
+	var min, max float64
+	if range1 > range2 {
+		max = range1
+		min = range2
+	} else {
+		max = range2
+		min = range1
+	}
+	rand.Seed(time.Now().UnixNano())
+	return min + rand.Float64()*(max-min)
 }

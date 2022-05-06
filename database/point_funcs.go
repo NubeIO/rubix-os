@@ -4,7 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -107,12 +108,12 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 					pointModel.WriteValue = writeValue
 				}
 				presentValue = highestValue
-			} else if !utils.FloatIsNilCheck(pointModel.Fallback) || currentPriority == nil {
-				pointModel.Priority.P16 = utils.NewFloat64(*pointModel.Fallback)
+			} else if !float.IsNilCheck(pointModel.Fallback) || currentPriority == nil {
+				pointModel.Priority.P16 = float.New(*pointModel.Fallback)
 				priorityMapTemp := map[string]*float64{"_16": pointModel.Fallback}
 				priorityMap = &priorityMapTemp
-				pointModel.CurrentPriority = utils.NewInt(16)
-				pointModel.WriteValueOriginal = utils.NewFloat64(*pointModel.Priority.P16)
+				pointModel.CurrentPriority = integer.New(16)
+				pointModel.WriteValueOriginal = float.New(*pointModel.Priority.P16)
 				writeValue, err := pointEval(pointModel.Priority.P16, pointModel.MathOnWriteValue)
 				if err != nil {
 					log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)

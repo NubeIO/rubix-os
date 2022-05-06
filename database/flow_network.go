@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/str"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -217,7 +218,7 @@ func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isM
 		}
 		bodyToSync.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
 		bodyToSync.FlowIP = str.NewStringAddress(localStorageFlowNetwork.FlowIP)
-		bodyToSync.FlowPort = utils.NewInt(localStorageFlowNetwork.FlowPort)
+		bodyToSync.FlowPort = integer.New(localStorageFlowNetwork.FlowPort)
 		bodyToSync.FlowUsername = str.NewStringAddress(localStorageFlowNetwork.FlowUsername)
 		bodyToSync.FlowPassword = str.NewStringAddress(localStorageFlowNetwork.FlowPassword)
 		bodyToSync.FlowToken = str.NewStringAddress(localStorageFlowNetwork.FlowToken)

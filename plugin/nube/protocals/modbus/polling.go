@@ -228,7 +228,7 @@ func (inst *Instance) ModbusPolling() error {
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 					continue
 				}
-				isChange := !float.CompareFloatPtr(pnt.PresentValue, &responseValue)
+				isChange := !float.ComparePtrValues(pnt.PresentValue, &responseValue)
 				if isChange {
 					if err != nil {
 						netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, callback)

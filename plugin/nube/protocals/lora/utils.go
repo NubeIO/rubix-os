@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/utils/array"
+	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/str"
 	"reflect"
 	"strings"
 
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
 )
@@ -30,7 +30,7 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	net.TransportType = model.TransType.Serial
 	net.PluginPath = model.TransProtocol.Lora
 	net.SerialPort = str.NewStringAddress(sp)
-	net.SerialBaudRate = utils.NewUint(38400)
+	net.SerialBaudRate = integer.NewUint(38400)
 
 	var dev model.Device
 	dev.Name = model.TransProtocol.Lora

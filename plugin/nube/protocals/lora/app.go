@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/bugs"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
@@ -328,7 +328,7 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 	priority := map[string]*float64{"_16": &value}
 	body.InSync = boolean.NewTrue()
 	if pnt.IoType != "" && pnt.IoType != string(model.IOTypeRAW) {
-		priority["_16"] = utils.NewFloat64(decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue))
+		priority["_16"] = float.New(decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue))
 	}
 	_, err = inst.db.UpdatePointValue(pnt.UUID, body, &priority, true)
 	if err != nil {

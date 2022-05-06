@@ -7,6 +7,9 @@ import (
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/flow-framework/utils/math"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -121,9 +124,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		return nil, errors.New(eMsg)
 	}
 
-	if !utils.IntNilCheck(body.AddressID) {
+	if !integer.NilCheck(body.AddressID) {
 		if existingAddrID {
-			eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", utils.IntIsNil(body.AddressID))
+			eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", integer.NonNil(body.AddressID))
 			return nil, errors.New(eMsg)
 		}
 	}
@@ -170,8 +173,8 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	}
 
 	pointModel, priority, presentValue := d.updatePriority(pointModel, priority)
-	ov := utils.Float64IsNil(presentValue)
-	pointModel.OriginalValue = &ov
+	ov := float.Copy(presentValue)
+	pointModel.OriginalValue = ov
 
 	presentValueTransformFault := false
 	presentValue = pointScale(presentValue, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax)
@@ -206,8 +209,8 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	if !fromPlugin {
 		pointModel.InSync = boolean.NewFalse()
 	}
-	if !utils.Unit32NilCheck(pointModel.Decimal) && presentValue != nil {
-		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
+	if !integer.Unit32NilCheck(pointModel.Decimal) && presentValue != nil {
+		val := math.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
 

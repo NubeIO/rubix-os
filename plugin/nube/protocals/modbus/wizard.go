@@ -3,14 +3,16 @@ package main
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/flow-framework/utils/str"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 	"time"
 )
 
-//wizard make a network/dev/pnt
+// wizard make a network/dev/pnt
 func (inst *Instance) wizardTCP(body wizard) (string, error) {
 	ip := "192.168.15.202"
 	if body.IP != "" {
@@ -47,7 +49,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 		var pnt model.Point
 		pnt.Name = "modbus"
 		pnt.Description = "modbus"
-		pnt.AddressID = utils.NewInt(1) //TODO check conversion
+		pnt.AddressID = integer.New(1) //TODO check conversion
 		pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 
 		_, err = inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
@@ -88,7 +90,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			var pnt model.Point
 			pnt.Name = "Modbus Pnt " + strconv.Itoa(j)
 			pnt.Description = "modbus"
-			pnt.AddressID = utils.NewInt(j) //TODO check conversion
+			pnt.AddressID = integer.New(j) //TODO check conversion
 			pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 			pnt.DeviceUUID = dev.UUID
 			pnt.PollPriority = model.PRIORITY_NORMAL
@@ -122,7 +124,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			var pnt model.Point
 			pnt.Name = "Modbus Pnt " + strconv.Itoa(j)
 			pnt.Description = "modbus"
-			pnt.AddressID = utils.NewInt(j) //TODO check conversion
+			pnt.AddressID = integer.New(j) //TODO check conversion
 			pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 
 			_, err = inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
@@ -167,7 +169,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				var pnt model.Point
 				pnt.Name = "Modbus Pnt " + strconv.Itoa(l)
 				pnt.Description = "modbus"
-				pnt.AddressID = utils.NewInt(l) //TODO check conversion
+				pnt.AddressID = integer.New(l) //TODO check conversion
 				pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 				pnt.DeviceUUID = dev.UUID
 				pnt.PollPriority = model.PRIORITY_NORMAL
@@ -225,7 +227,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				var pnt model.Point
 				pnt.Name = "Modbus Pnt " + strconv.Itoa(l)
 				pnt.Description = "modbus"
-				pnt.AddressID = utils.NewInt(l) //TODO check conversion
+				pnt.AddressID = integer.New(l) //TODO check conversion
 				pnt.ObjectType = string(model.ObjTypeWriteHolding)
 				pnt.DataType = string(model.TypeFloat32)
 				pnt.DeviceUUID = dev.UUID
@@ -646,14 +648,14 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				pnt := &model.Point{}
 				pnt.Name = point.Name
 				pnt.Description = point.Description
-				pnt.AddressID = utils.NewInt(point.AddressID)
+				pnt.AddressID = integer.New(point.AddressID)
 				pnt.ObjectType = string(point.ObjectType)
 				pnt.DataType = string(point.DataType)
 				pnt.DeviceUUID = dev.UUID
 				pnt.PollPriority = point.PollPriority
 				pnt.PollRate = point.PollRate
 				pnt.WriteMode = point.WriteMode
-				pnt.Fallback = utils.NewFloat64(point.Fallback)
+				pnt.Fallback = float.New(point.Fallback)
 				pnt.PointPriorityArrayMode = point.PointPriorityArrayMode
 				_, err = inst.addPoint(pnt)
 				if err != nil {
@@ -685,10 +687,10 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	net.TransportType = model.TransType.Serial
 	net.PluginPath = "modbus"
 	net.SerialPort = &sp
-	net.SerialBaudRate = utils.NewUint(uint(br))
-	net.SerialParity = utils.NewStr("none")
-	net.SerialDataBits = utils.NewUint(1)
-	net.SerialStopBits = utils.NewUint(1)
+	net.SerialBaudRate = integer.NewUint(uint(br))
+	net.SerialParity = str.New("none")
+	net.SerialDataBits = integer.NewUint(1)
+	net.SerialStopBits = integer.NewUint(1)
 
 	da := 1
 	if body.DeviceAddr != 0 {
@@ -704,7 +706,7 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	var pnt model.Point
 	pnt.Name = "modbus"
 	pnt.Description = "modbus"
-	pnt.AddressID = utils.NewInt(1) //TODO check conversion
+	pnt.AddressID = integer.New(1) //TODO check conversion
 	pnt.ObjectType = string(model.ObjTypeWriteCoil)
 
 	pntRet, err := inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)

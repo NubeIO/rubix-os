@@ -7,7 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnetmodel"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/bacnetserver/v1/bsrest"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/str"
@@ -106,8 +106,8 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	bacnetPoint := &bsrest.BacnetPoint{}
 	bacnetPoint.ObjectName = body.Name
 	bacnetPoint.ObjectType = body.ObjectType
-	if !utils.IntNilCheck(body.AddressID) {
-		bacnetPoint.Address = utils.IntIsNil(body.AddressID)
+	if !integer.NilCheck(body.AddressID) {
+		bacnetPoint.Address = integer.NonNil(body.AddressID)
 	}
 	log.Infoln("bacnet-server.app.updatePoint() try and update point over rest name:", body.Name, "bacnetPointUUID:", bacnetPointUUID)
 	bacnetPoint, r := bacnetClient.UpdatePoint(bacnetPointUUID, bacnetPoint)
@@ -133,8 +133,8 @@ func (inst *Instance) updatePointValue(body *model.Point) (*model.Point, error) 
 	if (*body.Priority).P16 != nil {
 		(*bacnetPoint.Priority).P16 = (*body.Priority).P16
 	}
-	//if !utils.IntNilCheck(body.AddressID) {
-	//	bacnetPoint.Address = utils.IntIsNil(body.Add1234ressID)
+	//if !utils.NilCheck(body.AddressID) {
+	//	bacnetPoint.Address = utils.NonNil(body.AddressID)
 	//}
 	point, r := bacnetClient.UpdatePointValue(bacnetPointUUID, bacnetPoint)
 	if r.GetError() != nil || point == nil {

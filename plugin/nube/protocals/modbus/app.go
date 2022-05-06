@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/array"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
@@ -424,10 +424,10 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSucces
 	}
 
 	if readSuccess {
-		if value != utils.Float64IsNil(point.OriginalValue) {
+		if value != float.NonNil(point.OriginalValue) {
 			point.ValueUpdatedFlag = boolean.NewTrue() //Flag so that UpdatePointValue() will broadcast new value to producers. TODO: MAY NOT BE NEEDED.
 		}
-		point.OriginalValue = utils.NewFloat64(value)
+		point.OriginalValue = float.New(value)
 	}
 	point.InSync = boolean.NewTrue() //TODO: MAY NOT BE NEEDED.
 

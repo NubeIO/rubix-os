@@ -17,6 +17,10 @@ const (
 	InvalidLogicalString = "invalid string value to test boolean value"
 )
 
+func New(value string) *string {
+	return &value
+}
+
 // input is struct that holds input form user and result
 type input struct {
 	Input  string

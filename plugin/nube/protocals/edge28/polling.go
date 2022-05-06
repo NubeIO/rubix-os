@@ -10,6 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/edge28"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/thermistor"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -40,7 +41,7 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 	rsyncWrite := pollCount % 10
 	//rsyncWrite is just a way to make sure the outputs on the device are not out of sync
 	// and rsync on first poll loop
-	writeValue := utils.Float64IsNil(pnt.WriteValue)
+	writeValue := float.NonNil(pnt.WriteValue)
 	var err error
 	if !boolean.BoolIsNil(pnt.InSync) || rsyncWrite == 0 || pollCount == 1 {
 		if pollCount == 1 {
@@ -74,7 +75,7 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 }
 
 func (inst *Instance) processRead(pnt *model.Point, readValue float64, pollCount float64) (float64, error) {
-	covEvent, _ := utils.COV(readValue, utils.Float64IsNil(pnt.PresentValue), 0) //Remove this as it's done in the main point db file
+	covEvent, _ := utils.COV(readValue, float.NonNil(pnt.PresentValue), 0) //Remove this as it's done in the main point db file
 	if pollCount == 1 || !boolean.BoolIsNil(pnt.InSync) {
 		_, err := inst.pointUpdateValue(pnt.UUID, readValue)
 		if err != nil {
