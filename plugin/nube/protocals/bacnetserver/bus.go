@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/mustafaturan/bus/v3"
 	log "github.com/sirupsen/logrus"
@@ -37,7 +37,7 @@ func (inst *Instance) BusServ() {
 		},
 		Matcher: eventbus.PluginsUpdated,
 	}
-	u, _ := utils.MakeUUID()
+	u, _ := nuuid.MakeUUID()
 	key := fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerUpdated)
 
@@ -53,7 +53,7 @@ func (inst *Instance) BusServ() {
 		},
 		Matcher: eventbus.MQTTUpdated,
 	}
-	u, _ = utils.MakeUUID()
+	u, _ = nuuid.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerMQTT)
 

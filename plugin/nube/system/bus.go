@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/mustafaturan/bus/v3"
 	log "github.com/sirupsen/logrus"
 )
@@ -29,7 +29,7 @@ func (inst *Instance) BusServ() {
 		},
 		Matcher: eventbus.JobTrigger,
 	}
-	u, _ := utils.MakeUUID()
+	u, _ := nuuid.MakeUUID()
 	key := fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerJobs)
 
@@ -52,7 +52,7 @@ func (inst *Instance) BusServ() {
 		},
 		Matcher: eventbus.JobTrigger,
 	}
-	u, _ = utils.MakeUUID()
+	u, _ = nuuid.MakeUUID()
 	key = fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerJobs)
 }

@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -113,13 +112,16 @@ func (a *FlowClient) PatchQueryMarshal(url string, body interface{}, result inte
 func checkError(method string, url string, resp *resty.Response, err error) *error {
 	if err != nil {
 		if resp == nil || resp.String() == "" {
-			return utils.NewError(fmt.Errorf("%s %s: %s", method, url, err))
+			e := fmt.Errorf("%s %s: %s", method, url, err)
+			return &e
 		} else {
-			return utils.NewError(fmt.Errorf("%s %s: %s", method, url, resp))
+			e := fmt.Errorf("%s %s: %s", method, url, resp)
+			return &e
 		}
 	}
 	if resp.IsError() {
-		return utils.NewError(fmt.Errorf("%s %s: %s", method, url, resp))
+		e := fmt.Errorf("%s %s: %s", method, url, resp)
+		return &e
 	}
 	return nil
 }

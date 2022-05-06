@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/bugs"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
@@ -285,9 +286,9 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 func (inst *Instance) setNewPointFields(deviceBody *model.Device, pointBody *model.Point, name string) {
 	pointBody.DeviceUUID = deviceBody.UUID
 	pointBody.AddressUUID = deviceBody.AddressUUID
-	pointBody.IsProducer = utils.NewFalse()
-	pointBody.IsConsumer = utils.NewFalse()
-	pointBody.IsOutput = utils.NewFalse()
+	pointBody.IsProducer = boolean.NewFalse()
+	pointBody.IsConsumer = boolean.NewFalse()
+	pointBody.IsOutput = boolean.NewFalse()
 	pointBody.Name = fmt.Sprintf("%s", name)
 	pointBody.IoNumber = name
 }
@@ -325,9 +326,9 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 	body.CommonFault.LastOk = time.Now().UTC()
 
 	priority := map[string]*float64{"_16": &value}
-	body.InSync = utils.NewTrue()
+	body.InSync = boolean.NewTrue()
 	if pnt.IoType != "" && pnt.IoType != string(model.IOTypeRAW) {
-		priority["_16"] = utils.NewFloat64(decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue))
+		priority["_16"] = float.New(decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue))
 	}
 	_, err = inst.db.UpdatePointValue(pnt.UUID, body, &priority, true)
 	if err != nil {

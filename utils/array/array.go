@@ -1,4 +1,4 @@
-package utils
+package array
 
 import (
 	"encoding/json"
@@ -11,11 +11,11 @@ type Array struct {
 }
 
 /*
-Example usage
-mArr := utils.NewArray()
-fmt.Println(utils.Unique(mArr.Add(1,2,1,2).Values()))
+NewArray
+Example:
+	arr := utils.NewArray()
+	fmt.Println(utils.Unique(arr.Add(1,2,1,2).Values()))
 */
-
 func NewArray() *Array {
 	return new(Array)
 }
@@ -27,9 +27,7 @@ func (a *Array) Add(values ...interface{}) *Array {
 	return a
 }
 
-/*
-AddIfNotExist add one value if not existing
-*/
+// AddIfNotExist add one value if not existing
 func (a *Array) AddIfNotExist(value interface{}) bool {
 	check := a.Exist(value)
 	if !check {
@@ -39,17 +37,13 @@ func (a *Array) AddIfNotExist(value interface{}) bool {
 	return false
 }
 
-/*
-Get a value by its index number
-*/
+// Get a value by its index number
 func (a *Array) Get(index int) interface{} {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
-
 	if index > a.size() {
 		return nil
 	}
-
 	return a.get(index)
 }
 
@@ -72,7 +66,7 @@ func (a *Array) RemoveNil(arr []interface{}) []interface{} {
 	return result
 }
 
-//MinMaxInt min and max value from an array
+// MinMaxInt min and max value from an array
 func (a *Array) MinMaxInt() (minVal int, maxVal int) {
 	max := a.data[0].(int)
 	min := a.data[0].(int)
@@ -117,9 +111,7 @@ func (a *Array) Unique(arr []interface{}) []interface{} {
 	return result
 }
 
-/*
-Remove a value from the array
-*/
+// Remove a value from the array
 func (a *Array) Remove(value interface{}) *Array {
 	a.mutex.Lock()
 	defer a.mutex.Unlock()
@@ -144,7 +136,7 @@ func (a *Array) Exist(value interface{}) bool {
 	return a.index(value) > -1
 }
 
-func (a Array) Includes(values ...interface{}) bool {
+func (a *Array) Includes(values ...interface{}) bool {
 	a.mutex.RLock()
 	defer a.mutex.RUnlock()
 	var count = 0
@@ -175,15 +167,13 @@ func (a *Array) Size() int {
 	return a.size()
 }
 
-func (a Array) MarshalJSON() ([]byte, error) {
+func (a *Array) MarshalJSON() ([]byte, error) {
 	return json.Marshal(a.data)
 }
 
 func (a *Array) UnmarshalJSON(b []byte) error {
 	return json.Unmarshal(b, &a.data)
 }
-
-// private
 
 func (a *Array) get(index int) interface{} {
 	return a.data[index]
@@ -201,12 +191,10 @@ func (a *Array) index(value interface{}) int {
 	if a.size() == 0 {
 		return -1
 	}
-
 	for _index, _value := range a.data {
 		if _value == value {
 			return _index
 		}
 	}
-
 	return -1
 }

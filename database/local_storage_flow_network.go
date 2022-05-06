@@ -3,7 +3,7 @@ package database
 import (
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -45,5 +45,5 @@ func (d *GormDatabase) RefreshLocalStorageFlowToken() (*bool, error) {
 	if err := d.DB.Model(&lsfn).Updates(model.LocalStorageFlowNetwork{FlowToken: *token}).Error; err != nil {
 		return nil, err
 	}
-	return utils.NewTrue(), nil
+	return boolean.NewTrue(), nil
 }

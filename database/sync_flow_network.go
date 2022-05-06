@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/nstring"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetworkClone, error) {
-	if !utils.IsTrue(body.IsMasterSlave) {
+	if !boolean.IsTrue(body.IsMasterSlave) {
 		accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
 		if err != nil {
 			return nil, err
@@ -33,10 +35,10 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 		return nil, err
 	}
 	fnc.SourceUUID = body.UUID
-	fnc.SyncUUID, _ = utils.MakeUUID()
-	if !utils.IsTrue(fnc.IsRemote) {
-		fnc.FlowHTTPS = utils.NewFalse()
-		fnc.FlowIP = utils.NewStringAddress("0.0.0.0")
+	fnc.SyncUUID, _ = nuuid.MakeUUID()
+	if !boolean.IsTrue(fnc.IsRemote) {
+		fnc.FlowHTTPS = boolean.NewFalse()
+		fnc.FlowIP = nstring.NewStringAddress("0.0.0.0")
 	}
 	deviceInfo, err := d.GetDeviceInfo()
 	if err != nil {
@@ -45,7 +47,7 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 	var flowNetworkClonesModel []*model.FlowNetworkClone
 	d.DB.Where("global_uuid = ? ", body.GlobalUUID).Find(&flowNetworkClonesModel)
 	if len(flowNetworkClonesModel) == 0 {
-		fnc.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetworkClone)
+		fnc.UUID = nuuid.MakeTopicUUID(model.CommonNaming.FlowNetworkClone)
 		if err = d.DB.Create(fnc).Error; err != nil {
 			return nil, err
 		}

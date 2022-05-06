@@ -3,7 +3,7 @@ package host
 import (
 	"github.com/NubeIO/flow-framework/src/system"
 	"github.com/NubeIO/flow-framework/src/utilstime"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/array"
 )
 
 type CmdArgs struct {
@@ -21,7 +21,7 @@ type Combination struct {
 	ServerInfo   string          `json:"server_info"`
 	SystemTime   *utilstime.Time `json:"system_time"`
 	Uptime       system.Details  `json:"uptime"`
-	MemInfo      *utils.Array    `json:"mem_info"`
+	MemInfo      *array.Array    `json:"mem_info"`
 	KernelInfo   KernelInfo      `json:"kernel_info"`
 	ProgressInfo ProgressInfo    `json:"progress_info"`
 	DiskInfo     DiskInfoDetail  `json:"disk_info"`

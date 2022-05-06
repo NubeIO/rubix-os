@@ -1,7 +1,7 @@
 package plugin
 
 import (
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -40,7 +40,7 @@ func ResolveID(ctx *gin.Context) string {
 }
 
 func PointWrite(pnt *model.Point) (out float64) {
-	out = utils.Float64IsNil(pnt.WriteValue)
+	out = float.NonNil(pnt.WriteValue)
 	return
 }
 

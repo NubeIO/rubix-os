@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/pollqueue"
+	"github.com/NubeIO/flow-framework/utils/array"
+	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
@@ -26,7 +28,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		return nil, errors.New("failed to create modbus network")
 	}
 
-	if utils.BoolIsNil(body.Enable) {
+	if boolean.IsTrue(body.Enable) {
 		pollManager := pollqueue.NewPollManager(&inst.db, network.UUID, inst.pluginUUID)
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
@@ -65,11 +67,11 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	modbusDebugMsg("addPoint(): ", body.Name)
 
 	if isWriteable(body.WriteMode) {
-		body.WritePollRequired = utils.NewTrue()
+		body.WritePollRequired = boolean.NewTrue()
 	} else {
-		body.WritePollRequired = utils.NewFalse()
+		body.WritePollRequired = boolean.NewFalse()
 	}
-	body.ReadPollRequired = utils.NewTrue()
+	body.ReadPollRequired = boolean.NewTrue()
 
 	//point, err = inst.db.CreatePoint(body, true, false)
 	point, err = inst.db.CreatePoint(body, true, true)
@@ -92,7 +94,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		return
 	}
 
-	if utils.BoolIsNil(point.Enable) {
+	if boolean.IsTrue(point.Enable) {
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 		//DO POLLING ENABLE ACTIONS FOR POINT
 		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
@@ -123,11 +125,11 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		return
 	}
 
-	if utils.BoolIsNil(network.Enable) == false && netPollMan.Enable == true {
+	if boolean.IsTrue(network.Enable) == false && netPollMan.Enable == true {
 		//DO POLLING DISABLE ACTIONS
 		netPollMan.StopPolling()
 
-	} else if utils.BoolIsNil(network.Enable) == true && netPollMan.Enable == false {
+	} else if boolean.IsTrue(network.Enable) == true && netPollMan.Enable == false {
 		//DO POLLING Enable ACTIONS
 		netPollMan.StartPolling()
 	}
@@ -148,7 +150,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		return nil, err
 	}
 
-	if utils.BoolIsNil(dev.Enable) == true { //If Enabled we need to GetDevice so we get Points
+	if boolean.IsTrue(dev.Enable) == true { //If Enabled we need to GetDevice so we get Points
 		dev, err = inst.db.GetDevice(dev.UUID, api.Args{WithPoints: true})
 		if err != nil || dev == nil {
 			return nil, err
@@ -161,25 +163,25 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		return
 	}
 
-	if utils.BoolIsNil(dev.Enable) == false && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
+	if boolean.IsTrue(dev.Enable) == false && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
 		//DO POLLING DISABLE ACTIONS FOR DEVICE
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 
-	} else if utils.BoolIsNil(dev.Enable) == true && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
+	} else if boolean.IsTrue(dev.Enable) == true && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
 		//DO POLLING ENABLE ACTIONS FOR DEVICE
 		for _, pnt := range dev.Points {
-			if utils.BoolIsNil(pnt.Enable) {
+			if boolean.IsTrue(pnt.Enable) {
 				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
 				pp.PollPriority = pnt.PollPriority
 				netPollMan.PollQueue.AddPollingPoint(pp)
 			}
 		}
 
-	} else if utils.BoolIsNil(dev.Enable) == true {
+	} else if boolean.IsTrue(dev.Enable) == true {
 		//TODO: Currently on every device update, all device points are removed, and re-added.
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 		for _, pnt := range dev.Points {
-			if utils.BoolIsNil(pnt.Enable) {
+			if boolean.IsTrue(pnt.Enable) {
 				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
 				pp.PollPriority = pnt.PollPriority
 				netPollMan.PollQueue.AddPollingPoint(pp)
@@ -235,7 +237,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		return
 	}
 
-	if utils.BoolIsNil(point.Enable) && utils.BoolIsNil(dev.Enable) {
+	if boolean.IsTrue(point.Enable) && boolean.IsTrue(dev.Enable) {
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 		//DO POLLING ENABLE ACTIONS FOR POINT
 		//TODO: review these steps to check that UpdatePollingPointByUUID might work better?
@@ -301,7 +303,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		return
 	}
 
-	if utils.BoolIsNil(point.Enable) {
+	if boolean.IsTrue(point.Enable) {
 		pp, err := netPollMan.PollQueue.GetPollingPointByPointUUID(point.UUID)
 		if pp == nil || err != nil {
 			modbusErrorMsg("writePoint(): cannot find PollingPoint for point: ", point.UUID)
@@ -422,12 +424,12 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSucces
 	}
 
 	if readSuccess {
-		if value != utils.Float64IsNil(point.OriginalValue) {
-			point.ValueUpdatedFlag = utils.NewTrue() //Flag so that UpdatePointValue() will broadcast new value to producers. TODO: MAY NOT BE NEEDED.
+		if value != float.NonNil(point.OriginalValue) {
+			point.ValueUpdatedFlag = boolean.NewTrue() //Flag so that UpdatePointValue() will broadcast new value to producers. TODO: MAY NOT BE NEEDED.
 		}
-		point.OriginalValue = utils.NewFloat64(value)
+		point.OriginalValue = float.New(value)
 	}
-	point.InSync = utils.NewTrue() //TODO: MAY NOT BE NEEDED.
+	point.InSync = boolean.NewTrue() //TODO: MAY NOT BE NEEDED.
 
 	_, err = inst.db.UpdatePoint(point.UUID, point, true)
 	if err != nil {
@@ -453,9 +455,9 @@ func (inst *Instance) pointUpdateErr(point *model.Point, err error) (*model.Poin
 }
 
 //listSerialPorts list all serial ports on host
-func (inst *Instance) listSerialPorts() (*utils.Array, error) {
+func (inst *Instance) listSerialPorts() (*array.Array, error) {
 	ports, err := serial.GetPortsList()
-	p := utils.NewArray()
+	p := array.NewArray()
 	for _, port := range ports {
 		p.Add(port)
 	}

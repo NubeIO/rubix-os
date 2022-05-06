@@ -5,7 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -57,8 +57,8 @@ func (d *GormDatabase) wizardMasterSlavePointMappingOnProducerSide() (*model.Flo
 		return nil, fmt.Errorf("CreateNetworkDevicePoint: %s", err)
 	}
 
-	flowNetworkModel.IsMasterSlave = utils.NewTrue()
-	flowNetworkModel.IsMasterSlave = utils.NewTrue()
+	flowNetworkModel.IsMasterSlave = boolean.NewTrue()
+	flowNetworkModel.IsMasterSlave = boolean.NewTrue()
 	fn, err := d.CreateFlowNetwork(&flowNetworkModel)
 	if err != nil {
 		return nil, fmt.Errorf("FlowNetwork creation failure: %s", err)

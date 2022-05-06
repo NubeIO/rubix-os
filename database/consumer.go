@@ -4,7 +4,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -49,7 +49,7 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 	if streamClone.SourceUUID != producer.StreamUUID {
 		return nil, newError("Validation failure", "consumer stream_clones & producer stream are different source of truth")
 	}
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Consumer)
+	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Consumer)
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID = producer.SyncUUID
 	body.ProducerThingName = producer.ProducerThingName

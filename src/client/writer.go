@@ -2,8 +2,8 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/flow-framework/utils"
 	"strconv"
 )
 
@@ -42,7 +42,7 @@ func (a *FlowClient) EditWriter(uuid string, body model.Writer, updateProducer b
 
 // CreateWriter edit an object
 func (a *FlowClient) CreateWriter(body model.Writer) (*model.Writer, error) {
-	name, _ := utils.MakeUUID()
+	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("sub_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&model.Writer{}).

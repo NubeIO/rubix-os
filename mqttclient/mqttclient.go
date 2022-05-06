@@ -3,7 +3,7 @@ package mqttclient
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -129,7 +129,7 @@ func NewClient(options ClientOptions) (c *Client, err error) {
 	}
 
 	if options.ClientID == "" {
-		options.ClientID, _ = utils.MakeUUID()
+		options.ClientID, _ = nuuid.MakeUUID()
 	}
 	c.clientID = options.ClientID
 	if options.Username != "" {

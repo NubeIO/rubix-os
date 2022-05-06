@@ -1,15 +1,17 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/utils/array"
+	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"reflect"
 	"strings"
 
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
 )
 
-//wizard make a network/dev/pnt
+// wizard make a network/dev/pnt
 func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	sp := "/dev/ttyACM0"
 	if body.SerialPort != "" {
@@ -27,8 +29,8 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	net.Name = model.TransProtocol.Lora
 	net.TransportType = model.TransType.Serial
 	net.PluginPath = model.TransProtocol.Lora
-	net.SerialPort = utils.NewStringAddress(sp)
-	net.SerialBaudRate = utils.NewUint(38400)
+	net.SerialPort = nstring.NewStringAddress(sp)
+	net.SerialBaudRate = integer.NewUint(38400)
 
 	var dev model.Device
 	dev.Name = model.TransProtocol.Lora
@@ -46,10 +48,10 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	return "pass: added network and points", err
 }
 
-//listSerialPorts list all serial ports on host
-func (inst *Instance) listSerialPorts() (*utils.Array, error) {
+// listSerialPorts list all serial ports on host
+func (inst *Instance) listSerialPorts() (*array.Array, error) {
 	ports, err := serial.GetPortsList()
-	p := utils.NewArray()
+	p := array.NewArray()
 	for _, port := range ports {
 		p.Add(port)
 	}

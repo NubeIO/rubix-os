@@ -1,4 +1,4 @@
-package utils
+package boolean
 
 func NewTrue() *bool {
 	b := true
@@ -10,14 +10,6 @@ func NewFalse() *bool {
 	return &b
 }
 
-func BoolIsNil(b *bool) bool {
-	if b == nil {
-		return false
-	} else {
-		return *b
-	}
-}
-
 func IsTrue(b *bool) bool {
 	if b == nil {
 		return false
@@ -26,7 +18,7 @@ func IsTrue(b *bool) bool {
 	}
 }
 
-func BoolIsNilCheck(b *bool) bool {
+func IsNil(b *bool) bool {
 	if b == nil {
 		return true
 	} else {

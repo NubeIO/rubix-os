@@ -8,7 +8,10 @@ import (
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/edgerest"
 	"github.com/NubeIO/flow-framework/src/poller"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/nmath"
+	"github.com/NubeIO/flow-framework/utils/structs"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/edge28"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/thermistor"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -39,9 +42,9 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 	rsyncWrite := pollCount % 10
 	//rsyncWrite is just a way to make sure the outputs on the device are not out of sync
 	// and rsync on first poll loop
-	writeValue := utils.Float64IsNil(pnt.WriteValue)
+	writeValue := float.NonNil(pnt.WriteValue)
 	var err error
-	if !utils.BoolIsNil(pnt.InSync) || rsyncWrite == 0 || pollCount == 1 {
+	if !boolean.IsTrue(pnt.InSync) || rsyncWrite == 0 || pollCount == 1 {
 		if pollCount == 1 {
 			log.Infof("edge28-polling: processWrite() SYNC on first poll wrote IO %s: %v\n", pnt.IoNumber, value)
 		}
@@ -73,15 +76,15 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 }
 
 func (inst *Instance) processRead(pnt *model.Point, readValue float64, pollCount float64) (float64, error) {
-	covEvent, _ := utils.COV(readValue, utils.Float64IsNil(pnt.PresentValue), 0) //Remove this as it's done in the main point db file
-	if pollCount == 1 || !utils.BoolIsNil(pnt.InSync) {
+	covEvent, _ := nmath.Cov(readValue, float.NonNil(pnt.PresentValue), 0) //Remove this as it's done in the main point db file
+	if pollCount == 1 || !boolean.IsTrue(pnt.InSync) {
 		_, err := inst.pointUpdateValue(pnt.UUID, readValue)
 		if err != nil {
 			log.Errorf("edge28-polling: READ UPDATE POINT %s: %v\n", pnt.IoNumber, readValue)
 			_, err := inst.pointUpdateErr(pnt.UUID, err)
 			return readValue, err
 		}
-		if utils.BoolIsNil(pnt.InSync) {
+		if boolean.IsTrue(pnt.InSync) {
 			log.Infof("edge28-polling: READ POINT SYNC %s: %v\n", pnt.IoNumber, readValue)
 		} else {
 			log.Infof("edge28-polling: READ ON START %s: %v\n", pnt.IoNumber, readValue)
@@ -175,7 +178,7 @@ func (inst *Instance) polling(p polling) error {
 							if getDI == nil {
 								continue
 							}
-							readValStruct, readValType, err = utils.GetStructFieldByString(getDI.Val, pnt.IoNumber)
+							readValStruct, readValType, err = structs.GetStructFieldByString(getDI.Val, pnt.IoNumber)
 							if err != nil {
 								log.Error("edge28-polling: ", err)
 								continue
@@ -195,7 +198,7 @@ func (inst *Instance) polling(p polling) error {
 							if getUI == nil {
 								continue
 							}
-							readValStruct, readValType, err = utils.GetStructFieldByString(getUI.Val, pnt.IoNumber)
+							readValStruct, readValType, err = structs.GetStructFieldByString(getUI.Val, pnt.IoNumber)
 							if err != nil {
 								log.Error(err)
 								continue
@@ -232,7 +235,7 @@ func (inst *Instance) polling(p polling) error {
 func GetGPIOValueForUOByType(point *model.Point) (float64, error) {
 	var err error
 	var result float64
-	if !utils.ExistsInStrut(UOTypes, point.IoType) {
+	if !structs.ExistsInStrut(UOTypes, point.IoType) {
 		err = errors.New(fmt.Sprintf("edge-28: skipping %v, IoType %v not recognized.", point.IoNumber, point.IoType))
 		return 0, err
 	}
@@ -260,7 +263,7 @@ func GetValueFromGPIOForUIByType(point *model.Point, value float64) (float64, er
 	var err error
 	var result float64
 
-	if !utils.ExistsInStrut(UITypes, point.IoType) {
+	if !structs.ExistsInStrut(UITypes, point.IoType) {
 		err = errors.New(fmt.Sprintf("edge28-polling: skipping %v, IoType %v not recognized.", point.IoNumber, point.IoType))
 		return 0, err
 	}

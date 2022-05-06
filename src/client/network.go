@@ -2,12 +2,12 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 )
 
 // ClientAddNetwork an object
 func (a *FlowClient) ClientAddNetwork(pluginUUID string) (*ResponseBody, error) {
-	name, _ := utils.MakeUUID()
+	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("net_name_%s", name)
 	resp, err := a.client.R().
 		SetResult(&ResponseBody{}).

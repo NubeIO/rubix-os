@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -24,7 +24,7 @@ func (d *GormDatabase) GetCommandGroup(uuid string) (*model.CommandGroup, error)
 }
 
 func (d *GormDatabase) CreateCommandGroup(body *model.CommandGroup) (*model.CommandGroup, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.CommandGroup)
+	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.CommandGroup)
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}

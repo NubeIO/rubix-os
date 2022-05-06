@@ -3,10 +3,12 @@ package database
 import (
 	"context"
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/flow-framework/utils/nmath"
 
 	"github.com/NubeIO/flow-framework/api"
-	unit "github.com/NubeIO/flow-framework/src/units"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/src/units"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/PaesslerAG/gval"
 )
@@ -35,7 +37,7 @@ func (d *GormDatabase) pointNameExists(body *model.Point) (nameExist, addressIDE
 	//check body with existing devices that a point with the same objectType do not have the same addrID
 	for _, pnt := range device.Points {
 		if pnt.ObjectType == body.ObjectType {
-			if utils.IntIsNil(pnt.AddressID) == utils.IntIsNil(body.AddressID) {
+			if integer.NonNil(pnt.AddressID) == integer.NonNil(body.AddressID) {
 				if pnt.UUID == body.UUID {
 					addressIDExist = false
 				} else {
@@ -78,30 +80,31 @@ func pointUnits(presentValue *float64, unitFrom, unitTo *string) (value *float64
 	if presentValue == nil || unitFrom == nil || unitTo == nil || *unitFrom == "" || *unitTo == "" {
 		return presentValue, nil
 	}
-	_, res, err := unit.Process(*presentValue, *unitFrom, *unitTo)
+	_, res, err := units.Process(*presentValue, *unitFrom, *unitTo)
 	if err != nil {
-		return utils.NewFloat64(0), err
+		return float.New(0), err
 	}
-	return utils.NewFloat64(res.AsFloat()), err
+	return float.New(res.AsFloat()), err
 }
 
 func pointRange(presentValue, limitMin, limitMax *float64) (value *float64) {
-	if !utils.FloatIsNilCheck(presentValue) && !utils.FloatIsNilCheck(limitMin) && !utils.FloatIsNilCheck(limitMax) {
+	if !float.IsNil(presentValue) && !float.IsNil(limitMin) && !float.IsNil(limitMax) {
 		if *limitMin == 0 && *limitMax == 0 {
 			return presentValue
 		}
-		out := utils.LimitToRange(*presentValue, *limitMin, *limitMax)
+		out := nmath.LimitToRange(*presentValue, *limitMin, *limitMax)
 		return &out
 	}
 	return presentValue
 }
 
 func pointScale(presentValue, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax *float64) (value *float64) {
-	if !utils.FloatIsNilCheck(presentValue) && !utils.FloatIsNilCheck(scaleInMin) && !utils.FloatIsNilCheck(scaleInMax) && !utils.FloatIsNilCheck(scaleOutMin) && !utils.FloatIsNilCheck(scaleOutMax) {
+	if !float.IsNil(presentValue) && !float.IsNil(scaleInMin) && !float.IsNil(scaleInMax) &&
+		!float.IsNil(scaleOutMin) && !float.IsNil(scaleOutMax) {
 		if *scaleInMin == 0 && *scaleInMax == 0 && *scaleOutMin == 0 && *scaleOutMax == 0 {
 			return presentValue
 		}
-		out := utils.Scale(*presentValue, *scaleInMin, *scaleInMax, *scaleOutMin, *scaleOutMax)
+		out := nmath.Scale(*presentValue, *scaleInMin, *scaleInMax, *scaleOutMin, *scaleOutMax)
 		return &out
 	}
 	return presentValue

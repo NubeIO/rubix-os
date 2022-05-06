@@ -4,7 +4,9 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/nstring"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -75,9 +77,9 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	if err != nil {
 		return nil, err
 	}
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.Producer)
+	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Producer)
 	body.Name = nameIsNil(body.Name)
-	body.SyncUUID, _ = utils.MakeUUID()
+	body.SyncUUID, _ = nuuid.MakeUUID()
 	body.ProducerThingName = nameIsNil(producerThingName)
 	if err = d.DB.Create(&body).Error; err != nil {
 		return nil, err
@@ -157,7 +159,7 @@ func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*flo
 	if err != nil {
 		return err
 	}
-	if utils.BoolIsNil(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
+	if boolean.IsTrue(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = uuid
 		ph.PresentValue = presentValue
@@ -200,7 +202,7 @@ func (d *GormDatabase) producerScheduleWrite(uuid string, scheduleData *model.Sc
 }
 
 func (d *GormDatabase) TriggerCOVToWriterClone(producer *model.Producer, body *model.SyncCOV) error {
-	wcs, err := d.GetWriterClones(api.Args{ProducerUUID: utils.NewStringAddress(producer.UUID)})
+	wcs, err := d.GetWriterClones(api.Args{ProducerUUID: nstring.NewStringAddress(producer.UUID)})
 	if err != nil {
 		return errors.New("error on getting writer clones from producer_uuid")
 	}

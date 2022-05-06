@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -39,7 +39,7 @@ func (d *GormDatabase) GetOneWriterCloneByArgs(args api.Args) (*model.WriterClon
 }
 
 func (d *GormDatabase) CreateWriterClone(body *model.WriterClone) (*model.WriterClone, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.WriterClone)
+	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.WriterClone)
 	query := d.DB.Create(body)
 	if query.Error != nil {
 		return nil, query.Error

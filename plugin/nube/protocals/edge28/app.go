@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -180,7 +180,7 @@ func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point
 	point.CommonFault.Message = fmt.Sprintf("last-update: %s", utilstime.TimeStamp())
 	point.CommonFault.LastOk = time.Now().UTC()
 	priority := map[string]*float64{"_16": &value}
-	point.InSync = utils.NewTrue()
+	point.InSync = boolean.NewTrue()
 	_, err := inst.db.UpdatePointValue(uuid, &point, &priority, true)
 	if err != nil {
 		log.Error("edge28-app: pointUpdateValue()", err)

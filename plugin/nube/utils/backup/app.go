@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	min "github.com/NubeIO/flow-framework/plugin/nube/utils/backup/minio"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/directory"
+	"github.com/NubeIO/flow-framework/utils/file"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"reflect"
 	"strings"
 	"time"
@@ -38,12 +40,12 @@ func (inst *Instance) connection() error {
 const dir = "flow-framework-tmp"
 
 func (inst *Instance) makeDir() (path string, err error) {
-	homeDir, err := utils.GetUserHomeDir()
+	homeDir, err := directory.GetUserHomeDir()
 	if err != nil {
 		return "", err
 	}
 	path = fmt.Sprintf("%s/%s", homeDir, dir)
-	err = utils.MakeDirIfNotExists(path)
+	err = directory.MakeDirIfNotExists(path)
 	return path, err
 }
 
@@ -63,7 +65,7 @@ func (inst *Instance) bucketName() string {
 	}
 	noDashes := strings.Replace(bucketName, "_", " ", -1)
 	noSpaceString := strings.ReplaceAll(noDashes, " ", "")
-	n := utils.NewString(noSpaceString)
+	n := nstring.NewString(noSpaceString)
 	nn := n.RemoveSpecialCharacter()
 	nn = n.ToLower()
 	return nn
@@ -75,14 +77,14 @@ func (inst *Instance) makeJson(data interface{}, objectName string) error {
 	if err != nil {
 		return err
 	}
-	file := fmt.Sprintf("%s/tmp.json", dirName)
+	f := fmt.Sprintf("%s/tmp.json", dirName)
 	var o min.ObjectArgs
 	o.BucketName = bucketName
 	o.ObjectName = objectName
-	o.FilePath = file
+	o.FilePath = f
 
 	d := reflect.ValueOf(data).Interface().(interface{})
-	_, err = utils.WriteDataToFileAsJSON(d, file)
+	_, err = file.WriteDataToFileAsJSON(d, f)
 	if err != nil {
 		fmt.Println(err)
 		return err

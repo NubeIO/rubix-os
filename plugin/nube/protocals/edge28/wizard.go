@@ -3,8 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -63,7 +62,7 @@ func (inst *Instance) wizard(body wizard) (string, error) {
 		pnt.Description = pName
 		pnt.IoNumber = e
 
-		pnt.Fallback = utils.NewFloat64(0)
+		pnt.Fallback = float.New(0)
 		if pnt.IoNumber == "UO1" || pnt.IoNumber == "UO2" {
 			pnt.IoType = UOTypes.DIGITAL
 		} else if pnt.IoNumber == "UO3" || pnt.IoNumber == "UO4" {
@@ -84,7 +83,7 @@ func (inst *Instance) wizard(body wizard) (string, error) {
 			pnt.IoType = UITypes.DIGITAL
 		}
 		pnt.IoType = string(model.IOTypeRAW)
-		pnt.COV = utils.NewFloat64(0.5)
+		pnt.COV = float.New(0.5)
 		point, err := inst.db.CreatePoint(&pnt, false, false)
 		if err != nil {
 			return "", err

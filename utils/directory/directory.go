@@ -1,4 +1,4 @@
-package utils
+package directory
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -26,8 +26,8 @@ func DirIsWritable(path string) bool {
 	return unix.Access(path, unix.W_OK) == nil
 }
 
-//DirChangePermissions
 /*
+DirChangePermissions
 @param path /etc
 @param permissions 0700
 */

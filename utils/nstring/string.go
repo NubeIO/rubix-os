@@ -1,4 +1,4 @@
-package utils
+package nstring
 
 import (
 	"errors"
@@ -16,6 +16,10 @@ const (
 	LengthError          = "passed length cannot be greater than input length"
 	InvalidLogicalString = "invalid string value to test boolean value"
 )
+
+func New(value string) *string {
+	return &value
+}
 
 // input is struct that holds input form user and result
 type input struct {

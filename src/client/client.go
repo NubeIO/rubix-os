@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/auth"
 	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -39,7 +39,7 @@ func NewLocalClient() (cli *FlowClient) {
 }
 
 func NewFlowClientCli(ip *string, port *int, token *string, isMasterSlave *bool, globalUUD string, isFNCreator bool) *FlowClient {
-	if utils.IsTrue(isMasterSlave) {
+	if boolean.IsTrue(isMasterSlave) {
 		if isFNCreator {
 			return newSlaveToMasterCallSession()
 		} else {

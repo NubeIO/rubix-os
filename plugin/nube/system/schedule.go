@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/src/schedule"
 	"github.com/NubeIO/flow-framework/src/utilstime"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -21,7 +21,7 @@ func (inst *Instance) runSchedule() {
 			log.Errorf("system-plugin-schedule: issue on DecodeSchedule %v\n", err)
 			return
 		}
-		if !utils.IsTrue(sch.Enable) {
+		if !boolean.IsTrue(sch.Enable) {
 			log.Infoln("system-plugin-schedule: runSchedule() sch is not enabled so skip logic name:", sch.Name)
 			continue
 		}
@@ -73,11 +73,11 @@ func (inst *Instance) runSchedule() {
 			inst.store.Set(sch.Name, finalResult, -1)
 			s := new(model.Schedule)
 			if finalResult.IsActive {
-				s.IsActive = utils.NewTrue()
+				s.IsActive = boolean.NewTrue()
 			} else {
-				s.IsActive = utils.NewFalse()
+				s.IsActive = boolean.NewFalse()
 			}
-			if utils.IsTrue(s.IsActive) != utils.IsTrue(sch.IsActive) {
+			if boolean.IsTrue(s.IsActive) != boolean.IsTrue(sch.IsActive) {
 				log.Printf("system-plugin-schedule: UPDATE SCHEDULE IN DB %v\n", sch.Name)
 				_, err = inst.db.UpdateSchedule(sch.UUID, s)
 				if err != nil {

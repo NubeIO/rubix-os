@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm"
 )
@@ -25,7 +25,7 @@ func (d *GormDatabase) GetPluginByPath(path string) (*model.PluginConf, error) {
 }
 
 func (d *GormDatabase) CreatePlugin(p *model.PluginConf) error {
-	p.UUID = utils.MakeTopicUUID(model.CommonNaming.Plugin)
+	p.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Plugin)
 	return d.DB.Create(p).Error
 }
 

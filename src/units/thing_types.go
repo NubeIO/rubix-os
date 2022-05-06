@@ -1,4 +1,4 @@
-package unit
+package units
 
 type PointThingTypes struct {
 	AHEnable                                       PointThing `json:"AH Enable"`

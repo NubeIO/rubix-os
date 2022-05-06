@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/flow-framework/utils/nmath"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -47,7 +51,7 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 }
 
 func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
-	body.UUID = utils.MakeTopicUUID(model.ThingClass.Point)
+	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
 	body.Name = nameIsNil(body.Name)
 
 	if body.Decimal == nil {
@@ -66,8 +70,8 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		body.PointPriorityArrayMode = model.PriorityArrayToPresentValue //sets default priority array mode.
 	}
 	body.ThingClass = model.ThingClass.Point
-	body.CommonEnable.Enable = utils.NewTrue()
-	body.InSync = utils.NewFalse()
+	body.CommonEnable.Enable = boolean.NewTrue()
+	body.InSync = boolean.NewFalse()
 	if body.Priority == nil {
 		body.Priority = &model.Priority{}
 	}
@@ -120,9 +124,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		return nil, errors.New(eMsg)
 	}
 
-	if !utils.IntNilCheck(body.AddressID) {
+	if !integer.IsNil(body.AddressID) {
 		if existingAddrID {
-			eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", utils.IntIsNil(body.AddressID))
+			eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", integer.NonNil(body.AddressID))
 			return nil, errors.New(eMsg)
 		}
 	}
@@ -133,7 +137,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	}
 	// example modbus: if user changes the data type then do a new read of the point on the modbus network
 	if !fromPlugin {
-		pointModel.InSync = utils.NewFalse()
+		pointModel.InSync = boolean.NewFalse()
 	}
 	// TODO: ARE THESE REQUIRED? OR ARE THEY DONE WITH THE FOLLOWING DB CALL?
 	pointModel.WritePollRequired = body.WritePollRequired
@@ -155,10 +159,10 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlug
 	if body.Priority == nil {
 		return nil, errors.New("no priority value is been sent")
 	} else {
-		pointModel.ValueUpdatedFlag = utils.NewTrue()
+		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
-	pointModel.InSync = utils.NewFalse()
-	pointModel.WritePollRequired = utils.NewTrue()
+	pointModel.InSync = boolean.NewFalse()
+	pointModel.WritePollRequired = boolean.NewTrue()
 	point, err := d.UpdatePointValue(pointModel, body.Priority, fromPlugin)
 	return point, err
 }
@@ -169,8 +173,8 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	}
 
 	pointModel, priority, presentValue := d.updatePriority(pointModel, priority)
-	ov := utils.Float64IsNil(presentValue)
-	pointModel.OriginalValue = &ov
+	ov := float.Copy(presentValue)
+	pointModel.OriginalValue = ov
 
 	presentValueTransformFault := false
 	presentValue = pointScale(presentValue, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax)
@@ -203,10 +207,10 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	// if a new value is written from wires then set this to false so the modbus knows on the next poll to write a new
 	// value to the modbus point
 	if !fromPlugin {
-		pointModel.InSync = utils.NewFalse()
+		pointModel.InSync = boolean.NewFalse()
 	}
-	if !utils.Unit32NilCheck(pointModel.Decimal) && presentValue != nil {
-		val := utils.RoundTo(*presentValue, *pointModel.Decimal)
+	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
+		val := nmath.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
 

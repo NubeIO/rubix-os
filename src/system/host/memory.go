@@ -3,7 +3,7 @@ package host
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/array"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -57,7 +57,7 @@ type Memory struct {
 	MemoryAvailable string `json:"memory_available"`
 }
 
-func GetMemory() *utils.Array {
+func GetMemory() *array.Array {
 	var mem Memory
 	memT, err := getMem(memTotal)
 	if err != nil {
@@ -74,7 +74,7 @@ func GetMemory() *utils.Array {
 	mem.MemoryTotal = memT
 	mem.MemoryFree = memF
 	mem.MemoryAvailable = memA
-	out := utils.NewArray()
+	out := array.NewArray()
 	out.Add(mem)
 	return out
 

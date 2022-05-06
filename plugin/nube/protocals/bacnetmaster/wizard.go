@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/helpers"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -50,7 +50,7 @@ func (inst *Instance) wizard(network *Network) (string, error) {
 
 	var pnt model.Point
 	pnt.DeviceUUID = d.UUID
-	pName := utils.NameIsNil()
+	pName := helpers.NameIsNil()
 	pnt.Name = pName
 	pnt.Description = pName
 	//pnt.AddressID = nums.NewInt(a)

@@ -5,7 +5,10 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/flow-framework/utils/nstring"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -55,7 +58,7 @@ CreateFlowNetwork
 - Update sync_uuid with FlowNetworkClone's sync_uuid
 */
 func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
-	body.UUID = utils.MakeTopicUUID(model.CommonNaming.FlowNetwork)
+	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.FlowNetwork)
 	isMasterSlave, cli, isRemote, tx, err := d.editFlowNetworkBody(body)
 	if err != nil {
 		return nil, err
@@ -128,11 +131,11 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 		accessToken, err := client.GetFlowToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowUsername, *fn.FlowPassword)
 		fnModel := model.FlowNetworkClone{}
 		if err != nil {
-			fnModel.IsError = utils.NewTrue()
-			fnModel.ErrorMsg = utils.NewStringAddress(err.Error())
+			fnModel.IsError = boolean.NewTrue()
+			fnModel.ErrorMsg = nstring.NewStringAddress(err.Error())
 			fnModel.FlowToken = fn.FlowToken
 		} else {
-			fnModel.IsError = utils.NewFalse()
+			fnModel.IsError = boolean.NewFalse()
 			fnModel.ErrorMsg = nil
 			fnModel.FlowToken = accessToken
 		}
@@ -141,14 +144,14 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 			log.Error(err)
 		}
 	}
-	return utils.NewTrue(), nil
+	return boolean.NewTrue(), nil
 }
 
 func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *client.FlowClient, bool, *gorm.DB, error) {
 	body.Name = nameIsNil(body.Name)
-	body.SyncUUID, _ = utils.MakeUUID()
-	body.IsRemote = utils.NewTrue()
-	isMasterSlave := utils.IsTrue(body.IsMasterSlave)
+	body.SyncUUID, _ = nuuid.MakeUUID()
+	body.IsRemote = boolean.NewTrue()
+	isMasterSlave := boolean.IsTrue(body.IsMasterSlave)
 	deviceInfo, err := d.GetDeviceInfo()
 	if err != nil {
 		return false, nil, false, nil, err
@@ -185,15 +188,15 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 		return false, nil, false, nil, err
 	} else {
 		if deviceInfo.GlobalUUID == remoteDeviceInfo.GlobalUUID {
-			body.IsRemote = utils.NewFalse()
+			body.IsRemote = boolean.NewFalse()
 			if !isMasterSlave {
-				body.FlowHTTPS = utils.NewFalse()
-				body.FlowIP = utils.NewStringAddress("0.0.0.0")
-				body.IsRemote = utils.NewFalse()
+				body.FlowHTTPS = boolean.NewFalse()
+				body.FlowIP = nstring.NewStringAddress("0.0.0.0")
+				body.IsRemote = boolean.NewFalse()
 			}
 		}
 	}
-	isRemote := utils.IsTrue(body.IsRemote)
+	isRemote := boolean.IsTrue(body.IsRemote)
 	// rollback is needed only when flow-network is remote,
 	// if we make it true in local it blocks the next transaction of clone creation which leads deadlock
 	var tx *gorm.DB
@@ -214,11 +217,11 @@ func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isM
 			return nil, err
 		}
 		bodyToSync.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
-		bodyToSync.FlowIP = utils.NewStringAddress(localStorageFlowNetwork.FlowIP)
-		bodyToSync.FlowPort = utils.NewInt(localStorageFlowNetwork.FlowPort)
-		bodyToSync.FlowUsername = utils.NewStringAddress(localStorageFlowNetwork.FlowUsername)
-		bodyToSync.FlowPassword = utils.NewStringAddress(localStorageFlowNetwork.FlowPassword)
-		bodyToSync.FlowToken = utils.NewStringAddress(localStorageFlowNetwork.FlowToken)
+		bodyToSync.FlowIP = nstring.NewStringAddress(localStorageFlowNetwork.FlowIP)
+		bodyToSync.FlowPort = integer.New(localStorageFlowNetwork.FlowPort)
+		bodyToSync.FlowUsername = nstring.NewStringAddress(localStorageFlowNetwork.FlowUsername)
+		bodyToSync.FlowPassword = nstring.NewStringAddress(localStorageFlowNetwork.FlowPassword)
+		bodyToSync.FlowToken = nstring.NewStringAddress(localStorageFlowNetwork.FlowToken)
 	}
 	err := d.syncAndEditFlowNetwork(cli, body, &bodyToSync)
 	if err != nil {

@@ -1,4 +1,4 @@
-package utils
+package file
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 )
 
 func WriteDataToFileAsJSON(data interface{}, fileDIR string) (int, error) {
-	//write data as buffer to json encoder
+	// write data as buffer to json encoder
 	buffer := new(bytes.Buffer)
 	encoder := json.NewEncoder(buffer)
 	encoder.SetIndent("", "\t")
