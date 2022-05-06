@@ -106,7 +106,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	bacnetPoint := &bsrest.BacnetPoint{}
 	bacnetPoint.ObjectName = body.Name
 	bacnetPoint.ObjectType = body.ObjectType
-	if !integer.NilCheck(body.AddressID) {
+	if !integer.IsNil(body.AddressID) {
 		bacnetPoint.Address = integer.NonNil(body.AddressID)
 	}
 	log.Infoln("bacnet-server.app.updatePoint() try and update point over rest name:", body.Name, "bacnetPointUUID:", bacnetPointUUID)
@@ -133,7 +133,7 @@ func (inst *Instance) updatePointValue(body *model.Point) (*model.Point, error) 
 	if (*body.Priority).P16 != nil {
 		(*bacnetPoint.Priority).P16 = (*body.Priority).P16
 	}
-	//if !utils.NilCheck(body.AddressID) {
+	//if !utils.IsNil(body.AddressID) {
 	//	bacnetPoint.Address = utils.NonNil(body.AddressID)
 	//}
 	point, r := bacnetClient.UpdatePointValue(bacnetPointUUID, bacnetPoint)

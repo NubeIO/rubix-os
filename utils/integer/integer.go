@@ -21,7 +21,7 @@ func NonNil(b *int) int {
 	}
 }
 
-func NilCheck(b *int) bool {
+func IsNil(b *int) bool {
 	if b == nil {
 		return true
 	} else {
@@ -29,7 +29,7 @@ func NilCheck(b *int) bool {
 	}
 }
 
-func Unit32NilCheck(b *uint32) bool {
+func IsUnit32Nil(b *uint32) bool {
 	if b == nil {
 		return true
 	} else {

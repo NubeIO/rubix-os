@@ -37,7 +37,7 @@ func NonNil(b *float64) float64 {
 	return *b
 }
 
-func IsNilCheck(b *float64) bool {
+func IsNil(b *float64) bool {
 	if b == nil {
 		return true
 	} else {

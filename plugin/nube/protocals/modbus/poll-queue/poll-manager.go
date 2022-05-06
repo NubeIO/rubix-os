@@ -118,7 +118,7 @@ func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { //This is trig
 	}
 	pm.PollQueue.RemovePollingPointByDeviceUUID(devUUID)
 	for _, pnt := range dev.Points {
-		if boolean.BoolIsNil(pnt.Enable) {
+		if boolean.IsTrue(pnt.Enable) {
 			pp := NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, pm.FFPluginUUID)
 			pp.PollPriority = pnt.PollPriority
 			pm.PollQueue.AddPollingPoint(pp)

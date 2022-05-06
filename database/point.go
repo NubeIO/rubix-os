@@ -124,7 +124,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		return nil, errors.New(eMsg)
 	}
 
-	if !integer.NilCheck(body.AddressID) {
+	if !integer.IsNil(body.AddressID) {
 		if existingAddrID {
 			eMsg := fmt.Sprintf("a point with existing AddressID: %d exists", integer.NonNil(body.AddressID))
 			return nil, errors.New(eMsg)
@@ -209,7 +209,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	if !fromPlugin {
 		pointModel.InSync = boolean.NewFalse()
 	}
-	if !integer.Unit32NilCheck(pointModel.Decimal) && presentValue != nil {
+	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
 		val := math.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}

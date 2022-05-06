@@ -28,7 +28,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		return nil, errors.New("failed to create modbus network")
 	}
 
-	if boolean.BoolIsNil(body.Enable) {
+	if boolean.IsTrue(body.Enable) {
 		pollManager := pollqueue.NewPollManager(&inst.db, network.UUID, inst.pluginUUID)
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
@@ -94,7 +94,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		return
 	}
 
-	if boolean.BoolIsNil(point.Enable) {
+	if boolean.IsTrue(point.Enable) {
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 		//DO POLLING ENABLE ACTIONS FOR POINT
 		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
@@ -125,11 +125,11 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		return
 	}
 
-	if boolean.BoolIsNil(network.Enable) == false && netPollMan.Enable == true {
+	if boolean.IsTrue(network.Enable) == false && netPollMan.Enable == true {
 		//DO POLLING DISABLE ACTIONS
 		netPollMan.StopPolling()
 
-	} else if boolean.BoolIsNil(network.Enable) == true && netPollMan.Enable == false {
+	} else if boolean.IsTrue(network.Enable) == true && netPollMan.Enable == false {
 		//DO POLLING Enable ACTIONS
 		netPollMan.StartPolling()
 	}
@@ -150,7 +150,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		return nil, err
 	}
 
-	if boolean.BoolIsNil(dev.Enable) == true { //If Enabled we need to GetDevice so we get Points
+	if boolean.IsTrue(dev.Enable) == true { //If Enabled we need to GetDevice so we get Points
 		dev, err = inst.db.GetDevice(dev.UUID, api.Args{WithPoints: true})
 		if err != nil || dev == nil {
 			return nil, err
@@ -163,25 +163,25 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		return
 	}
 
-	if boolean.BoolIsNil(dev.Enable) == false && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
+	if boolean.IsTrue(dev.Enable) == false && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
 		//DO POLLING DISABLE ACTIONS FOR DEVICE
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 
-	} else if boolean.BoolIsNil(dev.Enable) == true && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
+	} else if boolean.IsTrue(dev.Enable) == true && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
 		//DO POLLING ENABLE ACTIONS FOR DEVICE
 		for _, pnt := range dev.Points {
-			if boolean.BoolIsNil(pnt.Enable) {
+			if boolean.IsTrue(pnt.Enable) {
 				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
 				pp.PollPriority = pnt.PollPriority
 				netPollMan.PollQueue.AddPollingPoint(pp)
 			}
 		}
 
-	} else if boolean.BoolIsNil(dev.Enable) == true {
+	} else if boolean.IsTrue(dev.Enable) == true {
 		//TODO: Currently on every device update, all device points are removed, and re-added.
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 		for _, pnt := range dev.Points {
-			if boolean.BoolIsNil(pnt.Enable) {
+			if boolean.IsTrue(pnt.Enable) {
 				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
 				pp.PollPriority = pnt.PollPriority
 				netPollMan.PollQueue.AddPollingPoint(pp)
@@ -237,7 +237,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		return
 	}
 
-	if boolean.BoolIsNil(point.Enable) && boolean.BoolIsNil(dev.Enable) {
+	if boolean.IsTrue(point.Enable) && boolean.IsTrue(dev.Enable) {
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 		//DO POLLING ENABLE ACTIONS FOR POINT
 		//TODO: review these steps to check that UpdatePollingPointByUUID might work better?
@@ -303,7 +303,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		return
 	}
 
-	if boolean.BoolIsNil(point.Enable) {
+	if boolean.IsTrue(point.Enable) {
 		pp, err := netPollMan.PollQueue.GetPollingPointByPointUUID(point.UUID)
 		if pp == nil || err != nil {
 			modbusErrorMsg("writePoint(): cannot find PollingPoint for point: ", point.UUID)

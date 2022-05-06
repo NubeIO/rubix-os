@@ -93,7 +93,7 @@ func (inst *Instance) ModbusPolling() error {
 			}
 			//modbusDebugMsg(fmt.Sprintf("modbus-poll: POLL START: NAME: %s\n", net.Name))
 
-			if !boolean.BoolIsNil(net.Enable) {
+			if !boolean.IsTrue(net.Enable) {
 				modbusDebugMsg(fmt.Sprintf("NETWORK DISABLED: NAME: %s", net.Name))
 				continue
 			}
@@ -120,7 +120,7 @@ func (inst *Instance) ModbusPolling() error {
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
-			if !boolean.BoolIsNil(dev.Enable) {
+			if !boolean.IsTrue(dev.Enable) {
 				modbusErrorMsg("device is disabled.")
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
@@ -145,15 +145,15 @@ func (inst *Instance) ModbusPolling() error {
 				pnt.Priority = &model.Priority{}
 			}
 
-			if !boolean.BoolIsNil(pnt.Enable) {
+			if !boolean.IsTrue(pnt.Enable) {
 				modbusErrorMsg("point is disabled.")
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
 
-			modbusDebugMsg(fmt.Sprintf("MODBUS POLL! : Priority: %s, Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s, WriteRequired: %t, ReadRequired: %t", pp.PollPriority, net.UUID, dev.UUID, pnt.UUID, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.BoolIsNil(pnt.WritePollRequired), boolean.BoolIsNil(pnt.ReadPollRequired)))
+			modbusDebugMsg(fmt.Sprintf("MODBUS POLL! : Priority: %s, Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s, WriteRequired: %t, ReadRequired: %t", pp.PollPriority, net.UUID, dev.UUID, pnt.UUID, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
 
-			if !boolean.BoolIsNil(pnt.WritePollRequired) && !boolean.BoolIsNil(pnt.ReadPollRequired) {
+			if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
 				modbusDebugMsg("polling not required on this point")
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
@@ -201,7 +201,7 @@ func (inst *Instance) ModbusPolling() error {
 			var response interface{}
 			var writeValuePointer *float64
 			writeSuccess := false
-			if isWriteable(pnt.WriteMode) && boolean.BoolIsNil(pnt.WritePollRequired) { //DO WRITE IF REQUIRED
+			if isWriteable(pnt.WriteMode) && boolean.IsTrue(pnt.WritePollRequired) { //DO WRITE IF REQUIRED
 				modbusDebugMsg(fmt.Sprintf("modbus write point: %+v", pnt))
 				//pnt.PrintPointValues()
 				writeValuePointer = pnt.Priority.GetHighestPriorityValue()
@@ -221,7 +221,7 @@ func (inst *Instance) ModbusPolling() error {
 			}
 
 			readSuccess := false
-			if boolean.BoolIsNil(pnt.ReadPollRequired) { //DO READ IF REQUIRED
+			if boolean.IsTrue(pnt.ReadPollRequired) { //DO READ IF REQUIRED
 				response, responseValue, err = networkRead(mbClient, pnt)
 				if err != nil {
 					_, err = inst.pointUpdateErr(pnt, err)

@@ -108,7 +108,7 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 					pointModel.WriteValue = writeValue
 				}
 				presentValue = highestValue
-			} else if !float.IsNilCheck(pointModel.Fallback) || currentPriority == nil {
+			} else if !float.IsNil(pointModel.Fallback) || currentPriority == nil {
 				pointModel.Priority.P16 = float.New(*pointModel.Fallback)
 				priorityMapTemp := map[string]*float64{"_16": pointModel.Fallback}
 				priorityMap = &priorityMapTemp

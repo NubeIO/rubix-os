@@ -44,7 +44,7 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 	// and rsync on first poll loop
 	writeValue := float.NonNil(pnt.WriteValue)
 	var err error
-	if !boolean.BoolIsNil(pnt.InSync) || rsyncWrite == 0 || pollCount == 1 {
+	if !boolean.IsTrue(pnt.InSync) || rsyncWrite == 0 || pollCount == 1 {
 		if pollCount == 1 {
 			log.Infof("edge28-polling: processWrite() SYNC on first poll wrote IO %s: %v\n", pnt.IoNumber, value)
 		}
@@ -77,14 +77,14 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 
 func (inst *Instance) processRead(pnt *model.Point, readValue float64, pollCount float64) (float64, error) {
 	covEvent, _ := math.Cov(readValue, float.NonNil(pnt.PresentValue), 0) //Remove this as it's done in the main point db file
-	if pollCount == 1 || !boolean.BoolIsNil(pnt.InSync) {
+	if pollCount == 1 || !boolean.IsTrue(pnt.InSync) {
 		_, err := inst.pointUpdateValue(pnt.UUID, readValue)
 		if err != nil {
 			log.Errorf("edge28-polling: READ UPDATE POINT %s: %v\n", pnt.IoNumber, readValue)
 			_, err := inst.pointUpdateErr(pnt.UUID, err)
 			return readValue, err
 		}
-		if boolean.BoolIsNil(pnt.InSync) {
+		if boolean.IsTrue(pnt.InSync) {
 			log.Infof("edge28-polling: READ POINT SYNC %s: %v\n", pnt.IoNumber, readValue)
 		} else {
 			log.Infof("edge28-polling: READ ON START %s: %v\n", pnt.IoNumber, readValue)
