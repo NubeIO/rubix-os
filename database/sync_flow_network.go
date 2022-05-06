@@ -5,11 +5,12 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetworkClone, error) {
-	if !utils.IsTrue(body.IsMasterSlave) {
+	if !boolean.IsTrue(body.IsMasterSlave) {
 		accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
 		if err != nil {
 			return nil, err
@@ -34,8 +35,8 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 	}
 	fnc.SourceUUID = body.UUID
 	fnc.SyncUUID, _ = utils.MakeUUID()
-	if !utils.IsTrue(fnc.IsRemote) {
-		fnc.FlowHTTPS = utils.NewFalse()
+	if !boolean.IsTrue(fnc.IsRemote) {
+		fnc.FlowHTTPS = boolean.NewFalse()
 		fnc.FlowIP = utils.NewStringAddress("0.0.0.0")
 	}
 	deviceInfo, err := d.GetDeviceInfo()

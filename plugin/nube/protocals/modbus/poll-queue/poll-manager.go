@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -118,7 +118,7 @@ func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { //This is trig
 	}
 	pm.PollQueue.RemovePollingPointByDeviceUUID(devUUID)
 	for _, pnt := range dev.Points {
-		if utils.BoolIsNil(pnt.Enable) {
+		if boolean.BoolIsNil(pnt.Enable) {
 			pp := NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, pm.FFPluginUUID)
 			pp.PollPriority = pnt.PollPriority
 			pm.PollQueue.AddPollingPoint(pp)

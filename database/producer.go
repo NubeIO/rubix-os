@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -157,7 +158,7 @@ func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*flo
 	if err != nil {
 		return err
 	}
-	if utils.BoolIsNil(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
+	if boolean.BoolIsNil(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = uuid
 		ph.PresentValue = presentValue

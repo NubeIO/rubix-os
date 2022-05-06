@@ -6,7 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/migration"
 	"github.com/NubeIO/flow-framework/src/cachestore"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"os"
 	"path/filepath"
 	"time"
@@ -45,7 +45,7 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 	lsFlowNetwork := model.LocalStorageFlowNetwork{
 		FlowIP:    conf.Server.ListenAddr,
 		FlowPort:  conf.Server.RSPort,
-		FlowHTTPS: utils.NewFalse(),
+		FlowHTTPS: boolean.NewFalse(),
 	}
 	db.Find(&model.LocalStorageFlowNetwork{}).Count(&lsFlowNetworkCount)
 	if lsFlowNetworkCount == 0 {

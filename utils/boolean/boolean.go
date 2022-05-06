@@ -1,4 +1,4 @@
-package utils
+package boolean
 
 func NewTrue() *bool {
 	b := true

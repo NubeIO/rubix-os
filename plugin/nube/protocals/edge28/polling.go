@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/edgerest"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/edge28"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/thermistor"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -41,7 +42,7 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 	// and rsync on first poll loop
 	writeValue := utils.Float64IsNil(pnt.WriteValue)
 	var err error
-	if !utils.BoolIsNil(pnt.InSync) || rsyncWrite == 0 || pollCount == 1 {
+	if !boolean.BoolIsNil(pnt.InSync) || rsyncWrite == 0 || pollCount == 1 {
 		if pollCount == 1 {
 			log.Infof("edge28-polling: processWrite() SYNC on first poll wrote IO %s: %v\n", pnt.IoNumber, value)
 		}
@@ -74,14 +75,14 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 
 func (inst *Instance) processRead(pnt *model.Point, readValue float64, pollCount float64) (float64, error) {
 	covEvent, _ := utils.COV(readValue, utils.Float64IsNil(pnt.PresentValue), 0) //Remove this as it's done in the main point db file
-	if pollCount == 1 || !utils.BoolIsNil(pnt.InSync) {
+	if pollCount == 1 || !boolean.BoolIsNil(pnt.InSync) {
 		_, err := inst.pointUpdateValue(pnt.UUID, readValue)
 		if err != nil {
 			log.Errorf("edge28-polling: READ UPDATE POINT %s: %v\n", pnt.IoNumber, readValue)
 			_, err := inst.pointUpdateErr(pnt.UUID, err)
 			return readValue, err
 		}
-		if utils.BoolIsNil(pnt.InSync) {
+		if boolean.BoolIsNil(pnt.InSync) {
 			log.Infof("edge28-polling: READ POINT SYNC %s: %v\n", pnt.IoNumber, readValue)
 		} else {
 			log.Infof("edge28-polling: READ ON START %s: %v\n", pnt.IoNumber, readValue)

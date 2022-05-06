@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -128,11 +129,11 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 		accessToken, err := client.GetFlowToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowUsername, *fn.FlowPassword)
 		fnModel := model.FlowNetworkClone{}
 		if err != nil {
-			fnModel.IsError = utils.NewTrue()
+			fnModel.IsError = boolean.NewTrue()
 			fnModel.ErrorMsg = utils.NewStringAddress(err.Error())
 			fnModel.FlowToken = fn.FlowToken
 		} else {
-			fnModel.IsError = utils.NewFalse()
+			fnModel.IsError = boolean.NewFalse()
 			fnModel.ErrorMsg = nil
 			fnModel.FlowToken = accessToken
 		}
@@ -141,14 +142,14 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 			log.Error(err)
 		}
 	}
-	return utils.NewTrue(), nil
+	return boolean.NewTrue(), nil
 }
 
 func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *client.FlowClient, bool, *gorm.DB, error) {
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = utils.MakeUUID()
-	body.IsRemote = utils.NewTrue()
-	isMasterSlave := utils.IsTrue(body.IsMasterSlave)
+	body.IsRemote = boolean.NewTrue()
+	isMasterSlave := boolean.IsTrue(body.IsMasterSlave)
 	deviceInfo, err := d.GetDeviceInfo()
 	if err != nil {
 		return false, nil, false, nil, err
@@ -185,15 +186,15 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 		return false, nil, false, nil, err
 	} else {
 		if deviceInfo.GlobalUUID == remoteDeviceInfo.GlobalUUID {
-			body.IsRemote = utils.NewFalse()
+			body.IsRemote = boolean.NewFalse()
 			if !isMasterSlave {
-				body.FlowHTTPS = utils.NewFalse()
+				body.FlowHTTPS = boolean.NewFalse()
 				body.FlowIP = utils.NewStringAddress("0.0.0.0")
-				body.IsRemote = utils.NewFalse()
+				body.IsRemote = boolean.NewFalse()
 			}
 		}
 	}
-	isRemote := utils.IsTrue(body.IsRemote)
+	isRemote := boolean.IsTrue(body.IsRemote)
 	// rollback is needed only when flow-network is remote,
 	// if we make it true in local it blocks the next transaction of clone creation which leads deadlock
 	var tx *gorm.DB

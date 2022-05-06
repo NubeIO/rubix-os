@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 	"time"
@@ -40,7 +41,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 		dev.CommonIP.Host = ip
 		dev.CommonIP.Port = p
 		dev.AddressId = da
-		dev.ZeroMode = utils.NewTrue()
+		dev.ZeroMode = boolean.NewTrue()
 		dev.PollDelayPointsMS = 5000
 
 		var pnt model.Point
@@ -75,7 +76,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			dev.CommonIP.Host = "0.0.0.0"
 			dev.CommonIP.Port = p
 			dev.AddressId = j
-			dev.ZeroMode = utils.NewTrue()
+			dev.ZeroMode = boolean.NewTrue()
 			dev.PollDelayPointsMS = 5000
 			dev.NetworkUUID = net.UUID
 			_, err := inst.db.CreateDevice(&dev)
@@ -115,7 +116,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			dev.CommonIP.Host = "0.0.0.0"
 			dev.CommonIP.Port = p
 			dev.AddressId = j
-			dev.ZeroMode = utils.NewTrue()
+			dev.ZeroMode = boolean.NewTrue()
 			dev.PollDelayPointsMS = 5000
 
 			var pnt model.Point
@@ -151,7 +152,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			dev.CommonIP.Host = "0.0.0.0"
 			dev.CommonIP.Port = p
 			dev.AddressId = j
-			dev.ZeroMode = utils.NewTrue()
+			dev.ZeroMode = boolean.NewTrue()
 			dev.PollDelayPointsMS = 5000
 			dev.NetworkUUID = net.UUID
 			dev.FastPollRate = 5 * time.Second
@@ -207,7 +208,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			dev.CommonIP.Host = "0.0.0.0"
 			dev.CommonIP.Port = p
 			dev.AddressId = j
-			dev.ZeroMode = utils.NewTrue()
+			dev.ZeroMode = boolean.NewTrue()
 			dev.PollDelayPointsMS = 5000
 			dev.NetworkUUID = net.UUID
 			dev.FastPollRate = 5 * time.Second
@@ -272,7 +273,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				dev.CommonIP.Host = "0.0.0.0"
 				dev.CommonIP.Port = p
 				dev.AddressId = int(body.AddArg)
-				dev.ZeroMode = utils.NewTrue()
+				dev.ZeroMode = boolean.NewTrue()
 				dev.PollDelayPointsMS = 1000
 				dev.NetworkUUID = net.UUID
 				dev.FastPollRate = 5 * time.Second
@@ -697,7 +698,7 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	var dev model.Device
 	dev.Name = "modbus"
 	dev.AddressId = da
-	dev.ZeroMode = utils.NewTrue()
+	dev.ZeroMode = boolean.NewTrue()
 	dev.PollDelayPointsMS = 5000
 
 	var pnt model.Point

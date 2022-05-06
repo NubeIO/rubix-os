@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/plugin/compat"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -52,7 +53,7 @@ func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*mod
 	body.UUID = utils.MakeTopicUUID(model.ThingClass.Network)
 	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Network
-	body.CommonEnable.Enable = utils.NewTrue()
+	body.CommonEnable.Enable = boolean.NewTrue()
 	transport, err := checkTransport(body.TransportType) //set to ip by default
 	if err != nil {
 		return nil, err
