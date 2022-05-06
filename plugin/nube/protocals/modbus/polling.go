@@ -8,9 +8,9 @@ import (
 	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
 	"github.com/NubeIO/flow-framework/src/poller"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/url"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 	"time"
@@ -51,7 +51,7 @@ func (inst *Instance) getNetworkPollManagerByUUID(netUUID string) (*pollqueue.Ne
 
 var poll poller.Poller
 
-//TODO: currently Polling loops through each network, grabs one point, and polls it.  Could be improved by having a seperate client/go routine for each of the networks.
+// ModbusPolling TODO: currently Polling loops through each network, grabs one point, and polls it.  Could be improved by having a seperate client/go routine for each of the networks.
 func (inst *Instance) ModbusPolling() error {
 	poll = poller.New()
 	var counter = 0
@@ -183,13 +183,13 @@ func (inst *Instance) ModbusPolling() error {
 					mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
 				}
 			} else if dev.TransportType == model.TransType.IP {
-				url, err := utils.JoinIPPort(utils.URLParts{model.TransType.IP, dev.Host, strconv.Itoa(dev.Port)})
+				url_, err := url.JoinIPPort(url.Parts{Host: dev.Host, Port: strconv.Itoa(dev.Port)})
 				if err != nil {
-					modbusErrorMsg("failed to validate device IP", url)
+					modbusErrorMsg("failed to validate device IP", url_)
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 					continue
 				}
-				mbClient.TCPClientHandler.Address = url
+				mbClient.TCPClientHandler.Address = url_
 				mbClient.TCPClientHandler.SlaveID = byte(dev.AddressId)
 			} else {
 				modbusDebugMsg(fmt.Sprintf("failed to validate device and network %v %s", err, dev.Name))

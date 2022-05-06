@@ -1,4 +1,4 @@
-package utils
+package url
 
 import (
 	"errors"
@@ -8,14 +8,14 @@ import (
 	"strings"
 )
 
-type URLParts struct {
+type Parts struct {
 	Transport string //tcp
 	Host      string
 	Port      string
 }
 
-func SplitURL(url string) URLParts {
-	var o URLParts
+func SplitURL(url string) Parts {
+	var o Parts
 	u := strings.SplitN(url, "://", 2)
 	host := ""
 	if len(u) == 2 {
@@ -36,7 +36,7 @@ func IsTCP(target string) bool {
 	}
 }
 
-func JoinURL(u URLParts) (url string, err error) {
+func JoinURL(u Parts) (url string, err error) {
 	t := u.Transport
 	h := u.Host
 	p := u.Port
@@ -46,11 +46,11 @@ func JoinURL(u URLParts) (url string, err error) {
 	if !ValidPort(p) {
 		return "", errors.New("in valid url try ie: 8080 as a string")
 	}
-	ip := fmt.Sprintf("%s:%s", t, h, p)
+	ip := fmt.Sprintf("%s://%s:%s", t, h, p)
 	return ip, nil
 }
 
-func JoinIPPort(u URLParts) (url string, err error) {
+func JoinIPPort(u Parts) (url string, err error) {
 	h := u.Host
 	p := u.Port
 	if !ValidIP4(h) {
