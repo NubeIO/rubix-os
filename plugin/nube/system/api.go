@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/utils/array"
 	"net/http"
 
 	system_model "github.com/NubeIO/flow-framework/plugin/nube/system/model"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"github.com/gomarkdown/markdown"
@@ -49,9 +49,9 @@ You will never use anything else than this [website].
 
 this is *some* normal texy`
 
-//supportedObjects return all objects that are not bacnet
-func supportedObjects() *utils.Array {
-	out := utils.NewArray()
+// supportedObjects return all objects that are not bacnet
+func supportedObjects() *array.Array {
+	out := array.NewArray()
 	out.Add(model.ObjTypeAnalogInput)
 	out.Add(model.ObjTypeAnalogOutput)
 	out.Add(model.ObjTypeAnalogValue)

@@ -1,14 +1,14 @@
 package mqttclient
 
 import (
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/array"
 	"strings"
 )
 
-func TopicParts(topic string) (clean, raw *utils.Array) {
+func TopicParts(topic string) (clean, raw *array.Array) {
 	s := strings.SplitAfter(topic, "/")
-	clean = utils.NewArray()
-	raw = utils.NewArray()
+	clean = array.NewArray()
+	raw = array.NewArray()
 	for _, t := range s {
 		if t == "/" {
 			clean.Add("EMPTY-TOPIC-SPACE")

@@ -2,16 +2,16 @@ package main
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/array"
 	"net/url"
 
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-//supportedObjects return all objects that are not bacnet
-func supportedObjects() *utils.Array {
-	out := utils.NewArray()
+// supportedObjects return all objects that are not bacnet
+func supportedObjects() *array.Array {
+	out := array.NewArray()
 	out.Add(model.ObjTypeAnalogInput)
 	out.Add(model.ObjTypeAnalogOutput)
 	out.Add(model.ObjTypeAnalogValue)

@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	pollqueue "github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/poll-queue"
 	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/array"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
@@ -453,9 +454,9 @@ func (inst *Instance) pointUpdateErr(point *model.Point, err error) (*model.Poin
 }
 
 //listSerialPorts list all serial ports on host
-func (inst *Instance) listSerialPorts() (*utils.Array, error) {
+func (inst *Instance) listSerialPorts() (*array.Array, error) {
 	ports, err := serial.GetPortsList()
-	p := utils.NewArray()
+	p := array.NewArray()
 	for _, port := range ports {
 		p.Add(port)
 	}

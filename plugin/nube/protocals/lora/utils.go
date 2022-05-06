@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/utils/array"
 	"reflect"
 	"strings"
 
@@ -9,7 +10,7 @@ import (
 	"go.bug.st/serial"
 )
 
-//wizard make a network/dev/pnt
+// wizard make a network/dev/pnt
 func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	sp := "/dev/ttyACM0"
 	if body.SerialPort != "" {
@@ -46,10 +47,10 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	return "pass: added network and points", err
 }
 
-//listSerialPorts list all serial ports on host
-func (inst *Instance) listSerialPorts() (*utils.Array, error) {
+// listSerialPorts list all serial ports on host
+func (inst *Instance) listSerialPorts() (*array.Array, error) {
 	ports, err := serial.GetPortsList()
-	p := utils.NewArray()
+	p := array.NewArray()
 	for _, port := range ports {
 		p.Add(port)
 	}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/mbmodel"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/array"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
@@ -60,8 +60,8 @@ func bodyWizard(ctx *gin.Context) (dto wizard, err error) {
 }
 
 //supportedObjects return all objects that are not bacnet
-func supportedObjects() *utils.Array {
-	out := utils.NewArray()
+func supportedObjects() *array.Array {
+	out := array.NewArray()
 	out.Add(model.ObjTypeAnalogInput)
 	out.Add(model.ObjTypeAnalogOutput)
 	out.Add(model.ObjTypeAnalogValue)

@@ -3,7 +3,7 @@ package host
 import (
 	"github.com/NubeIO/flow-framework/src/system"
 	"github.com/NubeIO/flow-framework/src/utilstime"
-	"github.com/NubeIO/flow-framework/utils"
+	"github.com/NubeIO/flow-framework/utils/array"
 )
 
 func GetCombinationData(debug bool) Combination {
@@ -11,7 +11,7 @@ func GetCombinationData(debug bool) Combination {
 	chServer := make(chan string)
 	chTime := make(chan *utilstime.Time)
 	chUptime := make(chan system.Details)
-	chMem := make(chan *utils.Array)
+	chMem := make(chan *array.Array)
 	chKernel := make(chan KernelInfo)
 	chPro := make(chan ProgressInfo)
 	chDisk := make(chan DiskInfoDetail)
