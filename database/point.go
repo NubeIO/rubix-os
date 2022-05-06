@@ -8,7 +8,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
-	"github.com/NubeIO/flow-framework/utils/math"
+	"github.com/NubeIO/flow-framework/utils/nmath"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -210,7 +210,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.InSync = boolean.NewFalse()
 	}
 	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
-		val := math.RoundTo(*presentValue, *pointModel.Decimal)
+		val := nmath.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
 

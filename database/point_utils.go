@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
-	"github.com/NubeIO/flow-framework/utils/math"
+	"github.com/NubeIO/flow-framework/utils/nmath"
 
 	"github.com/NubeIO/flow-framework/api"
 	unit "github.com/NubeIO/flow-framework/src/units"
@@ -92,7 +92,7 @@ func pointRange(presentValue, limitMin, limitMax *float64) (value *float64) {
 		if *limitMin == 0 && *limitMax == 0 {
 			return presentValue
 		}
-		out := math.LimitToRange(*presentValue, *limitMin, *limitMax)
+		out := nmath.LimitToRange(*presentValue, *limitMin, *limitMax)
 		return &out
 	}
 	return presentValue
@@ -104,7 +104,7 @@ func pointScale(presentValue, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax *
 		if *scaleInMin == 0 && *scaleInMax == 0 && *scaleOutMin == 0 && *scaleOutMax == 0 {
 			return presentValue
 		}
-		out := math.Scale(*presentValue, *scaleInMin, *scaleInMax, *scaleOutMin, *scaleOutMax)
+		out := nmath.Scale(*presentValue, *scaleInMin, *scaleInMax, *scaleOutMin, *scaleOutMax)
 		return &out
 	}
 	return presentValue
