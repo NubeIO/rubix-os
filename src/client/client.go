@@ -38,15 +38,19 @@ func NewLocalClient() (cli *FlowClient) {
 	return
 }
 
-func NewFlowClientCli(ip *string, port *int, token *string, isMasterSlave *bool, globalUUD string, isFNCreator bool) *FlowClient {
-	if boolean.IsTrue(isMasterSlave) {
-		if isFNCreator {
-			return newSlaveToMasterCallSession()
-		} else {
-			return newMasterToSlaveSession(globalUUD)
-		}
+func NewFlowClientCliFromFN(fn *model.FlowNetwork) *FlowClient {
+	if boolean.IsTrue(fn.IsMasterSlave) {
+		return newSlaveToMasterCallSession()
 	} else {
-		return newSessionWithToken(*ip, *port, *token)
+		return newSessionWithToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowToken)
+	}
+}
+
+func NewFlowClientCliFromFNC(fnc *model.FlowNetworkClone) *FlowClient {
+	if boolean.IsTrue(fnc.IsMasterSlave) {
+		return newMasterToSlaveSession(fnc.GlobalUUID)
+	} else {
+		return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken)
 	}
 }
 

@@ -182,7 +182,7 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 		body.FlowToken = accessToken
 	}
 
-	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
+	cli := client.NewFlowClientCliFromFN(body)
 	remoteDeviceInfo, err := cli.DeviceInfo()
 	if err != nil {
 		return false, nil, false, nil, err

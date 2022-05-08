@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
@@ -117,13 +117,13 @@ func (a *Proxy) getFlowClient(isFN bool, uuid string) (*client.FlowClient, error
 		if err != nil {
 			return nil, err
 		}
-		cli = client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
+		cli = client.NewFlowClientCliFromFN(fn)
 	} else {
 		fnc, err := a.DB.GetFNC(uuid)
 		if err != nil {
 			return nil, err
 		}
-		cli = client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
+		cli = client.NewFlowClientCliFromFNC(fnc)
 	}
 	return cli, nil
 }

@@ -18,7 +18,7 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 		}
 		body.FlowToken = accessToken
 	}
-	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, false)
+	cli := client.NewFlowClientCliFromFN(body)
 	remoteDeviceInfo, err := cli.DeviceInfo()
 	if err != nil {
 		return nil, err
