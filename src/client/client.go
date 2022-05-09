@@ -42,7 +42,11 @@ func NewFlowClientCliFromFN(fn *model.FlowNetwork) *FlowClient {
 	if boolean.IsTrue(fn.IsMasterSlave) {
 		return newSlaveToMasterCallSession()
 	} else {
-		return newSessionWithToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowToken)
+		if boolean.IsTrue(fn.IsRemote) {
+			return newSessionWithToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowToken)
+		} else {
+			return NewLocalClient()
+		}
 	}
 }
 
@@ -50,7 +54,11 @@ func NewFlowClientCliFromFNC(fnc *model.FlowNetworkClone) *FlowClient {
 	if boolean.IsTrue(fnc.IsMasterSlave) {
 		return newMasterToSlaveSession(fnc.GlobalUUID)
 	} else {
-		return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken)
+		if boolean.IsTrue(fnc.IsRemote) {
+			return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken)
+		} else {
+			return NewLocalClient()
+		}
 	}
 }
 

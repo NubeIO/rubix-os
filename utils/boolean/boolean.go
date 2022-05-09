@@ -18,6 +18,10 @@ func IsTrue(b *bool) bool {
 	}
 }
 
+func IsFalse(b *bool) bool {
+	return !IsTrue(b)
+}
+
 func IsNil(b *bool) bool {
 	if b == nil {
 		return true
