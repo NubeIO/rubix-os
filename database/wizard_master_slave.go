@@ -37,7 +37,7 @@ func (d *GormDatabase) WizardMasterSlavePointMapping() (bool, error) {
 		return false, fmt.Errorf("GetDeviceInfo: %s", deviceInfo)
 	}
 
-	cli := client.NewFlowClientCli(flow.FlowIP, flow.FlowPort, flow.FlowToken, flow.IsMasterSlave, flow.GlobalUUID, model.IsFNCreator(flow))
+	cli := client.NewFlowClientCliFromFN(flow)
 	_, err = cli.WizardMasterSlavePointMappingOnConsumerSideByProducerSide(deviceInfo.GlobalUUID)
 	if err != nil {
 		return false, err
@@ -103,7 +103,7 @@ func (d *GormDatabase) WizardMasterSlavePointMappingOnConsumerSideByProducerSide
 		return false, fmt.Errorf("StreamClone search failure: %s", err)
 	}
 
-	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
+	cli := client.NewFlowClientCliFromFNC(fnc)
 	rawProducers, err := cli.GetQueryMarshal(urls.ProducerURLWithStream(streamClones[0].SourceUUID), []model.Producer{})
 	if err != nil {
 		return false, err

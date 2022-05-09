@@ -63,6 +63,14 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	if err != nil {
 		return nil, err
 	}
+	// restrict to create multiple flow-networks, so it doesn't break existing local flows
+	// this is needed because local flows don't have rollback
+	if boolean.IsFalse(body.IsRemote) {
+		fns, _ := d.GetFlowNetworks(api.Args{IsRemote: boolean.NewFalse()})
+		if fns != nil && len(fns) != 0 {
+			return nil, errors.New("you already have a local flow-network")
+		}
+	}
 	if err := tx.Create(&body).Error; err != nil {
 		if isRemote {
 			tx.Rollback()
@@ -78,10 +86,18 @@ func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (
 		return nil, err
 	}
 	if len(body.Streams) > 0 {
-		return d.updateStreamsOnFlowNetwork(fn, body.Streams) // normally we just either edit flow_network or assign stream
+		// we just either edit flow_network or assign stream
+		return d.updateStreamsOnFlowNetwork(fn, body.Streams)
 	}
-	if err := d.DB.Model(&fn).Updates(body).Error; err != nil {
-		return nil, err
+	// restrict to create multiple flow-networks, so it doesn't break existing local flows
+	// this is needed because local flows don't have rollback
+	if boolean.IsFalse(body.IsRemote) {
+		fns, _ := d.GetFlowNetworks(api.Args{IsRemote: boolean.NewFalse()})
+		if fns != nil && len(fns) != 0 {
+			if fns[0].UUID != uuid {
+				return nil, errors.New("you already have a local flow-network")
+			}
+		}
 	}
 	isMasterSlave, cli, isRemote, tx, err := d.editFlowNetworkBody(body)
 	if err != nil {
@@ -126,7 +142,7 @@ func (d *GormDatabase) DropFlowNetworks() (bool, error) {
 
 func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 	var flowNetworks []*model.FlowNetwork
-	d.DB.Where("is_master_slave IS NOT TRUE").Find(&flowNetworks)
+	d.DB.Where("is_master_slave IS NOT TRUE AND is_remote IS TRUE").Find(&flowNetworks)
 	for _, fn := range flowNetworks {
 		accessToken, err := client.GetFlowToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowUsername, *fn.FlowPassword)
 		fnModel := model.FlowNetworkClone{}
@@ -150,17 +166,15 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *client.FlowClient, bool, *gorm.DB, error) {
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = nuuid.MakeUUID()
-	body.IsRemote = boolean.NewTrue()
 	isMasterSlave := boolean.IsTrue(body.IsMasterSlave)
 	deviceInfo, err := d.GetDeviceInfo()
 	if err != nil {
 		return false, nil, false, nil, err
 	}
 	if isMasterSlave {
-		body.FlowHTTPS = nil
-		body.FlowIP = nil
-		body.FlowPort = nil
-		body.FlowToken = nil
+		d.resetHostAndCredential(body)
+	} else if boolean.IsFalse(body.IsRemote) {
+		d.resetHostAndCredential(body)
 	} else {
 		conf := config.Get()
 		if body.FlowIP == nil {
@@ -182,7 +196,7 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 		body.FlowToken = accessToken
 	}
 
-	cli := client.NewFlowClientCli(body.FlowIP, body.FlowPort, body.FlowToken, body.IsMasterSlave, body.GlobalUUID, model.IsFNCreator(body))
+	cli := client.NewFlowClientCliFromFN(body)
 	remoteDeviceInfo, err := cli.DeviceInfo()
 	if err != nil {
 		return false, nil, false, nil, err
@@ -190,10 +204,11 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 		if deviceInfo.GlobalUUID == remoteDeviceInfo.GlobalUUID {
 			body.IsRemote = boolean.NewFalse()
 			if !isMasterSlave {
-				body.FlowHTTPS = boolean.NewFalse()
-				body.FlowIP = nstring.NewStringAddress("0.0.0.0")
+				d.resetHostAndCredential(body)
 				body.IsRemote = boolean.NewFalse()
 			}
+		} else {
+			body.IsRemote = boolean.NewTrue()
 		}
 	}
 	isRemote := boolean.IsTrue(body.IsRemote)
@@ -206,14 +221,21 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 	return isMasterSlave, cli, isRemote, tx, nil
 }
 
+func (d *GormDatabase) resetHostAndCredential(body *model.FlowNetwork) {
+	body.FlowHTTPS = nil
+	body.FlowIP = nil
+	body.FlowPort = nil
+	body.FlowUsername = nil
+	body.FlowPassword = nil
+	body.FlowToken = nil
+}
+
 func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isMasterSlave bool, cli *client.FlowClient, isRemote bool, tx *gorm.DB) (*model.FlowNetwork, error) {
 	bodyToSync := *body
-	if !isMasterSlave {
+	if !isMasterSlave && isRemote {
 		var localStorageFlowNetwork *model.LocalStorageFlowNetwork
 		if err := d.DB.First(&localStorageFlowNetwork).Error; err != nil {
-			if isRemote {
-				tx.Rollback()
-			}
+			tx.Rollback()
 			return nil, err
 		}
 		bodyToSync.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS

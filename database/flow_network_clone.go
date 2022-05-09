@@ -47,7 +47,7 @@ func (d *GormDatabase) GetOneFlowNetworkCloneByArgs(args api.Args) (*model.FlowN
 
 func (d *GormDatabase) RefreshFlowNetworkClonesConnections() (*bool, error) {
 	var flowNetworkClones []*model.FlowNetworkClone
-	d.DB.Where("is_master_slave IS NOT TRUE").Find(&flowNetworkClones)
+	d.DB.Where("is_master_slave IS NOT TRUE AND is_remote IS TRUE").Find(&flowNetworkClones)
 	for _, fnc := range flowNetworkClones {
 		accessToken, err := client.GetFlowToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowUsername, *fnc.FlowPassword)
 		fncModel := model.FlowNetworkClone{}

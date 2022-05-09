@@ -40,7 +40,7 @@ func (d *GormDatabase) WizardP2PMapping(body *model.P2PBody) (bool, error) {
 		return false, fmt.Errorf("GetDeviceInfo: %s", deviceInfo)
 	}
 
-	cli := client.NewFlowClientCli(flow.FlowIP, flow.FlowPort, flow.FlowToken, flow.IsMasterSlave, flow.GlobalUUID, model.IsFNCreator(flow))
+	cli := client.NewFlowClientCliFromFN(flow)
 	url := fmt.Sprintf("/api/database/wizard/mapping/p2p/points/consumer/%s", deviceInfo.GlobalUUID)
 	_, err = cli.PostQuery(url, nil)
 	if err != nil {
@@ -157,7 +157,7 @@ func (d *GormDatabase) WizardP2PMappingOnConsumerSideByProducerSide(producerGlob
 		return false, fmt.Errorf("StreamClone search failure: %s", err)
 	}
 
-	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
+	cli := client.NewFlowClientCliFromFNC(fnc)
 	rawProducers, err := cli.GetQueryMarshal(urls.ProducerURLWithStream(streamClones[0].SourceUUID), []model.Producer{})
 	if err != nil {
 		return false, err

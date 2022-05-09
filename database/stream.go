@@ -151,7 +151,7 @@ func (d *GormDatabase) syncAfterCreateUpdateStream(body *model.Stream) error {
 }
 
 func (d *GormDatabase) SyncStreamFunction(fn *model.FlowNetwork, stream *model.Stream, deviceInfo *model.DeviceInfo) error {
-	cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
+	cli := client.NewFlowClientCliFromFN(fn)
 	syncStreamBody := model.SyncStream{
 		GlobalUUID: deviceInfo.GlobalUUID,
 		Stream:     stream,

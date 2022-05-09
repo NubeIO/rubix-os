@@ -1,5 +1,10 @@
 package boolean
 
+func New(value bool) *bool {
+	b := value
+	return &b
+}
+
 func NewTrue() *bool {
 	b := true
 	return &b
@@ -16,6 +21,10 @@ func IsTrue(b *bool) bool {
 	} else {
 		return *b
 	}
+}
+
+func IsFalse(b *bool) bool {
+	return !IsTrue(b)
 }
 
 func IsNil(b *bool) bool {

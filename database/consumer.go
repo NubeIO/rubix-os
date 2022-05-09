@@ -40,7 +40,7 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 	if err != nil {
 		return nil, newError("GetOneFlowNetworkCloneByArgs", "error on trying to get validate flow_network_clone from stream_clone_uuid")
 	}
-	cli := client.NewFlowClientCli(fnc.FlowIP, fnc.FlowPort, fnc.FlowToken, fnc.IsMasterSlave, fnc.GlobalUUID, model.IsFNCreator(fnc))
+	cli := client.NewFlowClientCliFromFNC(fnc)
 	rawProducer, err := cli.GetQueryMarshal(urls.ProducerSingularURL(body.ProducerUUID), model.Producer{})
 	if err != nil {
 		return nil, err

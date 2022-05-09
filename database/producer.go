@@ -217,7 +217,7 @@ func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Produce
 	for _, fn := range stream.FlowNetworks {
 		// TODO: wc.FlowFrameworkUUID == "" remove from condition; it's here coz old deployment doesn't used to have that value
 		if wc.FlowFrameworkUUID == "" || fn.UUID == wc.FlowFrameworkUUID {
-			cli := client.NewFlowClientCli(fn.FlowIP, fn.FlowPort, fn.FlowToken, fn.IsMasterSlave, fn.GlobalUUID, model.IsFNCreator(fn))
+			cli := client.NewFlowClientCliFromFN(fn)
 			_ = cli.SyncCOV(wc.SourceUUID, body)
 		}
 	}
