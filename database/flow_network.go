@@ -63,6 +63,14 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	if err != nil {
 		return nil, err
 	}
+	// restrict to create multiple flow-networks, so it doesn't break existing local flows
+	// this is needed because local flows don't have rollback
+	if boolean.IsFalse(body.IsRemote) {
+		fns, _ := d.GetFlowNetworks(api.Args{IsRemote: boolean.NewFalse()})
+		if fns != nil && len(fns) != 0 {
+			return nil, errors.New("you already have a local flow-network")
+		}
+	}
 	if err := tx.Create(&body).Error; err != nil {
 		if isRemote {
 			tx.Rollback()
@@ -78,10 +86,18 @@ func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (
 		return nil, err
 	}
 	if len(body.Streams) > 0 {
-		return d.updateStreamsOnFlowNetwork(fn, body.Streams) // normally we just either edit flow_network or assign stream
+		// we just either edit flow_network or assign stream
+		return d.updateStreamsOnFlowNetwork(fn, body.Streams)
 	}
-	if err := d.DB.Model(&fn).Updates(body).Error; err != nil {
-		return nil, err
+	// restrict to create multiple flow-networks, so it doesn't break existing local flows
+	// this is needed because local flows don't have rollback
+	if boolean.IsFalse(body.IsRemote) {
+		fns, _ := d.GetFlowNetworks(api.Args{IsRemote: boolean.NewFalse()})
+		if fns != nil && len(fns) != 0 {
+			if fns[0].UUID != uuid {
+				return nil, errors.New("you already have a local flow-network")
+			}
+		}
 	}
 	isMasterSlave, cli, isRemote, tx, err := d.editFlowNetworkBody(body)
 	if err != nil {

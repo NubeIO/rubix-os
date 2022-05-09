@@ -70,6 +70,7 @@ type Args struct {
 	ObjectType           *string
 	IoNumber             *string
 	IdGt                 *string
+	IsRemote             *bool
 }
 
 var ArgsType = struct {
@@ -130,6 +131,7 @@ var ArgsType = struct {
 	ObjectType           string
 	IoNumber             string
 	IdGt                 string
+	IsRemote             string
 }{
 	Sort:                 "sort",
 	Order:                "order",
@@ -188,6 +190,7 @@ var ArgsType = struct {
 	ObjectType:           "object_type",
 	IoNumber:             "io_number",
 	IdGt:                 "id_gt",
+	IsRemote:             "is_remote",
 }
 
 var ArgsDefault = struct {

@@ -39,6 +39,13 @@ func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
 	}
+	if args.IsRemote != nil {
+		if *args.IsRemote {
+			query = query.Where("is_remote IS TRUE")
+		} else {
+			query = query.Where("is_remote IS FALSE")
+		}
+	}
 	return query
 }
 

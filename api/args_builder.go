@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,6 +13,9 @@ func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	args.WithProducers, _ = toBool(ctx.DefaultQuery(aType.WithProducers, aDefault.WithProducers))
 	args.WithCommandGroups, _ = toBool(ctx.DefaultQuery(aType.WithCommandGroups, aDefault.WithCommandGroups))
 	args.WithWriterClones, _ = toBool(ctx.DefaultQuery(aType.WithWriterClones, aDefault.WithWriterClones))
+	if val, exists := ctx.Get(aType.IsRemote); exists {
+		args.IsRemote = boolean.New(val.(bool))
+	}
 	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
 		args.GlobalUUID = &value
 	}

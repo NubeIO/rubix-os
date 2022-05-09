@@ -1,5 +1,10 @@
 package boolean
 
+func New(value bool) *bool {
+	b := value
+	return &b
+}
+
 func NewTrue() *bool {
 	b := true
 	return &b
