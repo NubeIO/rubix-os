@@ -195,10 +195,16 @@ type Point struct {
 		Default     string `json:"default" default:"(x + 0) + 0"`
 		DisplayName string `json:"display_name" default:"math expression on write value"`
 	} `json:"math_on_write_value"`
+	Fallback struct {
+		Type        string `json:"type" default:"float"`
+		Required    bool   `json:"required" default:"false"`
+		Default     int    `json:"default" default:""`
+		DisplayName string `json:"display_name" default:"Fallback Value"`
+	} `json:"fallback"`
 	Enable struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"false"`
+		Options  bool   `json:"options" default:"true"`
 	} `json:"enable"`
 }
 
