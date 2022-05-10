@@ -31,7 +31,8 @@ func GetFlowToken(ip string, port int, username string, password string) (*strin
 func NewLocalClient() (cli *FlowClient) {
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("%s://%s:%d", getSchema(1660), "0.0.0.0", 1660)
+	port := config.Get().Server.Port
+	url := fmt.Sprintf("%s://%s:%d", getSchema(port), "0.0.0.0", port)
 	client.SetBaseURL(url)
 	client.SetError(&Error{})
 	cli = &FlowClient{client: client}
