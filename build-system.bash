@@ -16,6 +16,7 @@ BACNET_MASTER=false
 HISTORY=false
 INFLUX=false
 RUBIXIO=false
+MODBUSSERVER=false
 
 help() {
   echo "Service commands:"
@@ -61,6 +62,9 @@ parseCommand() {
       ;;
     --rubixio)
       RUBIXIO=true
+      ;;
+    --modbusserver)
+      MODBUSSERVER=true
       ;;
     *)
       echo -e "${RED}Unknown options ${i}  (-h, --help for help)${DEFAULT}"
@@ -135,6 +139,11 @@ if [ ${RUBIXIO} == true ]; then
   cd $dir/plugin/nube/protocals/rubixio
   go build -buildmode=plugin -o rubixio.so *.go && cp rubixio.so $pluginDir
   echo -e "${GREEN}BUILD RUBIXIO"
+fi
+if [ ${MODBUSSERVER} == true ]; then
+  cd $dir/plugin/nube/protocals/modbusserver
+  go build -buildmode=plugin -o modbusserver.so *.go && cp modbusserver.so $pluginDir
+  echo -e "${GREEN}BUILD MODBUS-SERVER"
 fi
 
 cd $dir

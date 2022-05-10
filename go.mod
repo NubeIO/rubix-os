@@ -32,6 +32,7 @@ require (
 require go.bug.st/serial v1.3.2
 
 require (
+	github.com/NubeDev/modbus v0.0.2
 	github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.4
 	github.com/PaesslerAG/gval v1.1.1
 	github.com/gomarkdown/markdown v0.0.0-20210918233619-6c1113f12c4a
@@ -64,8 +65,8 @@ require (
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/klauspost/cpuid v1.3.1 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
-	github.com/mattn/go-colorable v0.1.8 // indirect
-	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-colorable v0.1.9 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/minio/md5-simd v1.1.0 // indirect
 	github.com/minio/sha256-simd v0.1.1 // indirect
