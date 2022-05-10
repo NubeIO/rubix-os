@@ -196,10 +196,11 @@ type Point struct {
 		DisplayName string `json:"display_name" default:"math expression on write value"`
 	} `json:"math_on_write_value"`
 	Fallback struct {
-		Type        string `json:"type" default:"float"`
-		Required    bool   `json:"required" default:"false"`
-		Default     int    `json:"default" default:""`
-		DisplayName string `json:"display_name" default:"Fallback Value"`
+		Type        string   `json:"type" default:"float"`
+		Required    bool     `json:"required" default:"false"`
+		Default     *float64 `json:"default" default:""`
+		DisplayName string   `json:"display_name" default:"Fallback Value"`
+		Nullable    bool     `json:"nullable" default:"true"`
 	} `json:"fallback"`
 	Enable struct {
 		Type     string `json:"type" default:"bool"`

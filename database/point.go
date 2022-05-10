@@ -146,6 +146,10 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	pointModel.PollPriority = body.PollPriority
 	pointModel.PollRate = body.PollRate
 
+	if body.Fallback == nil {
+		// nil is ignored on GORM, so we are pushing forcefully because fallback is nullable field
+		d.DB.Model(&pointModel).Update("fallback", nil)
+	}
 	query = d.DB.Model(&pointModel).Updates(&body)
 	return pointModel, nil
 }
