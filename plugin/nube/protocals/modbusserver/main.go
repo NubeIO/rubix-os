@@ -31,6 +31,7 @@ type Instance struct {
 	pluginUUID     string
 	networkUUID    string
 	pollingEnabled bool
+	ModbusServer   *ModbusServer
 }
 
 // GetFlowPluginInfo returns plugin info.
