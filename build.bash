@@ -52,7 +52,6 @@ go build -buildmode=plugin -o system.so *.go  && cp system.so  $pluginDir
 cd $dir/plugin/nube/utils/backup
 go build -buildmode=plugin -o backup.so *.go  && cp backup.so  $pluginDir
 
-
 cd $dir/plugin/nube/protocals/edge28
 go build -buildmode=plugin -o edge28.so *.go  && cp edge28.so $pluginDir
 
@@ -70,6 +69,12 @@ go build -buildmode=plugin -o bacnetserver.so *.go  && cp bacnetserver.so $plugi
 
 cd $dir/plugin/nube/protocals/bacnetmaster
 go build -buildmode=plugin -o bacnetmaster.so *.go  && cp bacnetmaster.so $pluginDir
+
+cd $dir/plugin/nube/protocals/rubixio
+go build -buildmode=plugin -o rubixio.so *.go  && cp rubixio.so $pluginDir
+
+cd $dir/plugin/nube/protocals/modbusserver
+go build -buildmode=plugin -o modbusserver.so *.go  && cp modbusserver.so $pluginDir
 
 cd $dir/plugin/nube/database/influx
 go build -buildmode=plugin -o influx.so *.go  && cp influx.so $pluginDir
