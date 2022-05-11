@@ -158,7 +158,8 @@ func (d *GormDatabase) WizardP2PMappingOnConsumerSideByProducerSide(producerGlob
 	}
 
 	cli := client.NewFlowClientCliFromFNC(fnc)
-	rawProducers, err := cli.GetQueryMarshal(urls.ProducerURLWithStream(streamClones[0].SourceUUID), []model.Producer{})
+	url := urls.PluralUrlByArg(urls.ProducerUrl, "stream_uuid", streamClones[0].SourceUUID)
+	rawProducers, err := cli.GetQueryMarshal(url, []model.Producer{})
 	if err != nil {
 		return false, err
 	}

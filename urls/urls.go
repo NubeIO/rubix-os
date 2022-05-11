@@ -2,14 +2,18 @@ package urls
 
 import "fmt"
 
-func ProducerURL() string {
-	return "/api/producers"
+const FlowNetworkUrl string = "/api/flow_network"
+const FlowNetworkCloneUrl string = "/api/flow_network_clones"
+const ProducerUrl string = "/api/producers"
+
+func SingularUrl(url, uuid string) string {
+	return fmt.Sprintf("%s/%s", url, uuid)
 }
 
-func ProducerURLWithStream(streamUUID string) string {
-	return fmt.Sprintf("%s?stream_uuid=%s", ProducerURL(), streamUUID)
+func SingularUrlByArg(url, name, value string) string {
+	return fmt.Sprintf("%s/one/args?%s=%s", url, name, value)
 }
 
-func ProducerSingularURL(uuid string) string {
-	return fmt.Sprintf("%s/%s", ProducerURL(), uuid)
+func PluralUrlByArg(url, name, value string) string {
+	return fmt.Sprintf("%s?%s=%s", url, name, value)
 }

@@ -40,7 +40,19 @@ func (d *GormDatabase) GetOneFlowNetworkCloneByArgs(args api.Args) (*model.FlowN
 	var flowNetworkCloneModel *model.FlowNetworkClone
 	query := d.buildFlowNetworkCloneQuery(args)
 	if err := query.First(&flowNetworkCloneModel).Error; err != nil {
-		return nil, query.Error
+		return nil, err
+	}
+	return flowNetworkCloneModel, nil
+}
+
+func (d *GormDatabase) DeleteOneFlowNetworkCloneByArgs(args api.Args) (*model.FlowNetworkClone, error) {
+	var flowNetworkCloneModel *model.FlowNetworkClone
+	query := d.buildFlowNetworkCloneQuery(args)
+	if err := query.First(&flowNetworkCloneModel).Error; err != nil {
+		return nil, err
+	}
+	if err := query.Delete(&flowNetworkCloneModel).Error; err != nil {
+		return nil, err
 	}
 	return flowNetworkCloneModel, nil
 }

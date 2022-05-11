@@ -28,6 +28,9 @@ func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.DeviceId); ok {
 		args.DeviceId = &value
 	}
+	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
+		args.SourceUUID = &value
+	}
 	return args
 }
 
