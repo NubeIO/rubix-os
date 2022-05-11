@@ -1,4 +1,12 @@
 # CHANGELOG
+
+## [v0.4.6](https://github.com/NubeIO/flow-framework/tree/v0.4.6) (2022-05-11)
+- added new plugin modbus server
+- nullable fallback point field support
+- bug fixes on points for priority array
+- polling for modbus
+- bulk write api on points
+
 ## [v0.4.5](https://github.com/NubeIO/flow-framework/tree/v0.4.5) (2022-05-02)
 - get bacnet auto mapping working to rubix-io
 - fix bug on rubix-io plugin
