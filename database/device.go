@@ -45,7 +45,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	body.ThingClass = model.ThingClass.Device
 	body.CommonEnable.Enable = boolean.NewTrue()
 	if err := d.DB.Create(&body).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 	}
 	var nModel *model.Network
 	query = d.DB.Where("uuid = ?", body.NetworkUUID).First(&nModel)

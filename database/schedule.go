@@ -29,7 +29,7 @@ func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, err
 	var scheduleModel *model.Schedule
 	query := d.buildScheduleQuery(args)
 	if err := query.First(&scheduleModel).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 	}
 	return scheduleModel, nil
 }

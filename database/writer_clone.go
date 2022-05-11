@@ -33,7 +33,7 @@ func (d *GormDatabase) GetOneWriterCloneByArgs(args api.Args) (*model.WriterClon
 	var wcm *model.WriterClone
 	query := d.buildWriterCloneQuery(args)
 	if err := query.First(&wcm).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 	}
 	return wcm, nil
 }

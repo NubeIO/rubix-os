@@ -38,7 +38,7 @@ func (d *GormDatabase) GetOneProducerByArgs(args api.Args) (*model.Producer, err
 	var producerModel *model.Producer
 	query := d.buildProducerQuery(args)
 	if err := query.First(&producerModel).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 	}
 	return producerModel, nil
 }

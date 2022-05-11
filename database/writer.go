@@ -20,7 +20,7 @@ func (d *GormDatabase) GetWriters(args api.Args) ([]*model.Writer, error) {
 	var writers []*model.Writer
 	query := d.buildWriterQuery(args)
 	if err := query.Find(&writers).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 	}
 	return writers, nil
 }
