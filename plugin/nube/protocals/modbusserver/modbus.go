@@ -36,14 +36,15 @@ func (inst *Instance) serverInit() (*ModbusServer, error) {
 	host := inst.getIP()
 	listener, err := net.Listen("tcp", host)
 	if err != nil {
-		log.Printf("start server error %v, listener \n", err)
+		inst.log(true, "modbus-server:", "serverInit():", "start server error listener: ", err)
 		return nil, err
 
 	}
+	inst.log(false, "modbus-server:", "serverInit():", "start server with IP", host)
 	device := modbus.NewTCPServer(listener)
 	err = device.Serve(handlerGenerator())
 	if err != nil {
-		log.Printf("start server error %v, handlerGenerator \n", err)
+		inst.log(true, "modbus-server:", "serverInit():", "start server error handlerGenerator: ", err)
 		return nil, err
 	}
 	server := &ModbusServer{
@@ -57,11 +58,11 @@ func (inst *Instance) serverInit() (*ModbusServer, error) {
 func handlerGenerator() modbus.ProtocolHandler {
 	return &modbus.SimpleHandler{
 		ReadDiscreteInputs: func(address, quantity uint16) ([]bool, error) {
-			log.Printf("ReadDiscreteInputs from %v, quantity %v\n", address, quantity)
+			log.Infoln("modbus-server: ReadDiscreteInputs from %v, quantity %v\n", address, quantity)
 			return discretes[address : address+quantity], nil
 		},
 		WriteDiscreteInputs: func(address uint16, values []bool) error {
-			log.Printf("WriteDiscreteInputs from %v, quantity %v\n", address, len(values))
+			log.Printf("modbus-server: WriteDiscreteInputs from %v, quantity %v\n", address, len(values))
 			for i, v := range values {
 				discretes[address+uint16(i)] = v
 			}
@@ -69,11 +70,11 @@ func handlerGenerator() modbus.ProtocolHandler {
 		},
 
 		ReadCoils: func(address, quantity uint16) ([]bool, error) {
-			log.Printf("ReadCoils from %v, quantity %v\n", address, quantity)
+			log.Printf("modbus-server:  ReadCoils from %v, quantity %v\n", address, quantity)
 			return coils[address : address+quantity], nil
 		},
 		WriteCoils: func(address uint16, values []bool) error {
-			log.Printf("WriteCoils from %v, quantity %v\n", address, len(values))
+			log.Printf("modbus-server:  WriteCoils from %v, quantity %v\n", address, len(values))
 			for i, v := range values {
 				coils[address+uint16(i)] = v
 				log.Println(i, v)
@@ -82,11 +83,11 @@ func handlerGenerator() modbus.ProtocolHandler {
 		},
 
 		ReadInputRegisters: func(address, quantity uint16) ([]uint16, error) {
-			log.Printf("ReadInputRegisters from %v, quantity %v\n", address, quantity)
+			log.Printf("modbus-server:  ReadInputRegisters from %v, quantity %v\n", address, quantity)
 			return inputRegisters[address : address+quantity], nil
 		},
 		WriteInputRegisters: func(address uint16, values []uint16) error {
-			log.Printf("WriteInputRegisters from %v, quantity %v\n", address, len(values))
+			log.Printf("modbus-server:  WriteInputRegisters from %v, quantity %v\n", address, len(values))
 			for i, v := range values {
 				inputRegisters[address+uint16(i)] = v
 			}
@@ -94,11 +95,11 @@ func handlerGenerator() modbus.ProtocolHandler {
 		},
 
 		ReadHoldingRegisters: func(address, quantity uint16) ([]uint16, error) {
-			log.Printf("ReadHoldingRegisters from %v, quantity %v\n", address, quantity)
+			log.Printf("modbus-server:  ReadHoldingRegisters from %v, quantity %v\n", address, quantity)
 			return holdingRegisters[address : address+quantity], nil
 		},
 		WriteHoldingRegisters: func(address uint16, values []uint16) error {
-			log.Printf("WriteHoldingRegisters from %v, quantity %v\n", address, len(values))
+			log.Printf("modbus-server:  WriteHoldingRegisters from %v, quantity %v\n", address, len(values))
 			for i, v := range values {
 				holdingRegisters[address+uint16(i)] = v
 			}
@@ -106,7 +107,7 @@ func handlerGenerator() modbus.ProtocolHandler {
 		},
 
 		OnErrorImp: func(req modbus.PDU, errRep modbus.PDU) {
-			log.Printf("error received: %v from req: %v\n", errRep, req)
+			log.Errorf("modbus-server: error received: %v from req: %v\n", errRep, req)
 		},
 	}
 }
