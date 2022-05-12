@@ -1,5 +1,9 @@
 package main
 
+import (
+	log "github.com/sirupsen/logrus"
+)
+
 type Config struct {
 	EnablePolling   bool   `yaml:"enable_polling"`
 	Ip              string `yaml:"port"`
@@ -24,4 +28,12 @@ func (inst *Instance) ValidateAndSetConfig(config interface{}) error {
 	newConfig := config.(*Config)
 	inst.config = newConfig
 	return nil
+}
+
+func (inst *Instance) log(isErr bool, args ...interface{}) {
+	if isErr {
+		log.Error(args...)
+	} else {
+		log.Info(args...)
+	}
 }
