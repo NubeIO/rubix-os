@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.4.8](https://github.com/NubeIO/flow-framework/tree/v0.4.8) (2022-05-12)
+- Control COV streams on point value update
+
 ## [v0.4.7](https://github.com/NubeIO/flow-framework/tree/v0.4.7) (2022-05-12)
 - update to modbus-server plugin
 
