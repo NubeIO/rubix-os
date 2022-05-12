@@ -231,16 +231,18 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 			Update("present_value", nil)
 	}
 
-	// TODO: may be we can have a control mechanism for restricting frequent producer writes
-	_ = d.DB.Model(&pointModel).Updates(&pointModel)
-	err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue)
-	if err != nil {
-		return nil, err
+	// TODO: priority_array mismatch gets occurred, when lower priority gets change; coz it doesn't trigger
+	isChange := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
+	if isChange {
+		_ = d.DB.Model(&pointModel).Updates(&pointModel)
+		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue)
+		if err != nil {
+			return nil, err
+		}
+		d.DB.Model(&model.Writer{}).
+			Where("writer_thing_uuid = ?", pointModel.UUID).
+			Update("present_value", pointModel.PresentValue)
 	}
-	d.DB.Model(&model.Writer{}).
-		Where("writer_thing_uuid = ?", pointModel.UUID).
-		Update("present_value", pointModel.PresentValue)
-
 	if !fromPlugin { // stop looping
 		plug, err := d.GetNetworkByDeviceUUID(pointModel.DeviceUUID, api.Args{})
 		if err != nil {
