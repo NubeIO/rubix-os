@@ -1,4 +1,6 @@
 # CHANGELOG
+## [v0.4.7](https://github.com/NubeIO/flow-framework/tree/v0.4.7) (2022-05-12)
+- update to modbus-server plugin
 
 ## [v0.4.6](https://github.com/NubeIO/flow-framework/tree/v0.4.6) (2022-05-11)
 - added new plugin modbus server
