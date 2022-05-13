@@ -31,6 +31,17 @@ func (d *GormDatabase) GetHistoriesForSync(lastSyncId int) ([]*model.History, er
 	return historiesModel, nil
 }
 
+// GetHistoriesForPostgresSync returns all histories after id ordered by id.
+func (d *GormDatabase) GetHistoriesForPostgresSync(lastSyncId int) ([]*model.History, error) {
+	var historiesModel []*model.History
+	query := d.DB.Where("id > (?)", lastSyncId)
+	query.Order("id ASC").Find(&historiesModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return historiesModel, nil
+}
+
 // GetHistoriesByUUID returns the history for the given uuid or nil.
 func (d *GormDatabase) GetHistoriesByUUID(uuid string, args api.Args) ([]*model.History, int64, error) {
 	var count int64

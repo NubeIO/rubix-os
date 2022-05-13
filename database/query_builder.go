@@ -53,8 +53,14 @@ func (d *GormDatabase) buildFlowNetworkCloneQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.WithStreamClones {
 		query = query.Preload("StreamClones")
+		if args.WithTags {
+			query = query.Preload("StreamClones.Tags")
+		}
 		if args.WithConsumers {
 			query = query.Preload("StreamClones.Consumers")
+			if args.WithTags {
+				query = query.Preload("StreamClones.Consumers.Tags")
+			}
 			if args.WithWriters {
 				query = query.Preload("StreamClones.Consumers.Writers")
 			}
@@ -162,9 +168,15 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.WithDevices {
 		query = query.Preload("Devices")
+		if args.WithTags {
+			query = query.Preload("Devices.Tags")
+		}
 	}
 	if args.WithPoints {
 		query = query.Preload("Devices.Points").Preload("Devices.Points.Priority")
+		if args.WithTags {
+			query = query.Preload("Devices.Points.Tags")
+		}
 	}
 	if args.WithTags {
 		query = query.Preload("Tags")

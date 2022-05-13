@@ -38,5 +38,6 @@ func GetInitInterfaces() []interface{} {
 		&model.Link{},
 		&model.History{},
 		&model.HistoryLog{},
+		&model.HistoryPostgresLog{},
 	}
 }

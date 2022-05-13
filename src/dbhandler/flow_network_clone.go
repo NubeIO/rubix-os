@@ -5,8 +5,8 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-func (h *Handler) GetFlowNetworkClones() ([]*model.FlowNetworkClone, error) {
-	q, err := getDb().GetFlowNetworkClones(api.Args{})
+func (h *Handler) GetFlowNetworkClones(args api.Args) ([]*model.FlowNetworkClone, error) {
+	q, err := getDb().GetFlowNetworkClones(args)
 	if err != nil {
 		return nil, err
 	}
