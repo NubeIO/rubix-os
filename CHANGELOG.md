@@ -1,4 +1,8 @@
 # CHANGELOG
+
+## [v0.4.9](https://github.com/NubeIO/flow-framework/tree/v0.4.9) (2022-05-13)
+- Fix: isChange checker for COV updates
+
 ## [v0.4.8](https://github.com/NubeIO/flow-framework/tree/v0.4.8) (2022-05-12)
 - Control COV streams on point value update
 
