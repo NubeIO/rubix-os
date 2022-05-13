@@ -13,7 +13,7 @@ func (d *GormDatabase) GetFlowNetworkClones(args api.Args) ([]*model.FlowNetwork
 	var flowNetworkClonesModel []*model.FlowNetworkClone
 	query := d.buildFlowNetworkCloneQuery(args)
 	if err := query.Find(&flowNetworkClonesModel).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 	}
 	return flowNetworkClonesModel, nil
 }
@@ -22,7 +22,7 @@ func (d *GormDatabase) GetFlowNetworkClone(uuid string, args api.Args) (*model.F
 	var flowNetworkCloneModel *model.FlowNetworkClone
 	query := d.buildFlowNetworkCloneQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&flowNetworkCloneModel).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 
 	}
 	return flowNetworkCloneModel, nil

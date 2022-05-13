@@ -33,7 +33,7 @@ func (d *GormDatabase) GetStreamByArgs(args api.Args) (*model.Stream, error) {
 	var streamModel *model.Stream
 	query := d.buildStreamQuery(args)
 	if err := query.First(&streamModel).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 	}
 	return streamModel, nil
 }

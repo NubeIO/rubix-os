@@ -58,7 +58,7 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)
 	if err := query.First(&pointModel).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 	}
 	return pointModel, nil
 }

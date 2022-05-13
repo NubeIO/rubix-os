@@ -18,7 +18,7 @@ func (d *GormDatabase) GetFlowNetworks(args api.Args) ([]*model.FlowNetwork, err
 	var flowNetworksModel []*model.FlowNetwork
 	query := d.buildFlowNetworkQuery(args)
 	if err := query.Find(&flowNetworksModel).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 
 	}
 	return flowNetworksModel, nil
@@ -28,8 +28,7 @@ func (d *GormDatabase) GetFlowNetwork(uuid string, args api.Args) (*model.FlowNe
 	var flowNetworkModel *model.FlowNetwork
 	query := d.buildFlowNetworkQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&flowNetworkModel).Error; err != nil {
-		return nil, query.Error
-
+		return nil, err
 	}
 	return flowNetworkModel, nil
 }
@@ -38,7 +37,7 @@ func (d *GormDatabase) GetOneFlowNetworkByArgs(args api.Args) (*model.FlowNetwor
 	var flowNetworkModel *model.FlowNetwork
 	query := d.buildFlowNetworkQuery(args)
 	if err := query.First(&flowNetworkModel).Error; err != nil {
-		return nil, query.Error
+		return nil, err
 	}
 	return flowNetworkModel, nil
 }
