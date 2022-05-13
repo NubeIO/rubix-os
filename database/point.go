@@ -217,7 +217,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 		val := nmath.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &val
 	}
-
+	isChange := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
 	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
 	// but PresentValue should not change
 	if !presentValueTransformFault {
@@ -232,7 +232,6 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	}
 
 	// TODO: priority_array mismatch gets occurred, when lower priority gets change; coz it doesn't trigger
-	isChange := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
 	if isChange {
 		_ = d.DB.Model(&pointModel).Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue)
