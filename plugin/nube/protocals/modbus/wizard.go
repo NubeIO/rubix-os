@@ -157,9 +157,9 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			dev.ZeroMode = boolean.NewTrue()
 			dev.PollDelayPointsMS = 5000
 			dev.NetworkUUID = net.UUID
-			dev.FastPollRate = 5 * time.Second
-			dev.NormalPollRate = 30 * time.Second
-			dev.SlowPollRate = 120 * time.Second
+			dev.FastPollRate = float.New(5.0)
+			dev.NormalPollRate = float.New(30.0)
+			dev.SlowPollRate = float.New(120.0)
 			_, err = inst.db.CreateDevice(&dev)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
@@ -194,7 +194,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 		net.Name = "Modbus Net"
 		net.TransportType = model.TransType.Serial
 		net.PluginPath = "modbus"
-		net.MaxPollRate = 2 * time.Second
+		net.MaxPollRate = float.New(0.1)
 
 		net.PluginConfId = inst.pluginUUID
 		_, err := inst.db.CreateNetwork(&net, false)
@@ -213,9 +213,9 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			dev.ZeroMode = boolean.NewTrue()
 			dev.PollDelayPointsMS = 5000
 			dev.NetworkUUID = net.UUID
-			dev.FastPollRate = 5 * time.Second
-			dev.NormalPollRate = 30 * time.Second
-			dev.SlowPollRate = 120 * time.Second
+			dev.FastPollRate = float.New(5.0)
+			dev.NormalPollRate = float.New(30.0)
+			dev.SlowPollRate = float.New(120.0)
 			_, err = inst.db.CreateDevice(&dev)
 			if err != nil {
 				modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
@@ -255,7 +255,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				net.Name = "CliniMix-TMV"
 				net.TransportType = model.TransType.Serial
 				net.PluginPath = "modbus"
-				net.MaxPollRate = 100 * time.Millisecond
+				net.MaxPollRate = float.New(0.1)
 				net.PluginConfId = inst.pluginUUID
 				net, err = inst.addNetwork(net)
 				if err != nil {
@@ -278,9 +278,9 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				dev.ZeroMode = boolean.NewTrue()
 				dev.PollDelayPointsMS = 1000
 				dev.NetworkUUID = net.UUID
-				dev.FastPollRate = 5 * time.Second
-				dev.NormalPollRate = 30 * time.Second
-				dev.SlowPollRate = 120 * time.Second
+				dev.FastPollRate = float.New(5.0)
+				dev.NormalPollRate = float.New(30.0)
+				dev.SlowPollRate = float.New(120.0)
 				_, err = inst.addDevice(dev)
 				if err != nil {
 					modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))

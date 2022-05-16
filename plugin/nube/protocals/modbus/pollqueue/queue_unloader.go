@@ -39,8 +39,8 @@ func (pm *NetworkPollManager) StartQueueUnloader() {
 	}
 	pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.StartQueueUnloader(): net.MaxPollRate %d ", net.MaxPollRate))
 	refreshRate := 100 * time.Millisecond
-	if net.MaxPollRate > 0 {
-		refreshRate = net.MaxPollRate
+	if *net.MaxPollRate > 0 {
+		refreshRate, _ = time.ParseDuration(fmt.Sprintf("%fs", *net.MaxPollRate))
 	}
 	pm.MaxPollRate = refreshRate
 	ticker := time.NewTicker(refreshRate)

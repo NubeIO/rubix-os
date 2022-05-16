@@ -2,7 +2,6 @@ package mbmodel
 
 import (
 	"github.com/NubeIO/flow-framework/plugin/defaults"
-	"time"
 )
 
 type NameStruct struct {
@@ -68,10 +67,11 @@ type Network struct {
 		Default  int    `json:"default" default:""`
 	} `json:"serial_stop_bits"`
 	MaxPollRate struct {
-		Type     string        `json:"type" default:"int"`
-		Required bool          `json:"required" default:"true"`
-		Options  int           `json:"options" default:"1"`
-		Default  time.Duration `json:"default" default:"100000000"`
+		Type        string   `json:"type" default:"int"`
+		Required    bool     `json:"required" default:"true"`
+		Options     int      `json:"options" default:"1"`
+		DisplayName string   `json:"display_name" default:"Max Poll Rate (seconds)"`
+		Default     *float64 `json:"default" default:"0.1"`
 	} `json:"max_poll_rate"`
 	Enable struct {
 		Type     string `json:"type" default:"bool"`
@@ -103,22 +103,25 @@ type Device struct {
 		Default  int    `json:"default" default:""`
 	} `json:"port"`
 	FastPollRate struct {
-		Type     string        `json:"type" default:"int"`
-		Required bool          `json:"required" default:"true"`
-		Options  int           `json:"options" default:"1"`
-		Default  time.Duration `json:"default" default:"5000000000"`
+		Type        string   `json:"type" default:"int"`
+		Required    bool     `json:"required" default:"true"`
+		Options     int      `json:"options" default:"1"`
+		DisplayName string   `json:"display_name" default:"Fast Poll Rate (seconds)"`
+		Default     *float64 `json:"default" default:"5"`
 	} `json:"fast_poll_rate"`
 	NormalPollRate struct {
-		Type     string        `json:"type" default:"int"`
-		Required bool          `json:"required" default:"true"`
-		Options  int           `json:"options" default:"1"`
-		Default  time.Duration `json:"default" default:"30000000000"`
+		Type        string   `json:"type" default:"int"`
+		Required    bool     `json:"required" default:"true"`
+		Options     int      `json:"options" default:"1"`
+		DisplayName string   `json:"display_name" default:"Normal Poll Rate (seconds)"`
+		Default     *float64 `json:"default" default:"30"`
 	} `json:"normal_poll_rate"`
 	SlowPollRate struct {
-		Type     string        `json:"type" default:"int"`
-		Required bool          `json:"required" default:"true"`
-		Options  int           `json:"options" default:"1"`
-		Default  time.Duration `json:"default" default:"120000000000"`
+		Type        string   `json:"type" default:"int"`
+		Required    bool     `json:"required" default:"true"`
+		Options     int      `json:"options" default:"1"`
+		DisplayName string   `json:"display_name" default:"Slow Poll Rate (seconds)"`
+		Default     *float64 `json:"default" default:"120"`
 	} `json:"slow_poll_rate"`
 	ZeroMode struct {
 		Type     string `json:"type" default:"bool"`
