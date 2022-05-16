@@ -77,6 +77,7 @@ type Network struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
 		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
 	} `json:"enable"`
 }
 
@@ -127,11 +128,13 @@ type Device struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
 		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
 	} `json:"zero_mode"`
 	Enable struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
 		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
 	} `json:"enable"`
 }
 
@@ -209,6 +212,7 @@ type Point struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
 		Options  bool   `json:"options" default:"true"`
+		Default  *bool  `json:"default" default:"true"`
 	} `json:"enable"`
 }
 
