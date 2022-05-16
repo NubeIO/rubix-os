@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.5.0](https://github.com/NubeIO/flow-framework/tree/v0.5.0) (2022-05-17)
+- fixed modbus point/device/network time settings
+- updated pointWrite() for modbus compatibility
+- priority array utilities added
 
 ## [v0.4.9](https://github.com/NubeIO/flow-framework/tree/v0.4.9) (2022-05-13)
 - Fix: isChange checker for COV updates
