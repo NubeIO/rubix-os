@@ -165,34 +165,38 @@ func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUI
 	switch rate {
 	case model.RATE_FAST:
 		pollQueueDebugMsg("GetPollRateDuration(): FAST")
-		if device.FastPollRate <= 100*time.Millisecond {
+		fastRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.FastPollRate))
+		if fastRateDuration <= 100*time.Millisecond {
 			duration = 10 * time.Second
 		} else {
-			duration = device.FastPollRate
+			duration = fastRateDuration
 		}
 
 	case model.RATE_NORMAL:
 		pollQueueDebugMsg("GetPollRateDuration(): NORMAL")
-		if device.NormalPollRate <= 500*time.Millisecond {
+		normalRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.NormalPollRate))
+		if normalRateDuration <= 500*time.Millisecond {
 			duration = 30 * time.Second
 		} else {
-			duration = device.NormalPollRate
+			duration = normalRateDuration
 		}
 
 	case model.RATE_SLOW:
 		pollQueueDebugMsg("GetPollRateDuration(): SLOW")
-		if device.SlowPollRate <= 1*time.Second {
+		slowRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.SlowPollRate))
+		if slowRateDuration <= 1*time.Second {
 			duration = 120 * time.Second
 		} else {
-			duration = device.SlowPollRate
+			duration = slowRateDuration
 		}
 
 	default:
 		pollQueueDebugMsg("GetPollRateDuration(): UNKNOWN")
-		if device.NormalPollRate <= 500*time.Millisecond {
+		normalRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.NormalPollRate))
+		if normalRateDuration <= 500*time.Millisecond {
 			duration = 30 * time.Second
 		} else {
-			duration = device.NormalPollRate
+			duration = normalRateDuration
 		}
 	}
 

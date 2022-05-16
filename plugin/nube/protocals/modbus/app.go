@@ -304,10 +304,10 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	}
 
 	if boolean.IsTrue(point.Enable) {
-		pp, err := netPollMan.PollQueue.GetPollingPointByPointUUID(point.UUID)
-		if pp == nil || err != nil {
+		pp, _ := netPollMan.PollQueue.RemovePollingPointByPointUUID(pntUUID)
+		if pp == nil {
 			modbusErrorMsg("writePoint(): cannot find PollingPoint for point: ", point.UUID)
-			inst.pointUpdateErr(point, err)
+			inst.pointUpdateErr(point, errors.New(fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID)))
 			return point, err
 		}
 		pp.PollPriority = model.PRIORITY_ASAP
