@@ -10,6 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nmath"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
+	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -151,7 +152,19 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		d.DB.Model(&pointModel).Update("fallback", nil)
 	}
 	query = d.DB.Model(&pointModel).Updates(&body)
-	return pointModel, nil
+
+	// Don't update point value if priority array on body is nil
+	if body.Priority == nil {
+		return pointModel, nil
+	} else {
+		pointModel.Priority = body.Priority
+	}
+	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
+	pnt, err := d.UpdatePointValue(pointModel, &priorityMap, fromPlugin)
+	if err != nil {
+		return nil, err
+	}
+	return pnt, nil
 }
 
 func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlugin bool) (*model.Point, error) {
