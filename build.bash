@@ -82,6 +82,8 @@ go build -buildmode=plugin -o influx.so *.go  && cp influx.so $pluginDir
 cd $dir/plugin/nube/database/history
 go build -buildmode=plugin -o history.so *.go  && cp history.so $pluginDir
 
+cd $dir/plugin/nube/database/postgres
+go build -buildmode=plugin -o postgres.so *.go && cp postgres.so $pluginDir
 
 cd $dir
 

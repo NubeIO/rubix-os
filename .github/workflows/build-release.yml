@@ -128,6 +128,9 @@ jobs:
           cd ../../../../plugin/nube/database/history
           go build -buildmode=plugin -o history-amd64.so *.go  && cp history-amd64.so ../../../../
 
+          cd ../../../../plugin/nube/database/postgres
+          go build -buildmode=plugin -o postgres-amd64.so *.go  && cp postgres-amd64.so ../../../../
+
 
       - name: Build armv7
         if: ${{ needs.context.outputs.isRelease == 'true' }}
@@ -171,6 +174,9 @@ jobs:
 
           cd ../../../../plugin/nube/database/history
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o history-armv7.so *.go  && cp history-armv7.so ../../../../
+
+          cd ../../../../plugin/nube/database/postgres
+                    env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o postgres-armv7.so *.go  && cp postgres-armv7.so ../../../../
 
       - name: Zip artifacts
         if: ${{ needs.context.outputs.isRelease == 'true' }}
@@ -240,6 +246,11 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./history-amd64.so
           artifact=history-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./history-armv7.so
+
+          artifact=postgres-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+          zip -r /tmp/zip/$artifact.zip ./postgres-amd64.so
+          artifact=postgres-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+          zip -r /tmp/zip/$artifact.zip ./postgres-armv7.so
 
 
       - name: Create Release
