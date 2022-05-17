@@ -17,6 +17,7 @@ HISTORY=false
 INFLUX=false
 RUBIXIO=false
 MODBUSSERVER=false
+POSTGRES=false
 
 help() {
   echo "Service commands:"
@@ -65,6 +66,9 @@ parseCommand() {
       ;;
     --modbusserver)
       MODBUSSERVER=true
+      ;;
+    --postgres)
+      POSTGRES=true
       ;;
     *)
       echo -e "${RED}Unknown options ${i}  (-h, --help for help)${DEFAULT}"
@@ -144,6 +148,11 @@ if [ ${MODBUSSERVER} == true ]; then
   cd $dir/plugin/nube/protocals/modbusserver
   go build -buildmode=plugin -o modbusserver.so *.go && cp modbusserver.so $pluginDir
   echo -e "${GREEN}BUILD MODBUS-SERVER"
+fi
+if [ ${POSTGRES} == true ]; then
+  cd $dir/plugin/nube/database/postgres
+  go build -buildmode=plugin -o postgres.so *.go && cp postgres.so $pluginDir
+  echo -e "${GREEN}BUILD POSTGRES"
 fi
 
 cd $dir

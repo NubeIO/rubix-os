@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -9,7 +10,7 @@ import (
 
 func (inst *Instance) syncHistory() (bool, error) {
 	log.Info("History sync has is been called...")
-	fnClones, err := inst.db.GetFlowNetworkClones()
+	fnClones, err := inst.db.GetFlowNetworkClones(api.Args{})
 	if err != nil {
 		return false, err
 	}
