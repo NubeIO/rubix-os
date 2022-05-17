@@ -45,7 +45,8 @@ func (inst *Instance) syncPostgres(postgresSetting *PostgresSetting) (bool, erro
 	}
 	if len(histories) > 0 {
 		// bulk write to postgres
-		flowNetworkClones, _ := inst.db.GetFlowNetworkClones(api.Args{WithStreamClones: true, WithConsumers: true, WithTags: true})
+		flowNetworkClones, _ := inst.db.GetFlowNetworkClones(api.Args{WithStreamClones: true, WithConsumers: true,
+			WithWriters: true, WithTags: true})
 		mFlowNetworkClones, err := json.Marshal(flowNetworkClones)
 		if err != nil {
 			log.Error(err)

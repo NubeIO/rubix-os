@@ -52,6 +52,7 @@ func autoMigrate(db *gorm.DB) error {
 		pgmodel.FlowNetworkClone{},
 		pgmodel.StreamClone{},
 		pgmodel.Consumer{},
+		pgmodel.Writer{},
 		pgmodel.Network{},
 		pgmodel.Device{},
 		pgmodel.Point{},

@@ -1,6 +1,7 @@
 package pgmodel
 
 import (
+	"gorm.io/datatypes"
 	"time"
 )
 
@@ -38,6 +39,16 @@ type CommonFault struct {
 	LastFail     time.Time `json:"last_fail,omitempty"`
 }
 
+type CommonWriter struct {
+	CommonUUID
+	WriterThingClass string         `json:"writer_thing_class,omitempty"`
+	WriterThingType  string         `json:"writer_thing_type,omitempty"`
+	WriterThingUUID  string         `json:"writer_thing_uuid,omitempty"`
+	WriterThingName  string         `json:"writer_thing_name,omitempty"`
+	DataStore        datatypes.JSON `json:"data_store,omitempty"`
+	CommonCreated
+}
+
 type FlowNetworkClone struct {
 	CommonUUID
 	CommonName
@@ -70,15 +81,22 @@ type Consumer struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	ProducerUUID       string `json:"producer_uuid,omitempty" gorm:"uniqueIndex;not null"`
-	ProducerThingName  string `json:"producer_thing_name,omitempty"`
-	ProducerThingUUID  string `json:"producer_thing_uuid,omitempty"` // this is the remote point UUID
-	ProducerThingClass string `json:"producer_thing_class,omitempty"`
-	ProducerThingType  string `json:"producer_thing_type,omitempty"`
-	ProducerThingRef   string `json:"producer_thing_ref,omitempty"`
-	StreamCloneUUID    string `json:"stream_clone_uuid,omitempty" gorm:"TYPE:string REFERENCES stream_clones;not null;default:null"`
-	Tags               []*Tag `json:"tags,omitempty" gorm:"many2many:consumers_tags;constraint:OnDelete:CASCADE"`
+	ProducerUUID       string    `json:"producer_uuid,omitempty" gorm:"uniqueIndex;not null"`
+	ProducerThingName  string    `json:"producer_thing_name,omitempty"`
+	ProducerThingUUID  string    `json:"producer_thing_uuid,omitempty"` // this is the remote point UUID
+	ProducerThingClass string    `json:"producer_thing_class,omitempty"`
+	ProducerThingType  string    `json:"producer_thing_type,omitempty"`
+	ProducerThingRef   string    `json:"producer_thing_ref,omitempty"`
+	StreamCloneUUID    string    `json:"stream_clone_uuid,omitempty" gorm:"TYPE:string REFERENCES stream_clones;not null;default:null"`
+	Writers            []*Writer `json:"writers,omitempty" gorm:"constraint:OnDelete:CASCADE;"`
+	Tags               []*Tag    `json:"tags,omitempty" gorm:"many2many:consumers_tags;constraint:OnDelete:CASCADE"`
 	CommonCreated
+}
+
+type Writer struct {
+	CommonWriter
+	ConsumerUUID string   `json:"consumer_uuid,omitempty" gorm:"TYPE:string REFERENCES consumers;not null;default:null"`
+	PresentValue *float64 `json:"present_value,omitempty"`
 }
 
 type Network struct {
