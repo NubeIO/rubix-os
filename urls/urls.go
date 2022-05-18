@@ -4,6 +4,7 @@ import "fmt"
 
 const FlowNetworkUrl string = "/api/flow_network"
 const FlowNetworkCloneUrl string = "/api/flow_network_clones"
+const StreamCloneUrl string = "/api/stream_clones"
 const ProducerUrl string = "/api/producers"
 
 func SingularUrl(url, uuid string) string {

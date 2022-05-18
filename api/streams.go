@@ -11,7 +11,6 @@ type StreamDatabase interface {
 	CreateStream(body *model.Stream) (*model.Stream, error)
 	UpdateStream(uuid string, body *model.Stream) (*model.Stream, error)
 	DeleteStream(uuid string) (bool, error)
-	DropStreams() (bool, error)
 }
 
 type StreamAPI struct {
@@ -47,10 +46,5 @@ func (j *StreamAPI) UpdateStream(ctx *gin.Context) {
 func (j *StreamAPI) DeleteStream(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteStream(uuid)
-	responseHandler(q, err, ctx)
-}
-
-func (j *StreamAPI) DropStreams(ctx *gin.Context) {
-	q, err := j.DB.DropStreams()
 	responseHandler(q, err, ctx)
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -66,20 +67,6 @@ func (d *GormDatabase) GetFlowNetworksFromStreamUUID(streamUUID string) (*[]mode
 	return flowNetworks, nil
 }
 
-func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
-	var streamModel *model.Stream
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&streamModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
 func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Stream, error) {
 	var streamModel *model.Stream
 	if err := d.DB.Preload("FlowNetworks").Where("uuid = ?", uuid).First(&streamModel).Error; err != nil {
@@ -102,18 +89,17 @@ func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Str
 	return streamModel, nil
 }
 
-func (d *GormDatabase) DropStreams() (bool, error) {
+func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
 	var streamModel *model.Stream
-	query := d.DB.Where("1 = 1").Delete(&streamModel)
-	if query.Error != nil {
-		return false, query.Error
+	var aType = api.ArgsType
+	query := d.DB.Where("uuid = ? ", uuid).Preload("FlowNetworks").First(&streamModel)
+	for _, fn := range streamModel.FlowNetworks {
+		cli := client.NewFlowClientCliFromFN(fn)
+		url := urls.SingularUrlByArg(urls.StreamCloneUrl, aType.SourceUUID, streamModel.UUID)
+		_ = cli.DeleteQuery(url)
 	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	query = d.DB.Delete(&streamModel)
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) GetFlowUUID(uuid string) (*model.Stream, *model.FlowNetwork, error) {

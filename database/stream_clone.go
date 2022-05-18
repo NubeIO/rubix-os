@@ -35,10 +35,18 @@ func (d *GormDatabase) GetStreamClone(uuid string, args api.Args) (*model.Stream
 	return streamCloneModel, nil
 }
 
-func (d *GormDatabase) DeleteStreamClone(uuid string) error {
+func (d *GormDatabase) DeleteStreamClone(uuid string) (bool, error) {
 	var streamCloneModel *model.StreamClone
-	if err := d.DB.Where("uuid = ? ", uuid).Delete(&streamCloneModel).Error; err != nil {
-		return err
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&streamCloneModel)
+	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) DeleteOneStreamCloneByArgs(args api.Args) (bool, error) {
+	var streamCloneModel *model.StreamClone
+	query := d.buildStreamCloneQuery(args)
+	if err := query.First(&streamCloneModel).Error; err != nil {
+		return false, err
 	}
-	return nil
+	query = query.Delete(&streamCloneModel)
+	return d.deleteResponseBuilder(query)
 }

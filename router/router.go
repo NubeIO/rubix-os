@@ -225,7 +225,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			streamRoutes.GET("/:uuid", gatewayHandler.GetStream)
 			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
 			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
-			streamRoutes.DELETE("/drop", gatewayHandler.DropStreams)
 		}
 
 		mappingRoutes := apiRoutes.Group("/mapping")
@@ -238,6 +237,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			streamCloneRoutes.GET("", streamCloneHandler.GetStreamClones)
 			streamCloneRoutes.GET("/:uuid", streamCloneHandler.GetStreamClone)
 			streamCloneRoutes.DELETE("/:uuid", streamCloneHandler.DeleteStreamClone)
+			streamCloneRoutes.DELETE("/one/args", streamCloneHandler.DeleteOneStreamCloneByArgs)
 		}
 
 		networkRoutes := apiRoutes.Group("/networks")
