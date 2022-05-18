@@ -158,6 +158,18 @@ func buildPointArgs(ctx *gin.Context) Args {
 func buildWriterArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
+	if value, ok := ctx.GetQuery(aType.ConsumerUUID); ok {
+		args.ConsumerUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.WriterThingClass); ok {
+		args.WriterThingClass = &value
+	}
+	return args
+}
+
+func buildWriterCloneArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
 	if value, ok := ctx.GetQuery(aType.ProducerUUID); ok {
 		args.ProducerUUID = &value
 	}
@@ -166,15 +178,6 @@ func buildWriterArgs(ctx *gin.Context) Args {
 	}
 	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
 		args.SourceUUID = &value
-	}
-	return args
-}
-
-func buildWriterCloneArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	if value, ok := ctx.GetQuery(aType.WriterThingClass); ok {
-		args.WriterThingClass = &value
 	}
 	return args
 }

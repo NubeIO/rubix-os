@@ -305,7 +305,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 				producerWriterCloneRoutes.POST("", writerCloneHandler.CreateWriterClone)
 				producerWriterCloneRoutes.GET("/:uuid", writerCloneHandler.GetWriterClone)
 				producerWriterCloneRoutes.DELETE("/:uuid", writerCloneHandler.DeleteWriterClone)
-				producerWriterCloneRoutes.DELETE("/drop", writerCloneHandler.DropWriterClone)
+				producerWriterCloneRoutes.DELETE("/one/args", writerCloneHandler.DeleteOneWriterCloneByArgs)
 			}
 		}
 
@@ -325,7 +325,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 				consumerWriterRoutes.GET("/:uuid", writerHandler.GetWriter)
 				consumerWriterRoutes.PATCH("/:uuid", writerHandler.UpdateWriter)
 				consumerWriterRoutes.DELETE("/:uuid", writerHandler.DeleteWriter)
-				consumerWriterRoutes.DELETE("/drop", writerHandler.DropWriters)
 			}
 		}
 

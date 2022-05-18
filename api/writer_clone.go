@@ -13,7 +13,7 @@ type WriterCloneDatabase interface {
 	GetOneWriterCloneByArgs(args Args) (*model.WriterClone, error)
 	CreateWriterClone(body *model.WriterClone) (*model.WriterClone, error)
 	DeleteWriterClone(uuid string) (bool, error)
-	DropWriterClone() (bool, error)
+	DeleteOneWriterCloneByArgs(args Args) (bool, error)
 }
 type WriterCloneAPI struct {
 	DB WriterCloneDatabase
@@ -47,7 +47,8 @@ func (j *WriterCloneAPI) DeleteWriterClone(ctx *gin.Context) {
 	responseHandler(q, err, ctx)
 }
 
-func (j *WriterCloneAPI) DropWriterClone(ctx *gin.Context) {
-	q, err := j.DB.DropWriterClone()
+func (j *WriterCloneAPI) DeleteOneWriterCloneByArgs(ctx *gin.Context) {
+	args := buildWriterCloneArgs(ctx)
+	q, err := j.DB.DeleteOneWriterCloneByArgs(args)
 	responseHandler(q, err, ctx)
 }

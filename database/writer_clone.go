@@ -50,30 +50,7 @@ func (d *GormDatabase) CreateWriterClone(body *model.WriterClone) (*model.Writer
 func (d *GormDatabase) DeleteWriterClone(uuid string) (bool, error) {
 	var wcm *model.WriterClone
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&wcm)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-
-}
-
-func (d *GormDatabase) DropWriterClone() (bool, error) {
-	var wcm *model.WriterClone
-	query := d.DB.Where("1 = 1").Delete(&wcm)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) UpdateWriterClone(writerClone *model.WriterClone, body *model.WriterClone) error {
@@ -82,4 +59,10 @@ func (d *GormDatabase) UpdateWriterClone(writerClone *model.WriterClone, body *m
 		return query.Error
 	}
 	return nil
+}
+
+func (d *GormDatabase) DeleteOneWriterCloneByArgs(args api.Args) (bool, error) {
+	var wcm *model.WriterClone
+	query := d.buildWriterCloneQuery(args).Delete(&wcm)
+	return d.deleteResponseBuilder(query)
 }
