@@ -12,7 +12,7 @@ type FlowNetworkDatabase interface {
 	GetOneFlowNetworkByArgs(args Args) (*model.FlowNetwork, error)
 	CreateFlowNetwork(network *model.FlowNetwork) (*model.FlowNetwork, error)
 	UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (*model.FlowNetwork, error)
-	DeleteFlowNetwork(uuid string, force bool) (bool, error)
+	DeleteFlowNetwork(uuid string) (bool, error)
 	RefreshFlowNetworksConnections() (*bool, error)
 }
 type FlowNetworksAPI struct {
@@ -53,8 +53,7 @@ func (a *FlowNetworksAPI) CreateFlowNetwork(ctx *gin.Context) {
 
 func (a *FlowNetworksAPI) DeleteFlowNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	force, _ := toBool(ctx.DefaultQuery("force", "false"))
-	q, err := a.DB.DeleteFlowNetwork(uuid, force)
+	q, err := a.DB.DeleteFlowNetwork(uuid)
 	responseHandler(q, err, ctx)
 }
 

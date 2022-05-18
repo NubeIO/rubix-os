@@ -28,12 +28,10 @@ func (d *GormDatabase) GetFlowNetworkClone(uuid string, args api.Args) (*model.F
 	return flowNetworkCloneModel, nil
 }
 
-func (d *GormDatabase) DeleteFlowNetworkClone(uuid string) error {
+func (d *GormDatabase) DeleteFlowNetworkClone(uuid string) (bool, error) {
 	var flowNetworkCloneModel *model.FlowNetworkClone
-	if err := d.DB.Where("uuid = ? ", uuid).Delete(&flowNetworkCloneModel).Error; err != nil {
-		return err
-	}
-	return nil
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&flowNetworkCloneModel)
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) GetOneFlowNetworkCloneByArgs(args api.Args) (*model.FlowNetworkClone, error) {
@@ -45,16 +43,14 @@ func (d *GormDatabase) GetOneFlowNetworkCloneByArgs(args api.Args) (*model.FlowN
 	return flowNetworkCloneModel, nil
 }
 
-func (d *GormDatabase) DeleteOneFlowNetworkCloneByArgs(args api.Args) (*model.FlowNetworkClone, error) {
+func (d *GormDatabase) DeleteOneFlowNetworkCloneByArgs(args api.Args) (bool, error) {
 	var flowNetworkCloneModel *model.FlowNetworkClone
 	query := d.buildFlowNetworkCloneQuery(args)
 	if err := query.First(&flowNetworkCloneModel).Error; err != nil {
-		return nil, err
+		return false, err
 	}
-	if err := query.Delete(&flowNetworkCloneModel).Error; err != nil {
-		return nil, err
-	}
-	return flowNetworkCloneModel, nil
+	query = query.Delete(&flowNetworkCloneModel)
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) RefreshFlowNetworkClonesConnections() (*bool, error) {

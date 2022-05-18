@@ -112,28 +112,18 @@ func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (
 	return d.afterCreateUpdateFlowNetwork(body, isMasterSlave, cli, isRemote, tx)
 }
 
-func (d *GormDatabase) DeleteFlowNetwork(uuid string, force bool) (bool, error) {
+func (d *GormDatabase) DeleteFlowNetwork(uuid string) (bool, error) {
 	fn, err := d.GetFlowNetwork(uuid, api.Args{})
 	query := d.buildFlowNetworkQuery(api.Args{UUID: &uuid})
 	if err != nil {
 		return false, err
 	}
 	cli := client.NewFlowClientCliFromFN(fn)
-	url := urls.SingularUrlByArg(urls.FlowNetworkCloneUrl, "source_uuid", fn.UUID)
-	err = cli.DeleteQuery(url)
-	if err != nil && !force {
-		return false, err
-	}
-	d.DB.Delete(&fn)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	aType := api.ArgsType
+	url := urls.SingularUrlByArg(urls.FlowNetworkCloneUrl, aType.SourceUUID, fn.UUID)
+	_ = cli.DeleteQuery(url)
+	query = d.DB.Delete(&fn)
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
