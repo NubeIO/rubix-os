@@ -90,33 +90,15 @@ func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Str
 }
 
 func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
-	var streamModel *model.Stream
 	var aType = api.ArgsType
-	query := d.DB.Where("uuid = ? ", uuid).Preload("FlowNetworks").First(&streamModel)
+	streamModel, _ := d.GetStream(uuid, api.Args{WithFlowNetworks: true})
 	for _, fn := range streamModel.FlowNetworks {
 		cli := client.NewFlowClientCliFromFN(fn)
 		url := urls.SingularUrlByArg(urls.StreamCloneUrl, aType.SourceUUID, streamModel.UUID)
 		_ = cli.DeleteQuery(url)
 	}
-	query = d.DB.Delete(&streamModel)
+	query := d.DB.Delete(&streamModel)
 	return d.deleteResponseBuilder(query)
-}
-
-func (d *GormDatabase) GetFlowUUID(uuid string) (*model.Stream, *model.FlowNetwork, error) {
-	var stream *model.Stream
-	query := d.DB.Preload("FlowNetworks").Where("uuid = ? ", uuid).First(&stream)
-	if query.Error != nil {
-		return nil, nil, query.Error
-	}
-	flowUUID := ""
-	for _, net := range stream.FlowNetworks {
-		flowUUID = net.UUID
-	}
-	flow, err := d.GetFlowNetwork(flowUUID, api.Args{})
-	if err != nil {
-		return nil, nil, err
-	}
-	return stream, flow, nil
 }
 
 func (d *GormDatabase) syncAfterCreateUpdateStream(body *model.Stream) error {
