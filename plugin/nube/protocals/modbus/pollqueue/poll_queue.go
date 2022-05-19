@@ -58,7 +58,11 @@ func (nq *NetworkPriorityPollQueue) RemovePollingPointByPointUUID(pointUUID stri
 	pp = nil
 	if nq.QueueUnloader != nil && nq.QueueUnloader.NextPollPoint != nil && nq.QueueUnloader.NextPollPoint.FFPointUUID == pointUUID {
 		pp = nq.QueueUnloader.NextPollPoint
+		if nq.QueueUnloader.NextPollPoint.LockupAlertTimer != nil {
+			nq.QueueUnloader.NextPollPoint.LockupAlertTimer.Stop()
+		}
 		nq.QueueUnloader.NextPollPoint = nil
+
 	}
 	pp, _ = nq.PriorityQueue.RemovePollingPointByPointUUID(pointUUID)
 	pp, _ = nq.StandbyPollingPoints.RemovePollingPointByPointUUID(pointUUID)
@@ -223,6 +227,12 @@ func (q *PriorityPollQueue) RemovePollingPointByPointUUID(pointUUID string) (pp 
 	index := q.GetPollingPointIndexByPointUUID(pointUUID)
 	if index >= 0 {
 		pp = heap.Remove(q, index).(*PollingPoint)
+		if pp.RepollTimer != nil {
+			pp.RepollTimer.Stop()
+		}
+		if pp.LockupAlertTimer != nil {
+			pp.LockupAlertTimer.Stop()
+		}
 		return pp, true
 	}
 	return pp, false
@@ -236,6 +246,9 @@ func (q *PriorityPollQueue) RemovePollingPointByDeviceUUID(deviceUUID string) bo
 				pp.RepollTimer.Stop()
 			}
 			heap.Remove(q, index)
+			if pp.LockupAlertTimer != nil {
+				pp.LockupAlertTimer.Stop()
+			}
 		} else {
 			index++
 		}
@@ -247,7 +260,13 @@ func (q *PriorityPollQueue) RemovePollingPointByNetworkUUID(networkUUID string) 
 	for index < q.Len() {
 		pp := q.PriorityQueue[index]
 		if pp.FFNetworkUUID == networkUUID {
+			if pp.RepollTimer != nil {
+				pp.RepollTimer.Stop()
+			}
 			heap.Remove(q, index)
+			if pp.LockupAlertTimer != nil {
+				pp.LockupAlertTimer.Stop()
+			}
 		} else {
 			index++
 		}
