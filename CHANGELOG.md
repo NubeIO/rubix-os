@@ -1,4 +1,8 @@
 # CHANGELOG
+
+## [v0.5.1](https://github.com/NubeIO/flow-framework/tree/v0.5.1) (2022-05-19)
+- minor update to polling. Safeties on timeouts.
+
 ## [v0.5.0](https://github.com/NubeIO/flow-framework/tree/v0.5.0) (2022-05-17)
 - fixed modbus point/device/network time settings
 - updated pointWrite() for modbus compatibility
