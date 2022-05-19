@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/config"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/pollqueue"
 	"github.com/NubeIO/flow-framework/utils/array"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -29,13 +30,10 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	}
 
 	if boolean.IsTrue(body.Enable) {
-		pollManager := pollqueue.NewPollManager(&inst.db, network.UUID, inst.pluginUUID)
+		conf := inst.GetConfig().(*config.Config)
+		pollManager := pollqueue.NewPollManager(conf, &inst.db, network.UUID, inst.pluginUUID)
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
-	}
-
-	if err != nil {
-		return nil, err
 	}
 	return network, nil
 }
