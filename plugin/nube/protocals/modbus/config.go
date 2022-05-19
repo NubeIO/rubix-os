@@ -1,12 +1,14 @@
 package main
 
 type Config struct {
-	EnablePolling bool `yaml:"enable_polling"`
+	EnablePolling bool   `yaml:"enable_polling"`
+	LogLevel      string `yaml:"log_level"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
 	return &Config{
 		EnablePolling: true,
+		LogLevel:      "ERROR", // DEBUG or ERROR
 	}
 }
 
