@@ -271,12 +271,16 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 }
 
 func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
-	var pointModel *model.Point
-	point, err := d.GetPoint(uuid, api.Args{})
-	if err != nil {
-		return false, errors.New("point not exist")
+	point, _ := d.GetPoint(uuid, api.Args{})
+	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &point.UUID})
+	for _, producer := range producers {
+		_, _ = d.DeleteProducer(producer.UUID)
 	}
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&pointModel)
+	writers, _ := d.GetWriters(api.Args{WriterThingUUID: &point.UUID})
+	for _, writer := range writers {
+		_, _ = d.DeleteWriter(writer.UUID)
+	}
+	query := d.DB.Delete(&point)
 	if query.Error != nil {
 		return false, query.Error
 	}
@@ -294,20 +298,6 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 		if err != nil {
 			return false, errors.New("ERROR on device eventbus")
 		}
-		return true, nil
-	}
-}
-
-func (d *GormDatabase) DropPoints() (bool, error) {
-	var pointModel *model.Point
-	query := d.DB.Where("1 = 1").Delete(&pointModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
 		return true, nil
 	}
 }

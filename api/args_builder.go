@@ -167,6 +167,9 @@ func buildWriterArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.WriterThingClass); ok {
 		args.WriterThingClass = &value
 	}
+	if value, ok := ctx.GetQuery(aType.WriterThingUUID); ok {
+		args.WriterThingUUID = &value
+	}
 	return args
 }
 

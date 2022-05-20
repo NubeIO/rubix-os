@@ -14,7 +14,6 @@ type PointDatabase interface {
 	PointWrite(uuid string, body *model.PointWriter, fromPlugin bool) (*model.Point, error)
 	GetOnePointByArgs(args Args) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
-	DropPoints() (bool, error)
 	GetPointByName(networkName, deviceName, pointName string) (*model.Point, error)
 	PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter, fromPlugin bool) (*model.Point, error)
 
@@ -75,11 +74,6 @@ func (a *PointAPI) CreatePoint(ctx *gin.Context) {
 func (a *PointAPI) DeletePoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeletePointPlugin(uuid)
-	responseHandler(q, err, ctx)
-}
-
-func (a *PointAPI) DropPoints(ctx *gin.Context) {
-	q, err := a.DB.DropPoints()
 	responseHandler(q, err, ctx)
 }
 

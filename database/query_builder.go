@@ -239,6 +239,9 @@ func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
 	if args.WriterThingClass != nil {
 		query = query.Where("writer_thing_class = ?", *args.WriterThingClass)
 	}
+	if args.WriterThingUUID != nil {
+		query = query.Where("writer_thing_uuid = ?", *args.WriterThingUUID)
+	}
 	return query
 }
 
