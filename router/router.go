@@ -205,6 +205,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			flowNetworkRoutes.DELETE("/:uuid", flowNetwork.DeleteFlowNetwork)
 			flowNetworkRoutes.GET("/one/args", flowNetwork.GetOneFlowNetworkByArgs)
 			flowNetworkRoutes.GET("/refresh_connections", flowNetwork.RefreshFlowNetworksConnections)
+			flowNetworkRoutes.GET("/sync", flowNetwork.SyncFlowNetworks)
 		}
 
 		flowNetworkCloneRoutes := apiRoutes.Group("/flow_network_clones")

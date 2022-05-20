@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -147,6 +148,22 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 		}
 	}
 	return boolean.NewTrue(), nil
+}
+
+func (d *GormDatabase) SyncFlowNetworks() []*interfaces.SyncModel {
+	fns, _ := d.GetFlowNetworks(api.Args{})
+	var outputs []*interfaces.SyncModel
+	for _, fn := range fns {
+		_, err := d.UpdateFlowNetwork(fn.UUID, fn)
+		var output interfaces.SyncModel
+		if err != nil {
+			output = interfaces.SyncModel{Id: fn.UUID, IsError: true, Message: nstring.New(err.Error())}
+		} else {
+			output = interfaces.SyncModel{Id: fn.UUID, IsError: false}
+		}
+		outputs = append(outputs, &output)
+	}
+	return outputs
 }
 
 func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *client.FlowClient, bool, *gorm.DB, error) {
