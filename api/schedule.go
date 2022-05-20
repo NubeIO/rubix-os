@@ -13,7 +13,6 @@ type ScheduleDatabase interface {
 	UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error)
 	ScheduleWrite(uuid string, body *model.ScheduleData) error
 	DeleteSchedule(uuid string) (bool, error)
-	DropSchedules() (bool, error)
 }
 
 type ScheduleAPI struct {
