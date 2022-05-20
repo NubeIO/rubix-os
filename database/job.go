@@ -58,16 +58,7 @@ func (d *GormDatabase) GetJobByPluginConfId(pcId string) (*model.Job, error) {
 func (d *GormDatabase) DeleteJob(uuid string) (bool, error) {
 	var jobModel *model.Job
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&jobModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-
+	return d.deleteResponseBuilder(query)
 }
 
 // UpdateJob  returns the device for the given id or nil.

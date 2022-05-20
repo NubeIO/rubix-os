@@ -108,13 +108,5 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device, fromPlugin 
 func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 	var deviceModel *model.Device
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&deviceModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	return d.deleteResponseBuilder(query)
 }

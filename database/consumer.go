@@ -66,15 +66,7 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
 	var consumerModel *model.Consumer
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&consumerModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error) {

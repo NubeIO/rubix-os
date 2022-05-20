@@ -117,15 +117,7 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugi
 func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
 	var networkModel *model.Network
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&networkModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {

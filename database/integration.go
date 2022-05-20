@@ -73,15 +73,7 @@ func (d *GormDatabase) GetEnabledIntegrationByPluginConfId(pcId string) ([]*mode
 func (d *GormDatabase) DeleteIntegration(uuid string) (bool, error) {
 	var integration *model.Integration
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&integration)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	return d.deleteResponseBuilder(query)
 }
 
 // UpdateIntegration  update it

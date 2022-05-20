@@ -80,26 +80,12 @@ func (d *GormDatabase) DeleteHistoriesByUUID(uuid string, args api.Args) (bool, 
 	query := d.buildHistoryQuery(args)
 	query = query.Where("uuid = ? ", uuid)
 	query.Delete(&historyModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	}
-	return true, nil
+	return d.deleteResponseBuilder(query)
 }
 
 // DeleteHistory delete a history for given id
 func (d *GormDatabase) DeleteHistory(id int) (bool, error) {
 	var historyModel *model.History
 	query := d.DB.Where("id = ? ", id).Delete(&historyModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	}
-	return true, nil
+	return d.deleteResponseBuilder(query)
 }
