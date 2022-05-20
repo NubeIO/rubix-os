@@ -7,6 +7,7 @@ const FlowNetworkCloneUrl string = "/api/flow_network_clones"
 const StreamCloneUrl string = "/api/stream_clones"
 const WriterCloneUrl string = "/api/producers/writer_clones"
 const ProducerUrl string = "/api/producers"
+const ConsumerUrl string = "/api/consumers"
 
 func SingularUrl(url, uuid string) string {
 	return fmt.Sprintf("%s/%s", url, uuid)

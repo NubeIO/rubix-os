@@ -94,16 +94,9 @@ func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model
 
 }
 
-func (d *GormDatabase) DropConsumers() (bool, error) {
+func (d *GormDatabase) DeleteConsumers(args api.Args) (bool, error) {
 	var consumerModel *model.Consumer
-	query := d.DB.Where("1 = 1").Delete(&consumerModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	query := d.buildConsumerQuery(args)
+	query = query.Delete(&consumerModel)
+	return d.deleteResponseBuilder(query)
 }

@@ -90,6 +90,9 @@ func buildConsumerArgs(ctx *gin.Context) Args {
 	var aDefault = ArgsDefault
 	args.WithWriters, _ = toBool(ctx.DefaultQuery(aType.WithWriters, aDefault.WithWriters))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	if value, ok := ctx.GetQuery(aType.ProducerUUID); ok {
+		args.ProducerUUID = &value
+	}
 	return args
 }
 

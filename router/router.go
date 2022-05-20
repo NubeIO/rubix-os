@@ -296,7 +296,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			producerRoutes.GET("/:uuid", producerHandler.GetProducer)
 			producerRoutes.PATCH("/:uuid", producerHandler.UpdateProducer)
 			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
-			producerRoutes.DELETE("/drop", producerHandler.DropProducers)
 			producerRoutes.GET("/one/args", producerHandler.GetOneProducerByArgs)
 
 			producerWriterCloneRoutes := producerRoutes.Group("/writer_clones")
@@ -316,7 +315,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			consumerRoutes.GET("/:uuid", consumerHandler.GetConsumer)
 			consumerRoutes.PATCH("/:uuid", consumerHandler.UpdateConsumer)
 			consumerRoutes.DELETE("/:uuid", consumerHandler.DeleteConsumer)
-			consumerRoutes.DELETE("/drop", consumerHandler.DropConsumers)
+			consumerRoutes.DELETE("", consumerHandler.DeleteConsumers)
 
 			consumerWriterRoutes := consumerRoutes.Group("/writers")
 			{

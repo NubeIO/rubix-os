@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
@@ -104,31 +105,16 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 }
 
 func (d *GormDatabase) DeleteProducer(uuid string) (bool, error) {
-	var producerModel *model.Producer
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&producerModel)
-	if query.Error != nil {
-		return false, query.Error
+	producer, _ := d.GetProducer(uuid, api.Args{})
+	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
+	aType := api.ArgsType
+	url := urls.PluralUrlByArg(urls.ConsumerUrl, aType.ProducerUUID, producer.UUID)
+	for _, fn := range stream.FlowNetworks {
+		cli := client.NewFlowClientCliFromFN(fn)
+		_ = cli.DeleteQuery(url)
 	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
-func (d *GormDatabase) DropProducers() (bool, error) {
-	var producerModel *model.Producer
-	query := d.DB.Where("1 = 1").Delete(&producerModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	query := d.DB.Delete(&producer)
+	return d.deleteResponseBuilder(query)
 }
 
 type Point struct {
