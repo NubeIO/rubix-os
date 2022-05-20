@@ -84,18 +84,3 @@ func (d *GormDatabase) UpdateJob(uuid string, body *model.Job) (*model.Job, erro
 	return jobModel, nil
 
 }
-
-// DropJobs delete all.
-func (d *GormDatabase) DropJobs() (bool, error) {
-	var jobModel *model.Job
-	query := d.DB.Where("1 = 1").Delete(&jobModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}

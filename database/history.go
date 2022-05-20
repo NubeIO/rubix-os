@@ -103,18 +103,3 @@ func (d *GormDatabase) DeleteHistory(id int) (bool, error) {
 	}
 	return true, nil
 }
-
-// DeleteAllHistories delete all histories.
-func (d *GormDatabase) DeleteAllHistories() (bool, error) {
-	var historyModel *model.History
-	query := d.DB.Where("1 = 1")
-	query.Delete(&historyModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	}
-	return true, nil
-}

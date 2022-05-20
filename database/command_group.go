@@ -57,17 +57,3 @@ func (d *GormDatabase) DeleteCommandGroup(uuid string) (bool, error) {
 		return true, nil
 	}
 }
-
-func (d *GormDatabase) DropCommandGroups() (bool, error) {
-	var commandGroup *model.CommandGroup
-	query := d.DB.Where("1 = 1").Delete(&commandGroup)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}

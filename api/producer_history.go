@@ -15,7 +15,6 @@ type ProducerHistoryDatabase interface {
 	GetProducerHistoriesPoints(args Args) ([]*model.History, error)
 	GetProducerHistoriesPointsForSync(id string, timeStamp string) ([]*model.History, error)
 	CreateProducerHistory(history *model.ProducerHistory) (*model.ProducerHistory, error)
-	DeleteAllProducerHistories(args Args) (bool, error)
 	DeleteProducerHistoriesByProducerUUID(pUuid string, args Args) (bool, error)
 }
 type HistoriesAPI struct {
@@ -64,13 +63,6 @@ func (a *HistoriesAPI) CreateProducerHistory(ctx *gin.Context) {
 	body.Timestamp = time.Now().UTC()
 	q, err := a.DB.CreateProducerHistory(body)
 	responseHandler(q, err, ctx)
-}
-
-func (a *HistoriesAPI) DeleteAllProducerHistories(ctx *gin.Context) {
-	args := buildProducerHistoryArgs(ctx)
-	q, err := a.DB.DeleteAllProducerHistories(args)
-	responseHandler(q, err, ctx)
-
 }
 
 func (a *HistoriesAPI) DeleteProducerHistoriesByProducerUUID(ctx *gin.Context) {

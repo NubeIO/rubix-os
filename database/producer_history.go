@@ -118,22 +118,6 @@ func (d *GormDatabase) DeleteProducerHistoriesByProducerUUID(pUuid string, args 
 	return true, nil
 }
 
-// DeleteAllProducerHistories delete all histories.
-func (d *GormDatabase) DeleteAllProducerHistories(args api.Args) (bool, error) {
-	var historyModel *model.ProducerHistory
-	query := d.buildProducerHistoryQuery(args)
-	query = query.Where("1 = 1")
-	query.Delete(&historyModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	}
-	return true, nil
-}
-
 func (d *GormDatabase) AppendProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
 	var limit = 100 // TODO add in the limit as a field in the producer
 	var count int64

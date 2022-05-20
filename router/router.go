@@ -193,7 +193,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			historyProducerRoutes.GET("/points", historyHandler.GetProducerHistoriesPoints)
 			historyProducerRoutes.GET("/points_for_sync", historyHandler.GetProducerHistoriesPointsForSync)
 			historyProducerRoutes.POST("", historyHandler.CreateProducerHistory)
-			historyProducerRoutes.DELETE("/all", historyHandler.DeleteAllProducerHistories)
 			historyProducerRoutes.DELETE("/:producer_uuid", historyHandler.DeleteProducerHistoriesByProducerUUID)
 		}
 
