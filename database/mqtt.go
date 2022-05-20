@@ -44,15 +44,7 @@ func (d *GormDatabase) GetMqttConnection(uuid string) (*model.MqttConnection, er
 func (d *GormDatabase) DeleteMqttConnection(uuid string) (bool, error) {
 	var wcm *model.MqttConnection
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&wcm)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	return d.deleteResponseBuilder(query)
 }
 
 // UpdateMqttConnection  update it
@@ -67,19 +59,4 @@ func (d *GormDatabase) UpdateMqttConnection(uuid string, body *model.MqttConnect
 		return nil, query.Error
 	}
 	return wcm, nil
-}
-
-// DropMqttConnectionsList delete all.
-func (d *GormDatabase) DropMqttConnectionsList() (bool, error) {
-	var wcm *model.MqttConnection
-	query := d.DB.Where("1 = 1").Delete(&wcm)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
 }

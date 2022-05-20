@@ -41,7 +41,7 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 		return nil, newError("GetOneFlowNetworkCloneByArgs", "error on trying to get validate flow_network_clone from stream_clone_uuid")
 	}
 	cli := client.NewFlowClientCliFromFNC(fnc)
-	rawProducer, err := cli.GetQueryMarshal(urls.ProducerSingularURL(body.ProducerUUID), model.Producer{})
+	rawProducer, err := cli.GetQueryMarshal(urls.SingularUrl(urls.ProducerUrl, body.ProducerUUID), model.Producer{})
 	if err != nil {
 		return nil, err
 	}
@@ -66,15 +66,7 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
 	var consumerModel *model.Consumer
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&consumerModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error) {
@@ -94,16 +86,9 @@ func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model
 
 }
 
-func (d *GormDatabase) DropConsumers() (bool, error) {
+func (d *GormDatabase) DeleteConsumers(args api.Args) (bool, error) {
 	var consumerModel *model.Consumer
-	query := d.DB.Where("1 = 1").Delete(&consumerModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	query := d.buildConsumerQuery(args)
+	query = query.Delete(&consumerModel)
+	return d.deleteResponseBuilder(query)
 }

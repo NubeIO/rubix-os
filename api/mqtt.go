@@ -13,7 +13,6 @@ type MqttConnectionDatabase interface {
 	CreateMqttConnection(body *model.MqttConnection) (*model.MqttConnection, error)
 	UpdateMqttConnection(uuid string, body *model.MqttConnection) (*model.MqttConnection, error)
 	DeleteMqttConnection(uuid string) (bool, error)
-	DropMqttConnectionsList() (bool, error)
 }
 
 type MqttConnectionAPI struct {
@@ -53,10 +52,4 @@ func (j *MqttConnectionAPI) DeleteMqttConnection(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteMqttConnection(uuid)
 	responseHandler(q, err, ctx)
-}
-
-func (j *MqttConnectionAPI) DropMqttConnectionsList(ctx *gin.Context) {
-	q, err := j.DB.DropMqttConnectionsList()
-	responseHandler(q, err, ctx)
-
 }

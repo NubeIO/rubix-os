@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/flow-framework/utils/structs"
+	"gorm.io/gorm"
 
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -84,4 +85,16 @@ func checkHistoryCovType(t string) bool {
 		return false
 	}
 	return true
+}
+
+func (d *GormDatabase) deleteResponseBuilder(query *gorm.DB) (bool, error) {
+	if query.Error != nil {
+		return false, query.Error
+	}
+	r := query.RowsAffected
+	if r == 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
 }

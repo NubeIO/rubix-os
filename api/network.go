@@ -16,7 +16,6 @@ type NetworkDatabase interface {
 	CreateNetwork(network *model.Network, fromPlugin bool) (*model.Network, error)
 	UpdateNetwork(uuid string, body *model.Network, fromPlugin bool) (*model.Network, error)
 	DeleteNetwork(uuid string) (bool, error)
-	DropNetworks() (bool, error)
 
 	CreateNetworkPlugin(network *model.Network) (*model.Network, error)
 	UpdateNetworkPlugin(uuid string, body *model.Network) (*model.Network, error)
@@ -84,10 +83,5 @@ func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
 func (a *NetworksAPI) DeleteNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteNetworkPlugin(uuid)
-	responseHandler(q, err, ctx)
-}
-
-func (a *NetworksAPI) DropNetworks(ctx *gin.Context) {
-	q, err := a.DB.DropNetworks()
 	responseHandler(q, err, ctx)
 }

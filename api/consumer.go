@@ -12,7 +12,7 @@ type ConsumersDatabase interface {
 	CreateConsumer(body *model.Consumer) (*model.Consumer, error)
 	UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error)
 	DeleteConsumer(uuid string) (bool, error)
-	DropConsumers() (bool, error)
+	DeleteConsumers(args Args) (bool, error)
 }
 type ConsumersAPI struct {
 	DB ConsumersDatabase
@@ -54,7 +54,8 @@ func (j *ConsumersAPI) DeleteConsumer(ctx *gin.Context) {
 	responseHandler(q, err, ctx)
 }
 
-func (j *ConsumersAPI) DropConsumers(ctx *gin.Context) {
-	q, err := j.DB.DropConsumers()
+func (j *ConsumersAPI) DeleteConsumers(ctx *gin.Context) {
+	args := buildConsumerArgs(ctx)
+	q, err := j.DB.DeleteConsumers(args)
 	responseHandler(q, err, ctx)
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -76,16 +77,16 @@ func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer
 
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	var writerModel *model.Writer
+	aType := api.ArgsType
+	writer, _ := d.GetWriter(uuid)
+	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
+	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
+	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
+	cli := client.NewFlowClientCliFromFNC(fnc)
+	url := urls.SingularUrlByArg(urls.WriterCloneUrl, aType.SourceUUID, writer.UUID)
+	_ = cli.DeleteQuery(url)
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&writerModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
@@ -101,20 +102,6 @@ func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Wri
 	}
 	d.syncAfterCreateUpdateWriter(writerModel)
 	return writerModel, nil
-}
-
-func (d *GormDatabase) DropWriters() (bool, error) {
-	var writerModel *model.Writer
-	query := d.DB.Where("1 = 1").Delete(&writerModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
 }
 
 func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.WriterActionOutput {

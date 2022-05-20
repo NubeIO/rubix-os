@@ -36,13 +36,5 @@ func (d *GormDatabase) CreateTag(body *model.Tag) (*model.Tag, error) {
 func (d *GormDatabase) DeleteTag(tag string) (bool, error) {
 	var tagModel *model.Tag
 	query := d.DB.Where("tag = ? ", tag).Delete(&tagModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	return d.deleteResponseBuilder(query)
 }

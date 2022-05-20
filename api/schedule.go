@@ -13,7 +13,6 @@ type ScheduleDatabase interface {
 	UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error)
 	ScheduleWrite(uuid string, body *model.ScheduleData) error
 	DeleteSchedule(uuid string) (bool, error)
-	DropSchedules() (bool, error)
 }
 
 type ScheduleAPI struct {
@@ -60,10 +59,5 @@ func (a *ScheduleAPI) CreateSchedule(ctx *gin.Context) {
 func (a *ScheduleAPI) DeleteSchedule(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteSchedule(uuid)
-	responseHandler(q, err, ctx)
-}
-
-func (a *ScheduleAPI) DropSchedules(ctx *gin.Context) {
-	q, err := a.DB.DropSchedules()
 	responseHandler(q, err, ctx)
 }

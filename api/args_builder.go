@@ -28,6 +28,9 @@ func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.DeviceId); ok {
 		args.DeviceId = &value
 	}
+	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
+		args.SourceUUID = &value
+	}
 	return args
 }
 
@@ -87,6 +90,9 @@ func buildConsumerArgs(ctx *gin.Context) Args {
 	var aDefault = ArgsDefault
 	args.WithWriters, _ = toBool(ctx.DefaultQuery(aType.WithWriters, aDefault.WithWriters))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	if value, ok := ctx.GetQuery(aType.ProducerUUID); ok {
+		args.ProducerUUID = &value
+	}
 	return args
 }
 
@@ -155,6 +161,21 @@ func buildPointArgs(ctx *gin.Context) Args {
 func buildWriterArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
+	if value, ok := ctx.GetQuery(aType.ConsumerUUID); ok {
+		args.ConsumerUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.WriterThingClass); ok {
+		args.WriterThingClass = &value
+	}
+	if value, ok := ctx.GetQuery(aType.WriterThingUUID); ok {
+		args.WriterThingUUID = &value
+	}
+	return args
+}
+
+func buildWriterCloneArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
 	if value, ok := ctx.GetQuery(aType.ProducerUUID); ok {
 		args.ProducerUUID = &value
 	}
@@ -163,15 +184,6 @@ func buildWriterArgs(ctx *gin.Context) Args {
 	}
 	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
 		args.SourceUUID = &value
-	}
-	return args
-}
-
-func buildWriterCloneArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	if value, ok := ctx.GetQuery(aType.WriterThingClass); ok {
-		args.WriterThingClass = &value
 	}
 	return args
 }

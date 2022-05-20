@@ -101,29 +101,15 @@ func (d *GormDatabase) ScheduleWrite(uuid string, body *model.ScheduleData) erro
 }
 
 func (d *GormDatabase) DeleteSchedule(uuid string) (bool, error) {
-	var schModel *model.Schedule
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&schModel)
-	if query.Error != nil {
-		return false, query.Error
+	schedule, _ := d.GetSchedule(uuid)
+	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &schedule.UUID})
+	for _, producer := range producers {
+		_, _ = d.DeleteProducer(producer.UUID)
 	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
+	writers, _ := d.GetWriters(api.Args{WriterThingUUID: &schedule.UUID})
+	for _, writer := range writers {
+		_, _ = d.DeleteWriter(writer.UUID)
 	}
-}
-
-func (d *GormDatabase) DropSchedules() (bool, error) {
-	var schModel *model.Schedule
-	query := d.DB.Where("1 = 1").Delete(&schModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	query := d.DB.Delete(&schedule)
+	return d.deleteResponseBuilder(query)
 }

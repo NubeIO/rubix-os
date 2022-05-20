@@ -35,7 +35,6 @@ type ProducerDatabase interface {
 	CreateProducer(body *model.Producer) (*model.Producer, error)
 	UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error)
 	DeleteProducer(uuid string) (bool, error)
-	DropProducers() (bool, error)
 }
 type ProducerAPI struct {
 	DB ProducerDatabase
@@ -80,10 +79,5 @@ func (j *ProducerAPI) UpdateProducer(ctx *gin.Context) {
 func (j *ProducerAPI) DeleteProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteProducer(uuid)
-	responseHandler(q, err, ctx)
-}
-
-func (j *ProducerAPI) DropProducers(ctx *gin.Context) {
-	q, err := j.DB.DropProducers()
 	responseHandler(q, err, ctx)
 }

@@ -46,6 +46,7 @@ type Args struct {
 	WriterThingClass     *string
 	SourceUUID           *string
 	ProducerThingUUID    *string
+	WriterThingUUID      *string
 	PluginName           bool
 	TimestampGt          *string
 	TimestampLt          *string
@@ -107,6 +108,7 @@ var ArgsType = struct {
 	WriterThingClass     string
 	SourceUUID           string
 	ProducerThingUUID    string
+	WriterThingUUID      string
 	PluginName           string
 	TimestampGt          string
 	TimestampLt          string
@@ -166,6 +168,7 @@ var ArgsType = struct {
 	WriterThingClass:     "writer_thing_class",
 	SourceUUID:           "source_uuid",
 	ProducerThingUUID:    "producer_thing_uuid",
+	WriterThingUUID:      "writer_thing_uuid",
 	PluginName:           "by_plugin_name",
 	TimestampGt:          "timestamp_gt",
 	TimestampLt:          "timestamp_lt",

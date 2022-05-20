@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nstring"
@@ -112,31 +113,17 @@ func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (
 }
 
 func (d *GormDatabase) DeleteFlowNetwork(uuid string) (bool, error) {
-	var flowNetworkModel *model.FlowNetwork
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&flowNetworkModel)
-	if query.Error != nil {
-		return false, query.Error
+	fn, err := d.GetFlowNetwork(uuid, api.Args{})
+	query := d.buildFlowNetworkQuery(api.Args{UUID: &uuid})
+	if err != nil {
+		return false, err
 	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
-func (d *GormDatabase) DropFlowNetworks() (bool, error) {
-	var networkModel *model.FlowNetwork
-	query := d.DB.Where("1 = 1").Delete(&networkModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
+	cli := client.NewFlowClientCliFromFN(fn)
+	aType := api.ArgsType
+	url := urls.SingularUrlByArg(urls.FlowNetworkCloneUrl, aType.SourceUUID, fn.UUID)
+	_ = cli.DeleteQuery(url)
+	query = d.DB.Delete(&fn)
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {

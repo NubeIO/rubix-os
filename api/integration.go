@@ -13,7 +13,6 @@ type IntegrationDatabase interface {
 	CreateIntegration(body *model.Integration) (*model.Integration, error)
 	UpdateIntegration(uuid string, body *model.Integration) (*model.Integration, error)
 	DeleteIntegration(uuid string) (bool, error)
-	DropIntegrationsList() (bool, error)
 }
 
 type IntegrationAPI struct {
@@ -53,10 +52,4 @@ func (j *IntegrationAPI) DeleteIntegration(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteIntegration(uuid)
 	responseHandler(q, err, ctx)
-}
-
-func (j *IntegrationAPI) DropIntegrationsList(ctx *gin.Context) {
-	q, err := j.DB.DropIntegrationsList()
-	responseHandler(q, err, ctx)
-
 }

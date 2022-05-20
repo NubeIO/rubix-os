@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -66,20 +67,6 @@ func (d *GormDatabase) GetFlowNetworksFromStreamUUID(streamUUID string) (*[]mode
 	return flowNetworks, nil
 }
 
-func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
-	var streamModel *model.Stream
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&streamModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
 func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Stream, error) {
 	var streamModel *model.Stream
 	if err := d.DB.Preload("FlowNetworks").Where("uuid = ?", uuid).First(&streamModel).Error; err != nil {
@@ -102,35 +89,16 @@ func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Str
 	return streamModel, nil
 }
 
-func (d *GormDatabase) DropStreams() (bool, error) {
-	var streamModel *model.Stream
-	query := d.DB.Where("1 = 1").Delete(&streamModel)
-	if query.Error != nil {
-		return false, query.Error
+func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
+	var aType = api.ArgsType
+	streamModel, _ := d.GetStream(uuid, api.Args{WithFlowNetworks: true})
+	for _, fn := range streamModel.FlowNetworks {
+		cli := client.NewFlowClientCliFromFN(fn)
+		url := urls.SingularUrlByArg(urls.StreamCloneUrl, aType.SourceUUID, streamModel.UUID)
+		_ = cli.DeleteQuery(url)
 	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
-func (d *GormDatabase) GetFlowUUID(uuid string) (*model.Stream, *model.FlowNetwork, error) {
-	var stream *model.Stream
-	query := d.DB.Preload("FlowNetworks").Where("uuid = ? ", uuid).First(&stream)
-	if query.Error != nil {
-		return nil, nil, query.Error
-	}
-	flowUUID := ""
-	for _, net := range stream.FlowNetworks {
-		flowUUID = net.UUID
-	}
-	flow, err := d.GetFlowNetwork(flowUUID, api.Args{})
-	if err != nil {
-		return nil, nil, err
-	}
-	return stream, flow, nil
+	query := d.DB.Delete(&streamModel)
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) syncAfterCreateUpdateStream(body *model.Stream) error {

@@ -193,7 +193,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			historyProducerRoutes.GET("/points", historyHandler.GetProducerHistoriesPoints)
 			historyProducerRoutes.GET("/points_for_sync", historyHandler.GetProducerHistoriesPointsForSync)
 			historyProducerRoutes.POST("", historyHandler.CreateProducerHistory)
-			historyProducerRoutes.DELETE("/all", historyHandler.DeleteAllProducerHistories)
 			historyProducerRoutes.DELETE("/:producer_uuid", historyHandler.DeleteProducerHistoriesByProducerUUID)
 		}
 
@@ -205,7 +204,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			flowNetworkRoutes.PATCH("/:uuid", flowNetwork.UpdateFlowNetwork)
 			flowNetworkRoutes.DELETE("/:uuid", flowNetwork.DeleteFlowNetwork)
 			flowNetworkRoutes.GET("/one/args", flowNetwork.GetOneFlowNetworkByArgs)
-			flowNetworkRoutes.DELETE("/drop", flowNetwork.DropFlowNetworks)
 			flowNetworkRoutes.GET("/refresh_connections", flowNetwork.RefreshFlowNetworksConnections)
 		}
 
@@ -215,6 +213,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			flowNetworkCloneRoutes.GET("/:uuid", flowNetworkCloneHandler.GetFlowNetworkClone)
 			flowNetworkCloneRoutes.DELETE("/:uuid", flowNetworkCloneHandler.DeleteFlowNetworkClone)
 			flowNetworkCloneRoutes.GET("/one/args", flowNetworkCloneHandler.GetOneFlowNetworkCloneByArgs)
+			flowNetworkCloneRoutes.DELETE("/one/args", flowNetworkCloneHandler.DeleteOneFlowNetworkCloneByArgs)
 			flowNetworkCloneRoutes.GET("/refresh_connections", flowNetworkCloneHandler.RefreshFlowNetworkClonesConnections)
 		}
 
@@ -225,7 +224,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			streamRoutes.GET("/:uuid", gatewayHandler.GetStream)
 			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
 			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
-			streamRoutes.DELETE("/drop", gatewayHandler.DropStreams)
 		}
 
 		mappingRoutes := apiRoutes.Group("/mapping")
@@ -238,6 +236,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			streamCloneRoutes.GET("", streamCloneHandler.GetStreamClones)
 			streamCloneRoutes.GET("/:uuid", streamCloneHandler.GetStreamClone)
 			streamCloneRoutes.DELETE("/:uuid", streamCloneHandler.DeleteStreamClone)
+			streamCloneRoutes.DELETE("/one/args", streamCloneHandler.DeleteOneStreamCloneByArgs)
 		}
 
 		networkRoutes := apiRoutes.Group("/networks")
@@ -251,7 +250,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			networkRoutes.GET("/name/all/:name", networkHandler.GetNetworksByName)
 			networkRoutes.PATCH("/:uuid", networkHandler.UpdateNetwork)
 			networkRoutes.DELETE("/:uuid", networkHandler.DeleteNetwork)
-			networkRoutes.DELETE("/drop", networkHandler.DropNetworks)
 		}
 
 		deviceRoutes := apiRoutes.Group("/devices")
@@ -262,7 +260,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			deviceRoutes.GET("/one/args", deviceHandler.GetOneDeviceByArgs)
 			deviceRoutes.PATCH("/:uuid", deviceHandler.UpdateDevice)
 			deviceRoutes.DELETE("/:uuid", deviceHandler.DeleteDevice)
-			deviceRoutes.DELETE("/drop", deviceHandler.DropDevices)
 		}
 
 		pointRoutes := apiRoutes.Group("/points")
@@ -275,7 +272,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			pointRoutes.PATCH("/write/:uuid", pointHandler.PointWrite)
 			pointRoutes.GET("/one/args", pointHandler.GetOnePointByArgs)
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
-			pointRoutes.DELETE("/drop", pointHandler.DropPoints)
 			pointRoutes.GET("/name", pointHandler.GetPointByName)
 			pointRoutes.PATCH("/name", pointHandler.PointWriteByName)
 		}
@@ -296,7 +292,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			producerRoutes.GET("/:uuid", producerHandler.GetProducer)
 			producerRoutes.PATCH("/:uuid", producerHandler.UpdateProducer)
 			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
-			producerRoutes.DELETE("/drop", producerHandler.DropProducers)
 			producerRoutes.GET("/one/args", producerHandler.GetOneProducerByArgs)
 
 			producerWriterCloneRoutes := producerRoutes.Group("/writer_clones")
@@ -305,7 +300,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 				producerWriterCloneRoutes.POST("", writerCloneHandler.CreateWriterClone)
 				producerWriterCloneRoutes.GET("/:uuid", writerCloneHandler.GetWriterClone)
 				producerWriterCloneRoutes.DELETE("/:uuid", writerCloneHandler.DeleteWriterClone)
-				producerWriterCloneRoutes.DELETE("/drop", writerCloneHandler.DropWriterClone)
+				producerWriterCloneRoutes.DELETE("/one/args", writerCloneHandler.DeleteOneWriterCloneByArgs)
 			}
 		}
 
@@ -316,7 +311,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			consumerRoutes.GET("/:uuid", consumerHandler.GetConsumer)
 			consumerRoutes.PATCH("/:uuid", consumerHandler.UpdateConsumer)
 			consumerRoutes.DELETE("/:uuid", consumerHandler.DeleteConsumer)
-			consumerRoutes.DELETE("/drop", consumerHandler.DropConsumers)
+			consumerRoutes.DELETE("", consumerHandler.DeleteConsumers)
 
 			consumerWriterRoutes := consumerRoutes.Group("/writers")
 			{
@@ -325,7 +320,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 				consumerWriterRoutes.GET("/:uuid", writerHandler.GetWriter)
 				consumerWriterRoutes.PATCH("/:uuid", writerHandler.UpdateWriter)
 				consumerWriterRoutes.DELETE("/:uuid", writerHandler.DeleteWriter)
-				consumerWriterRoutes.DELETE("/drop", writerHandler.DropWriters)
 			}
 		}
 
@@ -345,7 +339,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			integrationRoutes.GET("/:uuid", integrationHandler.GetIntegration)
 			integrationRoutes.PATCH("/:uuid", integrationHandler.UpdateIntegration)
 			integrationRoutes.DELETE("/:uuid", integrationHandler.DeleteIntegration)
-			integrationRoutes.DELETE("/drop", integrationHandler.DropIntegrationsList)
 		}
 
 		mqttClientRoutes := apiRoutes.Group("/mqtt/clients")
@@ -355,7 +348,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			mqttClientRoutes.GET("/:uuid", mqttHandler.GetMqttConnection)
 			mqttClientRoutes.PATCH("/:uuid", mqttHandler.UpdateMqttConnection)
 			mqttClientRoutes.DELETE("/:uuid", mqttHandler.DeleteMqttConnection)
-			mqttClientRoutes.DELETE("/drop", mqttHandler.DropMqttConnectionsList)
 		}
 
 		schRoutes := apiRoutes.Group("/schedules")
@@ -367,7 +359,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			schRoutes.PATCH("/:uuid", schHandler.UpdateSchedule)
 			schRoutes.PATCH("/write/:uuid", schHandler.ScheduleWrite)
 			schRoutes.DELETE("/:uuid", schHandler.DeleteSchedule)
-			schRoutes.DELETE("/drop", schHandler.DropSchedules)
 		}
 
 		thingRoutes := apiRoutes.Group("/things")

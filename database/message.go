@@ -44,10 +44,6 @@ func (d *GormDatabase) GetMessagesSince(limit int, since uint) ([]*model.Message
 	return messages, err
 }
 
-func (d *GormDatabase) DeleteMessages() error {
-	return d.DB.Where("1 = 1").Delete(&model.Message{}).Error
-}
-
 func (d *GormDatabase) DeleteMessageByID(id uint) error {
 	return d.DB.Where("id = ?", id).Delete(&model.Message{}).Error
 }

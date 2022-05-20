@@ -36,6 +36,10 @@ func (d *GormDatabase) buildFlowNetworkQuery(args api.Args) *gorm.DB {
 		values := strings.Split(*args.DeviceId, ",")
 		query = query.Where(fmt.Sprintf(`device_id IN ( '%s' )`, strings.Join(values, "', '")))
 	}
+	if args.SourceUUID != nil {
+		values := strings.Split(*args.SourceUUID, ",")
+		query = query.Where(fmt.Sprintf(`source_uuid IN ( '%s' )`, strings.Join(values, "', '")))
+	}
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
 	}
@@ -141,6 +145,9 @@ func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
 	if args.WithTags {
 		query = query.Preload("Tags")
 	}
+	if args.ProducerUUID != nil {
+		query = query.Where("producer_uuid = ?", *args.ProducerUUID)
+	}
 	return query
 }
 
@@ -231,6 +238,9 @@ func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
 	}
 	if args.WriterThingClass != nil {
 		query = query.Where("writer_thing_class = ?", *args.WriterThingClass)
+	}
+	if args.WriterThingUUID != nil {
+		query = query.Where("writer_thing_uuid = ?", *args.WriterThingUUID)
 	}
 	return query
 }

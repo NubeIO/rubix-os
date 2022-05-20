@@ -99,7 +99,7 @@ func (d *GormDatabase) GetProducerHistoriesPointsForSync(id string, timeStamp st
 }
 
 func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (*model.ProducerHistory, error) {
-	return d.AppendProducerHistory(history)
+	return d.appendProducerHistory(history)
 }
 
 // DeleteProducerHistoriesByProducerUUID delete all history for given producer_uuid.
@@ -107,34 +107,11 @@ func (d *GormDatabase) DeleteProducerHistoriesByProducerUUID(pUuid string, args 
 	var historyModel *model.ProducerHistory
 	query := d.buildProducerHistoryQuery(args)
 	query = query.Where("producer_uuid = ? ", pUuid)
-	query.Delete(&historyModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	}
-	return true, nil
+	query = query.Delete(&historyModel)
+	return d.deleteResponseBuilder(query)
 }
 
-// DeleteAllProducerHistories delete all histories.
-func (d *GormDatabase) DeleteAllProducerHistories(args api.Args) (bool, error) {
-	var historyModel *model.ProducerHistory
-	query := d.buildProducerHistoryQuery(args)
-	query = query.Where("1 = 1")
-	query.Delete(&historyModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	}
-	return true, nil
-}
-
-func (d *GormDatabase) AppendProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
+func (d *GormDatabase) appendProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
 	var limit = 100 // TODO add in the limit as a field in the producer
 	var count int64
 	ids := d.DB.Model(&model.ProducerHistory{}).
@@ -163,12 +140,5 @@ func (d *GormDatabase) DeleteProducerHistoriesBeforeTimestamp(ts string) (bool, 
 	var historyModel *model.ProducerHistory
 	query := d.DB.Where("timestamp < datetime(?)", ts)
 	query.Delete(&historyModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	}
-	return true, nil
+	return d.deleteResponseBuilder(query)
 }
