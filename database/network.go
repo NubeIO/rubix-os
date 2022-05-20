@@ -128,20 +128,6 @@ func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
 	}
 }
 
-func (d *GormDatabase) DropNetworks() (bool, error) {
-	var networkModel *model.Network
-	query := d.DB.Where("1 = 1").Delete(&networkModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
 func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	var pluginConf *model.PluginConf
 	query := d.DB.Where("uuid = ?", body.PluginConfId).First(&pluginConf)

@@ -251,7 +251,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			networkRoutes.GET("/name/all/:name", networkHandler.GetNetworksByName)
 			networkRoutes.PATCH("/:uuid", networkHandler.UpdateNetwork)
 			networkRoutes.DELETE("/:uuid", networkHandler.DeleteNetwork)
-			networkRoutes.DELETE("/drop", networkHandler.DropNetworks)
 		}
 
 		deviceRoutes := apiRoutes.Group("/devices")
@@ -262,7 +261,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			deviceRoutes.GET("/one/args", deviceHandler.GetOneDeviceByArgs)
 			deviceRoutes.PATCH("/:uuid", deviceHandler.UpdateDevice)
 			deviceRoutes.DELETE("/:uuid", deviceHandler.DeleteDevice)
-			deviceRoutes.DELETE("/drop", deviceHandler.DropDevices)
 		}
 
 		pointRoutes := apiRoutes.Group("/points")
@@ -342,7 +340,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			integrationRoutes.GET("/:uuid", integrationHandler.GetIntegration)
 			integrationRoutes.PATCH("/:uuid", integrationHandler.UpdateIntegration)
 			integrationRoutes.DELETE("/:uuid", integrationHandler.DeleteIntegration)
-			integrationRoutes.DELETE("/drop", integrationHandler.DropIntegrationsList)
 		}
 
 		mqttClientRoutes := apiRoutes.Group("/mqtt/clients")
@@ -352,7 +349,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			mqttClientRoutes.GET("/:uuid", mqttHandler.GetMqttConnection)
 			mqttClientRoutes.PATCH("/:uuid", mqttHandler.UpdateMqttConnection)
 			mqttClientRoutes.DELETE("/:uuid", mqttHandler.DeleteMqttConnection)
-			mqttClientRoutes.DELETE("/drop", mqttHandler.DropMqttConnectionsList)
 		}
 
 		schRoutes := apiRoutes.Group("/schedules")
@@ -364,7 +360,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			schRoutes.PATCH("/:uuid", schHandler.UpdateSchedule)
 			schRoutes.PATCH("/write/:uuid", schHandler.ScheduleWrite)
 			schRoutes.DELETE("/:uuid", schHandler.DeleteSchedule)
-			schRoutes.DELETE("/drop", schHandler.DropSchedules)
 		}
 
 		thingRoutes := apiRoutes.Group("/things")

@@ -118,18 +118,3 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 		return true, nil
 	}
 }
-
-// DropDevices delete all devices.
-func (d *GormDatabase) DropDevices() (bool, error) {
-	var deviceModel *model.Device
-	query := d.DB.Where("1 = 1").Delete(&deviceModel)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}

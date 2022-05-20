@@ -97,18 +97,3 @@ func (d *GormDatabase) UpdateIntegration(uuid string, body *model.Integration) (
 	}
 	return integration, nil
 }
-
-// DropIntegrationsList delete all.
-func (d *GormDatabase) DropIntegrationsList() (bool, error) {
-	var integration *model.Integration
-	query := d.DB.Where("1 = 1").Delete(&integration)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}

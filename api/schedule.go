@@ -62,8 +62,3 @@ func (a *ScheduleAPI) DeleteSchedule(ctx *gin.Context) {
 	q, err := a.DB.DeleteSchedule(uuid)
 	responseHandler(q, err, ctx)
 }
-
-func (a *ScheduleAPI) DropSchedules(ctx *gin.Context) {
-	q, err := a.DB.DropSchedules()
-	responseHandler(q, err, ctx)
-}
