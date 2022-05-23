@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
@@ -12,6 +13,7 @@ type FlowNetworkCloneDatabase interface {
 	GetOneFlowNetworkCloneByArgs(args Args) (*model.FlowNetworkClone, error)
 	DeleteOneFlowNetworkCloneByArgs(args Args) (bool, error)
 	RefreshFlowNetworkClonesConnections() (*bool, error)
+	SyncFlowNetworkCloneStreamClones(uuid string) ([]*interfaces.SyncModel, error)
 }
 
 type FlowNetworkClonesAPI struct {
@@ -51,5 +53,11 @@ func (a *FlowNetworkClonesAPI) DeleteOneFlowNetworkCloneByArgs(ctx *gin.Context)
 
 func (a *FlowNetworkClonesAPI) RefreshFlowNetworkClonesConnections(ctx *gin.Context) {
 	q, err := a.DB.RefreshFlowNetworkClonesConnections()
+	responseHandler(q, err, ctx)
+}
+
+func (a *FlowNetworkClonesAPI) SyncFlowNetworkCloneStreamClones(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := a.DB.SyncFlowNetworkCloneStreamClones(uuid)
 	responseHandler(q, err, ctx)
 }

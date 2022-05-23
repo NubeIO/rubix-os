@@ -57,6 +57,14 @@ func (d *GormDatabase) DeleteOneStreamCloneByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
+func (d *GormDatabase) updateStreamClone(uuid string, body *model.StreamClone) error {
+	query := d.DB.Where("uuid = ?", uuid).Updates(body)
+	if query.Error != nil {
+		return query.Error
+	}
+	return nil
+}
+
 func (d *GormDatabase) SyncStreamCloneConsumers(uuid string) ([]*interfaces.SyncModel, error) {
 	streamClone, _ := d.GetStreamClone(uuid, api.Args{WithConsumers: true})
 	if streamClone == nil {

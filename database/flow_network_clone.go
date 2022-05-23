@@ -1,8 +1,12 @@
 package database
 
 import (
+	"errors"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -74,4 +78,36 @@ func (d *GormDatabase) RefreshFlowNetworkClonesConnections() (*bool, error) {
 		}
 	}
 	return boolean.NewTrue(), nil
+}
+
+func (d *GormDatabase) SyncFlowNetworkCloneStreamClones(uuid string) ([]*interfaces.SyncModel, error) {
+	var outputs []*interfaces.SyncModel
+	fnc, _ := d.GetFlowNetworkClone(uuid, api.Args{WithStreamClones: true})
+	if fnc == nil {
+		return nil, errors.New("no flow_network_clone")
+	}
+	for _, sc := range fnc.StreamClones {
+		var output interfaces.SyncModel
+		cli := client.NewFlowClientCliFromFNC(fnc)
+		_, err := cli.GetQueryMarshal(urls.SingularUrl(urls.StreamUrl, sc.SourceUUID), model.Writer{})
+		if err != nil {
+			output = interfaces.SyncModel{
+				UUID:    sc.UUID,
+				IsError: true,
+				Message: nstring.New(err.Error()),
+			}
+			sc.Connection = connection.Broken.String()
+			sc.Message = err.Error()
+		} else {
+			output = interfaces.SyncModel{
+				UUID:    sc.UUID,
+				IsError: false,
+			}
+			sc.Connection = connection.Connected.String()
+			sc.Message = ""
+		}
+		_ = d.updateStreamClone(sc.UUID, sc)
+		outputs = append(outputs, &output)
+	}
+	return outputs, nil
 }
