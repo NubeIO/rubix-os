@@ -11,7 +11,7 @@ type StreamCloneDatabase interface {
 	GetStreamClone(uuid string, args Args) (*model.StreamClone, error)
 	DeleteStreamClone(uuid string) (bool, error)
 	DeleteOneStreamCloneByArgs(args Args) (bool, error)
-	SyncStreamCloneConsumers(uuid string) []*interfaces.SyncModel
+	SyncStreamCloneConsumers(uuid string) ([]*interfaces.SyncModel, error)
 }
 
 type StreamCloneAPI struct {
@@ -45,6 +45,6 @@ func (j *StreamCloneAPI) DeleteOneStreamCloneByArgs(ctx *gin.Context) {
 
 func (j *StreamCloneAPI) SyncStreamCloneConsumers(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q := j.DB.SyncStreamCloneConsumers(uuid)
-	responseHandler(q, nil, ctx)
+	q, err := j.DB.SyncStreamCloneConsumers(uuid)
+	responseHandler(q, err, ctx)
 }

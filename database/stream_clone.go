@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/interfaces/connection"
@@ -56,8 +57,11 @@ func (d *GormDatabase) DeleteOneStreamCloneByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncStreamCloneConsumers(uuid string) []*interfaces.SyncModel {
+func (d *GormDatabase) SyncStreamCloneConsumers(uuid string) ([]*interfaces.SyncModel, error) {
 	streamClone, _ := d.GetStreamClone(uuid, api.Args{WithConsumers: true})
+	if streamClone == nil {
+		return nil, errors.New("no stream_clone")
+	}
 	flowNetworkClone, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	cli := client.NewFlowClientCliFromFNC(flowNetworkClone)
 	var outputs []*interfaces.SyncModel
@@ -79,5 +83,5 @@ func (d *GormDatabase) SyncStreamCloneConsumers(uuid string) []*interfaces.SyncM
 		_, _ = d.UpdateConsumer(consumer.UUID, consumer)
 		outputs = append(outputs, &output)
 	}
-	return outputs
+	return outputs, nil
 }

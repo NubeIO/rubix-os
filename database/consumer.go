@@ -1,6 +1,7 @@
 package database
 
 import (
+	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
@@ -95,9 +96,12 @@ func (d *GormDatabase) DeleteConsumers(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncConsumerWriters(uuid string) []*interfaces.SyncModel {
+func (d *GormDatabase) SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel, error) {
 	consumer, _ := d.GetConsumer(uuid, api.Args{WithWriters: true})
 	var outputs []*interfaces.SyncModel
+	if consumer == nil {
+		return nil, errors.New("not found consumer")
+	}
 	for _, writer := range consumer.Writers {
 		_, err := d.UpdateWriter(writer.UUID, writer)
 		var output interfaces.SyncModel
@@ -108,5 +112,5 @@ func (d *GormDatabase) SyncConsumerWriters(uuid string) []*interfaces.SyncModel 
 		}
 		outputs = append(outputs, &output)
 	}
-	return outputs
+	return outputs, nil
 }

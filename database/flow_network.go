@@ -166,9 +166,12 @@ func (d *GormDatabase) SyncFlowNetworks() []*interfaces.SyncModel {
 	return outputs
 }
 
-func (d *GormDatabase) SyncFlowNetworkStreams(uuid string) []*interfaces.SyncModel {
+func (d *GormDatabase) SyncFlowNetworkStreams(uuid string) ([]*interfaces.SyncModel, error) {
 	fn, _ := d.GetFlowNetwork(uuid, api.Args{WithStreams: true})
 	var outputs []*interfaces.SyncModel
+	if fn == nil {
+		return nil, errors.New("no flow_network")
+	}
 	for _, stream := range fn.Streams {
 		_, err := d.UpdateStream(stream.UUID, stream)
 		var output interfaces.SyncModel
@@ -179,7 +182,7 @@ func (d *GormDatabase) SyncFlowNetworkStreams(uuid string) []*interfaces.SyncMod
 		}
 		outputs = append(outputs, &output)
 	}
-	return outputs
+	return outputs, nil
 }
 
 func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *client.FlowClient, bool, *gorm.DB, error) {
