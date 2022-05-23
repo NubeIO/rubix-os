@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -35,6 +36,7 @@ type ProducerDatabase interface {
 	CreateProducer(body *model.Producer) (*model.Producer, error)
 	UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error)
 	DeleteProducer(uuid string) (bool, error)
+	SyncProducerWriterClones(uuid string) ([]*interfaces.SyncModel, error)
 }
 type ProducerAPI struct {
 	DB ProducerDatabase
@@ -79,5 +81,11 @@ func (j *ProducerAPI) UpdateProducer(ctx *gin.Context) {
 func (j *ProducerAPI) DeleteProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteProducer(uuid)
+	responseHandler(q, err, ctx)
+}
+
+func (j *ProducerAPI) SyncProducerWriterClones(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := j.DB.SyncProducerWriterClones(uuid)
 	responseHandler(q, err, ctx)
 }

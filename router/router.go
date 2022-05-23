@@ -296,6 +296,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			producerRoutes.PATCH("/:uuid", producerHandler.UpdateProducer)
 			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
 			producerRoutes.GET("/one/args", producerHandler.GetOneProducerByArgs)
+			producerRoutes.GET("/:uuid/sync/writer_clones", producerHandler.SyncProducerWriterClones)
 
 			producerWriterCloneRoutes := producerRoutes.Group("/writer_clones")
 			{

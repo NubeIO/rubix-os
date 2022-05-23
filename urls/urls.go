@@ -5,9 +5,10 @@ import "fmt"
 const FlowNetworkUrl string = "/api/flow_network"
 const FlowNetworkCloneUrl string = "/api/flow_network_clones"
 const StreamCloneUrl string = "/api/stream_clones"
-const WriterCloneUrl string = "/api/producers/writer_clones"
 const ProducerUrl string = "/api/producers"
 const ConsumerUrl string = "/api/consumers"
+const WriterCloneUrl string = "/api/producers/writer_clones"
+const WriterUrl string = "/api/consumers/writers"
 
 func SingularUrl(url, uuid string) string {
 	return fmt.Sprintf("%s/%s", url, uuid)

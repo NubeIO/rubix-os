@@ -3,6 +3,8 @@ package database
 import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -115,6 +117,46 @@ func (d *GormDatabase) DeleteProducer(uuid string) (bool, error) {
 	}
 	query := d.DB.Delete(&producer)
 	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) SyncProducerWriterClones(uuid string) ([]*interfaces.SyncModel, error) {
+	producer, _ := d.GetProducer(uuid, api.Args{WithWriterClones: true})
+	if producer == nil {
+		return nil, errors.New("producer not found")
+	}
+	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
+	var outputs []*interfaces.SyncModel
+	flowNetworkMap := map[string]*model.FlowNetwork{}
+	for _, fn := range stream.FlowNetworks {
+		flowNetworkMap[fn.UUID] = fn
+	}
+	for _, wc := range producer.WriterClones {
+		var output interfaces.SyncModel
+		fn, exists := flowNetworkMap[wc.FlowFrameworkUUID]
+		wc.Connection = connection.Connected.String()
+		if !exists {
+			output = interfaces.SyncModel{
+				UUID:    wc.UUID,
+				IsError: true,
+				Message: nstring.New("FlowNetwork is broken!"),
+			}
+			wc.Connection = connection.Broken.String()
+		} else {
+			cli := client.NewFlowClientCliFromFN(fn)
+			_, err := cli.GetQueryMarshal(urls.SingularUrl(urls.WriterUrl, wc.SourceUUID), model.Writer{})
+			if err != nil {
+				output = interfaces.SyncModel{
+					UUID:    wc.UUID,
+					IsError: true,
+					Message: nstring.New(err.Error()),
+				}
+				wc.Connection = connection.Broken.String()
+			}
+		}
+		_ = d.UpdateWriterClone(wc, wc)
+		outputs = append(outputs, &output)
+	}
+	return outputs, nil
 }
 
 type Point struct {
