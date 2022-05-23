@@ -206,7 +206,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			flowNetworkRoutes.GET("/one/args", flowNetwork.GetOneFlowNetworkByArgs)
 			flowNetworkRoutes.GET("/refresh_connections", flowNetwork.RefreshFlowNetworksConnections)
 			flowNetworkRoutes.GET("/sync", flowNetwork.SyncFlowNetworks)
-			flowNetworkRoutes.GET("/sync/streams/:uuid", flowNetwork.SyncFlowNetworkStreams)
+			flowNetworkRoutes.GET("/:uuid/sync/streams", flowNetwork.SyncFlowNetworkStreams)
 		}
 
 		flowNetworkCloneRoutes := apiRoutes.Group("/flow_network_clones")
@@ -314,6 +314,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			consumerRoutes.PATCH("/:uuid", consumerHandler.UpdateConsumer)
 			consumerRoutes.DELETE("/:uuid", consumerHandler.DeleteConsumer)
 			consumerRoutes.DELETE("", consumerHandler.DeleteConsumers)
+			consumerRoutes.GET("/:uuid/sync/writers", consumerHandler.SyncConsumerWriters)
 
 			consumerWriterRoutes := consumerRoutes.Group("/writers")
 			{

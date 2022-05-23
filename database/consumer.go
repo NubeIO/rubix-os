@@ -2,8 +2,10 @@ package database
 
 import (
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -91,4 +93,20 @@ func (d *GormDatabase) DeleteConsumers(args api.Args) (bool, error) {
 	query := d.buildConsumerQuery(args)
 	query = query.Delete(&consumerModel)
 	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) SyncConsumerWriters(uuid string) []*interfaces.SyncModel {
+	consumer, _ := d.GetConsumer(uuid, api.Args{WithWriters: true})
+	var outputs []*interfaces.SyncModel
+	for _, writer := range consumer.Writers {
+		_, err := d.UpdateWriter(writer.UUID, writer)
+		var output interfaces.SyncModel
+		if err != nil {
+			output = interfaces.SyncModel{UUID: writer.UUID, IsError: true, Message: nstring.New(err.Error())}
+		} else {
+			output = interfaces.SyncModel{UUID: writer.UUID, IsError: false}
+		}
+		outputs = append(outputs, &output)
+	}
+	return outputs
 }
