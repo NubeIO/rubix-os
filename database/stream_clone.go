@@ -71,10 +71,12 @@ func (d *GormDatabase) SyncStreamCloneConsumers(uuid string) ([]*interfaces.Sync
 		if err != nil {
 			output = interfaces.SyncModel{UUID: consumer.UUID, IsError: true, Message: nstring.New(err.Error())}
 			consumer.Connection = connection.Broken.String()
+			consumer.Message = err.Error()
 		} else {
 			output = interfaces.SyncModel{UUID: consumer.UUID, IsError: false}
 			producer := rawProducer.(*model.Producer)
 			consumer.Connection = connection.Connected.String()
+			consumer.Message = ""
 			consumer.ProducerThingName = producer.ProducerThingName
 			consumer.ProducerThingUUID = producer.ProducerThingUUID
 			consumer.ProducerThingClass = producer.ProducerThingClass

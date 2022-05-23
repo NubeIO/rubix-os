@@ -134,13 +134,16 @@ func (d *GormDatabase) SyncProducerWriterClones(uuid string) ([]*interfaces.Sync
 		var output interfaces.SyncModel
 		fn, exists := flowNetworkMap[wc.FlowFrameworkUUID]
 		wc.Connection = connection.Connected.String()
+		wc.Message = ""
 		if !exists {
+			msg := "FlowNetwork is broken!"
 			output = interfaces.SyncModel{
 				UUID:    wc.UUID,
 				IsError: true,
-				Message: nstring.New("FlowNetwork is broken!"),
+				Message: nstring.New(msg),
 			}
 			wc.Connection = connection.Broken.String()
+			wc.Message = msg
 		} else {
 			cli := client.NewFlowClientCliFromFN(fn)
 			_, err := cli.GetQueryMarshal(urls.SingularUrl(urls.WriterUrl, wc.SourceUUID), model.Writer{})
@@ -151,6 +154,7 @@ func (d *GormDatabase) SyncProducerWriterClones(uuid string) ([]*interfaces.Sync
 					Message: nstring.New(err.Error()),
 				}
 				wc.Connection = connection.Broken.String()
+				wc.Message = err.Error()
 			}
 		}
 		_ = d.UpdateWriterClone(wc, wc)
