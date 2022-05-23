@@ -1,7 +1,7 @@
 package interfaces
 
 type SyncModel struct {
-	Id      string  `json:"id"`
+	UUID    string  `json:"uuid"`
 	IsError bool    `json:"is_error"`
 	Message *string `json:"message"`
 }

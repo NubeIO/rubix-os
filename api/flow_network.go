@@ -16,6 +16,7 @@ type FlowNetworkDatabase interface {
 	DeleteFlowNetwork(uuid string) (bool, error)
 	RefreshFlowNetworksConnections() (*bool, error)
 	SyncFlowNetworks() []*interfaces.SyncModel
+	SyncFlowNetworkStreams(uuid string) []*interfaces.SyncModel
 }
 type FlowNetworksAPI struct {
 	DB FlowNetworkDatabase
@@ -66,5 +67,11 @@ func (a *FlowNetworksAPI) RefreshFlowNetworksConnections(ctx *gin.Context) {
 
 func (a *FlowNetworksAPI) SyncFlowNetworks(ctx *gin.Context) {
 	q := a.DB.SyncFlowNetworks()
+	responseHandler(q, nil, ctx)
+}
+
+func (a *FlowNetworksAPI) SyncFlowNetworkStreams(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q := a.DB.SyncFlowNetworkStreams(uuid)
 	responseHandler(q, nil, ctx)
 }

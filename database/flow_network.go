@@ -157,9 +157,25 @@ func (d *GormDatabase) SyncFlowNetworks() []*interfaces.SyncModel {
 		_, err := d.UpdateFlowNetwork(fn.UUID, fn)
 		var output interfaces.SyncModel
 		if err != nil {
-			output = interfaces.SyncModel{Id: fn.UUID, IsError: true, Message: nstring.New(err.Error())}
+			output = interfaces.SyncModel{UUID: fn.UUID, IsError: true, Message: nstring.New(err.Error())}
 		} else {
-			output = interfaces.SyncModel{Id: fn.UUID, IsError: false}
+			output = interfaces.SyncModel{UUID: fn.UUID, IsError: false}
+		}
+		outputs = append(outputs, &output)
+	}
+	return outputs
+}
+
+func (d *GormDatabase) SyncFlowNetworkStreams(uuid string) []*interfaces.SyncModel {
+	fn, _ := d.GetFlowNetwork(uuid, api.Args{WithStreams: true})
+	var outputs []*interfaces.SyncModel
+	for _, stream := range fn.Streams {
+		_, err := d.UpdateStream(stream.UUID, stream)
+		var output interfaces.SyncModel
+		if err != nil {
+			output = interfaces.SyncModel{UUID: stream.UUID, IsError: true, Message: nstring.New(err.Error())}
+		} else {
+			output = interfaces.SyncModel{UUID: stream.UUID, IsError: false}
 		}
 		outputs = append(outputs, &output)
 	}
