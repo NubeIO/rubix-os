@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
@@ -10,6 +11,7 @@ type StreamCloneDatabase interface {
 	GetStreamClone(uuid string, args Args) (*model.StreamClone, error)
 	DeleteStreamClone(uuid string) (bool, error)
 	DeleteOneStreamCloneByArgs(args Args) (bool, error)
+	SyncStreamCloneConsumers(uuid string) []*interfaces.SyncModel
 }
 
 type StreamCloneAPI struct {
@@ -39,4 +41,10 @@ func (j *StreamCloneAPI) DeleteOneStreamCloneByArgs(ctx *gin.Context) {
 	args := buildStreamCloneArgs(ctx)
 	q, err := j.DB.DeleteOneStreamCloneByArgs(args)
 	responseHandler(q, err, ctx)
+}
+
+func (j *StreamCloneAPI) SyncStreamCloneConsumers(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q := j.DB.SyncStreamCloneConsumers(uuid)
+	responseHandler(q, nil, ctx)
 }
