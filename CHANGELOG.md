@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.5.4](https://github.com/NubeIO/flow-framework/tree/v0.5.4) (2022-05-24)
+- bacnet master fix bug on select object type
+
 ## [v0.5.3](https://github.com/NubeIO/flow-framework/tree/v0.5.3) (2022-05-24)
 - cascade delete on flow networks
 - added native bacnet master plugin
