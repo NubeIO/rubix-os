@@ -6,12 +6,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type NameStruct struct {
+type NameNet struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
 	Max      int    `json:"max" default:"20"`
-	Default  string `json:"default" default:"bacnetmaster"`
+	Default  string `json:"default" default:"bacnet-master"`
+}
+
+type NameDev struct {
+	Type     string `json:"type" default:"string"`
+	Required bool   `json:"required" default:"true"`
+	Min      int    `json:"min" default:"2"`
+	Max      int    `json:"max" default:"20"`
+	Default  string `json:"default" default:"device"`
+}
+
+type NamePnt struct {
+	Type     string `json:"type" default:"string"`
+	Required bool   `json:"required" default:"true"`
+	Min      int    `json:"min" default:"2"`
+	Max      int    `json:"max" default:"20"`
+	Default  string `json:"default" default:"point"`
 }
 
 type DescriptionStruct struct {
@@ -27,7 +43,7 @@ type EnableStruct struct {
 }
 
 type Network struct {
-	Name        NameStruct        `json:"name"`
+	Name        NameNet           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
 		Type     string `json:"type" default:"string"`
@@ -65,7 +81,7 @@ type Network struct {
 }
 
 type Device struct {
-	Name        NameStruct        `json:"name"`
+	Name        NameDev           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	Host        struct {
 		Type     string `json:"type" default:"string"`
@@ -92,26 +108,26 @@ type Device struct {
 	DeviceMac struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"255"`
 		Default  int    `json:"default" default:"0"`
 	} `json:"device_mac"`
 	MaxADPU struct {
 		Type     string `json:"type" default:"array"`
 		Required bool   `json:"required" default:"true"`
 		Options  []int  `json:"options" default:"[50, 128, 206, 480, 1024, 1476]"`
-		Default  string `json:"default" default:"1476"`
+		Default  int    `json:"default" default:"1024"`
 	} `json:"max_adpu"`
 	Segmentation struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
 		Options  []string `json:"options" default:"[\"segmentation_both\",\"no_segmentation\",\"segmentation_transmit\",\"segmentation_receive\"]"`
-		Default  string   `json:"default" default:"segmentation_both"`
+		Default  string   `json:"default" default:"no_segmentation"`
 	} `json:"segmentation"`
 }
 
-//for io-type see model.IOType
-
 type Point struct {
-	Name        NameStruct        `json:"name"`
+	Name        NamePnt           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	ObjectType  struct {
 		Type     string   `json:"type" default:"array"`
@@ -127,7 +143,7 @@ type Point struct {
 	WriteMode struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"read_only\",\"write_only\",\"write_then_read\"]"`
+		Options  []string `json:"options" default:"[\"read_only\",\"write_only\"]"`
 		Default  string   `json:"default" default:"read_only"`
 	} `json:"write_mode"`
 	WritePriority struct {

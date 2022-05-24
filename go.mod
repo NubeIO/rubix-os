@@ -1,15 +1,15 @@
 module github.com/NubeIO/flow-framework
 
 //replace github.com/NubeIO/nubeio-rubix-lib-helpers-go => /home/aidan/code/go/nube/nubeio-rubix-lib-helpers-go
-replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-models-go
+//replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-models-go
 //replace github.com/NubeIO/nubeio-rubix-lib-rest-go => /home/aidan/code/go/nube/nubeio-rubix-lib-rest-go
-replace github.com/NubeDev/bacnet => /home/aidan/code/go/nube/bacnet
+//replace github.com/NubeDev/bacnet => /home/aidan/code/go/nube/bacnet
 
 require (
 	github.com/NubeDev/location v0.0.2
 	github.com/NubeIO/configor v0.0.3
 	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.6
-	github.com/NubeIO/nubeio-rubix-lib-models-go v1.2.2
+	github.com/NubeIO/nubeio-rubix-lib-models-go v1.2.3
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -44,7 +44,7 @@ require (
 	gorm.io/driver/postgres v1.3.1
 )
 
-require github.com/NubeDev/bacnet v0.0.2
+require github.com/NubeDev/bacnet v0.0.3
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
