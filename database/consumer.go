@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/nstring"
@@ -106,10 +107,15 @@ func (d *GormDatabase) SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel
 		_, err := d.UpdateWriter(writer.UUID, writer)
 		var output interfaces.SyncModel
 		if err != nil {
+			writer.Connection = connection.Broken.String()
+			writer.Message = err.Error()
 			output = interfaces.SyncModel{UUID: writer.UUID, IsError: true, Message: nstring.New(err.Error())}
 		} else {
+			writer.Connection = connection.Connected.String()
+			writer.Message = ""
 			output = interfaces.SyncModel{UUID: writer.UUID, IsError: false}
 		}
+		_, _ = d.updateWriterWithoutSync(writer.UUID, writer)
 		outputs = append(outputs, &output)
 	}
 	return outputs, nil

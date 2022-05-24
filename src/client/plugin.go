@@ -2,9 +2,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/rest/v1/rest"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/go-resty/resty/v2"
 )
 
 // ClientGetPlugins an object
@@ -30,20 +28,6 @@ func (a *FlowClient) ClientGetPlugin(uuid string) (*ResponseBody, error) {
 		return nil, failResponse
 	}
 	return resp.Result().(*ResponseBody), nil
-}
-
-func failedResponse(err error, resp *resty.Response) error {
-	if err != nil {
-		return fmt.Errorf("%s failed", err)
-	}
-	if resp.Error() != nil {
-		return getAPIError(resp)
-	}
-	if rest.StatusCodesAllBad(resp.StatusCode()) {
-		return getAPIError(resp)
-	}
-	return nil
-
 }
 
 // CreateNetworkPlugin an object
