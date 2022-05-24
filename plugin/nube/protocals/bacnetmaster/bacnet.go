@@ -49,12 +49,22 @@ func (inst *Instance) bacnetNetwork(net *model.Network) error {
 	return inst.BacStore.UpdateNetwork(net.UUID, bacnetNet)
 }
 
-//getNet get an instance of a created bacnet network that is cached in bacnet lib
+//getBacnetNetwork get an instance of a created bacnet network that is cached in bacnet lib
 func (inst *Instance) getBacnetNetwork(networkUUID string) (*network.Network, error) {
 	return inst.BacStore.GetNetwork(networkUUID)
 }
 
-//getDev get an instance of a created bacnet device that is cached in bacnet lib
+//closeBacnetNetwork delete the instance of a created bacnet network that is cached in bacnet lib
+func (inst *Instance) closeBacnetNetwork(networkUUID string) (bool, error) {
+	net, err := inst.BacStore.GetNetwork(networkUUID)
+	if err != nil {
+		return false, err
+	}
+	net.NetworkClose()
+	return true, nil
+}
+
+//getBacnetDevice get an instance of a created bacnet device that is cached in bacnet lib
 func (inst *Instance) getBacnetDevice(deviceUUID string) (*network.Device, error) {
 	return inst.BacStore.GetDevice(deviceUUID)
 }
@@ -117,7 +127,7 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 		}
 		outValue = float32ToFloat64(readFloat32)
 	}
-	log.Infoln("bacnet-master-read:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", outValue)
+	log.Infoln("bacnet-master-POINT-READ:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", outValue)
 	return outValue, nil
 }
 
@@ -162,7 +172,7 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 		}
 
 	}
-	log.Infoln("bacnet-master-write:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
+	log.Infoln("bacnet-master-POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
 	return nil
 
 }

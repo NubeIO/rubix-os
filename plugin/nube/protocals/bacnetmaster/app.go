@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -19,7 +18,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	}
 	err = inst.bacnetNetwork(network)
 	if err != nil {
-		return nil, errors.New("issue on add bacnet-device to store")
+		return nil, errors.New(fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error()))
 	}
 	return body, nil
 }
@@ -89,7 +88,8 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	if err != nil {
 		return false, err
 	}
-	return ok, nil
+	ok, err = inst.closeBacnetNetwork(body.UUID)
+	return ok, err
 }
 
 //writePoint update point. Called via API call.
@@ -128,9 +128,10 @@ func (inst *Instance) pointUpdate(uuid string) (*model.Point, error) {
 	var point model.Point
 	point.CommonFault.InFault = false
 	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
-	point.CommonFault.Message = fmt.Sprintf("last-update: %s", utilstime.TimeStamp())
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
 	point.CommonFault.LastOk = time.Now().UTC()
+	point.InSync = boolean.NewTrue()
 	_, err := inst.db.UpdatePoint(uuid, &point, true)
 	if err != nil {
 		log.Error("bacnet-master: UpdatePoint()", err)
@@ -144,14 +145,14 @@ func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point
 	var point model.Point
 	point.CommonFault.InFault = false
 	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
-	point.CommonFault.Message = fmt.Sprintf("last-update: %s", utilstime.TimeStamp())
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
 	point.CommonFault.LastOk = time.Now().UTC()
 	priority := map[string]*float64{"_16": &value}
 	point.InSync = boolean.NewTrue()
 	_, err := inst.db.UpdatePointValue(uuid, &point, &priority, true)
 	if err != nil {
-		log.Error("edge28-app: pointUpdateValue()", err)
+		log.Error("bacnet-master: pointUpdateValue()", err)
 		return nil, err
 	}
 	return nil, nil
@@ -162,76 +163,14 @@ func (inst *Instance) pointUpdateErr(uuid string, err error) (*model.Point, erro
 	var point model.Point
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = model.MessageLevel.Fail
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointError
-	point.CommonFault.Message = err.Error()
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteError
+	point.CommonFault.Message = fmt.Sprintf("error-time: %s msg:%s", utilstime.TimeStamp(), err.Error())
 	point.CommonFault.LastFail = time.Now().UTC()
+	point.InSync = boolean.NewFalse()
 	_, err = inst.db.UpdatePoint(uuid, &point, true)
 	if err != nil {
-		log.Error("edge28-app: pointUpdateErr()", err)
+		log.Error("bacnet-master: pointUpdateErr()", err)
 		return nil, err
 	}
 	return nil, nil
-}
-
-func selectObjectType(selectedPlugin string) (objectType string, isOutput, isTypeBool bool) {
-	isOutput = false
-	isOutput = false
-	switch selectedPlugin {
-	case PointsList.DO1.IoNumber, PointsList.DO2.IoNumber:
-		objectType = PointsList.DO1.ObjectType
-		isOutput = true
-		isTypeBool = true
-	case PointsList.UO1.IoNumber, PointsList.UO2.IoNumber, PointsList.UO3.IoNumber, PointsList.UO4.IoNumber, PointsList.UO5.IoNumber, PointsList.UO6.IoNumber:
-		objectType = PointsList.UO1.ObjectType
-		isOutput = true
-	case PointsList.UI1.IoNumber, PointsList.UI2.IoNumber, PointsList.UI3.IoNumber, PointsList.UI4.IoNumber, PointsList.UI5.IoNumber, PointsList.UI6.IoNumber, PointsList.UI7.IoNumber, PointsList.UI8.IoNumber:
-		objectType = PointsList.UI1.ObjectType
-	}
-	return
-
-}
-
-type Point struct {
-	IoNumber   string //R1
-	ObjectType string //binary_output
-	IsOutput   *bool
-	IsTypeBool *bool
-}
-
-var PointsList = struct {
-	UO1 Point `json:"UO1"`
-	UO2 Point `json:"UO2"`
-	UO3 Point `json:"UO3"`
-	UO4 Point `json:"UO4"`
-	UO5 Point `json:"UO5"`
-	UO6 Point `json:"UO6"`
-	DO1 Point `json:"DO1"`
-	DO2 Point `json:"DO2"`
-	UI1 Point `json:"UI1"`
-	UI2 Point `json:"UI2"`
-	UI3 Point `json:"UI3"`
-	UI4 Point `json:"UI4"`
-	UI5 Point `json:"UI5"`
-	UI6 Point `json:"UI6"`
-	UI7 Point `json:"UI7"`
-	UI8 Point `json:"UI8"`
-}{
-
-	UO1: Point{IoNumber: "UO1", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	UO2: Point{IoNumber: "UO2", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	UO3: Point{IoNumber: "UO3", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	UO4: Point{IoNumber: "UO4", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	UO5: Point{IoNumber: "UO5", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	UO6: Point{IoNumber: "UO6", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	DO1: Point{IoNumber: "DO1", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	DO2: Point{IoNumber: "DO2", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-
-	UI1: Point{IoNumber: "UI1", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI2: Point{IoNumber: "UI2", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI3: Point{IoNumber: "UI3", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI4: Point{IoNumber: "UI4", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI5: Point{IoNumber: "UI5", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI6: Point{IoNumber: "UI6", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI7: Point{IoNumber: "UI7", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI8: Point{IoNumber: "UI8", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
 }
