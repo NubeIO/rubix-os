@@ -80,6 +80,28 @@ func (d *GormDatabase) RefreshFlowNetworkClonesConnections() (*bool, error) {
 	return boolean.NewTrue(), nil
 }
 
+func (d *GormDatabase) SyncFlowNetworkClones() ([]*interfaces.SyncModel, error) {
+	fncs, _ := d.GetFlowNetworkClones(api.Args{})
+	var outputs []*interfaces.SyncModel
+	for _, fnc := range fncs {
+		var output interfaces.SyncModel
+		cli := client.NewFlowClientCliFromFNC(fnc)
+		_, err := cli.GetQueryMarshal(urls.SingularUrl(urls.FlowNetworkUrl, fnc.SourceUUID), model.Writer{})
+		if err != nil {
+			fnc.Message = err.Error()
+			fnc.Connection = connection.Broken.String()
+			output = interfaces.SyncModel{UUID: fnc.UUID, IsError: true, Message: nstring.New(err.Error())}
+		} else {
+			fnc.Message = nstring.NotAvailable
+			fnc.Connection = connection.Connected.String()
+			output = interfaces.SyncModel{UUID: fnc.UUID, IsError: false}
+		}
+		d.DB.Where("uuid = ?", fnc.UUID).Updates(fnc)
+		outputs = append(outputs, &output)
+	}
+	return outputs, nil
+}
+
 func (d *GormDatabase) SyncFlowNetworkCloneStreamClones(uuid string) ([]*interfaces.SyncModel, error) {
 	var outputs []*interfaces.SyncModel
 	fnc, _ := d.GetFlowNetworkClone(uuid, api.Args{WithStreamClones: true})
