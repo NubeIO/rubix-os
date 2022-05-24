@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -157,10 +158,15 @@ func (d *GormDatabase) SyncFlowNetworks() []*interfaces.SyncModel {
 		_, err := d.UpdateFlowNetwork(fn.UUID, fn)
 		var output interfaces.SyncModel
 		if err != nil {
+			fn.Connection = connection.Broken.String()
+			fn.Message = err.Error()
 			output = interfaces.SyncModel{UUID: fn.UUID, IsError: true, Message: nstring.New(err.Error())}
 		} else {
+			fn.Connection = connection.Connected.String()
+			fn.Message = nstring.NotAvailable
 			output = interfaces.SyncModel{UUID: fn.UUID, IsError: false}
 		}
+		d.DB.Where("uuid = ?", fn.UUID).Updates(fn)
 		outputs = append(outputs, &output)
 	}
 	return outputs

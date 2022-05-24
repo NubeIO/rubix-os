@@ -8,6 +8,7 @@ import (
 )
 
 const (
+	NotAvailable         = "N/A"
 	First                = "first"
 	Last                 = "last"
 	OddError             = "odd number rule provided please provide in even count"
