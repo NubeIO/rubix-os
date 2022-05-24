@@ -45,7 +45,7 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 	d.DB.Where("global_uuid = ? ", body.GlobalUUID).Find(&flowNetworkClonesModel)
 	if len(flowNetworkClonesModel) == 0 {
 		fnc.UUID = nuuid.MakeTopicUUID(model.CommonNaming.FlowNetworkClone)
-		if err = d.DB.Create(fnc).Error; err != nil {
+		if err = d.DB.Create(&fnc).Error; err != nil {
 			return nil, err
 		}
 	} else {
