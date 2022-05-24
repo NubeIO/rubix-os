@@ -112,7 +112,7 @@ func (d *GormDatabase) SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel
 			output = interfaces.SyncModel{UUID: writer.UUID, IsError: true, Message: nstring.New(err.Error())}
 		} else {
 			writer.Connection = connection.Connected.String()
-			writer.Message = ""
+			writer.Message = nstring.NotAvailable
 			output = interfaces.SyncModel{UUID: writer.UUID, IsError: false}
 		}
 		_, _ = d.updateWriterWithoutSync(writer.UUID, writer)

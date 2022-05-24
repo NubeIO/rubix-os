@@ -84,13 +84,13 @@ func (d *GormDatabase) SyncStreamCloneConsumers(uuid string) ([]*interfaces.Sync
 			output = interfaces.SyncModel{UUID: consumer.UUID, IsError: false}
 			producer := rawProducer.(*model.Producer)
 			consumer.Connection = connection.Connected.String()
-			consumer.Message = ""
+			consumer.Message = nstring.NotAvailable
 			consumer.ProducerThingName = producer.ProducerThingName
 			consumer.ProducerThingUUID = producer.ProducerThingUUID
 			consumer.ProducerThingClass = producer.ProducerThingClass
 			consumer.ProducerThingType = producer.ProducerThingType
 		}
-		_, _ = d.UpdateConsumer(consumer.UUID, consumer)
+		d.DB.Where("uuid = ?", consumer.UUID).Updates(consumer)
 		outputs = append(outputs, &output)
 	}
 	return outputs, nil

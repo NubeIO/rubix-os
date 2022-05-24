@@ -134,7 +134,7 @@ func (d *GormDatabase) SyncProducerWriterClones(uuid string) ([]*interfaces.Sync
 		var output interfaces.SyncModel
 		fn, exists := flowNetworkMap[wc.FlowFrameworkUUID]
 		wc.Connection = connection.Connected.String()
-		wc.Message = ""
+		wc.Message = nstring.NotAvailable
 		if !exists {
 			msg := "FlowNetwork is broken!"
 			output = interfaces.SyncModel{

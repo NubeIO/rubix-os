@@ -104,7 +104,7 @@ func (d *GormDatabase) SyncFlowNetworkCloneStreamClones(uuid string) ([]*interfa
 				IsError: false,
 			}
 			sc.Connection = connection.Connected.String()
-			sc.Message = ""
+			sc.Message = nstring.NotAvailable
 		}
 		_ = d.updateStreamClone(sc.UUID, sc)
 		outputs = append(outputs, &output)
