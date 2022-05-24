@@ -53,8 +53,8 @@ func (d *GormDatabase) DeleteWriterClone(uuid string) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) UpdateWriterClone(writerClone *model.WriterClone, body *model.WriterClone) error {
-	query := d.DB.Model(&writerClone).Updates(body)
+func (d *GormDatabase) updateWriterClone(uuid string, body *model.WriterClone) error {
+	query := d.DB.Where("uuid = ?", uuid).Updates(body)
 	if query.Error != nil {
 		return query.Error
 	}

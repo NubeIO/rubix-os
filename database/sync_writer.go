@@ -65,7 +65,7 @@ func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.Sync
 	if writerClone.WriterThingClass == model.ThingClass.Point {
 		data, _ := json.Marshal(body.Priority)
 		writerCloneBody := model.WriterClone{CommonWriter: model.CommonWriter{DataStore: data}}
-		err = d.UpdateWriterClone(writerClone, &writerCloneBody)
+		err = d.updateWriterClone(writerClone.UUID, &writerCloneBody)
 		if err != nil {
 			return nil
 		}
@@ -79,7 +79,7 @@ func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.Sync
 	} else if writerClone.WriterThingClass == model.ThingClass.Schedule {
 		data, _ := json.Marshal(body.Schedule)
 		writerCloneBody := model.WriterClone{CommonWriter: model.CommonWriter{DataStore: data}}
-		err = d.UpdateWriterClone(writerClone, &writerCloneBody)
+		err = d.updateWriterClone(writerClone.UUID, &writerCloneBody)
 		if err != nil {
 			return nil
 		}

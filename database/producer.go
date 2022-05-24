@@ -157,7 +157,7 @@ func (d *GormDatabase) SyncProducerWriterClones(uuid string) ([]*interfaces.Sync
 				wc.Message = err.Error()
 			}
 		}
-		_ = d.UpdateWriterClone(wc, wc)
+		_ = d.updateWriterClone(wc.UUID, wc)
 		outputs = append(outputs, &output)
 	}
 	return outputs, nil
