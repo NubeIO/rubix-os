@@ -53,7 +53,7 @@ func (inst *Instance) polling(p polling) error {
 			}
 			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 				timeStart := time.Now()
-				_, pointDelay := delays(net.TransportType)
+				devDelay, pointDelay := delays(net.TransportType)
 				counter++
 				if boolean.IsFalse(net.Enable) {
 					log.Infof("bacnet-master: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
@@ -69,6 +69,7 @@ func (inst *Instance) polling(p polling) error {
 						if boolean.IsFalse(net.Enable) {
 							continue
 						}
+						time.Sleep(devDelay) //DELAY between points
 						if pnt.WriteMode == "read_only" {
 							readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
 							if err != nil {
