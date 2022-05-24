@@ -183,8 +183,20 @@ func setObjectType(object string) (obj btypes.ObjectType, isWritable, isBool boo
 		return btypes.AnalogInput, false, false
 	case "analog_output":
 		return btypes.AnalogOutput, true, false
+	case "analog_value":
+		return btypes.AnalogValue, true, false
+	case "binary_input":
+		return btypes.BinaryInput, false, true
 	case "binary_output":
 		return btypes.BinaryOutput, true, true
+	case "binary_value":
+		return btypes.BinaryValue, true, true
+	case "multi_state_input":
+		return btypes.MultiStateInput, false, false
+	case "multi_state_output":
+		return btypes.MultiStateOutput, true, false
+	case "multi_state_value":
+		return btypes.MultiStateValue, true, false
 	default:
 		return btypes.AnalogInput, false, false
 	}

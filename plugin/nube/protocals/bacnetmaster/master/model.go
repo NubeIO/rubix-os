@@ -132,7 +132,7 @@ type Point struct {
 	ObjectType  struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"analog_input\",\"analog_value\",\"analog_output\",\"binary_input\",\"binary_value\",\"binary_output\"]"`
+		Options  []string `json:"options" default:"[\"analog_input\",\"analog_value\",\"analog_output\",\"binary_input\",\"binary_value\",\"binary_output\",\"multi_state_input\",\"multi_state_value\",\"multi_state_output\"]"`
 		Default  string   `json:"default" default:"analog_output"`
 	} `json:"object_type"`
 	ObjectId struct {
