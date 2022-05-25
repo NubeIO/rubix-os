@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
@@ -99,6 +100,22 @@ func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
 	}
 	query := d.DB.Delete(&streamModel)
 	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) SyncStreamProducers(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
+	stream, _ := d.GetStream(uuid, api.Args{WithProducers: true})
+	var localCli *client.FlowClient
+	// This is for syncing child descendants
+	if args.WithWriterClones {
+		for _, producer := range stream.Producers {
+			if localCli == nil {
+				localCli = client.NewLocalClient()
+			}
+			url := urls.GetUrl(urls.ProducerWriterClonesSyncUrl, producer.UUID)
+			_, _ = localCli.GetQuery(url)
+		}
+	}
+	return nil, nil
 }
 
 func (d *GormDatabase) syncAfterCreateUpdateStream(body *model.Stream) error {

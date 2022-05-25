@@ -151,9 +151,11 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 	return boolean.NewTrue(), nil
 }
 
-func (d *GormDatabase) SyncFlowNetworks() []*interfaces.SyncModel {
+func (d *GormDatabase) SyncFlowNetworks(args api.Args) []*interfaces.SyncModel {
 	fns, _ := d.GetFlowNetworks(api.Args{})
 	var outputs []*interfaces.SyncModel
+	params := urls.GenerateFNUrlParams(args)
+	var localCli *client.FlowClient
 	for _, fn := range fns {
 		_, err := d.UpdateFlowNetwork(fn.UUID, fn)
 		var output interfaces.SyncModel
@@ -166,20 +168,38 @@ func (d *GormDatabase) SyncFlowNetworks() []*interfaces.SyncModel {
 			fn.Message = nstring.NotAvailable
 			output = interfaces.SyncModel{UUID: fn.UUID, IsError: false}
 		}
+		// This is for syncing child descendants
+		if args.WithStreams == true {
+			if localCli == nil {
+				localCli = client.NewLocalClient()
+			}
+			url := urls.GetUrl(urls.FlowNetworkStreamsSyncUrl, fn.UUID) + params
+			_, _ = localCli.GetQuery(url)
+		}
 		d.DB.Where("uuid = ?", fn.UUID).Updates(fn)
 		outputs = append(outputs, &output)
 	}
 	return outputs
 }
 
-func (d *GormDatabase) SyncFlowNetworkStreams(uuid string) ([]*interfaces.SyncModel, error) {
+func (d *GormDatabase) SyncFlowNetworkStreams(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
 	fn, _ := d.GetFlowNetwork(uuid, api.Args{WithStreams: true})
 	var outputs []*interfaces.SyncModel
 	if fn == nil {
 		return nil, errors.New("no flow_network")
 	}
+	params := urls.GenerateFNUrlParams(args)
+	var localCli *client.FlowClient
 	for _, stream := range fn.Streams {
 		_, err := d.UpdateStream(stream.UUID, stream)
+		// This is for syncing child descendants
+		if args.WithProducers == true {
+			if localCli == nil {
+				localCli = client.NewLocalClient()
+			}
+			url := urls.GetUrl(urls.StreamProducersSyncUrl, stream.UUID) + params
+			_, _ = localCli.GetQuery(url)
+		}
 		var output interfaces.SyncModel
 		if err != nil {
 			output = interfaces.SyncModel{UUID: stream.UUID, IsError: true, Message: nstring.New(err.Error())}

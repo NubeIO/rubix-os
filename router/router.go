@@ -42,7 +42,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	jobHandler := api.JobAPI{
 		DB: db,
 	}
-	gatewayHandler := api.StreamAPI{
+	streamHandler := api.StreamAPI{
 		DB: db,
 	}
 	streamCloneHandler := api.StreamCloneAPI{
@@ -223,11 +223,12 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 
 		streamRoutes := apiRoutes.Group("/streams")
 		{
-			streamRoutes.GET("/", gatewayHandler.GetStreams)
-			streamRoutes.POST("/", gatewayHandler.CreateStream)
-			streamRoutes.GET("/:uuid", gatewayHandler.GetStream)
-			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
-			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
+			streamRoutes.GET("/", streamHandler.GetStreams)
+			streamRoutes.POST("/", streamHandler.CreateStream)
+			streamRoutes.GET("/:uuid", streamHandler.GetStream)
+			streamRoutes.PATCH("/:uuid", streamHandler.UpdateStream)
+			streamRoutes.DELETE("/:uuid", streamHandler.DeleteStream)
+			streamRoutes.GET("/:uuid/sync/producers", streamHandler.SyncStreamProducers)
 		}
 
 		mappingRoutes := apiRoutes.Group("/mapping")
