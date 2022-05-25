@@ -146,7 +146,7 @@ func (d *GormDatabase) SyncProducerWriterClones(uuid string) ([]*interfaces.Sync
 			wc.Message = msg
 		} else {
 			cli := client.NewFlowClientCliFromFN(fn)
-			_, err := cli.GetQueryMarshal(urls.SingularUrl(urls.WriterUrl, wc.SourceUUID), model.Writer{})
+			_, err := cli.GetQuery(urls.SingularUrl(urls.WriterUrl, wc.SourceUUID))
 			if err != nil {
 				output = interfaces.SyncModel{
 					UUID:    wc.UUID,

@@ -88,7 +88,7 @@ func (d *GormDatabase) SyncFlowNetworkClones(args api.Args) ([]*interfaces.SyncM
 	for _, fnc := range fncs {
 		var output interfaces.SyncModel
 		cli := client.NewFlowClientCliFromFNC(fnc)
-		_, err := cli.GetQueryMarshal(urls.SingularUrl(urls.FlowNetworkUrl, fnc.SourceUUID), model.Writer{})
+		_, err := cli.GetQuery(urls.SingularUrl(urls.FlowNetworkUrl, fnc.SourceUUID))
 		if err != nil {
 			fnc.Message = err.Error()
 			fnc.Connection = connection.Broken.String()
@@ -123,7 +123,7 @@ func (d *GormDatabase) SyncFlowNetworkCloneStreamClones(uuid string, args api.Ar
 	for _, sc := range fnc.StreamClones {
 		var output interfaces.SyncModel
 		cli := client.NewFlowClientCliFromFNC(fnc)
-		_, err := cli.GetQueryMarshal(urls.SingularUrl(urls.StreamUrl, sc.SourceUUID), model.Writer{})
+		_, err := cli.GetQuery(urls.SingularUrl(urls.StreamUrl, sc.SourceUUID))
 		if err != nil {
 			output = interfaces.SyncModel{
 				UUID:    sc.UUID,
