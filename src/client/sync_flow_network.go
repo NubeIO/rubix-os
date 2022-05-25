@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -10,15 +9,9 @@ func (a *FlowClient) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwor
 		SetResult(&model.FlowNetworkClone{}).
 		SetBody(body).
 		Post("/api/sync/flow_network")
-	if err != nil {
-		if resp == nil || resp.String() == "" {
-			return nil, fmt.Errorf("SyncFlowNetwork: %s", err)
-		} else {
-			return nil, fmt.Errorf("SyncFlowNetwork: %s", resp)
-		}
-	}
-	if resp.IsError() {
-		return nil, fmt.Errorf("SyncFlowNetwork: %s", resp)
+	fr := failedResponse(err, resp)
+	if fr != nil {
+		return nil, err
 	}
 	return resp.Result().(*model.FlowNetworkClone), nil
 }

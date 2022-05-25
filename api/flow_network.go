@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +15,8 @@ type FlowNetworkDatabase interface {
 	UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (*model.FlowNetwork, error)
 	DeleteFlowNetwork(uuid string) (bool, error)
 	RefreshFlowNetworksConnections() (*bool, error)
+	SyncFlowNetworks(args Args) []*interfaces.SyncModel
+	SyncFlowNetworkStreams(uuid string, args Args) ([]*interfaces.SyncModel, error)
 }
 type FlowNetworksAPI struct {
 	DB FlowNetworkDatabase
@@ -59,5 +62,18 @@ func (a *FlowNetworksAPI) DeleteFlowNetwork(ctx *gin.Context) {
 
 func (a *FlowNetworksAPI) RefreshFlowNetworksConnections(ctx *gin.Context) {
 	q, err := a.DB.RefreshFlowNetworksConnections()
+	responseHandler(q, err, ctx)
+}
+
+func (a *FlowNetworksAPI) SyncFlowNetworks(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	q := a.DB.SyncFlowNetworks(args)
+	responseHandler(q, nil, ctx)
+}
+
+func (a *FlowNetworksAPI) SyncFlowNetworkStreams(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	args := buildFlowNetworkArgs(ctx)
+	q, err := a.DB.SyncFlowNetworkStreams(uuid, args)
 	responseHandler(q, err, ctx)
 }

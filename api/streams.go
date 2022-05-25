@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
@@ -11,6 +12,7 @@ type StreamDatabase interface {
 	CreateStream(body *model.Stream) (*model.Stream, error)
 	UpdateStream(uuid string, body *model.Stream) (*model.Stream, error)
 	DeleteStream(uuid string) (bool, error)
+	SyncStreamProducers(uuid string, args Args) ([]*interfaces.SyncModel, error)
 }
 
 type StreamAPI struct {
@@ -46,5 +48,12 @@ func (j *StreamAPI) UpdateStream(ctx *gin.Context) {
 func (j *StreamAPI) DeleteStream(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteStream(uuid)
+	responseHandler(q, err, ctx)
+}
+
+func (j *StreamAPI) SyncStreamProducers(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	args := buildStreamArgs(ctx)
+	q, err := j.DB.SyncStreamProducers(uuid, args)
 	responseHandler(q, err, ctx)
 }

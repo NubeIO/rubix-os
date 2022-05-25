@@ -4,6 +4,8 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -147,6 +149,66 @@ func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 		}
 	}
 	return boolean.NewTrue(), nil
+}
+
+func (d *GormDatabase) SyncFlowNetworks(args api.Args) []*interfaces.SyncModel {
+	fns, _ := d.GetFlowNetworks(api.Args{})
+	var outputs []*interfaces.SyncModel
+	params := urls.GenerateFNUrlParams(args)
+	var localCli *client.FlowClient
+	for _, fn := range fns {
+		_, err := d.UpdateFlowNetwork(fn.UUID, fn)
+		var output interfaces.SyncModel
+		if err != nil {
+			fn.Connection = connection.Broken.String()
+			fn.Message = err.Error()
+			output = interfaces.SyncModel{UUID: fn.UUID, IsError: true, Message: nstring.New(err.Error())}
+		} else {
+			fn.Connection = connection.Connected.String()
+			fn.Message = nstring.NotAvailable
+			output = interfaces.SyncModel{UUID: fn.UUID, IsError: false}
+		}
+		// This is for syncing child descendants
+		if args.WithStreams == true {
+			if localCli == nil {
+				localCli = client.NewLocalClient()
+			}
+			url := urls.GetUrl(urls.FlowNetworkStreamsSyncUrl, fn.UUID) + params
+			_, _ = localCli.GetQuery(url)
+		}
+		d.DB.Where("uuid = ?", fn.UUID).Updates(fn)
+		outputs = append(outputs, &output)
+	}
+	return outputs
+}
+
+func (d *GormDatabase) SyncFlowNetworkStreams(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
+	fn, _ := d.GetFlowNetwork(uuid, api.Args{WithStreams: true})
+	var outputs []*interfaces.SyncModel
+	if fn == nil {
+		return nil, errors.New("no flow_network")
+	}
+	params := urls.GenerateFNUrlParams(args)
+	var localCli *client.FlowClient
+	for _, stream := range fn.Streams {
+		_, err := d.UpdateStream(stream.UUID, stream)
+		// This is for syncing child descendants
+		if args.WithProducers == true {
+			if localCli == nil {
+				localCli = client.NewLocalClient()
+			}
+			url := urls.GetUrl(urls.StreamProducersSyncUrl, stream.UUID) + params
+			_, _ = localCli.GetQuery(url)
+		}
+		var output interfaces.SyncModel
+		if err != nil {
+			output = interfaces.SyncModel{UUID: stream.UUID, IsError: true, Message: nstring.New(err.Error())}
+		} else {
+			output = interfaces.SyncModel{UUID: stream.UUID, IsError: false}
+		}
+		outputs = append(outputs, &output)
+	}
+	return outputs, nil
 }
 
 func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *client.FlowClient, bool, *gorm.DB, error) {

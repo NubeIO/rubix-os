@@ -42,7 +42,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	jobHandler := api.JobAPI{
 		DB: db,
 	}
-	gatewayHandler := api.StreamAPI{
+	streamHandler := api.StreamAPI{
 		DB: db,
 	}
 	streamCloneHandler := api.StreamCloneAPI{
@@ -205,6 +205,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			flowNetworkRoutes.DELETE("/:uuid", flowNetwork.DeleteFlowNetwork)
 			flowNetworkRoutes.GET("/one/args", flowNetwork.GetOneFlowNetworkByArgs)
 			flowNetworkRoutes.GET("/refresh_connections", flowNetwork.RefreshFlowNetworksConnections)
+			flowNetworkRoutes.GET("/sync", flowNetwork.SyncFlowNetworks)
+			flowNetworkRoutes.GET("/:uuid/sync/streams", flowNetwork.SyncFlowNetworkStreams)
 		}
 
 		flowNetworkCloneRoutes := apiRoutes.Group("/flow_network_clones")
@@ -215,15 +217,18 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			flowNetworkCloneRoutes.GET("/one/args", flowNetworkCloneHandler.GetOneFlowNetworkCloneByArgs)
 			flowNetworkCloneRoutes.DELETE("/one/args", flowNetworkCloneHandler.DeleteOneFlowNetworkCloneByArgs)
 			flowNetworkCloneRoutes.GET("/refresh_connections", flowNetworkCloneHandler.RefreshFlowNetworkClonesConnections)
+			flowNetworkCloneRoutes.GET("/sync", flowNetworkCloneHandler.SyncFlowNetworkClones)
+			flowNetworkCloneRoutes.GET("/:uuid/sync/stream_clones", flowNetworkCloneHandler.SyncFlowNetworkCloneStreamClones)
 		}
 
 		streamRoutes := apiRoutes.Group("/streams")
 		{
-			streamRoutes.GET("/", gatewayHandler.GetStreams)
-			streamRoutes.POST("/", gatewayHandler.CreateStream)
-			streamRoutes.GET("/:uuid", gatewayHandler.GetStream)
-			streamRoutes.PATCH("/:uuid", gatewayHandler.UpdateStream)
-			streamRoutes.DELETE("/:uuid", gatewayHandler.DeleteStream)
+			streamRoutes.GET("/", streamHandler.GetStreams)
+			streamRoutes.POST("/", streamHandler.CreateStream)
+			streamRoutes.GET("/:uuid", streamHandler.GetStream)
+			streamRoutes.PATCH("/:uuid", streamHandler.UpdateStream)
+			streamRoutes.DELETE("/:uuid", streamHandler.DeleteStream)
+			streamRoutes.GET("/:uuid/sync/producers", streamHandler.SyncStreamProducers)
 		}
 
 		mappingRoutes := apiRoutes.Group("/mapping")
@@ -237,6 +242,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			streamCloneRoutes.GET("/:uuid", streamCloneHandler.GetStreamClone)
 			streamCloneRoutes.DELETE("/:uuid", streamCloneHandler.DeleteStreamClone)
 			streamCloneRoutes.DELETE("/one/args", streamCloneHandler.DeleteOneStreamCloneByArgs)
+			streamCloneRoutes.GET("/:uuid/sync/consumers", streamCloneHandler.SyncStreamCloneConsumers)
 		}
 
 		networkRoutes := apiRoutes.Group("/networks")
@@ -293,6 +299,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			producerRoutes.PATCH("/:uuid", producerHandler.UpdateProducer)
 			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
 			producerRoutes.GET("/one/args", producerHandler.GetOneProducerByArgs)
+			producerRoutes.GET("/:uuid/sync/writer_clones", producerHandler.SyncProducerWriterClones)
 
 			producerWriterCloneRoutes := producerRoutes.Group("/writer_clones")
 			{
@@ -312,6 +319,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			consumerRoutes.PATCH("/:uuid", consumerHandler.UpdateConsumer)
 			consumerRoutes.DELETE("/:uuid", consumerHandler.DeleteConsumer)
 			consumerRoutes.DELETE("", consumerHandler.DeleteConsumers)
+			consumerRoutes.GET("/:uuid/sync/writers", consumerHandler.SyncConsumerWriters)
 
 			consumerWriterRoutes := consumerRoutes.Group("/writers")
 			{

@@ -9,7 +9,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 	"gorm.io/datatypes"
 )
 
@@ -53,7 +52,10 @@ func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	d.syncAfterCreateUpdateWriter(body)
+	err := d.syncAfterCreateUpdateWriter(body)
+	if err != nil {
+		return nil, err
+	}
 	return body, nil
 }
 
@@ -90,6 +92,18 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 }
 
 func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
+	writerModel, err := d.updateWriterWithoutSync(uuid, body)
+	if err != nil {
+		return nil, err
+	}
+	err = d.syncAfterCreateUpdateWriter(writerModel)
+	if err != nil {
+		return nil, err
+	}
+	return writerModel, nil
+}
+
+func (d *GormDatabase) updateWriterWithoutSync(uuid string, body *model.Writer) (*model.Writer, error) {
 	var writerModel *model.Writer
 	body.DataStore = nil
 	query := d.DB.Where("uuid = ?", uuid).First(&writerModel)
@@ -100,7 +114,6 @@ func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Wri
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	d.syncAfterCreateUpdateWriter(writerModel)
 	return writerModel, nil
 }
 
@@ -205,7 +218,7 @@ func (d *GormDatabase) validateWriterWriteBody(thingClass string, body *model.Wr
 	}
 }
 
-func (d *GormDatabase) syncAfterCreateUpdateWriter(body *model.Writer) {
+func (d *GormDatabase) syncAfterCreateUpdateWriter(body *model.Writer) error {
 	consumer, _ := d.GetConsumer(body.ConsumerUUID, api.Args{})
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
@@ -216,9 +229,7 @@ func (d *GormDatabase) syncAfterCreateUpdateWriter(body *model.Writer) {
 		FlowFrameworkUUID: fnc.SourceUUID,
 	}
 	_, err := cli.SyncWriter(&syncWriterBody)
-	if err != nil {
-		log.Error(err)
-	}
+	return err
 }
 
 func (d *GormDatabase) getDataStoreAndPresentValues(writer *model.Writer) (*datatypes.JSON, *float64, error) {

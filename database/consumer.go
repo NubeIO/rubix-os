@@ -1,9 +1,13 @@
 package database
 
 import (
+	"errors"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -36,9 +40,9 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 		return nil, newError("GetStreamClone", "error on trying to get validate the stream_clone_uuid")
 	}
 	flowNetworkCloneUUID := streamClone.FlowNetworkCloneUUID
-	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{UUID: &flowNetworkCloneUUID})
+	fnc, err := d.GetFlowNetworkClone(flowNetworkCloneUUID, api.Args{})
 	if err != nil {
-		return nil, newError("GetOneFlowNetworkCloneByArgs", "error on trying to get validate flow_network_clone from stream_clone_uuid")
+		return nil, newError("GetFlowNetworkClone", "error on trying to get validate flow_network_clone from stream_clone_uuid")
 	}
 	cli := client.NewFlowClientCliFromFNC(fnc)
 	rawProducer, err := cli.GetQueryMarshal(urls.SingularUrl(urls.ProducerUrl, body.ProducerUUID), model.Producer{})
@@ -91,4 +95,28 @@ func (d *GormDatabase) DeleteConsumers(args api.Args) (bool, error) {
 	query := d.buildConsumerQuery(args)
 	query = query.Delete(&consumerModel)
 	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel, error) {
+	consumer, _ := d.GetConsumer(uuid, api.Args{WithWriters: true})
+	var outputs []*interfaces.SyncModel
+	if consumer == nil {
+		return nil, errors.New("not found consumer")
+	}
+	for _, writer := range consumer.Writers {
+		_, err := d.UpdateWriter(writer.UUID, writer)
+		var output interfaces.SyncModel
+		if err != nil {
+			writer.Connection = connection.Broken.String()
+			writer.Message = err.Error()
+			output = interfaces.SyncModel{UUID: writer.UUID, IsError: true, Message: nstring.New(err.Error())}
+		} else {
+			writer.Connection = connection.Connected.String()
+			writer.Message = nstring.NotAvailable
+			output = interfaces.SyncModel{UUID: writer.UUID, IsError: false}
+		}
+		_, _ = d.updateWriterWithoutSync(writer.UUID, writer)
+		outputs = append(outputs, &output)
+	}
+	return outputs, nil
 }

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,7 @@ type ConsumersDatabase interface {
 	UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error)
 	DeleteConsumer(uuid string) (bool, error)
 	DeleteConsumers(args Args) (bool, error)
+	SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel, error)
 }
 type ConsumersAPI struct {
 	DB ConsumersDatabase
@@ -57,5 +59,11 @@ func (j *ConsumersAPI) DeleteConsumer(ctx *gin.Context) {
 func (j *ConsumersAPI) DeleteConsumers(ctx *gin.Context) {
 	args := buildConsumerArgs(ctx)
 	q, err := j.DB.DeleteConsumers(args)
+	responseHandler(q, err, ctx)
+}
+
+func (j *ConsumersAPI) SyncConsumerWriters(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := j.DB.SyncConsumerWriters(uuid)
 	responseHandler(q, err, ctx)
 }

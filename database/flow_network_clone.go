@@ -1,8 +1,12 @@
 package database
 
 import (
+	"errors"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -74,4 +78,78 @@ func (d *GormDatabase) RefreshFlowNetworkClonesConnections() (*bool, error) {
 		}
 	}
 	return boolean.NewTrue(), nil
+}
+
+func (d *GormDatabase) SyncFlowNetworkClones(args api.Args) ([]*interfaces.SyncModel, error) {
+	fncs, _ := d.GetFlowNetworkClones(api.Args{})
+	var outputs []*interfaces.SyncModel
+	params := urls.GenerateFNCUrlParams(args)
+	var localCli *client.FlowClient
+	for _, fnc := range fncs {
+		var output interfaces.SyncModel
+		cli := client.NewFlowClientCliFromFNC(fnc)
+		_, err := cli.GetQuery(urls.SingularUrl(urls.FlowNetworkUrl, fnc.SourceUUID))
+		if err != nil {
+			fnc.Message = err.Error()
+			fnc.Connection = connection.Broken.String()
+			output = interfaces.SyncModel{UUID: fnc.UUID, IsError: true, Message: nstring.New(err.Error())}
+		} else {
+			fnc.Message = nstring.NotAvailable
+			fnc.Connection = connection.Connected.String()
+			output = interfaces.SyncModel{UUID: fnc.UUID, IsError: false}
+		}
+		// This is for syncing child descendants
+		if args.WithStreamClones == true {
+			if localCli == nil {
+				localCli = client.NewLocalClient()
+			}
+			url := urls.GetUrl(urls.FlowNetworkCloneStreamClonesSyncUrl, fnc.UUID) + params
+			_, _ = localCli.GetQuery(url)
+		}
+		d.DB.Where("uuid = ?", fnc.UUID).Updates(fnc)
+		outputs = append(outputs, &output)
+	}
+	return outputs, nil
+}
+
+func (d *GormDatabase) SyncFlowNetworkCloneStreamClones(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
+	var outputs []*interfaces.SyncModel
+	fnc, _ := d.GetFlowNetworkClone(uuid, api.Args{WithStreamClones: true})
+	if fnc == nil {
+		return nil, errors.New("no flow_network_clone")
+	}
+	params := urls.GenerateFNCUrlParams(args)
+	var localCli *client.FlowClient
+	for _, sc := range fnc.StreamClones {
+		var output interfaces.SyncModel
+		cli := client.NewFlowClientCliFromFNC(fnc)
+		_, err := cli.GetQuery(urls.SingularUrl(urls.StreamUrl, sc.SourceUUID))
+		if err != nil {
+			output = interfaces.SyncModel{
+				UUID:    sc.UUID,
+				IsError: true,
+				Message: nstring.New(err.Error()),
+			}
+			sc.Connection = connection.Broken.String()
+			sc.Message = err.Error()
+		} else {
+			output = interfaces.SyncModel{
+				UUID:    sc.UUID,
+				IsError: false,
+			}
+			sc.Connection = connection.Connected.String()
+			sc.Message = nstring.NotAvailable
+		}
+		_ = d.updateStreamClone(sc.UUID, sc)
+		// This is for syncing child descendants
+		if args.WithConsumers == true {
+			if localCli == nil {
+				localCli = client.NewLocalClient()
+			}
+			url := urls.GetUrl(urls.StreamCloneConsumersSyncUrl, sc.UUID) + params
+			_, _ = localCli.GetQuery(url)
+		}
+		outputs = append(outputs, &output)
+	}
+	return outputs, nil
 }
