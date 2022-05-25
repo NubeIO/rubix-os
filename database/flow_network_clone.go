@@ -80,9 +80,11 @@ func (d *GormDatabase) RefreshFlowNetworkClonesConnections() (*bool, error) {
 	return boolean.NewTrue(), nil
 }
 
-func (d *GormDatabase) SyncFlowNetworkClones() ([]*interfaces.SyncModel, error) {
+func (d *GormDatabase) SyncFlowNetworkClones(args api.Args) ([]*interfaces.SyncModel, error) {
 	fncs, _ := d.GetFlowNetworkClones(api.Args{})
 	var outputs []*interfaces.SyncModel
+	params := urls.GenerateFNCUrlParams(args)
+	var localCli *client.FlowClient
 	for _, fnc := range fncs {
 		var output interfaces.SyncModel
 		cli := client.NewFlowClientCliFromFNC(fnc)
@@ -96,18 +98,28 @@ func (d *GormDatabase) SyncFlowNetworkClones() ([]*interfaces.SyncModel, error) 
 			fnc.Connection = connection.Connected.String()
 			output = interfaces.SyncModel{UUID: fnc.UUID, IsError: false}
 		}
+		// This is for syncing child descendants
+		if args.WithStreamClones == true {
+			if localCli == nil {
+				localCli = client.NewLocalClient()
+			}
+			url := urls.GetUrl(urls.FlowNetworkCloneStreamClonesSyncUrl, fnc.UUID) + params
+			_, _ = localCli.GetQuery(url)
+		}
 		d.DB.Where("uuid = ?", fnc.UUID).Updates(fnc)
 		outputs = append(outputs, &output)
 	}
 	return outputs, nil
 }
 
-func (d *GormDatabase) SyncFlowNetworkCloneStreamClones(uuid string) ([]*interfaces.SyncModel, error) {
+func (d *GormDatabase) SyncFlowNetworkCloneStreamClones(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
 	var outputs []*interfaces.SyncModel
 	fnc, _ := d.GetFlowNetworkClone(uuid, api.Args{WithStreamClones: true})
 	if fnc == nil {
 		return nil, errors.New("no flow_network_clone")
 	}
+	params := urls.GenerateFNCUrlParams(args)
+	var localCli *client.FlowClient
 	for _, sc := range fnc.StreamClones {
 		var output interfaces.SyncModel
 		cli := client.NewFlowClientCliFromFNC(fnc)
@@ -129,6 +141,14 @@ func (d *GormDatabase) SyncFlowNetworkCloneStreamClones(uuid string) ([]*interfa
 			sc.Message = nstring.NotAvailable
 		}
 		_ = d.updateStreamClone(sc.UUID, sc)
+		// This is for syncing child descendants
+		if args.WithConsumers == true {
+			if localCli == nil {
+				localCli = client.NewLocalClient()
+			}
+			url := urls.GetUrl(urls.StreamCloneConsumersSyncUrl, sc.UUID) + params
+			_, _ = localCli.GetQuery(url)
+		}
 		outputs = append(outputs, &output)
 	}
 	return outputs, nil

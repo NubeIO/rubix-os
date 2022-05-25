@@ -13,8 +13,8 @@ type FlowNetworkCloneDatabase interface {
 	GetOneFlowNetworkCloneByArgs(args Args) (*model.FlowNetworkClone, error)
 	DeleteOneFlowNetworkCloneByArgs(args Args) (bool, error)
 	RefreshFlowNetworkClonesConnections() (*bool, error)
-	SyncFlowNetworkClones() ([]*interfaces.SyncModel, error)
-	SyncFlowNetworkCloneStreamClones(uuid string) ([]*interfaces.SyncModel, error)
+	SyncFlowNetworkClones(args Args) ([]*interfaces.SyncModel, error)
+	SyncFlowNetworkCloneStreamClones(uuid string, args Args) ([]*interfaces.SyncModel, error)
 }
 
 type FlowNetworkClonesAPI struct {
@@ -58,12 +58,14 @@ func (a *FlowNetworkClonesAPI) RefreshFlowNetworkClonesConnections(ctx *gin.Cont
 }
 
 func (a *FlowNetworkClonesAPI) SyncFlowNetworkClones(ctx *gin.Context) {
-	q, err := a.DB.SyncFlowNetworkClones()
+	args := buildFlowNetworkCloneArgs(ctx)
+	q, err := a.DB.SyncFlowNetworkClones(args)
 	responseHandler(q, err, ctx)
 }
 
 func (a *FlowNetworkClonesAPI) SyncFlowNetworkCloneStreamClones(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.SyncFlowNetworkCloneStreamClones(uuid)
+	args := buildFlowNetworkCloneArgs(ctx)
+	q, err := a.DB.SyncFlowNetworkCloneStreamClones(uuid, args)
 	responseHandler(q, err, ctx)
 }

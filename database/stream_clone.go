@@ -65,7 +65,7 @@ func (d *GormDatabase) updateStreamClone(uuid string, body *model.StreamClone) e
 	return nil
 }
 
-func (d *GormDatabase) SyncStreamCloneConsumers(uuid string) ([]*interfaces.SyncModel, error) {
+func (d *GormDatabase) SyncStreamCloneConsumers(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
 	streamClone, _ := d.GetStreamClone(uuid, api.Args{WithConsumers: true})
 	if streamClone == nil {
 		return nil, errors.New("no stream_clone")
@@ -73,6 +73,7 @@ func (d *GormDatabase) SyncStreamCloneConsumers(uuid string) ([]*interfaces.Sync
 	flowNetworkClone, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	cli := client.NewFlowClientCliFromFNC(flowNetworkClone)
 	var outputs []*interfaces.SyncModel
+	var localCli *client.FlowClient
 	for _, consumer := range streamClone.Consumers {
 		rawProducer, err := cli.GetQueryMarshal(urls.SingularUrl(urls.ProducerUrl, consumer.ProducerUUID), model.Producer{})
 		var output interfaces.SyncModel
@@ -89,6 +90,14 @@ func (d *GormDatabase) SyncStreamCloneConsumers(uuid string) ([]*interfaces.Sync
 			consumer.ProducerThingUUID = producer.ProducerThingUUID
 			consumer.ProducerThingClass = producer.ProducerThingClass
 			consumer.ProducerThingType = producer.ProducerThingType
+		}
+		// This is for syncing child descendants
+		if args.WithWriters {
+			if localCli == nil {
+				localCli = client.NewLocalClient()
+			}
+			url := urls.GetUrl(urls.ConsumerWritersSyncUrl, consumer.UUID)
+			_, _ = localCli.GetQuery(url)
 		}
 		d.DB.Where("uuid = ?", consumer.UUID).Updates(consumer)
 		outputs = append(outputs, &output)
