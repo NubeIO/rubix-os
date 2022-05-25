@@ -44,7 +44,7 @@ require (
 	gorm.io/driver/postgres v1.3.1
 )
 
-require github.com/NubeDev/bacnet v0.0.3
+require github.com/NubeDev/bacnet v0.0.4
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect

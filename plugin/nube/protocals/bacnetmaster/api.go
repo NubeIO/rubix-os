@@ -14,7 +14,8 @@ const (
 )
 
 const (
-	whois = "/whois"
+	whois          = "/whois"
+	discoverPoints = "/device/points"
 )
 
 func resolveID(ctx *gin.Context) string {
@@ -93,6 +94,11 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		body, _ := master.BodyWhoIs(ctx)
 		uuid := resolveID(ctx)
 		resp, err := inst.whoIs(uuid, body)
+		plugin.ResponseHandler(resp, err, 0, ctx)
+	})
+	mux.POST(discoverPoints+"/:uuid", func(ctx *gin.Context) {
+		uuid := resolveID(ctx)
+		resp, err := inst.devicePoints(uuid)
 		plugin.ResponseHandler(resp, err, 0, ctx)
 	})
 

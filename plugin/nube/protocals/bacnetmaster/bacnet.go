@@ -170,7 +170,6 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 				return err
 			}
 		}
-
 	}
 	log.Infoln("bacnet-master-POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
 	return nil
@@ -256,6 +255,29 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts) (resp []
 		return nil, err
 	}
 	return devices, err
+}
+
+func (inst *Instance) devicePoints(deviceUUID string) (resp []*network.PointDetails, err error) {
+	getNetwork, err := inst.db.GetNetworkByDeviceUUID(deviceUUID, api.Args{})
+	if err != nil {
+		return nil, err
+	}
+	net, err := inst.getBacnetNetwork(getNetwork.UUID)
+	if err != nil {
+		return nil, err
+	}
+	go net.NetworkRun()
+	dev, err := inst.getBacnetDevice(deviceUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err = dev.GetDevicePoints(btypes.ObjectInstance(dev.DeviceID))
+	if err != nil {
+		return nil, err
+	}
+	return
+
 }
 
 func intToUnit32(value int) uint32 {

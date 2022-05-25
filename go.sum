@@ -62,8 +62,8 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030IGemrRc=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
-github.com/NubeDev/bacnet v0.0.3 h1:p/uvZcpwPCLNomwuOHPhQtmtKFVAE0bbYRoFibQ6evM=
-github.com/NubeDev/bacnet v0.0.3/go.mod h1:E0ox8zyC6E/cByw0CkOUd0j2/XNmQrBzOf7YSn6QdhA=
+github.com/NubeDev/bacnet v0.0.4 h1:atHZzuRJfFcc4oMfSmbj1g+9+WMuGYowf694kkyDYN8=
+github.com/NubeDev/bacnet v0.0.4/go.mod h1:E0ox8zyC6E/cByw0CkOUd0j2/XNmQrBzOf7YSn6QdhA=
 github.com/NubeDev/location v0.0.2 h1:EkXOIx6g6i6DRaDPWQzTH+qjgHnJYsUlBASL/p0OPFQ=
 github.com/NubeDev/location v0.0.2/go.mod h1:wvL1deOEefQrsTv+nojlMOKbwpos4xUbEGSHQ4AKERs=
 github.com/NubeDev/modbus v0.0.2 h1:XdKbkLg3paHHrUL8sOEv+l6lxtnmzOqAigNVIQN+u+0=

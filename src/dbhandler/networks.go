@@ -77,6 +77,14 @@ func (h *Handler) GetNetworksByName(name string, args api.Args) ([]*model.Networ
 	return q, nil
 }
 
+func (h *Handler) GetNetworkByDeviceUUID(uuid string, args api.Args) (*model.Network, error) {
+	q, err := getDb().GetNetworkByDeviceUUID(uuid, args)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}
+
 func (h *Handler) GetNetworkByName(name string, args api.Args) (*model.Network, error) {
 	q, err := getDb().GetNetworkByName(name, args)
 	if err != nil {
