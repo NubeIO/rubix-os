@@ -10,9 +10,9 @@ func (a *FlowClient) SyncWriter(body *model.SyncWriter) (*model.WriterClone, err
 		SetResult(&model.WriterClone{}).
 		SetBody(body).
 		Post("/api/sync/writer")
-	fr := failedResponse(err, resp)
-	if fr != nil {
-		return nil, fr
+	err = checkError(resp, err)
+	if err != nil {
+		return nil, err
 	}
 	return resp.Result().(*model.WriterClone), nil
 }
