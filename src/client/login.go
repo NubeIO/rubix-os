@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -10,16 +9,9 @@ func (a *FlowClient) Login(body *model.LoginBody) (*model.Token, error) {
 		SetBody(body).
 		SetResult(&model.Token{}).
 		Post("/api/users/login")
-
+	err = checkError(resp, err)
 	if err != nil {
-		if resp == nil || resp.String() == "" {
-			return nil, fmt.Errorf("login: %s", err)
-		} else {
-			return nil, fmt.Errorf("login: %s", resp)
-		}
-	}
-	if resp.IsError() {
-		return nil, fmt.Errorf("login: %s", resp)
+		return nil, err
 	}
 	return resp.Result().(*model.Token), nil
 }

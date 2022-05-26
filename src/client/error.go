@@ -1,7 +1,9 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/rest/v1/rest"
 	"github.com/go-resty/resty/v2"
 )
@@ -31,4 +33,22 @@ func getAPIError(resp *resty.Response) error {
 	e.Code = resp.StatusCode()
 	e.Message = resp.String()
 	return fmt.Errorf("request failed [%d]: %s", e.Code, e.Message)
+}
+
+func checkError(resp *resty.Response, err error) error {
+	if err != nil {
+		return err
+	}
+	if resp.IsError() {
+		message := interfaces.Message{}
+		rawMessage := resp.String()
+		_ = json.Unmarshal([]byte(rawMessage), &message)
+		// if we do not have => `{"message": <message>}`
+		if message.Message == "" {
+			message.Message = rawMessage
+		}
+		e := fmt.Errorf(message.Message)
+		return e
+	}
+	return nil
 }

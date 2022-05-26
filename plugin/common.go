@@ -1,6 +1,8 @@
 package plugin
 
 import (
+	"fmt"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
@@ -44,10 +46,6 @@ func PointWrite(pnt *model.Point) (out float64) {
 	return
 }
 
-type Message struct {
-	Message string `json:"message"`
-}
-
 func SetStatusCode(code, defaultCode int) int {
 	if code == 0 {
 		return defaultCode
@@ -62,7 +60,8 @@ func ResponseHandler(body interface{}, err error, statusCode int, ctx *gin.Conte
 	} else {
 		switch err {
 		case gorm.ErrRecordNotFound:
-			ctx.JSON(SetStatusCode(statusCode, http.StatusNotFound), Message{Message: err.Error()})
+			message := fmt.Sprintf("%s %s [%d]: %s", ctx.Request.Method, ctx.Request.URL, 404, err.Error())
+			ctx.JSON(http.StatusNotFound, interfaces.Message{Message: message})
 		case gorm.ErrInvalidTransaction,
 			gorm.ErrNotImplemented,
 			gorm.ErrMissingWhereClause,
@@ -78,10 +77,11 @@ func ResponseHandler(body interface{}, err error, statusCode int, ctx *gin.Conte
 			gorm.ErrInvalidDB,
 			gorm.ErrInvalidValue,
 			gorm.ErrInvalidValueOfLength:
-			ctx.JSON(SetStatusCode(statusCode, http.StatusInternalServerError), Message{Message: err.Error()})
+			message := fmt.Sprintf("%s %s [%d]: %s", ctx.Request.Method, ctx.Request.URL, 500, err.Error())
+			ctx.JSON(http.StatusInternalServerError, interfaces.Message{Message: message})
 		default:
-			ctx.JSON(SetStatusCode(statusCode, http.StatusBadRequest), Message{Message: err.Error()})
+			message := fmt.Sprintf("%s %s [%d]: %s", ctx.Request.Method, ctx.Request.URL, 400, err.Error())
+			ctx.JSON(http.StatusBadRequest, interfaces.Message{Message: message})
 		}
 	}
-	//return nil
 }
