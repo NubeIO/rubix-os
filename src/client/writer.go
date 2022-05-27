@@ -9,11 +9,10 @@ import (
 
 // GetWriter an object
 func (a *FlowClient) GetWriter(uuid string) (*model.Writer, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Writer{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/consumers/writers/{uuid}")
-	err = CheckError(resp, err)
+		Get("/api/consumers/writers/{uuid}"))
 	if err != nil {
 		return nil, err
 	}
@@ -23,13 +22,12 @@ func (a *FlowClient) GetWriter(uuid string) (*model.Writer, error) {
 // EditWriter edit an object
 func (a *FlowClient) EditWriter(uuid string, body model.Writer, updateProducer bool) (*model.Writer, error) {
 	param := strconv.FormatBool(updateProducer)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Writer{}).
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		SetQueryParam("update_producer", param).
-		Patch("/api/consumers/writers/{uuid}")
-	err = CheckError(resp, err)
+		Patch("/api/consumers/writers/{uuid}"))
 	if err != nil {
 		return nil, err
 	}
@@ -40,11 +38,10 @@ func (a *FlowClient) EditWriter(uuid string, body model.Writer, updateProducer b
 func (a *FlowClient) CreateWriter(body model.Writer) (*model.Writer, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("sub_name_%s", name)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Writer{}).
 		SetBody(body).
-		Post("/api/consumers/writers")
-	err = CheckError(resp, err)
+		Post("/api/consumers/writers"))
 	if err != nil {
 		return nil, err
 	}

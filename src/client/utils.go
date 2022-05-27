@@ -1,105 +1,93 @@
 package client
 
 func (a *FlowClient) GetQuery(url string) (*[]byte, error) {
-	resp, err := a.client.R().
-		Get(url)
-	e := CheckError(resp, err)
-	if e != nil {
-		return nil, e
+	resp, err := CheckError(a.client.R().
+		Get(url))
+	if err != nil {
+		return nil, err
 	}
 	output := resp.Body()
 	return &output, nil
 }
 
 func (a *FlowClient) PostQuery(url string, body interface{}) (*[]byte, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetBody(body).
-		Post(url)
-	e := CheckError(resp, err)
-	if e != nil {
-		return nil, e
+		Post(url))
+	if err != nil {
+		return nil, err
 	}
 	output := resp.Body()
 	return &output, nil
 }
 
 func (a *FlowClient) PutQuery(url string, body interface{}) (*[]byte, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetBody(body).
-		Patch(url)
-	e := CheckError(resp, err)
-	if e != nil {
-		return nil, e
+		Patch(url))
+	if err != nil {
+		return nil, err
 	}
 	output := resp.Body()
 	return &output, nil
 }
 
 func (a *FlowClient) PatchQuery(url string, body interface{}) (*[]byte, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetBody(body).
-		Patch(url)
-	e := CheckError(resp, err)
-	if e != nil {
-		return nil, e
+		Patch(url))
+	if err != nil {
+		return nil, err
 	}
 	output := resp.Body()
 	return &output, nil
 }
 
 func (a *FlowClient) DeleteQuery(url string) error {
-	resp, err := a.client.R().
-		Delete(url)
-	e := CheckError(resp, err)
-	if e != nil {
-		return e
-	}
-	return nil
+	_, err := CheckError(a.client.R().
+		Delete(url))
+	return err
 }
 
 func (a *FlowClient) GetQueryMarshal(url string, result interface{}) (interface{}, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(result).
-		Get(url)
-	e := CheckError(resp, err)
-	if e != nil {
-		return nil, e
+		Get(url))
+	if err != nil {
+		return nil, err
 	}
 	return resp.Result(), nil
 }
 
 func (a *FlowClient) PostQueryMarshal(url string, body interface{}, result interface{}) (interface{}, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetBody(body).
 		SetResult(result).
-		Post(url)
-	e := CheckError(resp, err)
-	if e != nil {
-		return nil, e
+		Post(url))
+	if err != nil {
+		return nil, err
 	}
 	return resp.Result(), nil
 }
 
 func (a *FlowClient) PutQueryMarshal(url string, body interface{}, result interface{}) (interface{}, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetBody(body).
 		SetResult(result).
-		Put(url)
-	e := CheckError(resp, err)
-	if e != nil {
-		return nil, e
+		Put(url))
+	if err != nil {
+		return nil, err
 	}
 	return resp.Result(), nil
 }
 
 func (a *FlowClient) PatchQueryMarshal(url string, body interface{}, result interface{}) (interface{}, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetBody(body).
 		SetResult(result).
-		Patch(url)
-	e := CheckError(resp, err)
-	if e != nil {
-		return nil, e
+		Patch(url))
+	if err != nil {
+		return nil, err
 	}
 	return resp.Result(), nil
 }

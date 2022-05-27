@@ -8,12 +8,11 @@ func (a *FlowClient) GetToken(name string, password string) (*Token, error) {
 	if name == "" {
 		return nil, fmt.Errorf("provide a name in the body")
 	}
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&Token{}).
 		SetBody(map[string]string{"name": name}).
 		SetBasicAuth(name, password).
-		Post("/client")
-	err = CheckError(resp, err)
+		Post("/client"))
 	if err != nil {
 		return nil, err
 	}

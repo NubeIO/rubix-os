@@ -5,11 +5,10 @@ import (
 )
 
 func (a *FlowClient) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetworkClone, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.FlowNetworkClone{}).
 		SetBody(body).
-		Post("/api/sync/flow_network")
-	err = CheckError(resp, err)
+		Post("/api/sync/flow_network"))
 	if err != nil {
 		return nil, err
 	}

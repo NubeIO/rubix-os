@@ -5,10 +5,9 @@ import (
 )
 
 func (a *FlowClient) DeviceInfo() (*model.DeviceInfo, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.DeviceInfo{}).
-		Get("/api/system/device_info")
-	err = CheckError(resp, err)
+		Get("/api/system/device_info"))
 	if err != nil {
 		return nil, err
 	}

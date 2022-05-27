@@ -107,10 +107,9 @@ type DI struct {
 
 // PingServer all points
 func (a *RestClient) PingServer() (*ServerPing, error) {
-	resp, err := a.client.R().
+	resp, err := client.CheckError(a.client.R().
 		SetResult(&ServerPing{}).
-		Get("/")
-	err = client.CheckError(resp, err)
+		Get("/"))
 	if err != nil {
 		return nil, err
 	}
@@ -119,10 +118,9 @@ func (a *RestClient) PingServer() (*ServerPing, error) {
 
 // GetUIs all ui points
 func (a *RestClient) GetUIs() (*UI, error) {
-	resp, err := a.client.R().
+	resp, err := client.CheckError(a.client.R().
 		SetResult(UI{}).
-		Get("/api/1.1/read/all/ui")
-	err = client.CheckError(resp, err)
+		Get("/api/1.1/read/all/ui"))
 	if err != nil {
 		return nil, err
 	}
@@ -131,10 +129,9 @@ func (a *RestClient) GetUIs() (*UI, error) {
 
 // GetDIs all di points
 func (a *RestClient) GetDIs() (*DI, error) {
-	resp, err := a.client.R().
+	resp, err := client.CheckError(a.client.R().
 		SetResult(DI{}).
-		Get("/api/1.1/read/all/di")
-	err = client.CheckError(resp, err)
+		Get("/api/1.1/read/all/di"))
 	if err != nil {
 		return nil, err
 	}
@@ -144,11 +141,10 @@ func (a *RestClient) GetDIs() (*DI, error) {
 // WriteUO to a UO point
 func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, error) {
 	req := fmt.Sprintf("/api/1.1/write/uo/%s/%d/16", strings.ToLower(ioNum), int(value))
-	log.Println("edge28-api: WriteUO:", req)
-	resp, err := a.client.R().
+	log.Info("edge28-api: WriteUO:", req)
+	resp, err := client.CheckError(a.client.R().
 		SetResult(WriteResponseUO{}).
-		Get(req)
-	err = client.CheckError(resp, err)
+		Get(req))
 	if err != nil {
 		return nil, err
 	}
@@ -158,11 +154,10 @@ func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, err
 // WriteDO to a DO point
 func (a *RestClient) WriteDO(ioNum string, value float64) (*WriteResponse, error) {
 	req := fmt.Sprintf("/api/1.1/write/do/%s/%d/16", strings.ToLower(ioNum), int(value))
-	log.Println("edge28-api: WriteDO:", req)
-	resp, err := a.client.R().
+	log.Info("edge28-api: WriteDO:", req)
+	resp, err := client.CheckError(a.client.R().
 		SetResult(WriteResponse{}).
-		Get(req)
-	err = client.CheckError(resp, err)
+		Get(req))
 	if err != nil {
 		return nil, err
 	}

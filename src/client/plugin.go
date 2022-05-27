@@ -7,10 +7,9 @@ import (
 
 // ClientGetPlugins an object
 func (a *FlowClient) ClientGetPlugins() (*ResponsePlugins, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&ResponsePlugins{}).
-		Get("/plugins")
-	err = CheckError(resp, err)
+		Get("/plugins"))
 	if err != nil {
 		return nil, err
 	}
@@ -19,11 +18,10 @@ func (a *FlowClient) ClientGetPlugins() (*ResponsePlugins, error) {
 
 // ClientGetPlugin an object
 func (a *FlowClient) ClientGetPlugin(uuid string) (*ResponseBody, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/plugins/{uuid}")
-	err = CheckError(resp, err)
+		Get("/api/plugins/{uuid}"))
 	if err != nil {
 		return nil, err
 	}
@@ -33,11 +31,10 @@ func (a *FlowClient) ClientGetPlugin(uuid string) (*ResponseBody, error) {
 // CreateNetworkPlugin an object
 func (a *FlowClient) CreateNetworkPlugin(body *model.Network, pluginName string) (*model.Network, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/networks", pluginName)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Network{}).
 		SetBody(body).
-		Post(url)
-	err = CheckError(resp, err)
+		Post(url))
 	if err != nil {
 		return nil, err
 	}
@@ -47,10 +44,9 @@ func (a *FlowClient) CreateNetworkPlugin(body *model.Network, pluginName string)
 // DeleteNetworkPlugin delete an object
 func (a *FlowClient) DeleteNetworkPlugin(body *model.Network, pluginName string) (ok bool, err error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/networks", pluginName)
-	resp, err := a.client.R().
+	_, err = CheckError(a.client.R().
 		SetBody(body).
-		Delete(url)
-	err = CheckError(resp, err)
+		Delete(url))
 	if err != nil {
 		return false, err
 	}
@@ -60,10 +56,9 @@ func (a *FlowClient) DeleteNetworkPlugin(body *model.Network, pluginName string)
 // DeleteDevicePlugin delete an object
 func (a *FlowClient) DeleteDevicePlugin(body *model.Device, pluginName string) (ok bool, err error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/devices", pluginName)
-	resp, err := a.client.R().
+	_, err = CheckError(a.client.R().
 		SetBody(body).
-		Delete(url)
-	err = CheckError(resp, err)
+		Delete(url))
 	if err != nil {
 		return false, err
 	}
@@ -73,10 +68,9 @@ func (a *FlowClient) DeleteDevicePlugin(body *model.Device, pluginName string) (
 // DeletePointPlugin delete an object
 func (a *FlowClient) DeletePointPlugin(body *model.Point, pluginName string) (ok bool, err error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/points", pluginName)
-	resp, err := a.client.R().
+	_, err = CheckError(a.client.R().
 		SetBody(body).
-		Delete(url)
-	err = CheckError(resp, err)
+		Delete(url))
 	if err != nil {
 		return false, err
 	}
@@ -86,11 +80,10 @@ func (a *FlowClient) DeletePointPlugin(body *model.Point, pluginName string) (ok
 // CreateDevicePlugin an object
 func (a *FlowClient) CreateDevicePlugin(body *model.Device, pluginName string) (*model.Device, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/devices", pluginName)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Device{}).
 		SetBody(body).
-		Post(url)
-	err = CheckError(resp, err)
+		Post(url))
 	if err != nil {
 		return nil, err
 	}
@@ -100,11 +93,10 @@ func (a *FlowClient) CreateDevicePlugin(body *model.Device, pluginName string) (
 // CreatePointPlugin an object
 func (a *FlowClient) CreatePointPlugin(body *model.Point, pluginName string) (*model.Point, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/points", pluginName)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Point{}).
 		SetBody(body).
-		Post(url)
-	err = CheckError(resp, err)
+		Post(url))
 	if err != nil {
 		return nil, err
 	}
@@ -114,11 +106,10 @@ func (a *FlowClient) CreatePointPlugin(body *model.Point, pluginName string) (*m
 // UpdateNetworkPlugin update an object
 func (a *FlowClient) UpdateNetworkPlugin(body *model.Network, pluginName string) (*model.Network, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/networks", pluginName)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Network{}).
 		SetBody(body).
-		Patch(url)
-	err = CheckError(resp, err)
+		Patch(url))
 	if err != nil {
 		return nil, err
 	}
@@ -128,11 +119,10 @@ func (a *FlowClient) UpdateNetworkPlugin(body *model.Network, pluginName string)
 // UpdateDevicePlugin update an object
 func (a *FlowClient) UpdateDevicePlugin(body *model.Device, pluginName string) (*model.Device, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/devices", pluginName)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Device{}).
 		SetBody(body).
-		Patch(url)
-	err = CheckError(resp, err)
+		Patch(url))
 	if err != nil {
 		return nil, err
 	}
@@ -142,11 +132,10 @@ func (a *FlowClient) UpdateDevicePlugin(body *model.Device, pluginName string) (
 // UpdatePointPlugin update an object
 func (a *FlowClient) UpdatePointPlugin(body *model.Point, pluginName string) (*model.Point, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/points", pluginName)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Point{}).
 		SetBody(body).
-		Patch(url)
-	err = CheckError(resp, err)
+		Patch(url))
 	if err != nil {
 		return nil, err
 	}
@@ -156,12 +145,11 @@ func (a *FlowClient) UpdatePointPlugin(body *model.Point, pluginName string) (*m
 // WritePointPlugin update an object
 func (a *FlowClient) WritePointPlugin(pointUUID string, body *model.PointWriter, pluginName string) (*model.Point, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/points/write/{uuid}", pluginName)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Point{}).
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": pointUUID}).
-		Patch(url)
-	err = CheckError(resp, err)
+		Patch(url))
 	if err != nil {
 		return nil, err
 	}

@@ -7,11 +7,10 @@ import (
 
 // GetWriterClone an object
 func (a *FlowClient) GetWriterClone(uuid string) (*model.WriterClone, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.WriterClone{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/producers/writer_clones/{uuid}")
-	err = CheckError(resp, err)
+		Get("/api/producers/writer_clones/{uuid}"))
 	if err != nil {
 		return nil, err
 	}
@@ -21,13 +20,12 @@ func (a *FlowClient) GetWriterClone(uuid string) (*model.WriterClone, error) {
 // EditWriterClone edit an object
 func (a *FlowClient) EditWriterClone(uuid string, body model.WriterClone, updateProducer bool) (*model.WriterClone, error) {
 	param := strconv.FormatBool(updateProducer)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.WriterClone{}).
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		SetQueryParam("update_producer", param).
-		Patch("/api/producers/writer_clones/{uuid}")
-	err = CheckError(resp, err)
+		Patch("/api/producers/writer_clones/{uuid}"))
 	if err != nil {
 		return nil, err
 	}
@@ -36,11 +34,10 @@ func (a *FlowClient) EditWriterClone(uuid string, body model.WriterClone, update
 
 // CreateWriterClone edit an object
 func (a *FlowClient) CreateWriterClone(body model.WriterClone) (*model.WriterClone, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.WriterClone{}).
 		SetBody(body).
-		Post("/api/producers/writer_clones")
-	err = CheckError(resp, err)
+		Post("/api/producers/writer_clones"))
 	if err != nil {
 		return nil, err
 	}

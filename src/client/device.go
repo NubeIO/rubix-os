@@ -9,11 +9,10 @@ import (
 func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("dev_name_%s", name)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name, "network_uuid": networkUUID}).
-		Post("/api/devices")
-	err = CheckError(resp, err)
+		Post("/api/devices"))
 	if err != nil {
 		return nil, err
 	}
@@ -22,11 +21,10 @@ func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) 
 
 // ClientGetDevice an object
 func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/devices/{uuid}")
-	err = CheckError(resp, err)
+		Get("/api/devices/{uuid}"))
 	if err != nil {
 		return nil, err
 	}
@@ -37,12 +35,11 @@ func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
 func (a *FlowClient) ClientEditDevice(uuid string) (*ResponseBody, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("dev_new_name_%s", name)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/devices/{}")
-	err = CheckError(resp, err)
+		Post("/api/devices/{}"))
 	if err != nil {
 		return nil, err
 	}

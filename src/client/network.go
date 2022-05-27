@@ -9,11 +9,10 @@ import (
 func (a *FlowClient) ClientAddNetwork(pluginUUID string) (*ResponseBody, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("net_name_%s", name)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name, "plugin_conf_id": pluginUUID}).
-		Post("/api/networks")
-	err = CheckError(resp, err)
+		Post("/api/networks"))
 	if err != nil {
 		return nil, err
 	}
@@ -22,11 +21,10 @@ func (a *FlowClient) ClientAddNetwork(pluginUUID string) (*ResponseBody, error) 
 
 // ClientGetNetwork an object
 func (a *FlowClient) ClientGetNetwork(uuid string) (*ResponseBody, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/networks/{uuid}")
-	err = CheckError(resp, err)
+		Get("/api/networks/{uuid}"))
 	if err != nil {
 		return nil, err
 	}

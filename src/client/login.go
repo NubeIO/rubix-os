@@ -5,11 +5,10 @@ import (
 )
 
 func (a *FlowClient) Login(body *model.LoginBody) (*model.Token, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetBody(body).
 		SetResult(&model.Token{}).
-		Post("/api/users/login")
-	err = CheckError(resp, err)
+		Post("/api/users/login"))
 	if err != nil {
 		return nil, err
 	}

@@ -10,11 +10,10 @@ import (
 func (a *FlowClient) ClientAddPoint(deviceUUID string) (*model.Point, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("pnt_name_%s", name)
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Point{}).
 		SetBody(map[string]string{"name": name, "device_uuid": deviceUUID}).
-		Post("/api/points")
-	err = CheckError(resp, err)
+		Post("/api/points"))
 	if err != nil {
 		return nil, err
 	}
@@ -23,11 +22,10 @@ func (a *FlowClient) ClientAddPoint(deviceUUID string) (*model.Point, error) {
 
 // ClientGetPoint an object
 func (a *FlowClient) ClientGetPoint(uuid string) (*model.Point, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&model.Point{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/points/{uuid}")
-	err = CheckError(resp, err)
+		Get("/api/points/{uuid}"))
 	if err != nil {
 		return nil, err
 	}
@@ -36,12 +34,11 @@ func (a *FlowClient) ClientGetPoint(uuid string) (*model.Point, error) {
 
 // ClientEditPoint an object
 func (a *FlowClient) ClientEditPoint(uuid string, body model.Point) (*model.Point, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetBody(body).
 		SetResult(&model.Point{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Patch("/api/points/{uuid}")
-	err = CheckError(resp, err)
+		Patch("/api/points/{uuid}"))
 	if err != nil {
 		return nil, err
 	}

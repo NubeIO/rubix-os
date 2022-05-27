@@ -6,10 +6,9 @@ type Ping struct {
 }
 
 func (a *FlowClient) Ping() (*Ping, error) {
-	resp, err := a.client.R().
+	resp, err := CheckError(a.client.R().
 		SetResult(&Ping{}).
-		Get("/api/system/ping")
-	err = CheckError(resp, err)
+		Get("/api/system/ping"))
 	if err != nil {
 		return nil, err
 	}
