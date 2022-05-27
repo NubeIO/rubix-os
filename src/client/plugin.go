@@ -10,7 +10,7 @@ func (a *FlowClient) ClientGetPlugins() (*ResponsePlugins, error) {
 	resp, err := a.client.R().
 		SetResult(&ResponsePlugins{}).
 		Get("/plugins")
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func (a *FlowClient) ClientGetPlugin(uuid string) (*ResponseBody, error) {
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/plugins/{uuid}")
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (a *FlowClient) CreateNetworkPlugin(body *model.Network, pluginName string)
 		SetResult(&model.Network{}).
 		SetBody(body).
 		Post(url)
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (a *FlowClient) DeleteNetworkPlugin(body *model.Network, pluginName string)
 	resp, err := a.client.R().
 		SetBody(body).
 		Delete(url)
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return false, err
 	}
@@ -63,7 +63,7 @@ func (a *FlowClient) DeleteDevicePlugin(body *model.Device, pluginName string) (
 	resp, err := a.client.R().
 		SetBody(body).
 		Delete(url)
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return false, err
 	}
@@ -76,7 +76,7 @@ func (a *FlowClient) DeletePointPlugin(body *model.Point, pluginName string) (ok
 	resp, err := a.client.R().
 		SetBody(body).
 		Delete(url)
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return false, err
 	}
@@ -90,7 +90,7 @@ func (a *FlowClient) CreateDevicePlugin(body *model.Device, pluginName string) (
 		SetResult(&model.Device{}).
 		SetBody(body).
 		Post(url)
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func (a *FlowClient) CreatePointPlugin(body *model.Point, pluginName string) (*m
 		SetResult(&model.Point{}).
 		SetBody(body).
 		Post(url)
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (a *FlowClient) UpdateNetworkPlugin(body *model.Network, pluginName string)
 		SetResult(&model.Network{}).
 		SetBody(body).
 		Patch(url)
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (a *FlowClient) UpdateDevicePlugin(body *model.Device, pluginName string) (
 		SetResult(&model.Device{}).
 		SetBody(body).
 		Patch(url)
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (a *FlowClient) UpdatePointPlugin(body *model.Point, pluginName string) (*m
 		SetResult(&model.Point{}).
 		SetBody(body).
 		Patch(url)
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ func (a *FlowClient) WritePointPlugin(pointUUID string, body *model.PointWriter,
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": pointUUID}).
 		Patch(url)
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}

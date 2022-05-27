@@ -13,11 +13,9 @@ func (a *FlowClient) GetWriter(uuid string) (*model.Writer, error) {
 		SetResult(&model.Writer{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/consumers/writers/{uuid}")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.Writer), nil
 }
@@ -31,11 +29,9 @@ func (a *FlowClient) EditWriter(uuid string, body model.Writer, updateProducer b
 		SetPathParams(map[string]string{"uuid": uuid}).
 		SetQueryParam("update_producer", param).
 		Patch("/api/consumers/writers/{uuid}")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.Writer), nil
 }
@@ -48,11 +44,9 @@ func (a *FlowClient) CreateWriter(body model.Writer) (*model.Writer, error) {
 		SetResult(&model.Writer{}).
 		SetBody(body).
 		Post("/api/consumers/writers")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.Writer), nil
 }

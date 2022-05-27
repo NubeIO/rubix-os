@@ -13,13 +13,10 @@ func (a *FlowClient) ClientAddConsumer(body Consumer) (*ResponseBody, error) {
 		SetResult(&ResponseBody{}).
 		SetBody(body).
 		Post("/api/consumers")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
+		return nil, err
 	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
-	}
-	fmt.Println(resp.String())
 	return resp.Result().(*ResponseBody), nil
 }
 
@@ -29,11 +26,9 @@ func (a *FlowClient) ClientGetConsumer(uuid string) (*ResponseBody, error) {
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/consumers/{uuid}")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*ResponseBody), nil
 }
@@ -47,11 +42,9 @@ func (a *FlowClient) ClientEditConsumer(uuid string) (*ResponseBody, error) {
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Post("/api/consumers/{}")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*ResponseBody), nil
 }

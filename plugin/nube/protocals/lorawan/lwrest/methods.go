@@ -3,6 +3,7 @@ package lwrest
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwmodel"
+	"github.com/NubeIO/flow-framework/src/client"
 )
 
 const limit = "50"
@@ -14,11 +15,9 @@ func (a *RestClient) GetOrganizations() (*lwmodel.Organizations, error) {
 	resp, err := a.client.R().
 		SetResult(lwmodel.Organizations{}).
 		Get(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("GetOrganizations %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.Organizations), nil
 }
@@ -29,11 +28,9 @@ func (a *RestClient) GetGateways() (*lwmodel.Gateways, error) {
 	resp, err := a.client.R().
 		SetResult(lwmodel.Gateways{}).
 		Get(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("GetApplications %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.Gateways), nil
 }
@@ -44,11 +41,9 @@ func (a *RestClient) GetApplications() (*lwmodel.Applications, error) {
 	resp, err := a.client.R().
 		SetResult(lwmodel.Applications{}).
 		Get(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("GetApplications %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.Applications), nil
 }
@@ -59,11 +54,9 @@ func (a *RestClient) GetDevices() (*lwmodel.Devices, error) {
 	resp, err := a.client.R().
 		SetResult(lwmodel.Devices{}).
 		Get(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("GetDevices %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.Devices), nil
 }
@@ -74,11 +67,9 @@ func (a *RestClient) GetDeviceProfiles() (*lwmodel.DeviceProfiles, error) {
 	resp, err := a.client.R().
 		SetResult(lwmodel.DeviceProfiles{}).
 		Get(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("GetDeviceProfiles %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.DeviceProfiles), nil
 }
@@ -89,11 +80,9 @@ func (a *RestClient) GetServiceProfiles() (*lwmodel.ServiceProfiles, error) {
 	resp, err := a.client.R().
 		SetResult(lwmodel.ServiceProfiles{}).
 		Get(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("GetServiceProfiles %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.ServiceProfiles), nil
 }
@@ -104,11 +93,9 @@ func (a *RestClient) GetGatewayProfiles() (*lwmodel.GatewayProfiles, error) {
 	resp, err := a.client.R().
 		SetResult(lwmodel.GatewayProfiles{}).
 		Get(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("GetGatewayProfiles %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.GatewayProfiles), nil
 }
@@ -120,11 +107,9 @@ func (a *RestClient) AddDevice(body lwmodel.Devices) (*lwmodel.Devices, error) {
 		SetResult(lwmodel.Devices{}).
 		SetBody(body).
 		Post(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("AddDevice %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.Devices), nil
 }
@@ -135,11 +120,9 @@ func (a *RestClient) GetDevice(devEui string) (*lwmodel.GetDevice, error) {
 	resp, err := a.client.R().
 		SetResult(lwmodel.GetDevice{}).
 		Get(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("GetDevice %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.GetDevice), nil
 }
@@ -151,11 +134,9 @@ func (a *RestClient) EditDevice(devEui string, body lwmodel.Device) (bool, error
 		SetResult(lwmodel.Device{}).
 		SetBody(body).
 		Put(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return false, fmt.Errorf("EditDevice %s failed", err)
-	}
-	if resp.Error() != nil {
-		return false, getAPIError(resp)
+		return false, err
 	}
 	return true, nil
 }
@@ -165,11 +146,9 @@ func (a *RestClient) DeleteDevice(devEui string) (bool, error) {
 	q := fmt.Sprintf("/api/devices/%s", devEui)
 	resp, err := a.client.R().
 		Delete(q)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return false, fmt.Errorf("DeleteDevice %s failed", err)
-	}
-	if resp.Error() != nil {
-		return false, getAPIError(resp)
+		return false, err
 	}
 	return true, nil
 }

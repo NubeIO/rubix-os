@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 )
@@ -12,11 +11,9 @@ func (a *FlowClient) GetWriterClone(uuid string) (*model.WriterClone, error) {
 		SetResult(&model.WriterClone{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/producers/writer_clones/{uuid}")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.WriterClone), nil
 }
@@ -30,11 +27,9 @@ func (a *FlowClient) EditWriterClone(uuid string, body model.WriterClone, update
 		SetPathParams(map[string]string{"uuid": uuid}).
 		SetQueryParam("update_producer", param).
 		Patch("/api/producers/writer_clones/{uuid}")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.WriterClone), nil
 }
@@ -45,11 +40,9 @@ func (a *FlowClient) CreateWriterClone(body model.WriterClone) (*model.WriterClo
 		SetResult(&model.WriterClone{}).
 		SetBody(body).
 		Post("/api/producers/writer_clones")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("%s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.WriterClone), nil
 }

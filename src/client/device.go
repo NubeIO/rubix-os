@@ -13,11 +13,9 @@ func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) 
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name, "network_uuid": networkUUID}).
 		Post("/api/devices")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*ResponseBody), nil
 }
@@ -28,11 +26,9 @@ func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/devices/{uuid}")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*ResponseBody), nil
 }
@@ -46,11 +42,9 @@ func (a *FlowClient) ClientEditDevice(uuid string) (*ResponseBody, error) {
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Post("/api/devices/{}")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*ResponseBody), nil
 }

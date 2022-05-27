@@ -9,7 +9,7 @@ func (a *FlowClient) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwor
 		SetResult(&model.FlowNetworkClone{}).
 		SetBody(body).
 		Post("/api/sync/flow_network")
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}

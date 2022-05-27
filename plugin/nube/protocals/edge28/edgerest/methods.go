@@ -2,6 +2,7 @@ package edgerest
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/src/client"
 	log "github.com/sirupsen/logrus"
 	"strings"
 )
@@ -109,11 +110,9 @@ func (a *RestClient) PingServer() (*ServerPing, error) {
 	resp, err := a.client.R().
 		SetResult(&ServerPing{}).
 		Get("/")
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("error geting server %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*ServerPing), nil
 }
@@ -123,11 +122,9 @@ func (a *RestClient) GetUIs() (*UI, error) {
 	resp, err := a.client.R().
 		SetResult(UI{}).
 		Get("/api/1.1/read/all/ui")
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*UI), nil
 }
@@ -137,11 +134,9 @@ func (a *RestClient) GetDIs() (*DI, error) {
 	resp, err := a.client.R().
 		SetResult(DI{}).
 		Get("/api/1.1/read/all/di")
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*DI), nil
 }
@@ -153,11 +148,9 @@ func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, err
 	resp, err := a.client.R().
 		SetResult(WriteResponseUO{}).
 		Get(req)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*WriteResponseUO), nil
 }
@@ -169,11 +162,9 @@ func (a *RestClient) WriteDO(ioNum string, value float64) (*WriteResponse, error
 	resp, err := a.client.R().
 		SetResult(WriteResponse{}).
 		Get(req)
+	err = client.CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*WriteResponse), nil
 }

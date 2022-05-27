@@ -14,11 +14,9 @@ func (a *FlowClient) ClientAddPoint(deviceUUID string) (*model.Point, error) {
 		SetResult(&model.Point{}).
 		SetBody(map[string]string{"name": name, "device_uuid": deviceUUID}).
 		Post("/api/points")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.Point), nil
 }
@@ -29,11 +27,9 @@ func (a *FlowClient) ClientGetPoint(uuid string) (*model.Point, error) {
 		SetResult(&model.Point{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/points/{uuid}")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.Point), nil
 }
@@ -45,11 +41,9 @@ func (a *FlowClient) ClientEditPoint(uuid string, body model.Point) (*model.Poin
 		SetResult(&model.Point{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Patch("/api/points/{uuid}")
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.Point), nil
 }

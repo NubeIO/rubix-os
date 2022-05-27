@@ -9,7 +9,7 @@ func (a *FlowClient) Ping() (*Ping, error) {
 	resp, err := a.client.R().
 		SetResult(&Ping{}).
 		Get("/api/system/ping")
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}

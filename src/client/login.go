@@ -9,7 +9,7 @@ func (a *FlowClient) Login(body *model.LoginBody) (*model.Token, error) {
 		SetBody(body).
 		SetResult(&model.Token{}).
 		Post("/api/users/login")
-	err = checkError(resp, err)
+	err = CheckError(resp, err)
 	if err != nil {
 		return nil, err
 	}

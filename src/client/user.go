@@ -13,12 +13,9 @@ func (a *FlowClient) GetToken(name string, password string) (*Token, error) {
 		SetBody(map[string]string{"name": name}).
 		SetBasicAuth(name, password).
 		Post("/client")
-
+	err = CheckError(resp, err)
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed: %s", name, err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*Token), nil
 }
