@@ -1,22 +1,19 @@
 package client
 
 import (
-	"fmt"
+	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 )
 
 // GetWriterClone an object
 func (a *FlowClient) GetWriterClone(uuid string) (*model.WriterClone, error) {
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.WriterClone{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/producers/writer_clones/{uuid}")
+		Get("/api/producers/writer_clones/{uuid}"))
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.WriterClone), nil
 }
@@ -24,32 +21,26 @@ func (a *FlowClient) GetWriterClone(uuid string) (*model.WriterClone, error) {
 // EditWriterClone edit an object
 func (a *FlowClient) EditWriterClone(uuid string, body model.WriterClone, updateProducer bool) (*model.WriterClone, error) {
 	param := strconv.FormatBool(updateProducer)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.WriterClone{}).
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		SetQueryParam("update_producer", param).
-		Patch("/api/producers/writer_clones/{uuid}")
+		Patch("/api/producers/writer_clones/{uuid}"))
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.WriterClone), nil
 }
 
 // CreateWriterClone edit an object
 func (a *FlowClient) CreateWriterClone(body model.WriterClone) (*model.WriterClone, error) {
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.WriterClone{}).
 		SetBody(body).
-		Post("/api/producers/writer_clones")
+		Post("/api/producers/writer_clones"))
 	if err != nil {
-		return nil, fmt.Errorf("%s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*model.WriterClone), nil
 }

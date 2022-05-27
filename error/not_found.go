@@ -1,19 +1,17 @@
 package error
 
 import (
+	"fmt"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"net/http"
 
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
 
 // NotFound creates a gin middleware for handling page not found.
 func NotFound() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, &model.Error{
-			Error:            http.StatusText(http.StatusNotFound),
-			ErrorCode:        http.StatusNotFound,
-			ErrorDescription: "page not found",
-		})
+	return func(ctx *gin.Context) {
+		message := fmt.Sprintf("%s %s [%d]: %s", ctx.Request.Method, ctx.Request.URL, 404, "api not found")
+		ctx.JSON(http.StatusNotFound, interfaces.Message{Message: message})
 	}
 }

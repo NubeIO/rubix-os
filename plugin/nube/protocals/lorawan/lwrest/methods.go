@@ -2,6 +2,7 @@ package lwrest
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwmodel"
 )
 
@@ -11,14 +12,11 @@ const orgID = "1"
 // GetOrganizations get all
 func (a *RestClient) GetOrganizations() (*lwmodel.Organizations, error) {
 	q := fmt.Sprintf("/api/organizations?limit=%s", limit)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(lwmodel.Organizations{}).
-		Get(q)
+		Get(q))
 	if err != nil {
-		return nil, fmt.Errorf("GetOrganizations %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.Organizations), nil
 }
@@ -26,14 +24,11 @@ func (a *RestClient) GetOrganizations() (*lwmodel.Organizations, error) {
 // GetGateways get all
 func (a *RestClient) GetGateways() (*lwmodel.Gateways, error) {
 	q := fmt.Sprintf("/api/gateways?limit=%s&organizationID=%s", limit, orgID)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(lwmodel.Gateways{}).
-		Get(q)
+		Get(q))
 	if err != nil {
-		return nil, fmt.Errorf("GetApplications %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.Gateways), nil
 }
@@ -41,14 +36,11 @@ func (a *RestClient) GetGateways() (*lwmodel.Gateways, error) {
 // GetApplications get all
 func (a *RestClient) GetApplications() (*lwmodel.Applications, error) {
 	q := fmt.Sprintf("/api/applications?limit=%s&organizationID=%s", limit, orgID)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(lwmodel.Applications{}).
-		Get(q)
+		Get(q))
 	if err != nil {
-		return nil, fmt.Errorf("GetApplications %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.Applications), nil
 }
@@ -56,14 +48,11 @@ func (a *RestClient) GetApplications() (*lwmodel.Applications, error) {
 // GetDevices get all
 func (a *RestClient) GetDevices() (*lwmodel.Devices, error) {
 	q := fmt.Sprintf("/api/devices?limit=%s&organizationID=%s", limit, orgID)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(lwmodel.Devices{}).
-		Get(q)
+		Get(q))
 	if err != nil {
-		return nil, fmt.Errorf("GetDevices %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.Devices), nil
 }
@@ -71,14 +60,11 @@ func (a *RestClient) GetDevices() (*lwmodel.Devices, error) {
 // GetDeviceProfiles get all
 func (a *RestClient) GetDeviceProfiles() (*lwmodel.DeviceProfiles, error) {
 	q := fmt.Sprintf("/api/device-profiles?limit=%s&organizationID=%s", limit, orgID)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(lwmodel.DeviceProfiles{}).
-		Get(q)
+		Get(q))
 	if err != nil {
-		return nil, fmt.Errorf("GetDeviceProfiles %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.DeviceProfiles), nil
 }
@@ -86,14 +72,11 @@ func (a *RestClient) GetDeviceProfiles() (*lwmodel.DeviceProfiles, error) {
 // GetServiceProfiles get all
 func (a *RestClient) GetServiceProfiles() (*lwmodel.ServiceProfiles, error) {
 	q := fmt.Sprintf("/api/service-profiles?limit=%s&organizationID=%s", limit, orgID)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(lwmodel.ServiceProfiles{}).
-		Get(q)
+		Get(q))
 	if err != nil {
-		return nil, fmt.Errorf("GetServiceProfiles %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.ServiceProfiles), nil
 }
@@ -101,14 +84,11 @@ func (a *RestClient) GetServiceProfiles() (*lwmodel.ServiceProfiles, error) {
 // GetGatewayProfiles get all
 func (a *RestClient) GetGatewayProfiles() (*lwmodel.GatewayProfiles, error) {
 	q := fmt.Sprintf("/api/gateway-profiles?limit=%s&organizationID=%s", limit, orgID)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(lwmodel.GatewayProfiles{}).
-		Get(q)
+		Get(q))
 	if err != nil {
-		return nil, fmt.Errorf("GetGatewayProfiles %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.GatewayProfiles), nil
 }
@@ -116,15 +96,12 @@ func (a *RestClient) GetGatewayProfiles() (*lwmodel.GatewayProfiles, error) {
 // AddDevice add all
 func (a *RestClient) AddDevice(body lwmodel.Devices) (*lwmodel.Devices, error) {
 	q := fmt.Sprintf("/api/devices")
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(lwmodel.Devices{}).
 		SetBody(body).
-		Post(q)
+		Post(q))
 	if err != nil {
-		return nil, fmt.Errorf("AddDevice %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.Devices), nil
 }
@@ -132,14 +109,11 @@ func (a *RestClient) AddDevice(body lwmodel.Devices) (*lwmodel.Devices, error) {
 // GetDevice get an object
 func (a *RestClient) GetDevice(devEui string) (*lwmodel.GetDevice, error) {
 	q := fmt.Sprintf("/api/devices/%s", devEui)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(lwmodel.GetDevice{}).
-		Get(q)
+		Get(q))
 	if err != nil {
-		return nil, fmt.Errorf("GetDevice %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*lwmodel.GetDevice), nil
 }
@@ -147,15 +121,12 @@ func (a *RestClient) GetDevice(devEui string) (*lwmodel.GetDevice, error) {
 // EditDevice edit object
 func (a *RestClient) EditDevice(devEui string, body lwmodel.Device) (bool, error) {
 	q := fmt.Sprintf("/api/devices/%s", devEui)
-	resp, err := a.client.R().
+	_, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(lwmodel.Device{}).
 		SetBody(body).
-		Put(q)
+		Put(q))
 	if err != nil {
-		return false, fmt.Errorf("EditDevice %s failed", err)
-	}
-	if resp.Error() != nil {
-		return false, getAPIError(resp)
+		return false, err
 	}
 	return true, nil
 }
@@ -163,13 +134,10 @@ func (a *RestClient) EditDevice(devEui string, body lwmodel.Device) (bool, error
 // DeleteDevice delete
 func (a *RestClient) DeleteDevice(devEui string) (bool, error) {
 	q := fmt.Sprintf("/api/devices/%s", devEui)
-	resp, err := a.client.R().
-		Delete(q)
+	_, err := nresty.FormatRestyResponse(a.client.R().
+		Delete(q))
 	if err != nil {
-		return false, fmt.Errorf("DeleteDevice %s failed", err)
-	}
-	if resp.Error() != nil {
-		return false, getAPIError(resp)
+		return false, err
 	}
 	return true, nil
 }

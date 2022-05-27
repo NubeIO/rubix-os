@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/auth"
 	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/go-resty/resty/v2"
@@ -19,7 +20,7 @@ func GetFlowToken(ip string, port int, username string, password string) (*strin
 	client.SetDebug(false)
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), ip, port)
 	client.SetBaseURL(url)
-	client.SetError(&Error{})
+	client.SetError(&nresty.Error{})
 	cli := &FlowClient{client: client}
 	token, err := cli.Login(&model.LoginBody{Username: username, Password: password})
 	if err != nil {
@@ -34,7 +35,7 @@ func NewLocalClient() (cli *FlowClient) {
 	port := config.Get().Server.Port
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), "0.0.0.0", port)
 	client.SetBaseURL(url)
-	client.SetError(&Error{})
+	client.SetError(&nresty.Error{})
 	cli = &FlowClient{client: client}
 	return
 }
@@ -68,7 +69,7 @@ func newSessionWithToken(ip string, port int, token string) *FlowClient {
 	client.SetDebug(false)
 	url := fmt.Sprintf("%s://%s:%d/ff", getSchema(port), ip, port)
 	client.SetBaseURL(url)
-	client.SetError(&Error{})
+	client.SetError(&nresty.Error{})
 	client.SetHeader("Authorization", token)
 	return &FlowClient{client: client}
 }
@@ -79,7 +80,7 @@ func newMasterToSlaveSession(globalUUID string) *FlowClient {
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", conf.Server.RSPort, globalUUID)
 	client.SetBaseURL(url)
-	client.SetError(&Error{})
+	client.SetError(&nresty.Error{})
 	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
 	return &FlowClient{client: client}
 }
@@ -90,7 +91,7 @@ func newSlaveToMasterCallSession() *FlowClient {
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", conf.Server.RSPort)
 	client.SetBaseURL(url)
-	client.SetError(&Error{})
+	client.SetError(&nresty.Error{})
 	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
 	return &FlowClient{client: client}
 }

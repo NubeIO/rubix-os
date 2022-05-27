@@ -2,6 +2,7 @@ package edgerest
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -18,7 +19,7 @@ func NewNoAuth(address string, port int) *RestClient {
 	url := fmt.Sprintf("http://%s:%d", address, port)
 	apiURL := url
 	client.SetHostURL(apiURL)
-	client.SetError(&Error{})
+	client.SetError(&nresty.Error{})
 	client.SetHeader("Content-Type", "application/json")
 	return &RestClient{client: client}
 }

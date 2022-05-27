@@ -2,6 +2,7 @@ package edgerest
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/nresty"
 	log "github.com/sirupsen/logrus"
 	"strings"
 )
@@ -106,42 +107,33 @@ type DI struct {
 
 // PingServer all points
 func (a *RestClient) PingServer() (*ServerPing, error) {
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&ServerPing{}).
-		Get("/")
+		Get("/"))
 	if err != nil {
-		return nil, fmt.Errorf("error geting server %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*ServerPing), nil
 }
 
 // GetUIs all ui points
 func (a *RestClient) GetUIs() (*UI, error) {
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(UI{}).
-		Get("/api/1.1/read/all/ui")
+		Get("/api/1.1/read/all/ui"))
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*UI), nil
 }
 
 // GetDIs all di points
 func (a *RestClient) GetDIs() (*DI, error) {
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(DI{}).
-		Get("/api/1.1/read/all/di")
+		Get("/api/1.1/read/all/di"))
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*DI), nil
 }
@@ -149,15 +141,12 @@ func (a *RestClient) GetDIs() (*DI, error) {
 // WriteUO to a UO point
 func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, error) {
 	req := fmt.Sprintf("/api/1.1/write/uo/%s/%d/16", strings.ToLower(ioNum), int(value))
-	log.Println("edge28-api: WriteUO:", req)
-	resp, err := a.client.R().
+	log.Info("edge28-api: WriteUO:", req)
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(WriteResponseUO{}).
-		Get(req)
+		Get(req))
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*WriteResponseUO), nil
 }
@@ -165,15 +154,12 @@ func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, err
 // WriteDO to a DO point
 func (a *RestClient) WriteDO(ioNum string, value float64) (*WriteResponse, error) {
 	req := fmt.Sprintf("/api/1.1/write/do/%s/%d/16", strings.ToLower(ioNum), int(value))
-	log.Println("edge28-api: WriteDO:", req)
-	resp, err := a.client.R().
+	log.Info("edge28-api: WriteDO:", req)
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(WriteResponse{}).
-		Get(req)
+		Get(req))
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*WriteResponse), nil
 }

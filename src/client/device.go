@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 )
 
@@ -9,30 +10,24 @@ import (
 func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("dev_name_%s", name)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name, "network_uuid": networkUUID}).
-		Post("/api/devices")
+		Post("/api/devices"))
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*ResponseBody), nil
 }
 
 // ClientGetDevice an object
 func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/devices/{uuid}")
+		Get("/api/devices/{uuid}"))
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*ResponseBody), nil
 }
@@ -41,16 +36,13 @@ func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
 func (a *FlowClient) ClientEditDevice(uuid string) (*ResponseBody, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("dev_new_name_%s", name)
-	resp, err := a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/devices/{}")
+		Post("/api/devices/{}"))
 	if err != nil {
-		return nil, fmt.Errorf("fetch name for name %s failed", err)
-	}
-	if resp.Error() != nil {
-		return nil, getAPIError(resp)
+		return nil, err
 	}
 	return resp.Result().(*ResponseBody), nil
 }
