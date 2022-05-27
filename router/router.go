@@ -166,8 +166,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 
 		databaseRoutes := apiRoutes.Group("/database")
 		{
-			// delete all networks, gateways, commandGroup, consumers, jobs and children
-			databaseRoutes.DELETE("/flows/drop", dbGroup.DropAllFlow)
 			databaseWizard := databaseRoutes.Group("wizard")
 			{
 				databaseWizard.POST("/mappings/p2p/points", dbGroup.WizardP2PMapping)

@@ -7,8 +7,7 @@ import (
 
 // The DBDatabase interface for encapsulating database access.
 type DBDatabase interface {
-	DropAllFlow() (string, error) //delete all networks, gateways and children
-	SyncTopics()                  //sync all the topics into the event bus
+	SyncTopics() // sync all the topics into the event bus
 	WizardP2PMapping(body *model.P2PBody) (bool, error)
 	WizardMasterSlavePointMapping() (bool, error)
 	WizardMasterSlavePointMappingOnConsumerSideByProducerSide(globalUUID string) (bool, error)
@@ -16,11 +15,6 @@ type DBDatabase interface {
 }
 type DatabaseAPI struct {
 	DB DBDatabase
-}
-
-func (a *DatabaseAPI) DropAllFlow(ctx *gin.Context) {
-	q, err := a.DB.DropAllFlow()
-	responseHandler(q, err, ctx)
 }
 
 func (a *DatabaseAPI) SyncTopics() {
