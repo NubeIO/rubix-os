@@ -1,4 +1,4 @@
-package client
+package nresty
 
 import (
 	"encoding/json"

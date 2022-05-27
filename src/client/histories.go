@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -10,7 +11,7 @@ func (a *FlowClient) GetProducerHistoriesPointsForSync(id int, timeStamp time.Ti
 	req := a.client.R().
 		SetResult(&[]model.History{}).SetQueryParam("id", fmt.Sprintf("%v", id)).
 		SetQueryParam("timestamp", fmt.Sprintf("%v", timeStamp.Format(time.RFC3339Nano)))
-	resp, err := FormatRestyResponse(req.Get("/api/histories/producers/points_for_sync"))
+	resp, err := nresty.FormatRestyResponse(req.Get("/api/histories/producers/points_for_sync"))
 	if err != nil {
 		return nil, err
 	}

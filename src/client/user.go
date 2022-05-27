@@ -1,6 +1,9 @@
 package client
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/NubeIO/flow-framework/nresty"
+)
 
 // GetToken gets the token
 func (a *FlowClient) GetToken(name string, password string) (*Token, error) {
@@ -8,7 +11,7 @@ func (a *FlowClient) GetToken(name string, password string) (*Token, error) {
 	if name == "" {
 		return nil, fmt.Errorf("provide a name in the body")
 	}
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&Token{}).
 		SetBody(map[string]string{"name": name}).
 		SetBasicAuth(name, password).

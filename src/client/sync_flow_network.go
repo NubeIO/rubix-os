@@ -1,11 +1,12 @@
 package client
 
 import (
+	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 func (a *FlowClient) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetworkClone, error) {
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.FlowNetworkClone{}).
 		SetBody(body).
 		Post("/api/sync/flow_network"))

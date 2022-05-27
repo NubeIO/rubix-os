@@ -2,7 +2,7 @@ package edgerest
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/nresty"
 	log "github.com/sirupsen/logrus"
 	"strings"
 )
@@ -107,7 +107,7 @@ type DI struct {
 
 // PingServer all points
 func (a *RestClient) PingServer() (*ServerPing, error) {
-	resp, err := client.FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&ServerPing{}).
 		Get("/"))
 	if err != nil {
@@ -118,7 +118,7 @@ func (a *RestClient) PingServer() (*ServerPing, error) {
 
 // GetUIs all ui points
 func (a *RestClient) GetUIs() (*UI, error) {
-	resp, err := client.FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(UI{}).
 		Get("/api/1.1/read/all/ui"))
 	if err != nil {
@@ -129,7 +129,7 @@ func (a *RestClient) GetUIs() (*UI, error) {
 
 // GetDIs all di points
 func (a *RestClient) GetDIs() (*DI, error) {
-	resp, err := client.FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(DI{}).
 		Get("/api/1.1/read/all/di"))
 	if err != nil {
@@ -142,7 +142,7 @@ func (a *RestClient) GetDIs() (*DI, error) {
 func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, error) {
 	req := fmt.Sprintf("/api/1.1/write/uo/%s/%d/16", strings.ToLower(ioNum), int(value))
 	log.Info("edge28-api: WriteUO:", req)
-	resp, err := client.FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(WriteResponseUO{}).
 		Get(req))
 	if err != nil {
@@ -155,7 +155,7 @@ func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, err
 func (a *RestClient) WriteDO(ioNum string, value float64) (*WriteResponse, error) {
 	req := fmt.Sprintf("/api/1.1/write/do/%s/%d/16", strings.ToLower(ioNum), int(value))
 	log.Info("edge28-api: WriteDO:", req)
-	resp, err := client.FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(WriteResponse{}).
 		Get(req))
 	if err != nil {

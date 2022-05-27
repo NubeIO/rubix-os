@@ -2,7 +2,7 @@ package lwrest
 
 import (
 	"fmt"
-	ffclient "github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/go-resty/resty/v2"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,7 +22,7 @@ func NewChirp(name string, password string, address string, port string) *RestCl
 	client.SetDebug(false)
 	url := fmt.Sprintf("http://%s:%s", address, port)
 	client.SetBaseURL(url)
-	client.SetError(&ffclient.Error{})
+	client.SetError(&nresty.Error{})
 	client.SetHeader("Content-Type", "application/json")
 	var t Token
 	resp, err := client.R().

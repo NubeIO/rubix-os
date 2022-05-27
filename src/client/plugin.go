@@ -2,12 +2,13 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 // ClientGetPlugins an object
 func (a *FlowClient) ClientGetPlugins() (*ResponsePlugins, error) {
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&ResponsePlugins{}).
 		Get("/plugins"))
 	if err != nil {
@@ -18,7 +19,7 @@ func (a *FlowClient) ClientGetPlugins() (*ResponsePlugins, error) {
 
 // ClientGetPlugin an object
 func (a *FlowClient) ClientGetPlugin(uuid string) (*ResponseBody, error) {
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/plugins/{uuid}"))
@@ -31,7 +32,7 @@ func (a *FlowClient) ClientGetPlugin(uuid string) (*ResponseBody, error) {
 // CreateNetworkPlugin an object
 func (a *FlowClient) CreateNetworkPlugin(body *model.Network, pluginName string) (*model.Network, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/networks", pluginName)
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.Network{}).
 		SetBody(body).
 		Post(url))
@@ -44,7 +45,7 @@ func (a *FlowClient) CreateNetworkPlugin(body *model.Network, pluginName string)
 // DeleteNetworkPlugin delete an object
 func (a *FlowClient) DeleteNetworkPlugin(body *model.Network, pluginName string) (ok bool, err error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/networks", pluginName)
-	_, err = FormatRestyResponse(a.client.R().
+	_, err = nresty.FormatRestyResponse(a.client.R().
 		SetBody(body).
 		Delete(url))
 	if err != nil {
@@ -56,7 +57,7 @@ func (a *FlowClient) DeleteNetworkPlugin(body *model.Network, pluginName string)
 // DeleteDevicePlugin delete an object
 func (a *FlowClient) DeleteDevicePlugin(body *model.Device, pluginName string) (ok bool, err error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/devices", pluginName)
-	_, err = FormatRestyResponse(a.client.R().
+	_, err = nresty.FormatRestyResponse(a.client.R().
 		SetBody(body).
 		Delete(url))
 	if err != nil {
@@ -68,7 +69,7 @@ func (a *FlowClient) DeleteDevicePlugin(body *model.Device, pluginName string) (
 // DeletePointPlugin delete an object
 func (a *FlowClient) DeletePointPlugin(body *model.Point, pluginName string) (ok bool, err error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/points", pluginName)
-	_, err = FormatRestyResponse(a.client.R().
+	_, err = nresty.FormatRestyResponse(a.client.R().
 		SetBody(body).
 		Delete(url))
 	if err != nil {
@@ -80,7 +81,7 @@ func (a *FlowClient) DeletePointPlugin(body *model.Point, pluginName string) (ok
 // CreateDevicePlugin an object
 func (a *FlowClient) CreateDevicePlugin(body *model.Device, pluginName string) (*model.Device, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/devices", pluginName)
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.Device{}).
 		SetBody(body).
 		Post(url))
@@ -93,7 +94,7 @@ func (a *FlowClient) CreateDevicePlugin(body *model.Device, pluginName string) (
 // CreatePointPlugin an object
 func (a *FlowClient) CreatePointPlugin(body *model.Point, pluginName string) (*model.Point, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/points", pluginName)
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.Point{}).
 		SetBody(body).
 		Post(url))
@@ -106,7 +107,7 @@ func (a *FlowClient) CreatePointPlugin(body *model.Point, pluginName string) (*m
 // UpdateNetworkPlugin update an object
 func (a *FlowClient) UpdateNetworkPlugin(body *model.Network, pluginName string) (*model.Network, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/networks", pluginName)
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.Network{}).
 		SetBody(body).
 		Patch(url))
@@ -119,7 +120,7 @@ func (a *FlowClient) UpdateNetworkPlugin(body *model.Network, pluginName string)
 // UpdateDevicePlugin update an object
 func (a *FlowClient) UpdateDevicePlugin(body *model.Device, pluginName string) (*model.Device, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/devices", pluginName)
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.Device{}).
 		SetBody(body).
 		Patch(url))
@@ -132,7 +133,7 @@ func (a *FlowClient) UpdateDevicePlugin(body *model.Device, pluginName string) (
 // UpdatePointPlugin update an object
 func (a *FlowClient) UpdatePointPlugin(body *model.Point, pluginName string) (*model.Point, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/points", pluginName)
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.Point{}).
 		SetBody(body).
 		Patch(url))
@@ -145,7 +146,7 @@ func (a *FlowClient) UpdatePointPlugin(body *model.Point, pluginName string) (*m
 // WritePointPlugin update an object
 func (a *FlowClient) WritePointPlugin(pointUUID string, body *model.PointWriter, pluginName string) (*model.Point, error) {
 	url := fmt.Sprintf("/api/plugins/api/%s/points/write/{uuid}", pluginName)
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.Point{}).
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": pointUUID}).

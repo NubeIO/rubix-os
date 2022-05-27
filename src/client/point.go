@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -10,7 +11,7 @@ import (
 func (a *FlowClient) ClientAddPoint(deviceUUID string) (*model.Point, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("pnt_name_%s", name)
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.Point{}).
 		SetBody(map[string]string{"name": name, "device_uuid": deviceUUID}).
 		Post("/api/points"))
@@ -22,7 +23,7 @@ func (a *FlowClient) ClientAddPoint(deviceUUID string) (*model.Point, error) {
 
 // ClientGetPoint an object
 func (a *FlowClient) ClientGetPoint(uuid string) (*model.Point, error) {
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(&model.Point{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/points/{uuid}"))
@@ -34,7 +35,7 @@ func (a *FlowClient) ClientGetPoint(uuid string) (*model.Point, error) {
 
 // ClientEditPoint an object
 func (a *FlowClient) ClientEditPoint(uuid string, body model.Point) (*model.Point, error) {
-	resp, err := FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetBody(body).
 		SetResult(&model.Point{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
