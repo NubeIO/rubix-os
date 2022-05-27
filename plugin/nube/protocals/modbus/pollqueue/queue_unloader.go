@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"time"
-	//log "github.com/sirupsen/logrus"
+	// log "github.com/sirupsen/logrus"
 )
 
 // REFS:
@@ -13,7 +13,7 @@ import (
 
 type QueueUnloader struct {
 	NextPollPoint *PollingPoint
-	//NextUnloadTimer 		*time.Timer
+	// NextUnloadTimer 		*time.Timer
 	NextUnloadTimer *time.Ticker
 	CancelChannel   chan bool
 }
@@ -71,21 +71,21 @@ func (pm *NetworkPollManager) StopQueueUnloader() {
 	pm.PluginQueueUnloader = nil
 }
 
-//This function should be called from the Polling service. It will start a timer that posts the next polling point.
+// This function should be called from the Polling service. It will start a timer that posts the next polling point.
 func (pm *NetworkPollManager) GetNextPollingPoint() (pp *PollingPoint, callback func(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate bool)) {
 	pm.pollQueueDebugMsg("GetNextPollingPoint()")
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint != nil {
 		pp := pm.PluginQueueUnloader.NextPollPoint
 		pm.PluginQueueUnloader.NextPollPoint = nil
-		//Moving the line below to a reoccurring timer instead.
-		//pm.PluginQueueUnloader.NextUnloadTimer = time.AfterFunc(pm.MaxPollRate, pm.postNextPointCallback)
+		// Moving the line below to a reoccurring timer instead.
+		// pm.PluginQueueUnloader.NextUnloadTimer = time.AfterFunc(pm.MaxPollRate, pm.postNextPointCallback)
 		return pp, pm.PollingPointCompleteNotification
 	}
 	pm.pollQueueDebugMsg("GetNextPollingPoint(): No pollingPoint available")
 	return nil, nil
 }
 
-//This is the callback function that is called by the timer made in (pm *NetworkPollManager) GetNextPollingPoint().
+// This is the callback function that is called by the timer made in (pm *NetworkPollManager) GetNextPollingPoint().
 func (pm *NetworkPollManager) postNextPointCallback() {
 	pm.pollQueueDebugMsg("postNextPointCallback()")
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint == nil {

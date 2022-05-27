@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//addNetwork add network
+// addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
 	if err != nil {
@@ -31,7 +31,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return body, nil
 }
 
-//addDevice add device
+// addDevice add device
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	network, err := inst.db.GetNetwork(body.NetworkUUID, api.Args{WithDevices: true})
 	if err != nil {
@@ -50,7 +50,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	return device, nil
 }
 
-//updateNetwork update network
+// updateNetwork update network
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
 	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
 	if err != nil {
@@ -59,7 +59,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	return network, nil
 }
 
-//updateDevice update device
+// updateDevice update device
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
 	device, err = inst.db.UpdateDevice(body.UUID, body, true)
 	if err != nil {
@@ -68,9 +68,9 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	return device, nil
 }
 
-//writePoint update point. Called via API call.
+// writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	//TODO: check for PointWriteByName calls that might not flow through the plugin.
+	// TODO: check for PointWriteByName calls that might not flow through the plugin.
 	if body == nil {
 		return
 	}
@@ -81,7 +81,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	return point, nil
 }
 
-//deleteNetwork network
+// deleteNetwork network
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	err = inst.dropPoints()
 	if err != nil {
@@ -94,7 +94,7 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	return ok, nil
 }
 
-//deleteNetwork device
+// deleteNetwork device
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	err = inst.dropPoints()
 	if err != nil {

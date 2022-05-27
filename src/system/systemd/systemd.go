@@ -7,8 +7,8 @@ import (
 )
 
 //
-//action: "stop/start/restart/enable/disable"
-//service: "POINT_SERVER"
+// action: "stop/start/restart/enable/disable"
+// service: "POINT_SERVER"
 
 // SystemctlStatus Run `systemctl status is-active`
 func SystemctlStatus(services []string) (statuses map[string]string, success bool) {

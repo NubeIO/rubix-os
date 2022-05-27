@@ -14,10 +14,10 @@ type Client struct {
 	Host       string        `json:"ip"`
 	Port       string        `json:"port"`
 	SerialPort string        `json:"serial_port"`
-	BaudRate   uint          `json:"baud_rate"` //38400
-	Parity     string        `json:"parity"`    //none, odd, even DEFAULT IS PARITY_NONE
-	DataBits   uint          `json:"data_bits"` //7 or 8
-	StopBits   uint          `json:"stop_bits"` //1 or 2
+	BaudRate   uint          `json:"baud_rate"` // 38400
+	Parity     string        `json:"parity"`    // none, odd, even DEFAULT IS PARITY_NONE
+	DataBits   uint          `json:"data_bits"` // 7 or 8
+	StopBits   uint          `json:"stop_bits"` // 1 or 2
 	Timeout    time.Duration `json:"device_timeout_in_ms"`
 }
 

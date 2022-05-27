@@ -15,7 +15,7 @@ type wizard struct {
 	Value float64 `json:"value"`
 }
 
-//wizard make a network/dev/pnt
+// wizard make a network/dev/pnt
 func (inst *Instance) wizard(body wizard) (string, error) {
 	ip := "192.168.15.63"
 	if body.IP != "" {

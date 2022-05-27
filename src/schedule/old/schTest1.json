@@ -1,13 +1,9 @@
 {
-  "events":
-  {},
-  "weekly":
-  {
-    "919d7b4c-2540-4759-bb29-afc017ed03c7":
-    {
+  "events": {},
+  "weekly": {
+    "919d7b4c-2540-4759-bb29-afc017ed03c7": {
       "name": "HVAC",
-      "days":
-      [
+      "days": [
         "monday",
         "tuesday",
         "wednesday",
@@ -21,6 +17,5 @@
       "timezone": "Australia/Sydney"
     }
   },
-  "holiday":
-  {}
+  "holiday": {}
 }

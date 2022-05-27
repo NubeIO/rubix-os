@@ -1,328 +1,328 @@
 [
-    {
-        "label": "StorageHandler",
-        "type": "interface",
-        "fileName": "storage.go",
-        "pos": 125,
-        "members": [
+  {
+    "label": "StorageHandler",
+    "type": "interface",
+    "fileName": "storage.go",
+    "pos": 125,
+    "members": [
+      {
+        "label": "Save",
+        "type": "method",
+        "funcSpec": {
+          "params": [
             {
-                "label": "Save",
-                "type": "method",
-                "funcSpec": {
-                    "params": [
-                        {
-                            "label": "[]byte",
-                            "type": "array"
-                        }
-                    ],
-                    "returns": [
-                        {
-                            "type": "type",
-                            "underlyingType": "error"
-                        }
-                    ]
-                }
-            },
-            {
-                "label": "Load",
-                "type": "method",
-                "funcSpec": {
-                    "returns": [
-                        {
-                            "label": "[]byte",
-                            "type": "array"
-                        },
-                        {
-                            "type": "type",
-                            "underlyingType": "error"
-                        }
-                    ]
-                }
+              "label": "[]byte",
+              "type": "array"
             }
-        ]
-    },
-    {
-        "label": "Storager",
-        "type": "interface",
-        "fileName": "storage.go",
-        "pos": 287,
-        "members": [
+          ],
+          "returns": [
             {
-                "label": "Plugin",
-                "type": "embed"
-            },
-            {
-                "label": "SetStorageHandler",
-                "type": "method",
-                "funcSpec": {
-                    "params": [
-                        {
-                            "type": "type",
-                            "underlyingType": "StorageHandler"
-                        }
-                    ]
-                }
+              "type": "type",
+              "underlyingType": "error"
             }
-        ]
-    },
-    {
-        "label": "Displayer",
-        "type": "interface",
-        "fileName": "displayer.go",
-        "pos": 390,
-        "members": [
+          ]
+        }
+      },
+      {
+        "label": "Load",
+        "type": "method",
+        "funcSpec": {
+          "returns": [
             {
-                "label": "Plugin",
-                "type": "embed"
+              "label": "[]byte",
+              "type": "array"
             },
             {
-                "label": "GetDisplay",
-                "type": "method",
-                "funcSpec": {
-                    "params": [
-                        {
-                            "label": "*url.URL",
-                            "type": "star"
-                        }
-                    ],
-                    "returns": [
-                        {
-                            "type": "type",
-                            "underlyingType": "string"
-                        }
-                    ]
-                }
+              "type": "type",
+              "underlyingType": "error"
             }
-        ]
-    },
-    {
-        "label": "Message",
-        "type": "struct",
-        "fileName": "messenger.go",
-        "pos": 93,
-        "members": [
-            {
-                "label": "Message",
-                "type": "member"
-            },
-            {
-                "label": "Title",
-                "type": "member"
-            },
-            {
-                "label": "Priority",
-                "type": "member"
-            },
-            {
-                "label": "Extras",
-                "type": "member"
-            }
-        ]
-    },
-    {
-        "label": "MessageHandler",
-        "type": "interface",
-        "fileName": "messenger.go",
-        "pos": 270,
-        "members": [
-            {
-                "label": "SendMessage",
-                "type": "method",
-                "funcSpec": {
-                    "params": [
-                        {
-                            "type": "type",
-                            "underlyingType": "Message"
-                        }
-                    ],
-                    "returns": [
-                        {
-                            "type": "type",
-                            "underlyingType": "error"
-                        }
-                    ]
-                }
-            }
-        ]
-    },
-    {
-        "label": "Messenger",
-        "type": "interface",
-        "fileName": "messenger.go",
-        "pos": 485,
-        "members": [
-            {
-                "label": "Plugin",
-                "type": "embed"
-            },
-            {
-                "label": "SetMessageHandler",
-                "type": "method",
-                "funcSpec": {
-                    "params": [
-                        {
-                            "type": "type",
-                            "underlyingType": "MessageHandler"
-                        }
-                    ]
-                }
-            }
-        ]
-    },
-    {
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "label": "Storager",
+    "type": "interface",
+    "fileName": "storage.go",
+    "pos": 287,
+    "members": [
+      {
         "label": "Plugin",
-        "type": "interface",
-        "fileName": "plugin.go",
-        "pos": 79,
-        "members": [
+        "type": "embed"
+      },
+      {
+        "label": "SetStorageHandler",
+        "type": "method",
+        "funcSpec": {
+          "params": [
             {
-                "label": "Enable",
-                "type": "method",
-                "funcSpec": {
-                    "returns": [
-                        {
-                            "type": "type",
-                            "underlyingType": "error"
-                        }
-                    ]
-                }
-            },
-            {
-                "label": "Disable",
-                "type": "method",
-                "funcSpec": {
-                    "returns": [
-                        {
-                            "type": "type",
-                            "underlyingType": "error"
-                        }
-                    ]
-                }
+              "type": "type",
+              "underlyingType": "StorageHandler"
             }
-        ]
-    },
-    {
-        "label": "UserContext",
-        "type": "struct",
-        "fileName": "plugin.go",
-        "pos": 473,
-        "members": [
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "label": "Displayer",
+    "type": "interface",
+    "fileName": "displayer.go",
+    "pos": 390,
+    "members": [
+      {
+        "label": "Plugin",
+        "type": "embed"
+      },
+      {
+        "label": "GetDisplay",
+        "type": "method",
+        "funcSpec": {
+          "params": [
             {
-                "label": "ID",
-                "type": "member"
-            },
-            {
-                "label": "Name",
-                "type": "member"
-            },
-            {
-                "label": "Admin",
-                "type": "member"
+              "label": "*url.URL",
+              "type": "star"
             }
-        ]
-    },
-    {
-        "label": "Info",
-        "type": "struct",
-        "fileName": "plugin.go",
-        "pos": 731,
-        "members": [
+          ],
+          "returns": [
             {
-                "label": "Version",
-                "type": "member"
-            },
-            {
-                "label": "Author",
-                "type": "member"
-            },
-            {
-                "label": "Name",
-                "type": "member"
-            },
-            {
-                "label": "Website",
-                "type": "member"
-            },
-            {
-                "label": "Description",
-                "type": "member"
-            },
-            {
-                "label": "License",
-                "type": "member"
-            },
-            {
-                "label": "ModulePath",
-                "type": "member"
+              "type": "type",
+              "underlyingType": "string"
             }
-        ]
-    },
-    {
-        "label": "Configurer",
-        "type": "interface",
-        "fileName": "config.go",
-        "pos": 133,
-        "members": [
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "label": "Message",
+    "type": "struct",
+    "fileName": "messenger.go",
+    "pos": 93,
+    "members": [
+      {
+        "label": "Message",
+        "type": "member"
+      },
+      {
+        "label": "Title",
+        "type": "member"
+      },
+      {
+        "label": "Priority",
+        "type": "member"
+      },
+      {
+        "label": "Extras",
+        "type": "member"
+      }
+    ]
+  },
+  {
+    "label": "MessageHandler",
+    "type": "interface",
+    "fileName": "messenger.go",
+    "pos": 270,
+    "members": [
+      {
+        "label": "SendMessage",
+        "type": "method",
+        "funcSpec": {
+          "params": [
             {
-                "label": "Plugin",
-                "type": "embed"
-            },
-            {
-                "label": "DefaultConfig",
-                "type": "method",
-                "funcSpec": {
-                    "returns": [
-                        {
-                            "type": "interface"
-                        }
-                    ]
-                }
-            },
-            {
-                "label": "ValidateAndSetConfig",
-                "type": "method",
-                "funcSpec": {
-                    "params": [
-                        {
-                            "type": "interface"
-                        }
-                    ],
-                    "returns": [
-                        {
-                            "type": "type",
-                            "underlyingType": "error"
-                        }
-                    ]
-                }
+              "type": "type",
+              "underlyingType": "Message"
             }
-        ]
-    },
-    {
-        "label": "Webhooker",
-        "type": "interface",
-        "fileName": "webhook.go",
-        "pos": 139,
-        "members": [
+          ],
+          "returns": [
             {
-                "label": "Plugin",
-                "type": "embed"
+              "type": "type",
+              "underlyingType": "error"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "label": "Messenger",
+    "type": "interface",
+    "fileName": "messenger.go",
+    "pos": 485,
+    "members": [
+      {
+        "label": "Plugin",
+        "type": "embed"
+      },
+      {
+        "label": "SetMessageHandler",
+        "type": "method",
+        "funcSpec": {
+          "params": [
+            {
+              "type": "type",
+              "underlyingType": "MessageHandler"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "label": "Plugin",
+    "type": "interface",
+    "fileName": "plugin.go",
+    "pos": 79,
+    "members": [
+      {
+        "label": "Enable",
+        "type": "method",
+        "funcSpec": {
+          "returns": [
+            {
+              "type": "type",
+              "underlyingType": "error"
+            }
+          ]
+        }
+      },
+      {
+        "label": "Disable",
+        "type": "method",
+        "funcSpec": {
+          "returns": [
+            {
+              "type": "type",
+              "underlyingType": "error"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "label": "UserContext",
+    "type": "struct",
+    "fileName": "plugin.go",
+    "pos": 473,
+    "members": [
+      {
+        "label": "ID",
+        "type": "member"
+      },
+      {
+        "label": "Name",
+        "type": "member"
+      },
+      {
+        "label": "Admin",
+        "type": "member"
+      }
+    ]
+  },
+  {
+    "label": "Info",
+    "type": "struct",
+    "fileName": "plugin.go",
+    "pos": 731,
+    "members": [
+      {
+        "label": "Version",
+        "type": "member"
+      },
+      {
+        "label": "Author",
+        "type": "member"
+      },
+      {
+        "label": "Name",
+        "type": "member"
+      },
+      {
+        "label": "Website",
+        "type": "member"
+      },
+      {
+        "label": "Description",
+        "type": "member"
+      },
+      {
+        "label": "License",
+        "type": "member"
+      },
+      {
+        "label": "ModulePath",
+        "type": "member"
+      }
+    ]
+  },
+  {
+    "label": "Configurer",
+    "type": "interface",
+    "fileName": "config.go",
+    "pos": 133,
+    "members": [
+      {
+        "label": "Plugin",
+        "type": "embed"
+      },
+      {
+        "label": "DefaultConfig",
+        "type": "method",
+        "funcSpec": {
+          "returns": [
+            {
+              "type": "interface"
+            }
+          ]
+        }
+      },
+      {
+        "label": "ValidateAndSetConfig",
+        "type": "method",
+        "funcSpec": {
+          "params": [
+            {
+              "type": "interface"
+            }
+          ],
+          "returns": [
+            {
+              "type": "type",
+              "underlyingType": "error"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "label": "Webhooker",
+    "type": "interface",
+    "fileName": "webhook.go",
+    "pos": 139,
+    "members": [
+      {
+        "label": "Plugin",
+        "type": "embed"
+      },
+      {
+        "label": "RegisterWebhook",
+        "type": "method",
+        "funcSpec": {
+          "params": [
+            {
+              "type": "type",
+              "underlyingType": "string"
             },
             {
-                "label": "RegisterWebhook",
-                "type": "method",
-                "funcSpec": {
-                    "params": [
-                        {
-                            "type": "type",
-                            "underlyingType": "string"
-                        },
-                        {
-                            "label": "*gin.RouterGroup",
-                            "type": "star"
-                        }
-                    ]
-                }
+              "label": "*gin.RouterGroup",
+              "type": "star"
             }
-        ]
-    }
+          ]
+        }
+      }
+    ]
+  }
 ]

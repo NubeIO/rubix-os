@@ -11,7 +11,7 @@ import (
 )
 
 func (inst *Instance) BusServ() {
-	handlerCreated := bus.Handler{ //PLUGIN CREATED BUS
+	handlerCreated := bus.Handler{ // PLUGIN CREATED BUS
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 
@@ -19,7 +19,7 @@ func (inst *Instance) BusServ() {
 				if !isThis {
 					return
 				}
-				//try and match is network
+				// try and match is network
 				net, err := eventbus.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
@@ -31,20 +31,20 @@ func (inst *Instance) BusServ() {
 					}
 					return
 				}
-				//try and match is device
+				// try and match is device
 				dev, err := eventbus.IsDevice(e.Topic, e)
 				if err != nil {
 					return
 				}
 				if dev != nil {
 					log.Info("lora: BUS PluginsCreated IsDevice", " ", dev.UUID)
-					//err = inst.addDevicePoints(dev)
+					// err = inst.addDevicePoints(dev)
 					if err != nil {
 						return
 					}
 					return
 				}
-				//try and match is point
+				// try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
 				if err != nil {
 					return
@@ -63,10 +63,10 @@ func (inst *Instance) BusServ() {
 	u, _ := nuuid.MakeUUID()
 	key := fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerCreated)
-	handlerUpdated := bus.Handler{ //PLUGIN UPDATED BUS
+	handlerUpdated := bus.Handler{ // PLUGIN UPDATED BUS
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
-				//try and match is network
+				// try and match is network
 				net, err := eventbus.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
@@ -78,20 +78,20 @@ func (inst *Instance) BusServ() {
 					}
 					return
 				}
-				//try and match is device
+				// try and match is device
 				dev, err := eventbus.IsDevice(e.Topic, e)
 				if err != nil {
 					return
 				}
 				if dev != nil {
-					//err = inst.updateDevicePointsAddress(dev)
+					// err = inst.updateDevicePointsAddress(dev)
 					log.Info("lora: BUS PluginsUpdated IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
 					}
 					return
 				}
-				//try and match is point
+				// try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
 				if err != nil {
 					return

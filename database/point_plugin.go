@@ -26,7 +26,7 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
 	body.CommonFault.InFault = true
-	//if plugin like bacnet then call the api direct on the plugin as the plugin knows best how to add a point to keep things in sync
+	// if plugin like bacnet then call the api direct on the plugin as the plugin knows best how to add a point to keep things in sync
 	cli := client.NewLocalClient()
 	point, err = cli.CreatePointPlugin(body, pluginName)
 	if err != nil {

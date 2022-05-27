@@ -59,7 +59,7 @@ func bodyWizard(ctx *gin.Context) (dto wizard, err error) {
 	return dto, err
 }
 
-//supportedObjects return all objects that are not bacnet
+// supportedObjects return all objects that are not bacnet
 func supportedObjects() *array.Array {
 	out := array.NewArray()
 	out.Add(model.ObjTypeAnalogInput)

@@ -170,8 +170,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			{
 				databaseWizard.POST("/mappings/p2p/points", dbGroup.WizardP2PMapping)
 				databaseWizard.POST("/mappings/master_slave/points", dbGroup.WizardMasterSlavePointMapping)
-				databaseWizard.POST("/mapping/master_slave/points/consumer/:global_uuid", dbGroup.WizardMasterSlavePointMappingOnConsumerSideByProducerSide) //supplementary API for remote_mapping
-				databaseWizard.POST("/mapping/p2p/points/consumer/:global_uuid", dbGroup.WizardP2PMappingOnConsumerSideByProducerSide)                       //supplementary API for remote_mapping
+				databaseWizard.POST("/mapping/master_slave/points/consumer/:global_uuid", dbGroup.WizardMasterSlavePointMappingOnConsumerSideByProducerSide) // supplementary API for remote_mapping
+				databaseWizard.POST("/mapping/p2p/points/consumer/:global_uuid", dbGroup.WizardP2PMappingOnConsumerSideByProducerSide)                       // supplementary API for remote_mapping
 			}
 		}
 

@@ -10,7 +10,7 @@ func SetLogger(logLevel string) {
 		DisableColors: false,
 		FullTimestamp: true,
 	})
-	//log.SetReportCaller(true)
+	// log.SetReportCaller(true)
 	log.AddHook(&MqttFieldHook{})
 	log.SetLevel(getLogLevel(logLevel))
 }
@@ -46,7 +46,7 @@ func (h *MqttFieldHook) Levels() []log.Level {
 }
 
 func (h *MqttFieldHook) Fire(e *log.Entry) error {
-	//TODO: extend feature for MQTT streaming
-	//fmt.Println(e.Level, e.Time, e.Message)
+	// TODO: extend feature for MQTT streaming
+	// fmt.Println(e.Level, e.Time, e.Message)
 	return nil
 }

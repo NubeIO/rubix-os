@@ -186,7 +186,7 @@ func (d *GormDatabase) WizardP2PMappingOnConsumerSideByProducerSide(producerGlob
 	log.Info("Writer is created successfully: ", writer)
 
 	consumerModel.Name = "schedule"
-	consumerModel.ProducerUUID = (*producers)[1].UUID //todo check indexing
+	consumerModel.ProducerUUID = (*producers)[1].UUID // todo check indexing
 	consumerModel.ConsumerApplication = "schedule"
 	consumerModel.StreamCloneUUID = streamClones[0].UUID
 	scheduleConsumer, err := d.CreateConsumer(&consumerModel)

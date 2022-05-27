@@ -49,7 +49,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 		var pnt model.Point
 		pnt.Name = "modbus"
 		pnt.Description = "modbus"
-		pnt.AddressID = integer.New(1) //TODO check conversion
+		pnt.AddressID = integer.New(1) // TODO check conversion
 		pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 
 		_, err = inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
@@ -90,7 +90,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			var pnt model.Point
 			pnt.Name = "Modbus Pnt " + strconv.Itoa(j)
 			pnt.Description = "modbus"
-			pnt.AddressID = integer.New(j) //TODO check conversion
+			pnt.AddressID = integer.New(j) // TODO check conversion
 			pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 			pnt.DeviceUUID = dev.UUID
 			pnt.PollPriority = model.PRIORITY_NORMAL
@@ -124,7 +124,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			var pnt model.Point
 			pnt.Name = "Modbus Pnt " + strconv.Itoa(j)
 			pnt.Description = "modbus"
-			pnt.AddressID = integer.New(j) //TODO check conversion
+			pnt.AddressID = integer.New(j) // TODO check conversion
 			pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 
 			_, err = inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
@@ -169,7 +169,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				var pnt model.Point
 				pnt.Name = "Modbus Pnt " + strconv.Itoa(l)
 				pnt.Description = "modbus"
-				pnt.AddressID = integer.New(l) //TODO check conversion
+				pnt.AddressID = integer.New(l) // TODO check conversion
 				pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 				pnt.DeviceUUID = dev.UUID
 				pnt.PollPriority = model.PRIORITY_NORMAL
@@ -221,13 +221,13 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				inst.modbusErrorMsg(fmt.Sprintf("device creation failure: %s", err))
 			}
 			inst.modbusDebugMsg("Created a Device: ", dev)
-			//pointsArray := [4]int{401, 403, 405, 407}
+			// pointsArray := [4]int{401, 403, 405, 407}
 			pointsArray := [1]int{401}
 			for _, l := range pointsArray {
 				var pnt model.Point
 				pnt.Name = "Modbus Pnt " + strconv.Itoa(l)
 				pnt.Description = "modbus"
-				pnt.AddressID = integer.New(l) //TODO check conversion
+				pnt.AddressID = integer.New(l) // TODO check conversion
 				pnt.ObjectType = string(model.ObjTypeWriteHolding)
 				pnt.DataType = string(model.TypeFloat32)
 				pnt.DeviceUUID = dev.UUID
@@ -670,7 +670,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 	return "modbus wizard error: unknown wizard version", err
 }
 
-//wizard make a network/dev/pnt
+// wizard make a network/dev/pnt
 func (inst *Instance) wizardSerial(body wizard) (string, error) {
 
 	sp := "/dev/ttyUSB0"
@@ -706,7 +706,7 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	var pnt model.Point
 	pnt.Name = "modbus"
 	pnt.Description = "modbus"
-	pnt.AddressID = integer.New(1) //TODO check conversion
+	pnt.AddressID = integer.New(1) // TODO check conversion
 	pnt.ObjectType = string(model.ObjTypeWriteCoil)
 
 	pntRet, err := inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)

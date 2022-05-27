@@ -34,7 +34,7 @@ func (d *GormDatabase) pointNameExists(body *model.Point) (nameExist, addressIDE
 		}
 	}
 
-	//check body with existing devices that a point with the same objectType do not have the same addrID
+	// check body with existing devices that a point with the same objectType do not have the same addrID
 	for _, pnt := range device.Points {
 		if pnt.ObjectType == body.ObjectType {
 			if integer.NonNil(pnt.AddressID) == integer.NonNil(body.AddressID) {

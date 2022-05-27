@@ -18,7 +18,7 @@ import (
 
 var err error
 
-//addNetwork add network
+// addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
 	if err != nil {
@@ -38,7 +38,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return body, nil
 }
 
-//addDevice add device
+// addDevice add device
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	device, _ = inst.db.GetOneDeviceByArgs(api.Args{AddressUUID: body.AddressUUID})
 	if device != nil {
@@ -57,7 +57,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	return device, nil
 }
 
-//addPoint add point
+// addPoint add point
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	point, err = inst.db.CreatePoint(body, true, true)
 	if err != nil {
@@ -66,7 +66,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	return point, nil
 }
 
-//updateNetwork update network
+// updateNetwork update network
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
 	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
 	if err != nil {
@@ -75,7 +75,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	return network, nil
 }
 
-//updateDevice update device
+// updateDevice update device
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
 	device, err = inst.db.UpdateDevice(body.UUID, body, true)
 	if err != nil {
@@ -89,7 +89,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	return device, nil
 }
 
-//updatePoint update point
+// updatePoint update point
 func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
 	point, err = inst.db.UpdatePoint(body.UUID, body, true)
 	if err != nil {
@@ -98,9 +98,9 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	return point, nil
 }
 
-//writePoint update point. Called via API call.
+// writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	//TODO: check for PointWriteByName calls that might not flow through the plugin.
+	// TODO: check for PointWriteByName calls that might not flow through the plugin.
 	if body == nil {
 		return
 	}
@@ -111,7 +111,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	return point, nil
 }
 
-//deleteNetwork delete network
+// deleteNetwork delete network
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	ok, err = inst.db.DeleteNetwork(body.UUID)
 	if err != nil {
@@ -120,7 +120,7 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	return ok, nil
 }
 
-//deleteNetwork delete device
+// deleteNetwork delete device
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	ok, err = inst.db.DeleteDevice(body.UUID)
 	if err != nil {
@@ -129,7 +129,7 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	return ok, nil
 }
 
-//deletePoint delete point
+// deletePoint delete point
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	ok, err = inst.db.DeletePoint(body.UUID)
 	if err != nil {
@@ -138,7 +138,7 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-//networkUpdate update network
+// networkUpdate update network
 func (inst *Instance) networkUpdate(uuid string) (*model.Point, error) {
 	var network model.Network
 	network.CommonFault.InFault = false
@@ -154,7 +154,7 @@ func (inst *Instance) networkUpdate(uuid string) (*model.Point, error) {
 	return nil, nil
 }
 
-//networkUpdateErr update network error
+// networkUpdateErr update network error
 func (inst *Instance) networkUpdateErr(uuid, port string, err error) (*model.Point, error) {
 	var network model.Network
 	network.CommonFault.InFault = true
@@ -170,7 +170,7 @@ func (inst *Instance) networkUpdateErr(uuid, port string, err error) (*model.Poi
 	return nil, nil
 }
 
-//deviceUpdateErr update device error
+// deviceUpdateErr update device error
 func (inst *Instance) deviceUpdate(uuid string) (*model.Point, error) {
 	var device model.Device
 	device.CommonFault.InFault = false
@@ -186,7 +186,7 @@ func (inst *Instance) deviceUpdate(uuid string) (*model.Point, error) {
 	return nil, nil
 }
 
-//deviceUpdateErr update device error
+// deviceUpdateErr update device error
 func (inst *Instance) deviceUpdateErr(uuid, addressUUID string, err error) (*model.Point, error) {
 	var device model.Device
 	device.CommonFault.InFault = true

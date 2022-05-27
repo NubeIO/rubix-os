@@ -15,8 +15,8 @@ import (
 	"time"
 )
 
-//THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
-//addDevice add network. Called via API call (or wizard)
+// THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
+// addDevice add network. Called via API call (or wizard)
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	if body == nil {
 		inst.modbusErrorMsg("addNetwork(): nil network object")
@@ -38,7 +38,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return network, nil
 }
 
-//addDevice add device. Called via API call (or wizard)
+// addDevice add device. Called via API call (or wizard)
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	if body == nil {
 		inst.modbusDebugMsg("addDevice(): nil device object")
@@ -52,11 +52,11 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	}
 
 	inst.modbusDebugMsg("addDevice(): ", body.UUID)
-	//NOTHING TO DO ON DEVICE CREATED
+	// NOTHING TO DO ON DEVICE CREATED
 	return device, nil
 }
 
-//addPoint add point. Called via API call (or wizard)
+// addPoint add point. Called via API call (or wizard)
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	if body == nil {
 		inst.modbusDebugMsg("addPoint(): nil point object")
@@ -71,7 +71,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	body.ReadPollRequired = boolean.NewTrue()
 
-	//point, err = inst.db.CreatePoint(body, true, false)
+	// point, err = inst.db.CreatePoint(body, true, false)
 	point, err = inst.db.CreatePoint(body, true, true)
 	if point == nil || err != nil {
 		inst.modbusDebugMsg("addPoint(): failed to create modbus point: ", body.Name)
@@ -79,7 +79,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	inst.modbusDebugMsg(fmt.Sprintf("addPoint(): %+v\n", point))
 
-	//net, err := inst.db.DB.GetNetworkByDeviceUUID(point.DeviceUUID, api.Args{})
+	// net, err := inst.db.DB.GetNetworkByDeviceUUID(point.DeviceUUID, api.Args{})
 	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	if err != nil || dev == nil {
 		inst.modbusDebugMsg("addPoint(): bad response from GetDevice()")
@@ -94,18 +94,18 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 
 	if boolean.IsTrue(point.Enable) {
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
-		//DO POLLING ENABLE ACTIONS FOR POINT
+		// DO POLLING ENABLE ACTIONS FOR POINT
 		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
 		pp.PollPriority = point.PollPriority
 		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
-		//netPollMan.PollQueue.AddPollingPoint(pp)
-		//netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
+		// netPollMan.PollQueue.AddPollingPoint(pp)
+		// netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
 	}
 	return point, nil
 
 }
 
-//updateNetwork update network. Called via API call.
+// updateNetwork update network. Called via API call.
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
 	inst.modbusDebugMsg("updateNetwork(): ", body.UUID)
 	if body == nil {
@@ -124,18 +124,18 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	}
 
 	if boolean.IsTrue(network.Enable) == false && netPollMan.Enable == true {
-		//DO POLLING DISABLE ACTIONS
+		// DO POLLING DISABLE ACTIONS
 		netPollMan.StopPolling()
 
 	} else if boolean.IsTrue(network.Enable) == true && netPollMan.Enable == false {
-		//DO POLLING Enable ACTIONS
+		// DO POLLING Enable ACTIONS
 		netPollMan.StartPolling()
 	}
 
 	return network, nil
 }
 
-//updateDevice update device. Called via API call.
+// updateDevice update device. Called via API call.
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
 	inst.modbusDebugMsg("updateDevice(): ", body.UUID)
 	if body == nil {
@@ -148,7 +148,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		return nil, err
 	}
 
-	if boolean.IsTrue(dev.Enable) == true { //If Enabled we need to GetDevice so we get Points
+	if boolean.IsTrue(dev.Enable) == true { // If Enabled we need to GetDevice so we get Points
 		dev, err = inst.db.GetDevice(dev.UUID, api.Args{WithPoints: true})
 		if err != nil || dev == nil {
 			return nil, err
@@ -162,11 +162,11 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	}
 
 	if boolean.IsTrue(dev.Enable) == false && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
-		//DO POLLING DISABLE ACTIONS FOR DEVICE
+		// DO POLLING DISABLE ACTIONS FOR DEVICE
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 
 	} else if boolean.IsTrue(dev.Enable) == true && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
-		//DO POLLING ENABLE ACTIONS FOR DEVICE
+		// DO POLLING ENABLE ACTIONS FOR DEVICE
 		for _, pnt := range dev.Points {
 			if boolean.IsTrue(pnt.Enable) {
 				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
@@ -176,7 +176,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		}
 
 	} else if boolean.IsTrue(dev.Enable) == true {
-		//TODO: Currently on every device update, all device points are removed, and re-added.
+		// TODO: Currently on every device update, all device points are removed, and re-added.
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 		for _, pnt := range dev.Points {
 			if boolean.IsTrue(pnt.Enable) {
@@ -195,7 +195,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	return device, nil
 }
 
-//updatePoint update point. Called via API call.
+// updatePoint update point. Called via API call.
 func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
 	inst.modbusDebugMsg("updatePoint(): ", body.UUID)
 	if body == nil {
@@ -237,25 +237,25 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 
 	if boolean.IsTrue(point.Enable) && boolean.IsTrue(dev.Enable) {
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
-		//DO POLLING ENABLE ACTIONS FOR POINT
-		//TODO: review these steps to check that UpdatePollingPointByUUID might work better?
+		// DO POLLING ENABLE ACTIONS FOR POINT
+		// TODO: review these steps to check that UpdatePollingPointByUUID might work better?
 		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
 		pp.PollPriority = point.PollPriority
 		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
-		//netPollMan.PollQueue.AddPollingPoint(pp)
-		//netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
+		// netPollMan.PollQueue.AddPollingPoint(pp)
+		// netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
 	} else {
-		//DO POLLING DISABLE ACTIONS FOR POINT
+		// DO POLLING DISABLE ACTIONS FOR POINT
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 	}
 
 	return point, nil
 }
 
-//writePoint update point. Called via API call.
+// writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
 
-	//TODO: check for PointWriteByName calls that might not flow through the plugin.
+	// TODO: check for PointWriteByName calls that might not flow through the plugin.
 
 	inst.modbusDebugMsg("writePoint(): ", pntUUID)
 	if body == nil {
@@ -279,7 +279,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	}
 	*/
 
-	//body.WritePollRequired = utils.NewTrue() // TODO: commented out this section, seems like useless
+	// body.WritePollRequired = utils.NewTrue() // TODO: commented out this section, seems like useless
 
 	point, err = inst.db.WritePoint(pntUUID, body, true)
 	if err != nil || point == nil {
@@ -310,7 +310,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		}
 		pp.PollPriority = model.PRIORITY_ASAP
 		netPollMan.PollQueue.AddPollingPoint(pp)
-		//netPollMan.PollQueue.UpdatePollingPointByPointUUID(point.UUID, model.PRIORITY_ASAP)
+		// netPollMan.PollQueue.UpdatePollingPointByPointUUID(point.UUID, model.PRIORITY_ASAP)
 
 		/*
 			netPollMan.PollQueue.RemovePollingPointByPointUUID(body.UUID)
@@ -323,13 +323,13 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			//netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
 		*/
 	} else {
-		//DO POLLING DISABLE ACTIONS FOR POINT
+		// DO POLLING DISABLE ACTIONS FOR POINT
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(pntUUID)
 	}
 	return point, nil
 }
 
-//deleteNetwork delete network. Called via API call.
+// deleteNetwork delete network. Called via API call.
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	inst.modbusDebugMsg("deleteNetwork(): ", body.UUID)
 	if body == nil {
@@ -340,7 +340,7 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	for index, netPollMan := range inst.NetworkPollManagers {
 		if netPollMan.FFNetworkUUID == body.UUID {
 			netPollMan.StopPolling()
-			//Next remove the NetworkPollManager from the slice in polling instance
+			// Next remove the NetworkPollManager from the slice in polling instance
 			inst.NetworkPollManagers[index] = inst.NetworkPollManagers[len(inst.NetworkPollManagers)-1]
 			inst.NetworkPollManagers = inst.NetworkPollManagers[:len(inst.NetworkPollManagers)-1]
 			found = true
@@ -356,7 +356,7 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	return ok, nil
 }
 
-//deleteNetwork delete device. Called via API call.
+// deleteNetwork delete device. Called via API call.
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	inst.modbusDebugMsg("deleteDevice(): ", body.UUID)
 	if body == nil {
@@ -377,7 +377,7 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	return ok, nil
 }
 
-//deletePoint delete point. Called via API call.
+// deletePoint delete point. Called via API call.
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	inst.modbusDebugMsg("deletePoint(): ", body.UUID)
 	if body == nil {
@@ -411,7 +411,7 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-//pointUpdate update point. Called from within plugin.
+// pointUpdate update point. Called from within plugin.
 func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSuccess, readSuccess, clearFaults bool) (*model.Point, error) {
 	if clearFaults {
 		point.CommonFault.InFault = false
@@ -423,11 +423,11 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSucces
 
 	if readSuccess {
 		if value != float.NonNil(point.OriginalValue) {
-			point.ValueUpdatedFlag = boolean.NewTrue() //Flag so that UpdatePointValue() will broadcast new value to producers. TODO: MAY NOT BE NEEDED.
+			point.ValueUpdatedFlag = boolean.NewTrue() // Flag so that UpdatePointValue() will broadcast new value to producers. TODO: MAY NOT BE NEEDED.
 		}
 		point.OriginalValue = float.New(value)
 	}
-	point.InSync = boolean.NewTrue() //TODO: MAY NOT BE NEEDED.
+	point.InSync = boolean.NewTrue() // TODO: MAY NOT BE NEEDED.
 
 	_, err = inst.db.UpdatePoint(point.UUID, point, true)
 	if err != nil {
@@ -437,7 +437,7 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSucces
 	return point, nil
 }
 
-//pointUpdateErr update point with errors. Called from within plugin.
+// pointUpdateErr update point with errors. Called from within plugin.
 func (inst *Instance) pointUpdateErr(point *model.Point, err error) (*model.Point, error) {
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = model.MessageLevel.Fail
@@ -452,7 +452,7 @@ func (inst *Instance) pointUpdateErr(point *model.Point, err error) (*model.Poin
 	return nil, nil
 }
 
-//listSerialPorts list all serial ports on host
+// listSerialPorts list all serial ports on host
 func (inst *Instance) listSerialPorts() (*array.Array, error) {
 	ports, err := serial.GetPortsList()
 	p := array.NewArray()

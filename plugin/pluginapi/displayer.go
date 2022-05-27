@@ -4,12 +4,12 @@ import "net/url"
 
 type Help struct {
 	Name               string `json:"name"`
-	PluginType         string `json:"plugin_type"` //protocol
+	PluginType         string `json:"plugin_type"` // protocol
 	AllowConfigWrite   bool   `json:"allow_config_write"`
 	IsNetwork          bool   `json:"is_network"`
-	MaxAllowedNetworks int    `json:"max_allowed_networks"` //as an example for lora only 1 network is allowed to be added
-	NetworkType        string `json:"network_type"`         //lora
-	TransportType      string `json:"transport_type"`       //serial
+	MaxAllowedNetworks int    `json:"max_allowed_networks"` // as an example for lora only 1 network is allowed to be added
+	NetworkType        string `json:"network_type"`         // lora
+	TransportType      string `json:"transport_type"`       // serial
 }
 
 // Response ...

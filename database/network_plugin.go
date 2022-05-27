@@ -22,7 +22,7 @@ func (d *GormDatabase) CreateNetworkPlugin(body *model.Network) (network *model.
 	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
-	//if plugin like bacnet then call the api direct on the plugin as the plugin knows best how to add a point to keep things in sync
+	// if plugin like bacnet then call the api direct on the plugin as the plugin knows best how to add a point to keep things in sync
 	cli := client.NewLocalClient()
 	network, err = cli.CreateNetworkPlugin(body, pluginName)
 	if err != nil {

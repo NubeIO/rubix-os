@@ -35,7 +35,7 @@ type WeeklyScheduleEntry struct {
 	DaysNums []DaysOfTheWeek
 	Start    string `json:"start"`
 	End      string `json:"end"`
-	//Timezone string  `json:"timezone"`
+	// Timezone string  `json:"timezone"`
 	Value  float64 `json:"value"`
 	Colour string  `json:"color"`
 }
@@ -74,23 +74,23 @@ var DaysMap = map[string]DaysOfTheWeek{
 	"saturday":  6,
 }
 
-//ScheduleCheckerResult this type defines the return values of any type of schedule.
-//The `Period` is the first scheduled period, and the `Next` is the following scheduled period; these 2 periods cannot overlap.
-//If ScheduleCheckerResults are combined and their scheduled periods overlap, they will be combined and the unnecessary timestamps dropped.
+// ScheduleCheckerResult this type defines the return values of any type of schedule.
+// The `Period` is the first scheduled period, and the `Next` is the following scheduled period; these 2 periods cannot overlap.
+// If ScheduleCheckerResults are combined and their scheduled periods overlap, they will be combined and the unnecessary timestamps dropped.
 type ScheduleCheckerResult struct {
 	Name              string   `json:"name"`
 	IsActive          bool     `json:"is_active"`
 	Payload           float64  `json:"payload"`
-	PeriodStart       int64    `json:"period_start"`        //unix timestamp in seconds
-	PeriodStartString string   `json:"period_start_string"` //human readable timestamp
-	PeriodStop        int64    `json:"period_stop"`         //unix timestamp in seconds
-	PeriodStopString  string   `json:"period_stop_string"`  //human readable timestamp
-	NextStart         int64    `json:"next_start"`          //unix timestamp in seconds.  Start time for the following scheduled period.
-	NextStartString   string   `json:"next_start_string"`   //human readable timestamp
-	NextStop          int64    `json:"next_stop"`           //unix timestamp in seconds   End time for the following scheduled period.
-	NextStopString    string   `json:"next_stop_string"`    //human readable timestamp
-	CheckTime         int64    `json:"check_time"`          //unix timestamp in seconds
-	CheckTimeString   string   `json:"check_time_string"`   //human readable timestamp
+	PeriodStart       int64    `json:"period_start"`        // unix timestamp in seconds
+	PeriodStartString string   `json:"period_start_string"` // human readable timestamp
+	PeriodStop        int64    `json:"period_stop"`         // unix timestamp in seconds
+	PeriodStopString  string   `json:"period_stop_string"`  // human readable timestamp
+	NextStart         int64    `json:"next_start"`          // unix timestamp in seconds.  Start time for the following scheduled period.
+	NextStartString   string   `json:"next_start_string"`   // human readable timestamp
+	NextStop          int64    `json:"next_stop"`           // unix timestamp in seconds   End time for the following scheduled period.
+	NextStopString    string   `json:"next_stop_string"`    // human readable timestamp
+	CheckTime         int64    `json:"check_time"`          // unix timestamp in seconds
+	CheckTimeString   string   `json:"check_time_string"`   // human readable timestamp
 	ErrorFlag         bool     `json:"error_flag"`
 	AlertFlag         bool     `json:"alert_flag"`
 	IsException       bool     `json:"is_exception"`
@@ -129,25 +129,25 @@ func DecodeSchedule(scheduleJsonInput datatypes.JSON) (SchJSON, error) {
 	var ScheduleJSON SchJSON
 	err := json.Unmarshal(scheduleJsonInput, &ScheduleJSON)
 	if err != nil {
-		//log.Println("Unexpected error parsing json")
+		// log.Println("Unexpected error parsing json")
 		return SchJSON{}, err
 	}
 	return ScheduleJSON, nil
 }
 
-//CombineScheduleCheckerResults Combines 2 ScheduleCheckerResults into a single ScheduleCheckerResult, calculating PeriodStart, and PeriodStop times of the combined ScheduleCheckerResult.
+// CombineScheduleCheckerResults Combines 2 ScheduleCheckerResults into a single ScheduleCheckerResult, calculating PeriodStart, and PeriodStop times of the combined ScheduleCheckerResult.
 func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCheckerResult) (ScheduleCheckerResult, error) {
-	//log.Println("CombineScheduleCheckerResults()")
+	// log.Println("CombineScheduleCheckerResults()")
 	result := ScheduleCheckerResult{}
 	var err error
 
-	//Check for Exception Schedules
+	// Check for Exception Schedules
 	if current.IsException || new.IsException {
 		err = errors.New("CombineScheduleCheckerResults function is not valid for Exception Schedules")
 		return result, err
 	}
 
-	//Check for empty ScheduleCheckerResult periods
+	// Check for empty ScheduleCheckerResult periods
 	currentEmptyPeriod := false
 	newEmptyPeriod := false
 	if current.PeriodStart == 0 || current.PeriodStop == 0 {
@@ -158,13 +158,13 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 	}
 	if currentEmptyPeriod && newEmptyPeriod {
 		return result, err
-	} else if currentEmptyPeriod { //return the valid (new) ScheduleCheckerResult
+	} else if currentEmptyPeriod { // return the valid (new) ScheduleCheckerResult
 		return new, err
-	} else if newEmptyPeriod { //return the valid (current) ScheduleCheckerResult
+	} else if newEmptyPeriod { // return the valid (current) ScheduleCheckerResult
 		return current, err
 	}
 
-	//AlertFlag & ErrorFlag & ErrorStrings
+	// AlertFlag & ErrorFlag & ErrorStrings
 	if new.ErrorFlag {
 		err = errors.New("`new` ScheduleCheckerResult has an ErrorFlag, cannot combine")
 		return current, err
@@ -176,17 +176,17 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 	result.AlertFlag = current.AlertFlag || new.AlertFlag
 	result.ErrorStrings = append(current.ErrorStrings, new.ErrorStrings...)
 
-	//Name
+	// Name
 	if current.Name != new.Name {
 		result.Name = "ANY"
 	} else {
 		result.Name = current.Name
 	}
 
-	//Find order of periods
+	// Find order of periods
 	currentPeriod := 0
 	newPeriod := 0
-	//Find which Period is first
+	// Find which Period is first
 	if current.PeriodStart <= new.PeriodStart {
 		currentPeriod = 1
 		newPeriod = 2
@@ -195,7 +195,7 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 		currentPeriod = 2
 	}
 
-	//Check if the periods overlap.
+	// Check if the periods overlap.
 	overlap := false
 	if currentPeriod == 1 && new.PeriodStart < current.PeriodStop {
 		overlap = true
@@ -203,24 +203,24 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 		overlap = true
 	}
 
-	//IsActive
+	// IsActive
 	result.IsActive = current.IsActive || new.IsActive
 
-	//CheckTime
+	// CheckTime
 	if current.CheckTime < new.CheckTime {
 		result.CheckTime = current.CheckTime
 	} else {
 		result.CheckTime = new.CheckTime
 	}
 
-	//PeriodStart
+	// PeriodStart
 	if currentPeriod == 1 {
 		result.PeriodStart = current.PeriodStart
 	} else {
 		result.PeriodStart = new.PeriodStart
 	}
 
-	//PeriodStop
+	// PeriodStop
 	if overlap {
 		if current.PeriodStop >= new.PeriodStop {
 			result.PeriodStop = current.PeriodStop
@@ -235,7 +235,7 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 		}
 	}
 
-	//Payload
+	// Payload
 	if currentPeriod == 1 {
 		result.Payload = current.Payload
 	} else {

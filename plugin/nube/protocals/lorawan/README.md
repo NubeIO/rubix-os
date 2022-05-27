@@ -61,8 +61,8 @@ curl -X POST --header 'Content-Type: application/json' --header 'Accept: applica
  }' 'http://localhost:8080/api/devices/0101010101010101/queue'
 ```
 
-
 ### swagger
+
 ```
 http://localhost:8080/api
 ```

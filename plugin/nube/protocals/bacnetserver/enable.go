@@ -24,18 +24,18 @@ func (inst *Instance) Enable() error {
 		log.Error("error on enable bacnetserver-plugin")
 	}
 
-	//restService := &rest.Service{}
-	//restService.Port = 1717
-	//options := &rest.Options{}
-	//restService.Options = options
-	//restService = rest.New(restService)
+	// restService := &rest.Service{}
+	// restService.Port = 1717
+	// options := &rest.Options{}
+	// restService.Options = options
+	// restService = rest.New(restService)
 	//
-	//commonClient := &iorest.NubeRest{}
-	//commonClient.UseRubixProxy = false
-	//commonClient.RubixUsername = "admin"
-	//commonClient.RubixPassword = "N00BWires"
-	//commonClient = iorest.New(commonClient, restService)
-	//bacnetClient = bsrest.New(&bsrest.BacnetClient{IoRest: commonClient})
+	// commonClient := &iorest.NubeRest{}
+	// commonClient.UseRubixProxy = false
+	// commonClient.RubixUsername = "admin"
+	// commonClient.RubixPassword = "N00BWires"
+	// commonClient = iorest.New(commonClient, restService)
+	// bacnetClient = bsrest.New(&bsrest.BacnetClient{IoRest: commonClient})
 
 	restService := &rest.Service{}
 	restService.Port = 1717

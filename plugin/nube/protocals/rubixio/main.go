@@ -7,7 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/dbhandler"
 )
 
-const name = "rubix-io" //must be unique across all plugins
+const name = "rubix-io" // must be unique across all plugins
 const description = "rubix-io api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
@@ -18,7 +18,7 @@ const allowConfigWrite = true
 const isNetwork = true
 const maxAllowedNetworks = 1
 const networkType = "rubix-io"
-const transportType = "ip" //serial, ip
+const transportType = "ip" // serial, ip
 
 // Instance is plugin instance
 type Instance struct {
@@ -52,7 +52,7 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 
 }
 
-//main will not let main run
+// main will not let main run
 func main() {
 	panic("this should be built as plugin")
 }

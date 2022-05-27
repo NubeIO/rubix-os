@@ -59,7 +59,7 @@ func main() {
 		panic(err)
 	}
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
-	localBroker := "tcp://0.0.0.0:1883" //TODO add to config, this is meant to be an unsecure broker
+	localBroker := "tcp://0.0.0.0:1883" // TODO add to config, this is meant to be an unsecure broker
 	connected, err := mqttclient.InternalMQTT(localBroker)
 	if err != nil {
 		log.Errorln(err)

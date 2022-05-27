@@ -7,7 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/dbhandler"
 )
 
-const name = "modbus-server" //must be unique across all plugins
+const name = "modbus-server" // must be unique across all plugins
 const description = "modbus-server"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
@@ -18,7 +18,7 @@ const allowConfigWrite = true
 const isNetwork = true
 const maxAllowedNetworks = 1
 const networkType = "modbus-server"
-const transportType = "ip" //serial, ip
+const transportType = "ip" // serial, ip
 
 // Instance is plugin instance
 type Instance struct {
@@ -53,7 +53,7 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 
 }
 
-//main will not let main run
+// main will not let main run
 func main() {
 	panic("this should be built as plugin")
 }

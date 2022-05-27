@@ -9,7 +9,7 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-const name = "backup" //must be unique across all plugins
+const name = "backup" // must be unique across all plugins
 const description = "backup"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
@@ -21,7 +21,7 @@ const allowConfigWrite = false
 const isNetwork = false
 const maxAllowedNetworks = 1
 const networkType = ""
-const transportType = "" //serial, ip
+const transportType = "" // serial, ip
 
 // Instance is plugin instance
 type Instance struct {
@@ -54,7 +54,7 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 
 }
 
-//main will not let main run
+// main will not let main run
 func main() {
 	panic("this should be built as plugin")
 }

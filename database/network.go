@@ -54,7 +54,7 @@ func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*mod
 	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Network
 	body.CommonEnable.Enable = boolean.NewTrue()
-	transport, err := checkTransport(body.TransportType) //set to ip by default
+	transport, err := checkTransport(body.TransportType) // set to ip by default
 	if err != nil {
 		return nil, err
 	}

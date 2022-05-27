@@ -27,7 +27,7 @@ func (d *GormDatabase) CreateIntegration(body *model.Integration) (*model.Integr
 	body.PluginName = pluginIsNil(body.PluginName)
 	body.IntegrationType = typeIsNil(body.IntegrationType, "mqtt")
 	p, err := d.GetPluginByPath(body.PluginName)
-	if err != nil { //the integration can be added by the pluginName
+	if err != nil { // the integration can be added by the pluginName
 		return nil, errors.New("invalid plugin name or id")
 	}
 	body.PluginConfId = p.UUID

@@ -1,5 +1,5 @@
 ---
-id: plugin-write
+id: plugin-write<br/>
 title: Writing Plugins
 ---
 
@@ -25,14 +25,15 @@ func (c *Plugin) Disable() error {
 }
 ```
 
-Now only the base [`Plugin`](https://godoc.org/github.com/Flow/plugin-api#Plugin) interface has been implemented.
-To give it more functionalities, more interfaces can be implemented.
+Now only the base [`Plugin`](https://godoc.org/github.com/Flow/plugin-api#Plugin) interface has been implemented. To
+give it more functionalities, more interfaces can be implemented.
 
 ## APIs
 
 ### Intro
 
-The APIs are provided as interfaces will be called during plugin initialization and/or remote API invocation to obtain information or provide callbacks.
+The APIs are provided as interfaces will be called during plugin initialization and/or remote API invocation to obtain
+information or provide callbacks.
 
 ### API Interfaces
 
@@ -40,10 +41,10 @@ _These are all API interfaces exposed by Flow. Some interface implementations ar
 
 #### Displayer
 
-[`Displayer`](https://godoc.org/github.com/Flow/plugin-api#Displayer) is the most simple form of plugin API, it is used to provide instructions on the plugin page in the WebUI.
-Plugins can dynamically generate information based on the current state.
-It receives a `location` parameter contains the server's hostname, port and scheme recovered from the original request to the `Displayer` API.
-Markdown is supported.
+[`Displayer`](https://godoc.org/github.com/Flow/plugin-api#Displayer) is the most simple form of plugin API, it is used
+to provide instructions on the plugin page in the WebUI. Plugins can dynamically generate information based on the
+current state. It receives a `location` parameter contains the server's hostname, port and scheme recovered from the
+original request to the `Displayer` API. Markdown is supported.
 
 The REST API for this exposed at [`/plugin/:id/display`](/api-docs#/plugin/getPluginDisplay).
 
@@ -71,8 +72,8 @@ func NewFlowPluginInstance(ctx plugin.UserContext) plugin.Plugin {
 
 #### Messenger
 
-[`Messenger`](https://godoc.org/github.com/Flow/plugin-api#Messenger) is used to send messages.
-It is called with a callback that plugin instances can call at any time to send messages to the user.
+[`Messenger`](https://godoc.org/github.com/Flow/plugin-api#Messenger) is used to send messages. It is called with a
+callback that plugin instances can call at any time to send messages to the user.
 
 ```golang
 // Plugin is the plugin instance
@@ -99,8 +100,8 @@ func (c *Plugin) Enable() error {
 
 #### Storager
 
-[`Storager`] is used to store permanent information on the Flow database on the user level.
-Data serialization is handled by the plugin itself.
+[`Storager`] is used to store permanent information on the Flow database on the user level. Data serialization is
+handled by the plugin itself.
 
 ```golang
 // Plugin is the plugin instance
@@ -138,10 +139,9 @@ func (c *Plugin) Enable() error {
 
 #### Webhooker
 
-[`Webhooker`]  is used to register custom gin handlers.
-The base path is the base path of the `RouterGroup`, which is kept consistent between restarts.
-Plugins can assemble an absolute webhook URL by combining `basePath` and `location` parameter in `Displayer` call.
-Useful to register webhook handlers. In theory you can even register a complete UI here.
+[`Webhooker`]  is used to register custom gin handlers. The base path is the base path of the `RouterGroup`, which is
+kept consistent between restarts. Plugins can assemble an absolute webhook URL by combining `basePath` and `location`
+parameter in `Displayer` call. Useful to register webhook handlers. In theory you can even register a complete UI here.
 
 ```golang
 // Plugin is the plugin instance
@@ -178,8 +178,8 @@ func (c *Plugin) GetDisplay(location *url.URL) string {
 
 #### Configurer
 
-[`Configurer`] is used to provide configuration interfaces to the user.
-Marshaling and Unmarshaling is handled by the Flow main program.
+[`Configurer`] is used to provide configuration interfaces to the user. Marshaling and Unmarshaling is handled by the
+Flow main program.
 
 The REST API for this is exposed at [`/plugin/:id/config`].
 
@@ -225,9 +225,12 @@ func (c *Plugin) ValidateAndSetConfig(c interface{}) error {
 
 ## Effective Plugin Practices
 
-Although we have covered how to implement plugin functionalities in the last chapter, it is very important to take these practices to make sure your plugin can be loaded successfully and works effectively.
+Although we have covered how to implement plugin functionalities in the last chapter, it is very important to take these
+practices to make sure your plugin can be loaded successfully and works effectively.
 
-- Use [go modules](https://github.com/golang/go/wiki/Modules) to manage dependencies, and use [gomod-cap] to prevent incompatible dependencies.
+- Use [go modules](https://github.com/golang/go/wiki/Modules) to manage dependencies, and use [gomod-cap] to prevent
+  incompatible dependencies.
 - Handle all errors. A panic in a goroutine spawned in the plugin can crash the whole Flow program.
-- Provide detailed plugin info and utilize [`Displayer`] to show instructions to users. A detailed plugin info would be shown in the WebUI which makes it easier to be identified and used.
+- Provide detailed plugin info and utilize [`Displayer`] to show instructions to users. A detailed plugin info would be
+  shown in the WebUI which makes it easier to be identified and used.
 

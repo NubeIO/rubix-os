@@ -17,4 +17,3 @@ func (h *Handler) UpdateHistoryPostgresLog(log *model.HistoryPostgresLog) (*mode
 	}
 	return q, nil
 }
-

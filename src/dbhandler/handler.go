@@ -10,7 +10,7 @@ type Handler struct {
 	DB *database.GormDatabase
 }
 
-//Init give db access
+// Init give db access
 func Init(h *Handler) {
 	db = h.DB
 }

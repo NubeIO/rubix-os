@@ -14,17 +14,17 @@ var (
 
 // MinioClient minio client interface
 type MinioClient interface {
-	//CreateBucket args bucket, region string
+	// CreateBucket args bucket, region string
 	CreateBucket(o ObjectArgs) error
-	//DeleteBucket args bucket string
+	// DeleteBucket args bucket string
 	DeleteBucket(o ObjectArgs) error
-	//ListBuckets args nil
+	// ListBuckets args nil
 	ListBuckets() ([]minio.BucketInfo, error)
-	//BucketExists args bucket string
+	// BucketExists args bucket string
 	BucketExists(o ObjectArgs) (bool, error)
-	//GetBucketLifecycle args bucket string
+	// GetBucketLifecycle args bucket string
 	GetBucketLifecycle(o ObjectArgs) (*lifecycle.Configuration, error)
-	//UploadObject o ObjectArgs, makeBucket bool
+	// UploadObject o ObjectArgs, makeBucket bool
 	UploadObject(o ObjectArgs, makeBucket bool) error
 	// RemoveObject removes an object from a bucket. args BucketName string, ObjectName string, RemoveObjectOptions
 	RemoveObject(o ObjectArgs) error

@@ -70,7 +70,7 @@ type Device struct {
 	} `json:"port"`
 }
 
-//for io-type see model.IOType
+// for io-type see model.IOType
 
 type Point struct {
 	Name        NameStruct        `json:"name"`

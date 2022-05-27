@@ -17,12 +17,12 @@ import (
 
 type NetworkPriorityPollQueue struct {
 	config               *config.Config
-	PriorityQueue        *PriorityPollQueue //This is the queue that is polling points are drawn from
-	StandbyPollingPoints *PriorityPollQueue //This is a slice that contains polling points that are not in the active polling queue, it is mostly a reference so that we can periodically find out if any points have been dropped from polling.
+	PriorityQueue        *PriorityPollQueue // This is the queue that is polling points are drawn from
+	StandbyPollingPoints *PriorityPollQueue // This is a slice that contains polling points that are not in the active polling queue, it is mostly a reference so that we can periodically find out if any points have been dropped from polling.
 	QueueUnloader        *QueueUnloader
 	FFPluginUUID         string
 	FFNetworkUUID        string
-	ActiveDevicesList    []string //UUIDs of devices that have points in the queue
+	ActiveDevicesList    []string // UUIDs of devices that have points in the queue
 }
 
 func (nq *NetworkPriorityPollQueue) AddPollingPoint(pp *PollingPoint) bool {
@@ -42,14 +42,14 @@ func (nq *NetworkPriorityPollQueue) AddPollingPoint(pp *PollingPoint) bool {
 		return false
 	}
 	if nq.StandbyPollingPoints.GetPollingPointIndexByPointUUID(pp.FFPointUUID) != -1 {
-		//point exists in the StandbyPollingPoints list, remove it and add immediately.
+		// point exists in the StandbyPollingPoints list, remove it and add immediately.
 		nq.RemovePollingPointByPointUUID(pp.FFPointUUID)
 	}
 
 	pp.QueueEntryTime = time.Now().Unix()
 	success := nq.PriorityQueue.AddPollingPoint(pp)
 	if !success {
-		//log.Errorf("NetworkPriorityPollQueue.AddPollingPoint: point already exists in poll queue. FFNetworkUUID: %s  FFPointUUID: %s \n", nq.FFNetworkUUID, pp.FFPointUUID)
+		// log.Errorf("NetworkPriorityPollQueue.AddPollingPoint: point already exists in poll queue. FFNetworkUUID: %s  FFPointUUID: %s \n", nq.FFNetworkUUID, pp.FFPointUUID)
 		return false
 	}
 	nq.AddDeviceToActiveDevicesList(pp.FFDeviceUUID)
@@ -110,10 +110,10 @@ func (nq *NetworkPriorityPollQueue) GetNextPollingPoint() (*PollingPoint, error)
 	return pp, nil
 }
 func (nq *NetworkPriorityPollQueue) Start() {
-	//nq.PriorityQueue.Start()
+	// nq.PriorityQueue.Start()
 }
 func (nq *NetworkPriorityPollQueue) Stop() {
-	//nq.PriorityQueue.Stop()
+	// nq.PriorityQueue.Stop()
 	nq.EmptyQueue()
 }
 func (nq *NetworkPriorityPollQueue) EmptyQueue() {
@@ -142,7 +142,7 @@ func (nq *NetworkPriorityPollQueue) AddDeviceToActiveDevicesList(devUUID string)
 func (nq *NetworkPriorityPollQueue) RemoveDeviceFromActiveDevicesList(devUUID string) bool {
 	for index, dev := range nq.ActiveDevicesList {
 		if dev == devUUID {
-			//remove the devUUID from ActiveDevicesList
+			// remove the devUUID from ActiveDevicesList
 			nq.ActiveDevicesList[index] = nq.ActiveDevicesList[len(nq.ActiveDevicesList)-1]
 			nq.ActiveDevicesList = nq.ActiveDevicesList[:len(nq.ActiveDevicesList)-1]
 			return true
@@ -166,7 +166,7 @@ func (nq *NetworkPriorityPollQueue) CheckPollingQueueForDevUUID(devUUID string) 
 
 // THIS IS THE BASE PriorityPollQueue Type and defines the base methods used to implement the `heap` library.  https://pkg.go.dev/container/heap
 type PriorityPollQueue struct {
-	//Enable        bool
+	// Enable        bool
 	PriorityQueue []*PollingPoint
 }
 
@@ -294,8 +294,8 @@ func (q *PriorityPollQueue) UpdatePollingPointByPointUUID(pointUUID string, newP
 	return false
 }
 
-//func (q *PriorityPollQueue) Start() { q.Enable = true }  //TODO: add queue startup code
-//func (q *PriorityPollQueue) Stop()  { q.Enable = false } //TODO: add queue stop code
+// func (q *PriorityPollQueue) Start() { q.Enable = true }  //TODO: add queue startup code
+// func (q *PriorityPollQueue) Stop()  { q.Enable = false } //TODO: add queue stop code
 func (q *PriorityPollQueue) EmptyQueue() {
 	for q.Len() > 0 {
 		heap.Pop(q)
@@ -322,7 +322,7 @@ type PollingPoint struct {
 
 func NewPollingPoint(ffPointUUID, ffDeviceUUID, ffNetworkUUID, ffPluginUUID string) *PollingPoint {
 	pp := &PollingPoint{model.PRIORITY_NORMAL, ffPointUUID, ffDeviceUUID, ffNetworkUUID, ffPluginUUID, nil, 0, nil}
-	//WHATEVER FUNCTION CALLS NewPollingPoint NEEDS TO SET THE PRIORITY
+	// WHATEVER FUNCTION CALLS NewPollingPoint NEEDS TO SET THE PRIORITY
 	return pp
 }
 

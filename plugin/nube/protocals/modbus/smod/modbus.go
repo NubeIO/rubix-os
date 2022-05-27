@@ -84,7 +84,7 @@ func convert(data []byte) []bool {
 	return res
 }
 
-//SetEncoding Sets the encoding (endianness and word ordering) of subsequent requests.
+// SetEncoding Sets the encoding (endianness and word ordering) of subsequent requests.
 func (mc *ModbusClient) SetEncoding(endianness Endianness, wordOrder WordOrder) (err error) {
 
 	if endianness != BigEndian && endianness != LittleEndian {
@@ -103,7 +103,7 @@ func (mc *ModbusClient) SetEncoding(endianness Endianness, wordOrder WordOrder) 
 	return
 }
 
-//ReadCoils Reads multiple coils (function code 01).
+// ReadCoils Reads multiple coils (function code 01).
 func (mc *ModbusClient) ReadCoils(addr uint16, quantity uint16) (raw []byte, out float64, err error) {
 	raw, err = mc.Client.ReadCoils(addr, quantity)
 	if err != nil {
@@ -114,7 +114,7 @@ func (mc *ModbusClient) ReadCoils(addr uint16, quantity uint16) (raw []byte, out
 	return
 }
 
-//ReadDiscreteInputs Reads multiple Discrete Input Registers (function code 02).
+// ReadDiscreteInputs Reads multiple Discrete Input Registers (function code 02).
 func (mc *ModbusClient) ReadDiscreteInputs(addr uint16, quantity uint16) (raw []byte, out float64, err error) {
 	raw, err = mc.Client.ReadDiscreteInputs(addr, quantity)
 	if err != nil {
@@ -125,7 +125,7 @@ func (mc *ModbusClient) ReadDiscreteInputs(addr uint16, quantity uint16) (raw []
 	return
 }
 
-//ReadInputRegisters Reads multiple Input Registers (function code 02).
+// ReadInputRegisters Reads multiple Input Registers (function code 02).
 func (mc *ModbusClient) ReadInputRegisters(addr uint16, quantity uint16) (raw []byte, out float64, err error) {
 	raw, err = mc.Client.ReadInputRegisters(addr, quantity)
 	if err != nil {
@@ -140,7 +140,7 @@ func (mc *ModbusClient) ReadInputRegisters(addr uint16, quantity uint16) (raw []
 	return
 }
 
-//ReadHoldingRegisters Reads Holding Registers (function code 02).
+// ReadHoldingRegisters Reads Holding Registers (function code 02).
 func (mc *ModbusClient) ReadHoldingRegisters(addr uint16, quantity uint16) (raw []byte, out float64, err error) {
 	raw, err = mc.Client.ReadHoldingRegisters(addr, quantity)
 	if err != nil {
@@ -155,7 +155,7 @@ func (mc *ModbusClient) ReadHoldingRegisters(addr uint16, quantity uint16) (raw 
 	return
 }
 
-//ReadFloat32s Reads multiple 32-bit float registers.
+// ReadFloat32s Reads multiple 32-bit float registers.
 func (mc *ModbusClient) ReadFloat32s(addr uint16, quantity uint16, regType RegType) (raw []float32, err error) {
 	var mbPayload []byte
 	// read 2 * quantity uint16 registers, as bytes
@@ -175,7 +175,7 @@ func (mc *ModbusClient) ReadFloat32s(addr uint16, quantity uint16, regType RegTy
 	return
 }
 
-//ReadFloat32 Reads a single 32-bit float register.
+// ReadFloat32 Reads a single 32-bit float register.
 func (mc *ModbusClient) ReadFloat32(addr uint16, regType RegType) (raw []float32, out float64, err error) {
 	raw, err = mc.ReadFloat32s(addr, 1, regType)
 	if err != nil {
@@ -186,7 +186,7 @@ func (mc *ModbusClient) ReadFloat32(addr uint16, regType RegType) (raw []float32
 	return
 }
 
-//ReadFloat64s Reads multiple 64-bit float registers.
+// ReadFloat64s Reads multiple 64-bit float registers.
 func (mc *ModbusClient) ReadFloat64s(addr uint16, quantity uint16, regType RegType) (raw []float64, err error) {
 	var mbPayload []byte
 	// read 2 * quantity uint16 registers, as bytes
@@ -207,7 +207,7 @@ func (mc *ModbusClient) ReadFloat64s(addr uint16, quantity uint16, regType RegTy
 	return
 }
 
-//ReadFloat64 Reads a single 64-bit float register.
+// ReadFloat64 Reads a single 64-bit float register.
 func (mc *ModbusClient) ReadFloat64(addr uint16, regType RegType) (raw []float64, out float64, err error) {
 	raw, err = mc.ReadFloat64s(addr, 1, regType)
 	if err != nil {
@@ -218,7 +218,7 @@ func (mc *ModbusClient) ReadFloat64(addr uint16, regType RegType) (raw []float64
 	return
 }
 
-//WriteFloat32 Writes a single 32-bit float register.
+// WriteFloat32 Writes a single 32-bit float register.
 func (mc *ModbusClient) WriteFloat32(addr uint16, value float64) (raw []byte, out float64, err error) {
 	raw, err = mc.Client.WriteMultipleRegisters(addr, 2, float32ToBytes(mc.Endianness, mc.WordOrder, float32(value)))
 	if err != nil {
@@ -229,7 +229,7 @@ func (mc *ModbusClient) WriteFloat32(addr uint16, value float64) (raw []byte, ou
 	return
 }
 
-//WriteSingleRegister write one register
+// WriteSingleRegister write one register
 func (mc *ModbusClient) WriteSingleRegister(addr uint16, value uint16) (raw []byte, out float64, err error) {
 	raw, err = mc.Client.WriteSingleRegister(addr, value)
 	if err != nil {
@@ -240,7 +240,7 @@ func (mc *ModbusClient) WriteSingleRegister(addr uint16, value uint16) (raw []by
 	return
 }
 
-//WriteCoil Writes a single coil (function code 05)
+// WriteCoil Writes a single coil (function code 05)
 func (mc *ModbusClient) WriteCoil(addr uint16, value uint16) (values []byte, out float64, err error) {
 	values, err = mc.Client.WriteSingleCoil(addr, value)
 	if err != nil {
@@ -255,7 +255,7 @@ func (mc *ModbusClient) WriteCoil(addr uint16, value uint16) (values []byte, out
 	return
 }
 
-//func main() {
+// func main() {
 //	fmt.Println(12132123)
 //
 //	handler := modbus.NewRTUClientHandler("/dev/ttyUSB0")
@@ -288,4 +288,4 @@ func (mc *ModbusClient) WriteCoil(addr uint16, value uint16) (values []byte, out
 //		return
 //	}
 //
-//}
+// }

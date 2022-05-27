@@ -9,8 +9,8 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-const path = "lorawan" //must be unique across all plugins
-const name = "lorawan" //must be unique across all plugins
+const path = "lorawan" // must be unique across all plugins
+const name = "lorawan" // must be unique across all plugins
 const description = "lorawan api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
@@ -22,7 +22,7 @@ const allowConfigWrite = false
 const isNetwork = true
 const maxAllowedNetworks = 1
 const networkType = "lorawan"
-const transportType = "ip" //serial, ip
+const transportType = "ip" // serial, ip
 const ip = "0.0.0.0"
 const port = "8080"
 
@@ -56,7 +56,7 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 	return &Instance{}
 }
 
-//main will not let main run
+// main will not let main run
 func main() {
 	panic("this should be built as plugin")
 }

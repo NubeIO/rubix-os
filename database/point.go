@@ -68,7 +68,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		body.Description = "na"
 	}
 	if body.PointPriorityArrayMode == "" {
-		body.PointPriorityArrayMode = model.PriorityArrayToPresentValue //sets default priority array mode.
+		body.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode.
 	}
 	body.ThingClass = model.ThingClass.Point
 	body.CommonEnable.Enable = boolean.NewTrue()

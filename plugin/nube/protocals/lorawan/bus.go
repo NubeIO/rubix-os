@@ -15,7 +15,7 @@ func (inst *Instance) BusServ() {
 	handlerCreated := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
-				//try and match is network
+				// try and match is network
 				net, err := eventbus.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
@@ -27,26 +27,26 @@ func (inst *Instance) BusServ() {
 					}
 					return
 				}
-				//try and match is device
+				// try and match is device
 				dev, err := eventbus.IsDevice(e.Topic, e)
 				if err != nil {
 					return
 				}
 				if dev != nil {
 					log.Info("BACNET BUS PluginsCreated IsDevice", " ", dev.UUID)
-					//_, err = inst.addPoints(dev)
+					// _, err = inst.addPoints(dev)
 					if err != nil {
 						return
 					}
 					return
 				}
-				//try and match is point
+				// try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
 				fmt.Println("ADD POINT ON BUS")
 				if err != nil {
 					return
 				}
-				//_, err = inst.addPoint(pnt)
+				// _, err = inst.addPoint(pnt)
 				if err != nil {
 					return
 				}
@@ -67,7 +67,7 @@ func (inst *Instance) BusServ() {
 	handlerUpdated := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
-				//try and match is network
+				// try and match is network
 				net, err := eventbus.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
@@ -79,26 +79,26 @@ func (inst *Instance) BusServ() {
 					}
 					return
 				}
-				//try and match is device
+				// try and match is device
 				dev, err := eventbus.IsDevice(e.Topic, e)
 				if err != nil {
 					return
 				}
 				if dev != nil {
-					//_, err = inst.addPoints(dev)
+					// _, err = inst.addPoints(dev)
 					log.Info("BACNET BUS PluginsUpdated IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
 					}
 					return
 				}
-				//try and match is point
+				// try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
 				if err != nil {
 					return
 				}
 				if pnt != nil {
-					//_, err = inst.pointPatch(pnt)
+					// _, err = inst.pointPatch(pnt)
 					log.Info("BACNET BUS PluginsUpdated IsPoint", " ", pnt.UUID)
 					if err != nil {
 						return
@@ -116,7 +116,7 @@ func (inst *Instance) BusServ() {
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				log.Info("BACNET BUS DELETED NEW MSG", " ", e.Topic)
-				//try and match is network
+				// try and match is network
 				net, err := eventbus.IsNetwork(e.Topic, e)
 				if err != nil {
 					return
@@ -128,27 +128,27 @@ func (inst *Instance) BusServ() {
 					}
 					return
 				}
-				//try and match is device
+				// try and match is device
 				dev, err := eventbus.IsDevice(e.Topic, e)
 				if err != nil {
 					return
 				}
 				if dev != nil {
-					//_, err = inst.addPoints(dev)
+					// _, err = inst.addPoints(dev)
 					log.Info("BACNET BUS DELETED IsDevice", " ", dev.UUID)
 					if err != nil {
 						return
 					}
 					return
 				}
-				//try and match is point
+				// try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
 				if err != nil {
 					return
 				}
 				log.Info("BACNET BUS DELETED IsPoint", " ")
 				if pnt != nil {
-					//p, err := inst.deletePoint(pnt)
+					// p, err := inst.deletePoint(pnt)
 					log.Info("BACNET BUS DELETED IsPoint", " ", pnt.UUID, "WAS DELETED", " ", "p")
 					if err != nil {
 						return
@@ -186,19 +186,19 @@ func (inst *Instance) BusServ() {
 func decodeMQTT(topic string) (devEUI, appID string, valid bool) {
 	t, _ := mqttclient.TopicParts(topic)
 
-	//is from topic application
+	// is from topic application
 	application := t.Get(0)
 	isApplication := application.(string)
 
-	//get EUI id
+	// get EUI id
 	eui := t.Get(1)
 	isEUI := eui.(string)
 
-	//get app id
+	// get app id
 	id := t.Get(1)
 	isID := id.(string)
 
-	//is from topic rx
+	// is from topic rx
 	rx := t.Get(4)
 	isRX := rx.(string)
 
