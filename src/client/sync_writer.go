@@ -6,7 +6,7 @@ import (
 )
 
 func (a *FlowClient) SyncWriter(body *model.SyncWriter) (*model.WriterClone, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetResult(&model.WriterClone{}).
 		SetBody(body).
 		Post("/api/sync/writer"))
@@ -17,20 +17,20 @@ func (a *FlowClient) SyncWriter(body *model.SyncWriter) (*model.WriterClone, err
 }
 
 func (a *FlowClient) SyncCOV(writerUUID string, body *model.SyncCOV) error {
-	_, err := CheckError(a.client.R().
+	_, err := FormatRestyResponse(a.client.R().
 		SetBody(body).
 		Post(fmt.Sprintf("/api/sync/cov/%s", writerUUID)))
 	return err
 }
 
 func (a *FlowClient) SyncWriterWriteAction(sourceUUID string, body *model.SyncWriterAction) error {
-	_, err := CheckError(a.client.R().
+	_, err := FormatRestyResponse(a.client.R().
 		SetBody(body).
 		Post(fmt.Sprintf("/api/sync/writer/write/%s", sourceUUID)))
 	return err
 }
 
 func (a *FlowClient) SyncWriterReadAction(sourceUUID string) error {
-	_, err := CheckError(a.client.R().Get(fmt.Sprintf("/api/sync/writer/read/%s", sourceUUID)))
+	_, err := FormatRestyResponse(a.client.R().Get(fmt.Sprintf("/api/sync/writer/read/%s", sourceUUID)))
 	return err
 }

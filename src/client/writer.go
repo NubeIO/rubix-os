@@ -9,7 +9,7 @@ import (
 
 // GetWriter an object
 func (a *FlowClient) GetWriter(uuid string) (*model.Writer, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetResult(&model.Writer{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/consumers/writers/{uuid}"))
@@ -22,7 +22,7 @@ func (a *FlowClient) GetWriter(uuid string) (*model.Writer, error) {
 // EditWriter edit an object
 func (a *FlowClient) EditWriter(uuid string, body model.Writer, updateProducer bool) (*model.Writer, error) {
 	param := strconv.FormatBool(updateProducer)
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetResult(&model.Writer{}).
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": uuid}).
@@ -38,7 +38,7 @@ func (a *FlowClient) EditWriter(uuid string, body model.Writer, updateProducer b
 func (a *FlowClient) CreateWriter(body model.Writer) (*model.Writer, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("sub_name_%s", name)
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetResult(&model.Writer{}).
 		SetBody(body).
 		Post("/api/consumers/writers"))

@@ -10,7 +10,7 @@ func (a *FlowClient) GetProducerHistoriesPointsForSync(id int, timeStamp time.Ti
 	req := a.client.R().
 		SetResult(&[]model.History{}).SetQueryParam("id", fmt.Sprintf("%v", id)).
 		SetQueryParam("timestamp", fmt.Sprintf("%v", timeStamp.Format(time.RFC3339Nano)))
-	resp, err := CheckError(req.Get("/api/histories/producers/points_for_sync"))
+	resp, err := FormatRestyResponse(req.Get("/api/histories/producers/points_for_sync"))
 	if err != nil {
 		return nil, err
 	}

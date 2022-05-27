@@ -5,7 +5,7 @@ import (
 )
 
 func (a *FlowClient) SyncStream(body *model.SyncStream) (*model.StreamClone, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetResult(&model.StreamClone{}).
 		SetBody(body).
 		Post("/api/sync/stream"))

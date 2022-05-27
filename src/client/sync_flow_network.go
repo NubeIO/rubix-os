@@ -5,7 +5,7 @@ import (
 )
 
 func (a *FlowClient) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetworkClone, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetResult(&model.FlowNetworkClone{}).
 		SetBody(body).
 		Post("/api/sync/flow_network"))

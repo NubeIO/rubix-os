@@ -13,7 +13,7 @@ type Error struct {
 	Message string `json:"error_message,omitempty"`
 }
 
-func CheckError(resp *resty.Response, err error) (*resty.Response, error) {
+func FormatRestyResponse(resp *resty.Response, err error) (*resty.Response, error) {
 	// it catches errors:
 	// => when we don't have host server (i/o timeout)
 	//    -> e.g: `Post \"http://10.8.1.9:1616/api/users/login\": dial tcp 10.8.1.9:1616: i/o timeout`

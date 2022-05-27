@@ -5,7 +5,7 @@ import (
 )
 
 func (a *FlowClient) Login(body *model.LoginBody) (*model.Token, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetBody(body).
 		SetResult(&model.Token{}).
 		Post("/api/users/login"))

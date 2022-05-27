@@ -8,7 +8,7 @@ func (a *FlowClient) GetToken(name string, password string) (*Token, error) {
 	if name == "" {
 		return nil, fmt.Errorf("provide a name in the body")
 	}
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetResult(&Token{}).
 		SetBody(map[string]string{"name": name}).
 		SetBasicAuth(name, password).

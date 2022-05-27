@@ -1,7 +1,7 @@
 package client
 
 func (a *FlowClient) GetQuery(url string) (*[]byte, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		Get(url))
 	if err != nil {
 		return nil, err
@@ -11,7 +11,7 @@ func (a *FlowClient) GetQuery(url string) (*[]byte, error) {
 }
 
 func (a *FlowClient) PostQuery(url string, body interface{}) (*[]byte, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetBody(body).
 		Post(url))
 	if err != nil {
@@ -22,7 +22,7 @@ func (a *FlowClient) PostQuery(url string, body interface{}) (*[]byte, error) {
 }
 
 func (a *FlowClient) PutQuery(url string, body interface{}) (*[]byte, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetBody(body).
 		Patch(url))
 	if err != nil {
@@ -33,7 +33,7 @@ func (a *FlowClient) PutQuery(url string, body interface{}) (*[]byte, error) {
 }
 
 func (a *FlowClient) PatchQuery(url string, body interface{}) (*[]byte, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetBody(body).
 		Patch(url))
 	if err != nil {
@@ -44,13 +44,13 @@ func (a *FlowClient) PatchQuery(url string, body interface{}) (*[]byte, error) {
 }
 
 func (a *FlowClient) DeleteQuery(url string) error {
-	_, err := CheckError(a.client.R().
+	_, err := FormatRestyResponse(a.client.R().
 		Delete(url))
 	return err
 }
 
 func (a *FlowClient) GetQueryMarshal(url string, result interface{}) (interface{}, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetResult(result).
 		Get(url))
 	if err != nil {
@@ -60,7 +60,7 @@ func (a *FlowClient) GetQueryMarshal(url string, result interface{}) (interface{
 }
 
 func (a *FlowClient) PostQueryMarshal(url string, body interface{}, result interface{}) (interface{}, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetBody(body).
 		SetResult(result).
 		Post(url))
@@ -71,7 +71,7 @@ func (a *FlowClient) PostQueryMarshal(url string, body interface{}, result inter
 }
 
 func (a *FlowClient) PutQueryMarshal(url string, body interface{}, result interface{}) (interface{}, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetBody(body).
 		SetResult(result).
 		Put(url))
@@ -82,7 +82,7 @@ func (a *FlowClient) PutQueryMarshal(url string, body interface{}, result interf
 }
 
 func (a *FlowClient) PatchQueryMarshal(url string, body interface{}, result interface{}) (interface{}, error) {
-	resp, err := CheckError(a.client.R().
+	resp, err := FormatRestyResponse(a.client.R().
 		SetBody(body).
 		SetResult(result).
 		Patch(url))
