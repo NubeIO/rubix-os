@@ -47,9 +47,9 @@ func (inst *Instance) polling(p polling) error {
 			time.Sleep(2 * time.Second)
 			log.Info("bacnet-master: NO NETWORKS FOUND")
 		}
-		for _, net := range nets { //NETWORKS
+		for _, net := range nets { // NETWORKS
 			if !inst.pollingEnabled {
-				//break
+				// break
 			}
 			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 				timeStart := time.Now()
@@ -59,17 +59,17 @@ func (inst *Instance) polling(p polling) error {
 					log.Infof("bacnet-master: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
 					continue
 				}
-				for _, dev := range net.Devices { //DEVICES
+				for _, dev := range net.Devices { // DEVICES
 					if boolean.IsFalse(net.Enable) {
 						log.Infof("bacnet-master-device: DEVICE DISABLED: NAME: %s\n", dev.Name)
 						continue
 					}
 
-					for _, pnt := range dev.Points { //POINTS
+					for _, pnt := range dev.Points { // POINTS
 						if boolean.IsFalse(net.Enable) {
 							continue
 						}
-						time.Sleep(devDelay) //DELAY between points
+						time.Sleep(devDelay) // DELAY between points
 						if pnt.WriteMode == "read_only" {
 							readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
 							if err != nil {
@@ -82,8 +82,8 @@ func (inst *Instance) polling(p polling) error {
 								}
 							}
 						} else if pnt.WriteMode == "write_only" || pnt.WriteMode == "write_then_read" {
-							//if poll count = 0 or InSync = false then write
-							//if write value == nil then don't write
+							// if poll count = 0 or InSync = false then write
+							// if write value == nil then don't write
 							var doWrite bool
 							rsyncWrite := counter % 10
 							if counter <= 1 || boolean.IsFalse(pnt.InSync) || rsyncWrite == 0 {
@@ -104,14 +104,14 @@ func (inst *Instance) polling(p polling) error {
 									_, err = inst.pointUpdateErr(pnt.UUID, err)
 									continue
 								}
-								//val := float.NonNil(pnt.WriteValue) //TODO not sure is this should then update the PV of the point
+								// val := float.NonNil(pnt.WriteValue) //TODO not sure is this should then update the PV of the point
 								_, err = inst.pointUpdate(pnt.UUID)
 								if err != nil {
 									continue
 								}
 							}
 						}
-						time.Sleep(pointDelay) //DELAY between points
+						time.Sleep(pointDelay) // DELAY between points
 					}
 					timeEnd := time.Now()
 					diff := timeEnd.Sub(timeStart)
@@ -120,7 +120,7 @@ func (inst *Instance) polling(p polling) error {
 				}
 			}
 		}
-		if !p.enable { //TODO the disable of the polling isn't working
+		if !p.enable { // TODO the disable of the polling isn't working
 			return true, nil
 		} else {
 			return false, nil

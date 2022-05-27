@@ -92,13 +92,13 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		log.Errorln("mapping.db.selectFlowNetwork(): missing flow network clone")
 		return nil, errors.New(fmt.Sprintf("missing flow network clone"))
 	}
-	//create a new stream or use existing
+	// create a new stream or use existing
 	stream, err := d.createPointMappingStream(device.Name, network.Name, flowNetwork)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, plugin := range body.AutoMappingNetworksSelection { //j njjk,liunmjj code comment from my daughter lenny-j 3-apr-2022  //DONT DELETE its her first one :)
+	for _, plugin := range body.AutoMappingNetworksSelection { // j njjk,liunmjj code comment from my daughter lenny-j 3-apr-2022  //DONT DELETE its her first one :)
 		streamClone, err := d.GetStreamCloneByArg(api.Args{SourceUUID: nils.NewString(stream.UUID)})
 		if err != nil {
 			log.Errorln("mapping.db.CreatePointMapping(): failed to find stream clone with source uuid:", stream.UUID)
@@ -107,12 +107,12 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		objectType := body.Point.ObjectType
 		isOutput := body.Point.IsOutput
 		if plugin != "self-mapping" {
-			//make the new network
+			// make the new network
 			network, err = d.createPointMappingNetwork(plugin)
 			if err != nil {
 				return nil, err
 			}
-			////Make a new device, check if device exits and if not make a new one
+			// //Make a new device, check if device exits and if not make a new one
 			device, err = d.createPointMappingDevice(device.Name, network.UUID)
 			if err != nil {
 				return nil, err
@@ -127,28 +127,28 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 			point = body.Point
 		}
 
-		//example user wants to make edge-28 mapping to bacnet: if the source point is an output from the edge-28 then we need to make the bacnet point the producer so the edge-28 can be commanded over bacnet
+		// example user wants to make edge-28 mapping to bacnet: if the source point is an output from the edge-28 then we need to make the bacnet point the producer so the edge-28 can be commanded over bacnet
 		if nils.BoolIsNil(isOutput) {
-			//example edge-28 UO to bacnet AO
-			//make the bacnet point the producer
+			// example edge-28 UO to bacnet AO
+			// make the bacnet point the producer
 			producer, err := d.createPointMappingProducer(point.UUID, point.Name, device.Name, stream.UUID)
 			if err != nil {
 				return nil, err
 			}
-			//this would be the edge28 point
+			// this would be the edge28 point
 			consumer, err := d.createPointMappingConsumer(body.Point.UUID, producer.Name, producer.UUID, streamClone.UUID)
 			if err != nil {
 				return nil, err
 			}
 			log.Info("Point mapping is done for TYPE-OUTPUT as the PRODUCER: ", consumer.Name)
-		} else { //if type is of input that make this the producer from the source point example: lora is the producer and bacnet is the consumer (as bacnet will read the value sent to it from lora)
-			//example edge-28 UI to bacnet AV
-			//make the edge-28 point the producer
+		} else { // if type is of input that make this the producer from the source point example: lora is the producer and bacnet is the consumer (as bacnet will read the value sent to it from lora)
+			// example edge-28 UI to bacnet AV
+			// make the edge-28 point the producer
 			producer, err := d.createPointMappingProducer(body.Point.UUID, body.Point.Name, device.Name, stream.UUID)
 			if err != nil {
 				return nil, err
 			}
-			//the consumer would be the bacnet-point
+			// the consumer would be the bacnet-point
 			consumer, err := d.createPointMappingConsumer(point.UUID, producer.Name, producer.UUID, streamClone.UUID)
 			if err != nil {
 				return nil, err
@@ -157,7 +157,7 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		}
 
 	}
-	//make new point for the producer
+	// make new point for the producer
 	return body, nil
 }
 
@@ -195,7 +195,7 @@ func (d *GormDatabase) createPointMappingStream(deviceName, networkName string, 
 	stream, err = d.CreateStream(streamModel)
 	if stream == nil || err != nil {
 		log.Error("mapping.db.CreatePointMapping(): failed to make a new stream ", stream)
-		//return nil, nil
+		// return nil, nil
 	} else {
 		log.Info("mapping.db.CreatePointMapping(): stream  is created successfully: ", stream)
 		return stream, nil
@@ -216,7 +216,7 @@ func (d *GormDatabase) createPointMappingStreamClone(deviceName, networkName str
 	stream, err = d.CreateStream(streamModel)
 	if stream == nil || err != nil {
 		log.Error("mapping.db.CreatePointMapping(): failed to make a new stream ", stream)
-		//return nil, nil
+		// return nil, nil
 	} else {
 		log.Info("mapping.db.CreatePointMapping(): stream  is created successfully: ", stream)
 		return stream, nil
@@ -226,7 +226,7 @@ func (d *GormDatabase) createPointMappingStreamClone(deviceName, networkName str
 
 func (d *GormDatabase) createPointMappingPoint(pointObjectType, pointName, deviceUUID string) (point *model.Point, err error) {
 	point = &model.Point{}
-	//make pnt, first check
+	// make pnt, first check
 	point.Name = pointName
 	point.ObjectType = pointObjectType
 	point.DeviceUUID = deviceUUID
@@ -264,7 +264,7 @@ func (d *GormDatabase) createPointMappingNetwork(plugin string) (network *model.
 }
 
 func (d *GormDatabase) createPointMappingDevice(deviceName, networkUUID string) (device *model.Device, err error) {
-	//Make a new device, check if device exits and if not make a new one
+	// Make a new device, check if device exits and if not make a new one
 	device, existing := d.deviceNameExistsInNetwork(deviceName, networkUUID)
 	if !existing {
 		newDevice := &model.Device{}
@@ -285,7 +285,7 @@ func (d *GormDatabase) createPointMappingDevice(deviceName, networkUUID string) 
 
 func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceName, streamUUID string) (producer *model.Producer, err error) {
 
-	//make a producer
+	// make a producer
 	producer = &model.Producer{}
 	producer.Name = fmt.Sprintf("%s_%s", deviceName, pointName)
 	producer.StreamUUID = streamUUID

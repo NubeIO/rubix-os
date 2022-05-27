@@ -75,7 +75,7 @@ type StreamClone struct {
 	Tags                 []*Tag      `json:"tags" gorm:"many2many:stream_clones_tags;constraint:OnDelete:CASCADE"`
 }
 
-//Consumer could be a local network, job or alarm and so on
+// Consumer could be a local network, job or alarm and so on
 type Consumer struct {
 	CommonUUID
 	CommonName

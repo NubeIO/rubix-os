@@ -51,8 +51,8 @@ func isWrite(t string) bool {
 var err error
 
 type Operation struct {
-	UnitId       uint8  `json:"unit_id"`     //device addr
-	ObjectType   string `json:"object_type"` //read_coil
+	UnitId       uint8  `json:"unit_id"`     // device addr
+	ObjectType   string `json:"object_type"` // read_coil
 	op           uint
 	Addr         uint16  `json:"addr"`
 	ZeroMode     bool    `json:"zero_mode"`
@@ -60,7 +60,7 @@ type Operation struct {
 	IsCoil       bool    `json:"is_coil"`
 	IsHoldingReg bool    `json:"is_holding_register"`
 	WriteValue   float64 `json:"write_value"`
-	Encoding     string  `json:"object_encoding"` //BEB_LEW
+	Encoding     string  `json:"object_encoding"` // BEB_LEW
 	coil         uint16
 	u16          uint16
 	u32          uint32
@@ -72,12 +72,12 @@ type Operation struct {
 func pointWrite(pnt *model.Point) (out float64) {
 	out = float.NonNil(pnt.WriteValue)
 	log.Infof("modbus-write: pointWrite() ObjectType: %s  Addr: %d WriteValue: %v\n", pnt.ObjectType, integer.NonNil(pnt.AddressID), out)
-	//if pnt.Priority != nil {
+	// if pnt.Priority != nil {
 	//	if (*pnt.Priority).P16 != nil {
 	//		out = *pnt.Priority.P16
 	//		log.Infof("modbus-write: pointWrite() ObjectType: %s  Addr: %d WriteValue: %v\n", pnt.ObjectType, utils.NonNil(pnt.AddressID), out)
 	//	}
-	//}
+	// }
 	return
 }
 
@@ -92,7 +92,7 @@ func writeCoilPayload(in float64) (out uint16) {
 
 func pointAddress(pnt *model.Point, zeroMode bool) (out uint16, err error) {
 	address := integer.NonNil(pnt.AddressID)
-	//zeroMode will subtract 1 from the register address, so address 1 will be address 0 if set to true
+	// zeroMode will subtract 1 from the register address, so address 1 will be address 0 if set to true
 	if !zeroMode {
 		if address <= 0 {
 			return 0, nil
@@ -109,11 +109,11 @@ func pointAddress(pnt *model.Point, zeroMode bool) (out uint16, err error) {
 
 func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Point, doWrite bool) (response interface{}, responseValue float64, err error) {
 	mbClient.Debug = true
-	objectEncoding := pnt.ObjectEncoding                          //beb_lew
-	objectType := nstring.NewString(pnt.ObjectType).ToSnakeCase() //eg: readCoil, read_coil, writeCoil
-	dataType := nstring.NewString(pnt.DataType).ToSnakeCase()     //eg: int16, uint16
-	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)    //register address
-	length := integer.NonNil(pnt.AddressLength)                   //modbus register length
+	objectEncoding := pnt.ObjectEncoding                          // beb_lew
+	objectType := nstring.NewString(pnt.ObjectType).ToSnakeCase() // eg: readCoil, read_coil, writeCoil
+	dataType := nstring.NewString(pnt.DataType).ToSnakeCase()     // eg: int16, uint16
+	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)    // register address
+	length := integer.NonNil(pnt.AddressLength)                   // modbus register length
 
 	switch objectEncoding {
 	case string(model.ByteOrderLebBew):
@@ -127,7 +127,7 @@ func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Poin
 	default:
 		err = mbClient.SetEncoding(smod.BigEndian, smod.LowWordFirst)
 	}
-	if length <= 0 { //make sure length is > 0
+	if length <= 0 { // make sure length is > 0
 		length = 1
 	}
 	var writeValue float64
@@ -142,15 +142,15 @@ func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Poin
 	}
 
 	switch objectType {
-	//COILS
+	// COILS
 	case string(model.ObjTypeReadCoil):
 		return mbClient.ReadCoils(address, uint16(length))
 	case string(model.ObjTypeWriteCoil):
 		return mbClient.WriteCoil(address, writeCoilPayload(writeValue))
-		//READ DISCRETE INPUTS
+		// READ DISCRETE INPUTS
 	case string(model.ObjTypeReadDiscreteInput):
 		return mbClient.ReadDiscreteInputs(address, uint16(length))
-		//READ HOLDINGS
+		// READ HOLDINGS
 	case string(model.ObjTypeReadHolding):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
 			return mbClient.ReadHoldingRegisters(address, uint16(length))
@@ -163,7 +163,7 @@ func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Poin
 		} else if dataType == string(model.TypeFloat64) || dataType == string(model.TypeFloat64) {
 			return mbClient.ReadFloat32(address, smod.HoldingRegister)
 		}
-		//READ INPUT REGISTERS
+		// READ INPUT REGISTERS
 	case string(model.ObjTypeReadRegister):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
 			return mbClient.ReadInputRegisters(address, uint16(length))
@@ -176,7 +176,7 @@ func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Poin
 		} else if dataType == string(model.TypeFloat64) {
 			return mbClient.ReadFloat32(address, smod.InputRegister)
 		}
-		//WRITE HOLDINGS
+		// WRITE HOLDINGS
 	case string(model.ObjTypeWriteHolding):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
 			return mbClient.WriteSingleRegister(address, uint16(writeValue))
@@ -197,11 +197,11 @@ func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Poin
 
 func (inst *Instance) networkWrite(mbClient smod.ModbusClient, pnt *model.Point) (response interface{}, responseValue float64, err error) {
 	mbClient.Debug = true
-	objectEncoding := pnt.ObjectEncoding                          //beb_lew
-	objectType := nstring.NewString(pnt.ObjectType).ToSnakeCase() //eg: readCoil, read_coil, writeCoil
-	dataType := nstring.NewString(pnt.DataType).ToSnakeCase()     //eg: int16, uint16
-	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)    //register address
-	length := integer.NonNil(pnt.AddressLength)                   //modbus register length
+	objectEncoding := pnt.ObjectEncoding                          // beb_lew
+	objectType := nstring.NewString(pnt.ObjectType).ToSnakeCase() // eg: readCoil, read_coil, writeCoil
+	dataType := nstring.NewString(pnt.DataType).ToSnakeCase()     // eg: int16, uint16
+	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)    // register address
+	length := integer.NonNil(pnt.AddressLength)                   // modbus register length
 
 	switch objectEncoding {
 	case string(model.ByteOrderLebBew):
@@ -215,7 +215,7 @@ func (inst *Instance) networkWrite(mbClient smod.ModbusClient, pnt *model.Point)
 	default:
 		err = mbClient.SetEncoding(smod.BigEndian, smod.LowWordFirst)
 	}
-	if length <= 0 { //make sure length is > 0
+	if length <= 0 { // make sure length is > 0
 		length = 1
 	}
 
@@ -224,11 +224,11 @@ func (inst *Instance) networkWrite(mbClient smod.ModbusClient, pnt *model.Point)
 	inst.modbusDebugMsg(fmt.Sprintf("modbus-write: ObjectType: %s  Addr: %d WriteValue: %v\n", objectType, address, writeValue))
 
 	switch objectType {
-	//WRITE COILS
+	// WRITE COILS
 	case string(model.ObjTypeWriteCoil), string(model.ObjTypeWriteCoils):
 		return mbClient.WriteCoil(address, writeCoilPayload(writeValue))
 
-	//WRITE HOLDINGS
+	// WRITE HOLDINGS
 	case string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
 			return mbClient.WriteSingleRegister(address, uint16(writeValue))
@@ -248,11 +248,11 @@ func (inst *Instance) networkWrite(mbClient smod.ModbusClient, pnt *model.Point)
 
 func (inst *Instance) networkRead(mbClient smod.ModbusClient, pnt *model.Point) (response interface{}, responseValue float64, err error) {
 	mbClient.Debug = true
-	objectEncoding := pnt.ObjectEncoding                          //beb_lew
-	objectType := nstring.NewString(pnt.ObjectType).ToSnakeCase() //eg: readCoil, read_coil, writeCoil
-	dataType := nstring.NewString(pnt.DataType).ToSnakeCase()     //eg: int16, uint16
-	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)    //register address
-	length := integer.NonNil(pnt.AddressLength)                   //modbus register length
+	objectEncoding := pnt.ObjectEncoding                          // beb_lew
+	objectType := nstring.NewString(pnt.ObjectType).ToSnakeCase() // eg: readCoil, read_coil, writeCoil
+	dataType := nstring.NewString(pnt.DataType).ToSnakeCase()     // eg: int16, uint16
+	address, err := pointAddress(pnt, mbClient.DeviceZeroMode)    // register address
+	length := integer.NonNil(pnt.AddressLength)                   // modbus register length
 
 	switch objectEncoding {
 	case string(model.ByteOrderLebBew):
@@ -266,22 +266,22 @@ func (inst *Instance) networkRead(mbClient smod.ModbusClient, pnt *model.Point) 
 	default:
 		err = mbClient.SetEncoding(smod.BigEndian, smod.LowWordFirst)
 	}
-	if length <= 0 { //make sure length is > 0
+	if length <= 0 { // make sure length is > 0
 		length = 1
 	}
 
 	inst.modbusDebugMsg(fmt.Sprintf("modbus-read: ObjectType: %s  Addr: %d", objectType, address))
 
 	switch objectType {
-	//COILS
+	// COILS
 	case string(model.ObjTypeReadCoil), string(model.ObjTypeReadCoils), string(model.ObjTypeWriteCoil), string(model.ObjTypeWriteCoils):
 		return mbClient.ReadCoils(address, uint16(length))
 
-	//READ DISCRETE INPUTS
+	// READ DISCRETE INPUTS
 	case string(model.ObjTypeReadDiscreteInput), string(model.ObjTypeReadDiscreteInputs):
 		return mbClient.ReadDiscreteInputs(address, uint16(length))
 
-	//READ INPUT REGISTERS
+	// READ INPUT REGISTERS
 	case string(model.ObjTypeReadRegister), string(model.ObjTypeReadRegisters):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
 			return mbClient.ReadInputRegisters(address, uint16(length))
@@ -295,7 +295,7 @@ func (inst *Instance) networkRead(mbClient smod.ModbusClient, pnt *model.Point) 
 			return mbClient.ReadFloat32(address, smod.InputRegister)
 		}
 
-	//READ HOLDINGS
+	// READ HOLDINGS
 	case string(model.ObjTypeReadHolding), string(model.ObjTypeReadHoldings), string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
 			return mbClient.ReadHoldingRegisters(address, uint16(length))

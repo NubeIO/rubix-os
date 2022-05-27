@@ -20,7 +20,7 @@ const (
 	schemaPoint   = "/schema/point"
 )
 
-//markdown guide
+// markdown guide
 const helpText = `
 # LoRa Help Guide
 

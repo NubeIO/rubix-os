@@ -7,10 +7,10 @@ import (
 
 var store *cache.Cache
 
-//StoreKeys used to try and keep track of the keys
+// StoreKeys used to try and keep track of the keys
 var StoreKeys = struct {
 	PluginUUID string
-	PluginName string //would be plugin_name_lora
+	PluginName string // would be plugin_name_lora
 }{
 	PluginUUID: "plugin_uuid",
 	PluginName: "plugin_name",
@@ -20,7 +20,7 @@ type Handler struct {
 	Store *cache.Cache
 }
 
-//Init init store
+// Init init store
 func Init(h *Handler) {
 	initStore(h.Store)
 }

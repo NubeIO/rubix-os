@@ -94,8 +94,8 @@ var ArgsType = struct {
 	Name                 string
 	Value                string
 	UpdateProducer       string
-	CompactPayload       string //for a point would be presentValue
-	CompactWithName      string //for a point would be presentValue and pointName
+	CompactPayload       string // for a point would be presentValue
+	CompactWithName      string // for a point would be presentValue and pointName
 	FlowUUID             string
 	StreamUUID           string
 	ProducerUUID         string
@@ -143,8 +143,8 @@ var ArgsType = struct {
 	Search:               "search",
 	AskRefresh:           "ask_refresh",
 	AskResponse:          "ask_response",
-	Write:                "write",      //consumer to write a value
-	ThingType:            "thing_type", //the type of thing like a point
+	Write:                "write",      // consumer to write a value
+	ThingType:            "thing_type", // the type of thing like a point
 	UUID:                 "uuid",
 	FlowNetworkUUID:      "flow_network_uuid",
 	FlowNetworkCloneUUID: "flow_network_clone_uuid",
@@ -238,7 +238,7 @@ var ArgsDefault = struct {
 	PointName         string
 }{
 	Sort:              "ID",
-	Order:             "DESC", //ASC or DESC
+	Order:             "DESC", // ASC or DESC
 	Offset:            "0",
 	Limit:             "25",
 	Search:            "",

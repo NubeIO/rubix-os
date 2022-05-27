@@ -27,8 +27,8 @@ func (inst *Instance) updateInputs(pnt *model.Point, inputs *rubixio.Inputs) {
 	if inputs == nil {
 		return
 	}
-	IoNumber := pnt.IoNumber //UI1
-	pntType := pnt.IoType    //10k
+	IoNumber := pnt.IoNumber // UI1
+	pntType := pnt.IoType    // 10k
 	found, temp, voltage, current, raw, digital, err := rubixio.GetInputValues(inputs, IoNumber)
 	if err != nil {
 		return
@@ -83,7 +83,7 @@ func (inst *Instance) syncOutputs(dev *model.Device) (bulk []rubixio.BulkWrite) 
 			do2 = int(nils.Float64IsNil(pnt.WriteValue))
 		}
 	}
-	//todo add in if point is disabled
+	// todo add in if point is disabled
 	bulk = []rubixio.BulkWrite{
 		{
 			IONum: "UO1",
@@ -160,7 +160,7 @@ func (inst *Instance) writeOutput(dev *model.Device) {
 }
 
 func (inst *Instance) polling(p polling) error {
-	var defaultInterval = time.Duration(inst.config.PollingTimeInMs) * time.Millisecond //default polling is 2.5 sec
+	var defaultInterval = time.Duration(inst.config.PollingTimeInMs) * time.Millisecond // default polling is 2.5 sec
 
 	if p.delayNetworks <= 0 {
 		p.delayNetworks = defaultInterval
@@ -187,13 +187,13 @@ func (inst *Instance) polling(p polling) error {
 			time.Sleep(15000 * time.Millisecond)
 			log.Info("rubixio-polling: NO NETWORKS FOUND")
 		}
-		for _, net := range nets { //NETWORKS
+		for _, net := range nets { // NETWORKS
 			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 				counter++
 				if !nils.BoolIsNil(net.Enable) {
 					continue
 				}
-				for _, dev := range net.Devices { //DEVICES
+				for _, dev := range net.Devices { // DEVICES
 					if err != nil {
 						log.Errorf("rubixio-polling: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
 					}
@@ -205,7 +205,7 @@ func (inst *Instance) polling(p polling) error {
 				}
 			}
 		}
-		if !p.enable { //TODO to disable of the polling isn't working
+		if !p.enable { // TODO to disable of the polling isn't working
 			return true, nil
 		} else {
 			return false, nil

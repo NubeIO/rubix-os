@@ -8,8 +8,8 @@ import (
 	"github.com/NubeIO/flow-framework/src/dbhandler"
 )
 
-const path = "bacnetmaster" //must be unique across all plugins
-const name = "bacnetmaster" //must be unique across all plugins
+const path = "bacnetmaster" // must be unique across all plugins
+const name = "bacnetmaster" // must be unique across all plugins
 const description = "bacnet master api to nube bacnet stack"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
@@ -20,7 +20,7 @@ const allowConfigWrite = false
 const isNetwork = true
 const maxAllowedNetworks = 1
 const networkType = "bacnet"
-const transportType = "ip" //serial, ip
+const transportType = "ip" // serial, ip
 
 // Instance is plugin instance
 type Instance struct {
@@ -54,7 +54,7 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 	return &Instance{}
 }
 
-//main will not let main run
+// main will not let main run
 func main() {
 	panic("this should be built as plugin")
 }

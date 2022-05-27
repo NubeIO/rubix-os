@@ -84,7 +84,7 @@ var UnitsMap = map[string]interface{}{
 	Mass:   UnitsMass,
 }
 
-//Exists checks if the selected unit exists by category ie: @unt temperature
+// Exists checks if the selected unit exists by category ie: @unt temperature
 func Exists(unt string) (found bool, options interface{}) {
 	var out interface{}
 	var f = false

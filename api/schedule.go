@@ -53,7 +53,7 @@ func (a *ScheduleAPI) ScheduleWrite(ctx *gin.Context) {
 func (a *ScheduleAPI) CreateSchedule(ctx *gin.Context) {
 	body, _ := getBODYSchedule(ctx)
 	q, err := a.DB.CreateSchedule(body)
-	responseHandler(q, err, ctx) //TODO
+	responseHandler(q, err, ctx) // TODO
 }
 
 func (a *ScheduleAPI) DeleteSchedule(ctx *gin.Context) {

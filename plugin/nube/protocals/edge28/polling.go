@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-const defaultInterval = 10000 * time.Millisecond //default polling is 2.5 sec
+const defaultInterval = 10000 * time.Millisecond // default polling is 2.5 sec
 const pollName = "polling"
 
 type polling struct {
@@ -37,10 +37,10 @@ var poll poller.Poller
 var getUI *edgerest.UI
 var getDI *edgerest.DI
 
-//TODO add COV WriteValueOnceSync and InSync
+// TODO add COV WriteValueOnceSync and InSync
 func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgerest.RestClient, pollCount uint64, isUO bool) (float64, error) {
 	rsyncWrite := pollCount % 10
-	//rsyncWrite is just a way to make sure the outputs on the device are not out of sync
+	// rsyncWrite is just a way to make sure the outputs on the device are not out of sync
 	// and rsync on first poll loop
 	writeValue := float.NonNil(pnt.WriteValue)
 	var err error
@@ -65,7 +65,7 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 			_, err := inst.pointUpdateErr(pnt.UUID, err)
 			return 0, err
 		} else {
-			//log.Infof("edge28-polling: wrote IO %s: %v\n", pnt.IoNumber, value)
+			// log.Infof("edge28-polling: wrote IO %s: %v\n", pnt.IoNumber, value)
 			return value, err
 		}
 	} else {
@@ -76,7 +76,7 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 }
 
 func (inst *Instance) processRead(pnt *model.Point, readValue float64, pollCount float64) (float64, error) {
-	covEvent, _ := nmath.Cov(readValue, float.NonNil(pnt.PresentValue), 0) //Remove this as it's done in the main point db file
+	covEvent, _ := nmath.Cov(readValue, float.NonNil(pnt.PresentValue), 0) // Remove this as it's done in the main point db file
 	if pollCount == 1 || !boolean.IsTrue(pnt.InSync) {
 		_, err := inst.pointUpdateValue(pnt.UUID, readValue)
 		if err != nil {
@@ -128,11 +128,11 @@ func (inst *Instance) polling(p polling) error {
 			time.Sleep(15000 * time.Millisecond)
 			log.Info("edge28-polling: NO NETWORKS FOUND")
 		}
-		for _, net := range nets { //NETWORKS
+		for _, net := range nets { // NETWORKS
 			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 				log.Infof("edge28-polling: LOOP COUNT: %v\n", counter)
 				counter++
-				for _, dev := range net.Devices { //DEVICES
+				for _, dev := range net.Devices { // DEVICES
 					if err != nil {
 						log.Errorf("edge28-polling: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
 					}
@@ -141,15 +141,15 @@ func (inst *Instance) polling(p polling) error {
 					getDI, err = rest.GetDIs()
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
-					for _, pnt := range dev.Points { //POINTS
+					for _, pnt := range dev.Points { // POINTS
 						var rv float64
 						var readValStruct interface{}
 						var readValType string
 						var wv float64
 						switch pnt.IoNumber {
-						//OUTPUTS
+						// OUTPUTS
 						case pointList.R1, pointList.R2, pointList.DO1, pointList.DO2, pointList.DO3, pointList.DO4, pointList.DO5:
-							//_, err := inst.db.UpdatePointValue(pnt.UUID, pnt, false)  //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
+							// _, err := inst.db.UpdatePointValue(pnt.UUID, pnt, false)  //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
 							if pnt.WriteValue != nil {
 								writeValue := plugin.PointWrite(pnt)
 								wv, err = DigitalToGPIOValue(writeValue, false)
@@ -160,7 +160,7 @@ func (inst *Instance) polling(p polling) error {
 								_, err = inst.processWrite(pnt, wv, rest, uint64(counter), false)
 							}
 						case pointList.UO1, pointList.UO2, pointList.UO3, pointList.UO4, pointList.UO5, pointList.UO6, pointList.UO7:
-							//_, err := inst.db.UpdatePointValue(pnt.UUID, pnt, false) //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
+							// _, err := inst.db.UpdatePointValue(pnt.UUID, pnt, false) //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
 							if pnt.WriteValue != nil {
 								wv, err = GetGPIOValueForUOByType(pnt)
 								if err != nil {
@@ -173,7 +173,7 @@ func (inst *Instance) polling(p polling) error {
 									continue
 								}
 							}
-						//INPUTS
+						// INPUTS
 						case pointList.DI1, pointList.DI2, pointList.DI3, pointList.DI4, pointList.DI5, pointList.DI6, pointList.DI7:
 							if getDI == nil {
 								continue
@@ -218,7 +218,7 @@ func (inst *Instance) polling(p polling) error {
 				}
 			}
 		}
-		if !p.enable { //TODO the disable of the polling isn't working
+		if !p.enable { // TODO the disable of the polling isn't working
 			return true, nil
 		} else {
 			return false, nil
@@ -302,7 +302,7 @@ func GetValueFromGPIOForUIByType(point *model.Point, value float64) (float64, er
 	return result, nil
 }
 
-//DigitalToGPIOValue converts true/false values (all basic types allowed) to BBB GPIO 0/1 ON/OFF (FOR DOs/Relays) and to 100/0 (FOR UOs).  Note that the GPIO value for digital points is inverted.
+// DigitalToGPIOValue converts true/false values (all basic types allowed) to BBB GPIO 0/1 ON/OFF (FOR DOs/Relays) and to 100/0 (FOR UOs).  Note that the GPIO value for digital points is inverted.
 func DigitalToGPIOValue(input interface{}, isUO bool) (float64, error) {
 	var inputAsBool bool
 	var err error = nil

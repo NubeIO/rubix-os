@@ -25,14 +25,14 @@ func (inst *Instance) runSchedule() {
 			log.Infoln("system-plugin-schedule: runSchedule() sch is not enabled so skip logic name:", sch.Name)
 			continue
 		}
-		scheduleNameToCheck := "ALL" //TODO: we need a way to specify the schedule name that is being checked for.
+		scheduleNameToCheck := "ALL" // TODO: we need a way to specify the schedule name that is being checked for.
 
 		timezone := ScheduleJSON.Config.TimeZone
 		_, err = time.LoadLocation(timezone)
 		if err != nil || timezone == "" { // If timezone field is not assigned or invalid, get timezone from System Time
 			log.Error("system-plugin-schedule: CheckWeeklyScheduleCollection(): invalid schedule timezone. checking with system time.")
 			systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
-			//fmt.Println("systemTimezone 2: ", systemTimezone)
+			// fmt.Println("systemTimezone 2: ", systemTimezone)
 			if systemTimezone == "" {
 				zone, _ := utilstime.GetHardwareTZ()
 				timezone = zone
@@ -41,20 +41,20 @@ func (inst *Instance) runSchedule() {
 			}
 		}
 
-		//CHECK WEEKLY SCHEDULES
-		weeklyResult, err := schedule.WeeklyCheck(ScheduleJSON.Schedules.Weekly, scheduleNameToCheck, timezone) //This will check for any active schedules with defined name.
+		// CHECK WEEKLY SCHEDULES
+		weeklyResult, err := schedule.WeeklyCheck(ScheduleJSON.Schedules.Weekly, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
 			log.Errorf("system-plugin-schedule: issue on WeeklyCheck %v\n", err)
 		}
 		// CHECK EVENT SCHEDULES
-		eventResult, err := schedule.EventCheck(ScheduleJSON.Schedules.Events, scheduleNameToCheck, timezone) //This will check for any active schedules with defined name.
+		eventResult, err := schedule.EventCheck(ScheduleJSON.Schedules.Events, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
 			log.Errorf("system-plugin-schedule: issue on EventCheck %v\n", err)
 		}
-		//Combine Event and Weekly schedule results.
+		// Combine Event and Weekly schedule results.
 		weeklyAndEventResult, err := schedule.CombineScheduleCheckerResults(weeklyResult, eventResult)
 		// CHECK EXCEPTION SCHEDULES
-		exceptionResult, err := schedule.ExceptionCheck(ScheduleJSON.Schedules.Exceptions, scheduleNameToCheck, timezone) //This will check for any active schedules with defined name.
+		exceptionResult, err := schedule.ExceptionCheck(ScheduleJSON.Schedules.Exceptions, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
 			log.Errorf("system-plugin-schedule: issue on ExceptionCheck %v\n", err)
 		}
@@ -62,7 +62,7 @@ func (inst *Instance) runSchedule() {
 			log.Println("system-plugin-schedule: Exception schedule is empty")
 		}
 
-		finalResult, err := schedule.ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult) //This applies the exception schedule to mask the combined weekly and event schedules.
+		finalResult, err := schedule.ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult) // This applies the exception schedule to mask the combined weekly and event schedules.
 		if err != nil {
 			log.Errorf("system-plugin-schedule: issue on ApplyExceptionSchedule %v\n", err)
 		}

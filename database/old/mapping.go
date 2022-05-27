@@ -1,45 +1,44 @@
 package database
 
-//
-//import (
+// import (
 //	"errors"
 //	"fmt"
 //	"github.com/NubeIO/flow-framework/api"
 //	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 //	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 //	log "github.com/sirupsen/logrus"
-//)
+// )
 //
-///*
-//Mapping
-//lora to bacnet >> one to one
-//bacnet to edge >>  one to many
-//modbus to bacnet >> many to one
-//*/
+// /*
+// Mapping
+// lora to bacnet >> one to one
+// bacnet to edge >>  one to many
+// modbus to bacnet >> many to one
+// */
 //
-//const (
+// const (
 //	edge28Bacnet  = "edge28-to-bacnetserver"
 //	loRaToBACnet  = "lora-to-bacnetserver"
 //	rubixIOBACnet = "rubix-io-to-bacnetserver"
-//)
+// )
 //
-//type MappingNetwork struct {
+// type MappingNetwork struct {
 //	Name        string
 //	FromNetwork string
 //	ToNetwork   string
-//}
+// }
 //
-//var MappingNetworks = struct {
+// var MappingNetworks = struct {
 //	Edge28Bacnet  MappingNetwork
 //	LoRaToBACnet  MappingNetwork
 //	RubixIOBACnet MappingNetwork
-//}{
+// }{
 //	Edge28Bacnet:  MappingNetwork{Name: edge28Bacnet, FromNetwork: model.PluginsNames.Edge28.PluginName, ToNetwork: model.PluginsNames.BACnetServer.PluginName},
 //	LoRaToBACnet:  MappingNetwork{Name: loRaToBACnet, FromNetwork: model.PluginsNames.LoRa.PluginName, ToNetwork: model.PluginsNames.BACnetServer.PluginName},
 //	RubixIOBACnet: MappingNetwork{Name: rubixIOBACnet, FromNetwork: model.PluginsNames.RubixIO.PluginName, ToNetwork: model.PluginsNames.BACnetServer.PluginName},
-//}
+// }
 //
-//func selectMappingNetwork(selectedPlugin string) (pluginName string) {
+// func selectMappingNetwork(selectedPlugin string) (pluginName string) {
 //	switch selectedPlugin {
 //	case MappingNetworks.Edge28Bacnet.Name:
 //		pluginName = MappingNetworks.Edge28Bacnet.ToNetwork
@@ -50,24 +49,24 @@ package database
 //	}
 //	return
 //
-//}
+// }
 //
-///*
-//CreatePointMapping
+// /*
+// CreatePointMapping
 //
-//Producer:
-//In our world a producer would be a lora temp sensor or a bacnet output
+// Producer:
+// In our world a producer would be a lora temp sensor or a bacnet output
 //
-//Consumer:
-//A consumer would be a bacnet point from the lora temp sensor or an edge-28 output as it needs to be written to from bacnet
+// Consumer:
+// A consumer would be a bacnet point from the lora temp sensor or an edge-28 output as it needs to be written to from bacnet
 //
-//Example mapping for self mapping
-//- user when making a new network selects "self-mapping"
-//- when they add a new point, make a new producer as type point and select the newly made point
-//- make a new consumer as type point and select the newly made point and newly made producer
-//- add a writer to the producer
-//*/
-//func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.PointMapping, error) {
+// Example mapping for self mapping
+// - user when making a new network selects "self-mapping"
+// - when they add a new point, make a new producer as type point and select the newly made point
+// - make a new consumer as type point and select the newly made point and newly made producer
+// - add a writer to the producer
+// */
+// func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.PointMapping, error) {
 //
 //	network := &model.Network{}
 //	device := &model.Device{}
@@ -160,9 +159,9 @@ package database
 //	}
 //	//make new point for the producer
 //	return body, nil
-//}
+// }
 //
-//func (d *GormDatabase) selectFlowNetwork(flowNetworkName, flowNetworkUUID string) (flowNetwork *model.FlowNetwork, err error) {
+// func (d *GormDatabase) selectFlowNetwork(flowNetworkName, flowNetworkUUID string) (flowNetwork *model.FlowNetwork, err error) {
 //	if flowNetworkUUID != "" {
 //		flowNetwork, err = d.GetFlowNetwork(flowNetworkUUID, api.Args{})
 //		if err != nil || flowNetwork == nil {
@@ -181,9 +180,9 @@ package database
 //		}
 //	}
 //	return
-//}
+// }
 //
-//func (d *GormDatabase) createPointMappingStream(deviceName, networkName string, flowNetwork *model.FlowNetwork) (stream *model.Stream, err error) {
+// func (d *GormDatabase) createPointMappingStream(deviceName, networkName string, flowNetwork *model.FlowNetwork) (stream *model.Stream, err error) {
 //	streamModel := &model.Stream{}
 //	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 //	streamModel.Name = fmt.Sprintf("%s_%s", networkName, deviceName)
@@ -202,9 +201,9 @@ package database
 //		return stream, nil
 //	}
 //	return stream, nil
-//}
+// }
 //
-//func (d *GormDatabase) createPointMappingStreamClone(deviceName, networkName string, flowNetwork *model.FlowNetwork) (stream *model.Stream, err error) {
+// func (d *GormDatabase) createPointMappingStreamClone(deviceName, networkName string, flowNetwork *model.FlowNetwork) (stream *model.Stream, err error) {
 //	streamModel := &model.Stream{}
 //	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 //	streamModel.Name = fmt.Sprintf("%s_%s", networkName, deviceName)
@@ -223,9 +222,9 @@ package database
 //		return stream, nil
 //	}
 //	return stream, nil
-//}
+// }
 //
-//func (d *GormDatabase) createPointMappingPoint(pointObjectType, pointName, deviceUUID string) (point *model.Point, err error) {
+// func (d *GormDatabase) createPointMappingPoint(pointObjectType, pointName, deviceUUID string) (point *model.Point, err error) {
 //	point = &model.Point{}
 //	//make pnt, first check
 //	point.Name = pointName
@@ -237,9 +236,9 @@ package database
 //		return nil, errors.New("failed to add a new point for auto mapping")
 //	}
 //	return point, err
-//}
+// }
 //
-//func (d *GormDatabase) createPointMappingNetwork(plugin string) (network *model.Network, err error) {
+// func (d *GormDatabase) createPointMappingNetwork(plugin string) (network *model.Network, err error) {
 //	plugin = selectMappingNetwork(plugin)
 //	if plugin == "" {
 //		log.Errorln("mapping.db.CreatePointMapping(): no valid plugin selection, try lora-to-bacnetserver")
@@ -262,9 +261,9 @@ package database
 //		log.Info("mapping.db.CreatePointMapping(): an existing network with this name exists name:", network.Name, "for plugin:", network.PluginPath)
 //		return network, err
 //	}
-//}
+// }
 //
-//func (d *GormDatabase) createPointMappingDevice(deviceName, networkUUID string) (device *model.Device, err error) {
+// func (d *GormDatabase) createPointMappingDevice(deviceName, networkUUID string) (device *model.Device, err error) {
 //	//Make a new device, check if device exits and if not make a new one
 //	device, existing := d.deviceNameExistsInNetwork(deviceName, networkUUID)
 //	if !existing {
@@ -282,9 +281,9 @@ package database
 //		log.Info("mapping.db.CreatePointMapping(): an existing device with this name exists name:", deviceName, "for network_uuid:", networkUUID)
 //		return device, nil
 //	}
-//}
+// }
 //
-//func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceName, streamUUID string) (producer *model.Producer, err error) {
+// func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceName, streamUUID string) (producer *model.Producer, err error) {
 //
 //	//make a producer
 //	producer = &model.Producer{}
@@ -300,9 +299,9 @@ package database
 //	log.Info("Producer point is created successfully: ", producer)
 //	return
 //
-//}
+// }
 //
-//func (d *GormDatabase) createPointMappingConsumer(pointUUID, producerName, producerUUID, streamCloneUUID string) (consumer *model.Consumer, err error) {
+// func (d *GormDatabase) createPointMappingConsumer(pointUUID, producerName, producerUUID, streamCloneUUID string) (consumer *model.Consumer, err error) {
 //
 //	consumer = &model.Consumer{}
 //	consumer.Name = producerName
@@ -327,4 +326,4 @@ package database
 //	log.Info("Writer is created successfully: ", writer.WriterThingName)
 //	return
 //
-//}
+// }

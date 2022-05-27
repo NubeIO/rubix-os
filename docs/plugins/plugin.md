@@ -1,5 +1,5 @@
 ---
-id: plugin
+id: plugin<br/>
 title: Intro to Flow Plugins
 ---
 
@@ -7,9 +7,11 @@ title: Intro to Flow Plugins
 
 ## Description
 
-_This documentation is generally designed for plugin developers. If you just wanted to use an existing plugin, you would need to refer to the documentation from the plugin maintainer._
+_This documentation is generally designed for plugin developers. If you just wanted to use an existing plugin, you would
+need to refer to the documentation from the plugin maintainer._
 
-Flow provides built-in plugin functionality built on top of the [go plugin system](https://godoc.org/plugin). It is built for extending Flow functionality.
+Flow provides built-in plugin functionality built on top of the [go plugin system](https://godoc.org/plugin). It is
+built for extending Flow functionality.
 
 ## Features
 
@@ -69,9 +71,14 @@ func main() {
 }
 ```
 
-This program exports two functions: `GetFlowPluginInfo` and `NewFlowPluginInstance`, Flow will use these to obtain the plugin metadata and create plugin instances for each user.
+This program exports two functions: `GetFlowPluginInfo` and `NewFlowPluginInstance`, Flow will use these to obtain the
+plugin metadata and create plugin instances for each user.
 
-The `GetFlowPluginInfo` must return a [`plugin.Info`](https://godoc.org/github.com/Flow/plugin-api#Info) containing descriptive info of the current plugin, all fields are optional except `ModulePath`(the module path of this plugin), which is used to distinguish different plugins.
+The `GetFlowPluginInfo` must return a [`plugin.Info`](https://godoc.org/github.com/Flow/plugin-api#Info) containing
+descriptive info of the current plugin, all fields are optional except `ModulePath`(the module path of this plugin),
+which is used to distinguish different plugins.
 
-The `NewFlowPluginInstance` is called with a [`plugin.UserContext`] for each user at startup and every time a new user is added, the plugin must return a plugin instance that satisfies [`plugin.Plugin`](https://godoc.org/github.com/Flow/plugin-api#Plugin) interface.
+The `NewFlowPluginInstance` is called with a [`plugin.UserContext`] for each user at startup and every time a new user
+is added, the plugin must return a plugin instance that
+satisfies [`plugin.Plugin`](https://godoc.org/github.com/Flow/plugin-api#Plugin) interface.
 

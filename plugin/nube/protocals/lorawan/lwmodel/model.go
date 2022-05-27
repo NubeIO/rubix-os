@@ -16,7 +16,7 @@ type Organizations struct {
 	} `json:"result"`
 }
 
-//Devices GET
+// Devices GET
 type Devices struct {
 	TotalCount string `json:"totalCount"`
 	Result     []struct {
@@ -35,7 +35,7 @@ type Devices struct {
 	} `json:"result"`
 }
 
-//Device POST and PUT (put is edit)
+// Device POST and PUT (put is edit)
 type Device struct {
 	Device struct {
 		DevEUI          string `json:"devEUI"`
@@ -67,7 +67,7 @@ type GetDevice struct {
 	Location            interface{} `json:"location"`
 }
 
-//DeviceActivation used to GET Activation
+// DeviceActivation used to GET Activation
 type DeviceActivation struct {
 	DA struct {
 		DevAddr     string `json:"devAddr"`
@@ -79,7 +79,7 @@ type DeviceActivation struct {
 	} `json:"deviceActivation"`
 }
 
-//DeviceActive used to POST active
+// DeviceActive used to POST active
 type DeviceActive struct {
 	DActive struct {
 		DevEUI      string `json:"devEUI"`
@@ -188,7 +188,7 @@ type Server struct {
 	VendorId          string `json:"vendor_id"`
 	VendorName        string `json:"vendor_name"`
 	EnableIpByNicName bool   `json:"enable_ip_by_nic_name"`
-	IpByNicName       string `json:"ip_by_nic_name"` //eth0
+	IpByNicName       string `json:"ip_by_nic_name"` // eth0
 }
 
 // MqttPayload payload from the bacnet server

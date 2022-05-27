@@ -39,7 +39,7 @@ func (inst *Instance) initBacStore() {
 	inst.BacStore = network.NewStore()
 }
 
-//bacnetNetwork add or update an instance a bacnet network that is cached in bacnet lib
+// bacnetNetwork add or update an instance a bacnet network that is cached in bacnet lib
 func (inst *Instance) bacnetNetwork(net *model.Network) error {
 	bacnetNet := &network.Network{
 		Interface: net.NetworkInterface,
@@ -49,12 +49,12 @@ func (inst *Instance) bacnetNetwork(net *model.Network) error {
 	return inst.BacStore.UpdateNetwork(net.UUID, bacnetNet)
 }
 
-//getBacnetNetwork get an instance of a created bacnet network that is cached in bacnet lib
+// getBacnetNetwork get an instance of a created bacnet network that is cached in bacnet lib
 func (inst *Instance) getBacnetNetwork(networkUUID string) (*network.Network, error) {
 	return inst.BacStore.GetNetwork(networkUUID)
 }
 
-//closeBacnetNetwork delete the instance of a created bacnet network that is cached in bacnet lib
+// closeBacnetNetwork delete the instance of a created bacnet network that is cached in bacnet lib
 func (inst *Instance) closeBacnetNetwork(networkUUID string) (bool, error) {
 	net, err := inst.BacStore.GetNetwork(networkUUID)
 	if err != nil {
@@ -64,12 +64,12 @@ func (inst *Instance) closeBacnetNetwork(networkUUID string) (bool, error) {
 	return true, nil
 }
 
-//getBacnetDevice get an instance of a created bacnet device that is cached in bacnet lib
+// getBacnetDevice get an instance of a created bacnet device that is cached in bacnet lib
 func (inst *Instance) getBacnetDevice(deviceUUID string) (*network.Device, error) {
 	return inst.BacStore.GetDevice(deviceUUID)
 }
 
-//bacnetDevice add or update an instance of a created bacnet device that is cached in bacnet lib
+// bacnetDevice add or update an instance of a created bacnet device that is cached in bacnet lib
 func (inst *Instance) bacnetDevice(dev *model.Device) error {
 	max := intToUnit32(integer.NonNil(dev.MaxADPU))
 	seg := uint32(setSegmentation(dev.Segmentation))
@@ -88,7 +88,7 @@ func (inst *Instance) bacnetDevice(dev *model.Device) error {
 	return inst.BacStore.UpdateDevice(dev.UUID, net, d)
 }
 
-//getDev get an instance of a created bacnet device that is cached in bacnet lib
+// getDev get an instance of a created bacnet device that is cached in bacnet lib
 func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID string) (float64, error) {
 	object, _, isBool := setObjectType(pnt.ObjectType)
 	bp := &network.Point{
@@ -100,7 +100,7 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 		ReadPresentValue: false,
 		ReadPriority:     false,
 	}
-	//get network
+	// get network
 	net, err := inst.getBacnetNetwork(networkUUID)
 	if err != nil {
 		return 0, err

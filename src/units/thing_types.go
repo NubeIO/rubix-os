@@ -223,20 +223,20 @@ type PointThing struct {
 	Invert          bool     `json:"invert"`
 }
 
-//type EquipTypeEnum string
+// type EquipTypeEnum string
 //
-//type KindEnum string
+// type KindEnum string
 //
-//const (
+// const (
 //	Boolean       KindEnum = "boolean"
 //	Number        KindEnum = "number"
 //	NumberBoolean KindEnum = "number boolean"
 //	String        KindEnum = "string"
-//)
+// )
 //
-//type Unt string
+// type Unt string
 //
-//const (
+// const (
 //	Empty       Unt = ""
 //	Temperature Unt = "Temperature"
-//)
+// )

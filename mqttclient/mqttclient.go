@@ -91,8 +91,8 @@ func (c *Client) Unsubscribe(topic string) error {
 	return token.Error()
 }
 
-//// SubscribeMultiple subscribes to multiple topics and errors if this fails.
-//func (c *Client) SubscribeMultiple(ctx context.Context, consumers map[string]QOS) error {
+// // SubscribeMultiple subscribes to multiple topics and errors if this fails.
+// func (c *Client) SubscribeMultiple(ctx context.Context, consumers map[string]QOS) error {
 //	subs := make(map[string]byte, len(consumers))
 //	for topic, qos := range consumers {
 //		subs[topic] = byte(qos)
@@ -100,7 +100,7 @@ func (c *Client) Unsubscribe(topic string) error {
 //	token := c.client.SubscribeMultiple(subs, nil)
 //	err := tokenWithContext(ctx, token)
 //	return err
-//}
+// }
 
 // Publish things
 func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) (err error) {
@@ -153,8 +153,8 @@ func NewClient(options ClientOptions) (c *Client, err error) {
 	opts.OnConnect = func(cc mqtt.Client) {
 		topicLog{"msg", "connected", nil}.logInfo()
 		c.connected = true
-		//Subscribe here, otherwise after connection lost,
-		//you may not receive any message
+		// Subscribe here, otherwise after connection lost,
+		// you may not receive any message
 		for _, s := range c.consumers {
 			if token := cc.Subscribe(s.topic, 2, s.handler); token.Wait() && token.Error() != nil {
 				topicLog{"error", "failed to subscribe", token.Error()}.logErr()

@@ -1,25 +1,30 @@
-
 # getting started
+
 rename the `config-example.yml` file to `config.yml`
 
 run the bash script to build and start with plugins
 `bash build-system.bash --system --rubix --modbus --lora`
 
 # default port
+
 1660
 
 # plugins
+
 ## See plugin docs
+
 /docs/plugins
 
-
 ## Build plugin
+
 add into /data/plugins
 
 ```
 go build -buildmode=plugin -o ehco.so *.go
 ```
+
 example to build and run the apps
+
 ```
 cd plugin/example/system
 go build -buildmode=plugin -o system.so *.go  && cp system.so  ../../../data/plugins/ && rm system.so && (cd ~/code/go/nube/flow-framework  && go run app.go)
@@ -44,5 +49,4 @@ error: while error happens, show it on red alert
 
 - /api/flow/networks?global_uuid=global_uuid1
 - /api/flow/networks/one/args?global_uuid=global_uuid1&client_id=client_id1&site_id=site_id1&device_id=device_id1
-
 ```

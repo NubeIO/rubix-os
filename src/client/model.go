@@ -26,7 +26,7 @@ type ResponseBody struct {
 
 type ResponseCommon struct {
 	UUID string `json:"uuid"`
-	//Name        string `json:"name"`
+	// Name        string `json:"name"`
 }
 
 type Stream struct {

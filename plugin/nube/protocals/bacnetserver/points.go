@@ -31,7 +31,7 @@ func setObjectType(objectType string) (objType string) {
 	return
 }
 
-//addPoint from rest api
+// addPoint from rest api
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	bacnetPoint := &bsrest.BacnetPoint{}
 	if body.Description == "" {
@@ -39,7 +39,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	if nils.IntNilCheck(body.AddressID) || nils.IntIsNil(body.AddressID) == 0 {
 		bacnetPoint.UseNextAvailableAddr = true
-		//bacnetPoint.Address = nums.RandInt(1, 65000)
+		// bacnetPoint.Address = nums.RandInt(1, 65000)
 	} else {
 		bacnetPoint.Address = nils.IntIsNil(body.AddressID)
 	}
@@ -80,7 +80,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 			log.Errorf(errMsg)
 			return nil, errors.New(errMsg)
 		}
-		//if ail to add a new point in FF then delete it in the bacnet stack
+		// if ail to add a new point in FF then delete it in the bacnet stack
 		r, notFound, deleteOk := bacnetClient.DeletePoint(bacnetUUID)
 		log.Infoln("bacnet-server.app.addPoint() delete the point if fail on add point in FF delete -> notFound:", notFound, "delete -> deleteOk:", deleteOk)
 		if r.GetError() != nil {
@@ -96,7 +96,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	return body, err
 }
 
-//updatePoint from rest
+// updatePoint from rest
 func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
 	bacnetPointUUID := nils.StringIsNil(body.AddressUUID)
 	if bacnetPointUUID == "" || body == nil {
@@ -119,7 +119,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 
 }
 
-//updatePointValue update point present value
+// updatePointValue update point present value
 func (inst *Instance) updatePointValue(body *model.Point) (*model.Point, error) {
 	bacnetPointUUID := nils.StringIsNil(body.AddressUUID)
 	if bacnetPointUUID == "" || body == nil {
@@ -133,9 +133,9 @@ func (inst *Instance) updatePointValue(body *model.Point) (*model.Point, error) 
 	if (*body.Priority).P16 != nil {
 		(*bacnetPoint.Priority).P16 = (*body.Priority).P16
 	}
-	//if !utils.IsNil(body.AddressID) {
+	// if !utils.IsNil(body.AddressID) {
 	//	bacnetPoint.Address = utils.NonNil(body.AddressID)
-	//}
+	// }
 	point, r := bacnetClient.UpdatePointValue(bacnetPointUUID, bacnetPoint)
 	if r.GetError() != nil || point == nil {
 		log.Errorln("bacnet-server: updatePointValue() body back from rest was nil or err:", r.GetError())
@@ -145,16 +145,16 @@ func (inst *Instance) updatePointValue(body *model.Point) (*model.Point, error) 
 	return nil, nil
 }
 
-//deletePoint point make sure
+// deletePoint point make sure
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
-	if nils.StringNilCheck(body.AddressUUID) { //still delete it anyway
+	if nils.StringNilCheck(body.AddressUUID) { // still delete it anyway
 		log.Errorln("bacnet-server.app.deletePoint() no address_uuid provided")
 		ok, err = inst.db.DeletePoint(body.UUID)
 		if err != nil {
 			return false, err
 		}
 	} else {
-		ok, err = inst.db.DeletePoint(body.UUID) //delete and try and delete on bacnet-server
+		ok, err = inst.db.DeletePoint(body.UUID) // delete and try and delete on bacnet-server
 		if err != nil {
 			return false, err
 		}
@@ -171,7 +171,7 @@ func (inst *Instance) dropPoints() (err error) {
 	return
 }
 
-//bacnetUpdate listen on mqtt and then update the point in flow-framework
+// bacnetUpdate listen on mqtt and then update the point in flow-framework
 func (inst *Instance) bacnetUpdate(body mqtt.Message) (*model.Point, error) {
 	payload := new(bacnetmodel.MqttPayload)
 	err := json.Unmarshal(body.Payload(), &payload)

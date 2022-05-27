@@ -27,7 +27,6 @@ func Init() {
 	bu.RegisterTopics(BusTopics()...)
 }
 
-//GetBus an
 func GetBus() *bus.Bus {
 	return bu
 }
@@ -49,7 +48,7 @@ func NewService(eb *bus.Bus) BusService {
 	ns := &notificationService{
 		eb: eb,
 	}
-	ns.registerPointsProducer() //add as types needed
+	ns.registerPointsProducer() // add as types needed
 	ns.registerProducer()
 	bs = ns
 	return ns

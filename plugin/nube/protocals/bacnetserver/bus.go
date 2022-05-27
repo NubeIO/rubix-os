@@ -12,7 +12,7 @@ import (
 
 func (inst *Instance) BusServ() {
 
-	handlerUpdated := bus.Handler{ //UPDATED
+	handlerUpdated := bus.Handler{ // UPDATED
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 
@@ -20,7 +20,7 @@ func (inst *Instance) BusServ() {
 				if !isThis {
 					return
 				}
-				//try and match is point
+				// try and match is point
 				pnt, err := eventbus.IsPoint(e.Topic, e)
 				if err != nil {
 					return
@@ -41,7 +41,7 @@ func (inst *Instance) BusServ() {
 	key := fmt.Sprintf("key_%s", u)
 	eventbus.GetBus().RegisterHandler(key, handlerUpdated)
 
-	handlerMQTT := bus.Handler{ //MQTT UPDATE (got as msg over from bacnet stack)
+	handlerMQTT := bus.Handler{ // MQTT UPDATE (got as msg over from bacnet stack)
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
 				p, _ := e.Data.(mqtt.Message)

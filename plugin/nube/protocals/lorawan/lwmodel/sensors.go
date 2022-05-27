@@ -7,7 +7,7 @@ type BasePayload struct {
 	DevEUI          string `json:"devEUI"`
 }
 
-//ElsysAPB from elis
+// ElsysAPB from elis
 type ElsysAPB struct {
 	ApplicationID   string `json:"applicationID"`
 	ApplicationName string `json:"applicationName"`

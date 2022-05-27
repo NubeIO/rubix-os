@@ -14,7 +14,7 @@ func (inst *Instance) GetDisplay(baseURL *url.URL) pluginapi.Response {
 	loc = loc.ResolveReference(&url.URL{
 		Path: "restart",
 	})
-	fmt.Println(loc) //can show the ui the custom endpoints
+	fmt.Println(loc) // can show the ui the custom endpoints
 
 	baseURL.Path = inst.basePath
 	m := pluginapi.Help{

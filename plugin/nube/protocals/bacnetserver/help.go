@@ -9,7 +9,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-//supportedObjects return all objects that are not bacnet
+// supportedObjects return all objects that are not bacnet
 func supportedObjects() *array.Array {
 	out := array.NewArray()
 	out.Add(model.ObjTypeAnalogInput)
@@ -29,7 +29,7 @@ func (inst *Instance) GetDisplay(baseURL *url.URL) pluginapi.Response {
 	loc = loc.ResolveReference(&url.URL{
 		Path: "restart",
 	})
-	fmt.Println(loc) //can show the ui the custom endpoints
+	fmt.Println(loc) // can show the ui the custom endpoints
 
 	baseURL.Path = inst.basePath
 	m := pluginapi.Help{

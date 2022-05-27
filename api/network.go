@@ -29,7 +29,7 @@ type NetworksAPI struct {
 func (a *NetworksAPI) GetNetworkByName(ctx *gin.Context) {
 	name := resolveName(ctx)
 	args := buildNetworkArgs(ctx)
-	q, err := a.DB.GetNetworkByName(name, args) //TODO fix this need to add in like "serial"
+	q, err := a.DB.GetNetworkByName(name, args) // TODO fix this need to add in like "serial"
 	responseHandler(q, err, ctx)
 }
 
@@ -43,7 +43,7 @@ func (a *NetworksAPI) GetNetworksByName(ctx *gin.Context) {
 func (a *NetworksAPI) GetNetworkByPluginName(ctx *gin.Context) {
 	name := resolveName(ctx)
 	args := buildNetworkArgs(ctx)
-	q, err := a.DB.GetNetworkByPluginName(name, args) //TODO fix this need to add in like "serial"
+	q, err := a.DB.GetNetworkByPluginName(name, args) // TODO fix this need to add in like "serial"
 	responseHandler(q, err, ctx)
 }
 

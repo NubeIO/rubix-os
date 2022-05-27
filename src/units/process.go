@@ -55,8 +55,8 @@ var (
 
 	simpleUnitVal = All(Float, unitToken).Map(mapSimpleUnit)
 
-	//currency = All(RuneIn(`$€¥£`), Float).Map(mapCurrency)
-	//fromExpr = Any(simpleUnitVal, feetInches, currency)
+	// currency = All(RuneIn(`$€¥£`), Float).Map(mapCurrency)
+	// fromExpr = Any(simpleUnitVal, feetInches, currency)
 	fromExpr = Any(simpleUnitVal, feetInches)
 
 	convertExpr = All(fromExpr, Atom(`to`), unitToken)

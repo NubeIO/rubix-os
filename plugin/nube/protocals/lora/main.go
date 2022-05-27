@@ -11,8 +11,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const path = "lora" //must be unique across all plugins
-const name = "lora" //must be unique across all plugins
+const path = "lora" // must be unique across all plugins
+const name = "lora" // must be unique across all plugins
 const description = "lora raw"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
@@ -24,7 +24,7 @@ const allowConfigWrite = false
 const isNetwork = true
 const maxAllowedNetworks = 1
 const networkType = "lora"
-const transportType = "serial" //serial, ip
+const transportType = "serial" // serial, ip
 
 // Instance is plugin instance
 type Instance struct {
@@ -58,7 +58,7 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 
 }
 
-//main will not let main run
+// main will not let main run
 func main() {
 	panic("this should be built as plugin")
 }

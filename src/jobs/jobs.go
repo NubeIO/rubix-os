@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/go-co-op/gocron"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -20,7 +20,7 @@ var cron *gocron.Scheduler
 var bus eventbus.BusService
 var enabled bool
 
-//GetJobService will return the instance of the job service
+// GetJobService will return the instance of the job service
 func GetJobService() (*gocron.Scheduler, bool) {
 	if enabled {
 		return cron, true
@@ -42,7 +42,7 @@ func (j *Jobs) task(mp string, uuid string) {
 	bus.RegisterTopic(t)
 	err := bus.Emit(eventbus.CTX(), t, "MEG OVER BUS")
 	if err != nil {
-		//TODO FIX ERROR
+		// TODO FIX ERROR
 	}
 }
 

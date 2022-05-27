@@ -66,9 +66,9 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 	responseHandler(result, err, ctx)
 }
 
-//buildUUID a way to query a plugin by its name or uuid
+// buildUUID a way to query a plugin by its name or uuid
 func (c *PluginAPI) buildUUID(ctx *gin.Context) string {
-	nameOrUUID := resolveID(ctx) //system?by_plugin_name=true is passed in then enable plugin by its name
+	nameOrUUID := resolveID(ctx) // system?by_plugin_name=true is passed in then enable plugin by its name
 	uuid := ""
 	args := buildPluginArgs(ctx)
 	if args.PluginName {

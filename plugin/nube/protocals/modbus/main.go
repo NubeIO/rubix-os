@@ -11,8 +11,8 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-const path = "modbus" //must be unique across all plugins
-const name = "modbus" //must be unique across all plugins
+const path = "modbus" // must be unique across all plugins
+const name = "modbus" // must be unique across all plugins
 const description = "modbus api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
@@ -24,7 +24,7 @@ const allowConfigWrite = false
 const isNetwork = true
 const maxAllowedNetworks = 1
 const networkType = "modbus"
-const transportType = "ip" //serial, ip
+const transportType = "ip" // serial, ip
 
 // Instance is plugin instance
 type Instance struct {
@@ -59,7 +59,7 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 	return &Instance{}
 }
 
-//main will not let main run
+// main will not let main run
 func main() {
 	panic("this should be built as plugin")
 }

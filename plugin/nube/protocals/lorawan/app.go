@@ -11,11 +11,11 @@ const (
 	elsysAPB = "ELSYS-ABP"
 )
 
-//mqttUpdate listen on mqtt and then update the point in flow-framework
+// mqttUpdate listen on mqtt and then update the point in flow-framework
 func (inst *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*bm.Point, error) {
-	//do an api call to chirpstack to get the device profile
-	//decode the mqtt payload based of the device profile
-	//if deviceProfileName
+	// do an api call to chirpstack to get the device profile
+	// decode the mqtt payload based of the device profile
+	// if deviceProfileName
 
 	payload := new(model.BasePayload)
 	err := json.Unmarshal(body.Payload(), &payload)
@@ -24,7 +24,7 @@ func (inst *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*bm.P
 	if err != nil {
 		return nil, err
 	}
-	//check the payload for how to decode from
+	// check the payload for how to decode from
 	if dev.Device.DeviceProfileID == elsysAPB {
 		decoded := new(model.ElsysAPB)
 		err = json.Unmarshal(body.Payload(), &decoded)
@@ -36,19 +36,19 @@ func (inst *Instance) mqttUpdate(body mqtt.Message, devEUI, appID string) (*bm.P
 	return nil, nil
 }
 
-//addPoint from rest api
+// addPoint from rest api
 func (inst *Instance) addPoint(body *bm.Point) (*bm.Point, error) {
 	return nil, nil
 }
 
-//pointPatch from rest
+// pointPatch from rest
 func (inst *Instance) pointPatch(body *bm.Point) (*bm.Point, error) {
 	return nil, nil
 }
 
-//writePoint update point. Called via API call.
+// writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *bm.PointWriter) (point *bm.Point, err error) {
-	//TODO: check for PointWriteByName calls that might not flow through the plugin.
+	// TODO: check for PointWriteByName calls that might not flow through the plugin.
 	if body == nil {
 		return
 	}
@@ -59,12 +59,12 @@ func (inst *Instance) writePoint(pntUUID string, body *bm.PointWriter) (point *b
 	return point, nil
 }
 
-//delete point make sure
+// delete point make sure
 func (inst *Instance) deletePoint(body *bm.Point) (bool, error) {
 	return true, nil
 }
 
-//DropDevices drop all devices
+// DropDevices drop all devices
 func (inst *Instance) DropDevices() (bool, error) {
 	cli := inst.REST
 	devices, err := cli.GetDevices()
@@ -80,7 +80,7 @@ func (inst *Instance) DropDevices() (bool, error) {
 	return true, nil
 }
 
-//delete point make sure
+// delete point make sure
 func (inst *Instance) serverDeletePoint(body *bm.Point) (bool, error) {
 	return true, nil
 }

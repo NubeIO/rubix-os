@@ -14,7 +14,7 @@ RUN
 go run *.go
 */
 
-//PROTO FILE
+// PROTO FILE
 /*
 make the proto file
 """

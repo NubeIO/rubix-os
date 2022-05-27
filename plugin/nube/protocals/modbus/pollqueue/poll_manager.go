@@ -28,41 +28,41 @@ type NetworkPollManager struct {
 	StatsCalcTimer         *time.Ticker
 	PortUnavailableTimeout *time.Timer
 
-	//References
+	// References
 	FFNetworkUUID string
 	FFPluginUUID  string
 
-	//Statistics
-	AveragePollExecuteTimeSecs    float64       //time in seconds for polling to complete (poll response time, doesn't include the time in queue).
-	TotalPollQueueLength          int64         //number of polling points in the current queue.
-	TotalStandbyPointsLength      int64         //number of polling points in the standby list.
-	ASAPPriorityPollQueueLength   int64         //number of ASAP priority polling points in the current queue.
-	HighPriorityPollQueueLength   int64         //number of High priority polling points in the current queue.
-	NormalPriorityPollQueueLength int64         //number of Normal priority polling points in the current queue.
-	LowPriorityPollQueueLength    int64         //number of Low priority polling points in the current queue.
-	ASAPPriorityAveragePollTime   float64       //average time in seconds between ASAP priority polling point added to current queue, and polling complete.
-	HighPriorityAveragePollTime   float64       //average time in seconds between High priority polling point added to current queue, and polling complete.
-	NormalPriorityAveragePollTime float64       //average time in seconds between Normal priority polling point added to current queue, and polling complete.
-	LowPriorityAveragePollTime    float64       //average time in seconds between Low priority polling point added to current queue, and polling complete.
-	TotalPollCount                int64         //total number of polls completed.
-	ASAPPriorityPollCount         int64         //total number of ASAP priority polls completed.
-	HighPriorityPollCount         int64         //total number of High priority polls completed.
-	NormalPriorityPollCount       int64         //total number of Normal priority polls completed.
-	LowPriorityPollCount          int64         //total number of Low priority polls completed.
-	ASAPPriorityPollCountForAvg   int64         //number of poll times included in avg polling time for ASAP priority (some are excluded because they have been modified while in the queue).
-	HighPriorityPollCountForAvg   int64         //number of poll times included in avg polling time for High priority (some are excluded because they have been modified while in the queue).
-	NormalPriorityPollCountForAvg int64         //number of poll times included in avg polling time for Normal priority (some are excluded because they have been modified while in the queue).
-	LowPriorityPollCountForAvg    int64         //number of poll times included in avg polling time for Low priority (some are excluded because they have been modified while in the queue).
-	ASAPPriorityMaxCycleTime      time.Duration //threshold setting for triggering a lockup alert for ASAP priority.
-	HighPriorityMaxCycleTime      time.Duration //threshold setting for triggering a lockup alert for High priority.
-	NormalPriorityMaxCycleTime    time.Duration //threshold setting for triggering a lockup alert for Normal priority.
-	LowPriorityMaxCycleTime       time.Duration //threshold setting for triggering a lockup alert for Low priority.
-	ASAPPriorityLockupAlert       bool          //alert if poll time has exceeded the ASAPPriorityMaxCycleTime
-	HighPriorityLockupAlert       bool          //alert if poll time has exceeded the HighPriorityMaxCycleTime
-	NormalPriorityLockupAlert     bool          //alert if poll time has exceeded the NormalPriorityMaxCycleTime
-	LowPriorityLockupAlert        bool          //alert if poll time has exceeded the LowPriorityMaxCycleTime
-	PollingStartTimeUnix          int64         //unix time (seconds) at polling start time.  Used for calculating Busy Time.
-	BusyTime                      float64       //percent of the time that the plugin is actively polling.
+	// Statistics
+	AveragePollExecuteTimeSecs    float64       // time in seconds for polling to complete (poll response time, doesn't include the time in queue).
+	TotalPollQueueLength          int64         // number of polling points in the current queue.
+	TotalStandbyPointsLength      int64         // number of polling points in the standby list.
+	ASAPPriorityPollQueueLength   int64         // number of ASAP priority polling points in the current queue.
+	HighPriorityPollQueueLength   int64         // number of High priority polling points in the current queue.
+	NormalPriorityPollQueueLength int64         // number of Normal priority polling points in the current queue.
+	LowPriorityPollQueueLength    int64         // number of Low priority polling points in the current queue.
+	ASAPPriorityAveragePollTime   float64       // average time in seconds between ASAP priority polling point added to current queue, and polling complete.
+	HighPriorityAveragePollTime   float64       // average time in seconds between High priority polling point added to current queue, and polling complete.
+	NormalPriorityAveragePollTime float64       // average time in seconds between Normal priority polling point added to current queue, and polling complete.
+	LowPriorityAveragePollTime    float64       // average time in seconds between Low priority polling point added to current queue, and polling complete.
+	TotalPollCount                int64         // total number of polls completed.
+	ASAPPriorityPollCount         int64         // total number of ASAP priority polls completed.
+	HighPriorityPollCount         int64         // total number of High priority polls completed.
+	NormalPriorityPollCount       int64         // total number of Normal priority polls completed.
+	LowPriorityPollCount          int64         // total number of Low priority polls completed.
+	ASAPPriorityPollCountForAvg   int64         // number of poll times included in avg polling time for ASAP priority (some are excluded because they have been modified while in the queue).
+	HighPriorityPollCountForAvg   int64         // number of poll times included in avg polling time for High priority (some are excluded because they have been modified while in the queue).
+	NormalPriorityPollCountForAvg int64         // number of poll times included in avg polling time for Normal priority (some are excluded because they have been modified while in the queue).
+	LowPriorityPollCountForAvg    int64         // number of poll times included in avg polling time for Low priority (some are excluded because they have been modified while in the queue).
+	ASAPPriorityMaxCycleTime      time.Duration // threshold setting for triggering a lockup alert for ASAP priority.
+	HighPriorityMaxCycleTime      time.Duration // threshold setting for triggering a lockup alert for High priority.
+	NormalPriorityMaxCycleTime    time.Duration // threshold setting for triggering a lockup alert for Normal priority.
+	LowPriorityMaxCycleTime       time.Duration // threshold setting for triggering a lockup alert for Low priority.
+	ASAPPriorityLockupAlert       bool          // alert if poll time has exceeded the ASAPPriorityMaxCycleTime
+	HighPriorityLockupAlert       bool          // alert if poll time has exceeded the HighPriorityMaxCycleTime
+	NormalPriorityLockupAlert     bool          // alert if poll time has exceeded the NormalPriorityMaxCycleTime
+	LowPriorityLockupAlert        bool          // alert if poll time has exceeded the LowPriorityMaxCycleTime
+	PollingStartTimeUnix          int64         // unix time (seconds) at polling start time.  Used for calculating Busy Time.
+	BusyTime                      float64       // percent of the time that the plugin is actively polling.
 
 }
 
@@ -79,10 +79,10 @@ func (pm *NetworkPollManager) StartPolling() {
 
 func (pm *NetworkPollManager) StopPolling() {
 	pm.Enable = false
-	//pm.EmptyQueue()
+	// pm.EmptyQueue()
 
 	pm.StopQueueUnloader()
-	//TODO: STOP ANY QUEUE LOADERS
+	// TODO: STOP ANY QUEUE LOADERS
 	for _, pp := range pm.PollQueue.StandbyPollingPoints.PriorityQueue {
 		if pp != nil && pp.RepollTimer != nil {
 			pp.RepollTimer.Stop()
@@ -91,12 +91,12 @@ func (pm *NetworkPollManager) StopPolling() {
 	pm.PollQueue.EmptyQueue()
 }
 
-func (pm *NetworkPollManager) PausePolling() { //POLLING SHOULD NOT BE PAUSED FOR LONG OR THE QUEUE WILL BECOME TOO LONG
+func (pm *NetworkPollManager) PausePolling() { // POLLING SHOULD NOT BE PAUSED FOR LONG OR THE QUEUE WILL BECOME TOO LONG
 	pm.Enable = false
 	var nextPP *PollingPoint = nil
 	if pm.PluginQueueUnloader.NextPollPoint != nil {
 		nextPP = pm.PluginQueueUnloader.NextPollPoint
-		pm.PollQueue.AddPollingPoint(nextPP) //add the next point back into the queue
+		pm.PollQueue.AddPollingPoint(nextPP) // add the next point back into the queue
 	}
 	pm.StopQueueUnloader()
 }
@@ -112,7 +112,7 @@ func (pm *NetworkPollManager) EmptyQueue() {
 	pm.PollQueue.EmptyQueue()
 }
 
-func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { //This is triggered by a user who wants to update the device poll times for standby points
+func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { // This is triggered by a user who wants to update the device poll times for standby points
 	var arg api.Args
 	arg.WithPoints = true
 	dev, err := pm.DBHandlerRef.GetDevice(devUUID, arg)
@@ -134,10 +134,10 @@ func NewPollManager(conf *config.Config, dbHandler *dbhandler.Handler, ffNetwork
 	// Make the main priority polling queue
 	queue := make([]*PollingPoint, 0)
 	pq := &PriorityPollQueue{queue}
-	heap.Init(pq)                        //Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
+	heap.Init(pq)                        // Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
 	refQueue := make([]*PollingPoint, 0) // Make the reference slice that contains points that are not in the current polling queue.
 	rq := &PriorityPollQueue{refQueue}
-	heap.Init(rq) //Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
+	heap.Init(rq) // Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
 	adl := make([]string, 0)
 	pqu := &QueueUnloader{nil, nil, nil}
 	npq := &NetworkPriorityPollQueue{conf, pq, rq, pqu, ffPluginUUID, ffNetworkUUID, adl}
@@ -147,7 +147,7 @@ func NewPollManager(conf *config.Config, dbHandler *dbhandler.Handler, ffNetwork
 	pm.PluginQueueUnloader = pqu
 	pm.DBHandlerRef = dbHandler
 	maxPollRate := 1000 * time.Millisecond
-	pm.MaxPollRate = maxPollRate //TODO: MaxPollRate should come from a network property,but I can't find it. Also kinda implemented in StartQueueUnloader().
+	pm.MaxPollRate = maxPollRate // TODO: MaxPollRate should come from a network property,but I can't find it. Also kinda implemented in StartQueueUnloader().
 	pm.FFNetworkUUID = ffNetworkUUID
 	pm.FFPluginUUID = ffPluginUUID
 	pm.ASAPPriorityMaxCycleTime, _ = time.ParseDuration("2m")
@@ -216,7 +216,7 @@ func (pm *NetworkPollManager) PollingFinished(pp *PollingPoint, pollStartTime ti
 	pollEndTime := time.Now()
 	pollDuration := pollEndTime.Sub(pollStartTime)
 	pollTimeSecs := pollDuration.Seconds()
-	callback(pp, writeSuccess, readSuccess, pollTimeSecs, false) //(pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool)
+	callback(pp, writeSuccess, readSuccess, pollTimeSecs, false) // (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool)
 }
 
 func (pm *NetworkPollManager) pollQueueDebugMsg(args ...interface{}) {

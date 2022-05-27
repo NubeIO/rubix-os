@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-//addNetwork add network
+// addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
@@ -23,7 +23,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return body, nil
 }
 
-//addDevice add device
+// addDevice add device
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	device, err = inst.db.CreateDevice(body)
 	if err != nil {
@@ -36,7 +36,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	return device, nil
 }
 
-//addPoint add point
+// addPoint add point
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	if body.ObjectType == "" {
 		errMsg := fmt.Sprintf("bacnet-master: point object type can not be empty")
@@ -50,7 +50,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	return point, nil
 }
 
-//updateNetwork update network
+// updateNetwork update network
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
 	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
 	if err != nil {
@@ -59,7 +59,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	return network, nil
 }
 
-//updateDevice update device
+// updateDevice update device
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
 	device, err = inst.db.UpdateDevice(body.UUID, body, true)
 	if err != nil {
@@ -73,7 +73,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	return device, nil
 }
 
-//updatePoint update point
+// updatePoint update point
 func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
 	point, err = inst.db.UpdatePoint(body.UUID, body, true)
 	if err != nil {
@@ -82,7 +82,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	return point, nil
 }
 
-//deleteNetwork delete network
+// deleteNetwork delete network
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	ok, err = inst.db.DeleteNetwork(body.UUID)
 	if err != nil {
@@ -92,9 +92,9 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	return ok, err
 }
 
-//writePoint update point. Called via API call.
+// writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	//TODO: check for PointWriteByName calls that might not flow through the plugin.
+	// TODO: check for PointWriteByName calls that might not flow through the plugin.
 	if body == nil {
 		return
 	}
@@ -105,7 +105,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	return point, nil
 }
 
-//deleteNetwork delete device
+// deleteNetwork delete device
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	ok, err = inst.db.DeleteDevice(body.UUID)
 	if err != nil {
@@ -114,7 +114,7 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	return ok, nil
 }
 
-//deletePoint delete point
+// deletePoint delete point
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	ok, err = inst.db.DeletePoint(body.UUID)
 	if err != nil {
@@ -123,7 +123,7 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-//pointUpdate update point present value
+// pointUpdate update point present value
 func (inst *Instance) pointUpdate(uuid string) (*model.Point, error) {
 	var point model.Point
 	point.CommonFault.InFault = false
@@ -140,7 +140,7 @@ func (inst *Instance) pointUpdate(uuid string) (*model.Point, error) {
 	return nil, nil
 }
 
-//pointUpdate update point present value
+// pointUpdate update point present value
 func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point, error) {
 	var point model.Point
 	point.CommonFault.InFault = false
@@ -158,7 +158,7 @@ func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point
 	return nil, nil
 }
 
-//pointUpdate update point present value
+// pointUpdate update point present value
 func (inst *Instance) pointUpdateErr(uuid string, err error) (*model.Point, error) {
 	var point model.Point
 	point.CommonFault.InFault = true

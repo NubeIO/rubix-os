@@ -39,7 +39,7 @@ type PluginInstance interface {
 	// SetStorageHandler see Storager#SetStorageHandler.
 	SetStorageHandler(handler StorageHandler)
 
-	//Supports Returns the supported modules, f.ex. storager
+	// Supports Returns the supported modules, f.ex. storager
 	Supports() Capabilities
 }
 

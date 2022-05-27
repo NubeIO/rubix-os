@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-//IsThisPlugin check if this is the correct plugin
+// IsThisPlugin check if this is the correct plugin
 func IsThisPlugin(topic, pluginUUID string) (this bool) {
 	s := strings.Split(topic, ".")
 	if len(s) > 2 {
@@ -19,7 +19,7 @@ func IsThisPlugin(topic, pluginUUID string) (this bool) {
 	return
 }
 
-//GetTopicPart will split the topics
+// GetTopicPart will split the topics
 func GetTopicPart(topic string, index int, contains string) string {
 	s := strings.Split(topic, ".")
 	for i, e := range s {
@@ -32,7 +32,7 @@ func GetTopicPart(topic string, index int, contains string) string {
 	return ""
 }
 
-//IsNetwork check if the payload is of type device
+// IsNetwork check if the payload is of type device
 func IsNetwork(topic string, payload bus.Event) (*model.Network, error) {
 	if GetTopicPart(topic, 3, "net") != "" {
 		p, _ := payload.Data.(*model.Network)
@@ -41,7 +41,7 @@ func IsNetwork(topic string, payload bus.Event) (*model.Network, error) {
 	return nil, nil
 }
 
-//IsDevice check if the payload is of type device
+// IsDevice check if the payload is of type device
 func IsDevice(topic string, payload bus.Event) (*model.Device, error) {
 	if GetTopicPart(topic, 3, "dev") != "" {
 		p, _ := payload.Data.(*model.Device)
@@ -50,7 +50,7 @@ func IsDevice(topic string, payload bus.Event) (*model.Device, error) {
 	return nil, nil
 }
 
-//IsPoint check if the payload is of type point
+// IsPoint check if the payload is of type point
 func IsPoint(topic string, payload bus.Event) (*model.Point, error) {
 	if GetTopicPart(topic, 3, "pnt") != "" {
 		p, _ := payload.Data.(*model.Point)
@@ -59,7 +59,7 @@ func IsPoint(topic string, payload bus.Event) (*model.Point, error) {
 	return nil, nil
 }
 
-//IsSchedule check if the payload is of type schedule
+// IsSchedule check if the payload is of type schedule
 func IsSchedule(topic string, payload bus.Event) (*model.Schedule, error) {
 	if GetTopicPart(topic, 3, "sch") != "" {
 		p, _ := payload.Data.(*model.Schedule)
@@ -68,7 +68,7 @@ func IsSchedule(topic string, payload bus.Event) (*model.Schedule, error) {
 	return nil, nil
 }
 
-//IsJob check if the payload is of type job
+// IsJob check if the payload is of type job
 func IsJob(topic string, payload bus.Event) (*model.Job, error) {
 	if GetTopicPart(topic, 3, "job") != "" {
 		p, _ := payload.Data.(*model.Job)

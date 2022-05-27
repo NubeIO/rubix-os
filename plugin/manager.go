@@ -88,7 +88,7 @@ func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 }
 
 // RestartPlugin reboots/restart the plugin.
-func (m *Manager) RestartPlugin(pluginID string) (string, error) { //TODO update the logic to check if plugin was enabled as it dont work well if it was disabled
+func (m *Manager) RestartPlugin(pluginID string) (string, error) { // TODO update the logic to check if plugin was enabled as it dont work well if it was disabled
 	instance, err := m.Instance(pluginID)
 	if err != nil {
 		return "restart fail", errors.New("instance not found")
@@ -219,7 +219,7 @@ func (m *Manager) initializePlugin(p compat.Plugin) error {
 		uuid := pluginConf.UUID
 		path := pluginConf.ModulePath
 		g := m.mux.Group("/"+path, requirePluginEnabled(uuid, m.db))
-		instance.RegisterWebhook(strings.Replace(g.BasePath(), ":id", path, 1), g) //change path to uuid if we want the url to register as uuid
+		instance.RegisterWebhook(strings.Replace(g.BasePath(), ":id", path, 1), g) // change path to uuid if we want the url to register as uuid
 	}
 	if pluginConf.Enabled {
 		err := instance.Enable()
