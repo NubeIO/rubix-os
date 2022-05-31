@@ -10,34 +10,42 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+var flowClients = map[string]*FlowClient{}
+
 type FlowClient struct {
-	client      *resty.Client
-	ClientToken string
+	client *resty.Client
 }
 
 func GetFlowToken(ip string, port int, username string, password string) (*string, error) {
-	client := resty.New()
-	client.SetDebug(false)
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), ip, port)
-	client.SetBaseURL(url)
-	client.SetError(&nresty.Error{})
-	cli := &FlowClient{client: client}
-	token, err := cli.Login(&model.LoginBody{Username: username, Password: password})
+	flowClient, found := flowClients[url]
+	if !found {
+		client := resty.New()
+		client.SetDebug(false)
+		client.SetBaseURL(url)
+		client.SetError(&nresty.Error{})
+		flowClient = &FlowClient{client: client}
+	}
+	token, err := flowClient.Login(&model.LoginBody{Username: username, Password: password})
 	if err != nil {
 		return nil, err
 	}
 	return &token.AccessToken, nil
 }
 
-func NewLocalClient() (cli *FlowClient) {
-	client := resty.New()
-	client.SetDebug(false)
+func NewLocalClient() *FlowClient {
 	port := config.Get().Server.Port
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), "0.0.0.0", port)
+	if flowClient, found := flowClients[url]; found {
+		return flowClient
+	}
+	client := resty.New()
+	client.SetDebug(false)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
-	cli = &FlowClient{client: client}
-	return
+	flowClient := &FlowClient{client: client}
+	flowClients[url] = flowClient
+	return flowClient
 }
 
 func NewFlowClientCliFromFN(fn *model.FlowNetwork) *FlowClient {
@@ -65,35 +73,50 @@ func NewFlowClientCliFromFNC(fnc *model.FlowNetworkClone) *FlowClient {
 }
 
 func newSessionWithToken(ip string, port int, token string) *FlowClient {
+	url := fmt.Sprintf("%s://%s:%d/ff", getSchema(port), ip, port)
+	if flowClient, found := flowClients[url]; found {
+		return flowClient
+	}
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("%s://%s:%d/ff", getSchema(port), ip, port)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Authorization", token)
-	return &FlowClient{client: client}
+	flowClient := &FlowClient{client: client}
+	flowClients[url] = flowClient
+	return flowClient
 }
 
 func newMasterToSlaveSession(globalUUID string) *FlowClient {
-	client := resty.New()
-	client.SetDebug(false)
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", conf.Server.RSPort, globalUUID)
+	if flowClient, found := flowClients[url]; found {
+		return flowClient
+	}
+	client := resty.New()
+	client.SetDebug(false)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
-	return &FlowClient{client: client}
+	flowClient := &FlowClient{client: client}
+	flowClients[url] = flowClient
+	return flowClient
 }
 
 func newSlaveToMasterCallSession() *FlowClient {
-	client := resty.New()
-	client.SetDebug(false)
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", conf.Server.RSPort)
+	if flowClient, found := flowClients[url]; found {
+		return flowClient
+	}
+	client := resty.New()
+	client.SetDebug(false)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
-	return &FlowClient{client: client}
+	flowClient := &FlowClient{client: client}
+	flowClients[url] = flowClient
+	return flowClient
 }
 
 func getSchema(port int) string {
