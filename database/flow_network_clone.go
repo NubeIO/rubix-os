@@ -126,37 +126,44 @@ func (d *GormDatabase) SyncFlowNetworkCloneStreamClones(uuid string, args api.Ar
 		return nil, errors.New("no flow_network_clone")
 	}
 	params := urls.GenerateFNCUrlParams(args)
-	var localCli *client.FlowClient
+	localCli := client.NewLocalClient()
+	channel := make(chan *interfaces.SyncModel)
+	defer close(channel)
 	for _, sc := range fnc.StreamClones {
-		var output interfaces.SyncModel
-		cli := client.NewFlowClientCliFromFNC(fnc)
-		_, err := cli.GetQuery(urls.SingularUrl(urls.StreamUrl, sc.SourceUUID))
-		if err != nil {
-			output = interfaces.SyncModel{
-				UUID:    sc.UUID,
-				IsError: true,
-				Message: nstring.New(err.Error()),
-			}
-			sc.Connection = connection.Broken.String()
-			sc.Message = err.Error()
-		} else {
-			output = interfaces.SyncModel{
-				UUID:    sc.UUID,
-				IsError: false,
-			}
-			sc.Connection = connection.Connected.String()
-			sc.Message = nstring.NotAvailable
-		}
-		_ = d.updateStreamClone(sc.UUID, sc)
-		// This is for syncing child descendants
-		if args.WithConsumers == true {
-			if localCli == nil {
-				localCli = client.NewLocalClient()
-			}
-			url := urls.GetUrl(urls.StreamCloneConsumersSyncUrl, sc.UUID) + params
-			_, _ = localCli.GetQuery(url)
-		}
-		outputs = append(outputs, &output)
+		go d.syncStreamClone(localCli, fnc, sc, args, params, channel)
+	}
+	for range fnc.StreamClones {
+		outputs = append(outputs, <-channel)
 	}
 	return outputs, nil
+}
+
+func (d *GormDatabase) syncStreamClone(localCli *client.FlowClient, fnc *model.FlowNetworkClone, sc *model.StreamClone,
+	args api.Args, params string, channel chan *interfaces.SyncModel) {
+	var output interfaces.SyncModel
+	cli := client.NewFlowClientCliFromFNC(fnc)
+	_, err := cli.GetQuery(urls.SingularUrl(urls.StreamUrl, sc.SourceUUID))
+	if err != nil {
+		output = interfaces.SyncModel{
+			UUID:    sc.UUID,
+			IsError: true,
+			Message: nstring.New(err.Error()),
+		}
+		sc.Connection = connection.Broken.String()
+		sc.Message = err.Error()
+	} else {
+		output = interfaces.SyncModel{
+			UUID:    sc.UUID,
+			IsError: false,
+		}
+		sc.Connection = connection.Connected.String()
+		sc.Message = nstring.NotAvailable
+	}
+	_ = d.updateStreamClone(sc.UUID, sc)
+	// This is for syncing child descendants
+	if args.WithConsumers == true {
+		url := urls.GetUrl(urls.StreamCloneConsumersSyncUrl, sc.UUID) + params
+		_, _ = localCli.GetQuery(url)
+	}
+	channel <- &output
 }
