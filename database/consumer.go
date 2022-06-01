@@ -103,20 +103,29 @@ func (d *GormDatabase) SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel
 	if consumer == nil {
 		return nil, errors.New("not found consumer")
 	}
+	channel := make(chan *interfaces.SyncModel)
+	defer close(channel)
 	for _, writer := range consumer.Writers {
-		_, err := d.UpdateWriter(writer.UUID, writer)
-		var output interfaces.SyncModel
-		if err != nil {
-			writer.Connection = connection.Broken.String()
-			writer.Message = err.Error()
-			output = interfaces.SyncModel{UUID: writer.UUID, IsError: true, Message: nstring.New(err.Error())}
-		} else {
-			writer.Connection = connection.Connected.String()
-			writer.Message = nstring.NotAvailable
-			output = interfaces.SyncModel{UUID: writer.UUID, IsError: false}
-		}
-		_, _ = d.updateWriterWithoutSync(writer.UUID, writer)
-		outputs = append(outputs, &output)
+		go d.syncWriter(writer, channel)
+	}
+	for range consumer.Writers {
+		outputs = append(outputs, <-channel)
 	}
 	return outputs, nil
+}
+
+func (d *GormDatabase) syncWriter(writer *model.Writer, channel chan *interfaces.SyncModel) {
+	_, err := d.UpdateWriter(writer.UUID, writer)
+	var output interfaces.SyncModel
+	if err != nil {
+		writer.Connection = connection.Broken.String()
+		writer.Message = err.Error()
+		output = interfaces.SyncModel{UUID: writer.UUID, IsError: true, Message: nstring.New(err.Error())}
+	} else {
+		writer.Connection = connection.Connected.String()
+		writer.Message = nstring.NotAvailable
+		output = interfaces.SyncModel{UUID: writer.UUID, IsError: false}
+	}
+	_, _ = d.updateWriterWithoutSync(writer.UUID, writer)
+	channel <- &output
 }
