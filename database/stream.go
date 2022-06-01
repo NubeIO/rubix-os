@@ -110,7 +110,7 @@ func (d *GormDatabase) SyncStreamProducers(uuid string, args api.Args) ([]*inter
 	// This is for syncing child descendants
 	if args.WithWriterClones {
 		for _, producer := range stream.Producers {
-			go d.syncProducer(producer, localCli, channel)
+			go d.syncProducer(localCli, producer, channel)
 		}
 		for range stream.Producers {
 			<-channel
@@ -119,7 +119,7 @@ func (d *GormDatabase) SyncStreamProducers(uuid string, args api.Args) ([]*inter
 	return nil, nil
 }
 
-func (d *GormDatabase) syncProducer(producer *model.Producer, localCli *client.FlowClient, channel chan bool) {
+func (d *GormDatabase) syncProducer(localCli *client.FlowClient, producer *model.Producer, channel chan bool) {
 	url := urls.GetUrl(urls.ProducerWriterClonesSyncUrl, producer.UUID)
 	_, _ = localCli.GetQuery(url)
 	channel <- true

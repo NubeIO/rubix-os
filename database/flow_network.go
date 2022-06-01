@@ -159,7 +159,7 @@ func (d *GormDatabase) SyncFlowNetworks(args api.Args) []*interfaces.SyncModel {
 	channel := make(chan *interfaces.SyncModel)
 	defer close(channel)
 	for _, fn := range fns {
-		go d.syncFlowNetwork(args, fn, params, localCli, channel)
+		go d.syncFlowNetwork(localCli, fn, args, params, channel)
 	}
 	for range fns {
 		outputs = append(outputs, <-channel)
@@ -167,8 +167,8 @@ func (d *GormDatabase) SyncFlowNetworks(args api.Args) []*interfaces.SyncModel {
 	return outputs
 }
 
-func (d *GormDatabase) syncFlowNetwork(args api.Args, fn *model.FlowNetwork, params string,
-	localCli *client.FlowClient, channel chan *interfaces.SyncModel) {
+func (d *GormDatabase) syncFlowNetwork(localCli *client.FlowClient, fn *model.FlowNetwork, args api.Args, params string,
+	channel chan *interfaces.SyncModel) {
 	_, err := d.UpdateFlowNetwork(fn.UUID, fn)
 	var output interfaces.SyncModel
 	if err != nil {
@@ -200,7 +200,7 @@ func (d *GormDatabase) SyncFlowNetworkStreams(uuid string, args api.Args) ([]*in
 	channel := make(chan *interfaces.SyncModel)
 	defer close(channel)
 	for _, stream := range fn.Streams {
-		go d.syncStream(stream, args, params, localCli, channel)
+		go d.syncStream(localCli, stream, args, params, channel)
 	}
 	for range fn.Streams {
 		outputs = append(outputs, <-channel)
@@ -208,14 +208,11 @@ func (d *GormDatabase) SyncFlowNetworkStreams(uuid string, args api.Args) ([]*in
 	return outputs, nil
 }
 
-func (d *GormDatabase) syncStream(stream *model.Stream, args api.Args, params string, localCli *client.FlowClient,
+func (d *GormDatabase) syncStream(localCli *client.FlowClient, stream *model.Stream, args api.Args, params string,
 	channel chan *interfaces.SyncModel) {
 	_, err := d.UpdateStream(stream.UUID, stream)
 	// This is for syncing child descendants
 	if args.WithProducers == true {
-		if localCli == nil {
-			localCli = client.NewLocalClient()
-		}
 		url := urls.GetUrl(urls.StreamProducersSyncUrl, stream.UUID) + params
 		_, _ = localCli.GetQuery(url)
 	}
