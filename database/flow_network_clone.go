@@ -84,32 +84,39 @@ func (d *GormDatabase) SyncFlowNetworkClones(args api.Args) ([]*interfaces.SyncM
 	fncs, _ := d.GetFlowNetworkClones(api.Args{})
 	var outputs []*interfaces.SyncModel
 	params := urls.GenerateFNCUrlParams(args)
-	var localCli *client.FlowClient
+	localCli := client.NewLocalClient()
+	channel := make(chan *interfaces.SyncModel)
+	defer close(channel)
 	for _, fnc := range fncs {
-		var output interfaces.SyncModel
-		cli := client.NewFlowClientCliFromFNC(fnc)
-		_, err := cli.GetQuery(urls.SingularUrl(urls.FlowNetworkUrl, fnc.SourceUUID))
-		if err != nil {
-			fnc.Message = err.Error()
-			fnc.Connection = connection.Broken.String()
-			output = interfaces.SyncModel{UUID: fnc.UUID, IsError: true, Message: nstring.New(err.Error())}
-		} else {
-			fnc.Message = nstring.NotAvailable
-			fnc.Connection = connection.Connected.String()
-			output = interfaces.SyncModel{UUID: fnc.UUID, IsError: false}
-		}
-		// This is for syncing child descendants
-		if args.WithStreamClones == true {
-			if localCli == nil {
-				localCli = client.NewLocalClient()
-			}
-			url := urls.GetUrl(urls.FlowNetworkCloneStreamClonesSyncUrl, fnc.UUID) + params
-			_, _ = localCli.GetQuery(url)
-		}
-		d.DB.Where("uuid = ?", fnc.UUID).Updates(fnc)
-		outputs = append(outputs, &output)
+		go d.syncFlowNetworkClone(localCli, fnc, args, params, channel)
+	}
+	for range fncs {
+		outputs = append(outputs, <-channel)
 	}
 	return outputs, nil
+}
+
+func (d *GormDatabase) syncFlowNetworkClone(localCli *client.FlowClient, fnc *model.FlowNetworkClone, args api.Args,
+	params string, channel chan *interfaces.SyncModel) {
+	var output interfaces.SyncModel
+	cli := client.NewFlowClientCliFromFNC(fnc)
+	_, err := cli.GetQuery(urls.SingularUrl(urls.FlowNetworkUrl, fnc.SourceUUID))
+	if err != nil {
+		fnc.Message = err.Error()
+		fnc.Connection = connection.Broken.String()
+		output = interfaces.SyncModel{UUID: fnc.UUID, IsError: true, Message: nstring.New(err.Error())}
+	} else {
+		fnc.Message = nstring.NotAvailable
+		fnc.Connection = connection.Connected.String()
+		output = interfaces.SyncModel{UUID: fnc.UUID, IsError: false}
+	}
+	// This is for syncing child descendants
+	if args.WithStreamClones == true {
+		url := urls.GetUrl(urls.FlowNetworkCloneStreamClonesSyncUrl, fnc.UUID) + params
+		_, _ = localCli.GetQuery(url)
+	}
+	d.DB.Where("uuid = ?", fnc.UUID).Updates(fnc)
+	channel <- &output
 }
 
 func (d *GormDatabase) SyncFlowNetworkCloneStreamClones(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
