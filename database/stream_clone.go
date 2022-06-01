@@ -73,34 +73,41 @@ func (d *GormDatabase) SyncStreamCloneConsumers(uuid string, args api.Args) ([]*
 	flowNetworkClone, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	cli := client.NewFlowClientCliFromFNC(flowNetworkClone)
 	var outputs []*interfaces.SyncModel
-	var localCli *client.FlowClient
+	localCli := client.NewLocalClient()
+	channel := make(chan *interfaces.SyncModel)
+	defer close(channel)
 	for _, consumer := range streamClone.Consumers {
-		rawProducer, err := cli.GetQueryMarshal(urls.SingularUrl(urls.ProducerUrl, consumer.ProducerUUID), model.Producer{})
-		var output interfaces.SyncModel
-		if err != nil {
-			output = interfaces.SyncModel{UUID: consumer.UUID, IsError: true, Message: nstring.New(err.Error())}
-			consumer.Connection = connection.Broken.String()
-			consumer.Message = err.Error()
-		} else {
-			output = interfaces.SyncModel{UUID: consumer.UUID, IsError: false}
-			producer := rawProducer.(*model.Producer)
-			consumer.Connection = connection.Connected.String()
-			consumer.Message = nstring.NotAvailable
-			consumer.ProducerThingName = producer.ProducerThingName
-			consumer.ProducerThingUUID = producer.ProducerThingUUID
-			consumer.ProducerThingClass = producer.ProducerThingClass
-			consumer.ProducerThingType = producer.ProducerThingType
-		}
-		// This is for syncing child descendants
-		if args.WithWriters {
-			if localCli == nil {
-				localCli = client.NewLocalClient()
-			}
-			url := urls.GetUrl(urls.ConsumerWritersSyncUrl, consumer.UUID)
-			_, _ = localCli.GetQuery(url)
-		}
-		d.DB.Where("uuid = ?", consumer.UUID).Updates(consumer)
-		outputs = append(outputs, &output)
+		go d.syncConsumer(cli, localCli, consumer, args, channel)
+	}
+	for range streamClone.Consumers {
+		outputs = append(outputs, <-channel)
 	}
 	return outputs, nil
+}
+
+func (d *GormDatabase) syncConsumer(cli *client.FlowClient, localCli *client.FlowClient, consumer *model.Consumer,
+	args api.Args, channel chan *interfaces.SyncModel) {
+	rawProducer, err := cli.GetQueryMarshal(urls.SingularUrl(urls.ProducerUrl, consumer.ProducerUUID), model.Producer{})
+	var output interfaces.SyncModel
+	if err != nil {
+		output = interfaces.SyncModel{UUID: consumer.UUID, IsError: true, Message: nstring.New(err.Error())}
+		consumer.Connection = connection.Broken.String()
+		consumer.Message = err.Error()
+	} else {
+		output = interfaces.SyncModel{UUID: consumer.UUID, IsError: false}
+		producer := rawProducer.(*model.Producer)
+		consumer.Connection = connection.Connected.String()
+		consumer.Message = nstring.NotAvailable
+		consumer.ProducerThingName = producer.ProducerThingName
+		consumer.ProducerThingUUID = producer.ProducerThingUUID
+		consumer.ProducerThingClass = producer.ProducerThingClass
+		consumer.ProducerThingType = producer.ProducerThingType
+	}
+	// This is for syncing child descendants
+	if args.WithWriters {
+		url := urls.GetUrl(urls.ConsumerWritersSyncUrl, consumer.UUID)
+		_, _ = localCli.GetQuery(url)
+	}
+	d.DB.Where("uuid = ?", consumer.UUID).Updates(consumer)
+	channel <- &output
 }

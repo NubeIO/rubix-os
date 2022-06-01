@@ -130,37 +130,47 @@ func (d *GormDatabase) SyncProducerWriterClones(uuid string) ([]*interfaces.Sync
 	for _, fn := range stream.FlowNetworks {
 		flowNetworkMap[fn.UUID] = fn
 	}
+	channel := make(chan *interfaces.SyncModel)
+	defer close(channel)
 	for _, wc := range producer.WriterClones {
-		var output interfaces.SyncModel
-		fn, exists := flowNetworkMap[wc.FlowFrameworkUUID]
-		wc.Connection = connection.Connected.String()
-		wc.Message = nstring.NotAvailable
-		if !exists {
-			msg := "FlowNetwork is broken!"
+		go d.syncWriterClone(flowNetworkMap, wc, channel)
+	}
+	for range producer.WriterClones {
+		outputs = append(outputs, <-channel)
+	}
+	return outputs, nil
+}
+
+func (d *GormDatabase) syncWriterClone(flowNetworkMap map[string]*model.FlowNetwork, wc *model.WriterClone,
+	channel chan *interfaces.SyncModel) {
+	var output interfaces.SyncModel
+	fn, exists := flowNetworkMap[wc.FlowFrameworkUUID]
+	wc.Connection = connection.Connected.String()
+	wc.Message = nstring.NotAvailable
+	if !exists {
+		msg := "FlowNetwork is broken!"
+		output = interfaces.SyncModel{
+			UUID:    wc.UUID,
+			IsError: true,
+			Message: nstring.New(msg),
+		}
+		wc.Connection = connection.Broken.String()
+		wc.Message = msg
+	} else {
+		cli := client.NewFlowClientCliFromFN(fn)
+		_, err := cli.GetQuery(urls.SingularUrl(urls.WriterUrl, wc.SourceUUID))
+		if err != nil {
 			output = interfaces.SyncModel{
 				UUID:    wc.UUID,
 				IsError: true,
-				Message: nstring.New(msg),
+				Message: nstring.New(err.Error()),
 			}
 			wc.Connection = connection.Broken.String()
-			wc.Message = msg
-		} else {
-			cli := client.NewFlowClientCliFromFN(fn)
-			_, err := cli.GetQuery(urls.SingularUrl(urls.WriterUrl, wc.SourceUUID))
-			if err != nil {
-				output = interfaces.SyncModel{
-					UUID:    wc.UUID,
-					IsError: true,
-					Message: nstring.New(err.Error()),
-				}
-				wc.Connection = connection.Broken.String()
-				wc.Message = err.Error()
-			}
+			wc.Message = err.Error()
 		}
-		_ = d.updateWriterClone(wc.UUID, wc)
-		outputs = append(outputs, &output)
 	}
-	return outputs, nil
+	_ = d.updateWriterClone(wc.UUID, wc)
+	channel <- &output
 }
 
 type Point struct {
