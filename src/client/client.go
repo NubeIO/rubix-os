@@ -8,15 +8,21 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/go-resty/resty/v2"
+	"sync"
 )
 
-var flowClients = map[string]*FlowClient{}
+var (
+	mutex       = &sync.RWMutex{}
+	flowClients = map[string]*FlowClient{}
+)
 
 type FlowClient struct {
 	client *resty.Client
 }
 
 func GetFlowToken(ip string, port int, username string, password string) (*string, error) {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), ip, port)
 	flowClient, found := flowClients[url]
 	if !found {
@@ -25,6 +31,7 @@ func GetFlowToken(ip string, port int, username string, password string) (*strin
 		client.SetBaseURL(url)
 		client.SetError(&nresty.Error{})
 		flowClient = &FlowClient{client: client}
+		flowClients[url] = flowClient
 	}
 	token, err := flowClient.Login(&model.LoginBody{Username: username, Password: password})
 	if err != nil {
@@ -34,6 +41,8 @@ func GetFlowToken(ip string, port int, username string, password string) (*strin
 }
 
 func NewLocalClient() *FlowClient {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	port := config.Get().Server.Port
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), "0.0.0.0", port)
 	if flowClient, found := flowClients[url]; found {
@@ -73,6 +82,8 @@ func NewFlowClientCliFromFNC(fnc *model.FlowNetworkClone) *FlowClient {
 }
 
 func newSessionWithToken(ip string, port int, token string) *FlowClient {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	url := fmt.Sprintf("%s://%s:%d/ff", getSchema(port), ip, port)
 	if flowClient, found := flowClients[url]; found {
 		return flowClient
@@ -88,6 +99,8 @@ func newSessionWithToken(ip string, port int, token string) *FlowClient {
 }
 
 func newMasterToSlaveSession(globalUUID string) *FlowClient {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", conf.Server.RSPort, globalUUID)
 	if flowClient, found := flowClients[url]; found {
@@ -104,6 +117,8 @@ func newMasterToSlaveSession(globalUUID string) *FlowClient {
 }
 
 func newSlaveToMasterCallSession() *FlowClient {
+	mutex.RLock()
+	defer mutex.RUnlock()
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", conf.Server.RSPort)
 	if flowClient, found := flowClients[url]; found {
