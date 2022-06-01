@@ -104,18 +104,25 @@ func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
 
 func (d *GormDatabase) SyncStreamProducers(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
 	stream, _ := d.GetStream(uuid, api.Args{WithProducers: true})
-	var localCli *client.FlowClient
+	localCli := client.NewLocalClient()
+	channel := make(chan bool)
+	defer close(channel)
 	// This is for syncing child descendants
 	if args.WithWriterClones {
 		for _, producer := range stream.Producers {
-			if localCli == nil {
-				localCli = client.NewLocalClient()
-			}
-			url := urls.GetUrl(urls.ProducerWriterClonesSyncUrl, producer.UUID)
-			_, _ = localCli.GetQuery(url)
+			go d.syncProducer(producer, localCli, channel)
+		}
+		for range stream.Producers {
+			<-channel
 		}
 	}
 	return nil, nil
+}
+
+func (d *GormDatabase) syncProducer(producer *model.Producer, localCli *client.FlowClient, channel chan bool) {
+	url := urls.GetUrl(urls.ProducerWriterClonesSyncUrl, producer.UUID)
+	_, _ = localCli.GetQuery(url)
+	channel <- true
 }
 
 func (d *GormDatabase) syncAfterCreateUpdateStream(body *model.Stream) error {
