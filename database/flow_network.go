@@ -156,30 +156,40 @@ func (d *GormDatabase) SyncFlowNetworks(args api.Args) []*interfaces.SyncModel {
 	var outputs []*interfaces.SyncModel
 	params := urls.GenerateFNUrlParams(args)
 	var localCli *client.FlowClient
+	channel := make(chan *interfaces.SyncModel)
+	defer close(channel)
 	for _, fn := range fns {
-		_, err := d.UpdateFlowNetwork(fn.UUID, fn)
-		var output interfaces.SyncModel
-		if err != nil {
-			fn.Connection = connection.Broken.String()
-			fn.Message = err.Error()
-			output = interfaces.SyncModel{UUID: fn.UUID, IsError: true, Message: nstring.New(err.Error())}
-		} else {
-			fn.Connection = connection.Connected.String()
-			fn.Message = nstring.NotAvailable
-			output = interfaces.SyncModel{UUID: fn.UUID, IsError: false}
-		}
-		// This is for syncing child descendants
-		if args.WithStreams == true {
-			if localCli == nil {
-				localCli = client.NewLocalClient()
-			}
-			url := urls.GetUrl(urls.FlowNetworkStreamsSyncUrl, fn.UUID) + params
-			_, _ = localCli.GetQuery(url)
-		}
-		d.DB.Where("uuid = ?", fn.UUID).Updates(fn)
-		outputs = append(outputs, &output)
+		go d.syncFlowNetwork(args, fn, params, localCli, channel)
+	}
+	for range fns {
+		outputs = append(outputs, <-channel)
 	}
 	return outputs
+}
+
+func (d *GormDatabase) syncFlowNetwork(args api.Args, fn *model.FlowNetwork, params string,
+	localCli *client.FlowClient, channel chan *interfaces.SyncModel) {
+	_, err := d.UpdateFlowNetwork(fn.UUID, fn)
+	var output interfaces.SyncModel
+	if err != nil {
+		fn.Connection = connection.Broken.String()
+		fn.Message = err.Error()
+		output = interfaces.SyncModel{UUID: fn.UUID, IsError: true, Message: nstring.New(err.Error())}
+	} else {
+		fn.Connection = connection.Connected.String()
+		fn.Message = nstring.NotAvailable
+		output = interfaces.SyncModel{UUID: fn.UUID, IsError: false}
+	}
+	// This is for syncing child descendants
+	if args.WithStreams == true {
+		if localCli == nil {
+			localCli = client.NewLocalClient()
+		}
+		url := urls.GetUrl(urls.FlowNetworkStreamsSyncUrl, fn.UUID) + params
+		_, _ = localCli.GetQuery(url)
+	}
+	d.DB.Where("uuid = ?", fn.UUID).Updates(fn)
+	channel <- &output
 }
 
 func (d *GormDatabase) SyncFlowNetworkStreams(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
