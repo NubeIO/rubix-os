@@ -1,12 +1,12 @@
-package error
+package nerrors
 
 import (
 	"fmt"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"net/http"
 	"strings"
 	"unicode"
 
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )

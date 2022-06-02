@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/interfaces/connection"
+	"github.com/NubeIO/flow-framework/nerrors"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -70,7 +71,7 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	if boolean.IsFalse(body.IsRemote) {
 		fns, _ := d.GetFlowNetworks(api.Args{IsRemote: boolean.NewFalse()})
 		if fns != nil && len(fns) != 0 {
-			return nil, errors.New("you already have a local flow-network")
+			return nil, nerrors.NewErrConflict("you already have a local flow-network")
 		}
 	}
 	if err := tx.Create(&body).Error; err != nil {

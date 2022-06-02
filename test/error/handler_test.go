@@ -3,7 +3,7 @@ package error
 import (
 	"encoding/json"
 	"errors"
-	"github.com/NubeIO/flow-framework/error"
+	"github.com/NubeIO/flow-framework/nerrors"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
@@ -19,7 +19,7 @@ func TestDefaultErrorInternal(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(rec)
 	ctx.AbortWithError(500, errors.New("something went wrong"))
 
-	error.Handler()(ctx)
+	nerrors.Handler()(ctx)
 
 	assertJSONResponse(t, rec, 500, `{"errorCode":500, "errorDescription":"something went wrong", "error":"Internal Server Error"}`)
 }
@@ -30,7 +30,7 @@ func TestBindingErrorDefault(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(rec)
 	ctx.AbortWithError(400, errors.New("you need todo something")).SetType(gin.ErrorTypeBind)
 
-	error.Handler()(ctx)
+	nerrors.Handler()(ctx)
 
 	assertJSONResponse(t, rec, 400, `{"errorCode":400, "errorDescription":"you need todo something", "error":"Bad Request"}`)
 }
@@ -41,7 +41,7 @@ func TestDefaultErrorBadRequest(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(rec)
 	ctx.AbortWithError(400, errors.New("you need todo something"))
 
-	error.Handler()(ctx)
+	nerrors.Handler()(ctx)
 
 	assertJSONResponse(t, rec, 400, `{"errorCode":400, "errorDescription":"you need todo something", "error":"Bad Request"}`)
 }
@@ -60,7 +60,7 @@ func TestValidationError(t *testing.T) {
 	ctx.Request = httptest.NewRequest("GET", "/uri", nil)
 
 	assert.Error(t, ctx.Bind(&testValidate{Age: 150, Limit: 20}))
-	error.Handler()(ctx)
+	nerrors.Handler()(ctx)
 
 	err := new(model.Error)
 	json.NewDecoder(rec.Body).Decode(err)
