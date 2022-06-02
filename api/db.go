@@ -24,22 +24,22 @@ func (a *DatabaseAPI) SyncTopics() {
 func (a *DatabaseAPI) WizardP2PMapping(ctx *gin.Context) {
 	body, _ := getP2PBody(ctx)
 	mapping, err := a.DB.WizardP2PMapping(body)
-	responseHandler(mapping, err, ctx)
+	ResponseHandler(mapping, err, ctx)
 }
 
 func (a *DatabaseAPI) WizardMasterSlavePointMapping(ctx *gin.Context) {
 	mapping, err := a.DB.WizardMasterSlavePointMapping()
-	responseHandler(mapping, err, ctx)
+	ResponseHandler(mapping, err, ctx)
 }
 
 func (a *DatabaseAPI) WizardMasterSlavePointMappingOnConsumerSideByProducerSide(ctx *gin.Context) {
 	globalUUID := resolveGlobalUUID(ctx)
 	sch, err := a.DB.WizardMasterSlavePointMappingOnConsumerSideByProducerSide(globalUUID)
-	responseHandler(sch, err, ctx)
+	ResponseHandler(sch, err, ctx)
 }
 
 func (a *DatabaseAPI) WizardP2PMappingOnConsumerSideByProducerSide(ctx *gin.Context) {
 	globalUUID := resolveGlobalUUID(ctx)
 	sch, err := a.DB.WizardP2PMappingOnConsumerSideByProducerSide(globalUUID)
-	responseHandler(sch, err, ctx)
+	ResponseHandler(sch, err, ctx)
 }

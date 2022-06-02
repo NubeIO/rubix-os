@@ -23,47 +23,47 @@ type ConsumersAPI struct {
 func (j *ConsumersAPI) GetConsumers(ctx *gin.Context) {
 	args := buildConsumerArgs(ctx)
 	q, err := j.DB.GetConsumers(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ConsumersAPI) GetConsumer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildConsumerArgs(ctx)
 	q, err := j.DB.GetConsumer(uuid, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ConsumersAPI) CreateConsumer(ctx *gin.Context) {
 	body, _ := getBODYConsumer(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
-		responseHandler(nil, err, ctx)
+		ResponseHandler(nil, err, ctx)
 	}
 	q, err := j.DB.CreateConsumer(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ConsumersAPI) UpdateConsumer(ctx *gin.Context) {
 	body, _ := getBODYConsumer(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.UpdateConsumer(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ConsumersAPI) DeleteConsumer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteConsumer(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ConsumersAPI) DeleteConsumers(ctx *gin.Context) {
 	args := buildConsumerArgs(ctx)
 	q, err := j.DB.DeleteConsumers(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ConsumersAPI) SyncConsumerWriters(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.SyncConsumerWriters(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

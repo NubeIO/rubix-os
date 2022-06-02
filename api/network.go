@@ -30,58 +30,58 @@ func (a *NetworksAPI) GetNetworkByName(ctx *gin.Context) {
 	name := resolveName(ctx)
 	args := buildNetworkArgs(ctx)
 	q, err := a.DB.GetNetworkByName(name, args) // TODO fix this need to add in like "serial"
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) GetNetworksByName(ctx *gin.Context) {
 	name := resolveName(ctx)
 	args := buildNetworkArgs(ctx)
 	q, err := a.DB.GetNetworksByName(name, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) GetNetworkByPluginName(ctx *gin.Context) {
 	name := resolveName(ctx)
 	args := buildNetworkArgs(ctx)
 	q, err := a.DB.GetNetworkByPluginName(name, args) // TODO fix this need to add in like "serial"
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) GetNetworksByPluginName(ctx *gin.Context) {
 	name := resolveName(ctx)
 	args := buildNetworkArgs(ctx)
 	q, err := a.DB.GetNetworksByPluginName(name, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) GetNetworks(ctx *gin.Context) {
 	args := buildNetworkArgs(ctx)
 	q, err := a.DB.GetNetworks(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) GetNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildNetworkArgs(ctx)
 	q, err := a.DB.GetNetwork(uuid, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) CreateNetwork(ctx *gin.Context) {
 	body, _ := getBODYNetwork(ctx)
 	q, err := a.DB.CreateNetworkPlugin(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
 	body, _ := getBODYNetwork(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdateNetworkPlugin(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *NetworksAPI) DeleteNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteNetworkPlugin(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

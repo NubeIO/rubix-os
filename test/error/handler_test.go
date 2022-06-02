@@ -3,12 +3,12 @@ package error
 import (
 	"encoding/json"
 	"errors"
-	"github.com/NubeIO/flow-framework/error"
+	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/nerrors"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,9 +19,9 @@ func TestDefaultErrorInternal(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(rec)
 	ctx.AbortWithError(500, errors.New("something went wrong"))
 
-	error.Handler()(ctx)
+	nerrors.Handler()(ctx)
 
-	assertJSONResponse(t, rec, 500, `{"errorCode":500, "errorDescription":"something went wrong", "error":"Internal Server Error"}`)
+	assertJSONResponse(t, rec, 500, `{"message":"[500]: something went wrong"}`)
 }
 
 func TestBindingErrorDefault(t *testing.T) {
@@ -30,9 +30,9 @@ func TestBindingErrorDefault(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(rec)
 	ctx.AbortWithError(400, errors.New("you need todo something")).SetType(gin.ErrorTypeBind)
 
-	error.Handler()(ctx)
+	nerrors.Handler()(ctx)
 
-	assertJSONResponse(t, rec, 400, `{"errorCode":400, "errorDescription":"you need todo something", "error":"Bad Request"}`)
+	assertJSONResponse(t, rec, 400, `{"message":"[400]: you need todo something"}`)
 }
 
 func TestDefaultErrorBadRequest(t *testing.T) {
@@ -41,9 +41,9 @@ func TestDefaultErrorBadRequest(t *testing.T) {
 	ctx, _ := gin.CreateTestContext(rec)
 	ctx.AbortWithError(400, errors.New("you need todo something"))
 
-	error.Handler()(ctx)
+	nerrors.Handler()(ctx)
 
-	assertJSONResponse(t, rec, 400, `{"errorCode":400, "errorDescription":"you need todo something", "error":"Bad Request"}`)
+	assertJSONResponse(t, rec, 400, `{"message":"[400]: you need todo something"}`)
 }
 
 type testValidate struct {
@@ -60,17 +60,15 @@ func TestValidationError(t *testing.T) {
 	ctx.Request = httptest.NewRequest("GET", "/uri", nil)
 
 	assert.Error(t, ctx.Bind(&testValidate{Age: 150, Limit: 20}))
-	error.Handler()(ctx)
+	nerrors.Handler()(ctx)
 
-	err := new(model.Error)
-	json.NewDecoder(rec.Body).Decode(err)
-	assert.Equal(t, 400, rec.Code)
-	assert.Equal(t, "Bad Request", err.Error)
-	assert.Equal(t, 400, err.ErrorCode)
-	assert.Contains(t, err.ErrorDescription, "Field 'username' is required")
-	assert.Contains(t, err.ErrorDescription, "Field 'mail' is not valid")
-	assert.Contains(t, err.ErrorDescription, "Field 'age' must be less or equal to 100")
-	assert.Contains(t, err.ErrorDescription, "Field 'limit' must be more or equal to 50")
+	err := new(interfaces.Message)
+	_ = json.NewDecoder(rec.Body).Decode(err)
+	assert.Contains(t, err.Message, "[400]")
+	assert.Contains(t, err.Message, "Field 'username' is required")
+	assert.Contains(t, err.Message, "Field 'mail' is not valid")
+	assert.Contains(t, err.Message, "Field 'age' must be less or equal to 100")
+	assert.Contains(t, err.Message, "Field 'limit' must be more or equal to 50")
 }
 
 func assertJSONResponse(t *testing.T, rec *httptest.ResponseRecorder, code int, json string) {

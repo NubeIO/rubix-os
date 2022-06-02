@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/mbmodel"
 	"github.com/NubeIO/flow-framework/utils/array"
@@ -78,53 +79,53 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
 		network, err := inst.addNetwork(body)
-		plugin.ResponseHandler(network, err, 0, ctx)
+		api.ResponseHandler(network, err, ctx)
 	})
 	mux.POST(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
 		device, err := inst.addDevice(body)
-		plugin.ResponseHandler(device, err, 0, ctx)
+		api.ResponseHandler(device, err, ctx)
 	})
 	mux.POST(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		point, err := inst.addPoint(body)
-		plugin.ResponseHandler(point, err, 0, ctx)
+		api.ResponseHandler(point, err, ctx)
 	})
 	mux.PATCH(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
 		network, err := inst.updateNetwork(body)
-		plugin.ResponseHandler(network, err, 0, ctx)
+		api.ResponseHandler(network, err, ctx)
 	})
 	mux.PATCH(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
 		device, err := inst.updateDevice(body)
-		plugin.ResponseHandler(device, err, 0, ctx)
+		api.ResponseHandler(device, err, ctx)
 	})
 	mux.PATCH(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		point, err := inst.updatePoint(body)
-		plugin.ResponseHandler(point, err, 0, ctx)
+		api.ResponseHandler(point, err, ctx)
 	})
 	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBodyPointWriter(ctx)
 		uuid := plugin.ResolveID(ctx)
 		point, err := inst.writePoint(uuid, body)
-		plugin.ResponseHandler(point, err, 0, ctx)
+		api.ResponseHandler(point, err, ctx)
 	})
 	mux.DELETE(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
 		ok, err := inst.deleteNetwork(body)
-		plugin.ResponseHandler(ok, err, 0, ctx)
+		api.ResponseHandler(ok, err, ctx)
 	})
 	mux.DELETE(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
 		ok, err := inst.deleteDevice(body)
-		plugin.ResponseHandler(ok, err, 0, ctx)
+		api.ResponseHandler(ok, err, ctx)
 	})
 	mux.DELETE(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		ok, err := inst.deletePoint(body)
-		plugin.ResponseHandler(ok, err, 0, ctx)
+		api.ResponseHandler(ok, err, ctx)
 	})
 
 	mux.GET(listSerial, func(ctx *gin.Context) {

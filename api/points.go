@@ -29,65 +29,65 @@ type PointAPI struct {
 func (a *PointAPI) GetPoints(ctx *gin.Context) {
 	args := buildPointArgs(ctx)
 	q, err := a.DB.GetPoints(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetPointsBulk(ctx *gin.Context) {
 	body, _ := getBODYBulkPoints(ctx)
 	q, err := a.DB.GetPointsBulk(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetPoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildPointArgs(ctx)
 	q, err := a.DB.GetPoint(uuid, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) UpdatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdatePointPlugin(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) PointWrite(ctx *gin.Context) {
 	body, _ := getBODYPointWriter(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.WritePointPlugin(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetOnePointByArgs(ctx *gin.Context) {
 	args := buildPointArgs(ctx)
 	q, err := a.DB.GetOnePointByArgs(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) CreatePoint(ctx *gin.Context) {
 	body, _ := getBODYPoint(ctx)
 	q, err := a.DB.CreatePointPlugin(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) DeletePoint(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeletePointPlugin(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) GetPointByName(ctx *gin.Context) {
 	networkName, deviceName, pointName := networkDevicePointNames(ctx)
 	q, err := a.DB.GetPointByName(networkName, deviceName, pointName)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) PointWriteByName(ctx *gin.Context) {
 	body, _ := getBODYPointWriter(ctx)
 	networkName, deviceName, pointName := networkDevicePointNames(ctx)
 	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body, false)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func networkDevicePointNames(ctx *gin.Context) (networkName, deviceName, pointName string) {

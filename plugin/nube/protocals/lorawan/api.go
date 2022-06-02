@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwmodel"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwrest"
@@ -147,7 +148,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		body, _ := plugin.GetBodyPointWriter(ctx)
 		uuid := plugin.ResolveID(ctx)
 		point, err := inst.writePoint(uuid, body)
-		plugin.ResponseHandler(point, err, 0, ctx)
+		api.ResponseHandler(point, err, ctx)
 	})
 
 }

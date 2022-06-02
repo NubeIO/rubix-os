@@ -19,25 +19,25 @@ type SyncWriterAPI struct {
 func (a *SyncWriterAPI) SyncWriter(ctx *gin.Context) {
 	body, _ := getBodySyncWriter(ctx)
 	q, err := a.DB.SyncWriter(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *SyncWriterAPI) SyncCOV(ctx *gin.Context) {
 	writerUUID := resolveWriterUUID(ctx)
 	body, _ := getBodySyncCOV(ctx)
 	err := a.DB.SyncCOV(writerUUID, body)
-	responseHandler(nil, err, ctx)
+	ResponseHandler(nil, err, ctx)
 }
 
 func (a *SyncWriterAPI) SyncWriterWriteAction(ctx *gin.Context) {
 	sourceUUID := resolveSourceUUID(ctx)
 	body, _ := getBodySyncWriterAction(ctx)
 	err := a.DB.SyncWriterWriteAction(sourceUUID, body)
-	responseHandler(nil, err, ctx)
+	ResponseHandler(nil, err, ctx)
 }
 
 func (a *SyncWriterAPI) SyncWriterReadAction(ctx *gin.Context) {
 	sourceUUID := resolveSourceUUID(ctx)
 	err := a.DB.SyncWriterReadAction(sourceUUID)
-	responseHandler(nil, err, ctx)
+	ResponseHandler(nil, err, ctx)
 }

@@ -24,37 +24,37 @@ type DeviceAPI struct {
 func (a *DeviceAPI) GetDevices(ctx *gin.Context) {
 	args := buildDeviceArgs(ctx)
 	q, err := a.DB.GetDevices(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *DeviceAPI) GetDevice(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildDeviceArgs(ctx)
 	q, err := a.DB.GetDevice(uuid, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *DeviceAPI) GetOneDeviceByArgs(ctx *gin.Context) {
 	args := buildDeviceArgs(ctx)
 	q, err := a.DB.GetOneDeviceByArgs(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *DeviceAPI) UpdateDevice(ctx *gin.Context) {
 	body, _ := getBODYDevice(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdateDevicePlugin(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *DeviceAPI) CreateDevice(ctx *gin.Context) {
 	body, _ := getBODYDevice(ctx)
 	q, err := a.DB.CreateDevicePlugin(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *DeviceAPI) DeleteDevice(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteDevicePlugin(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

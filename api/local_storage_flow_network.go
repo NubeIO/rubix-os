@@ -17,16 +17,16 @@ type LocalStorageFlowNetworkAPI struct {
 
 func (a *LocalStorageFlowNetworkAPI) GetLocalStorageFlowNetwork(ctx *gin.Context) {
 	q, err := a.DB.GetLocalStorageFlowNetwork()
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *LocalStorageFlowNetworkAPI) UpdateLocalStorageFlowNetwork(ctx *gin.Context) {
 	body, _ := getBodyLocalStorageFlowNetwork(ctx)
 	q, err := a.DB.UpdateLocalStorageFlowNetwork(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *LocalStorageFlowNetworkAPI) RefreshLocalStorageFlowToken(ctx *gin.Context) {
 	q, err := a.DB.RefreshLocalStorageFlowToken()
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

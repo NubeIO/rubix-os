@@ -45,47 +45,47 @@ type ProducerAPI struct {
 func (j *ProducerAPI) GetProducers(ctx *gin.Context) {
 	args := buildProducerArgs(ctx)
 	q, err := j.DB.GetProducers(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ProducerAPI) GetProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildProducerArgs(ctx)
 	q, err := j.DB.GetProducer(uuid, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ProducerAPI) GetOneProducerByArgs(ctx *gin.Context) {
 	args := buildProducerArgs(ctx)
 	q, err := j.DB.GetOneProducerByArgs(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ProducerAPI) CreateProducer(ctx *gin.Context) {
 	body, _ := getBODYProducer(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
-		responseHandler(nil, err, ctx)
+		ResponseHandler(nil, err, ctx)
 	}
 	body, err = j.DB.CreateProducer(body)
-	responseHandler(body, err, ctx)
+	ResponseHandler(body, err, ctx)
 }
 
 func (j *ProducerAPI) UpdateProducer(ctx *gin.Context) {
 	body, _ := getBODYProducer(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.UpdateProducer(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ProducerAPI) DeleteProducer(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteProducer(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *ProducerAPI) SyncProducerWriterClones(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.SyncProducerWriterClones(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

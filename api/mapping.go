@@ -15,5 +15,5 @@ type MappingAPI struct {
 func (m *MappingAPI) CreatePointMapping(ctx *gin.Context) {
 	body, _ := getBODYPointMapping(ctx)
 	q, err := m.DB.CreatePointMapping(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

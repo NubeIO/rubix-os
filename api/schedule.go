@@ -22,42 +22,42 @@ type ScheduleAPI struct {
 func (a *ScheduleAPI) GetSchedule(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.GetSchedule(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *ScheduleAPI) GetOneScheduleByArgs(ctx *gin.Context) {
 	args := buildScheduleArgs(ctx)
 	q, err := a.DB.GetOneScheduleByArgs(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *ScheduleAPI) GetSchedules(ctx *gin.Context) {
 	q, err := a.DB.GetSchedules()
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *ScheduleAPI) UpdateSchedule(ctx *gin.Context) {
 	body, _ := getBODYSchedule(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdateSchedule(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *ScheduleAPI) ScheduleWrite(ctx *gin.Context) {
 	body, _ := getBODYScheduleData(ctx)
 	uuid := resolveID(ctx)
 	err := a.DB.ScheduleWrite(uuid, body)
-	responseHandler(nil, err, ctx)
+	ResponseHandler(nil, err, ctx)
 }
 
 func (a *ScheduleAPI) CreateSchedule(ctx *gin.Context) {
 	body, _ := getBODYSchedule(ctx)
 	q, err := a.DB.CreateSchedule(body)
-	responseHandler(q, err, ctx) // TODO
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *ScheduleAPI) DeleteSchedule(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteSchedule(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

@@ -6,10 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-/*
-Stream
-*/
-
 // The CommandGroupDatabase interface for encapsulating database access.
 type CommandGroupDatabase interface {
 	GetCommandGroup(uuid string) (*model.CommandGroup, error)
@@ -26,12 +22,12 @@ type CommandGroupAPI struct {
 func (j *CommandGroupAPI) GetCommandGroup(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetCommandGroup(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *CommandGroupAPI) GetCommandGroups(ctx *gin.Context) {
 	q, err := j.DB.GetCommandGroups()
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 
 }
 
@@ -39,18 +35,18 @@ func (j *CommandGroupAPI) CreateCommandGroup(ctx *gin.Context) {
 	body, _ := getBODYCommandGroup(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	q, err := j.DB.CreateCommandGroup(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *CommandGroupAPI) UpdateCommandGroup(ctx *gin.Context) {
 	body, _ := getBODYCommandGroup(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.UpdateCommandGroup(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *CommandGroupAPI) DeleteCommandGroup(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteCommandGroup(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

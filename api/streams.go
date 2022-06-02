@@ -22,38 +22,38 @@ type StreamAPI struct {
 func (j *StreamAPI) GetStreams(ctx *gin.Context) {
 	args := buildStreamArgs(ctx)
 	q, err := j.DB.GetStreams(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *StreamAPI) GetStream(ctx *gin.Context) {
 	args := buildStreamArgs(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetStream(uuid, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *StreamAPI) CreateStream(ctx *gin.Context) {
 	body, _ := getBODYStream(ctx)
 	q, err := j.DB.CreateStream(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *StreamAPI) UpdateStream(ctx *gin.Context) {
 	body, _ := getBODYStream(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.UpdateStream(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *StreamAPI) DeleteStream(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteStream(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *StreamAPI) SyncStreamProducers(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	args := buildStreamArgs(ctx)
 	q, err := j.DB.SyncStreamProducers(uuid, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

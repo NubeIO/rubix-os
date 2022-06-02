@@ -1,7 +1,7 @@
 package error
 
 import (
-	"github.com/NubeIO/flow-framework/error"
+	"github.com/NubeIO/flow-framework/nerrors"
 	"net/http/httptest"
 	"testing"
 
@@ -13,7 +13,7 @@ func TestNotFound(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(rec)
 
-	error.NotFound()(ctx)
+	nerrors.NotFound()(ctx)
 
 	assertJSONResponse(t, rec, 404, `{"errorCode":404, "errorDescription":"page not found", "error":"Not Found"}`)
 }

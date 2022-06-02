@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/nerrors"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -33,7 +34,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	existing := d.deviceNameExists(body, body)
 	if existing {
 		eMsg := fmt.Sprintf("a device with existing name: %s exists", body.Name)
-		return nil, errors.New(eMsg)
+		return nil, nerrors.NewErrConflict(eMsg)
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Device)
 	networkUUID := body.NetworkUUID

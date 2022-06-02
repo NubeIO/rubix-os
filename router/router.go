@@ -7,9 +7,9 @@ import (
 	"github.com/NubeIO/flow-framework/auth"
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/database"
-	"github.com/NubeIO/flow-framework/error"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/logger"
+	"github.com/NubeIO/flow-framework/nerrors"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/networking/networking"
 	"github.com/gin-contrib/cors"
@@ -18,8 +18,8 @@ import (
 
 func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	engine := gin.New()
-	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), error.Handler(), location.Default())
-	engine.NoRoute(error.NotFound())
+	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), nerrors.Handler(), location.Default())
+	engine.NoRoute(nerrors.NotFound())
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
