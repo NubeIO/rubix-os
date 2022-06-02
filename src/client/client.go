@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"github.com/NubeIO/flow-framework/auth"
 	"github.com/NubeIO/flow-framework/config"
@@ -8,7 +9,10 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/go-resty/resty/v2"
+	"net"
+	"net/http"
 	"sync"
+	"time"
 )
 
 var (
@@ -18,6 +22,19 @@ var (
 
 type FlowClient struct {
 	client *resty.Client
+}
+
+// The dialTimeout normally catches: when the server is unreachable and returns i/o timeout within 2 seconds.
+// Otherwise, the i/o timeout takes 1.3 minutes on default; which is a very long time for waiting.
+// It uses the DialTimeout function of the net package which connects to a server address on a named network before
+// a specified timeout.
+func dialTimeout(_ context.Context, network, addr string) (net.Conn, error) {
+	timeout := 2 * time.Second
+	return net.DialTimeout(network, addr, timeout)
+}
+
+var transport = http.Transport{
+	DialContext: dialTimeout,
 }
 
 func GetFlowToken(ip string, port int, username string, password string) (*string, error) {
@@ -30,6 +47,7 @@ func GetFlowToken(ip string, port int, username string, password string) (*strin
 		client.SetDebug(false)
 		client.SetBaseURL(url)
 		client.SetError(&nresty.Error{})
+		client.SetTransport(&transport)
 		flowClient = &FlowClient{client: client}
 		flowClients[url] = flowClient
 	}
@@ -52,6 +70,7 @@ func NewLocalClient() *FlowClient {
 	client.SetDebug(false)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
+	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
 	return flowClient
@@ -93,6 +112,7 @@ func newSessionWithToken(ip string, port int, token string) *FlowClient {
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Authorization", token)
+	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
 	return flowClient
@@ -111,6 +131,7 @@ func newMasterToSlaveSession(globalUUID string) *FlowClient {
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
+	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
 	return flowClient
@@ -129,6 +150,7 @@ func newSlaveToMasterCallSession() *FlowClient {
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
+	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
 	return flowClient
