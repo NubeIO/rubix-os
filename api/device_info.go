@@ -22,42 +22,42 @@ type DeviceInfoAPI struct {
 
 func (inst *DeviceInfoAPI) GetDeviceInfo(ctx *gin.Context) {
 	q, err := inst.DB.GetDeviceInfo()
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (inst *DeviceInfoAPI) GetSystemTime(ctx *gin.Context) {
 	t := utilstime.SystemTime()
-	responseHandler(t, nil, ctx)
+	ResponseHandler(t, nil, ctx)
 }
 
 func (inst *DeviceInfoAPI) GetExternalIP(ctx *gin.Context) {
 	t, err := inst.Nets.GetInternetIP()
-	responseHandler(t, err, ctx)
+	ResponseHandler(t, err, ctx)
 }
 
 func (inst *DeviceInfoAPI) GetNetworks(ctx *gin.Context) {
 	t, err := inst.Nets.GetNetworks()
-	responseHandler(t, err, ctx)
+	ResponseHandler(t, err, ctx)
 }
 
 func (inst *DeviceInfoAPI) GetInterfacesNames(ctx *gin.Context) {
 	t, err := inst.Nets.GetInterfacesNames()
-	responseHandler(t, err, ctx)
+	ResponseHandler(t, err, ctx)
 }
 
 func (inst *DeviceInfoAPI) GetOSDetails(ctx *gin.Context) {
 	out := host.GetCombinationData(false)
-	responseHandler(out, nil, ctx)
+	ResponseHandler(out, nil, ctx)
 }
 
 func (inst *DeviceInfoAPI) GetTZoneList(ctx *gin.Context) {
 	out, err := utilstime.GetTimeZoneList()
-	responseHandler(out, err, ctx)
+	ResponseHandler(out, err, ctx)
 }
 
 func (inst *DeviceInfoAPI) FirewallStatus(ctx *gin.Context) {
 	out, err := ufw.FirewallStatus()
-	responseHandler(out, err, ctx)
+	ResponseHandler(out, err, ctx)
 }
 
 type Ping struct {
@@ -73,7 +73,7 @@ func (inst *DeviceInfoAPI) RubixNetworkPing(ctx *gin.Context) {
 		if interfaceName == "" { // if nothing is provided then take a guess of the user network
 			gateway, err := inst.Nets.GetNetworksThatHaveGateway()
 			if err != nil {
-				responseHandler(nil, err, ctx)
+				ResponseHandler(nil, err, ctx)
 				return
 			}
 			for i, net := range gateway {
@@ -83,7 +83,7 @@ func (inst *DeviceInfoAPI) RubixNetworkPing(ctx *gin.Context) {
 			}
 			net, err := inst.Nets.GetNetworkByIface(interfaceName)
 			if err != nil {
-				responseHandler(nil, err, ctx)
+				ResponseHandler(nil, err, ctx)
 			}
 			ip = net.Gateway
 		}
@@ -97,5 +97,5 @@ func (inst *DeviceInfoAPI) RubixNetworkPing(ctx *gin.Context) {
 
 	// result returns a map with open ports for each IP address.
 	results := portscanner.IPScanner(ipsSequence, ports, true)
-	responseHandler(results, nil, ctx)
+	ResponseHandler(results, nil, ctx)
 }

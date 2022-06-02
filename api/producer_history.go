@@ -24,50 +24,50 @@ type HistoriesAPI struct {
 func (a *HistoriesAPI) GetProducerHistories(ctx *gin.Context) {
 	args := buildProducerHistoryArgs(ctx)
 	q, err := a.DB.GetProducerHistories(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) GetProducerHistoriesByProducerUUID(ctx *gin.Context) {
 	pUuid := resolveProducerUUID(ctx)
 	args := buildProducerHistoryArgs(ctx)
 	q, _, err := a.DB.GetProducerHistoriesByProducerUUID(pUuid, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) GetLatestProducerHistoryByProducerName(ctx *gin.Context) {
 	name := resolveName(ctx)
 	q, err := a.DB.GetLatestProducerHistoryByProducerName(name)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) GetLatestProducerHistoryByProducerUUID(ctx *gin.Context) {
 	pUuid := resolveProducerUUID(ctx)
 	q, err := a.DB.GetLatestProducerHistoryByProducerUUID(pUuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) GetProducerHistoriesPoints(ctx *gin.Context) {
 	args := buildProducerHistoryArgs(ctx)
 	q, err := a.DB.GetProducerHistoriesPoints(args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) GetProducerHistoriesPointsForSync(ctx *gin.Context) {
 	id, timeStamp := buildProducerHistoryPointsSyncArgs(ctx)
 	q, err := a.DB.GetProducerHistoriesPointsForSync(id, timeStamp)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) CreateProducerHistory(ctx *gin.Context) {
 	body, _ := getBodyHistory(ctx)
 	body.Timestamp = time.Now().UTC()
 	q, err := a.DB.CreateProducerHistory(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *HistoriesAPI) DeleteProducerHistoriesByProducerUUID(ctx *gin.Context) {
 	pUuid := resolveProducerUUID(ctx)
 	args := buildProducerHistoryArgs(ctx)
 	q, err := a.DB.DeleteProducerHistoriesByProducerUUID(pUuid, args)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

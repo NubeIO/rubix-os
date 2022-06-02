@@ -22,12 +22,12 @@ type MqttConnectionAPI struct {
 func (j *MqttConnectionAPI) GetMqttConnection(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetMqttConnection(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *MqttConnectionAPI) GetMqttConnectionsList(ctx *gin.Context) {
 	q, err := j.DB.GetMqttConnectionsList()
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 
 }
 
@@ -35,21 +35,21 @@ func (j *MqttConnectionAPI) CreateMqttConnection(ctx *gin.Context) {
 	body, _ := getBODYMqttConnection(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	if err != nil {
-		responseHandler(nil, err, ctx)
+		ResponseHandler(nil, err, ctx)
 	}
 	q, err := j.DB.CreateMqttConnection(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *MqttConnectionAPI) UpdateMqttConnection(ctx *gin.Context) {
 	body, _ := getBODYMqttConnection(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.UpdateMqttConnection(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *MqttConnectionAPI) DeleteMqttConnection(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteMqttConnection(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

@@ -11,13 +11,13 @@ type ThingAPI struct {
 }
 
 func (t *ThingAPI) ThingClass(ctx *gin.Context) {
-	responseHandler(model.ThingClass, nil, ctx)
+	ResponseHandler(model.ThingClass, nil, ctx)
 }
 
 func (t *ThingAPI) WriterActions(ctx *gin.Context) {
-	responseHandler(model.WriterActions, nil, ctx)
+	ResponseHandler(model.WriterActions, nil, ctx)
 }
 
 func (t *ThingAPI) ThingUnits(ctx *gin.Context) {
-	responseHandler(units.UnitsMap, nil, ctx)
+	ResponseHandler(units.UnitsMap, nil, ctx)
 }

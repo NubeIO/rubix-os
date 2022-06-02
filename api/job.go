@@ -20,31 +20,31 @@ type JobAPI struct {
 
 func (j *JobAPI) GetJobs(ctx *gin.Context) {
 	q, err := j.DB.GetJobs()
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *JobAPI) CreateJob(ctx *gin.Context) {
 	body, _ := getBODYJobs(ctx)
 	_, err := govalidator.ValidateStruct(body)
 	q, err := j.DB.CreateJob(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *JobAPI) UpdateJob(ctx *gin.Context) {
 	body, _ := getBODYJobs(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.UpdateJob(uuid, body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *JobAPI) GetJob(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetJob(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (j *JobAPI) DeleteJob(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.DeleteJob(uuid)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }

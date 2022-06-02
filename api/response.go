@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func responseHandler(body interface{}, err error, ctx *gin.Context) {
+func ResponseHandler(body interface{}, err error, ctx *gin.Context) {
 	if err == nil {
 		ctx.JSON(http.StatusOK, body)
 	} else {

@@ -16,5 +16,5 @@ type SyncFlowNetworkAPI struct {
 func (a *SyncFlowNetworkAPI) SyncFlowNetwork(ctx *gin.Context) {
 	body, _ := getBODYFlowNetwork(ctx)
 	q, err := a.DB.SyncFlowNetwork(body)
-	responseHandler(q, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
