@@ -2,7 +2,7 @@ package nerrors
 
 import (
 	"fmt"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"net/http"
 	"strings"
 	"unicode"
@@ -52,10 +52,11 @@ func validationErrorToText(e validator.FieldError) string {
 	return fmt.Sprintf("Field '%s' is not valid", fieldName)
 }
 
-func writeError(ctx *gin.Context, errString string) {
-	status := http.StatusBadRequest
+func writeError(ctx *gin.Context, err string) {
+	statusCode := http.StatusBadRequest
 	if ctx.Writer.Status() != http.StatusOK {
-		status = ctx.Writer.Status()
+		statusCode = ctx.Writer.Status()
 	}
-	ctx.JSON(status, &model.Error{Error: http.StatusText(status), ErrorCode: status, ErrorDescription: errString})
+	message := fmt.Sprintf("[%d]: %s", statusCode, err)
+	ctx.JSON(statusCode, interfaces.Message{Message: message})
 }
