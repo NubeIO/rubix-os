@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,13 @@ type FlowNetworkClonesAPI struct {
 func (a *FlowNetworkClonesAPI) GetFlowNetworkClones(ctx *gin.Context) {
 	args := buildFlowNetworkCloneArgs(ctx)
 	q, err := a.DB.GetFlowNetworkClones(args)
+	if err == nil && args.IsMetadata {
+		var flowNetworkClonesMetaData []*interfaces.FlowNetworkCloneMetadata
+		out, _ := json.Marshal(q)
+		_ = json.Unmarshal(out, &flowNetworkClonesMetaData)
+		ResponseHandler(flowNetworkClonesMetaData, err, ctx)
+		return
+	}
 	ResponseHandler(q, err, ctx)
 }
 

@@ -42,6 +42,7 @@ func buildFlowNetworkCloneArgs(ctx *gin.Context) Args {
 	args.WithStreamClones, _ = toBool(ctx.DefaultQuery(aType.WithStreamClones, aDefault.WithStreamClones))
 	args.WithConsumers, _ = toBool(ctx.DefaultQuery(aType.WithConsumers, aDefault.WithConsumers))
 	args.WithWriters, _ = toBool(ctx.DefaultQuery(aType.WithWriters, aDefault.WithWriters))
+	args.IsMetadata, _ = toBool(ctx.DefaultQuery(aType.IsMetadata, aDefault.IsMetadata))
 	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
 		args.GlobalUUID = &value
 	}
