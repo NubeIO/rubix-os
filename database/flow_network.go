@@ -23,7 +23,6 @@ func (d *GormDatabase) GetFlowNetworks(args api.Args) ([]*model.FlowNetwork, err
 	query := d.buildFlowNetworkQuery(args)
 	if err := query.Find(&flowNetworksModel).Error; err != nil {
 		return nil, err
-
 	}
 	return flowNetworksModel, nil
 }
