@@ -13,6 +13,7 @@ func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	args.WithProducers, _ = toBool(ctx.DefaultQuery(aType.WithProducers, aDefault.WithProducers))
 	args.WithCommandGroups, _ = toBool(ctx.DefaultQuery(aType.WithCommandGroups, aDefault.WithCommandGroups))
 	args.WithWriterClones, _ = toBool(ctx.DefaultQuery(aType.WithWriterClones, aDefault.WithWriterClones))
+	args.IsMetadata, _ = toBool(ctx.DefaultQuery(aType.IsMetadata, aDefault.IsMetadata))
 	if val, exists := ctx.Get(aType.IsRemote); exists {
 		args.IsRemote = boolean.New(val.(bool))
 	}
