@@ -328,6 +328,9 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 	priority := map[string]*float64{"_16": &value}
 	body.InSync = boolean.NewTrue()
 	if pnt.IoType != "" && pnt.IoType != string(model.IOTypeRAW) {
+		if body.PresentValue == nil {
+			priority["_16"] = nil
+		}
 		priority["_16"] = float.New(decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue))
 	}
 	_, err = inst.db.UpdatePointValue(pnt.UUID, body, &priority, true)
