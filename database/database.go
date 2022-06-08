@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/migration"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/security"
 	"os"
 	"path/filepath"
 	"time"
@@ -16,6 +17,11 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+)
+
+const (
+	username = "admin"
+	password = "N00BWires"
 )
 
 var mkdirAll = os.MkdirAll
@@ -51,6 +57,17 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 	if lsFlowNetworkCount == 0 {
 		db.Create(&lsFlowNetwork)
 	}
+
+	var userCount int64 = 0
+	db.Find(&model.User{}).Count(&userCount)
+	if userCount == 0 {
+		hashedPassword, _ := security.GeneratePasswordHash(password)
+		db.Create(&model.User{
+			Username: username,
+			Password: hashedPassword,
+		})
+	}
+
 	busService := eventbus.NewService(eventbus.GetBus())
 	gormDatabase = &GormDatabase{DB: db, Bus: busService}
 	return &GormDatabase{DB: db, Bus: busService}, nil

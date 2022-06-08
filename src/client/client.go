@@ -81,7 +81,7 @@ func NewFlowClientCliFromFN(fn *model.FlowNetwork) *FlowClient {
 		return newSlaveToMasterCallSession()
 	} else {
 		if boolean.IsTrue(fn.IsRemote) {
-			return newSessionWithToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowToken)
+			return newSessionWithToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowToken, *fn.IsTokenAuth)
 		} else {
 			return NewLocalClient()
 		}
@@ -93,17 +93,21 @@ func NewFlowClientCliFromFNC(fnc *model.FlowNetworkClone) *FlowClient {
 		return newMasterToSlaveSession(fnc.GlobalUUID)
 	} else {
 		if boolean.IsTrue(fnc.IsRemote) {
-			return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken)
+			return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken, *fnc.IsTokenAuth)
 		} else {
 			return NewLocalClient()
 		}
 	}
 }
 
-func newSessionWithToken(ip string, port int, token string) *FlowClient {
+func newSessionWithToken(ip string, port int, token string, isTokenAuth bool) *FlowClient {
 	mutex.RLock()
 	defer mutex.RUnlock()
 	url := fmt.Sprintf("%s://%s:%d/ff", getSchema(port), ip, port)
+	if isTokenAuth {
+		url = fmt.Sprintf("%s://%s:%d", getSchema(port), ip, port)
+		token = fmt.Sprintf("External %s", token)
+	}
 	if flowClient, found := flowClients[url]; found {
 		return flowClient
 	}

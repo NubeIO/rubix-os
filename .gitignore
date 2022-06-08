@@ -12,3 +12,4 @@ images/
 src/client/ws.conf
 *.so
 *.zip
+secret.txt

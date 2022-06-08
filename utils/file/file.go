@@ -51,3 +51,23 @@ func DeleteFile(f string) (ok bool, err error) {
 	}
 	return true, err
 }
+
+func ReadFile(f string) (string, error) {
+	data, err := os.ReadFile(f)
+	if err != nil {
+		return "", err
+	}
+	return string(data), err
+}
+
+func WriteDataToFileAsString(f string, data string) (int, error) {
+	file, err := os.OpenFile(f, os.O_RDWR|os.O_CREATE, 0755)
+	if err != nil {
+		return 0, err
+	}
+	n, err := file.WriteString(data)
+	if err != nil {
+		return 0, err
+	}
+	return n, nil
+}
