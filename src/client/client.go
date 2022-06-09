@@ -71,6 +71,7 @@ func NewLocalClient() *FlowClient {
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetTransport(&transport)
+	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken(true))
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
 	return flowClient
@@ -81,7 +82,7 @@ func NewFlowClientCliFromFN(fn *model.FlowNetwork) *FlowClient {
 		return newSlaveToMasterCallSession()
 	} else {
 		if boolean.IsTrue(fn.IsRemote) {
-			return newSessionWithToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowToken, *fn.IsTokenAuth)
+			return newSessionWithToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowToken, boolean.IsTrue(fn.IsTokenAuth))
 		} else {
 			return NewLocalClient()
 		}
