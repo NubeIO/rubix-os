@@ -9,7 +9,7 @@ import (
 	"path"
 )
 
-func GetRubixServiceInternalToken() string {
+func GetRubixServiceInternalToken(withPrefix bool) string {
 	conf := config.Get()
 	authDataDir := conf.Location.AuthDataDir
 	relativeAuthDataFile := conf.Location.RelativeAuthDataFile
@@ -27,5 +27,9 @@ func GetRubixServiceInternalToken() string {
 	if err != nil {
 		log.Error(err)
 	}
-	return fmt.Sprintf("Internal %s", string(internalToken))
+	if withPrefix {
+		return fmt.Sprintf("Internal %s", string(internalToken))
+	} else {
+		return string(internalToken)
+	}
 }

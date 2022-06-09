@@ -126,7 +126,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	}
 
 	engine.GET("/api/system/ping", healthHandler.Health)
-	engine.POST("api/users/login", userHandler.Login)
+	engine.POST("/api/users/login", userHandler.Login)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
 	engine.Use(func(ctx *gin.Context) {
 		ctx.Header("Content-Type", "application/json") // if you comment it out it will detected as text on proxy-handlers
