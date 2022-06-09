@@ -9,7 +9,7 @@ require (
 	github.com/NubeDev/location v0.0.2
 	github.com/NubeIO/configor v0.0.3
 	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7
-	github.com/NubeIO/nubeio-rubix-lib-models-go v1.2.4
+	github.com/NubeIO/nubeio-rubix-lib-models-go v1.2.5
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -46,6 +46,8 @@ require (
 
 require (
 	github.com/NubeDev/bacnet v0.0.4
+	github.com/golang-jwt/jwt v3.2.2+incompatible
+	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
 	github.com/NubeIO/lib-date v0.0.1
 	github.com/NubeIO/lib-networking v0.0.4
 )
@@ -61,7 +63,6 @@ require (
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
-	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/google/uuid v1.1.2 // indirect
@@ -97,7 +98,6 @@ require (
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
-	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
 	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/text v0.3.7 // indirect
