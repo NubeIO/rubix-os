@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/nerrors"
 	"github.com/NubeIO/flow-framework/utils/security"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
@@ -33,7 +34,7 @@ func (j *UserAPI) Login(ctx *gin.Context) {
 		ResponseHandler(token, err, ctx)
 		return
 	}
-	ResponseHandler(nil, err, ctx)
+	ResponseHandler(nil, nerrors.NewErrUnauthorized("check username & password"), ctx)
 
 }
 
