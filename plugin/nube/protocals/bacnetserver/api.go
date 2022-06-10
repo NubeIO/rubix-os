@@ -3,7 +3,8 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bacnetmodel"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bserver"
+
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,6 +14,10 @@ const (
 	schemaDevice  = "/schema/device"
 	schemaPoint   = "/schema/point"
 )
+
+func resolveID(ctx *gin.Context) string {
+	return ctx.Param("uuid")
+}
 
 // RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
@@ -70,14 +75,14 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, bacnetmodel.GetNetworkSchema())
+		ctx.JSON(http.StatusOK, bserver.GetNetworkSchema())
 	})
 
 	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, bacnetmodel.GetDeviceSchema())
+		ctx.JSON(http.StatusOK, bserver.GetDeviceSchema())
 	})
 
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, bacnetmodel.GetPointSchema())
+		ctx.JSON(http.StatusOK, bserver.GetPointSchema())
 	})
 }

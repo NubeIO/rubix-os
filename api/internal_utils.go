@@ -205,11 +205,6 @@ func resolvePluginName(ctx *gin.Context) string {
 	return ctx.Param("plugin_name")
 }
 
-func getRubixPingDevice(ctx *gin.Context) (dto *Ping, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
 func toBool(value string) (bool, error) {
 	if value == "" {
 		return false, nil

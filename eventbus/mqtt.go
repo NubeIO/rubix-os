@@ -42,7 +42,7 @@ func RegisterMQTTBus() {
 	c, _ := mqttclient.GetMQTT()
 	// TODO this needs to be removed as its for a plugin, the plugin needs to register the topics it wants the main framework to subscribe to, also unsubscribe when the plugin is disabled
 	err := c.Subscribe("+/+/+/+/+/+/rubix/bacnet_server/points/+/#", mqttclient.AtMostOnce, handle) // bacnet-server
-	err = c.Subscribe("+/+/+/+/+/+/rubix/bacnet_master/points/+/#", mqttclient.AtMostOnce, handle)  // bacnet-master
+	err = c.Subscribe("+/+/+/+/+/+/rubix/bacnet_master/points/+/#", mqttclient.AtMostOnce, handle)  // bacnet-bserver
 	err = c.Subscribe("application/+/device/+/rx", mqttclient.AtMostOnce, handle)                   // lorawan
 	if err != nil {
 

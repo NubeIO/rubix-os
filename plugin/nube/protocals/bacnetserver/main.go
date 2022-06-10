@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeDev/bacnet/network"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/flow-framework/src/cachestore"
@@ -20,16 +21,19 @@ const isNetwork = true
 const maxAllowedNetworks = 1
 const networkType = "bacnet"
 const transportType = "ip" // serial, ip
+
 // Instance is plugin instance
 type Instance struct {
-	config      *Config
-	enabled     bool
-	basePath    string
-	db          dbhandler.Handler
-	store       cachestore.Handler
-	bus         eventbus.BusService
-	pluginUUID  string
-	networkUUID string
+	config         *Config
+	enabled        bool
+	basePath       string
+	db             dbhandler.Handler
+	store          cachestore.Handler
+	bus            eventbus.BusService
+	pluginUUID     string
+	networkUUID    string
+	pollingEnabled bool
+	BacStore       *network.Store
 }
 
 // GetFlowPluginInfo returns plugin info.

@@ -2,7 +2,7 @@ package schedule
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/src/utilstime"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"strings"

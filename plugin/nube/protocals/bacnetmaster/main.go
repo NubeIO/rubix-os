@@ -10,7 +10,7 @@ import (
 
 const path = "bacnetmaster" // must be unique across all plugins
 const name = "bacnetmaster" // must be unique across all plugins
-const description = "bacnet master api to nube bacnet stack"
+const description = "bacnet bserver api to nube bacnet stack"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
