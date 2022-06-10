@@ -40,12 +40,12 @@ func (inst *Instance) polling(p polling) error {
 	var arg api.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
-	log.Infoln("init bacnet master network")
+	log.Infoln("init bacnet bserver network")
 	f := func() (bool, error) {
 		nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, arg)
 		if len(nets) == 0 {
 			time.Sleep(2 * time.Second)
-			log.Info("bacnet-master: NO NETWORKS FOUND")
+			log.Info("bacnet-bserver: NO NETWORKS FOUND")
 		}
 		for _, net := range nets { // NETWORKS
 			if !inst.pollingEnabled {
@@ -56,12 +56,12 @@ func (inst *Instance) polling(p polling) error {
 				devDelay, pointDelay := delays(net.TransportType)
 				counter++
 				if boolean.IsFalse(net.Enable) {
-					log.Infof("bacnet-master: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
+					log.Infof("bacnet-bserver: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
 					continue
 				}
 				for _, dev := range net.Devices { // DEVICES
 					if boolean.IsFalse(net.Enable) {
-						log.Infof("bacnet-master-device: DEVICE DISABLED: NAME: %s\n", dev.Name)
+						log.Infof("bacnet-bserver-device: DEVICE DISABLED: NAME: %s\n", dev.Name)
 						continue
 					}
 
@@ -89,14 +89,14 @@ func (inst *Instance) polling(p polling) error {
 							if counter <= 1 || boolean.IsFalse(pnt.InSync) || rsyncWrite == 0 {
 								doWrite = true
 								if rsyncWrite == 0 {
-									log.Infoln("bacnet-master-WRITE-SYNC-ON-POLL-COUNT on device:", dev.Name, " point:", pnt.Name)
+									log.Infoln("bacnet-bserver-WRITE-SYNC-ON-POLL-COUNT on device:", dev.Name, " point:", pnt.Name)
 								} else {
-									log.Infoln("bacnet-master-WRITE-SYNC on device:", dev.Name, " point:", pnt.Name, " rsyncWrite:", rsyncWrite)
+									log.Infoln("bacnet-bserver-WRITE-SYNC on device:", dev.Name, " point:", pnt.Name, " rsyncWrite:", rsyncWrite)
 								}
 							}
 							if float.IsNil(pnt.WriteValue) {
 								doWrite = false
-								log.Infoln("bacnet-master-WRITE-SYNC-SKIP as writeValue is nil on device:", dev.Name, " point:", pnt.Name, " rsyncWrite:", rsyncWrite)
+								log.Infoln("bacnet-bserver-WRITE-SYNC-SKIP as writeValue is nil on device:", dev.Name, " point:", pnt.Name, " rsyncWrite:", rsyncWrite)
 							}
 							if doWrite {
 								err := inst.doWrite(pnt, net.UUID, dev.UUID)
@@ -116,7 +116,7 @@ func (inst *Instance) polling(p polling) error {
 					timeEnd := time.Now()
 					diff := timeEnd.Sub(timeStart)
 					out := time.Time{}.Add(diff)
-					log.Infof("bacnet-master-poll-loop: NETWORK-NAME:%s POLL-DURATION: %s  POLL-COUNT: %d\n", net.Name, out.Format("15:04:05.000"), counter)
+					log.Infof("bacnet-bserver-poll-loop: NETWORK-NAME:%s POLL-DURATION: %s  POLL-COUNT: %d\n", net.Name, out.Format("15:04:05.000"), counter)
 				}
 			}
 		}

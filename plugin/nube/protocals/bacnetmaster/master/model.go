@@ -11,7 +11,7 @@ type NameNet struct {
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
 	Max      int    `json:"max" default:"20"`
-	Default  string `json:"default" default:"bacnet-master"`
+	Default  string `json:"default" default:"bacnet-bserver"`
 }
 
 type NameDev struct {

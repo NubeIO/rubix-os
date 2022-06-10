@@ -1,9 +1,8 @@
 package bserver
 
 import (
-	"github.com/NubeDev/bacnet"
 	"github.com/NubeIO/flow-framework/plugin/defaults"
-	"github.com/gin-gonic/gin"
+	"github.com/NubeIO/lib-networking/networking"
 )
 
 type NameNet struct {
@@ -42,6 +41,13 @@ type EnableStruct struct {
 	Required bool   `json:"required" default:"true"`
 }
 
+type Interface struct {
+	Type     string   `json:"type" default:"string"`
+	Required bool     `json:"required" default:"true"`
+	Options  []string `json:"options" default:"[]"`
+	Default  string   `json:"default" default:""`
+}
+
 type Network struct {
 	Name        NameNet           `json:"name"`
 	Description DescriptionStruct `json:"description"`
@@ -50,12 +56,11 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"bacnetserver"`
 	} `json:"plugin_name"`
-	NetworkInterface struct {
-		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"false"`
-		Min      int    `json:"min" default:"0"`
-		Max      int    `json:"max" default:"200"`
-		Default  string `json:"default" default:"eth0"`
+	Interface struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[]"`
+		Default  string   `json:"default" default:""`
 	} `json:"network_interface"`
 	AutoMappingNetworksSelection struct {
 		Type     string   `json:"type" default:"array"`
@@ -81,49 +86,13 @@ type Network struct {
 }
 
 type Device struct {
-	Name        NameDev           `json:"name"`
-	Description DescriptionStruct `json:"description"`
-	Host        struct {
-		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"false"`
-		Options  string `json:"options" default:"192.168.15.10"`
-		Default  string `json:"default" default:"192.168.15.10"`
-	} `json:"host"`
-	Port struct {
-		Type     string `json:"type" default:"int"`
-		Required bool   `json:"required" default:"false"`
-		Options  int    `json:"options" default:"47808"`
-		Default  int    `json:"default" default:"47808"`
-	} `json:"port"`
+	Name           NameDev           `json:"name"`
+	Description    DescriptionStruct `json:"description"`
 	DeviceObjectId struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"false"`
-		Default  int    `json:"default" default:"0"`
+		Default  int    `json:"default" default:"1"`
 	} `json:"device_object_id"`
-	NetworkNumber struct {
-		Type     string `json:"type" default:"int"`
-		Required bool   `json:"required" default:"false"`
-		Default  int    `json:"default" default:"0"`
-	} `json:"network_number"`
-	DeviceMac struct {
-		Type     string `json:"type" default:"int"`
-		Required bool   `json:"required" default:"false"`
-		Min      int    `json:"min" default:"0"`
-		Max      int    `json:"max" default:"255"`
-		Default  int    `json:"default" default:"0"`
-	} `json:"device_mac"`
-	MaxADPU struct {
-		Type     string `json:"type" default:"array"`
-		Required bool   `json:"required" default:"true"`
-		Options  []int  `json:"options" default:"[50, 128, 206, 480, 1024, 1476]"`
-		Default  int    `json:"default" default:"1024"`
-	} `json:"max_adpu"`
-	Segmentation struct {
-		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"segmentation_both\",\"no_segmentation\",\"segmentation_transmit\",\"segmentation_receive\"]"`
-		Default  string   `json:"default" default:"no_segmentation"`
-	} `json:"segmentation"`
 }
 
 type Point struct {
@@ -154,10 +123,25 @@ type Point struct {
 	} `json:"write_priority"`
 }
 
+var nets = networking.New()
+
 func GetNetworkSchema() *Network {
-	network := &Network{}
-	defaults.Set(network)
-	return network
+	m := &Network{}
+	defaults.Set(m)
+	names, err := nets.GetInterfacesNames()
+	if err != nil {
+		return m
+	}
+	var out []string
+	out = append(out, "eth0")
+	out = append(out, "eth1")
+	for _, name := range names.Names {
+		if name != "lo" {
+			out = append(out, name)
+		}
+	}
+	m.Interface.Options = out
+	return m
 }
 
 func GetDeviceSchema() *Device {
@@ -170,9 +154,4 @@ func GetPointSchema() *Point {
 	point := &Point{}
 	defaults.Set(point)
 	return point
-}
-
-func BodyWhoIs(ctx *gin.Context) (dto *bacnet.WhoIsOpts, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
 }
