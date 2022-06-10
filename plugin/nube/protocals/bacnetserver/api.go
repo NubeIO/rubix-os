@@ -3,7 +3,8 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetmaster/master"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bserver"
+
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -12,11 +13,6 @@ const (
 	schemaNetwork = "/schema/network"
 	schemaDevice  = "/schema/device"
 	schemaPoint   = "/schema/point"
-)
-
-const (
-	whois          = "/whois"
-	discoverPoints = "/device/points"
 )
 
 func resolveID(ctx *gin.Context) string {
@@ -79,25 +75,14 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, master.GetNetworkSchema())
+		ctx.JSON(http.StatusOK, bserver.GetNetworkSchema())
 	})
 
 	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, master.GetDeviceSchema())
+		ctx.JSON(http.StatusOK, bserver.GetDeviceSchema())
 	})
 
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, master.GetPointSchema())
-	})
-	mux.POST(whois+"/:uuid", func(ctx *gin.Context) {
-		body, _ := master.BodyWhoIs(ctx)
-		uuid := resolveID(ctx)
-		resp, err := inst.whoIs(uuid, body)
-		api.ResponseHandler(resp, err, ctx)
-	})
-	mux.POST(discoverPoints+"/:uuid", func(ctx *gin.Context) {
-		uuid := resolveID(ctx)
-		resp, err := inst.devicePoints(uuid)
-		api.ResponseHandler(resp, err, ctx)
+		ctx.JSON(http.StatusOK, bserver.GetPointSchema())
 	})
 }

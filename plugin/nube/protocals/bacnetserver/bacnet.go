@@ -12,6 +12,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	defaultPort = 47809
+)
+
 func (inst *Instance) bacnetNetworkInit() {
 
 	networks, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true})
@@ -21,13 +25,13 @@ func (inst *Instance) bacnetNetworkInit() {
 	for _, net := range networks {
 		err := inst.bacnetNetwork(net)
 		if err != nil {
-			log.Errorln("bacnet-master init network error:", err)
+			log.Errorln("bacnet-server init network error:", err)
 			continue
 		}
 		for _, dev := range net.Devices {
 			err := inst.bacnetDevice(dev)
 			if err != nil {
-				log.Errorln("bacnet-master init device error:", err)
+				log.Errorln("bacnet-server init device error:", err)
 				continue
 			}
 		}
@@ -114,7 +118,7 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 	if isBool {
 		readBool, err := dev.PointReadBool(bp)
 		if err != nil {
-			log.Errorln("bacnet-master-read-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " error:", err)
+			log.Errorln("bacnet-server-read-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " error:", err)
 			return 0, err
 		}
 		outValue = Unit32ToFloat64(readBool)
@@ -122,12 +126,12 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 	} else {
 		readFloat32, err := dev.PointReadFloat32(bp)
 		if err != nil {
-			log.Errorln("bacnet-master-read-analogue:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " error:", err)
+			log.Errorln("bacnet-server-read-analogue:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " error:", err)
 			return 0, err
 		}
 		outValue = float32ToFloat64(readFloat32)
 	}
-	log.Infoln("bacnet-master-POINT-READ:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", outValue)
+	log.Infoln("bacnet-server-POINT-READ:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", outValue)
 	return outValue, nil
 }
 
@@ -160,18 +164,18 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 		if isBool {
 			err = dev.PointWriteBool(bp, float64ToUnit32(val))
 			if err != nil {
-				log.Errorln("bacnet-master-write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
+				log.Errorln("bacnet-server-write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
 				return err
 			}
 		} else {
 			err = dev.PointWriteAnalogue(bp, float64ToFloat32(val))
 			if err != nil {
-				log.Errorln("bacnet-master-write-analogue:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
+				log.Errorln("bacnet-server-write-analogue:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
 				return err
 			}
 		}
 	}
-	log.Infoln("bacnet-master-POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
+	log.Infoln("bacnet-server-POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
 	return nil
 
 }

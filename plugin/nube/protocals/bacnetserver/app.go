@@ -3,7 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -12,19 +14,53 @@ import (
 
 // addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
+	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
+	if err != nil {
+		return nil, err
+	}
+	for _, net := range nets {
+		if net != nil {
+			errMsg := fmt.Sprintf("bacnet-server: only max one network is allowed with lora")
+			log.Errorf(errMsg)
+			return nil, errors.New(errMsg)
+		}
+	}
+
+	if body.NetworkInterface == "" {
+		return nil, errors.New("network interface can not be empty try, eth0")
+	}
+
+	body.Port = integer.New(defaultPort)
+	fmt.Println(body.NetworkInterface)
 	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err
 	}
 	err = inst.bacnetNetwork(network)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error()))
+		return nil, errors.New(fmt.Sprintf("err:%s", err.Error()))
 	}
 	return body, nil
 }
 
 // addDevice add device
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
+	network, err := inst.db.GetNetwork(body.NetworkUUID, api.Args{WithDevices: true})
+	if err != nil {
+		return nil, err
+	}
+	if len(network.Devices) >= 1 {
+		errMsg := fmt.Sprintf("bacnet-server: only max one device is allowed")
+		log.Errorf(errMsg)
+		return nil, errors.New(errMsg)
+	}
+
+	body.NumberOfDevicesPermitted = integer.New(1)
+	body.CommonIP.Host = inst.getIp(network.NetworkInterface)
+	if integer.IsNil(body.DeviceObjectId) {
+		body.DeviceObjectId = integer.New(2508)
+	}
+	fmt.Println(11111, body.CommonIP.Host)
 	device, err = inst.db.CreateDevice(body)
 	if err != nil {
 		return nil, err
@@ -39,7 +75,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 // addPoint add point
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	if body.ObjectType == "" {
-		errMsg := fmt.Sprintf("bacnet-master: point object type can not be empty")
+		errMsg := fmt.Sprintf("bacnet-bserver: point object type can not be empty")
 		log.Errorf(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -134,7 +170,7 @@ func (inst *Instance) pointUpdate(uuid string) (*model.Point, error) {
 	point.InSync = boolean.NewTrue()
 	_, err := inst.db.UpdatePoint(uuid, &point, true)
 	if err != nil {
-		log.Error("bacnet-master: UpdatePoint()", err)
+		log.Error("bacnet-server: UpdatePoint()", err)
 		return nil, err
 	}
 	return nil, nil
@@ -152,7 +188,7 @@ func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point
 	point.InSync = boolean.NewTrue()
 	_, err := inst.db.UpdatePointValue(uuid, &point, &priority, true)
 	if err != nil {
-		log.Error("bacnet-master: pointUpdateValue()", err)
+		log.Error("bacnet-server: pointUpdateValue()", err)
 		return nil, err
 	}
 	return nil, nil
@@ -169,7 +205,7 @@ func (inst *Instance) pointUpdateErr(uuid string, err error) (*model.Point, erro
 	point.InSync = boolean.NewFalse()
 	_, err = inst.db.UpdatePoint(uuid, &point, true)
 	if err != nil {
-		log.Error("bacnet-master: pointUpdateErr()", err)
+		log.Error("bacnet-server: pointUpdateErr()", err)
 		return nil, err
 	}
 	return nil, nil
