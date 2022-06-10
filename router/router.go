@@ -11,7 +11,6 @@ import (
 	"github.com/NubeIO/flow-framework/logger"
 	"github.com/NubeIO/flow-framework/nerrors"
 	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/networking/networking"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -86,10 +85,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	tagHandler := api.TagAPI{
 		DB: db,
 	}
-	nets := networking.NewNets()
+
 	deviceInfoHandler := api.DeviceInfoAPI{
-		DB:   db,
-		Nets: nets,
+		DB: db,
 	}
 	writerHandler := api.WriterAPI{
 		DB: db,
@@ -385,14 +383,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		deviceInfoRoutes := apiRoutes.Group("/system")
 		{
 			deviceInfoRoutes.GET("/device_info", deviceInfoHandler.GetDeviceInfo)
-			deviceInfoRoutes.GET("/host/info", deviceInfoHandler.GetOSDetails)
-			deviceInfoRoutes.GET("/host/timezone/list", deviceInfoHandler.GetTZoneList)
-			deviceInfoRoutes.GET("/time", deviceInfoHandler.GetSystemTime)
-			deviceInfoRoutes.GET("/ip/internal", deviceInfoHandler.GetNetworks)
-			deviceInfoRoutes.GET("/ip/external", deviceInfoHandler.GetExternalIP)
-			deviceInfoRoutes.GET("/ip/interfaces", deviceInfoHandler.GetInterfacesNames)
-			deviceInfoRoutes.GET("/firewall/status", deviceInfoHandler.FirewallStatus)
-			deviceInfoRoutes.POST("/discover", deviceInfoHandler.RubixNetworkPing)
 		}
 
 		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)

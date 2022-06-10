@@ -48,6 +48,7 @@ require github.com/NubeDev/bacnet v0.0.4
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
+	github.com/NubeIO/lib-date v0.0.1 // indirect
 	github.com/creack/goselect v0.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deepmap/oapi-codegen v1.8.2 // indirect

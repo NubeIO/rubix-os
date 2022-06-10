@@ -2,52 +2,34 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/api/bacnetserver/v1/bsrest"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/rest/v1/rest"
 	"github.com/labstack/gommon/log"
 )
-
-var bacnetClient *bsrest.BacnetClient
 
 // Enable implements plugin.Plugin
 func (inst *Instance) Enable() error {
 	inst.enabled = true
 	inst.setUUID()
-	inst.BusServ()
 	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
 	if q != nil {
 		inst.networkUUID = q.UUID
-	} else {
-		inst.networkUUID = "NA"
 	}
-	if err != nil {
-		log.Error("error on enable bacnetserver-plugin")
+	inst.initBacStore()
+	inst.bacnetNetworkInit()
+	if !inst.pollingEnabled {
+		var arg polling
+		inst.pollingEnabled = true
+		arg.enable = true
+		go func() error {
+			err := inst.polling(arg)
+			if err != nil {
+				log.Errorf("rubix-io.enable: POLLING ERROR on routine: %v\n", err)
+			}
+			return nil
+		}()
+		if err != nil {
+			log.Errorf("rubix-io.enable: POLLING ERROR: %v\n", err)
+		}
 	}
-
-	// restService := &rest.Service{}
-	// restService.Port = 1717
-	// options := &rest.Options{}
-	// restService.Options = options
-	// restService = rest.New(restService)
-	//
-	// commonClient := &iorest.NubeRest{}
-	// commonClient.UseRubixProxy = false
-	// commonClient.RubixUsername = "admin"
-	// commonClient.RubixPassword = "N00BWires"
-	// commonClient = iorest.New(commonClient, restService)
-	// bacnetClient = bsrest.New(&bsrest.BacnetClient{IoRest: commonClient})
-
-	restService := &rest.Service{}
-	restService.Port = 1717
-	restOptions := &rest.Options{}
-	restService.Options = restOptions
-	restService = rest.New(restService)
-
-	nubeProxy := &rest.NubeProxy{}
-	nubeProxy.UseRubixProxy = false
-	restService.NubeProxy = nubeProxy
-
-	bacnetClient = bsrest.New(&bsrest.BacnetClient{Rest: restService})
 
 	return nil
 }
@@ -55,5 +37,15 @@ func (inst *Instance) Enable() error {
 // Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
 	inst.enabled = false
+	if inst.pollingEnabled {
+		var arg polling
+		inst.pollingEnabled = false
+		arg.enable = false
+		go func() {
+			err := inst.polling(arg)
+			if err != nil {
+			}
+		}()
+	}
 	return nil
 }
