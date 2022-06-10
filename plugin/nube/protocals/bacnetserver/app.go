@@ -60,7 +60,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	if integer.IsNil(body.DeviceObjectId) {
 		body.DeviceObjectId = integer.New(2508)
 	}
-	fmt.Println(11111, body.CommonIP.Host)
+	body.Port = 47808
 	device, err = inst.db.CreateDevice(body)
 	if err != nil {
 		return nil, err

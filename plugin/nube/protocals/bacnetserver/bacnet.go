@@ -159,7 +159,6 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 	if err != nil {
 		return err
 	}
-
 	if isWrite {
 		if isBool {
 			err = dev.PointWriteBool(bp, float64ToUnit32(val))

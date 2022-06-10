@@ -3,6 +3,7 @@ package master
 import (
 	"github.com/NubeDev/bacnet"
 	"github.com/NubeIO/flow-framework/plugin/defaults"
+	"github.com/NubeIO/lib-networking/networking"
 	"github.com/gin-gonic/gin"
 )
 
@@ -50,12 +51,11 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"bacnetmaster"`
 	} `json:"plugin_name"`
-	NetworkInterface struct {
-		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"false"`
-		Min      int    `json:"min" default:"0"`
-		Max      int    `json:"max" default:"200"`
-		Default  string `json:"default" default:"eth0"`
+	Interface struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[]"`
+		Default  string   `json:"default" default:""`
 	} `json:"network_interface"`
 	AutoMappingNetworksSelection struct {
 		Type     string   `json:"type" default:"array"`
@@ -154,10 +154,25 @@ type Point struct {
 	} `json:"write_priority"`
 }
 
+var nets = networking.New()
+
 func GetNetworkSchema() *Network {
-	network := &Network{}
-	defaults.Set(network)
-	return network
+	m := &Network{}
+	defaults.Set(m)
+	names, err := nets.GetInterfacesNames()
+	if err != nil {
+		return m
+	}
+	var out []string
+	out = append(out, "eth0")
+	out = append(out, "eth1")
+	for _, name := range names.Names {
+		if name != "lo" {
+			out = append(out, name)
+		}
+	}
+	m.Interface.Options = out
+	return m
 }
 
 func GetDeviceSchema() *Device {
