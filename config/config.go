@@ -40,9 +40,9 @@ type Configuration struct {
 			PluginsDir        string `default:"plugins"`
 			UploadedImagesDir string `default:"images"`
 		}
-		DeviceInfoFile       string `default:"/data/rubix-registry/device_info.json"`
-		AuthDataDir          string `default:"/data/rubix-service"`
-		RelativeAuthDataFile string `default:"/data/internal_token.txt"`
+		DeviceInfoFile    string `default:"/data/rubix-registry/device_info.json"`
+		TokenFolder       string `default:"/data/token"`
+		InternalTokenFile string `default:"internal.txt"`
 	}
 	Prod            bool  `default:"false"`
 	Auth            *bool `default:"true"`
@@ -102,7 +102,6 @@ func (conf *Configuration) HandleSecretKey() *Configuration {
 	return conf
 }
 
-
 func (conf *Configuration) GetAbsDataDir() string {
 	return path.Join(conf.Location.GlobalDir, conf.Location.DataDir)
 }
@@ -117,4 +116,8 @@ func (conf *Configuration) GetAbsPluginDir() string {
 
 func (conf *Configuration) GetAbsUploadedImagesDir() string {
 	return path.Join(conf.GetAbsDataDir(), conf.Location.Data.UploadedImagesDir)
+}
+
+func (conf *Configuration) GetAbsInternalTokenFile() string {
+	return path.Join(conf.Location.TokenFolder, conf.Location.InternalTokenFile)
 }

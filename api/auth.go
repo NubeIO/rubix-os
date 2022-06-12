@@ -25,7 +25,7 @@ func (j *AuthAPI) HandleAuth() gin.HandlerFunc {
 		if len(authorization) > 0 {
 			// Internal Auth
 			if len(authorization) == 2 && authorization[0] == "Internal" &&
-				authorization[1] == auth.GetRubixServiceInternalToken(false) {
+				authorization[1] == auth.GetInternalToken(false) {
 				c.Next()
 				return
 			}

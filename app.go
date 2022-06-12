@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/auth"
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/eventbus"
@@ -58,6 +59,7 @@ func main() {
 	if err := os.MkdirAll(conf.GetAbsUploadedImagesDir(), 0755); err != nil {
 		panic(err)
 	}
+	auth.CreateInternalToken()
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
 	localBroker := "tcp://0.0.0.0:1883" // TODO add to config, this is meant to be an unsecure broker
 	connected, err := mqttclient.InternalMQTT(localBroker)

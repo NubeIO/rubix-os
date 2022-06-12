@@ -71,7 +71,7 @@ func NewLocalClient() *FlowClient {
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetTransport(&transport)
-	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken(true))
+	client.SetHeader("Authorization", auth.GetInternalToken(true))
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
 	return flowClient
@@ -135,7 +135,7 @@ func newMasterToSlaveSession(globalUUID string) *FlowClient {
 	client.SetDebug(false)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
-	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken(true))
+	client.SetHeader("Authorization", auth.GetInternalToken(true))
 	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
@@ -154,7 +154,7 @@ func newSlaveToMasterCallSession() *FlowClient {
 	client.SetDebug(false)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
-	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken(true))
+	client.SetHeader("Authorization", auth.GetInternalToken(true))
 	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
