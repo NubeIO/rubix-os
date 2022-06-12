@@ -91,7 +91,7 @@ func NewFlowClientCliFromFN(fn *model.FlowNetwork) *FlowClient {
 
 func NewFlowClientCliFromFNC(fnc *model.FlowNetworkClone) *FlowClient {
 	if boolean.IsTrue(fnc.IsMasterSlave) {
-		return newMasterToSlaveSession(fnc.GlobalUUID)
+		return NewMasterToSlaveSession(fnc.GlobalUUID)
 	} else {
 		if boolean.IsTrue(fnc.IsRemote) {
 			return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken, boolean.IsTrue(fnc.IsTokenAuth))
@@ -123,7 +123,7 @@ func newSessionWithToken(ip string, port int, token string, isTokenAuth bool) *F
 	return flowClient
 }
 
-func newMasterToSlaveSession(globalUUID string) *FlowClient {
+func NewMasterToSlaveSession(globalUUID string) *FlowClient {
 	mutex.RLock()
 	defer mutex.RUnlock()
 	conf := config.Get()

@@ -20,6 +20,10 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 		}
 	}
 	cli := client.NewFlowClientCliFromFN(body)
+	// In this case it's even though FN, this is clone side & need to communicate with slave device from master
+	if boolean.IsTrue(body.IsMasterSlave) {
+		cli = client.NewMasterToSlaveSession(body.GlobalUUID)
+	}
 	remoteDeviceInfo, err := cli.DeviceInfo()
 	if err != nil {
 		return nil, err
