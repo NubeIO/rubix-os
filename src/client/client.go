@@ -94,7 +94,7 @@ func NewFlowClientCliFromFNC(fnc *model.FlowNetworkClone) *FlowClient {
 		return newMasterToSlaveSession(fnc.GlobalUUID)
 	} else {
 		if boolean.IsTrue(fnc.IsRemote) {
-			return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken, *fnc.IsTokenAuth)
+			return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken, boolean.IsTrue(fnc.IsTokenAuth))
 		} else {
 			return NewLocalClient()
 		}
