@@ -71,6 +71,7 @@ func NewLocalClient() *FlowClient {
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetTransport(&transport)
+	client.SetHeader("Authorization", auth.GetInternalToken(true))
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
 	return flowClient
@@ -81,7 +82,7 @@ func NewFlowClientCliFromFN(fn *model.FlowNetwork) *FlowClient {
 		return newSlaveToMasterCallSession()
 	} else {
 		if boolean.IsTrue(fn.IsRemote) {
-			return newSessionWithToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowToken)
+			return newSessionWithToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowToken, boolean.IsTrue(fn.IsTokenAuth))
 		} else {
 			return NewLocalClient()
 		}
@@ -90,20 +91,24 @@ func NewFlowClientCliFromFN(fn *model.FlowNetwork) *FlowClient {
 
 func NewFlowClientCliFromFNC(fnc *model.FlowNetworkClone) *FlowClient {
 	if boolean.IsTrue(fnc.IsMasterSlave) {
-		return newMasterToSlaveSession(fnc.GlobalUUID)
+		return NewMasterToSlaveSession(fnc.GlobalUUID)
 	} else {
 		if boolean.IsTrue(fnc.IsRemote) {
-			return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken)
+			return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken, boolean.IsTrue(fnc.IsTokenAuth))
 		} else {
 			return NewLocalClient()
 		}
 	}
 }
 
-func newSessionWithToken(ip string, port int, token string) *FlowClient {
+func newSessionWithToken(ip string, port int, token string, isTokenAuth bool) *FlowClient {
 	mutex.RLock()
 	defer mutex.RUnlock()
 	url := fmt.Sprintf("%s://%s:%d/ff", getSchema(port), ip, port)
+	if isTokenAuth {
+		url = fmt.Sprintf("%s://%s:%d", getSchema(port), ip, port)
+		token = fmt.Sprintf("External %s", token)
+	}
 	if flowClient, found := flowClients[url]; found {
 		return flowClient
 	}
@@ -118,7 +123,7 @@ func newSessionWithToken(ip string, port int, token string) *FlowClient {
 	return flowClient
 }
 
-func newMasterToSlaveSession(globalUUID string) *FlowClient {
+func NewMasterToSlaveSession(globalUUID string) *FlowClient {
 	mutex.RLock()
 	defer mutex.RUnlock()
 	conf := config.Get()
@@ -130,7 +135,7 @@ func newMasterToSlaveSession(globalUUID string) *FlowClient {
 	client.SetDebug(false)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
-	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
+	client.SetHeader("Authorization", auth.GetInternalToken(true))
 	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
@@ -149,7 +154,7 @@ func newSlaveToMasterCallSession() *FlowClient {
 	client.SetDebug(false)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
-	client.SetHeader("Authorization", auth.GetRubixServiceInternalToken())
+	client.SetHeader("Authorization", auth.GetInternalToken(true))
 	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient

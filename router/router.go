@@ -101,6 +101,16 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	syncWriterHandler := api.SyncWriterAPI{
 		DB: db,
 	}
+	userHandler := api.UserAPI{
+		DB: db,
+	}
+	tokenHandler := api.TokenAPI{
+		DB: db,
+	}
+	authHandler := api.AuthAPI{
+		DB: db,
+	}
+
 	dbGroup.SyncTopics()
 	// for the custom plugin endpoints you need to use the plugin token
 	// http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
@@ -116,6 +126,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	}
 
 	engine.GET("/api/system/ping", healthHandler.Health)
+	engine.POST("/api/users/login", userHandler.Login)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
 	engine.Use(func(ctx *gin.Context) {
 		ctx.Header("Content-Type", "application/json") // if you comment it out it will detected as text on proxy-handlers
@@ -127,7 +138,11 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	engine.Use(cors.New(auth.CorsConfig(conf)))
 	engine.OPTIONS("/*any")
 
-	apiRoutes := engine.Group("/api")
+	handleAuth := func(c *gin.Context) { c.Next() }
+	if *conf.Auth {
+		handleAuth = authHandler.HandleAuth()
+	}
+	apiRoutes := engine.Group("/api", handleAuth)
 	{
 		fnProxy := apiRoutes.Group("/fn")
 		{
@@ -396,6 +411,19 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			syncRoutes.POST("/cov/:writer_uuid", syncWriterHandler.SyncCOV) // clone ---> source side
 			syncRoutes.POST("/writer/write/:source_uuid", syncWriterHandler.SyncWriterWriteAction)
 			syncRoutes.GET("/writer/read/:source_uuid", syncWriterHandler.SyncWriterReadAction)
+		}
+
+		userRoutes := apiRoutes.Group("/users")
+		{
+			userRoutes.PUT("", userHandler.UpdateUser)
+			userRoutes.GET("", userHandler.GetUser)
+		}
+
+		tokenRoutes := apiRoutes.Group("/tokens")
+		{
+			tokenRoutes.GET("", tokenHandler.GetTokens)
+			tokenRoutes.PUT("", tokenHandler.UpdateToken)
+			tokenRoutes.POST("/generate", tokenHandler.GenerateToken)
 		}
 	}
 	return engine
