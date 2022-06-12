@@ -46,10 +46,9 @@ require (
 
 require (
 	github.com/NubeDev/bacnet v0.0.4
+	github.com/NubeIO/lib-networking v0.0.4
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
-	github.com/NubeIO/lib-date v0.0.1
-	github.com/NubeIO/lib-networking v0.0.4
 )
 
 require (
