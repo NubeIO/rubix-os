@@ -41,8 +41,8 @@ type Configuration struct {
 			UploadedImagesDir string `default:"images"`
 		}
 		DeviceInfoFile    string `default:"/data/rubix-registry/device_info.json"`
-		TokenFolder       string `default:"/data/token"`
-		InternalTokenFile string `default:"internal.txt"`
+		TokenFolder       string `default:"/data/rubix-service/data/"`
+		InternalTokenFile string `default:"internal_token.txt"`
 	}
 	Prod            bool  `default:"false"`
 	Auth            *bool `default:"true"`

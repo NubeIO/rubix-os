@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/utils/file"
 	"github.com/NubeIO/flow-framework/utils/security"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -12,17 +13,17 @@ import (
 func GetInternalToken(withPrefix bool) string {
 	conf := config.Get()
 	absInternalTokenFile := conf.GetAbsInternalTokenFile()
-	file, err := os.Open(absInternalTokenFile)
+	f, err := os.Open(absInternalTokenFile)
 	if err != nil {
 		log.Error(err)
 		return ""
 	}
 	defer func() {
-		if err = file.Close(); err != nil {
+		if err = f.Close(); err != nil {
 			log.Error(err)
 		}
 	}()
-	internalToken, err := ioutil.ReadAll(file)
+	internalToken, err := ioutil.ReadAll(f)
 	if err != nil {
 		log.Error(err)
 	}
@@ -33,18 +34,22 @@ func GetInternalToken(withPrefix bool) string {
 	}
 }
 
-func CreateInternalToken() {
+func CreateInternalTokenIfDoesNotExist() {
 	conf := config.Get()
 	if err := os.MkdirAll(conf.Location.TokenFolder, 0755); err != nil {
 		panic(err)
 	}
 	absInternalTokenFile := conf.GetAbsInternalTokenFile()
-	file, err := os.OpenFile(absInternalTokenFile, os.O_RDWR|os.O_CREATE, 0755)
+	_, err := file.ReadFile(absInternalTokenFile)
+	if err == nil {
+		return
+	}
+	f, err := os.OpenFile(absInternalTokenFile, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		log.Error(err)
 	}
 	token := security.GenerateToken()
-	_, err = file.Write([]byte(token))
+	_, err = f.Write([]byte(token))
 	if err != nil {
 		log.Error(err)
 	}
