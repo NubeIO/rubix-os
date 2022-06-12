@@ -111,6 +111,7 @@ func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (
 		}
 		return nil, err
 	}
+	body.UUID = uuid
 	return d.afterCreateUpdateFlowNetwork(body, isMasterSlave, cli, isRemote, tx)
 }
 
@@ -245,13 +246,13 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 		if body.FlowPort == nil {
 			body.FlowPort = &conf.Server.Port
 		}
-		if body.FlowUsername == nil {
-			return false, nil, false, nil, errors.New("FlowUsername can't be null when we it's not master/slave flow network")
-		}
-		if body.FlowPassword == nil {
-			return false, nil, false, nil, errors.New("FlowPassword can't be null when we it's not master/slave flow network")
-		}
 		if boolean.IsFalse(body.IsTokenAuth) {
+			if body.FlowUsername == nil {
+				return false, nil, false, nil, errors.New("FlowUsername can't be null when we it's not master/slave flow network")
+			}
+			if body.FlowPassword == nil {
+				return false, nil, false, nil, errors.New("FlowPassword can't be null when we it's not master/slave flow network")
+			}
 			accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
 			if err != nil {
 				return false, nil, false, nil, err
