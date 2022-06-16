@@ -18,6 +18,10 @@ func ResponseHandler(body interface{}, err error, ctx *gin.Context) {
 			statusCode := http.StatusConflict
 			message := fmt.Sprintf("%s %s [%d]: %s", ctx.Request.Method, ctx.Request.URL, statusCode, err.Error())
 			ctx.JSON(statusCode, interfaces.Message{Message: message})
+		case *nerrors.ErrUnauthorized:
+			statusCode := http.StatusUnauthorized
+			message := fmt.Sprintf("%s %s [%d]: %s", ctx.Request.Method, ctx.Request.URL, statusCode, err.Error())
+			ctx.JSON(statusCode, interfaces.Message{Message: message})
 		default:
 			switch err {
 			case gorm.ErrRecordNotFound:

@@ -1,9 +1,11 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/bools"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
+	"regexp"
 )
 
 func getBODYSchedule(ctx *gin.Context) (dto *model.Schedule, err error) {
@@ -156,6 +158,16 @@ func getBodyTag(ctx *gin.Context) (dto *model.Tag, err error) {
 	return dto, err
 }
 
+func getBodyUser(ctx *gin.Context) (dto *model.User, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyToken(ctx *gin.Context) (dto *interfaces.Token, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getP2PBody(ctx *gin.Context) (dto *model.P2PBody, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -212,4 +224,9 @@ func toBool(value string) (bool, error) {
 		c, err := bools.Boolean(value)
 		return c, err
 	}
+}
+
+func validUsername(username string) bool {
+	re, _ := regexp.Compile("^([A-Za-z0-9_-])+$")
+	return re.FindString(username) != ""
 }

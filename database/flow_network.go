@@ -111,6 +111,7 @@ func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (
 		}
 		return nil, err
 	}
+	body.UUID = uuid
 	return d.afterCreateUpdateFlowNetwork(body, isMasterSlave, cli, isRemote, tx)
 }
 
@@ -130,7 +131,7 @@ func (d *GormDatabase) DeleteFlowNetwork(uuid string) (bool, error) {
 
 func (d *GormDatabase) RefreshFlowNetworksConnections() (*bool, error) {
 	var flowNetworks []*model.FlowNetwork
-	d.DB.Where("is_master_slave IS NOT TRUE AND is_remote IS TRUE").Find(&flowNetworks)
+	d.DB.Where("is_master_slave IS NOT TRUE AND is_remote IS TRUE AND is_token_auth IS NOT TRUE").Find(&flowNetworks)
 	for _, fn := range flowNetworks {
 		accessToken, err := client.GetFlowToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowUsername, *fn.FlowPassword)
 		fnModel := model.FlowNetworkClone{}
@@ -245,17 +246,19 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 		if body.FlowPort == nil {
 			body.FlowPort = &conf.Server.Port
 		}
-		if body.FlowUsername == nil {
-			return false, nil, false, nil, errors.New("FlowUsername can't be null when we it's not master/slave flow network")
+		if boolean.IsFalse(body.IsTokenAuth) {
+			if body.FlowUsername == nil {
+				return false, nil, false, nil, errors.New("FlowUsername can't be null when we it's not master/slave flow network")
+			}
+			if body.FlowPassword == nil {
+				return false, nil, false, nil, errors.New("FlowPassword can't be null when we it's not master/slave flow network")
+			}
+			accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
+			if err != nil {
+				return false, nil, false, nil, err
+			}
+			body.FlowToken = accessToken
 		}
-		if body.FlowPassword == nil {
-			return false, nil, false, nil, errors.New("FlowPassword can't be null when we it's not master/slave flow network")
-		}
-		accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
-		if err != nil {
-			return false, nil, false, nil, err
-		}
-		body.FlowToken = accessToken
 	}
 
 	cli := client.NewFlowClientCliFromFN(body)
@@ -302,10 +305,18 @@ func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isM
 		}
 		bodyToSync.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
 		bodyToSync.FlowIP = nstring.NewStringAddress(localStorageFlowNetwork.FlowIP)
-		bodyToSync.FlowPort = integer.New(localStorageFlowNetwork.FlowPort)
-		bodyToSync.FlowUsername = nstring.NewStringAddress(localStorageFlowNetwork.FlowUsername)
-		bodyToSync.FlowPassword = nstring.NewStringAddress(localStorageFlowNetwork.FlowPassword)
-		bodyToSync.FlowToken = nstring.NewStringAddress(localStorageFlowNetwork.FlowToken)
+		if boolean.IsTrue(body.IsTokenAuth) {
+			conf := config.Get()
+			body.FlowPort = integer.New(conf.Server.Port)
+			bodyToSync.FlowUsername = nil
+			bodyToSync.FlowPassword = nil
+			bodyToSync.FlowToken = body.FlowTokenLocal
+		} else {
+			bodyToSync.FlowPort = integer.New(localStorageFlowNetwork.FlowPort)
+			bodyToSync.FlowUsername = nstring.NewStringAddress(localStorageFlowNetwork.FlowUsername)
+			bodyToSync.FlowPassword = nstring.NewStringAddress(localStorageFlowNetwork.FlowPassword)
+			bodyToSync.FlowToken = nstring.NewStringAddress(localStorageFlowNetwork.FlowToken)
+		}
 	}
 	err := d.syncAndEditFlowNetwork(cli, body, &bodyToSync)
 	if err != nil {

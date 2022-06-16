@@ -6,6 +6,13 @@
 - reformat nil helpers
 - add in sync on flow-networks
 
+## [v0.5.5](https://github.com/NubeIO/flow-framework/tree/v0.5.5) (2022-06-10)
+
+- redo of bacnet-server plugin
+- fix bug on lora plugin
+- reformat nil helpers
+- add in sync on flow-networks
+
 ## [v0.5.4](https://github.com/NubeIO/flow-framework/tree/v0.5.4) (2022-05-24)
 
 - bacnet master fix bug on select object type
