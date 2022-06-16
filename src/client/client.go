@@ -64,6 +64,7 @@ func NewLocalClient() *FlowClient {
 	port := config.Get().Server.Port
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), "0.0.0.0", port)
 	if flowClient, found := flowClients[url]; found {
+		flowClient.client.SetHeader("Authorization", auth.GetInternalToken(true))
 		return flowClient
 	}
 	client := resty.New()
@@ -110,6 +111,7 @@ func newSessionWithToken(ip string, port int, token string, isTokenAuth bool) *F
 		token = fmt.Sprintf("External %s", token)
 	}
 	if flowClient, found := flowClients[url]; found {
+		flowClient.client.SetHeader("Authorization", token)
 		return flowClient
 	}
 	client := resty.New()
@@ -129,6 +131,7 @@ func NewMasterToSlaveSession(globalUUID string) *FlowClient {
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", conf.Server.RSPort, globalUUID)
 	if flowClient, found := flowClients[url]; found {
+		flowClient.client.SetHeader("Authorization", auth.GetInternalToken(true))
 		return flowClient
 	}
 	client := resty.New()
@@ -148,6 +151,7 @@ func newSlaveToMasterCallSession() *FlowClient {
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", conf.Server.RSPort)
 	if flowClient, found := flowClients[url]; found {
+		flowClient.client.SetHeader("Authorization", auth.GetInternalToken(true))
 		return flowClient
 	}
 	client := resty.New()
