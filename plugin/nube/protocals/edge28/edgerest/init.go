@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/go-resty/resty/v2"
+	log "github.com/sirupsen/logrus"
 )
 
 // RestClient is used to invoke Form3 Accounts API.
@@ -22,4 +23,17 @@ func NewNoAuth(address string, port int) *RestClient {
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Content-Type", "application/json")
 	return &RestClient{client: client}
+}
+
+func (client *RestClient) edge28ClientDebugMsg(args ...interface{}) {
+	enable := true
+	if enable {
+		prefix := "Edge28 Client: "
+		log.Info(prefix, args)
+	}
+}
+
+func (client *RestClient) edge28ClientErrorMsg(args ...interface{}) {
+	prefix := "Edge28 Client: "
+	log.Error(prefix, args)
 }

@@ -2,33 +2,29 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/api"
-	log "github.com/sirupsen/logrus"
 )
 
 // Enable implements plugin.Plugin
 func (inst *Instance) Enable() error {
+	inst.edge28DebugMsg("Edge28 Enable()")
 	inst.enabled = true
 	inst.setUUID()
-	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
-	if q != nil {
-		inst.networkUUID = q.UUID
-	} else {
-		inst.networkUUID = "NA"
+	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
+	if nets != nil {
+		inst.networks = nets
+	} else if err != nil {
+		inst.networks = nil
 	}
+
 	if inst.config.EnablePolling {
 		if !inst.pollingEnabled {
 			var arg polling
 			inst.pollingEnabled = true
 			arg.enable = true
-			go func() error {
-				err := inst.polling(arg)
-				if err != nil {
-					log.Errorf("edge28-enable: POLLING ERROR on routine: %v\n", err)
-				}
-				return nil
-			}()
+
+			err := inst.Edge28Polling()
 			if err != nil {
-				log.Errorf("edge28-enable: POLLING ERROR: %v\n", err)
+				inst.edge28ErrorMsg("POLLING ERROR on routine: %v\n", err)
 			}
 		}
 	}
@@ -37,16 +33,14 @@ func (inst *Instance) Enable() error {
 
 // Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
+	inst.edge28DebugMsg("EDGE28 Disable()")
 	inst.enabled = false
 	if inst.pollingEnabled {
 		var arg polling
 		inst.pollingEnabled = false
 		arg.enable = false
-		go func() {
-			err := inst.polling(arg)
-			if err != nil {
-			}
-		}()
+		inst.pollingCancel()
+		inst.pollingCancel = nil
 	}
 	return nil
 }

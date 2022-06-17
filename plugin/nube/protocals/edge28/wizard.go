@@ -17,7 +17,7 @@ type wizard struct {
 
 // wizard make a network/dev/pnt
 func (inst *Instance) wizard(body wizard) (string, error) {
-	ip := "192.168.15.63"
+	ip := "192.168.15.10"
 	if body.IP != "" {
 		ip = body.IP
 	}

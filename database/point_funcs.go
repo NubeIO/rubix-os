@@ -66,6 +66,9 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 // updatePriority it updates priority array of point model
 // it attaches the point model fields values for updating it on it's parent function
 func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64) (*model.Point, *map[string]*float64, *float64) {
+	fmt.Println("updatePriority: priorityMap")
+	fmt.Printf("%+v\n", priority)
+	fmt.Println(priority == nil)
 	var presentValue *float64
 	priorityMap := priority
 	presentValueFromPriority := pointModel.PointPriorityArrayMode != model.ReadOnlyNoPriorityArrayRequired && pointModel.PointPriorityArrayMode != model.PriorityArrayToWriteValue
