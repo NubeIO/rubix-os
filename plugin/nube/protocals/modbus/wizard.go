@@ -256,7 +256,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				net.TransportType = model.TransType.Serial
 				net.PluginPath = "modbus"
 				net.SerialPort = nstring.New("/dev/ttyXBEE-2")
-				net.MaxPollRate = float.New(0.1)
+				net.MaxPollRate = float.New(5)
 				net.PluginConfId = inst.pluginUUID
 				net, err = inst.addNetwork(net)
 				if err != nil {
@@ -305,7 +305,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				Fallback               float64
 			}
 
-			pointsArray := [27]tmvPoint{
+			pointsArray := [26]tmvPoint{
 				{
 					AddressID:              1001,
 					Name:                   "Enable",
