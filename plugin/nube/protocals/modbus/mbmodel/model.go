@@ -27,6 +27,12 @@ type TransportTypeStruct struct {
 }
 
 type Network struct {
+	Enable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
+	} `json:"enable"`
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
@@ -80,15 +86,35 @@ type Network struct {
 		DisplayName string   `json:"display_name" default:"Polling Timeout"`
 		Default     *float64 `json:"default" default:"2"`
 	} `json:"serial_timeout"`
+	AutoMappingNetworksSelection struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[\"disable\",\"self-mapping\",\"rubix-io-to-bacnetserver\"]"`
+		Default  string   `json:"default" default:""`
+	} `json:"auto_mapping_networks_selection"`
+	AutoMappingFlowNetworkName struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"200"`
+		Default  string `json:"default" default:"local"`
+	} `json:"auto_mapping_flow_network_name"`
+	AutoMappingFlowNetworkUUID struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"200"`
+		Default  string `json:"default" default:""`
+	} `json:"auto_mapping_flow_network_uuid"`
+}
+
+type Device struct {
 	Enable struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
 		Options  bool   `json:"options" default:"false"`
 		Default  *bool  `json:"default" default:"true"`
 	} `json:"enable"`
-}
-
-type Device struct {
 	Name          NameStruct          `json:"name"`
 	Description   DescriptionStruct   `json:"description"`
 	TransportType TransportTypeStruct `json:"transport_type"`
@@ -137,15 +163,15 @@ type Device struct {
 		Options  bool   `json:"options" default:"false"`
 		Default  *bool  `json:"default" default:"true"`
 	} `json:"zero_mode"`
-	Enable struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"false"`
-		Default  *bool  `json:"default" default:"true"`
-	} `json:"enable"`
 }
 
 type Point struct {
+	Enable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"true"`
+		Default  *bool  `json:"default" default:"true"`
+	} `json:"enable"`
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	ObjectType  struct {
@@ -215,12 +241,6 @@ type Point struct {
 		DisplayName string   `json:"display_name" default:"Fallback Value"`
 		Nullable    bool     `json:"nullable" default:"true"`
 	} `json:"fallback"`
-	Enable struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"true"`
-		Default  *bool  `json:"default" default:"true"`
-	} `json:"enable"`
 }
 
 func GetNetworkSchema() *Network {

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -184,6 +186,7 @@ func (d *GormDatabase) selectFlowNetwork(flowNetworkName, flowNetworkUUID string
 
 func (d *GormDatabase) createPointMappingStream(deviceName, networkName string, flowNetwork *model.FlowNetwork) (stream *model.Stream, err error) {
 	streamModel := &model.Stream{}
+	streamModel.Enable = boolean.NewTrue()
 	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 	streamModel.Name = fmt.Sprintf("%s_%s", networkName, deviceName)
 	log.Info("Try and make anew stream or select existing with name: ", streamModel.Name)
@@ -205,6 +208,7 @@ func (d *GormDatabase) createPointMappingStream(deviceName, networkName string, 
 
 func (d *GormDatabase) createPointMappingStreamClone(deviceName, networkName string, flowNetwork *model.FlowNetwork) (stream *model.Stream, err error) {
 	streamModel := &model.Stream{}
+	streamModel.Enable = boolean.NewTrue()
 	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 	streamModel.Name = fmt.Sprintf("%s_%s", networkName, deviceName)
 	log.Info("Try and make anew stream or select existing with name: ", streamModel.Name)
@@ -226,6 +230,7 @@ func (d *GormDatabase) createPointMappingStreamClone(deviceName, networkName str
 
 func (d *GormDatabase) createPointMappingPoint(pointObjectType, pointName, deviceUUID string) (point *model.Point, err error) {
 	point = &model.Point{}
+	point.Enable = boolean.NewTrue()
 	// make pnt, first check
 	point.Name = pointName
 	point.ObjectType = pointObjectType
@@ -248,6 +253,7 @@ func (d *GormDatabase) createPointMappingNetwork(plugin string) (network *model.
 	network, err = d.GetNetworkByPluginName(plugin, api.Args{})
 	if network == nil {
 		network = &model.Network{}
+		network.Enable = boolean.NewTrue()
 		network.Name = plugin
 		network.PluginPath = plugin
 		network, err = d.CreateNetwork(network, false)
@@ -268,6 +274,7 @@ func (d *GormDatabase) createPointMappingDevice(deviceName, networkUUID string) 
 	device, existing := d.deviceNameExistsInNetwork(deviceName, networkUUID)
 	if !existing {
 		newDevice := &model.Device{}
+		newDevice.Enable = boolean.NewTrue()
 		newDevice.Name = deviceName
 		newDevice.NetworkUUID = networkUUID
 		device, err = d.CreateDevice(newDevice)
@@ -287,11 +294,19 @@ func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceNa
 
 	// make a producer
 	producer = &model.Producer{}
+	producer.Enable = boolean.NewTrue()
 	producer.Name = fmt.Sprintf("%s_%s", deviceName, pointName)
 	producer.StreamUUID = streamUUID
 	producer.ProducerThingUUID = pointUUID
 	producer.ProducerThingClass = "point"
 	producer.ProducerApplication = "mapping"
+
+	if true {
+		producer.EnableHistory = boolean.NewTrue()
+		producer.HistoryType = model.HistoryTypeCovAndInterval
+		producer.HistoryInterval = integer.New(60)
+	}
+
 	producer, err = d.CreateProducer(producer)
 	if err != nil {
 		return nil, fmt.Errorf("createPointMappingProducer() producer creation failure: %s", err)
@@ -304,6 +319,7 @@ func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceNa
 func (d *GormDatabase) createPointMappingConsumer(pointUUID, producerName, producerUUID, streamCloneUUID string) (consumer *model.Consumer, err error) {
 
 	consumer = &model.Consumer{}
+	consumer.Enable = boolean.NewTrue()
 	consumer.Name = producerName
 	consumer.ProducerUUID = producerUUID
 	consumer.ConsumerApplication = "mapping"

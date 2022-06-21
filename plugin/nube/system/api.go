@@ -106,4 +106,12 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, obj)
 		}
 	})
+	mux.GET("/system/schedule/store/all", func(ctx *gin.Context) {
+		obj, ok := inst.getAllScheduleData
+		if ok != true {
+			ctx.JSON(http.StatusBadRequest, "no schedule exists")
+		} else {
+			ctx.JSON(http.StatusOK, obj)
+		}
+	})
 }
