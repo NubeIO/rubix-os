@@ -18,7 +18,7 @@ import (
 func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	engine := gin.New()
 	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), nerrors.Handler(), location.Default())
-	engine.NoRoute(nerrors.NotFound())
+	engine.NoRoute(nerrors.NotFoundHandler())
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
