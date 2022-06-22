@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwrest"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
@@ -11,7 +11,7 @@ import (
 const path = "lorawan" // must be unique across all plugins
 const name = "lorawan" // must be unique across all plugins
 const description = "lorawan api"
-const author = "ap"
+const author = "Shiny380"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
 
@@ -21,8 +21,6 @@ const isNetwork = true
 const maxAllowedNetworks = 1
 const networkType = "lorawan"
 const transportType = "ip" // serial, ip
-const ip = "0.0.0.0"
-const port = "8080"
 
 // Instance is plugin instance
 type Instance struct {
@@ -34,7 +32,7 @@ type Instance struct {
 	bus         eventbus.BusService
 	pluginUUID  string
 	networkUUID string
-	REST        *lwrest.RestClient
+	REST        *csrest.RestClient
 }
 
 // GetFlowPluginInfo returns plugin info.

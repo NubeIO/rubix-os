@@ -3,16 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
-	"time"
-)
-
-const (
-	elsysAPB = "ELSYS-ABP"
 )
 
 // addNetwork add network

@@ -1,4 +1,4 @@
-package lwmodel
+package csmodel
 
 import "github.com/NubeIO/flow-framework/plugin/defaults"
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwrest"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
 	"github.com/labstack/gommon/log"
 )
 
@@ -18,9 +18,15 @@ func (inst *Instance) Enable() error {
 		inst.networkUUID = "NA"
 	}
 	if err != nil {
-		log.Error("error on enable lora-plugin")
+		log.Error("error on enable lorawan-plugin", err)
 	}
-	inst.REST = lwrest.NewChirp(chirpName, chirpPass, ip, port)
+
+	// TODO: temporary call due to config being broken
+	inst.ValidateAndSetConfig(&Config{})
+
+	inst.REST = csrest.CSLogin(inst.config.CSAddress, inst.config.CSPort,
+		inst.config.CSUsername, inst.config.CSPassword)
+	inst.REST.SetDeviceLimit(inst.config.DeviceLimit)
 	return nil
 }
 

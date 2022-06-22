@@ -1,7 +1,8 @@
-package lwrest
+package csrest
 
 import (
 	"fmt"
+
 	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/go-resty/resty/v2"
 	log "github.com/sirupsen/logrus"
@@ -21,12 +22,14 @@ type user struct {
 	Password string `json:"password"`
 }
 
-// NewChirp returns a new instance of NewChirp.
-func NewChirp(name string, password string, address string, port string) *RestClient {
-	log.Infof("lorawan: try and connect to chirpstack on user:%s password:*** ip:%s, port:%s", name, address, port)
+const csURLLogin = "/api/internal/login"
+
+// CSLogin login to Chirpstack and get JWT token
+func CSLogin(address string, port int, username string, password string) *RestClient {
+	log.Infof("lorawan: Connecting to chirpstack at %s:%d", address, port)
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%s", address, port)
+	url := fmt.Sprintf("http://%s:%d", address, port)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Content-Type", "application/json")
@@ -34,8 +37,8 @@ func NewChirp(name string, password string, address string, port string) *RestCl
 	resp, err := client.R().
 		SetResult(&t).
 		SetHeader("Content-Type", "application/json").
-		SetBody(user{Email: name, Password: password}).
-		Post("/api/internal/login")
+		SetBody(user{Email: username, Password: password}).
+		Post(csURLLogin)
 	if err != nil {
 		log.Println("getToken err:", err, resp.Status())
 	}
