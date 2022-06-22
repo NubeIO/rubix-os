@@ -2,10 +2,11 @@ package config
 
 import (
 	"flag"
+	"path"
+
 	"github.com/NubeIO/configor"
 	"github.com/NubeIO/flow-framework/utils/file"
 	"github.com/NubeIO/flow-framework/utils/security"
-	"path"
 )
 
 type Configuration struct {
@@ -58,6 +59,10 @@ type Configuration struct {
 		}
 	}
 	SecretKey string
+	MQTT      struct {
+		Address string `default:"localhost"`
+		Port    int    `default:"1883"`
+	}
 }
 
 var config *Configuration = nil
@@ -83,12 +88,16 @@ func (conf *Configuration) Parse() *Configuration {
 	dataDir := flag.String("d", "data", "Data Directory")
 	configDir := flag.String("c", "config", "Config Directory")
 	prod := flag.Bool("prod", false, "Deployment Mode")
+	mqttAddr := flag.String("mqtt-address", "localhost", "MQTT Broker Address")
+	mqttPort := flag.Int("mqtt-port", 1883, "MQTT Broker Port")
 	flag.Parse()
 	conf.Server.Port = *port
 	conf.Location.GlobalDir = *globalDir
 	conf.Location.DataDir = *dataDir
 	conf.Location.ConfigDir = *configDir
 	conf.Prod = *prod
+	conf.MQTT.Address = *mqttAddr
+	conf.MQTT.Port = *mqttPort
 	return conf
 }
 

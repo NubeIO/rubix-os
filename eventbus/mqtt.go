@@ -3,6 +3,7 @@ package eventbus
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -28,9 +29,13 @@ func publishMQTT(sensorStruct model.ProducerBody) {
 	}
 }
 
+var debug = false
+
 // used for getting data into the plugins
 var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-	log.Println("NEW MQTT MES", msg.Topic(), " ", string(msg.Payload()))
+	if debug {
+		log.Println("NEW MQTT MES", msg.Topic(), " ", string(msg.Payload()))
+	}
 	GetService().RegisterTopic(MQTTUpdated)
 	err := GetService().Emit(CTX(), MQTTUpdated, msg)
 	if err != nil {
@@ -38,13 +43,13 @@ var handle mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
 	}
 }
 
-func RegisterMQTTBus() {
+func RegisterMQTTBus(enableDebug bool) {
+	if enableDebug {
+		debug = true
+	}
 	c, _ := mqttclient.GetMQTT()
 	// TODO this needs to be removed as its for a plugin, the plugin needs to register the topics it wants the main framework to subscribe to, also unsubscribe when the plugin is disabled
-	err := c.Subscribe("+/+/+/+/+/+/rubix/bacnet_server/points/+/#", mqttclient.AtMostOnce, handle) // bacnet-server
-	err = c.Subscribe("+/+/+/+/+/+/rubix/bacnet_master/points/+/#", mqttclient.AtMostOnce, handle)  // bacnet-bserver
-	err = c.Subscribe("application/+/device/+/rx", mqttclient.AtMostOnce, handle)                   // lorawan
-	if err != nil {
-
-	}
+	c.Subscribe("+/+/+/+/+/+/rubix/bacnet_server/points/+/#", mqttclient.AtMostOnce, handle) // bacnet-server
+	c.Subscribe("+/+/+/+/+/+/rubix/bacnet_master/points/+/#", mqttclient.AtMostOnce, handle) // bacnet-bserver
+	c.Subscribe("application/+/device/+/event/up", mqttclient.AtMostOnce, handle)            // lorawan
 }
