@@ -107,7 +107,10 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 }
 
 func (d *GormDatabase) DeleteProducer(uuid string) (bool, error) {
-	producer, _ := d.GetProducer(uuid, api.Args{})
+	producer, err := d.GetProducer(uuid, api.Args{})
+	if err != nil {
+		return false, err
+	}
 	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
 	aType := api.ArgsType
 	url := urls.PluralUrlByArg(urls.ConsumerUrl, aType.ProducerUUID, producer.UUID)
