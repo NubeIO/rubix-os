@@ -31,6 +31,7 @@ func (inst *Instance) syncChirpstackDevices() {
 
 	inst.syncAddMissingDevices(devices.Result)
 	inst.syncRemoveOldDevices(devices.Result)
+	inst.syncUpdateDevices(devices.Result)
 }
 
 func (inst *Instance) syncAddMissingDevices(csDevices []csmodel.Device) {
@@ -66,6 +67,23 @@ func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
 		log.Warn("lorawan: Removing old device. EUI=", *currDev.CommonDevice.AddressUUID)
 		inst.db.DeleteDevice(currDev.UUID)
 		inst.euiRemove(*currDev.CommonDevice.AddressUUID)
+	}
+}
+
+func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
+	for _, csDev := range csDevices {
+		currDev, _ := inst.db.GetOneDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
+		if currDev.CommonName.Name != csDev.Name &&
+			currDev.CommonDescription.Description != csDev.Description {
+			currDev.CommonName.Name = csDev.Name
+			currDev.CommonDescription.Description = csDev.Description
+			_, err := inst.db.UpdateDevice(currDev.UUID, currDev, true)
+			if err != nil {
+				log.Error("lorawan: Error updating device during sync: ", err)
+			} else {
+				log.Debugf("lorawan: Updated device during sync: EUI=%s UUID=%s", csDev.DevEUI, currDev.UUID)
+			}
+		}
 	}
 }
 
