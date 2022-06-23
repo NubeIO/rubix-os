@@ -14,14 +14,14 @@ func (inst *Instance) BusServ() {
 	handlerMQTT := bus.Handler{
 		Handle: func(ctx context.Context, e bus.Event) {
 			go func() {
+				if !inst.csConnected {
+					return
+				}
 				p, _ := e.Data.(mqtt.Message)
-				if !CheckMQTTTopicUplink(p.Topic()) {
+				if !checkMqttTopicUplink(p.Topic()) {
 					return
 				}
-				_, err := inst.HandleMQTTUplink(p)
-				if err != nil {
-					return
-				}
+				inst.handleMqttUplink(p)
 			}()
 		},
 		Matcher: eventbus.MQTTUpdated,

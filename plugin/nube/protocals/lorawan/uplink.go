@@ -5,44 +5,38 @@ import (
 	"strings"
 
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
-	bm "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 )
 
-// mqttUpdate listen on mqtt and then update the point in flow-framework
-func (inst *Instance) HandleMQTTUplink(body mqtt.Message) (*bm.Point, error) {
-
-	log.Infof("lorawan: MQTT uplink")
-	// log.Infof("lorawan: MQTT uplink from dev-id:%s", devEUI)
-
+// handleMqttUplink parse CS MQTT uplink data
+func (inst *Instance) handleMqttUplink(body mqtt.Message) {
 	payload := new(csmodel.BaseUplink)
 	err := json.Unmarshal(body.Payload(), &payload)
 	if err != nil {
-		log.Errorf("lorawan: Invalid MQTT uplink data:", err)
-		return nil, err
+		log.Error("lorawan: Invalid MQTT uplink data: ", err)
+		return
 	}
-	log.Print(*payload)
+	log.Debug(*payload)
 
-	// dev, err := inst.REST.GetDevice(payload.DevEUI)
-
-	// if err != nil {
-	//     log.Errorf("lorawan: check device on chirpstack exists dev-id:%s  %v", devEUI, err)
-	//     return nil, err
-	// }
-	// // check the payload for how to decode from
-	// if dev.Device.DeviceProfileID == elsysAPB {
-	//     decoded := new(model.ElsysAPB)
-	//     err = json.Unmarshal(body.Payload(), &decoded)
-	// }
-	// if err != nil {
-	//     return nil, err
-	// }
-
-	return nil, nil
+	if !inst.euiExists(payload.DevEUI) {
+		dev, err := inst.REST.GetDevice(payload.DevEUI)
+		if csrest.IsCSConnectionError(err) {
+			inst.setCSDisconnected(err)
+			return
+		}
+		if err != nil {
+			log.Warn("lorawan: MQTT Uplink recived but device missing from Chirpstack ", payload.DevEUI, " ", err)
+			return
+		}
+		log.Info("lorawan: NEW DEVICE TO ADD: ", *payload, *dev)
+	}
+	// TODO: update device points
 }
 
-func CheckMQTTTopicUplink(topic string) bool {
+// checkMqttTopicUplink checks the topic is a CS uplink event
+func checkMqttTopicUplink(topic string) bool {
 	s := strings.Split(topic, "/")
 	if len(s) != 6 ||
 		!(s[0] == "application" && s[2] == "device" && s[4] == "event" && s[5] == "up") {

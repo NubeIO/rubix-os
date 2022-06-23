@@ -8,8 +8,8 @@ import (
 	"github.com/NubeIO/flow-framework/src/dbhandler"
 )
 
-const path = "lorawan" // must be unique across all plugins
-const name = "lorawan" // must be unique across all plugins
+const pluginPath = "lorawan" // must be unique across all plugins
+const pluginName = "lorawan" // must be unique across all plugins
 const description = "lorawan api"
 const author = "Shiny380"
 const webSite = "https://www.github.com/NubeIO"
@@ -18,7 +18,7 @@ const protocolType = "ip"
 const pluginType = "protocol"
 const allowConfigWrite = false
 const isNetwork = true
-const maxAllowedNetworks = 1
+const maxAllowedNetworks int = 1
 const networkType = "lorawan"
 const transportType = "ip" // serial, ip
 
@@ -33,13 +33,15 @@ type Instance struct {
 	pluginUUID  string
 	networkUUID string
 	REST        *csrest.RestClient
+	csConnected bool
+	deviceEUIs  []string
 }
 
 // GetFlowPluginInfo returns plugin info.
 func GetFlowPluginInfo() pluginapi.Info {
 	return pluginapi.Info{
-		ModulePath:   path,
-		Name:         name,
+		ModulePath:   pluginPath,
+		Name:         pluginName,
 		Description:  description,
 		Author:       author,
 		Website:      webSite,

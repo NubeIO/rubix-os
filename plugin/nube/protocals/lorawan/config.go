@@ -1,21 +1,25 @@
 package main
 
 type Config struct {
-	CSAddress         string `default:"localhost"`
-	CSPort            int    `default:"8080"`
-	CSUsername        string `default:"admin"`
-	CSPassword        string `default:"admin"`
-	DeviceLimit       int    `default:"200"`
-	SyncPeriodMinutes int    `default:"1"`
+	CSAddress            string `default:"localhost"`
+	CSPort               int    `default:"8080"`
+	CSUsername           string `default:"admin"`
+	CSPassword           string `default:"admin"`
+	DeviceLimit          int    `default:"200"`
+	SyncPeriodMins       int    `default:"1"`
+	ReconnectTimeoutSecs int    `default:"10"`
 }
 
-func (inst *Instance) setTemporaryConfigDefaults() {
-	inst.config.CSAddress = "192.168.1.114"
-	inst.config.CSPort = 8080
-	inst.config.CSUsername = "admin"
-	inst.config.CSPassword = "admin"
-	inst.config.DeviceLimit = 200
-	inst.config.SyncPeriodMinutes = 1
+func (inst *Instance) DefaultConfig() interface{} {
+	return &Config{
+		CSAddress:            "192.168.1.114",
+		CSPort:               8080,
+		CSUsername:           "admin",
+		CSPassword:           "admin",
+		DeviceLimit:          200,
+		SyncPeriodMins:       1,
+		ReconnectTimeoutSecs: 10,
+	}
 }
 
 func (inst *Instance) GetConfig() interface{} {
@@ -23,8 +27,7 @@ func (inst *Instance) GetConfig() interface{} {
 }
 
 func (inst *Instance) ValidateAndSetConfig(config interface{}) error {
-	newConfig := config.(*Config)
+	newConfig := inst.DefaultConfig().(*Config)
 	inst.config = newConfig
-	inst.setTemporaryConfigDefaults()
 	return nil
 }

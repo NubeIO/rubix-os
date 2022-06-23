@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
-	"github.com/labstack/gommon/log"
+	log "github.com/sirupsen/logrus"
 )
 
 // Enable implements plugin.Plugin
@@ -12,21 +14,31 @@ func (inst *Instance) Enable() error {
 	inst.setUUID()
 	inst.BusServ()
 	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
+	if err != nil {
+		q, err = inst.createNetwork()
+		if err != nil {
+			log.Error("lorawan: Cannot create network: ", err)
+			return err
+		}
+		log.Info("lorawan: Created default network")
+		err = nil
+	}
 	if q != nil {
 		inst.networkUUID = q.UUID
 	} else {
-		inst.networkUUID = "NA"
-	}
-	if err != nil {
-		log.Error("error on enable lorawan-plugin", err)
+		return errors.New("lorawan: Error creating default network")
 	}
 
 	// TODO: temporary call due to config being broken
-	inst.ValidateAndSetConfig(&Config{})
+	inst.ValidateAndSetConfig(new(Config))
 
-	inst.REST = csrest.CSLogin(inst.config.CSAddress, inst.config.CSPort,
-		inst.config.CSUsername, inst.config.CSPassword)
+	inst.csConnected = false
 	inst.REST.SetDeviceLimit(inst.config.DeviceLimit)
+	err = inst.connectToCS()
+	if csrest.IsCSConnectionError(err) {
+		go inst.connectToCSLoop()
+	}
+	go inst.syncChirpstackDevicesLoop()
 	return nil
 }
 

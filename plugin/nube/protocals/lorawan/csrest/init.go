@@ -25,7 +25,7 @@ type user struct {
 const csURLLogin = "/api/internal/login"
 
 // CSLogin login to Chirpstack and get JWT token
-func CSLogin(address string, port int, username string, password string) *RestClient {
+func CSLogin(address string, port int, username string, password string) (*RestClient, error) {
 	log.Infof("lorawan: Connecting to chirpstack at %s:%d", address, port)
 	client := resty.New()
 	client.SetDebug(false)
@@ -39,9 +39,11 @@ func CSLogin(address string, port int, username string, password string) *RestCl
 		SetHeader("Content-Type", "application/json").
 		SetBody(user{Email: username, Password: password}).
 		Post(csURLLogin)
+	err = checkResponse(resp, err)
 	if err != nil {
-		log.Println("getToken err:", err, resp.Status())
+		log.Warn("lorawan: Connection error: ", err)
+		return nil, err
 	}
 	client.SetHeader("Grpc-Metadata-Authorization", t.JWT)
-	return &RestClient{client: client, ClientToken: t.JWT}
+	return &RestClient{client: client, ClientToken: t.JWT}, nil
 }
