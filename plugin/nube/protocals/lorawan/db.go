@@ -82,12 +82,12 @@ func (inst *Instance) createNewPoint(name string, deviceEUI string, deviceUUID s
 	b := false
 	addressUUID := createPointAddressUUID(name, deviceEUI)
 	point = &model.Point{
-		CommonName:             model.CommonName{Name: name},
-		AddressUUID:            &addressUUID,
-		DeviceUUID:             deviceUUID,
-		EnableWriteable:        &b,
-		ObjectType:             string(model.ObjTypeAnalogValue),
-		PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+		CommonName:      model.CommonName{Name: name},
+		AddressUUID:     &addressUUID,
+		DeviceUUID:      deviceUUID,
+		EnableWriteable: &b,
+		ObjectType:      string(model.ObjTypeAnalogValue),
+		// PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
 	}
 	point, err = inst.db.CreatePoint(point, true, true)
 	if err != nil {

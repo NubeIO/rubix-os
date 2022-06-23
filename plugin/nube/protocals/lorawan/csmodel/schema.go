@@ -2,20 +2,20 @@ package csmodel
 
 import "github.com/NubeIO/flow-framework/plugin/defaults"
 
-func GetNetworkSchema() *Network {
-	m := &Network{}
+func GetNetworkSchema() *SchemaNetwork {
+	m := &SchemaNetwork{}
 	defaults.Set(m)
 	return m
 }
 
-func GetDeviceSchema() *Device {
-	device := &Device{}
+func GetDeviceSchema() *SchemaDevice {
+	device := &SchemaDevice{}
 	defaults.Set(device)
 	return device
 }
 
-func GetPointSchema() *Point {
-	point := &Point{}
+func GetPointSchema() *SchemaPoint {
+	point := &SchemaPoint{}
 	defaults.Set(point)
 	return point
 }
@@ -63,7 +63,7 @@ type Interface struct {
 	Default  string   `json:"default" default:""`
 }
 
-type Network struct {
+type SchemaNetwork struct {
 	Name        NameNet           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
@@ -71,36 +71,10 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"lorawan"`
 	} `json:"plugin_name"`
-	Interface struct {
-		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[]"`
-		Default  string   `json:"default" default:""`
-	} `json:"network_interface"`
-	AutoMappingNetworksSelection struct {
-		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[\"disable\",\"self-mapping\",\"rubix-io-to-lorawan\"]"`
-		Default  string   `json:"default" default:""`
-	} `json:"auto_mapping_networks_selection"`
-	AutoMappingFlowNetworkName struct {
-		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"false"`
-		Min      int    `json:"min" default:"0"`
-		Max      int    `json:"max" default:"200"`
-		Default  string `json:"default" default:"local"`
-	} `json:"auto_mapping_flow_network_name"`
-	AutoMappingFlowNetworkUUID struct {
-		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"false"`
-		Min      int    `json:"min" default:"0"`
-		Max      int    `json:"max" default:"200"`
-		Default  string `json:"default" default:""`
-	} `json:"auto_mapping_flow_network_uuid"`
 	Enable EnableStruct `json:"enable"`
 }
 
-type FlowDevice struct {
+type SchemaDevice struct {
 	Name           NameDev           `json:"name"`
 	Description    DescriptionStruct `json:"description"`
 	DeviceObjectId struct {
@@ -110,7 +84,7 @@ type FlowDevice struct {
 	} `json:"device_object_id"`
 }
 
-type Point struct {
+type SchemaPoint struct {
 	Name        NamePnt           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	ObjectType  struct {
@@ -124,16 +98,4 @@ type Point struct {
 		Required bool   `json:"required" default:"false"`
 		Default  int    `json:"default" default:"0"`
 	} `json:"object_id"`
-	WriteMode struct {
-		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"read_only\",\"write_only\"]"`
-		Default  string   `json:"default" default:"read_only"`
-	} `json:"write_mode"`
-	WritePriority struct {
-		Type     string `json:"type" default:"int"`
-		Required bool   `json:"required" default:"false"`
-		Options  []int  `json:"options" default:"[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]"`
-		Default  int    `json:"default" default:"16"`
-	} `json:"write_priority"`
 }
