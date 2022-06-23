@@ -3,6 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"time"
+
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -12,8 +15,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
-	"reflect"
-	"time"
 )
 
 var err error
@@ -40,7 +41,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 
 // addDevice add device
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
-	device, _ = inst.db.GetOneDeviceByArgs(api.Args{AddressUUID: body.AddressUUID})
+	device, _ = inst.db.GetDeviceByArgs(api.Args{AddressUUID: body.AddressUUID})
 	if device != nil {
 		errMsg := fmt.Sprintf("lora: the lora ID (address_uuid) must be unique: %s", nils.StringIsNil(body.AddressUUID))
 		log.Errorf(errMsg)
@@ -206,7 +207,7 @@ func (inst *Instance) handleSerialPayload(data string) {
 	commonData, fullData := decoder.DecodePayload(data)
 	deviceUUID := commonData.ID
 	if deviceUUID != "" {
-		dev, err := inst.db.GetOneDeviceByArgs(api.Args{AddressUUID: nils.NewString(deviceUUID)})
+		dev, err := inst.db.GetDeviceByArgs(api.Args{AddressUUID: nils.NewString(deviceUUID)})
 		if err != nil {
 			errMsg := fmt.Sprintf("lora: issue on failed to find device: %v id: %s\n", err.Error(), deviceUUID)
 			log.Errorf(errMsg)

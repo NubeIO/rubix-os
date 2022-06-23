@@ -55,11 +55,11 @@ func (a *RestClient) GetDevices() (*csmodel.Devices, error) {
 func (a *RestClient) GetDevice(devEui string) (*csmodel.Device, error) {
 	q := fmt.Sprintf("/api/devices/%s", devEui)
 	resp, err := nresty.FormatRestyResponse(a.client.R().
-		SetResult(csmodel.Device{}).
+		SetResult(csmodel.DeviceAll{}).
 		Get(q))
 	err = checkResponse(resp, err)
 	if err != nil {
 		return nil, err
 	}
-	return resp.Result().(*csmodel.Device), nil
+	return &resp.Result().(*csmodel.DeviceAll).Device, nil
 }

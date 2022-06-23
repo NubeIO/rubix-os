@@ -47,79 +47,58 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return body, nil
 }
 
-// addPoint add point
-func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
-	if body.ObjectType == "" {
-		errMsg := "lorawan: point object type can not be empty"
-		log.Errorf(errMsg)
-		return nil, errors.New(errMsg)
-	}
-	point, err = inst.db.CreatePoint(body, true, true)
+// addDeviceFromCSDevice
+func (inst *Instance) addDeviceFromCSDevice(csDev *csmodel.Device) (device *model.Device, err error) {
+	newDev := new(model.Device)
+	inst.csConvertDevice(newDev, csDev)
+	_, err = inst.db.CreateDevice(newDev)
 	if err != nil {
+		log.Error("lorawan: Error adding new device: ", err)
 		return nil, err
 	}
-	return point, nil
+	log.Info("lorawan: Added device ", csDev.DevEUI)
+	return newDev, nil
 }
 
-// updateNetwork update network
-// func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
-//     network, err = inst.db.UpdateNetwork(body.UUID, body, true)
-//     if err != nil {
-//         return nil, err
-//     }
-//     return network, nil
-// }
-
-// updateDevice update device
-// func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
-//     device, err = inst.db.UpdateDevice(body.UUID, body, true)
-//     if err != nil {
-//         return nil, err
-//     }
-
-//     return device, nil
-// }
-
-// updatePoint update point
-// func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
-//     point, err = inst.db.UpdatePoint(body.UUID, body, true)
-//     if err != nil {
-//         return nil, err
-//     }
-//     return point, nil
-// }
-
-// writePoint update point. Called via API call.
-func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	// TODO: check for PointWriteByName calls that might not flow through the plugin.
-	if body == nil {
-		return
-	}
-	point, err = inst.db.WritePoint(pntUUID, body, true)
-	if err != nil || point == nil {
-		return nil, err
-	}
-	return point, nil
+// createPointAddressUUID combines name and deviceEUI to form unique string to search
+func createPointAddressUUID(name string, deviceEUI string) string {
+	addressUUID := fmt.Sprintf("%s_%s", deviceEUI, name)
+	return addressUUID
 }
 
-// pointUpdate update point present value
-func (inst *Instance) pointUpdate(uuid string) (*model.Point, error) {
-	var point model.Point
-	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
-	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
-	point.CommonFault.LastOk = time.Now().UTC()
-	point.InSync = boolean.NewTrue()
-	_, err := inst.db.UpdatePoint(uuid, &point, true)
+// getPointByAddressUUID find point in local Point slice
+func (inst *Instance) getPointByAddressUUID(name string, deviceEUI string, points []*model.Point) *model.Point {
+	addressUUID := createPointAddressUUID(name, deviceEUI)
+	for _, point := range points {
+		if *point.AddressUUID == addressUUID {
+			return point
+		}
+	}
+	return nil
+}
+
+// createNewPoint create default lorawan point
+func (inst *Instance) createNewPoint(name string, deviceEUI string, deviceUUID string) (point *model.Point, err error) {
+	b := false
+	addressUUID := createPointAddressUUID(name, deviceEUI)
+	point = &model.Point{
+		CommonName:             model.CommonName{Name: name},
+		AddressUUID:            &addressUUID,
+		DeviceUUID:             deviceUUID,
+		EnableWriteable:        &b,
+		ObjectType:             string(model.ObjTypeAnalogValue),
+		PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+	}
+	point, err = inst.db.CreatePoint(point, true, true)
 	if err != nil {
-		log.Error("lorawan: UpdatePoint()", err)
-		return nil, err
+		log.Errorf("lorawan: Error creating point %s. Error: %s", addressUUID, err)
+	} else {
+		log.Debug("lorawan: created point ", addressUUID)
 	}
-	return nil, nil
+	return point, err
 }
 
-// pointUpdate update point present value
+// pointUpdateValue update point present value
 func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point, error) {
 	var point model.Point
 	point.CommonFault.InFault = false
@@ -127,28 +106,11 @@ func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point
 	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
 	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
 	point.CommonFault.LastOk = time.Now().UTC()
-	priority := map[string]*float64{"_16": &value}
 	point.InSync = boolean.NewTrue()
+	priority := map[string]*float64{"_16": &value}
 	_, err := inst.db.UpdatePointValue(uuid, &point, &priority, true)
 	if err != nil {
-		log.Error("lorawan: pointUpdateValue()", err)
-		return nil, err
-	}
-	return nil, nil
-}
-
-// pointUpdate update point present value
-func (inst *Instance) pointUpdateErr(uuid string, err error) (*model.Point, error) {
-	var point model.Point
-	point.CommonFault.InFault = true
-	point.CommonFault.MessageLevel = model.MessageLevel.Fail
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteError
-	point.CommonFault.Message = fmt.Sprintf("error-time: %s msg:%s", utilstime.TimeStamp(), err.Error())
-	point.CommonFault.LastFail = time.Now().UTC()
-	point.InSync = boolean.NewFalse()
-	_, err = inst.db.UpdatePoint(uuid, &point, true)
-	if err != nil {
-		log.Error("lorawan: pointUpdateErr()", err)
+		log.Error("lorawan: pointUpdateValue ", err)
 		return nil, err
 	}
 	return nil, nil

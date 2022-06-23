@@ -21,7 +21,7 @@ func (h *Handler) GetDevice(uuid string, args api.Args) (*model.Device, error) {
 	return q, nil
 }
 
-func (h *Handler) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
+func (h *Handler) GetDeviceByArgs(args api.Args) (*model.Device, error) {
 	return getDb().GetOneDeviceByArgs(args)
 }
 

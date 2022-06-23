@@ -22,6 +22,6 @@ type BaseUplink struct {
 		Rssi    int     `json:"rssi"`
 		LoRaSNR float64 `json:"loRaSNR"`
 	} `json:"rxInfo"`
-	FPort int    `json:"fPort"`
-	Data  string `json:"data"`
+	FPort  int                    `json:"fPort"`
+	Object map[string]interface{} `json:"object"`
 }

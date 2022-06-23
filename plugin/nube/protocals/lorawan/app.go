@@ -36,17 +36,9 @@ func (inst *Instance) syncChirpstackDevices() {
 
 func (inst *Instance) syncAddMissingDevices(csDevices []csmodel.Device) {
 	for _, csDev := range csDevices {
-		currDev, _ := inst.db.GetOneDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
+		currDev, _ := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
 		if currDev == nil {
-			newDev := model.Device{}
-			inst.csConvertDevice(&newDev, &csDev)
-			_, err := inst.db.CreateDevice(&newDev)
-			if err != nil {
-				log.Error("lorawan: Error adding new device during sync: ", err)
-				continue
-			}
-			inst.euiAdd(csDev.DevEUI)
-			log.Info("lorawan: Added device ", csDev.DevEUI)
+			inst.addDeviceFromCSDevice(&csDev)
 		}
 	}
 }
@@ -66,13 +58,12 @@ func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
 		}
 		log.Warn("lorawan: Removing old device. EUI=", *currDev.CommonDevice.AddressUUID)
 		inst.db.DeleteDevice(currDev.UUID)
-		inst.euiRemove(*currDev.CommonDevice.AddressUUID)
 	}
 }
 
 func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
 	for _, csDev := range csDevices {
-		currDev, _ := inst.db.GetOneDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
+		currDev, _ := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
 		if currDev.CommonName.Name != csDev.Name &&
 			currDev.CommonDescription.Description != csDev.Description {
 			currDev.CommonName.Name = csDev.Name
@@ -130,32 +121,4 @@ func (inst *Instance) createNetwork() (*model.Network, error) {
 		Port:                      &inst.config.CSPort,
 	}
 	return inst.addNetwork(&net)
-}
-
-func (inst *Instance) euiIndex(eui string) int {
-	for i, v := range inst.deviceEUIs {
-		if v == eui {
-			return i
-		}
-	}
-	return -1
-}
-
-func (inst *Instance) euiExists(eui string) bool {
-	return inst.euiIndex(eui) > -1
-}
-
-func (inst *Instance) euiAdd(eui string) {
-	inst.deviceEUIs = append(inst.deviceEUIs, eui)
-}
-
-func (inst *Instance) euiRemove(eui string) {
-	arr := inst.deviceEUIs
-	i := inst.euiIndex(eui)
-	if i == -1 {
-		return
-	}
-	arr[i] = arr[len(arr)-1]
-	arr[len(arr)-1] = ""
-	inst.deviceEUIs = arr[:len(arr)-1]
 }

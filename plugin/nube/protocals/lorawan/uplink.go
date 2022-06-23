@@ -2,10 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 )
@@ -18,21 +21,23 @@ func (inst *Instance) handleMqttUplink(body mqtt.Message) {
 		log.Error("lorawan: Invalid MQTT uplink data: ", err)
 		return
 	}
-	log.Debug(*payload)
+	log.Debug("lorawan: Uplink: ", *payload)
 
-	if !inst.euiExists(payload.DevEUI) {
-		dev, err := inst.REST.GetDevice(payload.DevEUI)
+	currDev, err := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &payload.DevEUI, WithPoints: true})
+	if err != nil {
+		csDev, err := inst.REST.GetDevice(payload.DevEUI)
 		if csrest.IsCSConnectionError(err) {
 			inst.setCSDisconnected(err)
 			return
 		}
 		if err != nil {
-			log.Warn("lorawan: MQTT Uplink recived but device missing from Chirpstack ", payload.DevEUI, " ", err)
+			log.Warnf("lorawan: MQTT Uplink recived but device missing from Chirpstack. EUI=%s, Error: %s", payload.DevEUI, err)
 			return
 		}
-		log.Info("lorawan: NEW DEVICE TO ADD: ", *payload, *dev)
+		log.Debug("lorawan: Adding new device from uplink")
+		inst.addDeviceFromCSDevice(csDev)
 	}
-	// TODO: update device points
+	inst.parseUplinkData(payload, currDev)
 }
 
 // checkMqttTopicUplink checks the topic is a CS uplink event
@@ -43,4 +48,38 @@ func checkMqttTopicUplink(topic string) bool {
 		return false
 	}
 	return true
+}
+
+func (inst *Instance) parseUplinkData(data *csmodel.BaseUplink, device *model.Device) {
+	log.Debugf("lorawan: Parsing uplink for device UUID=%s, EUI=%s, name=%s", device.UUID, data.DevEUI, device.Name)
+	var err error = nil
+	for k, v := range data.Object {
+		point := inst.getPointByAddressUUID(k, data.DevEUI, device.Points)
+		if point == nil {
+			point, err = inst.createNewPoint(k, data.DevEUI, device.UUID)
+			if err != nil {
+				continue
+			}
+		}
+		var value float64
+		switch t := v.(type) {
+		case int:
+			value = float64(reflect.ValueOf(v).Int())
+		case float64:
+			value = float64(reflect.ValueOf(v).Float())
+		case float32:
+			value = float64(reflect.ValueOf(v).Float())
+		case bool:
+			if reflect.ValueOf(v).Bool() {
+				value = 1
+			} else {
+				value = 0
+			}
+		default:
+			log.Warnf("lorawan: parseUplinkData unsupported value type: %T = %t", t, v)
+			continue
+		}
+		log.Debugf("lorawan: Update point %s value=%f", *point.AddressUUID, value)
+		inst.pointUpdateValue(point.UUID, value)
+	}
 }
