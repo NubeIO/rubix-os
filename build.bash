@@ -2,28 +2,21 @@
 
 # Console colors
 DEFAULT="\033[0m"
-GREEN="\033[32m"
 RED="\033[31m"
+YELLOW="\033[33m"
+GREEN="\033[32m"
 
 PRODUCTION=false
 BUILD_ONLY=false
-SYSTEM=false
-EDGE28=false
-MODBUS=false
-LORA=false
-BACNET=false
-LORAWAN=false
-BACNET_MASTER=false
-HISTORY=false
-INFLUX=false
-RUBIXIO=false
-MODBUSSERVER=false
-POSTGRES=false
 
 help() {
-  echo "Service commands:"
-  echo -e "   --prod | --production: add these suffix to start production"
-  echo -e "   --build-only : don't run program"
+  echo "USAGE: bash build.bash [OPTIONS] [PLUGINS...]"
+  echo "  i.e. bash build.bash --production modbus lorawan"
+  echo ""
+  echo "Options:"
+  echo " -h  --help :          Print this help"
+  echo " --prod  --production: Add these suffix to start production"
+  echo " --build-only :        Don't run program"
 }
 
 parseCommand() {
@@ -39,45 +32,6 @@ parseCommand() {
     --build-only)
       BUILD_ONLY=true
       ;;
-    --system)
-      SYSTEM=true
-      ;;
-    --edge28)
-      EDGE28=true
-      ;;
-    --modbus)
-      MODBUS=true
-      ;;
-    --lora)
-      LORA=true
-      ;;
-    --bacnet)
-      BACNET=true
-      ;;
-    --lorawan)
-      LORAWAN=true
-      ;;
-    --bacnetmaster)
-      BACNET_MASTER=true
-      ;;
-    --history)
-      HISTORY=true
-      ;;
-    --influx)
-      INFLUX=true
-      ;;
-    --rubixio)
-      RUBIXIO=true
-      ;;
-    --modbusserver)
-      MODBUSSERVER=true
-      ;;
-    --postgres)
-      POSTGRES=true
-      ;;
-    *)
-      echo -e "${RED}Unknown options ${i}  (-h, --help for help)${DEFAULT}"
-      ;;
     esac
   done
 }
@@ -85,70 +39,63 @@ parseCommand() {
 parseCommand "$@"
 
 dir=$(pwd)
-echo -e "${GREEN}Current working directory is: $dir${DEFAULT}"
+echo -e "Current working directory is: $dir${DEFAULT}"
 pluginDir=$dir/data/plugins
 
 if [ ${PRODUCTION} == true ]; then
-  echo -e "${GREEN}We are running in production mode!${DEFAULT}"
+  echo -e "${YELLOW}We are running in production mode!${DEFAULT}"
   pluginDir=/data/flow-framework/data/plugins
 else
-  echo -e "${GREEN}We are running in development mode!${DEFAULT}"
+  echo -e "${YELLOW}We are running in development mode!${DEFAULT}"
 fi
 
-echo -e "${GREEN}Creating a plugin directory if does not exist at: ${pluginDir}${DEFAULT}"
+echo -e "Creating a plugin directory if does not exist at: ${pluginDir}"
 rm -rf $pluginDir/* || true
 mkdir -p $pluginDir
 
 BUILD_ERROR=false
 
 function buildPlugin {
+  echo -e "${DEFAULT}BUILDING $1..."
   go build -buildmode=plugin -o $1.so $2/*.go && cp $1.so $pluginDir
   if [ $? -eq 0 ]; then
-    echo -e "${GREEN}BUILD $1"
+    echo -e "${GREEN}BUILD ${DEFAULT}$1"
   else
-    echo -e "${RED}ERROR BUILD $1"
+    echo -e "${RED}ERROR BUILD ${DEFAULT}$1"
     BUILD_ERROR=true
   fi
 }
 
 pushd $dir > /dev/null
 
-if [ ${SYSTEM} == true ]; then
-  buildPlugin "system" plugin/nube/system
-fi
-if [ ${EDGE28} == true ]; then
-  buildPlugin "edge28" plugin/nube/protocals/edge28
-fi
-if [ ${MODBUS} == true ]; then
-  buildPlugin "modbus" plugin/nube/protocals/modbus
-fi
-if [ ${LORA} == true ]; then
-  buildPlugin "lora" plugin/nube/protocals/lora
-fi
-if [ ${BACNET} == true ]; then
-  buildPlugin "bacnet" plugin/nube/protocals/bacnetserver
-fi
-if [ ${LORAWAN} == true ]; then
-  buildPlugin "lorawan" plugin/nube/protocals/lorawan
-fi
-if [ ${BACNET_MASTER} == true ]; then
-  buildPlugin "bacnet_master" plugin/nube/protocals/bacnetmaster
-fi
-if [ ${HISTORY} == true ]; then
-  buildPlugin "history" plugin/nube/database/history
-fi
-if [ ${INFLUX} == true ]; then
-  buildPlugin "influx" plugin/nube/database/influx
-fi
-if [ ${RUBIXIO} == true ]; then
-  buildPlugin "rubixio" plugin/nube/protocals/rubixio
-fi
-if [ ${MODBUSSERVER} == true ]; then
-  buildPlugin "modbusserver" plugin/nube/protocals/modbusserver
-fi
-if [ ${POSTGRES} == true ]; then
-  buildPlugin "postgres" plugin/nube/database/postgres
-fi
+for i in "$@"; do
+  case ${i} in
+    system)
+      buildPlugin "system" plugin/nube/system ;;
+    edge28)
+      buildPlugin "edge28" plugin/nube/protocals/edge28 ;;
+    modbus)
+      buildPlugin "modbus" plugin/nube/protocals/modbus ;;
+    lora)
+      buildPlugin "lora" plugin/nube/protocals/lora ;;
+    bacnet)
+      buildPlugin "bacnet" plugin/nube/protocals/bacnetserver ;;
+    lorawan)
+      buildPlugin "lorawan" plugin/nube/protocals/lorawan ;;
+    bacnet_master)
+      buildPlugin "bacnet_master" plugin/nube/protocals/bacnetmaster ;;
+    history)
+      buildPlugin "history" plugin/nube/database/history ;;
+    influx)
+      buildPlugin "influx" plugin/nube/database/influx ;;
+    rubixio)
+      buildPlugin "rubixio" plugin/nube/protocals/rubixio ;;
+    modbusserver)
+      buildPlugin "modbusserver" plugin/nube/protocals/modbusserver ;;
+    postgres)
+      buildPlugin "postgres" plugin/nube/database/postgres ;;
+  esac
+done
 
 if [ ${BUILD_ERROR} == true ]; then
     exit -1
