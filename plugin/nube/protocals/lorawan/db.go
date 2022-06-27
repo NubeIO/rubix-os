@@ -47,14 +47,20 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return body, nil
 }
 
-// addDeviceFromCSDevice
-func (inst *Instance) addDeviceFromCSDevice(csDev *csmodel.Device) (device *model.Device, err error) {
+// createDeviceFromCSDevice
+func (inst *Instance) createDeviceFromCSDevice(csDev *csmodel.Device) (device *model.Device, err error) {
 	newDev := new(model.Device)
 	inst.csConvertDevice(newDev, csDev)
 	_, err = inst.db.CreateDevice(newDev)
 	if err != nil {
 		log.Error("lorawan: Error adding new device: ", err)
-		return nil, err
+		log.Warn("lorawan: Trying with new name: ", csDev.DevEUI)
+		newDev.Name = fmt.Sprintf("%s_%s", csDev.Name, csDev.DevEUI)
+		_, err = inst.db.CreateDevice(newDev)
+		if err != nil {
+			log.Error("lorawan: Error adding new device: ", err)
+			return nil, err
+		}
 	}
 	log.Info("lorawan: Added device ", csDev.DevEUI)
 	return newDev, nil

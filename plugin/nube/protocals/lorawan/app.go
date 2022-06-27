@@ -38,13 +38,14 @@ func (inst *Instance) syncAddMissingDevices(csDevices []csmodel.Device) {
 	for _, csDev := range csDevices {
 		currDev, _ := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
 		if currDev == nil {
-			inst.addDeviceFromCSDevice(&csDev)
+			inst.createDeviceFromCSDevice(&csDev)
 		}
 	}
 }
 
 func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
-	currDevices, _ := inst.db.GetDevices(api.Args{})
+	currNetwork, _ := inst.db.GetNetwork(inst.networkUUID, api.Args{WithDevices: true})
+	currDevices := currNetwork.Devices
 	for _, currDev := range currDevices {
 		found := false
 		for _, csDev := range csDevices {

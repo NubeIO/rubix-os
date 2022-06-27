@@ -24,7 +24,7 @@ func (inst *Instance) handleMqttUplink(body mqtt.Message) {
 	log.Debug("lorawan: Uplink: ", *payload)
 
 	currDev, err := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &payload.DevEUI, WithPoints: true})
-	if err != nil {
+	if err != nil || currDev == nil {
 		csDev, err := inst.REST.GetDevice(payload.DevEUI)
 		if csrest.IsCSConnectionError(err) {
 			inst.setCSDisconnected(err)
@@ -35,7 +35,7 @@ func (inst *Instance) handleMqttUplink(body mqtt.Message) {
 			return
 		}
 		log.Debug("lorawan: Adding new device from uplink")
-		inst.addDeviceFromCSDevice(csDev)
+		inst.createDeviceFromCSDevice(csDev)
 	}
 	inst.parseUplinkData(payload, currDev)
 }
@@ -54,13 +54,6 @@ func (inst *Instance) parseUplinkData(data *csmodel.BaseUplink, device *model.De
 	log.Debugf("lorawan: Parsing uplink for device UUID=%s, EUI=%s, name=%s", device.UUID, data.DevEUI, device.Name)
 	var err error = nil
 	for k, v := range data.Object {
-		point := inst.getPointByAddressUUID(k, data.DevEUI, device.Points)
-		if point == nil {
-			point, err = inst.createNewPoint(k, data.DevEUI, device.UUID)
-			if err != nil {
-				continue
-			}
-		}
 		var value float64
 		switch t := v.(type) {
 		case int:
@@ -78,6 +71,13 @@ func (inst *Instance) parseUplinkData(data *csmodel.BaseUplink, device *model.De
 		default:
 			log.Warnf("lorawan: parseUplinkData unsupported value type: %T = %t", t, v)
 			continue
+		}
+		point := inst.getPointByAddressUUID(k, data.DevEUI, device.Points)
+		if point == nil {
+			point, err = inst.createNewPoint(k, data.DevEUI, device.UUID)
+			if err != nil {
+				continue
+			}
 		}
 		log.Debugf("lorawan: Update point %s value=%f", *point.AddressUUID, value)
 		inst.pointUpdateValue(point.UUID, value)

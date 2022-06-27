@@ -12,10 +12,10 @@ type Config struct {
 
 func (inst *Instance) DefaultConfig() interface{} {
 	return &Config{
-		CSAddress:            "192.168.1.114",
+		CSAddress:            "0.0.0.0",
 		CSPort:               8080,
 		CSUsername:           "admin",
-		CSPassword:           "admin",
+		CSPassword:           "N00BWAN",
 		DeviceLimit:          200,
 		SyncPeriodMins:       1,
 		ReconnectTimeoutSecs: 10,
