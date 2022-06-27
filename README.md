@@ -3,7 +3,7 @@
 rename the `config-example.yml` file to `config.yml`
 
 run the bash script to build and start with plugins
-`bash build-system.bash --system --rubix --modbus --lora`
+`bash build.bash --system --rubix --modbus --lora`
 
 # default port
 
