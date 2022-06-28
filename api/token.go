@@ -1,35 +1,29 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/utils/security"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/nubeio-rubix-lib-auth-go/externaltoken"
 	"github.com/gin-gonic/gin"
 )
 
 // The TokenDatabase interface for encapsulating database access.
 type TokenDatabase interface {
-	GetTokens() ([]*model.Token, error)
-	CreateToken(*model.Token) (*model.Token, error)
-	UpdateToken(*model.Token) (*model.Token, error)
 }
 
 type TokenAPI struct {
-	DB TokenDatabase
 }
 
 func (j *TokenAPI) GetTokens(ctx *gin.Context) {
-	q, err := j.DB.GetTokens()
+	q, err := externaltoken.GetExternalTokens()
 	ResponseHandler(q, err, ctx)
 }
 
 func (j *TokenAPI) GenerateToken(ctx *gin.Context) {
-	body, err := getBodyToken(ctx)
+	body, err := getBodyTokenCreate(ctx)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	token := &model.Token{Name: body.Name, Token: security.GenerateToken(), Blocked: body.Blocked}
-	q, err := j.DB.CreateToken(token)
+	q, err := externaltoken.CreateExternalToken(body.Name)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -37,13 +31,29 @@ func (j *TokenAPI) GenerateToken(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
-func (j *TokenAPI) UpdateToken(ctx *gin.Context) {
-	body, err := getBodyToken(ctx)
+func (j *TokenAPI) RegenerateToken(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := externaltoken.RegenerateExternalToken(uuid)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	token := &model.Token{Name: body.Name, Token: "", Blocked: body.Blocked}
-	q, err := j.DB.UpdateToken(token)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *TokenAPI) BlockToken(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	body, err := getBodyTokenBlock(ctx)
+	if err != nil {
+		ResponseHandler(nil, err, ctx)
+		return
+	}
+	q, err := externaltoken.BlockExternalToken(uuid, *body.Blocked)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *TokenAPI) DeleteToken(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := externaltoken.DeleteExternalToken(uuid)
 	ResponseHandler(q, err, ctx)
 }
