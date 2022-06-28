@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/NubeIO/flow-framework/api"
@@ -43,6 +44,21 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		point, err := inst.db.UpdatePoint(body.UUID, body, true)
 		api.ResponseHandler(point, err, ctx)
+	})
+	mux.DELETE(plugin.NetworksURL, func(ctx *gin.Context) {
+		if inst.enabled {
+			err := errors.New("cannot delete lorawan network when plugin is enabled")
+			api.ResponseHandler(false, err, ctx)
+			return
+		}
+		body, _ := plugin.GetBODYNetwork(ctx)
+		ok, err := inst.db.DeleteNetwork(body.UUID)
+		api.ResponseHandler(ok, err, ctx)
+	})
+	mux.DELETE(plugin.DevicesURL, func(ctx *gin.Context) {
+		body, _ := plugin.GetBODYDevice(ctx)
+		ok, err := inst.db.DeleteDevice(body.UUID)
+		api.ResponseHandler(ok, err, ctx)
 	})
 	mux.DELETE(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)

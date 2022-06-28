@@ -44,7 +44,10 @@ func (inst *Instance) syncAddMissingDevices(csDevices []csmodel.Device) {
 }
 
 func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
-	currNetwork, _ := inst.db.GetNetwork(inst.networkUUID, api.Args{WithDevices: true})
+	currNetwork, err := inst.db.GetNetwork(inst.networkUUID, api.Args{WithDevices: true})
+	if err != nil {
+		return
+	}
 	currDevices := currNetwork.Devices
 	for _, currDev := range currDevices {
 		found := false

@@ -35,7 +35,10 @@ func (inst *Instance) handleMqttUplink(body mqtt.Message) {
 			return
 		}
 		log.Debug("lorawan: Adding new device from uplink")
-		inst.createDeviceFromCSDevice(csDev)
+		currDev, err = inst.createDeviceFromCSDevice(csDev)
+		if err != nil {
+			return
+		}
 	}
 	inst.parseUplinkData(payload, currDev)
 }
