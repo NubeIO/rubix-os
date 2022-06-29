@@ -101,15 +101,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	syncWriterHandler := api.SyncWriterAPI{
 		DB: db,
 	}
-	userHandler := api.UserAPI{
-		DB: db,
-	}
-	tokenHandler := api.TokenAPI{
-		DB: db,
-	}
-	authHandler := api.AuthAPI{
-		DB: db,
-	}
+	userHandler := api.UserAPI{}
+	tokenHandler := api.TokenAPI{}
+	authHandler := api.AuthAPI{}
 
 	dbGroup.SyncTopics()
 	// for the custom plugin endpoints you need to use the plugin token
@@ -422,8 +416,10 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		tokenRoutes := apiRoutes.Group("/tokens")
 		{
 			tokenRoutes.GET("", tokenHandler.GetTokens)
-			tokenRoutes.PUT("", tokenHandler.UpdateToken)
 			tokenRoutes.POST("/generate", tokenHandler.GenerateToken)
+			tokenRoutes.PUT("/:uuid/block", tokenHandler.BlockToken)
+			tokenRoutes.PUT("/:uuid/regenerate", tokenHandler.RegenerateToken)
+			tokenRoutes.DELETE("/:uuid", tokenHandler.DeleteToken)
 		}
 	}
 	return engine

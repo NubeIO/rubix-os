@@ -1,12 +1,12 @@
 package main
 
 import (
+	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
 	"os"
 	"path"
 	"strconv"
 	"time"
 
-	"github.com/NubeIO/flow-framework/auth"
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/eventbus"
@@ -61,7 +61,7 @@ func main() {
 	if err := os.MkdirAll(conf.GetAbsUploadedImagesDir(), 0755); err != nil {
 		panic(err)
 	}
-	auth.CreateInternalTokenIfDoesNotExist()
+	internaltoken.CreateInternalTokenIfDoesNotExist()
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
 	mqttBroker := "tcp://" + conf.MQTT.Address + ":" + strconv.Itoa(conf.MQTT.Port)
 	_, err := mqttclient.InternalMQTT(mqttBroker)

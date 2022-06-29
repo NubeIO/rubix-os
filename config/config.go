@@ -5,8 +5,6 @@ import (
 	"path"
 
 	"github.com/NubeIO/configor"
-	"github.com/NubeIO/flow-framework/utils/file"
-	"github.com/NubeIO/flow-framework/utils/security"
 )
 
 type Configuration struct {
@@ -41,9 +39,7 @@ type Configuration struct {
 			PluginsDir        string `default:"plugins"`
 			UploadedImagesDir string `default:"images"`
 		}
-		DeviceInfoFile    string `default:"/data/rubix-registry/device_info.json"`
-		TokenFolder       string `default:"/data/rubix-service/data/"`
-		InternalTokenFile string `default:"internal_token.txt"`
+		DeviceInfoFile string `default:"/data/rubix-registry/device_info.json"`
 	}
 	Prod            bool  `default:"false"`
 	Auth            *bool `default:"true"`
@@ -74,7 +70,6 @@ func Get() *Configuration {
 func CreateApp() *Configuration {
 	config = new(Configuration)
 	config = config.Parse()
-	config = config.HandleSecretKey()
 	err := configor.New(&configor.Config{EnvironmentPrefix: "FLOW"}).Load(config, path.Join(config.GetAbsConfigDir(), "config.yml"))
 	if err != nil {
 		panic(err)
@@ -101,16 +96,6 @@ func (conf *Configuration) Parse() *Configuration {
 	return conf
 }
 
-func (conf *Configuration) HandleSecretKey() *Configuration {
-	secretKey, _ := file.ReadFile(path.Join(config.GetAbsConfigDir(), "secret.txt"))
-	if secretKey == "" {
-		secretKey = security.GenerateToken()
-		_, _ = file.WriteDataToFileAsString(path.Join(config.GetAbsConfigDir(), "secret.txt"), secretKey)
-	}
-	conf.SecretKey = secretKey
-	return conf
-}
-
 func (conf *Configuration) GetAbsDataDir() string {
 	return path.Join(conf.Location.GlobalDir, conf.Location.DataDir)
 }
@@ -125,8 +110,4 @@ func (conf *Configuration) GetAbsPluginDir() string {
 
 func (conf *Configuration) GetAbsUploadedImagesDir() string {
 	return path.Join(conf.GetAbsDataDir(), conf.Location.Data.UploadedImagesDir)
-}
-
-func (conf *Configuration) GetAbsInternalTokenFile() string {
-	return path.Join(conf.Location.TokenFolder, conf.Location.InternalTokenFile)
 }

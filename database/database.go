@@ -7,7 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/migration"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/security"
+	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"os"
 	"path/filepath"
 	"time"
@@ -58,14 +58,9 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 		db.Create(&lsFlowNetwork)
 	}
 
-	var userCount int64 = 0
-	db.Find(&model.User{}).Count(&userCount)
-	if userCount == 0 {
-		hashedPassword, _ := security.GeneratePasswordHash(password)
-		db.Create(&model.User{
-			Username: username,
-			Password: hashedPassword,
-		})
+	user_, _ := user.GetUser()
+	if user_ == nil {
+		_, _ = user.CreateUser(&user.User{Username: username, Password: password})
 	}
 
 	busService := eventbus.NewService(eventbus.GetBus())
