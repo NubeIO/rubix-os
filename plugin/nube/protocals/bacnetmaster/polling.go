@@ -40,12 +40,12 @@ func (inst *Instance) polling(p polling) error {
 	var arg api.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
-	log.Infoln("init bacnet bserver network")
+	log.Infoln("init bacnet server network")
 	f := func() (bool, error) {
 		nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, arg)
 		if len(nets) == 0 {
 			time.Sleep(2 * time.Second)
-			log.Info("bacnet-bserver: NO NETWORKS FOUND")
+			log.Info("bacnet-server: NO NETWORKS FOUND")
 		}
 		for _, net := range nets { // NETWORKS
 			if !inst.pollingEnabled {
@@ -56,7 +56,7 @@ func (inst *Instance) polling(p polling) error {
 				devDelay, pointDelay := delays(net.TransportType)
 				counter++
 				if boolean.IsFalse(net.Enable) {
-					log.Infof("bacnet-bserver: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
+					log.Infof("bacnet-server: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
 					continue
 				}
 				for _, dev := range net.Devices { // DEVICES
@@ -64,13 +64,12 @@ func (inst *Instance) polling(p polling) error {
 						log.Infof("bacnet-bserver-device: DEVICE DISABLED: NAME: %s\n", dev.Name)
 						continue
 					}
-
 					for _, pnt := range dev.Points { // POINTS
 						if boolean.IsFalse(net.Enable) {
 							continue
 						}
 						time.Sleep(devDelay) // DELAY between points
-						if pnt.WriteMode == "read_only" {
+						if pnt.WriteMode == "read_only" || pnt.WriteMode == "" || pnt.WriteMode == "write_then_read" {
 							readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
 							if err != nil {
 								_, err = inst.pointUpdateErr(pnt.UUID, err)

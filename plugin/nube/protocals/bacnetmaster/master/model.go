@@ -11,15 +11,15 @@ type NameNet struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
-	Max      int    `json:"max" default:"20"`
-	Default  string `json:"default" default:"bacnet-bserver"`
+	Max      int    `json:"max" default:"100"`
+	Default  string `json:"default" default:"bacnet-server"`
 }
 
 type NameDev struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
-	Max      int    `json:"max" default:"20"`
+	Max      int    `json:"max" default:"100"`
 	Default  string `json:"default" default:"device"`
 }
 
@@ -27,7 +27,7 @@ type NamePnt struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
-	Max      int    `json:"max" default:"20"`
+	Max      int    `json:"max" default:"100"`
 	Default  string `json:"default" default:"point"`
 }
 
@@ -143,7 +143,7 @@ type Point struct {
 	WriteMode struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"read_only\",\"write_only\"]"`
+		Options  []string `json:"options" default:"[\"read_only\",\"write_only\",\"write_then_read\"]"`
 		Default  string   `json:"default" default:"read_only"`
 	} `json:"write_mode"`
 	WritePriority struct {

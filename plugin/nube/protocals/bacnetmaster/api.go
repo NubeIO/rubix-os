@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetmaster/master"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 const (
@@ -92,12 +93,16 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.POST(whois+"/:uuid", func(ctx *gin.Context) {
 		body, _ := master.BodyWhoIs(ctx)
 		uuid := resolveID(ctx)
-		resp, err := inst.whoIs(uuid, body)
+		addDevices := ctx.Query("add_devices")
+		add, _ := strconv.ParseBool(addDevices)
+		resp, err := inst.whoIs(uuid, body, add)
 		api.ResponseHandler(resp, err, ctx)
 	})
 	mux.POST(discoverPoints+"/:uuid", func(ctx *gin.Context) {
 		uuid := resolveID(ctx)
-		resp, err := inst.devicePoints(uuid)
+		addPoints := ctx.Query("add_points")
+		add, _ := strconv.ParseBool(addPoints)
+		resp, err := inst.devicePoints(uuid, add)
 		api.ResponseHandler(resp, err, ctx)
 	})
 }
