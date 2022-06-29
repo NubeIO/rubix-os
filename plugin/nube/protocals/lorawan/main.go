@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
-	"github.com/patrickmn/go-cache"
 )
 
 const path = "lorawan" // must be unique across all plugins
@@ -15,7 +14,6 @@ const description = "lorawan api"
 const author = "ap"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
-const DefaultExpiration = cache.DefaultExpiration
 
 const pluginType = "protocol"
 const allowConfigWrite = false
@@ -47,6 +45,7 @@ func GetFlowPluginInfo() pluginapi.Info {
 		Description:  description,
 		Author:       author,
 		Website:      webSite,
+		HasNetwork:   true,
 		ProtocolType: protocolType,
 	}
 }

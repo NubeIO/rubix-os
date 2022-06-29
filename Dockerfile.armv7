@@ -1,0 +1,21 @@
+# syntax=docker/dockerfile:1
+
+## BASE ENVIRONMENT
+FROM golang:1.18-buster AS flow-framework-armv7-build-env
+
+RUN apt-get update
+RUN apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf zip
+
+## BUILDER
+FROM flow-framework-armv7-build-env AS go-build-flow-framework-armv7
+
+ARG plugins
+
+WORKDIR /app
+COPY . ./
+RUN go mod download
+
+RUN env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ go build -o app app.go
+RUN env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ bash build.bash --build-only $plugins
+
+RUN zip -r flow-framework.armv7.zip data/plugins app

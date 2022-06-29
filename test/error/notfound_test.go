@@ -13,7 +13,7 @@ func TestNotFound(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(rec)
 
-	nerrors.NotFound()(ctx)
+	nerrors.NotFoundHandler()(ctx)
 
 	assertJSONResponse(t, rec, 404, `{"errorCode":404, "errorDescription":"page not found", "error":"Not Found"}`)
 }
