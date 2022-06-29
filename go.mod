@@ -10,7 +10,7 @@ require (
 	github.com/NubeDev/location v0.0.2
 	github.com/NubeIO/configor v0.0.3
 	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7
-	github.com/NubeIO/nubeio-rubix-lib-models-go v1.2.5
+	github.com/NubeIO/nubeio-rubix-lib-models-go v1.2.6
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -48,7 +48,7 @@ require (
 require (
 	github.com/NubeDev/bacnet v0.0.4
 	github.com/NubeIO/lib-networking v0.0.4
-	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.2
+	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
 )
 
 require (

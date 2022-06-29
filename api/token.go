@@ -1,7 +1,9 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/externaltoken"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,7 +25,10 @@ func (j *TokenAPI) GenerateToken(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	q, err := externaltoken.CreateExternalToken(body.Name)
+	q, err := externaltoken.CreateExternalToken(&externaltoken.ExternalToken{
+		UUID:    nuuid.MakeTopicUUID(model.CommonNaming.Token),
+		Name:    body.Name,
+		Blocked: *body.Blocked})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
