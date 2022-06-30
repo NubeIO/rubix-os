@@ -83,6 +83,7 @@ func (conf *Configuration) Parse() *Configuration {
 	dataDir := flag.String("d", "data", "Data Directory")
 	configDir := flag.String("c", "config", "Config Directory")
 	prod := flag.Bool("prod", false, "Deployment Mode")
+	auth := flag.Bool("auth", true, "enable auth")
 	mqttAddr := flag.String("mqtt-address", "localhost", "MQTT Broker Address")
 	mqttPort := flag.Int("mqtt-port", 1883, "MQTT Broker Port")
 	flag.Parse()
@@ -91,6 +92,7 @@ func (conf *Configuration) Parse() *Configuration {
 	conf.Location.DataDir = *dataDir
 	conf.Location.ConfigDir = *configDir
 	conf.Prod = *prod
+	conf.Auth = auth
 	conf.MQTT.Address = *mqttAddr
 	conf.MQTT.Port = *mqttPort
 	return conf

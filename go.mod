@@ -48,8 +48,10 @@ require (
 require (
 	github.com/NubeDev/bacnet v0.0.4
 	github.com/NubeIO/lib-networking v0.0.4
+	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/iancoleman/strcase v0.2.0
+	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
 	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
-)
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
