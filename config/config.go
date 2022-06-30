@@ -45,8 +45,8 @@ type Configuration struct {
 		TokenFolder       string `default:"/data/rubix-service/data/"`
 		InternalTokenFile string `default:"internal_token.txt"`
 	}
-	Prod            bool `default:"false"`
-	Auth            bool `default:"true"`
+	Prod            bool  `default:"false"`
+	Auth            *bool `default:"true"`
 	ProducerHistory struct {
 		Cleaner struct {
 			Enable              *bool `default:"true"`
@@ -97,7 +97,7 @@ func (conf *Configuration) Parse() *Configuration {
 	conf.Location.DataDir = *dataDir
 	conf.Location.ConfigDir = *configDir
 	conf.Prod = *prod
-	conf.Auth = *auth
+	conf.Auth = auth
 	conf.MQTT.Address = *mqttAddr
 	conf.MQTT.Port = *mqttPort
 	return conf
