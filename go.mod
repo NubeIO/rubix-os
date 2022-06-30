@@ -2,6 +2,7 @@ module github.com/NubeIO/flow-framework
 
 //replace github.com/NubeIO/nubeio-rubix-lib-helpers-go => /home/aidan/code/go/nube/nubeio-rubix-lib-helpers-go
 //replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-models-go
+//replace github.com/NubeIO/nubeio-rubix-lib-auth-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-auth-go
 //replace github.com/NubeIO/nubeio-rubix-lib-rest-go => /home/aidan/code/go/nube/nubeio-rubix-lib-rest-go
 //replace github.com/NubeDev/bacnet => /home/aidan/code/go/nube/bacnet
 
@@ -9,7 +10,7 @@ require (
 	github.com/NubeDev/location v0.0.2
 	github.com/NubeIO/configor v0.0.3
 	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7
-	github.com/NubeIO/nubeio-rubix-lib-models-go v1.2.5
+	github.com/NubeIO/nubeio-rubix-lib-models-go v1.2.6
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -50,7 +51,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/iancoleman/strcase v0.2.0
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
-)
+	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
@@ -63,6 +64,7 @@ require (
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/go-yaml/yaml v2.1.0+incompatible // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/google/uuid v1.1.2 // indirect
@@ -98,6 +100,7 @@ require (
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/text v0.3.7 // indirect
