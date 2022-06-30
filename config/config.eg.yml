@@ -1,0 +1,48 @@
+# Example configuration file for the server.
+# Save it to `config.yml` when edited
+
+server:
+  keepaliveperiodseconds: 0 # 0 = use system default; set the interval in which keepalive packages will be sent. Only change this value if you know what you are doing.
+  listenaddr: "0.0.0.0" # the address to bind on, leave empty to bind on all addresses
+  rsport: 1616
+
+  responseheaders: # response headers are added to every response (default: none)
+  #    X-Custom-Header: "custom value"
+
+  stream:
+    pingperiodseconds: 45 # the interval in which websocket pings will be sent. Only change this value if you know what you are doing.
+    allowedorigins: # allowed origins for websocket connections (same origin is always allowed)
+    #      - ".+.example.com"
+    #      - "otherdomain.com"
+
+  cors: # Sets cors headers only when needed and provides support for multiple allowed origins. Overrides Access-Control-* Headers in response headers.
+    alloworigins:
+    #      - ".+.example.com"
+    #      - "otherdomain.com"
+    allowmethods:
+    #      - "GET"
+    #      - "POST"
+    allowheaders:
+    #      - "Authorization"
+    #      - "content-type"
+
+database: # for database see (configure database section)
+  dialect: sqlite3
+  connection: data.db
+  loglevel: "DEBUG" # options are: INFO, WARN, ERROR, SILENT (needs to be greater than or equal to global loglevel)
+
+loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
+
+location:
+  authdatadir: '/data/rubix-service' # for local when auth: true, it needs to be: `/<rubix_service_parent_dir>/data/rubix-service/out/rubix-service`
+
+auth: true
+
+producerhistory:
+  cleaner:
+    enable: true
+    frequency: 600
+    datapersistinghours: 24
+  syncinterval:
+    enable: true
+    syncperiod: 10

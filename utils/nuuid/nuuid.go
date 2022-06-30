@@ -37,6 +37,7 @@ func MakeTopicUUID(attribute string) string {
 	cmd := "cmd" // command
 	rub := "rbx" // rubix uuid
 	rxg := "rxg" // rubix global uuid
+	tok := "tok" // token uuid
 
 	switch attribute {
 	case model.CommonNaming.Plugin:
@@ -81,6 +82,8 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", rub, divider, u)
 	case model.CommonNaming.RubixGlobal:
 		return fmt.Sprintf("%s%s%s", rxg, divider, u)
+	case model.CommonNaming.Token:
+		return fmt.Sprintf("%s%s%s", tok, divider, u)
 	}
 	return u
 }

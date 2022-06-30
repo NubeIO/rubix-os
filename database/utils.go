@@ -93,7 +93,7 @@ func (d *GormDatabase) deleteResponseBuilder(query *gorm.DB) (bool, error) {
 	}
 	r := query.RowsAffected
 	if r == 0 {
-		return false, nil
+		return false, gorm.ErrRecordNotFound
 	} else {
 		return true, nil
 	}
