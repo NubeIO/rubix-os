@@ -110,5 +110,5 @@ fi
 if [ ${PRODUCTION} == true ]; then
   go run app.go -g /data/flow-framework -d data --prod
 else
-  go run app.go
+  go run app.go -auth=false
 fi
