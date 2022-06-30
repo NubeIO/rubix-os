@@ -291,7 +291,8 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 	if err != nil {
 		return nil, err
 	}
-	go net.NetworkRun()
+	go net.NetworkRun() //TODO: do we need to defer a NetworkClose()?
+	defer net.NetworkClose()
 	devices, err := net.Whois(opts)
 	if err != nil {
 		return nil, err
@@ -319,7 +320,7 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 	return devices, err
 }
 
-func (inst *Instance) devicePoints(deviceUUID string, addPoints bool) (resp []*network.PointDetails, err error) {
+func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints bool) (resp []*network.PointDetails, err error) {
 	getNetwork, err := inst.db.GetNetworkByDeviceUUID(deviceUUID, api.Args{})
 	if err != nil {
 		return nil, err
@@ -328,7 +329,8 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints bool) (resp []*n
 	if err != nil {
 		return nil, err
 	}
-	go net.NetworkRun()
+	go net.NetworkRun() //TODO: do we need to defer a NetworkClose()?
+	defer net.NetworkClose()
 	dev, err := inst.getBacnetDevice(deviceUUID)
 	if err != nil {
 		return nil, err
@@ -341,16 +343,16 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints bool) (resp []*n
 	if addPoints {
 		for _, pnt := range resp {
 			_, isWrite, _, objectType := setObjectType(convertObjectType(pnt.ObjectType))
-			writeMode := "read_only"
-			if isWrite {
-				writeMode = "write_then_read"
+			writeMode := model.ReadOnly
+			if isWrite && writeablePoints {
+				writeMode = model.WriteOnceThenRead
 			}
 			newPnt := &model.Point{
 				CommonName: model.CommonName{Name: pnt.Name},
 				DeviceUUID: deviceUUID,
 				ObjectType: objectType,
 				ObjectId:   integer.New(int(pnt.ObjectID)),
-				WriteMode:  model.WriteMode(writeMode),
+				WriteMode:  writeMode,
 			}
 			point, err := inst.addPoint(newPnt)
 			if err != nil {
@@ -360,9 +362,7 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints bool) (resp []*n
 			log.Infof("added new point from discover points%s", point.Name)
 		}
 	}
-
 	return
-
 }
 
 func intToUnit32(value int) uint32 {

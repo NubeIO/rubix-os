@@ -102,7 +102,9 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		uuid := resolveID(ctx)
 		addPoints := ctx.Query("add_points")
 		add, _ := strconv.ParseBool(addPoints)
-		resp, err := inst.devicePoints(uuid, add)
+		makeWriteablePoints := ctx.Query("writeable_points")
+		writeable, _ := strconv.ParseBool(makeWriteablePoints)
+		resp, err := inst.devicePoints(uuid, add, writeable)
 		api.ResponseHandler(resp, err, ctx)
 	})
 }
