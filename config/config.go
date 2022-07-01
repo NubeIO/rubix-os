@@ -49,9 +49,9 @@ type Configuration struct {
 			Frequency           int   `default:"600"`
 			DataPersistingHours int   `default:"24"`
 		}
-		SyncInterval struct {
-			Enable     *bool `default:"true"`
-			SyncPeriod int   `default:"10"`
+		IntervalHistoryCreator struct {
+			Enable    *bool `default:"true"`
+			Frequency int   `default:"10"`
 		}
 	}
 	SecretKey string

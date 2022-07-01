@@ -8,14 +8,14 @@ import (
 	"time"
 )
 
-func (h *History) InitProducerHistorySyncInterval(syncPeriod int) {
+func (h *History) InitIntervalHistoryCreator(syncPeriod int) {
 	h.cron = gocron.NewScheduler(time.UTC)
-	_, _ = h.cron.Every(syncPeriod).Tag("ProducerHistorySyncInterval").Do(h.syncProducerHistoryInterval)
+	_, _ = h.cron.Every(syncPeriod).Tag("InitIntervalHistoryCreator").Do(h.createIntervalHistories)
 	h.cron.StartAsync()
 }
 
-func (h *History) syncProducerHistoryInterval() {
-	log.Info("Producer history sync interval has is been called...")
+func (h *History) createIntervalHistories() {
+	log.Info("Create interval histories has been called...")
 	producers, err := h.DB.GetProducersForCreateInterval()
 	if err != nil {
 		log.Error(err)
@@ -32,7 +32,7 @@ func (h *History) syncProducerHistoryInterval() {
 		latestPH, _ := h.DB.GetLatestProducerHistoryByProducerUUID(producer.UUID)
 		if latestPH == nil || currentDate.Sub(latestPH.Timestamp).Seconds() >= float64(*producer.HistoryInterval*60) {
 			latestPH = new(model.ProducerHistory)
-			// Minutes is placing such a way if 15, then it will store values on 0, 15, 30, 45
+			// minutes are placing such a way if 15, then it will store values on 0, 15, 30, 45
 			minute := (currentDate.Minute() / *producer.HistoryInterval) * *producer.HistoryInterval
 			latestPH.ProducerUUID = producer.UUID
 			latestPH.Timestamp = time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(),
@@ -47,5 +47,5 @@ func (h *History) syncProducerHistoryInterval() {
 			}
 		}
 	}
-	log.Info("Finished producer history sync interval process")
+	log.Info("Finished create interval histories process")
 }
