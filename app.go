@@ -38,7 +38,7 @@ func intHandler(db *database.GormDatabase) {
 	}
 }
 
-func initHistory(db *database.GormDatabase, conf *config.Configuration) {
+func initHistorySchedulers(db *database.GormDatabase, conf *config.Configuration) {
 	h := new(history.History)
 	h.DB = db
 	if *conf.ProducerHistory.Cleaner.Enable {
@@ -46,8 +46,8 @@ func initHistory(db *database.GormDatabase, conf *config.Configuration) {
 			conf.ProducerHistory.Cleaner.Frequency,
 			conf.ProducerHistory.Cleaner.DataPersistingHours)
 	}
-	if *conf.ProducerHistory.SyncInterval.Enable {
-		h.InitProducerHistorySyncInterval(conf.ProducerHistory.SyncInterval.SyncPeriod)
+	if *conf.ProducerHistory.IntervalHistoryCreator.Enable {
+		h.InitIntervalHistoryCreator(conf.ProducerHistory.IntervalHistoryCreator.Frequency)
 	}
 }
 
@@ -77,6 +77,6 @@ func main() {
 	defer db.Close()
 	engine := router.Create(db, conf)
 	eventbus.RegisterMQTTBus(false)
-	initHistory(db, conf)
+	initHistorySchedulers(db, conf)
 	runner.Run(engine, conf)
 }

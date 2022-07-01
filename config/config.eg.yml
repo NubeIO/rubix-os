@@ -33,9 +33,6 @@ database: # for database see (configure database section)
 
 loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
 
-location:
-  authdatadir: '/data/rubix-service' # for local when auth: true, it needs to be: `/<rubix_service_parent_dir>/data/rubix-service/out/rubix-service`
-
 auth: true
 
 producerhistory:
@@ -43,6 +40,6 @@ producerhistory:
     enable: true
     frequency: 600
     datapersistinghours: 24
-  syncinterval:
+  intervalhistorycreator:
     enable: true
-    syncperiod: 10
+    frequency: 10
