@@ -74,7 +74,7 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 	device := &model.Device{}
 	point := &model.Point{}
 
-	log.Infoln("points.db.CreatePointMapping() try and make a new mapping pointMapping:", "AutoMappingFlowNetworkName:", body.AutoMappingFlowNetworkName, "AutoMappingFlowNetworkUUID:", body.AutoMappingFlowNetworkUUID)
+	log.Infoln("points.db.CreatePointMapping() try and make a new mapping pointMapping:", "AutoMappingFlowNetworkName:", body.AutoMappingFlowNetworkName, "AutoMappingFlowNetworkUUID:", body.AutoMappingFlowNetworkUUID, "AutoMappingEnableHistories:", body.AutoMappingEnableHistories)
 	device, err := d.GetDevice(body.Point.DeviceUUID, api.Args{})
 	if err != nil {
 		return nil, err
@@ -108,6 +108,7 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		}
 		objectType := body.Point.ObjectType
 		isOutput := body.Point.IsOutput
+		enableHistory := body.AutoMappingEnableHistories
 		if plugin != "self-mapping" {
 			// make the new network
 			network, err = d.createPointMappingNetwork(plugin)
@@ -133,7 +134,7 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		if nils.BoolIsNil(isOutput) {
 			// example edge-28 UO to bacnet AO
 			// make the bacnet point the producer
-			producer, err := d.createPointMappingProducer(point.UUID, point.Name, device.Name, stream.UUID)
+			producer, err := d.createPointMappingProducer(point.UUID, point.Name, device.Name, stream.UUID, enableHistory)
 			if err != nil {
 				return nil, err
 			}
@@ -146,7 +147,7 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		} else { // if type is of input that make this the producer from the source point example: lora is the producer and bacnet is the consumer (as bacnet will read the value sent to it from lora)
 			// example edge-28 UI to bacnet AV
 			// make the edge-28 point the producer
-			producer, err := d.createPointMappingProducer(body.Point.UUID, body.Point.Name, device.Name, stream.UUID)
+			producer, err := d.createPointMappingProducer(body.Point.UUID, body.Point.Name, device.Name, stream.UUID, enableHistory)
 			if err != nil {
 				return nil, err
 			}
@@ -290,7 +291,7 @@ func (d *GormDatabase) createPointMappingDevice(deviceName, networkUUID string) 
 	}
 }
 
-func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceName, streamUUID string) (producer *model.Producer, err error) {
+func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceName, streamUUID string, enableHistory bool) (producer *model.Producer, err error) {
 
 	// make a producer
 	producer = &model.Producer{}
@@ -300,11 +301,14 @@ func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceNa
 	producer.ProducerThingUUID = pointUUID
 	producer.ProducerThingClass = "point"
 	producer.ProducerApplication = "mapping"
+	producer.EnableHistory = boolean.NewFalse()
+	producer.HistoryType = model.HistoryTypeInterval
+	producer.HistoryInterval = integer.New(15)
 
-	if true {
+	if enableHistory {
 		producer.EnableHistory = boolean.NewTrue()
-		producer.HistoryType = model.HistoryTypeCovAndInterval
-		producer.HistoryInterval = integer.New(60)
+		producer.HistoryType = model.HistoryTypeInterval
+		producer.HistoryInterval = integer.New(15)
 	}
 
 	producer, err = d.CreateProducer(producer)
