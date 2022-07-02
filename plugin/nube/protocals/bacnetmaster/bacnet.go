@@ -300,7 +300,13 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 	if addDevices {
 		for _, device := range devices {
 			newDevice := &model.Device{
-				CommonName:     model.CommonName{Name: fmt.Sprintf("deviceId_%d_networkNum_%d", device.ID.Instance, device.NetworkNumber)},
+				CommonName: model.CommonName{Name: fmt.Sprintf("deviceId_%d_networkNum_%d", device.ID.Instance, device.NetworkNumber)},
+				CommonDevice: model.CommonDevice{
+					CommonIP: model.CommonIP{
+						Host: device.Ip,
+						Port: device.Port,
+					},
+				},
 				DeviceMac:      integer.New(device.MacMSTP),
 				DeviceObjectId: integer.New(int(device.ID.Instance)),
 				NetworkNumber:  integer.New(device.NetworkNumber),
