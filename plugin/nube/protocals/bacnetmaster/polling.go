@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -70,7 +69,6 @@ func (inst *Instance) polling(p polling) error {
 							continue
 						}
 						time.Sleep(devDelay) // DELAY between points
-						fmt.Println(pnt.Name, pnt.WriteMode)
 						if pnt.WriteMode == "read_only" || pnt.WriteMode == "" {
 							readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
 							if err != nil {
