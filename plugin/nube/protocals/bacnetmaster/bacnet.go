@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/iancoleman/strcase"
 	log "github.com/sirupsen/logrus"
+	"strconv"
 )
 
 func (inst *Instance) bacnetNetworkInit() {
@@ -286,34 +287,37 @@ func (inst *Instance) doWriteBool(networkUUID, deviceUUID string, pnt *network.P
 
 }
 
-func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevices bool) (resp []btypes.Device, err error) {
+func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevices bool) (resp []*model.Device, err error) {
 	net, err := inst.getBacnetNetwork(networkUUID)
 	if err != nil {
 		return nil, err
 	}
-	go net.NetworkRun() //TODO: do we need to defer a NetworkClose()?
-	defer net.NetworkClose()
+	go net.NetworkRun()
 	devices, err := net.Whois(opts)
 	if err != nil {
 		return nil, err
 	}
-	if addDevices {
-		for _, device := range devices {
-			newDevice := &model.Device{
-				CommonName: model.CommonName{Name: fmt.Sprintf("deviceId_%d_networkNum_%d", device.ID.Instance, device.NetworkNumber)},
-				CommonDevice: model.CommonDevice{
-					CommonIP: model.CommonIP{
-						Host: device.Ip,
-						Port: device.Port,
-					},
+	var devicesList []*model.Device
+
+	for _, device := range devices {
+		newDevice := &model.Device{
+			CommonName: model.CommonName{Name: fmt.Sprintf("deviceId_%d_networkNum_%d", device.DeviceID, device.NetworkNumber)},
+			CommonDevice: model.CommonDevice{
+				CommonIP: model.CommonIP{
+					Host: device.Ip,
+					Port: device.Port,
 				},
-				DeviceMac:      integer.New(device.MacMSTP),
-				DeviceObjectId: integer.New(int(device.ID.Instance)),
-				NetworkNumber:  integer.New(device.NetworkNumber),
-				MaxADPU:        integer.New(int(device.MaxApdu)),
-				Segmentation:   string(convertSegmentation(segmentation.SegmentedType(device.Segmentation))),
-				NetworkUUID:    networkUUID,
-			}
+				Manufacture: strconv.Itoa(int(device.Vendor)),
+			},
+
+			DeviceMac:      integer.New(device.MacMSTP),
+			DeviceObjectId: integer.New(device.DeviceID),
+			NetworkNumber:  integer.New(device.NetworkNumber),
+			MaxADPU:        integer.New(int(device.MaxApdu)),
+			Segmentation:   string(convertSegmentation(segmentation.SegmentedType(device.Segmentation))),
+			NetworkUUID:    networkUUID,
+		}
+		if addDevices {
 			addDevice, err := inst.addDevice(newDevice)
 			if err != nil {
 				log.Errorf("failed to add a new device from whois %d", device.ID.Instance)
@@ -321,9 +325,9 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 			}
 			log.Infof("added new device from whois %s", addDevice.Name)
 		}
+		devicesList = append(devicesList, newDevice)
 	}
-
-	return devices, err
+	return devicesList, nil
 }
 
 func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints bool) (resp []*network.PointDetails, err error) {
