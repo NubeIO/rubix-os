@@ -278,7 +278,6 @@ func (inst *Instance) doWriteBool(networkUUID, deviceUUID string, pnt *network.P
 	if err != nil {
 		return err
 	}
-
 	err = dev.PointWriteBool(pnt, value)
 	if err != nil {
 		return err
@@ -321,7 +320,7 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 			addDevice, err := inst.addDevice(newDevice)
 			if err != nil {
 				log.Errorf("failed to add a new device from whois %d", device.ID.Instance)
-				return nil, err
+				//return nil, err
 			}
 			log.Infof("added new device from whois %s", addDevice.Name)
 		}
