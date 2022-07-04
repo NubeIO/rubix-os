@@ -21,8 +21,8 @@ type polling struct {
 }
 
 func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
-	deviceDelay = 250 * time.Millisecond
-	pointDelay = 500 * time.Millisecond
+	deviceDelay = 100 * time.Millisecond
+	pointDelay = 100 * time.Millisecond
 	if networkType == model.TransType.LoRa {
 		deviceDelay = 80 * time.Millisecond
 		pointDelay = 6000 * time.Millisecond
@@ -69,7 +69,7 @@ func (inst *Instance) polling(p polling) error {
 							continue
 						}
 						time.Sleep(devDelay) // DELAY between points
-						if pnt.WriteMode == "read_only" || pnt.WriteMode == "" || pnt.WriteMode == "write_once_then_read" {
+						if pnt.WriteMode == "read_only" || pnt.WriteMode == "" {
 							readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
 							if err != nil {
 								_, err = inst.pointUpdateErr(pnt.UUID, err)
