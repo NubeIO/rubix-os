@@ -291,7 +291,7 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 	if err != nil {
 		return nil, err
 	}
-	go net.NetworkRun() //TODO: do we need to defer a NetworkClose()?
+	go net.NetworkRun()
 	devices, err := net.Whois(opts)
 	if err != nil {
 		return nil, err
@@ -338,7 +338,7 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints
 	if err != nil {
 		return nil, err
 	}
-	go net.NetworkRun() //TODO: do we need to defer a NetworkClose()?
+	go net.NetworkRun()
 	dev, err := inst.getBacnetDevice(deviceUUID)
 	if err != nil {
 		return nil, err
