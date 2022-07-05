@@ -1,10 +1,8 @@
 # CHANGELOG
-## [v0.5.5](https://github.com/NubeIO/flow-framework/tree/v0.5.5) (2022-06-10)
+## [v0.5.7](https://github.com/NubeIO/flow-framework/tree/v0.5.7) (2022-07-05)
 
-- redo of bacnet-server plugin
-- fix bug on lora plugin
-- reformat nil helpers
-- add in sync on flow-networks
+- added history api to get histories by producer name
+- updated point self-mapping to allow enable of history on producer
 
 ## [v0.5.6](https://github.com/NubeIO/flow-framework/tree/v0.5.6) (2022-06-17)
 
