@@ -44,6 +44,7 @@ type EnableStruct struct {
 }
 
 type Network struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameNet           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
@@ -82,10 +83,16 @@ type Network struct {
 		Max      int    `json:"max" default:"200"`
 		Default  string `json:"default" default:""`
 	} `json:"auto_mapping_flow_network_uuid"`
-	Enable EnableStruct `json:"enable"`
+	AutoMappingEnableHistories struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"false"`
+	} `json:"auto_mapping_enable_histories"`
 }
 
 type Device struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameDev           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	Host        struct {
@@ -132,6 +139,7 @@ type Device struct {
 }
 
 type Point struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NamePnt           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	ObjectType  struct {

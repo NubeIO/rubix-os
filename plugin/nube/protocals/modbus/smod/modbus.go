@@ -211,7 +211,7 @@ func (mc *ModbusClient) ReadFloat64s(addr uint16, quantity uint16, regType RegTy
 func (mc *ModbusClient) ReadFloat64(addr uint16, regType RegType) (raw []float64, out float64, err error) {
 	raw, err = mc.ReadFloat64s(addr, 1, regType)
 	if err != nil {
-		log.Errorf("modbus-function: failed to ReadFloat32: %v\n", err)
+		log.Errorf("modbus-function: failed to ReadFloat64: %v\n", err)
 		return
 	}
 	out = raw[0]

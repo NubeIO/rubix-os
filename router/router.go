@@ -194,6 +194,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			historyProducerRoutes.GET("", historyHandler.GetProducerHistories)
 			historyProducerRoutes.GET("/:producer_uuid", historyHandler.GetProducerHistoriesByProducerUUID)
 			historyProducerRoutes.GET("/name/:name/one", historyHandler.GetLatestProducerHistoryByProducerName)
+			historyProducerRoutes.GET("/name/:name", historyHandler.GetProducerHistoriesByProducerName)
 			historyProducerRoutes.GET("/:producer_uuid/one", historyHandler.GetLatestProducerHistoryByProducerUUID)
 			historyProducerRoutes.GET("/points", historyHandler.GetProducerHistoriesPoints)
 			historyProducerRoutes.GET("/points_for_sync", historyHandler.GetProducerHistoriesPointsForSync)

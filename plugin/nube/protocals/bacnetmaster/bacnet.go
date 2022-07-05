@@ -338,8 +338,7 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints
 	if err != nil {
 		return nil, err
 	}
-	go net.NetworkRun() //TODO: do we need to defer a NetworkClose()?
-	defer net.NetworkClose()
+	go net.NetworkRun()
 	dev, err := inst.getBacnetDevice(deviceUUID)
 	if err != nil {
 		return nil, err
