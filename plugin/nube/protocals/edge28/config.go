@@ -5,7 +5,7 @@ import "github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/config"
 func (inst *Instance) DefaultConfig() interface{} {
 	return &config.Config{
 		EnablePolling: true,
-		LogLevel:      "ERROR", // DEBUG or ERROR
+		LogLevel:      "DEBUG", // DEBUG or ERROR
 	}
 }
 

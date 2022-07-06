@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
@@ -22,8 +21,8 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	inst.edge28DebugMsg("addNetwork(): ", body.Name)
 	network, err = inst.db.CreateNetwork(body, true)
 	if network == nil || err != nil {
-		inst.edge28ErrorMsg("addNetwork(): failed to create modbus network: ", body.Name)
-		return nil, errors.New("failed to create modbus network")
+		inst.edge28ErrorMsg("addNetwork(): failed to create edge28 network: ", body.Name)
+		return nil, errors.New("failed to create edge28 network")
 	}
 	return network, nil
 }
@@ -37,12 +36,32 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	inst.edge28DebugMsg("addDevice(): ", body.Name)
 	device, err = inst.db.CreateDevice(body)
 	if device == nil || err != nil {
-		inst.edge28DebugMsg("addDevice(): failed to create modbus device: ", body.Name)
-		return nil, errors.New("failed to create modbus device")
+		inst.edge28DebugMsg("addDevice(): failed to create edge28 device: ", body.Name)
+		return nil, errors.New("failed to create edge28 device")
 	}
 
 	inst.edge28DebugMsg("addDevice(): ", body.UUID)
-	// NOTHING TO DO ON DEVICE CREATED
+
+	// CREATE ALL EDGE28 POINTS
+	inst.edge28DebugMsg("addDevice(): pointsAll():", pointsAll())
+	for _, e := range pointsAll() {
+		inst.edge28DebugMsg(e)
+		var pnt model.Point
+		pnt.DeviceUUID = device.UUID
+		pName := e
+		pnt.Name = pName
+		pnt.Description = pName
+		pnt.IoNumber = e
+		pnt.Fallback = float.New(0)
+		pnt.COV = float.New(0.1)
+		pnt.IoType = UITypes.DIGITAL
+
+		inst.edge28DebugMsg(fmt.Sprintf("%+v\n", pnt))
+		point, err := inst.addPoint(&pnt)
+		if err != nil || point.UUID == "" {
+			inst.edge28ErrorMsg("addDevice(): ", "failed to create a new point")
+		}
+	}
 	return device, nil
 }
 
@@ -126,12 +145,13 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		inst.edge28DebugMsg("updatePoint(): bad response from UpdatePoint()")
 		return nil, err
 	}
-
-	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
-	if err != nil || dev == nil {
-		inst.edge28DebugMsg("updatePoint(): bad response from GetDevice()")
-		return nil, err
-	}
+	/*
+		dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
+		if err != nil || dev == nil {
+			inst.edge28DebugMsg("updatePoint(): bad response from GetDevice()")
+			return nil, err
+		}
+	*/
 	return point, nil
 }
 
@@ -255,29 +275,28 @@ func (inst *Instance) pointUpdateErr(point *model.Point, err error) (*model.Poin
 	return nil, nil
 }
 
-func selectObjectType(selectedPlugin string) (objectType string, isOutput, isTypeBool bool) {
+func selectObjectType(ioType string) (objectType string, isOutput, isTypeBool bool) {
 	isOutput = false
-	isOutput = false
-	switch selectedPlugin {
+	isTypeBool = false
+	switch ioType {
 	case PointsList.R1.IoNumber, PointsList.R2.IoNumber:
 		objectType = PointsList.R1.ObjectType
 		isOutput = true
 		isTypeBool = true
-	case PointsList.UO1.IoNumber:
+	case PointsList.UO1.IoNumber, PointsList.UO2.IoNumber, PointsList.UO3.IoNumber, PointsList.UO4.IoNumber, PointsList.UO5.IoNumber, PointsList.UO6.IoNumber, PointsList.UO7.IoNumber:
 		objectType = PointsList.UO1.ObjectType
 		isOutput = true
-	case PointsList.DO1.IoNumber:
+	case PointsList.DO1.IoNumber, PointsList.DO2.IoNumber, PointsList.DO3.IoNumber, PointsList.DO4.IoNumber, PointsList.DO5.IoNumber:
 		objectType = PointsList.DO1.ObjectType
 		isOutput = true
 		isTypeBool = true
-	case PointsList.UI1.IoNumber:
+	case PointsList.UI1.IoNumber, PointsList.UI2.IoNumber, PointsList.UI3.IoNumber, PointsList.UI4.IoNumber, PointsList.UI5.IoNumber, PointsList.UI6.IoNumber, PointsList.UI7.IoNumber:
 		objectType = PointsList.UI1.ObjectType
-	case PointsList.DI1.IoNumber:
+	case PointsList.DI1.IoNumber, PointsList.DI2.IoNumber, PointsList.DI3.IoNumber, PointsList.DI4.IoNumber, PointsList.DI5.IoNumber, PointsList.DI6.IoNumber, PointsList.DI7.IoNumber:
 		objectType = PointsList.DI1.ObjectType
 		isTypeBool = true
 	}
 	return
-
 }
 
 var Rls = []string{"R1", "R2"}
@@ -294,63 +313,63 @@ type Point struct {
 }
 
 var PointsList = struct {
-	R1  Point  `json:"R1"`
-	R2  Point  `json:"R2"`
-	DO1 Point  `json:"DO1"`
-	DO2 string `json:"DO2"`
-	DO3 string `json:"DO3"`
-	DO4 string `json:"DO4"`
-	DO5 string `json:"DO5"`
-	UO1 Point  `json:"UO1"`
-	UO2 Point  `json:"UO2"`
-	UO3 string `json:"UO3"`
-	UO4 string `json:"UO4"`
-	UO5 string `json:"UO5"`
-	UO6 string `json:"UO6"`
-	UO7 string `json:"UO7"`
-	UI1 Point  `json:"UI1"`
-	UI2 string `json:"UI2"`
-	UI3 string `json:"UI3"`
-	UI4 string `json:"UI4"`
-	UI5 string `json:"UI5"`
-	UI6 string `json:"UI6"`
-	UI7 string `json:"UI7"`
-	DI1 Point  `json:"DI1"`
-	DI2 string `json:"DI2"`
-	DI3 string `json:"DI3"`
-	DI4 string `json:"DI4"`
-	DI5 string `json:"DI5"`
-	DI6 string `json:"DI6"`
-	DI7 string `json:"DI7"`
+	R1  Point `json:"R1"`
+	R2  Point `json:"R2"`
+	DO1 Point `json:"DO1"`
+	DO2 Point `json:"DO2"`
+	DO3 Point `json:"DO3"`
+	DO4 Point `json:"DO4"`
+	DO5 Point `json:"DO5"`
+	UO1 Point `json:"UO1"`
+	UO2 Point `json:"UO2"`
+	UO3 Point `json:"UO3"`
+	UO4 Point `json:"UO4"`
+	UO5 Point `json:"UO5"`
+	UO6 Point `json:"UO6"`
+	UO7 Point `json:"UO7"`
+	UI1 Point `json:"UI1"`
+	UI2 Point `json:"UI2"`
+	UI3 Point `json:"UI3"`
+	UI4 Point `json:"UI4"`
+	UI5 Point `json:"UI5"`
+	UI6 Point `json:"UI6"`
+	UI7 Point `json:"UI7"`
+	DI1 Point `json:"DI1"`
+	DI2 Point `json:"DI2"`
+	DI3 Point `json:"DI3"`
+	DI4 Point `json:"DI4"`
+	DI5 Point `json:"DI5"`
+	DI6 Point `json:"DI6"`
+	DI7 Point `json:"DI7"`
 }{
-	R1:  Point{IoNumber: "RI", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	R1:  Point{IoNumber: "R1", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
 	R2:  Point{IoNumber: "R2", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	DO1: Point{IoNumber: "RI", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	DO2: "DO2",
-	DO3: "DO3",
-	DO4: "DO4",
-	DO5: "DO5",
-	UO1: Point{IoNumber: "UO1", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	UO2: Point{IoNumber: "UO2", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	UO3: "UO3",
-	UO4: "UO4",
-	UO5: "UO5",
-	UO6: "UO6",
-	UO7: "UO7",
-	UI1: Point{IoNumber: "UI1", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI2: "UI2",
-	UI3: "UI3",
-	UI4: "UI4",
-	UI5: "UI5",
-	UI6: "UI6",
-	UI7: "UI7",
-	DI1: Point{IoNumber: "DI1", ObjectType: "binary_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	DI2: "DI2",
-	DI3: "DI3",
-	DI4: "DI4",
-	DI5: "DI5",
-	DI6: "DI6",
-	DI7: "DI7",
+	DO1: Point{IoNumber: "DO1", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	DO2: Point{IoNumber: "DO2", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	DO3: Point{IoNumber: "DO3", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	DO4: Point{IoNumber: "DO4", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	DO5: Point{IoNumber: "DO5", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	UO1: Point{IoNumber: "UO1", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewFalse()},
+	UO2: Point{IoNumber: "UO2", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewFalse()},
+	UO3: Point{IoNumber: "UO3", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewFalse()},
+	UO4: Point{IoNumber: "UO4", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewFalse()},
+	UO5: Point{IoNumber: "UO5", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewFalse()},
+	UO6: Point{IoNumber: "UO6", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewFalse()},
+	UO7: Point{IoNumber: "UO7", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewFalse()},
+	UI1: Point{IoNumber: "UI1", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI2: Point{IoNumber: "UI2", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI3: Point{IoNumber: "UI3", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI4: Point{IoNumber: "UI4", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI5: Point{IoNumber: "UI5", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI6: Point{IoNumber: "UI6", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI7: Point{IoNumber: "UI7", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	DI1: Point{IoNumber: "DI1", ObjectType: "binary_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewTrue()},
+	DI2: Point{IoNumber: "DI2", ObjectType: "binary_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewTrue()},
+	DI3: Point{IoNumber: "DI3", ObjectType: "binary_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewTrue()},
+	DI4: Point{IoNumber: "DI4", ObjectType: "binary_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewTrue()},
+	DI5: Point{IoNumber: "DI5", ObjectType: "binary_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewTrue()},
+	DI6: Point{IoNumber: "DI6", ObjectType: "binary_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewTrue()},
+	DI7: Point{IoNumber: "DI7", ObjectType: "binary_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewTrue()},
 }
 
 var pointList = struct {
