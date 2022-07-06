@@ -78,16 +78,18 @@ func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer
 }
 
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
-	var writerModel *model.Writer
 	aType := api.ArgsType
-	writer, _ := d.GetWriter(uuid)
+	writer, err := d.GetWriter(uuid)
+	if err != nil {
+		return false, err
+	}
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	cli := client.NewFlowClientCliFromFNC(fnc)
 	url := urls.SingularUrlByArg(urls.WriterCloneUrl, aType.SourceUUID, writer.UUID)
 	_ = cli.DeleteQuery(url)
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&writerModel)
+	query := d.DB.Delete(&writer)
 	return d.deleteResponseBuilder(query)
 }
 

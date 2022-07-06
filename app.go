@@ -1,7 +1,12 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/auth"
+	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
+	"os"
+	"path"
+	"strconv"
+	"time"
+
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/eventbus"
@@ -15,9 +20,6 @@ import (
 	"github.com/NubeIO/flow-framework/src/jobs"
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
-	"os"
-	"path"
-	"time"
 )
 
 func intHandler(db *database.GormDatabase) {
@@ -36,7 +38,7 @@ func intHandler(db *database.GormDatabase) {
 	}
 }
 
-func initHistory(db *database.GormDatabase, conf *config.Configuration) {
+func initHistorySchedulers(db *database.GormDatabase, conf *config.Configuration) {
 	h := new(history.History)
 	h.DB = db
 	if *conf.ProducerHistory.Cleaner.Enable {
@@ -44,8 +46,8 @@ func initHistory(db *database.GormDatabase, conf *config.Configuration) {
 			conf.ProducerHistory.Cleaner.Frequency,
 			conf.ProducerHistory.Cleaner.DataPersistingHours)
 	}
-	if *conf.ProducerHistory.SyncInterval.Enable {
-		h.InitProducerHistorySyncInterval(conf.ProducerHistory.SyncInterval.SyncPeriod)
+	if *conf.ProducerHistory.IntervalHistoryCreator.Enable {
+		h.InitIntervalHistoryCreator(conf.ProducerHistory.IntervalHistoryCreator.Frequency)
 	}
 }
 
@@ -59,14 +61,13 @@ func main() {
 	if err := os.MkdirAll(conf.GetAbsUploadedImagesDir(), 0755); err != nil {
 		panic(err)
 	}
-	auth.CreateInternalTokenIfDoesNotExist()
+	internaltoken.CreateInternalTokenIfDoesNotExist()
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
-	localBroker := "tcp://0.0.0.0:1883" // TODO add to config, this is meant to be an unsecure broker
-	connected, err := mqttclient.InternalMQTT(localBroker)
+	mqttBroker := "tcp://" + conf.MQTT.Address + ":" + strconv.Itoa(conf.MQTT.Port)
+	_, err := mqttclient.InternalMQTT(mqttBroker)
 	if err != nil {
 		log.Errorln(err)
 	}
-	log.Infoln("INIT INTERNAL MQTT CONNECTED", connected, "ERROR:", err)
 	eventbus.Init()
 	db, err := database.New(conf.Database.Dialect, connection, conf.Database.LogLevel)
 	if err != nil {
@@ -75,7 +76,7 @@ func main() {
 	intHandler(db)
 	defer db.Close()
 	engine := router.Create(db, conf)
-	eventbus.RegisterMQTTBus()
-	initHistory(db, conf)
+	eventbus.RegisterMQTTBus(false)
+	initHistorySchedulers(db, conf)
 	runner.Run(engine, conf)
 }

@@ -11,15 +11,15 @@ type NameNet struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
-	Max      int    `json:"max" default:"20"`
-	Default  string `json:"default" default:"bacnet-bserver"`
+	Max      int    `json:"max" default:"100"`
+	Default  string `json:"default" default:"bacnet-master"`
 }
 
 type NameDev struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
-	Max      int    `json:"max" default:"20"`
+	Max      int    `json:"max" default:"100"`
 	Default  string `json:"default" default:"device"`
 }
 
@@ -27,7 +27,7 @@ type NamePnt struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
-	Max      int    `json:"max" default:"20"`
+	Max      int    `json:"max" default:"100"`
 	Default  string `json:"default" default:"point"`
 }
 
@@ -44,6 +44,7 @@ type EnableStruct struct {
 }
 
 type Network struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameNet           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
@@ -51,6 +52,11 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"bacnetmaster"`
 	} `json:"plugin_name"`
+	Port struct {
+		Type     string `json:"type" default:"int"`
+		Required bool   `json:"required" default:"true"`
+		Default  int    `json:"default" default:"47808"`
+	} `json:"port"`
 	Interface struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
@@ -77,10 +83,16 @@ type Network struct {
 		Max      int    `json:"max" default:"200"`
 		Default  string `json:"default" default:""`
 	} `json:"auto_mapping_flow_network_uuid"`
-	Enable EnableStruct `json:"enable"`
+	AutoMappingEnableHistories struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"false"`
+	} `json:"auto_mapping_enable_histories"`
 }
 
 type Device struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameDev           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	Host        struct {
@@ -127,6 +139,7 @@ type Device struct {
 }
 
 type Point struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NamePnt           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	ObjectType  struct {
@@ -143,7 +156,7 @@ type Point struct {
 	WriteMode struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"read_only\",\"write_only\"]"`
+		Options  []string `json:"options" default:"[\"read_only\",\"write_only\",\"write_once_then_read\"]"`
 		Default  string   `json:"default" default:"read_only"`
 	} `json:"write_mode"`
 	WritePriority struct {

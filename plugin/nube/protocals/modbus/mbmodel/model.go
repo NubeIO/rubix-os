@@ -27,6 +27,12 @@ type TransportTypeStruct struct {
 }
 
 type Network struct {
+	Enable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
+	} `json:"enable"`
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
@@ -40,31 +46,31 @@ type Network struct {
 		Required bool   `json:"required" default:"false"`
 		Min      int    `json:"min" default:"0"`
 		Max      int    `json:"max" default:"100"`
-		Default  string `json:"default" default:""`
+		Default  string `json:"default" default:"/dev/ttyRS485-1"`
 	} `json:"serial_port"`
 	SerialBaudRate struct {
 		Type     string `json:"type" default:"array"`
 		Required bool   `json:"required" default:"false"`
 		Options  []int  `json:"options" default:"[9600, 38400, 57600, 115200]"`
-		Default  int    `json:"default" default:""`
+		Default  int    `json:"default" default:"38400"`
 	} `json:"serial_baud_rate"`
 	SerialParity struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
 		Options  []string `json:"options" default:"[\"odd\",\"even\",\"none\"]"`
-		Default  string   `json:"default" default:""`
+		Default  string   `json:"default" default:"none"`
 	} `json:"serial_parity"`
 	SerialDataBits struct {
 		Type     string `json:"type" default:"array"`
 		Required bool   `json:"required" default:"false"`
 		Options  []int  `json:"options" default:"[7, 8]"`
-		Default  int    `json:"default" default:""`
+		Default  int    `json:"default" default:"8"`
 	} `json:"serial_data_bits"`
 	SerialStopBits struct {
 		Type     string `json:"type" default:"array"`
 		Required bool   `json:"required" default:"false"`
 		Options  []int  `json:"options" default:"[1, 2]"`
-		Default  int    `json:"default" default:""`
+		Default  int    `json:"default" default:"1"`
 	} `json:"serial_stop_bits"`
 	MaxPollRate struct {
 		Type        string   `json:"type" default:"int"`
@@ -73,15 +79,48 @@ type Network struct {
 		DisplayName string   `json:"display_name" default:"Max Poll Rate (seconds)"`
 		Default     *float64 `json:"default" default:"0.1"`
 	} `json:"max_poll_rate"`
+	SerialTimeout struct {
+		Type        string   `json:"type" default:"int"`
+		Required    bool     `json:"required" default:"true"`
+		Options     int      `json:"options" default:"1"`
+		DisplayName string   `json:"display_name" default:"Polling Timeout"`
+		Default     *float64 `json:"default" default:"2"`
+	} `json:"serial_timeout"`
+	AutoMappingNetworksSelection struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[\"disable\",\"self-mapping\",\"rubix-io-to-bacnetserver\"]"`
+		Default  string   `json:"default" default:""`
+	} `json:"auto_mapping_networks_selection"`
+	AutoMappingFlowNetworkName struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"200"`
+		Default  string `json:"default" default:"local"`
+	} `json:"auto_mapping_flow_network_name"`
+	AutoMappingFlowNetworkUUID struct {
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"false"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"200"`
+		Default  string `json:"default" default:""`
+	} `json:"auto_mapping_flow_network_uuid"`
+	AutoMappingEnableHistories struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"false"`
+	} `json:"auto_mapping_enable_histories"`
+}
+
+type Device struct {
 	Enable struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
 		Options  bool   `json:"options" default:"false"`
 		Default  *bool  `json:"default" default:"true"`
 	} `json:"enable"`
-}
-
-type Device struct {
 	Name          NameStruct          `json:"name"`
 	Description   DescriptionStruct   `json:"description"`
 	TransportType TransportTypeStruct `json:"transport_type"`
@@ -130,15 +169,15 @@ type Device struct {
 		Options  bool   `json:"options" default:"false"`
 		Default  *bool  `json:"default" default:"true"`
 	} `json:"zero_mode"`
-	Enable struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"false"`
-		Default  *bool  `json:"default" default:"true"`
-	} `json:"enable"`
 }
 
 type Point struct {
+	Enable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"true"`
+		Default  *bool  `json:"default" default:"true"`
+	} `json:"enable"`
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	ObjectType  struct {
@@ -208,12 +247,6 @@ type Point struct {
 		DisplayName string   `json:"display_name" default:"Fallback Value"`
 		Nullable    bool     `json:"nullable" default:"true"`
 	} `json:"fallback"`
-	Enable struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"true"`
-		Default  *bool  `json:"default" default:"true"`
-	} `json:"enable"`
 }
 
 func GetNetworkSchema() *Network {

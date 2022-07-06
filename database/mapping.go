@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -72,7 +74,7 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 	device := &model.Device{}
 	point := &model.Point{}
 
-	log.Infoln("points.db.CreatePointMapping() try and make a new mapping pointMapping:", "AutoMappingFlowNetworkName:", body.AutoMappingFlowNetworkName, "AutoMappingFlowNetworkUUID:", body.AutoMappingFlowNetworkUUID)
+	log.Infoln("points.db.CreatePointMapping() try and make a new mapping pointMapping:", "AutoMappingFlowNetworkName:", body.AutoMappingFlowNetworkName, "AutoMappingFlowNetworkUUID:", body.AutoMappingFlowNetworkUUID, "AutoMappingEnableHistories:", body.AutoMappingEnableHistories)
 	device, err := d.GetDevice(body.Point.DeviceUUID, api.Args{})
 	if err != nil {
 		return nil, err
@@ -106,6 +108,7 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		}
 		objectType := body.Point.ObjectType
 		isOutput := body.Point.IsOutput
+		enableHistory := body.AutoMappingEnableHistories
 		if plugin != "self-mapping" {
 			// make the new network
 			network, err = d.createPointMappingNetwork(plugin)
@@ -131,7 +134,7 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		if nils.BoolIsNil(isOutput) {
 			// example edge-28 UO to bacnet AO
 			// make the bacnet point the producer
-			producer, err := d.createPointMappingProducer(point.UUID, point.Name, device.Name, stream.UUID)
+			producer, err := d.createPointMappingProducer(point.UUID, point.Name, device.Name, stream.UUID, enableHistory)
 			if err != nil {
 				return nil, err
 			}
@@ -144,7 +147,7 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		} else { // if type is of input that make this the producer from the source point example: lora is the producer and bacnet is the consumer (as bacnet will read the value sent to it from lora)
 			// example edge-28 UI to bacnet AV
 			// make the edge-28 point the producer
-			producer, err := d.createPointMappingProducer(body.Point.UUID, body.Point.Name, device.Name, stream.UUID)
+			producer, err := d.createPointMappingProducer(body.Point.UUID, body.Point.Name, device.Name, stream.UUID, enableHistory)
 			if err != nil {
 				return nil, err
 			}
@@ -184,6 +187,7 @@ func (d *GormDatabase) selectFlowNetwork(flowNetworkName, flowNetworkUUID string
 
 func (d *GormDatabase) createPointMappingStream(deviceName, networkName string, flowNetwork *model.FlowNetwork) (stream *model.Stream, err error) {
 	streamModel := &model.Stream{}
+	streamModel.Enable = boolean.NewTrue()
 	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 	streamModel.Name = fmt.Sprintf("%s_%s", networkName, deviceName)
 	log.Info("Try and make anew stream or select existing with name: ", streamModel.Name)
@@ -205,6 +209,7 @@ func (d *GormDatabase) createPointMappingStream(deviceName, networkName string, 
 
 func (d *GormDatabase) createPointMappingStreamClone(deviceName, networkName string, flowNetwork *model.FlowNetwork) (stream *model.Stream, err error) {
 	streamModel := &model.Stream{}
+	streamModel.Enable = boolean.NewTrue()
 	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 	streamModel.Name = fmt.Sprintf("%s_%s", networkName, deviceName)
 	log.Info("Try and make anew stream or select existing with name: ", streamModel.Name)
@@ -226,6 +231,7 @@ func (d *GormDatabase) createPointMappingStreamClone(deviceName, networkName str
 
 func (d *GormDatabase) createPointMappingPoint(pointObjectType, pointName, deviceUUID string) (point *model.Point, err error) {
 	point = &model.Point{}
+	point.Enable = boolean.NewTrue()
 	// make pnt, first check
 	point.Name = pointName
 	point.ObjectType = pointObjectType
@@ -248,6 +254,7 @@ func (d *GormDatabase) createPointMappingNetwork(plugin string) (network *model.
 	network, err = d.GetNetworkByPluginName(plugin, api.Args{})
 	if network == nil {
 		network = &model.Network{}
+		network.Enable = boolean.NewTrue()
 		network.Name = plugin
 		network.PluginPath = plugin
 		network, err = d.CreateNetwork(network, false)
@@ -268,6 +275,7 @@ func (d *GormDatabase) createPointMappingDevice(deviceName, networkUUID string) 
 	device, existing := d.deviceNameExistsInNetwork(deviceName, networkUUID)
 	if !existing {
 		newDevice := &model.Device{}
+		newDevice.Enable = boolean.NewTrue()
 		newDevice.Name = deviceName
 		newDevice.NetworkUUID = networkUUID
 		device, err = d.CreateDevice(newDevice)
@@ -283,15 +291,26 @@ func (d *GormDatabase) createPointMappingDevice(deviceName, networkUUID string) 
 	}
 }
 
-func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceName, streamUUID string) (producer *model.Producer, err error) {
+func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceName, streamUUID string, enableHistory bool) (producer *model.Producer, err error) {
 
 	// make a producer
 	producer = &model.Producer{}
+	producer.Enable = boolean.NewTrue()
 	producer.Name = fmt.Sprintf("%s_%s", deviceName, pointName)
 	producer.StreamUUID = streamUUID
 	producer.ProducerThingUUID = pointUUID
 	producer.ProducerThingClass = "point"
 	producer.ProducerApplication = "mapping"
+	producer.EnableHistory = boolean.NewFalse()
+	producer.HistoryType = model.HistoryTypeInterval
+	producer.HistoryInterval = integer.New(15)
+
+	if enableHistory {
+		producer.EnableHistory = boolean.NewTrue()
+		producer.HistoryType = model.HistoryTypeInterval
+		producer.HistoryInterval = integer.New(15)
+	}
+
 	producer, err = d.CreateProducer(producer)
 	if err != nil {
 		return nil, fmt.Errorf("createPointMappingProducer() producer creation failure: %s", err)
@@ -304,6 +323,7 @@ func (d *GormDatabase) createPointMappingProducer(pointUUID, pointName, deviceNa
 func (d *GormDatabase) createPointMappingConsumer(pointUUID, producerName, producerUUID, streamCloneUUID string) (consumer *model.Consumer, err error) {
 
 	consumer = &model.Consumer{}
+	consumer.Enable = boolean.NewTrue()
 	consumer.Name = producerName
 	consumer.ProducerUUID = producerUUID
 	consumer.ConsumerApplication = "mapping"

@@ -18,7 +18,7 @@ import (
 func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	engine := gin.New()
 	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), nerrors.Handler(), location.Default())
-	engine.NoRoute(nerrors.NotFound())
+	engine.NoRoute(nerrors.NotFoundHandler())
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
@@ -101,15 +101,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	syncWriterHandler := api.SyncWriterAPI{
 		DB: db,
 	}
-	userHandler := api.UserAPI{
-		DB: db,
-	}
-	tokenHandler := api.TokenAPI{
-		DB: db,
-	}
-	authHandler := api.AuthAPI{
-		DB: db,
-	}
+	userHandler := api.UserAPI{}
+	tokenHandler := api.TokenAPI{}
+	authHandler := api.AuthAPI{}
 
 	dbGroup.SyncTopics()
 	// for the custom plugin endpoints you need to use the plugin token
@@ -200,6 +194,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			historyProducerRoutes.GET("", historyHandler.GetProducerHistories)
 			historyProducerRoutes.GET("/:producer_uuid", historyHandler.GetProducerHistoriesByProducerUUID)
 			historyProducerRoutes.GET("/name/:name/one", historyHandler.GetLatestProducerHistoryByProducerName)
+			historyProducerRoutes.GET("/name/:name", historyHandler.GetProducerHistoriesByProducerName)
 			historyProducerRoutes.GET("/:producer_uuid/one", historyHandler.GetLatestProducerHistoryByProducerUUID)
 			historyProducerRoutes.GET("/points", historyHandler.GetProducerHistoriesPoints)
 			historyProducerRoutes.GET("/points_for_sync", historyHandler.GetProducerHistoriesPointsForSync)
@@ -422,8 +417,10 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		tokenRoutes := apiRoutes.Group("/tokens")
 		{
 			tokenRoutes.GET("", tokenHandler.GetTokens)
-			tokenRoutes.PUT("", tokenHandler.UpdateToken)
 			tokenRoutes.POST("/generate", tokenHandler.GenerateToken)
+			tokenRoutes.PUT("/:uuid/block", tokenHandler.BlockToken)
+			tokenRoutes.PUT("/:uuid/regenerate", tokenHandler.RegenerateToken)
+			tokenRoutes.DELETE("/:uuid", tokenHandler.DeleteToken)
 		}
 	}
 	return engine

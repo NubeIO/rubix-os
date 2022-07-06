@@ -15,20 +15,19 @@ func (inst *Instance) Enable() error {
 	}
 	inst.initBacStore()
 	inst.bacnetNetworkInit()
-	if !inst.pollingEnabled {
-		var arg polling
-		inst.pollingEnabled = true
-		arg.enable = true
-		go func() error {
-			err := inst.polling(arg)
-			if err != nil {
-				log.Errorf("rubix-io.enable: POLLING ERROR on routine: %v\n", err)
-			}
-			return nil
-		}()
+
+	var arg polling
+	inst.pollingEnabled = true
+	arg.enable = true
+	go func() error {
+		err := inst.polling(arg)
 		if err != nil {
-			log.Errorf("rubix-io.enable: POLLING ERROR: %v\n", err)
+			log.Errorf("rubix-io.enable: POLLING ERROR on routine: %v\n", err)
 		}
+		return nil
+	}()
+	if err != nil {
+		log.Errorf("rubix-io.enable: POLLING ERROR: %v\n", err)
 	}
 
 	return nil
@@ -37,15 +36,15 @@ func (inst *Instance) Enable() error {
 // Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
 	inst.enabled = false
-	if inst.pollingEnabled {
-		var arg polling
-		inst.pollingEnabled = false
-		arg.enable = false
-		go func() {
-			err := inst.polling(arg)
-			if err != nil {
-			}
-		}()
-	}
+	//if inst.pollingEnabled {
+	//	var arg polling
+	//	inst.pollingEnabled = false
+	//	arg.enable = false
+	//	go func() {
+	//		err := inst.polling(arg)
+	//		if err != nil {
+	//		}
+	//	}()
+	//}
 	return nil
 }

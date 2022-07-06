@@ -2,93 +2,113 @@
 
 # Console colors
 DEFAULT="\033[0m"
-GREEN="\033[32m"
 RED="\033[31m"
+YELLOW="\033[33m"
+GREEN="\033[32m"
 
 PRODUCTION=false
+BUILD_ONLY=false
 
 help() {
-    echo "Service commands:"
-    echo -e "   ${GREEN}--prod | --production: add these suffix to start production"
+  echo "USAGE: bash build.bash [OPTIONS] [PLUGINS...]"
+  echo "  i.e. bash build.bash --production modbus lorawan"
+  echo ""
+  echo "Options:"
+  echo " -h  --help :          Print this help"
+  echo " --prod  --production: Add these suffix to start production"
+  echo " --build-only :        Don't run program"
 }
 
 parseCommand() {
-    for i in "$@"; do
-        case ${i} in
-        -h | --help)
-            help
-            exit 0
-            ;;
-        --prod | --production)
-            PRODUCTION=true
-            ;;
-        *)
-            echo -e "${RED}Unknown options ${i}  (-h, --help for help)${DEFAULT}"
-            ;;
-        esac
-    done
+  for i in "$@"; do
+    case ${i} in
+    -h | --help)
+      help
+      exit 0
+      ;;
+    --prod | --production)
+      PRODUCTION=true
+      ;;
+    --build-only)
+      BUILD_ONLY=true
+      ;;
+    esac
+  done
 }
 
 parseCommand "$@"
 
 dir=$(pwd)
-echo -e "${GREEN}Current working directory is: $dir${DEFAULT}"
+echo -e "Current working directory is: $dir${DEFAULT}"
 pluginDir=$dir/data/plugins
 
 if [ ${PRODUCTION} == true ]; then
-    echo -e "${GREEN}We are running in production mode!${DEFAULT}"
-    pluginDir=/data/flow-framework/data/plugins
+  echo -e "${YELLOW}We are running in production mode!${DEFAULT}"
+  pluginDir=/data/flow-framework/data/plugins
 else
-    echo -e "${GREEN}We are running in development mode!${DEFAULT}"
+  echo -e "${YELLOW}We are running in development mode!${DEFAULT}"
 fi
 
-echo -e "${GREEN}Creating a plugin directory if does not exist at: ${pluginDir}${DEFAULT}"
+echo -e "Creating a plugin directory if does not exist at: ${pluginDir}"
 rm -rf $pluginDir/* || true
 mkdir -p $pluginDir
 
-cd $dir/plugin/nube/system/
-go build -buildmode=plugin -o system.so *.go  && cp system.so  $pluginDir
+BUILD_ERROR=false
 
-cd $dir/plugin/nube/utils/backup
-go build -buildmode=plugin -o backup.so *.go  && cp backup.so  $pluginDir
+function buildPlugin {
+  echo -e "${DEFAULT}BUILDING $1..."
+  go build -buildmode=plugin -o $1.so $2/*.go && cp $1.so $pluginDir
+  if [ $? -eq 0 ]; then
+    echo -e "${GREEN}BUILD ${DEFAULT}$1"
+  else
+    echo -e "${RED}ERROR BUILD ${DEFAULT}$1"
+    BUILD_ERROR=true
+  fi
+}
 
-cd $dir/plugin/nube/protocals/edge28
-go build -buildmode=plugin -o edge28.so *.go  && cp edge28.so $pluginDir
+pushd $dir > /dev/null
 
-cd $dir/plugin/nube/protocals/lorawan
-go build -buildmode=plugin -o lorawan.so *.go  && cp lorawan.so $pluginDir
+for i in "$@"; do
+  case ${i} in
+    system)
+      buildPlugin "system" plugin/nube/system ;;
+    edge28)
+      buildPlugin "edge28" plugin/nube/protocals/edge28 ;;
+    modbus)
+      buildPlugin "modbus" plugin/nube/protocals/modbus ;;
+    lora)
+      buildPlugin "lora" plugin/nube/protocals/lora ;;
+    bacnet)
+      buildPlugin "bacnet" plugin/nube/protocals/bacnetserver ;;
+    lorawan)
+      buildPlugin "lorawan" plugin/nube/protocals/lorawan ;;
+    bacnet_master)
+      buildPlugin "bacnet_master" plugin/nube/protocals/bacnetmaster ;;
+    history)
+      buildPlugin "history" plugin/nube/database/history ;;
+    influx)
+      buildPlugin "influx" plugin/nube/database/influx ;;
+    rubixio)
+      buildPlugin "rubixio" plugin/nube/protocals/rubixio ;;
+    modbusserver)
+      buildPlugin "modbusserver" plugin/nube/protocals/modbusserver ;;
+    postgres)
+      buildPlugin "postgres" plugin/nube/database/postgres ;;
+  esac
+done
 
-cd $dir/plugin/nube/protocals/modbus
-go build -buildmode=plugin -o modbus.so *.go  && cp modbus.so $pluginDir
+if [ ${BUILD_ERROR} == true ]; then
+    exit -1
+fi
 
-cd $dir/plugin/nube/protocals/lora
-go build -buildmode=plugin -o lora.so *.go  && cp lora.so $pluginDir
+popd > /dev/null
 
-cd $dir/plugin/nube/protocals/bacnetserver
-go build -buildmode=plugin -o bacnetserver.so *.go  && cp bacnetserver.so $pluginDir
-
-cd $dir/plugin/nube/protocals/bacnetmaster
-go build -buildmode=plugin -o bacnetmaster.so *.go  && cp bacnetmaster.so $pluginDir
-
-cd $dir/plugin/nube/protocals/rubixio
-go build -buildmode=plugin -o rubixio.so *.go  && cp rubixio.so $pluginDir
-
-cd $dir/plugin/nube/protocals/modbusserver
-go build -buildmode=plugin -o modbusserver.so *.go  && cp modbusserver.so $pluginDir
-
-cd $dir/plugin/nube/database/influx
-go build -buildmode=plugin -o influx.so *.go  && cp influx.so $pluginDir
-
-cd $dir/plugin/nube/database/history
-go build -buildmode=plugin -o history.so *.go  && cp history.so $pluginDir
-
-cd $dir/plugin/nube/database/postgres
-go build -buildmode=plugin -o postgres.so *.go && cp postgres.so $pluginDir
-
-cd $dir
+if [ ${BUILD_ONLY} == true ]; then
+    exit 0
+fi
 
 if [ ${PRODUCTION} == true ]; then
-  go run app.go -g /data/flow-framework  -d data --prod
+  go run app.go -g /data/flow-framework -d data --prod
 else
-  go run app.go
+  go run app.go --auth=false
 fi

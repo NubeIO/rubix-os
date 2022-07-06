@@ -118,6 +118,10 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	return point, nil
 }
 
+func (inst *Instance) getNetworks() ([]*model.Network, error) {
+	return inst.db.GetNetworks(api.Args{})
+}
+
 // deleteNetwork delete network
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	ok, err = inst.db.DeleteNetwork(body.UUID)

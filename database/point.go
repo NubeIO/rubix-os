@@ -102,6 +102,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		pointMapping.AutoMappingFlowNetworkName = network.AutoMappingFlowNetworkName
 		pointMapping.AutoMappingFlowNetworkUUID = network.AutoMappingFlowNetworkUUID
 		pointMapping.AutoMappingNetworksSelection = []string{network.AutoMappingNetworksSelection}
+		pointMapping.AutoMappingEnableHistories = network.AutoMappingEnableHistories
 		pointMapping, err = d.CreatePointMapping(pointMapping)
 		if err != nil {
 			log.Errorln("points.db.CreatePoint() failed to make auto point mapping")
@@ -271,14 +272,21 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 }
 
 func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
-	point, _ := d.GetPoint(uuid, api.Args{})
+	point, err := d.GetPoint(uuid, api.Args{})
+	if err != nil {
+		return false, err
+	}
 	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &point.UUID})
-	for _, producer := range producers {
-		_, _ = d.DeleteProducer(producer.UUID)
+	if producers != nil {
+		for _, producer := range producers {
+			_, _ = d.DeleteProducer(producer.UUID)
+		}
 	}
 	writers, _ := d.GetWriters(api.Args{WriterThingUUID: &point.UUID})
-	for _, writer := range writers {
-		_, _ = d.DeleteWriter(writer.UUID)
+	if writers != nil {
+		for _, writer := range writers {
+			_, _ = d.DeleteWriter(writer.UUID)
+		}
 	}
 	query := d.DB.Delete(&point)
 	if query.Error != nil {

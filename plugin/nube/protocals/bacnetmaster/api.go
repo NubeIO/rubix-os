@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetmaster/master"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 const (
@@ -29,6 +30,10 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
 		network, err := inst.addNetwork(body)
+		api.ResponseHandler(network, err, ctx)
+	})
+	mux.GET(plugin.NetworksURL, func(ctx *gin.Context) {
+		network, err := inst.getNetworks()
 		api.ResponseHandler(network, err, ctx)
 	})
 	mux.POST(plugin.DevicesURL, func(ctx *gin.Context) {
@@ -92,12 +97,18 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.POST(whois+"/:uuid", func(ctx *gin.Context) {
 		body, _ := master.BodyWhoIs(ctx)
 		uuid := resolveID(ctx)
-		resp, err := inst.whoIs(uuid, body)
+		addDevices := ctx.Query("add_devices")
+		add, _ := strconv.ParseBool(addDevices)
+		resp, err := inst.whoIs(uuid, body, add)
 		api.ResponseHandler(resp, err, ctx)
 	})
 	mux.POST(discoverPoints+"/:uuid", func(ctx *gin.Context) {
 		uuid := resolveID(ctx)
-		resp, err := inst.devicePoints(uuid)
+		addPoints := ctx.Query("add_points")
+		add, _ := strconv.ParseBool(addPoints)
+		makeWriteablePoints := ctx.Query("writeable_points")
+		writeable, _ := strconv.ParseBool(makeWriteablePoints)
+		resp, err := inst.devicePoints(uuid, add, writeable)
 		api.ResponseHandler(resp, err, ctx)
 	})
 }

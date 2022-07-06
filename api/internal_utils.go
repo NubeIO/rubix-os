@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/bools"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
@@ -158,12 +159,17 @@ func getBodyTag(ctx *gin.Context) (dto *model.Tag, err error) {
 	return dto, err
 }
 
-func getBodyUser(ctx *gin.Context) (dto *model.User, err error) {
+func getBodyUser(ctx *gin.Context) (dto *user.User, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
 
-func getBodyToken(ctx *gin.Context) (dto *interfaces.Token, err error) {
+func getBodyTokenCreate(ctx *gin.Context) (dto *interfaces.TokenCreate, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyTokenBlock(ctx *gin.Context) (dto *interfaces.TokenBlock, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

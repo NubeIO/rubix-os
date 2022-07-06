@@ -101,14 +101,21 @@ func (d *GormDatabase) ScheduleWrite(uuid string, body *model.ScheduleData) erro
 }
 
 func (d *GormDatabase) DeleteSchedule(uuid string) (bool, error) {
-	schedule, _ := d.GetSchedule(uuid)
+	schedule, err := d.GetSchedule(uuid)
+	if err != nil {
+		return false, err
+	}
 	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &schedule.UUID})
-	for _, producer := range producers {
-		_, _ = d.DeleteProducer(producer.UUID)
+	if producers != nil {
+		for _, producer := range producers {
+			_, _ = d.DeleteProducer(producer.UUID)
+		}
 	}
 	writers, _ := d.GetWriters(api.Args{WriterThingUUID: &schedule.UUID})
-	for _, writer := range writers {
-		_, _ = d.DeleteWriter(writer.UUID)
+	if writers != nil {
+		for _, writer := range writers {
+			_, _ = d.DeleteWriter(writer.UUID)
+		}
 	}
 	query := d.DB.Delete(&schedule)
 	return d.deleteResponseBuilder(query)

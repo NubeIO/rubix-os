@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -21,6 +22,10 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		return nil, errors.New(fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error()))
 	}
 	return body, nil
+}
+
+func (inst *Instance) getNetworks() ([]*model.Network, error) {
+	return inst.db.GetNetworks(api.Args{})
 }
 
 // addDevice add device
