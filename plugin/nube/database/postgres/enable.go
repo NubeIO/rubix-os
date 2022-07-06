@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-co-op/gocron"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -11,14 +13,12 @@ func (inst *Instance) Enable() error {
 	inst.enabled = true
 	inst.setUUID()
 	inst.BusServ()
+	inst.initializePostgresSetting()
 	cron = gocron.NewScheduler(time.UTC)
-	postgresSetting := inst.initializePostgresSetting()
-	postgresSetting, err := New(postgresSetting)
-	if err != nil {
-		return err
-	}
-	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncPostgres").Do(inst.syncPostgres, postgresSetting)
+	cron.SetMaxConcurrentJobs(1, gocron.RescheduleMode)
+	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncPostgres").Do(inst.syncPostgres)
 	cron.StartAsync()
+	log.Info(fmt.Sprintf("%s enabled", name))
 	return nil
 }
 
@@ -29,5 +29,6 @@ func (inst *Instance) Disable() error {
 		conn, _ := postgresConnectionInstance.db.DB()
 		_ = conn.Close()
 	}
+	log.Info(fmt.Sprintf("%s disabled", name))
 	return nil
 }
