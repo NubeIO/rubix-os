@@ -101,7 +101,6 @@ func (inst *Instance) Edge28Polling() error {
 						// OUTPUTS
 						case pointList.R1, pointList.R2, pointList.DO1, pointList.DO2, pointList.DO3, pointList.DO4, pointList.DO5:
 							pnt.PointPriorityArrayMode = model.PriorityArrayToWriteValue
-							// _, err := inst.db.UpdatePointValue(pnt.UUID, pnt, false)  //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
 							if pnt.WriteValue != nil {
 								writeValue := float.NonNil(pnt.WriteValue)
 								wv, err = DigitalToGPIOValue(writeValue, false)
@@ -112,14 +111,13 @@ func (inst *Instance) Edge28Polling() error {
 								_, err = inst.processWrite(pnt, wv, rest, uint64(counter), false)
 								if err != nil {
 									inst.edge28ErrorMsg(err)
+									inst.pointUpdateErr(pnt, err)
 									continue
 								}
-							} else {
-								inst.db.UpdatePoint(pnt.UUID, pnt, true)
 							}
+
 						case pointList.UO1, pointList.UO2, pointList.UO3, pointList.UO4, pointList.UO5, pointList.UO6, pointList.UO7:
 							pnt.PointPriorityArrayMode = model.PriorityArrayToWriteValue
-							// _, err := inst.db.UpdatePointValue(pnt.UUID, pnt, false) //TODO: This call sets the fallback value, but it ends up being called too often and overrides value changes from API calls
 							if pnt.WriteValue != nil {
 								wv, err = GetGPIOValueForUOByType(pnt)
 								if err != nil {
@@ -132,6 +130,7 @@ func (inst *Instance) Edge28Polling() error {
 									continue
 								}
 							}
+
 						// INPUTS
 						case pointList.DI1, pointList.DI2, pointList.DI3, pointList.DI4, pointList.DI5, pointList.DI6, pointList.DI7:
 							pnt.PointPriorityArrayMode = model.ReadOnlyNoPriorityArrayRequired
@@ -199,7 +198,7 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 	var err error
 	inst.edge28DebugMsg("processWrite: pnt")
 	inst.edge28DebugMsg(fmt.Sprintf("%+v\n", pnt))
-	if boolean.IsTrue(pnt.WritePollRequired) || !boolean.IsTrue(pnt.InSync) || rsyncWrite == 0 || pollCount == 1 {
+	if boolean.IsTrue(pnt.WritePollRequired) || rsyncWrite == 0 || pollCount == 1 {
 		if pollCount == 1 {
 			inst.edge28DebugMsg(fmt.Sprintf("processWrite() SYNC on first poll wrote IO %s: %v\n", pnt.IoNumber, value))
 		}
@@ -239,14 +238,13 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 		inst.edge28DebugMsg(fmt.Sprintf("point is in sync %s: %v\n", pnt.IoNumber, value))
 		return value, err
 	}
-
 }
 
 func (inst *Instance) processRead(pnt *model.Point, readValue float64, pollCount int) (float64, error) {
-	covEvent, _ := nmath.Cov(readValue, float.NonNil(pnt.PresentValue), 0) // TODO: Remove this as it's done in the main point db file
+	covEvent, _ := nmath.Cov(readValue, float.NonNil(pnt.OriginalValue), 0) // TODO: Remove this as it's done in the main point db file
 	inst.edge28DebugMsg("processRead: pnt")
 	inst.edge28DebugMsg(fmt.Sprintf("%+v\n", pnt))
-	if pollCount == 1 || !boolean.IsTrue(pnt.InSync) || boolean.IsTrue(pnt.ReadPollRequired) {
+	if pollCount == 1 || boolean.IsTrue(pnt.ReadPollRequired) {
 		_, err = inst.pointUpdate(pnt, readValue, true, true, true)
 		if err != nil {
 			inst.edge28DebugMsg(fmt.Sprintf("READ UPDATE POINT %s: %v\n", pnt.IoNumber, readValue))

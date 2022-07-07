@@ -43,7 +43,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	inst.edge28DebugMsg("addDevice(): ", body.UUID)
 
 	// CREATE ALL EDGE28 POINTS
-	inst.edge28DebugMsg("addDevice(): pointsAll():", pointsAll())
+	inst.edge28DebugMsg("addDevice(): ADDING ALL POINTS")
 	for _, e := range pointsAll() {
 		inst.edge28DebugMsg(e)
 		var pnt model.Point
@@ -88,8 +88,9 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	body.IsOutput = nils.NewBool(isOutput)
 	body.IsTypeBool = nils.NewBool(isTypeBool)
+	body.WritePollRequired = nils.NewBool(isOutput) //write value immediately if it is an output point
+	body.ReadPollRequired = nils.NewBool(!isOutput) //only read value if it isn't an output point
 
-	// point, err = inst.db.CreatePoint(body, true, false)
 	point, err = inst.db.CreatePoint(body, true, true)
 	if point == nil || err != nil {
 		inst.edge28DebugMsg("addPoint(): failed to create edge28 point: ", body.Name)

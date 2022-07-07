@@ -100,7 +100,18 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 	if priority != nil {
 		// override priorityMap
 		priorityMap, highestValue, currentPriority, doesPriorityExist := priorityarray.ParsePriority(pointModel.Priority, priority)
+		fmt.Println("updatePriority: doesPriorityExist:", doesPriorityExist)
+		fmt.Println("updatePriority: highestValue:", highestValue)
+		fmt.Println("updatePriority: currentPriority:", currentPriority)
+		fmt.Println("updatePriority: priorityMap:", priorityMap)
 		if doesPriorityExist {
+			if currentPriority == nil && highestValue == nil && !float.IsNil(pointModel.Fallback) {
+				pointModel.Priority.P16 = float.New(*pointModel.Fallback)
+				priorityMapTemp := map[string]*float64{"_16": pointModel.Fallback}
+				priorityMap = &priorityMapTemp
+				currentPriority = integer.New(16)
+				highestValue = float.New(*pointModel.Priority.P16)
+			}
 			if priorityMap != nil {
 				pointModel.CurrentPriority = currentPriority
 				pointModel.WriteValueOriginal = highestValue
@@ -111,19 +122,6 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 					pointModel.WriteValue = writeValue
 				}
 				presentValue = highestValue
-			} else if !float.IsNil(pointModel.Fallback) || currentPriority == nil {
-				pointModel.Priority.P16 = float.New(*pointModel.Fallback)
-				priorityMapTemp := map[string]*float64{"_16": pointModel.Fallback}
-				priorityMap = &priorityMapTemp
-				pointModel.CurrentPriority = integer.New(16)
-				pointModel.WriteValueOriginal = float.New(*pointModel.Priority.P16)
-				writeValue, err := pointEval(pointModel.Priority.P16, pointModel.MathOnWriteValue)
-				if err != nil {
-					log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
-				} else {
-					pointModel.WriteValue = writeValue
-				}
-				presentValue = pointModel.Fallback // only update presentValue if required by PointPriorityArrayMode
 			}
 		}
 		priorityMapToPatch := d.priorityMapToPatch(priorityMap)

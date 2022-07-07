@@ -34,7 +34,7 @@ func ParsePriority(pointPriority *model.Priority, priority *map[string]*float64)
 			val := priorityValue.Field(i).Interface().(*float64)
 			var v *float64
 			ok := false
-			if priority != nil {
+			if priority != nil { //TODO: This code looks like it could be optimized
 				p := *priority
 				v, ok = p[key]
 				if ok {
