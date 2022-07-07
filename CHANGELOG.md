@@ -1,4 +1,10 @@
 # CHANGELOG
+## [v0.5.8](https://github.com/NubeIO/flow-framework/tree/v0.5.8) (2022-09-05)
+
+- fix on PG DB resync
+- clean up of bacnet master
+
+
 ## [v0.5.7](https://github.com/NubeIO/flow-framework/tree/v0.5.7) (2022-07-05)
 
 - added history api to get histories by producer name
