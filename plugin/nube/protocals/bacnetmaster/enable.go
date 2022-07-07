@@ -14,7 +14,6 @@ func (inst *Instance) Enable() error {
 		inst.networkUUID = q.UUID
 	}
 	inst.initBacStore()
-	inst.bacnetNetworkInit()
 
 	var arg polling
 	inst.pollingEnabled = true

@@ -16,9 +16,10 @@ import (
 )
 
 func (inst *Instance) bacnetNetworkInit() {
-
+	log.Infof("bacnet-master bacnetNetworkInit enable network")
 	networks, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true})
 	if err != nil {
+		log.Errorln("bacnet-master bacnetNetworkInit err:", err.Error())
 		return
 	}
 	for _, net := range networks {
@@ -44,6 +45,7 @@ func (inst *Instance) bacnetNetworkInit() {
 
 func (inst *Instance) initBacStore() {
 	inst.BacStore = network.NewStore()
+	inst.bacnetNetworkInit()
 }
 
 // bacnetNetwork add or update an instance a bacnet network that is cached in bacnet lib
