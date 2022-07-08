@@ -15,8 +15,10 @@ func (inst *Instance) edge28DebugMsg(args ...interface{}) {
 }
 
 func (inst *Instance) edge28ErrorMsg(args ...interface{}) {
-	prefix := "Edge28: "
-	log.Error(prefix, args)
+	if nstring.InEqualIgnoreCase(inst.config.LogLevel, "ERROR") || nstring.InEqualIgnoreCase(inst.config.LogLevel, "DEBUG") {
+		prefix := "Edge28: "
+		log.Error(prefix, args)
+	}
 }
 
 func (inst *Instance) printPointDebugInfo(pnt *model.Point) {
