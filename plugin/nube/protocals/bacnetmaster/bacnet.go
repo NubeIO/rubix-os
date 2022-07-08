@@ -334,7 +334,7 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 	return devicesList, nil
 }
 
-func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints bool) (resp []*network.PointDetails, err error) {
+func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints bool) (resp []*model.Point, err error) {
 	getNetwork, err := inst.db.GetNetworkByDeviceUUID(deviceUUID, api.Args{})
 	if err != nil {
 		return nil, err
@@ -349,33 +349,36 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints
 		return nil, err
 	}
 
-	resp, err = dev.GetDevicePoints(btypes.ObjectInstance(dev.DeviceID))
+	bacnetPoints, err := dev.GetDevicePoints(btypes.ObjectInstance(dev.DeviceID))
 	if err != nil {
 		return nil, err
 	}
-	if addPoints {
-		for _, pnt := range resp {
-			_, isWrite, _, objectType := setObjectType(convertObjectType(pnt.ObjectType))
-			writeMode := model.ReadOnly
-			if isWrite && writeablePoints {
-				writeMode = model.WriteOnceThenRead
-			}
-			newPnt := &model.Point{
-				CommonName: model.CommonName{Name: pnt.Name},
-				DeviceUUID: deviceUUID,
-				ObjectType: objectType,
-				ObjectId:   integer.New(int(pnt.ObjectID)),
-				WriteMode:  writeMode,
-			}
+	var pointsList []*model.Point
+	for _, pnt := range bacnetPoints {
+		_, isWrite, _, objectType := setObjectType(convertObjectType(pnt.ObjectType))
+		writeMode := model.ReadOnly
+		if isWrite && writeablePoints {
+			writeMode = model.WriteOnceThenRead
+		}
+		newPnt := &model.Point{
+			CommonName: model.CommonName{Name: pnt.Name},
+			DeviceUUID: deviceUUID,
+			ObjectType: objectType,
+			ObjectId:   integer.New(int(pnt.ObjectID)),
+			WriteMode:  writeMode,
+		}
+		if addPoints {
 			point, err := inst.addPoint(newPnt)
 			if err != nil {
-				log.Errorf("failed to add a new point from discover points %s", pnt.Name)
-				return nil, err
+				log.Errorf("failed to add a new point from discover points %s", point.Name)
+				//return nil, err
+			} else {
+				log.Infof("added new point from discover points%s", point.Name)
 			}
-			log.Infof("added new point from discover points%s", point.Name)
 		}
+		pointsList = append(pointsList, newPnt)
 	}
-	return
+	return pointsList, nil
 }
 
 func intToUnit32(value int) uint32 {

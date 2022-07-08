@@ -7,8 +7,10 @@ import (
 
 // Enable implements plugin.Plugin
 func (inst *Instance) Enable() error {
+
 	inst.enabled = true
 	inst.setUUID()
+
 	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
 	if q != nil {
 		inst.networkUUID = q.UUID
@@ -37,7 +39,10 @@ func (inst *Instance) Disable() error {
 	inst.enabled = false
 	inst.setUUID()
 	q, _ := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
-	inst.closeBacnetStoreNetwork(q.UUID)
+	if q != nil {
+		// if there is a network then close it
+		inst.closeBacnetStoreNetwork(q.UUID)
+	}
 	if inst.pollingEnabled {
 		var arg polling
 		inst.pollingEnabled = false
