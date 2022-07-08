@@ -50,8 +50,8 @@ func (inst *Instance) Edge28Polling() error {
 			return false, err
 		}
 		if len(nets) == 0 {
-			time.Sleep(15000 * time.Millisecond)
 			inst.edge28DebugMsg("edge28-polling: NO NETWORKS FOUND")
+			time.Sleep(15000 * time.Millisecond)
 		}
 		for _, net := range nets { // NETWORKS
 			inst.edge28DebugMsg("Edge28Polling: net")

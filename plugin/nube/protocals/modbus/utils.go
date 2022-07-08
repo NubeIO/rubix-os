@@ -196,6 +196,9 @@ func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Poin
 }
 
 func (inst *Instance) networkWrite(mbClient smod.ModbusClient, pnt *model.Point) (response interface{}, responseValue float64, err error) {
+	if pnt.WriteValue == nil {
+		return nil, 0, errors.New("modbus-write: point has no WriteValue")
+	}
 	mbClient.Debug = true
 	objectEncoding := pnt.ObjectEncoding                          // beb_lew
 	objectType := nstring.NewString(pnt.ObjectType).ToSnakeCase() // eg: readCoil, read_coil, writeCoil
@@ -219,7 +222,7 @@ func (inst *Instance) networkWrite(mbClient smod.ModbusClient, pnt *model.Point)
 		length = 1
 	}
 
-	writeValue := float.NonNil(pnt.Priority.GetHighestPriorityValue())
+	writeValue := *pnt.WriteValue
 
 	inst.modbusDebugMsg(fmt.Sprintf("modbus-write: ObjectType: %s  Addr: %d WriteValue: %v\n", objectType, address, writeValue))
 
