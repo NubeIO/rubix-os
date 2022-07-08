@@ -204,7 +204,7 @@ func (inst *Instance) ModbusPolling() error {
 			if isWriteable(pnt.WriteMode) && boolean.IsTrue(pnt.WritePollRequired) { // DO WRITE IF REQUIRED
 				inst.modbusDebugMsg(fmt.Sprintf("modbus write point: %+v", pnt))
 				// pnt.PrintPointValues()
-				writeValuePointer = pnt.Priority.GetHighestPriorityValue()
+				writeValuePointer = pnt.Priority.GetHighestPriorityValue() // TODO: This is probably the wrong way to get the write value, updatePointValue() should be called to update pnt.WriteValue
 				if writeValuePointer != nil {
 					response, responseValue, err = inst.networkWrite(mbClient, pnt)
 					if err != nil {

@@ -75,7 +75,7 @@ type Point struct {
 	IoType struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"THERMISTOR_10K_TYPE2\",\"DIGITAL\",\"PERCENT\",\"0-10VDC\",\"4-20mA\",\"RESISTANCE\",\"light\",\"voltage\"]"`
+		Options  []string `json:"options" default:"[\"THERMISTOR_10K_TYPE2\",\"DIGITAL\",\"PERCENT\",\"0-10VDC\",\"4-20mA\",\"RESISTANCE\"]"`
 	} `json:"io_type"`
 }
 

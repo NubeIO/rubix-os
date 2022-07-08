@@ -1,6 +1,7 @@
 package priorityarray
 
 import (
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"reflect"
@@ -20,7 +21,7 @@ func ConvertToMap(priority model.Priority) map[string]*float64 {
 	return priorityMap
 }
 
-func ParsePriority(pointPriority *model.Priority, priority *map[string]*float64) (*map[string]*float64, *float64, *int, bool) {
+func ParsePriority(pointPriority *model.Priority, priority *map[string]*float64, isTypeBool bool) (*map[string]*float64, *float64, *int, bool) {
 	priorityMap := map[string]*float64{}
 	priorityValue := reflect.ValueOf(*pointPriority)
 	typeOfPriority := priorityValue.Type()
@@ -45,6 +46,9 @@ func ParsePriority(pointPriority *model.Priority, priority *map[string]*float64)
 			if val == nil {
 				priorityMap[key] = nil
 			} else {
+				if isTypeBool {
+					val = float.EvalAsBool(val)
+				}
 				if !isFirst {
 					currentPriority = integer.New(i) // can't assign address of i, coz it's referencing looping
 					highestValue = val
