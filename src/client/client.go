@@ -3,10 +3,10 @@ package client
 import (
 	"context"
 	"fmt"
-	"github.com/NubeIO/flow-framework/auth"
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/go-resty/resty/v2"
 	"net"
@@ -64,7 +64,7 @@ func NewLocalClient() *FlowClient {
 	port := config.Get().Server.Port
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), "0.0.0.0", port)
 	if flowClient, found := flowClients[url]; found {
-		flowClient.client.SetHeader("Authorization", auth.GetInternalToken(true))
+		flowClient.client.SetHeader("Authorization", internaltoken.GetInternalToken(true))
 		return flowClient
 	}
 	client := resty.New()
@@ -72,7 +72,7 @@ func NewLocalClient() *FlowClient {
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetTransport(&transport)
-	client.SetHeader("Authorization", auth.GetInternalToken(true))
+	client.SetHeader("Authorization", internaltoken.GetInternalToken(true))
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
 	return flowClient
@@ -131,14 +131,14 @@ func NewMasterToSlaveSession(globalUUID string) *FlowClient {
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", conf.Server.RSPort, globalUUID)
 	if flowClient, found := flowClients[url]; found {
-		flowClient.client.SetHeader("Authorization", auth.GetInternalToken(true))
+		flowClient.client.SetHeader("Authorization", internaltoken.GetInternalToken(true))
 		return flowClient
 	}
 	client := resty.New()
 	client.SetDebug(false)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
-	client.SetHeader("Authorization", auth.GetInternalToken(true))
+	client.SetHeader("Authorization", internaltoken.GetInternalToken(true))
 	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
@@ -151,14 +151,14 @@ func newSlaveToMasterCallSession() *FlowClient {
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", conf.Server.RSPort)
 	if flowClient, found := flowClients[url]; found {
-		flowClient.client.SetHeader("Authorization", auth.GetInternalToken(true))
+		flowClient.client.SetHeader("Authorization", internaltoken.GetInternalToken(true))
 		return flowClient
 	}
 	client := resty.New()
 	client.SetDebug(false)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
-	client.SetHeader("Authorization", auth.GetInternalToken(true))
+	client.SetHeader("Authorization", internaltoken.GetInternalToken(true))
 	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient

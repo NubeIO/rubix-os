@@ -10,6 +10,7 @@ import (
 type ProducerHistoryDatabase interface {
 	GetProducerHistories(args Args) ([]*model.ProducerHistory, error)
 	GetProducerHistoriesByProducerUUID(pUuid string, args Args) ([]*model.ProducerHistory, int64, error)
+	GetProducerHistoriesByProducerName(name string) ([]*model.ProducerHistory, int64, error)
 	GetLatestProducerHistoryByProducerName(name string) (*model.ProducerHistory, error)
 	GetLatestProducerHistoryByProducerUUID(pUuid string) (*model.ProducerHistory, error)
 	GetProducerHistoriesPoints(args Args) ([]*model.History, error)
@@ -31,6 +32,27 @@ func (a *HistoriesAPI) GetProducerHistoriesByProducerUUID(ctx *gin.Context) {
 	pUuid := resolveProducerUUID(ctx)
 	args := buildProducerHistoryArgs(ctx)
 	q, _, err := a.DB.GetProducerHistoriesByProducerUUID(pUuid, args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *HistoriesAPI) GetProducerHistoriesByProducerName(ctx *gin.Context) {
+	name := resolveName(ctx)
+	q, _, err := a.DB.GetProducerHistoriesByProducerName(name)
+	//TODO: @BINOD how do we get the name and count returned with the history data?
+	//q, cnt, err := a.DB.GetProducerHistoriesByProducerName(name)
+	/*
+		type response struct {
+			name      string                   `json:"name"`
+			count     int64                    `json:"count"`
+			histories []*model.ProducerHistory `json:"histories"`
+		}
+		resp := response{
+			name:      name,
+			count:     cnt,
+			histories: q,
+		}
+		ResponseHandler(resp, err, ctx)
+	*/
 	ResponseHandler(q, err, ctx)
 }
 

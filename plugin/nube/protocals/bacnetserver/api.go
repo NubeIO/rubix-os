@@ -27,6 +27,10 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		network, err := inst.addNetwork(body)
 		api.ResponseHandler(network, err, ctx)
 	})
+	mux.GET(plugin.NetworksURL, func(ctx *gin.Context) {
+		network, err := inst.getNetworks()
+		api.ResponseHandler(network, err, ctx)
+	})
 	mux.POST(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
 		device, err := inst.addDevice(body)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/database/postgres/pgmodel"
@@ -10,24 +9,32 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (inst *Instance) initializePostgresSetting() *PostgresSetting {
+var postgresSetting *PostgresSetting
+
+func (inst *Instance) initializePostgresSetting() {
 	postgresConnection := inst.config.Postgres
-	postgresSetting := new(PostgresSetting)
+	if postgresSetting == nil {
+		postgresSetting = new(PostgresSetting)
+	}
 	postgresSetting.Host = postgresConnection.Host
 	postgresSetting.User = postgresConnection.User
 	postgresSetting.Password = postgresConnection.Password
 	postgresSetting.DbName = postgresConnection.DbName
 	postgresSetting.Port = postgresConnection.Port
 	postgresSetting.SslMode = postgresConnection.SslMode
-	return postgresSetting
+	postgresSetting.postgresConnectionInstance = &PostgresConnection{
+		db: nil,
+	}
 }
 
-func (inst *Instance) syncPostgres(postgresSetting *PostgresSetting) (bool, error) {
-	log.Info("Postgres sync has is been called...")
-	if postgresSetting == nil {
-		err := "postgres: Postgres sync failure: no any valid Postgres connection"
-		log.Warn(err)
-		return false, errors.New(err)
+func (inst *Instance) syncPostgres() (bool, error) {
+	log.Info("postgres sync has been called...")
+	if postgresSetting.postgresConnectionInstance.db == nil {
+		err := postgresSetting.New()
+		if err != nil {
+			log.Warn(err)
+			return false, err
+		}
 	}
 	lastSyncId := 0
 	lastSyncHistoryPostgresLog, err := inst.db.GetLastSyncHistoryPostgresLog()
@@ -57,21 +64,32 @@ func (inst *Instance) syncPostgres(postgresSetting *PostgresSetting) (bool, erro
 			log.Error(err)
 			return false, err
 		}
-		postgresSetting.WriteToPostgresDb(flowNetworkClonesModel)
-
+		err = postgresSetting.WriteToPostgresDb(flowNetworkClonesModel)
+		if err != nil {
+			log.Error(err)
+			return false, err
+		}
 		networks, _ := inst.db.GetNetworks(api.Args{WithTags: true, WithDevices: true, WithPoints: true})
 		mNetworks, err := json.Marshal(networks)
 		if err != nil {
 			log.Error(err)
+			return false, err
 		}
 		var networksModel []*pgmodel.Network
 		if err = json.Unmarshal(mNetworks, &networksModel); err != nil {
 			log.Error(err)
 			return false, err
 		}
-		postgresSetting.WriteToPostgresDb(networksModel)
-
-		postgresSetting.WriteToPostgresDb(histories)
+		err = postgresSetting.WriteToPostgresDb(networksModel)
+		if err != nil {
+			log.Error(err)
+			return false, err
+		}
+		err = postgresSetting.WriteToPostgresDb(histories)
+		if err != nil {
+			log.Error(err)
+			return false, err
+		}
 		lastHistory := histories[len(histories)-1]
 		historyPostgresLog := &model.HistoryPostgresLog{
 			ID:        lastHistory.ID,

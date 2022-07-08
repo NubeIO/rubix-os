@@ -1,21 +1,17 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/nerrors"
-	"github.com/NubeIO/flow-framework/utils/security"
+	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
 
 // The UserDatabase interface for encapsulating database access.
 type UserDatabase interface {
-	GetUser() (*model.User, error)
-	UpdateUser(body *model.User) (*model.User, error)
 }
 
 type UserAPI struct {
-	DB UserDatabase
 }
 
 func (j *UserAPI) Login(ctx *gin.Context) {
@@ -24,18 +20,12 @@ func (j *UserAPI) Login(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	q, err := j.DB.GetUser()
-	if q != nil && body.Username == q.Username && security.CheckPasswordHash(q.Password, body.Password) {
-		token, err := security.EncodeJwtToken(q.Username, config.Get().SecretKey)
-		if err != nil {
-			ResponseHandler(nil, err, ctx)
-			return
-		}
-		ResponseHandler(token, err, ctx)
+	q, err := user.Login(body)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	ResponseHandler(nil, nerrors.NewErrUnauthorized("check username & password"), ctx)
-
+	ResponseHandler(&model.TokenResponse{AccessToken: q, TokenType: "JWT"}, err, ctx)
 }
 
 func (j *UserAPI) UpdateUser(ctx *gin.Context) {
@@ -44,26 +34,11 @@ func (j *UserAPI) UpdateUser(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	if !validUsername(body.Username) {
-		ResponseHandler("username should be alphanumeric and can contain '_', '-'", nil, ctx)
-		return
-	}
-	body.Password, err = security.GeneratePasswordHash(body.Password)
-	if err != nil {
-		ResponseHandler(nil, err, ctx)
-		return
-	}
-	q, err := j.DB.UpdateUser(body)
-	if q != nil {
-		q.Password = "******"
-	}
+	q, err := user.CreateUser(body)
 	ResponseHandler(q, err, ctx)
 }
 
 func (j *UserAPI) GetUser(ctx *gin.Context) {
-	q, err := j.DB.GetUser()
-	if q != nil {
-		q.Password = "******"
-	}
+	q, err := user.GetUser()
 	ResponseHandler(q, err, ctx)
 }

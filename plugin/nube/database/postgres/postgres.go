@@ -6,6 +6,7 @@ import (
 	postgresql "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"reflect"
 	"time"
 )
 
@@ -25,26 +26,23 @@ type PostgresConnection struct {
 	db *gorm.DB
 }
 
-func New(postgresSetting *PostgresSetting) (*PostgresSetting, error) {
+func (ps *PostgresSetting) New() error {
 	dns := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s",
-		postgresSetting.Host, postgresSetting.User, postgresSetting.Password, postgresSetting.DbName,
-		postgresSetting.Port, postgresSetting.SslMode)
-	db, err := gorm.Open(postgresql.Open(dns), &gorm.Config{
-		NowFunc: func() time.Time {
-			return time.Now().UTC()
-		},
-	})
-	if err != nil {
-		return nil, err
+		ps.Host, ps.User, ps.Password, ps.DbName, ps.Port, ps.SslMode)
+	ps.postgresConnectionInstance = &PostgresConnection{
+		db: nil,
 	}
-	postgresConnectionInstance = &PostgresConnection{
+	db, err := connectDb(dns)
+	if err != nil {
+		return err
+	}
+	ps.postgresConnectionInstance = &PostgresConnection{
 		db: db,
 	}
-	postgresSetting.postgresConnectionInstance = postgresConnectionInstance
 	if err := autoMigrate(db); err != nil {
-		return nil, err
+		return err
 	}
-	return postgresSetting, nil
+	return nil
 }
 
 func autoMigrate(db *gorm.DB) error {
@@ -67,6 +65,17 @@ func autoMigrate(db *gorm.DB) error {
 	return nil
 }
 
-func (ps PostgresSetting) WriteToPostgresDb(value interface{}) {
-	ps.postgresConnectionInstance.db.Clauses(clause.OnConflict{UpdateAll: true}).Create(value)
+func connectDb(dns string) (*gorm.DB, error) {
+	return gorm.Open(postgresql.Open(dns), &gorm.Config{
+		NowFunc: func() time.Time {
+			return time.Now().UTC()
+		},
+	})
+}
+
+func (ps PostgresSetting) WriteToPostgresDb(value interface{}) error {
+	if reflect.ValueOf(value).Len() > 0 {
+		return ps.postgresConnectionInstance.db.Clauses(clause.OnConflict{UpdateAll: true}).Create(value).Error
+	}
+	return nil
 }

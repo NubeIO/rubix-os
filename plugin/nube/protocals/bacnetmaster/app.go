@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -16,11 +17,15 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	if err != nil {
 		return nil, err
 	}
-	err = inst.bacnetNetwork(network)
+	err = inst.bacnetStoreNetwork(network)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error()))
 	}
 	return body, nil
+}
+
+func (inst *Instance) getNetworks() ([]*model.Network, error) {
+	return inst.db.GetNetworks(api.Args{})
 }
 
 // addDevice add device
@@ -29,7 +34,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	if err != nil {
 		return nil, err
 	}
-	err = inst.bacnetDevice(device)
+	err = inst.bacnetStoreDevice(device)
 	if err != nil {
 		return nil, errors.New("issue on add bacnet-device to store")
 	}
@@ -65,7 +70,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	if err != nil {
 		return nil, err
 	}
-	err = inst.bacnetDevice(device)
+	err = inst.bacnetStoreDevice(device)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +93,7 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	if err != nil {
 		return false, err
 	}
-	ok, err = inst.closeBacnetNetwork(body.UUID)
+	ok, err = inst.closeBacnetStoreNetwork(body.UUID)
 	return ok, err
 }
 

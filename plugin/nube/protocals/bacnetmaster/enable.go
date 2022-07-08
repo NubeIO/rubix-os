@@ -7,28 +7,28 @@ import (
 
 // Enable implements plugin.Plugin
 func (inst *Instance) Enable() error {
+
 	inst.enabled = true
 	inst.setUUID()
+
 	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
 	if q != nil {
 		inst.networkUUID = q.UUID
 	}
 	inst.initBacStore()
-	inst.bacnetNetworkInit()
-	if !inst.pollingEnabled {
-		var arg polling
-		inst.pollingEnabled = true
-		arg.enable = true
-		go func() error {
-			err := inst.polling(arg)
-			if err != nil {
-				log.Errorf("rubix-io.enable: POLLING ERROR on routine: %v\n", err)
-			}
-			return nil
-		}()
+
+	var arg polling
+	inst.pollingEnabled = true
+	arg.enable = true
+	go func() error {
+		err := inst.polling(arg)
 		if err != nil {
-			log.Errorf("rubix-io.enable: POLLING ERROR: %v\n", err)
+			log.Errorf("rubix-io.enable: POLLING ERROR on routine: %v\n", err)
 		}
+		return nil
+	}()
+	if err != nil {
+		log.Errorf("rubix-io.enable: POLLING ERROR: %v\n", err)
 	}
 
 	return nil
@@ -37,6 +37,12 @@ func (inst *Instance) Enable() error {
 // Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
 	inst.enabled = false
+	inst.setUUID()
+	q, _ := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
+	if q != nil {
+		// if there is a network then close it
+		inst.closeBacnetStoreNetwork(q.UUID)
+	}
 	if inst.pollingEnabled {
 		var arg polling
 		inst.pollingEnabled = false
