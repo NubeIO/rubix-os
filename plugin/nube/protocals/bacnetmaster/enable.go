@@ -14,7 +14,6 @@ func (inst *Instance) Enable() error {
 		inst.networkUUID = q.UUID
 	}
 	inst.initBacStore()
-	inst.bacnetNetworkInit()
 
 	var arg polling
 	inst.pollingEnabled = true
@@ -36,15 +35,18 @@ func (inst *Instance) Enable() error {
 // Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
 	inst.enabled = false
-	//if inst.pollingEnabled {
-	//	var arg polling
-	//	inst.pollingEnabled = false
-	//	arg.enable = false
-	//	go func() {
-	//		err := inst.polling(arg)
-	//		if err != nil {
-	//		}
-	//	}()
-	//}
+	inst.setUUID()
+	q, _ := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
+	inst.closeBacnetStoreNetwork(q.UUID)
+	if inst.pollingEnabled {
+		var arg polling
+		inst.pollingEnabled = false
+		arg.enable = false
+		go func() {
+			err := inst.polling(arg)
+			if err != nil {
+			}
+		}()
+	}
 	return nil
 }
