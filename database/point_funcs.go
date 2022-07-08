@@ -66,13 +66,14 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 
 // updatePriority it updates priority array of point model
 // it attaches the point model fields values for updating it on it's parent function
-func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64) (*model.Point, *map[string]*float64, *float64, *float64) {
+func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64) (*model.Point, *map[string]*float64, *float64, bool) {
 	var presentValue *float64
-	var writeValue *float64
+	isPriorityChanged := false
 	priorityMap := priority
 	presentValueFromPriority := pointModel.PointPriorityArrayMode != model.ReadOnlyNoPriorityArrayRequired && pointModel.PointPriorityArrayMode != model.PriorityArrayToWriteValue
 	// These values are not required for model.ReadOnlyNoPriorityArrayRequired
 	if pointModel.PointPriorityArrayMode == model.ReadOnlyNoPriorityArrayRequired {
+		isPriorityChanged = true
 		pointModel.CurrentPriority = nil
 		pointModel.WriteValue = nil
 		pointModel.WriteValueOriginal = nil
@@ -97,8 +98,10 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 	}
 
 	if priority != nil {
-		// override priorityMap
-		priorityMap, highestValue, currentPriority, doesPriorityExist := priorityarray.ParsePriority(pointModel.Priority, priority, boolean.IsTrue(pointModel.IsTypeBool))
+		pm, highestValue, currentPriority, doesPriorityExist, ipc :=
+			priorityarray.ParsePriority(pointModel.Priority, priority, boolean.IsTrue(pointModel.IsTypeBool))
+		priorityMap = pm
+		isPriorityChanged = ipc
 		if doesPriorityExist {
 			if currentPriority == nil && highestValue == nil && !float.IsNil(pointModel.Fallback) {
 				pointModel.Priority.P16 = float.New(*pointModel.Fallback)
@@ -120,14 +123,14 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 			}
 		}
 		priorityMapToPatch := d.priorityMapToPatch(priorityMap)
-		d.DB.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMapToPatch)
+		d.DB.Model(&pointModel.Priority).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMapToPatch)
 	}
 	if !presentValueFromPriority {
 		// presentValue will be OriginalValue if PointPriorityArrayMode is PriorityArrayToWriteValue or
 		// ReadOnlyNoPriorityArrayRequired
 		presentValue = pointModel.OriginalValue
 	}
-	return pointModel, priorityMap, presentValue, writeValue
+	return pointModel, priorityMap, presentValue, isPriorityChanged
 }
 
 func (d *GormDatabase) priorityMapToPatch(priorityMap *map[string]*float64) map[string]interface{} {

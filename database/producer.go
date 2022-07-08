@@ -180,12 +180,13 @@ type Point struct {
 	Priority model.Priority `json:"priority"`
 }
 
-func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*float64, presentValue *float64) error {
+func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*float64, presentValue *float64,
+	createCOVHistory bool) error {
 	producerModelBody := new(model.Producer)
 	producerModelBody.CurrentWriterUUID = uuid // TODO: check current_writer_uuid is needed or not
 	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &uuid})
 	for _, producer := range producers {
-		err := d.producerPointWrite(producer.UUID, priority, presentValue, producerModelBody)
+		err := d.producerPointWrite(producer.UUID, priority, presentValue, producerModelBody, createCOVHistory)
 		if err != nil {
 			return err
 		}
@@ -193,7 +194,8 @@ func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*fl
 	return nil
 }
 
-func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*float64, presentValue *float64, producerModelBody *model.Producer) error {
+func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*float64, presentValue *float64,
+	producerModelBody *model.Producer, createCOVHistory bool) error {
 	producerModel, err := d.UpdateProducer(uuid, producerModelBody) // TODO: check current_writer_uuid is needed or not
 	if err != nil {
 		log.Errorf("producer: issue on update producer err: %v\n", err)
@@ -204,7 +206,7 @@ func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*flo
 	if err != nil {
 		return err
 	}
-	if boolean.IsTrue(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
+	if createCOVHistory && boolean.IsTrue(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = uuid
 		ph.PresentValue = presentValue
