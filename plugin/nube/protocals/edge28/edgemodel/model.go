@@ -77,6 +77,13 @@ type Point struct {
 		Required bool     `json:"required" default:"true"`
 		Options  []string `json:"options" default:"[\"THERMISTOR_10K_TYPE2\",\"DIGITAL\",\"PERCENT\",\"0-10VDC\",\"4-20mA\",\"RESISTANCE\"]"`
 	} `json:"io_type"`
+	Fallback struct {
+		Type        string   `json:"type" default:"float"`
+		Required    bool     `json:"required" default:"false"`
+		Default     *float64 `json:"default" default:""`
+		DisplayName string   `json:"display_name" default:"Fallback Value"`
+		Nullable    bool     `json:"nullable" default:"true"`
+	} `json:"fallback"`
 }
 
 func GetNetworkSchema() *Network {

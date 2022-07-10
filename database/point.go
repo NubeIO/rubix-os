@@ -245,13 +245,21 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 			Update("present_value", nil)
 	}
 
+	// This section converts the Fallback value to a boolean if the point IsTypeBool property is set
+	fallbackUpdate := false
+	if boolean.IsTrue(pointModel.IsTypeBool) && pointModel.Fallback != nil && float.NonNil(pointModel.Fallback) != 0 && float.NonNil(pointModel.Fallback) != 1 {
+		pointModel.Fallback = float.EvalAsBoolNegToFalse(pointModel.Fallback)
+		fallbackUpdate = true
+	}
+
 	// TODO:
 	// Binod: priority_array mismatch gets occurred, when lower priority gets change; coz it doesn't trigger
 	// Marc: @binod I don't think the above is correct, priority has already been updated to DB in UpdatePriority()
 
 	isChange := !float.ComparePtrValues(pointModel.PresentValue, presentValue) || !float.ComparePtrValues(pointModel.WriteValue, writeValue)
 	createCOVHistory := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
-	if isChange || presentValueTransformFault {
+
+	if isChange || presentValueTransformFault || fallbackUpdate {
 		_ = d.DB.Model(&pointModel).Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, createCOVHistory)
 		if err != nil {
