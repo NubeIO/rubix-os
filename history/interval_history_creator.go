@@ -27,7 +27,8 @@ func (h *History) createIntervalHistories() {
 		if producer.ProducerThingClass != "point" { // TODO: CreateProducerHistory for ProducerThingClass == "schedule"
 			continue
 		}
-		if producer.Timestamp == nil || currentDate.Sub(*producer.Timestamp).Seconds() >= float64(*producer.HistoryInterval*60) {
+		timestamp, _ := time.Parse("2006-01-02 15:04:05+00:00", producer.Timestamp)
+		if timestamp.IsZero() || currentDate.Sub(timestamp).Seconds() >= float64(*producer.HistoryInterval*60) {
 			latestPH := new(model.ProducerHistory)
 			// minutes are placing such a way if 15, then it will store values on 0, 15, 30, 45
 			minute := (currentDate.Minute() / *producer.HistoryInterval) * *producer.HistoryInterval
