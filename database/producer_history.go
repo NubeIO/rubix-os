@@ -119,6 +119,13 @@ func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (*m
 	return d.appendProducerHistory(history)
 }
 
+func (d *GormDatabase) CreateBulkProducerHistory(histories []*model.ProducerHistory) (bool, error) {
+	if err := d.DB.Create(histories).Error; err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // DeleteProducerHistoriesByProducerUUID delete all history for given producer_uuid.
 func (d *GormDatabase) DeleteProducerHistoriesByProducerUUID(pUuid string, args api.Args) (bool, error) {
 	var historyModel *model.ProducerHistory

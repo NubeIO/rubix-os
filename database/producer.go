@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/interfaces/connection"
@@ -269,12 +270,17 @@ func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Produce
 	return nil
 }
 
-func (d *GormDatabase) GetProducersForCreateInterval() ([]*model.Producer, error) {
-	var historyModel []*model.Producer
-	query := d.DB.Where("enable_history = ? AND history_type != ?", true, model.HistoryTypeCov).
-		Find(&historyModel)
-	if query.Error != nil {
-		return nil, query.Error
+func (d *GormDatabase) GetProducersForCreateInterval() ([]*interfaces.ProducerIntervalHistory, error) {
+	var producerIntervalHistory []*interfaces.ProducerIntervalHistory
+	query := fmt.Sprintf("SELECT p.uuid,p.producer_thing_class,p.history_interval,ph.timestamp AS timestamp,pt.present_value "+
+		"FROM producers p "+
+		"LEFT JOIN (SELECT producer_uuid, MAX(timestamp) AS timestamp FROM producer_histories GROUP BY producer_uuid) ph "+
+		"ON p.uuid = ph.producer_uuid "+
+		"INNER JOIN points pt "+
+		"ON p.producer_thing_uuid = pt.uuid "+
+		"WHERE p.enable_history = %v AND p.history_type != '%s' AND p.history_interval > %d", true, model.HistoryTypeCov, 0)
+	if err := d.DB.Raw(query).Scan(&producerIntervalHistory).Error; err != nil {
+		return nil, err
 	}
-	return historyModel, nil
+	return producerIntervalHistory, nil
 }
