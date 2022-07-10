@@ -190,7 +190,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
 
-	pointModel, priority, presentValue, isPriorityChanged := d.updatePriority(pointModel, priority)
+	pointModel, priority, presentValue, writeValue := d.updatePriority(pointModel, priority)
 	ov := float.Copy(presentValue)
 	pointModel.OriginalValue = ov
 
@@ -232,7 +232,6 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 		presentValue = &val
 	}
 
-	createCOVHistory := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
 	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
 	// but PresentValue should not change
 	if !presentValueTransformFault {
@@ -246,8 +245,13 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 			Update("present_value", nil)
 	}
 
-	// TODO: priority_array mismatch gets occurred, when lower priority gets change; coz it doesn't trigger
-	if isPriorityChanged {
+	// TODO:
+	// Binod: priority_array mismatch gets occurred, when lower priority gets change; coz it doesn't trigger
+	// Marc: @binod I don't think the above is correct, priority has already been updated to DB in UpdatePriority()
+
+	isChange := !float.ComparePtrValues(pointModel.PresentValue, presentValue) || !float.ComparePtrValues(pointModel.WriteValue, writeValue)
+	createCOVHistory := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
+	if isChange || presentValueTransformFault {
 		_ = d.DB.Model(&pointModel).Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, createCOVHistory)
 		if err != nil {

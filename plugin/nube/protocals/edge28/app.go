@@ -144,6 +144,16 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		inst.edge28DebugMsg("updatePoint(): nil point object")
 		return
 	}
+	if body.IoNumber == "" {
+		body.IoNumber = pointList.UI1
+	}
+	if body.IoType == "" {
+		body.IoType = UITypes.DIGITAL
+	}
+	_, isOutput := selectObjectType(body.IoNumber)
+	isTypeBool := checkForBooleanType(body.IoType)
+	body.IsOutput = nils.NewBool(isOutput)
+	body.IsTypeBool = nils.NewBool(isTypeBool)
 
 	if body.WriteValue != nil {
 		body.WriteValue = limitValueByEdge28Type(body.IoType, body.WriteValue)
