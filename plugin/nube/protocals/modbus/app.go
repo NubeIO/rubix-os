@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/array"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
@@ -70,6 +71,12 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		body.WritePollRequired = boolean.NewFalse()
 	}
 	body.ReadPollRequired = boolean.NewTrue()
+
+	isTypeBool := checkForBooleanType(body.ObjectType, body.DataType)
+	body.IsTypeBool = nils.NewBool(isTypeBool)
+
+	isOutput := checkForOutputType(body.ObjectType)
+	body.IsOutput = nils.NewBool(isOutput)
 
 	// point, err = inst.db.CreatePoint(body, true, false)
 	point, err = inst.db.CreatePoint(body, true, true)
