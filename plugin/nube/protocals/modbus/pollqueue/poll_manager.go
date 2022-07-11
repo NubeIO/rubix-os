@@ -7,9 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/config"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -219,14 +217,31 @@ func (pm *NetworkPollManager) PollingFinished(pp *PollingPoint, pollStartTime ti
 	callback(pp, writeSuccess, readSuccess, pollTimeSecs, false) // (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool)
 }
 
-func (pm *NetworkPollManager) pollQueueDebugMsg(args ...interface{}) {
-	if nstring.InEqualIgnoreCase(pm.config.LogLevel, "DEBUG") {
-		prefix := "Modbus Poll Queue: "
-		log.Info(prefix, args)
+func (pm *NetworkPollManager) CheckAllPointsExistInQueues() bool {
+	var missingPoints [0]string
+	net, err := pm.DBHandlerRef.GetNetwork(pm.FFNetworkUUID, api.Args{WithDevices: true, WithPoints: true})
+	if net == nil || err != nil {
+		pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Network Not Found/n")
 	}
-}
+	for _, dev := range net.Devices {
+		if dev.Points != nil {
+			deviceExistsInQueue := pm.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID)
+			if !deviceExistsInQueue {
+				pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Device UUID doesn't exist in poll queue/n")
+			}
+			for _, pnt := range dev.Points {
+				if pnt != nil {
+					pm.PollQueue.GetPollingPointByPointUUID(pnt.UUID)
+					if pnt == nil || err != nil {
+						pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Device UUID doesn't exist in poll queue/n")
+					}
+				}
+			}
+		}
+	}
 
-func (pm *NetworkPollManager) pollQueueErrorMsg(args ...interface{}) {
-	prefix := "Modbus Poll Queue: "
-	log.Error(prefix, args)
+	pollEndTime := time.Now()
+	pollDuration := pollEndTime.Sub(pollStartTime)
+	pollTimeSecs := pollDuration.Seconds()
+	callback(pp, writeSuccess, readSuccess, pollTimeSecs, false) // (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool)
 }

@@ -1,4 +1,4 @@
-package main
+package pollqueue
 
 import (
 	"fmt"
@@ -7,20 +7,44 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (inst *Instance) modbusDebugMsg(args ...interface{}) {
-	if nstring.InEqualIgnoreCase(inst.config.LogLevel, "DEBUG") {
-		prefix := "Modbus: "
+func (pm *NetworkPollManager) pollQueueDebugMsg(args ...interface{}) {
+	if nstring.InEqualIgnoreCase(pm.config.LogLevel, "DEBUG") {
+		prefix := "Modbus Poll Queue: "
 		log.Info(prefix, args)
 	}
 }
 
-func (inst *Instance) modbusErrorMsg(args ...interface{}) {
-	prefix := "Modbus: "
+func (pm *NetworkPollManager) pollQueueErrorMsg(args ...interface{}) {
+	prefix := "Modbus Poll Queue: "
 	log.Error(prefix, args)
 }
 
-func (inst *Instance) printPointDebugInfo(pnt *model.Point) {
-	if nstring.InEqualIgnoreCase(inst.config.LogLevel, "DEBUG") { //Added here to disable debug processes when not using logging
+func (pm *NetworkPollManager) PrintPollQueuePointUUIDs() {
+	if nstring.InEqualIgnoreCase(pm.config.LogLevel, "DEBUG") { //Added here to disable debug processes when not using logging
+		printString := "\n\n"
+		hasNextPollPoint := 0
+		if pm.PluginQueueUnloader.NextPollPoint != nil {
+			hasNextPollPoint = 1
+		}
+		printString += fmt.Sprint("PrintPollQueuePointUUIDs: (NOTE: THE CURRENT PollPoint HAS ALREADY BEEN REMOVED FROM THE QUEUES AT THIS POINT!!\nTOTAL COUNT = ", hasNextPollPoint+pm.PollQueue.PriorityQueue.Len()+pm.PollQueue.StandbyPollingPoints.Len(), "\n")
+		printString += fmt.Sprint("NextPollPoint: ", "\n")
+		printString += fmt.Sprintf("%+v\n", pm.PluginQueueUnloader.NextPollPoint)
+		printString += fmt.Sprint("PollQueue: COUNT = ", pm.PollQueue.PriorityQueue.Len(), ": ", "\n")
+		for _, pp := range pm.PollQueue.PriorityQueue.PriorityQueue {
+			printString += fmt.Sprint(pp.FFPointUUID, " - ", pp.PollPriority, "; ")
+		}
+		printString += fmt.Sprint("", "\n")
+		printString += fmt.Sprint("StandbyPollingPoints COUNT = ", pm.PollQueue.StandbyPollingPoints.Len(), ": ", "\n")
+		for _, pp := range pm.PollQueue.StandbyPollingPoints.PriorityQueue {
+			printString += fmt.Sprint(pp.FFPointUUID, " - ", pp.PollPriority, ", repoll timer:", pp.RepollTimer != nil, "; ")
+		}
+		printString += fmt.Sprint("\n")
+		pm.pollQueueDebugMsg(printString)
+	}
+}
+
+func (pm *NetworkPollManager) PrintPointDebugInfo(pnt *model.Point) {
+	if nstring.InEqualIgnoreCase(pm.config.LogLevel, "DEBUG") { //Added here to disable debug processes when not using logging
 		printString := "\n\n"
 		if pnt != nil {
 			printString += fmt.Sprint("Point: ", pnt.UUID, " ", pnt.Name, "\n")
@@ -101,10 +125,15 @@ func (inst *Instance) printPointDebugInfo(pnt *model.Point) {
 					printString += fmt.Sprint("_16: ", *pnt.Priority.P16, "\n")
 				}
 			}
-			inst.modbusDebugMsg(printString)
+			pm.pollQueueDebugMsg(printString)
 			return
 		}
-		inst.modbusDebugMsg("ERROR: INVALID POINT")
+		pm.pollQueueDebugMsg("ERROR: INVALID POINT")
 	}
+}
 
+func (pm *NetworkPollManager) PrintPollingPointDebugInfo(pp *PollingPoint) {
+	if pp != nil {
+		pm.pollQueueDebugMsg(fmt.Sprintf("ModbusPolling() pp %+v", pp))
+	}
 }

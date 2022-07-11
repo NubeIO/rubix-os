@@ -68,7 +68,13 @@ func (nq *NetworkPriorityPollQueue) RemovePollingPointByPointUUID(pointUUID stri
 
 	}
 	pp, _ = nq.PriorityQueue.RemovePollingPointByPointUUID(pointUUID)
+	if pp != nil {
+		nq.pollQueueDebugMsg("RemovePollingPointByPointUUID(): Point is in the PriorityQueue")
+	}
 	pp, _ = nq.StandbyPollingPoints.RemovePollingPointByPointUUID(pointUUID)
+	if pp != nil {
+		nq.pollQueueDebugMsg("RemovePollingPointByPointUUID(): Point is in the StandbyPollingPoints Queue")
+	}
 	return pp, true
 }
 func (nq *NetworkPriorityPollQueue) RemovePollingPointByDeviceUUID(deviceUUID string) bool {
@@ -88,6 +94,7 @@ func (nq *NetworkPriorityPollQueue) GetPollingPointByPointUUID(pointUUID string)
 	pp = nil
 	if nq.QueueUnloader != nil && nq.QueueUnloader.NextPollPoint != nil && nq.QueueUnloader.NextPollPoint.FFPointUUID == pointUUID {
 		pp = nq.QueueUnloader.NextPollPoint
+		return pp, nil
 	}
 	pollQueueIndex := nq.PriorityQueue.GetPollingPointIndexByPointUUID(pointUUID)
 	if pollQueueIndex != -1 {
@@ -230,6 +237,9 @@ func (q *PriorityPollQueue) RemovePollingPointByPointUUID(pointUUID string) (pp 
 	index := q.GetPollingPointIndexByPointUUID(pointUUID)
 	if index >= 0 {
 		pp = heap.Remove(q, index).(*PollingPoint)
+		if pp != nil {
+			//pollQueueDebugMsg("RemovePollingPointByPointUUID() pp: %+v\n", pp)
+		}
 		if pp.RepollTimer != nil {
 			pp.RepollTimer.Stop()
 		}
