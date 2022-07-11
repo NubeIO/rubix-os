@@ -66,11 +66,14 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 
 // updatePriority it updates priority array of point model
 // it attaches the point model fields values for updating it on it's parent function
-func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64) (*model.Point, *map[string]*float64, *float64, *float64) {
+func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64) (
+	*model.Point, *map[string]*float64, *float64, *float64, bool) {
+	isPriorityChanged := false
 	var presentValue *float64
 	var writeValue *float64
 	priorityMap := priority
-	presentValueFromPriority := pointModel.PointPriorityArrayMode != model.ReadOnlyNoPriorityArrayRequired && pointModel.PointPriorityArrayMode != model.PriorityArrayToWriteValue
+	presentValueFromPriority := pointModel.PointPriorityArrayMode != model.ReadOnlyNoPriorityArrayRequired &&
+		pointModel.PointPriorityArrayMode != model.PriorityArrayToWriteValue
 	// These values are not required for model.ReadOnlyNoPriorityArrayRequired
 	if pointModel.PointPriorityArrayMode == model.ReadOnlyNoPriorityArrayRequired {
 		pointModel.CurrentPriority = nil
@@ -97,11 +100,16 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 	}
 
 	if priority != nil {
-		pm, highestValue, currentPriority, doesPriorityExist, _ := priorityarray.ParsePriority(pointModel.Priority, priority, boolean.IsTrue(pointModel.IsTypeBool))
+		pm, highestValue, currentPriority, doesPriorityExist, ipc :=
+			priorityarray.ParsePriority(pointModel.Priority, priority, boolean.IsTrue(pointModel.IsTypeBool))
 		priorityMap = pm
+		isPriorityChanged = ipc
 		if doesPriorityExist {
 			if currentPriority == nil && highestValue == nil && !float.IsNil(pointModel.Fallback) {
 				pointModel.Priority.P16 = float.New(*pointModel.Fallback)
+				if boolean.IsTrue(pointModel.IsTypeBool) {
+					pointModel.Priority.P16 = float.EvalAsBool(pointModel.Priority.P16)
+				}
 				priorityMapTemp := map[string]*float64{"_16": pointModel.Fallback}
 				priorityMap = &priorityMapTemp
 				currentPriority = integer.New(16)
@@ -127,7 +135,7 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 		// ReadOnlyNoPriorityArrayRequired
 		presentValue = pointModel.OriginalValue
 	}
-	return pointModel, priorityMap, presentValue, writeValue
+	return pointModel, priorityMap, presentValue, writeValue, isPriorityChanged
 }
 
 func (d *GormDatabase) priorityMapToPatch(priorityMap *map[string]*float64) map[string]interface{} {

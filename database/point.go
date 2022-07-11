@@ -190,7 +190,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
 
-	pointModel, priority, presentValue, writeValue := d.updatePriority(pointModel, priority)
+	pointModel, priority, presentValue, writeValue, isPriorityChanged := d.updatePriority(pointModel, priority)
 	ov := float.Copy(presentValue)
 	pointModel.OriginalValue = ov
 
@@ -232,6 +232,10 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 		presentValue = &val
 	}
 
+	isPresentValueChange := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
+	isWriteValueChange := !float.ComparePtrValues(pointModel.WriteValue, writeValue)
+	isChange := isPresentValueChange || isWriteValueChange || isPriorityChanged
+	createCOVHistory := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
 	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
 	// but PresentValue should not change
 	if !presentValueTransformFault {
@@ -245,21 +249,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 			Update("present_value", nil)
 	}
 
-	// This section converts the Fallback value to a boolean if the point IsTypeBool property is set
-	fallbackUpdate := false
-	if boolean.IsTrue(pointModel.IsTypeBool) && pointModel.Fallback != nil && float.NonNil(pointModel.Fallback) != 0 && float.NonNil(pointModel.Fallback) != 1 {
-		pointModel.Fallback = float.EvalAsBoolNegToFalse(pointModel.Fallback)
-		fallbackUpdate = true
-	}
-
-	// TODO:
-	// Binod: priority_array mismatch gets occurred, when lower priority gets change; coz it doesn't trigger
-	// Marc: @binod I don't think the above is correct, priority has already been updated to DB in UpdatePriority()
-
-	isChange := !float.ComparePtrValues(pointModel.PresentValue, presentValue) || !float.ComparePtrValues(pointModel.WriteValue, writeValue)
-	createCOVHistory := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
-
-	if isChange || presentValueTransformFault || fallbackUpdate {
+	if isChange {
 		_ = d.DB.Model(&pointModel).Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, createCOVHistory)
 		if err != nil {

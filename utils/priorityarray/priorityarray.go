@@ -21,7 +21,8 @@ func ConvertToMap(priority model.Priority) map[string]*float64 {
 	return priorityMap
 }
 
-func ParsePriority(originalPointPriority *model.Priority, newPriorityMapPntr *map[string]*float64, isTypeBool bool) (*map[string]*float64, *float64, *int, bool, bool) {
+func ParsePriority(originalPointPriority *model.Priority, newPriorityMapPtr *map[string]*float64, isTypeBool bool) (
+	*map[string]*float64, *float64, *int, bool, bool) {
 	resultPriorityMap := map[string]*float64{}
 	priorityValue := reflect.ValueOf(*originalPointPriority)
 	typeOfPriority := priorityValue.Type()
@@ -31,8 +32,8 @@ func ParsePriority(originalPointPriority *model.Priority, newPriorityMapPntr *ma
 	isPriorityChanged := false
 	isFirst := false
 	newPriorityMap := map[string]*float64{}
-	if newPriorityMapPntr != nil {
-		newPriorityMap = *newPriorityMapPntr
+	if newPriorityMapPtr != nil {
+		newPriorityMap = *newPriorityMapPtr
 	}
 	for i := 0; i < priorityValue.NumField(); i++ {
 		if priorityValue.Field(i).Type().Kind().String() == "ptr" {
@@ -57,7 +58,7 @@ func ParsePriority(originalPointPriority *model.Priority, newPriorityMapPntr *ma
 				resultPriorityMap[key] = nil
 			} else {
 				if isTypeBool {
-					val = float.EvalAsBoolNegToFalse(val)
+					val = float.EvalAsBool(val)
 				}
 				if !isFirst {
 					currentPriority = integer.New(i) // can't assign address of i, coz it's referencing looping
