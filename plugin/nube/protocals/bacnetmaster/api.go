@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetmaster/jsonschema"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetmaster/master"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,6 +14,12 @@ const (
 	schemaNetwork = "/schema/network"
 	schemaDevice  = "/schema/device"
 	schemaPoint   = "/schema/point"
+)
+
+const (
+	jsonSchemaNetwork = "/schema/json/network"
+	jsonSchemaDevice  = "/schema/json/device"
+	jsonSchemaPoint   = "/schema/json/point"
 )
 
 const (
@@ -82,17 +89,23 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ok, err := inst.deletePoint(body)
 		api.ResponseHandler(ok, err, ctx)
 	})
-
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, master.GetNetworkSchema())
 	})
-
 	mux.GET(schemaDevice, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, master.GetDeviceSchema())
 	})
-
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, master.GetPointSchema())
+	})
+	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema())
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetDeviceSchema())
+	})
+	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
 	})
 	mux.POST(whois+"/:uuid", func(ctx *gin.Context) {
 		body, _ := master.BodyWhoIs(ctx)
