@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 )
 
 // GetProducerHistories returns all histories.
@@ -115,12 +116,16 @@ func (d *GormDatabase) GetProducerHistoriesPointsForSync(id string, timeStamp st
 	return historiesModel, nil
 }
 
-func (d *GormDatabase) CreateProducerHistory(history *model.ProducerHistory) (*model.ProducerHistory, error) {
-	return d.appendProducerHistory(history)
+func (d *GormDatabase) CreateProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
+	if err := d.DB.Create(&body).Error; err != nil {
+		return nil, err
+	}
+	return body, nil
 }
 
 func (d *GormDatabase) CreateBulkProducerHistory(histories []*model.ProducerHistory) (bool, error) {
-	if err := d.DB.Create(histories).Error; err != nil {
+	if err := d.DB.CreateInBatches(histories, 1000).Error; err != nil {
+		log.Error("Issue on creating bulk producer histories")
 		return false, err
 	}
 	return true, nil
@@ -133,30 +138,6 @@ func (d *GormDatabase) DeleteProducerHistoriesByProducerUUID(pUuid string, args 
 	query = query.Where("producer_uuid = ? ", pUuid)
 	query = query.Delete(&historyModel)
 	return d.deleteResponseBuilder(query)
-}
-
-func (d *GormDatabase) appendProducerHistory(body *model.ProducerHistory) (*model.ProducerHistory, error) {
-	var limit = 100 // TODO add in the limit as a field in the producer
-	var count int64
-	ids := d.DB.Model(&model.ProducerHistory{}).
-		Select("id").
-		Where("producer_uuid = ?", body.ProducerUUID).
-		Order("timestamp desc").
-		Limit(limit - 1)
-	ids.Count(&count)
-	if count >= int64(limit) {
-		query := d.DB.
-			Where("producer_uuid = ?", body.ProducerUUID).
-			Where("id not in (?)", ids).
-			Delete(&model.ProducerHistory{})
-		if query.Error != nil {
-			return nil, query.Error
-		}
-	}
-	if err := d.DB.Create(&body).Error; err != nil {
-		return nil, err
-	}
-	return body, nil
 }
 
 // DeleteProducerHistoriesBeforeTimestamp delete producer histories before timestamp
