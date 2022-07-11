@@ -90,6 +90,12 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		return nil, errors.New(errMsg)
 	}
 	body.IsOutput = nils.NewBool(isOutput)
+	if isOutput {
+		body.PointPriorityArrayMode = model.PriorityArrayToWriteValue
+	} else {
+		body.PointPriorityArrayMode = model.ReadOnlyNoPriorityArrayRequired
+	}
+
 	body.IsTypeBool = nils.NewBool(isTypeBool)
 	body.WritePollRequired = nils.NewBool(isOutput) //write value immediately if it is an output point
 	body.ReadPollRequired = nils.NewBool(!isOutput) //only read value if it isn't an output point
@@ -212,7 +218,28 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 
 	// body.WritePollRequired = utils.NewTrue() // TODO: commented out this section, seems like useless
 
-	point, err = inst.db.WritePoint(pntUUID, body, true)
+	inst.edge28DebugMsg("writePoint() len(*body.Priority)", len(*body.Priority))
+	if body.Priority != nil && len(*body.Priority) == 0 {
+		priorityArray := *body.Priority
+		priorityArray["_1"] = nil
+		priorityArray["_2"] = nil
+		priorityArray["_3"] = nil
+		priorityArray["_4"] = nil
+		priorityArray["_5"] = nil
+		priorityArray["_6"] = nil
+		priorityArray["_7"] = nil
+		priorityArray["_8"] = nil
+		priorityArray["_9"] = nil
+		priorityArray["_10"] = nil
+		priorityArray["_11"] = nil
+		priorityArray["_12"] = nil
+		priorityArray["_13"] = nil
+		priorityArray["_14"] = nil
+		priorityArray["_15"] = nil
+		priorityArray["_16"] = nil
+	}
+
+	point, err = inst.db.WritePoint(pnt.UUID, body, true)
 	if err != nil || point == nil {
 		inst.edge28DebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err

@@ -26,7 +26,7 @@ func NewNoAuth(address string, port int) *RestClient {
 }
 
 func (client *RestClient) edge28ClientDebugMsg(args ...interface{}) {
-	enable := true
+	enable := false
 	if enable {
 		prefix := "Edge28 Client: "
 		log.Info(prefix, args)

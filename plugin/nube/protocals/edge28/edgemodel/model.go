@@ -18,7 +18,12 @@ type DescriptionStruct struct {
 }
 
 type Network struct {
-	Name        NameStruct        `json:"name"`
+	Name struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Default     string `json:"default" default:"edge28_net"`
+		DisplayName string `json:"display_name" default:"Network Name"`
+	} `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
 		Type     string `json:"type" default:"string"`
@@ -48,7 +53,12 @@ type Network struct {
 }
 
 type Device struct {
-	Name        NameStruct        `json:"name"`
+	Name struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Default     string `json:"default" default:"edge28_dev"`
+		DisplayName string `json:"display_name" default:"Device Name"`
+	} `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	Host        struct {
 		Type     string `json:"type" default:"string"`
@@ -65,7 +75,12 @@ type Device struct {
 }
 
 type Point struct {
-	Name        NameStruct        `json:"name"`
+	Name struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Default     string `json:"default" default:"edge28_pnt"`
+		DisplayName string `json:"display_name" default:"Point Name"`
+	} `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	IoNumber    struct {
 		Type     string   `json:"type" default:"array"`

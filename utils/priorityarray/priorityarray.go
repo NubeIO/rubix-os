@@ -58,7 +58,7 @@ func ParsePriority(originalPointPriority *model.Priority, newPriorityMapPtr *map
 				resultPriorityMap[key] = nil
 			} else {
 				if isTypeBool {
-					val = float.EvalAsBool(val)
+					val = float.EvalAsBoolOnlyOneIsTrue(val)
 				}
 				if !isFirst {
 					currentPriority = integer.New(i) // can't assign address of i, coz it's referencing looping

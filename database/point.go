@@ -232,10 +232,10 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 		presentValue = &val
 	}
 
-	isPresentValueChange := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
+	isPresentValueChange := !float.ComparePtrValues(pointModel.PresentValue, presentValue) // Use for createCOVHistory
 	isWriteValueChange := !float.ComparePtrValues(pointModel.WriteValue, writeValue)
-	isChange := isPresentValueChange || isWriteValueChange || isPriorityChanged
-	createCOVHistory := !float.ComparePtrValues(pointModel.PresentValue, presentValue)
+	isChange := isPresentValueChange || isWriteValueChange || isPriorityChanged || presentValueTransformFault
+
 	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
 	// but PresentValue should not change
 	if !presentValueTransformFault {
@@ -251,7 +251,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 
 	if isChange {
 		_ = d.DB.Model(&pointModel).Updates(&pointModel)
-		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, createCOVHistory)
+		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange)
 		if err != nil {
 			return nil, err
 		}

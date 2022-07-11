@@ -55,6 +55,16 @@ func EvalAsBool(b *float64) *float64 {
 	}
 }
 
+func EvalAsBoolOnlyOneIsTrue(b *float64) *float64 {
+	if b == nil {
+		return New(0)
+	} else if *b == 1 {
+		return New(1)
+	} else {
+		return New(0)
+	}
+}
+
 func Copy(b *float64) *float64 {
 	if b == nil {
 		return nil

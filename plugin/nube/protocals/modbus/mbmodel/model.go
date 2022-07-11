@@ -33,7 +33,12 @@ type Network struct {
 		Options  bool   `json:"options" default:"false"`
 		Default  *bool  `json:"default" default:"true"`
 	} `json:"enable"`
-	Name        NameStruct        `json:"name"`
+	Name struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Default     string `json:"default" default:"mb_net"`
+		DisplayName string `json:"display_name" default:"Network Name"`
+	} `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
 		Type     string `json:"type" default:"string"`
@@ -121,7 +126,12 @@ type Device struct {
 		Options  bool   `json:"options" default:"false"`
 		Default  *bool  `json:"default" default:"true"`
 	} `json:"enable"`
-	Name          NameStruct          `json:"name"`
+	Name struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Default     string `json:"default" default:"mb_dev"`
+		DisplayName string `json:"display_name" default:"Device Name"`
+	} `json:"name"`
 	Description   DescriptionStruct   `json:"description"`
 	TransportType TransportTypeStruct `json:"transport_type"`
 	AddressId     struct {
@@ -178,7 +188,12 @@ type Point struct {
 		Options  bool   `json:"options" default:"true"`
 		Default  *bool  `json:"default" default:"true"`
 	} `json:"enable"`
-	Name        NameStruct        `json:"name"`
+	Name struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Default     string `json:"default" default:"mb_pnt"`
+		DisplayName string `json:"display_name" default:"Point Name"`
+	} `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	ObjectType  struct {
 		Type     string   `json:"type" default:"array"`
