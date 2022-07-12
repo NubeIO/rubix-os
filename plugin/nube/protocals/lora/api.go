@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/jsonschema"
 	"net/http"
 
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/loramodel"
@@ -17,6 +18,12 @@ const (
 	schemaNetwork = "/schema/network"
 	schemaDevice  = "/schema/device"
 	schemaPoint   = "/schema/point"
+)
+
+const (
+	jsonSchemaNetwork = "/schema/json/network"
+	jsonSchemaDevice  = "/schema/json/device"
+	jsonSchemaPoint   = "/schema/json/point"
 )
 
 // wizard
@@ -126,5 +133,14 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, loramodel.GetPointSchema())
+	})
+	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema())
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetDeviceSchema())
+	})
+	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
 	})
 }

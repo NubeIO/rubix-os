@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/rubixio/jsonschema"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/rubixio/rubixiomodel"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -15,9 +16,9 @@ const (
 )
 
 const (
-	networks = "/networks"
-	devices  = "/devices"
-	points   = "/points"
+	jsonSchemaNetwork = "/schema/json/network"
+	jsonSchemaDevice  = "/schema/json/device"
+	jsonSchemaPoint   = "/schema/json/point"
 )
 
 var err error
@@ -87,5 +88,14 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, rubixiomodel.GetPointSchema())
+	})
+	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema())
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetDeviceSchema())
+	})
+	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
 	})
 }
