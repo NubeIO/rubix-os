@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -63,14 +62,10 @@ func (d *GormDatabase) CreateHistory(body *model.History) (*model.History, error
 
 // CreateBulkHistory bulk creates a thing.
 func (d *GormDatabase) CreateBulkHistory(histories []*model.History) (bool, error) {
-	tx := d.DB.Begin() // for restricting the access by data source while bulk history creation is still to complete
-	for _, history := range histories {
-		_, err := d.CreateHistory(history)
-		if err != nil {
-			log.Error(fmt.Sprintf("Issue on creating history.id = %d, producer_uuid = %s", history.ID, history.UUID))
-		}
+	if err := d.DB.CreateInBatches(histories, 1000).Error; err != nil {
+		log.Error("Issue on creating bulk histories")
+		return false, err
 	}
-	tx.Commit()
 	return true, nil
 }
 

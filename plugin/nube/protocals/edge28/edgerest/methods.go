@@ -3,7 +3,6 @@ package edgerest
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/nresty"
-	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -141,7 +140,7 @@ func (a *RestClient) GetDIs() (*DI, error) {
 // WriteUO to a UO point
 func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, error) {
 	req := fmt.Sprintf("/api/1.1/write/uo/%s/%d/16", strings.ToLower(ioNum), int(value))
-	log.Info("edge28-api: WriteUO:", req)
+	a.edge28ClientDebugMsg("WriteUO:", req)
 	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(WriteResponseUO{}).
 		Get(req))
@@ -154,7 +153,7 @@ func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, err
 // WriteDO to a DO point
 func (a *RestClient) WriteDO(ioNum string, value float64) (*WriteResponse, error) {
 	req := fmt.Sprintf("/api/1.1/write/do/%s/%d/16", strings.ToLower(ioNum), int(value))
-	log.Info("edge28-api: WriteDO:", req)
+	a.edge28ClientDebugMsg("WriteDO:", req)
 	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(WriteResponse{}).
 		Get(req))

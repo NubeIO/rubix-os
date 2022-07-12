@@ -69,6 +69,7 @@ func (inst *Instance) ModbusPolling() error {
 
 		if len(inst.NetworkPollManagers) == 0 {
 			inst.modbusDebugMsg("NO MODBUS NETWORKS FOUND")
+			time.Sleep(15000 * time.Millisecond)
 		}
 		// inst.modbusDebugMsg("inst.NetworkPollManagers")
 		// inst.modbusDebugMsg("%+v\n", inst.NetworkPollManagers)
@@ -199,13 +200,11 @@ func (inst *Instance) ModbusPolling() error {
 
 			var responseValue float64
 			var response interface{}
-			var writeValuePointer *float64
 			writeSuccess := false
 			if isWriteable(pnt.WriteMode) && boolean.IsTrue(pnt.WritePollRequired) { // DO WRITE IF REQUIRED
 				inst.modbusDebugMsg(fmt.Sprintf("modbus write point: %+v", pnt))
 				// pnt.PrintPointValues()
-				writeValuePointer = pnt.Priority.GetHighestPriorityValue()
-				if writeValuePointer != nil {
+				if pnt.WriteValue != nil {
 					response, responseValue, err = inst.networkWrite(mbClient, pnt)
 					if err != nil {
 						_, err = inst.pointUpdateErr(pnt, err)
@@ -241,11 +240,11 @@ func (inst *Instance) ModbusPolling() error {
 
 			// update point in DB if required
 			// For write_once and write_always type, write value should become present value
-			writeValueToPresentVal := (pnt.WriteMode == model.WriteOnce || pnt.WriteMode == model.WriteAlways) && writeSuccess && writeValuePointer != nil
+			writeValueToPresentVal := (pnt.WriteMode == model.WriteOnce || pnt.WriteMode == model.WriteAlways) && writeSuccess && pnt.WriteValue != nil
 
 			if readSuccess || writeValueToPresentVal {
 				if writeValueToPresentVal {
-					responseValue = *writeValuePointer
+					responseValue = *pnt.WriteValue
 					// fmt.Println("ModbusPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
 					readSuccess = true
 				}

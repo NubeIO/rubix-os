@@ -1,9 +1,19 @@
 # CHANGELOG
-## [v0.5.8](https://github.com/NubeIO/flow-framework/tree/v0.5.8) (2022-09-05)
+
+## [v0.5.9](https://github.com/NubeIO/flow-framework/tree/v0.5.9) (2022-07-12)
+
+- improvements to edge28 plugin stability
+- improvements to point write for priority array modes
+- improvements to modbus plugin
+- added bulk interval histories
+- improved CreateInBatches
+- added interface errors to bacnet network
+- added new JSON schema for network, device, point
+
+## [v0.5.8](https://github.com/NubeIO/flow-framework/tree/v0.5.8) (2022-07-05)
 
 - fix on PG DB resync
 - clean up of bacnet master
-
 
 ## [v0.5.7](https://github.com/NubeIO/flow-framework/tree/v0.5.7) (2022-07-05)
 

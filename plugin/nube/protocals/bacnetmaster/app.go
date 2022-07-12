@@ -13,6 +13,9 @@ import (
 
 // addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
+	if body.NetworkInterface == "" {
+		return nil, errors.New("network interface can not be empty try, eth0")
+	}
 	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err

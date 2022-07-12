@@ -19,7 +19,12 @@ type DescriptionStruct struct {
 }
 
 type Network struct {
-	Name        NameStruct        `json:"name"`
+	Name struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Default     string `json:"default" default:"net"`
+		DisplayName string `json:"display_name" default:"Network Name"`
+	} `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
 		Type     string `json:"type" default:"string"`
@@ -55,13 +60,30 @@ type Network struct {
 }
 
 type Device struct {
-	Name        NameStruct        `json:"name"`
+	Name struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Default     string `json:"default" default:"dev"`
+		DisplayName string `json:"display_name" default:"Device Name"`
+	} `json:"name"`
 	Description DescriptionStruct `json:"description"`
 }
 
 type Point struct {
-	Name        NameStruct        `json:"name"`
+	Name struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Default     string `json:"default" default:"pnt"`
+		DisplayName string `json:"display_name" default:"Point Name"`
+	} `json:"name"`
 	Description DescriptionStruct `json:"description"`
+	Fallback    struct {
+		Type        string   `json:"type" default:"float"`
+		Required    bool     `json:"required" default:"false"`
+		Default     *float64 `json:"default" default:""`
+		DisplayName string   `json:"display_name" default:"Fallback Value"`
+		Nullable    bool     `json:"nullable" default:"true"`
+	} `json:"fallback"`
 }
 
 func GetNetworkSchema() *Network {
