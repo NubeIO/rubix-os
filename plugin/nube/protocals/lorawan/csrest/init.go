@@ -13,37 +13,36 @@ type RestClient struct {
 	ClientToken string
 }
 
-type Token struct {
-	JWT string `json:"jwt"`
+type CSApplications struct {
+	Result []struct {
+		ID string `json:"id"`
+	} `json:"result"`
 }
 
-type user struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
+var csApplications CSApplications
 
-const csURLLogin = "/api/internal/login"
-
-// CSLogin login to Chirpstack and get JWT token
-func CSLogin(address string, port int, username string, password string) (*RestClient, error) {
-	log.Infof("lorawan: Connecting to chirpstack at %s:%d", address, port)
+// InitRest Set constant CS REST params
+func InitRest(address string, port int, token string) RestClient {
 	client := resty.New()
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%d", address, port)
+	url := fmt.Sprintf("http://%s:%d/api", address, port)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Content-Type", "application/json")
-	var t Token
-	resp, err := client.R().
-		SetResult(&t).
-		SetHeader("Content-Type", "application/json").
-		SetBody(user{Email: username, Password: password}).
-		Post(csURLLogin)
+	client.SetHeader("Grpc-Metadata-Authorization", token)
+	return RestClient{client: client, ClientToken: token}
+}
+
+// Connect test CS connection with API token
+func (a *RestClient) Connect() error {
+	log.Infof("lorawan: Connecting to chirpstack at %s", a.client.BaseURL)
+	csURLConnect := fmt.Sprintf("/applications?limit=%s", limit)
+	resp, err := a.client.R().
+		SetResult(&csApplications).
+		Get(csURLConnect)
 	err = checkResponse(resp, err)
 	if err != nil {
 		log.Warn("lorawan: Connection error: ", err)
-		return nil, err
 	}
-	client.SetHeader("Grpc-Metadata-Authorization", t.JWT)
-	return &RestClient{client: client, ClientToken: t.JWT}, nil
+	return err
 }

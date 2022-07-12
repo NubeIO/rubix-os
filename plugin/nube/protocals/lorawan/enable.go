@@ -29,10 +29,8 @@ func (inst *Instance) Enable() error {
 		return errors.New("lorawan: Error creating default network")
 	}
 
-	// TODO: temporary call due to config being broken
-	inst.ValidateAndSetConfig(new(Config))
-
 	inst.csConnected = false
+	inst.REST = csrest.InitRest(inst.config.CSAddress, inst.config.CSPort, inst.config.CSToken)
 	inst.REST.SetDeviceLimit(inst.config.DeviceLimit)
 	err = inst.connectToCS()
 	if csrest.IsCSConnectionError(err) {

@@ -9,9 +9,8 @@ import (
 	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
 	"github.com/go-resty/resty/v2"
+	log "github.com/sirupsen/logrus"
 )
-
-// TODO: handle reconnect
 
 var limit = "200"
 
@@ -40,20 +39,29 @@ func IsCSConnectionError(err error) bool {
 
 // GetDevices all
 func (a *RestClient) GetDevices() (*csmodel.Devices, error) {
-	q := fmt.Sprintf("/api/devices?limit=%s", limit)
-	resp, err := nresty.FormatRestyResponse(a.client.R().
-		SetResult(csmodel.Devices{}).
-		Get(q))
-	err = checkResponse(resp, err)
-	if err != nil {
-		return nil, err
+	var allDevices csmodel.Devices
+	for _, application := range csApplications.Result {
+		q := fmt.Sprintf("/devices?limit=%s&applicationID=%s", limit, application.ID)
+		resp, err := nresty.FormatRestyResponse(a.client.R().
+			SetResult(csmodel.Devices{}).
+			Get(q))
+		err = checkResponse(resp, err)
+		if err != nil {
+			log.Error("lorawan: rest GetDevices error: ", err)
+			return nil, err
+		}
+		if resp.Result() == nil {
+			log.Error("lorawan: rest GetDevices result nil", err)
+		}
+		currDevices := resp.Result().(*csmodel.Devices)
+		allDevices.Result = append(allDevices.Result, currDevices.Result...)
 	}
-	return resp.Result().(*csmodel.Devices), nil
+	return &allDevices, nil
 }
 
 // GetDevice single
 func (a *RestClient) GetDevice(devEui string) (*csmodel.Device, error) {
-	q := fmt.Sprintf("/api/devices/%s", devEui)
+	q := fmt.Sprintf("/devices/%s", devEui)
 	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(csmodel.DeviceAll{}).
 		Get(q))

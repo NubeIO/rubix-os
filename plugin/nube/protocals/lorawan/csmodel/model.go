@@ -7,8 +7,7 @@ type Device struct {
 }
 
 type Devices struct {
-	TotalCount string   `json:"totalCount"`
-	Result     []Device `json:"result"`
+	Result []Device `json:"result"`
 }
 
 type DeviceAll struct {

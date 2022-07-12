@@ -14,8 +14,6 @@ func (inst *Instance) syncChirpstackDevicesLoop() {
 	for {
 		if inst.csConnected {
 			inst.syncChirpstackDevices()
-		} else {
-			log.Warn("lorawan: Failed to sync devices due to CS connection error")
 		}
 		time.Sleep(time.Duration(inst.config.SyncPeriodMins) * time.Minute)
 	}
@@ -24,11 +22,13 @@ func (inst *Instance) syncChirpstackDevicesLoop() {
 func (inst *Instance) syncChirpstackDevices() {
 	log.Info("lorawan: Syncing Devices")
 	devices, err := inst.REST.GetDevices()
-	if csrest.IsCSConnectionError(err) {
-		inst.setCSDisconnected(err)
+	if err != nil {
+		if csrest.IsCSConnectionError(err) {
+			inst.setCSDisconnected(err)
+		}
+		log.Warn("lorawan: Failed to sync devices due to CS connection error")
 		return
 	}
-
 	inst.syncAddMissingDevices(devices.Result)
 	inst.syncRemoveOldDevices(devices.Result)
 	inst.syncUpdateDevices(devices.Result)
@@ -83,12 +83,9 @@ func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
 }
 
 func (inst *Instance) connectToCS() error {
-	rest, err := csrest.CSLogin(inst.config.CSAddress, inst.config.CSPort,
-		inst.config.CSUsername, inst.config.CSPassword)
+	err := inst.REST.Connect()
 	if err == nil {
-		log.Info("lorawan: Connected to Chirpstack")
-		inst.REST = rest
-		inst.csConnected = true
+		inst.setCSConnected()
 	} else if !csrest.IsCSConnectionError(err) {
 		log.Error("lorawan: Failed to connect to Chirpstack and unable to retry. Error: ", err)
 	}
@@ -100,15 +97,33 @@ func (inst *Instance) connectToCSLoop() error {
 		time.Sleep(5 * time.Second)
 		err := inst.connectToCS()
 		if !csrest.IsCSConnectionError(err) {
-			// TODO: disable self
 			return err
 		}
 	}
 }
 
+func (inst *Instance) setCSConnected() {
+	inst.csConnected = true
+	log.Info("lorawan: Connected to Chirpstack")
+	net := model.Network{
+		CommonFault: model.CommonFault{
+			InFault: false,
+			Message: "",
+		},
+	}
+	inst.db.UpdateNetwork(inst.networkUUID, &net, true)
+}
+
 func (inst *Instance) setCSDisconnected(err error) {
 	inst.csConnected = false
-	log.Warn("lorawan: Lost connection to Chirpstack. Cause: ", err)
+	log.Warn("lorawan: Lost connection to Chirpstack. Error: ", err)
+	net := model.Network{
+		CommonFault: model.CommonFault{
+			InFault: true,
+			Message: err.Error(),
+		},
+	}
+	inst.db.UpdateNetwork(inst.networkUUID, &net, true)
 	go inst.connectToCSLoop()
 }
 

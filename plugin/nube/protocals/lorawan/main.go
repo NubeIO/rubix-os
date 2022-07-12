@@ -32,7 +32,7 @@ type Instance struct {
 	bus         eventbus.BusService
 	pluginUUID  string
 	networkUUID string
-	REST        *csrest.RestClient
+	REST        csrest.RestClient
 	csConnected bool
 	deviceEUIs  []string
 }
