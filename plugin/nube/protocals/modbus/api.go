@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/jsonschema"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/mbmodel"
 	"github.com/NubeIO/flow-framework/utils/array"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
@@ -18,6 +19,12 @@ const (
 	schemaNetwork = "/schema/network"
 	schemaDevice  = "/schema/device"
 	schemaPoint   = "/schema/point"
+)
+
+const (
+	jsonSchemaNetwork = "/schema/json/network"
+	jsonSchemaDevice  = "/schema/json/device"
+	jsonSchemaPoint   = "/schema/json/point"
 )
 
 type Scan struct {
@@ -200,5 +207,14 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, mbmodel.GetPointSchema())
+	})
+	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema())
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetDeviceSchema())
+	})
+	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
 	})
 }
