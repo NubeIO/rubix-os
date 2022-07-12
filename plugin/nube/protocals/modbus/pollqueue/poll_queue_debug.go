@@ -27,14 +27,14 @@ func (pm *NetworkPollManager) PrintPollQueuePointUUIDs() {
 			hasNextPollPoint = 1
 		}
 		printString += fmt.Sprint("PrintPollQueuePointUUIDs: (NOTE: THE CURRENT PollPoint HAS ALREADY BEEN REMOVED FROM THE QUEUES AT THIS POINT!!\nTOTAL COUNT = ", hasNextPollPoint+pm.PollQueue.PriorityQueue.Len()+pm.PollQueue.StandbyPollingPoints.Len(), "\n")
-		printString += fmt.Sprint("NextPollPoint: ", "\n")
+		printString += fmt.Sprint("NextPollPoint: ")
 		printString += fmt.Sprintf("%+v\n", pm.PluginQueueUnloader.NextPollPoint)
-		printString += fmt.Sprint("PollQueue: COUNT = ", pm.PollQueue.PriorityQueue.Len(), ": ", "\n")
+		printString += fmt.Sprint("PollQueue: COUNT = ", pm.PollQueue.PriorityQueue.Len(), ": ")
 		for _, pp := range pm.PollQueue.PriorityQueue.PriorityQueue {
 			printString += fmt.Sprint(pp.FFPointUUID, " - ", pp.PollPriority, "; ")
 		}
 		printString += fmt.Sprint("", "\n")
-		printString += fmt.Sprint("StandbyPollingPoints COUNT = ", pm.PollQueue.StandbyPollingPoints.Len(), ": ", "\n")
+		printString += fmt.Sprint("StandbyPollingPoints COUNT = ", pm.PollQueue.StandbyPollingPoints.Len(), ": ")
 		for _, pp := range pm.PollQueue.StandbyPollingPoints.PriorityQueue {
 			printString += fmt.Sprint(pp.FFPointUUID, " - ", pp.PollPriority, ", repoll timer:", pp.RepollTimer != nil, "; ")
 		}

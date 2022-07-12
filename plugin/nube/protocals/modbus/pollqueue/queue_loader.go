@@ -109,14 +109,29 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		pm.PollCompleteStatsUpdate(pp, pollTimeSecs) // This will update the relevant PollManager statistics.
 	}
 
+	_, success := pm.PollQueue.OutstandingPollingPoints.RemovePollingPointByPointUUID(pp.FFPointUUID)
+	if !success {
+		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find polling point in OutstandingPollingPoints.  %s /n", pp.FFPointUUID)
+	}
+
 	point, err := pm.DBHandlerRef.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
 	if point == nil || err != nil {
-		fmt.Printf("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s /n", pp.FFPointUUID)
+		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s /n", pp.FFPointUUID)
 		return
 	}
 	// TODO: potentially only required on writeSuccess (but possibility of lockup on a bad point)
 	// Reset poll priority to set value (in cases where pp has been escalated to ASAP).
 	pp.PollPriority = point.PollPriority
+
+	val, ok := pm.PollQueue.PointsUpdatedWhilePolling[point.UUID]
+	if ok {
+		delete(pm.PollQueue.PointsUpdatedWhilePolling, point.UUID)
+		if val == true { // point needs an ASAP write
+			pp.PollPriority = model.PRIORITY_ASAP
+			pp.LockupAlertTimer = pm.MakeLockupTimerFunc(pp.PollPriority) // starts a countdown for queue lockup alerts.
+			pm.PollQueue.AddPollingPoint(pp)                              // re-add to poll queue immediately
+		}
+	}
 
 	//pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification: point %+v", point))
 	//pm.PrintPointDebugInfo(point)

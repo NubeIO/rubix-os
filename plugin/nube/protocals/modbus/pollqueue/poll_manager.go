@@ -135,10 +135,14 @@ func NewPollManager(conf *config.Config, dbHandler *dbhandler.Handler, ffNetwork
 	heap.Init(pq)                        // Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
 	refQueue := make([]*PollingPoint, 0) // Make the reference slice that contains points that are not in the current polling queue.
 	rq := &PriorityPollQueue{refQueue}
-	heap.Init(rq) // Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
+	heap.Init(rq)                                // Init needs to be called on the main PriorityQueue so that it is maintained by PollingPriority.
+	outstandingQueue := make([]*PollingPoint, 0) // Make the reference slice that contains points that are not in the current polling queue.
+	opq := &PriorityPollQueue{outstandingQueue}
+	heap.Init(opq)
 	adl := make([]string, 0)
 	pqu := &QueueUnloader{nil, nil, nil}
-	npq := &NetworkPriorityPollQueue{conf, pq, rq, pqu, ffPluginUUID, ffNetworkUUID, adl}
+	puwp := make(map[string]bool)
+	npq := &NetworkPriorityPollQueue{conf, pq, rq, opq, puwp, pqu, ffPluginUUID, ffNetworkUUID, adl}
 	pm := new(NetworkPollManager)
 	pm.config = conf
 	pm.PollQueue = npq
@@ -217,31 +221,60 @@ func (pm *NetworkPollManager) PollingFinished(pp *PollingPoint, pollStartTime ti
 	callback(pp, writeSuccess, readSuccess, pollTimeSecs, false) // (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool)
 }
 
-func (pm *NetworkPollManager) CheckAllPointsExistInQueues() bool {
-	var missingPoints [0]string
+func (pm *NetworkPollManager) CheckAllPointsExistInQueues() {
 	net, err := pm.DBHandlerRef.GetNetwork(pm.FFNetworkUUID, api.Args{WithDevices: true, WithPoints: true})
 	if net == nil || err != nil {
 		pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Network Not Found/n")
 	}
+	if boolean.IsFalse(net.Enable) { //If network isn't enabled, there should be no points in the polling queues
+		if pm.PollQueue.PriorityQueue.Len() > 0 {
+			pm.PollQueue.PriorityQueue.EmptyQueue()
+			pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Found PollingPoints in PriorityQueue of a disabled network/n")
+		}
+		if pm.PollQueue.StandbyPollingPoints.Len() > 0 {
+			pm.PollQueue.StandbyPollingPoints.EmptyQueue()
+			pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Found PollingPoints in StandbyPollingPoints of a disabled network./n")
+		}
+		if pm.PollQueue.OutstandingPollingPoints.Len() > 0 {
+			pm.PollQueue.OutstandingPollingPoints.EmptyQueue()
+			pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Found PollingPoints in OutstandingPollingPoints of a disabled network./n")
+		}
+	}
 	for _, dev := range net.Devices {
 		if dev.Points != nil {
 			deviceExistsInQueue := pm.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID)
-			if !deviceExistsInQueue {
-				pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Device UUID doesn't exist in poll queue/n")
+			if boolean.IsFalse(dev.Enable) {
+				if deviceExistsInQueue {
+					pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Device UUID exist in Poll Queues for a disabled device./n")
+					pm.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
+					continue
+				}
+			}
+			if boolean.IsTrue(dev.Enable) && !deviceExistsInQueue {
+				pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Device UUID doesn't exist in active devices list./n")
 			}
 			for _, pnt := range dev.Points {
 				if pnt != nil {
-					pm.PollQueue.GetPollingPointByPointUUID(pnt.UUID)
-					if pnt == nil || err != nil {
-						pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Device UUID doesn't exist in poll queue/n")
+					if boolean.IsFalse(pnt.Enable) {
+						pp, _ := pm.PollQueue.GetPollingPointByPointUUID(pnt.UUID)
+						if pp != nil {
+							pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Found disabled point in poll queue./n")
+							pm.PollQueue.RemovePollingPointByPointUUID(pnt.UUID)
+						}
+						continue
+					}
+					if boolean.IsTrue(pnt.Enable) {
+						pp, err := pm.PollQueue.GetPollingPointByPointUUID(pnt.UUID)
+						if pp == nil || err != nil {
+							pm.pollQueueErrorMsg("NetworkPollManager.CheckAllPointsExistInQueues: Polling point doesn't exist for point ", pnt.Name, "/n")
+							pp = NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, pm.FFPluginUUID)
+							pp.PollPriority = pnt.PollPriority
+							pm.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode.
+						}
+						continue
 					}
 				}
 			}
 		}
 	}
-
-	pollEndTime := time.Now()
-	pollDuration := pollEndTime.Sub(pollStartTime)
-	pollTimeSecs := pollDuration.Seconds()
-	callback(pp, writeSuccess, readSuccess, pollTimeSecs, false) // (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool)
 }

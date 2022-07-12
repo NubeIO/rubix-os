@@ -71,7 +71,7 @@ func (pm *NetworkPollManager) StopQueueUnloader() {
 	pm.PluginQueueUnloader = nil
 }
 
-// This function should be called from the Polling service. It will start a timer that posts the next polling point.
+// This function should be called from the Polling service.
 func (pm *NetworkPollManager) GetNextPollingPoint() (pp *PollingPoint, callback func(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate bool)) {
 	//pm.pollQueueDebugMsg("GetNextPollingPoint()")
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint != nil {
@@ -85,13 +85,17 @@ func (pm *NetworkPollManager) GetNextPollingPoint() (pp *PollingPoint, callback 
 	return nil, nil
 }
 
-// This is the callback function that is called by the timer made in (pm *NetworkPollManager) GetNextPollingPoint().
+// This is the callback function that is called by the reoccurring timer (seperate go routine) made in StartQueueUnloader().
 func (pm *NetworkPollManager) postNextPointCallback() {
 	//pm.pollQueueDebugMsg("postNextPointCallback()")
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint == nil {
 		pp, err := pm.PollQueue.GetNextPollingPoint()
 		if pp != nil && err == nil {
 			pm.PluginQueueUnloader.NextPollPoint = pp
+			addSuccess := pm.PollQueue.OutstandingPollingPoints.AddPollingPoint(pp)
+			if !addSuccess {
+				pm.pollQueueErrorMsg(fmt.Sprintf("Modbus postNextPointCallback(): polling point could not be added to OutstandingPollingPoints slice.  (%s)", pp.FFPointUUID))
+			}
 		}
 	}
 }
