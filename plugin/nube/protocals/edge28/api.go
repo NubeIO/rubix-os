@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/edgemodel"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/edgerest"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/jsonschema"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -25,6 +26,12 @@ const (
 	networks = "/networks"
 	devices  = "/devices"
 	points   = "/points"
+)
+
+const (
+	jsonSchemaNetwork = "/schema/json/network"
+	jsonSchemaDevice  = "/schema/json/device"
+	jsonSchemaPoint   = "/schema/json/point"
 )
 
 var err error
@@ -94,6 +101,15 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, edgemodel.GetPointSchema())
+	})
+	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema())
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetDeviceSchema())
+	})
+	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
 	})
 
 	mux.GET("/edge/ping", func(ctx *gin.Context) {

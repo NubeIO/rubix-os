@@ -2,10 +2,12 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/config"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/edgerest"
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 const name = "edge28" // must be unique across all plugins
@@ -23,16 +25,17 @@ const transportType = "ip" // serial, ip
 
 // Instance is plugin instance
 type Instance struct {
-	config         *Config
+	config         *config.Config
 	enabled        bool
 	basePath       string
 	db             dbhandler.Handler
 	store          cachestore.Handler
 	bus            eventbus.BusService
 	pluginUUID     string
-	networkUUID    string
-	rest           *edgerest.RestClient
+	networks       []*model.Network
 	pollingEnabled bool
+	pollingCancel  func()
+	rest           *edgerest.RestClient
 }
 
 // GetFlowPluginInfo returns plugin info.

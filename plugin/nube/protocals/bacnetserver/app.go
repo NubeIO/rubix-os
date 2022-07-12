@@ -14,6 +14,10 @@ import (
 
 // addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
+	if body.NetworkInterface == "" {
+		return nil, errors.New("network interface can not be empty try, eth0")
+	}
+
 	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
 	if err != nil {
 		return nil, err
@@ -25,13 +29,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 			return nil, errors.New(errMsg)
 		}
 	}
-
-	if body.NetworkInterface == "" {
-		return nil, errors.New("network interface can not be empty try, eth0")
-	}
-
 	body.Port = integer.New(defaultPort)
-	fmt.Println(body.NetworkInterface)
 	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err

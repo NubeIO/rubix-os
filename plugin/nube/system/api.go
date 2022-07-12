@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/plugin/nube/system/jsonschema"
 	"github.com/NubeIO/flow-framework/utils/array"
 	"net/http"
 
@@ -62,6 +63,12 @@ func supportedObjects() *array.Array {
 }
 
 const (
+	jsonSchemaNetwork = "/schema/json/network"
+	jsonSchemaDevice  = "/schema/json/device"
+	jsonSchemaPoint   = "/schema/json/point"
+)
+
+const (
 	help     = "/help"
 	helpHTML = "/help/guide"
 )
@@ -105,5 +112,14 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else {
 			ctx.JSON(http.StatusOK, obj)
 		}
+	})
+	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema())
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetDeviceSchema())
+	})
+	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
 	})
 }
