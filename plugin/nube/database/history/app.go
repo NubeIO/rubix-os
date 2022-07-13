@@ -15,6 +15,7 @@ func (inst *Instance) syncHistory() (bool, error) {
 		return false, err
 	}
 	var histories []*model.History
+	var historyLogs []*model.HistoryLog
 	for _, fnc := range fnClones {
 		hisLog, err := inst.db.GetHistoryLogByFlowNetworkCloneUUID(fnc.UUID)
 		if err != nil {
@@ -32,10 +33,7 @@ func (inst *Instance) syncHistory() (bool, error) {
 				hisLog.FlowNetworkCloneUUID = fnc.UUID
 				hisLog.LastSyncID = h.ID
 				hisLog.Timestamp = h.Timestamp
-				_, err = inst.db.UpdateHistoryLog(hisLog)
-				if err != nil {
-					continue
-				}
+				historyLogs = append(historyLogs, hisLog)
 			}
 		}
 	}
@@ -43,6 +41,12 @@ func (inst *Instance) syncHistory() (bool, error) {
 		_, err = inst.db.CreateBulkHistory(histories)
 		if err != nil {
 			return false, err
+		}
+		if len(historyLogs) > 0 {
+			_, err = inst.db.UpdateBulkHistoryLogs(historyLogs)
+			if err != nil {
+				return false, err
+			}
 		}
 	}
 	log.Info(fmt.Sprintf("Stored %v rows on %v", len(histories), path))

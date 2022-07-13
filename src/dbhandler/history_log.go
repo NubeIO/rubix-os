@@ -19,3 +19,7 @@ func (h *Handler) UpdateHistoryLog(log *model.HistoryLog) (*model.HistoryLog, er
 	}
 	return q, nil
 }
+
+func (h *Handler) UpdateBulkHistoryLogs(logs []*model.HistoryLog) (bool, error) {
+	return getDb().UpdateBulkHistoryLogs(logs)
+}

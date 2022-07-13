@@ -4,6 +4,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm/clause"
 )
 
 // GetHistories returns all histories.
@@ -62,7 +63,7 @@ func (d *GormDatabase) CreateHistory(body *model.History) (*model.History, error
 
 // CreateBulkHistory bulk creates a thing.
 func (d *GormDatabase) CreateBulkHistory(histories []*model.History) (bool, error) {
-	if err := d.DB.CreateInBatches(histories, 1000).Error; err != nil {
+	if err := d.DB.Clauses(clause.OnConflict{UpdateAll: true}).CreateInBatches(histories, 1000).Error; err != nil {
 		log.Error("Issue on creating bulk histories")
 		return false, err
 	}

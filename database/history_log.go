@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"gorm.io/gorm/clause"
 )
 
 // GetHistoryLogByFlowNetworkCloneUUID return history log for the given fncUuid or nil..
@@ -34,4 +35,12 @@ func (d *GormDatabase) UpdateHistoryLog(body *model.HistoryLog) (*model.HistoryL
 		return nil, query.Error
 	}
 	return historyLogModel, nil
+}
+
+// UpdateBulkHistoryLogs update/create a thing in a bulk.
+func (d *GormDatabase) UpdateBulkHistoryLogs(body []*model.HistoryLog) (bool, error) {
+	if err := d.DB.Clauses(clause.OnConflict{UpdateAll: true}).CreateInBatches(body, 1000).Error; err != nil {
+		return false, err
+	}
+	return true, nil
 }
