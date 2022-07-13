@@ -235,6 +235,7 @@ func (inst *Instance) getPollingStats() (result []interface{}, error error) {
 		return nil, nil
 	}
 	type Stats struct {
+		NetworkName                   string
 		MaxPollExecuteTimeSecs        float64 // time in seconds for polling to complete (poll response time, doesn't include the time in queue).
 		AveragePollExecuteTimeSecs    float64 // time in seconds for polling to complete (poll response time, doesn't include the time in queue).
 		MinPollExecuteTimeSecs        float64 // time in seconds for polling to complete (poll response time, doesn't include the time in queue).
@@ -268,7 +269,10 @@ func (inst *Instance) getPollingStats() (result []interface{}, error error) {
 	}
 
 	for _, netPollMan := range inst.NetworkPollManagers {
+		var netArg api.Args
+		net, _ := inst.db.GetNetwork(netPollMan.FFNetworkUUID, netArg)
 		pmResult := Stats{
+			NetworkName:                   net.Name,
 			MaxPollExecuteTimeSecs:        netPollMan.MaxPollExecuteTimeSecs,
 			AveragePollExecuteTimeSecs:    netPollMan.AveragePollExecuteTimeSecs,
 			MinPollExecuteTimeSecs:        netPollMan.MinPollExecuteTimeSecs,
