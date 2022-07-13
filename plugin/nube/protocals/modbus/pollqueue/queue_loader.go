@@ -53,65 +53,16 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	return nil
 }
 
-func (pm *NetworkPollManager) PollCompleteStatsUpdate(pp *PollingPoint, pollTimeSecs float64) {
-	pm.pollQueueDebugMsg("PollCompleteStatsUpdate()")
-
-	pm.AveragePollExecuteTimeSecs = ((pm.AveragePollExecuteTimeSecs * float64(pm.TotalPollCount)) + pollTimeSecs) / (float64(pm.TotalPollCount) + 1)
-	pm.TotalPollCount++
-	enabledTime := time.Since(time.Unix(pm.PollingStartTimeUnix, 0)) * time.Second
-	pm.BusyTime = (pm.AveragePollExecuteTimeSecs * float64(pm.TotalPollCount)) / enabledTime.Seconds()
-
-	switch pp.PollPriority {
-	case model.PRIORITY_ASAP:
-		pm.ASAPPriorityPollCount++
-		if pp.QueueEntryTime <= 0 {
-			return
-		}
-		pollTime := float64(time.Now().Unix() - pp.QueueEntryTime)
-		pm.ASAPPriorityAveragePollTime = ((pm.ASAPPriorityAveragePollTime * float64(pm.ASAPPriorityPollCountForAvg)) + pollTime) / (float64(pm.ASAPPriorityPollCountForAvg) + 1)
-		pm.ASAPPriorityPollCountForAvg++
-
-	case model.PRIORITY_HIGH:
-		pm.HighPriorityPollCount++
-		if pp.QueueEntryTime <= 0 {
-			return
-		}
-		pollTime := float64(time.Now().Unix() - pp.QueueEntryTime)
-		pm.HighPriorityAveragePollTime = ((pm.HighPriorityAveragePollTime * float64(pm.HighPriorityPollCountForAvg)) + pollTime) / (float64(pm.HighPriorityPollCountForAvg) + 1)
-		pm.HighPriorityPollCountForAvg++
-
-	case model.PRIORITY_NORMAL:
-		pm.NormalPriorityPollCount++
-		if pp.QueueEntryTime <= 0 {
-			return
-		}
-		pollTime := float64(time.Now().Unix() - pp.QueueEntryTime)
-		pm.NormalPriorityAveragePollTime = ((pm.NormalPriorityAveragePollTime * float64(pm.NormalPriorityPollCountForAvg)) + pollTime) / (float64(pm.NormalPriorityPollCountForAvg) + 1)
-		pm.NormalPriorityPollCountForAvg++
-
-	case model.PRIORITY_LOW:
-		pm.LowPriorityPollCount++
-		if pp.QueueEntryTime <= 0 {
-			return
-		}
-		pollTime := float64(time.Now().Unix() - pp.QueueEntryTime)
-		pm.LowPriorityAveragePollTime = ((pm.LowPriorityAveragePollTime * float64(pm.LowPriorityPollCountForAvg)) + pollTime) / (float64(pm.LowPriorityPollCountForAvg) + 1)
-		pm.LowPriorityPollCountForAvg++
-
-	}
-
-}
-
 func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate bool) {
 	pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, pollTimeSecs))
-
-	if !pointUpdate {
-		pm.PollCompleteStatsUpdate(pp, pollTimeSecs) // This will update the relevant PollManager statistics.
-	}
 
 	_, success := pm.PollQueue.OutstandingPollingPoints.RemovePollingPointByPointUUID(pp.FFPointUUID)
 	if !success {
 		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find polling point in OutstandingPollingPoints.  %s /n", pp.FFPointUUID)
+	}
+
+	if !pointUpdate {
+		pm.PollCompleteStatsUpdate(pp, pollTimeSecs) // This will update the relevant PollManager statistics.
 	}
 
 	point, err := pm.DBHandlerRef.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})

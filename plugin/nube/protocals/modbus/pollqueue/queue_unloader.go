@@ -65,10 +65,15 @@ func (pm *NetworkPollManager) StopQueueUnloader() {
 	pm.pollQueueDebugMsg("StopQueueUnloader()")
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextUnloadTimer != nil && pm.PluginQueueUnloader.CancelChannel != nil {
 		pm.PluginQueueUnloader.NextUnloadTimer.Stop()
+		pm.PluginQueueUnloader.NextUnloadTimer = nil
 		pm.PluginQueueUnloader.CancelChannel <- true
+		pm.PluginQueueUnloader.CancelChannel = nil
 		pm.pollQueueDebugMsg("StopQueueUnloader() NextUnloadTimer stopped and CancelChannel closed")
 	}
 	pm.PluginQueueUnloader = nil
+	//Also stop the Queue Checker
+	pm.pollQueueDebugMsg("StopQueueUnloader() pm.QueueCheckerTimer: ", pm.QueueCheckerTimer)
+	pm.pollQueueDebugMsg("StopQueueUnloader() pm.QueueCheckerCancelChannel: ", pm.QueueCheckerCancelChannel)
 }
 
 // This function should be called from the Polling service.

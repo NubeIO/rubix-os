@@ -170,9 +170,9 @@ func (inst *Instance) ModbusPolling() error {
 			if err != nil {
 				inst.modbusErrorMsg(fmt.Sprintf("failed to set client error: %v. network name:%s", err, net.Name))
 				if mbClient.PortUnavailable {
-					netPollMan.PausePolling()
+					netPollMan.PortUnavailable()
 					unpauseFunc := func() {
-						netPollMan.UnpausePolling()
+						netPollMan.PortAvailable()
 					}
 					netPollMan.PortUnavailableTimeout = time.AfterFunc(10*time.Second, unpauseFunc)
 				}
