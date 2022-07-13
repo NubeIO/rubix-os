@@ -77,7 +77,6 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 	// These values are not required for model.ReadOnlyNoPriorityArrayRequired
 	if pointModel.PointPriorityArrayMode == model.ReadOnlyNoPriorityArrayRequired {
 		pointModel.CurrentPriority = nil
-		pointModel.WriteValue = nil
 		pointModel.WriteValueOriginal = nil
 
 		pointModel.Priority.P1 = nil
@@ -118,11 +117,11 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 			if priorityMap != nil {
 				pointModel.CurrentPriority = currentPriority
 				pointModel.WriteValueOriginal = highestValue
-				writeValue, err := pointEval(highestValue, pointModel.MathOnWriteValue)
+				// interesting... it doesn't update if we directly update the initialized variable
+				writeValue_, err := pointEval(highestValue, pointModel.MathOnWriteValue)
+				writeValue = writeValue_
 				if err != nil {
 					log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
-				} else {
-					pointModel.WriteValue = writeValue
 				}
 				presentValue = highestValue
 			}
