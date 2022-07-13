@@ -233,8 +233,19 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	}
 
 	isPresentValueChange := !float.ComparePtrValues(pointModel.PresentValue, presentValue) // Use for createCOVHistory
+	// isWriteValueChange
+	// in some cases we don't write presentValue directly to the model.
+	// Instead of writing that, we firstly write it on writeValue & and we read that writeValue to update presentValue.
+	// Examples are: modbus, edge28 plugins
+	// So for such cases, to trigger that value we do this comparison
 	isWriteValueChange := !float.ComparePtrValues(pointModel.WriteValue, writeValue)
 	isChange := isPresentValueChange || isWriteValueChange || isPriorityChanged || presentValueTransformFault
+	pointModel.WriteValue = writeValue
+	if writeValue == nil {
+		// nil is ignored on GORM, so we are pushing forcefully because isChange comparison will fail on `null` write
+		// if we don't do this: it goes on infinite looping as writeValue and point.WriteValue gets different values
+		d.DB.Model(&pointModel).Update("write_value", nil)
+	}
 
 	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
 	// but PresentValue should not change
