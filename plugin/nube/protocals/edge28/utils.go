@@ -182,14 +182,11 @@ func limitValueByEdge28Type(ioType string, inputVal *float64) (outputVal *float6
 
 func limitPriorityArrayByEdge28Type(ioType string, priority *model.PointWriter) *map[string]*float64 {
 	priorityMap := map[string]*float64{}
-
 	for key, val := range *priority.Priority {
-
 		var outputVal *float64
 		if val == nil {
 			outputVal = nil
 		} else {
-
 			switch ioType {
 			case UOTypes.DIGITAL, UITypes.DIGITAL:
 				if *val <= 0 {
@@ -219,9 +216,6 @@ func limitPriorityArrayByEdge28Type(ioType string, priority *model.PointWriter) 
 			default:
 				outputVal = float.New(*val)
 			}
-		}
-		if outputVal != nil {
-			fmt.Println(`After limitPriorityArrayByEdge28Type(): `, key, *outputVal)
 		}
 		priorityMap[key] = outputVal
 	}
