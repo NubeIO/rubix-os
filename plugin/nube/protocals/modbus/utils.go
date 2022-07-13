@@ -339,3 +339,24 @@ func isWriteable(writeMode model.WriteMode) bool {
 		return false
 	}
 }
+
+func checkForBooleanType(ObjectType, DataType string) (isTypeBool bool) {
+	isTypeBool = false
+	if DataType == string(model.TypeDigital) {
+		isTypeBool = true
+	}
+	switch ObjectType {
+	case string(model.ObjTypeReadCoil), string(model.ObjTypeReadCoils), string(model.ObjTypeReadDiscreteInput), string(model.ObjTypeReadDiscreteInputs), string(model.ObjTypeWriteCoil), string(model.ObjTypeWriteCoils):
+		isTypeBool = true
+	}
+	return
+}
+
+func checkForOutputType(ObjectType string) (isOutput bool) {
+	isOutput = false
+	switch ObjectType {
+	case string(model.ObjTypeWriteCoil), string(model.ObjTypeWriteCoils), string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings), string(model.ObjTypeWriteInt16), string(model.ObjTypeWriteUint16), string(model.ObjTypeWriteFloat32), string(model.ObjTypeWriteFloat64):
+		isOutput = true
+	}
+	return
+}

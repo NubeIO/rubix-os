@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/array"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
@@ -70,6 +71,12 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		body.WritePollRequired = boolean.NewFalse()
 	}
 	body.ReadPollRequired = boolean.NewTrue()
+
+	isTypeBool := checkForBooleanType(body.ObjectType, body.DataType)
+	body.IsTypeBool = nils.NewBool(isTypeBool)
+
+	isOutput := checkForOutputType(body.ObjectType)
+	body.IsOutput = nils.NewBool(isOutput)
 
 	// point, err = inst.db.CreatePoint(body, true, false)
 	point, err = inst.db.CreatePoint(body, true, true)
@@ -161,11 +168,11 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		return
 	}
 
-	if boolean.IsTrue(dev.Enable) == false && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
+	if boolean.IsFalse(dev.Enable) && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
 		// DO POLLING DISABLE ACTIONS FOR DEVICE
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 
-	} else if boolean.IsTrue(dev.Enable) == true && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
+	} else if boolean.IsTrue(dev.Enable) && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
 		// DO POLLING ENABLE ACTIONS FOR DEVICE
 		for _, pnt := range dev.Points {
 			if boolean.IsTrue(pnt.Enable) {
@@ -175,7 +182,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 			}
 		}
 
-	} else if boolean.IsTrue(dev.Enable) == true {
+	} else if boolean.IsTrue(dev.Enable) {
 		// TODO: Currently on every device update, all device points are removed, and re-added.
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 		for _, pnt := range dev.Points {
@@ -302,11 +309,27 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	}
 
 	if boolean.IsTrue(point.Enable) {
-		pp, _ := netPollMan.PollQueue.RemovePollingPointByPointUUID(pntUUID)
+		pp, _ := netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 		if pp == nil {
-			inst.modbusDebugMsg("writePoint(): cannot find PollingPoint for point: ", point.UUID)
-			inst.pointUpdateErr(point, errors.New(fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID)))
-			return point, err
+			if netPollMan.PollQueue.OutstandingPollingPoints.GetPollingPointIndexByPointUUID(point.UUID) > -1 {
+				if isWriteable(point.WriteMode) {
+					netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = true // this triggers a write post at ASAP priority (for writeable points).
+					point.WritePollRequired = boolean.NewTrue()
+					if point.WriteMode != model.WriteAlways && point.WriteMode != model.WriteOnce {
+						point.ReadPollRequired = boolean.NewTrue()
+					} else {
+						point.ReadPollRequired = boolean.NewFalse()
+					}
+				} else {
+					netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = false //
+					point.WritePollRequired = boolean.NewFalse()
+				}
+				return point, nil
+			} else {
+				inst.modbusDebugMsg("writePoint(): cannot find PollingPoint for point (could be out for polling: ", point.UUID)
+				inst.pointUpdateErr(point, errors.New(fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID)))
+				return point, err
+			}
 		}
 		pp.PollPriority = model.PRIORITY_ASAP
 		netPollMan.PollQueue.AddPollingPoint(pp)

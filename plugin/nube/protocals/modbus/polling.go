@@ -58,7 +58,7 @@ func (inst *Instance) ModbusPolling() error {
 	f := func() (bool, error) {
 		counter++
 		// fmt.Println("\n \n")
-		// inst.modbusDebugMsg("LOOP COUNT: ", counter)
+		inst.modbusDebugMsg("LOOP COUNT: ", counter)
 		var netArg api.Args
 		/*
 			nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, netArg)
@@ -102,7 +102,7 @@ func (inst *Instance) ModbusPolling() error {
 			pp, callback := netPollMan.GetNextPollingPoint() // callback function is called once polling is completed.
 			// pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			if pp == nil {
-				// inst.modbusDebugMsg("No PollingPoint available in Network ", net.UUID)
+				//inst.modbusDebugMsg("No PollingPoint available in Network ", net.UUID)
 				continue
 			}
 
@@ -111,8 +111,8 @@ func (inst *Instance) ModbusPolling() error {
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
-			// netPollMan.PrintPollQueuePointUUIDs()
-			// printPollingPointDebugInfo(pp)
+			netPollMan.PrintPollQueuePointUUIDs()
+			netPollMan.PrintPollingPointDebugInfo(pp)
 
 			var devArg api.Args
 			dev, err := inst.db.GetDevice(pp.FFDeviceUUID, devArg)
@@ -170,9 +170,9 @@ func (inst *Instance) ModbusPolling() error {
 			if err != nil {
 				inst.modbusErrorMsg(fmt.Sprintf("failed to set client error: %v. network name:%s", err, net.Name))
 				if mbClient.PortUnavailable {
-					netPollMan.PausePolling()
+					netPollMan.PortUnavailable()
 					unpauseFunc := func() {
-						netPollMan.UnpausePolling()
+						netPollMan.PortAvailable()
 					}
 					netPollMan.PortUnavailableTimeout = time.AfterFunc(10*time.Second, unpauseFunc)
 				}
