@@ -173,13 +173,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		inst.edge28DebugMsg("updatePoint(): bad response from UpdatePoint()")
 		return nil, err
 	}
-	/*
-		dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
-		if err != nil || dev == nil {
-			inst.edge28DebugMsg("updatePoint(): bad response from GetDevice()")
-			return nil, err
-		}
-	*/
+
 	return point, nil
 }
 
@@ -200,11 +194,8 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		body.Priority = limitPriorityArrayByEdge28Type(pnt.IoType, body)
 	}
 
-	inst.edge28DebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
-	inst.edge28DebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
-
 	/* TODO: ONLY NEEDED IF THE WRITE VALUE IS WRITTEN ON COV (CURRENTLY IT IS WRITTEN ANYTIME THERE IS A WRITE COMMAND).
-	point, err = inst.db.GetPoint(pntUUID, apinst.Args{})
+	point, err = inst.db.GetPoint(pntUUID, inst.Args{})
 	if err != nil || point == nil {
 		inst.edge28ErrorMsg("writePoint(): bad response from GetPoint(), ", err)
 		return nil, err
@@ -217,27 +208,6 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	*/
 
 	// body.WritePollRequired = utils.NewTrue() // TODO: commented out this section, seems like useless
-
-	inst.edge28DebugMsg("writePoint() len(*body.Priority)", len(*body.Priority))
-	if body.Priority != nil && len(*body.Priority) == 0 {
-		priorityArray := *body.Priority
-		priorityArray["_1"] = nil
-		priorityArray["_2"] = nil
-		priorityArray["_3"] = nil
-		priorityArray["_4"] = nil
-		priorityArray["_5"] = nil
-		priorityArray["_6"] = nil
-		priorityArray["_7"] = nil
-		priorityArray["_8"] = nil
-		priorityArray["_9"] = nil
-		priorityArray["_10"] = nil
-		priorityArray["_11"] = nil
-		priorityArray["_12"] = nil
-		priorityArray["_13"] = nil
-		priorityArray["_14"] = nil
-		priorityArray["_15"] = nil
-		priorityArray["_16"] = nil
-	}
 
 	point, err = inst.db.WritePoint(pnt.UUID, body, true)
 	if err != nil || point == nil {

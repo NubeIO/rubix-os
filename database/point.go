@@ -154,12 +154,13 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	}
 	query = d.DB.Model(&pointModel).Updates(&body)
 
-	// Don't update point value if priority array on body is nil
+	//TODO: we need to decide if a read only point needs to have a priority array or if it should just be nil.
 	if body.Priority == nil {
-		return pointModel, nil
+		pointModel.Priority = &model.Priority{}
 	} else {
 		pointModel.Priority = body.Priority
 	}
+
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
 	pnt, err := d.UpdatePointValue(pointModel, &priorityMap, fromPlugin)
 	if err != nil {
