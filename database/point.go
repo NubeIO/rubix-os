@@ -3,6 +3,8 @@ package database
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -14,7 +16,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
@@ -80,7 +81,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		return nil, err
 	}
 	network, err := d.GetNetworkByDeviceUUID(body.DeviceUUID, api.Args{})
-	log.Infof("network: %+v\n", network)
 	if err != nil {
 		return nil, errors.New("ERROR failed to get plugin uuid")
 	}

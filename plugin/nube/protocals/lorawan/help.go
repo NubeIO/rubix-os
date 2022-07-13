@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"net/url"
+
+	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 )
 
 // GetDisplay implements public.Displayer
@@ -18,7 +19,7 @@ func (inst *Instance) GetDisplay(baseURL *url.URL) pluginapi.Response {
 
 	baseURL.Path = inst.basePath
 	m := pluginapi.Help{
-		Name:               name,
+		Name:               pluginName,
 		PluginType:         pluginType,
 		AllowConfigWrite:   allowConfigWrite,
 		IsNetwork:          isNetwork,

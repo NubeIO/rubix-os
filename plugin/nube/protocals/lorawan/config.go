@@ -1,12 +1,22 @@
 package main
 
 type Config struct {
-	MagicString string `yaml:"magic_string"`
+	CSAddress            string  `yaml:"csaddress"`
+	CSPort               int     `yaml:"csport"`
+	CSToken              string  `yaml:"cstoken"`
+	DeviceLimit          int     `yaml:"devicelimit"`
+	SyncPeriodMins       float32 `yaml:"syncperiodminutes"`
+	ReconnectTimeoutSecs int     `yaml:"reconnecttimeoutseconds"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
 	return &Config{
-		MagicString: "N/A",
+		CSAddress:            "0.0.0.0",
+		CSPort:               8080,
+		CSToken:              "",
+		DeviceLimit:          200,
+		SyncPeriodMins:       1,
+		ReconnectTimeoutSecs: 10,
 	}
 }
 

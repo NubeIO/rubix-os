@@ -1,9 +1,11 @@
 package main
 
 import (
+	"errors"
+
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/lwrest"
-	"github.com/labstack/gommon/log"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
+	log "github.com/sirupsen/logrus"
 )
 
 // Enable implements plugin.Plugin
@@ -12,15 +14,29 @@ func (inst *Instance) Enable() error {
 	inst.setUUID()
 	inst.BusServ()
 	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
+	if err != nil {
+		q, err = inst.createNetwork()
+		if err != nil {
+			log.Error("lorawan: Cannot create network: ", err)
+			return err
+		}
+		log.Info("lorawan: Created default network")
+		err = nil
+	}
 	if q != nil {
 		inst.networkUUID = q.UUID
 	} else {
-		inst.networkUUID = "NA"
+		return errors.New("lorawan: Error creating default network")
 	}
-	if err != nil {
-		log.Error("error on enable lora-plugin")
+
+	inst.csConnected = false
+	inst.REST = csrest.InitRest(inst.config.CSAddress, inst.config.CSPort, inst.config.CSToken)
+	inst.REST.SetDeviceLimit(inst.config.DeviceLimit)
+	err = inst.connectToCS()
+	if csrest.IsCSConnectionError(err) {
+		go inst.connectToCSLoop()
 	}
-	inst.REST = lwrest.NewChirp(chirpName, chirpPass, ip, port)
+	go inst.syncChirpstackDevicesLoop()
 	return nil
 }
 
