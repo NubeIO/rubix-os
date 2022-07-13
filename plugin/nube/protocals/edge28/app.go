@@ -173,13 +173,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		inst.edge28DebugMsg("updatePoint(): bad response from UpdatePoint()")
 		return nil, err
 	}
-	/*
-		dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
-		if err != nil || dev == nil {
-			inst.edge28DebugMsg("updatePoint(): bad response from GetDevice()")
-			return nil, err
-		}
-	*/
+
 	return point, nil
 }
 
@@ -201,7 +195,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	}
 
 	/* TODO: ONLY NEEDED IF THE WRITE VALUE IS WRITTEN ON COV (CURRENTLY IT IS WRITTEN ANYTIME THERE IS A WRITE COMMAND).
-	point, err = inst.db.GetPoint(pntUUID, apinst.Args{})
+	point, err = inst.db.GetPoint(pntUUID, inst.Args{})
 	if err != nil || point == nil {
 		inst.edge28ErrorMsg("writePoint(): bad response from GetPoint(), ", err)
 		return nil, err

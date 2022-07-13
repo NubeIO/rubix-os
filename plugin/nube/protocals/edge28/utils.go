@@ -189,7 +189,7 @@ func limitPriorityArrayByEdge28Type(ioType string, priority *model.PointWriter) 
 		if val == nil {
 			outputVal = nil
 		} else {
-			fmt.Println(`limitPriorityArrayByEdge28Type(): `, key, *val)
+
 			switch ioType {
 			case UOTypes.DIGITAL, UITypes.DIGITAL:
 				if *val <= 0 {
@@ -221,7 +221,7 @@ func limitPriorityArrayByEdge28Type(ioType string, priority *model.PointWriter) 
 			}
 		}
 		if outputVal != nil {
-			fmt.Println(`limitPriorityArrayByEdge28Type(): `, key, *outputVal)
+			fmt.Println(`After limitPriorityArrayByEdge28Type(): `, key, *outputVal)
 		}
 		priorityMap[key] = outputVal
 	}

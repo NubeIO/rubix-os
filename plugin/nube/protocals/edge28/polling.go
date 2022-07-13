@@ -75,6 +75,11 @@ func (inst *Instance) Edge28Polling() error {
 					getDI, err = rest.GetDIs()
 
 					for _, pnt := range dev.Points { // POINTS
+						pnt, err := inst.db.GetPoint(pnt.UUID, api.Args{WithPriority: true})
+						if err != nil {
+							inst.edge28ErrorMsg("cannot find point")
+						}
+
 						inst.edge28DebugMsg("Edge28Polling: pnt")
 						inst.edge28DebugMsg(fmt.Sprintf("%+v\n", pnt))
 						inst.printPointDebugInfo(pnt)
@@ -86,11 +91,6 @@ func (inst *Instance) Edge28Polling() error {
 						var readValStruct interface{}
 						var readValType string
 						var wv float64
-
-						if pnt.Priority == nil {
-							inst.edge28ErrorMsg("HAD TO ADD PRIORITY ARRAY")
-							pnt.Priority = &model.Priority{}
-						}
 
 						switch pnt.IoNumber {
 						// OUTPUTS
