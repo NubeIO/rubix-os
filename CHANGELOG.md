@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.6.1](https://github.com/NubeIO/flow-framework/tree/v0.6.1) (2022-07-19)
+
+- Modbus write improved
+
 ## [v0.6.0](https://github.com/NubeIO/flow-framework/tree/v0.6.0) (2022-07-14)
 
 - Merge pull request #528 from NubeIO/redo-lorawan
