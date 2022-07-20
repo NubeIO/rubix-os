@@ -108,3 +108,19 @@ func (h *Handler) DeleteNetwork(uuid string) (bool, error) {
 	}
 	return true, nil
 }
+
+func (h *Handler) SetErrorsForAllDevicesOnNetwork(networkUUID string, message string, messageLevel string, messageCode string, doPoints bool, fromPlugin bool) error {
+	err := getDb().SetErrorsForAllDevicesOnNetwork(networkUUID, message, messageLevel, messageCode, doPoints, fromPlugin)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (h *Handler) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool, fromPlugin bool) error {
+	err := getDb().ClearErrorsForAllDevicesOnNetwork(networkUUID, doPoints, fromPlugin)
+	if err != nil {
+		return err
+	}
+	return nil
+}

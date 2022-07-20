@@ -61,3 +61,19 @@ func (h *Handler) DeleteDevice(uuid string) (bool, error) {
 	}
 	return true, nil
 }
+
+func (h *Handler) SetErrorsForAllPointsOnDevice(networkUUID string, message string, messageLevel string, messageCode string, fromPlugin bool) error {
+	err := getDb().SetErrorsForAllPointsOnDevice(networkUUID, message, messageLevel, messageCode, fromPlugin)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (h *Handler) ClearErrorsForAllPointsOnDevice(networkUUID string, fromPlugin bool) error {
+	err := getDb().ClearErrorsForAllPointsOnDevice(networkUUID, fromPlugin)
+	if err != nil {
+		return err
+	}
+	return nil
+}

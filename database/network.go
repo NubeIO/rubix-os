@@ -98,7 +98,7 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugi
 			return nil, err
 		}
 	}
-	query = d.DB.Model(&networkModel).Updates(&body)
+	query = d.DB.Model(&networkModel).Select("*").Updates(&body)
 	if query.Error != nil {
 		return nil, query.Error
 	}

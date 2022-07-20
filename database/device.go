@@ -86,7 +86,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device, fromPlugin 
 			return nil, err
 		}
 	}
-	query = d.DB.Model(&deviceModel).Updates(body)
+	query = d.DB.Model(&deviceModel).Select("*").Updates(body)
 
 	var nModel *model.Network
 	query = d.DB.Where("uuid = ?", deviceModel.NetworkUUID).First(&nModel)
