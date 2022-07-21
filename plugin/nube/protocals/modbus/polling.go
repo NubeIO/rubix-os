@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/pollqueue"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
+	"github.com/NubeIO/flow-framework/services/pollqueue"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
@@ -102,7 +102,7 @@ func (inst *Instance) ModbusPolling() error {
 			pp, callback := netPollMan.GetNextPollingPoint() // callback function is called once polling is completed.
 			// pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			if pp == nil {
-				//inst.modbusDebugMsg("No PollingPoint available in Network ", net.UUID)
+				// inst.modbusDebugMsg("No PollingPoint available in Network ", net.UUID)
 				continue
 			}
 

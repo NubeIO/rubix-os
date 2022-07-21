@@ -79,7 +79,7 @@ func (pm *NetworkPollManager) StartPolling() {
 	} else if pm.PluginQueueUnloader == nil {
 		pm.StartQueueUnloader()
 	}
-	//Also start the Queue Checker
+	// Also start the Queue Checker
 	pm.StartQueueCheckerAndStats()
 	pm.StartPollingStatistics()
 }
@@ -241,7 +241,7 @@ func (pm *NetworkPollManager) PollQueueErrorChecking() {
 	if net == nil || err != nil {
 		pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Network Not Found/n")
 	}
-	if boolean.IsFalse(net.Enable) { //If network isn't enabled, there should be no points in the polling queues
+	if boolean.IsFalse(net.Enable) { // If network isn't enabled, there should be no points in the polling queues
 		if pm.PollQueue.PriorityQueue.Len() > 0 {
 			pm.PollQueue.PriorityQueue.EmptyQueue()
 			pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Found PollingPoints in PriorityQueue of a disabled network/n")
@@ -315,7 +315,7 @@ func (pm *NetworkPollManager) StartQueueCheckerAndStats() {
 			case <-done:
 				return
 			case <-ticker.C:
-				//pm.pollQueueDebugMsg("RELOAD QUEUE TICKER")
+				// pm.pollQueueDebugMsg("RELOAD QUEUE TICKER")
 				pm.PollQueueErrorChecking()
 				pm.PrintPollQueueStatistics()
 			}
