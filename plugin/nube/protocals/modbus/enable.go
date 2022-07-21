@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/pollqueue"
 )
 
@@ -26,7 +27,7 @@ func (inst *Instance) Enable() error {
 			for _, net := range nets {                                          // Create a new Poll Manager for each network in the plugin.
 				conf := inst.GetConfig().(*Config)
 				pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
-				pollManager := NewPollManager(&pollQueueConfig, &inst.db, net.UUID, inst.pluginUUID)
+				pollManager := NewPollManager(&pollQueueConfig, &inst.db, net.UUID, inst.pluginUUID, float.NonNil(net.MaxPollRate))
 				// inst.modbusDebugMsg("net")
 				// inst.modbusDebugMsg("%+v\n", net)
 				// inst.modbusDebugMsg("pollManager")

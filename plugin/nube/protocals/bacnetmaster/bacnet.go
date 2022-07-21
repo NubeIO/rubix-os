@@ -147,7 +147,7 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 	}
 	val := float.NonNil(pnt.WriteValue)
 	object, isWrite, isBool, _ := setObjectType(pnt.ObjectType)
-	writePriority := integer.NonNil(pnt.CurrentPriority)
+	writePriority := integer.NonNil(pnt.WritePriority)
 	if writePriority <= 0 || writePriority < 16 {
 		writePriority = 16
 	}

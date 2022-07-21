@@ -85,6 +85,7 @@ func (nq *NetworkPriorityPollQueue) RemovePollingPointByPointUUID(pointUUID stri
 	}
 	return pp, true
 }
+
 func (nq *NetworkPriorityPollQueue) RemovePollingPointByDeviceUUID(deviceUUID string) bool {
 	nq.pollQueueDebugMsg("RemovePollingPointByDeviceUUID(): ", deviceUUID)
 	nq.PriorityQueue.RemovePollingPointByDeviceUUID(deviceUUID)

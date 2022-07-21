@@ -60,7 +60,7 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 	return &Instance{}
 }
 
-func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID string) *pollqueue.NetworkPollManager {
+func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID string, maxPollRate float64) *pollqueue.NetworkPollManager {
 	// Make the main priority polling queue
 	queue := make([]*pollqueue.PollingPoint, 0)
 	pq := &pollqueue.PriorityPollQueue{PriorityQueue: queue}
@@ -80,8 +80,7 @@ func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetw
 	pm.PollQueue = npq
 	pm.PluginQueueUnloader = pqu
 	pm.DBHandlerRef = dbHandler
-	maxPollRate := 1000 * time.Millisecond
-	pm.MaxPollRate = maxPollRate // TODO: MaxPollRate should come from a network property,but I can't find it. Also kinda implemented in StartQueueUnloader().
+	pm.MaxPollRate = time.Duration(maxPollRate) * time.Second
 	pm.FFNetworkUUID = ffNetworkUUID
 	pm.FFPluginUUID = ffPluginUUID
 	pm.ASAPPriorityMaxCycleTime, _ = time.ParseDuration("2m")
