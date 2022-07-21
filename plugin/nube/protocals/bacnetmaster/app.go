@@ -36,10 +36,10 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		return nil, errors.New(fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error()))
 	}
 
-	if boolean.IsTrue(body.Enable) {
+	if boolean.IsTrue(network.Enable) {
 		conf := inst.GetConfig().(*Config)
 		pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
-		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, inst.pluginUUID)
+		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, inst.pluginUUID, float.NonNil(network.MaxPollRate))
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
 	}
