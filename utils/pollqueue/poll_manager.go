@@ -4,7 +4,6 @@ import (
 	"container/heap"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/config"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -17,7 +16,7 @@ import (
 //  - Worker Queue tutorial: https://www.opsdash.com/blog/job-queues-in-go.html
 
 type NetworkPollManager struct {
-	config       *config.Config
+	Config       *Config
 	DBHandlerRef *dbhandler.Handler
 
 	Enable                    bool
@@ -142,7 +141,7 @@ func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { // This is tri
 	}
 }
 
-func NewPollManager(conf *config.Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID string) *NetworkPollManager {
+func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID string) *NetworkPollManager {
 	// Make the main priority polling queue
 	queue := make([]*PollingPoint, 0)
 	pq := &PriorityPollQueue{queue}
@@ -158,7 +157,7 @@ func NewPollManager(conf *config.Config, dbHandler *dbhandler.Handler, ffNetwork
 	puwp := make(map[string]bool)
 	npq := &NetworkPriorityPollQueue{conf, pq, rq, opq, puwp, pqu, ffPluginUUID, ffNetworkUUID, adl}
 	pm := new(NetworkPollManager)
-	pm.config = conf
+	pm.Config = conf
 	pm.PollQueue = npq
 	pm.PluginQueueUnloader = pqu
 	pm.DBHandlerRef = dbHandler
