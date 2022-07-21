@@ -88,7 +88,7 @@ func (inst *Instance) ModbusPolling() error {
 			pp, callback := netPollMan.GetNextPollingPoint() // callback function is called once polling is completed.
 			// pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			if pp == nil {
-				//inst.modbusDebugMsg("No PollingPoint available in Network ", net.UUID)
+				// inst.modbusDebugMsg("No PollingPoint available in Network ", net.UUID)
 				continue
 			}
 
