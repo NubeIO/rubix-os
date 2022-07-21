@@ -13,6 +13,15 @@ func (h *Handler) CreateNetwork(body *model.Network, fromPlugin bool) (*model.Ne
 	return q, nil
 }
 
+// UpdateNetworkErrors will only update the error properties of the network, all other properties will not be updated.
+func (h *Handler) UpdateNetworkErrors(uuid string, body *model.Network) error {
+	err := getDb().UpdateNetworkErrors(uuid, body)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (h *Handler) UpdateNetwork(uuid string, body *model.Network, fromPlugin bool) (*model.Network, error) {
 	q, err := getDb().UpdateNetwork(uuid, body, fromPlugin)
 	if err != nil {
@@ -109,16 +118,16 @@ func (h *Handler) DeleteNetwork(uuid string) (bool, error) {
 	return true, nil
 }
 
-func (h *Handler) SetErrorsForAllDevicesOnNetwork(networkUUID string, message string, messageLevel string, messageCode string, doPoints bool, fromPlugin bool) error {
-	err := getDb().SetErrorsForAllDevicesOnNetwork(networkUUID, message, messageLevel, messageCode, doPoints, fromPlugin)
+func (h *Handler) SetErrorsForAllDevicesOnNetwork(networkUUID string, message string, messageLevel string, messageCode string, doPoints bool) error {
+	err := getDb().SetErrorsForAllDevicesOnNetwork(networkUUID, message, messageLevel, messageCode, doPoints)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (h *Handler) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool, fromPlugin bool) error {
-	err := getDb().ClearErrorsForAllDevicesOnNetwork(networkUUID, doPoints, fromPlugin)
+func (h *Handler) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool) error {
+	err := getDb().ClearErrorsForAllDevicesOnNetwork(networkUUID, doPoints)
 	if err != nil {
 		return err
 	}

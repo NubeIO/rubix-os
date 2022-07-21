@@ -55,7 +55,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	inst.modbusDebugMsg("addDevice(): ", body.UUID)
 
 	if boolean.IsFalse(device.Enable) {
-		inst.db.SetErrorsForAllPointsOnDevice(device.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError, true)
+		inst.db.SetErrorsForAllPointsOnDevice(device.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
 	}
 
 	// NOTHING TO DO ON DEVICE CREATED
@@ -146,7 +146,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	if boolean.IsFalse(network.Enable) && netPollMan.Enable == true {
 		// DO POLLING DISABLE ACTIONS
 		netPollMan.StopPolling()
-		inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError, true, true)
+		inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError, true)
 	} else if boolean.IsTrue(network.Enable) && netPollMan.Enable == false {
 		// DO POLLING Enable ACTIONS
 		netPollMan.StartPolling()
@@ -155,8 +155,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		network.CommonFault.MessageCode = model.CommonFaultCode.Ok
 		network.CommonFault.Message = errors.New("").Error()
 		network.CommonFault.LastOk = time.Now().UTC()
-		network, err = inst.db.UpdateNetwork(body.UUID, body, true)
-		inst.db.ClearErrorsForAllDevicesOnNetwork(network.UUID, true, true)
+		inst.db.ClearErrorsForAllDevicesOnNetwork(network.UUID, true)
 	}
 
 	network, err = inst.db.UpdateNetwork(body.UUID, network, true)
@@ -201,7 +200,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	}
 	if boolean.IsFalse(dev.Enable) && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
 		// DO POLLING DISABLE ACTIONS FOR DEVICE
-		inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError, true)
+		inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 
 	} else if boolean.IsTrue(dev.Enable) && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
@@ -211,7 +210,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		dev.CommonFault.MessageCode = model.CommonFaultCode.Ok
 		dev.CommonFault.Message = ""
 		dev.CommonFault.LastOk = time.Now().UTC()
-		err = inst.db.ClearErrorsForAllPointsOnDevice(dev.UUID, true)
+		err = inst.db.ClearErrorsForAllPointsOnDevice(dev.UUID)
 		if err != nil {
 			inst.modbusDebugMsg("updateDevice(): error on ClearErrorsForAllPointsOnDevice(): ", err)
 		}
@@ -525,22 +524,22 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSucces
 }
 
 // pointUpdateErr update point with errors. Called from within plugin.
-func (inst *Instance) pointUpdateErr(point *model.Point, message string, messageLevel string, messageCode string) (*model.Point, error) {
+func (inst *Instance) pointUpdateErr(point *model.Point, message string, messageLevel string, messageCode string) error {
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = messageLevel
 	point.CommonFault.MessageCode = messageCode
 	point.CommonFault.Message = message
 	point.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdatePoint(point.UUID, point, true)
+	err = inst.db.UpdatePointErrors(point.UUID, point)
 	if err != nil {
 		inst.modbusDebugMsg(" pointUpdateErr()", err)
-		return nil, err
+		return err
 	}
-	return nil, nil
+	return nil
 }
 
-// pointUpdateErr update point with errors. Called from within plugin.
-func (inst *Instance) deviceUpdateErr(device *model.Device, err error) (*model.Device, error) {
+// deviceUpdateErr update device with errors. Called from within plugin.
+func (inst *Instance) deviceUpdateErr(device *model.Device, err error) error {
 	device.CommonFault.InFault = true
 	device.CommonFault.MessageLevel = model.MessageLevel.Warning
 	device.CommonFault.MessageCode = model.CommonFaultCode.DeviceError
@@ -549,13 +548,13 @@ func (inst *Instance) deviceUpdateErr(device *model.Device, err error) (*model.D
 	_, err = inst.db.UpdateDevice(device.UUID, device, true)
 	if err != nil {
 		inst.modbusDebugMsg(" deviceUpdateErr()", err)
-		return nil, err
+		return err
 	}
-	return nil, nil
+	return nil
 }
 
-// pointUpdateErr update point with errors. Called from within plugin.
-func (inst *Instance) networkUpdateErr(network *model.Network, err error) (*model.Network, error) {
+// networkUpdateErr update network with errors. Called from within plugin.
+func (inst *Instance) networkUpdateErr(network *model.Network, err error) error {
 	network.CommonFault.InFault = true
 	network.CommonFault.MessageLevel = model.MessageLevel.Fail
 	network.CommonFault.MessageCode = model.CommonFaultCode.PointError
@@ -564,9 +563,9 @@ func (inst *Instance) networkUpdateErr(network *model.Network, err error) (*mode
 	_, err = inst.db.UpdateNetwork(network.UUID, network, true)
 	if err != nil {
 		inst.modbusDebugMsg(" networkUpdateErr()", err)
-		return nil, err
+		return err
 	}
-	return nil, nil
+	return nil
 }
 
 // listSerialPorts list all serial ports on host

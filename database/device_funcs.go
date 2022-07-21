@@ -56,7 +56,7 @@ func (d *GormDatabase) deviceNameExistsInNetwork(deviceName, networkUUID string)
 // SetErrorsForAllPointsOnDevice sets the fault/error properties of all points for a specific device
 // messageLevel = model.MessageLevel
 // messageCode = model.CommonFaultCode
-func (d *GormDatabase) SetErrorsForAllPointsOnDevice(deviceUUID string, message string, messageLevel string, messageCode string, fromPlugin bool) error {
+func (d *GormDatabase) SetErrorsForAllPointsOnDevice(deviceUUID string, message string, messageLevel string, messageCode string) error {
 	device, err := d.GetDevice(deviceUUID, api.Args{WithPoints: true})
 	if device != nil && err != nil {
 		return err
@@ -67,7 +67,7 @@ func (d *GormDatabase) SetErrorsForAllPointsOnDevice(deviceUUID string, message 
 		point.CommonFault.MessageCode = messageCode
 		point.CommonFault.Message = message
 		point.CommonFault.LastFail = time.Now().UTC()
-		_, err = d.UpdatePoint(point.UUID, point, fromPlugin)
+		err = d.UpdatePointErrors(point.UUID, point)
 		if err != nil {
 			log.Infof("setErrorsForAllPointsOnDevice() Error: %s\n", err.Error())
 		}
@@ -76,7 +76,7 @@ func (d *GormDatabase) SetErrorsForAllPointsOnDevice(deviceUUID string, message 
 }
 
 // ClearErrorsForAllPointsOnDevice clears the fault/error properties of all points for a specific device
-func (d *GormDatabase) ClearErrorsForAllPointsOnDevice(deviceUUID string, fromPlugin bool) error {
+func (d *GormDatabase) ClearErrorsForAllPointsOnDevice(deviceUUID string) error {
 	device, err := d.GetDevice(deviceUUID, api.Args{WithPoints: true})
 	if device != nil && err != nil {
 		return err
@@ -87,7 +87,7 @@ func (d *GormDatabase) ClearErrorsForAllPointsOnDevice(deviceUUID string, fromPl
 		point.CommonFault.MessageCode = model.CommonFaultCode.Ok
 		point.CommonFault.Message = ""
 		point.CommonFault.LastOk = time.Now().UTC()
-		_, err = d.UpdatePoint(point.UUID, point, fromPlugin)
+		err = d.UpdatePointErrors(point.UUID, point)
 		if err != nil {
 			log.Infof("clearErrorsForAllPointsOnDevice() Error: %s\n", err.Error())
 		}

@@ -110,7 +110,7 @@ func (d *GormDatabase) GetNetworkByDeviceUUID(devUUID string, args api.Args) (ne
 // SetErrorsForAllDevicesOnNetwork sets the fault/error properties of all devices for a specific network. Optional to set the points of each device also.
 // messageLevel = model.MessageLevel
 // messageCode = model.CommonFaultCode
-func (d *GormDatabase) SetErrorsForAllDevicesOnNetwork(networkUUID string, message string, messageLevel string, messageCode string, doPoints bool, fromPlugin bool) error {
+func (d *GormDatabase) SetErrorsForAllDevicesOnNetwork(networkUUID string, message string, messageLevel string, messageCode string, doPoints bool) error {
 	network, err := d.GetNetwork(networkUUID, api.Args{WithDevices: true, WithPoints: doPoints})
 	if network != nil && err != nil {
 		return err
@@ -121,19 +121,19 @@ func (d *GormDatabase) SetErrorsForAllDevicesOnNetwork(networkUUID string, messa
 		device.CommonFault.MessageCode = messageCode
 		device.CommonFault.Message = message
 		device.CommonFault.LastFail = time.Now().UTC()
-		_, err = d.UpdateDevice(device.UUID, device, fromPlugin)
+		err = d.UpdateDeviceErrors(device.UUID, device)
 		if err != nil {
 			log.Infof("setErrorsForAllDevicesOnNetwork() Error: %s\n", err.Error())
 		}
 		if doPoints {
-			err = d.SetErrorsForAllPointsOnDevice(device.UUID, message, messageLevel, messageCode, fromPlugin)
+			err = d.SetErrorsForAllPointsOnDevice(device.UUID, message, messageLevel, messageCode)
 		}
 	}
 	return nil
 }
 
 // ClearErrorsForAllDevicesOnNetwork clears the fault/error properties of all devices for a specific network. Optional to clear the points of each device also.
-func (d *GormDatabase) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool, fromPlugin bool) error {
+func (d *GormDatabase) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool) error {
 	network, err := d.GetNetwork(networkUUID, api.Args{WithDevices: true, WithPoints: doPoints})
 	if network != nil && err != nil {
 		return err
@@ -144,12 +144,12 @@ func (d *GormDatabase) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doP
 		device.CommonFault.MessageCode = model.CommonFaultCode.Ok
 		device.CommonFault.Message = ""
 		device.CommonFault.LastOk = time.Now().UTC()
-		_, err = d.UpdateDevice(device.UUID, device, fromPlugin)
+		err = d.UpdateDeviceErrors(device.UUID, device)
 		if err != nil {
 			log.Infof("clearErrorsForAllDevicesOnNetwork() Error: %s\n", err.Error())
 		}
 		if doPoints {
-			err = d.ClearErrorsForAllPointsOnDevice(device.UUID, fromPlugin)
+			err = d.ClearErrorsForAllPointsOnDevice(device.UUID)
 		}
 	}
 	return nil
