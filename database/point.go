@@ -173,9 +173,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		// nil is ignored on GORM, so we are pushing forcefully because fallback is nullable field
 		d.DB.Model(&pointModel).Update("fallback", nil)
 	}
-	query = d.DB.Model(&pointModel).Updates(&body)
-	// TODO: add boolean argument to update all properties or just non Zero Value properties.
-	//query = d.DB.Model(&pointModel).Select("*").Updates(&body)
+	query = d.DB.Model(&pointModel).Select("*").Updates(&body)
 
 	//TODO: we need to decide if a read only point needs to have a priority array or if it should just be nil.
 	if body.Priority == nil {
@@ -288,9 +286,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	}
 
 	if isChange {
-		_ = d.DB.Model(&pointModel).Updates(&pointModel)
-		// TODO: add boolean argument to update all properties or just non Zero Value properties.
-		//_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
+		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange)
 		if err != nil {
 			return nil, false, false, false, err
