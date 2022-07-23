@@ -36,14 +36,11 @@ func (h *Handler) CreatePoint(body *model.Point, fromPlugin, updatePoint bool) (
 }
 
 func (h *Handler) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
-	q, err := getDb().UpdatePoint(uuid, body, fromPlugin)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
+	return getDb().UpdatePoint(uuid, body, fromPlugin)
 }
 
-func (h *Handler) WritePoint(uuid string, body *model.PointWriter, fromPlugin bool) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
+func (h *Handler) WritePoint(uuid string, body *model.PointWriter, fromPlugin bool) (
+	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	q, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := getDb().PointWrite(uuid, body, fromPlugin)
 	if err != nil {
 		return nil, false, false, false, err
@@ -51,28 +48,14 @@ func (h *Handler) WritePoint(uuid string, body *model.PointWriter, fromPlugin bo
 	return q, isPresentValueChange, isWriteValueChange, isPriorityChanged, nil
 }
 
-func (h *Handler) UpdatePointValue(uuid string, body *model.Point, priority *map[string]*float64, fromPlugin bool) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
-	var pointModel *model.Point
-	query := getDb().DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
-	if query.Error != nil {
-		return nil, false, false, false, query.Error
-	}
-	_ = getDb().DB.Model(&pointModel).Updates(&body)
-	p, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := getDb().UpdatePointValue(pointModel, priority, fromPlugin)
-	if err != nil {
-		return nil, false, false, false, err
-	}
-
-	return p, isPresentValueChange, isWriteValueChange, isPriorityChanged, nil
+func (h *Handler) PointWrite(uuid string, pointWriter *model.PointWriter, fromPlugin bool) (
+	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
+	return getDb().PointWrite(uuid, pointWriter, fromPlugin)
 }
 
 // UpdatePointErrors will only update the error properties of the point, all other properties will not be updated.
 func (h *Handler) UpdatePointErrors(uuid string, body *model.Point) error {
-	err := getDb().UpdatePointErrors(uuid, body)
-	if err != nil {
-		return err
-	}
-	return nil
+	return getDb().UpdatePointErrors(uuid, body)
 }
 
 func (h *Handler) GetOnePointByArgs(args api.Args) (*model.Point, error) {

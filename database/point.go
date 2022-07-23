@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"time"
 
 	"github.com/NubeIO/flow-framework/api"
@@ -114,27 +115,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	return body, err
 }
 
-// UpdatePointErrors will only update the CommonFault properties of the point, all other properties will not be updated. Does not update `LastOk`.
-func (d *GormDatabase) UpdatePointErrors(uuid string, body *model.Point) error {
-	/* I THINK THE FIRST DB CALL HERE IS NOT REQUIRED
-	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).First(&pointModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	query = d.DB.Model(&pointModel).Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail").Updates(&body)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-
-	*/
-	query := d.DB.Model(&body).Where("uuid = ?", uuid).Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail").Updates(&body)
-	if query.Error != nil {
-		return query.Error
-	}
-	return nil
-}
-
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
@@ -158,24 +138,8 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, err
 		}
 	}
-	// example modbus: if user changes the data type then do a new read of the point on the modbus network
-	if !fromPlugin {
-		pointModel.InSync = boolean.NewFalse()
-	}
-	// TODO: ARE THESE REQUIRED? OR ARE THEY DONE WITH THE FOLLOWING DB CALL?
-	pointModel.WritePollRequired = body.WritePollRequired
-	pointModel.ReadPollRequired = body.ReadPollRequired
-	pointModel.WriteMode = body.WriteMode
-	pointModel.PollPriority = body.PollPriority
-	pointModel.PollRate = body.PollRate
 
-	if body.Fallback == nil {
-		// nil is ignored on GORM, so we are pushing forcefully because fallback is nullable field
-		d.DB.Model(&pointModel).Update("fallback", nil)
-	}
-	query = d.DB.Model(&pointModel).Select("*").Updates(&body)
-
-	//TODO: we need to decide if a read only point needs to have a priority array or if it should just be nil.
+	// TODO: we need to decide if a read only point needs to have a priority array or if it should just be nil.
 	if body.Priority == nil {
 		pointModel.Priority = &model.Priority{}
 	} else {
@@ -183,17 +147,15 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	}
 
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
-	pnt, _, _, _, err := d.UpdatePointValue(pointModel, &priorityMap, fromPlugin)
+	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin)
 	if err != nil {
 		return nil, err
 	}
 	return pnt, nil
 }
 
-// TODO: (Marc) I think the 2 functions below do roughly the same thing.  PointWrite() sets `WritePollRequired` and `InSync' but this is probably unneccesary as this should be
-//       done by the plugins.  Could be combined.
-
-func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlugin bool) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
+func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlugin bool) (
+	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
 	if query.Error != nil {
@@ -204,13 +166,12 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlug
 	} else {
 		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
-	pointModel.InSync = boolean.NewFalse()
-	pointModel.WritePollRequired = boolean.NewTrue()
-	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := d.UpdatePointValue(pointModel, body.Priority, fromPlugin)
+	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := d.updatePointValue(pointModel, body.Priority, fromPlugin)
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
-func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
+func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool) (
+	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
@@ -223,12 +184,17 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	presentValue = pointScale(presentValue, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax)
 	presentValue = pointRange(presentValue, pointModel.LimitMin, pointModel.LimitMax)
 	eval, err := pointEval(presentValue, pointModel.MathOnPresentValue)
+	pointModel.CommonFault.InFault = false
+	pointModel.CommonFault.MessageLevel = model.MessageLevel.Info
+	pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	pointModel.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	pointModel.CommonFault.LastOk = time.Now().UTC()
 	if err != nil {
-		log.Errorln("point.db UpdatePointValue() error on run point MathOnPresentValue error:", err)
+		log.Errorln("point.db updatePointValue() error on run point MathOnPresentValue error:", err)
 		pointModel.CommonFault.InFault = true
 		pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
 		pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
-		pointModel.CommonFault.Message = fmt.Sprint("point.db UpdatePointValue() error on run point MathOnPresentValue error:", err)
+		pointModel.CommonFault.Message = fmt.Sprint("point.db updatePointValue() error on run point MathOnPresentValue error:", err)
 		pointModel.CommonFault.LastFail = time.Now().UTC()
 		presentValueTransformFault = true
 	} else {
@@ -240,7 +206,7 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.CommonFault.InFault = true
 		pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
 		pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
-		pointModel.CommonFault.Message = fmt.Sprint("point.db UpdatePointValue() invalid point units. error:", err)
+		pointModel.CommonFault.Message = fmt.Sprint("point.db updatePointValue() invalid point units. error:", err)
 		pointModel.CommonFault.LastFail = time.Now().UTC()
 		presentValueTransformFault = true
 	} else {
@@ -251,6 +217,10 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	// value to the modbus point
 	if !fromPlugin {
 		pointModel.InSync = boolean.NewFalse()
+		pointModel.WritePollRequired = boolean.NewTrue()
+	} else {
+		pointModel.InSync = boolean.NewTrue()
+		pointModel.WritePollRequired = boolean.NewFalse()
 	}
 	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
 		val := nmath.RoundTo(*presentValue, *pointModel.Decimal)
@@ -266,27 +236,14 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 	isWriteValueChange = !float.ComparePtrValues(pointModel.WriteValue, writeValue)
 	isChange := isPresentValueChange || isWriteValueChange || isPriorityChanged || presentValueTransformFault
 	pointModel.WriteValue = writeValue
-	if writeValue == nil {
-		// nil is ignored on GORM, so we are pushing forcefully because isChange comparison will fail on `null` write
-		// if we don't do this: it goes on infinite looping as writeValue and point.WriteValue gets different values
-		d.DB.Model(&pointModel).Update("write_value", nil)
-	}
 
 	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
 	// but PresentValue should not change
 	if !presentValueTransformFault {
 		pointModel.PresentValue = presentValue
 	}
-	if presentValue == nil {
-		// nil is ignored on GORM, so we are pushing forcefully because isChange comparison will fail on `null` write
-		d.DB.Model(&pointModel).Update("present_value", nil)
-		d.DB.Model(&model.Writer{}).
-			Where("writer_thing_uuid = ?", pointModel.UUID).
-			Update("present_value", nil)
-	}
-
+	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 	if isChange {
-		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange)
 		if err != nil {
 			return nil, false, false, false, err
@@ -308,6 +265,16 @@ func (d *GormDatabase) UpdatePointValue(pointModel *model.Point, priority *map[s
 		}
 	}
 	return pointModel, isPresentValueChange, isWriteValueChange, isPriorityChanged, nil
+}
+
+// UpdatePointErrors will only update the CommonFault properties of the point, all other properties will not be updated.
+// Does not update `LastOk`.
+func (d *GormDatabase) UpdatePointErrors(uuid string, body *model.Point) error {
+	return d.DB.Model(&body).
+		Where("uuid = ?", uuid).
+		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
+		Updates(&body).
+		Error
 }
 
 func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {

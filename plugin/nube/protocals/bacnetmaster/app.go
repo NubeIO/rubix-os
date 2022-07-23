@@ -131,42 +131,33 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-// pointUpdate update point present value
-func (inst *Instance) pointUpdate(uuid string) (*model.Point, error) {
-	var point model.Point
-	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
-	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
-	point.CommonFault.LastOk = time.Now().UTC()
-	point.InSync = boolean.NewTrue()
-	_, err := inst.db.UpdatePoint(uuid, &point, true)
-	if err != nil {
-		log.Error("bacnet-master: UpdatePoint()", err)
-		return nil, err
-	}
-	return nil, nil
-}
-
-// pointUpdate update point present value
-func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point, error) {
-	var point model.Point
-	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
-	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
-	point.CommonFault.LastOk = time.Now().UTC()
+// pointWrite update point present value
+func (inst *Instance) pointWrite(uuid string, value float64) error {
 	priority := map[string]*float64{"_16": &value}
-	point.InSync = boolean.NewTrue()
-	_, _, _, _, err := inst.db.UpdatePointValue(uuid, &point, &priority, true)
+	pointWriter := model.PointWriter{Priority: &priority}
+	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter, true)
 	if err != nil {
-		log.Error("bacnet-master: pointUpdateValue()", err)
-		return nil, err
+		log.Error("bacnet-master: pointWrite()", err)
 	}
-	return nil, nil
+	return err
 }
 
-// pointUpdate update point present value
+// pointUpdateSuccess update point present value
+func (inst *Instance) pointUpdateSuccess(uuid string) error {
+	var point model.Point
+	point.CommonFault.InFault = false
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	point.CommonFault.LastOk = time.Now().UTC()
+	point.InSync = boolean.NewTrue()
+	err := inst.db.UpdatePointErrors(uuid, &point)
+	if err != nil {
+		log.Error("bacnet-master: pointUpdateSuccess()", err)
+	}
+	return err
+}
+
 func (inst *Instance) pointUpdateErr(uuid string, err error) error {
 	var point model.Point
 	point.CommonFault.InFault = true
@@ -175,10 +166,9 @@ func (inst *Instance) pointUpdateErr(uuid string, err error) error {
 	point.CommonFault.Message = fmt.Sprintf("error-time: %s msg:%s", utilstime.TimeStamp(), err.Error())
 	point.CommonFault.LastFail = time.Now().UTC()
 	point.InSync = boolean.NewFalse()
-	_, err = inst.db.UpdatePoint(uuid, &point, true)
+	err = inst.db.UpdatePointErrors(uuid, &point)
 	if err != nil {
 		log.Error("bacnet-master: pointUpdateErr()", err)
-		return err
 	}
-	return nil
+	return err
 }

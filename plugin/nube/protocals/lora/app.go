@@ -320,26 +320,19 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 		log.Errorf("lora: issue on failed to find point: %v name: %s IO-ID:%s\n", err, body.AddressUUID, body.IoNumber)
 		return err
 	}
-	body.CommonFault.InFault = false
-	body.CommonFault.MessageLevel = model.MessageLevel.Info
-	body.CommonFault.MessageCode = model.CommonFaultCode.Ok
-	body.CommonFault.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
-	body.CommonFault.LastOk = time.Now().UTC()
-
 	priority := map[string]*float64{"_16": &value}
-	body.InSync = boolean.NewTrue()
 	if pnt.IoType != "" && pnt.IoType != string(model.IOTypeRAW) {
 		if body.PresentValue == nil {
 			priority["_16"] = nil
 		}
 		priority["_16"] = float.New(decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue))
 	}
-	_, _, _, _, err = inst.db.UpdatePointValue(pnt.UUID, body, &priority, true)
+	pointWriter := model.PointWriter{Priority: &priority}
+	_, _, _, _, err = inst.db.PointWrite(pnt.UUID, &pointWriter, true)
 	if err != nil {
 		log.Error("lora: UpdatePointValue()", err)
-		return err
 	}
-	return nil
+	return err
 }
 
 // updateDevicePointValues update all points under a device within commonSensorData and sensorStruct
