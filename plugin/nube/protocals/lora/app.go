@@ -90,25 +90,9 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	return device, nil
 }
 
-// updatePoint update point
-func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
-	if err != nil {
-		return nil, err
-	}
-	return point, nil
-}
-
 // writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	// TODO: check for PointWriteByName calls that might not flow through the plugin.
-	if body == nil {
-		return
-	}
-	point, _, _, _, err = inst.db.WritePoint(pntUUID, body, true)
-	if err != nil || point == nil {
-		return nil, err
-	}
+	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
 	return point, nil
 }
 
@@ -296,14 +280,13 @@ func (inst *Instance) setNewPointFields(deviceBody *model.Device, pointBody *mod
 
 // updateDevicePointsAddress by its lora id and type as in temp or lux
 func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
-	var pnt model.Point
-	pnt.AddressUUID = body.AddressUUID
 	dev, err := inst.db.GetDevice(body.UUID, api.Args{WithPoints: true})
 	if err != nil {
 		return err
 	}
 	for _, pt := range dev.Points {
-		_, err = inst.db.UpdatePoint(pt.UUID, &pnt, true)
+		pt.AddressUUID = body.AddressUUID
+		_, err = inst.db.UpdatePoint(pt.UUID, pt, true, false)
 		if err != nil {
 			log.Errorf("lora: issue on UpdatePoint updateDevicePointsAddress(): %v\n", err)
 			return err

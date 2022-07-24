@@ -88,14 +88,6 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	return device, nil
 }
 
-func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
-	if err != nil {
-		return nil, err
-	}
-	return point, nil
-}
-
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	ok, err = inst.db.DeleteNetwork(body.UUID)
 	if err != nil {
@@ -106,15 +98,8 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 
 // writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	// TODO: check for PointWriteByName calls that might not flow through the plugin.
-	if body == nil {
-		return
-	}
-	point, _, _, _, err = inst.db.WritePoint(pntUUID, body, true)
-	if err != nil || point == nil {
-		return nil, err
-	}
-	return point, nil
+	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
+	return point, err
 }
 
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {

@@ -42,7 +42,7 @@ func (inst *Instance) Edge28Polling() error {
 	f := func() (bool, error) {
 		counter++
 		time.Sleep(time.Duration(inst.config.PollRate) * time.Second)
-		//fmt.Println("\n \n")
+		// fmt.Println("\n \n")
 		inst.edge28DebugMsg("LOOP COUNT: ", counter)
 
 		nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, arg)
@@ -210,7 +210,7 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 				inst.pointUpdateErr(pnt, err)
 				return 0, err
 			} else {
-				_, err = inst.pointUpdate(pnt, writeValue, true, true, true)
+				_, err = inst.pointUpdate(pnt, writeValue, true)
 			}
 		} else {
 			inst.edge28DebugMsg(fmt.Sprintf("processWrite() WRITE DO %s as type:%s  value:%v\n", pnt.IoNumber, pnt.IoType, value))
@@ -220,7 +220,7 @@ func (inst *Instance) processWrite(pnt *model.Point, value float64, rest *edgere
 				inst.pointUpdateErr(pnt, err)
 				return 0, err
 			} else {
-				_, err = inst.pointUpdate(pnt, writeValue, true, true, true)
+				_, err = inst.pointUpdate(pnt, writeValue, true)
 			}
 		}
 		if err != nil {
@@ -242,7 +242,7 @@ func (inst *Instance) processRead(pnt *model.Point, readValue float64, pollCount
 	inst.edge28DebugMsg("processRead: pnt")
 	inst.edge28DebugMsg(fmt.Sprintf("%+v\n", pnt))
 	if pollCount == 1 || boolean.IsTrue(pnt.ReadPollRequired) {
-		_, err = inst.pointUpdate(pnt, readValue, true, true, true)
+		_, err = inst.pointUpdate(pnt, readValue, true)
 		if err != nil {
 			inst.edge28DebugMsg(fmt.Sprintf("READ UPDATE POINT %s: %v\n", pnt.IoNumber, readValue))
 			err := inst.pointUpdateErr(pnt, err)
@@ -254,7 +254,7 @@ func (inst *Instance) processRead(pnt *model.Point, readValue float64, pollCount
 			inst.edge28DebugMsg(fmt.Sprintf("READ ON START %s: %v\n", pnt.IoNumber, readValue))
 		}
 	} else if covEvent {
-		_, err = inst.pointUpdate(pnt, readValue, true, true, true)
+		_, err = inst.pointUpdate(pnt, readValue, true)
 		if err != nil {
 			inst.edge28ErrorMsg(fmt.Sprintf("READ UPDATE POINT %s: %v\n", pnt.IoNumber, readValue))
 			err := inst.pointUpdateErr(pnt, err)
