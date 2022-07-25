@@ -2,13 +2,14 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/src/units"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nmath"
-
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/src/units"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/PaesslerAG/gval"
 )
@@ -124,4 +125,51 @@ func pointEval(val *float64, evalString string) (value *float64, err error) {
 		return &_v, nil
 	}
 	return val, nil
+}
+
+func pointValueTransformOnRead(originalValue *float64, scaleEnable, limitEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax, offset *float64) (value *float64, err error) {
+	if originalValue == nil {
+		return nil, errors.New("input value is undefined")
+	}
+	ov := float.NonNil(originalValue)
+
+	factored := ov
+	if float.NonNil(factor) != 0 {
+		factored = ov * float.NonNil(factor)
+	}
+
+	scaledAndLimited := factored
+	if boolean.IsTrue(scaleEnable) {
+		scaledAndLimited = float.NonNil(pointScale(float.New(factored), scaleInMin, scaleInMax, scaleOutMin, scaleOutMax))
+	} else if boolean.IsTrue(limitEnable) {
+		scaledAndLimited = float.NonNil(pointRange(float.New(factored), scaleOutMin, scaleOutMax))
+	}
+
+	offsetted := scaledAndLimited + float.NonNil(offset)
+
+	return float.New(offsetted), nil
+}
+
+func pointValueTransformOnWrite(originalValue *float64, scaleEnable, limitEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax, offset *float64) (value *float64, err error) {
+	ov := float.NonNil(originalValue)
+
+	if originalValue == nil {
+		return nil, errors.New("input value is undefined")
+	}
+
+	factored := ov
+	if float.NonNil(factor) != 0 {
+		factored = ov * float.NonNil(factor)
+	}
+
+	scaledAndLimited := factored
+	if boolean.IsTrue(scaleEnable) {
+		scaledAndLimited = float.NonNil(pointScale(float.New(factored), scaleInMin, scaleInMax, scaleOutMin, scaleOutMax))
+	} else if boolean.IsTrue(limitEnable) {
+		scaledAndLimited = float.NonNil(pointRange(float.New(factored), scaleOutMin, scaleOutMax))
+	}
+
+	offsetted := scaledAndLimited + float.NonNil(offset)
+
+	return float.New(offsetted), nil
 }

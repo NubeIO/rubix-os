@@ -243,18 +243,54 @@ type Point struct {
 		Options  []string `json:"options" default:"[\"leb_lew\",\"leb_bew\",\"beb_lew\",\"beb_bew\"]"`
 		Default  string   `json:"default" default:"beb_lew"`
 	} `json:"object_encoding"`
-	MathOnPresentValue struct {
-		Type        string `json:"type" default:"string"`
+	MultiplicationFactor struct {
+		Type        string `json:"type" default:"float"`
 		Required    bool   `json:"required" default:"false"`
-		Default     string `json:"default" default:"(x + 0) + 0"`
-		DisplayName string `json:"display_name" default:"math expression on present value"`
-	} `json:"math_on_present_value"`
-	MathOnWriteValue struct {
-		Type        string `json:"type" default:"string"`
+		Default     string `json:"default" default:"1"`
+		DisplayName string `json:"display_name" default:"Multiplication Factor"`
+	} `json:"multiplication_factor"`
+	ScaleEnable struct {
+		Type        string `json:"type" default:"bool"`
 		Required    bool   `json:"required" default:"false"`
-		Default     string `json:"default" default:"(x + 0) + 0"`
-		DisplayName string `json:"display_name" default:"math expression on write value"`
-	} `json:"math_on_write_value"`
+		Default     string `json:"default" default:"false"`
+		DisplayName string `json:"display_name" default:"Scale Enable"`
+	} `json:"scale_enable"`
+	LimitEnable struct {
+		Type        string `json:"type" default:"bool"`
+		Required    bool   `json:"required" default:"false"`
+		Default     string `json:"default" default:"false"`
+		DisplayName string `json:"display_name" default:"Limit Enable"`
+	} `json:"limit_enable"`
+	ScaleInMin struct {
+		Type        string `json:"type" default:"float"`
+		Required    bool   `json:"required" default:"false"`
+		Default     string `json:"default" default:"0"`
+		DisplayName string `json:"display_name" default:"Scale: Input Min"`
+	} `json:"scale_in_min"`
+	ScaleInMax struct {
+		Type        string `json:"type" default:"float"`
+		Required    bool   `json:"required" default:"false"`
+		Default     string `json:"default" default:"10"`
+		DisplayName string `json:"display_name" default:"Scale: Input Max"`
+	} `json:"scale_in_max"`
+	ScaleOutMin struct {
+		Type        string `json:"type" default:"float"`
+		Required    bool   `json:"required" default:"false"`
+		Default     string `json:"default" default:"0"`
+		DisplayName string `json:"display_name" default:"Scale: Output Min"`
+	} `json:"scale_out_min"`
+	ScaleOutMax struct {
+		Type        string `json:"type" default:"float"`
+		Required    bool   `json:"required" default:"false"`
+		Default     string `json:"default" default:"100"`
+		DisplayName string `json:"display_name" default:"Scale: Output Max"`
+	} `json:"scale_out_max"`
+	Offset struct {
+		Type        string `json:"type" default:"float"`
+		Required    bool   `json:"required" default:"false"`
+		Default     string `json:"default" default:"0"`
+		DisplayName string `json:"display_name" default:"Offset"`
+	} `json:"offset"`
 	Fallback struct {
 		Type        string   `json:"type" default:"float"`
 		Required    bool     `json:"required" default:"false"`
