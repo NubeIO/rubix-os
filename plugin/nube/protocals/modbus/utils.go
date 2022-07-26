@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nstring"
+	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -33,20 +34,6 @@ const (
 	writeUint64
 	writeFloat64
 )
-
-func isWrite(t string) bool {
-	switch model.ObjectType(t) {
-	case model.ObjTypeWriteCoil, model.ObjTypeWriteCoils:
-		return true
-	case model.ObjTypeWriteHolding, model.ObjTypeWriteHoldings:
-		return true
-	case model.ObjTypeWriteInt16, model.ObjTypeWriteUint16:
-		return true
-	case model.ObjTypeWriteFloat32:
-		return true
-	}
-	return false
-}
 
 var err error
 
@@ -329,15 +316,26 @@ func SetPriorityArrayModeBasedOnWriteMode(pnt *model.Point) bool {
 	return false
 }
 
-func isWriteable(writeMode model.WriteMode) bool {
-	switch writeMode {
-	case model.ReadOnce, model.ReadOnly:
-		return false
-	case model.WriteOnce, model.WriteOnceReadOnce, model.WriteAlways, model.WriteOnceThenRead, model.WriteAndMaintain:
+func isWriteable(writeMode model.WriteMode, objectType string) bool {
+	if isWriteableObjectType(objectType) && writemode.IsWriteable(writeMode) {
 		return true
-	default:
+	} else {
 		return false
 	}
+}
+
+func isWriteableObjectType(objectType string) bool {
+	switch objectType {
+	case string(model.ObjTypeWriteCoil), string(model.ObjTypeWriteCoils):
+		return true
+	case string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings):
+		return true
+	case string(model.ObjTypeWriteInt16), string(model.ObjTypeWriteUint16):
+		return true
+	case string(model.ObjTypeWriteFloat32):
+		return true
+	}
+	return false
 }
 
 func checkForBooleanType(ObjectType, DataType string) (isTypeBool bool) {

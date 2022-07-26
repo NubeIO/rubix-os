@@ -278,13 +278,13 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		{
 			pointRoutes.GET("", pointHandler.GetPoints)
 			pointRoutes.POST("/bulk", pointHandler.GetPointsBulk)
-			pointRoutes.POST("", pointHandler.CreatePoint)
 			pointRoutes.GET("/:uuid", pointHandler.GetPoint)
+			pointRoutes.GET("/name", pointHandler.GetPointByName)
+			pointRoutes.GET("/one/args", pointHandler.GetOnePointByArgs)
+			pointRoutes.POST("", pointHandler.CreatePoint)
 			pointRoutes.PATCH("/:uuid", pointHandler.UpdatePoint)
 			pointRoutes.PATCH("/write/:uuid", pointHandler.PointWrite)
-			pointRoutes.GET("/one/args", pointHandler.GetOnePointByArgs)
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
-			pointRoutes.GET("/name", pointHandler.GetPointByName)
 			pointRoutes.PATCH("/name", pointHandler.PointWriteByName)
 		}
 

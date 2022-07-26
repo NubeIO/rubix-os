@@ -87,6 +87,15 @@ func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*mod
 	return body, nil
 }
 
+// UpdateNetworkErrors will only update the CommonFault properties of the network, all other properties will not be updated. Does not update `LastOk`.
+func (d *GormDatabase) UpdateNetworkErrors(uuid string, body *model.Network) error {
+	return d.DB.Model(&body).
+		Where("uuid = ?", uuid).
+		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
+		Updates(&body).
+		Error
+}
+
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugin bool) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.DB.Where("uuid = ?", uuid).First(&networkModel)
@@ -98,7 +107,7 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugi
 			return nil, err
 		}
 	}
-	query = d.DB.Model(&networkModel).Updates(&body)
+	query = d.DB.Model(&networkModel).Select("*").Updates(&body)
 	if query.Error != nil {
 		return nil, query.Error
 	}

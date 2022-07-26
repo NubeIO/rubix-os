@@ -4,10 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -168,13 +166,11 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	inst.edge28DebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
 	inst.edge28DebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
 
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
+	point, err = inst.db.UpdatePoint(body.UUID, body, true, false)
 	if err != nil || point == nil {
 		inst.edge28DebugMsg("updatePoint(): bad response from UpdatePoint()")
-		return nil, err
 	}
-
-	return point, nil
+	return point, err
 }
 
 // writePoint update point. Called via API call.
@@ -188,7 +184,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		return
 	}
 
-	//TODO: add code to check through priority array and limit the values by IoType.
+	// TODO: add code to check through priority array and limit the values by IoType.
 	pnt, err := inst.db.GetPoint(pntUUID, api.Args{})
 	if err == nil {
 		body.Priority = limitPriorityArrayByEdge28Type(pnt.IoType, body)
@@ -209,10 +205,9 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 
 	// body.WritePollRequired = utils.NewTrue() // TODO: commented out this section, seems like useless
 
-	point, _, _, _, err = inst.db.WritePoint(pntUUID, body, true)
-	if err != nil || point == nil {
+	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
+	if err != nil {
 		inst.edge28DebugMsg("writePoint(): bad response from WritePoint(), ", err)
-		return nil, err
 	}
 	return point, nil
 }
@@ -260,24 +255,11 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 }
 
 // pointUpdate update point. Called from within plugin.
-func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSuccess, readSuccess, clearFaults bool) (*model.Point, error) {
-	if clearFaults {
-		point.CommonFault.InFault = false
-		point.CommonFault.MessageLevel = model.MessageLevel.Info
-		point.CommonFault.MessageCode = model.CommonFaultCode.Ok
-		point.CommonFault.Message = fmt.Sprintf("last-update: %s", utilstime.TimeStamp())
-		point.CommonFault.LastOk = time.Now().UTC()
-	}
-
+func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess bool) (*model.Point, error) {
 	if readSuccess {
-		if value != float.NonNil(point.OriginalValue) {
-			point.ValueUpdatedFlag = boolean.NewTrue() // Flag so that UpdatePointValue() will broadcast new value to producers. TODO: MAY NOT BE NEEDED.
-		}
 		point.OriginalValue = float.New(value)
 	}
-	point.InSync = boolean.NewTrue() // TODO: MAY NOT BE NEEDED.
-
-	_, err = inst.db.UpdatePoint(point.UUID, point, true)
+	_, err = inst.db.UpdatePoint(point.UUID, point, true, true)
 	if err != nil {
 		inst.edge28DebugMsg("EDGE28 UPDATE POINT UpdatePointPresentValue() error: ", err)
 		return nil, err
@@ -286,16 +268,16 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSucces
 }
 
 // pointUpdateErr update point with errors. Called from within plugin.
-func (inst *Instance) pointUpdateErr(point *model.Point, err error) (*model.Point, error) {
+func (inst *Instance) pointUpdateErr(point *model.Point, err error) error {
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = model.MessageLevel.Fail
 	point.CommonFault.MessageCode = model.CommonFaultCode.PointError
 	point.CommonFault.Message = err.Error()
 	point.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdatePoint(point.UUID, point, true)
+	err = inst.db.UpdatePointErrors(point.UUID, point)
 	if err != nil {
 		inst.edge28DebugMsg(" pointUpdateErr()", err)
-		return nil, err
+		return err
 	}
-	return nil, nil
+	return nil
 }
