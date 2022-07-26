@@ -203,7 +203,7 @@ func (inst *Instance) ModbusPolling() error {
 			var responseValue float64
 			var response interface{}
 			writeSuccess := false
-			if isWriteable(pnt.WriteMode) && boolean.IsTrue(pnt.WritePollRequired) { // DO WRITE IF REQUIRED
+			if isWriteable(pnt.WriteMode, pnt.ObjectType) && boolean.IsTrue(pnt.WritePollRequired) { // DO WRITE IF REQUIRED
 				inst.modbusDebugMsg(fmt.Sprintf("modbus write point: %+v", pnt))
 				// pnt.PrintPointValues()
 				if pnt.WriteValue != nil {

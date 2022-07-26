@@ -69,10 +69,10 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	inst.modbusDebugMsg("addPoint(): ", body.Name)
 
-	if isWriteable(body.WriteMode) {
+	if isWriteable(body.WriteMode, body.ObjectType) {
 		body.WritePollRequired = boolean.NewTrue()
 	} else {
-		body.WritePollRequired = boolean.NewFalse()
+		body = resetWriteableProperties(body)
 	}
 	body.ReadPollRequired = boolean.NewTrue()
 
@@ -266,6 +266,10 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 
 	*/
 
+	if !isWriteable(body.WriteMode, body.ObjectType) { // clear writeable point properties if point is not writeable
+		body = resetWriteableProperties(body)
+	}
+
 	inst.modbusDebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
 	inst.modbusDebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
 
@@ -315,9 +319,9 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 
 // writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-
 	// TODO: check for PointWriteByName calls that might not flow through the plugin.
 
+	point = nil
 	inst.modbusDebugMsg("writePoint(): ", pntUUID)
 	if body == nil {
 		inst.modbusDebugMsg("writePoint(): nil point object")
@@ -327,20 +331,21 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	inst.modbusDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
 	inst.modbusDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
 
-	/* TODO: ONLY NEEDED IF THE WRITE VALUE IS WRITTEN ON COV (CURRENTLY IT IS WRITTEN ANYTIME THERE IS A WRITE COMMAND).
-	point, err = inst.db.GetPoint(pntUUID, apinst.Args{})
+	point, err = inst.db.GetPoint(pntUUID, api.Args{})
 	if err != nil || point == nil {
 		inst.modbusErrorMsg("writePoint(): bad response from GetPoint(), ", err)
 		return nil, err
 	}
-
-	previousWriteVal := -1.11
-	if isWriteable(point.WriteMode) {
-		previousWriteVal = utils.Float64IsNil(point.WriteValue)
-	}
+	/*
+		if !isWriteable(point.WriteMode, point.ObjectType) { // if point isn't writeable then reset writeable properties and do `UpdatePoint()`
+			point = resetWriteableProperties(point)
+			point, err = inst.db.UpdatePoint(pntUUID, point, true, false)
+			if err != nil || point == nil {
+				inst.modbusDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
+				return nil, err
+			}
+			return point, nil
 	*/
-
-	// body.WritePollRequired = utils.NewTrue() // TODO: commented out this section, seems like useless
 
 	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body, false)
 	if err != nil {
@@ -348,7 +353,6 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		return nil, err
 	}
 
-	//  TODO: THIS SECTION MIGHT BE USEFUL IF WE ADD ASAP PRIORITY FOR IMMEDIATE POINT WRITES
 	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	if err != nil || dev == nil {
 		inst.modbusDebugMsg("writePoint(): bad response from GetDevice()")
@@ -359,7 +363,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	if err != nil {
 		inst.modbusDebugMsg("writePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
 		_ = inst.pointUpdateErr(point, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
-		return
+		return nil, err
 	}
 
 	if boolean.IsTrue(point.Enable) {
@@ -367,7 +371,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			pp, _ := netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 			if pp == nil {
 				if netPollMan.PollQueue.OutstandingPollingPoints.GetPollingPointIndexByPointUUID(point.UUID) > -1 {
-					if isWriteable(point.WriteMode) {
+					if isWriteable(point.WriteMode, point.ObjectType) {
 						netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = true // this triggers a write post at ASAP priority (for writeable points).
 						point.WritePollRequired = boolean.NewTrue()
 						if point.WriteMode != model.WriteAlways && point.WriteMode != model.WriteOnce {
@@ -410,7 +414,6 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		// DO POLLING DISABLE ACTIONS FOR POINT
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(pntUUID)
 	}
-
 	return point, nil
 }
 

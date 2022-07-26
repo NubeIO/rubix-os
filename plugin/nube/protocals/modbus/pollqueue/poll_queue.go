@@ -76,16 +76,26 @@ func (nq *NetworkPriorityPollQueue) RemovePollingPointByPointUUID(pointUUID stri
 		nq.QueueUnloader.NextPollPoint = nil
 
 	}
-	pp, _ = nq.PriorityQueue.RemovePollingPointByPointUUID(pointUUID)
+	ppPQ, _ := nq.PriorityQueue.RemovePollingPointByPointUUID(pointUUID)
 	if pp != nil {
 		nq.pollQueueDebugMsg("RemovePollingPointByPointUUID(): Point is in the PriorityQueue")
+		return pp, true
 	}
-	pp, _ = nq.StandbyPollingPoints.RemovePollingPointByPointUUID(pointUUID)
+	ppSPQ, _ := nq.StandbyPollingPoints.RemovePollingPointByPointUUID(pointUUID)
 	if pp != nil {
 		nq.pollQueueDebugMsg("RemovePollingPointByPointUUID(): Point is in the StandbyPollingPoints Queue")
+		return pp, true
 	}
-	return pp, true
+	if pp != nil {
+		return pp, true
+	} else if ppPQ != nil {
+		return ppPQ, true
+	} else if ppSPQ != nil {
+		return ppSPQ, true
+	}
+	return pp, false
 }
+
 func (nq *NetworkPriorityPollQueue) RemovePollingPointByDeviceUUID(deviceUUID string) bool {
 	nq.pollQueueDebugMsg("RemovePollingPointByDeviceUUID(): ", deviceUUID)
 	nq.PriorityQueue.RemovePollingPointByDeviceUUID(deviceUUID)
