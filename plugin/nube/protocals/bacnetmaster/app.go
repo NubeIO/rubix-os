@@ -500,20 +500,22 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSucces
 
 	_, err := inst.db.UpdatePoint(point.UUID, point, true)
 	if err != nil {
-		inst.bacnetDebugMsg("MODBUS UPDATE POINT UpdatePointPresentValue() error: ", err)
+		inst.bacnetDebugMsg("BACNET UPDATE POINT UpdatePoint() error: ", err)
 		return nil, err
 	}
 	return point, nil
 }
 
 // pointUpdateErr update point with errors. Called from within plugin.
-func (inst *Instance) pointUpdateErr(point *model.Point, err error) (*model.Point, error) {
+func (inst *Instance) pointUpdateErr(uuid string, err error) error {
+	var point model.Point
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = model.MessageLevel.Fail
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointError
-	point.CommonFault.Message = err.Error()
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteError
+	point.CommonFault.Message = fmt.Sprintf("error-time: %s msg:%s", utilstime.TimeStamp(), err.Error())
 	point.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdatePoint(point.UUID, point, true)
+	point.InSync = boolean.NewFalse()
+	err = inst.db.UpdatePointErrors(uuid, &point)
 	if err != nil {
 		inst.bacnetDebugMsg(" pointUpdateErr()", err)
 		return nil, err
@@ -521,7 +523,24 @@ func (inst *Instance) pointUpdateErr(point *model.Point, err error) (*model.Poin
 	return nil, nil
 }
 
-// pointUpdateErr update point with errors. Called from within plugin.
+// pointUpdateSuccess update point present value
+func (inst *Instance) pointUpdateSuccess(uuid string) error {
+	var point model.Point
+	point.CommonFault.InFault = false
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	point.CommonFault.LastOk = time.Now().UTC()
+	point.InSync = boolean.NewTrue()
+	err := inst.db.UpdatePointSuccess(uuid, &point)
+	if err != nil {
+		inst.bacnetErrorMsg("pointUpdateValue()", err)
+		return err
+	}
+	return nil
+}
+
+// deviceUpdateErr update device with errors. Called from within plugin.
 func (inst *Instance) deviceUpdateErr(device *model.Device, err error) (*model.Device, error) {
 	device.CommonFault.InFault = true
 	device.CommonFault.MessageLevel = model.MessageLevel.Fail
@@ -536,7 +555,7 @@ func (inst *Instance) deviceUpdateErr(device *model.Device, err error) (*model.D
 	return nil, nil
 }
 
-// pointUpdateErr update point with errors. Called from within plugin.
+// networkUpdateErr update network with errors. Called from within plugin.
 func (inst *Instance) networkUpdateErr(network *model.Network, err error) (*model.Network, error) {
 	network.CommonFault.InFault = true
 	network.CommonFault.MessageLevel = model.MessageLevel.Fail
@@ -544,12 +563,8 @@ func (inst *Instance) networkUpdateErr(network *model.Network, err error) (*mode
 	network.CommonFault.Message = err.Error()
 	network.CommonFault.LastFail = time.Now().UTC()
 	_, err = inst.db.UpdateNetwork(network.UUID, network, true)
-	if err != nil {
 		inst.bacnetDebugMsg(" networkUpdateErr()", err)
 		return nil, err
-	}
-	return nil, nil
-}
 
 func (inst *Instance) getNetworks() ([]*model.Network, error) {
 	return inst.db.GetNetworks(api.Args{})

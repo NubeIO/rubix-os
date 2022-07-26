@@ -3,12 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"time"
-
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
-	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -104,20 +100,13 @@ func (inst *Instance) createNewPoint(name string, deviceEUI string, deviceUUID s
 	return point, err
 }
 
-// pointUpdateValue update point present value
-func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point, error) {
-	var point model.Point
-	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
-	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
-	point.CommonFault.LastOk = time.Now().UTC()
-	point.InSync = boolean.NewTrue()
+// pointWrite update point present value
+func (inst *Instance) pointWrite(uuid string, value float64) error {
 	priority := map[string]*float64{"_16": &value}
-	_, _, _, _, err := inst.db.UpdatePointValue(uuid, &point, &priority, true)
+	pointWriter := model.PointWriter{Priority: &priority}
+	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter, true)
 	if err != nil {
-		log.Error("lorawan: pointUpdateValue ", err)
-		return nil, err
+		log.Error("lorawan: pointWrite ", err)
 	}
-	return nil, nil
+	return err
 }

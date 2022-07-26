@@ -55,7 +55,7 @@ mkdir -p $pluginDir
 
 BUILD_ERROR=false
 
-function buildPlugin {
+function buildPlugin() {
   echo -e "${DEFAULT}BUILDING $1..."
   go build -buildmode=plugin -o $1.so $2/*.go && cp $1.so $pluginDir
   if [ $? -eq 0 ]; then
@@ -66,45 +66,57 @@ function buildPlugin {
   fi
 }
 
-pushd $dir > /dev/null
+pushd $dir >/dev/null
 
 for i in "$@"; do
   case ${i} in
-    system)
-      buildPlugin "system" plugin/nube/system ;;
-    edge28)
-      buildPlugin "edge28" plugin/nube/protocals/edge28 ;;
-    modbus)
-      buildPlugin "modbus" plugin/nube/protocals/modbus ;;
-    lora)
-      buildPlugin "lora" plugin/nube/protocals/lora ;;
-    bacnet)
-      buildPlugin "bacnet" plugin/nube/protocals/bacnetserver ;;
-    lorawan)
-      buildPlugin "lorawan" plugin/nube/protocals/lorawan ;;
-    bacnet_master)
-      buildPlugin "bacnet_master" plugin/nube/protocals/bacnetmaster ;;
-    history)
-      buildPlugin "history" plugin/nube/database/history ;;
-    influx)
-      buildPlugin "influx" plugin/nube/database/influx ;;
-    rubixio)
-      buildPlugin "rubixio" plugin/nube/protocals/rubixio ;;
-    modbusserver)
-      buildPlugin "modbusserver" plugin/nube/protocals/modbusserver ;;
-    postgres)
-      buildPlugin "postgres" plugin/nube/database/postgres ;;
+  system)
+    buildPlugin "system" plugin/nube/system
+    ;;
+  edge28)
+    buildPlugin "edge28" plugin/nube/protocals/edge28
+    ;;
+  modbus)
+    buildPlugin "modbus" plugin/nube/protocals/modbus
+    ;;
+  lora)
+    buildPlugin "lora" plugin/nube/protocals/lora
+    ;;
+  bacnetserver)
+    buildPlugin "bacnetserver" plugin/nube/protocals/bacnetserver
+    ;;
+  lorawan)
+    buildPlugin "lorawan" plugin/nube/protocals/lorawan
+    ;;
+  bacnetmaster)
+    buildPlugin "bacnetmaster" plugin/nube/protocals/bacnetmaster
+    ;;
+  history)
+    buildPlugin "history" plugin/nube/database/history
+    ;;
+  influx)
+    buildPlugin "influx" plugin/nube/database/influx
+    ;;
+  rubixio)
+    buildPlugin "rubixio" plugin/nube/protocals/rubixio
+    ;;
+  modbusserver)
+    buildPlugin "modbusserver" plugin/nube/protocals/modbusserver
+    ;;
+  postgres)
+    buildPlugin "postgres" plugin/nube/database/postgres
+    ;;
   esac
 done
 
 if [ ${BUILD_ERROR} == true ]; then
-    exit -1
+  exit 1
 fi
 
-popd > /dev/null
+popd >/dev/null
 
 if [ ${BUILD_ONLY} == true ]; then
-    exit 0
+  exit 0
 fi
 
 if [ ${PRODUCTION} == true ]; then

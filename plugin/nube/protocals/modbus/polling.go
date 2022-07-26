@@ -109,11 +109,13 @@ func (inst *Instance) ModbusPolling() error {
 			}
 			if !boolean.IsTrue(dev.Enable) {
 				inst.modbusErrorMsg("device is disabled.")
+				inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
 			if dev.AddressId <= 0 || dev.AddressId >= 255 {
 				inst.modbusErrorMsg("address is not valid.  modbus addresses must be between 1 and 254")
+				inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "address out of range", model.MessageLevel.Critical, model.CommonFaultCode.ConfigError)
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
@@ -193,7 +195,7 @@ func (inst *Instance) ModbusPolling() error {
 				if pnt.WriteValue != nil {
 					response, responseValue, err = inst.networkWrite(mbClient, pnt)
 					if err != nil {
-						_, err = inst.pointUpdateErr(pnt, err)
+						err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 						netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 						continue
 					}
@@ -209,7 +211,7 @@ func (inst *Instance) ModbusPolling() error {
 			if boolean.IsTrue(pnt.ReadPollRequired) { // DO READ IF REQUIRED
 				response, responseValue, err = inst.networkRead(mbClient, pnt)
 				if err != nil {
-					_, err = inst.pointUpdateErr(pnt, err)
+					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 					continue
 				}
@@ -234,7 +236,7 @@ func (inst *Instance) ModbusPolling() error {
 					// fmt.Println("ModbusPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
 					readSuccess = true
 				}
-				_, err = inst.pointUpdate(pnt, responseValue, writeSuccess, readSuccess, true)
+				_, err = inst.pointUpdate(pnt, responseValue, readSuccess)
 			}
 
 			/*

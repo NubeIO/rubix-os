@@ -1,9 +1,7 @@
 package database
 
 import (
-	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
@@ -12,57 +10,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"strings"
 )
-
-func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string) (*model.Point, error) {
-	var pointModel *model.Point
-	net, err := d.GetNetworkByName(networkName, api.Args{WithDevices: true, WithPoints: true})
-	if err != nil {
-		return nil, errors.New("failed to find a network with that name")
-	}
-	deviceExist := false
-	pointExist := false
-	for _, device := range net.Devices {
-		if device.Name == deviceName {
-			deviceExist = true
-			for _, p := range device.Points {
-				if p.Name == pointName {
-					pointExist = true
-					pointModel = p
-					break
-				}
-			}
-		}
-	}
-	if !deviceExist {
-		return nil, errors.New("failed to find a device with that name")
-	}
-	if !pointExist {
-		return nil, errors.New("found device but failed to find a point with that name")
-	}
-	return pointModel, nil
-}
-
-// PointWriteByName TODO: functions calling  d.PointWrite(point.UUID, body, fromPlugin) should be routed via plugin!!
-func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter, fromPlugin bool) (*model.Point, error) {
-	point, err := d.GetPointByName(networkName, deviceName, pointName)
-	if err != nil {
-		return nil, err
-	}
-	write, _, _, _, err := d.PointWrite(point.UUID, body, fromPlugin)
-	if err != nil {
-		return nil, err
-	}
-	return write, nil
-}
-
-func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
-	var pointModel *model.Point
-	query := d.buildPointQuery(args)
-	if err := query.First(&pointModel).Error; err != nil {
-		return nil, err
-	}
-	return pointModel, nil
-}
 
 // updatePriority it updates priority array of point model
 // it attaches the point model fields values for updating it on it's parent function
