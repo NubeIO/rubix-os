@@ -84,8 +84,8 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		}
 	}
 
-	//pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification: point %+v", point))
-	//pm.PrintPointDebugInfo(point)
+	// pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification: point %+v", point))
+	// pm.PrintPointDebugInfo(point)
 
 	// If the device was deleted while this point was being polled, discard the PollingPoint
 	if !pointUpdate && !pm.PollQueue.CheckIfActiveDevicesListIncludes(point.DeviceUUID) {
@@ -116,7 +116,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		if readSuccess {
 			point.ReadPollRequired = boolean.NewFalse()
 			duration := pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID)
-			//pm.pollQueueDebugMsg("duration: ", duration)
+			// pm.pollQueueDebugMsg("duration: ", duration)
 			// This line sets a timer to re-add the point to the poll queue after the PollRate time.
 			pp.RepollTimer = time.AfterFunc(duration, pm.MakePollingPointRepollCallback(pp, point.WriteMode))
 			addSuccess := pm.PollQueue.StandbyPollingPoints.AddPollingPoint(pp)
@@ -190,7 +190,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		point.WritePollRequired = boolean.NewTrue()
 		if writeSuccess {
 			duration := pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID)
-			//pm.pollQueueDebugMsg("duration: ", duration)
+			// pm.pollQueueDebugMsg("duration: ", duration)
 			// This line sets a timer to re-add the point to the poll queue after the PollRate time.
 			pp.RepollTimer = time.AfterFunc(duration, pm.MakePollingPointRepollCallback(pp, point.WriteMode))
 			addSuccess := pm.PollQueue.StandbyPollingPoints.AddPollingPoint(pp)
@@ -240,9 +240,9 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 
 	case model.WriteAndMaintain: // WriteAndMaintain    If write_successful: Re-add with ReadPollRequired true, WritePollRequired false.  Need to check that write value matches present value after each read poll.
 		point.ReadPollRequired = boolean.NewTrue()
-		//pm.pollQueueDebugMsg(fmt.Sprintf("WriteAndMaintain point %+v\n", point))
+		// pm.pollQueueDebugMsg(fmt.Sprintf("WriteAndMaintain point %+v\n", point))
 		if point.WriteValue != nil {
-			//pm.pollQueueDebugMsg(fmt.Sprintf("WriteAndMaintain WriteValue %+v\n", float.NonNil(point.WriteValue)))
+			// pm.pollQueueDebugMsg(fmt.Sprintf("WriteAndMaintain WriteValue %+v\n", float.NonNil(point.WriteValue)))
 			noPV := true
 			var presentValue float64
 			if point.PresentValue != nil {
@@ -260,7 +260,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 			} else {
 				point.WritePollRequired = boolean.NewFalse()
 				duration := pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID)
-				//pm.pollQueueDebugMsg("duration: ", duration)
+				// pm.pollQueueDebugMsg("duration: ", duration)
 				// This line sets a timer to re-add the point to the poll queue after the PollRate time.
 				pp.RepollTimer = time.AfterFunc(duration, pm.MakePollingPointRepollCallback(pp, point.WriteMode))
 				addSuccess := pm.PollQueue.StandbyPollingPoints.AddPollingPoint(pp)
@@ -269,7 +269,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 				}
 			}
 		} else {
-			//If WriteValue is nil we still need to re-add the point to perform a read
+			// If WriteValue is nil we still need to re-add the point to perform a read
 			point.WritePollRequired = boolean.NewFalse()
 			duration := pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID)
 			// This line sets a timer to re-add the point to the poll queue after the PollRate time.
@@ -292,7 +292,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 func (pm *NetworkPollManager) MakePollingPointRepollCallback(pp *PollingPoint, writeMode model.WriteMode) func() {
 	// log.Info("MakePollingPointRepollCallback()")
 	f := func() {
-		//pm.pollQueueDebugMsg(fmt.Sprintf("CALL PollingPointRepollCallback func() pp: %+v", pp))
+		// pm.pollQueueDebugMsg(fmt.Sprintf("CALL PollingPointRepollCallback func() pp: %+v", pp))
 		pp.RepollTimer = nil
 		_, removeSuccess := pm.PollQueue.StandbyPollingPoints.RemovePollingPointByPointUUID(pp.FFPointUUID)
 		if !removeSuccess {
@@ -378,7 +378,7 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 			} else {
 				pm.pollQueueErrorMsg("Unknown Plugin: ASAP Priority Poll Queue LOCKUP")
 			}
-			//TODO: update network error to show queue lockup
+			// TODO: update network error to show queue lockup
 
 		case model.PRIORITY_HIGH:
 			pm.HighPriorityLockupAlert = true
@@ -387,7 +387,7 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 			} else {
 				pm.pollQueueErrorMsg("Unknown Plugin: HIGH Priority Poll Queue LOCKUP")
 			}
-			//TODO: update network error to show queue lockup
+			// TODO: update network error to show queue lockup
 
 		case model.PRIORITY_NORMAL:
 			pm.NormalPriorityLockupAlert = true
@@ -396,7 +396,7 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 			} else {
 				pm.pollQueueErrorMsg("Unknown Plugin: NORMAL Priority Poll Queue LOCKUP")
 			}
-			//TODO: update network error to show queue lockup
+			// TODO: update network error to show queue lockup
 
 		case model.PRIORITY_LOW:
 			pm.LowPriorityLockupAlert = true
@@ -405,7 +405,7 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 			} else {
 				pm.pollQueueErrorMsg("Unknown Plugin: LOW Priority Poll Queue LOCKUP")
 			}
-			//TODO: update network error to show queue lockup
+			// TODO: update network error to show queue lockup
 
 		}
 	}

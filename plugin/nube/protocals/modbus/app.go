@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/config"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/pollqueue"
+	"github.com/NubeIO/flow-framework/services/pollqueue"
 	"github.com/NubeIO/flow-framework/utils/array"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
@@ -29,11 +29,14 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		return nil, errors.New("failed to create modbus network")
 	}
 
-	if boolean.IsTrue(body.Enable) {
-		conf := inst.GetConfig().(*config.Config)
-		pollManager := pollqueue.NewPollManager(conf, &inst.db, network.UUID, inst.pluginUUID)
+	if boolean.IsTrue(network.Enable) {
+		conf := inst.GetConfig().(*Config)
+		pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
+		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, inst.pluginUUID, float.NonNil(network.MaxPollRate))
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
+	} else {
+		err = inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.NetworkError, true)
 	}
 	return network, nil
 }
@@ -71,8 +74,9 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 
 	if isWriteable(body.WriteMode, body.ObjectType) {
 		body.WritePollRequired = boolean.NewTrue()
+		body.EnableWriteable = boolean.NewTrue()
 	} else {
-		body = resetWriteableProperties(body)
+		body = writemode.ResetWriteableProperties(body)
 	}
 	body.ReadPollRequired = boolean.NewTrue()
 
@@ -82,7 +86,6 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	isOutput := checkForOutputType(body.ObjectType)
 	body.IsOutput = nils.NewBool(isOutput)
 
-	// point, err = inst.db.CreatePoint(body, true, false)
 	point, err = inst.db.CreatePoint(body, true, true)
 	if point == nil || err != nil {
 		inst.modbusDebugMsg("addPoint(): failed to create modbus point: ", body.Name)
@@ -267,7 +270,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	*/
 
 	if !isWriteable(body.WriteMode, body.ObjectType) { // clear writeable point properties if point is not writeable
-		body = resetWriteableProperties(body)
+		body = writemode.ResetWriteableProperties(body)
 	}
 
 	inst.modbusDebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
@@ -281,7 +284,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
-	point, err = inst.db.UpdatePoint(body.UUID, body, true, false)
+	point, err = inst.db.UpdatePoint(body.UUID, body, true, true)
 	if err != nil || point == nil {
 		inst.modbusDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -294,9 +297,9 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	}
 
 	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
-	if err != nil {
+	if netPollMan == nil || err != nil {
 		inst.modbusDebugMsg("updatePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
-		_ = inst.pointUpdateErr(point, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
+		_ = inst.pointUpdateErr(point, "cannot find NetworkPollManager for network", model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return
 	}
 
@@ -331,12 +334,13 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	inst.modbusDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
 	inst.modbusDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
 
-	point, err = inst.db.GetPoint(pntUUID, api.Args{})
-	if err != nil || point == nil {
-		inst.modbusErrorMsg("writePoint(): bad response from GetPoint(), ", err)
-		return nil, err
-	}
 	/*
+		point, err = inst.db.GetPoint(pntUUID, api.Args{})
+		if err != nil || point == nil {
+			inst.modbusErrorMsg("writePoint(): bad response from GetPoint(), ", err)
+			return nil, err
+		}
+
 		if !isWriteable(point.WriteMode, point.ObjectType) { // if point isn't writeable then reset writeable properties and do `UpdatePoint()`
 			point = resetWriteableProperties(point)
 			point, err = inst.db.UpdatePoint(pntUUID, point, true, false)
@@ -360,7 +364,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	}
 
 	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
-	if err != nil {
+	if netPollMan == nil || err != nil {
 		inst.modbusDebugMsg("writePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
 		_ = inst.pointUpdateErr(point, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return nil, err
@@ -371,7 +375,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			pp, _ := netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 			if pp == nil {
 				if netPollMan.PollQueue.OutstandingPollingPoints.GetPollingPointIndexByPointUUID(point.UUID) > -1 {
-					if isWriteable(point.WriteMode, point.ObjectType) {
+					if writemode.IsWriteable(point.WriteMode) {
 						netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = true // this triggers a write post at ASAP priority (for writeable points).
 						point.WritePollRequired = boolean.NewTrue()
 						if point.WriteMode != model.WriteAlways && point.WriteMode != model.WriteOnce {
@@ -386,7 +390,8 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 					point, err = inst.db.UpdatePoint(point.UUID, point, true, true)
 					if err != nil || point == nil {
 						inst.modbusDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
-						return nil, err
+						inst.pointUpdateErr(point, fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
+						return point, err
 					}
 					return point, nil
 				} else {
@@ -444,7 +449,7 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	return ok, nil
 }
 
-// deleteNetwork delete device. Called via API call.
+// deleteDevice delete device. Called via API call.
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	inst.modbusDebugMsg("deleteDevice(): ", body.UUID)
 	if body == nil {
@@ -455,6 +460,7 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	netPollMan, err := inst.getNetworkPollManagerByUUID(body.NetworkUUID)
 	if netPollMan == nil || err != nil {
 		inst.modbusDebugMsg("deleteDevice(): cannot find NetworkPollManager for network: ", body.NetworkUUID)
+		_ = inst.deviceUpdateErr(body, "cannot find NetworkPollManager for network", model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return
 	}
 	netPollMan.PollQueue.RemovePollingPointByDeviceUUID(body.UUID)
@@ -481,9 +487,9 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 
 	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
 
-	if err != nil {
+	if netPollMan == nil || err != nil {
 		inst.modbusDebugMsg("addPoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
-		_ = inst.pointUpdateErr(body, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
+		_ = inst.pointUpdateErr(body, "cannot find NetworkPollManager for network", model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return
 	}
 
@@ -500,11 +506,11 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 }
 
 // pointUpdate update point. Called from within plugin.
-func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess bool) (*model.Point, error) {
+func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess, clearFaults bool) (*model.Point, error) {
 	if readSuccess {
 		point.OriginalValue = float.New(value)
 	}
-	_, err = inst.db.UpdatePoint(point.UUID, point, true, true)
+	_, err := inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
 	if err != nil {
 		inst.modbusDebugMsg("MODBUS UPDATE POINT UpdatePointPresentValue() error: ", err)
 		return nil, err
@@ -519,37 +525,37 @@ func (inst *Instance) pointUpdateErr(point *model.Point, message string, message
 	point.CommonFault.MessageCode = messageCode
 	point.CommonFault.Message = message
 	point.CommonFault.LastFail = time.Now().UTC()
-	err = inst.db.UpdatePointErrors(point.UUID, point)
+	err := inst.db.UpdatePointErrors(point.UUID, point)
 	if err != nil {
-		inst.modbusDebugMsg(" pointUpdateErr()", err)
+		inst.modbusErrorMsg(" pointUpdateErr()", err)
 	}
 	return err
 }
 
 // deviceUpdateErr update device with errors. Called from within plugin.
-func (inst *Instance) deviceUpdateErr(device *model.Device, err error) error {
+func (inst *Instance) deviceUpdateErr(device *model.Device, message string, messageLevel string, messageCode string) error {
 	device.CommonFault.InFault = true
-	device.CommonFault.MessageLevel = model.MessageLevel.Warning
-	device.CommonFault.MessageCode = model.CommonFaultCode.DeviceError
-	device.CommonFault.Message = err.Error()
+	device.CommonFault.MessageLevel = messageLevel
+	device.CommonFault.MessageCode = messageCode
+	device.CommonFault.Message = message
 	device.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdateDevice(device.UUID, device, true)
+	err := inst.db.UpdateDeviceErrors(device.UUID, device)
 	if err != nil {
-		inst.modbusDebugMsg(" deviceUpdateErr()", err)
+		inst.modbusErrorMsg(" deviceUpdateErr()", err)
 	}
 	return err
 }
 
 // networkUpdateErr update network with errors. Called from within plugin.
-func (inst *Instance) networkUpdateErr(network *model.Network, err error) error {
+func (inst *Instance) networkUpdateErr(network *model.Network, message string, messageLevel string, messageCode string) error {
 	network.CommonFault.InFault = true
-	network.CommonFault.MessageLevel = model.MessageLevel.Fail
-	network.CommonFault.MessageCode = model.CommonFaultCode.PointError
-	network.CommonFault.Message = err.Error()
+	network.CommonFault.MessageLevel = messageLevel
+	network.CommonFault.MessageCode = messageCode
+	network.CommonFault.Message = message
 	network.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdateNetwork(network.UUID, network, true)
+	err := inst.db.UpdateNetworkErrors(network.UUID, network)
 	if err != nil {
-		inst.modbusDebugMsg(" networkUpdateErr()", err)
+		inst.modbusErrorMsg(" networkUpdateErr()", err)
 	}
 	return err
 }

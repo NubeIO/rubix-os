@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nstring"
+	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -316,31 +316,10 @@ func SetPriorityArrayModeBasedOnWriteMode(pnt *model.Point) bool {
 	return false
 }
 
-func resetWriteableProperties(point *model.Point) *model.Point {
-	point.WriteValueOriginal = nil
-	point.WriteValue = nil
-	point.WritePriority = nil
-	point.CurrentPriority = nil
-	point.EnableWriteable = boolean.NewFalse()
-	point.WritePollRequired = boolean.NewFalse()
-	return point
-}
-
 func isWriteable(writeMode model.WriteMode, objectType string) bool {
-	if isWriteableObjectType(objectType) && isWriteableWriteMode(writeMode) {
+	if isWriteableObjectType(objectType) && writemode.IsWriteable(writeMode) {
 		return true
 	} else {
-		return false
-	}
-}
-
-func isWriteableWriteMode(writeMode model.WriteMode) bool {
-	switch writeMode {
-	case model.ReadOnce, model.ReadOnly:
-		return false
-	case model.WriteOnce, model.WriteOnceReadOnce, model.WriteAlways, model.WriteOnceThenRead, model.WriteAndMaintain:
-		return true
-	default:
 		return false
 	}
 }
