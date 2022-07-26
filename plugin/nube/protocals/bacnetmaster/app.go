@@ -9,7 +9,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -42,6 +41,8 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, inst.pluginUUID, float.NonNil(network.MaxPollRate))
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
+	} else {
+		err = inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.NetworkError, true)
 	}
 	return network, nil
 }
@@ -65,6 +66,12 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	}
 
 	inst.bacnetDebugMsg("addDevice(): ", body.UUID)
+
+	if boolean.IsFalse(device.Enable) {
+		inst.db.SetErrorsForAllPointsOnDevice(device.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
+
+	}
+
 	// NOTHING TO DO ON DEVICE CREATED
 	return device, nil
 }
@@ -77,10 +84,11 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	inst.bacnetDebugMsg("addPoint(): ", body.Name)
 
-	if writemode.IsWriteable(body.WriteMode) {
+	if isWriteable(body.WriteMode, body.ObjectType) {
 		body.WritePollRequired = boolean.NewTrue()
+		body.EnableWriteable = boolean.NewTrue()
 	} else {
-		body.WritePollRequired = boolean.NewFalse()
+		body = writemode.ResetWriteableProperties(body)
 	}
 	body.ReadPollRequired = boolean.NewTrue()
 
@@ -90,7 +98,6 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	isOutput := checkForOutputType(body.ObjectType)
 	body.IsOutput = nils.NewBool(isOutput)
 
-	// point, err = inst.db.CreatePoint(body, true, false)
 	point, err = inst.db.CreatePoint(body, true, true)
 	if point == nil || err != nil {
 		inst.bacnetDebugMsg("addPoint(): failed to create bacnet point: ", body.Name)
@@ -98,7 +105,6 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	inst.bacnetDebugMsg(fmt.Sprintf("addPoint(): %+v\n", point))
 
-	// net, err := inst.db.DB.GetNetworkByDeviceUUID(point.DeviceUUID, api.Args{})
 	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	if err != nil || dev == nil {
 		inst.bacnetDebugMsg("addPoint(): bad response from GetDevice()")
@@ -136,7 +142,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		body.CommonFault.InFault = true
 		body.CommonFault.MessageLevel = model.MessageLevel.Fail
 		body.CommonFault.MessageCode = model.CommonFaultCode.PointError
-		body.CommonFault.Message = errors.New("network not enabled").Error()
+		body.CommonFault.Message = "network not enabled"
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
@@ -154,11 +160,22 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	if boolean.IsTrue(network.Enable) == false && netPollMan.Enable == true {
 		// DO POLLING DISABLE ACTIONS
 		netPollMan.StopPolling()
+		inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError, true)
 	} else if boolean.IsTrue(network.Enable) == true && netPollMan.Enable == false {
 		// DO POLLING Enable ACTIONS
 		netPollMan.StartPolling()
+		network.CommonFault.InFault = false
+		network.CommonFault.MessageLevel = model.MessageLevel.Info
+		network.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		network.CommonFault.Message = errors.New("").Error()
+		network.CommonFault.LastOk = time.Now().UTC()
+		inst.db.ClearErrorsForAllDevicesOnNetwork(network.UUID, true)
 	}
 
+	network, err = inst.db.UpdateNetwork(body.UUID, network, true)
+	if err != nil || network == nil {
+		return nil, err
+	}
 	return network, nil
 }
 
@@ -172,9 +189,9 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 
 	if boolean.IsFalse(body.Enable) {
 		body.CommonFault.InFault = true
-		body.CommonFault.MessageLevel = model.MessageLevel.Fail
-		body.CommonFault.MessageCode = model.CommonFaultCode.PointError
-		body.CommonFault.Message = errors.New("device not enabled").Error()
+		body.CommonFault.MessageLevel = model.MessageLevel.Warning
+		body.CommonFault.MessageCode = model.CommonFaultCode.DeviceError
+		body.CommonFault.Message = "device disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
@@ -203,10 +220,20 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 
 	if boolean.IsFalse(dev.Enable) && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
 		// DO POLLING DISABLE ACTIONS FOR DEVICE
+		inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 
 	} else if boolean.IsTrue(dev.Enable) && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
 		// DO POLLING ENABLE ACTIONS FOR DEVICE
+		dev.CommonFault.InFault = false
+		dev.CommonFault.MessageLevel = model.MessageLevel.Info
+		dev.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		dev.CommonFault.Message = ""
+		dev.CommonFault.LastOk = time.Now().UTC()
+		err = inst.db.ClearErrorsForAllPointsOnDevice(dev.UUID)
+		if err != nil {
+			inst.bacnetDebugMsg("updateDevice(): error on ClearErrorsForAllPointsOnDevice(): ", err)
+		}
 		for _, pnt := range dev.Points {
 			if boolean.IsTrue(pnt.Enable) {
 				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
@@ -218,6 +245,11 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 
 	} else if boolean.IsTrue(dev.Enable) {
 		// TODO: Currently on every device update, all device points are removed, and re-added.
+		dev.CommonFault.InFault = false
+		dev.CommonFault.MessageLevel = model.MessageLevel.Info
+		dev.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		dev.CommonFault.Message = ""
+		dev.CommonFault.LastOk = time.Now().UTC()
 		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 		for _, pnt := range dev.Points {
 			if boolean.IsTrue(pnt.Enable) {
@@ -255,6 +287,10 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 
 	*/
 
+	if !isWriteable(body.WriteMode, body.ObjectType) { // clear writeable point properties if point is not writeable
+		body = writemode.ResetWriteableProperties(body)
+	}
+
 	inst.bacnetDebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
 	inst.bacnetDebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
 
@@ -262,11 +298,11 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.InFault = true
 		body.CommonFault.MessageLevel = model.MessageLevel.Fail
 		body.CommonFault.MessageCode = model.CommonFaultCode.PointError
-		body.CommonFault.Message = errors.New("point not enabled").Error()
+		body.CommonFault.Message = errors.New("point disabled").Error()
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
+	point, err = inst.db.UpdatePoint(body.UUID, body, true, true)
 	if err != nil || point == nil {
 		inst.bacnetDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -281,7 +317,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
 	if netPollMan == nil || err != nil {
 		inst.bacnetDebugMsg("updatePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
-		inst.pointUpdateErr(point, err)
+		_ = inst.pointUpdateErr(point, "cannot find NetworkPollManager for network", model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return
 	}
 
@@ -304,9 +340,9 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 
 // writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-
 	// TODO: check for PointWriteByName calls that might not flow through the plugin.
 
+	point = nil
 	inst.bacnetDebugMsg("writePoint(): ", pntUUID)
 	if body == nil {
 		inst.bacnetDebugMsg("writePoint(): nil point object")
@@ -316,28 +352,29 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	inst.bacnetDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
 	inst.bacnetDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
 
-	/* TODO: ONLY NEEDED IF THE WRITE VALUE IS WRITTEN ON COV (CURRENTLY IT IS WRITTEN ANYTIME THERE IS A WRITE COMMAND).
-	point, err = inst.db.GetPoint(pntUUID, apinst.Args{})
-	if err != nil || point == nil {
-		inst.bacnetErrorMsg("writePoint(): bad response from GetPoint(), ", err)
-		return nil, err
-	}
+	/*
+		point, err = inst.db.GetPoint(pntUUID, api.Args{})
+		if err != nil || point == nil {
+			inst.modbusErrorMsg("writePoint(): bad response from GetPoint(), ", err)
+			return nil, err
+		}
 
-	previousWriteVal := -1.11
-	if isWriteable(point.WriteMode) {
-		previousWriteVal = utils.Float64IsNil(point.WriteValue)
-	}
+		if !isWriteable(point.WriteMode, point.ObjectType) { // if point isn't writeable then reset writeable properties and do `UpdatePoint()`
+			point = resetWriteableProperties(point)
+			point, err = inst.db.UpdatePoint(pntUUID, point, true, false)
+			if err != nil || point == nil {
+				inst.modbusDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
+				return nil, err
+			}
+			return point, nil
 	*/
 
-	// body.WritePollRequired = utils.NewTrue() // TODO: commented out this section, seems like useless
-
-	point, _, isWriteValueChange, _, err := inst.db.WritePoint(pntUUID, body, true)
+	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body, false)
 	if err != nil || point == nil {
 		inst.bacnetDebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err
 	}
 
-	//  TODO: THIS SECTION MIGHT BE USEFUL IF WE ADD ASAP PRIORITY FOR IMMEDIATE POINT WRITES
 	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	if err != nil || dev == nil {
 		inst.bacnetDebugMsg("writePoint(): bad response from GetDevice()")
@@ -347,7 +384,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
 	if netPollMan == nil || err != nil {
 		inst.bacnetDebugMsg("writePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
-		inst.pointUpdateErr(point, err)
+		_ = inst.pointUpdateErr(point, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return
 	}
 
@@ -368,10 +405,16 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 						netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = false //
 						point.WritePollRequired = boolean.NewFalse()
 					}
+					point, err = inst.db.UpdatePoint(point.UUID, point, true, true)
+					if err != nil || point == nil {
+						inst.bacnetDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
+						inst.pointUpdateErr(point, fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
+						return point, err
+					}
 					return point, nil
 				} else {
 					inst.bacnetDebugMsg("writePoint(): cannot find PollingPoint for point (could be out for polling: ", point.UUID)
-					inst.pointUpdateErr(point, errors.New(fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID)))
+					_ = inst.pointUpdateErr(point, "writePoint(): cannot find PollingPoint for point: ", model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 					return point, err
 				}
 			}
@@ -436,6 +479,7 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	netPollMan, err := inst.getNetworkPollManagerByUUID(body.NetworkUUID)
 	if netPollMan == nil || err != nil {
 		inst.bacnetDebugMsg("deleteDevice(): cannot find NetworkPollManager for network: ", body.NetworkUUID)
+		_ = inst.deviceUpdateErr(body, "cannot find NetworkPollManager for network", model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return
 	}
 	netPollMan.PollQueue.RemovePollingPointByDeviceUUID(body.UUID)
@@ -461,10 +505,9 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	}
 
 	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
-
 	if netPollMan == nil || err != nil {
 		inst.bacnetDebugMsg("addPoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
-		inst.pointUpdateErr(body, err)
+		_ = inst.pointUpdateErr(body, "cannot find NetworkPollManager for network", model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return
 	}
 
@@ -481,24 +524,11 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 }
 
 // pointUpdate update point. Called from within plugin.
-func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSuccess, readSuccess, clearFaults bool) (*model.Point, error) {
-	if clearFaults {
-		point.CommonFault.InFault = false
-		point.CommonFault.MessageLevel = model.MessageLevel.Info
-		point.CommonFault.MessageCode = model.CommonFaultCode.Ok
-		point.CommonFault.Message = fmt.Sprintf("last-update: %s", utilstime.TimeStamp())
-		point.CommonFault.LastOk = time.Now().UTC()
-	}
-
+func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess, clearFaults bool) (*model.Point, error) {
 	if readSuccess {
-		if value != float.NonNil(point.OriginalValue) {
-			point.ValueUpdatedFlag = boolean.NewTrue() // Flag so that UpdatePointValue() will broadcast new value to producers. TODO: MAY NOT BE NEEDED.
-		}
 		point.OriginalValue = float.New(value)
 	}
-	point.InSync = boolean.NewTrue() // TODO: MAY NOT BE NEEDED.
-
-	_, err := inst.db.UpdatePoint(point.UUID, point, true)
+	_, err := inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
 	if err != nil {
 		inst.bacnetDebugMsg("BACNET UPDATE POINT UpdatePoint() error: ", err)
 		return nil, err
@@ -507,64 +537,46 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, writeSucces
 }
 
 // pointUpdateErr update point with errors. Called from within plugin.
-func (inst *Instance) pointUpdateErr(uuid string, err error) error {
-	var point model.Point
+func (inst *Instance) pointUpdateErr(point *model.Point, message string, messageLevel string, messageCode string) error {
 	point.CommonFault.InFault = true
-	point.CommonFault.MessageLevel = model.MessageLevel.Fail
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteError
-	point.CommonFault.Message = fmt.Sprintf("error-time: %s msg:%s", utilstime.TimeStamp(), err.Error())
+	point.CommonFault.MessageLevel = messageLevel
+	point.CommonFault.MessageCode = messageCode
+	point.CommonFault.Message = message
 	point.CommonFault.LastFail = time.Now().UTC()
-	point.InSync = boolean.NewFalse()
-	err = inst.db.UpdatePointErrors(uuid, &point)
+	err := inst.db.UpdatePointErrors(point.UUID, point)
 	if err != nil {
-		inst.bacnetDebugMsg(" pointUpdateErr()", err)
-		return nil, err
+		inst.bacnetErrorMsg(" pointUpdateErr()", err)
 	}
-	return nil, nil
-}
-
-// pointUpdateSuccess update point present value
-func (inst *Instance) pointUpdateSuccess(uuid string) error {
-	var point model.Point
-	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
-	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
-	point.CommonFault.LastOk = time.Now().UTC()
-	point.InSync = boolean.NewTrue()
-	err := inst.db.UpdatePointSuccess(uuid, &point)
-	if err != nil {
-		inst.bacnetErrorMsg("pointUpdateValue()", err)
-		return err
-	}
-	return nil
+	return err
 }
 
 // deviceUpdateErr update device with errors. Called from within plugin.
-func (inst *Instance) deviceUpdateErr(device *model.Device, err error) (*model.Device, error) {
+func (inst *Instance) deviceUpdateErr(device *model.Device, message string, messageLevel string, messageCode string) error {
 	device.CommonFault.InFault = true
-	device.CommonFault.MessageLevel = model.MessageLevel.Fail
-	device.CommonFault.MessageCode = model.CommonFaultCode.PointError
-	device.CommonFault.Message = err.Error()
+	device.CommonFault.MessageLevel = messageLevel
+	device.CommonFault.MessageCode = messageCode
+	device.CommonFault.Message = message
 	device.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdateDevice(device.UUID, device, true)
+	err := inst.db.UpdateDeviceErrors(device.UUID, device)
 	if err != nil {
-		inst.bacnetDebugMsg(" deviceUpdateErr()", err)
-		return nil, err
+		inst.bacnetErrorMsg(" deviceUpdateErr()", err)
 	}
-	return nil, nil
+	return err
 }
 
 // networkUpdateErr update network with errors. Called from within plugin.
-func (inst *Instance) networkUpdateErr(network *model.Network, err error) (*model.Network, error) {
+func (inst *Instance) networkUpdateErr(network *model.Network, message string, messageLevel string, messageCode string) error {
 	network.CommonFault.InFault = true
-	network.CommonFault.MessageLevel = model.MessageLevel.Fail
-	network.CommonFault.MessageCode = model.CommonFaultCode.PointError
-	network.CommonFault.Message = err.Error()
+	network.CommonFault.MessageLevel = messageLevel
+	network.CommonFault.MessageCode = messageCode
+	network.CommonFault.Message = message
 	network.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdateNetwork(network.UUID, network, true)
-		inst.bacnetDebugMsg(" networkUpdateErr()", err)
-		return nil, err
+	err := inst.db.UpdateNetworkErrors(network.UUID, network)
+	if err != nil {
+		inst.bacnetErrorMsg(" networkUpdateErr()", err)
+	}
+	return err
+}
 
 func (inst *Instance) getNetworks() ([]*model.Network, error) {
 	return inst.db.GetNetworks(api.Args{})

@@ -64,23 +64,11 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 
 // UpdateDeviceErrors will only update the CommonFault properties of the device, all other properties will not be updated. Does not update `LastOk`.
 func (d *GormDatabase) UpdateDeviceErrors(uuid string, body *model.Device) error {
-	/* I THINK THE FIRST DB CALL HERE IS NOT REQUIRED
-	var deviceModel *model.Device
-	query := d.DB.Where("uuid = ?", uuid).First(&deviceModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	query = d.DB.Model(&deviceModel).Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail").Updates(&body)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-
-	*/
-	query := d.DB.Model(&body).Where("uuid = ?", uuid).Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail").Updates(&body)
-	if query.Error != nil {
-		return query.Error
-	}
-	return nil
+	return d.DB.Model(&body).
+		Where("uuid = ?", uuid).
+		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
+		Updates(&body).
+		Error
 }
 
 func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device, fromPlugin bool) (*model.Device, error) {

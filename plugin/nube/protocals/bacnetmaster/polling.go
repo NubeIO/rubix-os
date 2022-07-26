@@ -116,11 +116,13 @@ func (inst *Instance) BACnetPolling() error {
 			}
 			if !boolean.IsTrue(dev.Enable) {
 				inst.bacnetErrorMsg("device is disabled.")
+				inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
 			if dev.AddressId <= 0 || dev.AddressId >= 4194303 {
 				inst.bacnetErrorMsg("address is not valid.  bacnet addresses must be between 1 and 4194303")
+				inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "address out of range", model.MessageLevel.Critical, model.CommonFaultCode.ConfigError)
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
@@ -202,7 +204,7 @@ func (inst *Instance) BACnetPolling() error {
 				if pnt.WriteValue != nil {
 					err = inst.doWrite(pnt, net.UUID, dev.UUID)
 					if err != nil {
-						_, err = inst.pointUpdateErr(pnt, err)
+						err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 						netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 						continue
 					}
@@ -219,7 +221,7 @@ func (inst *Instance) BACnetPolling() error {
 			if boolean.IsTrue(pnt.ReadPollRequired) { // DO READ IF REQUIRED
 				responseValue, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
 				if err != nil {
-					_, err = inst.pointUpdateErr(pnt, err)
+					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 					continue
 				}
@@ -244,7 +246,7 @@ func (inst *Instance) BACnetPolling() error {
 					// fmt.Println("BACnetPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
 					readSuccess = true
 				}
-				_, err = inst.pointUpdate(pnt, responseValue, writeSuccess, readSuccess, true)
+				_, err = inst.pointUpdate(pnt, responseValue, readSuccess, true)
 			}
 
 			/*

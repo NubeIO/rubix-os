@@ -236,7 +236,7 @@ func (inst *Instance) ModbusPolling() error {
 					// fmt.Println("ModbusPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
 					readSuccess = true
 				}
-				_, err = inst.pointUpdate(pnt, responseValue, readSuccess)
+				_, err = inst.pointUpdate(pnt, responseValue, readSuccess, true)
 			}
 
 			/*
