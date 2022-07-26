@@ -83,6 +83,6 @@ func (inst *Instance) parseUplinkData(data *csmodel.BaseUplink, device *model.De
 			}
 		}
 		log.Debugf("lorawan: Update point %s value=%f", *point.AddressUUID, value)
-		inst.pointUpdateValue(point.UUID, value)
+		inst.pointWrite(point.UUID, value)
 	}
 }

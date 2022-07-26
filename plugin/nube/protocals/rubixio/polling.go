@@ -47,12 +47,11 @@ func (inst *Instance) updateInputs(pnt *model.Point, inputs *rubixio.Inputs) {
 		case string(model.IOTypeRAW):
 			pointValue = raw
 		}
-		_, err = inst.pointUpdateValue(pnt.UUID, pointValue)
+		err = inst.pointWrite(pnt.UUID, pointValue)
 		if err != nil {
 			log.Errorln("rubixio.polling.syncInputs() failed to update point value")
 		}
 	}
-
 }
 
 func (inst *Instance) syncInputs(dev *model.Device, inputs *rubixio.Inputs) {
@@ -156,7 +155,6 @@ func (inst *Instance) writeOutput(dev *model.Device) {
 		log.Errorln("rubixio.polling.writeOutput() failed to do rest-api call err:", err)
 		return
 	}
-
 }
 
 func (inst *Instance) polling(p polling) error {

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -12,7 +11,6 @@ import (
 	"time"
 )
 
-// addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
 	if err != nil {
@@ -33,7 +31,6 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return body, nil
 }
 
-// addDevice add device
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	network, err := inst.db.GetNetwork(body.NetworkUUID, api.Args{WithDevices: true})
 	if err != nil {
@@ -52,7 +49,6 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	return device, nil
 }
 
-// addPoint add point
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	if body.IoNumber == "" {
 		body.IoNumber = "UI1"
@@ -76,7 +72,6 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	return point, nil
 }
 
-// updateNetwork update network
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
 	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
 	if err != nil {
@@ -85,7 +80,6 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	return network, nil
 }
 
-// updateDevice update device
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
 	device, err = inst.db.UpdateDevice(body.UUID, body, true)
 	if err != nil {
@@ -94,16 +88,6 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	return device, nil
 }
 
-// updatePoint update point
-func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
-	if err != nil {
-		return nil, err
-	}
-	return point, nil
-}
-
-// deleteNetwork delete network
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	ok, err = inst.db.DeleteNetwork(body.UUID)
 	if err != nil {
@@ -114,18 +98,10 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 
 // writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	// TODO: check for PointWriteByName calls that might not flow through the plugin.
-	if body == nil {
-		return
-	}
-	point, _, _, _, err = inst.db.WritePoint(pntUUID, body, true)
-	if err != nil || point == nil {
-		return nil, err
-	}
-	return point, nil
+	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
+	return point, err
 }
 
-// deleteNetwork delete device
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	ok, err = inst.db.DeleteDevice(body.UUID)
 	if err != nil {
@@ -134,7 +110,6 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	return ok, nil
 }
 
-// deletePoint delete point
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	ok, err = inst.db.DeletePoint(body.UUID)
 	if err != nil {
@@ -143,54 +118,42 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-// pointUpdate update point present value
-func (inst *Instance) pointUpdate(uuid string) (*model.Point, error) {
+func (inst *Instance) pointWrite(uuid string, value float64) error {
+	priority := map[string]*float64{"_16": &value}
+	pointWriter := model.PointWriter{Priority: &priority}
+	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter, true)
+	if err != nil {
+		log.Error("edge28-app: pointWrite()", err)
+	}
+	return err
+}
+
+func (inst *Instance) pointUpdateSuccess(uuid string) error {
 	var point model.Point
 	point.CommonFault.InFault = false
 	point.CommonFault.MessageLevel = model.MessageLevel.Info
 	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	point.CommonFault.Message = fmt.Sprintf("last-update: %s", utilstime.TimeStamp())
 	point.CommonFault.LastOk = time.Now().UTC()
-	_, err := inst.db.UpdatePoint(uuid, &point, true)
+	err := inst.db.UpdatePointErrors(uuid, &point)
 	if err != nil {
 		log.Error("edge28-app: UpdatePoint()", err)
-		return nil, err
 	}
-	return nil, nil
+	return err
 }
 
-// pointUpdate update point present value
-func (inst *Instance) pointUpdateValue(uuid string, value float64) (*model.Point, error) {
-	var point model.Point
-	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.Ok
-	point.CommonFault.Message = fmt.Sprintf("last-update: %s", utilstime.TimeStamp())
-	point.CommonFault.LastOk = time.Now().UTC()
-	priority := map[string]*float64{"_16": &value}
-	point.InSync = boolean.NewTrue()
-	_, _, _, _, err := inst.db.UpdatePointValue(uuid, &point, &priority, true)
-	if err != nil {
-		log.Error("edge28-app: pointUpdateValue()", err)
-		return nil, err
-	}
-	return nil, nil
-}
-
-// pointUpdate update point present value
-func (inst *Instance) pointUpdateErr(uuid string, err error) (*model.Point, error) {
+func (inst *Instance) pointUpdateErr(uuid string, err error) error {
 	var point model.Point
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = model.MessageLevel.Fail
 	point.CommonFault.MessageCode = model.CommonFaultCode.PointError
 	point.CommonFault.Message = err.Error()
 	point.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdatePoint(uuid, &point, true)
+	err = inst.db.UpdatePointErrors(uuid, &point)
 	if err != nil {
 		log.Error("edge28-app: pointUpdateErr()", err)
-		return nil, err
 	}
-	return nil, nil
+	return err
 }
 
 func selectObjectType(selectedPlugin string) (objectType string, isOutput, isTypeBool bool) {
@@ -208,7 +171,6 @@ func selectObjectType(selectedPlugin string) (objectType string, isOutput, isTyp
 		objectType = PointsList.UI1.ObjectType
 	}
 	return
-
 }
 
 type Point struct {

@@ -73,10 +73,10 @@ func (inst *Instance) polling(p polling) error {
 						if pnt.WriteMode == "read_only" {
 							readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
 							if err != nil {
-								_, err = inst.pointUpdateErr(pnt.UUID, err)
+								err = inst.pointUpdateErr(pnt.UUID, err)
 								continue
 							} else {
-								_, err := inst.pointUpdateValue(pnt.UUID, readFloat)
+								err := inst.pointWrite(pnt.UUID, readFloat)
 								if err != nil {
 									continue
 								}
@@ -101,11 +101,11 @@ func (inst *Instance) polling(p polling) error {
 							if doWrite {
 								err := inst.doWrite(pnt, net.UUID, dev.UUID)
 								if err != nil {
-									_, err = inst.pointUpdateErr(pnt.UUID, err)
+									err = inst.pointUpdateErr(pnt.UUID, err)
 									continue
 								}
 								// val := float.NonNil(pnt.WriteValue) //TODO not sure is this should then update the PV of the point
-								_, err = inst.pointUpdate(pnt.UUID)
+								err = inst.pointUpdateSuccess(pnt.UUID)
 								if err != nil {
 									continue
 								}

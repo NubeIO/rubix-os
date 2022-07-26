@@ -281,10 +281,10 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		}
 	}
 
-	//pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification (ABOUT TO DB UPDATE): point  %+v", point))
+	// pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification (ABOUT TO DB UPDATE): point  %+v", point))
 	// point.PrintPointValues()
 	// TODO: WOULD BE GOOD IF THIS COULD BE MOVED TO app.go
-	point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point, true)
+	point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point, true, true)
 	// printPointDebugInfo(point)
 
 }
@@ -337,13 +337,13 @@ func (pm *NetworkPollManager) MakePollingPointRepollCallback(pp *PollingPoint, w
 		pm.PollQueue.AddPollingPoint(pp)
 
 		// TODO: WOULD BE GOOD IF THIS COULD BE MOVED TO app.go
-		//pm.pollQueueDebugMsg(fmt.Sprintf("pm.DBHandlerRef: %+v", pm.DBHandlerRef))
-		point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point, true)
+		// pm.pollQueueDebugMsg(fmt.Sprintf("pm.DBHandlerRef: %+v", pm.DBHandlerRef))
+		point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point, true, true)
 		if err != nil || point == nil {
 			pm.pollQueueErrorMsg(fmt.Sprintf("point DB UPDATE FAILED Err: %+v", err))
 			return
 		}
-		//pm.pollQueueDebugMsg(fmt.Sprintf("point after DB UPDATE: %+v", point))
+		// pm.pollQueueDebugMsg(fmt.Sprintf("point after DB UPDATE: %+v", point))
 		// printPointDebugInfo(point)
 	}
 	return f
@@ -456,6 +456,5 @@ func (pm *NetworkPollManager) SetPointPollRequiredFlagsBasedOnWriteMode(point *m
 	pm.pollQueueDebugMsg("MODBUS SetPointPollRequiredFlagsBasedOnWriteMode(): PRIORITY")
 	pm.pollQueueDebugMsg("%+v\n", point.Priority)
 
-	pm.DBHandlerRef.UpdatePoint(point.UUID, point, true)
-
+	pm.DBHandlerRef.UpdatePoint(point.UUID, point, true, true)
 }
