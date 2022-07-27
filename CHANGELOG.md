@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.6.2](https://github.com/NubeIO/flow-framework/tree/v0.6.2) (2022-07-27)
+
+- Merge pull request #579 from NubeIO/add/ff-error-drill-down-functions
+- Merge pull request #580 from NubeIO/update/seperate-database-methods-from-pollqueue
+
 ## [v0.6.1](https://github.com/NubeIO/flow-framework/tree/v0.6.1) (2022-07-19)
 
 - Modbus write improved

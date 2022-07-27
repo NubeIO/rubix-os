@@ -369,7 +369,7 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 
 	f := func() {
 		pm.pollQueueDebugMsg("Polling Lockout Timer Expired! Polling Priority: %d,  Polling Network: %s", priority, pm.FFNetworkUUID)
-		plugin, err := pm.DBHandlerRef.DB.GetPlugin(pm.FFPluginUUID)
+		plugin, err := pm.DBHandlerRef.GetPlugin(pm.FFPluginUUID)
 		switch priority {
 		case model.PRIORITY_ASAP:
 			pm.ASAPPriorityLockupAlert = true
@@ -409,7 +409,7 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 
 		}
 	}
-
+	f()
 	return time.AfterFunc(timeoutDuration, f)
 }
 
