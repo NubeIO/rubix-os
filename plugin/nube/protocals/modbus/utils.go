@@ -3,9 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nstring"
@@ -359,56 +357,4 @@ func checkForOutputType(ObjectType string) (isOutput bool) {
 		isOutput = true
 	}
 	return
-}
-
-func pointValueTransformOnRead(originalValue *float64, scaleEnable, limitEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax, offset *float64) (transformedValue *float64, err error) {
-	if originalValue == nil {
-		return nil, errors.New("input value is undefined")
-	}
-	ov := float.NonNil(originalValue)
-
-	// perform factor operation
-	factored := ov
-	if float.NonNil(factor) != 0 {
-		factored = ov * float.NonNil(factor)
-	}
-
-	// perform scaling and limit operations
-	scaledAndLimited := factored
-	if boolean.IsTrue(scaleEnable) {
-		scaledAndLimited = float.NonNil(database.PointScale(float.New(factored), scaleInMin, scaleInMax, scaleOutMin, scaleOutMax))
-	} else if boolean.IsTrue(limitEnable) {
-		scaledAndLimited = float.NonNil(database.PointRange(float.New(factored), scaleOutMin, scaleOutMax))
-	}
-
-	// perform offset operation
-	offsetted := scaledAndLimited + float.NonNil(offset)
-
-	return float.New(offsetted), nil
-}
-
-func pointValueTransformOnWrite(originalValue *float64, scaleEnable, limitEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax, offset *float64) (transformedValue *float64, err error) {
-	if originalValue == nil {
-		return nil, errors.New("input value is undefined")
-	}
-	ov := float.NonNil(originalValue)
-
-	// reverse offset operation
-	unoffsetted := ov - float.NonNil(offset)
-
-	// reverse scaling and limit operations
-	unscaledAndUnlimited := unoffsetted
-	if boolean.IsTrue(scaleEnable) {
-		unscaledAndUnlimited = float.NonNil(database.PointScale(float.New(unoffsetted), scaleOutMin, scaleOutMax, scaleInMin, scaleInMax))
-	} else if boolean.IsTrue(limitEnable) {
-		unscaledAndUnlimited = float.NonNil(database.PointRange(float.New(unoffsetted), scaleOutMin, scaleOutMax))
-	}
-
-	// reverse factoring operation
-	unfactored := unscaledAndUnlimited
-	if float.NonNil(factor) != 0 {
-		unfactored = unscaledAndUnlimited * float.NonNil(factor)
-	}
-
-	return float.New(unfactored), nil
 }

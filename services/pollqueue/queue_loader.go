@@ -413,7 +413,6 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 
 		}
 	}
-	//f()
 	return time.AfterFunc(timeoutDuration, f)
 }
 

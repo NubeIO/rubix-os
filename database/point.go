@@ -289,11 +289,11 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	// if a new value is written from wires then set this to false so the modbus knows on the next poll to write a new
 	// value to the modbus point
 	if fromPlugin && afterRealDeviceUpdate {
-		pointModel.InSync = boolean.NewTrue()
-		//pointModel.WritePollRequired = boolean.NewFalse()
+		pointModel.InSync = boolean.NewTrue() // TODO: do we still use InSync?
+		//pointModel.WritePollRequired = boolean.NewFalse()  // WritePollRequired should be set by the plugins (they know best)
 	} else {
-		pointModel.InSync = boolean.NewFalse()
-		//pointModel.WritePollRequired = boolean.NewTrue() // TODO: make sure making this writable won't effect
+		pointModel.InSync = boolean.NewFalse() // TODO: do we still use InSync?
+		//pointModel.WritePollRequired = boolean.NewTrue()  // WritePollRequired should be set by the plugins (they know best)
 	}
 
 	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
