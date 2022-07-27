@@ -36,6 +36,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
 	} else {
+		err = inst.networkUpdateErr(network, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.NetworkError)
 		err = inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.NetworkError, true)
 	}
 	return network, nil
@@ -57,7 +58,8 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	inst.modbusDebugMsg("addDevice(): ", body.UUID)
 
 	if boolean.IsFalse(device.Enable) {
-		inst.db.SetErrorsForAllPointsOnDevice(device.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
+		err = inst.deviceUpdateErr(device, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
+		err = inst.db.SetErrorsForAllPointsOnDevice(device.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
 	}
 
 	// NOTHING TO DO ON DEVICE CREATED
@@ -113,6 +115,8 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 		// netPollMan.PollQueue.AddPollingPoint(pp)
 		// netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
+	} else {
+		err = inst.pointUpdateErr(point, "point disabled", model.MessageLevel.Warning, model.CommonFaultCode.PointError)
 	}
 	return point, nil
 
@@ -132,6 +136,12 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		body.CommonFault.MessageCode = model.CommonFaultCode.NetworkError
 		body.CommonFault.Message = errors.New("network disabled").Error()
 		body.CommonFault.LastFail = time.Now().UTC()
+	} else {
+		body.CommonFault.InFault = false
+		body.CommonFault.MessageLevel = model.MessageLevel.Info
+		body.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		body.CommonFault.Message = errors.New("").Error()
+		body.CommonFault.LastOk = time.Now().UTC()
 	}
 
 	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
@@ -152,11 +162,6 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	} else if boolean.IsTrue(network.Enable) && netPollMan.Enable == false {
 		// DO POLLING Enable ACTIONS
 		netPollMan.StartPolling()
-		network.CommonFault.InFault = false
-		network.CommonFault.MessageLevel = model.MessageLevel.Info
-		network.CommonFault.MessageCode = model.CommonFaultCode.Ok
-		network.CommonFault.Message = errors.New("").Error()
-		network.CommonFault.LastOk = time.Now().UTC()
 		inst.db.ClearErrorsForAllDevicesOnNetwork(network.UUID, true)
 	}
 
@@ -181,6 +186,12 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		body.CommonFault.MessageCode = model.CommonFaultCode.DeviceError
 		body.CommonFault.Message = "device disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
+	} else {
+		body.CommonFault.InFault = false
+		body.CommonFault.MessageLevel = model.MessageLevel.Info
+		body.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		body.CommonFault.Message = ""
+		body.CommonFault.LastOk = time.Now().UTC()
 	}
 
 	dev, err := inst.db.UpdateDevice(body.UUID, body, true)
@@ -207,11 +218,6 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 
 	} else if boolean.IsTrue(dev.Enable) && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
 		// DO POLLING ENABLE ACTIONS FOR DEVICE
-		dev.CommonFault.InFault = false
-		dev.CommonFault.MessageLevel = model.MessageLevel.Info
-		dev.CommonFault.MessageCode = model.CommonFaultCode.Ok
-		dev.CommonFault.Message = ""
-		dev.CommonFault.LastOk = time.Now().UTC()
 		err = inst.db.ClearErrorsForAllPointsOnDevice(dev.UUID)
 		if err != nil {
 			inst.modbusDebugMsg("updateDevice(): error on ClearErrorsForAllPointsOnDevice(): ", err)

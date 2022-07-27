@@ -277,13 +277,13 @@ type Point struct {
 		Type        string `json:"type" default:"float"`
 		Required    bool   `json:"required" default:"false"`
 		Default     string `json:"default" default:"0"`
-		DisplayName string `json:"display_name" default:"Scale: Output Min"`
+		DisplayName string `json:"display_name" default:"Scale/Limit: Output Min"`
 	} `json:"scale_out_min"`
 	ScaleOutMax struct {
 		Type        string `json:"type" default:"float"`
 		Required    bool   `json:"required" default:"false"`
 		Default     string `json:"default" default:"100"`
-		DisplayName string `json:"display_name" default:"Scale: Output Max"`
+		DisplayName string `json:"display_name" default:"Scale/Limit: Output Max"`
 	} `json:"scale_out_max"`
 	Offset struct {
 		Type        string `json:"type" default:"float"`

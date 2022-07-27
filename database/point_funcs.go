@@ -7,7 +7,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -50,6 +49,12 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 			priorityarray.ParsePriority(pointModel.Priority, priority, boolean.IsTrue(pointModel.IsTypeBool))
 		priorityMap = pm
 		isPriorityChanged = ipc
+		if highestValue != nil {
+			fmt.Println("updatePriority() highestValue", *highestValue)
+		}
+		if currentPriority != nil {
+			fmt.Println("updatePriority() currentPriority", *currentPriority)
+		}
 		if doesPriorityExist {
 			if currentPriority == nil && highestValue == nil && !float.IsNil(pointModel.Fallback) {
 				pointModel.Priority.P16 = float.New(*pointModel.Fallback)
@@ -64,13 +69,8 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 			if priorityMap != nil {
 				pointModel.CurrentPriority = currentPriority
 				pointModel.WriteValueOriginal = highestValue
-				// interesting... it doesn't update if we directly update the initialized variable
-				writeValue_, err := pointEval(highestValue, pointModel.MathOnWriteValue)
-				writeValue = writeValue_
-				if err != nil {
-					log.Errorln("point.db parsePriority() error on run point MathOnWriteValue error:", err)
-				}
 				presentValue = highestValue
+				writeValue = highestValue
 			}
 		}
 		priorityMapToPatch := d.priorityMapToPatch(priorityMap)
