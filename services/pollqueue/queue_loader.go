@@ -53,7 +53,7 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	return nil
 }
 
-func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate bool) {
+func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool) {
 	pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, pollTimeSecs))
 
 	_, success := pm.PollQueue.OutstandingPollingPoints.RemovePollingPointByPointUUID(pp.FFPointUUID)
@@ -72,7 +72,9 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 	}
 	// TODO: potentially only required on writeSuccess (but possibility of lockup on a bad point)
 	// Reset poll priority to set value (in cases where pp has been escalated to ASAP).
-	pp.PollPriority = point.PollPriority
+	if resetToConfiguredPriority {
+		pp.PollPriority = point.PollPriority
+	}
 
 	val, ok := pm.PollQueue.PointsUpdatedWhilePolling[point.UUID]
 	if ok {
@@ -283,8 +285,10 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 
 	// pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification (ABOUT TO DB UPDATE): point  %+v", point))
 	// point.PrintPointValues()
+	pm.pollQueueDebugMsg("PollingPointCompleteNotification() before DB Update, WritePollRequired:", *point.WritePollRequired)
 	// TODO: WOULD BE GOOD IF THIS COULD BE MOVED TO app.go
 	point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point, true, true)
+	pm.pollQueueDebugMsg("PollingPointCompleteNotification() after DB Update, WritePollRequired:", *point.WritePollRequired)
 	// printPointDebugInfo(point)
 
 }
@@ -409,7 +413,7 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 
 		}
 	}
-	f()
+	//f()
 	return time.AfterFunc(timeoutDuration, f)
 }
 

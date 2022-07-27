@@ -265,7 +265,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 
 	writeValueTransformFault := false
 	if writeValue != nil {
-		transform, err = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.LimitEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
+		transform, err = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
 		if err != nil {
 			log.Errorln("point.db updatePointValue() error on write value transformation. error:", err)
 			pointModel.CommonFault.InFault = true
@@ -290,10 +290,10 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	// value to the modbus point
 	if fromPlugin && afterRealDeviceUpdate {
 		pointModel.InSync = boolean.NewTrue()
-		pointModel.WritePollRequired = boolean.NewFalse()
+		//pointModel.WritePollRequired = boolean.NewFalse()
 	} else {
 		pointModel.InSync = boolean.NewFalse()
-		pointModel.WritePollRequired = boolean.NewTrue() // TODO: make sure making this writable won't effect
+		//pointModel.WritePollRequired = boolean.NewTrue() // TODO: make sure making this writable won't effect
 	}
 
 	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {

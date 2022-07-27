@@ -243,24 +243,12 @@ type Point struct {
 		Options  []string `json:"options" default:"[\"leb_lew\",\"leb_bew\",\"beb_lew\",\"beb_bew\"]"`
 		Default  string   `json:"default" default:"beb_lew"`
 	} `json:"object_encoding"`
-	MultiplicationFactor struct {
-		Type        string `json:"type" default:"float"`
-		Required    bool   `json:"required" default:"false"`
-		Default     string `json:"default" default:"1"`
-		DisplayName string `json:"display_name" default:"Multiplication Factor"`
-	} `json:"multiplication_factor"`
 	ScaleEnable struct {
 		Type        string `json:"type" default:"bool"`
 		Required    bool   `json:"required" default:"false"`
 		Default     string `json:"default" default:"false"`
-		DisplayName string `json:"display_name" default:"Scale Enable"`
+		DisplayName string `json:"display_name" default:"Scale/Limit Enable"`
 	} `json:"scale_enable"`
-	LimitEnable struct {
-		Type        string `json:"type" default:"bool"`
-		Required    bool   `json:"required" default:"false"`
-		Default     string `json:"default" default:"false"`
-		DisplayName string `json:"display_name" default:"Limit Enable"`
-	} `json:"limit_enable"`
 	ScaleInMin struct {
 		Type        string `json:"type" default:"float"`
 		Required    bool   `json:"required" default:"false"`
@@ -285,6 +273,12 @@ type Point struct {
 		Default     string `json:"default" default:"100"`
 		DisplayName string `json:"display_name" default:"Scale/Limit: Output Max"`
 	} `json:"scale_out_max"`
+	MultiplicationFactor struct {
+		Type        string `json:"type" default:"float"`
+		Required    bool   `json:"required" default:"false"`
+		Default     string `json:"default" default:"1"`
+		DisplayName string `json:"display_name" default:"Multiplication Factor"`
+	} `json:"multiplication_factor"`
 	Offset struct {
 		Type        string `json:"type" default:"float"`
 		Required    bool   `json:"required" default:"false"`

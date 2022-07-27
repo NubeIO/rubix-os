@@ -142,9 +142,13 @@ func PointValueTransformOnRead(originalValue *float64, scaleEnable, limitEnable 
 	// perform scaling and limit operations
 	scaledAndLimited := factored
 	if boolean.IsTrue(scaleEnable) {
-		scaledAndLimited = float.NonNil(PointScale(float.New(factored), scaleInMin, scaleInMax, scaleOutMin, scaleOutMax))
-	} else if boolean.IsTrue(limitEnable) {
-		scaledAndLimited = float.NonNil(PointRange(float.New(factored), scaleOutMin, scaleOutMax))
+		if !float.IsNil(scaleOutMin) && !float.IsNil(scaleOutMax) {
+			if !float.IsNil(scaleInMin) && !float.IsNil(scaleInMax) { // scale with all 4 configs
+				scaledAndLimited = float.NonNil(PointScale(float.New(factored), scaleInMin, scaleInMax, scaleOutMin, scaleOutMax))
+			} else { //do limit with only scaleOutMin and scaleOutMin
+				scaledAndLimited = float.NonNil(PointRange(float.New(factored), scaleOutMin, scaleOutMax))
+			}
+		}
 	}
 
 	// perform offset operation
@@ -153,7 +157,7 @@ func PointValueTransformOnRead(originalValue *float64, scaleEnable, limitEnable 
 	return float.New(offsetted), nil
 }
 
-func PointValueTransformOnWrite(originalValue *float64, scaleEnable, limitEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax, offset *float64) (transformedValue *float64, err error) {
+func PointValueTransformOnWrite(originalValue *float64, scaleEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax, offset *float64) (transformedValue *float64, err error) {
 	if originalValue == nil {
 		return nil, errors.New("input value is undefined")
 	}
@@ -165,15 +169,19 @@ func PointValueTransformOnWrite(originalValue *float64, scaleEnable, limitEnable
 	// reverse scaling and limit operations
 	unscaledAndUnlimited := unoffsetted
 	if boolean.IsTrue(scaleEnable) {
-		unscaledAndUnlimited = float.NonNil(PointScale(float.New(unoffsetted), scaleOutMin, scaleOutMax, scaleInMin, scaleInMax))
-	} else if boolean.IsTrue(limitEnable) {
-		unscaledAndUnlimited = float.NonNil(PointRange(float.New(unoffsetted), scaleOutMin, scaleOutMax))
+		if !float.IsNil(scaleOutMin) && !float.IsNil(scaleOutMax) {
+			if !float.IsNil(scaleInMin) && !float.IsNil(scaleInMax) { // scale with all 4 configs
+				unscaledAndUnlimited = float.NonNil(PointScale(float.New(unoffsetted), scaleOutMin, scaleOutMax, scaleInMin, scaleInMax))
+			} else { //do limit with only scaleOutMin and scaleOutMin
+				unscaledAndUnlimited = float.NonNil(PointRange(float.New(unoffsetted), scaleOutMin, scaleOutMax))
+			}
+		}
 	}
 
 	// reverse factoring operation
 	unfactored := unscaledAndUnlimited
 	if float.NonNil(factor) != 0 {
-		unfactored = unscaledAndUnlimited * float.NonNil(factor)
+		unfactored = unscaledAndUnlimited / float.NonNil(factor)
 	}
 
 	return float.New(unfactored), nil

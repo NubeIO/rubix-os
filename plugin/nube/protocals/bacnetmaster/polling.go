@@ -120,12 +120,14 @@ func (inst *Instance) BACnetPolling() error {
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 				continue
 			}
-			if dev.AddressId <= 0 || dev.AddressId >= 4194303 {
-				inst.bacnetErrorMsg("address is not valid.  bacnet addresses must be between 1 and 4194303")
-				inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "address out of range", model.MessageLevel.Critical, model.CommonFaultCode.ConfigError)
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
-				continue
-			}
+			/*
+				if dev.AddressId <= 0 || dev.AddressId >= 4194303 {
+					inst.bacnetErrorMsg("address is not valid.  bacnet addresses must be between 1 and 4194303")
+					inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "address out of range", model.MessageLevel.Critical, model.CommonFaultCode.ConfigError)
+					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
+					continue
+				}
+			*/
 
 			pnt, err := inst.db.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
 			if pnt == nil || err != nil {
@@ -147,7 +149,7 @@ func (inst *Instance) BACnetPolling() error {
 				continue
 			}
 
-			inst.bacnetDebugMsg(fmt.Sprintf("BACNET POLL! : Priority: %s, Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s, WriteRequired: %t, ReadRequired: %t", pp.PollPriority, net.UUID, dev.UUID, pnt.UUID, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
+			// inst.bacnetDebugMsg(fmt.Sprintf("BACNET POLL! : Priority: %s, Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s, WriteRequired: %t, ReadRequired: %t", pp.PollPriority, net.UUID, dev.UUID, pnt.UUID, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
 
 			if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
 				inst.bacnetDebugMsg("polling not required on this point")
