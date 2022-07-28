@@ -9,13 +9,13 @@ import (
 
 func (pm *NetworkPollManager) pollQueueDebugMsg(args ...interface{}) {
 	if nstring.InEqualIgnoreCase(pm.Config.LogLevel, "DEBUG") {
-		prefix := "Modbus Poll Queue: "
+		prefix := fmt.Sprintf("%s Poll Queue: ", pm.PluginName)
 		log.Info(prefix, args)
 	}
 }
 
 func (pm *NetworkPollManager) pollQueueErrorMsg(args ...interface{}) {
-	prefix := "Modbus Poll Queue: "
+	prefix := fmt.Sprintf("%s Poll Queue: ", pm.PluginName)
 	log.Error(prefix, args)
 }
 
@@ -137,7 +137,7 @@ func (pm *NetworkPollManager) PrintPointDebugInfo(pnt *model.Point) {
 
 func (pm *NetworkPollManager) PrintPollingPointDebugInfo(pp *PollingPoint) {
 	if pp != nil {
-		pm.pollQueueDebugMsg(fmt.Sprintf("ModbusPolling() pp %+v", pp))
+		pm.pollQueueDebugMsg(fmt.Sprintf("PollingPoint pp %+v", pp))
 	}
 }
 

@@ -220,23 +220,11 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
 
-	if pointModel.OriginalValue != nil {
-		fmt.Println("updatePointValue() pointModel.OriginalValue 1:", *pointModel.OriginalValue)
-	}
-
 	pointModel, priority, presentValue, writeValue, isPriorityChanged := d.updatePriority(pointModel, priority)
 	ov := float.Copy(presentValue)
 	pointModel.OriginalValue = ov
 	wv := float.Copy(writeValue)
 	pointModel.WriteValueOriginal = wv
-
-	if presentValue != nil {
-		fmt.Println("updatePointValue() presentValue:", *presentValue)
-	}
-
-	if pointModel.OriginalValue != nil {
-		fmt.Println("updatePointValue() pointModel.OriginalValue 2:", *pointModel.OriginalValue)
-	}
 
 	presentValueTransformFault := false
 	transform, err := PointValueTransformOnRead(presentValue, pointModel.ScaleEnable, pointModel.LimitEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
@@ -248,7 +236,6 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.CommonFault.LastOk = time.Now().UTC()
 	}
 	if err != nil {
-		log.Errorln("point.db updatePointValue() error on present value transformation. error:", err)
 		pointModel.CommonFault.InFault = true
 		pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
 		pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
@@ -260,7 +247,6 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	}
 	val, err := pointUnits(presentValue, pointModel.Unit, pointModel.UnitTo)
 	if err != nil {
-		log.Errorln("ERROR on point invalid point unit")
 		pointModel.CommonFault.InFault = true
 		pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
 		pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
@@ -275,7 +261,6 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	if writeValue != nil {
 		transform, err = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
 		if err != nil {
-			log.Errorln("point.db updatePointValue() error on write value transformation. error:", err)
 			pointModel.CommonFault.InFault = true
 			pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
 			pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
@@ -287,10 +272,6 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		}
 	} else {
 		writeValueTransformFault = true
-	}
-	fmt.Println("updatePointValue() writeValueTransformFault:", writeValueTransformFault)
-	if writeValue != nil {
-		fmt.Println("updatePointValue() writeValue 2:", *writeValue)
 	}
 
 	// example for wires and modbus:

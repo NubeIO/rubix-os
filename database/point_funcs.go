@@ -49,12 +49,6 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 			priorityarray.ParsePriority(pointModel.Priority, priority, boolean.IsTrue(pointModel.IsTypeBool))
 		priorityMap = pm
 		isPriorityChanged = ipc
-		if highestValue != nil {
-			fmt.Println("updatePriority() highestValue", *highestValue)
-		}
-		if currentPriority != nil {
-			fmt.Println("updatePriority() currentPriority", *currentPriority)
-		}
 		if doesPriorityExist {
 			if currentPriority == nil && highestValue == nil && !float.IsNil(pointModel.Fallback) {
 				pointModel.Priority.P16 = float.New(*pointModel.Fallback)

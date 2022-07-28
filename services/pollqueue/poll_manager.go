@@ -31,6 +31,7 @@ type NetworkPollManager struct {
 	// References
 	FFNetworkUUID string
 	FFPluginUUID  string
+	PluginName    string
 
 	// Statistics
 	MaxPollExecuteTimeSecs        float64       // time in seconds for polling to complete (poll response time, doesn't include the time in queue).
@@ -141,7 +142,7 @@ func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { // This is tri
 	}
 }
 
-func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID string, maxPollRate float64) *NetworkPollManager {
+func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID, pluginName string, maxPollRate float64) *NetworkPollManager {
 	// Make the main priority polling queue
 	queue := make([]*PollingPoint, 0)
 	pq := &PriorityPollQueue{queue}
@@ -164,6 +165,7 @@ func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, f
 	pm.MaxPollRate = time.Duration(maxPollRate) * time.Second
 	pm.FFNetworkUUID = ffNetworkUUID
 	pm.FFPluginUUID = ffPluginUUID
+	pm.PluginName = pluginName
 	pm.ASAPPriorityMaxCycleTime, _ = time.ParseDuration("2m")
 	pm.HighPriorityMaxCycleTime, _ = time.ParseDuration("5m")
 	pm.NormalPriorityMaxCycleTime, _ = time.ParseDuration("15m")

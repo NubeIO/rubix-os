@@ -245,8 +245,8 @@ type Point struct {
 	} `json:"poll_rate"`
 	ScaleEnable struct {
 		Type        string `json:"type" default:"bool"`
-		Required    bool   `json:"required" default:"false"`
-		Default     string `json:"default" default:"false"`
+		Required    bool   `json:"required" default:"true"`
+		Default     *bool  `json:"default" default:"false"`
 		DisplayName string `json:"display_name" default:"Scale/Limit Enable"`
 	} `json:"scale_enable"`
 	ScaleInMin struct {
@@ -258,7 +258,7 @@ type Point struct {
 	ScaleInMax struct {
 		Type        string `json:"type" default:"float"`
 		Required    bool   `json:"required" default:"false"`
-		Default     string `json:"default" default:"10"`
+		Default     string `json:"default" default:"0"`
 		DisplayName string `json:"display_name" default:"Scale: Input Max"`
 	} `json:"scale_in_max"`
 	ScaleOutMin struct {
@@ -270,7 +270,7 @@ type Point struct {
 	ScaleOutMax struct {
 		Type        string `json:"type" default:"float"`
 		Required    bool   `json:"required" default:"false"`
-		Default     string `json:"default" default:"100"`
+		Default     string `json:"default" default:"0"`
 		DisplayName string `json:"display_name" default:"Scale/Limit: Output Max"`
 	} `json:"scale_out_max"`
 	MultiplicationFactor struct {

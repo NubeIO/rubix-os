@@ -36,6 +36,7 @@ type Instance struct {
 	store               cachestore.Handler
 	bus                 eventbus.BusService
 	pluginUUID          string
+	pluginName          string
 	networks            []*model.Network
 	pollingEnabled      bool
 	pollingCancel       func()
@@ -60,7 +61,7 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 	return &Instance{}
 }
 
-func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID string, maxPollRate float64) *pollqueue.NetworkPollManager {
+func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID, pluginName string, maxPollRate float64) *pollqueue.NetworkPollManager {
 	// Make the main priority polling queue
 	queue := make([]*pollqueue.PollingPoint, 0)
 	pq := &pollqueue.PriorityPollQueue{PriorityQueue: queue}
@@ -83,6 +84,7 @@ func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetw
 	pm.MaxPollRate = time.Duration(maxPollRate) * time.Second
 	pm.FFNetworkUUID = ffNetworkUUID
 	pm.FFPluginUUID = ffPluginUUID
+	pm.PluginName = pluginName
 	pm.ASAPPriorityMaxCycleTime, _ = time.ParseDuration("2m")
 	pm.HighPriorityMaxCycleTime, _ = time.ParseDuration("5m")
 	pm.NormalPriorityMaxCycleTime, _ = time.ParseDuration("15m")

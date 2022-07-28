@@ -8,6 +8,7 @@ import (
 func (inst *Instance) Enable() error {
 	inst.edge28DebugMsg("Edge28 Enable()")
 	inst.enabled = true
+	inst.pluginName = name
 	inst.setUUID()
 	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
 	if nets != nil {
