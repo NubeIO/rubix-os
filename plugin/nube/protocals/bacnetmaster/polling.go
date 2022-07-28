@@ -101,7 +101,7 @@ func (inst *Instance) BACnetPolling() error {
 
 			if pp.FFNetworkUUID != net.UUID {
 				inst.bacnetErrorMsg("PollingPoint FFNetworkUUID does not match the Network UUID")
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
 				continue
 			}
 			netPollMan.PrintPollQueuePointUUIDs()
@@ -111,13 +111,13 @@ func (inst *Instance) BACnetPolling() error {
 			dev, err := inst.db.GetDevice(pp.FFDeviceUUID, devArg)
 			if dev == nil || err != nil {
 				inst.bacnetErrorMsg("could not find deviceID:", pp.FFDeviceUUID)
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
 				continue
 			}
 			if !boolean.IsTrue(dev.Enable) {
 				inst.bacnetErrorMsg("device is disabled.")
 				inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.NEVER_RETRY, callback)
 				continue
 			}
 			/*
@@ -132,7 +132,7 @@ func (inst *Instance) BACnetPolling() error {
 			pnt, err := inst.db.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
 			if pnt == nil || err != nil {
 				inst.bacnetErrorMsg("could not find pointID: ", pp.FFPointUUID)
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
 				continue
 			}
 
@@ -145,7 +145,7 @@ func (inst *Instance) BACnetPolling() error {
 
 			if !boolean.IsTrue(pnt.Enable) {
 				inst.bacnetErrorMsg("point is disabled.")
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.NEVER_RETRY, callback)
 				continue
 			}
 
@@ -153,7 +153,7 @@ func (inst *Instance) BACnetPolling() error {
 
 			if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
 				inst.bacnetDebugMsg("polling not required on this point")
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
 				continue
 			}
 
@@ -207,7 +207,7 @@ func (inst *Instance) BACnetPolling() error {
 					err = inst.doWrite(pnt, net.UUID, dev.UUID)
 					if err != nil {
 						err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-						netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
+						netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
 						continue
 					}
 					responseValue = float.NonNil(pnt.WriteValue)
@@ -224,13 +224,13 @@ func (inst *Instance) BACnetPolling() error {
 				responseValue, err = inst.doReadValue(pnt, net.UUID, dev.UUID)
 				if err != nil {
 					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
-					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
+					netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
 					continue
 				}
 				isChange := !float.ComparePtrValues(pnt.PresentValue, &responseValue)
 				if isChange {
 					if err != nil {
-						netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, callback)
+						netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, pollqueue.NORMAL_RETRY, callback)
 						continue
 					}
 				}
@@ -260,7 +260,7 @@ func (inst *Instance) BACnetPolling() error {
 			*/
 
 			// This callback function triggers the PollManager to evaluate whether the point should be re-added to the PollQueue (Never, Immediately, or after the Poll Rate Delay)
-			netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, callback)
+			netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, pollqueue.NORMAL_RETRY, callback)
 
 		}
 		return false, nil
