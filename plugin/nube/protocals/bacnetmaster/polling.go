@@ -206,6 +206,7 @@ func (inst *Instance) BACnetPolling() error {
 				if pnt.WriteValue != nil {
 					err = inst.doWrite(pnt, net.UUID, dev.UUID)
 					if err != nil {
+						inst.bacnetErrorMsg("point write error: ", err)
 						err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 						netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
 						continue
@@ -223,6 +224,7 @@ func (inst *Instance) BACnetPolling() error {
 			if boolean.IsTrue(pnt.ReadPollRequired) { // DO READ IF REQUIRED
 				responseValue, err = inst.doReadValue(pnt, net.UUID, dev.UUID)
 				if err != nil {
+					inst.bacnetErrorMsg("point read error: ", err)
 					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
 					continue
