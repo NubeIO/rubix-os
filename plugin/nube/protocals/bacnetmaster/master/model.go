@@ -222,7 +222,7 @@ type Point struct {
 	WriteMode struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"read_only\",\"write_only\",\"write_once_then_read\"]"`
+		Options  []string `json:"options" default:"[\"read_once\",\"read_only\",\"write_once\",\"write_once_read_once\",\"write_always\",\"write_once_then_read\",\"write_and_maintain\"]"`
 		Default  string   `json:"default" default:"read_only"`
 	} `json:"write_mode"`
 	WritePriority struct {

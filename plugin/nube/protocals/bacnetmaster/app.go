@@ -529,7 +529,7 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess
 	if readSuccess {
 		point.OriginalValue = float.New(value)
 	}
-	_, err := inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
+	point, err := inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
 	if err != nil {
 		inst.bacnetDebugMsg("BACNET UPDATE POINT UpdatePoint() error: ", err)
 		return nil, err

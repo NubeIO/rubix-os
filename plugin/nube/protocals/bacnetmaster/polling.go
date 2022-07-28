@@ -221,7 +221,7 @@ func (inst *Instance) BACnetPolling() error {
 
 			readSuccess := false
 			if boolean.IsTrue(pnt.ReadPollRequired) { // DO READ IF REQUIRED
-				responseValue, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
+				responseValue, err = inst.doReadValue(pnt, net.UUID, dev.UUID)
 				if err != nil {
 					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
@@ -245,7 +245,7 @@ func (inst *Instance) BACnetPolling() error {
 			if readSuccess || writeValueToPresentVal {
 				if writeValueToPresentVal {
 					responseValue = *pnt.WriteValue
-					// fmt.Println("BACnetPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
+					fmt.Println("BACnetPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
 					readSuccess = true
 				}
 				_, err = inst.pointUpdate(pnt, responseValue, readSuccess, true)

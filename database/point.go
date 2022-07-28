@@ -220,14 +220,22 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
 
+	if pointModel.OriginalValue != nil {
+		fmt.Println("updatePointValue() pointModel.OriginalValue 1:", *pointModel.OriginalValue)
+	}
+
 	pointModel, priority, presentValue, writeValue, isPriorityChanged := d.updatePriority(pointModel, priority)
 	ov := float.Copy(presentValue)
 	pointModel.OriginalValue = ov
 	wv := float.Copy(writeValue)
 	pointModel.WriteValueOriginal = wv
 
-	if writeValue != nil {
-		fmt.Println("updatePointValue() writeValue:", *writeValue)
+	if presentValue != nil {
+		fmt.Println("updatePointValue() presentValue:", *presentValue)
+	}
+
+	if pointModel.OriginalValue != nil {
+		fmt.Println("updatePointValue() pointModel.OriginalValue 2:", *pointModel.OriginalValue)
 	}
 
 	presentValueTransformFault := false
