@@ -227,7 +227,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	pointModel.WriteValueOriginal = wv
 
 	presentValueTransformFault := false
-	transform, err := PointValueTransformOnRead(presentValue, pointModel.ScaleEnable, pointModel.LimitEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
+	transform, err := PointValueTransformOnRead(presentValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
 	if afterRealDeviceUpdate {
 		pointModel.CommonFault.InFault = false
 		pointModel.CommonFault.MessageLevel = model.MessageLevel.Info
