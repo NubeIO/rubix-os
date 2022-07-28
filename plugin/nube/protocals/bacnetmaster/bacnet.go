@@ -45,8 +45,12 @@ func (inst *Instance) bacnetNetworkInit() {
 }
 
 func (inst *Instance) initBacStore() {
-	inst.BacStore = network.NewStore()
-	inst.bacnetNetworkInit()
+	if inst.BacStore == nil {
+		inst.BacStore = network.NewStore()
+		inst.bacnetNetworkInit()
+	} else {
+		inst.bacnetNetworkInit()
+	}
 }
 
 // bacnetNetwork add or update an instance a bacnet network that is cached in bacnet lib
