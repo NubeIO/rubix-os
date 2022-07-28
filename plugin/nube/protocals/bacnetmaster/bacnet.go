@@ -81,6 +81,9 @@ func (inst *Instance) getBacnetStoreDevice(deviceUUID string) (*network.Device, 
 
 // bacnetDevice add or update an instance of a created bacnet device that is cached in bacnet lib
 func (inst *Instance) bacnetStoreDevice(dev *model.Device) error {
+	if dev == nil {
+		return errors.New("device can not be empty")
+	}
 	max := intToUint32(integer.NonNil(dev.MaxADPU))
 	seg := uint32(setSegmentation(dev.Segmentation))
 	d := &network.Device{

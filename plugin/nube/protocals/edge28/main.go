@@ -32,6 +32,7 @@ type Instance struct {
 	store          cachestore.Handler
 	bus            eventbus.BusService
 	pluginUUID     string
+	pluginName     string
 	networks       []*model.Network
 	pollingEnabled bool
 	pollingCancel  func()

@@ -10,6 +10,7 @@ import (
 func (inst *Instance) Enable() error {
 	inst.modbusDebugMsg("MODBUS Enable()")
 	inst.enabled = true
+	inst.pluginName = name
 	inst.setUUID()
 
 	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
@@ -27,7 +28,7 @@ func (inst *Instance) Enable() error {
 			for _, net := range nets {                                          // Create a new Poll Manager for each network in the plugin.
 				conf := inst.GetConfig().(*Config)
 				pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
-				pollManager := NewPollManager(&pollQueueConfig, &inst.db, net.UUID, inst.pluginUUID, float.NonNil(net.MaxPollRate))
+				pollManager := NewPollManager(&pollQueueConfig, &inst.db, net.UUID, inst.pluginUUID, inst.pluginName, float.NonNil(net.MaxPollRate))
 				// inst.modbusDebugMsg("net")
 				// inst.modbusDebugMsg("%+v\n", net)
 				// inst.modbusDebugMsg("pollManager")

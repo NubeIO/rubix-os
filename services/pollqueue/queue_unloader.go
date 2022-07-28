@@ -77,7 +77,7 @@ func (pm *NetworkPollManager) StopQueueUnloader() {
 }
 
 // This function should be called from the Polling service.
-func (pm *NetworkPollManager) GetNextPollingPoint() (pp *PollingPoint, callback func(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate bool)) {
+func (pm *NetworkPollManager) GetNextPollingPoint() (pp *PollingPoint, callback func(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool)) {
 	// pm.pollQueueDebugMsg("GetNextPollingPoint()")
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint != nil {
 		pp := pm.PluginQueueUnloader.NextPollPoint

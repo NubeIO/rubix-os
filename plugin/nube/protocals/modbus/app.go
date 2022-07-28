@@ -32,10 +32,11 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	if boolean.IsTrue(network.Enable) {
 		conf := inst.GetConfig().(*Config)
 		pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
-		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, inst.pluginUUID, float.NonNil(network.MaxPollRate))
+		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, inst.pluginUUID, inst.pluginName, float.NonNil(network.MaxPollRate))
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
 	} else {
+		err = inst.networkUpdateErr(network, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.NetworkError)
 		err = inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.NetworkError, true)
 	}
 	return network, nil
@@ -57,7 +58,8 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	inst.modbusDebugMsg("addDevice(): ", body.UUID)
 
 	if boolean.IsFalse(device.Enable) {
-		inst.db.SetErrorsForAllPointsOnDevice(device.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
+		err = inst.deviceUpdateErr(device, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
+		err = inst.db.SetErrorsForAllPointsOnDevice(device.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
 	}
 
 	// NOTHING TO DO ON DEVICE CREATED
@@ -109,10 +111,11 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 		// DO POLLING ENABLE ACTIONS FOR POINT
 		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
-		pp.PollPriority = point.PollPriority
-		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 		// netPollMan.PollQueue.AddPollingPoint(pp)
 		// netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
+	} else {
+		err = inst.pointUpdateErr(point, "point disabled", model.MessageLevel.Warning, model.CommonFaultCode.PointError)
 	}
 	return point, nil
 
@@ -130,8 +133,14 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		body.CommonFault.InFault = true
 		body.CommonFault.MessageLevel = model.MessageLevel.Warning
 		body.CommonFault.MessageCode = model.CommonFaultCode.NetworkError
-		body.CommonFault.Message = errors.New("network disabled").Error()
+		body.CommonFault.Message = "network disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
+	} else {
+		body.CommonFault.InFault = false
+		body.CommonFault.MessageLevel = model.MessageLevel.Info
+		body.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		body.CommonFault.Message = ""
+		body.CommonFault.LastOk = time.Now().UTC()
 	}
 
 	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
@@ -152,11 +161,6 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	} else if boolean.IsTrue(network.Enable) && netPollMan.Enable == false {
 		// DO POLLING Enable ACTIONS
 		netPollMan.StartPolling()
-		network.CommonFault.InFault = false
-		network.CommonFault.MessageLevel = model.MessageLevel.Info
-		network.CommonFault.MessageCode = model.CommonFaultCode.Ok
-		network.CommonFault.Message = errors.New("").Error()
-		network.CommonFault.LastOk = time.Now().UTC()
 		inst.db.ClearErrorsForAllDevicesOnNetwork(network.UUID, true)
 	}
 
@@ -181,70 +185,69 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		body.CommonFault.MessageCode = model.CommonFaultCode.DeviceError
 		body.CommonFault.Message = "device disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
+	} else {
+		body.CommonFault.InFault = false
+		body.CommonFault.MessageLevel = model.MessageLevel.Info
+		body.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		body.CommonFault.Message = ""
+		body.CommonFault.LastOk = time.Now().UTC()
 	}
 
-	dev, err := inst.db.UpdateDevice(body.UUID, body, true)
-	if err != nil || dev == nil {
+	device, err = inst.db.UpdateDevice(body.UUID, body, true)
+	if err != nil || device == nil {
 		return nil, err
 	}
 
-	if boolean.IsTrue(dev.Enable) { // If Enabled we need to GetDevice so we get Points
-		dev, err = inst.db.GetDevice(dev.UUID, api.Args{WithPoints: true})
-		if err != nil || dev == nil {
+	if boolean.IsTrue(device.Enable) { // If Enabled we need to GetDevice so we get Points
+		device, err = inst.db.GetDevice(device.UUID, api.Args{WithPoints: true})
+		if err != nil || device == nil {
 			return nil, err
 		}
 	}
 
-	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
+	netPollMan, err := inst.getNetworkPollManagerByUUID(device.NetworkUUID)
 	if netPollMan == nil || err != nil {
-		inst.modbusDebugMsg("updateDevice(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
+		inst.modbusDebugMsg("updateDevice(): cannot find NetworkPollManager for network: ", device.NetworkUUID)
 		return
 	}
-	if boolean.IsFalse(dev.Enable) && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
+	if boolean.IsFalse(device.Enable) && netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(device.UUID) {
 		// DO POLLING DISABLE ACTIONS FOR DEVICE
-		inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
-		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
+		inst.db.SetErrorsForAllPointsOnDevice(device.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
+		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(device.UUID)
 
-	} else if boolean.IsTrue(dev.Enable) && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID) {
+	} else if boolean.IsTrue(device.Enable) && !netPollMan.PollQueue.CheckIfActiveDevicesListIncludes(device.UUID) {
 		// DO POLLING ENABLE ACTIONS FOR DEVICE
-		dev.CommonFault.InFault = false
-		dev.CommonFault.MessageLevel = model.MessageLevel.Info
-		dev.CommonFault.MessageCode = model.CommonFaultCode.Ok
-		dev.CommonFault.Message = ""
-		dev.CommonFault.LastOk = time.Now().UTC()
-		err = inst.db.ClearErrorsForAllPointsOnDevice(dev.UUID)
+		err = inst.db.ClearErrorsForAllPointsOnDevice(device.UUID)
 		if err != nil {
 			inst.modbusDebugMsg("updateDevice(): error on ClearErrorsForAllPointsOnDevice(): ", err)
 		}
-		for _, pnt := range dev.Points {
+		for _, pnt := range device.Points {
 			if boolean.IsTrue(pnt.Enable) {
-				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
-				pp.PollPriority = pnt.PollPriority
-				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, device.NetworkUUID, netPollMan.FFPluginUUID)
+				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 				// netPollMan.PollQueue.AddPollingPoint(pp)  //This is the original tested way, above is new so that on device update, it will re-poll write-once points
 			}
 		}
 
-	} else if boolean.IsTrue(dev.Enable) {
+	} else if boolean.IsTrue(device.Enable) {
 		// TODO: Currently on every device update, all device points are removed, and re-added.
-		dev.CommonFault.InFault = false
-		dev.CommonFault.MessageLevel = model.MessageLevel.Info
-		dev.CommonFault.MessageCode = model.CommonFaultCode.Ok
-		dev.CommonFault.Message = ""
-		dev.CommonFault.LastOk = time.Now().UTC()
-		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
-		for _, pnt := range dev.Points {
+		device.CommonFault.InFault = false
+		device.CommonFault.MessageLevel = model.MessageLevel.Info
+		device.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		device.CommonFault.Message = ""
+		device.CommonFault.LastOk = time.Now().UTC()
+		netPollMan.PollQueue.RemovePollingPointByDeviceUUID(device.UUID)
+		for _, pnt := range device.Points {
 			if boolean.IsTrue(pnt.Enable) {
-				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
-				pp.PollPriority = pnt.PollPriority
-				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, device.NetworkUUID, netPollMan.FFPluginUUID)
+				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 				// netPollMan.PollQueue.AddPollingPoint(pp)  //This is the original tested way, above is new so that on device update, it will re-poll write-once points
 			}
 		}
 	}
 	// TODO: NEED TO ACCOUNT FOR OTHER CHANGES ON DEVICE.  It would be useful to have a way to know if the device polling rates were changed.
 
-	device, err = inst.db.UpdateDevice(dev.UUID, dev, true)
+	device, err = inst.db.UpdateDevice(device.UUID, device, true)
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +283,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.InFault = true
 		body.CommonFault.MessageLevel = model.MessageLevel.Fail
 		body.CommonFault.MessageCode = model.CommonFaultCode.PointError
-		body.CommonFault.Message = errors.New("point disabled").Error()
+		body.CommonFault.Message = "point disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
@@ -308,15 +311,13 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		// DO POLLING ENABLE ACTIONS FOR POINT
 		// TODO: review these steps to check that UpdatePollingPointByUUID might work better?
 		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
-		pp.PollPriority = point.PollPriority
-		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 		// netPollMan.PollQueue.AddPollingPoint(pp)
 		// netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
 	} else {
 		// DO POLLING DISABLE ACTIONS FOR POINT
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 	}
-
 	return point, nil
 }
 
@@ -401,7 +402,8 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 				}
 			}
 			pp.PollPriority = model.PRIORITY_ASAP
-			netPollMan.PollQueue.AddPollingPoint(pp)
+			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+			// netPollMan.PollQueue.AddPollingPoint(pp)
 			// netPollMan.PollQueue.UpdatePollingPointByPointUUID(point.UUID, model.PRIORITY_ASAP)
 
 			/*
@@ -409,8 +411,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 				//DO POLLING ENABLE ACTIONS FOR POINT
 				//TODO: review these steps to check that UpdatePollingPointByUUID might work better?
 				pp := pollqueue.NewPollingPoint(body.UUID, body.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
-				pp.PollPriority = body.PollPriority
-				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 				//netPollMan.PollQueue.AddPollingPoint(pp)
 				//netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
 			*/
@@ -486,7 +487,6 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	}
 
 	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
-
 	if netPollMan == nil || err != nil {
 		inst.modbusDebugMsg("addPoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
 		_ = inst.pointUpdateErr(body, "cannot find NetworkPollManager for network", model.MessageLevel.Fail, model.CommonFaultCode.SystemError)

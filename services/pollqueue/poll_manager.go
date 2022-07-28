@@ -31,6 +31,7 @@ type NetworkPollManager struct {
 	// References
 	FFNetworkUUID string
 	FFPluginUUID  string
+	PluginName    string
 
 	// Statistics
 	MaxPollExecuteTimeSecs        float64       // time in seconds for polling to complete (poll response time, doesn't include the time in queue).
@@ -141,7 +142,7 @@ func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { // This is tri
 	}
 }
 
-func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID string, maxPollRate float64) *NetworkPollManager {
+func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID, pluginName string, maxPollRate float64) *NetworkPollManager {
 	// Make the main priority polling queue
 	queue := make([]*PollingPoint, 0)
 	pq := &PriorityPollQueue{queue}
@@ -164,6 +165,7 @@ func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, f
 	pm.MaxPollRate = time.Duration(maxPollRate) * time.Second
 	pm.FFNetworkUUID = ffNetworkUUID
 	pm.FFPluginUUID = ffPluginUUID
+	pm.PluginName = pluginName
 	pm.ASAPPriorityMaxCycleTime, _ = time.ParseDuration("2m")
 	pm.HighPriorityMaxCycleTime, _ = time.ParseDuration("5m")
 	pm.NormalPriorityMaxCycleTime, _ = time.ParseDuration("15m")
@@ -172,18 +174,16 @@ func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, f
 }
 
 func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUID string) time.Duration {
-	pm.pollQueueDebugMsg("GetPollRateDuration(): ", rate)
 	var arg api.Args
 	device, err := pm.DBHandlerRef.GetDevice(deviceUUID, arg)
 	if err != nil {
 		pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.GetPollRateDuration(): couldn't find device %s/n", deviceUUID))
 	}
-	pm.pollQueueDebugMsg("GetPollRateDuration() device poll times: ", device.FastPollRate, device.NormalPollRate, device.SlowPollRate)
+	// pm.pollQueueDebugMsg("GetPollRateDuration() device poll times: ", device.FastPollRate, device.NormalPollRate, device.SlowPollRate)
 
 	var duration time.Duration
 	switch rate {
 	case model.RATE_FAST:
-		pm.pollQueueDebugMsg("GetPollRateDuration(): FAST")
 		fastRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.FastPollRate))
 		if fastRateDuration <= 100*time.Millisecond {
 			duration = 10 * time.Second
@@ -192,7 +192,6 @@ func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUI
 		}
 
 	case model.RATE_NORMAL:
-		pm.pollQueueDebugMsg("GetPollRateDuration(): NORMAL")
 		normalRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.NormalPollRate))
 		if normalRateDuration <= 500*time.Millisecond {
 			duration = 30 * time.Second
@@ -201,7 +200,6 @@ func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUI
 		}
 
 	case model.RATE_SLOW:
-		pm.pollQueueDebugMsg("GetPollRateDuration(): SLOW")
 		slowRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.SlowPollRate))
 		if slowRateDuration <= 1*time.Second {
 			duration = 120 * time.Second
@@ -226,11 +224,11 @@ func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUI
 	return duration
 }
 
-func (pm *NetworkPollManager) PollingFinished(pp *PollingPoint, pollStartTime time.Time, writeSuccess, readSuccess bool, callback func(pp *PollingPoint, writeSuccess bool, readSuccess bool, pollTimeSecs float64, pointUpdate bool)) {
+func (pm *NetworkPollManager) PollingFinished(pp *PollingPoint, pollStartTime time.Time, writeSuccess, readSuccess bool, callback func(pp *PollingPoint, writeSuccess bool, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool)) {
 	pollEndTime := time.Now()
 	pollDuration := pollEndTime.Sub(pollStartTime)
 	pollTimeSecs := pollDuration.Seconds()
-	callback(pp, writeSuccess, readSuccess, pollTimeSecs, false) // (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool)
+	callback(pp, writeSuccess, readSuccess, pollTimeSecs, false, true) // (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool)
 }
 
 func (pm *NetworkPollManager) PollQueueErrorChecking() {
@@ -281,8 +279,7 @@ func (pm *NetworkPollManager) PollQueueErrorChecking() {
 						if pp == nil || err != nil {
 							pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Polling point doesn't exist for point ", pnt.Name, "/n")
 							pp = NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, pm.FFPluginUUID)
-							pp.PollPriority = pnt.PollPriority
-							pm.PollingPointCompleteNotification(pp, false, false, 0, true) // This will perform the queue re-add actions based on Point WriteMode.
+							pm.PollingPointCompleteNotification(pp, false, false, 0, true, true) // This will perform the queue re-add actions based on Point WriteMode.
 						}
 						continue
 					}

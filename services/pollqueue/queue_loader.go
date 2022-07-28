@@ -53,7 +53,7 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	return nil
 }
 
-func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate bool) {
+func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool) {
 	pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, pollTimeSecs))
 
 	_, success := pm.PollQueue.OutstandingPollingPoints.RemovePollingPointByPointUUID(pp.FFPointUUID)
@@ -72,7 +72,9 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 	}
 	// TODO: potentially only required on writeSuccess (but possibility of lockup on a bad point)
 	// Reset poll priority to set value (in cases where pp has been escalated to ASAP).
-	pp.PollPriority = point.PollPriority
+	if resetToConfiguredPriority {
+		pp.PollPriority = point.PollPriority
+	}
 
 	val, ok := pm.PollQueue.PointsUpdatedWhilePolling[point.UUID]
 	if ok {
@@ -113,10 +115,9 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 
 	case model.ReadOnly: // ReadOnly          Re-add with ReadPollRequired true, WritePollRequired false.
 		point.WritePollRequired = boolean.NewFalse()
+		point.ReadPollRequired = boolean.NewTrue()
 		if readSuccess {
-			point.ReadPollRequired = boolean.NewFalse()
 			duration := pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID)
-			// pm.pollQueueDebugMsg("duration: ", duration)
 			// This line sets a timer to re-add the point to the poll queue after the PollRate time.
 			pp.RepollTimer = time.AfterFunc(duration, pm.MakePollingPointRepollCallback(pp, point.WriteMode))
 			addSuccess := pm.PollQueue.StandbyPollingPoints.AddPollingPoint(pp)
@@ -124,11 +125,8 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 				pm.pollQueueErrorMsg(fmt.Sprintf("Modbus PollingPointCompleteNotification(): polling point could not be added to StandbyPollingPoints slice.  (%s)", pp.FFPointUUID))
 			}
 		} else {
-			pm.pollQueueDebugMsg("PollingPointCompleteNotification: NOT readSuccess")
-			point.ReadPollRequired = boolean.NewTrue()
 			pp.LockupAlertTimer = pm.MakeLockupTimerFunc(pp.PollPriority) // starts a countdown for queue lockup alerts.  TODO: This might conflict with pausing polling on PortUnavailable
-			pm.pollQueueDebugMsg("PollingPointCompleteNotification: ABOUT TO ADD POINT")
-			pm.PollQueue.AddPollingPoint(pp) // re-add to poll queue immediately
+			pm.PollQueue.AddPollingPoint(pp)                              // re-add to poll queue immediately
 		}
 
 	case model.WriteOnce: // WriteOnce         If write_successful then don't re-add.
@@ -190,7 +188,6 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		point.WritePollRequired = boolean.NewTrue()
 		if writeSuccess {
 			duration := pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID)
-			// pm.pollQueueDebugMsg("duration: ", duration)
 			// This line sets a timer to re-add the point to the poll queue after the PollRate time.
 			pp.RepollTimer = time.AfterFunc(duration, pm.MakePollingPointRepollCallback(pp, point.WriteMode))
 			addSuccess := pm.PollQueue.StandbyPollingPoints.AddPollingPoint(pp)
@@ -260,7 +257,6 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 			} else {
 				point.WritePollRequired = boolean.NewFalse()
 				duration := pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID)
-				// pm.pollQueueDebugMsg("duration: ", duration)
 				// This line sets a timer to re-add the point to the poll queue after the PollRate time.
 				pp.RepollTimer = time.AfterFunc(duration, pm.MakePollingPointRepollCallback(pp, point.WriteMode))
 				addSuccess := pm.PollQueue.StandbyPollingPoints.AddPollingPoint(pp)
@@ -299,7 +295,7 @@ func (pm *NetworkPollManager) MakePollingPointRepollCallback(pp *PollingPoint, w
 			pm.pollQueueErrorMsg(fmt.Sprintf("Modbus MakePollingPointRepollCallback(): polling point could not be found in StandbyPollingPoints.  (%s)", pp.FFPointUUID))
 		}
 
-		point, err := pm.DBHandlerRef.GetPoint(pp.FFPointUUID, api.Args{})
+		point, err := pm.DBHandlerRef.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
 		if point == nil || err != nil {
 			pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s", pp.FFPointUUID))
 			return
@@ -409,7 +405,6 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 
 		}
 	}
-	f()
 	return time.AfterFunc(timeoutDuration, f)
 }
 
