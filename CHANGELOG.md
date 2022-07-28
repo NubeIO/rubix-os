@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.6.3](https://github.com/NubeIO/flow-framework/tree/v0.6.3) (2022-07-28)
+
+- Fixed bacnet polling
+- Implemented point value transformations (factor, scale, limit, offset)
+
 ## [v0.6.2](https://github.com/NubeIO/flow-framework/tree/v0.6.2) (2022-07-27)
 
 - Merge pull request #579 from NubeIO/add/ff-error-drill-down-functions
