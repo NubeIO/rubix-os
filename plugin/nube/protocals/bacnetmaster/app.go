@@ -251,7 +251,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 			if boolean.IsTrue(pnt.Enable) {
 				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, device.NetworkUUID, netPollMan.FFPluginUUID)
 				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true, pollqueue.NORMAL_RETRY) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
-				//netPollMan.PollQueue.AddPollingPoint(pp)  //This is the original tested way, above is new so that on device update, it will re-poll write-once points
+				// netPollMan.PollQueue.AddPollingPoint(pp)  //This is the original tested way, above is new so that on device update, it will re-poll write-once points
 			}
 		}
 
@@ -267,7 +267,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 			if boolean.IsTrue(pnt.Enable) {
 				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, device.NetworkUUID, netPollMan.FFPluginUUID)
 				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true, pollqueue.NORMAL_RETRY) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
-				//netPollMan.PollQueue.AddPollingPoint(pp)  //This is the original tested way, above is new so that on device update, it will re-poll write-once points
+				// netPollMan.PollQueue.AddPollingPoint(pp)  //This is the original tested way, above is new so that on device update, it will re-poll write-once points
 			}
 		}
 	}
@@ -398,7 +398,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	}
 
 	if boolean.IsTrue(point.Enable) {
-		if isWriteValueChange { //if the write value has changed, we need to re-add the point so that it is polled asap (if required)
+		if isWriteValueChange { // if the write value has changed, we need to re-add the point so that it is polled asap (if required)
 			pp, _ := netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 			if pp == nil {
 				if netPollMan.PollQueue.OutstandingPollingPoints.GetPollingPointIndexByPointUUID(point.UUID) > -1 {

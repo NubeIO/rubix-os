@@ -20,7 +20,7 @@ func (inst *Instance) bacnetErrorMsg(args ...interface{}) {
 }
 
 func (inst *Instance) printPointDebugInfo(pnt *model.Point) {
-	if nstring.InEqualIgnoreCase(inst.config.LogLevel, "DEBUG") { //Added here to disable debug processes when not using logging
+	if nstring.InEqualIgnoreCase(inst.config.LogLevel, "DEBUG") { // Added here to disable debug processes when not using logging
 		printString := "\n\n"
 		if pnt != nil {
 			printString += fmt.Sprint("Point: ", pnt.UUID, " ", pnt.Name, "\n")

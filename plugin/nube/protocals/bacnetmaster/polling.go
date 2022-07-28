@@ -95,7 +95,7 @@ func (inst *Instance) BACnetPolling() error {
 			pp, callback := netPollMan.GetNextPollingPoint() // callback function is called once polling is completed.
 			// pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			if pp == nil {
-				//inst.bacnetDebugMsg("No PollingPoint available in Network ", net.UUID)
+				// inst.bacnetDebugMsg("No PollingPoint available in Network ", net.UUID)
 				continue
 			}
 

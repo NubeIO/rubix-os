@@ -95,8 +95,8 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 
 	body.IsTypeBool = nils.NewBool(isTypeBool)
-	body.WritePollRequired = nils.NewBool(isOutput) //write value immediately if it is an output point
-	body.ReadPollRequired = nils.NewBool(!isOutput) //only read value if it isn't an output point
+	body.WritePollRequired = nils.NewBool(isOutput) // write value immediately if it is an output point
+	body.ReadPollRequired = nils.NewBool(!isOutput) // only read value if it isn't an output point
 
 	if body.WriteValue != nil {
 		body.WriteValue = limitValueByEdge28Type(body.IoType, body.WriteValue)
