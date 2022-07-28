@@ -127,7 +127,7 @@ func PointEval(val *float64, evalString string) (value *float64, err error) {
 	return val, nil
 }
 
-func PointValueTransformOnRead(originalValue *float64, scaleEnable, limitEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax, offset *float64) (transformedValue *float64, err error) {
+func PointValueTransformOnRead(originalValue *float64, scaleEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax, offset *float64) (transformedValue *float64, err error) {
 	if originalValue == nil {
 		return nil, errors.New("input value is undefined")
 	}
