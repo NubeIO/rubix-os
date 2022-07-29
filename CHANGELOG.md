@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.6.4](https://github.com/NubeIO/flow-framework/tree/v0.6.4) (2022-07-29)
+
+- Improvements to poll queue, modbus, and bacnet
+
 ## [v0.6.3](https://github.com/NubeIO/flow-framework/tree/v0.6.3) (2022-07-28)
 
 - Fixed bacnet polling
