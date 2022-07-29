@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"math"
 	"time"
@@ -175,51 +176,60 @@ func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, f
 
 func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUID string) time.Duration {
 	var arg api.Args
-	device, err := pm.DBHandlerRef.GetDevice(deviceUUID, arg)
-	if err != nil {
-		pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.GetPollRateDuration(): couldn't find device %s/n", deviceUUID))
-	}
-	// pm.pollQueueDebugMsg("GetPollRateDuration() device poll times: ", device.FastPollRate, device.NormalPollRate, device.SlowPollRate)
-
 	var duration time.Duration
-	switch rate {
-	case model.RATE_FAST:
-		fastRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.FastPollRate))
-		if fastRateDuration <= 100*time.Millisecond {
-			duration = 10 * time.Second
-		} else {
-			duration = fastRateDuration
+
+	if pm.DBHandlerRef != nil {
+		device, err := pm.DBHandlerRef.GetDevice(deviceUUID, arg)
+		if err != nil {
+			pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.GetPollRateDuration(): couldn't find device %s/n", deviceUUID))
+		}
+		// Get durations from device
+		switch rate {
+		case model.RATE_FAST:
+			fastRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", float.NonNil(device.FastPollRate)))
+			if fastRateDuration <= 100*time.Millisecond {
+				duration = 10 * time.Second
+			} else {
+				duration = fastRateDuration
+			}
+
+		case model.RATE_NORMAL:
+			normalRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", float.NonNil(device.NormalPollRate)))
+			if normalRateDuration <= 500*time.Millisecond {
+				duration = 30 * time.Second
+			} else {
+				duration = normalRateDuration
+			}
+
+		case model.RATE_SLOW:
+			slowRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", float.NonNil(device.SlowPollRate)))
+			if slowRateDuration <= 1*time.Second {
+				duration = 120 * time.Second
+			} else {
+				duration = slowRateDuration
+			}
+
+		default:
+			pm.pollQueueDebugMsg("GetPollRateDuration(): UNKNOWN")
+			normalRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.NormalPollRate))
+			if normalRateDuration <= 500*time.Millisecond {
+				duration = 30 * time.Second
+			} else {
+				duration = normalRateDuration
+			}
 		}
 
-	case model.RATE_NORMAL:
-		normalRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.NormalPollRate))
-		if normalRateDuration <= 500*time.Millisecond {
-			duration = 30 * time.Second
-		} else {
-			duration = normalRateDuration
-		}
-
-	case model.RATE_SLOW:
-		slowRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.SlowPollRate))
-		if slowRateDuration <= 1*time.Second {
-			duration = 120 * time.Second
-		} else {
-			duration = slowRateDuration
-		}
-
-	default:
-		pm.pollQueueDebugMsg("GetPollRateDuration(): UNKNOWN")
-		normalRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.NormalPollRate))
-		if normalRateDuration <= 500*time.Millisecond {
-			duration = 30 * time.Second
-		} else {
-			duration = normalRateDuration
-		}
+	} else {
+		pm.pollQueueErrorMsg("GetPollRateDuration(): NetworkPollManager DBHandlerRef is undefined")
+		// use default durations
+		duration = 30 * time.Second
 	}
 
+	// pm.pollQueueDebugMsg("GetPollRateDuration() device poll times: ", device.FastPollRate, device.NormalPollRate, device.SlowPollRate)
 	if duration.Milliseconds() <= 100 {
 		duration = 30 * time.Second
 		pm.pollQueueErrorMsg("NetworkPollManager.GetPollRateDuration: invalid PollRate duration. Set to 30 seconds/n")
+
 	}
 	return duration
 }
