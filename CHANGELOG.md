@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.6.5](https://github.com/NubeIO/flow-framework/tree/v0.6.5) (2022-07-29)
+
+- poll queue nil guarding
 
 ## [v0.6.4](https://github.com/NubeIO/flow-framework/tree/v0.6.4) (2022-07-29)
 
