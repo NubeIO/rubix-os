@@ -36,6 +36,7 @@ loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
 auth: true
 
 producerhistory:
+  enable: true
   cleaner:
     enable: true
     frequency: 600
