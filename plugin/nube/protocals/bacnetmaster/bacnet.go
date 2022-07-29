@@ -45,8 +45,12 @@ func (inst *Instance) bacnetNetworkInit() {
 }
 
 func (inst *Instance) initBacStore() {
-	inst.BacStore = network.NewStore()
-	inst.bacnetNetworkInit()
+	if inst.BacStore == nil {
+		inst.BacStore = network.NewStore()
+		inst.bacnetNetworkInit()
+	} else {
+		inst.bacnetNetworkInit()
+	}
 }
 
 // bacnetNetwork add or update an instance a bacnet network that is cached in bacnet lib
@@ -331,7 +335,7 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 			addDevice, err := inst.addDevice(newDevice)
 			if err != nil {
 				log.Errorf("failed to add a new device from whois %d", device.ID.Instance)
-				//return nil, err
+				// return nil, err
 			}
 			log.Infof("added new device from whois %s", addDevice.Name)
 		}
@@ -377,7 +381,7 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints
 			point, err := inst.addPoint(newPnt)
 			if err != nil {
 				log.Errorf("failed to add a new point from discover points %s", point.Name)
-				//return nil, err
+				// return nil, err
 			} else {
 				log.Infof("added new point from discover points%s", point.Name)
 			}

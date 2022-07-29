@@ -59,7 +59,7 @@ func (inst *Instance) Disable() error {
 		inst.pollingCancel = nil
 		for _, pollMan := range inst.NetworkPollManagers {
 			pollMan.StopPolling()
-			inst.closeBacnetStoreNetwork(pollMan.FFNetworkUUID)
+			// inst.closeBacnetStoreNetwork(pollMan.FFNetworkUUID)  // TODO: this causes FF to lock up
 		}
 		inst.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0)
 	}

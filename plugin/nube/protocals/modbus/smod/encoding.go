@@ -196,7 +196,7 @@ func encodeBools(in []bool) (out []byte) {
 	out = make([]byte, byteCount)
 	for i = 0; i < uint(len(in)); i++ {
 		if in[i] {
-			out[i/8] |= (0x01 << (i % 8))
+			out[i/8] |= 0x01 << (i % 8)
 		}
 	}
 
@@ -206,7 +206,7 @@ func encodeBools(in []bool) (out []byte) {
 func decodeBools(quantity uint16, in []byte) (out []bool) {
 	var i uint
 	for i = 0; i < uint(quantity); i++ {
-		out = append(out, (((in[i/8] >> (i % 8)) & 0x01) == 0x01))
+		out = append(out, ((in[i/8]>>(i%8))&0x01) == 0x01)
 	}
 
 	return
