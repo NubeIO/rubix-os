@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
@@ -207,7 +208,8 @@ func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*flo
 	if err != nil {
 		return err
 	}
-	if createCOVHistory && boolean.IsTrue(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
+	if boolean.IsTrue(config.Get().ProducerHistory.Enable) && createCOVHistory &&
+		boolean.IsTrue(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = uuid
 		ph.PresentValue = presentValue

@@ -44,6 +44,7 @@ type Configuration struct {
 	Prod            bool  `default:"false"`
 	Auth            *bool `default:"true"`
 	ProducerHistory struct {
+		Enable  *bool `default:"true"`
 		Cleaner struct {
 			Enable              *bool `default:"true"`
 			Frequency           int   `default:"600"`
