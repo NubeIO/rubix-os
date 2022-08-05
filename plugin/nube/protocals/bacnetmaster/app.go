@@ -14,12 +14,7 @@ import (
 )
 
 // THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
-// addNetwork add network. Called via API call (or wizard)
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	if body == nil {
-		inst.bacnetErrorMsg("addNetwork(): nil network object")
-		return nil, errors.New("empty network body, no network created")
-	}
 	if body.NetworkInterface == "" {
 		return nil, errors.New("network interface can not be empty try, eth0")
 	}
@@ -48,7 +43,6 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return network, nil
 }
 
-// addDevice add device. Called via API call (or wizard)
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	if body == nil {
 		inst.bacnetDebugMsg("addDevice(): nil device object")
@@ -78,7 +72,6 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	return device, nil
 }
 
-// addPoint add point. Called via API call (or wizard)
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	if body == nil {
 		inst.bacnetDebugMsg("addPoint(): nil point object")
@@ -130,10 +123,8 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		err = inst.pointUpdateErr(point, "point disabled", model.MessageLevel.Warning, model.CommonFaultCode.PointError)
 	}
 	return point, nil
-
 }
 
-// updateNetwork update network. Called via API call.
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
 	inst.bacnetDebugMsg("updateNetwork(): ", body.UUID)
 	if body == nil {
@@ -191,7 +182,6 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	return network, nil
 }
 
-// updateDevice update device. Called via API call.
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
 	inst.bacnetDebugMsg("updateDevice(): ", body.UUID)
 	if body == nil {
@@ -280,7 +270,6 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	return device, nil
 }
 
-// updatePoint update point. Called via API call.
 func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
 	inst.bacnetDebugMsg("updatePoint(): ", body.UUID)
 	if body == nil {
@@ -347,7 +336,6 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	return point, nil
 }
 
-// writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
 	// TODO: check for PointWriteByName calls that might not flow through the plugin.
 
@@ -391,7 +379,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	}
 
 	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
-	if netPollMan == nil || err != nil {
+	if err != nil {
 		inst.bacnetDebugMsg("writePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
 		_ = inst.pointUpdateErr(point, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return
@@ -449,7 +437,6 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	return point, nil
 }
 
-// deleteNetwork delete network. Called via API call.
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	inst.bacnetDebugMsg("deleteNetwork(): ", body.UUID)
 	if body == nil {
@@ -477,7 +464,6 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	return ok, nil
 }
 
-// deleteDevice delete device. Called via API call.
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	inst.bacnetDebugMsg("deleteDevice(): ", body.UUID)
 	if body == nil {
@@ -499,7 +485,6 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	return ok, nil
 }
 
-// deletePoint delete point. Called via API call.
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	inst.bacnetDebugMsg("deletePoint(): ", body.UUID)
 	if body == nil {
@@ -532,7 +517,6 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-// pointUpdate update point. Called from within plugin.
 func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess, clearFaults bool) (*model.Point, error) {
 	if readSuccess {
 		point.OriginalValue = float.New(value)
@@ -545,7 +529,6 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess
 	return point, nil
 }
 
-// pointUpdateErr update point with errors. Called from within plugin.
 func (inst *Instance) pointUpdateErr(point *model.Point, message string, messageLevel string, messageCode string) error {
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = messageLevel
@@ -559,7 +542,6 @@ func (inst *Instance) pointUpdateErr(point *model.Point, message string, message
 	return err
 }
 
-// deviceUpdateErr update device with errors. Called from within plugin.
 func (inst *Instance) deviceUpdateErr(device *model.Device, message string, messageLevel string, messageCode string) error {
 	device.CommonFault.InFault = true
 	device.CommonFault.MessageLevel = messageLevel
@@ -573,7 +555,6 @@ func (inst *Instance) deviceUpdateErr(device *model.Device, message string, mess
 	return err
 }
 
-// networkUpdateErr update network with errors. Called from within plugin.
 func (inst *Instance) networkUpdateErr(network *model.Network, message string, messageLevel string, messageCode string) error {
 	network.CommonFault.InFault = true
 	network.CommonFault.MessageLevel = messageLevel

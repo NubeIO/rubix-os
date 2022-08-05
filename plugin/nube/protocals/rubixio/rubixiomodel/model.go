@@ -2,6 +2,13 @@ package rubixiomodel
 
 import "github.com/NubeIO/flow-framework/plugin/defaults"
 
+type EnableStruct struct {
+	Type     string `json:"type" default:"bool"`
+	Required bool   `json:"required" default:"true"`
+	Options  bool   `json:"options" default:"false"`
+	Default  *bool  `json:"default" default:"true"`
+}
+
 type NameStruct struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
@@ -17,12 +24,8 @@ type DescriptionStruct struct {
 	Max      int    `json:"max" default:"80"`
 }
 
-type EnableStruct struct {
-	Type     string `json:"type" default:"bool"`
-	Required bool   `json:"required" default:"true"`
-}
-
 type Network struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
@@ -50,10 +53,10 @@ type Network struct {
 		Max      int    `json:"max" default:"200"`
 		Default  string `json:"default" default:""`
 	} `json:"auto_mapping_flow_network_uuid"`
-	Enable EnableStruct `json:"enable"`
 }
 
 type Device struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	Host        struct {
@@ -73,6 +76,7 @@ type Device struct {
 // for io-type see model.IOType
 
 type Point struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	IoNumber    struct {

@@ -106,5 +106,4 @@ func (inst *Instance) printPointDebugInfo(pnt *model.Point) {
 		}
 		inst.bacnetDebugMsg("ERROR: INVALID POINT")
 	}
-
 }

@@ -106,5 +106,4 @@ func (inst *Instance) printPointDebugInfo(pnt *model.Point) {
 		return
 	}
 	inst.edge28DebugMsg("ERROR: INVALID POINT")
-
 }

@@ -4,6 +4,13 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/defaults"
 )
 
+type EnableStruct struct {
+	Type     string `json:"type" default:"bool"`
+	Required bool   `json:"required" default:"true"`
+	Options  bool   `json:"options" default:"false"`
+	Default  *bool  `json:"default" default:"true"`
+}
+
 type NameStruct struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
@@ -26,12 +33,8 @@ type TransportTypeStruct struct {
 	Default  string   `json:"default" default:"serial"`
 }
 
-type EnableStruct struct {
-	Type     string `json:"type" default:"bool"`
-	Required bool   `json:"required" default:"false"`
-}
-
 type Network struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
@@ -75,6 +78,7 @@ type Network struct {
 }
 
 type Device struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	AddressUUID struct {
@@ -90,10 +94,10 @@ type Device struct {
 		Options  []string `json:"options" default:"[\"THLM\",\"THL\",\"TH\",\"MicroEdge\",\"ZipHydroTap\"]"`
 		Default  string   `json:"default" default:"THLM"`
 	} `json:"model"`
-	Enable EnableStruct `json:"enable"`
 }
 
 type Point struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameStruct        `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	AddressUUID struct {

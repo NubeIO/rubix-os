@@ -5,7 +5,6 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-// Enable implements plugin.Plugin
 func (inst *Instance) Enable() error {
 	inst.enabled = true
 	inst.setUUID()
@@ -30,11 +29,9 @@ func (inst *Instance) Enable() error {
 			log.Errorf("rubix-io.enable: POLLING ERROR: %v\n", err)
 		}
 	}
-
 	return nil
 }
 
-// Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
 	inst.enabled = false
 	if inst.pollingEnabled {

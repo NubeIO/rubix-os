@@ -85,6 +85,5 @@ func (inst *Instance) runSchedule() {
 				}
 			}
 		}
-
 	}
 }

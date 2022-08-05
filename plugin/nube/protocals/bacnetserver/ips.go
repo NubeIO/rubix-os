@@ -6,7 +6,6 @@ var nets = networking.New()
 
 func (inst *Instance) getNetworkByIface(iface string) (networking.NetworkInterfaces, error) {
 	return nets.GetNetworkByIface(iface)
-
 }
 
 func (inst *Instance) getIp(iface string) (network string) {

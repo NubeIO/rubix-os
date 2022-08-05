@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -52,7 +53,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 		pnt.AddressID = integer.New(1) // TODO check conversion
 		pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 
-		_, err = inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
+		_, err := inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 		if err != nil {
 			return "modbus wizard 0 error: on flow-framework add modbus TCP network wizard", err
 		}
@@ -127,12 +128,12 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			pnt.AddressID = integer.New(j) // TODO check conversion
 			pnt.ObjectType = string(model.ObjTypeWriteFloat32)
 
-			_, err = inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
+			_, err := inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 			if err != nil {
 				return "modbus wizard 1: on flow-framework add modbus TCP network wizard", err
 			}
 		}
-		return "modbus wizard 1: added networks, devices, and points", err
+		return "", errors.New("modbus wizard 1: added networks, devices, and points")
 
 	case 3:
 		var net model.Network
@@ -642,9 +643,9 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			}
 			return "modbus wizard 5: added TMV Points", err
 		}
-		return "modbus wizard 5: no device name specified in 'arg1'", err
+		return "", errors.New("modbus wizard 5: no device name specified in 'arg1'")
 	}
-	return "modbus wizard error: unknown wizard version", err
+	return "", errors.New("modbus wizard error: unknown wizard version")
 }
 
 // wizard make a network/dev/pnt

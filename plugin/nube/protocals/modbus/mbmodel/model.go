@@ -4,6 +4,13 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/defaults"
 )
 
+type EnableStruct struct {
+	Type     string `json:"type" default:"bool"`
+	Required bool   `json:"required" default:"true"`
+	Options  bool   `json:"options" default:"false"`
+	Default  *bool  `json:"default" default:"true"`
+}
+
 type NameStruct struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
@@ -27,13 +34,8 @@ type TransportTypeStruct struct {
 }
 
 type Network struct {
-	Enable struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"false"`
-		Default  *bool  `json:"default" default:"true"`
-	} `json:"enable"`
-	Name struct {
+	Enable EnableStruct `json:"enable"`
+	Name   struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"true"`
 		Default     string `json:"default" default:"mb_net"`
@@ -120,13 +122,8 @@ type Network struct {
 }
 
 type Device struct {
-	Enable struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"false"`
-		Default  *bool  `json:"default" default:"true"`
-	} `json:"enable"`
-	Name struct {
+	Enable EnableStruct `json:"enable"`
+	Name   struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"true"`
 		Default     string `json:"default" default:"mb_dev"`
@@ -182,13 +179,8 @@ type Device struct {
 }
 
 type Point struct {
-	Enable struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"true"`
-		Default  *bool  `json:"default" default:"true"`
-	} `json:"enable"`
-	Name struct {
+	Enable EnableStruct `json:"enable"`
+	Name   struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"true"`
 		Default     string `json:"default" default:"mb_pnt"`

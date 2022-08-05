@@ -7,6 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type EnableStruct struct {
+	Type     string `json:"type" default:"bool"`
+	Required bool   `json:"required" default:"true"`
+	Options  bool   `json:"options" default:"false"`
+	Default  *bool  `json:"default" default:"true"`
+}
+
 type NameNet struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
@@ -38,11 +45,6 @@ type DescriptionStruct struct {
 	Max      int    `json:"max" default:"80"`
 }
 
-type EnableStruct struct {
-	Type     string `json:"type" default:"bool"`
-	Required bool   `json:"required" default:"true"`
-}
-
 type TransportTypeStruct struct {
 	Type     string   `json:"type" default:"array"`
 	Required bool     `json:"required" default:"true"`
@@ -51,13 +53,8 @@ type TransportTypeStruct struct {
 }
 
 type Network struct {
-	Enable struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"false"`
-		Default  *bool  `json:"default" default:"true"`
-	} `json:"enable"`
-	Name struct {
+	Enable EnableStruct `json:"enable"`
+	Name   struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"true"`
 		Default     string `json:"default" default:"bac_net"`
@@ -117,13 +114,8 @@ type Network struct {
 }
 
 type Device struct {
-	Enable struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"false"`
-		Default  *bool  `json:"default" default:"true"`
-	} `json:"enable"`
-	Name struct {
+	Enable EnableStruct `json:"enable"`
+	Name   struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"true"`
 		Default     string `json:"default" default:"bac_dev"`
@@ -195,13 +187,8 @@ type Device struct {
 }
 
 type Point struct {
-	Enable struct {
-		Type     string `json:"type" default:"bool"`
-		Required bool   `json:"required" default:"true"`
-		Options  bool   `json:"options" default:"true"`
-		Default  *bool  `json:"default" default:"true"`
-	} `json:"enable"`
-	Name struct {
+	Enable EnableStruct `json:"enable"`
+	Name   struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"true"`
 		Default     string `json:"default" default:"bac_pnt"`

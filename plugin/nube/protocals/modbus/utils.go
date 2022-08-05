@@ -35,8 +35,6 @@ const (
 	writeFloat64
 )
 
-var err error
-
 type Operation struct {
 	UnitId       uint8  `json:"unit_id"`     // device addr
 	ObjectType   string `json:"object_type"` // read_coil

@@ -39,9 +39,9 @@ func (inst *Instance) SerialOpen() (SerialSetting, error) {
 
 	_, err = s.open()
 	if err != nil {
-		inst.networkUpdateErr(net.UUID, s.SerialPort, err)
+		_ = inst.networkUpdateErr(net.UUID, s.SerialPort, err)
 	} else {
-		inst.networkUpdate(net.UUID)
+		_ = inst.networkUpdateSuccess(net.UUID)
 	}
 
 	return s, err

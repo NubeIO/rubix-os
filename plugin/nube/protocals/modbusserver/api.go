@@ -8,18 +8,11 @@ const (
 	schemaNetwork = "/schema/network"
 	schemaDevice  = "/schema/device"
 	schemaPoint   = "/schema/point"
+	networks      = "/networks"
+	devices       = "/devices"
+	points        = "/points"
 )
 
-const (
-	networks = "/networks"
-	devices  = "/devices"
-	points   = "/points"
-)
-
-var err error
-
-// RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
-
 }

@@ -12,7 +12,6 @@ var cron *gocron.Scheduler
 func (inst *Instance) Enable() error {
 	inst.enabled = true
 	inst.setUUID()
-	inst.BusServ()
 	inst.initializePostgresSetting()
 	cron = gocron.NewScheduler(time.UTC)
 	cron.SetMaxConcurrentJobs(1, gocron.RescheduleMode)

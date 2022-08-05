@@ -17,9 +17,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var err error
-
-// addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
 	if err != nil {
@@ -39,7 +36,6 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return body, nil
 }
 
-// addDevice add device
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	device, _ = inst.db.GetDeviceByArgs(api.Args{AddressUUID: body.AddressUUID})
 	if device != nil {
@@ -58,7 +54,6 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	return device, nil
 }
 
-// addPoint add point
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	point, err = inst.db.CreatePoint(body, true, true)
 	if err != nil {
@@ -67,7 +62,6 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	return point, nil
 }
 
-// updateNetwork update network
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
 	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
 	if err != nil {
@@ -76,7 +70,6 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	return network, nil
 }
 
-// updateDevice update device
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
 	device, err = inst.db.UpdateDevice(body.UUID, body, true)
 	if err != nil {
@@ -96,7 +89,6 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	return point, nil
 }
 
-// deleteNetwork delete network
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	ok, err = inst.db.DeleteNetwork(body.UUID)
 	if err != nil {
@@ -105,7 +97,6 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	return ok, nil
 }
 
-// deleteNetwork delete device
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	ok, err = inst.db.DeleteDevice(body.UUID)
 	if err != nil {
@@ -114,7 +105,6 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	return ok, nil
 }
 
-// deletePoint delete point
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	ok, err = inst.db.DeletePoint(body.UUID)
 	if err != nil {
@@ -123,68 +113,60 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-// networkUpdate update network
-func (inst *Instance) networkUpdate(uuid string) (*model.Point, error) {
+func (inst *Instance) networkUpdateSuccess(uuid string) error {
 	var network model.Network
 	network.CommonFault.InFault = false
 	network.CommonFault.MessageLevel = model.MessageLevel.Info
 	network.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	network.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
 	network.CommonFault.LastOk = time.Now().UTC()
-	_, err = inst.db.UpdateNetwork(uuid, &network, true)
+	err := inst.db.UpdateNetworkErrors(uuid, &network)
 	if err != nil {
-		log.Error(bugs.DebugPrint(name, inst.networkUpdate, err))
-		return nil, err
+		log.Error(bugs.DebugPrint(name, inst.networkUpdateSuccess, err))
 	}
-	return nil, nil
+	return err
 }
 
-// networkUpdateErr update network error
-func (inst *Instance) networkUpdateErr(uuid, port string, err error) (*model.Point, error) {
+func (inst *Instance) networkUpdateErr(uuid, port string, e error) error {
 	var network model.Network
 	network.CommonFault.InFault = true
 	network.CommonFault.MessageLevel = model.MessageLevel.Fail
 	network.CommonFault.MessageCode = model.CommonFaultCode.NetworkError
-	network.CommonFault.Message = fmt.Sprintf(" port: %s message: %s", port, err.Error())
+	network.CommonFault.Message = fmt.Sprintf(" port: %s message: %s", port, e.Error())
 	network.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdateNetwork(uuid, &network, true)
+	err := inst.db.UpdateNetworkErrors(uuid, &network)
 	if err != nil {
-		log.Error(bugs.DebugPrint(name, inst.networkUpdate, err))
-		return nil, err
+		log.Error(bugs.DebugPrint(name, inst.networkUpdateErr, err))
 	}
-	return nil, nil
+	return err
 }
 
-// deviceUpdateErr update device error
-func (inst *Instance) deviceUpdate(uuid string) (*model.Point, error) {
+func (inst *Instance) deviceUpdateSuccess(uuid string) error {
 	var device model.Device
 	device.CommonFault.InFault = false
 	device.CommonFault.MessageLevel = model.MessageLevel.Info
 	device.CommonFault.MessageCode = model.CommonFaultCode.Ok
 	device.CommonFault.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
 	device.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdateDevice(uuid, &device, true)
+	err := inst.db.UpdateDeviceErrors(uuid, &device)
 	if err != nil {
 		log.Error("lora-app deviceUpdateErr()", err)
-		return nil, err
 	}
-	return nil, nil
+	return err
 }
 
-// deviceUpdateErr update device error
-func (inst *Instance) deviceUpdateErr(uuid, addressUUID string, err error) (*model.Point, error) {
+func (inst *Instance) deviceUpdateErr(uuid string, err error) error {
 	var device model.Device
 	device.CommonFault.InFault = true
 	device.CommonFault.MessageLevel = model.MessageLevel.Fail
 	device.CommonFault.MessageCode = model.CommonFaultCode.DeviceError
 	device.CommonFault.Message = fmt.Sprintf(" error: %s", err.Error())
 	device.CommonFault.LastFail = time.Now().UTC()
-	_, err = inst.db.UpdateDevice(uuid, &device, true)
+	err = inst.db.UpdateDeviceErrors(uuid, &device)
 	if err != nil {
 		log.Error("lora-app deviceUpdateErr()", err)
-		return nil, err
 	}
-	return nil, nil
+	return err
 }
 
 func (inst *Instance) handleSerialPayload(data string) {
@@ -196,25 +178,22 @@ func (inst *Instance) handleSerialPayload(data string) {
 			errMsg := fmt.Sprintf("lora: issue on failed to find device: %v id: %s\n", err.Error(), deviceUUID)
 			log.Errorf(errMsg)
 			if dev != nil {
-				inst.deviceUpdateErr(dev.UUID, deviceUUID, errors.New(errMsg))
+				_ = inst.deviceUpdateErr(dev.UUID, errors.New(errMsg))
 			}
 			return
 		}
 		if dev != nil {
 			log.Println("lora: sensor-found", deviceUUID, "sensor rssi:", commonData.Rssi)
-			inst.deviceUpdate(dev.UUID)
+			_ = inst.deviceUpdateSuccess(dev.UUID)
 		}
 	}
 
 	if fullData != nil {
 		inst.updateDevicePointValues(commonData, fullData)
 	}
-
 }
 
-// TODO: need better way to add/update CommonValues points instead of
-//    adding/updating the rssi point manually in each func
-
+// TODO: need better way to add/update CommonValues points instead of adding/updating the rssi point manually in each func
 // addDevicePoints add all points related to a device
 func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 	network, err := inst.db.GetNetwork(deviceBody.NetworkUUID, api.Args{})
@@ -253,13 +232,13 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 	for i := 0; i < pointsRefl.NumField(); i++ {
 		if pointsRefl.Field(i).Kind() == reflect.Struct {
 			if _, ok := pointsRefl.Field(i).Interface().(decoder.CommonValues); !ok {
-				inst.addPointsFromStruct(deviceBody, pointsRefl.Field(i))
+				_ = inst.addPointsFromStruct(deviceBody, pointsRefl.Field(i))
 			}
 			continue
 		}
 		pointName := getReflectFieldJSONName(pointsRefl.Type().Field(i))
 		inst.setNewPointFields(deviceBody, point, pointName)
-		_, err = inst.addPoint(point)
+		_, err := inst.addPoint(point)
 		if err != nil {
 			log.Errorf("lora: issue on addPoint: %v\n", err)
 			return err

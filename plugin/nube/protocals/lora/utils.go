@@ -38,7 +38,7 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 	dev.Manufacture = model.CommonNaming.NubeIO
 	dev.Model = st
 
-	_, err = inst.db.WizardNewNetworkDevicePoint("lora", &net, &dev, nil)
+	_, err := inst.db.WizardNewNetworkDevicePoint("lora", &net, &dev, nil)
 	if err != nil {
 		return "error: add lora serial network wizard", err
 	}
