@@ -121,7 +121,6 @@ func (inst *Instance) syncOutputs(dev *model.Device) (bulk []rubixio.BulkWrite) 
 }
 
 func (inst *Instance) getInputs() *rubixio.Inputs {
-
 	restService := &rest.Service{}
 	restService.Url = inst.config.Ip
 	restService.Port = 5001
@@ -134,7 +133,7 @@ func (inst *Instance) getInputs() *rubixio.Inputs {
 	bacnetClient := rubixio.New(restService)
 	inputs, res := bacnetClient.GetInputs()
 	if res.GetError() != nil {
-		log.Errorln("rubixio.polling.getInputs() failed to do rest-api call err:", err)
+		log.Errorln("rubixio.polling.getInputs() failed to do rest-api call err:", res.GetError())
 	}
 	return inputs
 }
@@ -152,7 +151,7 @@ func (inst *Instance) writeOutput(dev *model.Device) {
 	bulk := inst.syncOutputs(dev)
 	outs, resp := client.UpdatePointValueBulk(bulk)
 	if resp.GetError() != nil || outs == nil {
-		log.Errorln("rubixio.polling.writeOutput() failed to do rest-api call err:", err)
+		log.Errorln("rubixio.polling.writeOutput() failed to do rest-api call err:", resp.GetError())
 		return
 	}
 }
@@ -192,9 +191,6 @@ func (inst *Instance) polling(p polling) error {
 					continue
 				}
 				for _, dev := range net.Devices { // DEVICES
-					if err != nil {
-						log.Errorf("rubixio-polling: failed to vaildate device %v %s\n", err, dev.CommonIP.Host)
-					}
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
 					inputs := inst.getInputs()

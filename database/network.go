@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/plugin/compat"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -48,13 +47,10 @@ func (d *GormDatabase) GetNetworkByField(field string, value string, withDevices
 	}
 }
 
-// CreateNetwork creates a device.
 func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*model.Network, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Network)
-	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Network
-	body.CommonEnable.Enable = boolean.NewTrue()
-	transport, err := checkTransport(body.TransportType) // set to ip by default
+	transport, err := checkTransport(body.TransportType)
 	if err != nil {
 		return nil, err
 	}
@@ -73,27 +69,10 @@ func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*mod
 	} else {
 		return nil, errors.New("provide a plugin name ie: system, lora, modbus, lorawan, bacnet")
 	}
-	if err := d.DB.Create(&body).Error; err != nil {
+	if err = d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
-	if !fromPlugin {
-		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, body.PluginConfId, body.UUID)
-		d.Bus.RegisterTopic(t)
-		err = d.Bus.Emit(eventbus.CTX(), t, body)
-	}
-	if err != nil {
-		return nil, errors.New("error on device eventbus")
-	}
 	return body, nil
-}
-
-// UpdateNetworkErrors will only update the CommonFault properties of the network, all other properties will not be updated. Does not update `LastOk`.
-func (d *GormDatabase) UpdateNetworkErrors(uuid string, body *model.Network) error {
-	return d.DB.Model(&body).
-		Where("uuid = ?", uuid).
-		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
-		Updates(&body).
-		Error
 }
 
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugin bool) (*model.Network, error) {
@@ -120,7 +99,16 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugi
 		}
 	}
 	return networkModel, nil
+}
 
+// UpdateNetworkErrors will only update the CommonFault properties of the network, all other properties won't be updated.
+// Does not update `LastOk`.
+func (d *GormDatabase) UpdateNetworkErrors(uuid string, body *model.Network) error {
+	return d.DB.Model(&body).
+		Where("uuid = ?", uuid).
+		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
+		Updates(&body).
+		Error
 }
 
 func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {

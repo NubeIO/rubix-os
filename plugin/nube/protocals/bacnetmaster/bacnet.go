@@ -41,7 +41,6 @@ func (inst *Instance) bacnetNetworkInit() {
 			}
 		}
 	}
-
 }
 
 func (inst *Instance) initBacStore() {

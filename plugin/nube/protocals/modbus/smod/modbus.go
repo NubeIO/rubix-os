@@ -33,7 +33,6 @@ const (
 	HighWordFirst WordOrder = 1
 	LowWordFirst  WordOrder = 2
 
-	// errors
 	ErrConfigurationError      Error = "configuration error"
 	ErrRequestTimedOut         Error = "request timed out"
 	ErrIllegalFunction         Error = "illegal function"
@@ -254,38 +253,3 @@ func (mc *ModbusClient) WriteCoil(addr uint16, value uint16) (values []byte, out
 	}
 	return
 }
-
-// func main() {
-//	fmt.Println(12132123)
-//
-//	handler := modbus.NewRTUClientHandler("/dev/ttyUSB0")
-//	handler.BaudRate = 38400
-//	handler.DataBits = 8
-//	handler.Parity = "N"
-//	handler.StopBits = 1
-//	handler.SlaveID = 1
-//	handler.Timeout = 5 * time.Second
-//
-//	handler.Connect()
-//	defer handler.Close()
-//
-//	client := modbus.NewClient(handler)
-//	var c ModbusClient
-//	c.Client = client
-//	c.RegType = HoldingRegister
-//	c.Endianness = BigEndian
-//	c.WordOrder = LowWordFirst
-//
-//	coil, err := c.ReadCoils(0, 2)
-//	fmt.Println(coil)
-//	fmt.Println(err)
-//
-//	f, err := c.ReadFloat32(0, 2)
-//	fmt.Println(f)
-//	fmt.Println(err)
-//
-//	if err != nil {
-//		return
-//	}
-//
-// }

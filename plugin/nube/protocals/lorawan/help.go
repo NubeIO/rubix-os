@@ -7,7 +7,6 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 )
 
-// GetDisplay implements public.Displayer
 func (inst *Instance) GetDisplay(baseURL *url.URL) pluginapi.Response {
 	loc := &url.URL{
 		Path: inst.basePath,

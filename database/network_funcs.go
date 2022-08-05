@@ -96,15 +96,10 @@ func (d *GormDatabase) GetNetworkByPointUUID(pntUUID string, args api.Args) (net
 // GetNetworkByDeviceUUID returns a network by passing in the device UUID.
 func (d *GormDatabase) GetNetworkByDeviceUUID(devUUID string, args api.Args) (network *model.Network, err error) {
 	device, err := d.GetDevice(devUUID, args)
-	if err != nil && device == nil {
-		return nil, err
-	}
-
-	network, err = d.GetNetwork(device.NetworkUUID, args)
 	if err != nil {
 		return nil, err
 	}
-	return
+	return d.GetNetwork(device.NetworkUUID, args)
 }
 
 // SetErrorsForAllDevicesOnNetwork sets the fault/error properties of all devices for a specific network. Optional to set the points of each device also.
@@ -112,7 +107,7 @@ func (d *GormDatabase) GetNetworkByDeviceUUID(devUUID string, args api.Args) (ne
 // messageCode = model.CommonFaultCode
 func (d *GormDatabase) SetErrorsForAllDevicesOnNetwork(networkUUID string, message string, messageLevel string, messageCode string, doPoints bool) error {
 	network, err := d.GetNetwork(networkUUID, api.Args{WithDevices: true, WithPoints: doPoints})
-	if network != nil && err != nil {
+	if err != nil {
 		return err
 	}
 	for _, device := range network.Devices {

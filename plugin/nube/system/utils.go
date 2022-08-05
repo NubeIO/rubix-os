@@ -7,7 +7,6 @@ import (
 
 // listSerialPorts list all serial ports on host
 func (inst *Instance) getAllScheduleData() (*array.Array, error) {
-
 	ports, err := serial.GetPortsList()
 	p := array.NewArray()
 	for _, port := range ports {

@@ -1,6 +1,13 @@
-package system_model
+package smodel
 
 import "github.com/NubeIO/flow-framework/plugin/defaults"
+
+type EnableStruct struct {
+	Type     string `json:"type" default:"bool"`
+	Required bool   `json:"required" default:"true"`
+	Options  bool   `json:"options" default:"false"`
+	Default  *bool  `json:"default" default:"true"`
+}
 
 type NameStruct struct {
 	Type     string `json:"type" default:"string"`
@@ -19,7 +26,8 @@ type DescriptionStruct struct {
 }
 
 type Network struct {
-	Name struct {
+	Enable EnableStruct `json:"enable"`
+	Name   struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"true"`
 		Default     string `json:"default" default:"net"`
@@ -60,7 +68,8 @@ type Network struct {
 }
 
 type Device struct {
-	Name struct {
+	Enable EnableStruct `json:"enable"`
+	Name   struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"true"`
 		Default     string `json:"default" default:"dev"`
@@ -70,7 +79,8 @@ type Device struct {
 }
 
 type Point struct {
-	Name struct {
+	Enable EnableStruct `json:"enable"`
+	Name   struct {
 		Type        string `json:"type" default:"string"`
 		Required    bool   `json:"required" default:"true"`
 		Default     string `json:"default" default:"pnt"`

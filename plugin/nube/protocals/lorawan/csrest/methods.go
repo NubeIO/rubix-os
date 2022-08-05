@@ -29,7 +29,7 @@ func checkResponse(resp *resty.Response, err error) error {
 }
 
 // IsCSConnectionError returns true if error is related to connection.
-//  i.e. "401 Unauthorised" or "connection refused"
+// i.e. "401 Unauthorised" or "connection refused"
 func IsCSConnectionError(err error) bool {
 	return err != nil && (strings.Contains(err.Error(), "401") ||
 		strings.Contains(err.Error(), "connection refused") ||

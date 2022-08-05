@@ -5,7 +5,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Enable implements plugin.Plugin
 func (inst *Instance) Enable() error {
 	inst.enabled = true
 	inst.setUUID()
@@ -33,7 +32,6 @@ func (inst *Instance) Enable() error {
 	return nil
 }
 
-// Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
 	inst.enabled = false
 	if inst.pollingEnabled {

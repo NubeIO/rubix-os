@@ -4,7 +4,6 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 )
 
-// Enable implements plugin.Plugin
 func (inst *Instance) Enable() error {
 	inst.edge28DebugMsg("Edge28 Enable()")
 	inst.enabled = true
@@ -32,7 +31,6 @@ func (inst *Instance) Enable() error {
 	return nil
 }
 
-// Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
 	inst.edge28DebugMsg("EDGE28 Disable()")
 	inst.enabled = false

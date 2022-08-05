@@ -32,7 +32,6 @@ func (inst *Instance) getIP() string {
 }
 
 func (inst *Instance) serverInit() (*ModbusServer, error) {
-
 	host := inst.getIP()
 	listener, err := net.Listen("tcp", host)
 	if err != nil {

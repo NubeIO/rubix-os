@@ -10,20 +10,14 @@ import (
 )
 
 const (
-	schemaNetwork = "/schema/network"
-	schemaDevice  = "/schema/device"
-	schemaPoint   = "/schema/point"
-)
-
-const (
+	schemaNetwork     = "/schema/network"
+	schemaDevice      = "/schema/device"
+	schemaPoint       = "/schema/point"
 	jsonSchemaNetwork = "/schema/json/network"
 	jsonSchemaDevice  = "/schema/json/device"
 	jsonSchemaPoint   = "/schema/json/point"
 )
 
-var err error
-
-// RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
 	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
@@ -81,11 +75,9 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, rubixiomodel.GetNetworkSchema())
 	})
-
 	mux.GET(schemaDevice, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, rubixiomodel.GetDeviceSchema())
 	})
-
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, rubixiomodel.GetPointSchema())
 	})

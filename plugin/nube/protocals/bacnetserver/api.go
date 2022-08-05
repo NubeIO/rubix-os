@@ -11,22 +11,14 @@ import (
 )
 
 const (
-	schemaNetwork = "/schema/network"
-	schemaDevice  = "/schema/device"
-	schemaPoint   = "/schema/point"
-)
-
-const (
+	schemaNetwork     = "/schema/network"
+	schemaDevice      = "/schema/device"
+	schemaPoint       = "/schema/point"
 	jsonSchemaNetwork = "/schema/json/network"
 	jsonSchemaDevice  = "/schema/json/device"
 	jsonSchemaPoint   = "/schema/json/point"
 )
 
-func resolveID(ctx *gin.Context) string {
-	return ctx.Param("uuid")
-}
-
-// RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
 	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
@@ -84,6 +76,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ok, err := inst.deletePoint(body)
 		api.ResponseHandler(ok, err, ctx)
 	})
+
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, bserver.GetNetworkSchema())
 	})

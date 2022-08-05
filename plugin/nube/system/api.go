@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/plugin/nube/system/jsonschema"
+	"github.com/NubeIO/flow-framework/plugin/nube/system/smodel"
 	"github.com/NubeIO/flow-framework/utils/array"
 	"net/http"
 
-	system_model "github.com/NubeIO/flow-framework/plugin/nube/system/model"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"github.com/gomarkdown/markdown"
@@ -16,9 +16,14 @@ func resolveName(ctx *gin.Context) string {
 }
 
 const (
-	schemaNetwork = "/schema/network"
-	schemaDevice  = "/schema/device"
-	schemaPoint   = "/schema/point"
+	schemaNetwork     = "/schema/network"
+	schemaDevice      = "/schema/device"
+	schemaPoint       = "/schema/point"
+	jsonSchemaNetwork = "/schema/json/network"
+	jsonSchemaDevice  = "/schema/json/device"
+	jsonSchemaPoint   = "/schema/json/point"
+	help              = "/help"
+	helpHTML          = "/help/guide"
 )
 
 // markdown guide
@@ -62,17 +67,6 @@ func supportedObjects() *array.Array {
 	return out
 }
 
-const (
-	jsonSchemaNetwork = "/schema/json/network"
-	jsonSchemaDevice  = "/schema/json/device"
-	jsonSchemaPoint   = "/schema/json/point"
-)
-
-const (
-	help     = "/help"
-	helpHTML = "/help/guide"
-)
-
 var Supports = struct {
 	Network     bool `json:"network"`
 	NetworkCRUD bool `json:"networkCRUD"`
@@ -81,22 +75,8 @@ var Supports = struct {
 	NetworkCRUD: true,
 }
 
-// RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
-
-	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, system_model.GetNetworkSchema())
-	})
-
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, system_model.GetDeviceSchema())
-	})
-
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, system_model.GetPointSchema())
-	})
-
 	mux.GET(help, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, Supports)
 	})
@@ -112,6 +92,16 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else {
 			ctx.JSON(http.StatusOK, obj)
 		}
+	})
+
+	mux.GET(schemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, smodel.GetNetworkSchema())
+	})
+	mux.GET(schemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, smodel.GetDeviceSchema())
+	})
+	mux.GET(schemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, smodel.GetPointSchema())
 	})
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema())
