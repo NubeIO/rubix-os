@@ -172,12 +172,13 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	}
 
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
-	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate)
+	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil)
 	return pnt, err
 }
 
-func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlugin bool, afterRealDeviceUpdate bool) (
-	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
+func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlugin bool, afterRealDeviceUpdate bool,
+	currentWriterUUID *string) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange,
+	isPriorityChanged bool, err error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
 	if query.Error != nil {
@@ -190,13 +191,13 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlug
 		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
 	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err :=
-		d.updatePointValue(pointModel, body.Priority, fromPlugin, afterRealDeviceUpdate)
+		d.updatePointValue(pointModel, body.Priority, fromPlugin, afterRealDeviceUpdate, currentWriterUUID)
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
 func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool,
-	afterRealDeviceUpdate bool) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange,
-	isPriorityChanged bool, err error) {
+	afterRealDeviceUpdate bool, currentWriterUUID *string) (returnPoint *model.Point, isPresentValueChange,
+	isWriteValueChange, isPriorityChanged bool, err error) {
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
@@ -291,7 +292,8 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 
 	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 	if isChange {
-		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange)
+		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange,
+			currentWriterUUID)
 		if err != nil {
 			return nil, false, false, false, err
 		}
@@ -369,7 +371,7 @@ func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName strin
 	if err != nil {
 		return nil, err
 	}
-	write, _, _, _, err := d.PointWrite(point.UUID, body, fromPlugin, false)
+	write, _, _, _, err := d.PointWrite(point.UUID, body, fromPlugin, false, nil)
 	if err != nil {
 		return nil, err
 	}

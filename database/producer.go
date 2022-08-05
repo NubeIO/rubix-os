@@ -105,6 +105,11 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 	if err := d.DB.Model(&producerModel).Updates(body).Error; err != nil {
 		return nil, err
 	}
+	if body.CurrentWriterUUID == nil {
+		if err := d.DB.Model(&producerModel).Update("current_writer_uuid", nil).Error; err != nil {
+			return nil, err
+		}
+	}
 	return producerModel, nil
 }
 
@@ -183,9 +188,9 @@ type Point struct {
 }
 
 func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*float64, presentValue *float64,
-	createCOVHistory bool) error {
+	createCOVHistory bool, currentWriterUUID *string) error {
 	producerModelBody := new(model.Producer)
-	producerModelBody.CurrentWriterUUID = uuid // TODO: check current_writer_uuid is needed or not
+	producerModelBody.CurrentWriterUUID = currentWriterUUID
 	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &uuid})
 	for _, producer := range producers {
 		err := d.producerPointWrite(producer.UUID, priority, presentValue, producerModelBody, createCOVHistory)
@@ -198,7 +203,7 @@ func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*fl
 
 func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*float64, presentValue *float64,
 	producerModelBody *model.Producer, createCOVHistory bool) error {
-	producerModel, err := d.UpdateProducer(uuid, producerModelBody) // TODO: check current_writer_uuid is needed or not
+	producerModel, err := d.UpdateProducer(uuid, producerModelBody)
 	if err != nil {
 		log.Errorf("producer: issue on update producer err: %v\n", err)
 		return errors.New("issue on update producer")
@@ -212,6 +217,7 @@ func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*flo
 		boolean.IsTrue(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
 		ph := new(model.ProducerHistory)
 		ph.ProducerUUID = uuid
+		ph.CurrentWriterUUID = producerModel.CurrentWriterUUID
 		ph.PresentValue = presentValue
 		ph.Timestamp = time.Now().UTC()
 		_, err = d.CreateProducerHistory(ph)
@@ -225,7 +231,7 @@ func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*flo
 
 func (d *GormDatabase) ProducersScheduleWrite(uuid string, body *model.ScheduleData) error {
 	producerModelBody := new(model.Producer)
-	producerModelBody.CurrentWriterUUID = uuid // TODO: check current_writer_uuid is needed or not
+	producerModelBody.CurrentWriterUUID = nil
 	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &uuid})
 	for _, producer := range producers {
 		err := d.producerScheduleWrite(producer.UUID, body, producerModelBody)
@@ -237,7 +243,7 @@ func (d *GormDatabase) ProducersScheduleWrite(uuid string, body *model.ScheduleD
 }
 
 func (d *GormDatabase) producerScheduleWrite(uuid string, scheduleData *model.ScheduleData, producerModelBody *model.Producer) error {
-	producerModel, err := d.UpdateProducer(uuid, producerModelBody) // TODO: check current_writer_uuid is needed or not
+	producerModel, err := d.UpdateProducer(uuid, producerModelBody)
 	if err != nil {
 		log.Errorf("producer: issue on update producer err: %v\n", err)
 		return errors.New("issue on update producer")
