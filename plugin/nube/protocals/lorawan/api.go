@@ -2,12 +2,11 @@ package main
 
 import (
 	"errors"
-	"net/http"
-
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 const (
@@ -16,20 +15,8 @@ const (
 	schemaPoint   = "/schema/point"
 )
 
-// RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
-
-	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, csmodel.GetNetworkSchema())
-	})
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, csmodel.GetDeviceSchema())
-	})
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, csmodel.GetPointSchema())
-	})
-
 	mux.PATCH(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
 		network, err := inst.db.UpdateNetwork(body.UUID, body, true)
@@ -64,5 +51,15 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		ok, err := inst.db.DeletePoint(body.UUID)
 		api.ResponseHandler(ok, err, ctx)
+	})
+
+	mux.GET(schemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, csmodel.GetNetworkSchema())
+	})
+	mux.GET(schemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, csmodel.GetDeviceSchema())
+	})
+	mux.GET(schemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, csmodel.GetPointSchema())
 	})
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 )
 
-// Enable implements plugin.Plugin
 func (inst *Instance) Enable() error {
 	inst.modbusDebugMsg("MODBUS Enable()")
 	inst.enabled = true
@@ -47,7 +46,6 @@ func (inst *Instance) Enable() error {
 	return nil
 }
 
-// Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
 	inst.modbusDebugMsg("MODBUS Disable()")
 	inst.enabled = false

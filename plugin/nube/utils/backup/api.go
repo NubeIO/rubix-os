@@ -10,7 +10,6 @@ const (
 	backUpdateNetworks = "/backup/networks"
 )
 
-// RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
 	mux.GET(listBuckets, func(ctx *gin.Context) {

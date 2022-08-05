@@ -14,14 +14,11 @@ import (
 )
 
 const (
-	help          = "/help"
-	listSerial    = "/list/serial"
-	schemaNetwork = "/schema/network"
-	schemaDevice  = "/schema/device"
-	schemaPoint   = "/schema/point"
-)
-
-const (
+	help              = "/help"
+	listSerial        = "/list/serial"
+	schemaNetwork     = "/schema/network"
+	schemaDevice      = "/schema/device"
+	schemaPoint       = "/schema/point"
 	jsonSchemaNetwork = "/schema/json/network"
 	jsonSchemaDevice  = "/schema/json/device"
 	jsonSchemaPoint   = "/schema/json/point"
@@ -79,7 +76,6 @@ func supportedObjects() *array.Array {
 	return out
 }
 
-// RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
 	inst.modbusDebugMsg(fmt.Sprintf("RegisterWebhook(): %+v\n", inst))
@@ -199,6 +195,17 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			return
 		}
 	})
+	mux.GET("/modbus/polling/stats", func(ctx *gin.Context) {
+		stats, err := inst.getPollingStats()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		} else {
+			ctx.JSON(http.StatusOK, stats)
+			return
+		}
+	})
+
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, mbmodel.GetNetworkSchema())
 	})
@@ -216,16 +223,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
-	})
-	mux.GET("/modbus/polling/stats", func(ctx *gin.Context) {
-		stats, err := inst.getPollingStats()
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		} else {
-			ctx.JSON(http.StatusOK, stats)
-			return
-		}
 	})
 }
 

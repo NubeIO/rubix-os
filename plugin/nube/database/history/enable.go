@@ -10,7 +10,6 @@ var cron *gocron.Scheduler
 func (inst *Instance) Enable() error {
 	inst.enabled = true
 	inst.setUUID()
-	inst.BusServ()
 	cron = gocron.NewScheduler(time.UTC)
 	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncHistory").Do(inst.syncHistory)
 	cron.StartAsync()

@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 )
 
-// Enable implements plugin.Plugin
 func (inst *Instance) Enable() error {
 	inst.bacnetDebugMsg("BACNET Enable()")
 	inst.enabled = true
@@ -49,7 +48,6 @@ func (inst *Instance) Enable() error {
 	return nil
 }
 
-// Disable implements plugin.Disable
 func (inst *Instance) Disable() error {
 	inst.bacnetDebugMsg("BACNET Disable()")
 	inst.enabled = false

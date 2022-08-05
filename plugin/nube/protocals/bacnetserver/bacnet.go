@@ -17,7 +17,6 @@ const (
 )
 
 func (inst *Instance) bacnetNetworkInit() {
-
 	networks, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true})
 	if err != nil {
 		return
@@ -36,7 +35,6 @@ func (inst *Instance) bacnetNetworkInit() {
 			}
 		}
 	}
-
 }
 
 func (inst *Instance) initBacStore() {
@@ -176,7 +174,6 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 	}
 	log.Infoln("bacnet-server-POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
 	return nil
-
 }
 
 func setObjectType(object string) (obj btypes.ObjectType, isWritable, isBool bool) {

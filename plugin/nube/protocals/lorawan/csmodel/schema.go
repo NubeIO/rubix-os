@@ -20,6 +20,13 @@ func GetPointSchema() *SchemaPoint {
 	return point
 }
 
+type EnableStruct struct {
+	Type     string `json:"type" default:"bool"`
+	Required bool   `json:"required" default:"true"`
+	Options  bool   `json:"options" default:"false"`
+	Default  *bool  `json:"default" default:"true"`
+}
+
 type NameNet struct {
 	Type     string `json:"type" default:"string"`
 	Required bool   `json:"required" default:"true"`
@@ -51,11 +58,6 @@ type DescriptionStruct struct {
 	Max      int    `json:"max" default:"80"`
 }
 
-type EnableStruct struct {
-	Type     string `json:"type" default:"bool"`
-	Required bool   `json:"required" default:"true"`
-}
-
 type Interface struct {
 	Type     string   `json:"type" default:"string"`
 	Required bool     `json:"required" default:"true"`
@@ -64,6 +66,7 @@ type Interface struct {
 }
 
 type SchemaNetwork struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NameNet           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
@@ -71,10 +74,10 @@ type SchemaNetwork struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"lorawan"`
 	} `json:"plugin_name"`
-	Enable EnableStruct `json:"enable"`
 }
 
 type SchemaDevice struct {
+	Enable         EnableStruct      `json:"enable"`
 	Name           NameDev           `json:"name"`
 	Description    DescriptionStruct `json:"description"`
 	DeviceObjectId struct {
@@ -85,6 +88,7 @@ type SchemaDevice struct {
 }
 
 type SchemaPoint struct {
+	Enable      EnableStruct      `json:"enable"`
 	Name        NamePnt           `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	ObjectType  struct {

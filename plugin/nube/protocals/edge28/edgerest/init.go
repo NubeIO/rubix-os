@@ -19,13 +19,13 @@ func NewNoAuth(address string, port int) *RestClient {
 	client.SetDebug(false)
 	url := fmt.Sprintf("http://%s:%d", address, port)
 	apiURL := url
-	client.SetHostURL(apiURL)
+	client.SetBaseURL(apiURL)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Content-Type", "application/json")
 	return &RestClient{client: client}
 }
 
-func (client *RestClient) edge28ClientDebugMsg(args ...interface{}) {
+func (*RestClient) edge28ClientDebugMsg(args ...interface{}) {
 	enable := false
 	if enable {
 		prefix := "Edge28 Client: "
@@ -33,7 +33,7 @@ func (client *RestClient) edge28ClientDebugMsg(args ...interface{}) {
 	}
 }
 
-func (client *RestClient) edge28ClientErrorMsg(args ...interface{}) {
+func (*RestClient) edge28ClientErrorMsg(args ...interface{}) {
 	prefix := "Edge28 Client: "
 	log.Error(prefix, args)
 }

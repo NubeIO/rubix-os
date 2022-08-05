@@ -11,7 +11,6 @@ import (
 )
 
 // THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
-// addNetwork add network. Called via API call (or wizard)
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	if body == nil {
 		inst.edge28ErrorMsg("addNetwork(): nil network object")
@@ -26,7 +25,6 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return network, nil
 }
 
-// addDevice add device. Called via API call (or wizard)
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	if body == nil {
 		inst.edge28DebugMsg("addDevice(): nil device object")
@@ -64,7 +62,6 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	return device, nil
 }
 
-// addPoint add point. Called via API call (or wizard)
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	if body == nil {
 		inst.edge28DebugMsg("addPoint(): nil point object")
@@ -112,7 +109,6 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	return point, nil
 }
 
-// updateNetwork update network. Called via API call.
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
 	inst.edge28DebugMsg("updateNetwork(): ", body.UUID)
 	if body == nil {
@@ -126,7 +122,6 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	return network, nil
 }
 
-// updateDevice update device. Called via API call.
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
 	inst.edge28DebugMsg("updateDevice(): ", body.UUID)
 	if body == nil {
@@ -141,7 +136,6 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	return dev, nil
 }
 
-// updatePoint update point. Called via API call.
 func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
 	inst.edge28DebugMsg("updatePoint(): ", body.UUID)
 	if body == nil {
@@ -173,11 +167,8 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	return point, err
 }
 
-// writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-
 	// TODO: check for PointWriteByName calls that might not flow through the plugin.
-
 	inst.edge28DebugMsg("writePoint(): ", pntUUID)
 	if body == nil {
 		inst.edge28DebugMsg("writePoint(): nil point object")
@@ -212,7 +203,6 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	return point, nil
 }
 
-// deleteNetwork delete network. Called via API call.
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	inst.edge28DebugMsg("deleteNetwork(): ", body.UUID)
 	if body == nil {
@@ -240,7 +230,6 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	return ok, nil
 }
 
-// deletePoint delete point. Called via API call.
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	inst.edge28DebugMsg("deletePoint(): ", body.UUID)
 	if body == nil {
@@ -254,12 +243,11 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-// pointUpdate update point. Called from within plugin.
 func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess bool) (*model.Point, error) {
 	if readSuccess {
 		point.OriginalValue = float.New(value)
 	}
-	_, err = inst.db.UpdatePoint(point.UUID, point, true, true)
+	_, err := inst.db.UpdatePoint(point.UUID, point, true, true)
 	if err != nil {
 		inst.edge28DebugMsg("EDGE28 UPDATE POINT UpdatePointPresentValue() error: ", err)
 		return nil, err
@@ -267,7 +255,6 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess
 	return point, nil
 }
 
-// pointUpdateErr update point with errors. Called from within plugin.
 func (inst *Instance) pointUpdateErr(point *model.Point, err error) error {
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = model.MessageLevel.Fail

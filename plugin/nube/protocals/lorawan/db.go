@@ -24,7 +24,6 @@ func (inst *Instance) getNetwork() (network *model.Network, err error) {
 	return net[0], err
 }
 
-// addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
 	if err != nil {
@@ -43,7 +42,6 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return body, nil
 }
 
-// createDeviceFromCSDevice
 func (inst *Instance) createDeviceFromCSDevice(csDev *csmodel.Device) (device *model.Device, err error) {
 	newDev := new(model.Device)
 	inst.csConvertDevice(newDev, csDev)

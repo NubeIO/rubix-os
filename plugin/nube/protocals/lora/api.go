@@ -38,7 +38,6 @@ func bodyWizard(ctx *gin.Context) (dto wizard, err error) {
 	return dto, err
 }
 
-// RegisterWebhook implements plugin.Webhooker
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
 	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
@@ -123,14 +122,13 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, serial)
 		}
 	})
+
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, loramodel.GetNetworkSchema())
 	})
-
 	mux.GET(schemaDevice, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, loramodel.GetDeviceSchema())
 	})
-
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, loramodel.GetPointSchema())
 	})

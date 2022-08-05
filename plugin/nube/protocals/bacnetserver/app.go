@@ -12,7 +12,6 @@ import (
 	"time"
 )
 
-// addNetwork add network
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	if body.NetworkInterface == "" {
 		return nil, errors.New("network interface can not be empty try, eth0")
@@ -41,7 +40,6 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return body, nil
 }
 
-// addDevice add device
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	network, err := inst.db.GetNetwork(body.NetworkUUID, api.Args{WithDevices: true})
 	if err != nil {
@@ -70,30 +68,19 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	return device, nil
 }
 
-// addPoint add point
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	if body.ObjectType == "" {
 		errMsg := fmt.Sprintf("bacnet-bserver: point object type can not be empty")
 		log.Errorf(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	point, err = inst.db.CreatePoint(body, true, true)
-	if err != nil {
-		return nil, err
-	}
-	return point, nil
+	return inst.db.CreatePoint(body, true, true)
 }
 
-// updateNetwork update network
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
-	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
-	if err != nil {
-		return nil, err
-	}
-	return network, nil
+	return inst.db.UpdateNetwork(body.UUID, body, true)
 }
 
-// updateDevice update device
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
 	device, err = inst.db.UpdateDevice(body.UUID, body, true)
 	if err != nil {
@@ -103,7 +90,6 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	if err != nil {
 		return nil, err
 	}
-
 	return device, nil
 }
 
@@ -111,7 +97,6 @@ func (inst *Instance) getNetworks() ([]*model.Network, error) {
 	return inst.db.GetNetworks(api.Args{})
 }
 
-// deleteNetwork delete network
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	ok, err = inst.db.DeleteNetwork(body.UUID)
 	if err != nil {
@@ -121,13 +106,11 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	return ok, err
 }
 
-// writePoint update point. Called via API call.
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
 	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
 	return point, err
 }
 
-// deleteNetwork delete device
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	ok, err = inst.db.DeleteDevice(body.UUID)
 	if err != nil {
@@ -136,7 +119,6 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 	return ok, nil
 }
 
-// deletePoint delete point
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	ok, err = inst.db.DeletePoint(body.UUID)
 	if err != nil {
@@ -145,7 +127,6 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-// pointWrite update point present value
 func (inst *Instance) pointWrite(uuid string, value float64) error {
 	priority := map[string]*float64{"_16": &value}
 	pointWriter := model.PointWriter{Priority: &priority}
@@ -156,7 +137,6 @@ func (inst *Instance) pointWrite(uuid string, value float64) error {
 	return err
 }
 
-// pointUpdateSuccess update point present value
 func (inst *Instance) pointUpdateSuccess(uuid string) error {
 	var point model.Point
 	point.CommonFault.InFault = false
@@ -172,7 +152,6 @@ func (inst *Instance) pointUpdateSuccess(uuid string) error {
 	return err
 }
 
-// pointUpdateErr update point present value
 func (inst *Instance) pointUpdateErr(uuid string, err error) error {
 	var point model.Point
 	point.CommonFault.InFault = true

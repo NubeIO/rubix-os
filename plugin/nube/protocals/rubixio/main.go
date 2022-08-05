@@ -49,7 +49,6 @@ func GetFlowPluginInfo() pluginapi.Info {
 // NewFlowPluginInstance creates a plugin instance for a user context.
 func NewFlowPluginInstance() pluginapi.Plugin {
 	return &Instance{}
-
 }
 
 // main will not let main run

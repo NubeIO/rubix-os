@@ -115,7 +115,6 @@ func (a *RestClient) PingServer() (*ServerPing, error) {
 	return resp.Result().(*ServerPing), nil
 }
 
-// GetUIs all ui points
 func (a *RestClient) GetUIs() (*UI, error) {
 	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(UI{}).
@@ -126,7 +125,6 @@ func (a *RestClient) GetUIs() (*UI, error) {
 	return resp.Result().(*UI), nil
 }
 
-// GetDIs all di points
 func (a *RestClient) GetDIs() (*DI, error) {
 	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(DI{}).
@@ -137,7 +135,6 @@ func (a *RestClient) GetDIs() (*DI, error) {
 	return resp.Result().(*DI), nil
 }
 
-// WriteUO to a UO point
 func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, error) {
 	req := fmt.Sprintf("/api/1.1/write/uo/%s/%d/16", strings.ToLower(ioNum), int(value))
 	a.edge28ClientDebugMsg("WriteUO:", req)
@@ -150,7 +147,6 @@ func (a *RestClient) WriteUO(ioNum string, value float64) (*WriteResponseUO, err
 	return resp.Result().(*WriteResponseUO), nil
 }
 
-// WriteDO to a DO point
 func (a *RestClient) WriteDO(ioNum string, value float64) (*WriteResponse, error) {
 	req := fmt.Sprintf("/api/1.1/write/do/%s/%d/16", strings.ToLower(ioNum), int(value))
 	a.edge28ClientDebugMsg("WriteDO:", req)

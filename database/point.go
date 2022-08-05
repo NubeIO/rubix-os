@@ -92,26 +92,23 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 }
 
 func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
+	network, err := d.GetNetworkByDeviceUUID(body.DeviceUUID, api.Args{})
+	if err != nil {
+		return nil, err
+	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
-	body.Name = nameIsNil(body.Name)
-
 	if body.Decimal == nil {
 		body.Decimal = nils.NewUint32(2)
 	}
-
 	obj, err := checkObjectType(body.ObjectType)
 	if err != nil {
 		return nil, err
 	}
 	body.ObjectType = string(obj)
-	if body.Description == "" {
-		body.Description = "na"
-	}
 	if body.PointPriorityArrayMode == "" {
 		body.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode.
 	}
 	body.ThingClass = model.ThingClass.Point
-	body.CommonEnable.Enable = boolean.NewTrue()
 	body.InSync = boolean.NewFalse()
 	if body.Priority == nil {
 		body.Priority = &model.Priority{}
@@ -119,21 +116,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
-	network, err := d.GetNetworkByDeviceUUID(body.DeviceUUID, api.Args{})
-	if err != nil {
-		return nil, errors.New("ERROR failed to get plugin uuid")
-	}
-	if network == nil {
-		return nil, errors.New("ERROR failed to get network")
-	}
-	if !fromPlugin {
-		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsCreated, network.PluginConfId, body.UUID)
-		d.Bus.RegisterTopic(t)
-		err = d.Bus.Emit(eventbus.CTX(), t, body)
-		if err != nil {
-			return nil, errors.New("ERROR on device eventbus")
-		}
-	}
+
 	// check for mapping
 	if network.AutoMappingNetworksSelection != "" {
 		pointMapping := &model.PointMapping{}
@@ -150,7 +133,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 			log.Println("points.db.CreatePoint() added point new mapping")
 		}
 	}
-	return body, err
+	return body, nil
 }
 
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool, afterRealDeviceUpdate bool) (
@@ -177,7 +160,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, err
 		}
 	}
-	query = d.DB.Model(&pointModel).Select("*").Updates(&body)
+	if err := d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
+		return nil, err
+	}
 
 	// TODO: we need to decide if a read only point needs to have a priority array or if it should just be nil.
 	if body.Priority == nil {
@@ -188,11 +173,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
 	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate)
-
-	if err != nil {
-		return nil, err
-	}
-	return pnt, nil
+	return pnt, err
 }
 
 func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlugin bool, afterRealDeviceUpdate bool) (
@@ -279,10 +260,10 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	// value to the modbus point
 	if fromPlugin && afterRealDeviceUpdate {
 		pointModel.InSync = boolean.NewTrue() // TODO: do we still use InSync?
-		//pointModel.WritePollRequired = boolean.NewFalse()  // WritePollRequired should be set by the plugins (they know best)
+		// pointModel.WritePollRequired = boolean.NewFalse()  // WritePollRequired should be set by the plugins (they know best)
 	} else {
 		pointModel.InSync = boolean.NewFalse() // TODO: do we still use InSync?
-		//pointModel.WritePollRequired = boolean.NewTrue()  // WritePollRequired should be set by the plugins (they know best)
+		// pointModel.WritePollRequired = boolean.NewTrue()  // WritePollRequired should be set by the plugins (they know best)
 	}
 
 	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
