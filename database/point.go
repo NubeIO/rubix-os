@@ -209,7 +209,8 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	pointModel.WriteValueOriginal = wv
 
 	presentValueTransformFault := false
-	transform, err := PointValueTransformOnRead(presentValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
+	transform := PointValueTransformOnRead(presentValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor,
+		pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
 	if afterRealDeviceUpdate {
 		pointModel.CommonFault.InFault = false
 		pointModel.CommonFault.MessageLevel = model.MessageLevel.Info
@@ -217,16 +218,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
 		pointModel.CommonFault.LastOk = time.Now().UTC()
 	}
-	if err != nil {
-		pointModel.CommonFault.InFault = true
-		pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
-		pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
-		pointModel.CommonFault.Message = fmt.Sprint("point.db updatePointValue() error on present value transformation. error:", err)
-		pointModel.CommonFault.LastFail = time.Now().UTC()
-		presentValueTransformFault = true
-	} else {
-		presentValue = transform
-	}
+	presentValue = transform
 	val, err := pointUnits(presentValue, pointModel.Unit, pointModel.UnitTo)
 	if err != nil {
 		pointModel.CommonFault.InFault = true
@@ -241,7 +233,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 
 	writeValueTransformFault := false
 	if writeValue != nil {
-		transform, err = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
+		transform = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
 		if err != nil {
 			pointModel.CommonFault.InFault = true
 			pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
@@ -300,18 +292,6 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		d.DB.Model(&model.Writer{}).
 			Where("writer_thing_uuid = ?", pointModel.UUID).
 			Update("present_value", pointModel.PresentValue)
-	}
-	if !fromPlugin { // stop looping
-		plug, err := d.GetNetworkByDeviceUUID(pointModel.DeviceUUID, api.Args{})
-		if err != nil {
-			return nil, false, false, false, errors.New("ERROR failed to get plugin uuid")
-		}
-		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, plug.PluginConfId, pointModel.UUID)
-		d.Bus.RegisterTopic(t)
-		err = d.Bus.Emit(eventbus.CTX(), t, pointModel)
-		if err != nil {
-			return nil, false, false, false, errors.New("ERROR on device eventbus")
-		}
 	}
 	return pointModel, isPresentValueChange, isWriteValueChange, isPriorityChanged, nil
 }
