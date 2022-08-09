@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
@@ -328,21 +327,7 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 		return false, query.Error
 	}
 	r := query.RowsAffected
-	if r == 0 {
-		return false, nil
-	} else {
-		plug, err := d.GetNetworkByDeviceUUID(point.DeviceUUID, api.Args{})
-		if err != nil {
-			return false, errors.New("ERROR failed to get plugin uuid")
-		}
-		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsDeleted, plug.PluginConfId, point.UUID)
-		d.Bus.RegisterTopic(t)
-		err = d.Bus.Emit(eventbus.CTX(), t, point)
-		if err != nil {
-			return false, errors.New("ERROR on device eventbus")
-		}
-		return true, nil
-	}
+	return r != 0, nil
 }
 
 func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter,
