@@ -1,4 +1,10 @@
 # CHANGELOG
+
+## [v0.6.6](https://github.com/NubeIO/flow-framework/tree/v0.6.6) (2022-08-09)
+- Issue/producer history current writer UUID #598
+- Improvements/misc #596
+- Add central history producer enable flag #594
+
 ## [v0.6.5](https://github.com/NubeIO/flow-framework/tree/v0.6.5) (2022-07-29)
 
 - poll queue nil guarding

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/plugin/compat"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -89,14 +88,6 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugi
 	query = d.DB.Model(&networkModel).Select("*").Updates(&body)
 	if query.Error != nil {
 		return nil, query.Error
-	}
-	if !fromPlugin {
-		t := fmt.Sprintf("%s.%s.%s", eventbus.PluginsUpdated, networkModel.PluginConfId, networkModel.UUID)
-		d.Bus.RegisterTopic(t)
-		err := d.Bus.Emit(eventbus.CTX(), t, networkModel)
-		if err != nil {
-			return nil, errors.New("error on network eventbus")
-		}
 	}
 	return networkModel, nil
 }

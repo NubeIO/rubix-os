@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/units"
@@ -83,9 +82,9 @@ func pointUnits(presentValue *float64, unitFrom, unitTo *string) (value *float64
 	}
 	_, res, err := units.Process(*presentValue, *unitFrom, *unitTo)
 	if err != nil {
-		return float.New(0), err
+		return nil, err
 	}
-	return float.New(res.AsFloat()), err
+	return float.New(res.AsFloat()), nil
 }
 
 func PointRange(presentValue, limitMin, limitMax *float64) (value *float64) {
@@ -127,9 +126,10 @@ func PointEval(val *float64, evalString string) (value *float64, err error) {
 	return val, nil
 }
 
-func PointValueTransformOnRead(originalValue *float64, scaleEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax, offset *float64) (transformedValue *float64, err error) {
+func PointValueTransformOnRead(originalValue *float64, scaleEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin,
+	scaleOutMax, offset *float64) (transformedValue *float64) {
 	if originalValue == nil {
-		return nil, errors.New("input value is undefined")
+		return nil
 	}
 	ov := float.NonNil(originalValue)
 
@@ -144,22 +144,22 @@ func PointValueTransformOnRead(originalValue *float64, scaleEnable *bool, factor
 	if boolean.IsTrue(scaleEnable) {
 		if !float.IsNil(scaleOutMin) && !float.IsNil(scaleOutMax) {
 			if !float.IsNil(scaleInMin) && !float.IsNil(scaleInMax) { // scale with all 4 configs
-				scaledAndLimited = float.NonNil(PointScale(float.New(factored), scaleInMin, scaleInMax, scaleOutMin, scaleOutMax))
-			} else { //do limit with only scaleOutMin and scaleOutMin
+				scaledAndLimited = float.NonNil(PointScale(float.New(factored), scaleInMin, scaleInMax, scaleOutMin,
+					scaleOutMax))
+			} else { // do limit with only scaleOutMin and scaleOutMin
 				scaledAndLimited = float.NonNil(PointRange(float.New(factored), scaleOutMin, scaleOutMax))
 			}
 		}
 	}
-
 	// perform offset operation
 	offsetted := scaledAndLimited + float.NonNil(offset)
-
-	return float.New(offsetted), nil
+	return float.New(offsetted)
 }
 
-func PointValueTransformOnWrite(originalValue *float64, scaleEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax, offset *float64) (transformedValue *float64, err error) {
+func PointValueTransformOnWrite(originalValue *float64, scaleEnable *bool, factor, scaleInMin, scaleInMax, scaleOutMin,
+	scaleOutMax, offset *float64) (transformedValue *float64) {
 	if originalValue == nil {
-		return nil, errors.New("input value is undefined")
+		return nil
 	}
 	ov := float.NonNil(originalValue)
 
@@ -171,8 +171,9 @@ func PointValueTransformOnWrite(originalValue *float64, scaleEnable *bool, facto
 	if boolean.IsTrue(scaleEnable) {
 		if !float.IsNil(scaleOutMin) && !float.IsNil(scaleOutMax) {
 			if !float.IsNil(scaleInMin) && !float.IsNil(scaleInMax) { // scale with all 4 configs
-				unscaledAndUnlimited = float.NonNil(PointScale(float.New(unoffsetted), scaleOutMin, scaleOutMax, scaleInMin, scaleInMax))
-			} else { //do limit with only scaleOutMin and scaleOutMin
+				unscaledAndUnlimited = float.NonNil(PointScale(float.New(unoffsetted), scaleOutMin, scaleOutMax,
+					scaleInMin, scaleInMax))
+			} else { // do limit with only scaleOutMin and scaleOutMin
 				unscaledAndUnlimited = float.NonNil(PointRange(float.New(unoffsetted), scaleOutMin, scaleOutMax))
 			}
 		}
@@ -184,5 +185,5 @@ func PointValueTransformOnWrite(originalValue *float64, scaleEnable *bool, facto
 		unfactored = unscaledAndUnlimited / float.NonNil(factor)
 	}
 
-	return float.New(unfactored), nil
+	return float.New(unfactored)
 }

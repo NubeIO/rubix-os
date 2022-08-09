@@ -11,7 +11,7 @@ import (
 
 func (inst *Instance) csConvertDevice(dev *model.Device, csDev *csmodel.Device) {
 	dev.NetworkUUID = inst.networkUUID
-	dev.CommonName.Name = csDev.Name
+	dev.Name = csDev.Name
 	dev.CommonDescription.Description = csDev.Description
 	dev.CommonDevice.AddressUUID = &csDev.DevEUI
 }
@@ -82,7 +82,7 @@ func (inst *Instance) createNewPoint(name string, deviceEUI string, deviceUUID s
 	b := false
 	addressUUID := createPointAddressUUID(name, deviceEUI)
 	point = &model.Point{
-		CommonName:      model.CommonName{Name: name},
+		Name:            name,
 		AddressUUID:     &addressUUID,
 		DeviceUUID:      deviceUUID,
 		EnableWriteable: &b,
