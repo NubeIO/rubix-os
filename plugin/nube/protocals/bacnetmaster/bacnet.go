@@ -314,7 +314,7 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 
 	for _, device := range devices {
 		newDevice := &model.Device{
-			CommonName: model.CommonName{Name: fmt.Sprintf("deviceId_%d_networkNum_%d", device.DeviceID, device.NetworkNumber)},
+			Name: fmt.Sprintf("deviceId_%d_networkNum_%d", device.DeviceID, device.NetworkNumber),
 			CommonDevice: model.CommonDevice{
 				CommonIP: model.CommonIP{
 					Host: device.Ip,
@@ -370,7 +370,7 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints
 			writeMode = model.WriteOnceThenRead
 		}
 		newPnt := &model.Point{
-			CommonName: model.CommonName{Name: pnt.Name},
+			Name:       pnt.Name,
 			DeviceUUID: deviceUUID,
 			ObjectType: objectType,
 			ObjectId:   integer.New(int(pnt.ObjectID)),

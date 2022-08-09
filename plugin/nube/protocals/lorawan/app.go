@@ -68,9 +68,9 @@ func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
 func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
 	for _, csDev := range csDevices {
 		currDev, _ := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
-		if currDev.CommonName.Name != csDev.Name &&
+		if currDev.Name != csDev.Name &&
 			currDev.CommonDescription.Description != csDev.Description {
-			currDev.CommonName.Name = csDev.Name
+			currDev.Name = csDev.Name
 			currDev.CommonDescription.Description = csDev.Description
 			_, err := inst.db.UpdateDevice(currDev.UUID, currDev, true)
 			if err != nil {
