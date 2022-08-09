@@ -118,18 +118,20 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 
 	// check for mapping
 	if network.AutoMappingNetworksSelection != "" {
-		pointMapping := &model.PointMapping{}
-		pointMapping.Point = body
-		pointMapping.AutoMappingFlowNetworkName = network.AutoMappingFlowNetworkName
-		pointMapping.AutoMappingFlowNetworkUUID = network.AutoMappingFlowNetworkUUID
-		pointMapping.AutoMappingNetworksSelection = []string{network.AutoMappingNetworksSelection}
-		pointMapping.AutoMappingEnableHistories = network.AutoMappingEnableHistories
-		pointMapping, err = d.CreatePointMapping(pointMapping)
-		if err != nil {
-			log.Errorln("points.db.CreatePoint() failed to make auto point mapping")
-			return nil, err
-		} else {
-			log.Println("points.db.CreatePoint() added point new mapping")
+		if network.AutoMappingNetworksSelection != "disable" {
+			pointMapping := &model.PointMapping{}
+			pointMapping.Point = body
+			pointMapping.AutoMappingFlowNetworkName = network.AutoMappingFlowNetworkName
+			pointMapping.AutoMappingFlowNetworkUUID = network.AutoMappingFlowNetworkUUID
+			pointMapping.AutoMappingNetworksSelection = []string{network.AutoMappingNetworksSelection}
+			pointMapping.AutoMappingEnableHistories = network.AutoMappingEnableHistories
+			pointMapping, err = d.CreatePointMapping(pointMapping)
+			if err != nil {
+				log.Errorln("points.db.CreatePoint() failed to make auto point mapping")
+				return nil, err
+			} else {
+				log.Println("points.db.CreatePoint() added point new mapping")
+			}
 		}
 	}
 	return body, nil
