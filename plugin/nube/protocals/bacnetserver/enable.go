@@ -29,6 +29,7 @@ func (inst *Instance) Enable() error {
 			log.Errorf("rubix-io.enable: POLLING ERROR: %v\n", err)
 		}
 	}
+	go inst.initPointsNames()
 	return nil
 }
 

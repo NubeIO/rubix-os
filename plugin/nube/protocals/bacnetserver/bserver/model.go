@@ -68,7 +68,7 @@ type Network struct {
 	AutoMappingNetworksSelection struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[\"disable\",\"self-mapping\",\"rubix-io-to-bacnetserver\"]"`
+		Options  []string `json:"options" default:"[\"disable\",\"self-mapping\"]"`
 		Default  string   `json:"default" default:""`
 	} `json:"auto_mapping_networks_selection"`
 	AutoMappingFlowNetworkName struct {
@@ -94,7 +94,7 @@ type Device struct {
 	DeviceObjectId struct {
 		Type     string `json:"type" default:"int"`
 		Required bool   `json:"required" default:"false"`
-		Default  int    `json:"default" default:"1"`
+		Default  int    `json:"default" default:"2508"`
 	} `json:"device_object_id"`
 }
 
