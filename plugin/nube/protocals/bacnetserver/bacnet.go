@@ -176,6 +176,37 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 	return nil
 }
 
+/*
+writeBacnetPointName
+examples from the lib
+go run main.go read --interface=wlp0s20f3 --address=192.168.15.191 --device=2508 --objectID=1 --objectType=1 --property=77
+go run main.go write --interface=wlp0s20f3 --address=192.168.15.191 --device=2508 --objectID=1 --objectType=1 --property=77 --priority=16 --value=testing
+*/
+func (inst *Instance) writeBacnetPointName(pnt *model.Point, name, networkUUID, deviceUUID string) error {
+	val := float.NonNil(pnt.WriteValue)
+	object, _, _ := setObjectType(pnt.ObjectType)
+	bp := &network.Point{
+		ObjectID:   btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
+		ObjectType: object,
+	}
+	net, err := inst.getBacnetNetwork(networkUUID)
+	if err != nil {
+		return err
+	}
+	go net.NetworkRun()
+	dev, err := inst.getBacnetDevice(deviceUUID)
+	if err != nil {
+		return err
+	}
+	err = dev.WritePointName(bp, name)
+	if err != nil {
+		log.Errorln("bacnet-server-write-name:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " name:", val, " error:", err)
+		return err
+	}
+	log.Infoln("bacnet-server-write-name:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " name:", val)
+	return nil
+}
+
 func setObjectType(object string) (obj btypes.ObjectType, isWritable, isBool bool) {
 	switch object {
 	case "analog_input":

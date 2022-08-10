@@ -93,6 +93,45 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	return device, nil
 }
 
+func (inst *Instance) updatePoint(body *model.Point) (*model.Point, error) {
+	point, err := inst.db.UpdatePoint(body.UUID, body, true, false)
+	if err != nil {
+		return nil, err
+	}
+	err = inst.updatePointName(body)
+	if err != nil {
+		return nil, err
+	}
+	return point, nil
+}
+
+func (inst *Instance) updatePointName(body *model.Point) error {
+	device, err := inst.db.GetDevice(body.DeviceUUID, api.Args{})
+	if err != nil {
+		return err
+	}
+	return inst.writeBacnetPointName(body, body.Name, device.NetworkUUID, device.UUID) //update the bacnet point name
+}
+
+// initPointsNames on start update all the point names
+func (inst *Instance) initPointsNames() error {
+	net, err := inst.db.GetNetwork(inst.networkUUID, api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		log.Errorf(fmt.Sprintf("bacnet-server-write-all-point-names: network-UUID%s  err:%s", inst.networkUUID, err.Error()))
+		return err
+	}
+	for _, dev := range net.Devices {
+		for _, point := range dev.Points {
+			err := inst.writeBacnetPointName(point, point.Name, dev.NetworkUUID, dev.UUID)
+			if err != nil {
+				log.Errorf(fmt.Sprintf("bacnet-server-write-all-point-name: point-name:%s  err:%s", point.Name, err.Error()))
+			}
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+	return nil
+}
+
 func (inst *Instance) getNetworks() ([]*model.Network, error) {
 	return inst.db.GetNetworks(api.Args{})
 }
