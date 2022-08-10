@@ -95,7 +95,7 @@ jobs:
           cd ./plugin/nube/system
           go build -buildmode=plugin -o system-amd64.so *.go  && cp system-amd64.so ../../../
 
-          cd ../../../../plugin/nube/protocals/edge28
+          cd ../../../plugin/nube/protocals/edge28
           go build -buildmode=plugin -o edge28-amd64.so *.go  && cp edge28-amd64.so ../../../../
 
           cd ../../../../plugin/nube/protocals/lorawan
@@ -139,7 +139,7 @@ jobs:
           cd ./plugin/nube/system
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o system-armv7.so *.go  && cp system-armv7.so ../../../
 
-          cd ../../../../plugin/nube/protocals/edge28
+          cd ../../../plugin/nube/protocals/edge28
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edge28-armv7.so *.go  && cp edge28-armv7.so ../../../../
 
           cd ../../../../plugin/nube/protocals/lorawan
