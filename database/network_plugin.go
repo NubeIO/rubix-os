@@ -64,7 +64,10 @@ func (d *GormDatabase) DeleteNetworkPlugin(uuid string) (ok bool, err error) {
 	cli := client.NewLocalClient()
 	ok, err = cli.DeleteNetworkPlugin(network, pluginName)
 	if err != nil {
-		return ok, err
+		ok, err = d.DeleteNetwork(uuid)
+		if err != nil {
+			return ok, err
+		}
 	}
 	return
 }
