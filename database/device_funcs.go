@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -45,11 +46,13 @@ func (d *GormDatabase) deviceNameExistsInNetwork(deviceName, networkUUID string)
 		return nil, false
 	}
 	for _, dev := range network.Devices {
+		if integer.NonNil(dev.NumberOfDevicesPermitted) == 1 { // some networks like the bacnet-server plugin only allow one network and device
+			return dev, true
+		}
 		if dev.Name == deviceName {
 			return dev, true
 		}
 	}
-
 	return nil, false
 }
 

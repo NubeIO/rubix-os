@@ -257,7 +257,7 @@ func (d *GormDatabase) createPointMappingNetwork(plugin string) (network *model.
 		network.Enable = boolean.NewTrue()
 		network.Name = plugin
 		network.PluginPath = plugin
-		network, err = d.CreateNetwork(network, false)
+		network, err = d.CreateNetworkPlugin(network)
 		if err != nil {
 			log.Errorln("mapping.db.CreatePointMapping(): failed to add network for plugin name:", plugin)
 			return nil, errors.New("failed to add a new network for auto mapping")
@@ -278,7 +278,7 @@ func (d *GormDatabase) createPointMappingDevice(deviceName, networkUUID string) 
 		newDevice.Enable = boolean.NewTrue()
 		newDevice.Name = deviceName
 		newDevice.NetworkUUID = networkUUID
-		device, err = d.CreateDevice(newDevice)
+		device, err = d.CreateDevicePlugin(newDevice)
 		if err != nil {
 			log.Errorln("mapping.db.CreatePointMapping(): failed to add new device:", newDevice.Name)
 			return nil, err

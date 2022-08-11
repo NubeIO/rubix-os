@@ -14,16 +14,30 @@ import (
 
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	if body.NetworkInterface == "" {
-		return nil, errors.New("network interface can not be empty try, eth0")
+		interfaces, err := nets.GetInterfacesNames()
+		if err != nil {
+			return nil, err
+		}
+		for _, name := range interfaces.Names {
+			if name != "lo" {
+				iface, _ := nets.GetNetworkByIface(name)
+				if iface.IP != "" {
+					body.NetworkInterface = name
+				}
+			}
+		}
+		if body.NetworkInterface == "" {
+			return nil, errors.New("network interface can not be empty try, eth0")
+		}
 	}
-
+	body.NumberOfNetworksPermitted = integer.New(1)
 	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
 	if err != nil {
 		return nil, err
 	}
 	for _, net := range nets {
 		if net != nil {
-			errMsg := fmt.Sprintf("bacnet-server: only max one network is allowed with lora")
+			errMsg := fmt.Sprintf("bacnet-server: only max one network is allowed with bacnet")
 			log.Errorf(errMsg)
 			return nil, errors.New(errMsg)
 		}
@@ -36,6 +50,17 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	err = inst.bacnetNetwork(network)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("err:%s", err.Error()))
+	}
+	device := &model.Device{
+		Name:        network.Name,
+		NetworkUUID: network.UUID,
+		CommonEnable: model.CommonEnable{
+			Enable: boolean.NewTrue(),
+		},
+	}
+	device, err = inst.addDevice(device)
+	if err != nil {
+		return nil, err
 	}
 	return body, nil
 }
