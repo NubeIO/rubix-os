@@ -86,12 +86,12 @@ func (inst *Instance) polling(p polling) error {
 						} else if pnt.WriteMode == "write_only" || pnt.WriteMode == "write_then_read" {
 							// if poll count = 0 or InSync = false then write
 							// if write value == nil then don't write
-							readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
-							if err != nil {
-								err = inst.pointUpdateErr(pnt.UUID, err)
-								continue
-							}
-							err = inst.pointWrite(pnt.UUID, readFloat)
+							//readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
+							//if err != nil {
+							//	err = inst.pointUpdateErr(pnt.UUID, err)
+							//	continue
+							//}
+							//err = inst.pointWrite(pnt.UUID, readFloat)
 							var doWrite bool
 							rsyncWrite := counter % 10
 							if counter <= 1 || boolean.IsFalse(pnt.InSync) || rsyncWrite == 0 {
@@ -106,7 +106,7 @@ func (inst *Instance) polling(p polling) error {
 								doWrite = false
 								log.Infoln("bacnet-server-WRITE-SYNC-SKIP as writeValue is nil on device:", dev.Name, " point:", pnt.Name, " rsyncWrite:", rsyncWrite)
 							}
-							pnt.WriteValue = float.New(readFloat)
+							//pnt.WriteValue = float.New(readFloat)
 							if doWrite {
 								err := inst.doWrite(pnt, net.UUID, dev.UUID)
 								if err != nil {
