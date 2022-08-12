@@ -62,8 +62,8 @@ type Device struct {
 	Host        struct {
 		Type     string `json:"type" default:"string"`
 		Required bool   `json:"required" default:"false"`
-		Options  string `json:"options" default:"192.168.15.10"`
-		Default  string `json:"default" default:"192.168.15.10"`
+		Options  string `json:"options" default:"0.0.0.0"`
+		Default  string `json:"default" default:"0.0.0.0"`
 	} `json:"host"`
 	Port struct {
 		Type     string `json:"type" default:"int"`

@@ -21,12 +21,12 @@ func (inst *Instance) Enable() error {
 		go func() error {
 			err := inst.polling(arg)
 			if err != nil {
-				log.Errorf("rubix-io.enable: POLLING ERROR on routine: %v\n", err)
+				log.Errorf("bacnet-server.enable: POLLING ERROR on routine: %v\n", err)
 			}
 			return nil
 		}()
 		if err != nil {
-			log.Errorf("rubix-io.enable: POLLING ERROR: %v\n", err)
+			log.Errorf("bacnet-server: POLLING ERROR: %v\n", err)
 		}
 	}
 	go inst.initPointsNames()

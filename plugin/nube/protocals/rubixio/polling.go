@@ -120,9 +120,13 @@ func (inst *Instance) syncOutputs(dev *model.Device) (bulk []rubixio.BulkWrite) 
 	return
 }
 
-func (inst *Instance) getInputs() *rubixio.Inputs {
+func (inst *Instance) getInputs(dev *model.Device) *rubixio.Inputs {
 	restService := &rest.Service{}
-	restService.Url = inst.config.Ip
+	var ip = "0.0.0.0"
+	if dev.CommonIP.Host != "" {
+		ip = dev.CommonIP.Host
+	}
+	restService.Url = ip
 	restService.Port = 5001
 	restOptions := &rest.Options{}
 	restService.Options = restOptions
@@ -140,7 +144,11 @@ func (inst *Instance) getInputs() *rubixio.Inputs {
 
 func (inst *Instance) writeOutput(dev *model.Device) {
 	restService := &rest.Service{}
-	restService.Url = inst.config.Ip
+	var ip = "0.0.0.0"
+	if dev.CommonIP.Host != "" {
+		ip = dev.CommonIP.Host
+	}
+	restService.Url = ip
 	restService.Port = 5001
 	restOptions := &rest.Options{}
 	restService.Options = restOptions
@@ -193,7 +201,7 @@ func (inst *Instance) polling(p polling) error {
 				for _, dev := range net.Devices { // DEVICES
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
-					inputs := inst.getInputs()
+					inputs := inst.getInputs(dev)
 					inst.syncInputs(dev, inputs)
 					inst.writeOutput(dev)
 				}
