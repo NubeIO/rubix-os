@@ -1,8 +1,11 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"github.com/NubeDev/bacnet"
 	"github.com/NubeDev/bacnet/btypes"
+	"github.com/NubeDev/bacnet/btypes/priority"
 	"github.com/NubeDev/bacnet/btypes/segmentation"
 	"github.com/NubeDev/bacnet/network"
 	"github.com/NubeIO/flow-framework/api"
@@ -88,6 +91,28 @@ func (inst *Instance) bacnetDevice(dev *model.Device) error {
 
 	net, _ := inst.getBacnetNetwork(dev.NetworkUUID)
 	return inst.BacStore.UpdateDevice(dev.UUID, net, d)
+}
+
+func (inst *Instance) doReadPriority(pnt *model.Point, networkUUID, deviceUUID string) (pri *priority.Float32, err error) {
+	object, isWrite, _ := setObjectType(pnt.ObjectType)
+	if !isWrite {
+		return nil, errors.New(fmt.Sprintf("bacnet-server err read priority as its incorecct type%s %s", pnt.Name, object.String()))
+	}
+	bp := &network.Point{
+		ObjectID:   btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
+		ObjectType: object,
+	}
+	// get network
+	net, err := inst.getBacnetNetwork(networkUUID)
+	if err != nil {
+		return nil, err
+	}
+	go net.NetworkRun()
+	dev, err := inst.getBacnetDevice(deviceUUID)
+	if err != nil {
+		return nil, err
+	}
+	return dev.PointReadPriority(bp)
 }
 
 // getDev get an instance of a created bacnet device that is cached in bacnet lib
