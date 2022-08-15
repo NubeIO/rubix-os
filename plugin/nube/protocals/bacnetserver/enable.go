@@ -2,48 +2,38 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/labstack/gommon/log"
 )
 
 func (inst *Instance) Enable() error {
+	inst.bacnetDebugMsg("Polling Enable()")
 	inst.enabled = true
+	inst.pluginName = name
 	inst.setUUID()
-	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
-	if q != nil {
-		inst.networkUUID = q.UUID
+
+	net, _ := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
+	if net != nil {
+		inst.networkUUID = net.UUID
 	}
 	inst.initBacStore()
-	inst.bacnetNetworkInit()
+
 	if !inst.pollingEnabled {
-		var arg polling
 		inst.pollingEnabled = true
-		arg.enable = true
-		go func() error {
-			err := inst.polling(arg)
-			if err != nil {
-				log.Errorf("bacnet-server.enable: POLLING ERROR on routine: %v\n", err)
-			}
-			return nil
-		}()
+		err := inst.BACnetSlavePolling()
 		if err != nil {
-			log.Errorf("bacnet-server: POLLING ERROR: %v\n", err)
+			inst.bacnetErrorMsg("POLLING ERROR on routine: %v\n", err)
 		}
+		go inst.initPointsNames()
 	}
-	go inst.initPointsNames()
 	return nil
 }
 
 func (inst *Instance) Disable() error {
+	inst.bacnetDebugMsg("Polling Disable()")
 	inst.enabled = false
 	if inst.pollingEnabled {
-		var arg polling
 		inst.pollingEnabled = false
-		arg.enable = false
-		go func() {
-			err := inst.polling(arg)
-			if err != nil {
-			}
-		}()
+		inst.pollingCancel()
+		inst.pollingCancel = nil
 	}
 	return nil
 }

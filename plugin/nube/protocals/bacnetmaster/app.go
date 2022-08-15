@@ -65,7 +65,6 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	if boolean.IsFalse(device.Enable) {
 		err = inst.deviceUpdateErr(device, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
 		inst.db.SetErrorsForAllPointsOnDevice(device.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
-
 	}
 
 	// NOTHING TO DO ON DEVICE CREATED
@@ -162,7 +161,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		return
 	}
 
-	if boolean.IsTrue(network.Enable) == false && netPollMan.Enable == true {
+	if boolean.IsFalse(network.Enable) && netPollMan.Enable {
 		// DO POLLING DISABLE ACTIONS
 		netPollMan.StopPolling()
 		inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError, true)
@@ -204,7 +203,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	}
 
 	device, err = inst.db.UpdateDevice(body.UUID, body, true)
-	if err != nil || device == nil {
+	if err != nil {
 		return nil, err
 	}
 
@@ -213,7 +212,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		return nil, err
 	}
 
-	if boolean.IsTrue(device.Enable) == true { // If Enabled we need to GetDevice so we get Points
+	if boolean.IsTrue(device.Enable) { // If Enabled we need to GetDevice so we get Points
 		device, err = inst.db.GetDevice(device.UUID, api.Args{WithPoints: true})
 		if err != nil || device == nil {
 			return nil, err
@@ -307,7 +306,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		inst.bacnetDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
 	}
-
+	// err = inst.updatePointName(body)  //TODO: Does this need to be added (from BACnet Server)
 	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	if err != nil || dev == nil {
 		inst.bacnetDebugMsg("updatePoint(): bad response from GetDevice()")
@@ -523,7 +522,7 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess
 	}
 	point, err := inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
 	if err != nil {
-		inst.bacnetDebugMsg("BACNET UPDATE POINT UpdatePoint() error: ", err)
+		inst.bacnetDebugMsg("UpdatePoint() error: ", err)
 		return nil, err
 	}
 	return point, nil
