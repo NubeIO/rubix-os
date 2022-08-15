@@ -136,6 +136,12 @@ type Point struct {
 
 func GetNetworkSchema() *Network {
 	network := &Network{}
+	//ports, err := serial.GetPortsList()
+	//if err != nil {
+	//	log.Errorf("lora: get serial ports for schema err:%s", err.Error())
+	//} else {
+	//	network.SerialPort.Options = ports
+	//}
 	defaults.Set(network)
 	return network
 }
