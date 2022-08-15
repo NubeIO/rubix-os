@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
-	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -58,13 +57,13 @@ func (inst *Instance) BACnetSlavePolling() error {
 				if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 					timeStart := time.Now()
 					devDelay, pointDelay := delays(net.TransportType)
-					//counter++
+					// counter++
 					for _, dev := range net.Devices { // DEVICES
 						if boolean.IsFalse(net.Enable) {
 							inst.bacnetDebugMsg("DEVICE DISABLED: NAME: %s\n", dev.Name)
 							continue
 						}
-						time.Sleep(devDelay) // DELAY between devices
+						time.Sleep(devDelay)             // DELAY between devices
 						for _, pnt := range dev.Points { // POINTS
 							if boolean.IsFalse(net.Enable) {
 								continue
@@ -133,120 +132,5 @@ func (inst *Instance) BACnetSlavePolling() error {
 	ctx, cancel := context.WithCancel(context.Background())
 	inst.pollingCancel = cancel
 	go poll.GoPoll(ctx, f)
-	return nil
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, arg)
-		if len(nets) == 0 {
-			time.Sleep(2 * time.Second)
-			log.Info("bacnet-server: NO NETWORKS FOUND")
-		} else {
-			log.Infof("bacnet-server NETWORKS FOUND %d", len(nets))
-		}
-		for _, net := range nets { // NETWORKS
-			if !inst.pollingEnabled {
-				// break
-			}
-			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
-				timeStart := time.Now()
-				devDelay, pointDelay := delays(net.TransportType)
-				counter++
-				if boolean.IsFalse(net.Enable) {
-					log.Infof("bacnet-bserver: LOOP NETWORK DISABLED: COUNT %v NAME: %s\n", counter, net.Name)
-					continue
-				}
-				for _, dev := range net.Devices { // DEVICES
-					if boolean.IsFalse(net.Enable) {
-						log.Infof("bacnet-bserver-device: DEVICE DISABLED: NAME: %s\n", dev.Name)
-						continue
-					}
-
-					for _, pnt := range dev.Points { // POINTS
-						if boolean.IsFalse(net.Enable) {
-							continue
-						}
-						time.Sleep(devDelay) // DELAY between points
-						if pnt.WriteMode == "read_only" {
-							readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
-							if err != nil {
-								err = inst.pointUpdateErr(pnt.UUID, err)
-								continue
-							} else {
-								err := inst.pointWrite(pnt.UUID, readFloat)
-								if err != nil {
-									continue
-								}
-							}
-						} else if pnt.WriteMode == "write_only" || pnt.WriteMode == "write_then_read" {
-							// if poll count = 0 or InSync = false then write
-							// if write value == nil then don't write
-							// readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
-							// if err != nil {
-							//	err = inst.pointUpdateErr(pnt.UUID, err)
-							//	continue
-							// }
-							// err = inst.pointWrite(pnt.UUID, readFloat)
-							var doWrite bool
-							rsyncWrite := counter % 10
-							if counter <= 1 || boolean.IsFalse(pnt.InSync) || rsyncWrite == 0 {
-								doWrite = true
-								if rsyncWrite == 0 {
-									log.Infoln("bacnet-server-WRITE-SYNC-ON-POLL-COUNT on device:", dev.Name, " point:", pnt.Name)
-								} else {
-									log.Infoln("bacnet-server-WRITE-SYNC on device:", dev.Name, " point:", pnt.Name, " rsyncWrite:", rsyncWrite)
-								}
-							}
-							if float.IsNil(pnt.WriteValue) {
-								doWrite = false
-								log.Infoln("bacnet-server-WRITE-SYNC-SKIP as writeValue is nil on device:", dev.Name, " point:", pnt.Name, " rsyncWrite:", rsyncWrite)
-							}
-							// pnt.WriteValue = float.New(readFloat)
-							if doWrite {
-								err := inst.doWrite(pnt, net.UUID, dev.UUID)
-								if err != nil {
-									err = inst.pointUpdateErr(pnt.UUID, err)
-									continue
-								}
-								// val := float.NonNil(pnt.WriteValue) //TODO not sure is this should then update the PV of the point
-								err = inst.pointUpdateSuccess(pnt.UUID)
-								if err != nil {
-									continue
-								}
-							}
-						}
-						time.Sleep(pointDelay) // DELAY between points
-					}
-					timeEnd := time.Now()
-					diff := timeEnd.Sub(timeStart)
-					out := time.Time{}.Add(diff)
-					log.Infof("bacnet-bserver-poll-loop: NETWORK-NAME:%s POLL-DURATION: %s  POLL-COUNT: %d\n", net.Name, out.Format("15:04:05.000"), counter)
-				}
-			}
-		}
-		if !p.enable { // TODO the disable of the polling isn't working
-			return true, nil
-		} else {
-			return false, nil
-		}
-	}
-	err := poll.Poll(context.Background(), f)
-	if err != nil {
-		return nil
-	}
 	return nil
 }
