@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -46,11 +47,11 @@ func (inst *Instance) BACnetServerPolling() error {
 			time.Sleep(5 * time.Second)
 			inst.bacnetDebugMsg("NO NETWORKS FOUND")
 		} else {
-			inst.bacnetDebugMsg("NETWORKS FOUND %d", len(nets))
+			inst.bacnetDebugMsg("NETWORKS FOUND", len(nets))
 		}
 		for _, net := range nets { // NETWORKS
 			if boolean.IsFalse(net.Enable) {
-				inst.bacnetDebugMsg("NETWORK DISABLED: NAME: %s\n", net.Name)
+				inst.bacnetDebugMsg("NETWORK DISABLED: NAME: ", net.Name)
 				continue
 			} else {
 				if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
@@ -59,7 +60,7 @@ func (inst *Instance) BACnetServerPolling() error {
 					// counter++
 					for _, dev := range net.Devices { // DEVICES
 						if boolean.IsFalse(net.Enable) {
-							inst.bacnetDebugMsg("DEVICE DISABLED: NAME: %s\n", dev.Name)
+							inst.bacnetDebugMsg("DEVICE DISABLED: NAME: ", dev.Name)
 							continue
 						}
 						time.Sleep(devDelay)             // DELAY between devices
@@ -113,7 +114,7 @@ func (inst *Instance) BACnetServerPolling() error {
 						timeEnd := time.Now()
 						diff := timeEnd.Sub(timeStart)
 						out := time.Time{}.Add(diff)
-						inst.bacnetDebugMsg("poll-loop: NETWORK-NAME:%s POLL-DURATION: %s  POLL-COUNT: %d\n", net.Name, out.Format("15:04:05.000"), counter)
+						inst.bacnetDebugMsg(fmt.Sprintf("poll-loop: NETWORK-NAME:%s POLL-DURATION: %s  POLL-COUNT: %d\n", net.Name, out.Format("15:04:05.000"), counter))
 					}
 				}
 			}

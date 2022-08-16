@@ -63,6 +63,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	}
 	device, err = inst.addDevice(device)
 	if err != nil {
+		inst.bacnetErrorMsg(err)
 		return nil, err
 	}
 
@@ -103,6 +104,8 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 
 	err = inst.bacnetStoreDevice(device)
 	if err != nil {
+		inst.bacnetErrorMsg("issue on add bacnet-device to store")
+		inst.bacnetErrorMsg(err)
 		return nil, errors.New("issue on add bacnet-device to store")
 	}
 
