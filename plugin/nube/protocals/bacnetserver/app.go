@@ -232,8 +232,10 @@ func (inst *Instance) updatePoint(body *model.Point) (*model.Point, error) {
 		return nil, errors.New("nil point object")
 	}
 
-	if !isWriteable(body.WriteMode, body.ObjectType) { // clear writeable point properties if point is not writeable
-		body = writemode.ResetWriteableProperties(body)
+	if isWriteable(body.WriteMode, body.ObjectType) { // clear writeable point properties if point is not writeable
+		body.PointPriorityArrayMode = model.PriorityArrayToWriteValue
+	} else {
+		body.PointPriorityArrayMode = model.PriorityArrayToPresentValue
 	}
 
 	inst.bacnetDebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
@@ -418,6 +420,7 @@ func (inst *Instance) pointWrite(uuid string, value float64) error {
 	return err
 }
 
+// THIS SHOULD NOT BE USED, CHANGE TO pointUpdate() (Above)
 func (inst *Instance) pointUpdateSuccess(uuid string) error {
 	var point model.Point
 	point.CommonFault.InFault = false

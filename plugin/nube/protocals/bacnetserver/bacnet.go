@@ -162,11 +162,11 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 	return outValue, nil
 }
 
-func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) error {
-	val := float.NonNil(pnt.WriteValue)
+func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string, writeValue float64) error {
 	object, isWrite, isBool := setObjectType(pnt.ObjectType)
-	writePriority := integer.NonNil(pnt.WritePriority)
-	if writePriority == 0 {
+	// writePriority := integer.NonNil(pnt.WritePriority) // TODO: need to decide if we specify a write priority, or use the current write priority.
+	writePriority := integer.NonNil(pnt.CurrentPriority)
+	if writePriority <= 0 || writePriority > 16 {
 		writePriority = 16
 	}
 	bp := &network.Point{
@@ -186,22 +186,22 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 	if err != nil {
 		return err
 	}
-	if isWrite {
+	if isWrite { // TODO: remove this condition once bacnet library is fixed for `input` type points. It is used to write values from FF points to bacnet server points, so all point types need to be supported for writes
 		if isBool {
-			err = dev.PointWriteBool(bp, float64ToUint32(val))
+			err = dev.PointWriteBool(bp, float64ToUint32(writeValue))
 			if err != nil {
-				inst.bacnetErrorMsg("bacnet-server-write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
+				inst.bacnetErrorMsg("write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority, " error:", err)
 				return err
 			}
 		} else {
-			err = dev.PointWriteAnalogue(bp, float64ToFloat32(val))
+			err = dev.PointWriteAnalogue(bp, float64ToFloat32(writeValue))
 			if err != nil {
-				inst.bacnetErrorMsg("bacnet-server-write-analogue:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
+				inst.bacnetErrorMsg("write-analog:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority, " error:", err)
 				return err
 			}
 		}
 	}
-	inst.bacnetDebugMsg("bacnet-server-POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
+	inst.bacnetDebugMsg("POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority)
 	return nil
 }
 

@@ -116,7 +116,7 @@ type Point struct {
 	WriteMode struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"read_only\",\"write_only\"]"`
+		Options  []string `json:"options" default:"[\"read_only\",\"write_once_then_read\"]"`
 		Default  string   `json:"default" default:"read_only"`
 	} `json:"write_mode"`
 	WritePriority struct {

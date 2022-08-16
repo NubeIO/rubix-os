@@ -7,7 +7,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -32,7 +31,7 @@ func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
 
 var poll poller.Poller
 
-func (inst *Instance) BACnetSlavePolling() error {
+func (inst *Instance) BACnetServerPolling() error {
 	poll = poller.New()
 	var counter = 0
 	f := func() (bool, error) {
@@ -68,60 +67,53 @@ func (inst *Instance) BACnetSlavePolling() error {
 							if boolean.IsFalse(net.Enable) {
 								continue
 							}
-							if pnt.WriteMode == "read_only" {
+							time.Sleep(pointDelay)            // DELAY between points
+							if pnt.WriteMode == "read_only" { // Only need to write value from FF Point to BACnet Server
+								pnt.PointPriorityArrayMode = model.PriorityArrayToPresentValue
+								writeVal := float.NonNil(pnt.PresentValue)
+								err := inst.doWrite(pnt, net.UUID, dev.UUID, writeVal)
+								if err != nil {
+									err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
+									continue
+								}
+								// val := float.NonNil(pnt.WriteValue) //TODO not sure if this should then update the PV of the point
+								pnt, err = inst.pointUpdate(pnt, writeVal, true, true)
+								if err != nil {
+									continue
+								}
+
+							} else if pnt.WriteMode == "write_once_then_read" {
+								if boolean.IsTrue(pnt.WritePollRequired) { // DO WRITE IF REQUIRED
+									pnt.PointPriorityArrayMode = model.PriorityArrayToWriteValue
+									if pnt.WriteValue != nil {
+										writeVal := float.NonNil(pnt.WriteValue)
+										err := inst.doWrite(pnt, net.UUID, dev.UUID, writeVal)
+										if err != nil {
+											err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
+											continue
+										}
+										pnt, err = inst.pointUpdate(pnt, writeVal, true, true)
+										if err != nil {
+											continue
+										}
+									}
+								}
 								readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
 								if err != nil {
-									err = inst.pointUpdateErr(pnt.UUID, err)
+									err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 									continue
 								} else {
-									err := inst.pointWrite(pnt.UUID, readFloat)
-									if err != nil {
-										continue
-									}
-								}
-							} else if pnt.WriteMode == "write_only" || pnt.WriteMode == "write_then_read" {
-								// if poll count = 0 or InSync = false then write
-								// if write value == nil then don't write
-								// readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
-								// if err != nil {
-								//	err = inst.pointUpdateErr(pnt.UUID, err)
-								//	continue
-								// }
-								// err = inst.pointWrite(pnt.UUID, readFloat)
-								var doWrite bool
-								rsyncWrite := counter % 10
-								if counter <= 1 || boolean.IsFalse(pnt.InSync) || rsyncWrite == 0 {
-									doWrite = true
-									if rsyncWrite == 0 {
-										log.Infoln("bacnet-server-WRITE-SYNC-ON-POLL-COUNT on device:", dev.Name, " point:", pnt.Name)
-									} else {
-										log.Infoln("bacnet-server-WRITE-SYNC on device:", dev.Name, " point:", pnt.Name, " rsyncWrite:", rsyncWrite)
-									}
-								}
-								if float.IsNil(pnt.WriteValue) {
-									doWrite = false
-									log.Infoln("bacnet-server-WRITE-SYNC-SKIP as writeValue is nil on device:", dev.Name, " point:", pnt.Name, " rsyncWrite:", rsyncWrite)
-								}
-								// pnt.WriteValue = float.New(readFloat)
-								if doWrite {
-									err := inst.doWrite(pnt, net.UUID, dev.UUID)
-									if err != nil {
-										err = inst.pointUpdateErr(pnt.UUID, err)
-										continue
-									}
-									// val := float.NonNil(pnt.WriteValue) //TODO not sure is this should then update the PV of the point
-									err = inst.pointUpdateSuccess(pnt.UUID)
+									pnt, err = inst.pointUpdate(pnt, readFloat, true, true)
 									if err != nil {
 										continue
 									}
 								}
 							}
-							time.Sleep(pointDelay) // DELAY between points
 						}
 						timeEnd := time.Now()
 						diff := timeEnd.Sub(timeStart)
 						out := time.Time{}.Add(diff)
-						log.Infof("bacnet-bserver-poll-loop: NETWORK-NAME:%s POLL-DURATION: %s  POLL-COUNT: %d\n", net.Name, out.Format("15:04:05.000"), counter)
+						inst.bacnetDebugMsg("poll-loop: NETWORK-NAME:%s POLL-DURATION: %s  POLL-COUNT: %d\n", net.Name, out.Format("15:04:05.000"), counter)
 					}
 				}
 			}

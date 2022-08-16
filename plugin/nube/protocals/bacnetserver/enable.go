@@ -18,7 +18,7 @@ func (inst *Instance) Enable() error {
 
 	if !inst.pollingEnabled {
 		inst.pollingEnabled = true
-		err := inst.BACnetSlavePolling()
+		err := inst.BACnetServerPolling()
 		if err != nil {
 			inst.bacnetErrorMsg("POLLING ERROR on routine: %v\n", err)
 		}
