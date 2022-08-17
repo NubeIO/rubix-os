@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -27,7 +26,7 @@ func checkForOutputType(ObjectType string) (isOutput bool) {
 }
 
 func isWriteable(writeMode model.WriteMode, objectType string) bool {
-	if isWriteableObjectType(objectType) && writemode.IsWriteable(writeMode) {
+	if isWriteableObjectType(objectType) {
 		return true
 	} else {
 		return false

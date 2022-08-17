@@ -39,6 +39,7 @@ func (inst *Instance) BACnetServerPolling() error {
 		counter++
 		// fmt.Println("\n \n")
 		inst.bacnetDebugMsg("LOOP COUNT: ", counter)
+		var err error
 		var arg api.Args
 		arg.WithDevices = true
 		arg.WithPoints = true
@@ -59,55 +60,50 @@ func (inst *Instance) BACnetServerPolling() error {
 					devDelay, pointDelay := delays(net.TransportType)
 					// counter++
 					for _, dev := range net.Devices { // DEVICES
+						dev, err = inst.db.GetDevice(dev.UUID, api.Args{WithPoints: true})
+						if err != nil {
+							inst.bacnetErrorMsg("BACnetServerPolling(): Device not found")
+							continue
+						}
 						if boolean.IsFalse(net.Enable) {
 							inst.bacnetDebugMsg("DEVICE DISABLED: NAME: ", dev.Name)
 							continue
 						}
 						time.Sleep(devDelay)             // DELAY between devices
 						for _, pnt := range dev.Points { // POINTS
+							// pnt, err = inst.db.GetPoint(pnt.UUID, api.Args{WithPriority: true})
+							pnt, err = inst.db.GetPoint(pnt.UUID, api.Args{})
+							if err != nil {
+								inst.bacnetErrorMsg("BACnetServerPolling(): Point not found")
+								continue
+							}
+							inst.bacnetDebugMsg("BACnetServerPolling() pnt.ObjectType: ", pnt.ObjectType)
+							inst.bacnetDebugMsg("BACnetServerPolling(): pnt.WritePollRequired: ", boolean.IsTrue(pnt.WritePollRequired))
 							if boolean.IsFalse(net.Enable) {
 								continue
 							}
-							time.Sleep(pointDelay)            // DELAY between points
-							if pnt.WriteMode == "read_only" { // Only need to write value from FF Point to BACnet Server
-								pnt.PointPriorityArrayMode = model.PriorityArrayToPresentValue
-								writeVal := float.NonNil(pnt.PresentValue)
+							time.Sleep(pointDelay) // DELAY between points
+							if !isWriteableObjectType(pnt.ObjectType) || boolean.IsTrue(pnt.WritePollRequired) {
+								writeVal := float.NonNil(pnt.WriteValue)
 								err := inst.doWrite(pnt, net.UUID, dev.UUID, writeVal)
 								if err != nil {
 									err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 									continue
 								}
-								// val := float.NonNil(pnt.WriteValue) //TODO not sure if this should then update the PV of the point
-								pnt, err = inst.pointUpdate(pnt, writeVal, true, true)
+								// pnt, err = inst.pointUpdate(pnt, writeVal, true, true)
+								// if err != nil {
+								//	continue
+								// }
+							}
+							// TODO: below could be optimized by not doing read on successful write.  currently I found cases where the write didn't return an error, but the values wasn't updated on the server.
+							readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
+							if err != nil {
+								err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
+								continue
+							} else {
+								pnt, err = inst.pointUpdate(pnt, readFloat, true, true)
 								if err != nil {
 									continue
-								}
-
-							} else if pnt.WriteMode == "write_once_then_read" {
-								if boolean.IsTrue(pnt.WritePollRequired) { // DO WRITE IF REQUIRED
-									pnt.PointPriorityArrayMode = model.PriorityArrayToWriteValue
-									if pnt.WriteValue != nil {
-										writeVal := float.NonNil(pnt.WriteValue)
-										err := inst.doWrite(pnt, net.UUID, dev.UUID, writeVal)
-										if err != nil {
-											err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-											continue
-										}
-										pnt, err = inst.pointUpdate(pnt, writeVal, true, true)
-										if err != nil {
-											continue
-										}
-									}
-								}
-								readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
-								if err != nil {
-									err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-									continue
-								} else {
-									pnt, err = inst.pointUpdate(pnt, readFloat, true, true)
-									if err != nil {
-										continue
-									}
 								}
 							}
 						}

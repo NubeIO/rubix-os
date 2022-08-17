@@ -9,7 +9,6 @@ import (
 	"github.com/NubeDev/bacnet/btypes/segmentation"
 	"github.com/NubeDev/bacnet/network"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -212,7 +211,6 @@ go run main.go read --interface=wlp0s20f3 --address=192.168.15.191 --device=2508
 go run main.go write --interface=wlp0s20f3 --address=192.168.15.191 --device=2508 --objectID=1 --objectType=1 --property=77 --priority=16 --value=testing
 */
 func (inst *Instance) writeBacnetPointName(pnt *model.Point, name, networkUUID, deviceUUID string) error {
-	val := float.NonNil(pnt.WriteValue)
 	object, _, _ := setObjectType(pnt.ObjectType)
 	bp := &network.Point{
 		ObjectID:   btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
@@ -229,10 +227,10 @@ func (inst *Instance) writeBacnetPointName(pnt *model.Point, name, networkUUID, 
 	}
 	err = dev.WritePointName(bp, name)
 	if err != nil {
-		inst.bacnetErrorMsg("bacnet-server-write-name:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " name:", val, " error:", err)
+		inst.bacnetErrorMsg("bacnet-server-write-name:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " name:", name, " error:", err)
 		return err
 	}
-	inst.bacnetDebugMsg("bacnet-server-write-name:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " name:", val)
+	inst.bacnetDebugMsg("bacnet-server-write-name:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " name:", name)
 	return nil
 }
 
