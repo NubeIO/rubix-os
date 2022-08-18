@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/NubeDev/bacnet/btypes"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -60,30 +63,70 @@ func (inst *Instance) BACnetServerPolling() error {
 					devDelay, pointDelay := delays(net.TransportType)
 					// counter++
 					for _, dev := range net.Devices { // DEVICES
+						time.Sleep(devDelay) // DELAY between devices
 						dev, err = inst.db.GetDevice(dev.UUID, api.Args{WithPoints: true})
 						if err != nil {
 							inst.bacnetErrorMsg("BACnetServerPolling(): Device not found")
 							continue
 						}
-						if boolean.IsFalse(net.Enable) {
+						if boolean.IsFalse(dev.Enable) {
 							inst.bacnetDebugMsg("DEVICE DISABLED: NAME: ", dev.Name)
 							continue
 						}
-						time.Sleep(devDelay)             // DELAY between devices
 						for _, pnt := range dev.Points { // POINTS
+							time.Sleep(pointDelay) // DELAY between points
 							// pnt, err = inst.db.GetPoint(pnt.UUID, api.Args{WithPriority: true})
-							pnt, err = inst.db.GetPoint(pnt.UUID, api.Args{})
+							pnt, err = inst.db.GetPoint(pnt.UUID, api.Args{WithPriority: true})
 							if err != nil {
 								inst.bacnetErrorMsg("BACnetServerPolling(): Point not found")
 								continue
 							}
 							inst.bacnetDebugMsg("BACnetServerPolling() pnt.ObjectType: ", pnt.ObjectType)
 							inst.bacnetDebugMsg("BACnetServerPolling(): pnt.WritePollRequired: ", boolean.IsTrue(pnt.WritePollRequired))
-							if boolean.IsFalse(net.Enable) {
+							if boolean.IsFalse(pnt.Enable) {
 								continue
 							}
-							time.Sleep(pointDelay) // DELAY between points
+							if pnt.Priority == nil {
+								inst.bacnetErrorMsg("BACnetServerPolling(): Point doesn't have a priority array; skipped")
+								continue
+							}
+
+							currentPriorityMap := priorityarray.ConvertToMap(*pnt.Priority)
+
 							if !isWriteableObjectType(pnt.ObjectType) || boolean.IsTrue(pnt.WritePollRequired) {
+								// For these points we don't need to read the priority array because we are forcing the values to match our FF point
+								for key, val := range currentPriorityMap {
+									inst.bacnetDebugMsg("BACnetServerPolling() currentPriorityMap key: ", key, "val", val)
+									err := inst.doWrite(pnt, net.UUID, dev.UUID, val)
+									if err != nil {
+										err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
+										continue
+										errors.New("hello")
+									}
+								}
+
+//PointReleasePriority use this when releasing a priority
+func (device *Device) PointReleasePriority(pnt *Point, pri uint8) error {
+	if pnt == nil{
+		return errors.New("invalid point to PointReleasePriority()")
+	}
+	if pri > 16 || pri < 1 {
+		return errors.New("invalid priority to PointReleasePriority()")
+	}
+	write := &Write{
+		ObjectID:      pnt.ObjectID,
+		ObjectType:    pnt.ObjectType,
+		Prop:          btypes.PropPresentValue,
+		WriteNull:     true,
+		WritePriority: pri,
+	}
+	err := device.Write(write)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 								writeVal := float.NonNil(pnt.WriteValue)
 								err := inst.doWrite(pnt, net.UUID, dev.UUID, writeVal)
 								if err != nil {

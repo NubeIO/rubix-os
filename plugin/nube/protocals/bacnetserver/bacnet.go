@@ -204,6 +204,38 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string, 
 	return nil
 }
 
+func (inst *Instance) doRelease(pnt *model.Point, networkUUID, deviceUUID string, priority uint8) error {
+	object, _, _ := setObjectType(pnt.ObjectType)
+	// writePriority := integer.NonNil(pnt.WritePriority) // TODO: need to decide if we specify a write priority, or use the current write priority.
+	if priority <= 0 || priority > 16 {
+		return errors.New("invalid priority to doRelease()")
+	}
+	bp := &network.Point{
+		ObjectID:         btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
+		ObjectType:       object,
+		WriteNull:        false,
+		WritePriority:    priority,
+		ReadPresentValue: false,
+		ReadPriority:     false,
+	}
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	if err != nil {
+		return err
+	}
+	go net.NetworkRun()
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
+	if err != nil {
+		return err
+	}
+	err = dev.PointReleasePriority(bp, priority)
+	if err != nil {
+		inst.bacnetErrorMsg("release-priority:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " priority:", priority, " error:", err)
+		return err
+	}
+	inst.bacnetDebugMsg("POINT-RELEASE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " priority:", priority)
+	return nil
+}
+
 /*
 writeBacnetPointName
 examples from the lib
