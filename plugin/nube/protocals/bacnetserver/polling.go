@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/NubeDev/bacnet/btypes"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -105,6 +104,7 @@ func (inst *Instance) BACnetServerPolling() error {
 
 							if !isWriteableObjectType(pnt.ObjectType) || boolean.IsTrue(pnt.WritePollRequired) {
 								// For these points we don't need to read the priority array because we are forcing the values to match our FF point
+								err = dev.PointReleasePriority(bp, priority)
 								for key, val := range currentPriorityMap {
 									inst.bacnetDebugMsg("BACnetServerPolling() currentPriorityMap key: ", key, "val", val)
 									err := inst.doWrite(pnt, net.UUID, dev.UUID, val)
@@ -114,28 +114,6 @@ func (inst *Instance) BACnetServerPolling() error {
 										errors.New("hello")
 									}
 								}
-
-//PointReleasePriority use this when releasing a priority
-func (device *Device) PointReleasePriority(pnt *Point, pri uint8) error {
-	if pnt == nil{
-		return errors.New("invalid point to PointReleasePriority()")
-	}
-	if pri > 16 || pri < 1 {
-		return errors.New("invalid priority to PointReleasePriority()")
-	}
-	write := &Write{
-		ObjectID:      pnt.ObjectID,
-		ObjectType:    pnt.ObjectType,
-		Prop:          btypes.PropPresentValue,
-		WriteNull:     true,
-		WritePriority: pri,
-	}
-	err := device.Write(write)
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
 								writeVal := float.NonNil(pnt.WriteValue)
 								err := inst.doWrite(pnt, net.UUID, dev.UUID, writeVal)
