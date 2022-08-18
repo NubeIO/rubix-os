@@ -31,9 +31,11 @@ type Instance struct {
 	store          cachestore.Handler
 	bus            eventbus.BusService
 	pluginUUID     string
+	pluginName     string
 	networkUUID    string
 	pollingEnabled bool
 	BacStore       *network.Store
+	pollingCancel  func()
 }
 
 // GetFlowPluginInfo returns plugin info.

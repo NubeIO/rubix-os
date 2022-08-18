@@ -44,8 +44,8 @@ func (inst *Instance) getNetworkPollManagerByUUID(netUUID string) (*pollqueue.Ne
 
 var poll poller.Poller
 
-// BACnetPolling TODO: currently Polling loops through each network, grabs one point, and polls it.  Could be improved by having a seperate client/go routine for each of the networks.
-func (inst *Instance) BACnetPolling() error {
+// BACnetMasterPolling TODO: currently Polling loops through each network, grabs one point, and polls it.  Could be improved by having a seperate client/go routine for each of the networks.
+func (inst *Instance) BACnetMasterPolling() error {
 	poll = poller.New()
 	var counter = 0
 	f := func() (bool, error) {

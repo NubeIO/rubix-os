@@ -9,10 +9,8 @@ import (
 	"github.com/NubeDev/bacnet/btypes/segmentation"
 	"github.com/NubeDev/bacnet/network"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -25,15 +23,15 @@ func (inst *Instance) bacnetNetworkInit() {
 		return
 	}
 	for _, net := range networks {
-		err := inst.bacnetNetwork(net)
+		err := inst.bacnetStoreNetwork(net)
 		if err != nil {
-			log.Errorln("bacnet-server init network error:", err)
+			inst.bacnetErrorMsg("init network error:", err)
 			continue
 		}
 		for _, dev := range net.Devices {
-			err := inst.bacnetDevice(dev)
+			err := inst.bacnetStoreDevice(dev)
 			if err != nil {
-				log.Errorln("bacnet-server init device error:", err)
+				inst.bacnetErrorMsg("init device error:", err)
 				continue
 			}
 		}
@@ -41,11 +39,16 @@ func (inst *Instance) bacnetNetworkInit() {
 }
 
 func (inst *Instance) initBacStore() {
-	inst.BacStore = network.NewStore()
+	if inst.BacStore == nil {
+		inst.BacStore = network.NewStore()
+		inst.bacnetNetworkInit()
+	} else {
+		inst.bacnetNetworkInit()
+	}
 }
 
-// bacnetNetwork add or update an instance a bacnet network that is cached in bacnet lib
-func (inst *Instance) bacnetNetwork(net *model.Network) error {
+// bacnetStoreNetwork add or update an instance a bacnet network that is cached in bacnet lib
+func (inst *Instance) bacnetStoreNetwork(net *model.Network) error {
 	bacnetNet := &network.Network{
 		Interface: net.NetworkInterface,
 		Port:      integer.NonNil(net.Port),
@@ -54,13 +57,13 @@ func (inst *Instance) bacnetNetwork(net *model.Network) error {
 	return inst.BacStore.UpdateNetwork(net.UUID, bacnetNet)
 }
 
-// getBacnetNetwork get an instance of a created bacnet network that is cached in bacnet lib
-func (inst *Instance) getBacnetNetwork(networkUUID string) (*network.Network, error) {
+// getBacnetStoreNetwork get an instance of a created bacnet network that is cached in bacnet lib
+func (inst *Instance) getBacnetStoreNetwork(networkUUID string) (*network.Network, error) {
 	return inst.BacStore.GetNetwork(networkUUID)
 }
 
-// closeBacnetNetwork delete the instance of a created bacnet network that is cached in bacnet lib
-func (inst *Instance) closeBacnetNetwork(networkUUID string) (bool, error) {
+// closeBacnetStoreNetwork delete the instance of a created bacnet network that is cached in bacnet lib
+func (inst *Instance) closeBacnetStoreNetwork(networkUUID string) (bool, error) {
 	net, err := inst.BacStore.GetNetwork(networkUUID)
 	if err != nil {
 		return false, err
@@ -70,12 +73,12 @@ func (inst *Instance) closeBacnetNetwork(networkUUID string) (bool, error) {
 }
 
 // getBacnetDevice get an instance of a created bacnet device that is cached in bacnet lib
-func (inst *Instance) getBacnetDevice(deviceUUID string) (*network.Device, error) {
+func (inst *Instance) getBacnetStoreDevice(deviceUUID string) (*network.Device, error) {
 	return inst.BacStore.GetDevice(deviceUUID)
 }
 
 // bacnetDevice add or update an instance of a created bacnet device that is cached in bacnet lib
-func (inst *Instance) bacnetDevice(dev *model.Device) error {
+func (inst *Instance) bacnetStoreDevice(dev *model.Device) error {
 	max := intToUint32(integer.NonNil(dev.MaxADPU))
 	seg := uint32(setSegmentation(dev.Segmentation))
 	d := &network.Device{
@@ -89,7 +92,7 @@ func (inst *Instance) bacnetDevice(dev *model.Device) error {
 		Segmentation:  seg,
 	}
 
-	net, _ := inst.getBacnetNetwork(dev.NetworkUUID)
+	net, _ := inst.getBacnetStoreNetwork(dev.NetworkUUID)
 	return inst.BacStore.UpdateDevice(dev.UUID, net, d)
 }
 
@@ -103,12 +106,12 @@ func (inst *Instance) doReadPriority(pnt *model.Point, networkUUID, deviceUUID s
 		ObjectType: object,
 	}
 	// get network
-	net, err := inst.getBacnetNetwork(networkUUID)
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
 	if err != nil {
 		return nil, err
 	}
 	go net.NetworkRun()
-	dev, err := inst.getBacnetDevice(deviceUUID)
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -128,12 +131,12 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 		ReadPriority:     false,
 	}
 	// get network
-	net, err := inst.getBacnetNetwork(networkUUID)
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
 	if err != nil {
 		return 0, err
 	}
 	go net.NetworkRun()
-	dev, err := inst.getBacnetDevice(deviceUUID)
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
 	if err != nil {
 		return 0, err
 	}
@@ -141,7 +144,7 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 	if isBool {
 		readBool, err := dev.PointReadBool(bp)
 		if err != nil {
-			log.Errorln("bacnet-server-read-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " error:", err)
+			inst.bacnetErrorMsg(" read-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " error:", err)
 			return 0, err
 		}
 		outValue = Unit32ToFloat64(readBool)
@@ -149,20 +152,20 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 	} else {
 		readFloat32, err := dev.PointReadFloat32(bp)
 		if err != nil {
-			log.Errorln("bacnet-server-read-analogue:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " error:", err)
+			inst.bacnetErrorMsg(" read-analogue:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " error:", err)
 			return 0, err
 		}
 		outValue = float32ToFloat64(readFloat32)
 	}
-	log.Infoln("bacnet-server-POINT-READ:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", outValue)
+	inst.bacnetDebugMsg(" POINT-READ:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", outValue)
 	return outValue, nil
 }
 
-func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) error {
-	val := float.NonNil(pnt.WriteValue)
+func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string, writeValue float64) error {
 	object, isWrite, isBool := setObjectType(pnt.ObjectType)
-	writePriority := integer.NonNil(pnt.WritePriority)
-	if writePriority == 0 {
+	// writePriority := integer.NonNil(pnt.WritePriority) // TODO: need to decide if we specify a write priority, or use the current write priority.
+	writePriority := integer.NonNil(pnt.CurrentPriority)
+	if writePriority <= 0 || writePriority > 16 {
 		writePriority = 16
 	}
 	bp := &network.Point{
@@ -173,31 +176,31 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 		ReadPresentValue: false,
 		ReadPriority:     false,
 	}
-	net, err := inst.getBacnetNetwork(networkUUID)
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
 	if err != nil {
 		return err
 	}
 	go net.NetworkRun()
-	dev, err := inst.getBacnetDevice(deviceUUID)
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
 	if err != nil {
 		return err
 	}
-	if isWrite {
+	if isWrite { // TODO: remove this condition once bacnet library is fixed for `input` type points. It is used to write values from FF points to bacnet server points, so all point types need to be supported for writes
 		if isBool {
-			err = dev.PointWriteBool(bp, float64ToUint32(val))
+			err = dev.PointWriteBool(bp, float64ToUint32(writeValue))
 			if err != nil {
-				log.Errorln("bacnet-server-write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
+				inst.bacnetErrorMsg("write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority, " error:", err)
 				return err
 			}
 		} else {
-			err = dev.PointWriteAnalogue(bp, float64ToFloat32(val))
+			err = dev.PointWriteAnalogue(bp, float64ToFloat32(writeValue))
 			if err != nil {
-				log.Errorln("bacnet-server-write-analogue:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
+				inst.bacnetErrorMsg("write-analog:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority, " error:", err)
 				return err
 			}
 		}
 	}
-	log.Infoln("bacnet-server-POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
+	inst.bacnetDebugMsg("POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority)
 	return nil
 }
 
@@ -208,27 +211,26 @@ go run main.go read --interface=wlp0s20f3 --address=192.168.15.191 --device=2508
 go run main.go write --interface=wlp0s20f3 --address=192.168.15.191 --device=2508 --objectID=1 --objectType=1 --property=77 --priority=16 --value=testing
 */
 func (inst *Instance) writeBacnetPointName(pnt *model.Point, name, networkUUID, deviceUUID string) error {
-	val := float.NonNil(pnt.WriteValue)
 	object, _, _ := setObjectType(pnt.ObjectType)
 	bp := &network.Point{
 		ObjectID:   btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
 		ObjectType: object,
 	}
-	net, err := inst.getBacnetNetwork(networkUUID)
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
 	if err != nil {
 		return err
 	}
 	go net.NetworkRun()
-	dev, err := inst.getBacnetDevice(deviceUUID)
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
 	if err != nil {
 		return err
 	}
 	err = dev.WritePointName(bp, name)
 	if err != nil {
-		log.Errorln("bacnet-server-write-name:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " name:", val, " error:", err)
+		inst.bacnetErrorMsg("bacnet-server-write-name:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " name:", name, " error:", err)
 		return err
 	}
-	log.Infoln("bacnet-server-write-name:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " name:", val)
+	inst.bacnetDebugMsg("bacnet-server-write-name:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " name:", name)
 	return nil
 }
 
@@ -282,12 +284,12 @@ func setSegmentation(SegmentedType string) (out segmentation.SegmentedType) {
 }
 
 func (inst *Instance) doWriteBool(networkUUID, deviceUUID string, pnt *network.Point, value uint32) error {
-	net, err := inst.getBacnetNetwork(networkUUID)
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
 	if err != nil {
 		return err
 	}
 	go net.NetworkRun()
-	dev, err := inst.getBacnetDevice(deviceUUID)
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
 	if err != nil {
 		return err
 	}
@@ -301,7 +303,7 @@ func (inst *Instance) doWriteBool(networkUUID, deviceUUID string, pnt *network.P
 }
 
 func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts) (resp []btypes.Device, err error) {
-	net, err := inst.getBacnetNetwork(networkUUID)
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
 	if err != nil {
 		return nil, err
 	}
@@ -318,12 +320,12 @@ func (inst *Instance) devicePoints(deviceUUID string) (resp []*network.PointDeta
 	if err != nil {
 		return nil, err
 	}
-	net, err := inst.getBacnetNetwork(getNetwork.UUID)
+	net, err := inst.getBacnetStoreNetwork(getNetwork.UUID)
 	if err != nil {
 		return nil, err
 	}
 	go net.NetworkRun()
-	dev, err := inst.getBacnetDevice(deviceUUID)
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
 	if err != nil {
 		return nil, err
 	}
