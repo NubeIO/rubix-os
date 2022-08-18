@@ -88,13 +88,20 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		inst.bacnetErrorMsg(errMsg)
 		return nil, errors.New(errMsg)
 	}
-
 	body.NumberOfDevicesPermitted = integer.New(1)
-	body.CommonIP.Host = inst.getIp(network.NetworkInterface)
+	body.Host = inst.getIp(network.NetworkInterface)
+	if body.Host == "" {
+		body.Host = "192.168.15.100"
+	}
+	if body.Host == "0.0.0.0" {
+		body.Host = "192.168.15.100"
+	}
 	if integer.IsNil(body.DeviceObjectId) {
 		body.DeviceObjectId = integer.New(2508)
 	}
-	body.Port = 47808
+	if body.Port == 0 {
+		body.Port = 47808
+	}
 	inst.bacnetDebugMsg("addDevice(): ", body.Name)
 	device, err = inst.db.CreateDevice(body)
 	if err != nil {
@@ -176,6 +183,10 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError, true)
 	} else {
 		inst.db.ClearErrorsForAllDevicesOnNetwork(network.UUID, true)
+	}
+	err = inst.bacnetStoreNetwork(network)
+	if err != nil {
+		inst.bacnetDebugMsg("updateNetwork(): bacnetStoreNetwork: ", network.UUID)
 	}
 
 	network, err = inst.db.UpdateNetwork(body.UUID, network, true)

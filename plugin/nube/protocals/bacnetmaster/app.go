@@ -28,7 +28,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	}
 	err = inst.bacnetStoreNetwork(network)
 	if err != nil {
-		inst.bacnetErrorMsg("addNetwork(): issue on add bacnet-device to store err ", err.Error())
+		inst.bacnetErrorMsg("addNetwork(): issue on add bacnet-network to store err ", err.Error())
 		//fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error())
 	}
 	body.MaxPollRate = float.New(0.1)
