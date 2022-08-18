@@ -21,17 +21,14 @@ type polling struct {
 }
 
 func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
-	deviceDelay = 250 * time.Millisecond
-	pointDelay = 500 * time.Millisecond
-	if networkType == model.TransType.LoRa {
-		deviceDelay = 80 * time.Millisecond
-		pointDelay = 6000 * time.Millisecond
-	}
+	deviceDelay = 100 * time.Millisecond
+	pointDelay = 100 * time.Millisecond
 	return
 }
 
 var poll poller.Poller
 var lastPingFailed = "start"
+var rsyncWrite = 0
 
 func (inst *Instance) BACnetServerPolling() error {
 	poll = poller.New()
@@ -77,11 +74,10 @@ func (inst *Instance) BACnetServerPolling() error {
 						if lastPingFailed == "fail" && err != nil {
 							lastPingFailed = "rsync"
 						}
-						if lastPingFailed == "start" || lastPingFailed == "rsync" {
+						if rsyncWrite == 0 || lastPingFailed == "rsync" {
 							inst.massUpdateServer(net, dev)
 							lastPingFailed = "in-sync"
 						}
-
 						time.Sleep(devDelay)             // DELAY between devices
 						for _, pnt := range dev.Points { // POINTS
 							// pnt, err = inst.db.GetPoint(pnt.UUID, api.Args{WithPriority: true})
@@ -120,6 +116,7 @@ func (inst *Instance) BACnetServerPolling() error {
 								}
 							}
 						}
+						rsyncWrite = counter % 50
 
 						timeEnd := time.Now()
 						diff := timeEnd.Sub(timeStart)
