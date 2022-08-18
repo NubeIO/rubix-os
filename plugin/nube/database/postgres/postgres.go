@@ -60,6 +60,9 @@ func autoMigrate(db *gorm.DB) error {
 	if (db.Migrator().HasConstraint(&pgmodel.FlowNetworkClone{}, "flow_network_clones_global_uuid_key")) {
 		_ = db.Migrator().DropConstraint(&pgmodel.FlowNetworkClone{}, "flow_network_clones_global_uuid_key")
 	}
+	if (db.Migrator().HasIndex(&pgmodel.Consumer{}, "idx_consumers_producer_uuid")) {
+		_ = db.Migrator().DropIndex(&pgmodel.Consumer{}, "idx_consumers_producer_uuid")
+	}
 	for _, s := range interfaces {
 		if err := db.AutoMigrate(s); err != nil {
 			return err
