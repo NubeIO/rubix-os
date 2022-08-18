@@ -8,6 +8,8 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/writemode"
+	address "github.com/NubeIO/lib-networking/ip"
+	pprint "github.com/NubeIO/lib-networking/print"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
@@ -29,7 +31,8 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error()))
 	}
-
+	body.MaxPollRate = float.New(0.1)
+	body.TransportType = "ip"
 	if boolean.IsTrue(network.Enable) {
 		conf := inst.GetConfig().(*Config)
 		pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
@@ -54,7 +57,21 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		inst.bacnetDebugMsg("addDevice(): failed to create bacnet device: ", body.Name)
 		return nil, errors.New("failed to create bacnet device")
 	}
-
+	if body.Host == "" {
+		body.Host = "192.168.15.100"
+	}
+	if body.Host == "0.0.0.0" {
+		body.Host = "192.168.15.100"
+	}
+	if body.Port == 0 {
+		body.Port = 47808
+	}
+	err = address.New().IsIPAddrErr(body.Host)
+	if body == nil {
+		inst.bacnetDebugMsg("addDevice(): nil device object")
+		return nil, errors.New(fmt.Sprintf("invalid ip addr %s", body.Host))
+	}
+	pprint.PrintJOSN(body)
 	err = inst.bacnetStoreDevice(device)
 	if err != nil {
 		return nil, errors.New("issue on add bacnet-device to store")

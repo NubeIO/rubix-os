@@ -23,6 +23,7 @@ type NetworkSchema struct {
 
 func GetNetworkSchema() *NetworkSchema {
 	m := &NetworkSchema{}
+	m.Port.Default = 47808
 	schema.Set(m)
 	names, err := nets.GetInterfacesNames()
 	if err != nil {

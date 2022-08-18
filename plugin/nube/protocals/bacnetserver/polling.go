@@ -20,7 +20,7 @@ type polling struct {
 	isRunning     bool
 }
 
-func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
+func delays() (deviceDelay, pointDelay time.Duration) {
 	deviceDelay = 100 * time.Millisecond
 	pointDelay = 100 * time.Millisecond
 	return
@@ -55,7 +55,7 @@ func (inst *Instance) BACnetServerPolling() error {
 			} else {
 				if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 					timeStart := time.Now()
-					devDelay, pointDelay := delays(net.TransportType)
+					devDelay, pointDelay := delays()
 					// counter++
 					for _, dev := range net.Devices { // DEVICES
 						dev, err = inst.db.GetDevice(dev.UUID, api.Args{WithPoints: true})
