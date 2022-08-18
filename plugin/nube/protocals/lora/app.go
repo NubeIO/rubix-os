@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/utils/integer"
-	pprint "github.com/NubeIO/lib-networking/print"
 	"reflect"
 	"strings"
 	"time"
@@ -50,7 +49,6 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		log.Errorf(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	pprint.PrintJOSN(body)
 	body.Model = strings.ToUpper(body.Model)
 	device, err = inst.db.CreateDevice(body)
 	if err != nil {

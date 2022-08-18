@@ -31,6 +31,7 @@ func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
 }
 
 var poll poller.Poller
+var lastPingFailed = "start"
 
 func (inst *Instance) BACnetServerPolling() error {
 	poll = poller.New()
@@ -69,6 +70,18 @@ func (inst *Instance) BACnetServerPolling() error {
 							inst.bacnetDebugMsg("DEVICE DISABLED: NAME: ", dev.Name)
 							continue
 						}
+						err = inst.pingDevice(net, dev)
+						if err != nil {
+							lastPingFailed = "fail"
+						}
+						if lastPingFailed == "fail" && err != nil {
+							lastPingFailed = "rsync"
+						}
+						if lastPingFailed == "start" || lastPingFailed == "rsync" {
+							inst.massUpdateServer(net, dev)
+							lastPingFailed = "in-sync"
+						}
+
 						time.Sleep(devDelay)             // DELAY between devices
 						for _, pnt := range dev.Points { // POINTS
 							// pnt, err = inst.db.GetPoint(pnt.UUID, api.Args{WithPriority: true})
@@ -107,6 +120,7 @@ func (inst *Instance) BACnetServerPolling() error {
 								}
 							}
 						}
+
 						timeEnd := time.Now()
 						diff := timeEnd.Sub(timeStart)
 						out := time.Time{}.Add(diff)
