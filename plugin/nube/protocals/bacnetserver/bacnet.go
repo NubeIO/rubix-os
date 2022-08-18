@@ -2,16 +2,17 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"github.com/NubeDev/bacnet"
 	"github.com/NubeDev/bacnet/btypes"
 	"github.com/NubeDev/bacnet/btypes/priority"
 	"github.com/NubeDev/bacnet/btypes/segmentation"
 	"github.com/NubeDev/bacnet/network"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"reflect"
 )
 
 const (
@@ -109,10 +110,7 @@ func (inst *Instance) bacnetStoreDevice(dev *model.Device) error {
 }
 
 func (inst *Instance) doReadPriority(pnt *model.Point, networkUUID, deviceUUID string) (pri *priority.Float32, err error) {
-	object, isWrite, _ := setObjectType(pnt.ObjectType)
-	if !isWrite {
-		return nil, errors.New(fmt.Sprintf("bacnet-server err read priority as its incorecct type%s %s", pnt.Name, object.String()))
-	}
+	object, _, _ := setObjectType(pnt.ObjectType)
 	bp := &network.Point{
 		ObjectID:   btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
 		ObjectType: object,
@@ -177,7 +175,7 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string, 
 	object, isWrite, isBool := setObjectType(pnt.ObjectType)
 	// writePriority := integer.NonNil(pnt.WritePriority) // TODO: need to decide if we specify a write priority, or use the current write priority.
 	writePriority := integer.NonNil(pnt.CurrentPriority)
-	if writePriority <= 0 || writePriority > 16 {
+	if !isWrite || writePriority <= 0 || writePriority > 16 {
 		writePriority = 16
 	}
 	bp := &network.Point{
@@ -197,19 +195,17 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string, 
 	if err != nil {
 		return err
 	}
-	if isWrite { // TODO: remove this condition once bacnet library is fixed for `input` type points. It is used to write values from FF points to bacnet server points, so all point types need to be supported for writes
-		if isBool {
-			err = dev.PointWriteBool(bp, float64ToUint32(writeValue))
-			if err != nil {
-				inst.bacnetErrorMsg("write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority, " error:", err)
-				return err
-			}
-		} else {
-			err = dev.PointWriteAnalogue(bp, float64ToFloat32(writeValue))
-			if err != nil {
-				inst.bacnetErrorMsg("write-analog:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority, " error:", err)
-				return err
-			}
+	if isBool {
+		err = dev.PointWriteBool(bp, float64ToUint32(writeValue))
+		if err != nil {
+			inst.bacnetErrorMsg("write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority, " error:", err)
+			return err
+		}
+	} else {
+		err = dev.PointWriteAnalogue(bp, float64ToFloat32(writeValue))
+		if err != nil {
+			inst.bacnetErrorMsg("write-analog:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority, " error:", err)
+			return err
 		}
 	}
 	inst.bacnetDebugMsg("POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority)
@@ -422,6 +418,35 @@ func (inst *Instance) devicePoints(deviceUUID string) (resp []*network.PointDeta
 	}
 	return
 
+}
+
+func ConvertPriorityToMap(priority priority.Float32) map[string]*float32 {
+	priorityMap := map[string]*float32{}
+	priorityValue := reflect.ValueOf(priority)
+	typeOfPriority := priorityValue.Type()
+	for i := 0; i < priorityValue.NumField(); i++ {
+		if priorityValue.Field(i).Type().Kind().String() == "ptr" {
+			key := typeOfPriority.Field(i).Tag.Get("json")
+			val := priorityValue.Field(i).Interface().(*float32)
+			priorityMap[key] = val
+		}
+	}
+	return priorityMap
+}
+
+func FFPointAndBACnetServerPointAreEqual(FFPointValPntr *float64, BACServPointValPntr *float32) bool {
+	BACServValIsNil := float.IsNil32(BACServPointValPntr)
+	BACServVal64 := float64(float.NonNil32(BACServPointValPntr))
+	FFPointValIsNil := float.IsNil(FFPointValPntr)
+	FFPointVal64 := float.NonNil(FFPointValPntr)
+
+	if BACServValIsNil && FFPointValIsNil {
+		return true
+	}
+	if BACServVal64 == FFPointVal64 {
+		return true
+	}
+	return false
 }
 
 func intToUint32(value int) uint32 {

@@ -2,14 +2,16 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"github.com/NubeDev/bacnet/btypes/priority"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"strconv"
 	"time"
 )
 
@@ -24,7 +26,8 @@ type polling struct {
 
 func delays() (deviceDelay, pointDelay time.Duration) {
 	deviceDelay = 100 * time.Millisecond
-	pointDelay = 100 * time.Millisecond
+	// pointDelay = 100 * time.Millisecond
+	pointDelay = 5000 * time.Millisecond
 	return
 }
 
@@ -81,60 +84,114 @@ func (inst *Instance) BACnetServerPolling() error {
 							inst.massUpdateServer(net, dev)
 							lastPingFailed = "in-sync"
 						}
-						time.Sleep(devDelay)             // DELAY between devices
 						for _, pnt := range dev.Points { // POINTS
 							time.Sleep(pointDelay) // DELAY between points
-							// pnt, err = inst.db.GetPoint(pnt.UUID, api.Args{WithPriority: true})
 							pnt, err = inst.db.GetPoint(pnt.UUID, api.Args{WithPriority: true})
 							if err != nil {
 								inst.bacnetErrorMsg("BACnetServerPolling(): Point not found")
-								continue
+								continue // next point
 							}
 							inst.bacnetDebugMsg("BACnetServerPolling() pnt.ObjectType: ", pnt.ObjectType)
 							inst.bacnetDebugMsg("BACnetServerPolling(): pnt.WritePollRequired: ", boolean.IsTrue(pnt.WritePollRequired))
 							if boolean.IsFalse(pnt.Enable) {
-								continue
+								inst.bacnetErrorMsg("BACnetServerPolling(): Point is disabled; skipped")
+								continue // next point
 							}
 							if pnt.Priority == nil {
 								inst.bacnetErrorMsg("BACnetServerPolling(): Point doesn't have a priority array; skipped")
-								continue
+								err = inst.pointUpdateErr(pnt, "no priority array found", model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
+								continue // next point
 							}
-
-							currentPriorityMap := priorityarray.ConvertToMap(*pnt.Priority)
-
-							if !isWriteableObjectType(pnt.ObjectType) || boolean.IsTrue(pnt.WritePollRequired) {
-								// For these points we don't need to read the priority array because we are forcing the values to match our FF point
-								err = dev.PointReleasePriority(bp, priority)
-								for key, val := range currentPriorityMap {
-									inst.bacnetDebugMsg("BACnetServerPolling() currentPriorityMap key: ", key, "val", val)
-									err := inst.doWrite(pnt, net.UUID, dev.UUID, val)
-									if err != nil {
-										err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-										continue
-										errors.New("hello")
-									}
-								}
-
+							if !isWriteableObjectType(pnt.ObjectType) { // Do these actions fort AI, BI
+								// For AI/BI there is no priority array we just write the values to match our FF point WriteValue
 								writeVal := float.NonNil(pnt.WriteValue)
-								err := inst.doWrite(pnt, net.UUID, dev.UUID, writeVal)
+								err = inst.doWrite(pnt, net.UUID, dev.UUID, writeVal)
 								if err != nil {
 									err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-									continue
+									continue // next point
 								}
-								// pnt, err = inst.pointUpdate(pnt, writeVal, true, true)
-								// if err != nil {
-								//	continue
-								// }
-							}
-							// TODO: below could be optimized by not doing read on successful write.  currently I found cases where the write didn't return an error, but the values wasn't updated on the server.
-							readFloat, err := inst.doReadValue(pnt, net.UUID, dev.UUID)
-							if err != nil {
-								err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-								continue
-							} else {
-								pnt, err = inst.pointUpdate(pnt, readFloat, true, true)
+								pnt, err = inst.pointUpdate(pnt, writeVal, true, true)
+								continue // next point
+							} else { // Do these actions fort AV, AO, BV, BO
+								// We need to read the priority array of our FF point, and the BACnet Server point, then update the FF point and BACnet Server point
+
+								// Get Priority array of FF
+								currentFFPointPriorityMap := priorityarray.ConvertToMap(*pnt.Priority)
+
+								// Get Priority Array of BACnet Server Point
+								inst.bacnetDebugMsg("BACnetServerPolling() Read Priority")
+								var currentBACServPriority *priority.Float32
+								currentBACServPriority, err = inst.doReadPriority(pnt, net.UUID, dev.UUID)
 								if err != nil {
-									continue
+									inst.bacnetErrorMsg("BACnetServerPolling(): doReadPriority error:", err)
+									inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
+									continue // next point
+								}
+								if currentBACServPriority == nil {
+									inst.bacnetErrorMsg("BACnetServerPolling(): BACnet Server Point returned an empty priority array; skipped")
+									inst.pointUpdateErr(pnt, "BACnet Server Point returned an empty priority array", model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
+									continue // next point
+								}
+								currentBACServPriorityMap := ConvertPriorityToMap(*currentBACServPriority)
+								for key, val := range currentBACServPriorityMap {
+									inst.bacnetDebugMsg("BACnetServerPolling() currentBACServPriorityMap key: ", key, "val", val)
+								}
+
+								// var pointOperationError string
+								// loop through the FF Point priority array and check for differences
+								priorityArraysMatch := true
+								for key, FFPointVal := range currentFFPointPriorityMap {
+									inst.bacnetDebugMsg("BACnetServerPolling() currentPriorityMap key: ", nstring.NewString(key).RemoveSpecialCharacter(), "val", FFPointVal)
+									if BACServVal, ok := currentBACServPriorityMap[key]; ok { // If the matching priority exists on the BACnet Server point,
+										if !FFPointAndBACnetServerPointAreEqual(FFPointVal, BACServVal) { // Points are NOT equal
+											priorityArraysMatch = false
+											if boolean.IsFalse(pnt.WritePollRequired) { // No Writes Required, so match FF point to BACnet Server point
+												currentFFPointPriorityMap[key] = float.New(float64(float.NonNil32(BACServVal)))
+											} else { // Write is required, so set the BACnet Server point to match FF Point values
+												if FFPointVal == nil { // Do priority release on nil
+													var priorityAsInt int
+													priorityAsInt, err = strconv.Atoi(nstring.NewString(key).RemoveSpecialCharacter())
+													if err != nil {
+														inst.bacnetErrorMsg("BACnetServerPolling(): cannot parse priority", key)
+														// pointOperationError = "cannot parse priority"
+														continue // next priority
+													} else {
+														err = inst.doRelease(pnt, net.UUID, dev.UUID, uint8(priorityAsInt))
+														if err != nil {
+															inst.bacnetErrorMsg("BACnetServerPolling(): doWrite error:", err)
+															// pointOperationError = err.Error()
+															continue // next priority
+														}
+													}
+												} else { // Otherwise write the value
+													err = inst.doWrite(pnt, net.UUID, dev.UUID, float.NonNil(FFPointVal))
+													if err != nil {
+														inst.bacnetErrorMsg("BACnetServerPolling(): doWrite error:", err)
+														// pointOperationError = err.Error()
+													}
+												}
+											}
+										}
+									} else {
+										inst.bacnetErrorMsg("BACnetServerPolling(): BACnet Server Point is missing priority: ", key)
+									}
+								}
+								if !priorityArraysMatch {
+									inst.bacnetDebugMsg("BACnetServerPolling() PRIORITY ARRAYS ARE DIFFERENT")
+									// err = inst.pointUpdateErr(pnt, pointOperationError, model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
+									// Update point
+									var readFloat float64
+									readFloat, err = inst.doReadValue(pnt, dev.NetworkUUID, dev.UUID)
+									if err != nil {
+										inst.bacnetErrorMsg("BACnetServerPolling(): doReadValue error:", err)
+									} else {
+										pnt, err = inst.pointUpdate(pnt, readFloat, true, true)
+										if err != nil {
+											inst.bacnetErrorMsg("BACnetServerPolling(): pointUpdate() error:", err)
+										}
+									}
+								} else {
+									inst.bacnetDebugMsg("BACnetServerPolling() PRIORITY ARRAYS ARE IDENTICAL")
 								}
 							}
 						}
