@@ -53,7 +53,7 @@ type FlowNetworkClone struct {
 	CommonUUID
 	CommonName
 	CommonDescription
-	GlobalUUID string `json:"global_uuid,omitempty" gorm:"unique"`
+	GlobalUUID string `json:"global_uuid,omitempty"`
 	ClientId   string `json:"client_id,omitempty"`
 	ClientName string `json:"client_name,omitempty"`
 	SiteId     string `json:"site_id,omitempty"`
