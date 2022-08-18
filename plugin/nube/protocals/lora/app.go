@@ -3,7 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/integer"
+	pprint "github.com/NubeIO/lib-networking/print"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/NubeIO/flow-framework/api"
@@ -29,6 +32,10 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 			return nil, errors.New(errMsg)
 		}
 	}
+	body.TransportType = "serial"
+	if integer.IsUnitNil(body.SerialBaudRate) {
+		body.SerialBaudRate = integer.NewUint(38400)
+	}
 	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err
@@ -43,6 +50,8 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		log.Errorf(errMsg)
 		return nil, errors.New(errMsg)
 	}
+	pprint.PrintJOSN(body)
+	body.Model = strings.ToUpper(body.Model)
 	device, err = inst.db.CreateDevice(body)
 	if err != nil {
 		return nil, err

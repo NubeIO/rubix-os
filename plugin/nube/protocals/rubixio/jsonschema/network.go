@@ -18,6 +18,7 @@ type NetworkSchema struct {
 
 func GetNetworkSchema() *NetworkSchema {
 	m := &NetworkSchema{}
+	m.Enable.Default = true
 	schema.Set(m)
 	return m
 }

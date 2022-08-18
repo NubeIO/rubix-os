@@ -12,7 +12,6 @@ type NetworkSchema struct {
 	Name                         schema.Name                         `json:"name"`
 	Description                  schema.Description                  `json:"description"`
 	Enable                       schema.Enable                       `json:"enable"`
-	Port                         schema.Port                         `json:"port"`
 	Interface                    schema.Interface                    `json:"network_interface"`
 	PluginName                   schema.PluginName                   `json:"plugin_name"`
 	AutoMappingNetworksSelection schema.AutoMappingNetworksSelection `json:"auto_mapping_networks_selection"`

@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -61,14 +62,13 @@ func (inst *Instance) wizard(body wizard) (string, error) {
 		pnt.Name = pName
 		pnt.Description = pName
 		pnt.IoNumber = e
+		pnt.Enable = boolean.NewTrue()
 
 		pnt.Fallback = float.New(0)
 		if pnt.IoNumber == "UO1" || pnt.IoNumber == "UO2" {
 			pnt.IoType = UOTypes.DIGITAL
 		} else if pnt.IoNumber == "UO3" || pnt.IoNumber == "UO4" {
 			pnt.IoType = UOTypes.VOLTSDC
-		} else if pnt.IoNumber == "UO5" || pnt.IoNumber == "UO6" || pnt.IoNumber == "UO7" {
-			pnt.IoType = UOTypes.PERCENT
 		} else if pnt.IoNumber == "UI1" || pnt.IoNumber == "UI2" {
 			pnt.IoType = UITypes.DIGITAL
 		} else if pnt.IoNumber == "UI3" || pnt.IoNumber == "UI4" {
