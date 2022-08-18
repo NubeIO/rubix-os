@@ -36,11 +36,11 @@ type PointSchema struct {
 	IoNumber    IoNumber           `json:"io_number"`
 	IoType      IoType             `json:"io_type"`
 	ObjectType  ObjectType         `json:"object_type"`
-	//ScaleEnable schema.ScaleEnable `json:"scale_enable"`
-	//ScaleInMin  schema.ScaleInMin  `json:"scale_in_min"`
-	//ScaleInMax  schema.ScaleInMax  `json:"scale_in_max"`
-	//ScaleOutMin schema.ScaleOutMin `json:"scale_out_min"`
-	//ScaleOutMax schema.ScaleOutMax `json:"scale_out_max"`
+	ScaleEnable schema.ScaleEnable `json:"scale_enable"`
+	ScaleInMin  schema.ScaleInMin  `json:"scale_in_min"`
+	ScaleInMax  schema.ScaleInMax  `json:"scale_in_max"`
+	ScaleOutMin schema.ScaleOutMin `json:"scale_out_min"`
+	ScaleOutMax schema.ScaleOutMax `json:"scale_out_max"`
 }
 
 func GetPointSchema() *PointSchema {

@@ -198,21 +198,21 @@ var PointsList = struct {
 	UI8 Point `json:"UI8"`
 }{
 
-	UO1: Point{IoNumber: "UO1", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	UO2: Point{IoNumber: "UO2", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	UO1: Point{IoNumber: "UO1", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	UO2: Point{IoNumber: "UO2", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
 	UO3: Point{IoNumber: "UO3", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	UO4: Point{IoNumber: "UO4", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
-	UO5: Point{IoNumber: "UO5", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	UO4: Point{IoNumber: "UO4", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
+	UO5: Point{IoNumber: "UO5", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
 	UO6: Point{IoNumber: "UO6", ObjectType: "analog_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
 	DO1: Point{IoNumber: "DO1", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
 	DO2: Point{IoNumber: "DO2", ObjectType: "binary_output", IsOutput: nils.NewTrue(), IsTypeBool: nils.NewTrue()},
 
-	UI1: Point{IoNumber: "UI1", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI2: Point{IoNumber: "UI2", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI3: Point{IoNumber: "UI3", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI4: Point{IoNumber: "UI4", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI5: Point{IoNumber: "UI5", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI6: Point{IoNumber: "UI6", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI7: Point{IoNumber: "UI7", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
-	UI8: Point{IoNumber: "UI8", ObjectType: "analog_value", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI1: Point{IoNumber: "UI1", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI2: Point{IoNumber: "UI2", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI3: Point{IoNumber: "UI3", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI4: Point{IoNumber: "UI4", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI5: Point{IoNumber: "UI5", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI6: Point{IoNumber: "UI6", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI7: Point{IoNumber: "UI7", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
+	UI8: Point{IoNumber: "UI8", ObjectType: "analog_input", IsOutput: nils.NewFalse(), IsTypeBool: nils.NewFalse()},
 }

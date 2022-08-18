@@ -13,6 +13,11 @@ type PointSchema struct {
 	WritePriority schema.WritePriority `json:"write_priority"`
 	PollPriority  schema.PollPriority  `json:"poll_priority"`
 	PollRate      schema.PollRate      `json:"poll_rate"`
+	ScaleEnable   schema.ScaleEnable   `json:"scale_enable"`
+	ScaleInMin    schema.ScaleInMin    `json:"scale_in_min"`
+	ScaleInMax    schema.ScaleInMax    `json:"scale_in_max"`
+	ScaleOutMin   schema.ScaleOutMin   `json:"scale_out_min"`
+	ScaleOutMax   schema.ScaleOutMax   `json:"scale_out_max"`
 }
 
 func GetPointSchema() *PointSchema {

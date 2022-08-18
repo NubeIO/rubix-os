@@ -24,6 +24,7 @@ type ObjectType struct {
 	Options  []string `json:"enum" default:"[\"analog_input\",\"analog_value\",\"analog_output\",\"binary_input\",\"binary_value\",\"binary_output\"]"`
 	EnumName []string `json:"enumNames" default:"[\"analog input\",\"analog value\",\"analog output\",\"binary input\",\"binary value\",\"binary output\"]"`
 	Default  string   `json:"default" default:"analog_input"`
+	ReadOnly bool     `json:"readOnly" default:"true"`
 }
 
 type PointSchema struct {
