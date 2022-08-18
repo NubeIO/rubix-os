@@ -10,6 +10,9 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
+	address "github.com/NubeIO/lib-networking/ip"
+	"github.com/NubeIO/lib-networking/networking"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/iancoleman/strcase"
 	log "github.com/sirupsen/logrus"
@@ -101,7 +104,48 @@ func (inst *Instance) bacnetStoreDevice(dev *model.Device) error {
 	}
 
 	net, _ := inst.getBacnetStoreNetwork(dev.NetworkUUID)
+	if net == nil {
+		getNetwork, err := inst.db.GetNetwork(dev.NetworkUUID, api.Args{})
+		if getNetwork == nil {
+			return errors.New("failed to find network to init bacnet network")
+		}
+		err = inst.bacnetStoreNetwork(getNetwork)
+		if err != nil {
+			return errors.New("network can not be empty")
+		}
+
+	}
 	return inst.BacStore.UpdateDevice(dev.UUID, net, d)
+}
+
+func getNetworkIP(network string) (*networking.NetworkInterfaces, error) {
+	net, err := networking.New().GetNetworkByIface(network)
+	if err != nil {
+		return nil, err
+	}
+	return &net, nil
+}
+
+func (inst *Instance) buildBacnetForAction(networkUUID, action string) (*network.Network, error) {
+	// get network
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	if err != nil {
+		return nil, err
+	}
+	if net.Ip == "" { // TODO make this update the actual bacnet inst
+		ip, err := getNetworkIP(net.Interface)
+		if err != nil {
+		} else {
+			net.Ip = ip.IP
+		}
+	}
+	err = address.New().IsIPAddrErr(net.Ip)
+	if err != nil {
+		log.Errorf("bacnet-master-%s: ip-address is invalid ip:%s err:%s", net.Ip, err.Error(), action)
+		return nil, err
+	}
+	return net, err
+
 }
 
 // getDev get an instance of a created bacnet device that is cached in bacnet lib
@@ -117,10 +161,11 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 		ReadPriority:     false,
 	}
 	// get network
-	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	net, err := inst.buildBacnetForAction(networkUUID, "read")
 	if err != nil {
 		return 0, err
 	}
+
 	go net.NetworkRun()
 	dev, err := inst.getBacnetStoreDevice(deviceUUID)
 	if err != nil {
@@ -165,7 +210,8 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 		ReadPresentValue: false,
 		ReadPriority:     false,
 	}
-	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	// get network
+	net, err := inst.buildBacnetForAction(networkUUID, "read")
 	if err != nil {
 		return err
 	}
@@ -302,7 +348,8 @@ func (inst *Instance) doWriteBool(networkUUID, deviceUUID string, pnt *network.P
 }
 
 func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevices bool) (resp []*model.Device, err error) {
-	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	// get network
+	net, err := inst.buildBacnetForAction(networkUUID, "read")
 	if err != nil {
 		return nil, err
 	}
@@ -370,6 +417,9 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints
 			writeMode = model.WriteOnceThenRead
 		}
 		newPnt := &model.Point{
+			CommonUUID: model.CommonUUID{
+				UUID: uuid.SmallUUID(),
+			},
 			Name:       pnt.Name,
 			DeviceUUID: deviceUUID,
 			ObjectType: objectType,

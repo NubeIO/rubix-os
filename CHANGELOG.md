@@ -1,6 +1,23 @@
 # CHANGELOG
 
+## [v0.6.7](https://github.com/NubeIO/flow-framework/tree/v0.6.7) (2022-08-18)
+
+- allow user to delete network if plugin is not installed
+- got bacnet-server plugin working with the new bacnet-server app
+- remove backup plugin
+- Merge pull request #606 from NubeIO/cleanup-of-mapping
+- add bacnet read priority
+- Merge pull request #608 from NubeIO/list-serial-ports
+- Merge pull request #610 from NubeIO/redo-json-schema
+- Merge pull request #611 from NubeIO/resync-bacnet-names
+- Merge pull request #612 from NubeIO/fix-bacnet-master-net
+- Merge pull request #613 from NubeIO/bump-schema
+- Fix: remove GlobalUUID unique constraint
+- Fix: remove GlobalUUID unique constraint
+- Fix: remove consumer's producer_uuid unique index
+
 ## [v0.6.6](https://github.com/NubeIO/flow-framework/tree/v0.6.6) (2022-08-09)
+
 - Issue/producer history current writer UUID #598
 - Improvements/misc #596
 - Add central history producer enable flag #594

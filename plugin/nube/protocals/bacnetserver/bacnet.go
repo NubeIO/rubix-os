@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -93,6 +94,17 @@ func (inst *Instance) bacnetStoreDevice(dev *model.Device) error {
 	}
 
 	net, _ := inst.getBacnetStoreNetwork(dev.NetworkUUID)
+	if net == nil {
+		getNetwork, err := inst.db.GetNetwork(dev.NetworkUUID, api.Args{})
+		if getNetwork == nil {
+			return errors.New("failed to find network to init bacnet network")
+		}
+		err = inst.bacnetStoreNetwork(getNetwork)
+		if err != nil {
+			return errors.New("network can not be empty")
+		}
+
+	}
 	return inst.BacStore.UpdateDevice(dev.UUID, net, d)
 }
 
@@ -201,6 +213,48 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string, 
 		}
 	}
 	inst.bacnetDebugMsg("POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority)
+	return nil
+}
+
+func (inst *Instance) pingDevice(network *model.Network, device *model.Device) error {
+	if inst.BacStore != nil {
+		netUUID := network.UUID
+		devUUID := device.UUID
+		storeNetwork, err := inst.getBacnetStoreNetwork(netUUID)
+		if err != nil {
+			return err
+		}
+		go storeNetwork.NetworkRun()
+		storeDevice, err := inst.getBacnetStoreDevice(devUUID)
+		if err != nil {
+			return err
+		}
+		obj := integer.NonNil(device.DeviceObjectId)
+		deviceName, err := storeDevice.ReadDeviceName(btypes.ObjectInstance(obj))
+		if err != nil {
+			return err
+		}
+		log.Infof("bacnet-server ping:%s", deviceName)
+	} else {
+		log.Infof("bacnet-server ping:%s device-id:%d", device.Name, integer.NonNil(device.DeviceObjectId))
+	}
+	return nil
+}
+
+func (inst *Instance) massUpdateServer(network *model.Network, device *model.Device) error {
+	if inst.BacStore != nil {
+		netUUID := network.UUID
+		devUUID := device.UUID
+		for _, point := range device.Points {
+			err := inst.writeBacnetPointName(point, point.Name, netUUID, devUUID)
+			if err != nil {
+			} else {
+				log.Infof("bacnet-server mass update names:%s", point.Name)
+			}
+		}
+	} else {
+		log.Infof("bacnet-server ping:%s device-id:%d", device.Name, integer.NonNil(device.DeviceObjectId))
+	}
 	return nil
 }
 

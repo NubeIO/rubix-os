@@ -23,17 +23,15 @@ type polling struct {
 	isRunning     bool
 }
 
-func delays(networkType string) (deviceDelay, pointDelay time.Duration) {
-	deviceDelay = 250 * time.Millisecond
-	pointDelay = 500 * time.Millisecond
-	if networkType == model.TransType.LoRa {
-		deviceDelay = 80 * time.Millisecond
-		pointDelay = 6000 * time.Millisecond
-	}
+func delays() (deviceDelay, pointDelay time.Duration) {
+	deviceDelay = 100 * time.Millisecond
+	pointDelay = 100 * time.Millisecond
 	return
 }
 
 var poll poller.Poller
+var lastPingFailed = "start"
+var rsyncWrite = 0
 
 func (inst *Instance) BACnetServerPolling() error {
 	poll = poller.New()
@@ -60,7 +58,7 @@ func (inst *Instance) BACnetServerPolling() error {
 			} else {
 				if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 					timeStart := time.Now()
-					devDelay, pointDelay := delays(net.TransportType)
+					devDelay, pointDelay := delays()
 					// counter++
 					for _, dev := range net.Devices { // DEVICES
 						time.Sleep(devDelay) // DELAY between devices
@@ -73,6 +71,18 @@ func (inst *Instance) BACnetServerPolling() error {
 							inst.bacnetDebugMsg("DEVICE DISABLED: NAME: ", dev.Name)
 							continue
 						}
+						err = inst.pingDevice(net, dev)
+						if err != nil {
+							lastPingFailed = "fail"
+						}
+						if lastPingFailed == "fail" && err != nil {
+							lastPingFailed = "rsync"
+						}
+						if rsyncWrite == 0 || lastPingFailed == "rsync" {
+							inst.massUpdateServer(net, dev)
+							lastPingFailed = "in-sync"
+						}
+						time.Sleep(devDelay)             // DELAY between devices
 						for _, pnt := range dev.Points { // POINTS
 							time.Sleep(pointDelay) // DELAY between points
 							// pnt, err = inst.db.GetPoint(pnt.UUID, api.Args{WithPriority: true})
@@ -150,6 +160,8 @@ func (device *Device) PointReleasePriority(pnt *Point, pri uint8) error {
 								}
 							}
 						}
+						rsyncWrite = counter % 50
+
 						timeEnd := time.Now()
 						diff := timeEnd.Sub(timeStart)
 						out := time.Time{}.Add(diff)

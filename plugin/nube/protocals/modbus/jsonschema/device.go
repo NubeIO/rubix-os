@@ -7,8 +7,8 @@ type DeviceSchema struct {
 	Name        schema.Name        `json:"name"`
 	Description schema.Description `json:"description"`
 	Enable      schema.Enable      `json:"enable"`
-	// IP          schema.IP          `json:"ip"`
-	Port schema.Port `json:"port"`
+	IP          schema.Host        `json:"ip"`
+	Port        schema.Port        `json:"port"`
 }
 
 func GetDeviceSchema() *DeviceSchema {

@@ -99,7 +99,11 @@ func (d *GormDatabase) DeletePointPlugin(uuid string) (ok bool, err error) {
 	cli := client.NewLocalClient()
 	ok, err = cli.DeletePointPlugin(point, pluginName)
 	if err != nil {
-		return ok, err
+		_, err := d.DeletePoint(uuid)
+		if err != nil {
+			return false, err
+		}
+		return true, err
 	}
 	return
 }

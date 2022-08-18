@@ -3,9 +3,25 @@ package jsonschema
 import (
 	"github.com/NubeIO/lib-networking/networking"
 	"github.com/NubeIO/lib-schema/schema"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
 var nets = networking.New()
+
+type AutoMappingFlowNetworkUUID struct {
+	Type     string   `json:"type" default:"string"`
+	Title    string   `json:"title" default:"select flow network for mapping"`
+	Options  []string `json:"enum" default:"[]"`
+	EnumName []string `json:"enumNames" default:"[]"`
+}
+
+type AutoMappingNetworksSelection struct {
+	Type     string   `json:"type" default:"string"`
+	Title    string   `json:"title" default:"enable mapping"`
+	Options  []string `json:"enum" default:"[\"disable\",\"self-mapping\",\"bacnet\"]"`
+	EnumName []string `json:"enumNames" default:"[\"disable\",\"self-mapping\",\"bacnet\"]"`
+	Default  string   `json:"default" default:"disable"`
+}
 
 type NetworkSchema struct {
 	UUID                         schema.UUID                         `json:"uuid"`
@@ -16,14 +32,12 @@ type NetworkSchema struct {
 	Interface                    schema.Interface                    `json:"network_interface"`
 	PluginName                   schema.PluginName                   `json:"plugin_name"`
 	AutoMappingNetworksSelection schema.AutoMappingNetworksSelection `json:"auto_mapping_networks_selection"`
-	AutoMappingFlowNetworkName   schema.AutoMappingFlowNetworkName   `json:"auto_mapping_flow_network_name"`
-	AutoMappingFlowNetworkUUID   schema.AutoMappingFlowNetworkUUID   `json:"auto_mapping_flow_network_uuid"`
-	AutoMappingEnableHistories   schema.AutoMappingEnableHistories   `json:"auto_mapping_enable_histories"`
+	AutoMappingFlowNetworkUUID   AutoMappingFlowNetworkUUID          `json:"auto_mapping_flow_network_uuid"`
 }
 
-func GetNetworkSchema() *NetworkSchema {
+func GetNetworkSchema(flows []*model.FlowNetwork) *NetworkSchema {
 	m := &NetworkSchema{}
-	schema.Set(m)
+	m.Port.Default = 47808
 	names, err := nets.GetInterfacesNames()
 	if err != nil {
 		return m
@@ -36,6 +50,17 @@ func GetNetworkSchema() *NetworkSchema {
 			out = append(out, name)
 		}
 	}
+	var flowNames []string
+	var flowUUIDS []string
+	for _, flow := range flows {
+		flowNames = append(flowNames, flow.Name)
+		flowUUIDS = append(flowUUIDS, flow.UUID)
+	}
+
 	m.Interface.Options = out
+	m.AutoMappingFlowNetworkUUID.EnumName = flowNames
+	m.AutoMappingFlowNetworkUUID.Options = flowUUIDS
+
+	schema.Set(m)
 	return m
 }

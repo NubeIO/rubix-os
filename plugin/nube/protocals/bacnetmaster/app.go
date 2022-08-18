@@ -8,6 +8,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/writemode"
+	address "github.com/NubeIO/lib-networking/ip"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
@@ -27,9 +28,11 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	}
 	err = inst.bacnetStoreNetwork(network)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error()))
+		inst.bacnetErrorMsg("addNetwork(): issue on add bacnet-network to store err ", err.Error())
+		//fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error())
 	}
-
+	body.MaxPollRate = float.New(0.1)
+	body.TransportType = "ip"
 	if boolean.IsTrue(network.Enable) {
 		conf := inst.GetConfig().(*Config)
 		pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
@@ -54,12 +57,34 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		inst.bacnetDebugMsg("addDevice(): failed to create bacnet device: ", body.Name)
 		return nil, errors.New("failed to create bacnet device")
 	}
-
+	if body.Host == "" {
+		body.Host = "192.168.15.100"
+	}
+	if body.Host == "0.0.0.0" {
+		body.Host = "192.168.15.100"
+	}
+	if body.Port == 0 {
+		body.Port = 47808
+	}
+	if float.IsNil(body.FastPollRate) {
+		body.FastPollRate = float.New(1)
+	}
+	if float.IsNil(body.NormalPollRate) {
+		body.NormalPollRate = float.New(15)
+	}
+	if float.IsNil(body.SlowPollRate) {
+		body.SlowPollRate = float.New(120)
+	}
+	err = address.New().IsIPAddrErr(body.Host)
+	if body == nil {
+		inst.bacnetDebugMsg("addDevice(): nil device object")
+		return nil, errors.New(fmt.Sprintf("invalid ip addr %s", body.Host))
+	}
 	err = inst.bacnetStoreDevice(device)
 	if err != nil {
+		inst.bacnetDebugMsg("addDevice(): issue on add bacnet-device to store")
 		return nil, errors.New("issue on add bacnet-device to store")
 	}
-
 	inst.bacnetDebugMsg("addDevice(): ", body.UUID)
 
 	if boolean.IsFalse(device.Enable) {
@@ -159,6 +184,10 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	if netPollMan == nil || err != nil {
 		inst.bacnetDebugMsg("updateNetwork(): cannot find NetworkPollManager for network: ", network.UUID)
 		return
+	}
+	err = inst.bacnetStoreNetwork(network)
+	if err != nil {
+		inst.bacnetDebugMsg("updateNetwork(): bacnetStoreNetwork: ", network.UUID)
 	}
 
 	if boolean.IsFalse(network.Enable) && netPollMan.Enable {
