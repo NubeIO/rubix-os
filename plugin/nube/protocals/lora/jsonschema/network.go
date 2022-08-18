@@ -2,8 +2,6 @@ package jsonschema
 
 import (
 	"github.com/NubeIO/lib-schema/schema"
-	log "github.com/sirupsen/logrus"
-	"go.bug.st/serial"
 )
 
 type NetworkSchema struct {
@@ -13,6 +11,7 @@ type NetworkSchema struct {
 	Enable                       schema.Enable                       `json:"enable"`
 	PluginName                   schema.PluginName                   `json:"plugin_name"`
 	SerialPort                   schema.SerialPort                   `json:"serial_port"`
+	SerialBaudRate               schema.SerialBaudRate               `json:"serial_baud_rate"`
 	AutoMappingNetworksSelection schema.AutoMappingNetworksSelection `json:"auto_mapping_networks_selection"`
 	AutoMappingFlowNetworkName   schema.AutoMappingFlowNetworkName   `json:"auto_mapping_flow_network_name"`
 	AutoMappingFlowNetworkUUID   schema.AutoMappingFlowNetworkUUID   `json:"auto_mapping_flow_network_uuid"`
@@ -21,14 +20,17 @@ type NetworkSchema struct {
 
 func GetNetworkSchema() *NetworkSchema {
 	m := &NetworkSchema{}
-	ports, err := serial.GetPortsList()
-	if err != nil {
-		log.Errorf("lora: get serial ports for schema err:%s", err.Error())
-	} else {
-		m.SerialPort.Options = ports
-		m.SerialPort.EnumName = ports
-
-	}
+	m.SerialBaudRate.ReadOnly = true
+	m.SerialBaudRate.EnumName = []string{"9600", "38400", "57600", "115200"}
+	m.SerialBaudRate.Options = []string{"9600", "38400", "57600", "115200"}
+	//Options  []string `json:"options" default:"[\"/dev/ttyAMA0\",\"/data/socat/loRa1\",\"/dev/ttyUSB0\",\"/dev/ttyUSB1\",\"/dev/ttyUSB2\",\"/dev/ttyUSB3\",\"/dev/ttyUSB4\"]"`
+	//ports, err := serial.GetPortsList()
+	//if err != nil {
+	//	log.Errorf("lora: get serial ports for schema err:%s", err.Error())
+	//} else {
+	//	m.SerialPort.Options = ports
+	//	m.SerialPort.EnumName = ports
+	//}
 	schema.Set(m)
 	return m
 }

@@ -26,8 +26,6 @@ func GetGPIOValueForUOByType(point *model.Point) (float64, error) {
 	switch point.IoType {
 	case UOTypes.DIGITAL:
 		result, err = DigitalToGPIOValue(result, true)
-	case UOTypes.PERCENT:
-		result = edge28.PercentToGPIOValue(result)
 	case UOTypes.VOLTSDC:
 		result = edge28.VoltageToGPIOValue(result)
 	default:
@@ -65,18 +63,18 @@ func GetValueFromGPIOForUIByType(point *model.Point, value float64) (float64, er
 	case UITypes.THERMISTOR10KT2:
 		resistance := edge28.ScaleGPIOValueToResistance(value)
 		result, err = thermistor.ResistanceToTemperature(resistance, thermistor.T210K)
-	case UITypes.THERMISTOR10KT3:
-		resistance := edge28.ScaleGPIOValueToResistance(value)
-		result, err = thermistor.ResistanceToTemperature(resistance, thermistor.T310K)
-	case UITypes.THERMISTOR20KT1:
-		resistance := edge28.ScaleGPIOValueToResistance(value)
-		result, err = thermistor.ResistanceToTemperature(resistance, thermistor.T120K)
-	case UITypes.THERMISTORPT100:
-		resistance := edge28.ScaleGPIOValueToResistance(value)
-		result, err = thermistor.ResistanceToTemperature(resistance, thermistor.PT100)
-	case UITypes.THERMISTORPT1000:
-		resistance := edge28.ScaleGPIOValueToResistance(value)
-		result, err = thermistor.ResistanceToTemperature(resistance, thermistor.PT1000)
+	//case UITypes.THERMISTOR10KT3:
+	//	resistance := edge28.ScaleGPIOValueToResistance(value)
+	//	result, err = thermistor.ResistanceToTemperature(resistance, thermistor.T310K)
+	//case UITypes.THERMISTOR20KT1:
+	//	resistance := edge28.ScaleGPIOValueToResistance(value)
+	//	result, err = thermistor.ResistanceToTemperature(resistance, thermistor.T120K)
+	//case UITypes.THERMISTORPT100:
+	//	resistance := edge28.ScaleGPIOValueToResistance(value)
+	//	result, err = thermistor.ResistanceToTemperature(resistance, thermistor.PT100)
+	//case UITypes.THERMISTORPT1000:
+	//	resistance := edge28.ScaleGPIOValueToResistance(value)
+	//	result, err = thermistor.ResistanceToTemperature(resistance, thermistor.PT1000)
 	default:
 		err = errors.New("UI IoType is not a recognized type")
 		return 0, err
@@ -166,14 +164,14 @@ func limitValueByEdge28Type(ioType string, inputVal *float64) (outputVal *float6
 		} else {
 			outputVal = inputVal
 		}
-	case UOTypes.PERCENT, UITypes.PERCENT:
-		if inputValFloat <= 0 {
-			outputVal = float.New(0)
-		} else if inputValFloat >= 100 {
-			outputVal = float.New(100)
-		} else {
-			outputVal = inputVal
-		}
+	//case UOTypes.PERCENT, UITypes.PERCENT:
+	//	if inputValFloat <= 0 {
+	//		outputVal = float.New(0)
+	//	} else if inputValFloat >= 100 {
+	//		outputVal = float.New(100)
+	//	} else {
+	//		outputVal = inputVal
+	//	}
 	default:
 		outputVal = inputVal
 	}
@@ -204,14 +202,14 @@ func limitPriorityArrayByEdge28Type(ioType string, priority *model.PointWriter) 
 					outputVal = float.New(*val)
 				}
 
-			case UOTypes.PERCENT, UITypes.PERCENT:
-				if *val <= 0 {
-					outputVal = float.New(0)
-				} else if *val >= 100 {
-					outputVal = float.New(100)
-				} else {
-					outputVal = float.New(*val)
-				}
+			//case UOTypes.PERCENT, UITypes.PERCENT:
+			//	if *val <= 0 {
+			//		outputVal = float.New(0)
+			//	} else if *val >= 100 {
+			//		outputVal = float.New(100)
+			//	} else {
+			//		outputVal = float.New(*val)
+			//	}
 
 			default:
 				outputVal = float.New(*val)
