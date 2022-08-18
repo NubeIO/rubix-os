@@ -10,6 +10,8 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
+	address "github.com/NubeIO/lib-networking/ip"
+	"github.com/NubeIO/lib-networking/networking"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/iancoleman/strcase"
 	log "github.com/sirupsen/logrus"
@@ -115,6 +117,14 @@ func (inst *Instance) bacnetStoreDevice(dev *model.Device) error {
 	return inst.BacStore.UpdateDevice(dev.UUID, net, d)
 }
 
+func getNetworkIP(network string) (*networking.NetworkInterfaces, error) {
+	net, err := networking.New().GetNetworkByIface(network)
+	if err != nil {
+		return nil, err
+	}
+	return &net, nil
+}
+
 // getDev get an instance of a created bacnet device that is cached in bacnet lib
 func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID string) (float64, error) {
 	object, _, isBool, _ := setObjectType(pnt.ObjectType)
@@ -132,6 +142,19 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 	if err != nil {
 		return 0, err
 	}
+	if net.Ip == "" { // TODO make this update the actual bacnet inst
+		ip, err := getNetworkIP(net.Interface)
+		if err != nil {
+		} else {
+			net.Ip = ip.IP
+		}
+	}
+	err = address.New().IsIPAddrErr(net.Ip)
+	if err != nil {
+		log.Errorf("bacnet-master-read: ip-address is invalid ip:%s err:%s", net.Ip, err.Error())
+		return 0, err
+	}
+
 	go net.NetworkRun()
 	dev, err := inst.getBacnetStoreDevice(deviceUUID)
 	if err != nil {
@@ -178,6 +201,18 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 	}
 	net, err := inst.getBacnetStoreNetwork(networkUUID)
 	if err != nil {
+		return err
+	}
+	if net.Ip == "" { // TODO make this update the actual bacnet inst
+		ip, err := getNetworkIP(net.Interface)
+		if err != nil {
+		} else {
+			net.Ip = ip.IP
+		}
+	}
+	err = address.New().IsIPAddrErr(net.Ip)
+	if err != nil {
+		log.Errorf("bacnet-master-write: ip-address is invalid ip:%s err:%s", net.Ip, err.Error())
 		return err
 	}
 	go net.NetworkRun()
