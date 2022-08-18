@@ -9,7 +9,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	address "github.com/NubeIO/lib-networking/ip"
-	pprint "github.com/NubeIO/lib-networking/print"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
@@ -29,7 +28,8 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	}
 	err = inst.bacnetStoreNetwork(network)
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error()))
+		inst.bacnetErrorMsg("addNetwork(): issue on add bacnet-device to store err ", err.Error())
+		//fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error())
 	}
 	body.MaxPollRate = float.New(0.1)
 	body.TransportType = "ip"
@@ -66,17 +66,25 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	if body.Port == 0 {
 		body.Port = 47808
 	}
+	if float.IsNil(body.FastPollRate) {
+		body.FastPollRate = float.New(1)
+	}
+	if float.IsNil(body.NormalPollRate) {
+		body.NormalPollRate = float.New(15)
+	}
+	if float.IsNil(body.SlowPollRate) {
+		body.SlowPollRate = float.New(120)
+	}
 	err = address.New().IsIPAddrErr(body.Host)
 	if body == nil {
 		inst.bacnetDebugMsg("addDevice(): nil device object")
 		return nil, errors.New(fmt.Sprintf("invalid ip addr %s", body.Host))
 	}
-	pprint.PrintJOSN(body)
 	err = inst.bacnetStoreDevice(device)
 	if err != nil {
+		inst.bacnetDebugMsg("addDevice(): issue on add bacnet-device to store")
 		return nil, errors.New("issue on add bacnet-device to store")
 	}
-
 	inst.bacnetDebugMsg("addDevice(): ", body.UUID)
 
 	if boolean.IsFalse(device.Enable) {
@@ -176,6 +184,10 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	if netPollMan == nil || err != nil {
 		inst.bacnetDebugMsg("updateNetwork(): cannot find NetworkPollManager for network: ", network.UUID)
 		return
+	}
+	err = inst.bacnetStoreNetwork(network)
+	if err != nil {
+		inst.bacnetDebugMsg("updateNetwork(): bacnetStoreNetwork: ", network.UUID)
 	}
 
 	if boolean.IsFalse(network.Enable) && netPollMan.Enable {
