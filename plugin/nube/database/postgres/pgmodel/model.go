@@ -81,7 +81,7 @@ type Consumer struct {
 	CommonName
 	CommonDescription
 	CommonEnable
-	ProducerUUID       string    `json:"producer_uuid,omitempty" gorm:"uniqueIndex;not null"`
+	ProducerUUID       string    `json:"producer_uuid,omitempty"`
 	ProducerThingName  string    `json:"producer_thing_name,omitempty"`
 	ProducerThingUUID  string    `json:"producer_thing_uuid,omitempty"` // this is the remote point UUID
 	ProducerThingClass string    `json:"producer_thing_class,omitempty"`
