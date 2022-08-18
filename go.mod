@@ -1,11 +1,7 @@
 module github.com/NubeIO/flow-framework
 
-//replace github.com/NubeIO/nubeio-rubix-lib-helpers-go => /home/aidan/code/go/nube/nubeio-rubix-lib-helpers-go
-//replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-models-go
-//replace github.com/NubeIO/nubeio-rubix-lib-auth-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-auth-go
-//replace github.com/NubeIO/nubeio-rubix-lib-rest-go => /home/aidan/code/go/nube/nubeio-rubix-lib-rest-go
 //replace github.com/NubeDev/bacnet => /home/aidan/code/go/nube/bacnet
-//replace github.com/NubeIO/lib-schema => /home/aidan/code/go/nube/lib/lib-schema
+replace github.com/NubeIO/lib-schema => /home/aidan/code/go/nube/lib/lib-schema
 
 require (
 	github.com/NubeDev/location v0.0.2
@@ -39,16 +35,15 @@ require (
 	github.com/gomarkdown/markdown v0.0.0-20210918233619-6c1113f12c4a
 	github.com/grid-x/modbus v0.0.0-20220210093200-c7b3bba92b40
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
-	github.com/labstack/gommon v0.3.0
 	github.com/martinlindhe/unit v0.0.0-20210313160520-19b60e03648d
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
 	gorm.io/driver/postgres v1.3.1
 )
 
 require (
-	github.com/NubeDev/bacnet v0.0.7
+	github.com/NubeDev/bacnet v0.0.8
 	github.com/NubeIO/lib-networking v0.0.4
-	github.com/NubeIO/lib-schema v0.1.0
+	github.com/NubeIO/lib-schema v0.1.1
 	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
 	github.com/iancoleman/strcase v0.2.0
 )
@@ -80,7 +75,6 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/kr/pretty v0.2.0 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
@@ -91,15 +85,12 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
-	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasttemplate v1.2.1 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	gorm.io/driver/mysql v1.3.2 // indirect
 )

@@ -101,6 +101,17 @@ func (inst *Instance) bacnetStoreDevice(dev *model.Device) error {
 	}
 
 	net, _ := inst.getBacnetStoreNetwork(dev.NetworkUUID)
+	if net == nil {
+		getNetwork, err := inst.db.GetNetwork(dev.NetworkUUID, api.Args{})
+		if getNetwork == nil {
+			return errors.New("failed to find network to init bacnet network")
+		}
+		err = inst.bacnetStoreNetwork(getNetwork)
+		if err != nil {
+			return errors.New("network can not be empty")
+		}
+
+	}
 	return inst.BacStore.UpdateDevice(dev.UUID, net, d)
 }
 
