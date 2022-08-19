@@ -171,18 +171,16 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 	return outValue, nil
 }
 
-func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string, writeValue float64) error {
+func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string, writeValue float64, priority uint8) error {
 	object, isWrite, isBool := setObjectType(pnt.ObjectType)
-	// writePriority := integer.NonNil(pnt.WritePriority) // TODO: need to decide if we specify a write priority, or use the current write priority.
-	writePriority := integer.NonNil(pnt.CurrentPriority)
-	if !isWrite || writePriority <= 0 || writePriority > 16 {
-		writePriority = 16
+	if !isWrite || priority <= 0 || priority > 16 {
+		priority = 16
 	}
 	bp := &network.Point{
 		ObjectID:         btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
 		ObjectType:       object,
 		WriteNull:        false,
-		WritePriority:    uint8(writePriority),
+		WritePriority:    priority,
 		ReadPresentValue: false,
 		ReadPriority:     false,
 	}
@@ -198,17 +196,48 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string, 
 	if isBool {
 		err = dev.PointWriteBool(bp, float64ToUint32(writeValue))
 		if err != nil {
-			inst.bacnetErrorMsg("write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority, " error:", err)
+			inst.bacnetErrorMsg("write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", priority, " error:", err)
 			return err
 		}
 	} else {
 		err = dev.PointWriteAnalogue(bp, float64ToFloat32(writeValue))
 		if err != nil {
-			inst.bacnetErrorMsg("write-analog:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority, " error:", err)
+			inst.bacnetErrorMsg("write-analog:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", priority, " error:", err)
 			return err
 		}
 	}
-	inst.bacnetDebugMsg("POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", writePriority)
+	inst.bacnetDebugMsg("POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", writeValue, " writePriority", priority)
+	return nil
+}
+
+func (inst *Instance) doRelease(pnt *model.Point, networkUUID, deviceUUID string, priority uint8) error {
+	object, _, _ := setObjectType(pnt.ObjectType)
+	if priority <= 0 || priority > 16 {
+		return errors.New("invalid priority to doRelease()")
+	}
+	bp := &network.Point{
+		ObjectID:         btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
+		ObjectType:       object,
+		WriteNull:        false,
+		WritePriority:    priority,
+		ReadPresentValue: false,
+		ReadPriority:     false,
+	}
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	if err != nil {
+		return err
+	}
+	go net.NetworkRun()
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
+	if err != nil {
+		return err
+	}
+	err = dev.PointReleasePriority(bp, priority)
+	if err != nil {
+		inst.bacnetErrorMsg("release-priority:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " priority:", priority, " error:", err)
+		return err
+	}
+	inst.bacnetDebugMsg("POINT-RELEASE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " priority:", priority)
 	return nil
 }
 
@@ -251,38 +280,6 @@ func (inst *Instance) massUpdateServer(network *model.Network, device *model.Dev
 	} else {
 		log.Infof("bacnet-server ping:%s device-id:%d", device.Name, integer.NonNil(device.DeviceObjectId))
 	}
-	return nil
-}
-
-func (inst *Instance) doRelease(pnt *model.Point, networkUUID, deviceUUID string, priority uint8) error {
-	object, _, _ := setObjectType(pnt.ObjectType)
-	// writePriority := integer.NonNil(pnt.WritePriority) // TODO: need to decide if we specify a write priority, or use the current write priority.
-	if priority <= 0 || priority > 16 {
-		return errors.New("invalid priority to doRelease()")
-	}
-	bp := &network.Point{
-		ObjectID:         btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
-		ObjectType:       object,
-		WriteNull:        false,
-		WritePriority:    priority,
-		ReadPresentValue: false,
-		ReadPriority:     false,
-	}
-	net, err := inst.getBacnetStoreNetwork(networkUUID)
-	if err != nil {
-		return err
-	}
-	go net.NetworkRun()
-	dev, err := inst.getBacnetStoreDevice(deviceUUID)
-	if err != nil {
-		return err
-	}
-	err = dev.PointReleasePriority(bp, priority)
-	if err != nil {
-		inst.bacnetErrorMsg("release-priority:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " priority:", priority, " error:", err)
-		return err
-	}
-	inst.bacnetDebugMsg("POINT-RELEASE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " priority:", priority)
 	return nil
 }
 
@@ -442,6 +439,9 @@ func FFPointAndBACnetServerPointAreEqual(FFPointValPntr *float64, BACServPointVa
 
 	if BACServValIsNil && FFPointValIsNil {
 		return true
+	}
+	if (BACServValIsNil && !FFPointValIsNil) || (!BACServValIsNil && FFPointValIsNil) {
+		return false
 	}
 	if BACServVal64 == FFPointVal64 {
 		return true
