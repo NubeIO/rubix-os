@@ -24,15 +24,15 @@ type AutoMappingNetworksSelection struct {
 }
 
 type NetworkSchema struct {
-	UUID                         schema.UUID                         `json:"uuid"`
-	Name                         schema.Name                         `json:"name"`
-	Description                  schema.Description                  `json:"description"`
-	Enable                       schema.Enable                       `json:"enable"`
-	Port                         schema.Port                         `json:"port"`
-	Interface                    schema.Interface                    `json:"network_interface"`
-	PluginName                   schema.PluginName                   `json:"plugin_name"`
-	AutoMappingNetworksSelection schema.AutoMappingNetworksSelection `json:"auto_mapping_networks_selection"`
-	AutoMappingFlowNetworkUUID   AutoMappingFlowNetworkUUID          `json:"auto_mapping_flow_network_uuid"`
+	UUID        schema.UUID        `json:"uuid"`
+	Name        schema.Name        `json:"name"`
+	Description schema.Description `json:"description"`
+	Enable      schema.Enable      `json:"enable"`
+	Port        schema.Port        `json:"port"`
+	Interface   schema.Interface   `json:"network_interface"`
+	PluginName  schema.PluginName  `json:"plugin_name"`
+	//AutoMappingNetworksSelection schema.AutoMappingNetworksSelection `json:"auto_mapping_networks_selection"`
+	//AutoMappingFlowNetworkUUID   AutoMappingFlowNetworkUUID          `json:"auto_mapping_flow_network_uuid"`
 }
 
 func GetNetworkSchema(flows []*model.FlowNetwork) *NetworkSchema {
@@ -50,16 +50,16 @@ func GetNetworkSchema(flows []*model.FlowNetwork) *NetworkSchema {
 			out = append(out, name)
 		}
 	}
-	var flowNames []string
-	var flowUUIDS []string
-	for _, flow := range flows {
-		flowNames = append(flowNames, flow.Name)
-		flowUUIDS = append(flowUUIDS, flow.UUID)
-	}
-
-	m.Interface.Options = out
-	m.AutoMappingFlowNetworkUUID.EnumName = flowNames
-	m.AutoMappingFlowNetworkUUID.Options = flowUUIDS
+	//var flowNames []string
+	//var flowUUIDS []string
+	//for _, flow := range flows {
+	//	flowNames = append(flowNames, flow.Name)
+	//	flowUUIDS = append(flowUUIDS, flow.UUID)
+	//}
+	//
+	//m.Interface.Options = out
+	//m.AutoMappingFlowNetworkUUID.EnumName = flowNames
+	//m.AutoMappingFlowNetworkUUID.Options = flowUUIDS
 
 	schema.Set(m)
 	return m
