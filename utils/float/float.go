@@ -37,7 +37,22 @@ func NonNil(b *float64) float64 {
 	return *b
 }
 
+func NonNil32(b *float32) float32 {
+	if b == nil {
+		return 0
+	}
+	return *b
+}
+
 func IsNil(b *float64) bool {
+	if b == nil {
+		return true
+	} else {
+		return false
+	}
+}
+
+func IsNil32(b *float32) bool {
 	if b == nil {
 		return true
 	} else {

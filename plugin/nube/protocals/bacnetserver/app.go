@@ -134,6 +134,8 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		// return nil, errors.New(errMsg) // Use if we should error out and not create the point
 		body.ObjectType = "analog_value" // Use if we should default to analog_value
 	}
+	_, _, isBool := setObjectType(body.ObjectType)
+	body.IsTypeBool = boolean.New(isBool)
 	body.PointPriorityArrayMode = model.PriorityArrayToWriteValue
 	body.WritePriority = integer.New(16)
 	inst.bacnetDebugMsg("addPoint(): ", body.Name)
@@ -252,13 +254,14 @@ func (inst *Instance) updatePoint(body *model.Point) (*model.Point, error) {
 		return nil, errors.New("nil point object")
 	}
 
-	inst.bacnetDebugMsg("updatePoint() body.ObjectType: ", body.ObjectType)
 	if body.ObjectType == "" {
 		errMsg := fmt.Sprintf("point object type can not be empty")
 		inst.bacnetErrorMsg(errMsg)
 		// return nil, errors.New(errMsg) // Use if we should error out and not create the point
 		body.ObjectType = "analog_value" // Use if we should default to analog_value
 	}
+	_, _, isBool := setObjectType(body.ObjectType)
+	body.IsTypeBool = boolean.New(isBool)
 	body.PointPriorityArrayMode = model.PriorityArrayToWriteValue
 
 	inst.bacnetDebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
@@ -302,50 +305,32 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		inst.bacnetDebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err
 	}
-	inst.bacnetDebugMsg("writePoint() point.ObjectType: ", point.ObjectType)
 
-	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
-	if err != nil || dev == nil {
-		inst.bacnetDebugMsg("writePoint(): bad response from GetDevice()")
-		return nil, err
+	if isWriteValueChange {
+		point.WritePollRequired = boolean.NewTrue()
 	}
 
 	if boolean.IsTrue(point.Enable) {
-		inst.bacnetDebugMsg("writePoint(): point is enabled")
-		inst.bacnetDebugMsg("writePoint(): isWriteValueChange: ", isWriteValueChange)
-		inst.bacnetDebugMsg("writePoint(): isWriteableObjectType(point.ObjectType): ", isWriteableObjectType(point.ObjectType))
-		if isWriteValueChange {
-			point.WritePollRequired = boolean.NewTrue()
-			writeVal := float.NonNil(point.WriteValue)
-			dev, err = inst.db.GetDevice(point.DeviceUUID, api.Args{})
-			if err == nil {
-				inst.bacnetDebugMsg("writePoint(): about to point write")
-				err = inst.doWrite(point, dev.NetworkUUID, dev.UUID, writeVal)
-				if err != nil {
-					err = inst.pointUpdateErr(point, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-				} else {
-					inst.bacnetDebugMsg("writePoint(): about to point read")
-					readFloat, err := inst.doReadValue(point, dev.NetworkUUID, dev.UUID)
-					if err != nil {
-						err = inst.pointUpdateErr(point, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-					} else {
-						point, err = inst.pointUpdate(point, readFloat, true, true)
-						if err != nil || point == nil {
-							inst.bacnetDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
-							return point, err
-						}
-					}
-				}
+		dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
+		if err != nil {
+			inst.bacnetErrorMsg("BACnetServerPolling(): Device not found")
+			return point, nil
+		}
+
+		_, err = inst.SyncFFPointWithBACnetServerPoint(point, point.DeviceUUID, dev.NetworkUUID, isWriteValueChange)
+		if err != nil {
+			inst.bacnetErrorMsg(err)
+			if isWriteValueChange {
+				point.WritePollRequired = boolean.NewTrue()
+				point, err = inst.db.UpdatePoint(point.UUID, point, true, false)
 			}
 		}
-		/*
-			point, err = inst.db.UpdatePoint(point.UUID, point, true, true)
-			if err != nil || point == nil {
-				inst.bacnetDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
-				inst.pointUpdateErr(point, fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
-				return point, err
-			}
-		*/
+		return point, nil
+	}
+	point, err = inst.db.UpdatePoint(point.UUID, point, true, true)
+	if err != nil || point == nil {
+		inst.bacnetDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
+		inst.pointUpdateErr(point, fmt.Sprint("writePoint(): bad response from UpdatePoint() err:", err), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 	}
 	return point, nil
 }
@@ -419,6 +404,7 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
+// THE FOLLOWING FUNCTIONS ARE CALLED FROM WITHIN THE PLUGIN
 func (inst *Instance) pointUpdate(point *model.Point, value float64, readWriteSuccess, clearFaults bool) (*model.Point, error) {
 	if readWriteSuccess {
 		point.OriginalValue = float.New(value)
