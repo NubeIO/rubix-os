@@ -24,13 +24,17 @@ type AutoMappingNetworksSelection struct {
 }
 
 type NetworkSchema struct {
-	UUID        schema.UUID        `json:"uuid"`
-	Name        schema.Name        `json:"name"`
-	Description schema.Description `json:"description"`
-	Enable      schema.Enable      `json:"enable"`
-	Port        schema.Port        `json:"port"`
-	Interface   schema.Interface   `json:"network_interface"`
-	PluginName  schema.PluginName  `json:"plugin_name"`
+	UUID           schema.UUID           `json:"uuid"`
+	Name           schema.Name           `json:"name"`
+	Description    schema.Description    `json:"description"`
+	Enable         schema.Enable         `json:"enable"`
+	Port           schema.Port           `json:"port"`
+	Interface      schema.Interface      `json:"network_interface"`
+	PluginName     schema.PluginName     `json:"plugin_name"`
+	FastPollRate   schema.FastPollRate   `json:"fast_poll_rate"`
+	NormalPollRate schema.NormalPollRate `json:"normal_poll_rate"`
+	SlowPollRate   schema.SlowPollRate   `json:"slow_poll_rate"`
+
 	//AutoMappingNetworksSelection schema.AutoMappingNetworksSelection `json:"auto_mapping_networks_selection"`
 	//AutoMappingFlowNetworkUUID   AutoMappingFlowNetworkUUID          `json:"auto_mapping_flow_network_uuid"`
 }
@@ -50,6 +54,7 @@ func GetNetworkSchema(flows []*model.FlowNetwork) *NetworkSchema {
 			out = append(out, name)
 		}
 	}
+	m.Interface.Options = out
 	//var flowNames []string
 	//var flowUUIDS []string
 	//for _, flow := range flows {
@@ -57,7 +62,7 @@ func GetNetworkSchema(flows []*model.FlowNetwork) *NetworkSchema {
 	//	flowUUIDS = append(flowUUIDS, flow.UUID)
 	//}
 	//
-	//m.Interface.Options = out
+
 	//m.AutoMappingFlowNetworkUUID.EnumName = flowNames
 	//m.AutoMappingFlowNetworkUUID.Options = flowUUIDS
 

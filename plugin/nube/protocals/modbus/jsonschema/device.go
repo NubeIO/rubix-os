@@ -19,6 +19,7 @@ type DeviceSchema struct {
 
 func GetDeviceSchema() *DeviceSchema {
 	m := &DeviceSchema{}
+	m.Port.Default = 502
 	schema.Set(m)
 	return m
 }

@@ -2,8 +2,6 @@ package jsonschema
 
 import (
 	"github.com/NubeIO/lib-schema/schema"
-	log "github.com/sirupsen/logrus"
-	"go.bug.st/serial"
 )
 
 type NetworkSchema struct {
@@ -23,14 +21,6 @@ type NetworkSchema struct {
 
 func GetNetworkSchema() *NetworkSchema {
 	m := &NetworkSchema{}
-	ports, err := serial.GetPortsList()
-	if err != nil {
-		log.Errorf("lora: get serial ports for schema err:%s", err.Error())
-	} else {
-		m.SerialPort.Options = ports
-		m.SerialPort.EnumName = ports
-
-	}
 	schema.Set(m)
 	return m
 }
