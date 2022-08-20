@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/jsonschema"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/mbmodel"
 	"github.com/NubeIO/flow-framework/utils/array"
+	modbschema "github.com/NubeIO/lib-schema/modbuschema"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
@@ -216,13 +216,13 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, mbmodel.GetPointSchema())
 	})
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema())
+		ctx.JSON(http.StatusOK, modbschema.GetNetworkSchema())
 	})
 	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetDeviceSchema())
+		ctx.JSON(http.StatusOK, modbschema.GetDeviceSchema())
 	})
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
+		ctx.JSON(http.StatusOK, modbschema.GetPointSchema())
 	})
 }
 

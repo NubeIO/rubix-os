@@ -32,7 +32,6 @@ require (
 	github.com/NubeDev/modbus v0.0.2
 	github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.6
 	github.com/PaesslerAG/gval v1.1.1
-	github.com/gomarkdown/markdown v0.0.0-20210918233619-6c1113f12c4a
 	github.com/grid-x/modbus v0.0.0-20220210093200-c7b3bba92b40
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
 	github.com/martinlindhe/unit v0.0.0-20210313160520-19b60e03648d
@@ -42,8 +41,8 @@ require (
 
 require (
 	github.com/NubeDev/bacnet v0.0.9
-	github.com/NubeIO/lib-networking v0.0.4
-	github.com/NubeIO/lib-schema v0.1.2
+	github.com/NubeIO/lib-networking v0.0.6
+	github.com/NubeIO/lib-schema v0.1.3
 	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
 	github.com/iancoleman/strcase v0.2.0
 )

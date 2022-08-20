@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetmaster/jsonschema"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetmaster/master"
+	"github.com/NubeIO/lib-schema/masterschema"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -82,25 +82,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ok, err := inst.deletePoint(body)
 		api.ResponseHandler(ok, err, ctx)
 	})
-	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, master.GetNetworkSchema())
-	})
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, master.GetDeviceSchema())
-	})
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, master.GetPointSchema())
-	})
-	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
-		flows, _ := inst.db.GetFlowNetworks(api.Args{})
-		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema(flows))
-	})
-	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetDeviceSchema())
-	})
-	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
-	})
+
 	mux.POST(whois+"/:uuid", func(ctx *gin.Context) {
 		body, _ := master.BodyWhoIs(ctx)
 		uuid := resolveID(ctx)
@@ -117,5 +99,24 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		writeable, _ := strconv.ParseBool(makeWriteablePoints)
 		resp, err := inst.devicePoints(uuid, add, writeable)
 		api.ResponseHandler(resp, err, ctx)
+	})
+
+	mux.GET(schemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, master.GetNetworkSchema())
+	})
+	mux.GET(schemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, master.GetDeviceSchema())
+	})
+	mux.GET(schemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, master.GetPointSchema())
+	})
+	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, masterschema.GetNetworkSchema())
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, masterschema.GetDeviceSchema())
+	})
+	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, masterschema.GetPointSchema())
 	})
 }

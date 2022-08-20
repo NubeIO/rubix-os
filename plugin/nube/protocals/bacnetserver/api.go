@@ -4,7 +4,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/bserver"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetserver/jsonschema"
+	"github.com/NubeIO/lib-schema/bacnetschema"
 
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -87,12 +87,12 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, bserver.GetPointSchema())
 	})
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema())
+		ctx.JSON(http.StatusOK, bacnetschema.GetNetworkSchema())
 	})
 	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetDeviceSchema())
+		ctx.JSON(http.StatusOK, bacnetschema.GetDeviceSchema())
 	})
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
+		ctx.JSON(http.StatusOK, bacnetschema.GetPointSchema())
 	})
 }
