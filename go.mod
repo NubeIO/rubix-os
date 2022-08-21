@@ -42,7 +42,7 @@ require (
 require (
 	github.com/NubeDev/bacnet v0.0.9
 	github.com/NubeIO/lib-networking v0.0.6
-	github.com/NubeIO/lib-schema v0.1.3
+	github.com/NubeIO/lib-schema v0.1.4
 	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
 	github.com/iancoleman/strcase v0.2.0
 )

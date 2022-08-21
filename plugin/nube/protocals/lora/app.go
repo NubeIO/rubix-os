@@ -62,6 +62,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 }
 
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
+	body.ObjectType = "analog_input"
 	point, err = inst.db.CreatePoint(body, true, true)
 	if err != nil {
 		return nil, err
