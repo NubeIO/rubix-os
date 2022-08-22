@@ -8,6 +8,7 @@ import (
 	"github.com/NubeDev/bacnet/btypes/segmentation"
 	"github.com/NubeDev/bacnet/network"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	address "github.com/NubeIO/lib-networking/ip"
@@ -364,6 +365,9 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 			CommonUUID: model.CommonUUID{
 				UUID: uuid.SmallUUID(),
 			},
+			CommonEnable: model.CommonEnable{
+				Enable: boolean.NewTrue(),
+			},
 			Name: fmt.Sprintf("deviceId_%d_networkNum_%d", device.DeviceID, device.NetworkNumber),
 			CommonDevice: model.CommonDevice{
 				CommonIP: model.CommonIP{
@@ -423,11 +427,15 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints
 			CommonUUID: model.CommonUUID{
 				UUID: uuid.SmallUUID(),
 			},
-			Name:       pnt.Name,
-			DeviceUUID: deviceUUID,
-			ObjectType: objectType,
-			ObjectId:   integer.New(int(pnt.ObjectID)),
-			WriteMode:  writeMode,
+			CommonEnable: model.CommonEnable{
+				Enable: boolean.NewTrue(),
+			},
+			ScaleEnable: boolean.NewFalse(),
+			Name:        pnt.Name,
+			DeviceUUID:  deviceUUID,
+			ObjectType:  objectType,
+			ObjectId:    integer.New(int(pnt.ObjectID)),
+			WriteMode:   writeMode,
 		}
 		if addPoints {
 			point, err := inst.addPoint(newPnt)
