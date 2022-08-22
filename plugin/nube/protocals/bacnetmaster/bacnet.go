@@ -361,6 +361,9 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 
 	for _, device := range devices {
 		newDevice := &model.Device{
+			CommonUUID: model.CommonUUID{
+				UUID: uuid.SmallUUID(),
+			},
 			Name: fmt.Sprintf("deviceId_%d_networkNum_%d", device.DeviceID, device.NetworkNumber),
 			CommonDevice: model.CommonDevice{
 				CommonIP: model.CommonIP{
