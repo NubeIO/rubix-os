@@ -2,8 +2,10 @@ package api
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 type NetworkDatabase interface {
@@ -22,8 +24,9 @@ type NetworkDatabase interface {
 	DeleteNetworkPlugin(uuid string) (bool, error)
 }
 type NetworksAPI struct {
-	DB  NetworkDatabase
-	Bus eventbus.BusService
+	DB     NetworkDatabase
+	Bus    eventbus.BusService
+	Plugin *plugin.Manager
 }
 
 func (a *NetworksAPI) GetNetworkByName(ctx *gin.Context) {
@@ -69,7 +72,21 @@ func (a *NetworksAPI) GetNetwork(ctx *gin.Context) {
 
 func (a *NetworksAPI) CreateNetwork(ctx *gin.Context) {
 	body, _ := getBODYNetwork(ctx)
+	restart, _ := strconv.ParseBool(ctx.Query("restart_plugin"))
 	q, err := a.DB.CreateNetworkPlugin(body)
+	if err != nil {
+		ResponseHandler(q, err, ctx)
+		return
+	}
+	if restart {
+		if q.PluginConfId != "" {
+			restartPlugin, err := a.Plugin.RestartPlugin(q.PluginConfId)
+			if err != nil {
+				ResponseHandler(restartPlugin, err, ctx)
+				return
+			}
+		}
+	}
 	ResponseHandler(q, err, ctx)
 }
 

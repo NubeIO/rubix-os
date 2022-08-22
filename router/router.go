@@ -22,12 +22,24 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
+	// http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/api/plugins/api"))
+	if err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
+	db.PluginManager = pluginManager
+	pluginHandler := api.PluginAPI{
+		Manager: pluginManager,
+		DB:      db,
+	}
 	localStorageFlowNetworkHandler := api.LocalStorageFlowNetworkAPI{
 		DB: db,
 	}
 	networkHandler := api.NetworksAPI{
-		DB:  db,
-		Bus: eventBus,
+		DB:     db,
+		Bus:    eventBus,
+		Plugin: pluginManager,
 	}
 	deviceHandler := api.DeviceAPI{
 		DB: db,
@@ -107,17 +119,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 
 	dbGroup.SyncTopics()
 	// for the custom plugin endpoints you need to use the plugin token
-	// http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/api/plugins/api"))
-	if err != nil {
-		fmt.Println(err)
-		panic(err)
-	}
-	db.PluginManager = pluginManager
-	pluginHandler := api.PluginAPI{
-		Manager: pluginManager,
-		DB:      db,
-	}
 
 	engine.GET("/api/system/ping", healthHandler.Health)
 	engine.POST("/api/users/login", userHandler.Login)
@@ -167,6 +168,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 				plugins.GET("/display/:uuid", pluginHandler.GetDisplay)
 				plugins.POST("/enable/:uuid", pluginHandler.EnablePluginByUUID)
 				plugins.POST("/restart/:uuid", pluginHandler.RestartPlugin)
+				plugins.POST("/restart/name/:name", pluginHandler.RestartPluginByName)
 				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
 			}
 		}
