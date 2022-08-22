@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.6.8](https://github.com/NubeIO/flow-framework/tree/v0.6.8) (2022-08-22)
+
+- updates to all the schemas
+- fix on bacnet-master polling
+- setup of bacnet-server
+
 ## [v0.6.7](https://github.com/NubeIO/flow-framework/tree/v0.6.7) (2022-08-18)
 
 - allow user to delete network if plugin is not installed
