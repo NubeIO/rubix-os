@@ -24,6 +24,9 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	network, err = inst.db.CreateNetwork(body, true)
 	if network == nil || err != nil {
 		inst.bacnetErrorMsg("addNetwork(): failed to create bacnet network: ", body.Name)
+		if err != nil {
+			return nil, err
+		}
 		return nil, errors.New("failed to create bacnet network")
 	}
 	err = inst.bacnetStoreNetwork(network)
