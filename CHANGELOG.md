@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.6.9](https://github.com/NubeIO/flow-framework/tree/v0.6.9) (2022-08-22)
+
+- fix bug on bacnet polling
+
 ## [v0.6.8](https://github.com/NubeIO/flow-framework/tree/v0.6.8) (2022-08-22)
 
 - updates to all the schemas
