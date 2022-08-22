@@ -143,6 +143,42 @@ func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
 		ResponseHandler(res, nil, ctx)
 	}
 	ResponseHandler("plugin restart ok", err, ctx)
+}
+
+// RestartPluginByName restart a plugin.
+func (c *PluginAPI) RestartPluginByName(ctx *gin.Context) {
+	name := ctx.Param("name")
+	plugins, err := c.DB.GetPlugins()
+	if err != nil {
+		ResponseHandler("plugin", err, ctx)
+		return
+	}
+	for _, conf := range plugins {
+		if conf.Name == name {
+			uuid := conf.UUID
+			if success := successOrAbort(ctx, 500, err); !success {
+				return
+			}
+			if conf == nil {
+				ResponseHandler("unknown plugin", err, ctx)
+				return
+			}
+			_, err = c.Manager.Instance(uuid)
+			if err != nil {
+				ResponseHandler("plugin not found", err, ctx)
+				return
+			}
+			if res, err := c.Manager.RestartPlugin(uuid); err == plugin.ErrAlreadyEnabledOrDisabled {
+				ResponseHandler(res, err, ctx)
+			} else if err != nil {
+				ResponseHandler(res, nil, ctx)
+			}
+			ResponseHandler("plugin restart ok", err, ctx)
+			return
+		}
+	}
+	ResponseHandler(fmt.Sprintf("plugin not found with that name:%s", name), nil, ctx)
+	return
 
 }
 

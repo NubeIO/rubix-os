@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/services/pollqueue"
 	"github.com/NubeIO/flow-framework/utils/float"
 )
 
 func (inst *Instance) Enable() error {
+	fmt.Println("11111")
 	inst.bacnetDebugMsg("Polling Enable()")
 	inst.enabled = true
 	inst.pluginName = name

@@ -166,7 +166,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 				plugins.POST("/config/:uuid", pluginHandler.UpdateConfig)
 				plugins.GET("/display/:uuid", pluginHandler.GetDisplay)
 				plugins.POST("/enable/:uuid", pluginHandler.EnablePluginByUUID)
-				plugins.POST("/restart/:uuid", pluginHandler.RestartPlugin)
+				plugins.GET("/restart/:uuid", pluginHandler.RestartPlugin)
+				plugins.GET("/restart/name/:name", pluginHandler.RestartPluginByName)
 				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
 			}
 		}
