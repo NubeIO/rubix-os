@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.7.0](https://github.com/NubeIO/flow-framework/tree/v0.7.0) (2022-08-22)
+
+- added restart plugin api
 
 ## [v0.6.9](https://github.com/NubeIO/flow-framework/tree/v0.6.9) (2022-08-22)
 
