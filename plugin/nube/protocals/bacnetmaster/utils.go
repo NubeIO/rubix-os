@@ -30,8 +30,12 @@ func checkForOutputType(ObjectType string) (isOutput bool) {
 		string(model.ObjTypeAnalogValue),
 		string(model.ObjTypeBinaryOutput),
 		string(model.ObjTypeBinaryValue),
+		string(model.ObjTypeEnumOutput),
+		string(model.ObjTypeEnumValue),
 		string(model.ObjAnalogOutput),
 		string(model.ObjAnalogValue),
+		string(model.ObjEnumOutput),
+		string(model.ObjEnumValue),
 		string(model.ObjBinaryOutput),
 		string(model.ObjBinaryValue):
 		isOutput = true
@@ -55,11 +59,17 @@ func isWriteableObjectType(objectType string) bool {
 	case string(model.ObjTypeBinaryOutput),
 		string(model.ObjTypeBinaryValue):
 		return true
+	case string(model.ObjTypeEnumOutput),
+		string(model.ObjTypeEnumValue):
+		return true
 	case string(model.ObjAnalogOutput),
 		string(model.ObjAnalogValue):
 		return true
 	case string(model.ObjBinaryOutput),
 		string(model.ObjBinaryValue):
+		return true
+	case string(model.ObjEnumOutput),
+		string(model.ObjEnumValue):
 		return true
 	}
 	return false
