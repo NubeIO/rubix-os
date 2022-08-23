@@ -34,8 +34,8 @@ func checkForOutputType(ObjectType string) (isOutput bool) {
 		string(model.ObjTypeEnumValue),
 		string(model.ObjAnalogOutput),
 		string(model.ObjAnalogValue),
-		string(model.ObjEnumOutput),
-		string(model.ObjEnumValue),
+		string(model.ObjEnumOutput), //MSO
+		string(model.ObjEnumValue),  //MSV
 		string(model.ObjBinaryOutput),
 		string(model.ObjBinaryValue):
 		isOutput = true

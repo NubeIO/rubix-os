@@ -181,6 +181,13 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 		}
 		outValue = Unit32ToFloat64(readBool)
 
+	} else if pnt.ObjectType == "multi_state_input" || pnt.ObjectType == "multi_state_output" || pnt.ObjectType == "multi_state_value" {
+		readFloat32, err := dev.PointReadMultiState(bp)
+		if err != nil {
+			log.Errorln("bacnet-master-read-multi-state:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " error:", err)
+			return 0, err
+		}
+		outValue = Unit32ToFloat64(readFloat32)
 	} else {
 		readFloat32, err := dev.PointReadFloat32(bp)
 		if err != nil {
@@ -189,6 +196,7 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 		}
 		outValue = float32ToFloat64(readFloat32)
 	}
+	inst.bacnetDebugMsg("bacnet-master-POINT-READ:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", outValue)
 	inst.bacnetDebugMsg("bacnet-master-POINT-READ:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", outValue)
 	return outValue, nil
 }
@@ -227,6 +235,12 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 			err = dev.PointWriteBool(bp, float64ToUint32(val))
 			if err != nil {
 				inst.bacnetErrorMsg("bacnet-master-write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
+				return err
+			}
+		} else if pnt.ObjectType == "multi_state_output" || pnt.ObjectType == "multi_state_value" {
+			err = dev.PointWriteMultiState(bp, float64ToUint32(val))
+			if err != nil {
+				inst.bacnetErrorMsg("bacnet-master-write-multi-state:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
 				return err
 			}
 		} else {

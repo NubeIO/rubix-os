@@ -123,7 +123,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	point, err = inst.db.CreatePoint(body, true, true)
 	if point == nil || err != nil {
 		inst.bacnetDebugMsg("addPoint(): failed to create bacnet point: ", body.Name)
-		return nil, errors.New("failed to create bacnet point")
+		return nil, err
 	}
 	inst.bacnetDebugMsg(fmt.Sprintf("addPoint(): %+v\n", point))
 
