@@ -1,13 +1,13 @@
 module github.com/NubeIO/flow-framework
 
 //replace github.com/NubeDev/bacnet => /home/aidan/code/go/nube/bacnet
-//replace github.com/NubeIO/lib-schema => /home/aidan/code/go/nube/lib/lib-schema
+//replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-models-go
 
 require (
 	github.com/NubeDev/location v0.0.2
 	github.com/NubeIO/configor v0.0.3
 	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7
-	github.com/NubeIO/nubeio-rubix-lib-models-go v1.3.6
+	github.com/NubeIO/nubeio-rubix-lib-models-go v1.3.7
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -40,9 +40,9 @@ require (
 )
 
 require (
-	github.com/NubeDev/bacnet v0.0.9
+	github.com/NubeDev/bacnet v0.1.0
 	github.com/NubeIO/lib-networking v0.0.6
-	github.com/NubeIO/lib-schema v0.1.4
+	github.com/NubeIO/lib-schema v0.1.6
 	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
 	github.com/iancoleman/strcase v0.2.0
 )

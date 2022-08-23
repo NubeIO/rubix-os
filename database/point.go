@@ -112,6 +112,30 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	if body.Priority == nil {
 		body.Priority = &model.Priority{}
 	}
+	if body.ScaleEnable == nil {
+		body.ScaleEnable = boolean.NewFalse()
+	}
+	if body.ScaleInMin == nil {
+		body.ScaleInMin = float.New(0)
+	}
+	if body.ScaleInMax == nil {
+		body.ScaleInMax = float.New(0)
+	}
+	if body.ScaleOutMin == nil {
+		body.ScaleOutMin = float.New(0)
+	}
+	if body.ScaleOutMax == nil {
+		body.ScaleOutMax = float.New(0)
+	}
+	if body.Offset == nil {
+		body.Offset = float.New(0)
+	}
+	if body.PollRate == "" {
+		body.PollRate = model.RATE_NORMAL
+	}
+	if body.PollPriority == "" {
+		body.PollPriority = model.PRIORITY_NORMAL
+	}
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
