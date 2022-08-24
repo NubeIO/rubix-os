@@ -256,8 +256,10 @@ func (q *PriorityPollQueue) Pop() interface{} {
 }
 func (q *PriorityPollQueue) GetPollingPointIndexByPointUUID(pointUUID string) int {
 	for index, pp := range q.PriorityQueue {
-		if pp.FFPointUUID == pointUUID {
-			return index
+		if pp != nil { // i got a nil pointer issue here and it crashed FF @Marc to look (aidan)
+			if pp.FFPointUUID == pointUUID {
+				return index
+			}
 		}
 	}
 	return -1
