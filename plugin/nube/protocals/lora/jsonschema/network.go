@@ -23,7 +23,7 @@ func GetNetworkSchema() *NetworkSchema {
 	m := &NetworkSchema{}
 	ports, err := serial.GetPortsList()
 	if err != nil {
-		log.Errorf("lora: get serial ports for schema err:%s", err.Error())
+		log.Errorf("loraraw: get serial ports for schema err:%s", err.Error())
 	} else {
 		m.SerialPort.Options = ports
 		m.SerialPort.EnumName = ports

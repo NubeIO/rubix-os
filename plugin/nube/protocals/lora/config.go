@@ -2,14 +2,11 @@ package main
 
 // Config is user plugin configuration
 type Config struct {
-	MagicString string `yaml:"magic_string"`
 }
 
 // DefaultConfig implements plugin.Configurer
 func (inst *Instance) DefaultConfig() interface{} {
-	return &Config{
-		MagicString: "N/A",
-	}
+	return &Config{}
 }
 
 func (inst *Instance) GetConfig() interface{} {

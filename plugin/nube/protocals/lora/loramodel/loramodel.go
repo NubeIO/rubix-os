@@ -16,7 +16,11 @@ type NameStruct struct {
 	Required bool   `json:"required" default:"true"`
 	Min      int    `json:"min" default:"2"`
 	Max      int    `json:"max" default:"50"`
-	Default  string `json:"default" default:"lora"`
+}
+
+type NameStructNet struct {
+	NameStruct
+	Default string `json:"default" default:"LoRaRAW"`
 }
 
 type DescriptionStruct struct {
@@ -35,7 +39,7 @@ type TransportTypeStruct struct {
 
 type Network struct {
 	Enable      EnableStruct      `json:"enable"`
-	Name        NameStruct        `json:"name"`
+	Name        NameStructNet     `json:"name"`
 	Description DescriptionStruct `json:"description"`
 	PluginName  struct {
 		Type     string `json:"type" default:"string"`
@@ -44,15 +48,16 @@ type Network struct {
 	} `json:"plugin_name"`
 	TransportType TransportTypeStruct `json:"transport_type"`
 	SerialPort    struct {
-		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"/dev/ttyAMA0\",\"/data/socat/loRa1\",\"/dev/ttyUSB0\",\"/dev/ttyUSB1\",\"/dev/ttyUSB2\",\"/dev/ttyUSB3\",\"/dev/ttyUSB4\"]"`
-		Default  string   `json:"default" default:"/dev/ttyAMA0"`
+		Type     string `json:"type" default:"string"`
+		Required bool   `json:"required" default:"true"`
+		Min      int    `json:"min" default:"0"`
+		Max      int    `json:"max" default:"100"`
+		Default  string `json:"default" default:"/data/socat/loRa1"`
 	} `json:"serial_port"`
 	SerialBaudRate struct {
 		Type     string `json:"type" default:"array"`
-		Required bool   `json:"required" default:"true"`
-		Options  []int  `json:"options" default:"[38400]"`
+		Required bool   `json:"required" default:"false"`
+		Options  []int  `json:"options" default:"[9600, 14400, 19200, 38400, 57600, 115200]"`
 		Default  int    `json:"default" default:"38400"`
 	} `json:"serial_baud_rate"`
 	AutoMappingNetworksSelection struct {
@@ -136,12 +141,6 @@ type Point struct {
 
 func GetNetworkSchema() *Network {
 	network := &Network{}
-	//ports, err := serial.GetPortsList()
-	//if err != nil {
-	//	log.Errorf("lora: get serial ports for schema err:%s", err.Error())
-	//} else {
-	//	network.SerialPort.Options = ports
-	//}
 	defaults.Set(network)
 	return network
 }
