@@ -1,6 +1,8 @@
 package decoder
 
 import (
+	"strings"
+
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -81,7 +83,7 @@ var LoRaDeviceDescriptions = [...]LoRaDeviceDescription{
 
 func GetDeviceDescription(device *model.Device) *LoRaDeviceDescription {
 	for _, dev := range LoRaDeviceDescriptions {
-		if device.Model == dev.Model {
+		if strings.EqualFold(device.Model, dev.Model) {
 			return &dev
 		}
 	}

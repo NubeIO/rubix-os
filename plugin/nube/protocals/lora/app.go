@@ -3,10 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils/integer"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/NubeIO/flow-framework/utils/integer"
 
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
@@ -59,6 +60,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	}
 	err = inst.addDevicePoints(device)
 	if err != nil {
+		inst.db.DeleteDevice(device.UUID)
 		return nil, err
 	}
 	return device, nil
