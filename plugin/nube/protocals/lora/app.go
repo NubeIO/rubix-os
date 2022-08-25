@@ -269,19 +269,30 @@ func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 		log.Errorf("loraraw: issue on addPoint: %v\n", err)
 		return err
 	}
-	return inst.addPointsFromStruct(deviceBody, pointsRefl)
+	return inst.addPointsFromStruct(deviceBody, pointsRefl, "")
 }
 
-func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl reflect.Value) error {
+func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl reflect.Value, postfix string) error {
 	point := new(model.Point)
 	for i := 0; i < pointsRefl.NumField(); i++ {
-		if pointsRefl.Field(i).Kind() == reflect.Struct {
-			if _, ok := pointsRefl.Field(i).Interface().(decoder.CommonValues); !ok {
-				_ = inst.addPointsFromStruct(deviceBody, pointsRefl.Field(i))
+		field := pointsRefl.Field(i)
+		if field.Kind() == reflect.Struct {
+			if _, ok := field.Interface().(decoder.CommonValues); !ok {
+				_ = inst.addPointsFromStruct(deviceBody, pointsRefl.Field(i), postfix)
+			}
+			continue
+		} else if field.Kind() == reflect.Array || field.Kind() == reflect.Slice {
+			for j := 0; j < field.Len(); j++ {
+				pf := fmt.Sprintf("%s_%d", postfix, (j + 1))
+				v := field.Index(j)
+				inst.addPointsFromStruct(deviceBody, v, pf)
 			}
 			continue
 		}
 		pointName := getReflectFieldJSONName(pointsRefl.Type().Field(i))
+		if postfix != "" {
+			pointName = fmt.Sprintf("%s%s", pointName, postfix)
+		}
 		inst.setNewPointFields(deviceBody, point, pointName)
 		_, err := inst.addPoint(point)
 		if err != nil {
@@ -358,36 +369,43 @@ func (inst *Instance) updateDevicePointValues(commonValues *decoder.CommonValues
 		return
 	}
 	// update all other fields in sensorStruct
-	inst.updateDevicePointValuesStruct(commonValues.ID, sensorStruct)
+	inst.updateDevicePointValuesStruct(commonValues.ID, sensorStruct, "")
 }
 
-func (inst *Instance) updateDevicePointValuesStruct(deviceID string, sensorStruct interface{}) {
+func (inst *Instance) updateDevicePointValuesStruct(deviceID string, sensorStruct interface{}, postfix string) {
 	pnt := new(model.Point)
 	pnt.AddressUUID = &deviceID
 	sensorRefl := reflect.ValueOf(sensorStruct)
 
 	for i := 0; i < sensorRefl.NumField(); i++ {
 		value := 0.0
+		pnt.IoNumber = fmt.Sprintf("%s%s", getReflectFieldJSONName(sensorRefl.Type().Field(i)), postfix)
+		field := sensorRefl.Field(i)
 
-		// TODO: check if this is needed
-		pnt.IoNumber = getReflectFieldJSONName(sensorRefl.Type().Field(i))
-
-		switch sensorRefl.Field(i).Kind() {
-		case reflect.String:
-			// TODO: handle strings
-			continue
+		switch field.Kind() {
 		case reflect.Float32, reflect.Float64:
-			value = sensorRefl.Field(i).Float()
+			value = field.Float()
 		case reflect.Bool:
-			value = BoolToFloat(sensorRefl.Field(i).Bool())
+			value = BoolToFloat(field.Bool())
 		case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
-			value = float64(sensorRefl.Field(i).Int())
+			value = float64(field.Int())
 		case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uint:
-			value = float64(sensorRefl.Field(i).Uint())
+			value = float64(field.Uint())
 		case reflect.Struct:
-			if _, ok := sensorRefl.Field(i).Interface().(decoder.CommonValues); !ok {
-				inst.updateDevicePointValuesStruct(deviceID, sensorRefl.Field(i).Interface())
+			if _, ok := field.Interface().(decoder.CommonValues); !ok {
+				inst.updateDevicePointValuesStruct(deviceID, field.Interface(), postfix)
 			}
+			continue
+		case reflect.Array:
+			fallthrough
+		case reflect.Slice:
+			for j := 0; j < field.Len(); j++ {
+				pf := fmt.Sprintf("%s_%d", postfix, (j + 1))
+				v := field.Index(j).Interface()
+				inst.updateDevicePointValuesStruct(deviceID, v, pf)
+			}
+			continue
+		default:
 			continue
 		}
 
