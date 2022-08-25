@@ -5,7 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/edgemodel"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/edgerest"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/jsonschema"
+	"github.com/NubeIO/lib-schema/edge28schema"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -77,25 +77,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		ok, err := inst.deletePoint(body)
 		api.ResponseHandler(ok, err, ctx)
-	})
-
-	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, edgemodel.GetNetworkSchema())
-	})
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, edgemodel.GetDeviceSchema())
-	})
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, edgemodel.GetPointSchema())
-	})
-	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetNetworkSchema())
-	})
-	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetDeviceSchema())
-	})
-	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, jsonschema.GetPointSchema())
 	})
 
 	mux.GET("/edge/ping", func(ctx *gin.Context) {
@@ -170,5 +151,24 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else {
 			ctx.JSON(http.StatusOK, p)
 		}
+	})
+
+	mux.GET(schemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, edgemodel.GetNetworkSchema())
+	})
+	mux.GET(schemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, edgemodel.GetDeviceSchema())
+	})
+	mux.GET(schemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, edgemodel.GetPointSchema())
+	})
+	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, edge28schema.GetNetworkSchema())
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, edge28schema.GetDeviceSchema())
+	})
+	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, edge28schema.GetPointSchema())
 	})
 }

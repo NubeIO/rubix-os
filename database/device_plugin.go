@@ -81,7 +81,11 @@ func (d *GormDatabase) DeleteDevicePlugin(uuid string) (ok bool, err error) {
 	cli := client.NewLocalClient()
 	ok, err = cli.DeleteDevicePlugin(device, pluginName)
 	if err != nil {
-		return ok, err
+		_, err := d.DeleteDevice(uuid)
+		if err != nil {
+			return false, err
+		}
+		return true, err
 	}
 	return
 }

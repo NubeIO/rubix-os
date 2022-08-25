@@ -211,14 +211,13 @@ func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUI
 
 		default:
 			pm.pollQueueDebugMsg("GetPollRateDuration(): UNKNOWN")
-			normalRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", *device.NormalPollRate))
+			normalRateDuration, _ := time.ParseDuration(fmt.Sprintf("%fs", float.NonNil(device.SlowPollRate)))
 			if normalRateDuration <= 500*time.Millisecond {
 				duration = 30 * time.Second
 			} else {
 				duration = normalRateDuration
 			}
 		}
-
 	} else {
 		pm.pollQueueErrorMsg("GetPollRateDuration(): NetworkPollManager DBHandlerRef is undefined")
 		// use default durations

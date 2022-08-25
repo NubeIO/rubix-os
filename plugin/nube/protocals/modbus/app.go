@@ -499,6 +499,7 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
+// THE FOLLOWING FUNCTIONS ARE CALLED FROM WITHIN THE PLUGIN
 func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess, clearFaults bool) (*model.Point, error) {
 	if readSuccess {
 		point.OriginalValue = float.New(value)

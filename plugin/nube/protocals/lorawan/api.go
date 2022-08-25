@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
+	"github.com/NubeIO/lib-schema/lorawanschema"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -13,6 +14,10 @@ const (
 	schemaNetwork = "/schema/network"
 	schemaDevice  = "/schema/device"
 	schemaPoint   = "/schema/point"
+
+	jsonSchemaNetwork = "/schema/json/network"
+	jsonSchemaDevice  = "/schema/json/device"
+	jsonSchemaPoint   = "/schema/json/point"
 )
 
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
@@ -61,5 +66,15 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, csmodel.GetPointSchema())
+	})
+
+	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, lorawanschema.GetNetworkSchema())
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, lorawanschema.GetDeviceSchema())
+	})
+	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, lorawanschema.GetPointSchema())
 	})
 }

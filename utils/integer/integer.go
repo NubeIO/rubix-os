@@ -29,6 +29,14 @@ func IsNil(b *int) bool {
 	}
 }
 
+func IsUnitNil(b *uint) bool {
+	if b == nil {
+		return true
+	} else {
+		return false
+	}
+}
+
 func IsUnit32Nil(b *uint32) bool {
 	if b == nil {
 		return true

@@ -8,8 +8,12 @@ import (
 	"github.com/NubeDev/bacnet/btypes/segmentation"
 	"github.com/NubeDev/bacnet/network"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
+	address "github.com/NubeIO/lib-networking/ip"
+	"github.com/NubeIO/lib-networking/networking"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/iancoleman/strcase"
 	log "github.com/sirupsen/logrus"
@@ -101,7 +105,48 @@ func (inst *Instance) bacnetStoreDevice(dev *model.Device) error {
 	}
 
 	net, _ := inst.getBacnetStoreNetwork(dev.NetworkUUID)
+	if net == nil {
+		getNetwork, err := inst.db.GetNetwork(dev.NetworkUUID, api.Args{})
+		if getNetwork == nil {
+			return errors.New("failed to find network to init bacnet network")
+		}
+		err = inst.bacnetStoreNetwork(getNetwork)
+		if err != nil {
+			return errors.New("network can not be empty")
+		}
+
+	}
 	return inst.BacStore.UpdateDevice(dev.UUID, net, d)
+}
+
+func getNetworkIP(network string) (*networking.NetworkInterfaces, error) {
+	net, err := networking.New().GetNetworkByIface(network)
+	if err != nil {
+		return nil, err
+	}
+	return &net, nil
+}
+
+func (inst *Instance) buildBacnetForAction(networkUUID, action string) (*network.Network, error) {
+	// get network
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	if err != nil {
+		return nil, err
+	}
+	if net.Ip == "" { // TODO make this update the actual bacnet inst
+		ip, err := getNetworkIP(net.Interface)
+		if err != nil {
+		} else {
+			net.Ip = ip.IP
+		}
+	}
+	err = address.New().IsIPAddrErr(net.Ip)
+	if err != nil {
+		log.Errorf("bacnet-master-%s: ip-address is invalid ip:%s err:%s", net.Ip, err.Error(), action)
+		return nil, err
+	}
+	return net, err
+
 }
 
 // getDev get an instance of a created bacnet device that is cached in bacnet lib
@@ -117,10 +162,11 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 		ReadPriority:     false,
 	}
 	// get network
-	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	net, err := inst.buildBacnetForAction(networkUUID, "read")
 	if err != nil {
 		return 0, err
 	}
+
 	go net.NetworkRun()
 	dev, err := inst.getBacnetStoreDevice(deviceUUID)
 	if err != nil {
@@ -135,6 +181,13 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 		}
 		outValue = Unit32ToFloat64(readBool)
 
+	} else if pnt.ObjectType == "multi_state_input" || pnt.ObjectType == "multi_state_output" || pnt.ObjectType == "multi_state_value" {
+		readFloat32, err := dev.PointReadMultiState(bp)
+		if err != nil {
+			log.Errorln("bacnet-master-read-multi-state:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " error:", err)
+			return 0, err
+		}
+		outValue = Unit32ToFloat64(readFloat32)
 	} else {
 		readFloat32, err := dev.PointReadFloat32(bp)
 		if err != nil {
@@ -143,6 +196,7 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 		}
 		outValue = float32ToFloat64(readFloat32)
 	}
+	inst.bacnetDebugMsg("bacnet-master-POINT-READ:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", outValue)
 	inst.bacnetDebugMsg("bacnet-master-POINT-READ:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", outValue)
 	return outValue, nil
 }
@@ -165,7 +219,8 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 		ReadPresentValue: false,
 		ReadPriority:     false,
 	}
-	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	// get network
+	net, err := inst.buildBacnetForAction(networkUUID, "read")
 	if err != nil {
 		return err
 	}
@@ -180,6 +235,12 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 			err = dev.PointWriteBool(bp, float64ToUint32(val))
 			if err != nil {
 				inst.bacnetErrorMsg("bacnet-master-write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
+				return err
+			}
+		} else if pnt.ObjectType == "multi_state_output" || pnt.ObjectType == "multi_state_value" {
+			err = dev.PointWriteMultiState(bp, float64ToUint32(val))
+			if err != nil {
+				inst.bacnetErrorMsg("bacnet-master-write-multi-state:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
 				return err
 			}
 		} else {
@@ -216,7 +277,7 @@ func setObjectType(object string) (obj btypes.ObjectType, isWritable, isBool boo
 	case "multi_state_value":
 		return btypes.MultiStateValue, true, false, "multi_state_value"
 	default:
-		return btypes.AnalogInput, false, false, "analog_input"
+		return btypes.AnalogValue, true, false, "analog_value"
 	}
 }
 
@@ -302,7 +363,8 @@ func (inst *Instance) doWriteBool(networkUUID, deviceUUID string, pnt *network.P
 }
 
 func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevices bool) (resp []*model.Device, err error) {
-	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	// get network
+	net, err := inst.buildBacnetForAction(networkUUID, "read")
 	if err != nil {
 		return nil, err
 	}
@@ -314,6 +376,12 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 
 	for _, device := range devices {
 		newDevice := &model.Device{
+			CommonUUID: model.CommonUUID{
+				UUID: uuid.SmallUUID(),
+			},
+			CommonEnable: model.CommonEnable{
+				Enable: boolean.NewTrue(),
+			},
 			Name: fmt.Sprintf("deviceId_%d_networkNum_%d", device.DeviceID, device.NetworkNumber),
 			CommonDevice: model.CommonDevice{
 				CommonIP: model.CommonIP{
@@ -370,11 +438,18 @@ func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints
 			writeMode = model.WriteOnceThenRead
 		}
 		newPnt := &model.Point{
-			Name:       pnt.Name,
-			DeviceUUID: deviceUUID,
-			ObjectType: objectType,
-			ObjectId:   integer.New(int(pnt.ObjectID)),
-			WriteMode:  writeMode,
+			CommonUUID: model.CommonUUID{
+				UUID: uuid.SmallUUID(),
+			},
+			CommonEnable: model.CommonEnable{
+				Enable: boolean.NewTrue(),
+			},
+			ScaleEnable: boolean.NewFalse(),
+			Name:        pnt.Name,
+			DeviceUUID:  deviceUUID,
+			ObjectType:  objectType,
+			ObjectId:    integer.New(int(pnt.ObjectID)),
+			WriteMode:   writeMode,
 		}
 		if addPoints {
 			point, err := inst.addPoint(newPnt)

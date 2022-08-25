@@ -11,7 +11,13 @@ func checkForBooleanType(ObjectType, DataType string) (isTypeBool bool) {
 		isTypeBool = true
 	}
 	switch ObjectType {
-	case string(model.ObjTypeBinaryInput), string(model.ObjTypeBinaryOutput), string(model.ObjTypeBinaryValue), string(model.ObjTypeReadDiscreteInputs), string(model.ObjBinaryInput), string(model.ObjBinaryOutput), string(model.ObjBinaryValue):
+	case string(model.ObjTypeBinaryInput),
+		string(model.ObjTypeBinaryOutput),
+		string(model.ObjTypeBinaryValue),
+		string(model.ObjTypeReadDiscreteInputs),
+		string(model.ObjBinaryInput),
+		string(model.ObjBinaryOutput),
+		string(model.ObjBinaryValue):
 		isTypeBool = true
 	}
 	return
@@ -20,7 +26,18 @@ func checkForBooleanType(ObjectType, DataType string) (isTypeBool bool) {
 func checkForOutputType(ObjectType string) (isOutput bool) {
 	isOutput = false
 	switch ObjectType {
-	case string(model.ObjTypeAnalogOutput), string(model.ObjTypeAnalogValue), string(model.ObjTypeBinaryOutput), string(model.ObjTypeBinaryValue), string(model.ObjAnalogOutput), string(model.ObjAnalogValue), string(model.ObjBinaryOutput), string(model.ObjBinaryValue):
+	case string(model.ObjTypeAnalogOutput),
+		string(model.ObjTypeAnalogValue),
+		string(model.ObjTypeBinaryOutput),
+		string(model.ObjTypeBinaryValue),
+		string(model.ObjTypeEnumOutput),
+		string(model.ObjTypeEnumValue),
+		string(model.ObjAnalogOutput),
+		string(model.ObjAnalogValue),
+		string(model.ObjEnumOutput), //MSO
+		string(model.ObjEnumValue),  //MSV
+		string(model.ObjBinaryOutput),
+		string(model.ObjBinaryValue):
 		isOutput = true
 	}
 	return
@@ -36,13 +53,23 @@ func isWriteable(writeMode model.WriteMode, objectType string) bool {
 
 func isWriteableObjectType(objectType string) bool {
 	switch objectType {
-	case string(model.ObjTypeAnalogOutput), string(model.ObjTypeAnalogValue):
+	case string(model.ObjTypeAnalogOutput),
+		string(model.ObjTypeAnalogValue):
 		return true
-	case string(model.ObjTypeBinaryOutput), string(model.ObjTypeBinaryValue):
+	case string(model.ObjTypeBinaryOutput),
+		string(model.ObjTypeBinaryValue):
 		return true
-	case string(model.ObjAnalogOutput), string(model.ObjAnalogValue):
+	case string(model.ObjTypeEnumOutput),
+		string(model.ObjTypeEnumValue):
 		return true
-	case string(model.ObjBinaryOutput), string(model.ObjBinaryValue):
+	case string(model.ObjAnalogOutput),
+		string(model.ObjAnalogValue):
+		return true
+	case string(model.ObjBinaryOutput),
+		string(model.ObjBinaryValue):
+		return true
+	case string(model.ObjEnumOutput),
+		string(model.ObjEnumValue):
 		return true
 	}
 	return false

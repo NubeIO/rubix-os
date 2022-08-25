@@ -133,7 +133,6 @@ func (inst *Instance) getInputs(dev *model.Device) *rubixio.Inputs {
 	restService = rest.New(restService)
 	nubeProxy := &rest.NubeProxy{}
 	restService.NubeProxy = nubeProxy
-
 	bacnetClient := rubixio.New(restService)
 	inputs, res := bacnetClient.GetInputs()
 	if res.GetError() != nil {

@@ -41,24 +41,24 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 
 	// CREATE ALL EDGE28 POINTS
 	inst.edge28DebugMsg("addDevice(): ADDING ALL POINTS")
-	for _, e := range pointsAll() {
-		inst.edge28DebugMsg(e)
-		var pnt model.Point
-		pnt.DeviceUUID = device.UUID
-		pName := e
-		pnt.Name = pName
-		pnt.Description = pName
-		pnt.IoNumber = e
-		pnt.Fallback = float.New(0)
-		pnt.COV = float.New(0.1)
-		pnt.IoType = UITypes.DIGITAL
-
-		inst.edge28DebugMsg(fmt.Sprintf("%+v\n", pnt))
-		point, err := inst.addPoint(&pnt)
-		if err != nil || point.UUID == "" {
-			inst.edge28ErrorMsg("addDevice(): ", "failed to create a new point")
-		}
-	}
+	//for _, e := range pointsAll() {
+	//	inst.edge28DebugMsg(e)
+	//	var pnt model.Point
+	//	pnt.DeviceUUID = device.UUID
+	//	pName := e
+	//	pnt.Name = pName
+	//	pnt.Description = pName
+	//	pnt.IoNumber = e
+	//	pnt.Fallback = float.New(0)
+	//	pnt.COV = float.New(0.1)
+	//	pnt.IoType = UITypes.DIGITAL
+	//	pnt.Enable = boolean.NewTrue()
+	//	inst.edge28DebugMsg(fmt.Sprintf("%+v\n", pnt))
+	//	point, err := inst.addPoint(&pnt)
+	//	if err != nil || point.UUID == "" {
+	//		inst.edge28ErrorMsg("addDevice(): ", "failed to create a new point")
+	//	}
+	//}
 	return device, nil
 }
 

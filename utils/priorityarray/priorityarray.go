@@ -1,6 +1,7 @@
 package priorityarray
 
 import (
+	"errors"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -19,6 +20,51 @@ func ConvertToMap(priority model.Priority) map[string]*float64 {
 		}
 	}
 	return priorityMap
+}
+
+func ApplyMapToPriorityArray(pnt *model.Point, updatedPriorityMap *map[string]*float64) (*model.Point, error) {
+	if updatedPriorityMap != nil && pnt.Priority != nil {
+		for key, val := range *updatedPriorityMap {
+			newVal := float.Copy(val)
+
+			switch key {
+			case "_1":
+				pnt.Priority.P1 = newVal
+			case "_2":
+				pnt.Priority.P2 = newVal
+			case "_3":
+				pnt.Priority.P3 = newVal
+			case "_4":
+				pnt.Priority.P4 = newVal
+			case "_5":
+				pnt.Priority.P5 = newVal
+			case "_6":
+				pnt.Priority.P6 = newVal
+			case "_7":
+				pnt.Priority.P7 = newVal
+			case "_8":
+				pnt.Priority.P8 = newVal
+			case "_9":
+				pnt.Priority.P9 = newVal
+			case "_10":
+				pnt.Priority.P10 = newVal
+			case "_11":
+				pnt.Priority.P11 = newVal
+			case "_12":
+				pnt.Priority.P12 = newVal
+			case "_13":
+				pnt.Priority.P13 = newVal
+			case "_14":
+				pnt.Priority.P14 = newVal
+			case "_15":
+				pnt.Priority.P15 = newVal
+			case "_16":
+				pnt.Priority.P16 = newVal
+			}
+		}
+		return pnt, nil
+	}
+	return pnt, errors.New("Invalid priority map. not applied to point.")
 }
 
 func ParsePriority(originalPointPriority *model.Priority, newPriorityMapPtr *map[string]*float64, isTypeBool bool) (

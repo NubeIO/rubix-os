@@ -7,7 +7,7 @@ import (
 )
 
 func (inst *Instance) Enable() error {
-	inst.bacnetDebugMsg("BACNET Enable()")
+	inst.bacnetDebugMsg("Polling Enable()")
 	inst.enabled = true
 	inst.pluginName = name
 	inst.setUUID()
@@ -22,9 +22,7 @@ func (inst *Instance) Enable() error {
 
 	if inst.config.EnablePolling {
 		if !inst.pollingEnabled {
-			var arg polling
 			inst.pollingEnabled = true
-			arg.enable = true
 			inst.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0) // This will delete any existing NetworkPollManagers (if enable is called multiple times, it will rebuild the queues).
 			for _, net := range nets {                                          // Create a new Poll Manager for each network in the plugin.
 				conf := inst.GetConfig().(*Config)
@@ -39,7 +37,7 @@ func (inst *Instance) Enable() error {
 			}
 
 			// TODO: VERIFY POLLING WITHOUT GO ROUTINE WRAPPER
-			err := inst.BACnetPolling()
+			err := inst.BACnetMasterPolling()
 			if err != nil {
 				inst.bacnetErrorMsg("POLLING ERROR on routine: %v\n", err)
 			}
@@ -49,7 +47,7 @@ func (inst *Instance) Enable() error {
 }
 
 func (inst *Instance) Disable() error {
-	inst.bacnetDebugMsg("BACNET Disable()")
+	inst.bacnetDebugMsg("Polling Disable()")
 	inst.enabled = false
 	if inst.pollingEnabled {
 		inst.pollingEnabled = false

@@ -9,13 +9,13 @@ import (
 
 func (inst *Instance) bacnetDebugMsg(args ...interface{}) {
 	if nstring.InEqualIgnoreCase(inst.config.LogLevel, "DEBUG") {
-		prefix := "BACnet Master: "
+		prefix := "BACnet Server: "
 		log.Info(prefix, args)
 	}
 }
 
 func (inst *Instance) bacnetErrorMsg(args ...interface{}) {
-	prefix := "BACnet Master: "
+	prefix := "BACnet Server: "
 	log.Error(prefix, args)
 }
 
