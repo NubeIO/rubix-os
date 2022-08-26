@@ -10,12 +10,9 @@ func (inst *Instance) Enable() error {
 	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
 	if q != nil {
 		inst.networkUUID = q.UUID
-	} else {
-		inst.networkUUID = "NA"
 	}
+	inst.interruptChan = make(chan struct{}, 1)
 	if err == nil {
-		inst.networkUUID = q.UUID
-		inst.interruptChan = make(chan struct{}, 1)
 		go inst.run()
 	}
 	return nil

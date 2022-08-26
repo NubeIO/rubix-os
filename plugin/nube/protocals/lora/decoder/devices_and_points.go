@@ -1,6 +1,8 @@
 package decoder
 
 import (
+	"strings"
+
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -38,7 +40,6 @@ var LoRaDeviceDescriptions = [...]LoRaDeviceDescription{
 	{
 		DeviceName:      "MicroEdge",
 		Model:           "MicroEdge",
-		SensorCode:      "AA",
 		CheckLength:     CheckPayloadLengthME,
 		Decode:          DecodeME,
 		GetPointsStruct: GetPointsStructME,
@@ -46,7 +47,6 @@ var LoRaDeviceDescriptions = [...]LoRaDeviceDescription{
 	{
 		DeviceName:      "Droplet",
 		Model:           "THLM",
-		SensorCode:      "AB",
 		CheckLength:     CheckPayloadLengthDroplet,
 		Decode:          DecodeDropletTHLM,
 		GetPointsStruct: GetPointsStructTHLM,
@@ -54,7 +54,6 @@ var LoRaDeviceDescriptions = [...]LoRaDeviceDescription{
 	{
 		DeviceName:      "Droplet",
 		Model:           "TH",
-		SensorCode:      "B0",
 		CheckLength:     CheckPayloadLengthDroplet,
 		Decode:          DecodeDropletTH,
 		GetPointsStruct: GetPointsStructTH,
@@ -62,7 +61,6 @@ var LoRaDeviceDescriptions = [...]LoRaDeviceDescription{
 	{
 		DeviceName:      "Droplet",
 		Model:           "THL",
-		SensorCode:      "B1",
 		CheckLength:     CheckPayloadLengthDroplet,
 		Decode:          DecodeDropletTHL,
 		GetPointsStruct: GetPointsStructTHL,
@@ -70,7 +68,6 @@ var LoRaDeviceDescriptions = [...]LoRaDeviceDescription{
 	{
 		DeviceName:      "Droplet",
 		Model:           "THLM",
-		SensorCode:      "B2",
 		CheckLength:     CheckPayloadLengthDroplet,
 		Decode:          DecodeDropletTHLM,
 		GetPointsStruct: GetPointsStructTHLM,
@@ -78,20 +75,15 @@ var LoRaDeviceDescriptions = [...]LoRaDeviceDescription{
 	{
 		DeviceName:      "ZipHydroTap",
 		Model:           "ZipHydroTap",
-		SensorCode:      "D1",
 		CheckLength:     CheckPayloadLengthZHT,
 		Decode:          DecodeZHT,
 		GetPointsStruct: GetPointsStructZHT,
 	},
 }
 
-func GetLoRaDeviceDescriptionFromID(devID string) *LoRaDeviceDescription {
-	return GetLoRaDeviceDescription(devID[2:4])
-}
-
-func GetLoRaDeviceDescription(sensorCode string) *LoRaDeviceDescription {
+func GetDeviceDescription(device *model.Device) *LoRaDeviceDescription {
 	for _, dev := range LoRaDeviceDescriptions {
-		if sensorCode == dev.SensorCode {
+		if strings.EqualFold(device.Model, dev.Model) {
 			return &dev
 		}
 	}
@@ -99,5 +91,5 @@ func GetLoRaDeviceDescription(sensorCode string) *LoRaDeviceDescription {
 }
 
 func GetDevicePointsStruct(device *model.Device) interface{} {
-	return getDeviceDescriptionFromPayload(device.AddressUUID).GetPointsStruct()
+	return GetDeviceDescription(device).GetPointsStruct()
 }

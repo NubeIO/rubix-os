@@ -13,8 +13,8 @@ import (
 
 const path = "lora" // must be unique across all plugins
 const name = "lora" // must be unique across all plugins
-const description = "lora raw"
-const author = "ap"
+const description = "LoRaRAW"
+const author = "ap, dm"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "serial"
 const DefaultExpiration = cache.DefaultExpiration
@@ -69,7 +69,7 @@ func (inst *Instance) run() {
 	for {
 		sc, err := inst.SerialOpen()
 		if err != nil {
-			log.Error("lora-main: error opening serial ", err)
+			log.Error("loraraw: error opening serial ", err)
 			time.Sleep(5 * time.Second)
 			continue
 		}
@@ -81,11 +81,11 @@ func (inst *Instance) run() {
 		for {
 			select {
 			case <-inst.interruptChan:
-				log.Info("lora-main: interrupt received on run")
+				log.Info("loraraw: interrupt received on run")
 				return
 			case err := <-serialCloseChan:
-				log.Error("lora-main: serial connection error: ", err)
-				log.Info("lora-main: serial connection attempting to reconnect...")
+				log.Error("loraraw: serial connection error: ", err)
+				log.Info("loraraw: serial connection attempting to reconnect...")
 				break readLoop
 			case data := <-serialPayloadChan:
 				inst.handleSerialPayload(data)
