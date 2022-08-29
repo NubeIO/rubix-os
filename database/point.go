@@ -220,9 +220,7 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlug
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
-func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool,
-	afterRealDeviceUpdate bool, currentWriterUUID *string) (returnPoint *model.Point, isPresentValueChange,
-	isWriteValueChange, isPriorityChanged bool, err error) {
+func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool, afterRealDeviceUpdate bool, currentWriterUUID *string) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
@@ -255,23 +253,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	} else {
 		presentValue = val
 	}
-
-	writeValueTransformFault := false
-	if writeValue != nil {
-		transform = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
-		if err != nil {
-			pointModel.CommonFault.InFault = true
-			pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
-			pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
-			pointModel.CommonFault.Message = fmt.Sprint("point.db updatePointValue() error on write value transformation. error:", err)
-			pointModel.CommonFault.LastFail = time.Now().UTC()
-			writeValueTransformFault = true
-		} else {
-			writeValue = transform
-		}
-	} else {
-		writeValueTransformFault = true
-	}
+	writeValue = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
 
 	// example for wires and modbus:
 	// if a new value is written from wires then set this to false so the modbus knows on the next poll to write a new
@@ -285,8 +267,8 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	}
 
 	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
-		val := nmath.RoundTo(*presentValue, *pointModel.Decimal)
-		presentValue = &val
+		value := nmath.RoundTo(*presentValue, *pointModel.Decimal)
+		presentValue = &value
 	}
 
 	isPresentValueChange = !float.ComparePtrValues(pointModel.PresentValue, presentValue) // Use for createCOVHistory
@@ -296,16 +278,14 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	// Examples are: modbus, edge28 plugins
 	// So for such cases, to trigger that value we do this comparison
 	isWriteValueChange = !float.ComparePtrValues(pointModel.WriteValue, writeValue)
-	isChange := isPresentValueChange || isWriteValueChange || isPriorityChanged || presentValueTransformFault || writeValueTransformFault
+	isChange := isPresentValueChange || isWriteValueChange || isPriorityChanged
 
 	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
 	// but PresentValue should not change
 	if !presentValueTransformFault {
 		pointModel.PresentValue = presentValue
 	}
-	if !writeValueTransformFault {
-		pointModel.WriteValue = writeValue
-	}
+	pointModel.WriteValue = writeValue
 
 	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 	if isChange {
