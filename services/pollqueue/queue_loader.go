@@ -24,7 +24,7 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	arg.WithPoints = true
 	net, err := pm.DBHandlerRef.GetNetwork(pm.FFNetworkUUID, arg)
 	if err != nil || len(net.Devices) == 0 {
-		return errors.New(fmt.Sprintf("NetworkPollManager.RebuildPollingQueue: couldn't find any devices for the network %s/n", pm.FFNetworkUUID))
+		return errors.New(fmt.Sprintf("NetworkPollManager.RebuildPollingQueue: couldn't find any devices for the network %s", pm.FFNetworkUUID))
 	}
 	devs := net.Devices
 	for _, dev := range devs { // DEVICES
@@ -37,11 +37,11 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 					pp.LockupAlertTimer = pm.MakeLockupTimerFunc(pp.PollPriority) // starts a countdown for queue lockup alerts.
 					pm.PollQueue.AddPollingPoint(pp)
 				} else {
-					pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.RebuildPollingQueue: Point (%s) is not enabled./n", pnt.UUID))
+					pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.RebuildPollingQueue: Point (%s) is not enabled", pnt.UUID))
 				}
 			}
 		} else {
-			pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.RebuildPollingQueue: Device (%s) is not enabled./n", dev.UUID))
+			pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.RebuildPollingQueue: Device (%s) is not enabled", dev.UUID))
 		}
 	}
 	heap.Init(pm.PollQueue.PriorityQueue)
@@ -58,7 +58,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 
 	_, success := pm.PollQueue.OutstandingPollingPoints.RemovePollingPointByPointUUID(pp.FFPointUUID)
 	if !success {
-		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find polling point in OutstandingPollingPoints.  %s /n", pp.FFPointUUID)
+		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find polling point in OutstandingPollingPoints, %s", pp.FFPointUUID)
 	}
 
 	if !pointUpdate {
@@ -67,7 +67,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 
 	point, err := pm.DBHandlerRef.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
 	if point == nil || err != nil {
-		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s /n", pp.FFPointUUID)
+		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s", pp.FFPointUUID)
 		return
 	}
 	// TODO: potentially only required on writeSuccess (but possibility of lockup on a bad point)
@@ -534,7 +534,7 @@ func (pm *NetworkPollManager) SetPointPollRequiredFlagsBasedOnWriteMode(point *m
 	pm.pollQueueDebugMsg("%+v\n", point.Priority)
 
 	if point == nil {
-		pm.pollQueueDebugMsg("NetworkPollManager.SetPointPollRequiredFlagsBasedOnWriteMode(): couldn't find point %s /n", point.UUID)
+		pm.pollQueueDebugMsg("NetworkPollManager.SetPointPollRequiredFlagsBasedOnWriteMode(): couldn't find point")
 		return
 	}
 

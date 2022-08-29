@@ -181,7 +181,8 @@ func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUI
 	if pm.DBHandlerRef != nil {
 		device, err := pm.DBHandlerRef.GetDevice(deviceUUID, arg)
 		if err != nil {
-			pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.GetPollRateDuration(): couldn't find device %s/n", deviceUUID))
+			pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.GetPollRateDuration(): couldn't find device %s", deviceUUID))
+			return 30 * time.Second
 		}
 		// Get durations from device
 		switch rate {
@@ -227,7 +228,7 @@ func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUI
 	// pm.pollQueueDebugMsg("GetPollRateDuration() device poll times: ", device.FastPollRate, device.NormalPollRate, device.SlowPollRate)
 	if duration.Milliseconds() <= 100 {
 		duration = 30 * time.Second
-		pm.pollQueueErrorMsg("NetworkPollManager.GetPollRateDuration: invalid PollRate duration. Set to 30 seconds/n")
+		pm.pollQueueErrorMsg("NetworkPollManager.GetPollRateDuration: invalid PollRate duration. Set to 30 seconds")
 
 	}
 	return duration
@@ -244,33 +245,34 @@ func (pm *NetworkPollManager) PollQueueErrorChecking() {
 	pm.pollQueueDebugMsg("NetworkPollManager.PollQueueErrorChecking")
 	net, err := pm.DBHandlerRef.GetNetwork(pm.FFNetworkUUID, api.Args{WithDevices: true, WithPoints: true})
 	if net == nil || err != nil {
-		pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Network Not Found/n")
+		pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Network Not Found")
+		return
 	}
 	if boolean.IsFalse(net.Enable) { // If network isn't enabled, there should be no points in the polling queues
 		if pm.PollQueue.PriorityQueue.Len() > 0 {
 			pm.PollQueue.PriorityQueue.EmptyQueue()
-			pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Found PollingPoints in PriorityQueue of a disabled network/n")
+			pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Found PollingPoints in PriorityQueue of a disabled network")
 		}
 		if pm.PollQueue.StandbyPollingPoints.Len() > 0 {
 			pm.PollQueue.StandbyPollingPoints.EmptyQueue()
-			pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Found PollingPoints in StandbyPollingPoints of a disabled network./n")
+			pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Found PollingPoints in StandbyPollingPoints of a disabled network")
 		}
 		if pm.PollQueue.OutstandingPollingPoints.Len() > 0 {
 			pm.PollQueue.OutstandingPollingPoints.EmptyQueue()
-			pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Found PollingPoints in OutstandingPollingPoints of a disabled network./n")
+			pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Found PollingPoints in OutstandingPollingPoints of a disabled network")
 		}
 	}
 	for _, dev := range net.Devices {
 		deviceExistsInQueue := pm.PollQueue.CheckIfActiveDevicesListIncludes(dev.UUID)
 		if boolean.IsFalse(net.Enable) || boolean.IsFalse(dev.Enable) {
 			if deviceExistsInQueue {
-				pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Device UUID exist in Poll Queues for a disabled device./n")
+				pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Device UUID exist in Poll Queues for a disabled device")
 				pm.PollQueue.RemovePollingPointByDeviceUUID(dev.UUID)
 				continue
 			}
 		}
 		if boolean.IsTrue(net.Enable) && boolean.IsTrue(dev.Enable) && !deviceExistsInQueue {
-			pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Device UUID doesn't exist in active devices list./n")
+			pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Device UUID doesn't exist in active devices list")
 		}
 		if dev.Points != nil {
 			for _, pnt := range dev.Points {
@@ -278,7 +280,7 @@ func (pm *NetworkPollManager) PollQueueErrorChecking() {
 					if boolean.IsFalse(net.Enable) || boolean.IsFalse(dev.Enable) || boolean.IsFalse(pnt.Enable) {
 						pp, _ := pm.PollQueue.GetPollingPointByPointUUID(pnt.UUID)
 						if pp != nil {
-							pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Found disabled point in poll queue./n")
+							pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Found disabled point in poll queue")
 							pm.PollQueue.RemovePollingPointByPointUUID(pnt.UUID)
 						}
 						continue
@@ -286,7 +288,7 @@ func (pm *NetworkPollManager) PollQueueErrorChecking() {
 					if boolean.IsTrue(net.Enable) && boolean.IsTrue(dev.Enable) && boolean.IsTrue(pnt.Enable) {
 						pp, err := pm.PollQueue.GetPollingPointByPointUUID(pnt.UUID)
 						if pp == nil || err != nil {
-							pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Polling point doesn't exist for point ", pnt.Name, "/n")
+							pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Polling point doesn't exist for point ", pnt.Name)
 							pp = NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, pm.FFPluginUUID)
 							pm.PollingPointCompleteNotification(pp, false, false, 0, true, true, NORMAL_RETRY) // This will perform the queue re-add actions based on Point WriteMode.
 						}
