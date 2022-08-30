@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.7.2](https://github.com/NubeIO/flow-framework/tree/v0.7.2) (2022-08-31)
+- fixed nil pointers and looping in pollqueue
+- updated lora raw defaults and payload structures
+
 ## [v0.7.1](https://github.com/NubeIO/flow-framework/tree/v0.7.1) (2022-08-24)
 
 - added bacnet multistate
