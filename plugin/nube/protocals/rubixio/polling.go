@@ -233,8 +233,8 @@ func (inst *Instance) polling(p polling) error {
 						continue
 					}
 					inst.writeOutput(device)
-					inputs := inst.getInputs(dev)
-					inst.syncInputs(dev, inputs)
+					inputs := inst.getInputs(device)
+					inst.syncInputs(device, inputs)
 				}
 			}
 		}
