@@ -210,7 +210,7 @@ func (inst *Instance) polling(p polling) error {
 	}
 	var counter float64
 	f := func() (bool, error) {
-		nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true, WithPoints: true})
+		nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true})
 		if err != nil {
 			return false, err
 		}
@@ -228,13 +228,13 @@ func (inst *Instance) polling(p polling) error {
 				for _, dev := range net.Devices { // DEVICES
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
-					inputs := inst.getInputs(dev)
-					inst.syncInputs(dev, inputs)
 					device, err := inst.db.GetDevice(dev.UUID, api.Args{WithPoints: true}) // This is here so that it gets the most current device points (otherwise they may have changed)
 					if device == nil || err != nil {
 						continue
 					}
 					inst.writeOutput(device)
+					inputs := inst.getInputs(dev)
+					inst.syncInputs(dev, inputs)
 				}
 			}
 		}
