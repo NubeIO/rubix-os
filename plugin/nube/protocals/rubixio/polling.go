@@ -168,6 +168,31 @@ func (inst *Instance) writeOutput(dev *model.Device) {
 	}
 }
 
+func (inst *Instance) writeOutputSingle(dev *model.Device, ioNum string, val int) {
+	if dev == nil {
+		log.Errorln("rubixio.polling.writeOutput() device in nil")
+		return
+	}
+	restService := &rest.Service{}
+	var ip = "0.0.0.0"
+	if dev.CommonIP.Host != "" {
+		ip = dev.CommonIP.Host
+	}
+	restService.Url = ip
+	restService.Port = 5001
+	restOptions := &rest.Options{}
+	restService.Options = restOptions
+	restService = rest.New(restService)
+	nubeProxy := &rest.NubeProxy{}
+	restService.NubeProxy = nubeProxy
+	client := rubixio.New(restService)
+	outs, resp := client.UpdatePointValue(ioNum, val)
+	if resp.GetError() != nil || outs == nil {
+		log.Errorln("rubixio.polling.writeOutput() failed to do rest-api call err:", resp.GetError())
+		return
+	}
+}
+
 func (inst *Instance) polling(p polling) error {
 	var defaultInterval = time.Duration(inst.config.PollingTimeInMs) * time.Millisecond // default polling is 2.5 sec
 

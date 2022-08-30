@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -102,11 +103,11 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		return point, err
 	}
 	if writeValueChange {
-		device, err := inst.db.GetDevice(point.DeviceUUID, api.Args{WithPoints: true})
+		device, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 		if device == nil || err != nil {
 			return point, err
 		}
-		inst.writeOutput(device)
+		inst.writeOutputSingle(device, point.IoNumber, int(float.NonNil(point.WriteValue)))
 	}
 	return point, err
 }
