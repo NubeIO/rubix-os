@@ -97,7 +97,17 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 }
 
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
+	point, _, writeValueChange, _, err := inst.db.PointWrite(pntUUID, body, false)
+	if point == nil || err != nil {
+		return point, err
+	}
+	if writeValueChange {
+		device, err := inst.db.GetDevice(point.DeviceUUID, api.Args{WithPoints: true})
+		if device == nil || err != nil {
+			return point, err
+		}
+		inst.writeOutput(device)
+	}
 	return point, err
 }
 

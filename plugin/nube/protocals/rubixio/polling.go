@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/poller"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/nubeio-rubix-lib-rest-go/pkg/nube/rubixio"
@@ -142,6 +143,10 @@ func (inst *Instance) getInputs(dev *model.Device) *rubixio.Inputs {
 }
 
 func (inst *Instance) writeOutput(dev *model.Device) {
+	if dev == nil {
+		log.Errorln("rubixio.polling.writeOutput() device in nil")
+		return
+	}
 	restService := &rest.Service{}
 	var ip = "0.0.0.0"
 	if dev.CommonIP.Host != "" {
@@ -194,7 +199,7 @@ func (inst *Instance) polling(p polling) error {
 		for _, net := range nets { // NETWORKS
 			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
 				counter++
-				if !nils.BoolIsNil(net.Enable) {
+				if boolean.IsFalse(net.Enable) {
 					continue
 				}
 				for _, dev := range net.Devices { // DEVICES

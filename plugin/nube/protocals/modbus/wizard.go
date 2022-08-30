@@ -256,8 +256,9 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				net.Name = "CliniMix-TMV"
 				net.TransportType = model.TransType.Serial
 				net.PluginPath = "modbus"
-				net.SerialPort = nstring.New("/dev/ttyXBEE-2")
+				net.SerialPort = nstring.New("/data/socat/serialBridge1")
 				net.MaxPollRate = float.New(5)
+				net.SerialTimeout = integer.New(3)
 				net.PluginConfId = inst.pluginUUID
 				net, err = inst.addNetwork(net)
 				if err != nil {
@@ -278,7 +279,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				dev.CommonIP.Port = p
 				dev.AddressId = int(body.AddArg)
 				dev.ZeroMode = boolean.NewTrue()
-				dev.PollDelayPointsMS = 1000
+				dev.PollDelayPointsMS = 100
 				dev.NetworkUUID = net.UUID
 				dev.FastPollRate = float.New(5.0)
 				dev.NormalPollRate = float.New(30.0)
