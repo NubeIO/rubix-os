@@ -210,7 +210,7 @@ func (inst *Instance) polling(p polling) error {
 	}
 	var counter float64
 	f := func() (bool, error) {
-		nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true})
+		nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true, WithPoints: true})
 		if err != nil {
 			return false, err
 		}
