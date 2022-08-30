@@ -209,17 +209,15 @@ func (inst *Instance) polling(p polling) error {
 		poll = poller.New()
 	}
 	var counter float64
-	var arg api.Args
-	arg.WithDevices = true
-	arg.WithPoints = true
 	f := func() (bool, error) {
-		nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, arg)
+		nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true})
 		if err != nil {
 			return false, err
 		}
 		if len(nets) == 0 {
-			time.Sleep(15000 * time.Millisecond)
 			log.Info("rubixio-polling: NO NETWORKS FOUND")
+			time.Sleep(15000 * time.Millisecond)
+			return false, nil
 		}
 		for _, net := range nets { // NETWORKS
 			if net.UUID != "" && net.PluginConfId == inst.pluginUUID {
@@ -232,7 +230,11 @@ func (inst *Instance) polling(p polling) error {
 					time.Sleep(dNet)
 					inputs := inst.getInputs(dev)
 					inst.syncInputs(dev, inputs)
-					inst.writeOutput(dev)
+					device, err := inst.db.GetDevice(dev.UUID, api.Args{WithPoints: true}) // This is here so that it gets the most current device points (otherwise they may have changed)
+					if device == nil || err != nil {
+						continue
+					}
+					inst.writeOutput(device)
 				}
 			}
 		}
