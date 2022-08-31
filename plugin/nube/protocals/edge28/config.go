@@ -6,7 +6,7 @@ func (inst *Instance) DefaultConfig() interface{} {
 	return &config.Config{
 		EnablePolling: true,
 		LogLevel:      "NONE", // DEBUG or ERROR
-		PollRate:      5,      // in seconds
+		PollRate:      3,      // in seconds
 	}
 }
 
