@@ -52,4 +52,5 @@ func RegisterMQTTBus(enableDebug bool) {
 	c.Subscribe("+/+/+/+/+/+/rubix/bacnet_server/points/+/#", mqttclient.AtMostOnce, handle) // bacnet-server
 	c.Subscribe("+/+/+/+/+/+/rubix/bacnet_master/points/+/#", mqttclient.AtMostOnce, handle) // bacnet-bserver
 	c.Subscribe("application/+/device/+/event/up", mqttclient.AtMostOnce, handle)            // lorawan
+	c.Subscribe("bacnet/program/#", mqttclient.AtMostOnce, handle)                           // bacnet-server
 }

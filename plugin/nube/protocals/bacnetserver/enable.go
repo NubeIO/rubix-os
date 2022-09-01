@@ -9,7 +9,7 @@ func (inst *Instance) Enable() error {
 	inst.enabled = true
 	inst.pluginName = name
 	inst.setUUID()
-
+	inst.BusServ()
 	net, _ := inst.db.GetNetworkByPlugin(inst.pluginUUID, api.Args{})
 	if net != nil {
 		inst.networkUUID = net.UUID
