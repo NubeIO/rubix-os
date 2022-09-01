@@ -43,6 +43,9 @@ func (inst *Instance) BACnetServerPolling() error {
 		counter++
 		// fmt.Println("\n \n")
 		inst.bacnetDebugMsg("LOOP COUNT: ", counter)
+		fmt.Println("-----------------------------------------")
+		fmt.Println("BACNET JUST STARTED", bacnetStarted)
+		fmt.Println("-----------------------------------------")
 		var err error
 		var arg api.Args
 		arg.WithDevices = true
