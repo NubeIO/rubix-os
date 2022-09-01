@@ -43,14 +43,13 @@ func (inst *Instance) BACnetServerPolling() error {
 		counter++
 		// fmt.Println("\n \n")
 		inst.bacnetDebugMsg("LOOP COUNT: ", counter)
-		fmt.Println("-----------------------------------------")
-		fmt.Println("BACNET JUST STARTED", bacnetStarted)
-		fmt.Println("-----------------------------------------")
+		if bacnetStarted {
+			inst.bacnetErrorMsg("-----------------------------------------")
+			inst.bacnetErrorMsg("BACNET JUST STARTED")
+			inst.bacnetErrorMsg("-----------------------------------------")
+		}
 		var err error
-		var arg api.Args
-		arg.WithDevices = true
-		arg.WithPoints = true
-		nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, arg)
+		nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true})
 		if len(nets) == 0 {
 			time.Sleep(5 * time.Second)
 			inst.bacnetDebugMsg("NO NETWORKS FOUND")
@@ -96,7 +95,13 @@ func (inst *Instance) BACnetServerPolling() error {
 						}
 						for _, pnt := range dev.Points { // POINTS
 							time.Sleep(pointDelay) // DELAY between points
-							pnt, err = inst.SyncFFPointWithBACnetServerPoint(pnt, dev.UUID, net.UUID, false)
+							if counter == 1 || bacnetStarted {
+								inst.bacnetDebugMsg("FIRST START, WRITE ALL POINTS TO BACNET SERVER")
+								pnt, err = inst.SyncFFPointWithBACnetServerPoint(pnt, dev.UUID, net.UUID, true)
+							} else {
+								pnt, err = inst.SyncFFPointWithBACnetServerPoint(pnt, dev.UUID, net.UUID, false)
+							}
+							bacnetStarted = false
 							if err != nil {
 								inst.bacnetErrorMsg(err)
 								continue // next point
@@ -220,6 +225,11 @@ func (inst *Instance) SyncFFPointWithBACnetServerPoint(pnt *model.Point, devUUID
 			} else {
 				inst.bacnetErrorMsg("BACnetServerPolling(): BACnet Server Point is missing priority: ", key)
 			}
+		}
+		if boolean.IsFalse(pnt.WritePollRequired) && !forceWrite {
+			inst.bacnetDebugMsg("BACnetServerPolling() WRITE NOT REQUIRED")
+		} else {
+			inst.bacnetDebugMsg("BACnetServerPolling() WRITE IS REQUIRED")
 		}
 		if !priorityArraysMatch {
 			inst.bacnetDebugMsg("BACnetServerPolling() PRIORITY ARRAYS ARE DIFFERENT")
