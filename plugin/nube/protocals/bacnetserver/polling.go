@@ -98,6 +98,9 @@ func (inst *Instance) BACnetServerPolling() error {
 							if counter == 1 || bacnetStarted {
 								inst.bacnetDebugMsg("FIRST START, WRITE ALL POINTS TO BACNET SERVER")
 								pnt, err = inst.SyncFFPointWithBACnetServerPoint(pnt, dev.UUID, net.UUID, true)
+								if bacnetStarted {
+									bacnetStarted = false
+								}
 							} else {
 								pnt, err = inst.SyncFFPointWithBACnetServerPoint(pnt, dev.UUID, net.UUID, false)
 							}
@@ -117,7 +120,6 @@ func (inst *Instance) BACnetServerPolling() error {
 				}
 			}
 		}
-		bacnetStarted = false
 		return false, nil
 	}
 
