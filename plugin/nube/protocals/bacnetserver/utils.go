@@ -39,9 +39,13 @@ func isWriteableObjectType(objectType string) bool {
 		return true
 	case string(model.ObjTypeBinaryOutput), string(model.ObjTypeBinaryValue):
 		return true
+	case string(model.ObjTypeEnumOutput), string(model.ObjTypeEnumValue):
+		return true
 	case string(model.ObjAnalogOutput), string(model.ObjAnalogValue):
 		return true
 	case string(model.ObjBinaryOutput), string(model.ObjBinaryValue):
+		return true
+	case string(model.ObjEnumOutput), string(model.ObjEnumValue):
 		return true
 	}
 	return false
