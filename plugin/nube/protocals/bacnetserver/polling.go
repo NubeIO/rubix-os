@@ -28,7 +28,7 @@ type polling struct {
 func delays() (deviceDelay, pointDelay time.Duration) {
 	deviceDelay = 100 * time.Millisecond
 	// pointDelay = 100 * time.Millisecond
-	pointDelay = 5000 * time.Millisecond
+	pointDelay = 100 * time.Millisecond
 	return
 }
 
@@ -101,13 +101,13 @@ func (inst *Instance) BACnetServerPolling() error {
 							} else {
 								pnt, err = inst.SyncFFPointWithBACnetServerPoint(pnt, dev.UUID, net.UUID, false)
 							}
-							bacnetStarted = false
 							if err != nil {
 								inst.bacnetErrorMsg(err)
 								continue // next point
 							}
 						}
-						rsyncWrite = counter % 50
+
+						rsyncWrite = counter % 5
 
 						timeEnd := time.Now()
 						diff := timeEnd.Sub(timeStart)
@@ -117,6 +117,7 @@ func (inst *Instance) BACnetServerPolling() error {
 				}
 			}
 		}
+		bacnetStarted = false
 		return false, nil
 	}
 
