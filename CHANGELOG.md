@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.7.3](https://github.com/NubeIO/flow-framework/tree/v0.7.3) (2022-09-05)
+- bacnetserver repost point values on server restart
+- bacnetmaster add multi-state object type support
+
 ## [v0.7.2](https://github.com/NubeIO/flow-framework/tree/v0.7.2) (2022-08-31)
 - fixed nil pointers and looping in pollqueue
 - updated lora raw defaults and payload structures
