@@ -186,7 +186,7 @@ func (c *Client) Connect() (err error) {
 }
 
 func (c *Client) IsConnected() bool {
-	return c.connected
+	return c.client.IsConnected()
 }
 
 func (c *Client) IsTerminated() bool {
