@@ -40,23 +40,19 @@ func (inst *Instance) handleMqttUplink(body mqtt.Message) {
 			return
 		}
 	}
-	inst.parseUplinkData(payload, currDev)
+	inst.parseUplinkData(&payload.Object, currDev)
 }
 
 // checkMqttTopicUplink checks the topic is a CS uplink event
 func checkMqttTopicUplink(topic string) bool {
 	s := strings.Split(topic, "/")
-	if len(s) != 6 ||
-		!(s[0] == "application" && s[2] == "device" && s[4] == "event" && s[5] == "up") {
-		return false
-	}
-	return true
+	return len(s) == 6 && s[0] == "application" && s[2] == "device" && s[4] == "event" && s[5] == "up"
 }
 
-func (inst *Instance) parseUplinkData(data *csmodel.BaseUplink, device *model.Device) {
-	log.Debugf("lorawan: Parsing uplink for device UUID=%s, EUI=%s, name=%s", device.UUID, data.DevEUI, device.Name)
+func (inst *Instance) parseUplinkData(data *map[string]interface{}, device *model.Device) {
+	log.Debugf("lorawan: Parsing uplink for device UUID=%s, EUI=%s, name=%s", device.UUID, *device.AddressUUID, device.Name)
 	var err error = nil
-	for k, v := range data.Object {
+	for k, v := range *data {
 		var value float64
 		switch t := v.(type) {
 		case int:
@@ -71,13 +67,17 @@ func (inst *Instance) parseUplinkData(data *csmodel.BaseUplink, device *model.De
 			} else {
 				value = 0
 			}
+		case map[string]interface{}:
+			dataInternal := v.(map[string]interface{})
+			inst.parseUplinkData(&dataInternal, device)
+
 		default:
 			log.Warnf("lorawan: parseUplinkData unsupported value type: %T = %t", t, v)
 			continue
 		}
-		point := inst.getPointByAddressUUID(k, data.DevEUI, device.Points)
+		point := inst.getPointByAddressUUID(k, *device.AddressUUID, device.Points)
 		if point == nil {
-			point, err = inst.createNewPoint(k, data.DevEUI, device.UUID)
+			point, err = inst.createNewPoint(k, *device.AddressUUID, device.UUID)
 			if err != nil {
 				continue
 			}
