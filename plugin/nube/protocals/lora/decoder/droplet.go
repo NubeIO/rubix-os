@@ -94,6 +94,9 @@ func dropletHumidity(data string) int {
 func dropletVoltage(data string) float64 {
 	v, _ := strconv.ParseInt(data[22:24], 16, 0)
 	v_ := float64(v) / 50
+	if v_ < 1 { // added in by aidan not tested asked by Craig (its needed when the droplet uses lithium batteries)
+		v_ = v_ - 0.06 + 5
+	}
 	return v_
 }
 
