@@ -1,4 +1,9 @@
 # CHANGELOG
+## [v0.7.4](https://github.com/NubeIO/flow-framework/tree/v0.7.4) (2022-09-12)
+- fix voltage error #652
+- fix bug on is mqtt connected #651
+- lorawan recurse nested maps in uplink #649
+
 ## [v0.7.3](https://github.com/NubeIO/flow-framework/tree/v0.7.3) (2022-09-05)
 - bacnetserver repost point values on server restart
 - bacnetmaster add multi-state object type support
