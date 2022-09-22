@@ -15,6 +15,8 @@ import (
 	"github.com/brocaar/lora-app-server/api"
 )
 
+// EXAMPLE OF CHIRPSTACK GO CLIENT: https://forum.chirpstack.io/t/creating-a-terraform-provider-for-loraserver/4081
+
 // JWTCredentials provides JWT credentials for gRPC
 type JWTCredentials struct {
 	token string

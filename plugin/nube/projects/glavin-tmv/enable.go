@@ -5,7 +5,7 @@ import (
 )
 
 func (inst *Instance) Enable() error {
-	inst.tmvDebugMsg("Polling Enable()")
+	inst.tmvDebugMsg("TMV Plugin Enable()")
 	inst.enabled = true
 	inst.pluginName = name
 	inst.setUUID()
@@ -22,19 +22,16 @@ func (inst *Instance) Enable() error {
 			inst.pollingEnabled = true
 			arg.enable = true
 			// TODO: VERIFY POLLING WITHOUT GO ROUTINE WRAPPER
-			err := inst.ModbusPolling()
-			if err != nil {
-				inst.tmvErrorMsg("POLLING ERROR on routine: %v\n", err)
-			}
+			inst.updatePointNames()
 		}
 	}
 	return nil
 }
 
 func (inst *Instance) Disable() error {
-	inst.tmvDebugMsg("Polling Disable()")
+	inst.tmvDebugMsg("TMV Plugin Disable()")
 	inst.enabled = false
-	if inst.pollingEnabled {
+	if inst.pollingEnabled && inst.pollingCancel != nil {
 		inst.pollingEnabled = false
 		inst.pollingCancel()
 		inst.pollingCancel = nil

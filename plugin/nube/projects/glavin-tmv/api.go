@@ -34,7 +34,6 @@ type Body struct {
 	Network *model.Network
 	Device  *model.Device
 	Point   *model.Point
-	Client  `json:"client"`
 	// Operation     `json:"request_body"`
 	Scan          `json:"scan"`
 	ReturnArray   bool  `json:"return_array"`
@@ -47,8 +46,7 @@ func bodyClient(ctx *gin.Context) (dto Body, err error) {
 	return dto, err
 }
 
-// serialWizard
-type wizard struct {
+type tmvDeviceJSON struct {
 	IP            string `json:"ip"`
 	Port          int    `json:"port"`
 	SerialPort    string `json:"serial_port"`
