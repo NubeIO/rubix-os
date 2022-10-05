@@ -23,13 +23,14 @@ const transportType = "N/A"
 
 // Instance is plugin instance
 type Instance struct {
-	config     *Config
-	enabled    bool
-	basePath   string
-	db         dbhandler.Handler
-	store      cachestore.Handler
-	bus        eventbus.BusService
-	pluginUUID string
+	config        *Config
+	enabled       bool
+	basePath      string
+	db            dbhandler.Handler
+	store         cachestore.Handler
+	bus           eventbus.BusService
+	pluginUUID    string
+	influxDetails []*InfluxSetting
 }
 
 // GetFlowPluginInfo returns plugin info.

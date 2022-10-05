@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/float"
 	log "github.com/sirupsen/logrus"
-	"math"
 	"time"
 )
 
@@ -40,15 +39,8 @@ func (inst *Instance) initializeInfluxSettings() []*InfluxSetting {
 	return influxSettings
 }
 
-func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
-	log.Info("InfluxDB sync has is been called...")
-	if len(influxSettings) == 0 {
-		err := "influx: InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
-		log.Warn(err)
-		return false, errors.New(err)
-	}
+func (inst *Instance) setupInfluxInstances(influxSettings []*InfluxSetting) ([]InfluxDetail, error) {
 
-	leastLastSyncId := math.MinInt16
 	var influxDetails []InfluxDetail
 	allError := true
 	for _, influxSetting := range influxSettings {
@@ -64,21 +56,18 @@ func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) 
 		if !isError {
 			allError = false
 		}
-		if leastLastSyncId > lastSyncId && !isError {
-			leastLastSyncId = lastSyncId
-		}
 		influxDetails = append(influxDetails, influxDetail)
 	}
 
 	if allError {
 		err := "influx: no connections are valid"
 		log.Warn(err)
-		return false, errors.New(err)
+		return nil, errors.New(err)
 	}
-	histories, err := inst.GetHistoryValues()
-	if err != nil {
-		return false, err
-	}
+	return influxDetails, nil
+}
+
+func (inst *Instance) sendHistoriesToInflux(influxDetails []InfluxDetail, histories []*History) (bool, error) {
 
 	for _, history := range histories {
 		tags := history.Tags
@@ -101,6 +90,33 @@ func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) 
 	return true, nil
 }
 
+func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
+	log.Info("InfluxDB sync has is been called...")
+	if len(influxSettings) == 0 {
+		err := "influx: InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
+		log.Warn(err)
+		return false, errors.New(err)
+	}
+
+	influxDetails, err := inst.setupInfluxInstances(influxSettings)
+	if err != nil {
+		log.Warn(err)
+	}
+
+	histories, err := inst.GetHistoryValues()
+	if err != nil {
+		log.Warn(err)
+		return false, err
+	}
+
+	_, err = inst.sendHistoriesToInflux(influxDetails, histories)
+	if err != nil {
+		log.Warn(err)
+		return false, err
+	}
+	return true, nil
+}
+
 func (inst *Instance) GetHistoryValues() ([]*History, error) {
 	inst.edgeinfluxDebugMsg("GetHistoryValues()")
 	var historyArray []*History
@@ -117,7 +133,7 @@ func (inst *Instance) GetHistoryValues() ([]*History, error) {
 				// inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() point: %+v", point))
 				if point.PresentValue != nil {
 					tagMap := make(map[string]string)
-					tagMap["plugin_name"] = net.Name
+					tagMap["plugin_name"] = "system"
 					tagMap["network_name"] = net.Name
 					tagMap["network_uuid"] = net.UUID
 					tagMap["device_name"] = dev.Name
@@ -138,4 +154,53 @@ func (inst *Instance) GetHistoryValues() ([]*History, error) {
 		}
 	}
 	return historyArray, nil
+}
+
+func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
+	log.Info("InfluxDB COV sync has is been called...")
+	if len(inst.influxDetails) == 0 {
+		err := "influx: InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
+		log.Warn(err)
+		return errors.New(err)
+	}
+
+	influxDetails, err := inst.setupInfluxInstances(inst.influxDetails)
+	if err != nil {
+		log.Warn(err)
+	}
+
+	inst.edgeinfluxDebugMsg("SendPointWriteHistory()")
+
+	point, _ := inst.db.GetPoint(pntUUID, api.Args{WithTags: true})
+	dev, _ := inst.db.GetDevice(point.DeviceUUID, api.Args{})
+	net, _ := inst.db.GetNetwork(dev.NetworkUUID, api.Args{})
+	// inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() point: %+v", point))
+	if point.PresentValue != nil {
+		tagMap := make(map[string]string)
+		tagMap["plugin_name"] = "system"
+		tagMap["network_name"] = net.Name
+		tagMap["network_uuid"] = net.UUID
+		tagMap["device_name"] = dev.Name
+		tagMap["device_uuid"] = dev.UUID
+		tagMap["point_name"] = point.Name
+		tagMap["point_uuid"] = point.UUID
+
+		pointHistory := History{
+			UUID:      point.UUID,
+			Value:     float.NonNil(point.PresentValue),
+			Timestamp: time.Now(),
+			Tags:      tagMap,
+		}
+		inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() history: %+v", pointHistory))
+
+		var historyArray []*History
+		historyArray = append(historyArray, &pointHistory)
+		_, err = inst.sendHistoriesToInflux(influxDetails, historyArray)
+		if err != nil {
+			log.Warn(err)
+			return err
+		}
+		return nil
+	}
+	return errors.New("no point present value found")
 }

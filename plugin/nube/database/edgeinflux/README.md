@@ -15,3 +15,20 @@
 ### How to delete influxDB data
 
 - `influx delete --org nube-org --bucket nube-bucket --start 2020-03-01T00:00:00Z --stop 2023-11-14T00:00:00Z`
+
+### Influx v1 config
+
+```
+influx:
+- host: <host with no http/https>
+  port: <port>
+  token: <database name>:<password>
+  org: ""  <-- leave this blank
+  bucket: <database name>
+  measurement: <add a name here>
+job:
+  frequency: 5m
+  networks:
+  - system
+log_level: DEBUG
+```
