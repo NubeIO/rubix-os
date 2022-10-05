@@ -282,15 +282,15 @@ func (inst *Instance) updatePointNames() error {
 					newPointName = "ONE_DAY_FLOW_ACCUMULATION"
 				case "digital-12":
 					newPointName = "ONE_DAY_LOW_FLOW_ALERT"
-				case "int_8-13":
+				case "uint_8-13":
 					newPointName = "DAYS_OF_LOW_FLOW"
 				case "digital-14":
 					newPointName = "FIVE_DAY_LOW_FLOW_ALERT"
 				case "digital-15":
 					newPointName = "MONTHLY_HOT_FLUSH_STATUS"
-				case "int_8-16":
+				case "uint_8-16":
 					newPointName = "OVER_TEMPERATURE_WARN_COUNT"
-				case "int_8-17":
+				case "uint_8-17":
 					newPointName = "OVER_TEMPERATURE_ALERT_COUNT"
 				case "digital-18":
 					newPointName = "SOLENOID_STATUS"
@@ -300,7 +300,7 @@ func (inst *Instance) updatePointNames() error {
 					newPointName = "TEMPERATURE_SP"
 				case "temp-21":
 					newPointName = "OVER_TEMPERATURE_OFFSET"
-				case "int_16-22":
+				case "uint_16-22":
 					newPointName = "LOW_FLOW_THRESHOLD"
 				case "temp-23":
 					newPointName = "HOT_FLUSH_SP"

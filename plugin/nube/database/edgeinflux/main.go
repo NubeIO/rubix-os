@@ -10,7 +10,7 @@ import (
 const path = "edgeinflux" // must be unique across all plugins
 const name = "edgeinflux" // must be unique across all plugins
 const description = "Edge to Influx DataSource"
-const author = "Nube iO"
+const author = "md"
 const webSite = "https://www.github.com/NubeIO"
 const protocolType = "ip"
 
