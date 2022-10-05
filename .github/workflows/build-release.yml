@@ -123,7 +123,7 @@ jobs:
           go build -buildmode=plugin -o influx-amd64.so *.go  && cp influx-amd64.so ../../../../
           
           cd ../../../../plugin/nube/database/edgeinflux
-          go build -buildmode=plugin -o influx-amd64.so *.go  && cp influx-amd64.so ../../../../
+          go build -buildmode=plugin -o edgeinflux-amd64.so *.go  && cp edgeinflux-amd64.so ../../../../
 
           cd ../../../../plugin/nube/database/history
           go build -buildmode=plugin -o history-amd64.so *.go  && cp history-amd64.so ../../../../
@@ -170,7 +170,7 @@ jobs:
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o influx-armv7.so *.go  && cp influx-armv7.so ../../../../
 
           cd ../../../../plugin/nube/database/edgeinflux
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o influx-armv7.so *.go  && cp influx-armv7.so ../../../../
+          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edgeinflux-armv7.so *.go  && cp edgeinflux-armv7.so ../../../../
 
           cd ../../../../plugin/nube/database/history
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o history-armv7.so *.go  && cp history-armv7.so ../../../../
