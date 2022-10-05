@@ -97,6 +97,9 @@ for i in "$@"; do
   influx)
     buildPlugin "influx" plugin/nube/database/influx
     ;;
+  edgeinflux)
+      buildPlugin "edgeinflux" plugin/nube/database/edgeinflux
+      ;;
   rubixio)
     buildPlugin "rubixio" plugin/nube/protocals/rubixio
     ;;

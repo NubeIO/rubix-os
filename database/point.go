@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"time"
 
@@ -297,6 +298,12 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		d.DB.Model(&model.Writer{}).
 			Where("writer_thing_uuid = ?", pointModel.UUID).
 			Update("present_value", pointModel.PresentValue)
+
+		// TODO: this section is added temporarily to support edge->influx plugin while we sort the official histories
+		if isPresentValueChange {
+			cli := client.NewLocalClient()
+			_, err = cli.WritePointPlugin(pointModel.UUID, &model.PointWriter{}, "edgeinflux")
+		}
 	}
 	return pointModel, isPresentValueChange, isWriteValueChange, isPriorityChanged, nil
 }

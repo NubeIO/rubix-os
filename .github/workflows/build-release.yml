@@ -124,6 +124,9 @@ jobs:
 
           cd ../../../../plugin/nube/database/influx
           go build -buildmode=plugin -o influx-amd64.so *.go  && cp influx-amd64.so ../../../../
+          
+          cd ../../../../plugin/nube/database/edgeinflux
+          go build -buildmode=plugin -o edgeinflux-amd64.so *.go  && cp edgeinflux-amd64.so ../../../../
 
           cd ../../../../plugin/nube/database/history
           go build -buildmode=plugin -o history-amd64.so *.go  && cp history-amd64.so ../../../../
@@ -171,6 +174,9 @@ jobs:
 
           cd ../../../../plugin/nube/database/influx
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o influx-armv7.so *.go  && cp influx-armv7.so ../../../../
+
+          cd ../../../../plugin/nube/database/edgeinflux
+          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edgeinflux-armv7.so *.go  && cp edgeinflux-armv7.so ../../../../
 
           cd ../../../../plugin/nube/database/history
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o history-armv7.so *.go  && cp history-armv7.so ../../../../
@@ -233,7 +239,7 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./rubixio-armv7.so
 
           artifact=modbusserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./rubixio-amd64.so
+          zip -r /tmp/zip/$artifact.zip ./modbusserver-amd64.so
           artifact=modbusserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./modbusserver-armv7.so
 
@@ -241,6 +247,11 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./influx-amd64.so
           artifact=influx-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./influx-armv7.so
+          
+          artifact=edgeinflux-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+          zip -r /tmp/zip/$artifact.zip ./edgeinflux-amd64.so
+          artifact=edgeinflux-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+          zip -r /tmp/zip/$artifact.zip ./edgeinflux-armv7.so
 
           artifact=history-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./history-amd64.so
