@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.7.5](https://github.com/NubeIO/flow-framework/tree/v0.7.5) (2022-10-05)
+- adds gavlintmv plugin
+- adds edgeinflux plugin
+
 ## [v0.7.4](https://github.com/NubeIO/flow-framework/tree/v0.7.4) (2022-09-12)
 - fix voltage error #652
 - fix bug on is mqtt connected #651
