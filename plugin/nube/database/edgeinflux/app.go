@@ -103,7 +103,7 @@ func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) 
 		log.Warn(err)
 	}
 
-	histories, err := inst.GetHistoryValues()
+	histories, err := inst.GetHistoryValues(inst.config.Job.Networks)
 	if err != nil {
 		log.Warn(err)
 		return false, err
@@ -117,42 +117,48 @@ func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) 
 	return true, nil
 }
 
-func (inst *Instance) GetHistoryValues() ([]*History, error) {
+func (inst *Instance) GetHistoryValues(pluginsArray []string) ([]*History, error) {
 	inst.edgeinfluxDebugMsg("GetHistoryValues()")
-	var historyArray []*History
-	// nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
-	nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
-	if err != nil {
-		return nil, err
+	if pluginsArray == nil || len(pluginsArray) == 0 {
+		pluginsArray = []string{"system"}
 	}
-	for _, net := range nets {
-		inst.edgeinfluxDebugMsg("GetHistoryValues() Net: ", net.Name)
-		for _, dev := range net.Devices {
-			for _, pnt := range dev.Points {
-				point, _ := inst.db.GetPoint(pnt.UUID, api.Args{WithTags: true})
-				// inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() point: %+v", point))
-				if point.PresentValue != nil {
-					tagMap := make(map[string]string)
-					tagMap["plugin_name"] = "system"
-					tagMap["network_name"] = net.Name
-					tagMap["network_uuid"] = net.UUID
-					tagMap["device_name"] = dev.Name
-					tagMap["device_uuid"] = dev.UUID
-					tagMap["point_name"] = point.Name
-					tagMap["point_uuid"] = point.UUID
+	var historyArray []*History
+	for _, plugin := range pluginsArray {
+		nets, err := inst.db.GetNetworksByPluginName(plugin, api.Args{WithDevices: true, WithPoints: true})
+		// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
+		if err != nil {
+			continue
+		}
+		for _, net := range nets {
+			inst.edgeinfluxDebugMsg("GetHistoryValues() Net: ", net.Name)
+			for _, dev := range net.Devices {
+				for _, pnt := range dev.Points {
+					point, _ := inst.db.GetPoint(pnt.UUID, api.Args{WithTags: true})
+					// inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() point: %+v", point))
+					if point.PresentValue != nil {
+						tagMap := make(map[string]string)
+						tagMap["plugin_name"] = "lorawan"
+						tagMap["network_name"] = net.Name
+						tagMap["network_uuid"] = net.UUID
+						tagMap["device_name"] = dev.Name
+						tagMap["device_uuid"] = dev.UUID
+						tagMap["point_name"] = point.Name
+						tagMap["point_uuid"] = point.UUID
 
-					pointHistory := History{
-						UUID:      point.UUID,
-						Value:     float.NonNil(point.PresentValue),
-						Timestamp: time.Now(),
-						Tags:      tagMap,
+						pointHistory := History{
+							UUID:      point.UUID,
+							Value:     float.NonNil(point.PresentValue),
+							Timestamp: time.Now(),
+							Tags:      tagMap,
+						}
+						inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() history: %+v", pointHistory))
+						historyArray = append(historyArray, &pointHistory)
 					}
-					inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() history: %+v", pointHistory))
-					historyArray = append(historyArray, &pointHistory)
 				}
 			}
 		}
 	}
+
 	return historyArray, nil
 }
 
@@ -174,10 +180,23 @@ func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 	point, _ := inst.db.GetPoint(pntUUID, api.Args{WithTags: true})
 	dev, _ := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	net, _ := inst.db.GetNetwork(dev.NetworkUUID, api.Args{})
+
+	// Check that the point is from a plugin network with history enabled (from config file)
+	networkIsHistoryEnabled := false
+	for _, plugin := range inst.config.Job.Networks {
+		if plugin == net.PluginPath {
+			networkIsHistoryEnabled = true
+			break
+		}
+	}
+	if !networkIsHistoryEnabled {
+		return nil
+	}
+	inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() net: %+v", net))
 	// inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() point: %+v", point))
 	if point.PresentValue != nil {
 		tagMap := make(map[string]string)
-		tagMap["plugin_name"] = "system"
+		tagMap["plugin_name"] = "lorawan"
 		tagMap["network_name"] = net.Name
 		tagMap["network_uuid"] = net.UUID
 		tagMap["device_name"] = dev.Name
