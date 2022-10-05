@@ -194,7 +194,7 @@ jobs:
 
           artifact=galvintmv-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./galvintmv-amd64.so
-          artifact=edge28-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+          artifact=galvintmv-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./galvintmv-armv7.so
           
           artifact=edge28-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
