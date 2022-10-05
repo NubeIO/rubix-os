@@ -9,8 +9,8 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
-const path = "galvin-tmv" // must be unique across all plugins
-const name = "galvin-tmv" // must be unique across all plugins
+const path = "galvintmv" // must be unique across all plugins
+const name = "galvintmv" // must be unique across all plugins
 const description = "galvin tmv plugin"
 const author = "md"
 const webSite = "https://www.github.com/NubeIO"
@@ -21,7 +21,7 @@ const pluginType = "project"
 const allowConfigWrite = false
 const isNetwork = true
 const maxAllowedNetworks = 1
-const networkType = "galvin-tmv"
+const networkType = "galvintmv"
 const transportType = "serial" // serial, ip
 
 // Instance is plugin instance

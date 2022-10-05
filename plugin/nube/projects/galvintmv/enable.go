@@ -16,15 +16,7 @@ func (inst *Instance) Enable() error {
 	} else if err != nil {
 		inst.networks = nil
 	}
-	if inst.config.EnablePolling {
-		if !inst.pollingEnabled {
-			var arg polling
-			inst.pollingEnabled = true
-			arg.enable = true
-			// TODO: VERIFY POLLING WITHOUT GO ROUTINE WRAPPER
-			inst.updatePointNames()
-		}
-	}
+	inst.updatePointNames()
 	return nil
 }
 

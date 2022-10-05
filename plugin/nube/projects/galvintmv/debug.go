@@ -9,13 +9,13 @@ import (
 
 func (inst *Instance) tmvDebugMsg(args ...interface{}) {
 	if nstring.InEqualIgnoreCase(inst.config.LogLevel, "DEBUG") {
-		prefix := "Modbus: "
+		prefix := "TMV: "
 		log.Info(prefix, args)
 	}
 }
 
 func (inst *Instance) tmvErrorMsg(args ...interface{}) {
-	prefix := "Modbus: "
+	prefix := "TMV: "
 	log.Error(prefix, args)
 }
 

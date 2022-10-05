@@ -106,6 +106,9 @@ for i in "$@"; do
   postgres)
     buildPlugin "postgres" plugin/nube/database/postgres
     ;;
+  galvintmv)
+    buildPlugin "galvintmv" plugin/nube/projects/galvintmv
+    ;;
   esac
 done
 

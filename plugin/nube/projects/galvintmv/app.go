@@ -246,11 +246,14 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 
 // THE FOLLOWING FUNCTIONS ARE CALLED FROM WITHIN THE PLUGIN
 func (inst *Instance) updatePointNames() error {
-	nets, err := inst.db.GetNetworksByPlugin("lorawan", api.Args{WithDevices: true, WithPoints: true})
+	inst.tmvDebugMsg("updatePointNames()")
+	nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
+	// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err
 	}
 	for _, net := range nets {
+		inst.tmvDebugMsg("updatePointNames() Net: ", net.Name)
 		for _, dev := range net.Devices {
 			for _, pnt := range dev.Points {
 				newPointName := ""
@@ -312,7 +315,9 @@ func (inst *Instance) updatePointNames() error {
 				case "temp-28":
 					newPointName = "TEMP_CALIBRATION_OFFSET"
 				}
+				inst.tmvDebugMsg("Point Name: ", pnt.Name)
 				if newPointName != "" {
+					inst.tmvDebugMsg("NEW  Name: ", newPointName)
 					pnt.Name = newPointName
 					pnt, err = inst.db.UpdatePoint(pnt.UUID, pnt, true, false)
 				}
