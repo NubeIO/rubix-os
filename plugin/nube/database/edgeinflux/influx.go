@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api"
 	log "github.com/sirupsen/logrus"
@@ -82,27 +81,8 @@ func (i *InfluxSetting) GetLastSyncId() (value int, isError bool) {
 	return value, false
 }
 
-func tagsHistory(ht *model.HistoryInfluxTag) map[string]string {
-	newMap := make(map[string]string)
-	newMap["clint_id"] = ht.ClientId
-	newMap["client_name"] = ht.ClientName
-	newMap["site_id"] = ht.SiteId
-	newMap["site_name"] = ht.SiteName
-	newMap["device_id"] = ht.DeviceId
-	newMap["device_name"] = ht.DeviceName
-	newMap["rubix_point_uuid"] = ht.RubixPointUUID
-	newMap["rubix_point_name"] = ht.RubixPointName
-	newMap["rubix_device_uuid"] = ht.RubixDeviceUUID
-	newMap["rubix_device_name"] = ht.RubixDeviceName
-	newMap["rubix_network_uuid"] = ht.RubixNetworkUUID
-	newMap["rubix_network_name"] = ht.RubixNetworkName
-	newMap["uniq"] = ht.RubixPointUUID
-	return newMap
-}
-
-func fieldsHistory(t *model.History) map[string]interface{} {
+func fieldsHistory(t *History) map[string]interface{} {
 	newMap := make(map[string]interface{})
-	newMap["id"] = t.ID
 	newMap["value"] = t.Value
 	return newMap
 }

@@ -63,11 +63,11 @@ func (i *InfluxSetting) GetLastSyncId() (value int, isError bool) {
 	queryAPI := client.QueryAPI(i.Org)
 	fluxQuery := fmt.Sprintf(
 		`from(bucket: "%v")
-				  |> range(start:-1)
-				  |> filter(fn: (r) => r["_measurement"] == "%v")
-				  |> filter(fn: (r) => r["_field"] == "id")
-				  |> aggregateWindow(every: 1y, fn: max, createEmpty: false)
-				  |> yield(name: "max")`, i.Bucket, i.Measurement)
+					  |> range(start:-1)
+					  |> filter(fn: (r) => r["_measurement"] == "%v")
+					  |> filter(fn: (r) => r["_field"] == "id")
+					  |> aggregateWindow(every: 1y, fn: max, createEmpty: false)
+					  |> yield(name: "max")`, i.Bucket, i.Measurement)
 	log.Debugf("Flux Query: %s", fluxQuery)
 	result, err := queryAPI.Query(context.Background(), fluxQuery)
 	if err != nil {

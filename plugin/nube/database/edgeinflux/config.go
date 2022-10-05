@@ -10,12 +10,14 @@ type Influx struct {
 }
 
 type Job struct {
-	Frequency string `yaml:"frequency"`
+	Frequency string   `yaml:"frequency"`
+	Networks  []string `yaml:"networks"`
 }
 
 type Config struct {
-	Influx []Influx `yaml:"influx"`
-	Job    Job      `yaml:"job"`
+	Influx   []Influx `yaml:"influx"`
+	Job      Job      `yaml:"job"`
+	LogLevel string   `yaml:"log_level"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
@@ -30,9 +32,11 @@ func (inst *Instance) DefaultConfig() interface{} {
 	job := Job{
 		Frequency: "1m",
 	}
+
 	return &Config{
-		Influx: []Influx{influx},
-		Job:    job,
+		Influx:   []Influx{influx},
+		Job:      job,
+		LogLevel: "ERROR", // DEBUG or ERROR
 	}
 }
 

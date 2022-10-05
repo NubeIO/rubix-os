@@ -3,9 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/float"
 	log "github.com/sirupsen/logrus"
 	"math"
+	"time"
 )
 
 type InfluxDetail struct {
@@ -50,7 +52,9 @@ func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) 
 	var influxDetails []InfluxDetail
 	allError := true
 	for _, influxSetting := range influxSettings {
-		lastSyncId, isError := influxSetting.GetLastSyncId()
+		// lastSyncId, isError := influxSetting.GetLastSyncId()
+		lastSyncId := 0
+		isError := false
 		influxDetail := InfluxDetail{
 			InfluxSetting: influxSetting,
 			MaxId:         lastSyncId,
@@ -71,31 +75,17 @@ func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) 
 		log.Warn(err)
 		return false, errors.New(err)
 	}
-	histories, err := inst.db.GetHistoriesForSync(leastLastSyncId)
+	histories, err := inst.GetHistoryValues()
 	if err != nil {
 		return false, err
 	}
 
-	producerUuid := ""
-	var historyTags []*model.HistoryInfluxTag
 	for _, history := range histories {
-		if producerUuid != history.UUID {
-			producerUuid = history.UUID
-			historyTags, err = inst.db.GetHistoryInfluxTags(producerUuid)
-			if err != nil || len(historyTags) == 0 {
-				log.Warn(fmt.Sprintf("influx: We unable to get the producer_uuid = %s details!", producerUuid))
-				continue
-			}
-		}
-		for _, historyTag := range historyTags {
-			tags := tagsHistory(historyTag)
-			fields := fieldsHistory(history)
-			for i, influxDetail := range influxDetails {
-				if influxDetail.MaxId < history.ID {
-					influxDetail.InfluxSetting.WriteHistories(tags, fields, history.Timestamp)
-					influxDetails[i].Records += 1 // directly updating to reflect value
-				}
-			}
+		tags := history.Tags
+		fields := fieldsHistory(history)
+		for i, influxDetail := range influxDetails {
+			influxDetail.InfluxSetting.WriteHistories(tags, fields, history.Timestamp)
+			influxDetails[i].Records += 1 // directly updating to reflect value
 		}
 	}
 
@@ -109,4 +99,43 @@ func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) 
 		}
 	}
 	return true, nil
+}
+
+func (inst *Instance) GetHistoryValues() ([]*History, error) {
+	inst.edgeinfluxDebugMsg("GetHistoryValues()")
+	var historyArray []*History
+	// nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
+	nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return nil, err
+	}
+	for _, net := range nets {
+		inst.edgeinfluxDebugMsg("GetHistoryValues() Net: ", net.Name)
+		for _, dev := range net.Devices {
+			for _, pnt := range dev.Points {
+				point, _ := inst.db.GetPoint(pnt.UUID, api.Args{WithTags: true})
+				// inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() point: %+v", point))
+				if point.PresentValue != nil {
+					tagMap := make(map[string]string)
+					tagMap["plugin_name"] = net.Name
+					tagMap["network_name"] = net.Name
+					tagMap["network_uuid"] = net.UUID
+					tagMap["device_name"] = dev.Name
+					tagMap["device_uuid"] = dev.UUID
+					tagMap["point_name"] = point.Name
+					tagMap["point_uuid"] = point.UUID
+
+					pointHistory := History{
+						UUID:      point.UUID,
+						Value:     float.NonNil(point.PresentValue),
+						Timestamp: time.Now(),
+						Tags:      tagMap,
+					}
+					inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() history: %+v", pointHistory))
+					historyArray = append(historyArray, &pointHistory)
+				}
+			}
+		}
+	}
+	return historyArray, nil
 }
