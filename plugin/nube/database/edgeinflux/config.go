@@ -10,8 +10,9 @@ type Influx struct {
 }
 
 type Job struct {
-	Frequency string   `yaml:"frequency"`
-	Networks  []string `yaml:"networks"`
+	Frequency            string   `yaml:"frequency"`
+	Networks             []string `yaml:"networks"`
+	RequireHistoryEnable bool     `yaml:"require_history_enable"`
 }
 
 type Config struct {
@@ -30,7 +31,9 @@ func (inst *Instance) DefaultConfig() interface{} {
 		Measurement: "points",
 	}
 	job := Job{
-		Frequency: "1m",
+		Frequency:            "60m",
+		Networks:             []string{"system"},
+		RequireHistoryEnable: true,
 	}
 
 	return &Config{

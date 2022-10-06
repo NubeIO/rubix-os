@@ -1,14 +1,23 @@
 package main
 
 type Config struct {
-	EnablePolling bool   `yaml:"enable_polling"`
-	LogLevel      string `yaml:"log_level"`
+	Job      Job    `yaml:"job"`
+	LogLevel string `yaml:"log_level"`
+}
+
+type Job struct {
+	Frequency string   `yaml:"frequency"`
+	Networks  []string `yaml:"networks"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
+	job := Job{
+		Frequency: "60m",
+	}
+
 	return &Config{
-		EnablePolling: true,
-		LogLevel:      "ERROR", // DEBUG or ERROR
+		Job:      job,
+		LogLevel: "ERROR", // DEBUG or ERROR
 	}
 }
 

@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
@@ -122,6 +124,7 @@ func (inst *Instance) GetHistoryValues(pluginsArray []string) ([]*History, error
 	if pluginsArray == nil || len(pluginsArray) == 0 {
 		pluginsArray = []string{"system"}
 	}
+	nowTimestamp := time.Now()
 	var historyArray []*History
 	for _, plugin := range pluginsArray {
 		nets, err := inst.db.GetNetworksByPluginName(plugin, api.Args{WithDevices: true, WithPoints: true})
@@ -134,6 +137,9 @@ func (inst *Instance) GetHistoryValues(pluginsArray []string) ([]*History, error
 			for _, dev := range net.Devices {
 				for _, pnt := range dev.Points {
 					point, _ := inst.db.GetPoint(pnt.UUID, api.Args{WithTags: true})
+					if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeInterval && point.HistoryType != model.HistoryTypeCovAndInterval) {
+						continue
+					}
 					// inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() point: %+v", point))
 					if point.PresentValue != nil {
 						tagMap := make(map[string]string)
@@ -148,7 +154,7 @@ func (inst *Instance) GetHistoryValues(pluginsArray []string) ([]*History, error
 						pointHistory := History{
 							UUID:      point.UUID,
 							Value:     float.NonNil(point.PresentValue),
-							Timestamp: time.Now(),
+							Timestamp: nowTimestamp,
 							Tags:      tagMap,
 						}
 						inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() history: %+v", pointHistory))
@@ -178,6 +184,9 @@ func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 	inst.edgeinfluxDebugMsg("SendPointWriteHistory()")
 
 	point, _ := inst.db.GetPoint(pntUUID, api.Args{WithTags: true})
+	if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeCov && point.HistoryType != model.HistoryTypeCovAndInterval) {
+		return nil
+	}
 	dev, _ := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	net, _ := inst.db.GetNetwork(dev.NetworkUUID, api.Args{})
 
