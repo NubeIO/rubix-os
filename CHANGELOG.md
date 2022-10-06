@@ -1,4 +1,8 @@
 # CHANGELOG
+
+## [v0.7.6](https://github.com/NubeIO/flow-framework/tree/v0.7.5) (2022-10-06)
+- minor gavlintmv plugin update
+
 ## [v0.7.5](https://github.com/NubeIO/flow-framework/tree/v0.7.5) (2022-10-05)
 - adds gavlintmv plugin
 - adds edgeinflux plugin
