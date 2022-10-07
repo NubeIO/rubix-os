@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
@@ -32,6 +34,8 @@ type Instance struct {
 	bus         eventbus.BusService
 	pluginUUID  string
 	networkUUID string
+	ctx         context.Context
+	cancel      func()
 	REST        csrest.RestClient
 	csConnected bool
 	deviceEUIs  []string

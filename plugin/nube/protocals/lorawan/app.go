@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	"github.com/NubeIO/flow-framework/api"
@@ -10,12 +11,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (inst *Instance) syncChirpstackDevicesLoop() {
+func (inst *Instance) syncChirpstackDevicesLoop(ctx context.Context) {
 	for {
-		if inst.csConnected {
-			inst.syncChirpstackDevices()
+		select {
+		case <-ctx.Done():
+			log.Debug("lorawan: Stopping CS connection loop")
+			return
+		default:
+			if inst.csConnected {
+				inst.syncChirpstackDevices()
+			}
+			time.Sleep(time.Duration(inst.config.SyncPeriodMins) * time.Minute)
 		}
-		time.Sleep(time.Duration(inst.config.SyncPeriodMins) * time.Minute)
 	}
 }
 
@@ -92,12 +99,18 @@ func (inst *Instance) connectToCS() error {
 	return err
 }
 
-func (inst *Instance) connectToCSLoop() error {
+func (inst *Instance) connectToCSLoop(ctx context.Context) error {
 	for {
-		time.Sleep(5 * time.Second)
-		err := inst.connectToCS()
-		if !csrest.IsCSConnectionError(err) {
-			return err
+		select {
+		case <-ctx.Done():
+			log.Debug("lorawan: Stopping main loop")
+			return ctx.Err()
+		default:
+			time.Sleep(5 * time.Second)
+			err := inst.connectToCS()
+			if !csrest.IsCSConnectionError(err) {
+				return err
+			}
 		}
 	}
 }
@@ -124,15 +137,17 @@ func (inst *Instance) setCSDisconnected(err error) {
 		},
 	}
 	inst.db.UpdateNetwork(inst.networkUUID, &net, true)
-	go inst.connectToCSLoop()
+	go inst.connectToCSLoop(inst.ctx)
 }
 
 func (inst *Instance) createNetwork() (*model.Network, error) {
 	maxNetworks := new(int)
 	*maxNetworks = maxAllowedNetworks
+	enable := true
 	net := model.Network{
 		CommonNameUnique:          model.CommonNameUnique{Name: pluginName},
 		CommonDescription:         model.CommonDescription{Description: "Chirpstack"},
+		CommonEnable:              model.CommonEnable{Enable: &enable},
 		PluginPath:                pluginPath,
 		NumberOfNetworksPermitted: maxNetworks,
 		TransportType:             transportType,

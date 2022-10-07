@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -82,18 +83,15 @@ func (inst *Instance) getPointByAddressUUID(name string, deviceEUI string, point
 
 // createNewPoint create default lorawan point
 func (inst *Instance) createNewPoint(name string, deviceEUI string, deviceUUID string) (point *model.Point, err error) {
-	b := false
 	addressUUID := createPointAddressUUID(name, deviceEUI)
 	point = &model.Point{
+		CommonEnable:    model.CommonEnable{Enable: boolean.NewTrue()},
 		Name:            name,
 		AddressUUID:     &addressUUID,
 		DeviceUUID:      deviceUUID,
-		EnableWriteable: &b,
+		EnableWriteable: boolean.NewFalse(),
 		ObjectType:      string(model.ObjTypeAnalogValue),
 		// PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
-		CommonEnable: model.CommonEnable{
-			Enable: boolean.NewTrue(),
-		},
 		HistoryConfig: model.HistoryConfig{
 			HistoryEnable:       boolean.NewTrue(),
 			HistoryType:         model.HistoryTypeCovAndInterval,

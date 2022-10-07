@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 
 	"github.com/NubeIO/flow-framework/api"
@@ -32,14 +33,16 @@ func (inst *Instance) Enable() error {
 	inst.REST = csrest.InitRest(inst.config.CSAddress, inst.config.CSPort, inst.config.CSToken)
 	inst.REST.SetDeviceLimit(inst.config.DeviceLimit)
 	err = inst.connectToCS()
+	inst.ctx, inst.cancel = context.WithCancel(context.Background())
 	if csrest.IsCSConnectionError(err) {
-		go inst.connectToCSLoop()
+		go inst.connectToCSLoop(inst.ctx)
 	}
-	go inst.syncChirpstackDevicesLoop()
+	go inst.syncChirpstackDevicesLoop(inst.ctx)
 	return nil
 }
 
 func (inst *Instance) Disable() error {
 	inst.enabled = false
+	inst.cancel()
 	return nil
 }
