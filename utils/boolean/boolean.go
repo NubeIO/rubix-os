@@ -34,3 +34,10 @@ func IsNil(b *bool) bool {
 		return false
 	}
 }
+
+func NonNil(b *bool) bool {
+	if b == nil {
+		return false
+	}
+	return *b
+}

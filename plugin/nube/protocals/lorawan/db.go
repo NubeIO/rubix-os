@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
+	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -34,7 +36,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
-
+	body.Enable = boolean.NewTrue()
 	body, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
 		return nil, err
@@ -45,6 +47,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 func (inst *Instance) createDeviceFromCSDevice(csDev *csmodel.Device) (device *model.Device, err error) {
 	newDev := new(model.Device)
 	inst.csConvertDevice(newDev, csDev)
+	newDev.Enable = boolean.NewTrue()
 	_, err = inst.db.CreateDevice(newDev)
 	if err != nil {
 		log.Error("lorawan: Error adding new device: ", err)
@@ -88,7 +91,17 @@ func (inst *Instance) createNewPoint(name string, deviceEUI string, deviceUUID s
 		EnableWriteable: &b,
 		ObjectType:      string(model.ObjTypeAnalogValue),
 		// PointPriorityArrayMode: model.ReadOnlyNoPriorityArrayRequired,
+		CommonEnable: model.CommonEnable{
+			Enable: boolean.NewTrue(),
+		},
+		HistoryConfig: model.HistoryConfig{
+			HistoryEnable:       boolean.NewTrue(),
+			HistoryType:         model.HistoryTypeCovAndInterval,
+			HistoryInterval:     float.New(60),
+			HistoryCOVThreshold: float.New(0.1),
+		},
 	}
+	point.HistoryEnable = boolean.NewTrue()
 	point, err = inst.db.CreatePoint(point, true, true)
 	if err != nil {
 		log.Errorf("lorawan: Error creating point %s. Error: %s", addressUUID, err)
