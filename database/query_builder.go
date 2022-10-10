@@ -205,6 +205,12 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	if args.AddressUUID != nil {
 		query = query.Where("address_uuid = ?", *args.AddressUUID)
 	}
+	if args.Name != nil {
+		query = query.Where("name = ?", *args.Name)
+	}
+	if args.NetworkUUID != nil {
+		query = query.Where("network_uuid = ?", args.NetworkUUID)
+	}
 	return query
 }
 
@@ -227,6 +233,9 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	}
 	if args.ObjectType != nil {
 		query = query.Where("object_type = ?", *args.ObjectType)
+	}
+	if args.DeviceUUID != nil {
+		query = query.Where("device_uuid = ?", *args.DeviceUUID)
 	}
 	return query
 }

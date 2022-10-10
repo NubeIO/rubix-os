@@ -61,6 +61,8 @@ type Args struct {
 	IdGt                 *string
 	IsRemote             *bool
 	IsMetadata           bool
+	NetworkUUID          *string
+	DeviceUUID           *string
 }
 
 var ArgsType = struct {
@@ -124,6 +126,8 @@ var ArgsType = struct {
 	IdGt                 string
 	IsRemote             string
 	IsMetadata           string
+	NetworkUUID          string
+	DeviceUUID           string
 }{
 	Sort:                 "sort",
 	Order:                "order",
@@ -185,6 +189,8 @@ var ArgsType = struct {
 	IdGt:                 "id_gt",
 	IsRemote:             "is_remote",
 	IsMetadata:           "is_metadata",
+	NetworkUUID:          "network_uuid",
+	DeviceUUID:           "device_uuid",
 }
 
 var ArgsDefault = struct {
@@ -227,6 +233,8 @@ var ArgsDefault = struct {
 	DeviceName        string
 	PointName         string
 	IsMetadata        string
+	NetworkUUID       string
+	DeviceUUID        string
 }{
 	Sort:              "ID",
 	Order:             "DESC", // ASC or DESC
@@ -266,4 +274,6 @@ var ArgsDefault = struct {
 	DeviceName:        "",
 	PointName:         "",
 	IsMetadata:        "false",
+	NetworkUUID:       "",
+	DeviceUUID:        "",
 }

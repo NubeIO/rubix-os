@@ -3,12 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 type InfluxDetail struct {

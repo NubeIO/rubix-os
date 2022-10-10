@@ -112,6 +112,9 @@ for i in "$@"; do
   postgres)
     buildPlugin "postgres" plugin/nube/database/postgres
     ;;
+  networklinker)
+    buildPlugin "networklinker" plugin/nube/protocals/networklinker
+    ;;
   galvintmv)
     buildPlugin "galvintmv" plugin/nube/projects/galvintmv
     ;;
