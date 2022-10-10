@@ -7,13 +7,13 @@ import (
 	"strconv"
 )
 
-const ZHTPlLenStaticV1 = 98
+const ZHTPlLenStaticV1 = 97
 const ZHTPlLenStaticV2 = 102 // 9500ms
 
-const ZHTPlLenWriteV1 = 52
+const ZHTPlLenWriteV1 = 51
 const ZHTPlLenWriteV2 = 66 // 7200ms
 
-const ZHTPlLenPollV1 = 41
+const ZHTPlLenPollV1 = 40
 const ZHTPlLenPollV2 = 47 // 6200ms
 
 type TZipHydrotapBase struct {
