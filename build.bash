@@ -106,6 +106,9 @@ for i in "$@"; do
   modbusserver)
     buildPlugin "modbusserver" plugin/nube/protocals/modbusserver
     ;;
+  rubixpointsync)
+    buildPlugin "rubixpointsync" plugin/nube/protocals/rubixpointsync
+      ;;
   postgres)
     buildPlugin "postgres" plugin/nube/database/postgres
     ;;
