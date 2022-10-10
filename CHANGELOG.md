@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.7.7](https://github.com/NubeIO/flow-framework/tree/v0.7.7) (2022-10-10)
+- zip-hydro-tap lora fix #671
+- plugin/networklinker #670
+- updates to edgeinflux, galvintmv, and lorawan #668
+
 ## [v0.7.6](https://github.com/NubeIO/flow-framework/tree/v0.7.5) (2022-10-06)
 - minor gavlintmv plugin update
 
