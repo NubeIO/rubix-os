@@ -1,6 +1,8 @@
 package main
 
 type Job struct {
+	Host                string   `yaml:"host"`
+	Port                float64  `yaml:"port"`
 	Frequency           string   `yaml:"frequency"`
 	Networks            []string `yaml:"networks"`
 	RequireNetworkMatch bool     `yaml:"require_network_match"`
@@ -14,6 +16,8 @@ type Config struct {
 
 func (inst *Instance) DefaultConfig() interface{} {
 	job := Job{
+		Host:                "0.0.0.0",
+		Port:                1515,
 		Frequency:           "15m",
 		Networks:            []string{"system"},
 		RequireNetworkMatch: true,
