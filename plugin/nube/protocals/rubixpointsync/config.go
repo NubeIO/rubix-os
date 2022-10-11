@@ -14,7 +14,7 @@ type Config struct {
 
 func (inst *Instance) DefaultConfig() interface{} {
 	job := Job{
-		Frequency:           "60m",
+		Frequency:           "15m",
 		Networks:            []string{"system"},
 		RequireNetworkMatch: true,
 		GenerateRubixPoints: false,
