@@ -1,9 +1,11 @@
 package smod
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/grid-x/modbus"
 	log "github.com/sirupsen/logrus"
-	"strconv"
 )
 
 type RegType uint
@@ -84,22 +86,9 @@ func convert(data []byte) []bool {
 }
 
 // SetEncoding Sets the encoding (endianness and word ordering) of subsequent requests.
-func (mc *ModbusClient) SetEncoding(endianness Endianness, wordOrder WordOrder) (err error) {
-
-	if endianness != BigEndian && endianness != LittleEndian {
-		log.Errorf("unknown endianness value %v", endianness)
-		err = ErrUnexpectedParameters
-		return
-	}
-
-	if wordOrder != HighWordFirst && wordOrder != LowWordFirst {
-		log.Errorf("unknown word order value %v", wordOrder)
-		err = ErrUnexpectedParameters
-		return
-	}
+func (mc *ModbusClient) SetEncoding(endianness Endianness, wordOrder WordOrder) {
 	mc.Endianness = endianness
 	mc.WordOrder = wordOrder
-	return
 }
 
 // ReadCoils Reads multiple coils (function code 01).
@@ -232,7 +221,36 @@ func (mc *ModbusClient) WriteFloat32(addr uint16, value float64) (raw []byte, ou
 func (mc *ModbusClient) WriteSingleRegister(addr uint16, value uint16) (raw []byte, out float64, err error) {
 	raw, err = mc.Client.WriteSingleRegister(addr, value)
 	if err != nil {
-		log.Errorf("modbus-function: failed to WriteSingleRegister: %v\n", err)
+		// This is a small hack for Nube-IO modbus (R-IO_v2.0 to R-IO_v3.1)(ZHT_v0.1 to ZHT_v2.1)
+		//  where the value bytes are switched around.
+		//  Most other Modbus tools do not check for this error anyway.
+		if !strings.Contains(err.Error(), "modbus: response value") {
+			log.Errorf("modbus-function: failed to WriteSingleRegister: %v\n", err)
+			return
+		} else {
+			err = nil
+		}
+	}
+	out = float64(value)
+	return
+}
+
+// WriteDoubleRegister Writes to a double register (32bit)
+func (mc *ModbusClient) WriteDoubleRegister(addr uint16, value uint32) (raw []byte, out float64, err error) {
+	raw, err = mc.Client.WriteMultipleRegisters(addr, 2, uint32ToBytes(mc.Endianness, mc.WordOrder, value))
+	if err != nil {
+		log.Errorf("modbus-function: failed to WriteDoubleRegister: %v\n", err)
+		return
+	}
+	out = float64(value)
+	return
+}
+
+// WriteQuadRegister Writes to a double register (64bit)
+func (mc *ModbusClient) WriteQuadRegister(addr uint16, value uint64) (raw []byte, out float64, err error) {
+	raw, err = mc.Client.WriteMultipleRegisters(addr, 4, uint64ToBytes(mc.Endianness, mc.WordOrder, value))
+	if err != nil {
+		log.Errorf("modbus-function: failed to WriteQuadRegister : %v\n", err)
 		return
 	}
 	out = float64(value)
