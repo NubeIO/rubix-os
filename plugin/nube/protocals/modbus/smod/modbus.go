@@ -232,7 +232,15 @@ func (mc *ModbusClient) WriteFloat32(addr uint16, value float64) (raw []byte, ou
 func (mc *ModbusClient) WriteSingleRegister(addr uint16, value uint16) (raw []byte, out float64, err error) {
 	raw, err = mc.Client.WriteSingleRegister(addr, value)
 	if err != nil {
+		// This is a small hack for Nube-IO modbus (R-IO_v2.0 to R-IO_v3.1)(ZHT_v0.1 to ZHT_v2.1)
+		//  where the value bytes are switched around.
+		//  Most other Modbus tools do not check for this error anyway.
+		if !strings.Contains(err.Error(), "modbus: response value") {
 		log.Errorf("modbus-function: failed to WriteSingleRegister: %v\n", err)
+			return
+		} else {
+			err = nil
+		}
 		return
 	}
 	out = float64(value)
