@@ -32,7 +32,7 @@ require (
 	github.com/NubeDev/modbus v0.0.2
 	github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.6
 	github.com/PaesslerAG/gval v1.1.1
-	github.com/grid-x/modbus v0.0.0-20220210093200-c7b3bba92b40
+	github.com/grid-x/modbus v0.0.0-20220829110112-006eee73392e
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
 	github.com/martinlindhe/unit v0.0.0-20210313160520-19b60e03648d
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f
@@ -61,7 +61,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/grid-x/serial v0.0.0-20191104121038-e24bc9bf6f08 // indirect
+	github.com/grid-x/serial v0.0.0-20211107191517-583c7356b3aa // indirect
 	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.11.0 // indirect
