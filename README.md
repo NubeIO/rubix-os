@@ -26,3 +26,39 @@ warn: when we want to give a warning for user for some operations
 error: while error happens, show it on red alert  
 ```
 
+### MQTT client
+  
+#### Topic structure:
+```
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/<event>/...
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/<network_plugin_path>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
+```
+```
+COV:
+<client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/<network_plugin_path>/<network_uuid>/<network_name>/<device_uuid>/<device_name>/<point_uuid>/<point_name>
+```
+
+
+#### Example topics:
+
+**COV:**
+```
+all points:
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/#
+
+by network plugin path:
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/<network_plugin_path>/+/+/+/+/+/+
+
+by point uuid:
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/+/+/+/<point_uuid>/+
+
+by point name:
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/cov/all/+/+/<network_name>/+/<device_name>/+/<point_name>
+```
+**List:**
+```
+points list:
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
+```
+
+  

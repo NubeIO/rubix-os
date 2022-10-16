@@ -44,3 +44,14 @@ producerhistory:
   intervalhistorycreator:
     enable: true
     frequency: 10
+
+mqtt:
+  enable: true
+  address: "localhost"
+  port: 1883
+  username: ""
+  password: ""
+  setkeepalive: "0s"
+  setpingtimeout: "0s"
+  autoreconnect: false
+  qos: 1
