@@ -10,6 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
@@ -230,7 +231,7 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = nuuid.MakeUUID()
 	isMasterSlave := boolean.IsTrue(body.IsMasterSlave)
-	deviceInfo, err := d.GetDeviceInfo()
+	deviceInfo, err := deviceinfo.GetDeviceInfo()
 	if err != nil {
 		return false, nil, false, nil, err
 	}
@@ -333,7 +334,7 @@ func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isM
 }
 
 func (d *GormDatabase) syncAndEditFlowNetwork(cli *client.FlowClient, body *model.FlowNetwork, bodyToSync *model.FlowNetwork) error {
-	deviceInfo, err := d.GetDeviceInfo()
+	deviceInfo, err := deviceinfo.GetDeviceInfo()
 	if err != nil {
 		return err
 	}
@@ -363,7 +364,7 @@ func (d *GormDatabase) updateStreamsOnFlowNetwork(fn *model.FlowNetwork, streams
 	if err := d.DB.Model(&fn).Association("Streams").Replace(streams); err != nil {
 		return nil, err
 	}
-	deviceInfo, err := d.GetDeviceInfo()
+	deviceInfo, err := deviceinfo.GetDeviceInfo()
 	if err != nil {
 		return nil, err
 	}

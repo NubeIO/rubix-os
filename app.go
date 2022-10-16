@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/mqttclient"
+	"github.com/NubeIO/flow-framework/services/mqtt"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
 	"os"
 	"path"
@@ -12,7 +14,6 @@ import (
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/history"
 	"github.com/NubeIO/flow-framework/logger"
-	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/router"
 	"github.com/NubeIO/flow-framework/runner"
 	"github.com/NubeIO/flow-framework/src/cachestore"
@@ -72,6 +73,15 @@ func main() {
 	db, err := database.New(conf.Database.Dialect, connection, conf.Database.LogLevel)
 	if err != nil {
 		panic(err)
+	}
+	if *conf.MQTT.Enable {
+		err = mqtt.Init(mqttBroker, conf)
+		if err != nil {
+			log.Errorln(err)
+		} else {
+			go db.PublishPointsList()
+			go db.RePublishPointsCov()
+		}
 	}
 	intHandler(db)
 	defer db.Close()

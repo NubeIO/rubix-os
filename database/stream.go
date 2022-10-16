@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -135,7 +136,7 @@ func (d *GormDatabase) syncAfterCreateUpdateStream(body *model.Stream) error {
 	} else if len(*flowNetworks) == 0 {
 		return nil
 	}
-	deviceInfo, err := d.GetDeviceInfo()
+	deviceInfo, err := deviceinfo.GetDeviceInfo()
 	if err != nil {
 		return err
 	}

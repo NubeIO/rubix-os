@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -41,7 +42,7 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 	}
 	fnc.SourceUUID = body.UUID
 	fnc.SyncUUID, _ = nuuid.MakeUUID()
-	deviceInfo, err := d.GetDeviceInfo()
+	deviceInfo, err := deviceinfo.GetDeviceInfo()
 	if err != nil {
 		return nil, err
 	}

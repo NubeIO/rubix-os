@@ -1,4 +1,4 @@
-package database
+package deviceinfo
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func (d *GormDatabase) GetDeviceInfo() (*model.DeviceInfo, error) {
+func GetDeviceInfo() (*model.DeviceInfo, error) {
 	file, err := os.Open(config.Get().Location.DeviceInfoFile)
 	if err != nil {
 		log.Fatal(err)

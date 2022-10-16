@@ -98,9 +98,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		DB: db,
 	}
 
-	deviceInfoHandler := api.DeviceInfoAPI{
-		DB: db,
-	}
+	deviceInfoHandler := api.DeviceInfoAPI{}
 	writerHandler := api.WriterAPI{
 		DB: db,
 	}

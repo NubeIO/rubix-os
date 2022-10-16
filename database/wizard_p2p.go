@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -35,7 +36,7 @@ func (d *GormDatabase) WizardP2PMapping(body *model.P2PBody) (bool, error) {
 		return false, err
 	}
 
-	deviceInfo, err := d.GetDeviceInfo()
+	deviceInfo, err := deviceinfo.GetDeviceInfo()
 	if err != nil {
 		return false, fmt.Errorf("GetDeviceInfo: %s", deviceInfo)
 	}

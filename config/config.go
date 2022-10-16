@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"path"
+	"time"
 
 	"github.com/NubeIO/configor"
 )
@@ -57,8 +58,15 @@ type Configuration struct {
 	}
 	SecretKey string
 	MQTT      struct {
-		Address string `default:"localhost"`
-		Port    int    `default:"1883"`
+		Enable         *bool         `default:"true"`
+		Address        string        `default:"localhost"`
+		Port           int           `default:"1883"`
+		Username       string        `default:""`
+		Password       string        `default:""`
+		SetKeepAlive   time.Duration `default:"0s"`
+		SetPingTimeout time.Duration `default:"0s"`
+		AutoReconnect  bool          `default:"true"`
+		QOS            int           `default:"1"`
 	}
 }
 
@@ -85,8 +93,6 @@ func (conf *Configuration) Parse() *Configuration {
 	configDir := flag.String("c", "config", "Config Directory")
 	prod := flag.Bool("prod", false, "Deployment Mode")
 	auth := flag.Bool("auth", true, "enable auth")
-	mqttAddr := flag.String("mqtt-address", "localhost", "MQTT Broker Address")
-	mqttPort := flag.Int("mqtt-port", 1883, "MQTT Broker Port")
 	flag.Parse()
 	conf.Server.Port = *port
 	conf.Location.GlobalDir = *globalDir
@@ -94,8 +100,6 @@ func (conf *Configuration) Parse() *Configuration {
 	conf.Location.ConfigDir = *configDir
 	conf.Prod = *prod
 	conf.Auth = auth
-	conf.MQTT.Address = *mqttAddr
-	conf.MQTT.Port = *mqttPort
 	return conf
 }
 
