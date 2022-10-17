@@ -15,7 +15,7 @@ type PointDatabase interface {
 		currentWriterUUID *string) (*model.Point, bool, bool, bool, error)
 	GetOnePointByArgs(args Args) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
-	GetPointByName(networkName, deviceName, pointName string) (*model.Point, error)
+	GetPointByName(networkName, deviceName, pointName string, args Args) (*model.Point, error)
 	PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter, fromPlugin bool) (*model.Point, error)
 
 	CreatePointPlugin(body *model.Point) (*model.Point, error)
@@ -78,15 +78,33 @@ func (a *PointAPI) DeletePoint(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
-func (a *PointAPI) GetPointByName(ctx *gin.Context) {
+func (a *PointAPI) GetPointByNameArgs(ctx *gin.Context) {
 	networkName, deviceName, pointName := networkDevicePointNames(ctx)
-	q, err := a.DB.GetPointByName(networkName, deviceName, pointName)
+	q, err := a.DB.GetPointByName(networkName, deviceName, pointName, Args{})
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *PointAPI) GetPointByName(ctx *gin.Context) {
+	networkName := resolveNetworkName(ctx)
+	deviceName := resolveDeviceName(ctx)
+	pointName := resolvePointName(ctx)
+	args := buildPointArgs(ctx)
+	q, err := a.DB.GetPointByName(networkName, deviceName, pointName, args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *PointAPI) PointWriteByNameArgs(ctx *gin.Context) {
+	body, _ := getBODYPointWriter(ctx)
+	networkName, deviceName, pointName := networkDevicePointNames(ctx)
+	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body, false)
 	ResponseHandler(q, err, ctx)
 }
 
 func (a *PointAPI) PointWriteByName(ctx *gin.Context) {
 	body, _ := getBODYPointWriter(ctx)
-	networkName, deviceName, pointName := networkDevicePointNames(ctx)
+	networkName := resolveNetworkName(ctx)
+	deviceName := resolveDeviceName(ctx)
+	pointName := resolvePointName(ctx)
 	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body, false)
 	ResponseHandler(q, err, ctx)
 }

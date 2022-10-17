@@ -10,7 +10,6 @@ import (
 
 type NetworkDatabase interface {
 	GetNetworkByName(name string, args Args) (*model.Network, error)
-	GetNetworksByName(name string, args Args) ([]*model.Network, error)
 	GetNetworkByPluginName(name string, args Args) (*model.Network, error)
 	GetNetworksByPluginName(name string, args Args) ([]*model.Network, error)
 	GetNetworks(args Args) ([]*model.Network, error)
@@ -33,13 +32,6 @@ func (a *NetworksAPI) GetNetworkByName(ctx *gin.Context) {
 	name := resolveName(ctx)
 	args := buildNetworkArgs(ctx)
 	q, err := a.DB.GetNetworkByName(name, args) // TODO fix this need to add in like "serial"
-	ResponseHandler(q, err, ctx)
-}
-
-func (a *NetworksAPI) GetNetworksByName(ctx *gin.Context) {
-	name := resolveName(ctx)
-	args := buildNetworkArgs(ctx)
-	q, err := a.DB.GetNetworksByName(name, args)
 	ResponseHandler(q, err, ctx)
 }
 

@@ -40,6 +40,17 @@ func (d *GormDatabase) GetOneDeviceByArgs(args api.Args) (*model.Device, error) 
 	return deviceModel, nil
 }
 
+func (d *GormDatabase) GetDeviceByName(networkName string, deviceName string, args api.Args) (*model.Device, error) {
+	var deviceModel *model.Device
+	query := d.buildDeviceQuery(args)
+	if err := query.Joins("JOIN networks ON devices.network_uuid = networks.uuid").
+		Where("networks.name = ?", networkName).Where("devices.name = ?", deviceName).
+		First(&deviceModel).Error; err != nil {
+		return nil, err
+	}
+	return deviceModel, nil
+}
+
 func (d *GormDatabase) deviceNameExistsInNetwork(deviceName, networkUUID string) (device *model.Device, existing bool) {
 	network, err := d.GetNetwork(networkUUID, api.Args{WithDevices: true})
 	if err != nil {
