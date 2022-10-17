@@ -53,31 +53,15 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 	return pointModel, nil
 }
 
-func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string) (*model.Point, error) {
+func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string, args api.Args) (*model.Point, error) {
 	var pointModel *model.Point
-	net, err := d.GetNetworkByName(networkName, api.Args{WithDevices: true, WithPoints: true})
-	if err != nil {
-		return nil, errors.New("failed to find a network with that name")
-	}
-	deviceExist := false
-	pointExist := false
-	for _, device := range net.Devices {
-		if device.Name == deviceName {
-			deviceExist = true
-			for _, p := range device.Points {
-				if p.Name == pointName {
-					pointExist = true
-					pointModel = p
-					break
-				}
-			}
-		}
-	}
-	if !deviceExist {
-		return nil, errors.New("failed to find a device with that name")
-	}
-	if !pointExist {
-		return nil, errors.New("found device but failed to find a point with that name")
+	query := d.buildPointQuery(args)
+	if err := query.Joins("JOIN devices ON points.device_uuid = devices.uuid").
+		Joins("JOIN networks ON devices.network_uuid = networks.uuid").
+		Where("networks.name = ?", networkName).Where("devices.name = ?", deviceName).
+		Where("points.name = ?", pointName).
+		First(&pointModel).Error; err != nil {
+		return nil, err
 	}
 	return pointModel, nil
 }
@@ -350,7 +334,7 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 
 func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter,
 	fromPlugin bool) (*model.Point, error) {
-	point, err := d.GetPointByName(networkName, deviceName, pointName)
+	point, err := d.GetPointByName(networkName, deviceName, pointName, api.Args{})
 	if err != nil {
 		return nil, err
 	}

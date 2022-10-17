@@ -47,16 +47,6 @@ func (d *GormDatabase) GetNetworksByPlugin(pluginUUID string, args api.Args) ([]
 	return networksModel, nil
 }
 
-// GetNetworksByName returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworksByName(name string, args api.Args) ([]*model.Network, error) {
-	var networksModel []*model.Network
-	query := d.buildNetworkQuery(args)
-	if err := query.Where("name = ? ", name).Find(&networksModel).Error; err != nil {
-		return nil, err
-	}
-	return networksModel, nil
-}
-
 // GetNetworkByName returns the network for the given id or nil.
 func (d *GormDatabase) GetNetworkByName(name string, args api.Args) (*model.Network, error) {
 	var networksModel *model.Network

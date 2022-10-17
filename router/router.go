@@ -258,7 +258,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			networkRoutes.GET("/plugin/:name", networkHandler.GetNetworkByPluginName)
 			networkRoutes.GET("/plugin/all/:name", networkHandler.GetNetworksByPluginName)
 			networkRoutes.GET("/name/:name", networkHandler.GetNetworkByName)
-			networkRoutes.GET("/name/all/:name", networkHandler.GetNetworksByName)
 			networkRoutes.PATCH("/:uuid", networkHandler.UpdateNetwork)
 			networkRoutes.DELETE("/:uuid", networkHandler.DeleteNetwork)
 		}
@@ -269,6 +268,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			deviceRoutes.POST("", deviceHandler.CreateDevice)
 			deviceRoutes.GET("/:uuid", deviceHandler.GetDevice)
 			deviceRoutes.GET("/one/args", deviceHandler.GetOneDeviceByArgs)
+			deviceRoutes.GET("/name/:network_name/:device_name", deviceHandler.GetDeviceByName)
 			deviceRoutes.PATCH("/:uuid", deviceHandler.UpdateDevice)
 			deviceRoutes.DELETE("/:uuid", deviceHandler.DeleteDevice)
 		}
@@ -278,13 +278,15 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			pointRoutes.GET("", pointHandler.GetPoints)
 			pointRoutes.POST("/bulk", pointHandler.GetPointsBulk)
 			pointRoutes.GET("/:uuid", pointHandler.GetPoint)
-			pointRoutes.GET("/name", pointHandler.GetPointByName)
+			pointRoutes.GET("/name", pointHandler.GetPointByNameArgs) // TODO remove
+			pointRoutes.GET("/name/:network_name/:device_name/:point_name", pointHandler.GetPointByName)
 			pointRoutes.GET("/one/args", pointHandler.GetOnePointByArgs)
 			pointRoutes.POST("", pointHandler.CreatePoint)
 			pointRoutes.PATCH("/:uuid", pointHandler.UpdatePoint)
 			pointRoutes.PATCH("/write/:uuid", pointHandler.PointWrite)
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
-			pointRoutes.PATCH("/name", pointHandler.PointWriteByName)
+			pointRoutes.PATCH("/name", pointHandler.PointWriteByNameArgs) // TODO remove
+			pointRoutes.PATCH("/name/:network_name/:device_name/:point_name", pointHandler.PointWriteByName)
 		}
 
 		commandRoutes := apiRoutes.Group("/commands")

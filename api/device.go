@@ -9,6 +9,7 @@ type DeviceDatabase interface {
 	GetDevices(args Args) ([]*model.Device, error)
 	GetDevice(uuid string, args Args) (*model.Device, error)
 	GetOneDeviceByArgs(args Args) (*model.Device, error)
+	GetDeviceByName(networkName string, deviceName string, args Args) (*model.Device, error)
 	CreateDevice(body *model.Device) (*model.Device, error)
 	UpdateDevice(uuid string, body *model.Device, fromPlugin bool) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
@@ -37,6 +38,14 @@ func (a *DeviceAPI) GetDevice(ctx *gin.Context) {
 func (a *DeviceAPI) GetOneDeviceByArgs(ctx *gin.Context) {
 	args := buildDeviceArgs(ctx)
 	q, err := a.DB.GetOneDeviceByArgs(args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *DeviceAPI) GetDeviceByName(ctx *gin.Context) {
+	networkName := resolveNetworkName(ctx)
+	deviceName := resolveDeviceName(ctx)
+	args := buildDeviceArgs(ctx)
+	q, err := a.DB.GetDeviceByName(networkName, deviceName, args)
 	ResponseHandler(q, err, ctx)
 }
 

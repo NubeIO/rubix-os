@@ -223,6 +223,18 @@ func resolvePluginName(ctx *gin.Context) string {
 	return ctx.Param("plugin_name")
 }
 
+func resolveNetworkName(ctx *gin.Context) string {
+	return ctx.Param("network_name")
+}
+
+func resolveDeviceName(ctx *gin.Context) string {
+	return ctx.Param("device_name")
+}
+
+func resolvePointName(ctx *gin.Context) string {
+	return ctx.Param("point_name")
+}
+
 func toBool(value string) (bool, error) {
 	if value == "" {
 		return false, nil
