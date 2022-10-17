@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [v0.7.8](https://github.com/NubeIO/flow-framework/tree/v0.7.8) (2022-10-17)
+- adds rubix sync plugin
+
 ## [v0.7.7](https://github.com/NubeIO/flow-framework/tree/v0.7.7) (2022-10-10)
 - zip-hydro-tap lora fix #671
 - plugin/networklinker #670
