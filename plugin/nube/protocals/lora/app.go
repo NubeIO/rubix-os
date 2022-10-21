@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"reflect"
 	"strings"
 	"time"
@@ -255,6 +257,7 @@ func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 
 	// kinda poor repeating this but oh well
 	pointName := getStructFieldJSONNameByName(decoder.CommonValues{}, "Rssi")
+	cases.Title(language.English).String(pointName) // To capitalize the first letter of the point name
 	point := new(model.Point)
 	inst.setNewPointFields(deviceBody, point, pointName)
 	_, err = inst.addPoint(point)
@@ -263,6 +266,7 @@ func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 		return err
 	}
 	pointName = getStructFieldJSONNameByName(decoder.CommonValues{}, "Snr")
+	cases.Title(language.English).String(pointName) // To capitalize the first letter of the point name
 	inst.setNewPointFields(deviceBody, point, pointName)
 	_, err = inst.addPoint(point)
 	if err != nil {
@@ -290,6 +294,7 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 			continue
 		}
 		pointName := getReflectFieldJSONName(pointsRefl.Type().Field(i))
+		cases.Title(language.English).String(pointName) // To capitalize the first letter of the point name
 		if postfix != "" {
 			pointName = fmt.Sprintf("%s%s", pointName, postfix)
 		}
