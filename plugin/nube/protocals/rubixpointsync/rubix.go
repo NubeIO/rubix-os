@@ -64,19 +64,25 @@ func (inst *Instance) RubixPointExistsInNetworkArray(checkNetwork *[]rubixrest.R
 	pntExists = false
 	if checkNetwork != nil {
 		for _, net := range *checkNetwork {
-			if (inst.config.Job.RequireNetworkMatch && net.Name != networkName) || net.Devices == nil {
+			if inst.config.Job.RequireNetworkMatch && net.Name != networkName {
 				continue
 			}
 			netUUID = net.UUID
 			if net.Name == networkName {
 				netExists = true
 			}
+			if net.Devices == nil {
+				continue
+			}
 			for _, dev := range net.Devices {
-				if dev == nil || dev.Name != deviceName || dev.Points == nil {
+				if dev == nil || dev.Name != deviceName {
 					continue
 				}
 				devUUID = dev.UUID
 				devExists = true
+				if dev.Points == nil {
+					continue
+				}
 				for _, pnt := range dev.Points {
 					if pnt == nil || pnt.Name != pointName {
 						continue
