@@ -17,6 +17,7 @@ func (inst *Instance) SyncRubixToFF() (bool, error) {
 		inst.rubixpointsyncErrorMsg(err)
 	}
 
+	rescanRubix := false
 	if ffNetworksArray != nil {
 		for _, net := range ffNetworksArray {
 			if net == nil || net.Devices == nil {
@@ -30,10 +31,17 @@ func (inst *Instance) SyncRubixToFF() (bool, error) {
 					if pnt == nil {
 						continue
 					}
+					if rescanRubix {
+						rubixNets, err = inst.GetRubixNetworks()
+						if err != nil {
+							inst.rubixpointsyncErrorMsg(err)
+						}
+					}
 					netExists, devExists, pointExists, devUUID, netUUID, _ := inst.RubixPointExistsInNetworkArray(rubixNets, net.Name, dev.Name, pnt.Name)
 					if !pointExists && inst.config.Job.GenerateRubixPoints {
 						if (inst.config.Job.RequireNetworkMatch && !netExists) || netUUID == "" {
 							newRubixNet, err := inst.CreateNewRubixNetwork(net.Name)
+							rescanRubix = true
 							if err != nil {
 								inst.rubixpointsyncErrorMsg("bad response from CreateNewRubixNetwork(), ", err)
 								continue
@@ -42,6 +50,7 @@ func (inst *Instance) SyncRubixToFF() (bool, error) {
 						}
 						if !devExists {
 							newRubixDev, err := inst.CreateNewRubixDevice(dev.Name, netUUID)
+							rescanRubix = true
 							if err != nil {
 								inst.rubixpointsyncErrorMsg("bad response from CreateNewRubixDevice(), ", err)
 								continue
@@ -50,6 +59,7 @@ func (inst *Instance) SyncRubixToFF() (bool, error) {
 
 						}
 						_, err = inst.CreateNewRubixPoint(pnt.Name, devUUID)
+						rescanRubix = true
 						if err != nil {
 							inst.rubixpointsyncErrorMsg("bad response from CreateNewRubixPoint(), ", err)
 							continue
