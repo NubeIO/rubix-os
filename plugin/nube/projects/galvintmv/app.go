@@ -1,13 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/array"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"go.bug.st/serial"
+	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -327,6 +328,79 @@ func (inst *Instance) updatePointNames() error {
 	return nil
 }
 
+func (inst *Instance) createModbusDevicesAndPoints() error {
+	inst.tmvDebugMsg("createModbusDevicesAndPoints()")
+	jsonFile, err := os.Open("/home/user/test.json")
+	if err != nil {
+		inst.tmvErrorMsg("createModbusDevicesAndPoints() err: ", err)
+		return err
+	}
+	inst.tmvDebugMsg("createModbusDevicesAndPoints():  Successfully Opened test.json")
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	// inst.tmvDebugMsg("createModbusDevicesAndPoints():  byteValue:", byteValue)
+
+	var tmvDevices TMVDevices
+	json.Unmarshal(byteValue, &tmvDevices.Devices)
+
+	/*
+		for ind, tmvDevice := range tmvDevices.Devices {
+			inst.tmvDebugMsg(fmt.Sprintf("createModbusDevicesAndPoints() device %d: %+v", ind, tmvDevice))
+
+		}
+	*/
+
+	nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
+	// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return err
+	}
+
+	for _, net := range nets {
+		inst.tmvDebugMsg("createModbusDevicesAndPoints() Net: ", net.Name)
+		for _, dev := range net.Devices {
+			for _, tmvDevice := range tmvDevices.Devices {
+				inst.tmvDebugMsg("createModbusDevicesAndPoints() tmvDevice: ", tmvDevice.DeviceName)
+				if tmvDevice.DeviceName == dev.Name {
+					newDevice := model.Device{}
+					newDevice.Enable = boolean.NewTrue()
+					newDevice.AddressId = tmvDevice.DeviceAddress
+					newDevice.ZeroMode = boolean.NewTrue()
+					inst.addDevice(&newDevice)
+				}
+
+			}
+			/*
+				for _, pnt := range dev.Points {
+
+				}
+			*/
+		}
+	}
+	return nil
+}
+
+/*
+func (inst *Instance) updateIOModuleRTC() error {
+	inst.tmvDebugMsg("updatePointNames()")
+	nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
+	// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return err
+	}
+	for _, net := range nets {
+		inst.tmvDebugMsg("updatePointNames() Net: ", net.Name)
+		for _, dev := range net.Devices {
+			for _, pnt := range dev.Points {
+			}
+		}
+	}
+	return nil
+}
+
+*/
+
 func (inst *Instance) pointUpdateErr(point *model.Point, message string, messageLevel string, messageCode string) error {
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = messageLevel
@@ -364,13 +438,4 @@ func (inst *Instance) networkUpdateErr(network *model.Network, message string, m
 		inst.tmvErrorMsg(" networkUpdateErr()", err)
 	}
 	return err
-}
-
-func (inst *Instance) listSerialPorts() (*array.Array, error) {
-	ports, err := serial.GetPortsList()
-	p := array.NewArray()
-	for _, port := range ports {
-		p.Add(port)
-	}
-	return p, err
 }
