@@ -67,6 +67,7 @@ type Configuration struct {
 		SetPingTimeout time.Duration `default:"0s"`
 		AutoReconnect  bool          `default:"true"`
 		QOS            int           `default:"1"`
+		Retain         *bool         `default:"true"`
 	}
 }
 
