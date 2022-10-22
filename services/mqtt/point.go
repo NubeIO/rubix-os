@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/mqttclient"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -12,13 +13,16 @@ import (
 )
 
 const (
-	separator       = "/"
-	mqttTopic       = "rubix/points/value"
+	separator = "/"
+	mqttTopic = "rubix/points/value"
+	// +/+/+/+/+/+/rubix/points/value/points
+	// +/+/+/+/+/+/rubix/points/value/points/value/cov/all/system/+/net/+/dev/+/pnt
 	mqttTopicCov    = "cov"
 	mqttTopicCovAll = "all"
 )
 
 var pointMqtt *PointMqtt
+var retainMessage bool
 
 func Init(ip string, conf *config.Configuration) error {
 	pm := new(PointMqtt)
@@ -41,6 +45,7 @@ func Init(ip string, conf *config.Configuration) error {
 	if err != nil {
 		return err
 	}
+	retainMessage = boolean.NonNil(conf.MQTT.Retain)
 	return nil
 }
 
@@ -64,7 +69,7 @@ func PublishPointsList(networks []*model.Network) {
 		log.Error(err)
 		return
 	}
-	err = pointMqtt.client.Publish(topic, pointMqtt.QOS, false, string(payload))
+	err = pointMqtt.client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 	if err != nil {
 		log.Error(err)
 	}
@@ -84,7 +89,7 @@ func PublishPointCov(network *model.Network, device *model.Device, point *model.
 		log.Error(err)
 		return
 	}
-	err = pointMqtt.client.Publish(topic, pointMqtt.QOS, false, string(payload))
+	err = pointMqtt.client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 	if err != nil {
 		log.Error(err)
 	}
