@@ -22,7 +22,7 @@ func (inst *Instance) Enable() error {
 	}
 	cron = gocron.NewScheduler(time.UTC)
 	// _, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncTMVPointNames").Do(inst.updatePointNames())
-	inst.createModbusDevicesAndPoints()
+	inst.createModbusNetworkDevicesAndPoints()
 	// _, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncTMVPointNames").Do(inst.createModbusDevicesAndPoints())
 	// cron.StartAsync()
 	return nil

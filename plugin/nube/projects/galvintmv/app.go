@@ -328,7 +328,7 @@ func (inst *Instance) updatePointNames() error {
 	return nil
 }
 
-func (inst *Instance) createModbusDevicesAndPoints() error {
+func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 	inst.tmvDebugMsg("createModbusDevicesAndPoints()")
 	jsonFile, err := os.Open("/home/user/test.json")
 	if err != nil {
@@ -350,9 +350,10 @@ func (inst *Instance) createModbusDevicesAndPoints() error {
 
 		}
 	*/
+	modbusNet, err := inst.createModbusNetworkIfItNeeded("TMV")
 
-	nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
-	// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
+	// nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
+	nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err
 	}
@@ -360,14 +361,39 @@ func (inst *Instance) createModbusDevicesAndPoints() error {
 	for _, net := range nets {
 		inst.tmvDebugMsg("createModbusDevicesAndPoints() Net: ", net.Name)
 		for _, dev := range net.Devices {
+			inst.tmvDebugMsg("createModbusDevicesAndPoints() lorawan network device: ", dev.Name)
+			// Check for lorawan devices that are in the device json file
 			for _, tmvDevice := range tmvDevices.Devices {
-				inst.tmvDebugMsg("createModbusDevicesAndPoints() tmvDevice: ", tmvDevice.DeviceName)
 				if tmvDevice.DeviceName == dev.Name {
-					newDevice := model.Device{}
-					newDevice.Enable = boolean.NewTrue()
-					newDevice.AddressId = tmvDevice.DeviceAddress
-					newDevice.ZeroMode = boolean.NewTrue()
-					inst.addDevice(&newDevice)
+					inst.tmvDebugMsg("createModbusDevicesAndPoints() tmvDevice: ", tmvDevice.DeviceName)
+					var foundModbusDevice *model.Device
+					for _, modbusDevice := range modbusNet.Devices {
+						if modbusDevice.Name == tmvDevice.DeviceName {
+							foundModbusDevice = modbusDevice
+							break
+						}
+					}
+					if foundModbusDevice == nil {
+						newDevice := model.Device{}
+						newDevice.Name = tmvDevice.DeviceName
+						newDevice.Enable = boolean.NewTrue()
+						newDevice.AddressId = tmvDevice.DeviceAddress
+						newDevice.ZeroMode = boolean.NewTrue()
+						newDevice.NetworkUUID = modbusNet.UUID
+						inst.tmvDebugMsg("createModbusNetworkIfItNeeded(): ", newDevice.Name)
+						foundModbusDevice, err := inst.db.CreateDevice(&newDevice)
+						if foundModbusDevice == nil || err != nil {
+							inst.tmvErrorMsg("createModbusNetworkIfItNeeded(): failed to create tmv device: ", newDevice.Name)
+							continue
+						}
+					}
+					// modbus device exists now, so create the required points
+					var foundEnablePoint *model.Point
+					var foundSetpointPoint *model.Point
+					var foundResetPoint *model.Point
+					var foundSolenoidAllowPoint *model.Point
+					var foundCalibrationPoint *model.Point
+					var foundRTCPoint *model.Point
 				}
 
 			}
@@ -379,6 +405,27 @@ func (inst *Instance) createModbusDevicesAndPoints() error {
 		}
 	}
 	return nil
+}
+
+func (inst *Instance) createModbusNetworkIfItNeeded(reqNetName string) (*model.Network, error) {
+	inst.tmvDebugMsg("createModbusNetworkIfItNeeded(): reqNetName")
+
+	modbusNetworks, err := inst.db.GetNetworksByPluginName("modbus", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return nil, err
+	}
+	for _, modbusNet := range modbusNetworks {
+		inst.tmvDebugMsg("createModbusDevicesAndPoints() modbusNet: ", modbusNet.Name)
+		if modbusNet.Name == reqNetName {
+			return modbusNet, nil
+		}
+	}
+	// not found, so create a new FF modbus network
+	newModbusNet := model.Network{}
+	newModbusNet.PluginPath = "modbus"
+	newModbusNet.Name = reqNetName
+	newModbusNet.Enable = boolean.NewTrue()
+	return inst.db.CreateNetwork(&newModbusNet, true)
 }
 
 /*
