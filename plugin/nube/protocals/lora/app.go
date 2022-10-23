@@ -206,7 +206,6 @@ func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 
 	// kinda poor repeating this but oh well
 	pointName := getStructFieldJSONNameByName(decoder.CommonValues{}, "Rssi")
-	pointName = cases.Title(language.English).String(pointName) // To capitalize the first letter of the point name
 	fmt.Println("addDevicePoints() pointName: ", pointName)
 	point := new(model.Point)
 	inst.setNewPointFields(deviceBody, point, pointName)
@@ -216,7 +215,6 @@ func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 		return err
 	}
 	pointName = getStructFieldJSONNameByName(decoder.CommonValues{}, "Snr")
-	pointName = cases.Title(language.English).String(pointName) // To capitalize the first letter of the point name
 	inst.setNewPointFields(deviceBody, point, pointName)
 	_, err = inst.addPoint(point)
 	if err != nil {
@@ -244,7 +242,6 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 			continue
 		}
 		pointName := getReflectFieldJSONName(pointsRefl.Type().Field(i))
-		pointName = cases.Title(language.English).String(pointName) // To capitalize the first letter of the point name
 		if postfix != "" {
 			pointName = fmt.Sprintf("%s%s", pointName, postfix)
 		}
@@ -264,7 +261,7 @@ func (inst *Instance) setNewPointFields(deviceBody *model.Device, pointBody *mod
 	pointBody.IsProducer = boolean.NewFalse()
 	pointBody.IsConsumer = boolean.NewFalse()
 	pointBody.IsOutput = boolean.NewFalse()
-	pointBody.Name = fmt.Sprintf("%s", name)
+	pointBody.Name = cases.Title(language.English).String(name)
 	pointBody.IoNumber = name
 }
 
