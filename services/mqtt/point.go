@@ -16,7 +16,7 @@ const (
 	separator = "/"
 	mqttTopic = "rubix/points/value"
 	// +/+/+/+/+/+/rubix/points/value/points
-	// +/+/+/+/+/+/rubix/points/value/points/value/cov/all/system/+/net/+/dev/+/pnt
+	// +/+/+/+/+/+/rubix/points/value/cov/all/system/+/net/+/dev/+/pnt
 	mqttTopicCov    = "cov"
 	mqttTopicCovAll = "all"
 )
@@ -59,7 +59,7 @@ func PublishPointsList(networks []*model.Network) {
 		for _, device := range network.Devices {
 			for _, point := range device.Points {
 				pointPayload = append(pointPayload, &PointListPayload{UUID: point.UUID,
-					Name: fmt.Sprintf("%s:%s:%s", network.Name, device.Name, point.Name)})
+					Name: fmt.Sprintf("%s:%s:%s:%s", network.PluginPath, network.Name, device.Name, point.Name)})
 			}
 		}
 	}
@@ -95,9 +95,22 @@ func PublishPointCov(network *model.Network, device *model.Device, point *model.
 	}
 }
 
+func ifEmpty(in string) string {
+	if in == "" {
+		return "na"
+	}
+	return in
+}
+
 func makeTopic(parts []string) string {
 	deviceInfo, _ := deviceinfo.GetDeviceInfo()
-	prefixTopic := []string{deviceInfo.ClientId, deviceInfo.ClientName, deviceInfo.SiteId, deviceInfo.SiteName,
-		deviceInfo.DeviceId, deviceInfo.DeviceName}
+	clientId := deviceInfo.ClientId
+	clientName := deviceInfo.ClientName
+	siteId := deviceInfo.SiteId
+	siteName := deviceInfo.SiteName
+	deviceId := deviceInfo.DeviceId
+	deviceName := deviceInfo.DeviceName
+	prefixTopic := []string{ifEmpty(clientId), ifEmpty(clientName), ifEmpty(siteId), ifEmpty(siteName),
+		ifEmpty(deviceId), ifEmpty(deviceName)}
 	return strings.Join(append(prefixTopic, parts...), separator)
 }
