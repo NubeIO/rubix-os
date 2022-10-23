@@ -6,7 +6,7 @@ import (
 
 var m *Client
 
-// InternalMQTT internal non-secure mqtt connection
+// InternalMQTT internal non-secure localmqtt connection
 // for plugins use the plugin path as the topic
 func InternalMQTT(ip string) (bool, error) {
 	c, err := NewClient(ClientOptions{

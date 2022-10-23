@@ -61,4 +61,23 @@ points list:
   <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
 ```
 
+**get device platform info:**
+
+send a message to these topic to get the device info
+
+get the device platform info
+```
+rubix/platform/info
+// will response on this topic
+rubix/platform/info/publish
+```
+
+get the edge-device points list
+```
+rubix/platform/points
+// will response on this topic
+rubix/platform/points/publish
+```
+
+
   

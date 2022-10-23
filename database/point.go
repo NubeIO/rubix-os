@@ -143,7 +143,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 			}
 		}
 	}
-	d.PublishPointsList()
+	d.PublishPointsList("")
 	return body, nil
 }
 
@@ -184,7 +184,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
 	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil)
-	d.PublishPointsList()
+	d.PublishPointsList("")
 	return pnt, err
 }
 
@@ -328,7 +328,7 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 		return false, query.Error
 	}
 	r := query.RowsAffected
-	d.PublishPointsList()
+	d.PublishPointsList("")
 	return r != 0, nil
 }
 

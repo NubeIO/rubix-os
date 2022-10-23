@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// mqtt topic
+// localmqtt topic
 // bacnet/program/DEVICE-ID/state
 
 func checkMqttTopicUplink(topic string) bool {

@@ -1,9 +1,9 @@
-package mqtt
+package localmqtt
 
 import "github.com/NubeIO/flow-framework/mqttclient"
 
 type PointMqtt struct {
-	client *mqttclient.Client
+	Client *mqttclient.Client
 	QOS    mqttclient.QOS
 }
 
