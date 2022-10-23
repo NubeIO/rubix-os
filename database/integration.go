@@ -25,7 +25,7 @@ func (d *GormDatabase) CreateIntegration(body *model.Integration) (*model.Integr
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Integration)
 	body.Name = nameIsNil(body.Name)
 	body.PluginName = pluginIsNil(body.PluginName)
-	body.IntegrationType = typeIsNil(body.IntegrationType, "mqtt")
+	body.IntegrationType = typeIsNil(body.IntegrationType, "localmqtt")
 	p, err := d.GetPluginByPath(body.PluginName)
 	if err != nil { // the integration can be added by the pluginName
 		return nil, errors.New("invalid plugin name or id")

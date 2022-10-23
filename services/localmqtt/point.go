@@ -1,4 +1,4 @@
-package mqtt
+package localmqtt
 
 import (
 	"encoding/json"
@@ -39,9 +39,9 @@ func Init(ip string, conf *config.Configuration) error {
 		log.Println("MQTT connection error:", err)
 		return err
 	}
-	pm.client = c
+	pm.Client = c
 	pointMqtt = pm
-	err = pm.client.Connect()
+	err = pm.Client.Connect()
 	if err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func GetPointMqtt() *PointMqtt {
 	return pointMqtt
 }
 
-func PublishPointsList(networks []*model.Network) {
+func PublishPointsList(networks []*model.Network, topic string) {
 	var pointPayload []*PointListPayload
 	for _, network := range networks {
 		for _, device := range network.Devices {
@@ -63,13 +63,15 @@ func PublishPointsList(networks []*model.Network) {
 			}
 		}
 	}
-	topic := makeTopic([]string{mqttTopic, "points"})
+	if topic == "" {
+		topic = MakeTopic([]string{mqttTopic, "points"})
+	}
 	payload, err := json.Marshal(pointPayload)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	err = pointMqtt.client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
+	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 	if err != nil {
 		log.Error(err)
 	}
@@ -82,14 +84,14 @@ func PublishPointCov(network *model.Network, device *model.Device, point *model.
 		Priority: priority,
 		Ts:       point.UpdatedAt.String(),
 	}
-	topic := makeTopic([]string{mqttTopic, mqttTopicCov, mqttTopicCovAll, network.PluginPath, network.UUID,
+	topic := MakeTopic([]string{mqttTopic, mqttTopicCov, mqttTopicCovAll, network.PluginPath, network.UUID,
 		network.Name, device.UUID, device.Name, point.UUID, point.Name})
 	payload, err := json.Marshal(pointCovPayload)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	err = pointMqtt.client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
+	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 	if err != nil {
 		log.Error(err)
 	}
@@ -102,7 +104,7 @@ func ifEmpty(in string) string {
 	return in
 }
 
-func makeTopic(parts []string) string {
+func MakeTopic(parts []string) string {
 	deviceInfo, _ := deviceinfo.GetDeviceInfo()
 	clientId := deviceInfo.ClientId
 	clientName := deviceInfo.ClientName

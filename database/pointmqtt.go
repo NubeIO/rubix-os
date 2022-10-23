@@ -1,18 +1,55 @@
 package database
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/services/mqtt"
+	"github.com/NubeIO/flow-framework/services/localmqtt"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *GormDatabase) PublishPointsList() {
+const fetchDeviceInfo = "rubix/platform/info"
+const fetchPointsTopic = "rubix/platform/points"
+
+func (d *GormDatabase) PublishPointsListListener() {
+	callback := func(client mqtt.Client, message mqtt.Message) {
+		d.PublishPointsList(fmt.Sprintf("%s/publish", fetchPointsTopic))
+	}
+	topic := fetchPointsTopic
+	mqttClient := localmqtt.GetPointMqtt().Client
+	if mqttClient != nil {
+		err := mqttClient.Subscribe(topic, 1, callback)
+		if err != nil {
+			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+		} else {
+			log.Infof("localmqtt-broker subscribe:%s", topic)
+		}
+	}
+}
+
+func (d *GormDatabase) PublishDeviceInfo() {
+	callback := func(client mqtt.Client, message mqtt.Message) {
+		localmqtt.PublishInfo()
+	}
+	topic := fetchDeviceInfo
+	mqttClient := localmqtt.GetPointMqtt().Client
+	if mqttClient != nil {
+		err := mqttClient.Subscribe(fetchDeviceInfo, 1, callback)
+		if err != nil {
+			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+		} else {
+			log.Infof("localmqtt-broker subscribe:%s", topic)
+		}
+	}
+}
+
+func (d *GormDatabase) PublishPointsList(topic string) {
 	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		log.Error("PublishPointsList error:", err)
 		return
 	}
-	mqtt.PublishPointsList(networks)
+	localmqtt.PublishPointsList(networks, topic)
 }
 
 func (d *GormDatabase) RePublishPointsCov() {
@@ -25,7 +62,7 @@ func (d *GormDatabase) RePublishPointsCov() {
 		for _, device := range network.Devices {
 			for _, point := range device.Points {
 				priority := point.Priority.GetHighestPriorityValue()
-				mqtt.PublishPointCov(network, device, point, priority)
+				localmqtt.PublishPointCov(network, device, point, priority)
 			}
 		}
 	}
@@ -45,6 +82,6 @@ func (d *GormDatabase) PublishPointCov(uuid string) error {
 	if err != nil {
 		return err
 	}
-	mqtt.PublishPointCov(network, device, point, priority)
+	localmqtt.PublishPointCov(network, device, point, priority)
 	return nil
 }
