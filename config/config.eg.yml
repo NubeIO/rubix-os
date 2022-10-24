@@ -56,3 +56,4 @@ mqtt:
   autoreconnect: false
   qos: 1
   retain: true
+  globalbroadcast: false
