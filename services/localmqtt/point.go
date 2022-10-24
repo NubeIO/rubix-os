@@ -53,6 +53,40 @@ func GetPointMqtt() *PointMqtt {
 	return pointMqtt
 }
 
+func PublishPointList(networks []*model.Network, details []string) {
+	var pointPayload *model.Point
+	if len(details) != 3 {
+		return
+	}
+	networkName := details[0]
+	deviceName := details[1]
+	pointName := details[2]
+	for _, network := range networks {
+		for _, device := range network.Devices {
+			for _, point := range device.Points {
+				if networkName == network.Name {
+					if deviceName == device.Name {
+						if pointName == point.Name {
+							pointPayload = point
+						}
+					}
+				}
+			}
+		}
+	}
+
+	payload, err := json.Marshal(pointPayload)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	topic := fmt.Sprintf("rubix/platform/points/%s/%s/%s/publish", networkName, deviceName, pointName)
+	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
+	if err != nil {
+		log.Error(err)
+	}
+}
+
 func PublishPointsList(networks []*model.Network, topic string) {
 	var pointPayload []*PointListPayload
 	for _, network := range networks {
