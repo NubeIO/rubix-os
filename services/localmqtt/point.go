@@ -14,16 +14,15 @@ import (
 )
 
 const (
-	separator = "/"
-	mqttTopic = "rubix/points/value"
-	// +/+/+/+/+/+/rubix/points/value/points
-	// +/+/+/+/+/+/rubix/points/value/cov/all/system/+/net/+/dev/+/pnt
+	separator       = "/"
+	mqttTopic       = "rubix/points/value"
 	mqttTopicCov    = "cov"
 	mqttTopicCovAll = "all"
 )
 
 var pointMqtt *PointMqtt
 var retainMessage bool
+var globalBroadcast bool
 
 func Init(ip string, conf *config.Configuration) error {
 	pm := new(PointMqtt)
@@ -47,6 +46,7 @@ func Init(ip string, conf *config.Configuration) error {
 		return err
 	}
 	retainMessage = boolean.NonNil(conf.MQTT.Retain)
+	globalBroadcast = boolean.NonNil(conf.MQTT.GlobalBroadcast)
 	return nil
 }
 
@@ -83,7 +83,6 @@ func PublishPointByName(networks []*model.Network, details *interfaces.MqttPoint
 		log.Error(err)
 		return
 	}
-	//topic := fmt.Sprintf("rubix/platform/points/%s/%s/%s/publish", networkName, deviceName, pointName)
 	topic := fmt.Sprintf("rubix/platform/points/publish")
 	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 	if err != nil {
@@ -168,5 +167,10 @@ func MakeTopic(parts []string) string {
 	deviceName := deviceInfo.DeviceName
 	prefixTopic := []string{ifEmpty(clientId), ifEmpty(clientName), ifEmpty(siteId), ifEmpty(siteName),
 		ifEmpty(deviceId), ifEmpty(deviceName)}
-	return strings.Join(append(prefixTopic, parts...), separator)
+
+	if globalBroadcast {
+		return strings.Join(append(prefixTopic, parts...), separator)
+	}
+	return strings.Join(append(parts), separator)
+
 }

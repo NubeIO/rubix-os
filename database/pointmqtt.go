@@ -12,7 +12,52 @@ import (
 
 const fetchDeviceInfo = "rubix/platform/info"
 const fetchPointsTopic = "rubix/platform/points"
+const fetchPointsTopicWrite = "rubix/platform/points/write"
 const fetchPointTopic = "rubix/platform/list/points"
+
+func (d *GormDatabase) PublishPointWriteListener() {
+	callback := func(client mqtt.Client, message mqtt.Message) {
+		body := &interfaces.MqttPoint{}
+		err := json.Unmarshal(message.Payload(), &body)
+		if err == nil {
+			if body != nil {
+				d.publishPointWrite(body)
+			}
+		}
+	}
+	topic := fetchPointsTopicWrite
+	mqttClient := localmqtt.GetPointMqtt().Client
+	if mqttClient != nil {
+		err := mqttClient.Subscribe(topic, 1, callback)
+		if err != nil {
+			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+		} else {
+			log.Infof("localmqtt-broker subscribe:%s", topic)
+		}
+	}
+}
+
+func (d *GormDatabase) publishPointWrite(details *interfaces.MqttPoint) {
+	if details == nil {
+		return
+	}
+	if details.PointUUID != "" {
+		_, _, _, _, err := d.PointWrite(details.PointUUID, details.Priority, false, false, nil)
+		if err != nil {
+			log.Error("mqtt write point by uuid: error:", err)
+			return
+		}
+	} else {
+		networkName := details.NetworkName
+		deviceName := details.DeviceName
+		pointName := details.PointName
+		_, err := d.PointWriteByName(networkName, deviceName, pointName, details.Priority, false)
+		if err != nil {
+			log.Error("mqtt write point by name: error:", err)
+			return
+		}
+	}
+}
 
 func (d *GormDatabase) PublishFetchPointListener() {
 	callback := func(client mqtt.Client, message mqtt.Message) {
@@ -84,7 +129,6 @@ func (d *GormDatabase) PublishPoint(details *interfaces.MqttPoint) {
 		}
 		localmqtt.PublishPointByName(networks, details)
 	}
-
 }
 
 func (d *GormDatabase) PublishPointsList(topic string) {

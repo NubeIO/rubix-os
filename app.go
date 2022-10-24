@@ -84,6 +84,7 @@ func main() {
 			go db.PublishPointsListListener()
 			go db.PublishDeviceInfo()
 			go db.PublishFetchPointListener()
+			go db.PublishPointWriteListener()
 		}
 	}
 	intHandler(db)
