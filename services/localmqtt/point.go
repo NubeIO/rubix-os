@@ -134,7 +134,7 @@ func PublishPointCov(network *model.Network, device *model.Device, point *model.
 	pointCovPayload := &PointCovPayload{
 		Value:    point.PresentValue,
 		ValueRaw: point.OriginalValue,
-		Priority: priority,
+		Priority: point.CurrentPriority,
 		Ts:       point.UpdatedAt.String(),
 	}
 	topic := MakeTopic([]string{mqttTopic, mqttTopicCov, mqttTopicCovAll, network.PluginPath, network.UUID,
