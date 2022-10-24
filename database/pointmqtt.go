@@ -14,12 +14,6 @@ const fetchDeviceInfo = "rubix/platform/info"
 const fetchPointsTopic = "rubix/platform/points"
 const fetchPointTopic = "rubix/platform/list/points"
 
-type MqttPoint struct {
-	networkName string
-	deviceName  string
-	pointName   string
-}
-
 func (d *GormDatabase) PublishFetchPointListener() {
 	callback := func(client mqtt.Client, message mqtt.Message) {
 		body := &interfaces.MqttPoint{}
@@ -75,12 +69,22 @@ func (d *GormDatabase) PublishDeviceInfo() {
 }
 
 func (d *GormDatabase) PublishPoint(details *interfaces.MqttPoint) {
-	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true})
-	if err != nil {
-		log.Error("PublishPointsList error:", err)
-		return
+	if details.PointUUID != "" {
+		point, err := d.GetPoint(details.PointUUID, api.Args{WithPriority: true})
+		if err != nil {
+			log.Error("PublishPointsList error:", err)
+			return
+		}
+		localmqtt.PublishPoint(point)
+	} else {
+		networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true})
+		if err != nil {
+			log.Error("PublishPointsList error:", err)
+			return
+		}
+		localmqtt.PublishPointByName(networks, details)
 	}
-	localmqtt.PublishPointList(networks, details)
+
 }
 
 func (d *GormDatabase) PublishPointsList(topic string) {
