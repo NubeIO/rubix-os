@@ -1,10 +1,9 @@
 package main
 
 import (
-	"time"
-
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/go-co-op/gocron"
+	"time"
 )
 
 var cron *gocron.Scheduler
@@ -21,10 +20,10 @@ func (inst *Instance) Enable() error {
 		inst.networks = nil
 	}
 	cron = gocron.NewScheduler(time.UTC)
-	// _, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncTMVPointNames").Do(inst.updatePointNames())
+	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncTMVPointNames").Do(inst.updatePointNames())
 	inst.createModbusNetworkDevicesAndPoints()
 	// _, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncTMVPointNames").Do(inst.createModbusDevicesAndPoints())
-	// cron.StartAsync()
+	cron.StartAsync()
 	return nil
 }
 
