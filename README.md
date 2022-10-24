@@ -103,3 +103,63 @@ body by uuid
 // will response on this topic
 rubix/platform/list/points/publish
 ```
+
+point write over MQTT
+
+```
+rubix/platform/points/write
+body by name 
+{
+    "network_name": "net",
+    "device_name": "dev",
+    "point_name": "pnt",
+    "priority": {
+        "priority": {
+            "_1": null,
+            "_2": null,
+            "_3": null,
+            "_4": null,
+            "_5": null,
+            "_6": null,
+            "_7": null,
+            "_8": null,
+            "_9": null,
+            "_10": null,
+            "_11": null,
+            "_12": null,
+            "_13": null,
+            "_14": null,
+            "_15": null,
+            "_16": 11345
+        }
+    }
+}
+body by uuid
+{
+    "point_uuid": "pnt_94ea3ea254dc440a"
+     "priority": {
+        "priority": {
+            "_1": null,
+            "_2": null,
+            "_3": null,
+            "_4": null,
+            "_5": null,
+            "_6": null,
+            "_7": null,
+            "_8": null,
+            "_9": null,
+            "_10": null,
+            "_11": null,
+            "_12": null,
+            "_13": null,
+            "_14": null,
+            "_15": null,
+            "_16": 11345
+        }
+    }
+}
+// will response on this topic
+rubix/platform/list/points/publish
+```
+
+
