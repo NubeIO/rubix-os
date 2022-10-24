@@ -6,10 +6,51 @@ import (
 	"github.com/NubeIO/flow-framework/services/localmqtt"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
+	"strings"
 )
 
 const fetchDeviceInfo = "rubix/platform/info"
 const fetchPointsTopic = "rubix/platform/points"
+const fetchPointTopic = "rubix/platform/list/points/#"
+
+func splitTopic(topic string) []string {
+	parts := strings.Split(topic, "/")
+	if len(parts) > 3 {
+		if parts[0] != "rubix" {
+			return nil
+		}
+		if parts[1] != "platform" {
+			return nil
+		}
+		if parts[2] != "list" {
+			return nil
+		}
+		if parts[3] != "points" {
+			return nil
+		}
+		return parts[len(parts)-3:]
+	}
+	return nil
+}
+
+func (d *GormDatabase) PublishFetchPointListener() {
+	callback := func(client mqtt.Client, message mqtt.Message) {
+		topicParts := splitTopic(message.Topic())
+		if topicParts != nil {
+			d.PublishPoint(topicParts)
+		}
+	}
+	topic := fetchPointTopic
+	mqttClient := localmqtt.GetPointMqtt().Client
+	if mqttClient != nil {
+		err := mqttClient.Subscribe(topic, 1, callback)
+		if err != nil {
+			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+		} else {
+			log.Infof("localmqtt-broker subscribe:%s", topic)
+		}
+	}
+}
 
 func (d *GormDatabase) PublishPointsListListener() {
 	callback := func(client mqtt.Client, message mqtt.Message) {
@@ -41,6 +82,15 @@ func (d *GormDatabase) PublishDeviceInfo() {
 			log.Infof("localmqtt-broker subscribe:%s", topic)
 		}
 	}
+}
+
+func (d *GormDatabase) PublishPoint(details []string) {
+	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		log.Error("PublishPointsList error:", err)
+		return
+	}
+	localmqtt.PublishPointList(networks, details)
 }
 
 func (d *GormDatabase) PublishPointsList(topic string) {

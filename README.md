@@ -65,19 +65,23 @@ points list:
 
 send a message to these topic to get the device info
 
-get the device platform info
+get the device platform info (will return all the platform info in flow-framework)
 ```
 rubix/platform/info
 // will response on this topic
 rubix/platform/info/publish
 ```
 
-get the edge-device points list
+get the edge-device points list (will return all the points in flow-framework)
 ```
 rubix/platform/points
 // will response on this topic
 rubix/platform/points/publish
 ```
 
-
-  
+get the edge-device point (will return a single point in flow-framework)
+```
+rubix/platform/list/points/<networkName>/<deviceName>/<pointName>
+// will response on this topic
+rubix/platform/list/points/<networkName>/<deviceName>/<pointName>/publish
+```
