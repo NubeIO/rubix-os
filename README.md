@@ -81,7 +81,13 @@ rubix/platform/points/publish
 
 get the edge-device point (will return a single point in flow-framework)
 ```
-rubix/platform/list/points/<networkName>/<deviceName>/<pointName>
+rubix/platform/list/points
+body 
+{
+    "network_name": "networkName",
+    "device_name": "deviceName",
+    "point_name": "pointName"
+}
 // will response on this topic
-rubix/platform/list/points/<networkName>/<deviceName>/<pointName>/publish
+rubix/platform/list/points/publish
 ```
