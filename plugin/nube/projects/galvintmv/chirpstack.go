@@ -6,7 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin/nube/projects/galvintmv/chirpstackrest"
 )
 
-func (inst *Instance) GetChirpstackToken() (*chirpstackrest.ChirpstackToken, error) {
+func (inst *Instance) GetChirpstackToken(user, pass string) (*chirpstackrest.ChirpstackToken, error) {
 	inst.tmvDebugMsg("GetChirpstackToken()")
 	host := inst.config.Job.ChirpstackHost
 	if host == "" {
@@ -17,7 +17,7 @@ func (inst *Instance) GetChirpstackToken() (*chirpstackrest.ChirpstackToken, err
 		port = 8080
 	}
 	rest := chirpstackrest.NewNoAuth(host, int(port))
-	token, err := rest.GetChirpstackToken()
+	token, err := rest.GetChirpstackToken(user, pass)
 	if err != nil {
 		inst.tmvErrorMsg(err)
 	}
@@ -52,7 +52,7 @@ func (inst *Instance) GetChirpstackDeviceProfileUUID(chirpstackToken string) (st
 	return "", errors.New("could not find 'R-IO-OTAA' device profile UUID")
 }
 
-func (inst *Instance) AddChirpstackDevice(chirpstackAppNum, modbusAddress int, deviceName, lorawanDeviceEUI, chirpstackDeviceProfileUUID string) (*interface{}, error) {
+func (inst *Instance) AddChirpstackDevice(chirpstackAppNum, modbusAddress int, deviceName, lorawanDeviceEUI, chirpstackDeviceProfileUUID, token string) error {
 	inst.tmvDebugMsg("AddChirpstackDevice()")
 	host := inst.config.Job.ChirpstackHost
 	if host == "" {
@@ -63,12 +63,27 @@ func (inst *Instance) AddChirpstackDevice(chirpstackAppNum, modbusAddress int, d
 		port = 8080
 	}
 	rest := chirpstackrest.NewNoAuth(host, int(port))
-	response, err := rest.AddChirpstackDevice(chirpstackAppNum, modbusAddress, deviceName, lorawanDeviceEUI, chirpstackDeviceProfileUUID)
+	err := rest.AddChirpstackDevice(chirpstackAppNum, modbusAddress, deviceName, lorawanDeviceEUI, chirpstackDeviceProfileUUID, token)
 	if err != nil {
-		inst.tmvErrorMsg(err)
+		return err
 	}
+	return nil
+}
+
+func (inst *Instance) ActivateChirpstackDevice(applicationKey, lorawanDeviceEUI, token, lorawanNetworkKey string) error {
+	inst.tmvDebugMsg("ActivateChirpstackDevice(): ", lorawanDeviceEUI)
+	host := inst.config.Job.ChirpstackHost
+	if host == "" {
+		host = "0.0.0.0"
+	}
+	port := inst.config.Job.ChirpstackPort
+	if port == 0 {
+		port = 8080
+	}
+	rest := chirpstackrest.NewNoAuth(host, int(port))
+	err := rest.ActivateChirpstackDevice(applicationKey, lorawanDeviceEUI, token, lorawanNetworkKey)
 	if err != nil {
-		return nil, errors.New("could not get chirpstack token")
+		return err
 	}
-	return response, nil
+	return nil
 }

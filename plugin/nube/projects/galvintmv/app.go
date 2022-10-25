@@ -332,12 +332,12 @@ func (inst *Instance) updatePointNames() error {
 
 func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints()")
-	jsonFile, err := os.Open("/home/user/test.json")
+	jsonFile, err := os.Open(inst.config.Job.DeviceJSONFilePath)
 	if err != nil {
 		inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() file open err: ", err)
 		return err
 	}
-	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints():  Successfully Opened test.json")
+	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints():  Successfully Opened ", inst.config.Job.DeviceJSONFilePath)
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -772,45 +772,48 @@ func (inst *Instance) createModbusNetworkIfItNeeded(reqNetName string) (*model.N
 	return inst.db.CreateNetwork(&newModbusNet, true)
 }
 
-func (inst *Instance) createChirpstackDevices(applicationNum int) (*model.Network, error) {
-	inst.tmvDebugMsg("createChirpstackDevices()")
-	jsonFile, err := os.Open("/home/user/test.json")
+func (inst *Instance) createAndActivateChirpstackDevices() error {
+	inst.tmvDebugMsg("createAndActivateChirpstackDevices()")
+	jsonFile, err := os.Open(inst.config.Job.DeviceJSONFilePath)
 	if err != nil {
-		inst.tmvErrorMsg("createChirpstackDevices() file open err: ", err)
-		return nil, err
+		inst.tmvErrorMsg("createAndActivateChirpstackDevices() file open err: ", err)
+		return err
 	}
-	inst.tmvDebugMsg("createChirpstackDevices():  Successfully Opened test.json")
+	inst.tmvDebugMsg("createAndActivateChirpstackDevices():  Successfully Opened ", inst.config.Job.DeviceJSONFilePath)
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
-	// inst.tmvDebugMsg("createModbusDevicesAndPoints():  byteValue:", byteValue)
 
 	var tmvDevices TMVDevices
 	json.Unmarshal(byteValue, &tmvDevices.Devices)
 
-	inst.tmvDebugMsg("createModbusNetworkIfItNeeded(): reqNetName")
-
-	modbusNetworks, err := inst.db.GetNetworksByPluginName("modbus", api.Args{WithDevices: true, WithPoints: true})
+	token, err := inst.GetChirpstackToken(inst.config.Job.ChirpstackUsername, inst.config.Job.ChirpstackPassword)
 	if err != nil {
-		return nil, err
+		inst.tmvDebugMsg("createAndActivateChirpstackDevices() err: ", err)
+		return nil
 	}
-	for _, modbusNet := range modbusNetworks {
-		inst.tmvDebugMsg("createModbusDevicesAndPoints() modbusNet: ", modbusNet.Name)
-		if modbusNet.Name == "" {
-			return modbusNet, nil
+	if token != nil && token.Token != "" {
+		inst.tmvDebugMsg("createAndActivateChirpstackDevices() token: ", token.Token)
+		profileUUID, err := inst.GetChirpstackDeviceProfileUUID(token.Token)
+		if profileUUID == "" || err != nil {
+			inst.tmvErrorMsg("createAndActivateChirpstackDevices() err: ", err)
+			return err
+		}
+		inst.tmvDebugMsg("createAndActivateChirpstackDevices() device profile UUID: ", profileUUID)
+
+		for _, tmvDevice := range tmvDevices.Devices {
+			err := inst.AddChirpstackDevice(inst.config.Job.ChirpstackApplicationNumber, tmvDevice.DeviceAddress, tmvDevice.DeviceName, tmvDevice.LoRaWANDeviceEUI, profileUUID, token.Token)
+			// err := inst.AddChirpstackDevice(inst.config.Job.ChirpstackApplicationNumber, 666, "Test21", "4E7562654910FFFF", profileUUID, token.Token)
+			if err != nil {
+				inst.tmvErrorMsg("createAndActivateChirpstackDevices() AddChirpstackDevice() error: ", err)
+			}
+			err = inst.ActivateChirpstackDevice(inst.config.Job.ChirpstackNetworkKey, tmvDevice.LoRaWANDeviceEUI, token.Token, inst.config.Job.ChirpstackNetworkKey)
+			if err != nil {
+				inst.tmvErrorMsg("createAndActivateChirpstackDevices() ActivateChirpstackDevice() error: ", err)
+			}
 		}
 	}
-	// not found, so create a new FF modbus network
-	newModbusNet := model.Network{}
-	newModbusNet.PluginPath = "modbus"
-	// newModbusNet.Name = reqNetName
-	newModbusNet.Enable = boolean.NewTrue()
-	serialPort := "/data/socat/ptyLORAWAN"
-	newModbusNet.SerialPort = &serialPort
-	newModbusNet.SerialTimeout = integer.New(8)
-	newModbusNet.MaxPollRate = float.New(10)
-	newModbusNet.TransportType = "serial"
-	return inst.db.CreateNetwork(&newModbusNet, true)
+	return nil
 }
 
 /*

@@ -6,17 +6,25 @@ type Config struct {
 }
 
 type Job struct {
-	Frequency      string   `yaml:"frequency"`
-	Networks       []string `yaml:"networks"`
-	ChirpstackHost string   `yaml:"host"`
-	ChirpstackPort float64  `yaml:"port"`
+	EnableConfigSteps           bool    `yaml:"enable_config_steps"`
+	Frequency                   string  `yaml:"frequency"`
+	ChirpstackHost              string  `yaml:"chirpstack_host"`
+	ChirpstackPort              float64 `yaml:"chirpstack_port"`
+	ChirpstackApplicationNumber int     `yaml:"chirpstack_application_number"`
+	ChirpstackNetworkKey        string  `yaml:"chirpstack_network_key"`
+	ChirpstackUsername          string  `yaml:"chirpstack_username"`
+	ChirpstackPassword          string  `yaml:"chirpstack_password"`
+	DeviceJSONFilePath          string  `yaml:"device_json_file_path"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
 	job := Job{
-		Frequency:      "60m",
-		ChirpstackHost: "0.0.0.0",
-		ChirpstackPort: 8080,
+		EnableConfigSteps:           false,
+		Frequency:                   "30m",
+		ChirpstackHost:              "0.0.0.0",
+		ChirpstackPort:              8080,
+		ChirpstackApplicationNumber: 1,
+		DeviceJSONFilePath:          "/home/pi/test.json",
 	}
 
 	return &Config{
