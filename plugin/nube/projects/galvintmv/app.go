@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -332,12 +333,12 @@ func (inst *Instance) updatePointNames() error {
 
 func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints()")
-	jsonFile, err := os.Open(inst.config.Job.DeviceJSONFilePath)
+	jsonFile, err := os.Open(inst.config.Job.TMVJSONFilePath)
 	if err != nil {
 		inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() file open err: ", err)
 		return err
 	}
-	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints():  Successfully Opened ", inst.config.Job.DeviceJSONFilePath)
+	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints():  Successfully Opened ", inst.config.Job.TMVJSONFilePath)
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -774,12 +775,12 @@ func (inst *Instance) createModbusNetworkIfItNeeded(reqNetName string) (*model.N
 
 func (inst *Instance) createAndActivateChirpstackDevices() error {
 	inst.tmvDebugMsg("createAndActivateChirpstackDevices()")
-	jsonFile, err := os.Open(inst.config.Job.DeviceJSONFilePath)
+	jsonFile, err := os.Open(inst.config.Job.TMVJSONFilePath)
 	if err != nil {
 		inst.tmvErrorMsg("createAndActivateChirpstackDevices() file open err: ", err)
 		return err
 	}
-	inst.tmvDebugMsg("createAndActivateChirpstackDevices():  Successfully Opened ", inst.config.Job.DeviceJSONFilePath)
+	inst.tmvDebugMsg("createAndActivateChirpstackDevices():  Successfully Opened ", inst.config.Job.TMVJSONFilePath)
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -801,6 +802,7 @@ func (inst *Instance) createAndActivateChirpstackDevices() error {
 		}
 		inst.tmvDebugMsg("createAndActivateChirpstackDevices() device profile UUID: ", profileUUID)
 
+		mapFileContent := ""
 		for _, tmvDevice := range tmvDevices.Devices {
 			err := inst.AddChirpstackDevice(inst.config.Job.ChirpstackApplicationNumber, tmvDevice.DeviceAddress, tmvDevice.DeviceName, tmvDevice.LoRaWANDeviceEUI, profileUUID, token.Token)
 			// err := inst.AddChirpstackDevice(inst.config.Job.ChirpstackApplicationNumber, 666, "Test21", "4E7562654910FFFF", profileUUID, token.Token)
@@ -811,30 +813,58 @@ func (inst *Instance) createAndActivateChirpstackDevices() error {
 			if err != nil {
 				inst.tmvErrorMsg("createAndActivateChirpstackDevices() ActivateChirpstackDevice() error: ", err)
 			}
+			mapFileContent += strconv.Itoa(tmvDevice.DeviceAddress) + ":" + tmvDevice.LoRaWANDeviceEUI + "\n"
+		}
+		// err = os.Remove(inst.config.Job.LorawanBridgeMapFilePath)
+		err = os.Remove("/home/pi/lorawan-modbus-bridge/map.txt")
+		if err != nil {
+			inst.tmvErrorMsg("createAndActivateChirpstackDevices() remove old map file error: ", err)
+		}
+		// err = os.WriteFile(inst.config.Job.LorawanBridgeMapFilePath, []byte(mapFileContent), 0666)
+		err = os.WriteFile("/home/pi/lorawan-modbus-bridge/map.txt", []byte(mapFileContent), 0666)
+		if err != nil {
+			inst.tmvErrorMsg("createAndActivateChirpstackDevices() create new map file error: ", err)
 		}
 	}
 	return nil
 }
 
-/*
 func (inst *Instance) updateIOModuleRTC() error {
-	inst.tmvDebugMsg("updatePointNames()")
-	nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
+	inst.tmvDebugMsg("updateIOModuleRTC()")
+	nets, err := inst.db.GetNetworksByPluginName("modbus", api.Args{WithDevices: true, WithPoints: true})
 	// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err
 	}
 	for _, net := range nets {
-		inst.tmvDebugMsg("updatePointNames() Net: ", net.Name)
+		inst.tmvDebugMsg("updateIOModuleRTC() Net: ", net.Name)
 		for _, dev := range net.Devices {
 			for _, pnt := range dev.Points {
+				if pnt.Name == "RTC" {
+					inst.tmvDebugMsg("updateIOModuleRTC() rtcPointWrite() device: ", dev.Name)
+					inst.rtcPointWrite(pnt)
+					time.Sleep(20 * time.Second)
+				}
 			}
 		}
 	}
 	return nil
 }
 
-*/
+func (inst *Instance) rtcPointWrite(rtcPoint *model.Point) error {
+	now := time.Now().Unix()
+	inst.tmvDebugMsg("rtcPointWrite() now: ", now)
+	pointUpdateMap := make(map[string]*float64)
+	pointUpdateMap["_1"] = float.New(float64(now))
+	pointWriter := model.PointWriter{Priority: &pointUpdateMap}
+
+	_, _, _, _, err := inst.db.PointWrite(rtcPoint.UUID, &pointWriter, false)
+	if err != nil {
+		inst.tmvErrorMsg("rtcPointWrite() PointWrite() error: ", err)
+		return err
+	}
+	return nil
+}
 
 func (inst *Instance) pointUpdateErr(point *model.Point, message string, messageLevel string, messageCode string) error {
 	point.CommonFault.InFault = true
