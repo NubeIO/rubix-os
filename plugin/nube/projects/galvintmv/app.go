@@ -332,12 +332,12 @@ func (inst *Instance) updatePointNames() error {
 
 func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints()")
-	jsonFile, err := os.Open("/home/user/test.json")
+	jsonFile, err := os.Open(inst.config.Job.DeviceJSONFilePath)
 	if err != nil {
 		inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() file open err: ", err)
 		return err
 	}
-	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints():  Successfully Opened test.json")
+	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints():  Successfully Opened ", inst.config.Job.DeviceJSONFilePath)
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)
@@ -774,12 +774,12 @@ func (inst *Instance) createModbusNetworkIfItNeeded(reqNetName string) (*model.N
 
 func (inst *Instance) createAndActivateChirpstackDevices() error {
 	inst.tmvDebugMsg("createAndActivateChirpstackDevices()")
-	jsonFile, err := os.Open("/home/user/test.json")
+	jsonFile, err := os.Open(inst.config.Job.DeviceJSONFilePath)
 	if err != nil {
 		inst.tmvErrorMsg("createAndActivateChirpstackDevices() file open err: ", err)
 		return err
 	}
-	inst.tmvDebugMsg("createAndActivateChirpstackDevices():  Successfully Opened test.json")
+	inst.tmvDebugMsg("createAndActivateChirpstackDevices():  Successfully Opened ", inst.config.Job.DeviceJSONFilePath)
 	defer jsonFile.Close()
 
 	byteValue, _ := ioutil.ReadAll(jsonFile)

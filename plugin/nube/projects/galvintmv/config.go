@@ -14,6 +14,7 @@ type Job struct {
 	ChirpstackNetworkKey        string  `yaml:"chirpstack_network_key"`
 	ChirpstackUsername          string  `yaml:"chirpstack_username"`
 	ChirpstackPassword          string  `yaml:"chirpstack_password"`
+	DeviceJSONFilePath          string  `yaml:"device_json_file_path"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
@@ -23,6 +24,7 @@ func (inst *Instance) DefaultConfig() interface{} {
 		ChirpstackHost:              "0.0.0.0",
 		ChirpstackPort:              8080,
 		ChirpstackApplicationNumber: 1,
+		DeviceJSONFilePath:          "/home/pi/test.json",
 	}
 
 	return &Config{
