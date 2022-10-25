@@ -148,3 +148,32 @@ type History struct {
 	Value     float64   `json:"value" gorm:"primary_key"`
 	Timestamp time.Time `json:"timestamp" gorm:"primary_key"`
 }
+
+type HistoryData struct {
+	Value            float64   `json:"value"`
+	Timestamp        time.Time `json:"timestamp"`
+	RubixNetworkUUID string    `json:"rubix_network_uuid"`
+	RubixNetworkName string    `json:"rubix_network_name"`
+	RubixDeviceUUID  string    `json:"rubix_device_uuid"`
+	RubixDeviceName  string    `json:"rubix_device_name"`
+	RubixPointUUID   string    `json:"rubix_point_uuid"`
+	RubixPointName   string    `json:"rubix_point_name"`
+	TagData
+	FlowNetworkCloneData
+}
+
+type TagData struct {
+	NetworkTag string `json:"network_tag,omitempty"`
+	DeviceTag  string `json:"device_tag,omitempty"`
+	PointTag   string `json:"point_tag,omitempty"`
+}
+
+type FlowNetworkCloneData struct {
+	GlobalUUID string `json:"global_uuid,omitempty"`
+	ClintId    string `json:"client_id,omitempty"`
+	ClintName  string `json:"client_name,omitempty"`
+	SiteId     string `json:"site_id,omitempty"`
+	SiteName   string `json:"site_name,omitempty"`
+	DeviceId   string `json:"device_id,omitempty"`
+	DeviceName string `json:"device_name,omitempty"`
+}
