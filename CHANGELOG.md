@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.7.9](https://github.com/NubeIO/flow-framework/tree/v0.7.9) (2022-10-25)
+- capitalizes lora naming
+- adds mqtt functionality
 
 ## [v0.7.8](https://github.com/NubeIO/flow-framework/tree/v0.7.8) (2022-10-17)
 - adds rubix sync plugin
