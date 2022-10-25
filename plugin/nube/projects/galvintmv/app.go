@@ -1,13 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/array"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"go.bug.st/serial"
+	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -259,7 +262,7 @@ func (inst *Instance) updatePointNames() error {
 				newPointName := ""
 				switch pnt.Name {
 				case "digital-1":
-					newPointName = "APP-FAULT"
+					newPointName = "APP_FAULT"
 				case "digital-2":
 					newPointName = "FLOW_STATUS"
 				case "temp-3":
@@ -327,6 +330,509 @@ func (inst *Instance) updatePointNames() error {
 	return nil
 }
 
+func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
+	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints()")
+	jsonFile, err := os.Open("/home/user/test.json")
+	if err != nil {
+		inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() file open err: ", err)
+		return err
+	}
+	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints():  Successfully Opened test.json")
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	// inst.tmvDebugMsg("createModbusDevicesAndPoints():  byteValue:", byteValue)
+
+	var tmvDevices TMVDevices
+	json.Unmarshal(byteValue, &tmvDevices.Devices)
+
+	/*
+		for ind, tmvDevice := range tmvDevices.Devices {
+			inst.tmvDebugMsg(fmt.Sprintf("createModbusDevicesAndPoints() device %d: %+v", ind, tmvDevice))
+
+		}
+	*/
+	modbusNet, err := inst.createModbusNetworkIfItNeeded("TMV")
+
+	// nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
+	nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return err
+	}
+
+	for _, net := range nets {
+		inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints() Net: ", net.Name)
+		for _, dev := range net.Devices {
+			inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints() lorawan network device: ", dev.Name)
+			// Check for lorawan devices that are in the device json file
+			for _, tmvDevice := range tmvDevices.Devices {
+				if tmvDevice.DeviceName == dev.Name {
+					inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints() tmvDevice: ", tmvDevice.DeviceName)
+					var foundModbusDevice *model.Device
+					for _, modbusDevice := range modbusNet.Devices {
+						if modbusDevice.Name == tmvDevice.DeviceName {
+							foundModbusDevice = modbusDevice
+							break
+						}
+					}
+					if foundModbusDevice == nil {
+						inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints() no existing ModbusDevice: ")
+						newDevice := model.Device{}
+						newDevice.Name = tmvDevice.DeviceName
+						newDevice.Enable = boolean.NewTrue()
+						newDevice.AddressId = tmvDevice.DeviceAddress
+						newDevice.ZeroMode = boolean.NewTrue()
+						newDevice.NetworkUUID = modbusNet.UUID
+						inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints(): ", newDevice.Name)
+						foundModbusDevice, err = inst.db.CreateDevice(&newDevice)
+						if foundModbusDevice == nil || err != nil {
+							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints(): failed to create tmv device: ", newDevice.Name)
+							continue
+						}
+					}
+					// modbus device exists now, so create the required points
+					var foundEnablePoint *model.Point
+					var foundSetpointPoint *model.Point
+					var foundResetPoint *model.Point
+					var foundSolenoidAllowPoint *model.Point
+					var foundCalibrationPoint *model.Point
+					var foundRTCPoint *model.Point
+					if foundModbusDevice.Points != nil {
+						for _, modbusPoint := range foundModbusDevice.Points {
+							switch modbusPoint.Name {
+							case "ENABLE":
+								foundEnablePoint = modbusPoint
+								pointUpdateReq := false
+								if boolean.NonNil(foundEnablePoint.Enable) != false {
+									pointUpdateReq = true
+									foundEnablePoint.Enable = boolean.NewTrue()
+								}
+								if integer.NonNil(foundEnablePoint.AddressID) != 1001 {
+									pointUpdateReq = true
+									foundEnablePoint.AddressID = integer.New(1001)
+								}
+								if foundEnablePoint.ObjectType != string(model.ObjTypeWriteCoil) {
+									pointUpdateReq = true
+									foundEnablePoint.ObjectType = string(model.ObjTypeWriteCoil)
+								}
+								if foundEnablePoint.WriteMode != model.WriteOnce {
+									pointUpdateReq = true
+									foundEnablePoint.WriteMode = model.WriteOnce
+								}
+								if foundEnablePoint.DataType != string(model.TypeDigital) {
+									pointUpdateReq = true
+									foundEnablePoint.DataType = string(model.TypeDigital)
+								}
+								if foundEnablePoint.PollRate != model.RATE_SLOW {
+									pointUpdateReq = true
+									foundEnablePoint.PollRate = model.RATE_SLOW
+								}
+								if foundEnablePoint.PollPriority != model.PRIORITY_HIGH {
+									pointUpdateReq = true
+									foundEnablePoint.PollPriority = model.PRIORITY_HIGH
+								}
+								if pointUpdateReq {
+									foundEnablePoint, err = inst.db.UpdatePoint(foundEnablePoint.UUID, foundEnablePoint, false, false)
+									if err != nil {
+										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() EnablePoint update err: ", err)
+									}
+								}
+							case "TEMPERATURE_SP":
+								foundSetpointPoint = modbusPoint
+								pointUpdateReq := false
+								if boolean.NonNil(foundSetpointPoint.Enable) != false {
+									pointUpdateReq = true
+									foundSetpointPoint.Enable = boolean.NewTrue()
+								}
+								if integer.NonNil(foundSetpointPoint.AddressID) != 1001 {
+									pointUpdateReq = true
+									foundSetpointPoint.AddressID = integer.New(1001)
+								}
+								if foundSetpointPoint.ObjectType != string(model.ObjTypeWriteHolding) {
+									pointUpdateReq = true
+									foundSetpointPoint.ObjectType = string(model.ObjTypeWriteHolding)
+								}
+								if foundSetpointPoint.WriteMode != model.WriteOnce {
+									pointUpdateReq = true
+									foundSetpointPoint.WriteMode = model.WriteOnce
+								}
+								if foundSetpointPoint.DataType != string(model.TypeFloat64) {
+									pointUpdateReq = true
+									foundSetpointPoint.DataType = string(model.TypeFloat64)
+								}
+								if foundSetpointPoint.PollRate != model.RATE_SLOW {
+									pointUpdateReq = true
+									foundSetpointPoint.PollRate = model.RATE_SLOW
+								}
+								if foundSetpointPoint.PollPriority != model.PRIORITY_HIGH {
+									pointUpdateReq = true
+									foundSetpointPoint.PollPriority = model.PRIORITY_HIGH
+								}
+								if pointUpdateReq {
+									foundSetpointPoint, err = inst.db.UpdatePoint(foundSetpointPoint.UUID, foundSetpointPoint, false, false)
+									if err != nil {
+										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SetpointPoint update err: ", err)
+									}
+								}
+							case "SOLENOID_ALLOW":
+								foundSolenoidAllowPoint = modbusPoint
+								pointUpdateReq := false
+								if boolean.NonNil(foundSolenoidAllowPoint.Enable) != false {
+									pointUpdateReq = true
+									foundSolenoidAllowPoint.Enable = boolean.NewTrue()
+								}
+								if integer.NonNil(foundSolenoidAllowPoint.AddressID) != 1003 {
+									pointUpdateReq = true
+									foundSolenoidAllowPoint.AddressID = integer.New(1003)
+								}
+								if foundSolenoidAllowPoint.ObjectType != string(model.ObjTypeWriteCoil) {
+									pointUpdateReq = true
+									foundSolenoidAllowPoint.ObjectType = string(model.ObjTypeWriteCoil)
+								}
+								if foundSolenoidAllowPoint.WriteMode != model.WriteOnce {
+									pointUpdateReq = true
+									foundSolenoidAllowPoint.WriteMode = model.WriteOnce
+								}
+								if foundSolenoidAllowPoint.DataType != string(model.TypeDigital) {
+									pointUpdateReq = true
+									foundSolenoidAllowPoint.DataType = string(model.TypeDigital)
+								}
+								if foundSolenoidAllowPoint.PollRate != model.RATE_SLOW {
+									pointUpdateReq = true
+									foundSolenoidAllowPoint.PollRate = model.RATE_SLOW
+								}
+								if foundSolenoidAllowPoint.PollPriority != model.PRIORITY_HIGH {
+									pointUpdateReq = true
+									foundSolenoidAllowPoint.PollPriority = model.PRIORITY_HIGH
+								}
+								if pointUpdateReq {
+									foundSolenoidAllowPoint, err = inst.db.UpdatePoint(foundSolenoidAllowPoint.UUID, foundSolenoidAllowPoint, false, false)
+									if err != nil {
+										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SolenoidAllowPoint update err: ", err)
+									}
+								}
+							case "TEMP_CALIBRATION_OFFSET":
+								foundCalibrationPoint = modbusPoint
+								pointUpdateReq := false
+								if boolean.NonNil(foundCalibrationPoint.Enable) != false {
+									pointUpdateReq = true
+									foundCalibrationPoint.Enable = boolean.NewTrue()
+								}
+								if integer.NonNil(foundCalibrationPoint.AddressID) != 1013 {
+									pointUpdateReq = true
+									foundCalibrationPoint.AddressID = integer.New(1013)
+								}
+								if foundCalibrationPoint.ObjectType != string(model.ObjTypeWriteHolding) {
+									pointUpdateReq = true
+									foundCalibrationPoint.ObjectType = string(model.ObjTypeWriteHolding)
+								}
+								if foundCalibrationPoint.WriteMode != model.WriteOnce {
+									pointUpdateReq = true
+									foundCalibrationPoint.WriteMode = model.WriteOnce
+								}
+								if foundCalibrationPoint.DataType != string(model.TypeFloat64) {
+									pointUpdateReq = true
+									foundCalibrationPoint.DataType = string(model.TypeFloat64)
+								}
+								if foundCalibrationPoint.PollRate != model.RATE_SLOW {
+									pointUpdateReq = true
+									foundCalibrationPoint.PollRate = model.RATE_SLOW
+								}
+								if foundCalibrationPoint.PollPriority != model.PRIORITY_HIGH {
+									pointUpdateReq = true
+									foundCalibrationPoint.PollPriority = model.PRIORITY_HIGH
+								}
+								if pointUpdateReq {
+									foundCalibrationPoint, err = inst.db.UpdatePoint(foundCalibrationPoint.UUID, foundCalibrationPoint, false, false)
+									if err != nil {
+										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() CalibrationPoint update err: ", err)
+									}
+								}
+							case "RESET_ALL":
+								foundResetPoint = modbusPoint
+								pointUpdateReq := false
+								if boolean.NonNil(foundResetPoint.Enable) != false {
+									pointUpdateReq = true
+									foundResetPoint.Enable = boolean.NewTrue()
+								}
+								if integer.NonNil(foundResetPoint.AddressID) != 1002 {
+									pointUpdateReq = true
+									foundResetPoint.AddressID = integer.New(1002)
+								}
+								if foundResetPoint.ObjectType != string(model.ObjTypeWriteCoil) {
+									pointUpdateReq = true
+									foundResetPoint.ObjectType = string(model.ObjTypeWriteCoil)
+								}
+								if foundResetPoint.WriteMode != model.WriteOnce {
+									pointUpdateReq = true
+									foundResetPoint.WriteMode = model.WriteOnce
+								}
+								if foundResetPoint.DataType != string(model.TypeDigital) {
+									pointUpdateReq = true
+									foundResetPoint.DataType = string(model.TypeDigital)
+								}
+								if foundResetPoint.PollRate != model.RATE_SLOW {
+									pointUpdateReq = true
+									foundResetPoint.PollRate = model.RATE_SLOW
+								}
+								if foundResetPoint.PollPriority != model.PRIORITY_HIGH {
+									pointUpdateReq = true
+									foundResetPoint.PollPriority = model.PRIORITY_HIGH
+								}
+								if pointUpdateReq {
+									foundResetPoint, err = inst.db.UpdatePoint(foundResetPoint.UUID, foundResetPoint, false, false)
+									if err != nil {
+										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() ResetPoint update err: ", err)
+									}
+								}
+							case "RTC":
+								foundRTCPoint = modbusPoint
+								pointUpdateReq := false
+								if boolean.NonNil(foundRTCPoint.Enable) != false {
+									pointUpdateReq = true
+									foundRTCPoint.Enable = boolean.NewTrue()
+								}
+								if integer.NonNil(foundRTCPoint.AddressID) != 10007 {
+									pointUpdateReq = true
+									foundRTCPoint.AddressID = integer.New(10007)
+								}
+								if foundRTCPoint.ObjectType != string(model.ObjTypeWriteHolding) {
+									pointUpdateReq = true
+									foundRTCPoint.ObjectType = string(model.ObjTypeWriteHolding)
+								}
+								if foundRTCPoint.WriteMode != model.WriteOnce {
+									pointUpdateReq = true
+									foundRTCPoint.WriteMode = model.WriteOnce
+								}
+								if foundRTCPoint.DataType != string(model.TypeUint32) {
+									pointUpdateReq = true
+									foundRTCPoint.DataType = string(model.TypeUint32)
+								}
+								if foundRTCPoint.PollRate != model.RATE_SLOW {
+									pointUpdateReq = true
+									foundRTCPoint.PollRate = model.RATE_SLOW
+								}
+								if foundRTCPoint.PollPriority != model.PRIORITY_HIGH {
+									pointUpdateReq = true
+									foundRTCPoint.PollPriority = model.PRIORITY_HIGH
+								}
+								if pointUpdateReq {
+									foundRTCPoint, err = inst.db.UpdatePoint(foundRTCPoint.UUID, foundRTCPoint, false, false)
+									if err != nil {
+										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCPoint update err: ", err)
+									}
+								}
+							}
+						}
+					}
+					if foundEnablePoint == nil {
+						foundEnablePoint = &model.Point{}
+						foundEnablePoint.DeviceUUID = foundModbusDevice.UUID
+						foundEnablePoint.Name = "ENABLE"
+						foundEnablePoint.Enable = boolean.NewTrue()
+						foundEnablePoint.AddressID = integer.New(1001)
+						foundEnablePoint.ObjectType = string(model.ObjTypeWriteCoil)
+						foundEnablePoint.WriteMode = model.WriteOnce
+						foundEnablePoint.DataType = string(model.TypeDigital)
+						foundEnablePoint.PollRate = model.RATE_SLOW
+						foundEnablePoint.PollPriority = model.PRIORITY_HIGH
+						foundEnablePoint.Fallback = float.New(1)
+						foundEnablePoint.WritePollRequired = boolean.NewTrue()
+						foundEnablePoint, err = inst.db.CreatePoint(foundEnablePoint, false, false)
+						if err != nil {
+							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() EnablePoint create err: ", err)
+						}
+					}
+					if foundSetpointPoint == nil {
+						foundSetpointPoint = &model.Point{}
+						foundSetpointPoint.DeviceUUID = foundModbusDevice.UUID
+						foundSetpointPoint.Name = "TEMPERATURE_SP"
+						foundSetpointPoint.Enable = boolean.NewTrue()
+						foundSetpointPoint.AddressID = integer.New(1001)
+						foundSetpointPoint.ObjectType = string(model.ObjTypeWriteHolding)
+						foundSetpointPoint.WriteMode = model.WriteOnce
+						foundSetpointPoint.DataType = string(model.TypeFloat64)
+						foundSetpointPoint.PollRate = model.RATE_SLOW
+						foundSetpointPoint.PollPriority = model.PRIORITY_HIGH
+						foundSetpointPoint.Fallback = float.New(tmvDevice.TemperatureSetpoint)
+						foundSetpointPoint.WritePollRequired = boolean.NewTrue()
+						foundSetpointPoint, err = inst.db.CreatePoint(foundSetpointPoint, false, false)
+						if err != nil {
+							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SetpointPoint create err: ", err)
+						}
+					}
+					if foundResetPoint == nil {
+						foundResetPoint = &model.Point{}
+						foundResetPoint.DeviceUUID = foundModbusDevice.UUID
+						foundResetPoint.Name = "RESET_ALL"
+						foundResetPoint.Enable = boolean.NewTrue()
+						foundResetPoint.AddressID = integer.New(1002)
+						foundResetPoint.ObjectType = string(model.ObjTypeWriteCoil)
+						foundResetPoint.WriteMode = model.WriteOnce
+						foundResetPoint.DataType = string(model.TypeDigital)
+						foundResetPoint.PollRate = model.RATE_SLOW
+						foundResetPoint.PollPriority = model.PRIORITY_HIGH
+						foundResetPoint.Fallback = float.New(0)
+						foundResetPoint, err = inst.db.CreatePoint(foundResetPoint, false, false)
+						if err != nil {
+							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() ResetPoint create err: ", err)
+						}
+					}
+					if foundSolenoidAllowPoint == nil {
+						foundSolenoidAllowPoint = &model.Point{}
+						foundSolenoidAllowPoint.DeviceUUID = foundModbusDevice.UUID
+						foundSolenoidAllowPoint.Name = "SOLENOID_ALLOW"
+						foundSolenoidAllowPoint.Enable = boolean.NewTrue()
+						foundSolenoidAllowPoint.AddressID = integer.New(1003)
+						foundSolenoidAllowPoint.ObjectType = string(model.ObjTypeWriteCoil)
+						foundSolenoidAllowPoint.WriteMode = model.WriteOnce
+						foundSolenoidAllowPoint.DataType = string(model.TypeDigital)
+						foundSolenoidAllowPoint.PollRate = model.RATE_SLOW
+						foundSolenoidAllowPoint.PollPriority = model.PRIORITY_HIGH
+						fallbackFloat := float64(0)
+						if tmvDevice.SolenoidRequired == "Yes" || tmvDevice.SolenoidRequired == "true" {
+							fallbackFloat = 1
+						}
+						foundSolenoidAllowPoint.Fallback = float.New(fallbackFloat)
+						foundSolenoidAllowPoint.WritePollRequired = boolean.NewTrue()
+						foundSolenoidAllowPoint, err = inst.db.CreatePoint(foundSolenoidAllowPoint, false, false)
+						if err != nil {
+							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SolenoidAllowPoint create err: ", err)
+						}
+					}
+					if foundCalibrationPoint == nil {
+						foundCalibrationPoint = &model.Point{}
+						foundCalibrationPoint.DeviceUUID = foundModbusDevice.UUID
+						foundCalibrationPoint.Name = "TEMP_CALIBRATION_OFFSET"
+						foundCalibrationPoint.Enable = boolean.NewTrue()
+						foundCalibrationPoint.AddressID = integer.New(1013)
+						foundCalibrationPoint.ObjectType = string(model.ObjTypeWriteHolding)
+						foundCalibrationPoint.WriteMode = model.WriteOnce
+						foundCalibrationPoint.DataType = string(model.TypeFloat64)
+						foundCalibrationPoint.PollRate = model.RATE_SLOW
+						foundCalibrationPoint.PollPriority = model.PRIORITY_HIGH
+						foundCalibrationPoint.Fallback = float.New(0)
+						foundCalibrationPoint, err = inst.db.CreatePoint(foundCalibrationPoint, false, false)
+						if err != nil {
+							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() CalibrationPoint create err: ", err)
+						}
+					}
+					if foundRTCPoint == nil {
+						foundRTCPoint = &model.Point{}
+						foundRTCPoint.DeviceUUID = foundModbusDevice.UUID
+						foundRTCPoint.Name = "RTC"
+						foundRTCPoint.Enable = boolean.NewTrue()
+						foundRTCPoint.AddressID = integer.New(10007)
+						foundRTCPoint.ObjectType = string(model.ObjTypeWriteHolding)
+						foundRTCPoint.WriteMode = model.WriteOnce
+						foundRTCPoint.DataType = string(model.TypeUint32)
+						foundRTCPoint.PollRate = model.RATE_SLOW
+						foundRTCPoint.PollPriority = model.PRIORITY_HIGH
+						foundRTCPoint.WritePollRequired = boolean.NewFalse()
+						foundRTCPoint, err = inst.db.CreatePoint(foundRTCPoint, false, false)
+						if err != nil {
+							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCPoint create err: ", err)
+						}
+					}
+				}
+			}
+			/*
+				for _, pnt := range dev.Points {
+
+				}
+			*/
+		}
+	}
+	return nil
+}
+
+func (inst *Instance) createModbusNetworkIfItNeeded(reqNetName string) (*model.Network, error) {
+	inst.tmvDebugMsg("createModbusNetworkIfItNeeded(): reqNetName")
+
+	modbusNetworks, err := inst.db.GetNetworksByPluginName("modbus", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return nil, err
+	}
+	for _, modbusNet := range modbusNetworks {
+		inst.tmvDebugMsg("createModbusDevicesAndPoints() modbusNet: ", modbusNet.Name)
+		if modbusNet.Name == reqNetName {
+			return modbusNet, nil
+		}
+	}
+	// not found, so create a new FF modbus network
+	newModbusNet := model.Network{}
+	newModbusNet.PluginPath = "modbus"
+	newModbusNet.Name = reqNetName
+	newModbusNet.Enable = boolean.NewTrue()
+	serialPort := "/data/socat/ptyLORAWAN"
+	newModbusNet.SerialPort = &serialPort
+	newModbusNet.SerialTimeout = integer.New(8)
+	newModbusNet.MaxPollRate = float.New(10)
+	newModbusNet.TransportType = "serial"
+	return inst.db.CreateNetwork(&newModbusNet, true)
+}
+
+func (inst *Instance) createChirpstackDevices(applicationNum int) (*model.Network, error) {
+	inst.tmvDebugMsg("createChirpstackDevices()")
+	jsonFile, err := os.Open("/home/user/test.json")
+	if err != nil {
+		inst.tmvErrorMsg("createChirpstackDevices() file open err: ", err)
+		return nil, err
+	}
+	inst.tmvDebugMsg("createChirpstackDevices():  Successfully Opened test.json")
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	// inst.tmvDebugMsg("createModbusDevicesAndPoints():  byteValue:", byteValue)
+
+	var tmvDevices TMVDevices
+	json.Unmarshal(byteValue, &tmvDevices.Devices)
+
+	inst.tmvDebugMsg("createModbusNetworkIfItNeeded(): reqNetName")
+
+	modbusNetworks, err := inst.db.GetNetworksByPluginName("modbus", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return nil, err
+	}
+	for _, modbusNet := range modbusNetworks {
+		inst.tmvDebugMsg("createModbusDevicesAndPoints() modbusNet: ", modbusNet.Name)
+		if modbusNet.Name == "" {
+			return modbusNet, nil
+		}
+	}
+	// not found, so create a new FF modbus network
+	newModbusNet := model.Network{}
+	newModbusNet.PluginPath = "modbus"
+	// newModbusNet.Name = reqNetName
+	newModbusNet.Enable = boolean.NewTrue()
+	serialPort := "/data/socat/ptyLORAWAN"
+	newModbusNet.SerialPort = &serialPort
+	newModbusNet.SerialTimeout = integer.New(8)
+	newModbusNet.MaxPollRate = float.New(10)
+	newModbusNet.TransportType = "serial"
+	return inst.db.CreateNetwork(&newModbusNet, true)
+}
+
+/*
+func (inst *Instance) updateIOModuleRTC() error {
+	inst.tmvDebugMsg("updatePointNames()")
+	nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
+	// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return err
+	}
+	for _, net := range nets {
+		inst.tmvDebugMsg("updatePointNames() Net: ", net.Name)
+		for _, dev := range net.Devices {
+			for _, pnt := range dev.Points {
+			}
+		}
+	}
+	return nil
+}
+
+*/
+
 func (inst *Instance) pointUpdateErr(point *model.Point, message string, messageLevel string, messageCode string) error {
 	point.CommonFault.InFault = true
 	point.CommonFault.MessageLevel = messageLevel
@@ -364,13 +870,4 @@ func (inst *Instance) networkUpdateErr(network *model.Network, message string, m
 		inst.tmvErrorMsg(" networkUpdateErr()", err)
 	}
 	return err
-}
-
-func (inst *Instance) listSerialPorts() (*array.Array, error) {
-	ports, err := serial.GetPortsList()
-	p := array.NewArray()
-	for _, port := range ports {
-		p.Add(port)
-	}
-	return p, err
 }
