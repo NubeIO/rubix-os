@@ -334,7 +334,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints()")
 	jsonFile, err := os.Open("/home/user/test.json")
 	if err != nil {
-		inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() err: ", err)
+		inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() file open err: ", err)
 		return err
 	}
 	inst.tmvDebugMsg("createModbusNetworkDevicesAndPoints():  Successfully Opened test.json")
@@ -766,7 +766,48 @@ func (inst *Instance) createModbusNetworkIfItNeeded(reqNetName string) (*model.N
 	newModbusNet.Enable = boolean.NewTrue()
 	serialPort := "/data/socat/ptyLORAWAN"
 	newModbusNet.SerialPort = &serialPort
-	newModbusNet.SerialTimeout = integer.New(6)
+	newModbusNet.SerialTimeout = integer.New(8)
+	newModbusNet.MaxPollRate = float.New(10)
+	newModbusNet.TransportType = "serial"
+	return inst.db.CreateNetwork(&newModbusNet, true)
+}
+
+func (inst *Instance) createChirpstackDevices(applicationNum int) (*model.Network, error) {
+	inst.tmvDebugMsg("createChirpstackDevices()")
+	jsonFile, err := os.Open("/home/user/test.json")
+	if err != nil {
+		inst.tmvErrorMsg("createChirpstackDevices() file open err: ", err)
+		return nil, err
+	}
+	inst.tmvDebugMsg("createChirpstackDevices():  Successfully Opened test.json")
+	defer jsonFile.Close()
+
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	// inst.tmvDebugMsg("createModbusDevicesAndPoints():  byteValue:", byteValue)
+
+	var tmvDevices TMVDevices
+	json.Unmarshal(byteValue, &tmvDevices.Devices)
+
+	inst.tmvDebugMsg("createModbusNetworkIfItNeeded(): reqNetName")
+
+	modbusNetworks, err := inst.db.GetNetworksByPluginName("modbus", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return nil, err
+	}
+	for _, modbusNet := range modbusNetworks {
+		inst.tmvDebugMsg("createModbusDevicesAndPoints() modbusNet: ", modbusNet.Name)
+		if modbusNet.Name == "" {
+			return modbusNet, nil
+		}
+	}
+	// not found, so create a new FF modbus network
+	newModbusNet := model.Network{}
+	newModbusNet.PluginPath = "modbus"
+	// newModbusNet.Name = reqNetName
+	newModbusNet.Enable = boolean.NewTrue()
+	serialPort := "/data/socat/ptyLORAWAN"
+	newModbusNet.SerialPort = &serialPort
+	newModbusNet.SerialTimeout = integer.New(8)
 	newModbusNet.MaxPollRate = float.New(10)
 	newModbusNet.TransportType = "serial"
 	return inst.db.CreateNetwork(&newModbusNet, true)

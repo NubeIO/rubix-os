@@ -6,13 +6,17 @@ type Config struct {
 }
 
 type Job struct {
-	Frequency string   `yaml:"frequency"`
-	Networks  []string `yaml:"networks"`
+	Frequency      string   `yaml:"frequency"`
+	Networks       []string `yaml:"networks"`
+	ChirpstackHost string   `yaml:"host"`
+	ChirpstackPort float64  `yaml:"port"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
 	job := Job{
-		Frequency: "60m",
+		Frequency:      "60m",
+		ChirpstackHost: "0.0.0.0",
+		ChirpstackPort: 8080,
 	}
 
 	return &Config{
