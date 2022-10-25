@@ -206,7 +206,6 @@ func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 
 	// kinda poor repeating this but oh well
 	pointName := getStructFieldJSONNameByName(decoder.CommonValues{}, "Rssi")
-	fmt.Println("addDevicePoints() pointName: ", pointName)
 	point := new(model.Point)
 	inst.setNewPointFields(deviceBody, point, pointName)
 	_, err = inst.addPoint(point)
