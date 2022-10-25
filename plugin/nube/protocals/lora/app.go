@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"reflect"
 	"strings"
 	"time"
@@ -27,7 +29,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	}
 	for _, net := range nets {
 		if net != nil {
-			errMsg := fmt.Sprintf("loraraw: only max one network is allowed with lora")
+			errMsg := "loraraw: only max one network is allowed with lora"
 			log.Errorf(errMsg)
 			return nil, errors.New(errMsg)
 		}
@@ -75,64 +77,13 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	return point, nil
 }
 
-func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
-	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
-	if err != nil {
-		return nil, err
-	}
-	return network, nil
-}
-
-func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
-	device, err = inst.db.UpdateDevice(body.UUID, body, true)
-	if err != nil {
-		return nil, err
-	}
-	err = inst.updateDevicePointsAddress(device)
-	if err != nil {
-		return nil, err
-	}
-
-	return device, nil
-}
-
-// writePoint update point. Called via API call.
-func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
-	return point, nil
-}
-
-func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
-	ok, err = inst.db.DeleteNetwork(body.UUID)
-	if err != nil {
-		return false, err
-	}
-	return ok, nil
-}
-
-func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
-	ok, err = inst.db.DeleteDevice(body.UUID)
-	if err != nil {
-		return false, err
-	}
-	return ok, nil
-}
-
-func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
-	ok, err = inst.db.DeletePoint(body.UUID)
-	if err != nil {
-		return false, err
-	}
-	return ok, nil
-}
-
 func (inst *Instance) networkUpdateSuccess(uuid string) error {
 	var network model.Network
-	network.CommonFault.InFault = false
-	network.CommonFault.MessageLevel = model.MessageLevel.Info
-	network.CommonFault.MessageCode = model.CommonFaultCode.Ok
-	network.CommonFault.Message = model.CommonFaultMessage.NetworkMessage
-	network.CommonFault.LastOk = time.Now().UTC()
+	network.InFault = false
+	network.MessageLevel = model.MessageLevel.Info
+	network.MessageCode = model.CommonFaultCode.Ok
+	network.Message = model.CommonFaultMessage.NetworkMessage
+	network.LastOk = time.Now().UTC()
 	err := inst.db.UpdateNetworkErrors(uuid, &network)
 	if err != nil {
 		log.Error(bugs.DebugPrint(name, inst.networkUpdateSuccess, err))
@@ -142,11 +93,11 @@ func (inst *Instance) networkUpdateSuccess(uuid string) error {
 
 func (inst *Instance) networkUpdateErr(uuid, port string, e error) error {
 	var network model.Network
-	network.CommonFault.InFault = true
-	network.CommonFault.MessageLevel = model.MessageLevel.Fail
-	network.CommonFault.MessageCode = model.CommonFaultCode.NetworkError
-	network.CommonFault.Message = fmt.Sprintf(" port: %s message: %s", port, e.Error())
-	network.CommonFault.LastFail = time.Now().UTC()
+	network.InFault = true
+	network.MessageLevel = model.MessageLevel.Fail
+	network.MessageCode = model.CommonFaultCode.NetworkError
+	network.Message = fmt.Sprintf(" port: %s message: %s", port, e.Error())
+	network.LastFail = time.Now().UTC()
 	err := inst.db.UpdateNetworkErrors(uuid, &network)
 	if err != nil {
 		log.Error(bugs.DebugPrint(name, inst.networkUpdateErr, err))
@@ -156,11 +107,11 @@ func (inst *Instance) networkUpdateErr(uuid, port string, e error) error {
 
 func (inst *Instance) deviceUpdateSuccess(uuid string) error {
 	var device model.Device
-	device.CommonFault.InFault = false
-	device.CommonFault.MessageLevel = model.MessageLevel.Info
-	device.CommonFault.MessageCode = model.CommonFaultCode.Ok
-	device.CommonFault.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
-	device.CommonFault.LastFail = time.Now().UTC()
+	device.InFault = false
+	device.MessageLevel = model.MessageLevel.Info
+	device.MessageCode = model.CommonFaultCode.Ok
+	device.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
+	device.LastFail = time.Now().UTC()
 	err := inst.db.UpdateDeviceErrors(uuid, &device)
 	if err != nil {
 		log.Error("lora-app deviceUpdateErr()", err)
@@ -170,11 +121,11 @@ func (inst *Instance) deviceUpdateSuccess(uuid string) error {
 
 func (inst *Instance) deviceUpdateErr(uuid string, err error) error {
 	var device model.Device
-	device.CommonFault.InFault = true
-	device.CommonFault.MessageLevel = model.MessageLevel.Fail
-	device.CommonFault.MessageCode = model.CommonFaultCode.DeviceError
-	device.CommonFault.Message = fmt.Sprintf(" error: %s", err.Error())
-	device.CommonFault.LastFail = time.Now().UTC()
+	device.InFault = true
+	device.MessageLevel = model.MessageLevel.Fail
+	device.MessageCode = model.CommonFaultCode.DeviceError
+	device.Message = fmt.Sprintf(" error: %s", err.Error())
+	device.LastFail = time.Now().UTC()
 	err = inst.db.UpdateDeviceErrors(uuid, &device)
 	if err != nil {
 		log.Error("lora-app deviceUpdateErr()", err)
@@ -309,7 +260,7 @@ func (inst *Instance) setNewPointFields(deviceBody *model.Device, pointBody *mod
 	pointBody.IsProducer = boolean.NewFalse()
 	pointBody.IsConsumer = boolean.NewFalse()
 	pointBody.IsOutput = boolean.NewFalse()
-	pointBody.Name = fmt.Sprintf("%s", name)
+	pointBody.Name = cases.Title(language.English).String(name)
 	pointBody.IoNumber = name
 }
 
