@@ -1,12 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/plugin/nube/database/postgres/pgmodel"
 	postgresql "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"reflect"
+	"strconv"
 	"time"
 )
 
@@ -84,4 +86,59 @@ func (ps PostgresSetting) WriteToPostgresDb(value interface{}) error {
 		return ps.postgresConnectionInstance.db.Clauses(clause.OnConflict{UpdateAll: true}).Create(value).Error
 	}
 	return nil
+}
+
+func (ps PostgresSetting) GetHistories(args Args) ([]*pgmodel.HistoryData, error) {
+	var historyDataModel []*pgmodel.HistoryData
+	query, err := ps.buildHistoryQuery(args)
+	if err != nil {
+		return nil, err
+	}
+	query.Find(&historyDataModel)
+	if query.Error != nil {
+		return nil, errors.New("invalid filter")
+	}
+	return historyDataModel, nil
+
+}
+
+func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
+	filterQuery, hasTag, hasFnc, err := buildFilterQuery(args.Filter)
+	if err != nil {
+		return nil, err
+	}
+	selectQuery := buildSelectQuery(hasTag, hasFnc)
+	query := ps.postgresConnectionInstance.db
+	query = query.Table("histories").
+		Select(selectQuery).
+		Joins("INNER JOIN consumers ON consumers.producer_uuid = histories.uuid").
+		Joins("INNER JOIN writers ON writers.consumer_uuid = consumers.uuid").
+		Joins("INNER JOIN points ON points.uuid = writers.writer_thing_uuid").
+		Joins("INNER JOIN devices ON devices.uuid = points.device_uuid").
+		Joins("INNER JOIN networks ON networks.uuid = devices.network_uuid")
+	if hasTag {
+		query = query.Joins("LEFT JOIN points_tags ON points_tags.point_uuid = points.uuid").
+			Joins("LEFT JOIN devices_tags ON devices_tags.device_uuid = devices.uuid").
+			Joins("LEFT JOIN networks_tags ON networks_tags.network_uuid = networks.uuid")
+	}
+	if hasFnc {
+		query = query.Joins("INNER JOIN stream_clones ON stream_clones.uuid = consumers.stream_clone_uuid").
+			Joins("INNER JOIN flow_network_clones ON flow_network_clones.uuid = stream_clones.flow_network_clone_uuid")
+	}
+	if args.Filter != nil {
+		query = query.Where(filterQuery)
+	}
+	if args.Limit != nil {
+		limit, err := strconv.Atoi(*args.Limit)
+		if err == nil {
+			query.Limit(limit)
+		}
+	}
+	if args.Offset != nil {
+		offset, err := strconv.Atoi(*args.Offset)
+		if err == nil {
+			query.Offset(offset)
+		}
+	}
+	return query, nil
 }

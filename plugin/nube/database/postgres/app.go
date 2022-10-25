@@ -104,3 +104,14 @@ func (inst *Instance) syncPostgres() (bool, error) {
 	}
 	return true, nil
 }
+
+func (inst *Instance) getHistories(args Args) ([]*pgmodel.HistoryData, error) {
+	if postgresSetting.postgresConnectionInstance.db == nil {
+		err := postgresSetting.New()
+		if err != nil {
+			log.Warn(err)
+			return nil, err
+		}
+	}
+	return postgresSetting.GetHistories(args)
+}
