@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/mqttclient"
-	"github.com/NubeIO/flow-framework/services/mqtt"
+	"github.com/NubeIO/flow-framework/services/localmqtt"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
 	"os"
 	"path"
@@ -75,12 +75,16 @@ func main() {
 		panic(err)
 	}
 	if *conf.MQTT.Enable {
-		err = mqtt.Init(mqttBroker, conf)
+		err = localmqtt.Init(mqttBroker, conf)
 		if err != nil {
 			log.Errorln(err)
 		} else {
-			go db.PublishPointsList()
+			go db.PublishPointsList("")
 			go db.RePublishPointsCov()
+			go db.PublishPointsListListener()
+			go db.PublishDeviceInfo()
+			go db.PublishFetchPointListener()
+			go db.PublishPointWriteListener()
 		}
 	}
 	intHandler(db)

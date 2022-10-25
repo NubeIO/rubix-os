@@ -1,9 +1,9 @@
-package mqtt
+package localmqtt
 
 import "github.com/NubeIO/flow-framework/mqttclient"
 
 type PointMqtt struct {
-	client *mqttclient.Client
+	Client *mqttclient.Client
 	QOS    mqttclient.QOS
 }
 
@@ -16,5 +16,5 @@ type PointCovPayload struct {
 	Value    *float64 `json:"value"`
 	ValueRaw *float64 `json:"value_raw"`
 	Ts       string   `json:"ts"`
-	Priority *float64 `json:"priority"`
+	Priority *int     `json:"priority"`
 }

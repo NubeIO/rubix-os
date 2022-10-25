@@ -356,7 +356,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			integrationRoutes.DELETE("/:uuid", integrationHandler.DeleteIntegration)
 		}
 
-		mqttClientRoutes := apiRoutes.Group("/mqtt/clients")
+		mqttClientRoutes := apiRoutes.Group("/localmqtt/clients")
 		{
 			mqttClientRoutes.GET("", mqttHandler.GetMqttConnectionsList)
 			mqttClientRoutes.POST("", mqttHandler.CreateMqttConnection)
