@@ -70,7 +70,7 @@ func (i *InfluxSetting) GetLastSyncId() (value int, isError bool) {
 	log.Debugf("Flux Query: %s", fluxQuery)
 	result, err := queryAPI.Query(context.Background(), fluxQuery)
 	if err != nil {
-		log.Errorf("Error :%v", err)
+		fmt.Errorf("Error :%v", err)
 		return 0, true
 	}
 	value = 0

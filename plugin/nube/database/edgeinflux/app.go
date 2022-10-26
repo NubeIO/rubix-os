@@ -85,16 +85,16 @@ func (inst *Instance) sendHistoriesToInflux(influxDetails []InfluxDetail, histor
 	for _, influxDetail := range influxDetails {
 		influxDetail.InfluxSetting.getInfluxConnectionInstance().writeAPI.Flush()
 		if influxDetail.Records > 0 {
-			log.Info(fmt.Sprintf("Stored %v rows on %v", influxDetail.Records, path))
+			inst.edgeinfluxDebugMsg(fmt.Sprintf("Stored %v rows on %v", influxDetail.Records, path))
 		} else {
-			log.Info("influx: Nothing to store, no new records")
+			inst.edgeinfluxDebugMsg("influx: Nothing to store, no new records")
 		}
 	}
 	return true, nil
 }
 
 func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
-	log.Info("InfluxDB sync has is been called...")
+	inst.edgeinfluxDebugMsg("InfluxDB sync has is been called...")
 	if len(influxSettings) == 0 {
 		err := "influx: InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
 		log.Warn(err)
@@ -145,12 +145,12 @@ func (inst *Instance) GetHistoryValues(pluginsArray []string) ([]*History, error
 					if point.PresentValue != nil {
 						tagMap := make(map[string]string)
 						tagMap["plugin_name"] = "lorawan"
-						tagMap["network_name"] = net.Name
-						tagMap["network_uuid"] = net.UUID
-						tagMap["device_name"] = dev.Name
-						tagMap["device_uuid"] = dev.UUID
-						tagMap["point_name"] = point.Name
-						tagMap["point_uuid"] = point.UUID
+						tagMap["rubix_network_name"] = net.Name
+						tagMap["rubix_network_uuid"] = net.UUID
+						tagMap["rubix_device_name"] = dev.Name
+						tagMap["rubix_device_uuid"] = dev.UUID
+						tagMap["rubix_point_name"] = point.Name
+						tagMap["rubix_point_uuid"] = point.UUID
 
 						pointHistory := History{
 							UUID:      point.UUID,
@@ -170,7 +170,7 @@ func (inst *Instance) GetHistoryValues(pluginsArray []string) ([]*History, error
 }
 
 func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
-	log.Info("InfluxDB COV sync has is been called...")
+	inst.edgeinfluxDebugMsg("InfluxDB COV sync has is been called...")
 	if len(inst.influxDetails) == 0 {
 		err := "influx: InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
 		log.Warn(err)
@@ -185,9 +185,12 @@ func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 	inst.edgeinfluxDebugMsg("SendPointWriteHistory()")
 
 	point, _ := inst.db.GetPoint(pntUUID, api.Args{WithTags: true})
+	/*(
 	if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeCov && point.HistoryType != model.HistoryTypeCovAndInterval) {
 		return nil
 	}
+
+	*/
 	dev, _ := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	net, _ := inst.db.GetNetwork(dev.NetworkUUID, api.Args{})
 
@@ -207,12 +210,12 @@ func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 	if point.PresentValue != nil {
 		tagMap := make(map[string]string)
 		tagMap["plugin_name"] = "lorawan"
-		tagMap["network_name"] = net.Name
-		tagMap["network_uuid"] = net.UUID
-		tagMap["device_name"] = dev.Name
-		tagMap["device_uuid"] = dev.UUID
-		tagMap["point_name"] = point.Name
-		tagMap["point_uuid"] = point.UUID
+		tagMap["rubix_network_name"] = net.Name
+		tagMap["rubix_network_uuid"] = net.UUID
+		tagMap["rubix_device_name"] = dev.Name
+		tagMap["rubix_device_uuid"] = dev.UUID
+		tagMap["rubix_point_name"] = point.Name
+		tagMap["rubix_point_uuid"] = point.UUID
 
 		pointHistory := History{
 			UUID:      point.UUID,

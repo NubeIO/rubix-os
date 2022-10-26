@@ -149,8 +149,7 @@ func (d *GormDatabase) RePublishPointsCov() {
 	for _, network := range networks {
 		for _, device := range network.Devices {
 			for _, point := range device.Points {
-				priority := point.Priority.GetHighestPriorityValue()
-				localmqtt.PublishPointCov(network, device, point, priority)
+				localmqtt.PublishPointCov(network, device, point)
 			}
 		}
 	}
@@ -161,7 +160,6 @@ func (d *GormDatabase) PublishPointCov(uuid string) error {
 	if err != nil {
 		return err
 	}
-	priority := point.Priority.GetHighestPriorityValue()
 	device, err := d.GetDevice(point.DeviceUUID, api.Args{})
 	if err != nil {
 		return err
@@ -170,6 +168,6 @@ func (d *GormDatabase) PublishPointCov(uuid string) error {
 	if err != nil {
 		return err
 	}
-	localmqtt.PublishPointCov(network, device, point, priority)
+	localmqtt.PublishPointCov(network, device, point)
 	return nil
 }

@@ -15,6 +15,7 @@ func (inst *Instance) Enable() error {
 	inst.influxDetails = influxDetails
 	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncInflux").Do(inst.syncInflux, influxDetails)
 	cron.StartAsync()
+	go inst.subscribeToMQTTForPointCOV()
 	return nil
 }
 
