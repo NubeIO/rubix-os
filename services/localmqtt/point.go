@@ -14,10 +14,11 @@ import (
 )
 
 const (
-	separator       = "/"
-	mqttTopic       = "rubix/points/value"
-	mqttTopicCov    = "cov"
-	mqttTopicCovAll = "all"
+	separator        = "/"
+	mqttTopic        = "rubix/points/value"
+	fetchPointsTopic = "rubix/platform/points/publish"
+	mqttTopicCov     = "cov"
+	mqttTopicCovAll  = "all"
 )
 
 var pointMqtt *PointMqtt
@@ -83,7 +84,7 @@ func PublishPointByName(networks []*model.Network, details *interfaces.MqttPoint
 		log.Error(err)
 		return
 	}
-	topic := fmt.Sprintf("rubix/platform/points/publish")
+	topic := fmt.Sprintf("rubix/platform/point/publish")
 	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 	if err != nil {
 		log.Error(err)
@@ -99,7 +100,7 @@ func PublishPoint(point *model.Point) {
 		log.Error(err)
 		return
 	}
-	topic := fmt.Sprintf("rubix/platform/points/publish")
+	topic := fmt.Sprintf("rubix/platform/point/publish")
 	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 	if err != nil {
 		log.Error(err)
@@ -117,7 +118,7 @@ func PublishPointsList(networks []*model.Network, topic string) {
 		}
 	}
 	if topic == "" {
-		topic = MakeTopic([]string{mqttTopic, "points"})
+		topic = MakeTopic([]string{fetchPointsTopic})
 	}
 	payload, err := json.Marshal(pointPayload)
 	if err != nil {

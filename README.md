@@ -63,7 +63,7 @@ by point name:
 
 ```
 points list:
-  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/points/value/points
+  <client_id>/<client_name>/<site_id>/<site_name>/<device_id>/<device_name>/rubix/platform/points/publish
 ```
 
 **get device platform info:**
@@ -89,7 +89,7 @@ rubix/platform/points/publish
 get the edge-device point (will return a single point in flow-framework)
 
 ```
-rubix/platform/list/points
+rubix/platform/point
 body by name
 {
     "network_name": "net",
@@ -101,7 +101,7 @@ body by uuid
     "point_uuid": "pnt_94ea3ea254dc440a"
 }
 // will response on this topic
-rubix/platform/list/points/publish
+rubix/platform/point/publish
 ```
 
 point write over MQTT

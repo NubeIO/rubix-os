@@ -12,8 +12,8 @@ import (
 
 const fetchDeviceInfo = "rubix/platform/info"
 const fetchPointsTopic = "rubix/platform/points"
-const fetchPointsTopicWrite = "rubix/platform/points/write"
-const fetchPointTopic = "rubix/platform/list/points"
+const fetchPointTopicWrite = "rubix/platform/point/write"
+const fetchPointTopic = "rubix/platform/point"
 
 func (d *GormDatabase) PublishPointWriteListener() {
 	callback := func(client mqtt.Client, message mqtt.Message) {
@@ -25,7 +25,7 @@ func (d *GormDatabase) PublishPointWriteListener() {
 			}
 		}
 	}
-	topic := fetchPointsTopicWrite
+	topic := fetchPointTopicWrite
 	mqttClient := localmqtt.GetPointMqtt().Client
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
