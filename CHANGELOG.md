@@ -1,4 +1,8 @@
 # CHANGELOG
+## [v0.8.0](https://github.com/NubeIO/flow-framework/tree/v0.8.0) (2022-10-27)
+- adds mqtt to plugins
+- adds apis for histories
+
 ## [v0.7.9](https://github.com/NubeIO/flow-framework/tree/v0.7.9) (2022-10-25)
 - capitalizes lora naming
 - adds mqtt functionality
