@@ -7,6 +7,7 @@ type Job struct {
 	Networks            []string `yaml:"networks"`
 	RequireNetworkMatch bool     `yaml:"require_network_match"`
 	GenerateRubixPoints bool     `yaml:"generate_rubix_points"`
+	UpdateOnCOV         bool     `yaml:"update_on_cov"`
 }
 
 type Config struct {
@@ -22,6 +23,7 @@ func (inst *Instance) DefaultConfig() interface{} {
 		Networks:            []string{"system"},
 		RequireNetworkMatch: true,
 		GenerateRubixPoints: false,
+		UpdateOnCOV:         true,
 	}
 
 	return &Config{
