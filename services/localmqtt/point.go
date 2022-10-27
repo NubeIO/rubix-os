@@ -130,7 +130,7 @@ func PublishPointsList(networks []*model.Network, topic string) {
 	}
 }
 
-func PublishPointCov(network *model.Network, device *model.Device, point *model.Point, priority *float64) {
+func PublishPointCov(network *model.Network, device *model.Device, point *model.Point) {
 	pointCovPayload := &PointCovPayload{
 		Value:    point.PresentValue,
 		ValueRaw: point.OriginalValue,

@@ -85,16 +85,16 @@ func (inst *Instance) sendHistoriesToInflux(influxDetails []InfluxDetail, histor
 	for _, influxDetail := range influxDetails {
 		influxDetail.InfluxSetting.getInfluxConnectionInstance().writeAPI.Flush()
 		if influxDetail.Records > 0 {
-			log.Info(fmt.Sprintf("Stored %v rows on %v", influxDetail.Records, path))
+			inst.edgeinfluxDebugMsg(fmt.Sprintf("Stored %v rows on %v", influxDetail.Records, path))
 		} else {
-			log.Info("influx: Nothing to store, no new records")
+			inst.edgeinfluxDebugMsg("influx: Nothing to store, no new records")
 		}
 	}
 	return true, nil
 }
 
 func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) {
-	log.Info("InfluxDB sync has is been called...")
+	inst.edgeinfluxDebugMsg("InfluxDB sync has is been called...")
 	if len(influxSettings) == 0 {
 		err := "influx: InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
 		log.Warn(err)
@@ -120,47 +120,45 @@ func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) 
 	return true, nil
 }
 
-func (inst *Instance) GetHistoryValues(pluginsArray []string) ([]*History, error) {
+func (inst *Instance) GetHistoryValues(requiredNetworksArray []string) ([]*History, error) {
 	inst.edgeinfluxDebugMsg("GetHistoryValues()")
-	if pluginsArray == nil || len(pluginsArray) == 0 {
-		pluginsArray = []string{"system"}
+	if requiredNetworksArray == nil || len(requiredNetworksArray) == 0 {
+		requiredNetworksArray = []string{"system"}
 	}
 	nowTimestamp := time.Now()
 	var historyArray []*History
-	for _, plugin := range pluginsArray {
-		nets, err := inst.db.GetNetworksByPluginName(plugin, api.Args{WithDevices: true, WithPoints: true})
+	for _, reqNet := range requiredNetworksArray {
+		net, err := inst.db.GetNetworkByName(reqNet, api.Args{WithDevices: true, WithPoints: true})
 		// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
 		if err != nil {
 			continue
 		}
-		for _, net := range nets {
-			inst.edgeinfluxDebugMsg("GetHistoryValues() Net: ", net.Name)
-			for _, dev := range net.Devices {
-				for _, pnt := range dev.Points {
-					point, _ := inst.db.GetPoint(pnt.UUID, api.Args{WithTags: true})
-					if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeInterval && point.HistoryType != model.HistoryTypeCovAndInterval) {
-						continue
-					}
-					// inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() point: %+v", point))
-					if point.PresentValue != nil {
-						tagMap := make(map[string]string)
-						tagMap["plugin_name"] = "lorawan"
-						tagMap["network_name"] = net.Name
-						tagMap["network_uuid"] = net.UUID
-						tagMap["device_name"] = dev.Name
-						tagMap["device_uuid"] = dev.UUID
-						tagMap["point_name"] = point.Name
-						tagMap["point_uuid"] = point.UUID
+		inst.edgeinfluxDebugMsg("GetHistoryValues() Net: ", net.Name)
+		for _, dev := range net.Devices {
+			for _, pnt := range dev.Points {
+				point, _ := inst.db.GetPoint(pnt.UUID, api.Args{WithTags: true})
+				if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeInterval && point.HistoryType != model.HistoryTypeCovAndInterval) {
+					continue
+				}
+				// inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() point: %+v", point))
+				if point.PresentValue != nil {
+					tagMap := make(map[string]string)
+					tagMap["plugin_name"] = "lorawan"
+					tagMap["rubix_network_name"] = net.Name
+					tagMap["rubix_network_uuid"] = net.UUID
+					tagMap["rubix_device_name"] = dev.Name
+					tagMap["rubix_device_uuid"] = dev.UUID
+					tagMap["rubix_point_name"] = point.Name
+					tagMap["rubix_point_uuid"] = point.UUID
 
-						pointHistory := History{
-							UUID:      point.UUID,
-							Value:     float.NonNil(point.PresentValue),
-							Timestamp: nowTimestamp,
-							Tags:      tagMap,
-						}
-						inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() history: %+v", pointHistory))
-						historyArray = append(historyArray, &pointHistory)
+					pointHistory := History{
+						UUID:      point.UUID,
+						Value:     float.NonNil(point.PresentValue),
+						Timestamp: nowTimestamp,
+						Tags:      tagMap,
 					}
+					inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() history: %+v", pointHistory))
+					historyArray = append(historyArray, &pointHistory)
 				}
 			}
 		}
@@ -170,7 +168,7 @@ func (inst *Instance) GetHistoryValues(pluginsArray []string) ([]*History, error
 }
 
 func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
-	log.Info("InfluxDB COV sync has is been called...")
+	inst.edgeinfluxDebugMsg("InfluxDB COV sync has is been called...")
 	if len(inst.influxDetails) == 0 {
 		err := "influx: InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
 		log.Warn(err)
@@ -185,16 +183,19 @@ func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 	inst.edgeinfluxDebugMsg("SendPointWriteHistory()")
 
 	point, _ := inst.db.GetPoint(pntUUID, api.Args{WithTags: true})
+	/*(
 	if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeCov && point.HistoryType != model.HistoryTypeCovAndInterval) {
 		return nil
 	}
+
+	*/
 	dev, _ := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	net, _ := inst.db.GetNetwork(dev.NetworkUUID, api.Args{})
 
 	// Check that the point is from a plugin network with history enabled (from config file)
 	networkIsHistoryEnabled := false
-	for _, plugin := range inst.config.Job.Networks {
-		if plugin == net.PluginPath {
+	for _, reqNet := range inst.config.Job.Networks {
+		if reqNet == net.Name {
 			networkIsHistoryEnabled = true
 			break
 		}
@@ -207,12 +208,12 @@ func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 	if point.PresentValue != nil {
 		tagMap := make(map[string]string)
 		tagMap["plugin_name"] = "lorawan"
-		tagMap["network_name"] = net.Name
-		tagMap["network_uuid"] = net.UUID
-		tagMap["device_name"] = dev.Name
-		tagMap["device_uuid"] = dev.UUID
-		tagMap["point_name"] = point.Name
-		tagMap["point_uuid"] = point.UUID
+		tagMap["rubix_network_name"] = net.Name
+		tagMap["rubix_network_uuid"] = net.UUID
+		tagMap["rubix_device_name"] = dev.Name
+		tagMap["rubix_device_uuid"] = dev.UUID
+		tagMap["rubix_point_name"] = point.Name
+		tagMap["rubix_point_uuid"] = point.UUID
 
 		pointHistory := History{
 			UUID:      point.UUID,

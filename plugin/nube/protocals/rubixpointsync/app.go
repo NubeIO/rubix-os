@@ -1,18 +1,14 @@
 package main
 
-import (
-	"github.com/NubeIO/flow-framework/utils/float"
-)
-
 func (inst *Instance) SyncRubixToFF() (bool, error) {
-	inst.rubixpointsyncDebugMsg("Sync Rubix Points with FF Points...")
+	inst.rubixpointsyncDebugMsg("SyncRubixToFF()")
 
 	rubixNets, err := inst.GetRubixNetworks()
 	if err != nil {
 		inst.rubixpointsyncErrorMsg(err)
 	}
 
-	ffNetworksArray, err := inst.GetFFNetworks(inst.config.Job.Networks)
+	ffNetworksArray, err := inst.GetRequiredFFNetworks(inst.config.Job.Networks)
 	if err != nil {
 		inst.rubixpointsyncErrorMsg(err)
 	}
@@ -65,7 +61,7 @@ func (inst *Instance) SyncRubixToFF() (bool, error) {
 							continue
 						}
 					}
-					_, err = inst.WriteRubixPoint(net.Name, dev.Name, pnt.Name, float.NonNil(pnt.PresentValue))
+					_, err = inst.WriteRubixPoint(net.Name, dev.Name, pnt.Name, pnt.PresentValue)
 					if err != nil {
 						inst.rubixpointsyncErrorMsg("writePoint(): bad response from WriteRubixPoint(), ", err)
 					}
@@ -74,4 +70,23 @@ func (inst *Instance) SyncRubixToFF() (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+func (inst *Instance) SyncSingleRubixPointWithFF(netName, devName, pntName string, value *float64) error {
+	inst.rubixpointsyncDebugMsg("SyncSingleRubixPointWithFF()")
+
+	rubixNets, err := inst.GetRubixNetworks()
+	if err != nil {
+		inst.rubixpointsyncErrorMsg(err)
+	}
+
+	netExists, devExists, pointExists, _, _, _ := inst.RubixPointExistsInNetworkArray(rubixNets, netName, devName, pntName)
+
+	if netExists && devExists && pointExists {
+		_, err = inst.WriteRubixPoint(netName, devName, pntName, value)
+		if err != nil {
+			inst.rubixpointsyncErrorMsg("writePoint(): bad response from WriteRubixPoint(), ", err)
+		}
+	}
+	return nil
 }

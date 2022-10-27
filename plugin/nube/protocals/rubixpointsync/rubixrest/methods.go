@@ -2,7 +2,6 @@ package rubixrest
 
 import (
 	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/utils/float"
 )
 
 type RubixNet struct {
@@ -98,13 +97,13 @@ func (a *RestClient) CreateNewRubixPoint(pointName, deviceUUID string) (*RubixPn
 	return resp.Result().(*RubixPnt), nil
 }
 
-func (a *RestClient) WriteRubixPoint(networkName, deviceName, pointName string, writeValue float64) (*RubixPnt, error) {
+func (a *RestClient) WriteRubixPoint(networkName, deviceName, pointName string, writeValue *float64) (*RubixPnt, error) {
 	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetBody(RubixPointWrite{
 			Enable:   true,
 			Writable: true,
 			PriorityArray: PriorityArrayWrite{
-				P3: float.New(writeValue),
+				P3: writeValue,
 			},
 		}).
 		SetResult(RubixPnt{}).

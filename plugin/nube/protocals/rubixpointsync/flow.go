@@ -5,7 +5,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-func (inst *Instance) GetFFNetworks(requiredNetworks []string) ([]*model.Network, error) {
+func (inst *Instance) GetRequiredFFNetworks(requiredNetworks []string) ([]*model.Network, error) {
 	var networksArray []*model.Network
 	if requiredNetworks == nil || len(requiredNetworks) == 0 {
 		inst.rubixpointsyncDebugMsg("no network name was specified to sync")

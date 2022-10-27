@@ -40,7 +40,7 @@ func (inst *Instance) CreateNewRubixPoint(pointName, deviceUUID string) (*rubixr
 	return rubixPoint, nil
 }
 
-func (inst *Instance) WriteRubixPoint(networkName, deviceName, pointName string, writeValue float64) (*rubixrest.RubixPnt, error) {
+func (inst *Instance) WriteRubixPoint(networkName, deviceName, pointName string, writeValue *float64) (*rubixrest.RubixPnt, error) {
 	inst.rubixpointsyncDebugMsg("WriteRubixPoint()", networkName, deviceName, pointName, writeValue)
 	host := inst.config.Job.Host
 	if host == "" {

@@ -13,6 +13,7 @@ func (inst *Instance) Enable() error {
 	cron = gocron.NewScheduler(time.UTC)
 	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncRubixToFF").Do(inst.SyncRubixToFF)
 	cron.StartAsync()
+	go inst.subscribeToMQTTForPointCOV()
 	return nil
 }
 
