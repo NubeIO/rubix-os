@@ -355,8 +355,8 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 	*/
 	modbusNet, err := inst.createModbusNetworkIfItNeeded("TMV")
 
-	// nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
-	nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
+	nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
+	// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err
 	}
