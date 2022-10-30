@@ -36,11 +36,7 @@ func (inst *Instance) syncPostgres() (bool, error) {
 			return false, err
 		}
 	}
-	lastSyncId := 0
-	lastSyncHistoryPostgresLog, err := inst.db.GetLastSyncHistoryPostgresLog()
-	if lastSyncHistoryPostgresLog != nil {
-		lastSyncId = lastSyncHistoryPostgresLog.ID
-	}
+	lastSyncId, err := inst.db.GetHistoryPostgresLogLastSyncHistoryId()
 	if err != nil {
 		log.Warn(err)
 		return false, err
@@ -85,7 +81,17 @@ func (inst *Instance) syncPostgres() (bool, error) {
 			log.Error(err)
 			return false, err
 		}
-		err = postgresSetting.WriteToPostgresDb(histories)
+		mHistories, err := json.Marshal(histories)
+		if err != nil {
+			log.Error(err)
+			return false, err
+		}
+		var historiesModel []*pgmodel.History
+		if err = json.Unmarshal(mHistories, &historiesModel); err != nil {
+			log.Error(err)
+			return false, err
+		}
+		err = postgresSetting.WriteToPostgresDb(historiesModel)
 		if err != nil {
 			log.Error(err)
 			return false, err

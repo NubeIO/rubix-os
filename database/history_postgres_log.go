@@ -4,8 +4,8 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-// GetLastSyncHistoryPostgresLog returns the last sync history postgres log if it exists in history table also.
-func (d *GormDatabase) GetLastSyncHistoryPostgresLog() (*model.HistoryPostgresLog, error) {
+// GetHistoryPostgresLogLastSyncHistoryId returns the last history postgres log last sync history id if it exists in history table also.
+func (d *GormDatabase) GetHistoryPostgresLogLastSyncHistoryId() (int, error) {
 	var logsModel *model.HistoryPostgresLog
 	query := d.DB
 	query.First(&logsModel)
@@ -16,11 +16,12 @@ func (d *GormDatabase) GetLastSyncHistoryPostgresLog() (*model.HistoryPostgresLo
 			Where("value = ?", logsModel.Value).
 			Where("datetime(timestamp) = datetime(?)", logsModel.Timestamp).
 			First(&historiesModel)
-		if historiesModel.ID != 0 {
-			return logsModel, nil
+		if query.Error != nil {
+			return 0, query.Error
 		}
+		return historiesModel.HistoryID, nil
 	}
-	return nil, nil
+	return 0, nil
 }
 
 // UpdateHistoryPostgresLog update or create if not found a thing.

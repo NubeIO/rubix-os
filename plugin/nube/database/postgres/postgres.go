@@ -83,7 +83,7 @@ func connectDb(dns string) (*gorm.DB, error) {
 
 func (ps PostgresSetting) WriteToPostgresDb(value interface{}) error {
 	if reflect.ValueOf(value).Len() > 0 {
-		return ps.postgresConnectionInstance.db.Clauses(clause.OnConflict{UpdateAll: true}).Create(value).Error
+		return ps.postgresConnectionInstance.db.Clauses(clause.OnConflict{UpdateAll: true}).CreateInBatches(value, 1000).Error
 	}
 	return nil
 }

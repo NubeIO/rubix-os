@@ -2,10 +2,10 @@ package dbhandler
 
 import "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 
-func (h *Handler) GetLastSyncHistoryPostgresLog() (*model.HistoryPostgresLog, error) {
-	q, err := getDb().GetLastSyncHistoryPostgresLog()
+func (h *Handler) GetHistoryPostgresLogLastSyncHistoryId() (int, error) {
+	q, err := getDb().GetHistoryPostgresLogLastSyncHistoryId()
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	return q, nil
 }
