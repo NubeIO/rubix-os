@@ -1,37 +1,53 @@
 # CHANGELOG
+
+## [v0.8.1](https://github.com/NubeIO/flow-framework/tree/v0.8.1) (2022-10-30)
+
+- Fix: postgres large data push and history mismatched order
+- Fix: galvintmv for network search
+- Fix: bug on mqtt publish cov
+
 ## [v0.8.0](https://github.com/NubeIO/flow-framework/tree/v0.8.0) (2022-10-27)
+
 - adds mqtt to plugins
 - adds apis for histories
 
 ## [v0.7.9](https://github.com/NubeIO/flow-framework/tree/v0.7.9) (2022-10-25)
+
 - capitalizes lora naming
 - adds mqtt functionality
 
 ## [v0.7.8](https://github.com/NubeIO/flow-framework/tree/v0.7.8) (2022-10-17)
+
 - adds rubix sync plugin
 
 ## [v0.7.7](https://github.com/NubeIO/flow-framework/tree/v0.7.7) (2022-10-10)
+
 - zip-hydro-tap lora fix #671
 - plugin/networklinker #670
 - updates to edgeinflux, galvintmv, and lorawan #668
 
 ## [v0.7.6](https://github.com/NubeIO/flow-framework/tree/v0.7.5) (2022-10-06)
+
 - minor gavlintmv plugin update
 
 ## [v0.7.5](https://github.com/NubeIO/flow-framework/tree/v0.7.5) (2022-10-05)
+
 - adds gavlintmv plugin
 - adds edgeinflux plugin
 
 ## [v0.7.4](https://github.com/NubeIO/flow-framework/tree/v0.7.4) (2022-09-12)
+
 - fix voltage error #652
 - fix bug on is mqtt connected #651
 - lorawan recurse nested maps in uplink #649
 
 ## [v0.7.3](https://github.com/NubeIO/flow-framework/tree/v0.7.3) (2022-09-05)
+
 - bacnetserver repost point values on server restart
 - bacnetmaster add multi-state object type support
 
 ## [v0.7.2](https://github.com/NubeIO/flow-framework/tree/v0.7.2) (2022-08-31)
+
 - fixed nil pointers and looping in pollqueue
 - updated lora raw defaults and payload structures
 
