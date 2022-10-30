@@ -8,7 +8,8 @@ import (
 )
 
 func AutoMigrate(db *gorm.DB) error {
-	if (db.Migrator().HasColumn(&model.History{}, "idx_histories_id")) {
+	if (db.Migrator().HasColumn(&model.History{}, "idx_histories_id") ||
+		!db.Migrator().HasColumn(&model.History{}, "history_id")) {
 		// We drop old table and create new one with composite primary_key
 		// Update of primary_key doesn't support in GORM
 		// Fore more info: https://github.com/go-gorm/gorm/issues/4742
