@@ -17,6 +17,12 @@ func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	if val, exists := ctx.Get(aType.IsRemote); exists {
 		args.IsRemote = boolean.New(val.(bool))
 	}
+	if value, ok := ctx.GetQuery(aType.PluginName); ok {
+		args.PluginName = value
+	}
+	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
+		args.FlowNetworkUUID = value
+	}
 	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
 		args.GlobalUUID = &value
 	}
@@ -194,7 +200,7 @@ func buildPluginArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.PluginName, _ = toBool(ctx.DefaultQuery(aType.PluginName, aDefault.PluginName))
+	args.ByPluginName, _ = toBool(ctx.DefaultQuery(aType.ByPluginName, aDefault.PluginName))
 	return args
 }
 

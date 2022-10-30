@@ -7,8 +7,8 @@ type Ping struct {
 	Database string `json:"database"`
 }
 
-func (a *FlowClient) Ping() (*Ping, error) {
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+func (inst *FlowClient) Ping() (*Ping, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&Ping{}).
 		Get("/api/system/ping"))
 	if err != nil {

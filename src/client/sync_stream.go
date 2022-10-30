@@ -5,8 +5,8 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-func (a *FlowClient) SyncStream(body *model.SyncStream) (*model.StreamClone, error) {
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+func (inst *FlowClient) SyncStream(body *model.SyncStream) (*model.StreamClone, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&model.StreamClone{}).
 		SetBody(body).
 		Post("/api/sync/stream"))

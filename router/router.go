@@ -56,6 +56,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	streamHandler := api.StreamAPI{
 		DB: db,
 	}
+	remoteHandler := api.RemoteAPI{
+		DB: db,
+	}
 	streamCloneHandler := api.StreamCloneAPI{
 		DB: db,
 	}
@@ -239,6 +242,27 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		mappingRoutes := apiRoutes.Group("/mapping")
 		{
 			mappingRoutes.POST("/points", mapping.CreatePointMapping)
+		}
+
+		remoteRoutes := apiRoutes.Group("/remote")
+		{
+			remoteRoutes.GET("/networks", remoteHandler.RemoteGetNetworks)
+			remoteRoutes.GET("/networks/:uuid", remoteHandler.RemoteGetNetwork)
+			remoteRoutes.POST("/networks", remoteHandler.RemoteCreateNetwork)
+			remoteRoutes.PATCH("/networks/:uuid", remoteHandler.RemoteEditNetwork)
+			remoteRoutes.DELETE("/networks", remoteHandler.RemoteDeleteNetwork)
+
+			remoteRoutes.GET("/devices", remoteHandler.RemoteGetDevices)
+			remoteRoutes.GET("/devices/:uuid", remoteHandler.RemoteGetDevice)
+			remoteRoutes.POST("/devices", remoteHandler.RemoteCreateDevice)
+			remoteRoutes.PATCH("/devices/:uuid", remoteHandler.RemoteEditDevice)
+			remoteRoutes.DELETE("/devices", remoteHandler.RemoteDeleteDevice)
+
+			remoteRoutes.GET("/points", remoteHandler.RemoteGetPoints)
+			remoteRoutes.GET("/points/:uuid", remoteHandler.RemoteGetPoint)
+			remoteRoutes.POST("/points", remoteHandler.RemoteCreatePoint)
+			remoteRoutes.PATCH("/points/:uuid", remoteHandler.RemoteEditPoint)
+			remoteRoutes.DELETE("/points", remoteHandler.RemoteDeletePoint)
 		}
 
 		streamCloneRoutes := apiRoutes.Group("/stream_clones")

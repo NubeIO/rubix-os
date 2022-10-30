@@ -7,10 +7,10 @@ import (
 )
 
 // ClientAddConsumer an object
-func (a *FlowClient) ClientAddConsumer(body Consumer) (*ResponseBody, error) {
+func (inst *FlowClient) ClientAddConsumer(body Consumer) (*ResponseBody, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("sub_name_%s", name)
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(body).
 		Post("/api/consumers"))
@@ -21,8 +21,8 @@ func (a *FlowClient) ClientAddConsumer(body Consumer) (*ResponseBody, error) {
 }
 
 // ClientGetConsumer an object
-func (a *FlowClient) ClientGetConsumer(uuid string) (*ResponseBody, error) {
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+func (inst *FlowClient) ClientGetConsumer(uuid string) (*ResponseBody, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&ResponseBody{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/consumers/{uuid}"))
@@ -33,10 +33,10 @@ func (a *FlowClient) ClientGetConsumer(uuid string) (*ResponseBody, error) {
 }
 
 // ClientEditConsumer edit an object
-func (a *FlowClient) ClientEditConsumer(uuid string) (*ResponseBody, error) {
+func (inst *FlowClient) ClientEditConsumer(uuid string) (*ResponseBody, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("sub_new_name_%s", name)
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&ResponseBody{}).
 		SetBody(map[string]string{"name": name}).
 		SetPathParams(map[string]string{"uuid": uuid}).

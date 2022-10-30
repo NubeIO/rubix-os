@@ -28,7 +28,7 @@ On consumer (normally server) side:
 - Create writer under the consumer
 */
 func (d *GormDatabase) WizardMasterSlavePointMapping() (bool, error) {
-	flow, err := d.wizardMasterSlavePointMappingOnProducerSide()
+	flow, err := d.wizardMasterSlavePointMappingOnProducerSide() // make the producer
 	if err != nil {
 		return false, err
 	}

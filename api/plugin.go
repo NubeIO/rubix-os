@@ -71,7 +71,7 @@ func (c *PluginAPI) buildUUID(ctx *gin.Context) string {
 	nameOrUUID := resolveID(ctx) // system?by_plugin_name=true is passed in then enable plugin by its name
 	uuid := ""
 	args := buildPluginArgs(ctx)
-	if args.PluginName {
+	if args.ByPluginName {
 		path, err := c.DB.GetPluginByPath(nameOrUUID)
 		if err != nil {
 			ResponseHandler("err: no plugin with that name was found", nil, ctx)
