@@ -33,12 +33,16 @@ type RemoteDatabase interface {
 	RemoteDeletePoint(uuid string, args Args) (bool, error)
 	RemoteEditPoint(uuid string, body *model.Point, args Args) (*model.Point, error)
 
-	// producers
+	// streams
 	RemoteGetStreams(args Args) ([]model.Stream, error)
 	RemoteGetStream(uuid string, args Args) (*model.Stream, error)
 	RemoteCreateStream(body *model.Stream, args Args) (*model.Stream, error)
 	RemoteDeleteStream(uuid string, args Args) (bool, error)
 	RemoteEditStream(uuid string, body *model.Stream, args Args) (*model.Stream, error)
+
+	// streams clones
+	RemoteGetStreamClones(args Args) ([]model.StreamClone, error)
+	RemoteDeleteStreamClone(uuid string, args Args) (bool, error)
 
 	// producers
 	RemoteGetProducers(args Args) ([]model.Producer, error)
@@ -91,34 +95,34 @@ func (j *RemoteAPI) RemoteDeleteFlowNetworkClone(ctx *gin.Context) {
 // NETWORKS
 
 func (j *RemoteAPI) RemoteGetNetworks(ctx *gin.Context) {
-	args := buildFlowNetworkArgs(ctx)
+	args := buildNetworkArgs(ctx)
 	q, err := j.DB.RemoteGetNetworks(args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (j *RemoteAPI) RemoteGetNetwork(ctx *gin.Context) {
-	args := buildFlowNetworkArgs(ctx)
+	args := buildNetworkArgs(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.RemoteGetNetwork(uuid, args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (j *RemoteAPI) RemoteCreateNetwork(ctx *gin.Context) {
-	args := buildFlowNetworkArgs(ctx)
+	args := buildNetworkArgs(ctx)
 	body, _ := getBODYNetwork(ctx)
 	q, err := j.DB.RemoteCreateNetwork(body, args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (j *RemoteAPI) RemoteDeleteNetwork(ctx *gin.Context) {
-	args := buildFlowNetworkArgs(ctx)
+	args := buildNetworkArgs(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.RemoteDeleteNetwork(uuid, args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (j *RemoteAPI) RemoteEditNetwork(ctx *gin.Context) {
-	args := buildFlowNetworkArgs(ctx)
+	args := buildNetworkArgs(ctx)
 	uuid := resolveID(ctx)
 	body, _ := getBODYNetwork(ctx)
 	q, err := j.DB.RemoteEditNetwork(uuid, body, args)
@@ -202,13 +206,13 @@ func (j *RemoteAPI) RemoteEditPoint(ctx *gin.Context) {
 // STREAMS
 
 func (j *RemoteAPI) RemoteGetStreams(ctx *gin.Context) {
-	args := buildFlowNetworkArgs(ctx)
+	args := buildStreamCloneArgs(ctx)
 	q, err := j.DB.RemoteGetStreams(args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (j *RemoteAPI) RemoteGetStream(ctx *gin.Context) {
-	args := buildFlowNetworkArgs(ctx)
+	args := buildStreamCloneArgs(ctx)
 	uuid := resolveID(ctx)
 	q, err := j.DB.RemoteGetStream(uuid, args)
 	ResponseHandler(q, err, ctx)
@@ -233,6 +237,21 @@ func (j *RemoteAPI) RemoteEditStream(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	body, _ := getBODYStream(ctx)
 	q, err := j.DB.RemoteEditStream(uuid, body, args)
+	ResponseHandler(q, err, ctx)
+}
+
+// STREAMS CLONES
+
+func (j *RemoteAPI) RemoteGetStreamClones(ctx *gin.Context) {
+	args := buildStreamCloneArgs(ctx)
+	q, err := j.DB.RemoteGetStreamClones(args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *RemoteAPI) RemoteDeleteStreamClone(ctx *gin.Context) {
+	args := buildStreamCloneArgs(ctx)
+	uuid := resolveID(ctx)
+	q, err := j.DB.RemoteDeleteStreamClone(uuid, args)
 	ResponseHandler(q, err, ctx)
 }
 

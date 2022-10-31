@@ -276,6 +276,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			remoteRoutes.PATCH("/streams/:uuid", remoteHandler.RemoteEditStream)
 			remoteRoutes.DELETE("/streams", remoteHandler.RemoteDeleteStream)
 
+			remoteRoutes.GET("/stream_clones", remoteHandler.RemoteGetStreamClones)
+			remoteRoutes.DELETE("/stream_clones", remoteHandler.RemoteDeleteStreamClone)
+
 			remoteRoutes.GET("/producers", remoteHandler.RemoteGetProducers)
 			remoteRoutes.GET("/producers/:uuid", remoteHandler.RemoteGetProducer)
 			remoteRoutes.POST("/producers", remoteHandler.RemoteCreateProducer)

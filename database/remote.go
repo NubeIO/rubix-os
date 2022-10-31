@@ -68,6 +68,13 @@ func (d *GormDatabase) RemoteGetNetwork(uuid string, args api.Args) (*model.Netw
 		return nil, err
 	}
 	cli := client.NewFlowClientCliFromFN(fn)
+	if args.WithPoints {
+		resp, err := cli.GetNetworkWithPoints(uuid)
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
+	}
 	resp, err := cli.GetNetwork(uuid)
 	if err != nil {
 		return nil, err
@@ -311,6 +318,34 @@ func (d *GormDatabase) RemoteEditStream(uuid string, body *model.Stream, args ap
 	resp, err := cli.EditStream(uuid, body)
 	if err != nil {
 		return nil, err
+	}
+	return resp, nil
+}
+
+// STREAMS CLONES
+
+func (d *GormDatabase) RemoteGetStreamClones(args api.Args) ([]model.StreamClone, error) {
+	fn, err := d.GetFlowNetwork(args.FlowNetworkUUID, args)
+	if err != nil {
+		return nil, err
+	}
+	cli := client.NewFlowClientCliFromFN(fn)
+	resp, err := cli.GetStreamClones()
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (d *GormDatabase) RemoteDeleteStreamClone(uuid string, args api.Args) (bool, error) {
+	fn, err := d.GetFlowNetwork(args.FlowNetworkUUID, args)
+	if err != nil {
+		return false, err
+	}
+	cli := client.NewFlowClientCliFromFN(fn)
+	resp, err := cli.DeleteStreamClone(uuid)
+	if err != nil {
+		return false, err
 	}
 	return resp, nil
 }

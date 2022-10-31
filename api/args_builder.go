@@ -86,6 +86,9 @@ func buildStreamCloneArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
 		args.SourceUUID = &value
 	}
+	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
+		args.FlowNetworkUUID = value
+	}
 	if value, ok := ctx.GetQuery(aType.FlowNetworkCloneUUID); ok {
 		args.FlowNetworkCloneUUID = &value
 	}
@@ -129,6 +132,9 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	args.WithDevices, _ = toBool(ctx.DefaultQuery(aType.WithDevices, aDefault.WithDevices))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
+		args.FlowNetworkUUID = value
+	}
 	return args
 }
 
