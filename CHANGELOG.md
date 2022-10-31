@@ -1,6 +1,11 @@
 # CHANGELOG
 
+## [v0.8.3](https://github.com/NubeIO/flow-framework/tree/v0.8.3) (2022-10-31)
+
+- Fix: get the latest history for postgres sync
+
 ## [v0.8.2](https://github.com/NubeIO/flow-framework/tree/v0.8.2) (2022-10-31)
+
 - added mapping apis (will be removed)
 
 ## [v0.8.1](https://github.com/NubeIO/flow-framework/tree/v0.8.1) (2022-10-30)
