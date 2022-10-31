@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## [v0.8.2](https://github.com/NubeIO/flow-framework/tree/v0.8.2) (2022-10-31)
+- added mapping apis (will be removed)
+
 ## [v0.8.1](https://github.com/NubeIO/flow-framework/tree/v0.8.1) (2022-10-30)
 
 - Fix: postgres large data push and history mismatched order
