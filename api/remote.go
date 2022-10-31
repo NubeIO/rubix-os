@@ -34,18 +34,32 @@ type RemoteDatabase interface {
 	RemoteEditPoint(uuid string, body *model.Point, args Args) (*model.Point, error)
 
 	// producers
+	RemoteGetStreams(args Args) ([]model.Stream, error)
+	RemoteGetStream(uuid string, args Args) (*model.Stream, error)
+	RemoteCreateStream(body *model.Stream, args Args) (*model.Stream, error)
+	RemoteDeleteStream(uuid string, args Args) (bool, error)
+	RemoteEditStream(uuid string, body *model.Stream, args Args) (*model.Stream, error)
+
+	// producers
 	RemoteGetProducers(args Args) ([]model.Producer, error)
 	RemoteGetProducer(uuid string, args Args) (*model.Producer, error)
-	RemoteCreateProducer(body *model.Producer, args Args) (*model.Point, error)
+	RemoteCreateProducer(body *model.Producer, args Args) (*model.Producer, error)
 	RemoteDeleteProducer(uuid string, args Args) (bool, error)
 	RemoteEditProducer(uuid string, body *model.Producer, args Args) (*model.Producer, error)
+
+	// consumers
+	RemoteGetConsumers(args Args) ([]model.Consumer, error)
+	RemoteGetConsumer(uuid string, args Args) (*model.Consumer, error)
+	RemoteCreateConsumer(body *model.Consumer, args Args) (*model.Consumer, error)
+	RemoteDeleteConsumer(uuid string, args Args) (bool, error)
+	RemoteEditConsumer(uuid string, body *model.Consumer, args Args) (*model.Consumer, error)
 
 	// writers
 	RemoteGetWriters(args Args) ([]model.Writer, error)
 	RemoteGetWriter(uuid string, args Args) (*model.Writer, error)
 	RemoteCreateWriter(body *model.Writer, args Args) (*model.Writer, error)
 	RemoteDeleteWriter(uuid string, args Args) (bool, error)
-	RemoteEditWriter(uuid string, body *model.Writer, args Args) (*model.Writer, error)
+	RemoteEditWriter(uuid string, body *model.Writer, updateProducer bool, args Args) (*model.Writer, error)
 }
 
 type RemoteAPI struct {
@@ -185,6 +199,43 @@ func (j *RemoteAPI) RemoteEditPoint(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
+// STREAMS
+
+func (j *RemoteAPI) RemoteGetStreams(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	q, err := j.DB.RemoteGetStreams(args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *RemoteAPI) RemoteGetStream(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	uuid := resolveID(ctx)
+	q, err := j.DB.RemoteGetStream(uuid, args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *RemoteAPI) RemoteCreateStream(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	body, _ := getBODYStream(ctx)
+	q, err := j.DB.RemoteCreateStream(body, args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *RemoteAPI) RemoteDeleteStream(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	uuid := resolveID(ctx)
+	q, err := j.DB.RemoteDeleteStream(uuid, args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *RemoteAPI) RemoteEditStream(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	uuid := resolveID(ctx)
+	body, _ := getBODYStream(ctx)
+	q, err := j.DB.RemoteEditStream(uuid, body, args)
+	ResponseHandler(q, err, ctx)
+}
+
 // PRODUCERS
 
 func (j *RemoteAPI) RemoteGetProducers(ctx *gin.Context) {
@@ -222,6 +273,43 @@ func (j *RemoteAPI) RemoteEditProducer(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
+// CONSUMERS
+
+func (j *RemoteAPI) RemoteGetConsumers(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	q, err := j.DB.RemoteGetProducers(args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *RemoteAPI) RemoteGetConsumer(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	uuid := resolveID(ctx)
+	q, err := j.DB.RemoteGetConsumer(uuid, args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *RemoteAPI) RemoteCreateConsumer(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	body, _ := getBODYConsumer(ctx)
+	q, err := j.DB.RemoteCreateConsumer(body, args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *RemoteAPI) RemoteDeleteConsumer(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	uuid := resolveID(ctx)
+	q, err := j.DB.RemoteDeleteConsumer(uuid, args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (j *RemoteAPI) RemoteEditConsumer(ctx *gin.Context) {
+	args := buildFlowNetworkArgs(ctx)
+	uuid := resolveID(ctx)
+	body, _ := getBODYConsumer(ctx)
+	q, err := j.DB.RemoteEditConsumer(uuid, body, args)
+	ResponseHandler(q, err, ctx)
+}
+
 // WRITERS
 
 func (j *RemoteAPI) RemoteGetWriters(ctx *gin.Context) {
@@ -255,6 +343,6 @@ func (j *RemoteAPI) RemoteEditWriter(ctx *gin.Context) {
 	args := buildFlowNetworkArgs(ctx)
 	uuid := resolveID(ctx)
 	body, _ := getBODYWriter(ctx)
-	q, err := j.DB.RemoteEditWriter(uuid, body, args)
+	q, err := j.DB.RemoteEditWriter(uuid, body, false, args)
 	ResponseHandler(q, err, ctx)
 }

@@ -245,7 +245,13 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		}
 
 		remoteRoutes := apiRoutes.Group("/remote")
+
 		{
+
+			remoteRoutes.GET("/flow_network_clones", remoteHandler.RemoteGetFlowNetworkClones)
+			remoteRoutes.GET("/flow_network_clones/:uuid", remoteHandler.RemoteGetFlowNetworkClone)
+			remoteRoutes.DELETE("/flow_network_clones", remoteHandler.RemoteDeleteFlowNetworkClone)
+
 			remoteRoutes.GET("/networks", remoteHandler.RemoteGetNetworks)
 			remoteRoutes.GET("/networks/:uuid", remoteHandler.RemoteGetNetwork)
 			remoteRoutes.POST("/networks", remoteHandler.RemoteCreateNetwork)
@@ -263,6 +269,31 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			remoteRoutes.POST("/points", remoteHandler.RemoteCreatePoint)
 			remoteRoutes.PATCH("/points/:uuid", remoteHandler.RemoteEditPoint)
 			remoteRoutes.DELETE("/points", remoteHandler.RemoteDeletePoint)
+
+			remoteRoutes.GET("/streams", remoteHandler.RemoteGetStreams)
+			remoteRoutes.GET("/streams/:uuid", remoteHandler.RemoteGetStream)
+			remoteRoutes.POST("/streams", remoteHandler.RemoteCreateStream)
+			remoteRoutes.PATCH("/streams/:uuid", remoteHandler.RemoteEditStream)
+			remoteRoutes.DELETE("/streams", remoteHandler.RemoteDeleteStream)
+
+			remoteRoutes.GET("/producers", remoteHandler.RemoteGetProducers)
+			remoteRoutes.GET("/producers/:uuid", remoteHandler.RemoteGetProducer)
+			remoteRoutes.POST("/producers", remoteHandler.RemoteCreateProducer)
+			remoteRoutes.PATCH("/producers/:uuid", remoteHandler.RemoteEditProducer)
+			remoteRoutes.DELETE("/producers", remoteHandler.RemoteDeleteProducer)
+
+			remoteRoutes.GET("/consumers", remoteHandler.RemoteGetConsumers)
+			remoteRoutes.GET("/consumers/:uuid", remoteHandler.RemoteGetConsumer)
+			remoteRoutes.POST("/consumers", remoteHandler.RemoteCreateConsumer)
+			remoteRoutes.PATCH("/consumers/:uuid", remoteHandler.RemoteEditConsumer)
+			remoteRoutes.DELETE("/consumers", remoteHandler.RemoteDeleteConsumer)
+
+			remoteRoutes.GET("/writers", remoteHandler.RemoteGetWriters)
+			remoteRoutes.GET("/writers/:uuid", remoteHandler.RemoteGetWriter)
+			remoteRoutes.POST("/writers", remoteHandler.RemoteCreateWriter)
+			remoteRoutes.PATCH("/writers/:uuid", remoteHandler.RemoteEditWriter)
+			remoteRoutes.DELETE("/writers", remoteHandler.RemoteDeleteWriter)
+
 		}
 
 		streamCloneRoutes := apiRoutes.Group("/stream_clones")
