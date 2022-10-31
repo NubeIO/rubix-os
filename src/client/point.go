@@ -1,19 +1,14 @@
 package client
 
 import (
-	"fmt"
 	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-// ClientAddPoint an object
-func (a *FlowClient) ClientAddPoint(deviceUUID string) (*model.Point, error) {
-	name, _ := nuuid.MakeUUID()
-	name = fmt.Sprintf("pnt_name_%s", name)
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+func (inst *FlowClient) AddPoint(body *model.Point) (*model.Point, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&model.Point{}).
-		SetBody(map[string]string{"name": name, "device_uuid": deviceUUID}).
+		SetBody(body).
 		Post("/api/points"))
 	if err != nil {
 		return nil, err
@@ -21,9 +16,20 @@ func (a *FlowClient) ClientAddPoint(deviceUUID string) (*model.Point, error) {
 	return resp.Result().(*model.Point), nil
 }
 
-// ClientGetPoint an object
-func (a *FlowClient) ClientGetPoint(uuid string) (*model.Point, error) {
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+func (inst *FlowClient) GetPoints() ([]model.Point, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&[]model.Point{}).
+		Get("/api/points"))
+	if err != nil {
+		return nil, err
+	}
+	var out []model.Point
+	out = *resp.Result().(*[]model.Point)
+	return out, nil
+}
+
+func (inst *FlowClient) GetPoint(uuid string) (*model.Point, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&model.Point{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/points/{uuid}"))
@@ -33,9 +39,18 @@ func (a *FlowClient) ClientGetPoint(uuid string) (*model.Point, error) {
 	return resp.Result().(*model.Point), nil
 }
 
-// ClientEditPoint an object
-func (a *FlowClient) ClientEditPoint(uuid string, body model.Point) (*model.Point, error) {
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+func (inst *FlowClient) DeletePoint(uuid string) (bool, error) {
+	_, err := nresty.FormatRestyResponse(inst.client.R().
+		SetPathParams(map[string]string{"uuid": uuid}).
+		Delete("/api/points/{uuid}"))
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (inst *FlowClient) EditPoint(uuid string, body *model.Point) (*model.Point, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetBody(body).
 		SetResult(&model.Point{}).
 		SetPathParams(map[string]string{"uuid": uuid}).

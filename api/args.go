@@ -35,7 +35,7 @@ type Args struct {
 	SourceUUID           *string
 	ProducerThingUUID    *string
 	WriterThingUUID      *string
-	PluginName           bool
+	ByPluginName         bool
 	TimestampGt          *string
 	TimestampLt          *string
 	WithFlowNetworks     bool
@@ -51,6 +51,7 @@ type Args struct {
 	WithPoints           bool
 	WithPriority         bool
 	WithTags             bool
+	PluginName           string
 	NetworkName          *string
 	DeviceName           *string
 	PointName            *string
@@ -100,7 +101,7 @@ var ArgsType = struct {
 	SourceUUID           string
 	ProducerThingUUID    string
 	WriterThingUUID      string
-	PluginName           string
+	ByPluginName         string
 	TimestampGt          string
 	TimestampLt          string
 	WithFlowNetworks     string
@@ -116,6 +117,7 @@ var ArgsType = struct {
 	WithPoints           string
 	WithPriority         string
 	WithTags             string
+	PluginName           string
 	NetworkName          string
 	DeviceName           string
 	PointName            string
@@ -163,7 +165,7 @@ var ArgsType = struct {
 	SourceUUID:           "source_uuid",
 	ProducerThingUUID:    "producer_thing_uuid",
 	WriterThingUUID:      "writer_thing_uuid",
-	PluginName:           "by_plugin_name",
+	ByPluginName:         "by_plugin_name",
 	TimestampGt:          "timestamp_gt",
 	TimestampLt:          "timestamp_lt",
 	WithFlowNetworks:     "with_flow_networks",
@@ -179,6 +181,7 @@ var ArgsType = struct {
 	WithPoints:           "with_points",
 	WithPriority:         "with_priority",
 	WithTags:             "with_tags",
+	PluginName:           "plugin_name",
 	NetworkName:          "network_name",
 	DeviceName:           "device_name",
 	PointName:            "point_name",

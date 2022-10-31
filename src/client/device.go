@@ -3,46 +3,85 @@ package client
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/utils/nuuid"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-// ClientAddDevice an object
-func (a *FlowClient) ClientAddDevice(networkUUID string) (*ResponseBody, error) {
-	name, _ := nuuid.MakeUUID()
-	name = fmt.Sprintf("dev_name_%s", name)
-	resp, err := nresty.FormatRestyResponse(a.client.R().
-		SetResult(&ResponseBody{}).
-		SetBody(map[string]string{"name": name, "network_uuid": networkUUID}).
-		Post("/api/devices"))
+func (inst *FlowClient) AddDevice(device *model.Device) (*model.Device, error) {
+	url := fmt.Sprintf("/api/devices")
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&model.Device{}).
+		SetBody(device).
+		Post(url))
 	if err != nil {
 		return nil, err
 	}
-	return resp.Result().(*ResponseBody), nil
+	return resp.Result().(*model.Device), nil
 }
 
-// ClientGetDevice an object
-func (a *FlowClient) ClientGetDevice(uuid string) (*ResponseBody, error) {
-	resp, err := nresty.FormatRestyResponse(a.client.R().
-		SetResult(&ResponseBody{}).
-		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/devices/{uuid}"))
+// GetFirstDevice first object
+func (inst *FlowClient) GetFirstDevice(withPoints ...bool) (*model.Device, error) {
+	devices, err := inst.GetDevices(withPoints...)
 	if err != nil {
 		return nil, err
 	}
-	return resp.Result().(*ResponseBody), nil
+	for _, device := range devices {
+		return &device, err
+	}
+	return nil, err
 }
 
-// ClientEditDevice edit an object
-func (a *FlowClient) ClientEditDevice(uuid string) (*ResponseBody, error) {
-	name, _ := nuuid.MakeUUID()
-	name = fmt.Sprintf("dev_new_name_%s", name)
-	resp, err := nresty.FormatRestyResponse(a.client.R().
-		SetResult(&ResponseBody{}).
-		SetBody(map[string]string{"name": name}).
-		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/devices/{}"))
+func (inst *FlowClient) GetDevices(withPoints ...bool) ([]model.Device, error) {
+	url := fmt.Sprintf("/api/devices")
+	if len(withPoints) > 0 {
+		if withPoints[0] == true {
+			url = fmt.Sprintf("/api/devices?with_points=true")
+		}
+	}
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&[]model.Device{}).
+		Get(url))
 	if err != nil {
 		return nil, err
 	}
-	return resp.Result().(*ResponseBody), nil
+	var out []model.Device
+	out = *resp.Result().(*[]model.Device)
+	return out, nil
+}
+
+func (inst *FlowClient) GetDevice(uuid string, withPoints ...bool) (*model.Device, error) {
+	url := fmt.Sprintf("/api/devices/%s", uuid)
+	if len(withPoints) > 0 {
+		if withPoints[0] == true {
+			url = fmt.Sprintf("/api/devices/%s?with_points=true", uuid)
+		}
+	}
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&model.Device{}).
+		Get(url))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Result().(*model.Device), nil
+}
+
+func (inst *FlowClient) EditDevice(uuid string, device *model.Device) (*model.Device, error) {
+	url := fmt.Sprintf("/api/devices/%s", uuid)
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&model.Device{}).
+		SetBody(device).
+		Patch(url))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Result().(*model.Device), nil
+}
+
+func (inst *FlowClient) DeleteDevice(uuid string) (bool, error) {
+	_, err := nresty.FormatRestyResponse(inst.client.R().
+		SetPathParams(map[string]string{"uuid": uuid}).
+		Delete("/api/devices/{uuid}"))
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

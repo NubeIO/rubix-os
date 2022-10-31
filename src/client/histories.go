@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-func (a *FlowClient) GetProducerHistoriesPointsForSync(id int, timeStamp time.Time) (*[]model.History, error) {
-	req := a.client.R().
+func (inst *FlowClient) GetProducerHistoriesPointsForSync(id int, timeStamp time.Time) (*[]model.History, error) {
+	req := inst.client.R().
 		SetResult(&[]model.History{}).SetQueryParam("id", fmt.Sprintf("%v", id)).
 		SetQueryParam("timestamp", fmt.Sprintf("%v", timeStamp.Format(time.RFC3339Nano)))
 	resp, err := nresty.FormatRestyResponse(req.Get("/api/histories/producers/points_for_sync"))

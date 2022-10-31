@@ -5,8 +5,8 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-func (a *FlowClient) Login(body *model.LoginBody) (*model.TokenResponse, error) {
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+func (inst *FlowClient) Login(body *model.LoginBody) (*model.TokenResponse, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetBody(body).
 		SetResult(&model.TokenResponse{}).
 		Post("/api/users/login"))

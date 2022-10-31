@@ -17,6 +17,12 @@ func buildFlowNetworkArgs(ctx *gin.Context) Args {
 	if val, exists := ctx.Get(aType.IsRemote); exists {
 		args.IsRemote = boolean.New(val.(bool))
 	}
+	if value, ok := ctx.GetQuery(aType.PluginName); ok {
+		args.PluginName = value
+	}
+	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
+		args.FlowNetworkUUID = value
+	}
 	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
 		args.GlobalUUID = &value
 	}
@@ -80,6 +86,9 @@ func buildStreamCloneArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
 		args.SourceUUID = &value
 	}
+	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
+		args.FlowNetworkUUID = value
+	}
 	if value, ok := ctx.GetQuery(aType.FlowNetworkCloneUUID); ok {
 		args.FlowNetworkCloneUUID = &value
 	}
@@ -123,6 +132,9 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	args.WithDevices, _ = toBool(ctx.DefaultQuery(aType.WithDevices, aDefault.WithDevices))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
+		args.FlowNetworkUUID = value
+	}
 	return args
 }
 
@@ -194,7 +206,7 @@ func buildPluginArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	var aDefault = ArgsDefault
-	args.PluginName, _ = toBool(ctx.DefaultQuery(aType.PluginName, aDefault.PluginName))
+	args.ByPluginName, _ = toBool(ctx.DefaultQuery(aType.ByPluginName, aDefault.PluginName))
 	return args
 }
 

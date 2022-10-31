@@ -3,46 +3,62 @@ package client
 import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/utils/nuuid"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-// ClientAddConsumer an object
-func (a *FlowClient) ClientAddConsumer(body Consumer) (*ResponseBody, error) {
-	name, _ := nuuid.MakeUUID()
-	name = fmt.Sprintf("sub_name_%s", name)
-	resp, err := nresty.FormatRestyResponse(a.client.R().
-		SetResult(&ResponseBody{}).
+func (inst *FlowClient) AddConsumer(body *model.Consumer) (*model.Consumer, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&model.Consumer{}).
 		SetBody(body).
 		Post("/api/consumers"))
 	if err != nil {
 		return nil, err
 	}
-	return resp.Result().(*ResponseBody), nil
+	return resp.Result().(*model.Consumer), nil
 }
 
-// ClientGetConsumer an object
-func (a *FlowClient) ClientGetConsumer(uuid string) (*ResponseBody, error) {
-	resp, err := nresty.FormatRestyResponse(a.client.R().
-		SetResult(&ResponseBody{}).
-		SetPathParams(map[string]string{"uuid": uuid}).
-		Get("/api/consumers/{uuid}"))
+func (inst *FlowClient) EditConsumer(uuid string, body *model.Consumer) (*model.Consumer, error) {
+	url := fmt.Sprintf("/api/consumers/%s", uuid)
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&model.Consumer{}).
+		SetBody(body).
+		Patch(url))
 	if err != nil {
 		return nil, err
 	}
-	return resp.Result().(*ResponseBody), nil
+	return resp.Result().(*model.Consumer), nil
 }
 
-// ClientEditConsumer edit an object
-func (a *FlowClient) ClientEditConsumer(uuid string) (*ResponseBody, error) {
-	name, _ := nuuid.MakeUUID()
-	name = fmt.Sprintf("sub_new_name_%s", name)
-	resp, err := nresty.FormatRestyResponse(a.client.R().
-		SetResult(&ResponseBody{}).
-		SetBody(map[string]string{"name": name}).
-		SetPathParams(map[string]string{"uuid": uuid}).
-		Post("/api/consumers/{}"))
+func (inst *FlowClient) GetConsumers() ([]model.Consumer, error) {
+	url := fmt.Sprintf("/api/consumers")
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&[]model.Consumer{}).
+		Get(url))
 	if err != nil {
 		return nil, err
 	}
-	return resp.Result().(*ResponseBody), nil
+	var out []model.Consumer
+	out = *resp.Result().(*[]model.Consumer)
+	return out, nil
+}
+
+func (inst *FlowClient) GetConsumer(uuid string) (*model.Consumer, error) {
+	url := fmt.Sprintf("/api/consumers/%s", uuid)
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&model.Consumer{}).
+		Get(url))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Result().(*model.Consumer), nil
+}
+
+func (inst *FlowClient) DeleteConsumer(uuid string) (bool, error) {
+	_, err := nresty.FormatRestyResponse(inst.client.R().
+		SetPathParams(map[string]string{"uuid": uuid}).
+		Delete("/api/consumers/{uuid}"))
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

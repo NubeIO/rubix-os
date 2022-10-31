@@ -8,10 +8,10 @@ import (
 )
 
 // AddProducer an object
-func (a *FlowClient) AddProducer(body model.Producer) (*model.Producer, error) {
+func (inst *FlowClient) AddProducer(body *model.Producer) (*model.Producer, error) {
 	name, _ := nuuid.MakeUUID()
 	name = fmt.Sprintf("sub_name_%s", name)
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&model.Producer{}).
 		SetBody(body).
 		Post("/api/producers"))
@@ -21,21 +21,21 @@ func (a *FlowClient) AddProducer(body model.Producer) (*model.Producer, error) {
 	return resp.Result().(*model.Producer), nil
 }
 
-func (a *FlowClient) GetProducers(streamUUID *string) (*[]model.Producer, error) {
-	req := a.client.R().
-		SetResult(&[]model.Producer{})
-	if streamUUID != nil {
-		req.SetQueryParam("stream_uuid", *streamUUID)
-	}
-	resp, err := nresty.FormatRestyResponse(req.Get("/api/producers"))
+func (inst *FlowClient) GetProducers() ([]model.Producer, error) {
+	url := fmt.Sprintf("/api/producers")
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&[]model.Producer{}).
+		Get(url))
 	if err != nil {
 		return nil, err
 	}
-	return resp.Result().(*[]model.Producer), nil
+	var out []model.Producer
+	out = *resp.Result().(*[]model.Producer)
+	return out, nil
 }
 
-func (a *FlowClient) GetProducer(uuid string) (*model.Producer, error) {
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+func (inst *FlowClient) GetProducer(uuid string) (*model.Producer, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&model.Producer{}).
 		SetPathParams(map[string]string{"uuid": uuid}).
 		Get("/api/producers/{uuid}"))
@@ -46,8 +46,8 @@ func (a *FlowClient) GetProducer(uuid string) (*model.Producer, error) {
 }
 
 // EditProducer edit an object
-func (a *FlowClient) EditProducer(uuid string, body model.Producer) (*model.Producer, error) {
-	resp, err := nresty.FormatRestyResponse(a.client.R().
+func (inst *FlowClient) EditProducer(uuid string, body *model.Producer) (*model.Producer, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&model.Producer{}).
 		SetBody(body).
 		SetPathParams(map[string]string{"uuid": uuid}).
@@ -56,4 +56,14 @@ func (a *FlowClient) EditProducer(uuid string, body model.Producer) (*model.Prod
 		return nil, err
 	}
 	return resp.Result().(*model.Producer), nil
+}
+
+func (inst *FlowClient) DeleteProducer(uuid string) (bool, error) {
+	_, err := nresty.FormatRestyResponse(inst.client.R().
+		SetPathParams(map[string]string{"uuid": uuid}).
+		Delete("/api/producers/{uuid}"))
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
