@@ -169,7 +169,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 				pm.pollQueueErrorMsg(fmt.Sprintf("Modbus PollingPointCompleteNotification(): polling point could not be added to StandbyPollingPoints slice.  (%s)", pp.FFPointUUID))
 			}
 		} else if (!writeSuccess && retryType == NORMAL_RETRY) || retryType == IMMEDIATE_RETRY {
-			point.WritePollRequired = boolean.NewTrue()
+			point.WritePollRequired = boolean.NewTrue() // TODO: this might cause these points to write more than once.
 			if pp.RepollTimer != nil {
 				pp.RepollTimer.Stop()
 				pp.RepollTimer = nil
