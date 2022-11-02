@@ -88,7 +88,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.DELETE(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
-		ok, err := inst.db.DeletePoint(body.UUID)
+		ok, err := inst.deletePoint(body)
 		api.ResponseHandler(ok, err, ctx)
 	})
 

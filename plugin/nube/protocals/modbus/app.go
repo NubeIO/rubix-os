@@ -84,7 +84,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	point, err = inst.db.CreatePoint(body, true, true)
 	if point == nil || err != nil {
 		inst.modbusDebugMsg("addPoint(): failed to create modbus point: ", body.Name)
-		return nil, errors.New("failed to create modbus point")
+		return nil, errors.New(fmt.Sprint("failed to create modbus point. err: ", err))
 	}
 	inst.modbusDebugMsg(fmt.Sprintf("addPoint(): %+v\n", point))
 
