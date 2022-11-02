@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.8.5](https://github.com/NubeIO/flow-framework/tree/v0.8.5) (2022-11-02)
+
+- Review unique constraints (#707)
+
 ## [v0.8.4](https://github.com/NubeIO/flow-framework/tree/v0.8.4) (2022-11-02)
 
 - Adds plugins to convert legacy lora and modbus to FF
