@@ -77,6 +77,17 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	return point, nil
 }
 
+func (inst *Instance) deletePoint(body *model.Point) (success bool, err error) {
+	// TODO: For now this db call has been removed, so that point deletes of lora points is not allowed by the user; can only be deleted by the whole device.
+	/*
+		success, err = inst.db.DeletePoint(body.UUID)
+		if err != nil {
+			return false, err
+		}
+	*/
+	return success, nil
+}
+
 func (inst *Instance) networkUpdateSuccess(uuid string) error {
 	var network model.Network
 	network.InFault = false
