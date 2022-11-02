@@ -50,7 +50,7 @@ type ModbusPnt struct {
 
 func (a *RestClient) GetLegacyModbusNetworksAndDevices() (*[]ModbusNet, error) {
 	resp, err := nresty.FormatRestyResponse(a.client.R().
-		SetAuthToken("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Njk5MjI4NDYsImlhdCI6MTY2NzMzMDg0Niwic3ViIjoiYWRtaW4ifQ.epFqcUgTj03c7tIU26icpQyOGUkOW4ki5BINbq5rYVE").
+		// SetAuthToken("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Njk5MjI4NDYsImlhdCI6MTY2NzMzMDg0Niwic3ViIjoiYWRtaW4ifQ.epFqcUgTj03c7tIU26icpQyOGUkOW4ki5BINbq5rYVE").
 		SetHeader("Accept", "*/*").
 		SetResult([]ModbusNet{}).
 		Get("/modbus/api/modbus/networks?with_children=true"))
@@ -66,7 +66,7 @@ func (a *RestClient) GetLegacyModbusDeviceAndPoints(modbusDevUUID string) (*Modb
 	}
 	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult(ModbusDev{}).
-		SetAuthToken("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Njk5MjI4NDYsImlhdCI6MTY2NzMzMDg0Niwic3ViIjoiYWRtaW4ifQ.epFqcUgTj03c7tIU26icpQyOGUkOW4ki5BINbq5rYVE").
+		// SetAuthToken("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Njk5MjI4NDYsImlhdCI6MTY2NzMzMDg0Niwic3ViIjoiYWRtaW4ifQ.epFqcUgTj03c7tIU26icpQyOGUkOW4ki5BINbq5rYVE").
 		Get("/modbus/api/modbus/devices/uuid/" + modbusDevUUID + "?with_children=true"))
 	if err != nil {
 		return nil, err
