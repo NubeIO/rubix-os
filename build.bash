@@ -98,8 +98,8 @@ for i in "$@"; do
     buildPlugin "influx" plugin/nube/database/influx
     ;;
   edgeinflux)
-      buildPlugin "edgeinflux" plugin/nube/database/edgeinflux
-      ;;
+    buildPlugin "edgeinflux" plugin/nube/database/edgeinflux
+    ;;
   rubixio)
     buildPlugin "rubixio" plugin/nube/protocals/rubixio
     ;;
@@ -108,7 +108,7 @@ for i in "$@"; do
     ;;
   rubixpointsync)
     buildPlugin "rubixpointsync" plugin/nube/protocals/rubixpointsync
-      ;;
+    ;;
   postgres)
     buildPlugin "postgres" plugin/nube/database/postgres
     ;;
@@ -119,11 +119,11 @@ for i in "$@"; do
     buildPlugin "galvintmv" plugin/nube/projects/galvintmv
     ;;
   maplora)
-      buildPlugin "maplora" plugin/nube/protocals/maplora
-      ;;
+    buildPlugin "maplora" plugin/nube/protocals/maplora
+    ;;
   mapmodbus)
-        buildPlugin "mapmodbus" plugin/nube/protocals/mapmodbus
-        ;;
+    buildPlugin "mapmodbus" plugin/nube/protocals/mapmodbus
+    ;;
   esac
 done
 
