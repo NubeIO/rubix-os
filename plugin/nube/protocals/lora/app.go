@@ -266,6 +266,7 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 }
 
 func (inst *Instance) setNewPointFields(deviceBody *model.Device, pointBody *model.Point, name string) {
+	pointBody.Enable = boolean.NewTrue()
 	pointBody.DeviceUUID = deviceBody.UUID
 	pointBody.AddressUUID = deviceBody.AddressUUID
 	pointBody.IsProducer = boolean.NewFalse()
@@ -273,6 +274,8 @@ func (inst *Instance) setNewPointFields(deviceBody *model.Device, pointBody *mod
 	pointBody.IsOutput = boolean.NewFalse()
 	pointBody.Name = cases.Title(language.English).String(name)
 	pointBody.IoNumber = name
+	pointBody.ThingType = "point"
+	pointBody.WriteMode = model.ReadOnly
 }
 
 // updateDevicePointsAddress by its lora id and type as in temp or lux
