@@ -24,6 +24,7 @@ func (inst *Instance) subscribeToMQTTForPointCOV() {
 			if body != nil {
 				// d.publishPointWrite(body)
 				messageTopic := message.Topic()
+				inst.edgeinfluxDebugMsg("subscribeToMQTTForPointCOV() messageTopic:", messageTopic)
 				pluginsArray := inst.config.Job.Networks
 				if pluginsArray == nil || len(pluginsArray) == 0 {
 					pluginsArray = []string{"system"}
