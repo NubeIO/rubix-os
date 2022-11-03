@@ -169,6 +169,10 @@ func (inst *Instance) GetHistoryValues(requiredNetworksArray []string) ([]*Histo
 
 func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 	inst.edgeinfluxDebugMsg("InfluxDB COV sync has is been called...")
+	if pntUUID == "" {
+		inst.edgeinfluxDebugMsg("Invalid Point UUID (empty) to SendPointWriteHistory()")
+		return errors.New("invalid Point UUID (empty) to SendPointWriteHistory()")
+	}
 	if len(inst.influxDetails) == 0 {
 		err := "influx: InfluxDB sync failure: no any valid InfluxDB connection with not NULL token"
 		log.Warn(err)
@@ -182,15 +186,28 @@ func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 
 	inst.edgeinfluxDebugMsg("SendPointWriteHistory()")
 
-	point, _ := inst.db.GetPoint(pntUUID, api.Args{WithTags: true})
+	point, err := inst.db.GetPoint(pntUUID, api.Args{WithTags: true})
+	if err != nil || point == nil {
+		inst.edgeinfluxErrorMsg("SendPointWriteHistory() GetPoint() err: ", err)
+		return errors.New("SendPointWriteHistory() GetPoint() error")
+	}
+
 	/*(
 	if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeCov && point.HistoryType != model.HistoryTypeCovAndInterval) {
 		return nil
 	}
 
 	*/
-	dev, _ := inst.db.GetDevice(point.DeviceUUID, api.Args{})
+	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
+	if err != nil || dev == nil {
+		inst.edgeinfluxErrorMsg("SendPointWriteHistory() GetDevice() err: ", err)
+		return errors.New("SendPointWriteHistory() GetDevice() error")
+	}
 	net, _ := inst.db.GetNetwork(dev.NetworkUUID, api.Args{})
+	if err != nil || dev == nil {
+		inst.edgeinfluxErrorMsg("SendPointWriteHistory() GetNetwork() err: ", err)
+		return errors.New("SendPointWriteHistory() GetNetwork() error")
+	}
 
 	// Check that the point is from a plugin network with history enabled (from config file)
 	networkIsHistoryEnabled := false
