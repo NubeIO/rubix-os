@@ -3,6 +3,7 @@
 ## [v0.8.6](https://github.com/NubeIO/flow-framework/tree/v0.8.6) (2022-11-03)
 
 - Try rebuild to fix modbus plugin (issue since 0.8.4)
+- Fixes edgeinflux plugin nil pointer
 
 ## [v0.8.5](https://github.com/NubeIO/flow-framework/tree/v0.8.5) (2022-11-02)
 
