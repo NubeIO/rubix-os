@@ -118,12 +118,6 @@ for i in "$@"; do
   galvintmv)
     buildPlugin "galvintmv" plugin/nube/projects/galvintmv
     ;;
-  maplora)
-    buildPlugin "maplora" plugin/nube/protocals/maplora
-    ;;
-  mapmodbus)
-    buildPlugin "mapmodbus" plugin/nube/protocals/mapmodbus
-    ;;
   esac
 done
 
