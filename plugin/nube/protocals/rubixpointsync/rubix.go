@@ -40,8 +40,8 @@ func (inst *Instance) CreateNewRubixPoint(pointName, deviceUUID string) (*rubixr
 	return rubixPoint, nil
 }
 
-func (inst *Instance) WriteRubixPoint(networkName, deviceName, pointName string, writeValue *float64) (*rubixrest.RubixPnt, error) {
-	inst.rubixpointsyncDebugMsg("WriteRubixPoint()", networkName, deviceName, pointName, writeValue)
+func (inst *Instance) WriteRubixPointByPathNames(networkName, deviceName, pointName string, writeValue *float64) (*rubixrest.RubixPnt, error) {
+	inst.rubixpointsyncDebugMsg("WriteRubixPointByPathNames()", networkName, deviceName, pointName, writeValue)
 	host := inst.config.Job.Host
 	if host == "" {
 		host = "0.0.0.0"
@@ -51,19 +51,39 @@ func (inst *Instance) WriteRubixPoint(networkName, deviceName, pointName string,
 		port = 1515
 	}
 	rest := rubixrest.NewNoAuth(host, int(port))
-	rubixPoint, err := rest.WriteRubixPoint(networkName, deviceName, pointName, writeValue)
+	rubixPoint, err := rest.WriteRubixPointByPathNames(networkName, deviceName, pointName, writeValue)
 	if err != nil {
-		return nil, errors.New("could not create rubix point")
+		inst.rubixpointsyncErrorMsg("WriteRubixPointByPathNames() could not write rubix point. err:", err)
+		return nil, errors.New("could not write rubix point")
 	}
 	return rubixPoint, nil
 }
 
-func (inst *Instance) RubixPointExistsInNetworkArray(checkNetwork *[]rubixrest.RubixNet, networkName, deviceName, pointName string) (netExists bool, devExists bool, pntExists bool, devUUID, netUUID string, err error) {
+func (inst *Instance) WriteRubixPointByUUID(pointUUID string, writeValue *float64) (*rubixrest.RubixPnt, error) {
+	inst.rubixpointsyncDebugMsg("WriteRubixPointByPathNames()", pointUUID, writeValue)
+	host := inst.config.Job.Host
+	if host == "" {
+		host = "0.0.0.0"
+	}
+	port := inst.config.Job.Port
+	if port == 0 {
+		port = 1515
+	}
+	rest := rubixrest.NewNoAuth(host, int(port))
+	rubixPoint, err := rest.WriteRubixPointByUUID(pointUUID, writeValue)
+	if err != nil {
+		inst.rubixpointsyncErrorMsg("WriteRubixPointByPathNames() could not write rubix point. err:", err)
+		return nil, errors.New("could not write rubix point")
+	}
+	return rubixPoint, nil
+}
+
+func (inst *Instance) RubixPointExistsInNetworkArray(checkNetworks *[]rubixrest.RubixNet, networkName, deviceName, pointName string) (netExists bool, devExists bool, pntExists bool, netUUID, devUUID, pntUUID string, err error) {
 	netExists = false
 	devExists = false
 	pntExists = false
-	if checkNetwork != nil {
-		for _, net := range *checkNetwork {
+	if checkNetworks != nil {
+		for _, net := range *checkNetworks {
 			if inst.config.Job.RequireNetworkMatch && net.Name != networkName {
 				continue
 			}
@@ -88,13 +108,14 @@ func (inst *Instance) RubixPointExistsInNetworkArray(checkNetwork *[]rubixrest.R
 						continue
 					} else { // Found the point
 						pntExists = true
-						return netExists, devExists, pntExists, devUUID, netUUID, nil
+						pntUUID = pnt.UUID
+						return netExists, devExists, pntExists, netUUID, devUUID, pntUUID, nil
 					}
 				}
 			}
 		}
 	}
-	return netExists, devExists, pntExists, devUUID, netUUID, errors.New("point couldn't be found")
+	return netExists, devExists, pntExists, netUUID, devUUID, pntUUID, errors.New("point couldn't be found")
 }
 
 func (inst *Instance) CreateNewRubixDevice(deviceName, networkUUID string) (*rubixrest.RubixDev, error) {

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/NubeIO/flow-framework/services/localmqtt"
+	"github.com/NubeIO/flow-framework/src/gocancel"
 	"github.com/NubeIO/flow-framework/utils/float"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"strings"
@@ -34,7 +36,7 @@ func (inst *Instance) subscribeToMQTTForPointCOV() {
 					netName := topicParts[7]
 					devName := topicParts[9]
 					pntName := topicParts[11]
-					if netName == reqNetwork { // topicParts[7] is the plugin name
+					if netName == reqNetwork { // topicParts[7] is the network name
 						inst.rubixpointsyncDebugMsg(fmt.Sprintf("subscribeToMQTTForPointCOV() message: %+v", message))
 						inst.rubixpointsyncDebugMsg(fmt.Sprintf("subscribeToMQTTForPointCOV() body: %+v", body))
 						pointValue := float.New(body.Value)
@@ -59,4 +61,11 @@ func (inst *Instance) subscribeToMQTTForPointCOV() {
 			inst.rubixpointsyncDebugMsg(fmt.Sprintf("localmqtt-broker subscribe:%s", topic))
 		}
 	}
+}
+
+func (inst *Instance) StartMQTTSubscribeCOV() error {
+	ctx, cancel := context.WithCancel(context.Background())
+	inst.mqttCancel = cancel
+	go gocancel.GoRoutineWithContextCancel(ctx, inst.subscribeToMQTTForPointCOV)
+	return nil
 }

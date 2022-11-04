@@ -181,7 +181,7 @@ func (pm *NetworkPollManager) PrintPollQueueStatistics() {
 		printString += fmt.Sprint("LowPriorityLockupAlert: ", pm.LowPriorityLockupAlert, "\n")
 		printString += fmt.Sprint("PollingStartTimeUnix: ", pm.PollingStartTimeUnix, "\n")
 		printString += fmt.Sprint("BusyTime: ", pm.BusyTime, "% \n")
-		printString += fmt.Sprint("EnabledTime: ", pm.EnabledTime, "% \n")
+		printString += fmt.Sprint("EnabledTime: ", pm.EnabledTime, " \n")
 		printString += fmt.Sprint("PortUnavailableTime: ", pm.PortUnavailableTime, " \n")
 		printString += fmt.Sprint("\n")
 		pm.pollQueueDebugMsg(printString)

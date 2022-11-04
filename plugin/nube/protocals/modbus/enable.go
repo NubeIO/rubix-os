@@ -26,7 +26,10 @@ func (inst *Instance) Enable() error {
 			inst.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0) // This will delete any existing NetworkPollManagers (if enable is called multiple times, it will rebuild the queues).
 			for _, net := range nets {                                          // Create a new Poll Manager for each network in the plugin.
 				conf := inst.GetConfig().(*Config)
-				pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
+				if conf.PollQueueLogLevel != "ERROR" && conf.PollQueueLogLevel != "DEBUG" {
+					conf.PollQueueLogLevel = "ERROR"
+				}
+				pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.PollQueueLogLevel}
 				pollManager := NewPollManager(&pollQueueConfig, &inst.db, net.UUID, inst.pluginUUID, inst.pluginName, float.NonNil(net.MaxPollRate))
 				// inst.modbusDebugMsg("net")
 				// inst.modbusDebugMsg("%+v\n", net)

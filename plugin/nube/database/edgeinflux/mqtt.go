@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/NubeIO/flow-framework/services/localmqtt"
+	"github.com/NubeIO/flow-framework/src/gocancel"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"strings"
 )
@@ -58,4 +60,11 @@ func (inst *Instance) subscribeToMQTTForPointCOV() {
 			inst.edgeinfluxDebugMsg(fmt.Sprintf("localmqtt-broker subscribe:%s", topic))
 		}
 	}
+}
+
+func (inst *Instance) StartMQTTSubscribeCOV() error {
+	ctx, cancel := context.WithCancel(context.Background())
+	inst.mqttCancel = cancel
+	go gocancel.GoRoutineWithContextCancel(ctx, inst.subscribeToMQTTForPointCOV)
+	return nil
 }
