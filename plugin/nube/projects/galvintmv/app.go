@@ -817,7 +817,8 @@ func (inst *Instance) createAndActivateChirpstackDevices() error {
 			if err != nil {
 				inst.tmvErrorMsg("createAndActivateChirpstackDevices() ActivateChirpstackDevice() error: ", err)
 			}
-			mapFileContent += strconv.Itoa(tmvDevice.DeviceAddress) + ":" + tmvDevice.LoRaWANDeviceEUI + "\n"
+			mapFileContent += "\"" + strconv.Itoa(tmvDevice.DeviceAddress) + ":" + tmvDevice.LoRaWANDeviceEUI + "\"," + "\n"
+
 		}
 		// err = os.Remove(inst.config.Job.LorawanBridgeMapFilePath)
 		err = os.Remove("/home/pi/lorawan-modbus-bridge/map.txt")
@@ -825,7 +826,7 @@ func (inst *Instance) createAndActivateChirpstackDevices() error {
 			inst.tmvErrorMsg("createAndActivateChirpstackDevices() remove old map file error: ", err)
 		}
 		// err = os.WriteFile(inst.config.Job.LorawanBridgeMapFilePath, []byte(mapFileContent), 0666)
-		err = os.WriteFile("/home/pi/lorawan-modbus-bridge/map.txt", []byte(mapFileContent), 0666)
+		err = os.WriteFile("/data/lorawan-modbus-bridge/map.txt", []byte(mapFileContent), 0666)
 		if err != nil {
 			inst.tmvErrorMsg("createAndActivateChirpstackDevices() create new map file error: ", err)
 		}
