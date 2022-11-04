@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm/clause"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -125,6 +126,13 @@ func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
 		query = query.Joins("INNER JOIN stream_clones ON stream_clones.uuid = consumers.stream_clone_uuid").
 			Joins("INNER JOIN flow_network_clones ON flow_network_clones.uuid = stream_clones.flow_network_clone_uuid")
 	}
+	if args.GroupLimit != nil {
+		groupLimitQuery := fmt.Sprintf("INNER JOIN (SELECT *,row_number FROM (SELECT *,ROW_NUMBER() OVER "+
+			"(PARTITION BY UUID) AS row_number FROM histories ORDER BY timestamp DESC) _ WHERE row_number <= %s) AS "+
+			"group_limits ON histories.id = group_limits.id AND histories.uuid = group_limits.uuid AND "+
+			"histories.value = group_limits.value AND histories.timestamp = group_limits.timestamp", *args.GroupLimit)
+		query = query.Joins(groupLimitQuery)
+	}
 	if args.Filter != nil {
 		query = query.Where(filterQuery)
 	}
@@ -139,6 +147,13 @@ func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
 		if err == nil {
 			query.Offset(offset)
 		}
+	}
+	if args.OrderBy != nil {
+		order := "DESC"
+		if args.Order != nil && strings.ToUpper(strings.TrimSpace(*args.Order)) == "ASC" {
+			order = "ASC"
+		}
+		query.Order(fmt.Sprintf("%s %s", *args.OrderBy, order))
 	}
 	return query, nil
 }

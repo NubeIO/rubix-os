@@ -43,6 +43,9 @@
         ```
 - limit
 - offset
+- order_by
+- order [default: DESC]
+- group_limit
 
 ### Endpoint
-- GET `/api/plugins/api/postgres/histories?filter=<filter>&limit=<int>&offset=<int>`
+- GET `/api/plugins/api/postgres/histories?filter=<filter>&limit=<int>&offset=<int>&order_by=<order_by>&order=<order>&group_limit=<group_limit>`
