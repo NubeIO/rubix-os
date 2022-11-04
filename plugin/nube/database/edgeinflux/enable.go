@@ -15,12 +15,14 @@ func (inst *Instance) Enable() error {
 	inst.influxDetails = influxDetails
 	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncInflux").Do(inst.syncInflux, influxDetails)
 	cron.StartAsync()
-	go inst.subscribeToMQTTForPointCOV()
+	inst.StartMQTTSubscribeCOV() // this runs in a go routine with cancel on mqttCancel()
+
 	return nil
 }
 
 func (inst *Instance) Disable() error {
 	inst.enabled = false
+	inst.mqttCancel()
 	cron.Clear()
 	for _, influxConnectionInstance := range influxConnectionInstances {
 		influxConnectionInstance.client.Close()

@@ -30,6 +30,7 @@ type Instance struct {
 	store         cachestore.Handler
 	bus           eventbus.BusService
 	pluginUUID    string
+	mqttCancel    func()
 	influxDetails []*InfluxSetting
 }
 

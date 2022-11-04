@@ -13,12 +13,13 @@ func (inst *Instance) Enable() error {
 	cron = gocron.NewScheduler(time.UTC)
 	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncRubixToFF").Do(inst.SyncRubixToFF)
 	cron.StartAsync()
-	go inst.subscribeToMQTTForPointCOV()
+	inst.StartMQTTSubscribeCOV() // this runs in a go routine with cancel on mqttCancel()
 	return nil
 }
 
 func (inst *Instance) Disable() error {
 	inst.enabled = false
+	inst.mqttCancel()
 	cron.Clear()
 	return nil
 }

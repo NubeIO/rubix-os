@@ -97,17 +97,30 @@ func (a *RestClient) CreateNewRubixPoint(pointName, deviceUUID string) (*RubixPn
 	return resp.Result().(*RubixPnt), nil
 }
 
-func (a *RestClient) WriteRubixPoint(networkName, deviceName, pointName string, writeValue *float64) (*RubixPnt, error) {
+func (a *RestClient) WriteRubixPointByPathNames(networkName, deviceName, pointName string, writeValue *float64) (*RubixPnt, error) {
 	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetBody(RubixPointWrite{
-			Enable:   true,
-			Writable: true,
 			PriorityArray: PriorityArrayWrite{
 				P3: writeValue,
 			},
 		}).
 		SetResult(RubixPnt{}).
 		Patch(`/api/generic/points/name/` + networkName + `/` + deviceName + `/` + pointName))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Result().(*RubixPnt), nil
+}
+
+func (a *RestClient) WriteRubixPointByUUID(pointUUID string, writeValue *float64) (*RubixPnt, error) {
+	resp, err := nresty.FormatRestyResponse(a.client.R().
+		SetBody(RubixPointWrite{
+			PriorityArray: PriorityArrayWrite{
+				P3: writeValue,
+			},
+		}).
+		SetResult(RubixPnt{}).
+		Patch(`/api/generic/points/uuid/` + pointUUID))
 	if err != nil {
 		return nil, err
 	}

@@ -1,5 +1,7 @@
 package main
 
+import "github.com/NubeIO/flow-framework/plugin/nube/protocals/rubixpointsync/rubixrest"
+
 func (inst *Instance) SyncRubixToFF() (bool, error) {
 	inst.rubixpointsyncDebugMsg("SyncRubixToFF()")
 
@@ -33,7 +35,9 @@ func (inst *Instance) SyncRubixToFF() (bool, error) {
 							inst.rubixpointsyncErrorMsg(err)
 						}
 					}
-					netExists, devExists, pointExists, devUUID, netUUID, _ := inst.RubixPointExistsInNetworkArray(rubixNets, net.Name, dev.Name, pnt.Name)
+					netExists, devExists, pointExists, netUUID, devUUID, pntUUID, _ := inst.RubixPointExistsInNetworkArray(rubixNets, net.Name, dev.Name, pnt.Name)
+					var newRubixPnt *rubixrest.RubixPnt
+					newRubixPnt = nil
 					if !pointExists && inst.config.Job.GenerateRubixPoints {
 						if (inst.config.Job.RequireNetworkMatch && !netExists) || netUUID == "" {
 							newRubixNet, err := inst.CreateNewRubixNetwork(net.Name)
@@ -54,14 +58,18 @@ func (inst *Instance) SyncRubixToFF() (bool, error) {
 							devUUID = newRubixDev.UUID
 
 						}
-						_, err = inst.CreateNewRubixPoint(pnt.Name, devUUID)
+
+						newRubixPnt, err = inst.CreateNewRubixPoint(pnt.Name, devUUID)
 						rescanRubix = true
 						if err != nil {
 							inst.rubixpointsyncErrorMsg("bad response from CreateNewRubixPoint(), ", err)
 							continue
 						}
 					}
-					_, err = inst.WriteRubixPoint(net.Name, dev.Name, pnt.Name, pnt.PresentValue)
+					if newRubixPnt != nil {
+						pntUUID = newRubixPnt.UUID
+					}
+					_, err = inst.WriteRubixPointByUUID(pntUUID, pnt.PresentValue)
 					if err != nil {
 						inst.rubixpointsyncErrorMsg("writePoint(): bad response from WriteRubixPoint(), ", err)
 					}
@@ -80,12 +88,12 @@ func (inst *Instance) SyncSingleRubixPointWithFF(netName, devName, pntName strin
 		inst.rubixpointsyncErrorMsg(err)
 	}
 
-	netExists, devExists, pointExists, _, _, _ := inst.RubixPointExistsInNetworkArray(rubixNets, netName, devName, pntName)
+	netExists, devExists, pointExists, _, _, pntUUID, _ := inst.RubixPointExistsInNetworkArray(rubixNets, netName, devName, pntName)
 
 	if netExists && devExists && pointExists {
-		_, err = inst.WriteRubixPoint(netName, devName, pntName, value)
+		_, err = inst.WriteRubixPointByUUID(pntUUID, value)
 		if err != nil {
-			inst.rubixpointsyncErrorMsg("writePoint(): bad response from WriteRubixPoint(), ", err)
+			inst.rubixpointsyncErrorMsg("SyncSingleRubixPointWithFF(): bad response from WriteRubixPointByUUID(), ", err)
 		}
 	}
 	return nil
