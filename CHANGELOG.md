@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.8.9](https://github.com/NubeIO/flow-framework/tree/v0.8.9) (2022-11-04)
+
+- Fixes cancel of MQTT subscribe
+- Fixes Rubix Legacy API Calls
+
 ## [v0.8.8](https://github.com/NubeIO/flow-framework/tree/v0.8.8) (2022-11-04)
 
 - Re adds legacy mapping plugins
