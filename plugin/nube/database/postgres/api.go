@@ -40,19 +40,28 @@ var (
 )
 
 type Args struct {
-	Filter *string
-	Limit  *string
-	Offset *string
+	Filter     *string
+	Limit      *string
+	Offset     *string
+	OrderBy    *string
+	Order      *string
+	GroupLimit *string
 }
 
 var ArgsType = struct {
-	Filter string
-	Limit  string
-	Offset string
+	Filter     string
+	Limit      string
+	Offset     string
+	OrderBy    string
+	Order      string
+	GroupLimit string
 }{
-	Filter: "filter",
-	Limit:  "limit",
-	Offset: "offset",
+	Filter:     "filter",
+	Limit:      "limit",
+	Offset:     "offset",
+	OrderBy:    "order_by",
+	Order:      "order",
+	GroupLimit: "group_limit",
 }
 
 func buildHistoryArgs(ctx *gin.Context) Args {
@@ -66,6 +75,15 @@ func buildHistoryArgs(ctx *gin.Context) Args {
 	}
 	if value, ok := ctx.GetQuery(aType.Offset); ok {
 		args.Offset = &value
+	}
+	if value, ok := ctx.GetQuery(aType.OrderBy); ok {
+		args.OrderBy = &value
+	}
+	if value, ok := ctx.GetQuery(aType.Order); ok {
+		args.Order = &value
+	}
+	if value, ok := ctx.GetQuery(aType.GroupLimit); ok {
+		args.GroupLimit = &value
 	}
 	return args
 }
