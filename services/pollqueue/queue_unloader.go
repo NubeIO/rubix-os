@@ -25,11 +25,15 @@ func (pm *NetworkPollManager) StartQueueUnloader() {
 	ql := &QueueUnloader{nil, nil, nil}
 	pm.PluginQueueUnloader = ql
 	if pm.PluginQueueUnloader.NextPollPoint == nil {
-		pm.pollQueueDebugMsg("StartQueueUnloader() pm.PluginQueueUnloader.NextPollPoint == nil")
-		pp, err := pm.PollQueue.GetNextPollingPoint()
-		if pp != nil && err == nil {
-			pm.PluginQueueUnloader.NextPollPoint = pp
-		}
+		pm.postNextPointCallback()
+		/*
+			pm.pollQueueDebugMsg("StartQueueUnloader() pm.PluginQueueUnloader.NextPollPoint == nil")
+			pp, err := pm.PollQueue.GetNextPollingPoint()
+			if pp != nil && err == nil {
+				pm.PluginQueueUnloader.NextPollPoint = pp
+			}
+
+		*/
 	}
 
 	refreshRate := 100 * time.Millisecond // Default MaxPollRate
@@ -80,7 +84,7 @@ func (pm *NetworkPollManager) StopQueueUnloader() {
 }
 
 // This function should be called from the Polling service.
-func (pm *NetworkPollManager) GetNextPollingPoint() (pp *PollingPoint, callback func(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool, retryType PollRetryType)) {
+func (pm *NetworkPollManager) GetNextPollingPoint() (pp *PollingPoint, callback func(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool, retryType PollRetryType, actualPoll, pollingWasNotRequired bool)) {
 	if pm.PluginQueueUnloader != nil && pm.PluginQueueUnloader.NextPollPoint != nil {
 		pp := pm.PluginQueueUnloader.NextPollPoint
 		pm.PluginQueueUnloader.NextPollPoint = nil
