@@ -86,7 +86,6 @@ func (inst *Instance) ModbusPolling() error {
 			}
 
 			pp, callback := netPollMan.GetNextPollingPoint() // callback function is called once polling is completed.
-			// pp, _ := netPollMan.GetNextPollingPoint() //TODO: once polling completes, callback should be called
 			if pp == nil {
 				// inst.modbusDebugMsg("No PollingPoint available in Network ", net.UUID)
 				continue
@@ -94,7 +93,7 @@ func (inst *Instance) ModbusPolling() error {
 
 			if pp.FFNetworkUUID != net.UUID {
 				inst.modbusErrorMsg("PollingPoint FFNetworkUUID does not match the Network UUID")
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, false, pollqueue.DELAYED_RETRY, callback)
 				continue
 			}
 			netPollMan.PrintPollQueuePointUUIDs()
@@ -104,26 +103,26 @@ func (inst *Instance) ModbusPolling() error {
 			dev, err := inst.db.GetDevice(pp.FFDeviceUUID, devArg)
 			if dev == nil || err != nil {
 				inst.modbusErrorMsg("could not find deviceID:", pp.FFDeviceUUID)
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.DELAYED_RETRY, callback)
 				continue
 			}
 			if boolean.IsFalse(dev.Enable) {
 				inst.modbusErrorMsg("device is disabled.")
 				inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "device disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError)
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.NEVER_RETRY, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.NEVER_RETRY, callback)
 				continue
 			}
 			if dev.AddressId <= 0 || dev.AddressId >= 255 {
 				inst.modbusErrorMsg("address is not valid.  modbus addresses must be between 1 and 254")
 				inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "address out of range", model.MessageLevel.Critical, model.CommonFaultCode.ConfigError)
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.NEVER_RETRY, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.NEVER_RETRY, callback)
 				continue
 			}
 
 			pnt, err := inst.db.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
 			if pnt == nil || err != nil {
 				inst.modbusErrorMsg("could not find pointID: ", pp.FFPointUUID)
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.DELAYED_RETRY, callback)
 				continue
 			}
 
@@ -136,7 +135,7 @@ func (inst *Instance) ModbusPolling() error {
 
 			if !boolean.IsTrue(pnt.Enable) {
 				inst.modbusErrorMsg("point is disabled.")
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.NEVER_RETRY, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.NEVER_RETRY, callback)
 				continue
 			}
 
@@ -144,7 +143,7 @@ func (inst *Instance) ModbusPolling() error {
 
 			if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
 				inst.modbusDebugMsg("polling not required on this point")
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.NORMAL_RETRY, callback)
 				continue
 			}
 
@@ -164,7 +163,7 @@ func (inst *Instance) ModbusPolling() error {
 					}
 					netPollMan.PortUnavailableTimeout = time.AfterFunc(10*time.Second, unpauseFunc)
 				}
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.NORMAL_RETRY, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, false, pollqueue.NORMAL_RETRY, callback)
 				continue
 			}
 			if net.TransportType == model.TransType.Serial || net.TransportType == model.TransType.LoRa {
@@ -175,14 +174,14 @@ func (inst *Instance) ModbusPolling() error {
 				url, err := nurl.JoinIPPort(nurl.Parts{Host: dev.Host, Port: strconv.Itoa(dev.Port)})
 				if err != nil {
 					inst.modbusErrorMsg("failed to validate device IP", url)
-					netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
+					netPollMan.PollingFinished(pp, pollStartTime, false, false, false, false, pollqueue.DELAYED_RETRY, callback)
 					continue
 				}
 				mbClient.TCPClientHandler.Address = url
 				mbClient.TCPClientHandler.SlaveID = byte(dev.AddressId)
 			} else {
 				inst.modbusDebugMsg(fmt.Sprintf("failed to validate device and network %v %s", err, dev.Name))
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, false, pollqueue.DELAYED_RETRY, callback)
 				continue
 			}
 
@@ -196,7 +195,7 @@ func (inst *Instance) ModbusPolling() error {
 					response, responseValue, err = inst.networkWrite(mbClient, pnt)
 					if err != nil {
 						err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-						netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
+						netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
 						continue
 					}
 					writeSuccess = true
@@ -212,13 +211,13 @@ func (inst *Instance) ModbusPolling() error {
 				response, responseValue, err = inst.networkRead(mbClient, pnt)
 				if err != nil {
 					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
-					netPollMan.PollingFinished(pp, pollStartTime, false, false, pollqueue.DELAYED_RETRY, callback)
+					netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
 					continue
 				}
 				isChange := !float.ComparePtrValues(pnt.PresentValue, &responseValue)
 				if isChange {
 					if err != nil {
-						netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, pollqueue.NORMAL_RETRY, callback)
+						netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, true, false, pollqueue.NORMAL_RETRY, callback)
 						continue
 					}
 				}
@@ -248,7 +247,7 @@ func (inst *Instance) ModbusPolling() error {
 			*/
 
 			// This callback function triggers the PollManager to evaluate whether the point should be re-added to the PollQueue (Never, Immediately, or after the Poll Rate Delay)
-			netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, pollqueue.NORMAL_RETRY, callback)
+			netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, true, false, pollqueue.NORMAL_RETRY, callback)
 
 		}
 		return false, nil

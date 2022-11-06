@@ -32,7 +32,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	err = inst.bacnetStoreNetwork(network)
 	if err != nil {
 		inst.bacnetErrorMsg("addNetwork(): issue on add bacnet-network to store err ", err.Error())
-		//fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error())
+		// fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error())
 	}
 	body.MaxPollRate = float.New(0.1)
 	body.TransportType = "ip"
@@ -143,7 +143,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 		// DO POLLING ENABLE ACTIONS FOR POINT
 		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
-		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true, pollqueue.NORMAL_RETRY) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true, pollqueue.NORMAL_RETRY, false, false) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 		// netPollMan.PollQueue.AddPollingPoint(pp)
 		// netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
 	} else {
@@ -271,7 +271,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		for _, pnt := range device.Points {
 			if boolean.IsTrue(pnt.Enable) {
 				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, device.NetworkUUID, netPollMan.FFPluginUUID)
-				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true, pollqueue.NORMAL_RETRY) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true, pollqueue.NORMAL_RETRY, false, false) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 				// netPollMan.PollQueue.AddPollingPoint(pp)  //This is the original tested way, above is new so that on device update, it will re-poll write-once points
 			}
 		}
@@ -287,7 +287,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		for _, pnt := range device.Points {
 			if boolean.IsTrue(pnt.Enable) {
 				pp := pollqueue.NewPollingPoint(pnt.UUID, pnt.DeviceUUID, device.NetworkUUID, netPollMan.FFPluginUUID)
-				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true, pollqueue.NORMAL_RETRY) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+				netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true, pollqueue.NORMAL_RETRY, false, false) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 				// netPollMan.PollQueue.AddPollingPoint(pp)  //This is the original tested way, above is new so that on device update, it will re-poll write-once points
 			}
 		}
@@ -357,7 +357,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		// DO POLLING ENABLE ACTIONS FOR POINT
 		// TODO: review these steps to check that UpdatePollingPointByUUID might work better?
 		pp := pollqueue.NewPollingPoint(point.UUID, point.DeviceUUID, dev.NetworkUUID, netPollMan.FFPluginUUID)
-		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true, pollqueue.NORMAL_RETRY) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+		netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, true, pollqueue.NORMAL_RETRY, false, false) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 		// netPollMan.PollQueue.AddPollingPoint(pp)
 		// netPollMan.SetPointPollRequiredFlagsBasedOnWriteMode(pnt)
 	} else {
@@ -447,7 +447,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 				}
 			}
 			pp.PollPriority = model.PRIORITY_ASAP
-			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false, pollqueue.NORMAL_RETRY) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false, pollqueue.NORMAL_RETRY, false, false) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 			// netPollMan.PollQueue.AddPollingPoint(pp)
 			// netPollMan.PollQueue.UpdatePollingPointByPointUUID(point.UUID, model.PRIORITY_ASAP)
 

@@ -53,11 +53,16 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	return nil
 }
 
-func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool, retryType PollRetryType) {
-	pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, pollTimeSecs))
+func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool, retryType PollRetryType, actualPoll, pollingWasNotRequired bool) {
+	pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t, actualPoll: %t, pollingWasNotRequired: %t, retryType: %s, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, actualPoll, pollingWasNotRequired, retryType, pollTimeSecs))
+
+	if !actualPoll { // This posts the next polling point immediately (faster than the MaxPollRate) because no poll was actually made.
+		pm.postNextPointCallback()
+	}
 
 	_, success := pm.PollQueue.OutstandingPollingPoints.RemovePollingPointByPointUUID(pp.FFPointUUID)
 	if !success {
+		// It's ok to get this error message when adding/re-adding points.
 		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find polling point in OutstandingPollingPoints, %s", pp.FFPointUUID)
 	}
 
@@ -98,7 +103,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 	switch point.WriteMode {
 	case model.ReadOnce: // ReadOnce          If read_successful then don't re-add.
 		point.WritePollRequired = boolean.NewFalse()
-		if retryType == NEVER_RETRY || (readSuccess && retryType == NORMAL_RETRY) {
+		if retryType == NEVER_RETRY || ((readSuccess || pollingWasNotRequired) && retryType == NORMAL_RETRY) {
 			point.ReadPollRequired = boolean.NewFalse()
 			if pp.RepollTimer != nil {
 				pp.RepollTimer.Stop()
@@ -130,7 +135,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 	case model.ReadOnly: // ReadOnly          Re-add with ReadPollRequired true, WritePollRequired false.
 		point.WritePollRequired = boolean.NewFalse()
 		point.ReadPollRequired = boolean.NewTrue()
-		if (readSuccess && retryType == NORMAL_RETRY) || retryType == DELAYED_RETRY {
+		if ((readSuccess || pollingWasNotRequired) && retryType == NORMAL_RETRY) || retryType == DELAYED_RETRY {
 			duration := pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID)
 			// This line sets a timer to re-add the point to the poll queue after the PollRate time.
 			pp.RepollTimer = time.AfterFunc(duration, pm.MakePollingPointRepollCallback(pp, point.WriteMode))
@@ -158,7 +163,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 
 	case model.WriteOnce: // WriteOnce         If write_successful then don't re-add.
 		point.ReadPollRequired = boolean.NewFalse()
-		if (writeSuccess && retryType == NORMAL_RETRY) || retryType == NEVER_RETRY {
+		if ((writeSuccess || pollingWasNotRequired) && retryType == NORMAL_RETRY) || retryType == NEVER_RETRY {
 			point.WritePollRequired = boolean.NewFalse()
 			if pp.RepollTimer != nil {
 				pp.RepollTimer.Stop()
