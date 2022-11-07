@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.9.4](https://github.com/NubeIO/flow-framework/tree/v0.9.4) (2022-11-08)
+
+- Typo fix on galvintmv plugin
+
 ## [v0.9.3](https://github.com/NubeIO/flow-framework/tree/v0.9.3) (2022-11-07)
 
 - Improves maplora and mapmodbus plugins
