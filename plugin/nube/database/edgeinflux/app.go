@@ -129,14 +129,22 @@ func (inst *Instance) GetHistoryValues(requiredNetworksArray []string) ([]*Histo
 	var historyArray []*History
 	for _, reqNet := range requiredNetworksArray {
 		net, err := inst.db.GetNetworkByName(reqNet, api.Args{WithDevices: true, WithPoints: true})
-		// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
-		if err != nil {
+		if err != nil || net == nil || net.Devices == nil {
+			inst.edgeinfluxErrorMsg("GetHistoryValues() issue getting network: ", reqNet)
 			continue
 		}
 		inst.edgeinfluxDebugMsg("GetHistoryValues() Net: ", net.Name)
 		for _, dev := range net.Devices {
+			if dev == nil || dev.Points == nil {
+				inst.edgeinfluxErrorMsg("GetHistoryValues() issue getting device: ", reqNet)
+				continue
+			}
 			for _, pnt := range dev.Points {
-				point, _ := inst.db.GetPoint(pnt.UUID, api.Args{WithTags: true})
+				point, err := inst.db.GetPoint(pnt.UUID, api.Args{WithTags: true})
+				if point == nil || err != nil {
+					inst.edgeinfluxErrorMsg("GetHistoryValues() Point is nil: ", pnt.Name, pnt.UUID)
+					continue
+				}
 				if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeInterval && point.HistoryType != model.HistoryTypeCovAndInterval) {
 					continue
 				}
