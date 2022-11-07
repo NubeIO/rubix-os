@@ -23,7 +23,8 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	arg.WithDevices = true
 	arg.WithPoints = true
 	net, err := pm.DBHandlerRef.GetNetwork(pm.FFNetworkUUID, arg)
-	if err != nil || len(net.Devices) == 0 {
+	if err != nil || net.Devices == nil || len(net.Devices) == 0 {
+		pm.pollQueueDebugMsg("RebuildPollingQueue() couldn't find any devices for the network %s", pm.FFNetworkUUID)
 		return errors.New(fmt.Sprintf("NetworkPollManager.RebuildPollingQueue: couldn't find any devices for the network %s", pm.FFNetworkUUID))
 	}
 	devs := net.Devices

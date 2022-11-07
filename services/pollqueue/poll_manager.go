@@ -77,6 +77,7 @@ func (pm *NetworkPollManager) StartPolling() {
 	if !pm.Enable {
 		pm.Enable = true
 		pm.RebuildPollingQueue()
+		pm.StartQueueUnloader()
 	} else if pm.PluginQueueUnloader == nil {
 		pm.StartQueueUnloader()
 	}

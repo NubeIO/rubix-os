@@ -77,9 +77,11 @@ func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetw
 	puwp := make(map[string]bool)
 	npq := &pollqueue.NetworkPriorityPollQueue{Config: conf, PriorityQueue: pq, StandbyPollingPoints: rq, OutstandingPollingPoints: opq, PointsUpdatedWhilePolling: puwp, QueueUnloader: pqu, FFPluginUUID: ffPluginUUID, FFNetworkUUID: ffNetworkUUID, ActiveDevicesList: adl}
 	pm := new(pollqueue.NetworkPollManager)
+	pm.Enable = false
 	pm.Config = conf
 	pm.PollQueue = npq
-	pm.PluginQueueUnloader = pqu
+	// pm.PluginQueueUnloader = pqu
+	pm.PluginQueueUnloader = nil
 	pm.DBHandlerRef = dbHandler
 	pm.MaxPollRate = time.Duration(maxPollRate) * time.Second
 	pm.FFNetworkUUID = ffNetworkUUID
