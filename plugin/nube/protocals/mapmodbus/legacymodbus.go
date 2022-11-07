@@ -14,7 +14,7 @@ func (inst *Instance) GetLegacyModbusNetworksAndDevices() (*[]legacymodbusrest.M
 	}
 	port := inst.config.Job.Port
 	if port == 0 {
-		port = 1919
+		port = 1515
 	}
 	rest := legacymodbusrest.NewNoAuth(host, int(port))
 	modbusNet, err := rest.GetLegacyModbusNetworksAndDevices()
@@ -33,7 +33,7 @@ func (inst *Instance) GetLegacyModbusDeviceAndPoints(modbusDevUUID string) (*leg
 	}
 	port := inst.config.Job.Port
 	if port == 0 {
-		port = 1616
+		port = 1515
 	}
 	rest := legacymodbusrest.NewNoAuth(host, int(port))
 	modbusDevsArray, err := rest.GetLegacyModbusDeviceAndPoints(modbusDevUUID)

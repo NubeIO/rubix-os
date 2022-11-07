@@ -31,7 +31,7 @@ func (inst *Instance) GetLegacyLoRaDevices() (*[]legacylorarest.LoRaDev, error) 
 	}
 	port := inst.config.Job.Port
 	if port == 0 {
-		port = 1515
+		port = 1919
 	}
 	rest := legacylorarest.NewNoAuth(host, int(port))
 	loraDevsArray, err := rest.GetLegacyLoRaDevices()

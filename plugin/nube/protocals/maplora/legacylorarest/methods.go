@@ -27,7 +27,7 @@ func (a *RestClient) GetLegacyLoRaNetwork() (*LoRaNet, error) {
 		// SetAuthToken("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Njk5MjI4NDYsImlhdCI6MTY2NzMzMDg0Niwic3ViIjoiYWRtaW4ifQ.epFqcUgTj03c7tIU26icpQyOGUkOW4ki5BINbq5rYVE").
 		SetHeader("Accept", "*/*").
 		SetResult(LoRaNet{}).
-		Get("/lora/api/lora/networks"))
+		Get("/api/lora/networks"))
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (a *RestClient) GetLegacyLoRaDevices() (*[]LoRaDev, error) {
 	resp, err := nresty.FormatRestyResponse(a.client.R().
 		SetResult([]LoRaDev{}).
 		// SetAuthToken("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE2Njk5MjI4NDYsImlhdCI6MTY2NzMzMDg0Niwic3ViIjoiYWRtaW4ifQ.epFqcUgTj03c7tIU26icpQyOGUkOW4ki5BINbq5rYVE").
-		Get("/lora/api/lora/devices"))
+		Get("/api/lora/devices"))
 	if err != nil {
 		return nil, err
 	}
