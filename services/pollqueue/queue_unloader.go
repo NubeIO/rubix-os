@@ -21,7 +21,6 @@ type QueueUnloader struct {
 
 func (pm *NetworkPollManager) StartQueueUnloader() {
 	pm.StopQueueUnloader()
-	pm.pollQueueDebugMsg("StartQueueUnloader()")
 	ql := &QueueUnloader{nil, nil, nil}
 	pm.PluginQueueUnloader = ql
 	if pm.PluginQueueUnloader.NextPollPoint == nil {
