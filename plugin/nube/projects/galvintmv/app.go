@@ -684,7 +684,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundResetPoint.Fallback = float.New(0)
 						foundResetPoint.Priority = &model.Priority{}
 						foundResetPoint.Priority.P3 = float.New(0)
-						foundSolenoidAllowPoint.WritePollRequired = boolean.NewFalse()
+						foundResetPoint.WritePollRequired = boolean.NewFalse()
 						foundResetPoint, err = inst.db.CreatePoint(foundResetPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() ResetPoint create err: ", err)
@@ -728,7 +728,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundCalibrationPoint.Fallback = float.New(0)
 						foundCalibrationPoint.Priority = &model.Priority{}
 						foundCalibrationPoint.Priority.P3 = float.New(0)
-						foundSolenoidAllowPoint.WritePollRequired = boolean.NewFalse()
+						foundCalibrationPoint.WritePollRequired = boolean.NewFalse()
 						foundCalibrationPoint, err = inst.db.CreatePoint(foundCalibrationPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() CalibrationPoint create err: ", err)
