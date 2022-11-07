@@ -120,7 +120,7 @@ func (a *RestClient) WriteRubixPointByUUID(pointUUID string, writeValue *float64
 			},
 		}).
 		SetResult(RubixPnt{}).
-		Patch(`/api/generic/points/uuid/` + pointUUID))
+		Patch(`/api/generic/points_value/uuid/` + pointUUID))
 	if err != nil {
 		return nil, err
 	}
