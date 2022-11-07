@@ -408,7 +408,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 							case "ENABLE":
 								foundEnablePoint = modbusPoint
 								pointUpdateReq := false
-								if boolean.NonNil(foundEnablePoint.Enable) != false {
+								if boolean.NonNil(foundEnablePoint.Enable) != true {
 									pointUpdateReq = true
 									foundEnablePoint.Enable = boolean.NewTrue()
 								}
@@ -445,7 +445,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 							case "TEMPERATURE_SP":
 								foundSetpointPoint = modbusPoint
 								pointUpdateReq := false
-								if boolean.NonNil(foundSetpointPoint.Enable) != false {
+								if boolean.NonNil(foundSetpointPoint.Enable) != true {
 									pointUpdateReq = true
 									foundSetpointPoint.Enable = boolean.NewTrue()
 								}
@@ -482,7 +482,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 							case "SOLENOID_ALLOW":
 								foundSolenoidAllowPoint = modbusPoint
 								pointUpdateReq := false
-								if boolean.NonNil(foundSolenoidAllowPoint.Enable) != false {
+								if boolean.NonNil(foundSolenoidAllowPoint.Enable) != true {
 									pointUpdateReq = true
 									foundSolenoidAllowPoint.Enable = boolean.NewTrue()
 								}
@@ -519,7 +519,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 							case "TEMP_CALIBRATION_OFFSET":
 								foundCalibrationPoint = modbusPoint
 								pointUpdateReq := false
-								if boolean.NonNil(foundCalibrationPoint.Enable) != false {
+								if boolean.NonNil(foundCalibrationPoint.Enable) != true {
 									pointUpdateReq = true
 									foundCalibrationPoint.Enable = boolean.NewTrue()
 								}
@@ -556,7 +556,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 							case "RESET_ALL":
 								foundResetPoint = modbusPoint
 								pointUpdateReq := false
-								if boolean.NonNil(foundResetPoint.Enable) != false {
+								if boolean.NonNil(foundResetPoint.Enable) != true {
 									pointUpdateReq = true
 									foundResetPoint.Enable = boolean.NewTrue()
 								}
@@ -593,7 +593,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 							case "RTC":
 								foundRTCPoint = modbusPoint
 								pointUpdateReq := false
-								if boolean.NonNil(foundRTCPoint.Enable) != false {
+								if boolean.NonNil(foundRTCPoint.Enable) != true {
 									pointUpdateReq = true
 									foundRTCPoint.Enable = boolean.NewTrue()
 								}
@@ -642,8 +642,10 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundEnablePoint.PollRate = model.RATE_SLOW
 						foundEnablePoint.PollPriority = model.PRIORITY_HIGH
 						foundEnablePoint.Fallback = float.New(1)
+						foundEnablePoint.Priority = &model.Priority{}
+						foundEnablePoint.Priority.P3 = float.New(1)
 						foundEnablePoint.WritePollRequired = boolean.NewTrue()
-						foundEnablePoint, err = inst.db.CreatePoint(foundEnablePoint, false, false)
+						foundEnablePoint, err = inst.db.CreatePoint(foundEnablePoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() EnablePoint create err: ", err)
 						}
@@ -660,8 +662,10 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundSetpointPoint.PollRate = model.RATE_SLOW
 						foundSetpointPoint.PollPriority = model.PRIORITY_HIGH
 						foundSetpointPoint.Fallback = float.New(tmvDevice.TemperatureSetpoint)
+						foundSetpointPoint.Priority = &model.Priority{}
+						foundSetpointPoint.Priority.P3 = float.New(tmvDevice.TemperatureSetpoint)
 						foundSetpointPoint.WritePollRequired = boolean.NewTrue()
-						foundSetpointPoint, err = inst.db.CreatePoint(foundSetpointPoint, false, false)
+						foundSetpointPoint, err = inst.db.CreatePoint(foundSetpointPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SetpointPoint create err: ", err)
 						}
@@ -678,7 +682,10 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundResetPoint.PollRate = model.RATE_SLOW
 						foundResetPoint.PollPriority = model.PRIORITY_HIGH
 						foundResetPoint.Fallback = float.New(0)
-						foundResetPoint, err = inst.db.CreatePoint(foundResetPoint, false, false)
+						foundResetPoint.Priority = &model.Priority{}
+						foundResetPoint.Priority.P3 = float.New(0)
+						foundSolenoidAllowPoint.WritePollRequired = boolean.NewFalse()
+						foundResetPoint, err = inst.db.CreatePoint(foundResetPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() ResetPoint create err: ", err)
 						}
@@ -699,8 +706,10 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 							fallbackFloat = 1
 						}
 						foundSolenoidAllowPoint.Fallback = float.New(fallbackFloat)
+						foundSolenoidAllowPoint.Priority = &model.Priority{}
+						foundSolenoidAllowPoint.Priority.P3 = float.New(fallbackFloat)
 						foundSolenoidAllowPoint.WritePollRequired = boolean.NewTrue()
-						foundSolenoidAllowPoint, err = inst.db.CreatePoint(foundSolenoidAllowPoint, false, false)
+						foundSolenoidAllowPoint, err = inst.db.CreatePoint(foundSolenoidAllowPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SolenoidAllowPoint create err: ", err)
 						}
@@ -717,7 +726,10 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundCalibrationPoint.PollRate = model.RATE_SLOW
 						foundCalibrationPoint.PollPriority = model.PRIORITY_HIGH
 						foundCalibrationPoint.Fallback = float.New(0)
-						foundCalibrationPoint, err = inst.db.CreatePoint(foundCalibrationPoint, false, false)
+						foundCalibrationPoint.Priority = &model.Priority{}
+						foundCalibrationPoint.Priority.P3 = float.New(0)
+						foundSolenoidAllowPoint.WritePollRequired = boolean.NewFalse()
+						foundCalibrationPoint, err = inst.db.CreatePoint(foundCalibrationPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() CalibrationPoint create err: ", err)
 						}
@@ -734,7 +746,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundRTCPoint.PollRate = model.RATE_SLOW
 						foundRTCPoint.PollPriority = model.PRIORITY_HIGH
 						foundRTCPoint.WritePollRequired = boolean.NewFalse()
-						foundRTCPoint, err = inst.db.CreatePoint(foundRTCPoint, false, false)
+						foundRTCPoint, err = inst.db.CreatePoint(foundRTCPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCPoint create err: ", err)
 						}
