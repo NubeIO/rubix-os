@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [v0.9.4](https://github.com/NubeIO/flow-framework/tree/v0.9.4) (2022-11-08)
+## [v0.9.5](https://github.com/NubeIO/flow-framework/tree/v0.9.5) (2022-11-08)
 
 - fix nil errors on lorawan 
 
