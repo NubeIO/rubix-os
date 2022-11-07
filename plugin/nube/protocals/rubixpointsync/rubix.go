@@ -35,6 +35,7 @@ func (inst *Instance) CreateNewRubixPoint(pointName, deviceUUID string) (*rubixr
 	rest := rubixrest.NewNoAuth(host, int(port))
 	rubixPoint, err := rest.CreateNewRubixPoint(pointName, deviceUUID)
 	if err != nil {
+		inst.rubixpointsyncErrorMsg("CreateNewRubixPoint() err: ", err)
 		return nil, errors.New("could not create rubix point")
 	}
 	return rubixPoint, nil
@@ -60,7 +61,7 @@ func (inst *Instance) WriteRubixPointByPathNames(networkName, deviceName, pointN
 }
 
 func (inst *Instance) WriteRubixPointByUUID(pointUUID string, writeValue *float64) (*rubixrest.RubixPnt, error) {
-	inst.rubixpointsyncDebugMsg("WriteRubixPointByPathNames()", pointUUID, writeValue)
+	inst.rubixpointsyncDebugMsg("WriteRubixPointByUUID()", pointUUID, writeValue)
 	host := inst.config.Job.Host
 	if host == "" {
 		host = "0.0.0.0"
@@ -131,6 +132,7 @@ func (inst *Instance) CreateNewRubixDevice(deviceName, networkUUID string) (*rub
 	rest := rubixrest.NewNoAuth(host, int(port))
 	rubixDevice, err := rest.CreateNewRubixDevice(deviceName, networkUUID)
 	if err != nil {
+		inst.rubixpointsyncErrorMsg("CreateNewRubixDevice() err: ", err)
 		return nil, errors.New("could not create rubix device")
 	}
 	return rubixDevice, nil
@@ -149,6 +151,7 @@ func (inst *Instance) CreateNewRubixNetwork(netName string) (*rubixrest.RubixNet
 	rest := rubixrest.NewNoAuth(host, int(port))
 	rubixNetwork, err := rest.CreateNewRubixNetwork(netName)
 	if err != nil {
+		inst.rubixpointsyncErrorMsg("CreateNewRubixNetwork() err: ", err)
 		return nil, errors.New("could not create rubix network")
 	}
 	return rubixNetwork, nil
