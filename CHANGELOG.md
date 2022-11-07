@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.9.2](https://github.com/NubeIO/flow-framework/tree/v0.9.2) (2022-11-07)
+
+- Improves rubixpointsync plugin
+
 ## [v0.9.1](https://github.com/NubeIO/flow-framework/tree/v0.9.1) (2022-11-07)
 
 - Improves polling (bacnet and modbus)
