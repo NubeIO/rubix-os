@@ -14,7 +14,7 @@ type Config struct {
 func (inst *Instance) DefaultConfig() interface{} {
 	job := Job{
 		Host:               "0.0.0.0",
-		Port:               1616,
+		Port:               1515,
 		UseExistingNetwork: false,
 	}
 
