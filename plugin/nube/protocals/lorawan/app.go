@@ -42,6 +42,10 @@ func (inst *Instance) syncChirpstackDevices() {
 }
 
 func (inst *Instance) syncAddMissingDevices(csDevices []csmodel.Device) {
+	if len(csDevices) <= 0 {
+		log.Error("lorawan: syncAddMissingDevices() empty csdevice array")
+		return
+	}
 	for _, csDev := range csDevices {
 		currDev, _ := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
 		if currDev == nil {
@@ -51,8 +55,12 @@ func (inst *Instance) syncAddMissingDevices(csDevices []csmodel.Device) {
 }
 
 func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
+	if len(csDevices) <= 0 {
+		log.Error("lorawan: syncRemoveOldDevices() empty csdevice array")
+		return
+	}
 	currNetwork, err := inst.db.GetNetwork(inst.networkUUID, api.Args{WithDevices: true})
-	if err != nil {
+	if err != nil || currNetwork == nil {
 		return
 	}
 	currDevices := currNetwork.Devices
@@ -73,13 +81,21 @@ func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
 }
 
 func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
+	if len(csDevices) <= 0 {
+		log.Error("lorawan: syncUpdateDevices() empty csdevice array")
+		return
+	}
 	for _, csDev := range csDevices {
-		currDev, _ := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
+		currDev, err := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
+		if err != nil || currDev == nil {
+			log.Error("lorawan: GetDeviceByArgs() err: ", err)
+			continue
+		}
 		if currDev.Name != csDev.Name &&
 			currDev.CommonDescription.Description != csDev.Description {
 			currDev.Name = csDev.Name
 			currDev.CommonDescription.Description = csDev.Description
-			_, err := inst.db.UpdateDevice(currDev.UUID, currDev, true)
+			_, err = inst.db.UpdateDevice(currDev.UUID, currDev, true)
 			if err != nil {
 				log.Error("lorawan: Error updating device during sync: ", err)
 			} else {
