@@ -73,13 +73,20 @@ func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
 }
 
 func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
+	if len(csDevices) <= 0 {
+		log.Error("lorawan: syncUpdateDevices() empty csdevice array")
+	}
 	for _, csDev := range csDevices {
-		currDev, _ := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
+		currDev, err := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
+		if err != nil || currDev == nil {
+			log.Error("lorawan: GetDeviceByArgs() err: ", err)
+			continue
+		}
 		if currDev.Name != csDev.Name &&
 			currDev.CommonDescription.Description != csDev.Description {
 			currDev.Name = csDev.Name
 			currDev.CommonDescription.Description = csDev.Description
-			_, err := inst.db.UpdateDevice(currDev.UUID, currDev, true)
+			_, err = inst.db.UpdateDevice(currDev.UUID, currDev, true)
 			if err != nil {
 				log.Error("lorawan: Error updating device during sync: ", err)
 			} else {
