@@ -249,6 +249,14 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 }
 
 // THE FOLLOWING FUNCTIONS ARE CALLED FROM WITHIN THE PLUGIN
+
+func (inst *Instance) runSetupSteps() error {
+	err := inst.createAndActivateChirpstackDevices()
+	err = inst.updatePointNames()
+	err = inst.createModbusNetworkDevicesAndPoints()
+	return err
+}
+
 func (inst *Instance) updatePointNames() error {
 	inst.tmvDebugMsg("updatePointNames()")
 	nets, err := inst.db.GetNetworksByPluginName("lorawan", api.Args{WithDevices: true, WithPoints: true})
