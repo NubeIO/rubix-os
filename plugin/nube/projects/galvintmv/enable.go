@@ -22,9 +22,7 @@ func (inst *Instance) Enable() error {
 
 	cron = gocron.NewScheduler(time.Local)
 	if inst.config.Job.EnableConfigSteps {
-		_, _ = cron.Every(inst.config.Job.Frequency).Tag("CreateAndActivateLoRaWANDevices").Do(inst.createAndActivateChirpstackDevices)
-		_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncTMVPointNamesToLorawan").Do(inst.updatePointNames)
-		_, _ = cron.Every(inst.config.Job.Frequency).Tag("CreateModbusNetworkDevicesPoints").Do(inst.createModbusNetworkDevicesAndPoints)
+		_, _ = cron.Every(inst.config.Job.Frequency).Tag("runSetupSteps").Do(inst.runSetupSteps)
 	}
 	_, _ = cron.Every(1).Day().At("02:00").Tag("UpdateIOModuleRTC").Do(inst.updateIOModuleRTC)
 	// _, _ = cron.Every(inst.config.Job.Frequency).Tag("UpdateIOModuleRTC").Do(inst.updateIOModuleRTC)
