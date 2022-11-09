@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.9.7](https://github.com/NubeIO/flow-framework/tree/v0.9.7) (2022-11-09)
+
+- slows lorawan and galvintmv api calls
+- lorawan plugin gets cs token at runtime
+
 ## [v0.9.6](https://github.com/NubeIO/flow-framework/tree/v0.9.6) (2022-11-08)
 
 - makes galvin setup steps run in order
