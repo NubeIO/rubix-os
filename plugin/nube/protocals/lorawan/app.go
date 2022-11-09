@@ -50,6 +50,7 @@ func (inst *Instance) syncAddMissingDevices(csDevices []csmodel.Device) {
 		currDev, _ := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
 		if currDev == nil {
 			inst.createDeviceFromCSDevice(&csDev)
+			time.Sleep(50 * time.Millisecond)
 		}
 	}
 }
@@ -77,6 +78,7 @@ func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
 		}
 		log.Warn("lorawan: Removing old device. EUI=", *currDev.CommonDevice.AddressUUID)
 		inst.db.DeleteDevice(currDev.UUID)
+		time.Sleep(50 * time.Millisecond)
 	}
 }
 
@@ -101,6 +103,7 @@ func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
 			} else {
 				log.Debugf("lorawan: Updated device during sync: EUI=%s UUID=%s", csDev.DevEUI, currDev.UUID)
 			}
+			time.Sleep(50 * time.Millisecond)
 		}
 	}
 }

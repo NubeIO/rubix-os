@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
 	log "github.com/sirupsen/logrus"
@@ -30,7 +29,12 @@ func (inst *Instance) Enable() error {
 	}
 
 	inst.csConnected = false
-	inst.REST = csrest.InitRest(inst.config.CSAddress, inst.config.CSPort, inst.config.CSToken)
+	token, err := inst.GetChirpstackToken(inst.config.ChirpstackUsername, inst.config.ChirpstackPassword)
+	if err != nil || token == nil && token.Token == "" {
+		log.Error("createAndActivateChirpstackDevices() err: ", err)
+		return nil
+	}
+	inst.REST = csrest.InitRest(inst.config.CSAddress, inst.config.CSPort, token.Token)
 	inst.REST.SetDeviceLimit(inst.config.DeviceLimit)
 	err = inst.connectToCS()
 	inst.ctx, inst.cancel = context.WithCancel(context.Background())

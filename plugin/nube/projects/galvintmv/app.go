@@ -402,6 +402,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints(): failed to create tmv device: ", newDevice.Name)
 							continue
 						}
+						time.Sleep(50 * time.Millisecond)
 					}
 					// modbus device exists now, so create the required points
 					var foundEnablePoint *model.Point
@@ -636,6 +637,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 									}
 								}
 							}
+							time.Sleep(50 * time.Millisecond)
 						}
 					}
 					if foundEnablePoint == nil {
@@ -657,6 +659,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() EnablePoint create err: ", err)
 						}
+						time.Sleep(50 * time.Millisecond)
 					}
 					if foundSetpointPoint == nil {
 						foundSetpointPoint = &model.Point{}
@@ -677,6 +680,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SetpointPoint create err: ", err)
 						}
+						time.Sleep(50 * time.Millisecond)
 					}
 					if foundResetPoint == nil {
 						foundResetPoint = &model.Point{}
@@ -697,6 +701,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() ResetPoint create err: ", err)
 						}
+						time.Sleep(50 * time.Millisecond)
 					}
 					if foundSolenoidAllowPoint == nil {
 						foundSolenoidAllowPoint = &model.Point{}
@@ -721,6 +726,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SolenoidAllowPoint create err: ", err)
 						}
+						time.Sleep(50 * time.Millisecond)
 					}
 					if foundCalibrationPoint == nil {
 						foundCalibrationPoint = &model.Point{}
@@ -741,6 +747,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() CalibrationPoint create err: ", err)
 						}
+						time.Sleep(50 * time.Millisecond)
 					}
 					if foundRTCPoint == nil {
 						foundRTCPoint = &model.Point{}
@@ -758,6 +765,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCPoint create err: ", err)
 						}
+						time.Sleep(50 * time.Millisecond)
 					}
 				}
 			}
@@ -833,10 +841,12 @@ func (inst *Instance) createAndActivateChirpstackDevices() error {
 			if err != nil {
 				inst.tmvErrorMsg("createAndActivateChirpstackDevices() AddChirpstackDevice() error: ", err)
 			}
+			time.Sleep(50 * time.Millisecond)
 			err = inst.ActivateChirpstackDevice(inst.config.Job.ChirpstackNetworkKey, tmvDevice.LoRaWANDeviceEUI, token.Token, inst.config.Job.ChirpstackNetworkKey)
 			if err != nil {
 				inst.tmvErrorMsg("createAndActivateChirpstackDevices() ActivateChirpstackDevice() error: ", err)
 			}
+			time.Sleep(50 * time.Millisecond)
 			mapFileContent += "\"" + strconv.Itoa(tmvDevice.DeviceAddress) + ":" + tmvDevice.LoRaWANDeviceEUI + "\"," + "\n"
 
 		}
@@ -868,7 +878,7 @@ func (inst *Instance) updateIOModuleRTC() error {
 				if pnt.Name == "RTC" {
 					inst.tmvDebugMsg("updateIOModuleRTC() rtcPointWrite() device: ", dev.Name)
 					inst.rtcPointWrite(pnt)
-					time.Sleep(20 * time.Second)
+					time.Sleep(30 * time.Second)
 				}
 			}
 		}

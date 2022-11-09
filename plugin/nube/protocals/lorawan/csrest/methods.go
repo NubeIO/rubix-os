@@ -14,6 +14,15 @@ import (
 
 var limit = "200"
 
+type ChirpstackCredentials struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type ChirpstackToken struct {
+	Token string `json:"jwt"`
+}
+
 func (a *RestClient) SetDeviceLimit(newLimit int) {
 	limit = strconv.Itoa(newLimit)
 }
