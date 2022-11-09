@@ -64,6 +64,7 @@ type Args struct {
 	IsMetadata           bool
 	NetworkUUID          *string
 	DeviceUUID           *string
+	WithMetaTags         bool
 }
 
 var ArgsType = struct {
@@ -130,6 +131,7 @@ var ArgsType = struct {
 	IsMetadata           string
 	NetworkUUID          string
 	DeviceUUID           string
+	WithMetaTags         string
 }{
 	Sort:                 "sort",
 	Order:                "order",
@@ -194,6 +196,7 @@ var ArgsType = struct {
 	IsMetadata:           "is_metadata",
 	NetworkUUID:          "network_uuid",
 	DeviceUUID:           "device_uuid",
+	WithMetaTags:         "with_meta_tags",
 }
 
 var ArgsDefault = struct {
@@ -238,6 +241,7 @@ var ArgsDefault = struct {
 	IsMetadata        string
 	NetworkUUID       string
 	DeviceUUID        string
+	WithMetaTags      string
 }{
 	Sort:              "ID",
 	Order:             "DESC", // ASC or DESC
@@ -279,4 +283,5 @@ var ArgsDefault = struct {
 	IsMetadata:        "false",
 	NetworkUUID:       "",
 	DeviceUUID:        "",
+	WithMetaTags:      "false",
 }

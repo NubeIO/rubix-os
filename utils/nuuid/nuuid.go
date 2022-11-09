@@ -38,6 +38,9 @@ func MakeTopicUUID(attribute string) string {
 	rub := "rbx" // rubix uuid
 	rxg := "rxg" // rubix global uuid
 	tok := "tok" // token uuid
+	nmt := "nmt" // network meta tag
+	dmt := "dmt" // device meta tag
+	pmt := "pmt" // point meta tag
 
 	switch attribute {
 	case model.CommonNaming.Plugin:
@@ -84,6 +87,12 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", rxg, divider, u)
 	case model.CommonNaming.Token:
 		return fmt.Sprintf("%s%s%s", tok, divider, u)
+	case model.CommonNaming.NetworkMetaTag:
+		return fmt.Sprintf("%s%s%s", nmt, divider, u)
+	case model.CommonNaming.DeviceMetaTag:
+		return fmt.Sprintf("%s%s%s", dmt, divider, u)
+	case model.CommonNaming.PointMetaTag:
+		return fmt.Sprintf("%s%s%s", pmt, divider, u)
 	}
 	return u
 }

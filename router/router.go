@@ -318,6 +318,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			networkRoutes.GET("/name/:name", networkHandler.GetNetworkByName)
 			networkRoutes.PATCH("/:uuid", networkHandler.UpdateNetwork)
 			networkRoutes.DELETE("/:uuid", networkHandler.DeleteNetwork)
+			networkRoutes.POST("/meta_tags/uuid/:uuid", networkHandler.CreateNetworkMetaTags)
 		}
 
 		deviceRoutes := apiRoutes.Group("/devices")
@@ -329,6 +330,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			deviceRoutes.GET("/name/:network_name/:device_name", deviceHandler.GetDeviceByName)
 			deviceRoutes.PATCH("/:uuid", deviceHandler.UpdateDevice)
 			deviceRoutes.DELETE("/:uuid", deviceHandler.DeleteDevice)
+			deviceRoutes.POST("/meta_tags/uuid/:uuid", deviceHandler.CreateDeviceMetaTags)
 		}
 
 		pointRoutes := apiRoutes.Group("/points")
@@ -345,6 +347,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
 			pointRoutes.PATCH("/name", pointHandler.PointWriteByNameArgs) // TODO remove
 			pointRoutes.PATCH("/name/:network_name/:device_name/:point_name", pointHandler.PointWriteByName)
+			pointRoutes.POST("/meta_tags/uuid/:uuid", pointHandler.CreatePointMetaTags)
 		}
 
 		commandRoutes := apiRoutes.Group("/commands")

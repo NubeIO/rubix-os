@@ -21,6 +21,8 @@ type NetworkDatabase interface {
 	CreateNetworkPlugin(network *model.Network) (*model.Network, error)
 	UpdateNetworkPlugin(uuid string, body *model.Network) (*model.Network, error)
 	DeleteNetworkPlugin(uuid string) (bool, error)
+
+	CreateNetworkMetaTags(networkUUID string, networkMetaTags []*model.NetworkMetaTag) ([]*model.NetworkMetaTag, error)
 }
 type NetworksAPI struct {
 	DB     NetworkDatabase
@@ -92,5 +94,16 @@ func (a *NetworksAPI) UpdateNetwork(ctx *gin.Context) {
 func (a *NetworksAPI) DeleteNetwork(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteNetworkPlugin(uuid)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *NetworksAPI) CreateNetworkMetaTags(ctx *gin.Context) {
+	networkUUID := resolveID(ctx)
+	body, _ := getBodyBulkNetworkMetaTags(ctx)
+	q, err := a.DB.CreateNetworkMetaTags(networkUUID, body)
+	if err != nil {
+		ResponseHandler(q, err, ctx)
+		return
+	}
 	ResponseHandler(q, err, ctx)
 }
