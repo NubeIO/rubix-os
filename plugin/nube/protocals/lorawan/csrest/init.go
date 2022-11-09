@@ -33,6 +33,18 @@ func InitRest(address string, port int, token string) RestClient {
 	return RestClient{client: client, ClientToken: token}
 }
 
+// NewNoAuth returns a new instance
+func NewNoAuth(address string, port int) *RestClient {
+	client := resty.New()
+	client.SetDebug(false)
+	url := fmt.Sprintf("http://%s:%d", address, port)
+	apiURL := url
+	client.SetBaseURL(apiURL)
+	client.SetError(&nresty.Error{})
+	client.SetHeader("Content-Type", "application/json")
+	return &RestClient{client: client}
+}
+
 // Connect test CS connection with API token
 func (a *RestClient) Connect() error {
 	log.Infof("lorawan: Connecting to chirpstack at %s", a.client.BaseURL)
