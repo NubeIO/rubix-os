@@ -174,6 +174,21 @@ func getBodyTokenBlock(ctx *gin.Context) (dto *interfaces.TokenBlock, err error)
 	return dto, err
 }
 
+func getBodyBulkNetworkMetaTags(ctx *gin.Context) (dto []*model.NetworkMetaTag, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyBulkDeviceMetaTag(ctx *gin.Context) (dto []*model.DeviceMetaTag, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyBulkPointMetaTag(ctx *gin.Context) (dto []*model.PointMetaTag, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getP2PBody(ctx *gin.Context) (dto *model.P2PBody, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err

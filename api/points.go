@@ -22,6 +22,8 @@ type PointDatabase interface {
 	UpdatePointPlugin(uuid string, body *model.Point) (*model.Point, error)
 	WritePointPlugin(uuid string, body *model.PointWriter) (*model.Point, error)
 	DeletePointPlugin(uuid string) (bool, error)
+
+	CreatePointMetaTags(pointUUID string, pointMetaTags []*model.PointMetaTag) ([]*model.PointMetaTag, error)
 }
 type PointAPI struct {
 	DB PointDatabase
@@ -116,4 +118,15 @@ func networkDevicePointNames(ctx *gin.Context) (networkName, deviceName, pointNa
 	deviceName = ctx.DefaultQuery(aType.DeviceName, aDefault.DeviceName)
 	pointName = ctx.DefaultQuery(aType.PointName, aDefault.PointName)
 	return networkName, deviceName, pointName
+}
+
+func (a *PointAPI) CreatePointMetaTags(ctx *gin.Context) {
+	pointUUID := resolveID(ctx)
+	body, _ := getBodyBulkPointMetaTag(ctx)
+	q, err := a.DB.CreatePointMetaTags(pointUUID, body)
+	if err != nil {
+		ResponseHandler(q, err, ctx)
+		return
+	}
+	ResponseHandler(q, err, ctx)
 }

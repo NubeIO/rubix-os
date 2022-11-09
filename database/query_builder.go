@@ -188,6 +188,9 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 	if args.WithTags {
 		query = query.Preload("Tags")
 	}
+	if args.WithMetaTags {
+		query = query.Preload("MetaTags")
+	}
 	return query
 }
 
@@ -210,6 +213,9 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	}
 	if args.NetworkUUID != nil {
 		query = query.Where("network_uuid = ?", args.NetworkUUID)
+	}
+	if args.WithMetaTags {
+		query = query.Preload("MetaTags")
 	}
 	return query
 }
@@ -236,6 +242,9 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	}
 	if args.DeviceUUID != nil {
 		query = query.Where("device_uuid = ?", *args.DeviceUUID)
+	}
+	if args.WithMetaTags {
+		query = query.Preload("MetaTags")
 	}
 	return query
 }
