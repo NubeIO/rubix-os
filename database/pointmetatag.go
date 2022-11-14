@@ -38,3 +38,11 @@ func (d *GormDatabase) CreatePointMetaTags(pointUUID string, body []*model.Point
 	tx.Commit()
 	return body, nil
 }
+
+func (d *GormDatabase) GetPointMetaTags() ([]*model.PointMetaTag, error) {
+	var pointMetaTagsModel []*model.PointMetaTag
+	if err := d.DB.Find(&pointMetaTagsModel).Error; err != nil {
+		return nil, err
+	}
+	return pointMetaTagsModel, nil
+}

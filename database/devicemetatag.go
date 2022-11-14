@@ -38,3 +38,11 @@ func (d *GormDatabase) CreateDeviceMetaTags(deviceUUID string, body []*model.Dev
 	tx.Commit()
 	return body, nil
 }
+
+func (d *GormDatabase) GetDeviceMetaTags() ([]*model.DeviceMetaTag, error) {
+	var deviceMetaTagsModel []*model.DeviceMetaTag
+	if err := d.DB.Find(&deviceMetaTagsModel).Error; err != nil {
+		return nil, err
+	}
+	return deviceMetaTagsModel, nil
+}

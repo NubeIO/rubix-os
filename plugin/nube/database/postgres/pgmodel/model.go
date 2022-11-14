@@ -106,8 +106,9 @@ type Network struct {
 	CommonEnable
 	CommonFault
 	CommonCreated
-	Devices []*Device `json:"devices,omitempty" gorm:"constraint:OnDelete:CASCADE"`
-	Tags    []*Tag    `json:"tags,omitempty" gorm:"many2many:networks_tags;constraint:OnDelete:CASCADE"`
+	Devices  []*Device         `json:"devices,omitempty" gorm:"constraint:OnDelete:CASCADE"`
+	Tags     []*Tag            `json:"tags,omitempty" gorm:"many2many:networks_tags;constraint:OnDelete:CASCADE"`
+	MetaTags []*NetworkMetaTag `json:"meta_tags,omitempty" gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type Device struct {
@@ -117,9 +118,10 @@ type Device struct {
 	CommonEnable
 	CommonFault
 	CommonCreated
-	NetworkUUID string   `json:"network_uuid,omitempty" gorm:"TYPE:varchar(255) REFERENCES networks;not null;default:null"`
-	Points      []*Point `json:"points,omitempty" gorm:"constraint:OnDelete:CASCADE"`
-	Tags        []*Tag   `json:"tags,omitempty" gorm:"many2many:devices_tags;constraint:OnDelete:CASCADE"`
+	NetworkUUID string           `json:"network_uuid,omitempty" gorm:"TYPE:varchar(255) REFERENCES networks;not null;default:null"`
+	Points      []*Point         `json:"points,omitempty" gorm:"constraint:OnDelete:CASCADE"`
+	Tags        []*Tag           `json:"tags,omitempty" gorm:"many2many:devices_tags;constraint:OnDelete:CASCADE"`
+	MetaTags    []*DeviceMetaTag `json:"meta_tags,omitempty" gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type Point struct {
@@ -129,8 +131,9 @@ type Point struct {
 	CommonEnable
 	CommonFault
 	CommonCreated
-	DeviceUUID string `json:"device_uuid,omitempty" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
-	Tags       []*Tag `json:"tags,omitempty" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
+	DeviceUUID string          `json:"device_uuid,omitempty" gorm:"TYPE:string REFERENCES devices;not null;default:null"`
+	Tags       []*Tag          `json:"tags,omitempty" gorm:"many2many:points_tags;constraint:OnDelete:CASCADE"`
+	MetaTags   []*PointMetaTag `json:"meta_tags,omitempty" gorm:"constraint:OnDelete:CASCADE"`
 }
 
 type Tag struct {
@@ -176,4 +179,22 @@ type FlowNetworkCloneData struct {
 	SiteName   string `json:"site_name,omitempty"`
 	DeviceId   string `json:"device_id,omitempty"`
 	DeviceName string `json:"device_name,omitempty"`
+}
+
+type NetworkMetaTag struct {
+	NetworkUUID string `json:"network_uuid,omitempty" gorm:"type:varchar(255) references networks;not null;default:null;primaryKey"`
+	Key         string `json:"key,omitempty" gorm:"primaryKey"`
+	Value       string `json:"value,omitempty"`
+}
+
+type DeviceMetaTag struct {
+	DeviceUUID string `json:"device_uuid,omitempty" gorm:"type:varchar(255) references devices;not null;default:null;primaryKey"`
+	Key        string `json:"key,omitempty" gorm:"primaryKey"`
+	Value      string `json:"value,omitempty"`
+}
+
+type PointMetaTag struct {
+	PointUUID string `json:"point_uuid,omitempty" gorm:"type:varchar(255) references points;not null;default:null;primaryKey"`
+	Key       string `json:"key,omitempty" gorm:"primaryKey"`
+	Value     string `json:"value,omitempty"`
 }
