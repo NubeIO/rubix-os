@@ -178,11 +178,17 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 		if args.WithTags {
 			query = query.Preload("Devices.Tags")
 		}
+		if args.WithMetaTags {
+			query = query.Preload("Devices.MetaTags")
+		}
 	}
 	if args.WithPoints {
 		query = query.Preload("Devices.Points").Preload("Devices.Points.Priority")
 		if args.WithTags {
 			query = query.Preload("Devices.Points.Tags")
+		}
+		if args.WithMetaTags {
+			query = query.Preload("Devices.Points.MetaTags")
 		}
 	}
 	if args.WithTags {

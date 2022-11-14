@@ -38,3 +38,11 @@ func (d *GormDatabase) CreateNetworkMetaTags(networkUUID string, body []*model.N
 	tx.Commit()
 	return body, nil
 }
+
+func (d *GormDatabase) GetNetworkMetaTags() ([]*model.NetworkMetaTag, error) {
+	var networkMetaTagsModel []*model.NetworkMetaTag
+	if err := d.DB.Find(&networkMetaTagsModel).Error; err != nil {
+		return nil, err
+	}
+	return networkMetaTagsModel, nil
+}

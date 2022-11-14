@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/plugin/nube/database/postgres/pgmodel"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	postgresql "gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -59,6 +60,9 @@ func autoMigrate(db *gorm.DB) error {
 		pgmodel.Point{},
 		pgmodel.Tag{},
 		pgmodel.History{},
+		pgmodel.NetworkMetaTag{},
+		pgmodel.DeviceMetaTag{},
+		pgmodel.PointMetaTag{},
 	}
 	if (db.Migrator().HasConstraint(&pgmodel.FlowNetworkClone{}, "flow_network_clones_global_uuid_key")) {
 		_ = db.Migrator().DropConstraint(&pgmodel.FlowNetworkClone{}, "flow_network_clones_global_uuid_key")
@@ -156,4 +160,53 @@ func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
 		query.Order(fmt.Sprintf("%s %s", *args.OrderBy, order))
 	}
 	return query, nil
+}
+
+func (ps PostgresSetting) DeleteDeletedNetworkMetaTags(metaTags []*model.NetworkMetaTag) error {
+	if len(metaTags) == 0 {
+		return ps.postgresConnectionInstance.db.Where("true").Delete(pgmodel.NetworkMetaTag{}).Error
+	}
+	notIn := make([][]interface{}, len(metaTags))
+	for i, metaTag := range metaTags {
+		ni := make([]interface{}, 2)
+		ni[0] = metaTag.NetworkUUID
+		ni[1] = metaTag.Key
+		notIn[i] = ni
+	}
+	return ps.postgresConnectionInstance.db.Where("(network_uuid,key) NOT IN ?", notIn).
+		Delete(pgmodel.NetworkMetaTag{}).Error
+}
+
+func (ps PostgresSetting) DeleteDeletedDeviceMetaTags(metaTags []*model.DeviceMetaTag) error {
+	if len(metaTags) == 0 {
+		return ps.postgresConnectionInstance.db.Where("true").Delete(pgmodel.DeviceMetaTag{}).Error
+	}
+	notIn := make([][]interface{}, len(metaTags))
+	for i, metaTag := range metaTags {
+		ni := make([]interface{}, 2)
+		ni[0] = metaTag.DeviceUUID
+		ni[1] = metaTag.Key
+		notIn[i] = ni
+	}
+	return ps.postgresConnectionInstance.db.Where("(device_uuid,key) NOT IN ?", notIn).
+		Delete(pgmodel.DeviceMetaTag{}).Error
+}
+
+func (ps PostgresSetting) DeleteDeletedPointMetaTags(metaTags []*model.PointMetaTag) error {
+	if len(metaTags) == 0 {
+		return ps.postgresConnectionInstance.db.Where("true").Delete(pgmodel.PointMetaTag{}).Error
+	}
+	notIn := make([][]interface{}, len(metaTags))
+	for i, metaTag := range metaTags {
+		ni := make([]interface{}, 2)
+		ni[0] = metaTag.PointUUID
+		ni[1] = metaTag.Key
+		notIn[i] = ni
+	}
+	return ps.postgresConnectionInstance.db.Where("(point_uuid,key) NOT IN ?", notIn).
+		Delete(pgmodel.PointMetaTag{}).Error
+}
+
+func (ps PostgresSetting) updateTags(model, tags interface{}) error {
+	return ps.postgresConnectionInstance.db.Model(model).Association("Tags").Replace(tags)
 }
