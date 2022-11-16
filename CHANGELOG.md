@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.9.8](https://github.com/NubeIO/flow-framework/tree/v0.9.8) (2022-11-16)
+
+- updates network options on plugins
+- adds edgeazure (for testing)
+
 ## [v0.9.7](https://github.com/NubeIO/flow-framework/tree/v0.9.7) (2022-11-09)
 
 - slows lorawan and galvintmv api calls
