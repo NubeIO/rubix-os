@@ -17,6 +17,8 @@ type DeviceDatabase interface {
 	CreateDevicePlugin(body *model.Device) (*model.Device, error)
 	UpdateDevicePlugin(uuid string, body *model.Device) (*model.Device, error)
 	DeleteDevicePlugin(uuid string) (bool, error)
+
+	CreateDeviceMetaTags(deviceUUID string, deviceMetaTags []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error)
 }
 type DeviceAPI struct {
 	DB DeviceDatabase
@@ -65,5 +67,16 @@ func (a *DeviceAPI) CreateDevice(ctx *gin.Context) {
 func (a *DeviceAPI) DeleteDevice(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteDevicePlugin(uuid)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *DeviceAPI) CreateDeviceMetaTags(ctx *gin.Context) {
+	deviceUUID := resolveID(ctx)
+	body, _ := getBodyBulkDeviceMetaTag(ctx)
+	q, err := a.DB.CreateDeviceMetaTags(deviceUUID, body)
+	if err != nil {
+		ResponseHandler(q, err, ctx)
+		return
+	}
 	ResponseHandler(q, err, ctx)
 }

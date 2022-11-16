@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -92,4 +93,15 @@ func contains(v string, a []string) bool {
 		}
 	}
 	return false
+}
+
+func convertData(data interface{}, v interface{}) error {
+	mData, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	if err = json.Unmarshal(mData, &v); err != nil {
+		return err
+	}
+	return nil
 }

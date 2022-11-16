@@ -31,5 +31,8 @@ func GetInitInterfaces() []interface{} {
 		&model.History{},
 		&model.HistoryLog{},
 		&model.HistoryPostgresLog{},
+		&model.NetworkMetaTag{},
+		&model.DeviceMetaTag{},
+		&model.PointMetaTag{},
 	}
 }

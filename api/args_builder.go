@@ -132,6 +132,7 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	args.WithDevices, _ = toBool(ctx.DefaultQuery(aType.WithDevices, aDefault.WithDevices))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	args.WithMetaTags, _ = toBool(ctx.DefaultQuery(aType.WithMetaTags, aDefault.WithMetaTags))
 	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
 		args.FlowNetworkUUID = value
 	}
@@ -145,6 +146,7 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	args.WithPriority, _ = toBool(ctx.DefaultQuery(aType.WithPriority, aDefault.WithPriority))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	args.WithMetaTags, _ = toBool(ctx.DefaultQuery(aType.WithMetaTags, aDefault.WithMetaTags))
 	if value, ok := ctx.GetQuery(aType.AddressUUID); ok {
 		args.AddressUUID = &value
 	}
@@ -157,6 +159,7 @@ func buildPointArgs(ctx *gin.Context) Args {
 	var aDefault = ArgsDefault
 	args.WithPriority, _ = toBool(ctx.DefaultQuery(aType.WithPriority, aDefault.WithPriority))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	args.WithMetaTags, _ = toBool(ctx.DefaultQuery(aType.WithMetaTags, aDefault.WithMetaTags))
 	if value, ok := ctx.GetQuery(aType.AddressUUID); ok {
 		args.AddressUUID = &value
 	}
