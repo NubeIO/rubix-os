@@ -41,7 +41,7 @@ type Network struct {
 	AutoMappingNetworksSelection struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[\"disable\",\"edge28-to-bacnetserver\"]"`
+		Options  []string `json:"options" default:"[\"disable\",\"self-mapping\",\"edge28-to-bacnetserver\"]"`
 		Default  string   `json:"default" default:""`
 	} `json:"auto_mapping_networks_selection"`
 	AutoMappingFlowNetworkName struct {
