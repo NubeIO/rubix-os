@@ -100,6 +100,9 @@ for i in "$@"; do
   edgeinflux)
     buildPlugin "edgeinflux" plugin/nube/database/edgeinflux
     ;;
+  edgeazure)
+    buildPlugin "edgeazure" plugin/nube/database/edgeazure
+    ;;
   rubixio)
     buildPlugin "rubixio" plugin/nube/protocals/rubixio
     ;;

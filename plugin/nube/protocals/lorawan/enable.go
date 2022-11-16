@@ -47,6 +47,8 @@ func (inst *Instance) Enable() error {
 
 func (inst *Instance) Disable() error {
 	inst.enabled = false
-	inst.cancel()
+	if inst.cancel != nil {
+		inst.cancel()
+	}
 	return nil
 }

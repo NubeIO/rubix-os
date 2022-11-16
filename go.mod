@@ -44,6 +44,7 @@ require (
 	github.com/NubeIO/lib-networking v0.0.6
 	github.com/NubeIO/lib-schema v0.1.6
 	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
+	github.com/amenzhinsky/iothub v0.9.0
 	github.com/iancoleman/strcase v0.2.0
 	golang.org/x/exp v0.0.0-20220921164117-439092de6870
 	golang.org/x/text v0.3.7
