@@ -161,14 +161,7 @@ type HistoryData struct {
 	RubixDeviceName  string    `json:"rubix_device_name"`
 	RubixPointUUID   string    `json:"rubix_point_uuid"`
 	RubixPointName   string    `json:"rubix_point_name"`
-	TagData
 	FlowNetworkCloneData
-}
-
-type TagData struct {
-	NetworkTag string `json:"network_tag,omitempty"`
-	DeviceTag  string `json:"device_tag,omitempty"`
-	PointTag   string `json:"point_tag,omitempty"`
 }
 
 type FlowNetworkCloneData struct {

@@ -108,11 +108,11 @@ func (ps PostgresSetting) GetHistories(args Args) ([]*pgmodel.HistoryData, error
 }
 
 func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
-	filterQuery, hasTag, hasFnc, err := buildFilterQuery(args.Filter)
+	filterQuery, hasFnc, err := buildFilterQuery(args.Filter)
 	if err != nil {
 		return nil, err
 	}
-	selectQuery := buildSelectQuery(hasTag, hasFnc)
+	selectQuery := buildSelectQuery(hasFnc)
 	query := ps.postgresConnectionInstance.db
 	query = query.Table("histories").
 		Select(selectQuery).
@@ -121,11 +121,6 @@ func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
 		Joins("INNER JOIN points ON points.uuid = writers.writer_thing_uuid").
 		Joins("INNER JOIN devices ON devices.uuid = points.device_uuid").
 		Joins("INNER JOIN networks ON networks.uuid = devices.network_uuid")
-	if hasTag {
-		query = query.Joins("LEFT JOIN points_tags ON points_tags.point_uuid = points.uuid").
-			Joins("LEFT JOIN devices_tags ON devices_tags.device_uuid = devices.uuid").
-			Joins("LEFT JOIN networks_tags ON networks_tags.network_uuid = networks.uuid")
-	}
 	if hasFnc {
 		query = query.Joins("INNER JOIN stream_clones ON stream_clones.uuid = consumers.stream_clone_uuid").
 			Joins("INNER JOIN flow_network_clones ON flow_network_clones.uuid = stream_clones.flow_network_clone_uuid")
@@ -152,12 +147,16 @@ func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
 			query.Offset(offset)
 		}
 	}
-	if args.OrderBy != nil {
+	if args.OrderBy != nil || args.Order != nil {
 		order := "DESC"
+		orderBy := "timestamp"
 		if args.Order != nil && strings.ToUpper(strings.TrimSpace(*args.Order)) == "ASC" {
 			order = "ASC"
 		}
-		query.Order(fmt.Sprintf("%s %s", *args.OrderBy, order))
+		if args.OrderBy != nil {
+			orderBy = *args.OrderBy
+		}
+		query.Order(fmt.Sprintf("%s %s", orderBy, order))
 	}
 	return query, nil
 }
