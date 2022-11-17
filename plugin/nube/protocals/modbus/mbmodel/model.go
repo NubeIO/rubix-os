@@ -58,7 +58,7 @@ type Network struct {
 	SerialBaudRate struct {
 		Type     string `json:"type" default:"array"`
 		Required bool   `json:"required" default:"false"`
-		Options  []int  `json:"options" default:"[9600, 38400, 57600, 115200]"`
+		Options  []int  `json:"options" default:"[1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 76800, 115200]"`
 		Default  int    `json:"default" default:"38400"`
 	} `json:"serial_baud_rate"`
 	SerialParity struct {
