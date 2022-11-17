@@ -147,12 +147,16 @@ func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
 			query.Offset(offset)
 		}
 	}
-	if args.OrderBy != nil {
+	if args.OrderBy != nil || args.Order != nil {
 		order := "DESC"
+		orderBy := "timestamp"
 		if args.Order != nil && strings.ToUpper(strings.TrimSpace(*args.Order)) == "ASC" {
 			order = "ASC"
 		}
-		query.Order(fmt.Sprintf("%s %s", *args.OrderBy, order))
+		if args.OrderBy != nil {
+			orderBy = *args.OrderBy
+		}
+		query.Order(fmt.Sprintf("%s %s", orderBy, order))
 	}
 	return query, nil
 }
