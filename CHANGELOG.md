@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.9.10](https://github.com/NubeIO/flow-framework/tree/v0.9.10) (2022-11-18)
+
+- adds more modbus baud rates
+
 ## [v0.9.9](https://github.com/NubeIO/flow-framework/tree/v0.9.9) (2022-11-16)
 
 - adds network history enable
