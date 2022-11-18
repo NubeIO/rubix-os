@@ -37,14 +37,14 @@ func (inst *Instance) subscribeToMQTTForPointCOV() {
 						inst.edgeazureDebugMsg(fmt.Sprintf("subscribeToMQTTForPointCOV() message: %+v", message))
 						inst.edgeazureDebugMsg(fmt.Sprintf("subscribeToMQTTForPointCOV() body: %+v", body))
 						inst.edgeazureDebugMsg("subscribeToMQTTForPointCOV() topicParts[10]:", topicParts[10])
-						err := inst.SendPointWriteHistory(topicParts[10]) // topicParts[10] is the point UUID
-						if err != nil {
-							inst.edgeazureErrorMsg("subscribeToMQTTForPointCOV() error:", err)
-						}
+						/*
+							err := inst.SendPointWriteHistory(topicParts[10]) // topicParts[10] is the point UUID
+							if err != nil {
+								inst.edgeazureErrorMsg("subscribeToMQTTForPointCOV() error:", err)
+							}
+						*/
 					}
-
 				}
-
 			}
 		}
 	}
