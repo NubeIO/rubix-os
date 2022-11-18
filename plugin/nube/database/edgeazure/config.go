@@ -1,9 +1,9 @@
 package main
 
 type Azure struct {
-	HostName        string `json:"azure_host_name"`
-	DeviceId        string `json:"azure_device_id"`
-	SharedAccessKey string `json:"azure_shared_access_key"`
+	HostName              string `json:"azure_host_name"`
+	DeviceId              string `json:"azure_device_id"`
+	SharedAccessSignature string `json:"azure_shared_access_signature"`
 }
 
 type Job struct {
@@ -20,9 +20,9 @@ type Config struct {
 
 func (inst *Instance) DefaultConfig() interface{} {
 	azure := Azure{
-		HostName:        "",
-		DeviceId:        "",
-		SharedAccessKey: "",
+		HostName:              "",
+		DeviceId:              "",
+		SharedAccessSignature: "",
 	}
 	job := Job{
 		Frequency:            "60m",

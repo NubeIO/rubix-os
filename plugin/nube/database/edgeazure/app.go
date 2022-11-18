@@ -17,28 +17,31 @@ import (
 func (inst *Instance) syncAzure() error {
 	inst.edgeazureDebugMsg("syncAzure()")
 
-	azureDetails, err := inst.makeDeviceConnectionDetails()
+	azureDetails, err := inst.checkDeviceConnectionDetails()
 	if err != nil {
 		inst.edgeazureErrorMsg("makeDeviceConnectionDetails() err:", err)
 		return err
 	}
 	inst.AzureDetails = azureDetails
 
-	azureClient, err := inst.getAzureClient(inst.AzureDetails)
-	if err != nil {
-		inst.edgeazureErrorMsg("getAzureClient() err:", err)
-		return err
-	}
+	/*
+		azureClient, err := inst.getAzureClient(inst.AzureDetails)
+		if err != nil {
+			inst.edgeazureErrorMsg("getAzureClient() err:", err)
+			return err
+		}
 
-	inst.edgeazureDebugMsg("syncAzure() DeviceConnectionString:", inst.AzureDetails.DeviceConnectionString)
+		inst.edgeazureDebugMsg("syncAzure() DeviceConnectionString:", inst.AzureDetails.DeviceConnectionString)
 
-	// connect to the iothub
-	err = azureClient.Connect(context.Background())
-	if err != nil {
-		inst.edgeazureErrorMsg("azureClient.Connect() err:", err)
-		return err
-	}
-	// defer azureClient.Close()
+		// connect to the iothub
+		err = azureClient.Connect(context.Background())
+		if err != nil {
+			inst.edgeazureErrorMsg("azureClient.Connect() err:", err)
+			return err
+		}
+		// defer azureClient.Close()
+
+	*/
 
 	histories, err := inst.GetHistoryValues(inst.config.Job.Networks)
 	if err != nil {
@@ -46,29 +49,31 @@ func (inst *Instance) syncAzure() error {
 		return err
 	}
 
-	err = inst.sendHistoriesToAzureWithHttp(histories)
+	err = inst.sendHistoriesToAzureWithHttp(azureDetails, histories)
 	if err != nil {
-		inst.edgeazureErrorMsg("sendHistoriesToAzure() err:", err)
+		inst.edgeazureErrorMsg("sendHistoriesToAzureWithHttp() err:", err)
 		return err
 	}
 
-	inst.edgeazureDebugMsg(fmt.Sprintf("syncAzure() azureClient: %+v", azureClient))
 	/*
+		inst.edgeazureDebugMsg(fmt.Sprintf("syncAzure() azureClient: %+v", azureClient))
 		err = inst.sendHistoriesToAzure(azureClient, histories)
 		if err != nil {
 			inst.edgeazureErrorMsg("sendHistoriesToAzure() err:", err)
 			return err
 		}
-
 	*/
 
 	return nil
 }
 
-func (inst *Instance) sendHistoriesToAzureWithHttp(histories []*History) error {
+func (inst *Instance) sendHistoriesToAzureWithHttp(azureDetails *AzureDeviceConnectionDetails, histories []*History) error {
 	inst.edgeazureDebugMsg("sendHistoriesToAzureWithHttp()")
 	var err error
-	rest := inst.NewAzureRestClient()
+	rest := inst.NewAzureRestClient(azureDetails)
+	if rest == nil {
+		return errors.New("failed to create rest client")
+	}
 	for _, history := range histories {
 		resp, err := rest.sendAzureDeviceEventHttp(history)
 		inst.edgeazureDebugMsg("sendHistoriesToAzureWithHttp() response Status: ", resp.Status())
@@ -186,32 +191,25 @@ func (inst *Instance) EncodeToBytes(p interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+/*
 func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 	inst.edgeazureDebugMsg("SendPointWriteHistory()")
 	if pntUUID == "" {
-		inst.edgeazureDebugMsg("Invalid Point UUID (empty) to SendPointWriteHistory()")
 		return errors.New("invalid Point UUID (empty) to SendPointWriteHistory()")
 	}
 
-	azureDetails, err := inst.makeDeviceConnectionDetails()
+	azureDetails, err := inst.checkDeviceConnectionDetails()
 	if err != nil {
 		inst.edgeazureErrorMsg("makeDeviceConnectionDetails() err:", err)
 		return err
 	}
 	inst.AzureDetails = azureDetails
 
-	azureClient, err := inst.getAzureClient(inst.AzureDetails)
-	if err != nil {
-		inst.edgeazureErrorMsg("getAzureClient() err:", err)
-		return err
+	rest := inst.NewAzureRestClient(azureDetails)
+	if rest == nil {
+		return errors.New("failed to create rest client")
 	}
 
-	// connect to the iothub
-	err = azureClient.Connect(context.Background())
-	if err != nil {
-		inst.edgeazureErrorMsg("azureClient.Connect() err:", err)
-		return err
-	}
 
 	point, err := inst.db.GetPoint(pntUUID, api.Args{WithTags: true})
 	if err != nil || point == nil {
@@ -219,12 +217,12 @@ func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 		return errors.New("SendPointWriteHistory() GetPoint() error")
 	}
 
-	/*(
+
 	if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeCov && point.HistoryType != model.HistoryTypeCovAndInterval) {
 		return nil
 	}
 
-	*/
+
 	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	if err != nil || dev == nil {
 		inst.edgeazureErrorMsg("SendPointWriteHistory() GetDevice() err: ", err)
@@ -270,7 +268,7 @@ func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 		var historyArray []*History
 		historyArray = append(historyArray, &pointHistory)
 
-		err = inst.sendHistoriesToAzure(azureClient, historyArray)
+		err = inst.sendHistoriesToAzure(rest, historyArray)
 		if err != nil {
 			inst.edgeazureErrorMsg("sendHistoriesToAzure() err:", err)
 			return err
@@ -279,3 +277,5 @@ func (inst *Instance) SendPointWriteHistory(pntUUID string) error {
 	}
 	return errors.New("no point present value found")
 }
+
+*/
