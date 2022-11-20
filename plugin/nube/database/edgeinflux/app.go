@@ -145,7 +145,8 @@ func (inst *Instance) GetHistoryValues(requiredNetworksArray []string) ([]*Histo
 					inst.edgeinfluxErrorMsg("GetHistoryValues() Point is nil: ", pnt.Name, pnt.UUID)
 					continue
 				}
-				if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeInterval && point.HistoryType != model.HistoryTypeCovAndInterval) {
+				if (inst.config.Job.RequireHistoryEnable && !boolean.NonNil(point.HistoryEnable)) || (point.HistoryType != model.HistoryTypeInterval && point.HistoryType != model.HistoryTypeCovAndInterval && point.HistoryType != "") {
+					inst.edgeinfluxDebugMsg("GetHistoryValues() History save not required.")
 					continue
 				}
 				// inst.edgeinfluxDebugMsg(fmt.Sprintf("GetHistoryValues() point: %+v", point))
@@ -171,7 +172,6 @@ func (inst *Instance) GetHistoryValues(requiredNetworksArray []string) ([]*Histo
 			}
 		}
 	}
-
 	return historyArray, nil
 }
 

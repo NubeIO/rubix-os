@@ -22,7 +22,9 @@ func (inst *Instance) Enable() error {
 
 func (inst *Instance) Disable() error {
 	inst.enabled = false
-	inst.mqttCancel()
+	if inst.mqttCancel != nil {
+		inst.mqttCancel()
+	}
 	cron.Clear()
 	for _, influxConnectionInstance := range influxConnectionInstances {
 		influxConnectionInstance.client.Close()
