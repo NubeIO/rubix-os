@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.9.11](https://github.com/NubeIO/flow-framework/tree/v0.9.11) (2022-11-21)
+
+- fix edgeinflux history
+
 ## [v0.9.10](https://github.com/NubeIO/flow-framework/tree/v0.9.10) (2022-11-18)
 
 - adds more modbus baud rates
