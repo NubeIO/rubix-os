@@ -42,9 +42,7 @@ func (inst *Instance) subscribeToMQTTForPointCOV() {
 							inst.edgeinfluxErrorMsg("subscribeToMQTTForPointCOV() error:", err)
 						}
 					}
-
 				}
-
 			}
 		}
 	}

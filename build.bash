@@ -121,6 +121,9 @@ for i in "$@"; do
   galvintmv)
     buildPlugin "galvintmv" plugin/nube/projects/galvintmv
     ;;
+  thresholdalerts)
+      buildPlugin "thresholdalerts" plugin/nube/projects/thresholdalerts
+      ;;
   maplora)
     buildPlugin "maplora" plugin/nube/protocals/maplora
     ;;

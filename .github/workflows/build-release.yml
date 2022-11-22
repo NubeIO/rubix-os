@@ -98,6 +98,9 @@ jobs:
           cd ../../../plugin/nube/projects/galvintmv
           go build -buildmode=plugin -o galvintmv-amd64.so *.go  && cp galvintmv-amd64.so ../../../../
           
+          cd ../../../../plugin/nube/projects/thresholdalerts
+          go build -buildmode=plugin -o thresholdalerts-amd64.so *.go  && cp thresholdalerts-amd64.so ../../../../
+          
           cd ../../../../plugin/nube/protocals/edge28
           go build -buildmode=plugin -o edge28-amd64.so *.go  && cp edge28-amd64.so ../../../../
 
@@ -163,6 +166,9 @@ jobs:
           
           cd ../../../plugin/nube/projects/galvintmv
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o galvintmv-armv7.so *.go  && cp galvintmv-armv7.so ../../../../
+          
+          cd ../../../../plugin/nube/projects/thresholdalerts
+          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o thresholdalerts-armv7.so *.go  && cp thresholdalerts-armv7.so ../../../../
           
           cd ../../../../plugin/nube/protocals/edge28
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edge28-armv7.so *.go  && cp edge28-armv7.so ../../../../
@@ -234,6 +240,11 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./galvintmv-amd64.so
           artifact=galvintmv-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./galvintmv-armv7.so
+          
+          artifact=thresholdalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+          zip -r /tmp/zip/$artifact.zip ./thresholdalerts-amd64.so
+          artifact=thresholdalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+          zip -r /tmp/zip/$artifact.zip ./thresholdalerts-armv7.so
           
           artifact=edge28-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./edge28-amd64.so
