@@ -250,15 +250,12 @@ func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
 	}
 
 	newConf := instance.DefaultConfig()
+	_ = yaml.Unmarshal(conf.Config, newConf)
 	newConfBytes, err := ioutil.ReadAll(ctx.Request.Body)
 	var jsonConf map[string]string
 	err = json.Unmarshal(newConfBytes, &jsonConf)
 	if err != nil {
 		ctx.AbortWithError(400, errors.New("invalid data"))
-		return
-	}
-	if err != nil {
-		ctx.AbortWithError(500, err)
 		return
 	}
 	if err := yaml.Unmarshal([]byte(jsonConf["data"]), newConf); err != nil {

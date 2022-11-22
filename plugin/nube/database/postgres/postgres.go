@@ -127,7 +127,7 @@ func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
 	}
 	if args.GroupLimit != nil {
 		groupLimitQuery := fmt.Sprintf("INNER JOIN (SELECT *,row_number FROM (SELECT *,ROW_NUMBER() OVER "+
-			"(PARTITION BY UUID) AS row_number FROM histories ORDER BY timestamp DESC) _ WHERE row_number <= %s) AS "+
+			"(PARTITION BY UUID ORDER BY timestamp DESC) AS row_number FROM histories) _ WHERE row_number <= %s) AS "+
 			"group_limits ON histories.id = group_limits.id AND histories.uuid = group_limits.uuid AND "+
 			"histories.value = group_limits.value AND histories.timestamp = group_limits.timestamp", *args.GroupLimit)
 		query = query.Joins(groupLimitQuery)
