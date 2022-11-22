@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.9.12](https://github.com/NubeIO/flow-framework/tree/v0.9.12) (2022-11-23)
+
+- fix edgeinflux cov
+- fix config file reset to default
+- improve history api query
+
 ## [v0.9.11](https://github.com/NubeIO/flow-framework/tree/v0.9.11) (2022-11-21)
 
 - fix edgeinflux history
