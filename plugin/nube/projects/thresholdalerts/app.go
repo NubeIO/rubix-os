@@ -215,7 +215,7 @@ func (inst *Instance) ProcessThresholdAlerts() error {
 	// Get FF Token
 	ffTokenResp, err := inst.GetFFToken("admin", "N00BWires")
 	if ffTokenResp == nil || err != nil {
-		inst.thresholdalertsErrorMsg("GetFFToken() err: ", err)
+		inst.thresholdalertsErrorMsg("ProcessThresholdAlerts()  GetFFToken() err: ", err)
 	}
 
 	// Assemble Query Parameters (From Config File)
@@ -223,9 +223,12 @@ func (inst *Instance) ProcessThresholdAlerts() error {
 	inst.thresholdalertsDebugMsg("ProcessQueryParams() queryParams ", queryParams)
 
 	ffHistoryArray, err := inst.GetFFHistories(*ffTokenResp, queryParams)
-	if ffHistoryArray != nil {
-		inst.thresholdalertsDebugMsg(fmt.Sprintf("ProcessQueryParams() ffHistoryArray: %+v", ffHistoryArray))
+	if ffHistoryArray == nil || len(ffHistoryArray) <= 0 || err != nil {
+		inst.thresholdalertsErrorMsg("ProcessThresholdAlerts() GetFFHistories(): ", err)
+		return errors.New("ProcessThresholdAlerts() GetFFHistories(): error getting histories")
 	}
+	inst.thresholdalertsDebugMsg(fmt.Sprintf("ProcessQueryParams() ffHistoryArray: %+v", ffHistoryArray))
+	inst.ThresholdAnalysis(ffHistoryArray, inst.config.Job)
 
 	return err
 }
@@ -362,10 +365,15 @@ func (inst *Instance) ProcessQueryParams(jobConfig Job) (string, error) {
 	if filterParamsExist {
 		paramString := fmt.Sprintf("?%s", filterParams)
 		anHourAgo := time.Now().Add(time.Hour * -1)
-		anHourAgoString := anHourAgo.UTC().Format("2006-01-02 15:04:05")
-		inst.thresholdalertsDebugMsg("ProcessQueryParams() anHourAgoString: ", anHourAgoString)
+		// anHourAgoString := anHourAgo.UTC().Format("2006-01-02%2015:04:05")
+		anHourAgoDateString := anHourAgo.UTC().Format("2006-01-02")
+		anHourAgoTimeString := anHourAgo.UTC().Format("15:04:05")
+		inst.thresholdalertsDebugMsg("ProcessQueryParams() anHourAgoDateString: ", anHourAgoDateString)
+		inst.thresholdalertsDebugMsg("ProcessQueryParams() anHourAgoTimeString: ", anHourAgoTimeString)
 		paramString += "%26%26(timestamp%3E"
-		paramString += anHourAgoString
+		paramString += anHourAgoDateString
+		paramString += "%20"
+		paramString += anHourAgoTimeString
 		paramString += ")"
 		return paramString, nil
 	} else {
