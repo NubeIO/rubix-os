@@ -27,13 +27,13 @@ func (inst *Instance) subscribeToMQTTForPointCOV() {
 				// d.publishPointWrite(body)
 				messageTopic := message.Topic()
 				inst.edgeazureDebugMsg("subscribeToMQTTForPointCOV() messageTopic:", messageTopic)
-				pluginsArray := inst.config.Job.Networks
-				if pluginsArray == nil || len(pluginsArray) == 0 {
-					pluginsArray = []string{"system"}
+				networksArray := inst.config.Job.Networks
+				if networksArray == nil || len(networksArray) == 0 {
+					networksArray = []string{"system"}
 				}
-				for _, plugin := range pluginsArray {
+				for _, network := range networksArray {
 					topicParts := strings.Split(messageTopic, "/")
-					if topicParts[5] == plugin { // topicParts[5] is the plugin name
+					if topicParts[7] == network { // topicParts[7] is the plugin name
 						inst.edgeazureDebugMsg(fmt.Sprintf("subscribeToMQTTForPointCOV() message: %+v", message))
 						inst.edgeazureDebugMsg(fmt.Sprintf("subscribeToMQTTForPointCOV() body: %+v", body))
 						inst.edgeazureDebugMsg("subscribeToMQTTForPointCOV() topicParts[10]:", topicParts[10])
