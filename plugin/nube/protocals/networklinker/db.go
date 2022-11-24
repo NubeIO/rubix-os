@@ -3,10 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"golang.org/x/exp/slices"
 	"strings"
 
+	"golang.org/x/exp/slices"
+
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -159,9 +161,10 @@ func (inst *Instance) createPoint(devUUID string, name string, uuid1 *string, uu
 		addr = *uuid1
 	}
 	p := model.Point{
-		DeviceUUID:  devUUID,
-		Name:        name,
-		AddressUUID: &addr,
+		DeviceUUID:   devUUID,
+		Name:         name,
+		AddressUUID:  &addr,
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	inst.db.CreatePoint(&p, true, false)
 	return p
