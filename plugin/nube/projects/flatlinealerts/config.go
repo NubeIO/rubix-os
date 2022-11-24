@@ -12,10 +12,6 @@ type Job struct {
 	FFHost                   string            `yaml:"ff_host"`
 	FFPort                   float64           `yaml:"ff_port"`
 	AlertDelayMins           *float64          `yaml:"alert_delay_mins"`
-	HighLimitThreshold       *float64          `yaml:"high_limit_threshold"`
-	LowLimitThreshold        *float64          `yaml:"low_limit_threshold"`
-	HighLimitEnable          bool              `yaml:"high_limit_enable"`
-	LowLimitEnable           bool              `yaml:"low_limit_enable"`
 	SiteNamesInclude         []string          `yaml:"site_names_include"`
 	SiteNamesExclude         []string          `yaml:"site_names_exclude"`
 	RubixNetworkNamesInclude []string          `yaml:"rubix_network_names_include"`
@@ -35,12 +31,12 @@ func (inst *Instance) DefaultConfig() interface{} {
 		Frequency:      "30m",
 		FFHost:         "192.168.1.10",
 		FFPort:         1616,
-		AlertDelayMins: float.New(5),
+		AlertDelayMins: float.New(60),
 	}
 
 	return &Config{
 		Job:      job,
-		LogLevel: "ERROR", // DEBUG or ERROR
+		LogLevel: "DEBUG", // DEBUG or ERROR
 	}
 }
 

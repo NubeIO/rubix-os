@@ -11,10 +11,10 @@ import (
 
 // THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	inst.thresholdalertsDebugMsg("addNetwork(): ", body.Name)
+	inst.statusmismatchalertsDebugMsg("addNetwork(): ", body.Name)
 	network, err = inst.db.CreateNetwork(body, true)
 	if err != nil {
-		inst.thresholdalertsErrorMsg("addNetwork(): failed to create network: ", body.Name)
+		inst.statusmismatchalertsErrorMsg("addNetwork(): failed to create network: ", body.Name)
 		return nil, errors.New("failed to create network")
 	}
 	return network, nil
@@ -22,13 +22,13 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	if body == nil {
-		inst.thresholdalertsDebugMsg("addDevice(): nil device object")
+		inst.statusmismatchalertsDebugMsg("addDevice(): nil device object")
 		return nil, errors.New("empty device body, no device created")
 	}
-	inst.thresholdalertsDebugMsg("addDevice(): ", body.Name)
+	inst.statusmismatchalertsDebugMsg("addDevice(): ", body.Name)
 	device, err = inst.db.CreateDevice(body)
 	if device == nil || err != nil {
-		inst.thresholdalertsDebugMsg("addDevice(): failed to create tmv device: ", body.Name)
+		inst.statusmismatchalertsDebugMsg("addDevice(): failed to create tmv device: ", body.Name)
 		return nil, errors.New("failed to create tmv device")
 	}
 	return device, nil
@@ -36,26 +36,26 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	if body == nil {
-		inst.thresholdalertsDebugMsg("addPoint(): nil point object")
+		inst.statusmismatchalertsDebugMsg("addPoint(): nil point object")
 		return nil, errors.New("empty point body, no point created")
 	}
-	inst.thresholdalertsDebugMsg("addPoint(): ", body.Name)
+	inst.statusmismatchalertsDebugMsg("addPoint(): ", body.Name)
 
 	point, err = inst.db.CreatePoint(body, true, true)
 	if point == nil || err != nil {
-		inst.thresholdalertsDebugMsg("addPoint(): failed to create tmv point: ", body.Name)
+		inst.statusmismatchalertsDebugMsg("addPoint(): failed to create tmv point: ", body.Name)
 		return nil, errors.New("failed to create tmv point")
 	}
-	inst.thresholdalertsDebugMsg(fmt.Sprintf("addPoint(): %+v\n", point))
+	inst.statusmismatchalertsDebugMsg(fmt.Sprintf("addPoint(): %+v\n", point))
 
 	return point, nil
 
 }
 
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
-	inst.thresholdalertsDebugMsg("updateNetwork(): ", body.UUID)
+	inst.statusmismatchalertsDebugMsg("updateNetwork(): ", body.UUID)
 	if body == nil {
-		inst.thresholdalertsDebugMsg("updateNetwork():  nil network object")
+		inst.statusmismatchalertsDebugMsg("updateNetwork():  nil network object")
 		return
 	}
 	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
@@ -76,9 +76,9 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 }
 
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
-	inst.thresholdalertsDebugMsg("updateDevice(): ", body.UUID)
+	inst.statusmismatchalertsDebugMsg("updateDevice(): ", body.UUID)
 	if body == nil {
-		inst.thresholdalertsDebugMsg("updateDevice(): nil device object")
+		inst.statusmismatchalertsDebugMsg("updateDevice(): nil device object")
 		return
 	}
 
@@ -121,14 +121,14 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 }
 
 func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
-	inst.thresholdalertsDebugMsg("updatePoint(): ", body.UUID)
+	inst.statusmismatchalertsDebugMsg("updatePoint(): ", body.UUID)
 	if body == nil {
-		inst.thresholdalertsDebugMsg("updatePoint(): nil point object")
+		inst.statusmismatchalertsDebugMsg("updatePoint(): nil point object")
 		return
 	}
 
-	inst.thresholdalertsDebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
-	inst.thresholdalertsDebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
+	inst.statusmismatchalertsDebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
+	inst.statusmismatchalertsDebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
 
 	if boolean.IsFalse(body.Enable) {
 		body.CommonFault.InFault = true
@@ -140,7 +140,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 
 	point, err = inst.db.UpdatePoint(body.UUID, body, true, true)
 	if err != nil || point == nil {
-		inst.thresholdalertsDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
+		inst.statusmismatchalertsDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
 	}
 	return point, nil
@@ -150,18 +150,18 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	// TODO: check for PointWriteByName calls that might not flow through the plugin.
 
 	point = nil
-	inst.thresholdalertsDebugMsg("writePoint(): ", pntUUID)
+	inst.statusmismatchalertsDebugMsg("writePoint(): ", pntUUID)
 	if body == nil {
-		inst.thresholdalertsDebugMsg("writePoint(): nil point object")
+		inst.statusmismatchalertsDebugMsg("writePoint(): nil point object")
 		return
 	}
 
-	inst.thresholdalertsDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
-	inst.thresholdalertsDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
+	inst.statusmismatchalertsDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
+	inst.statusmismatchalertsDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
 
 	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
 	if err != nil {
-		inst.thresholdalertsDebugMsg("writePoint(): bad response from WritePoint(), ", err)
+		inst.statusmismatchalertsDebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err
 	}
 
@@ -169,9 +169,9 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 }
 
 func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
-	inst.thresholdalertsDebugMsg("deleteNetwork(): ", body.UUID)
+	inst.statusmismatchalertsDebugMsg("deleteNetwork(): ", body.UUID)
 	if body == nil {
-		inst.thresholdalertsDebugMsg("deleteNetwork(): nil network object")
+		inst.statusmismatchalertsDebugMsg("deleteNetwork(): nil network object")
 		return
 	}
 
@@ -183,9 +183,9 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 }
 
 func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
-	inst.thresholdalertsDebugMsg("deleteDevice(): ", body.UUID)
+	inst.statusmismatchalertsDebugMsg("deleteDevice(): ", body.UUID)
 	if body == nil {
-		inst.thresholdalertsDebugMsg("deleteDevice(): nil device object")
+		inst.statusmismatchalertsDebugMsg("deleteDevice(): nil device object")
 		return
 	}
 
@@ -197,9 +197,9 @@ func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
 }
 
 func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
-	inst.thresholdalertsDebugMsg("deletePoint(): ", body.UUID)
+	inst.statusmismatchalertsDebugMsg("deletePoint(): ", body.UUID)
 	if body == nil {
-		inst.thresholdalertsDebugMsg("deletePoint(): nil point object")
+		inst.statusmismatchalertsDebugMsg("deletePoint(): nil point object")
 		return
 	}
 
@@ -212,47 +212,47 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 
 // THE FOLLOWING FUNCTIONS ARE CALLED FROM WITHIN THE PLUGIN
 
-func (inst *Instance) ProcessThresholdAlerts() error {
-	// Check that there is a High or Low Threshold configured
-	if inst.config.Job.HighLimitThreshold == nil && inst.config.Job.LowLimitThreshold == nil {
-		inst.thresholdalertsErrorMsg("ProcessThresholdAlerts()  Error: no high or low limit thresholds were set")
-		return errors.New("no high or low limit thresholds were set")
+func (inst *Instance) ProcessStatusMismatchAlerts() error {
+	// Check that there is a High or Low StatusMismatch configured
+	if inst.config.Job.CommandPointName == "" || inst.config.Job.StatusPointName == "" {
+		inst.statusmismatchalertsErrorMsg("ProcessStatusMismatchAlerts()  Error: command or status point names are not configured")
+		return errors.New("command or status point names are not configured")
 	}
 
-	if !inst.config.Job.HighLimitEnable && !inst.config.Job.LowLimitEnable {
-		inst.thresholdalertsErrorMsg("ProcessThresholdAlerts()  Error: no high or low limit thresholds alerts enabled")
-		return errors.New("no high or low limit thresholds alerts enabled")
+	if !inst.config.Job.OnCommandFailureEnable && !inst.config.Job.OffCommandFailureEnable {
+		inst.statusmismatchalertsErrorMsg("ProcessStatusMismatchAlerts()  Error: no  status mismatch alerts enabled")
+		return errors.New("no  status mismatch alerts enabled")
 	}
 
 	// Get FF Token
 	ffTokenResp, err := inst.GetFFToken("admin", "N00BWires")
 	if ffTokenResp == nil || err != nil {
-		inst.thresholdalertsErrorMsg("ProcessThresholdAlerts()  GetFFToken() err: ", err)
+		inst.statusmismatchalertsErrorMsg("ProcessStatusMismatchAlerts()  GetFFToken() err: ", err)
 	}
 
 	// Assemble Query Parameters (From Config File)
 	queryParams, err := inst.ProcessQueryParams(inst.config.Job)
-	inst.thresholdalertsDebugMsg("ProcessQueryParams() queryParams ", queryParams)
+	inst.statusmismatchalertsDebugMsg("ProcessQueryParams() queryParams ", queryParams)
 
 	ffHistoryArray, err := inst.GetFFHistories(*ffTokenResp, queryParams)
 	if ffHistoryArray == nil || len(ffHistoryArray) <= 0 || err != nil {
-		inst.thresholdalertsErrorMsg("ProcessThresholdAlerts() GetFFHistories(): ", err)
-		return errors.New("ProcessThresholdAlerts() GetFFHistories(): error getting histories")
+		inst.statusmismatchalertsErrorMsg("ProcessStatusMismatchAlerts() GetFFHistories(): ", err)
+		return errors.New("ProcessStatusMismatchAlerts() GetFFHistories(): error getting histories")
 	}
-	inst.thresholdalertsDebugMsg(fmt.Sprintf("ProcessQueryParams() ffHistoryArray: %+v", ffHistoryArray))
-	highThresholdAlerts, lowThresholdAlerts, err := inst.ThresholdAnalysis(ffHistoryArray, inst.config.Job)
+	inst.statusmismatchalertsDebugMsg(fmt.Sprintf("ProcessQueryParams() ffHistoryArray: %+v", ffHistoryArray))
+	highStatusMismatchAlerts, lowStatusMismatchAlerts, err := inst.StatusMismatchAnalysis(ffHistoryArray, inst.config.Job)
 	if err != nil {
-		inst.thresholdalertsErrorMsg("ProcessThresholdAlerts() ThresholdAnalysis(): ", err)
-		return errors.New("ProcessThresholdAlerts() ThresholdAnalysis(): error converting histories to dataframe")
+		inst.statusmismatchalertsErrorMsg("ProcessStatusMismatchAlerts() StatusMismatchAnalysis(): ", err)
+		return errors.New("ProcessStatusMismatchAlerts() StatusMismatchAnalysis(): error converting histories to dataframe")
 	}
-	inst.thresholdalertsDebugMsg("ProcessQueryParams() highThresholdAlerts ", highThresholdAlerts)
-	inst.thresholdalertsDebugMsg("ProcessQueryParams() lowThresholdAlerts ", lowThresholdAlerts)
+	inst.statusmismatchalertsDebugMsg("ProcessQueryParams() highStatusMismatchAlerts ", highStatusMismatchAlerts)
+	inst.statusmismatchalertsDebugMsg("ProcessQueryParams() lowStatusMismatchAlerts ", lowStatusMismatchAlerts)
 
 	return err
 }
 
 func (inst *Instance) ProcessQueryParams(jobConfig Job) (string, error) {
-	inst.thresholdalertsDebugMsg("ProcessQueryParams()")
+	inst.statusmismatchalertsDebugMsg("ProcessQueryParams()")
 
 	// Filter Params
 	filterParams := "filter="
@@ -347,36 +347,14 @@ func (inst *Instance) ProcessQueryParams(jobConfig Job) (string, error) {
 		filterParams += ")"
 	}
 
-	// Rubix Point Includes
-	if jobConfig.RubixPointNamesInclude != nil && len(jobConfig.RubixPointNamesInclude) > 0 {
+	// Command Points
+	if jobConfig.CommandPointName != "" && jobConfig.StatusPointName != "" {
 		if filterParamsExist {
 			filterParams += "%26%26"
 		}
-		filterParams += "("
-		for ind, pntIncludeEntry := range jobConfig.RubixPointNamesInclude {
-			filterParamsExist = true
-			if ind > 0 {
-				filterParams += "%7C%7C"
-			}
-			filterParams += fmt.Sprintf("rubix_point_name=%s", pntIncludeEntry)
-		}
-		filterParams += ")"
-	}
-
-	// Rubix Point Excludes
-	if jobConfig.RubixPointNamesExclude != nil && len(jobConfig.RubixPointNamesExclude) > 0 {
-		if filterParamsExist {
-			filterParams += "%26%26"
-		}
-		filterParams += "("
-		for ind, pntExcludeEntry := range jobConfig.RubixPointNamesExclude {
-			filterParamsExist = true
-			if ind > 0 {
-				filterParams += "%26%26"
-			}
-			filterParams += fmt.Sprintf("rubix_point_name!=%s", pntExcludeEntry)
-		}
-		filterParams += ")"
+		filterParams += fmt.Sprintf("(rubix_point_name=%s)", jobConfig.CommandPointName)
+		filterParams += "%7C%7C"
+		filterParams += fmt.Sprintf("(rubix_point_name=%s)", jobConfig.StatusPointName)
 	}
 
 	// Tags Includes
@@ -451,7 +429,7 @@ func (inst *Instance) ProcessQueryParams(jobConfig Job) (string, error) {
 		filterParams += ")"
 	}
 
-	inst.thresholdalertsDebugMsg("ProcessQueryParams() filterParams: ", filterParams)
+	inst.statusmismatchalertsDebugMsg("ProcessQueryParams() filterParams: ", filterParams)
 
 	if filterParamsExist {
 		paramString := fmt.Sprintf("?%s", filterParams)
@@ -467,8 +445,8 @@ func (inst *Instance) ProcessQueryParams(jobConfig Job) (string, error) {
 		periodStartTime := time.Now().Add(alertDelay * -1)
 		periodStartDateString := periodStartTime.UTC().Format("2006-01-02")
 		periodStartTimeString := periodStartTime.UTC().Format("15:04:05")
-		inst.thresholdalertsDebugMsg("ProcessQueryParams() periodStartDateString: ", periodStartDateString)
-		inst.thresholdalertsDebugMsg("ProcessQueryParams() periodStartTimeString: ", periodStartTimeString)
+		inst.statusmismatchalertsDebugMsg("ProcessQueryParams() periodStartDateString: ", periodStartDateString)
+		inst.statusmismatchalertsDebugMsg("ProcessQueryParams() periodStartTimeString: ", periodStartTimeString)
 		paramString += "%26%26(timestamp%3E"
 		paramString += periodStartDateString
 		paramString += "%20"
