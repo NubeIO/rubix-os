@@ -44,6 +44,14 @@ func bytesToUint16s(endianness Endianness, in []byte) (out []uint16) {
 	return
 }
 
+func bytesToInt16s(endianness Endianness, in []byte) (out []int16) {
+	for i := 0; i < len(in); i += 2 {
+		out = append(out, int16(bytesToUint16(endianness, in[i:i+2])))
+	}
+
+	return
+}
+
 func bytesToUint32s(endianness Endianness, wordOrder WordOrder, in []byte) (out []uint32) {
 	var u32 uint32
 
@@ -66,6 +74,33 @@ func bytesToUint32s(endianness Endianness, wordOrder WordOrder, in []byte) (out 
 		}
 
 		out = append(out, u32)
+	}
+
+	return
+}
+
+func bytesToInt32s(endianness Endianness, wordOrder WordOrder, in []byte) (out []int32) {
+	var i32 int32
+
+	for i := 0; i < len(in); i += 4 {
+		switch endianness {
+		case BigEndian:
+			if wordOrder == HighWordFirst {
+				i32 = int32(binary.BigEndian.Uint32(in[i : i+4]))
+			} else {
+				i32 = int32(binary.BigEndian.Uint32(
+					[]byte{in[i+2], in[i+3], in[i+0], in[i+1]}))
+			}
+		case LittleEndian:
+			if wordOrder == LowWordFirst {
+				i32 = int32(binary.LittleEndian.Uint32(in[i : i+4]))
+			} else {
+				i32 = int32(binary.LittleEndian.Uint32(
+					[]byte{in[i+2], in[i+3], in[i+0], in[i+1]}))
+			}
+		}
+
+		out = append(out, i32)
 	}
 
 	return
@@ -136,6 +171,35 @@ func bytesToUint64s(endianness Endianness, wordOrder WordOrder, in []byte) (out 
 		}
 
 		out = append(out, u64)
+	}
+
+	return
+}
+
+func bytesToInt64s(endianness Endianness, wordOrder WordOrder, in []byte) (out []int64) {
+	var i64 int64
+
+	for i := 0; i < len(in); i += 8 {
+		switch endianness {
+		case BigEndian:
+			if wordOrder == HighWordFirst {
+				i64 = int64(binary.BigEndian.Uint64(in[i : i+8]))
+			} else {
+				i64 = int64(binary.BigEndian.Uint64(
+					[]byte{in[i+6], in[i+7], in[i+4], in[i+5],
+						in[i+2], in[i+3], in[i+0], in[i+1]}))
+			}
+		case LittleEndian:
+			if wordOrder == LowWordFirst {
+				i64 = int64(binary.LittleEndian.Uint64(in[i : i+8]))
+			} else {
+				i64 = int64(binary.LittleEndian.Uint64(
+					[]byte{in[i+6], in[i+7], in[i+4], in[i+5],
+						in[i+2], in[i+3], in[i+0], in[i+1]}))
+			}
+		}
+
+		out = append(out, i64)
 	}
 
 	return

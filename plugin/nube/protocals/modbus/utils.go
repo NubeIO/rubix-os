@@ -131,11 +131,11 @@ func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Poin
 		// READ HOLDINGS
 	case string(model.ObjTypeReadHolding):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeFloat32) {
 			return mbClient.ReadFloat32(address, smod.HoldingRegister)
 		} else if dataType == string(model.TypeFloat64) {
@@ -144,11 +144,11 @@ func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Poin
 		// READ INPUT REGISTERS
 	case string(model.ObjTypeReadRegister):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeFloat32) {
 			return mbClient.ReadFloat32(address, smod.InputRegister)
 		} else if dataType == string(model.TypeFloat64) {
@@ -265,11 +265,11 @@ func (inst *Instance) networkRead(mbClient smod.ModbusClient, pnt *model.Point) 
 	// READ INPUT REGISTERS
 	case string(model.ObjTypeReadRegister), string(model.ObjTypeReadRegisters):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeFloat32) {
 			return mbClient.ReadFloat32(address, smod.InputRegister)
 		} else if dataType == string(model.TypeFloat64) {
@@ -279,11 +279,11 @@ func (inst *Instance) networkRead(mbClient smod.ModbusClient, pnt *model.Point) 
 	// READ HOLDINGS
 	case string(model.ObjTypeReadHolding), string(model.ObjTypeReadHoldings), string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeFloat32) {
 			return mbClient.ReadFloat32(address, smod.HoldingRegister)
 		} else if dataType == string(model.TypeFloat64) {
@@ -342,6 +342,16 @@ func checkForBooleanType(ObjectType, DataType string) (isTypeBool bool) {
 }
 
 func checkForOutputType(ObjectType string) (isOutput bool) {
+	isOutput = false
+	switch ObjectType {
+	case string(model.ObjTypeWriteCoil), string(model.ObjTypeWriteCoils), string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings), string(model.ObjTypeWriteInt16), string(model.ObjTypeWriteUint16), string(model.ObjTypeWriteFloat32), string(model.ObjTypeWriteFloat64):
+		isOutput = true
+	}
+	return
+}
+
+func getBitFromByteArray(rawByteArray []byte, reqIndex int) ([]bool, bool, error) {
+
 	isOutput = false
 	switch ObjectType {
 	case string(model.ObjTypeWriteCoil), string(model.ObjTypeWriteCoils), string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings), string(model.ObjTypeWriteInt16), string(model.ObjTypeWriteUint16), string(model.ObjTypeWriteFloat32), string(model.ObjTypeWriteFloat64):

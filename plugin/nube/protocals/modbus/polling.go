@@ -214,6 +214,9 @@ func (inst *Instance) ModbusPolling() error {
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
 					continue
 				}
+				if boolean.IsTrue(pnt.IsBitwise) && pnt.BitwiseIndex != nil {
+
+				}
 				isChange := !float.ComparePtrValues(pnt.PresentValue, &responseValue)
 				if isChange {
 					if err != nil {
