@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.9.14](https://github.com/NubeIO/flow-framework/tree/v0.9.14) (2022-11-29)
+
+- networklinker fix name overwrite #772
+
 ## [v0.9.13](https://github.com/NubeIO/flow-framework/tree/v0.9.13) (2022-11-25)
 
 - networklinker allow edit point name #770
