@@ -154,6 +154,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		return nil, query.Error
 	}
 	existingName, existingAddrID := d.pointNameExists(body)
+	if existingAddrID && boolean.IsTrue(body.IsBitwise) && body.BitwiseIndex != nil && *body.BitwiseIndex >= 0 {
+		existingAddrID = false
+	}
 	if existingName {
 		eMsg := fmt.Sprintf("a point with existing name: %s exists", body.Name)
 		return nil, errors.New(eMsg)

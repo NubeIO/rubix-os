@@ -409,6 +409,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 				point.ReadPollRequired = boolean.NewFalse()
 			}
 			point, err = inst.db.UpdatePoint(point.UUID, point, true, true)
+
 			pp.PollPriority = model.PRIORITY_ASAP                                                                               // TODO: this line look sus.
 			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false, pollqueue.NORMAL_RETRY, false, false) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 			// netPollMan.PollQueue.AddPollingPoint(pp)

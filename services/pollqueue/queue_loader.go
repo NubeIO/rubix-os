@@ -55,7 +55,7 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 }
 
 func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool, retryType PollRetryType, actualPoll, pollingWasNotRequired bool) {
-	pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t, actualPoll: %t, pollingWasNotRequired: %t, retryType: %s, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, actualPoll, pollingWasNotRequired, retryType, pollTimeSecs))
+	pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t, pointUpdate: %t, actualPoll: %t, pollingWasNotRequired: %t, retryType: %s, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, pointUpdate, actualPoll, pollingWasNotRequired, retryType, pollTimeSecs))
 
 	if !actualPoll { // This posts the next polling point immediately (faster than the MaxPollRate) because no poll was actually made.
 		pm.postNextPointCallback()

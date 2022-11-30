@@ -390,19 +390,43 @@ func getBitFromFloat64(value float64, reqIndex int) (indexValue bool, err error)
 		err = errors.New("cannot get bits from negative numbers")
 		return
 	}
-	buf := make([]byte, binary.MaxVarintLen64)
-	length := binary.PutUvarint(buf, uint64(value))
-	currentIndex := 0
-	for j := 0; j < length; j++ {
-		bits := buf[j]
-		for i := 0; bits > 0; i, bits = i+1, bits>>1 {
-			if bits&1 == 1 && currentIndex == reqIndex {
-				return true, nil
-			} else if bits&1 == 0 && currentIndex == reqIndex {
-				return false, nil
+
+	indexValue = hasBit(int(value), uint(reqIndex))
+
+	/*
+		buf := make([]byte, binary.MaxVarintLen64)
+		length := binary.PutUvarint(buf, uint64(value))
+		currentIndex := 0
+		for j := 0; j < length; j++ {
+			bits := buf[j]
+			for i := 0; bits > 0; i, bits = i+1, bits>>1 {
+				if bits&1 == 1 && currentIndex == reqIndex {
+					return true, nil
+				} else if bits&1 == 0 && currentIndex == reqIndex {
+					return false, nil
+				}
+				currentIndex++
 			}
-			currentIndex++
 		}
-	}
+	*/
 	return
+}
+
+// Sets the bit at pos in the integer n.
+func setBit(n int, pos uint) int {
+	n |= (1 << pos)
+	return n
+}
+
+// Clears the bit at pos in n.
+func clearBit(n int, pos uint) int {
+	mask := ^(1 << pos)
+	n &= mask
+	return n
+}
+
+// checks bit at pos in n
+func hasBit(n int, pos uint) bool {
+	val := n & (1 << pos)
+	return (val > 0)
 }
