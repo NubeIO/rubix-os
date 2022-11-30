@@ -211,11 +211,24 @@ func (inst *Instance) ModbusPolling() error {
 				response, responseValue, err = inst.networkRead(mbClient, pnt)
 				if err != nil {
 					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
-					netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+					netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, false, true, false, pollqueue.DELAYED_RETRY, callback)
 					continue
 				}
 				if boolean.IsTrue(pnt.IsBitwise) && pnt.BitwiseIndex != nil {
-
+					getBitsFromFloat64(responseValue)
+					bitValue, err := getBitFromFloat64(responseValue, *pnt.BitwiseIndex)
+					inst.modbusDebugMsg("*pnt.BitwiseIndex: ", *pnt.BitwiseIndex)
+					inst.modbusDebugMsg("bitValue: ", bitValue)
+					if err != nil {
+						err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
+						netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, false, true, false, pollqueue.DELAYED_RETRY, callback)
+						continue
+					}
+					if bitValue {
+						responseValue = float64(1)
+					} else {
+						responseValue = float64(0)
+					}
 				}
 				isChange := !float.ComparePtrValues(pnt.PresentValue, &responseValue)
 				if isChange {

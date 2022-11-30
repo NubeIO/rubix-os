@@ -281,8 +281,10 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 
 	case model.WriteOnceThenRead: // WriteOnceThenRead     If write_successful: Re-add with ReadPollRequired true, WritePollRequired false.
 		point.ReadPollRequired = boolean.NewTrue()
-		if (boolean.IsTrue(point.WritePollRequired) && writeSuccess && retryType == NORMAL_RETRY) || retryType == NEVER_RETRY {
-			point.WritePollRequired = boolean.NewFalse()
+		if retryType == NEVER_RETRY {
+			if writeSuccess {
+				point.WritePollRequired = boolean.NewFalse()
+			}
 			if pp.RepollTimer != nil {
 				pp.RepollTimer.Stop()
 				pp.RepollTimer = nil
@@ -292,7 +294,9 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 				pm.pollQueueErrorMsg(fmt.Sprintf("Modbus PollingPointCompleteNotification(): polling point could not be added to StandbyPollingPoints slice.  (%s)", pp.FFPointUUID))
 			}
 		} else if pointUpdate || (boolean.IsTrue(point.WritePollRequired) && !writeSuccess && retryType == NORMAL_RETRY) || retryType == IMMEDIATE_RETRY {
-			point.WritePollRequired = boolean.NewTrue()
+			if writeSuccess {
+				point.WritePollRequired = boolean.NewFalse()
+			}
 			if pp.RepollTimer != nil {
 				pp.RepollTimer.Stop()
 				pp.RepollTimer = nil
@@ -300,9 +304,10 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 			pp.LockupAlertTimer = pm.MakeLockupTimerFunc(pp.PollPriority) // starts a countdown for queue lockup alerts.
 			pm.PollQueue.AddPollingPoint(pp)                              // re-add to poll queue immediately
 			break
-		} else if retryType == DELAYED_RETRY {
-			point.WritePollRequired = boolean.NewTrue()
-			point.ReadPollRequired = boolean.NewTrue()
+		} else if (boolean.IsTrue(point.WritePollRequired) && writeSuccess && retryType == NORMAL_RETRY) || retryType == DELAYED_RETRY {
+			if writeSuccess {
+				point.WritePollRequired = boolean.NewFalse()
+			}
 			duration := pm.GetPollRateDuration(point.PollRate, pp.FFDeviceUUID)
 			// This line sets a timer to re-add the point to the poll queue after the PollRate time.
 			pp.RepollTimer = time.AfterFunc(duration, pm.MakePollingPointRepollCallback(pp, point.WriteMode))

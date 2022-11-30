@@ -198,7 +198,6 @@ func bytesToInt64s(endianness Endianness, wordOrder WordOrder, in []byte) (out [
 						in[i+2], in[i+3], in[i+0], in[i+1]}))
 			}
 		}
-
 		out = append(out, i64)
 	}
 

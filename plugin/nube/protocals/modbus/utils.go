@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
@@ -10,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"math"
 )
 
 const (
@@ -350,12 +352,57 @@ func checkForOutputType(ObjectType string) (isOutput bool) {
 	return
 }
 
-func getBitFromByteArray(rawByteArray []byte, reqIndex int) ([]bool, bool, error) {
+func getBitsFromFloat64(value float64) (bitArray []bool, err error) {
+	if math.Mod(value, 1) != 0 {
+		err = errors.New("cannot get bits from floats")
+		return
+	}
+	if value < 0 {
+		err = errors.New("cannot get bits from negative numbers")
+		return
+	}
+	buf := make([]byte, binary.MaxVarintLen64)
+	length := binary.PutUvarint(buf, uint64(value))
+	fmt.Println("getBitsFromFloat64() length: ", length)
+	fmt.Println("getBitsFromFloat64() uint64(value): ", uint64(value))
+	fmt.Println("getBitsFromFloat64() raw buf: ", buf)
+	fmt.Println(fmt.Sprintf("getBitsFromFloat64() binary: %b", uint64(value)))
+	for j := 0; j < length; j++ {
+		bits := buf[j]
+		for i := 0; bits > 0; i, bits = i+1, bits>>1 {
+			if bits&1 == 1 {
+				bitArray = append(bitArray, true)
+			} else if bits&1 == 0 {
+				bitArray = append(bitArray, false)
+			}
+		}
+	}
+	fmt.Println("getBitsFromFloat64() bitArray: ", bitArray)
+	return
+}
 
-	isOutput = false
-	switch ObjectType {
-	case string(model.ObjTypeWriteCoil), string(model.ObjTypeWriteCoils), string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings), string(model.ObjTypeWriteInt16), string(model.ObjTypeWriteUint16), string(model.ObjTypeWriteFloat32), string(model.ObjTypeWriteFloat64):
-		isOutput = true
+func getBitFromFloat64(value float64, reqIndex int) (indexValue bool, err error) {
+	if math.Mod(value, 1) != 0 {
+		err = errors.New("cannot get bits from floats")
+		return
+	}
+	if value < 0 {
+		err = errors.New("cannot get bits from negative numbers")
+		return
+	}
+	buf := make([]byte, binary.MaxVarintLen64)
+	length := binary.PutUvarint(buf, uint64(value))
+	currentIndex := 0
+	for j := 0; j < length; j++ {
+		bits := buf[j]
+		for i := 0; bits > 0; i, bits = i+1, bits>>1 {
+			if bits&1 == 1 && currentIndex == reqIndex {
+				return true, nil
+			} else if bits&1 == 0 && currentIndex == reqIndex {
+				return false, nil
+			}
+			currentIndex++
+		}
 	}
 	return
 }
