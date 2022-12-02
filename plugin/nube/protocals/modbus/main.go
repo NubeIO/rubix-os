@@ -2,6 +2,7 @@ package main
 
 import (
 	"container/heap"
+	"fmt"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/plugin/pluginapi"
 	"github.com/NubeIO/flow-framework/services/pollqueue"
@@ -83,7 +84,7 @@ func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetw
 	// pm.PluginQueueUnloader = pqu
 	pm.PluginQueueUnloader = nil
 	pm.DBHandlerRef = dbHandler
-	pm.MaxPollRate = time.Duration(maxPollRate) * time.Second
+	pm.MaxPollRate, _ = time.ParseDuration(fmt.Sprintf("%fs", maxPollRate))
 	pm.FFNetworkUUID = ffNetworkUUID
 	pm.FFPluginUUID = ffPluginUUID
 	pm.PluginName = pluginName

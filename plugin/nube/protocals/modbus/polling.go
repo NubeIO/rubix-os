@@ -205,7 +205,6 @@ func (inst *Instance) ModbusPolling() error {
 					continue
 				}
 				if bitwiseType {
-					getBitsFromFloat64(readResponseValue) // TODO: Remove this line (it's only there for the debug)
 					var bitValue bool
 					bitValue, err = getBitFromFloat64(readResponseValue, *pnt.BitwiseIndex)
 					if err != nil {

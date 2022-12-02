@@ -27,6 +27,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	if boolean.IsTrue(network.Enable) {
 		conf := inst.GetConfig().(*Config)
 		pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
+		inst.modbusDebugMsg("addNetwork()  MAX POLL RATE: ", float.NonNil(network.MaxPollRate))
 		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, inst.pluginUUID, inst.pluginName, float.NonNil(network.MaxPollRate))
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)

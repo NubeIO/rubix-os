@@ -363,10 +363,6 @@ func getBitsFromFloat64(value float64) (bitArray []bool, err error) {
 	}
 	buf := make([]byte, binary.MaxVarintLen64)
 	length := binary.PutUvarint(buf, uint64(value))
-	fmt.Println("getBitsFromFloat64() length: ", length)
-	fmt.Println("getBitsFromFloat64() uint64(value): ", uint64(value))
-	fmt.Println("getBitsFromFloat64() raw buf: ", buf)
-	fmt.Println(fmt.Sprintf("getBitsFromFloat64() binary: %b", uint64(value)))
 	for j := 0; j < length; j++ {
 		bits := buf[j]
 		for i := 0; bits > 0; i, bits = i+1, bits>>1 {
@@ -377,7 +373,6 @@ func getBitsFromFloat64(value float64) (bitArray []bool, err error) {
 			}
 		}
 	}
-	fmt.Println("getBitsFromFloat64() bitArray: ", bitArray)
 	return
 }
 

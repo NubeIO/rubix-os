@@ -82,7 +82,7 @@ type Network struct {
 	MaxPollRate struct {
 		Type        string   `json:"type" default:"float"`
 		Required    bool     `json:"required" default:"true"`
-		Options     int      `json:"options" default:"1"`
+		Options     int      `json:"options" default:"0.1"`
 		DisplayName string   `json:"display_name" default:"Max Poll Rate (seconds)"`
 		Default     *float64 `json:"default" default:"0.1"`
 	} `json:"max_poll_rate"`

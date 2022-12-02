@@ -30,6 +30,7 @@ func (inst *Instance) Enable() error {
 					conf.PollQueueLogLevel = "ERROR"
 				}
 				pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.PollQueueLogLevel}
+				inst.modbusDebugMsg("Enable()  MAX POLL RATE: ", float.NonNil(net.MaxPollRate))
 				pollManager := NewPollManager(&pollQueueConfig, &inst.db, net.UUID, inst.pluginUUID, inst.pluginName, float.NonNil(net.MaxPollRate))
 				// inst.modbusDebugMsg("net")
 				// inst.modbusDebugMsg("%+v\n", net)
@@ -39,7 +40,6 @@ func (inst *Instance) Enable() error {
 				inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
 			}
 
-			// TODO: VERIFY POLLING WITHOUT GO ROUTINE WRAPPER
 			err := inst.ModbusPolling()
 			if err != nil {
 				inst.modbusErrorMsg("POLLING ERROR on routine: %v\n", err)
