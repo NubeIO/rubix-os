@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
@@ -10,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"math"
 )
 
 const (
@@ -131,11 +133,11 @@ func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Poin
 		// READ HOLDINGS
 	case string(model.ObjTypeReadHolding):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeFloat32) {
 			return mbClient.ReadFloat32(address, smod.HoldingRegister)
 		} else if dataType == string(model.TypeFloat64) {
@@ -144,11 +146,11 @@ func (inst *Instance) networkRequest(mbClient smod.ModbusClient, pnt *model.Poin
 		// READ INPUT REGISTERS
 	case string(model.ObjTypeReadRegister):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeFloat32) {
 			return mbClient.ReadFloat32(address, smod.InputRegister)
 		} else if dataType == string(model.TypeFloat64) {
@@ -265,11 +267,11 @@ func (inst *Instance) networkRead(mbClient smod.ModbusClient, pnt *model.Point) 
 	// READ INPUT REGISTERS
 	case string(model.ObjTypeReadRegister), string(model.ObjTypeReadRegisters):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
-			return mbClient.ReadInputRegisters(address, uint16(length))
+			return mbClient.ReadInputRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeFloat32) {
 			return mbClient.ReadFloat32(address, smod.InputRegister)
 		} else if dataType == string(model.TypeFloat64) {
@@ -279,11 +281,11 @@ func (inst *Instance) networkRead(mbClient smod.ModbusClient, pnt *model.Point) 
 	// READ HOLDINGS
 	case string(model.ObjTypeReadHolding), string(model.ObjTypeReadHoldings), string(model.ObjTypeWriteHolding), string(model.ObjTypeWriteHoldings):
 		if dataType == string(model.TypeUint16) || dataType == string(model.TypeInt16) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint32) || dataType == string(model.TypeInt32) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeUint64) || dataType == string(model.TypeInt64) {
-			return mbClient.ReadHoldingRegisters(address, uint16(length))
+			return mbClient.ReadHoldingRegisters(address, uint16(length), dataType)
 		} else if dataType == string(model.TypeFloat32) {
 			return mbClient.ReadFloat32(address, smod.HoldingRegister)
 		} else if dataType == string(model.TypeFloat64) {
@@ -348,4 +350,78 @@ func checkForOutputType(ObjectType string) (isOutput bool) {
 		isOutput = true
 	}
 	return
+}
+
+func getBitsFromFloat64(value float64) (bitArray []bool, err error) {
+	if math.Mod(value, 1) != 0 {
+		err = errors.New("cannot get bits from floats")
+		return
+	}
+	if value < 0 {
+		err = errors.New("cannot get bits from negative numbers")
+		return
+	}
+	buf := make([]byte, binary.MaxVarintLen64)
+	length := binary.PutUvarint(buf, uint64(value))
+	for j := 0; j < length; j++ {
+		bits := buf[j]
+		for i := 0; bits > 0; i, bits = i+1, bits>>1 {
+			if bits&1 == 1 {
+				bitArray = append(bitArray, true)
+			} else if bits&1 == 0 {
+				bitArray = append(bitArray, false)
+			}
+		}
+	}
+	return
+}
+
+func getBitFromFloat64(value float64, reqIndex int) (indexValue bool, err error) {
+	if math.Mod(value, 1) != 0 {
+		err = errors.New("cannot get bits from floats")
+		return
+	}
+	if value < 0 {
+		err = errors.New("cannot get bits from negative numbers")
+		return
+	}
+
+	indexValue = hasBit(int(value), uint(reqIndex))
+
+	/*
+		buf := make([]byte, binary.MaxVarintLen64)
+		length := binary.PutUvarint(buf, uint64(value))
+		currentIndex := 0
+		for j := 0; j < length; j++ {
+			bits := buf[j]
+			for i := 0; bits > 0; i, bits = i+1, bits>>1 {
+				if bits&1 == 1 && currentIndex == reqIndex {
+					return true, nil
+				} else if bits&1 == 0 && currentIndex == reqIndex {
+					return false, nil
+				}
+				currentIndex++
+			}
+		}
+	*/
+	return
+}
+
+// Sets the bit at pos in the integer n.
+func setBit(n int, pos uint) int {
+	n |= (1 << pos)
+	return n
+}
+
+// Clears the bit at pos in n.
+func clearBit(n int, pos uint) int {
+	mask := ^(1 << pos)
+	n &= mask
+	return n
+}
+
+// checks bit at pos in n
+func hasBit(n int, pos uint) bool {
+	val := n & (1 << pos)
+	return (val > 0)
 }

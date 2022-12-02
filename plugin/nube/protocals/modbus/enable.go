@@ -39,7 +39,6 @@ func (inst *Instance) Enable() error {
 				inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
 			}
 
-			// TODO: VERIFY POLLING WITHOUT GO ROUTINE WRAPPER
 			err := inst.ModbusPolling()
 			if err != nil {
 				inst.modbusErrorMsg("POLLING ERROR on routine: %v\n", err)

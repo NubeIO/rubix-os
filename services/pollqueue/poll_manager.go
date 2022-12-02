@@ -164,7 +164,7 @@ func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, f
 	pm.PollQueue = npq
 	pm.PluginQueueUnloader = pqu
 	pm.DBHandlerRef = dbHandler
-	pm.MaxPollRate = time.Duration(maxPollRate) * time.Second
+	pm.MaxPollRate, _ = time.ParseDuration(fmt.Sprintf("%fs", maxPollRate))
 	pm.FFNetworkUUID = ffNetworkUUID
 	pm.FFPluginUUID = ffPluginUUID
 	pm.PluginName = pluginName
