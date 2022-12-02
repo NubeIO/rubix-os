@@ -30,7 +30,6 @@ func (inst *Instance) Enable() error {
 					conf.PollQueueLogLevel = "ERROR"
 				}
 				pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.PollQueueLogLevel}
-				inst.modbusDebugMsg("Enable()  MAX POLL RATE: ", float.NonNil(net.MaxPollRate))
 				pollManager := NewPollManager(&pollQueueConfig, &inst.db, net.UUID, inst.pluginUUID, inst.pluginName, float.NonNil(net.MaxPollRate))
 				// inst.modbusDebugMsg("net")
 				// inst.modbusDebugMsg("%+v\n", net)
