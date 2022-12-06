@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.9.16](https://github.com/NubeIO/flow-framework/tree/v0.9.16) (2022-12-07)
+
+- fixes modbus polling order.
+- adds history analysis plugins (as examples)
+
 ## [v0.9.15](https://github.com/NubeIO/flow-framework/tree/v0.9.15) (2022-12-02)
 
 - adds support for modbus bitwise.
