@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## [v0.9.15](https://github.com/NubeIO/flow-framework/tree/v0.9.15) (2022-12-02)
+
+- adds support for modbus bitwise.
+- fixed up MaxPollRate on polling
+
+## [v0.9.14](https://github.com/NubeIO/flow-framework/tree/v0.9.14) (2022-11-29)
+
+- networklinker fix name overwrite #772
+
+## [v0.9.13](https://github.com/NubeIO/flow-framework/tree/v0.9.13) (2022-11-25)
+
+- networklinker allow edit point name #770
+
 ## [v0.9.12](https://github.com/NubeIO/flow-framework/tree/v0.9.12) (2022-11-23)
 
 - fix edgeinflux cov

@@ -13,6 +13,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nurl"
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"math"
 	"strconv"
 	"time"
 )
@@ -139,7 +140,7 @@ func (inst *Instance) ModbusPolling() error {
 				continue
 			}
 
-			inst.modbusDebugMsg(fmt.Sprintf("MODBUS POLL! : Priority: %s, Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s, WriteRequired: %t, ReadRequired: %t", pp.PollPriority, net.UUID, dev.UUID, pnt.UUID, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
+			inst.modbusDebugMsg(fmt.Sprintf("MODBUS POLL! : Network: %s, Device: %s, Point: %s, Priority: %s, Device-Add: %d, Point-Add: %d, Point Type: %s, WriteRequired: %t, ReadRequired: %t", net.Name, dev.Name, pnt.Name, pnt.PollPriority, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
 
 			if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
 				inst.modbusDebugMsg("polling not required on this point")
@@ -185,44 +186,110 @@ func (inst *Instance) ModbusPolling() error {
 				continue
 			}
 
-			var responseValue float64
-			var response interface{}
+			var readResponseValue float64
+			var writeResponseValue float64
+			var bitwiseResponseValue float64
+			var bitwiseWriteValueFloat float64
+			var bitwiseWriteValueBool bool
+			var readResponse interface{}
+			var writeResponse interface{}
+
+			bitwiseType := boolean.IsTrue(pnt.IsBitwise) && pnt.BitwiseIndex != nil && *pnt.BitwiseIndex >= 0
+
+			readSuccess := false
+			if boolean.IsTrue(pnt.ReadPollRequired) && (boolean.IsFalse(pnt.WritePollRequired) || (bitwiseType && boolean.IsTrue(pnt.WritePollRequired))) { // DO READ IF REQUIRED
+				readResponse, readResponseValue, err = inst.networkRead(mbClient, pnt)
+				if err != nil {
+					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
+					netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+					continue
+				}
+				if bitwiseType {
+					var bitValue bool
+					bitValue, err = getBitFromFloat64(readResponseValue, *pnt.BitwiseIndex)
+					if err != nil {
+						inst.modbusDebugMsg("Bitwise Error: ", err)
+						err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
+						netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+						continue
+					}
+					if bitValue {
+						bitwiseResponseValue = float64(1)
+					} else {
+						bitwiseResponseValue = float64(0)
+					}
+				}
+				readSuccess = true
+				inst.modbusDebugMsg(fmt.Sprintf("modbus-read response: responseValue %f, point UUID: %s, response: %+v ", readResponseValue, pnt.UUID, readResponse))
+			}
+
 			writeSuccess := false
 			if writemode.IsWriteable(pnt.WriteMode) && boolean.IsTrue(pnt.WritePollRequired) { // DO WRITE IF REQUIRED
-				inst.modbusDebugMsg(fmt.Sprintf("modbus write point: %+v", pnt))
+				// inst.modbusDebugMsg(fmt.Sprintf("modbus write point: %+v", pnt))
 				// pnt.PrintPointValues()
 				if pnt.WriteValue != nil {
-					response, responseValue, err = inst.networkWrite(mbClient, pnt)
+					if readSuccess {
+						inst.modbusDebugMsg(netPollMan.MaxPollRate.String(), " delay between read and write.")
+						time.Sleep(1 * time.Second)
+						// time.Sleep(netPollMan.MaxPollRate) // TODO: use actual MaxPollRate (after it's fixed)
+					}
+					if bitwiseType {
+						if !readSuccess || math.Mod(readResponseValue, 1) != 0 {
+							err = inst.pointUpdateErr(pnt, "read fail: bitwise point needs successful read before write", model.MessageLevel.Fail, model.CommonFaultCode.PointError)
+							netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+							continue
+						}
+						// Set appropriate writeValue for the bitwise type.  This value is the readResponseValue with the bit index modified
+						if *pnt.WriteValue == 1 {
+							bitwiseWriteValueBool = true
+							bitwiseWriteValueFloat = float64(setBit(int(readResponseValue), uint(*pnt.BitwiseIndex)))
+						} else if *pnt.WriteValue == 0 {
+							bitwiseWriteValueBool = false
+							bitwiseWriteValueFloat = float64(clearBit(int(readResponseValue), uint(*pnt.BitwiseIndex)))
+						}
+						pnt.WriteValue = float.New(bitwiseWriteValueFloat)
+					}
+					writeResponse, writeResponseValue, err = inst.networkWrite(mbClient, pnt)
 					if err != nil {
 						err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 						netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
 						continue
 					}
+					if bitwiseType {
+						if bitwiseWriteValueBool {
+							writeResponseValue = float64(1)
+						} else {
+							writeResponseValue = float64(0)
+						}
+					}
 					writeSuccess = true
-					inst.modbusDebugMsg(fmt.Sprintf("modbus-write response: responseValue %f, point UUID: %s, response: %+v", responseValue, pnt.UUID, response))
+
+					inst.modbusDebugMsg(fmt.Sprintf("modbus-write response: responseValue %f, point UUID: %s, response: %+v", writeResponseValue, pnt.UUID, writeResponse))
 				} else {
 					writeSuccess = true // successful because there is no value to write.  Otherwise the point will short cycle.
 					inst.modbusDebugMsg("modbus write point error: no value in priority array to write")
 				}
 			}
 
-			readSuccess := false
-			if boolean.IsTrue(pnt.ReadPollRequired) { // DO READ IF REQUIRED
-				response, responseValue, err = inst.networkRead(mbClient, pnt)
+			var newValue float64
+			if writeSuccess {
+				newValue = writeResponseValue
+			} else if readSuccess {
+				if bitwiseType {
+					newValue = bitwiseResponseValue
+				} else {
+					newValue = readResponseValue
+				}
+			} else {
+				newValue = float.NonNil(pnt.PresentValue)
+			}
+
+			isChange := !float.ComparePtrValues(pnt.PresentValue, &newValue)
+			if isChange {
 				if err != nil {
-					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
-					netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+					netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, true, false, pollqueue.NORMAL_RETRY, callback)
 					continue
 				}
-				isChange := !float.ComparePtrValues(pnt.PresentValue, &responseValue)
-				if isChange {
-					if err != nil {
-						netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, true, false, pollqueue.NORMAL_RETRY, callback)
-						continue
-					}
-				}
-				readSuccess = true
-				inst.modbusDebugMsg(fmt.Sprintf("modbus-read response: responseValue %f, point UUID: %s, response: %+v ", responseValue, pnt.UUID, response))
 			}
 
 			// update point in DB if required
@@ -231,11 +298,10 @@ func (inst *Instance) ModbusPolling() error {
 
 			if readSuccess || writeValueToPresentVal {
 				if writeValueToPresentVal {
-					responseValue = *pnt.WriteValue
 					// fmt.Println("ModbusPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
 					readSuccess = true
 				}
-				_, err = inst.pointUpdate(pnt, responseValue, readSuccess, true)
+				_, err = inst.pointUpdate(pnt, newValue, readSuccess, true)
 			}
 
 			/*

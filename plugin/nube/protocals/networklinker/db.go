@@ -3,10 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"golang.org/x/exp/slices"
 	"strings"
 
+	"golang.org/x/exp/slices"
+
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -159,9 +161,10 @@ func (inst *Instance) createPoint(devUUID string, name string, uuid1 *string, uu
 		addr = *uuid1
 	}
 	p := model.Point{
-		DeviceUUID:  devUUID,
-		Name:        name,
-		AddressUUID: &addr,
+		DeviceUUID:   devUUID,
+		Name:         name,
+		AddressUUID:  &addr,
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	inst.db.CreatePoint(&p, true, false)
 	return p
@@ -181,12 +184,14 @@ func (inst *Instance) syncPoint(point *model.Point, net1 *model.Network, net2 *m
 
 func (inst *Instance) syncPointSelected(point *model.Point, linkedUUID string) *model.Point {
 	origPoint, _ := inst.db.GetPoint(linkedUUID, api.Args{WithPriority: true})
-	origPoint.UUID = point.UUID
-	origPoint.AddressUUID = point.AddressUUID
-	origPoint.DeviceUUID = point.DeviceUUID
 	if origPoint.PresentValue == nil || (point.PresentValue != nil && (*point.PresentValue == *origPoint.PresentValue)) {
 		return point
 	}
+	origPoint.UUID = point.UUID
+	origPoint.AddressUUID = point.AddressUUID
+	origPoint.DeviceUUID = point.DeviceUUID
+	origPoint.Name = point.Name
+	origPoint.Enable = point.Enable
 	point, _ = inst.db.UpdatePoint(point.UUID, origPoint, true, false)
 	return point
 }

@@ -44,8 +44,8 @@ func (pm *NetworkPollManager) StartQueueUnloader() {
 			return
 		}
 		if float.NonNil(net.MaxPollRate) > 0 {
-			refreshRate, _ = time.ParseDuration(fmt.Sprintf("%fs", *net.MaxPollRate))
-			pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.StartQueueUnloader(): net.MaxPollRate %d ", net.MaxPollRate))
+			refreshRate, _ = time.ParseDuration(fmt.Sprintf("%fs", float.NonNil(net.MaxPollRate)))
+			pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.StartQueueUnloader(): net.MaxPollRate %f ", float.NonNil(net.MaxPollRate)))
 		}
 	} else {
 		pm.pollQueueErrorMsg("StartQueueUnloader(): NetworkPollManager DBHandlerRef is undefined")

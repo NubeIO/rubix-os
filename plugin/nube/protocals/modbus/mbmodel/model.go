@@ -82,7 +82,7 @@ type Network struct {
 	MaxPollRate struct {
 		Type        string   `json:"type" default:"float"`
 		Required    bool     `json:"required" default:"true"`
-		Options     int      `json:"options" default:"1"`
+		Options     int      `json:"options" default:"0.1"`
 		DisplayName string   `json:"display_name" default:"Max Poll Rate (seconds)"`
 		Default     *float64 `json:"default" default:"0.1"`
 	} `json:"max_poll_rate"`
@@ -211,6 +211,19 @@ type Point struct {
 		Options  []string `json:"options" default:"[\"digital\",\"uint16\",\"int16\",\"uint32\",\"int32\",\"uint64\",\"int64\",\"float32\",\"float64\"]"`
 		Default  string   `json:"default" default:"uint16"`
 	} `json:"data_type"`
+	IsBitwise struct {
+		Type        string `json:"type" default:"bool"`
+		Required    bool   `json:"required" default:"true"`
+		Default     *bool  `json:"default" default:"false"`
+		DisplayName string `json:"display_name" default:"Bitwise Point (single bit of numeric register)"`
+	} `json:"is_bitwise"`
+	BitwiseIndex struct {
+		Type        string `json:"type" default:"int"`
+		Required    bool   `json:"required" default:"false"`
+		Options     int    `json:"options" default:"0"`
+		Default     int    `json:"default" default:"0"`
+		DisplayName string `json:"display_name" default:"Bitwise Index"`
+	} `json:"bitwise_index"`
 	WriteMode struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
