@@ -237,7 +237,16 @@ func (q *PriorityPollQueue) Less(i, j int) bool {
 		jPriorityNum = 3
 	}
 
-	return iPriorityNum < jPriorityNum
+	if iPriorityNum < jPriorityNum {
+		return true
+	}
+	if iPriorityNum > jPriorityNum {
+		return false
+	}
+
+	iTimestamp := q.PriorityQueue[i].QueueEntryTime
+	jTimestamp := q.PriorityQueue[j].QueueEntryTime
+	return iTimestamp < jTimestamp
 }
 func (q *PriorityPollQueue) Swap(i, j int) {
 	q.PriorityQueue[i], q.PriorityQueue[j] = q.PriorityQueue[j], q.PriorityQueue[i]
