@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.9.17](https://github.com/NubeIO/flow-framework/tree/v0.9.17) (2022-12-07)
+
+- Make it installable on old distribution
+
 ## [v0.9.16](https://github.com/NubeIO/flow-framework/tree/v0.9.16) (2022-12-07)
 
 - fixes modbus polling order.
@@ -52,7 +56,7 @@
 
 ## [v0.9.5](https://github.com/NubeIO/flow-framework/tree/v0.9.5) (2022-11-08)
 
-- fix nil errors on lorawan 
+- fix nil errors on lorawan
 
 ## [v0.9.4](https://github.com/NubeIO/flow-framework/tree/v0.9.4) (2022-11-08)
 
