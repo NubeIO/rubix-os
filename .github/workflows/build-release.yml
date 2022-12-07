@@ -21,7 +21,7 @@ env:
 jobs:
 
   context:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     outputs:
       shouldBuild: ${{ steps.context.outputs.decision_build }}
@@ -56,7 +56,7 @@ jobs:
           defaultBranch: master
 
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     needs: context
     if: needs.context.outputs.shouldBuild == 'true'
     services:
