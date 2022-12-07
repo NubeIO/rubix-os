@@ -230,8 +230,7 @@ func (inst *Instance) ModbusPolling() error {
 				if pnt.WriteValue != nil {
 					if readSuccess {
 						inst.modbusDebugMsg(netPollMan.MaxPollRate.String(), " delay between read and write.")
-						time.Sleep(1 * time.Second)
-						// time.Sleep(netPollMan.MaxPollRate) // TODO: use actual MaxPollRate (after it's fixed)
+						time.Sleep(netPollMan.MaxPollRate)
 					}
 					if bitwiseType {
 						if !readSuccess || math.Mod(readResponseValue, 1) != 0 {
