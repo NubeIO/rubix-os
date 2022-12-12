@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.9.18](https://github.com/NubeIO/flow-framework/tree/v0.9.18) (2022-12-12)
+
+- Remove suffix slash (/) from APIs for to support reverse proxy
+- prevents clearing of errors on poll queue re-add
+
 ## [v0.9.17](https://github.com/NubeIO/flow-framework/tree/v0.9.17) (2022-12-07)
 
 - Make it installable on old distribution
