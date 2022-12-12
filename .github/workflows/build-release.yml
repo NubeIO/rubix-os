@@ -158,8 +158,6 @@ jobs:
           cd ../../../../plugin/nube/protocals/maplora
           go build -buildmode=plugin -o maplora-amd64.so *.go  && cp maplora-amd64.so ../../../../
 
-
-
       - name: Build armv7
         if: ${{ needs.context.outputs.isRelease == 'true' }}
         run: |
@@ -232,7 +230,6 @@ jobs:
           
           cd ../../../../plugin/nube/protocals/maplora
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o maplora-armv7.so *.go  && cp maplora-armv7.so ../../../../
-      
 
       - name: Zip artifacts
         if: ${{ needs.context.outputs.isRelease == 'true' }}
@@ -353,8 +350,6 @@ jobs:
           artifact=maplora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./maplora-armv7.so
       
-      
-
       - name: Create Release
         if: ${{ needs.context.outputs.isRelease == 'true' }}
         uses: softprops/action-gh-release@v1
@@ -368,4 +363,3 @@ jobs:
           files: |
             /tmp/zip/*.amd64.zip
             /tmp/zip/*.armv7.zip
-            

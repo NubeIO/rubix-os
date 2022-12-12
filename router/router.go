@@ -231,8 +231,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 
 		streamRoutes := apiRoutes.Group("/streams")
 		{
-			streamRoutes.GET("/", streamHandler.GetStreams)
-			streamRoutes.POST("/", streamHandler.CreateStream)
+			streamRoutes.GET("", streamHandler.GetStreams)
+			streamRoutes.POST("", streamHandler.CreateStream)
 			streamRoutes.GET("/:uuid", streamHandler.GetStream)
 			streamRoutes.PATCH("/:uuid", streamHandler.UpdateStream)
 			streamRoutes.DELETE("/:uuid", streamHandler.DeleteStream)
@@ -245,9 +245,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		}
 
 		remoteRoutes := apiRoutes.Group("/remote")
-
 		{
-
 			remoteRoutes.GET("/flow_network_clones", remoteHandler.RemoteGetFlowNetworkClones)
 			remoteRoutes.GET("/flow_network_clones/:uuid", remoteHandler.RemoteGetFlowNetworkClone)
 			remoteRoutes.DELETE("/flow_network_clones", remoteHandler.RemoteDeleteFlowNetworkClone)
@@ -296,7 +294,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			remoteRoutes.POST("/writers", remoteHandler.RemoteCreateWriter)
 			remoteRoutes.PATCH("/writers/:uuid", remoteHandler.RemoteEditWriter)
 			remoteRoutes.DELETE("/writers", remoteHandler.RemoteDeleteWriter)
-
 		}
 
 		streamCloneRoutes := apiRoutes.Group("/stream_clones")
