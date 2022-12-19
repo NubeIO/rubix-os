@@ -14,6 +14,8 @@ const fetchDeviceInfo = "rubix/platform/info"
 const fetchPointsTopic = "rubix/platform/points"
 const fetchPointTopicWrite = "rubix/platform/point/write"
 const fetchPointTopic = "rubix/platform/point"
+const fetchAllPointsCOVTopic = "rubix/platform/points/cov/all"
+const fetchSelectedPointsCOVTopic = "rubix/platform/points/cov/selected"
 
 func (d *GormDatabase) PublishPointWriteListener() {
 	callback := func(client mqtt.Client, message mqtt.Message) {
@@ -97,6 +99,45 @@ func (d *GormDatabase) PublishPointsListListener() {
 	}
 }
 
+func (d *GormDatabase) RePublishPointsCovListener() {
+	callback := func(client mqtt.Client, message mqtt.Message) {
+		d.RePublishPointsCov()
+	}
+	topic := fetchAllPointsCOVTopic
+	mqttClient := localmqtt.GetPointMqtt().Client
+	if mqttClient != nil {
+		err := mqttClient.Subscribe(topic, 1, callback)
+		if err != nil {
+			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+		} else {
+			log.Infof("localmqtt-broker subscribe:%s", topic)
+		}
+	}
+}
+
+func (d *GormDatabase) RePublishSelectedPointsCovListener() {
+	callback := func(client mqtt.Client, message mqtt.Message) {
+		body := &[]interfaces.MqttPoint{}
+		err := json.Unmarshal(message.Payload(), &body)
+		if err == nil {
+			if body != nil {
+				d.RePublishSelectedPointsCov(body)
+			}
+		}
+
+	}
+	topic := fetchSelectedPointsCOVTopic
+	mqttClient := localmqtt.GetPointMqtt().Client
+	if mqttClient != nil {
+		err := mqttClient.Subscribe(topic, 1, callback)
+		if err != nil {
+			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+		} else {
+			log.Infof("localmqtt-broker subscribe:%s", topic)
+		}
+	}
+}
+
 func (d *GormDatabase) PublishDeviceInfo() {
 	callback := func(client mqtt.Client, message mqtt.Message) {
 		localmqtt.PublishInfo()
@@ -150,6 +191,53 @@ func (d *GormDatabase) RePublishPointsCov() {
 		for _, device := range network.Devices {
 			for _, point := range device.Points {
 				localmqtt.PublishPointCov(network, device, point)
+			}
+		}
+	}
+}
+
+func (d *GormDatabase) RePublishSelectedPointsCov(selectedPoints *[]interfaces.MqttPoint) {
+	if selectedPoints == nil {
+		return
+	}
+
+	/*  TODO: only used if we don't want to use the existing COV topics
+	var pointReqArray []*model.Point
+	for _, pnt := range *selectedPoints {
+		if pnt.PointUUID != "" {
+			newPnt := model.Point{}
+			newPnt.UUID = pnt.PointUUID
+			pointReqArray = append(pointReqArray, &newPnt)
+		}
+	}
+	if len(pointReqArray) <= 0 {
+		return
+	}
+
+	pointsWithValues := d.GetPointsBulk(pointReqArray)
+	*/
+
+	/* TODO: This one is inefficient because it does multiple network/device DB calls
+	for _, pnt := range *selectedPoints {
+		if pnt.PointUUID != "" {
+			d.PublishPointCov(pnt.PointUUID)
+		}
+	}
+	*/
+
+	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true, WithPriority: true})
+	if err != nil {
+		log.Error("RePublishSelectedPointsCov() error:", err)
+		return
+	}
+	for _, network := range networks {
+		for _, device := range network.Devices {
+			for _, point := range device.Points {
+				for _, val := range *selectedPoints {
+					if val.PointUUID == point.UUID {
+						localmqtt.PublishPointCov(network, device, point)
+					}
+				}
 			}
 		}
 	}
