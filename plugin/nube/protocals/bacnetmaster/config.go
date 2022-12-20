@@ -1,7 +1,6 @@
 package main
 
 type Config struct {
-	MagicString   string `yaml:"magic_string"`
 	EnablePolling bool   `yaml:"enable_polling"`
 	LogLevel      string `yaml:"log_level"`
 }

@@ -1,13 +1,10 @@
 package main
 
 type Config struct {
-	MagicString string `yaml:"magic_string"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
-	return &Config{
-		MagicString: "N/A",
-	}
+	return &Config{}
 }
 
 func (inst *Instance) GetConfig() interface{} {
