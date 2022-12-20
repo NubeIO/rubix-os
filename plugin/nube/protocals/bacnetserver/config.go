@@ -1,14 +1,12 @@
 package main
 
 type Config struct {
-	MagicString string `yaml:"magic_string"`
-	LogLevel    string `yaml:"log_level"`
+	LogLevel string `yaml:"log_level"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
 	return &Config{
-		MagicString: "N/A",
-		LogLevel:    "ERROR", // DEBUG or ERROR
+		LogLevel: "ERROR", // DEBUG or ERROR
 	}
 }
 
