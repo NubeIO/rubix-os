@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.9.20](https://github.com/NubeIO/flow-framework/tree/v0.9.20) (2022-12-20)
+
+- bump version
+
 ## [v0.9.19](https://github.com/NubeIO/flow-framework/tree/v0.9.19) (2022-12-20)
 
 - mqtt support get selected points
