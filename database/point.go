@@ -173,6 +173,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, err
 		}
 	}
+	publishPointList := body.Name != pointModel.Name
 	if err := d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
 		return nil, err
 	}
@@ -186,7 +187,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
 	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil)
-	// d.PublishPointsList("")
+	if publishPointList {
+		d.PublishPointsList("")
+	}
 	return pnt, err
 }
 
