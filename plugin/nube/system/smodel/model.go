@@ -1,6 +1,8 @@
 package smodel
 
-import "github.com/NubeIO/flow-framework/plugin/defaults"
+import (
+	"github.com/NubeIO/flow-framework/plugin/defaults"
+)
 
 type EnableStruct struct {
 	Type     string `json:"type" default:"bool"`
@@ -46,19 +48,11 @@ type Network struct {
 		Default  *bool  `json:"default" default:"false"`
 	} `json:"auto_mapping_enable"`
 	AutoMappingFlowNetworkName struct {
-		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"false"`
-		Min      int    `json:"min" default:"0"`
-		Max      int    `json:"max" default:"200"`
-		Default  string `json:"default" default:"local"`
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[]"`
+		Default  string   `json:"default" default:""`
 	} `json:"auto_mapping_flow_network_name"`
-	AutoMappingFlowNetworkUUID struct {
-		Type     string `json:"type" default:"string"`
-		Required bool   `json:"required" default:"false"`
-		Min      int    `json:"min" default:"0"`
-		Max      int    `json:"max" default:"200"`
-		Default  string `json:"default" default:""`
-	} `json:"auto_mapping_flow_network_uuid"`
 }
 
 type Device struct {
