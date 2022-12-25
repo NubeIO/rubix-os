@@ -114,6 +114,15 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	syncWriterHandler := api.SyncWriterAPI{
 		DB: db,
 	}
+	syncDeviceHandler := api.SyncDeviceAPI{
+		DB: db,
+	}
+	syncNetworkHandler := api.SyncNetworkAPI{
+		DB: db,
+	}
+	autoMappingHandler := api.AutoMappingAPI{
+		DB: db,
+	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
 	authHandler := api.AuthAPI{}
@@ -315,7 +324,10 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			networkRoutes.GET("/name/:name", networkHandler.GetNetworkByName)
 			networkRoutes.PATCH("/:uuid", networkHandler.UpdateNetwork)
 			networkRoutes.DELETE("/:uuid", networkHandler.DeleteNetwork)
+			networkRoutes.DELETE("/one/args", networkHandler.DeleteOneNetworkByArgs)
 			networkRoutes.PUT("/meta_tags/uuid/:uuid", networkHandler.CreateNetworkMetaTags)
+			networkRoutes.GET("/sync", networkHandler.SyncNetworks)
+			networkRoutes.GET("/:uuid/sync/devices", networkHandler.SyncNetworkDevices)
 		}
 
 		deviceRoutes := apiRoutes.Group("/devices")
@@ -327,7 +339,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			deviceRoutes.GET("/name/:network_name/:device_name", deviceHandler.GetDeviceByName)
 			deviceRoutes.PATCH("/:uuid", deviceHandler.UpdateDevice)
 			deviceRoutes.DELETE("/:uuid", deviceHandler.DeleteDevice)
+			deviceRoutes.DELETE("/one/args", deviceHandler.DeleteOneDeviceByArgs)
 			deviceRoutes.PUT("/meta_tags/uuid/:uuid", deviceHandler.CreateDeviceMetaTags)
+			deviceRoutes.GET("/:uuid/sync/points", deviceHandler.SyncDevicePoints)
 		}
 
 		pointRoutes := apiRoutes.Group("/points")
@@ -342,6 +356,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			pointRoutes.PATCH("/:uuid", pointHandler.UpdatePoint)
 			pointRoutes.PATCH("/write/:uuid", pointHandler.PointWrite)
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
+			pointRoutes.DELETE("/one/args", pointHandler.DeleteOnePointByArgs)
 			pointRoutes.PATCH("/name", pointHandler.PointWriteByNameArgs) // TODO remove
 			pointRoutes.PATCH("/name/:network_name/:device_name/:point_name", pointHandler.PointWriteByName)
 			pointRoutes.PUT("/meta_tags/uuid/:uuid", pointHandler.CreatePointMetaTags)
@@ -465,6 +480,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			syncRoutes.POST("/cov/:writer_uuid", syncWriterHandler.SyncCOV) // clone ---> source side
 			syncRoutes.POST("/writer/write/:source_uuid", syncWriterHandler.SyncWriterWriteAction)
 			syncRoutes.GET("/writer/read/:source_uuid", syncWriterHandler.SyncWriterReadAction)
+			syncRoutes.POST("/device", syncDeviceHandler.SyncDevice)
+			syncRoutes.POST("/network", syncNetworkHandler.SyncNetwork)
 		}
 
 		userRoutes := apiRoutes.Group("/users")
@@ -480,6 +497,11 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			tokenRoutes.PUT("/:uuid/block", tokenHandler.BlockToken)
 			tokenRoutes.PUT("/:uuid/regenerate", tokenHandler.RegenerateToken)
 			tokenRoutes.DELETE("/:uuid", tokenHandler.DeleteToken)
+		}
+
+		autoMappingRoutes := apiRoutes.Group("/auto_mappings")
+		{
+			autoMappingRoutes.POST("", autoMappingHandler.CreateAutoMapping)
 		}
 	}
 	return engine

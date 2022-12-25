@@ -77,6 +77,15 @@ func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer
 	return writerModel, nil
 }
 
+func (d *GormDatabase) GetOneWriterByArgs(args api.Args) (*model.Writer, error) {
+	var writerModel *model.Writer
+	query := d.buildWriterQuery(args)
+	if err := query.First(&writerModel).Error; err != nil {
+		return nil, err
+	}
+	return writerModel, nil
+}
+
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	aType := api.ArgsType
 	writer, err := d.GetWriter(uuid)

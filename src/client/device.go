@@ -85,3 +85,14 @@ func (inst *FlowClient) DeleteDevice(uuid string) (bool, error) {
 	}
 	return true, nil
 }
+
+func (inst *FlowClient) SyncDevice(body *model.SyncDevice) (*model.Device, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&model.Device{}).
+		SetBody(body).
+		Post("/api/sync/device"))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Result().(*model.Device), nil
+}
