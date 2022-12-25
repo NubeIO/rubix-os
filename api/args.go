@@ -65,6 +65,8 @@ type Args struct {
 	NetworkUUID          *string
 	DeviceUUID           *string
 	WithMetaTags         bool
+	AutoMappingUUID      *string
+	AutoMappingEnable    *bool
 }
 
 var ArgsType = struct {
@@ -132,6 +134,8 @@ var ArgsType = struct {
 	NetworkUUID          string
 	DeviceUUID           string
 	WithMetaTags         string
+	AutoMappingUUID      string
+	AutoMappingEnable    string
 }{
 	Sort:                 "sort",
 	Order:                "order",
@@ -197,6 +201,8 @@ var ArgsType = struct {
 	NetworkUUID:          "network_uuid",
 	DeviceUUID:           "device_uuid",
 	WithMetaTags:         "with_meta_tags",
+	AutoMappingUUID:      "auto_mapping_uuid",
+	AutoMappingEnable:    "auto_mapping_enable",
 }
 
 var ArgsDefault = struct {
@@ -242,6 +248,8 @@ var ArgsDefault = struct {
 	NetworkUUID       string
 	DeviceUUID        string
 	WithMetaTags      string
+	AutoMappingUUID   string
+	AutoMappingEnable string
 }{
 	Sort:              "ID",
 	Order:             "DESC", // ASC or DESC
@@ -284,4 +292,6 @@ var ArgsDefault = struct {
 	NetworkUUID:       "",
 	DeviceUUID:        "",
 	WithMetaTags:      "false",
+	AutoMappingUUID:   "",
+	AutoMappingEnable: "false",
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
@@ -17,12 +18,16 @@ type NetworkDatabase interface {
 	CreateNetwork(network *model.Network, fromPlugin bool) (*model.Network, error)
 	UpdateNetwork(uuid string, body *model.Network, fromPlugin bool) (*model.Network, error)
 	DeleteNetwork(uuid string) (bool, error)
+	DeleteOneNetworkByArgs(args Args) (bool, error)
 
 	CreateNetworkPlugin(network *model.Network) (*model.Network, error)
 	UpdateNetworkPlugin(uuid string, body *model.Network) (*model.Network, error)
 	DeleteNetworkPlugin(uuid string) (bool, error)
 
 	CreateNetworkMetaTags(networkUUID string, networkMetaTags []*model.NetworkMetaTag) ([]*model.NetworkMetaTag, error)
+
+	SyncNetworks(args Args) ([]*interfaces.SyncModel, error)
+	SyncNetworkDevices(uuid string, args Args) ([]*interfaces.SyncModel, error)
 }
 type NetworksAPI struct {
 	DB     NetworkDatabase
@@ -97,6 +102,12 @@ func (a *NetworksAPI) DeleteNetwork(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
+func (a *NetworksAPI) DeleteOneNetworkByArgs(ctx *gin.Context) {
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.DeleteOneNetworkByArgs(args)
+	ResponseHandler(q, err, ctx)
+}
+
 func (a *NetworksAPI) CreateNetworkMetaTags(ctx *gin.Context) {
 	networkUUID := resolveID(ctx)
 	body, _ := getBodyBulkNetworkMetaTags(ctx)
@@ -105,5 +116,18 @@ func (a *NetworksAPI) CreateNetworkMetaTags(ctx *gin.Context) {
 		ResponseHandler(q, err, ctx)
 		return
 	}
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *NetworksAPI) SyncNetworks(ctx *gin.Context) {
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.SyncNetworks(args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *NetworksAPI) SyncNetworkDevices(ctx *gin.Context) {
+	networkUUID := resolveID(ctx)
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.SyncNetworkDevices(networkUUID, args)
 	ResponseHandler(q, err, ctx)
 }

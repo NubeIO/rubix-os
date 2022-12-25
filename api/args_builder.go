@@ -136,6 +136,9 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
 		args.FlowNetworkUUID = value
 	}
+	if value, ok := ctx.GetQuery(aType.AutoMappingUUID); ok {
+		args.AutoMappingUUID = &value
+	}
 	return args
 }
 
@@ -149,6 +152,9 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	args.WithMetaTags, _ = toBool(ctx.DefaultQuery(aType.WithMetaTags, aDefault.WithMetaTags))
 	if value, ok := ctx.GetQuery(aType.AddressUUID); ok {
 		args.AddressUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.AutoMappingUUID); ok {
+		args.AutoMappingUUID = &value
 	}
 	return args
 }

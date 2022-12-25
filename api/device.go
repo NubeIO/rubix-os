@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
@@ -13,12 +14,15 @@ type DeviceDatabase interface {
 	CreateDevice(body *model.Device) (*model.Device, error)
 	UpdateDevice(uuid string, body *model.Device, fromPlugin bool) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
+	DeleteOneDeviceByArgs(args Args) (bool, error)
 
 	CreateDevicePlugin(body *model.Device) (*model.Device, error)
 	UpdateDevicePlugin(uuid string, body *model.Device) (*model.Device, error)
 	DeleteDevicePlugin(uuid string) (bool, error)
 
 	CreateDeviceMetaTags(deviceUUID string, deviceMetaTags []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error)
+
+	SyncDevicePoints(deviceUUID string, args Args) ([]*interfaces.SyncModel, error)
 }
 type DeviceAPI struct {
 	DB DeviceDatabase
@@ -70,6 +74,12 @@ func (a *DeviceAPI) DeleteDevice(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
+func (a *DeviceAPI) DeleteOneDeviceByArgs(ctx *gin.Context) {
+	args := buildDeviceArgs(ctx)
+	q, err := a.DB.DeleteOneDeviceByArgs(args)
+	ResponseHandler(q, err, ctx)
+}
+
 func (a *DeviceAPI) CreateDeviceMetaTags(ctx *gin.Context) {
 	deviceUUID := resolveID(ctx)
 	body, _ := getBodyBulkDeviceMetaTag(ctx)
@@ -78,5 +88,12 @@ func (a *DeviceAPI) CreateDeviceMetaTags(ctx *gin.Context) {
 		ResponseHandler(q, err, ctx)
 		return
 	}
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *DeviceAPI) SyncDevicePoints(ctx *gin.Context) {
+	deviceUUID := resolveID(ctx)
+	args := buildDeviceArgs(ctx)
+	q, err := a.DB.SyncDevicePoints(deviceUUID, args)
 	ResponseHandler(q, err, ctx)
 }

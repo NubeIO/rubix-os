@@ -34,6 +34,15 @@ func (d *GormDatabase) GetConsumer(uuid string, args api.Args) (*model.Consumer,
 	return consumerModel, nil
 }
 
+func (d *GormDatabase) GetOneConsumerByArgs(args api.Args) (*model.Consumer, error) {
+	var consumerModel *model.Consumer
+	query := d.buildConsumerQuery(args)
+	if err := query.First(&consumerModel).Error; err != nil {
+		return nil, err
+	}
+	return consumerModel, nil
+}
+
 func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, error) {
 	streamClone, err := d.GetStreamClone(body.StreamCloneUUID, api.Args{})
 	if err != nil {

@@ -33,12 +33,12 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"rubix-io"`
 	} `json:"plugin_name"`
-	AutoMappingNetworksSelection struct {
-		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[\"disable\",\"self-mapping\",\"rubix-io-to-bacnetserver\"]"`
-		Default  string   `json:"default" default:""`
-	} `json:"auto_mapping_networks_selection"`
+	AutoMappingEnable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"false"`
+	} `json:"auto_mapping_enable"`
 	AutoMappingFlowNetworkName struct {
 		Type     string `json:"type" default:"string"`
 		Required bool   `json:"required" default:"false"`

@@ -3,6 +3,8 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"time"
 
@@ -75,10 +77,6 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 }
 
 func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
-	network, err := d.GetNetworkByDeviceUUID(body.DeviceUUID, api.Args{})
-	if err != nil {
-		return nil, err
-	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
 	if body.Decimal == nil {
 		body.Decimal = nils.NewUint32(2)
@@ -124,25 +122,14 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 		return nil, err
 	}
 
-	// check for mapping
-	if network.AutoMappingNetworksSelection != "" {
-		if network.AutoMappingNetworksSelection != "disable" {
-			pointMapping := &model.PointMapping{}
-			pointMapping.Point = body
-			pointMapping.AutoMappingFlowNetworkName = network.AutoMappingFlowNetworkName
-			pointMapping.AutoMappingFlowNetworkUUID = network.AutoMappingFlowNetworkUUID
-			pointMapping.AutoMappingNetworksSelection = []string{network.AutoMappingNetworksSelection}
-			pointMapping.AutoMappingEnableHistories = network.AutoMappingEnableHistories
-			pointMapping, err = d.CreatePointMapping(pointMapping)
-			if err != nil {
-				log.Errorln("points.db.CreatePoint() failed to make auto point mapping")
-				return nil, err
-			} else {
-				log.Println("points.db.CreatePoint() added point new mapping")
-			}
-		}
-	}
 	d.PublishPointsList("")
+	err = d.CreatePointAutoMapping(body)
+	if err != nil {
+		log.Errorln("points.db.CreatePointAutoMapping() failed to make auto mapping")
+		return nil, err
+	} else {
+		log.Println("points.db.CreatePointAutoMapping() added point new mapping")
+	}
 	return body, nil
 }
 
@@ -189,6 +176,14 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil)
 	if publishPointList {
 		d.PublishPointsList("")
+	}
+
+	err = d.UpdatePointAutoMapping(body)
+	if err != nil {
+		log.Errorln("points.db.UpdatePointAutoMapping() failed to make auto mapping")
+		return nil, err
+	} else {
+		log.Println("points.db.UpdatePointAutoMapping() added point new mapping")
 	}
 	return pnt, err
 }
@@ -302,7 +297,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 func (d *GormDatabase) UpdatePointErrors(uuid string, body *model.Point) error {
 	return d.DB.Model(&body).
 		Where("uuid = ?", uuid).
-		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
+		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync", "Connection").
 		Updates(&body).
 		Error
 }
@@ -330,6 +325,21 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	}
 	r := query.RowsAffected
 	d.PublishPointsList("")
+	var aType = api.ArgsType
+	deviceModel, err := d.GetDevice(point.DeviceUUID, api.Args{})
+	if err != nil {
+		return false, err
+	}
+	networkModel, err := d.GetNetwork(deviceModel.NetworkUUID, api.Args{})
+	if err != nil {
+		return false, err
+	}
+	if boolean.IsTrue(networkModel.AutoMappingEnable) {
+		fn, _ := d.selectFlowNetwork(networkModel.AutoMappingFlowNetworkName, networkModel.AutoMappingFlowNetworkUUID)
+		cli := client.NewFlowClientCliFromFN(fn)
+		url := urls.SingularUrlByArg(urls.PointUrl, aType.AutoMappingUUID, point.UUID)
+		_ = cli.DeleteQuery(url)
+	}
 	return r != 0, nil
 }
 
@@ -344,4 +354,14 @@ func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName strin
 		return nil, err
 	}
 	return write, nil
+}
+
+func (d *GormDatabase) DeleteOnePointByArgs(args api.Args) (bool, error) {
+	var pointModel *model.Point
+	query := d.buildPointQuery(args)
+	if err := query.First(&pointModel).Error; err != nil {
+		return false, err
+	}
+	query = query.Delete(&pointModel)
+	return d.deleteResponseBuilder(query)
 }

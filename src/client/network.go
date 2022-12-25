@@ -119,3 +119,14 @@ func (inst *FlowClient) GetNetwork(uuid string) (*model.Network, error) {
 	}
 	return resp.Result().(*model.Network), nil
 }
+
+func (inst *FlowClient) SyncNetwork(body *model.SyncNetwork) (*model.Network, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&model.Network{}).
+		SetBody(body).
+		Post("/api/sync/network"))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Result().(*model.Network), nil
+}
