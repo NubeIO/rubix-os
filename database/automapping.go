@@ -33,7 +33,7 @@ func (d *GormDatabase) UpdatePointAutoMapping(point *model.Point) error {
 			streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 			flowNetworkClone, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 			cli := client.NewFlowClientCliFromFNC(flowNetworkClone)
-			_, err = cli.GetQueryMarshal(urls.SingularUrl(urls.PointUrl, point.AutoMappingUUID), model.Producer{})
+			_, err = cli.GetQueryMarshal(urls.SingularUrl(urls.PointUrl, point.AutoMappingUUID), model.Point{})
 			if err != nil {
 				point.Connection = connection.Broken.String()
 				point.Message = err.Error()
@@ -113,7 +113,7 @@ func (d *GormDatabase) createUpdatePointAutoMapping(point *model.Point) error {
 
 func (d *GormDatabase) createPointAutoMappingStream(flowNetwork *model.FlowNetwork, networkUUID string,
 	networkName string) (stream *model.Stream, err error) {
-	stream, _ = d.GetStreamByArgs(api.Args{AutoMappingUUID: nils.NewString(networkUUID)})
+	stream, _ = d.GetStreamByArgs(api.Args{AutoMappingUUID: nils.NewString(networkUUID), WithFlowNetworks: true})
 	if stream == nil {
 		streamModel := &model.Stream{}
 		streamModel.Enable = boolean.NewTrue()
@@ -122,8 +122,15 @@ func (d *GormDatabase) createPointAutoMappingStream(flowNetwork *model.FlowNetwo
 		streamModel.AutoMappingUUID = networkUUID
 		return d.CreateStream(streamModel)
 	}
-	if stream.Name != networkName {
+	updateStream := stream.Name != networkName
+	if !updateStream {
+		for _, fn := range stream.FlowNetworks {
+			updateStream = fn.UUID != flowNetwork.UUID
+		}
+	}
+	if updateStream {
 		stream.Name = networkName
+		stream.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 		return d.UpdateStream(stream.UUID, stream)
 	}
 	return stream, nil

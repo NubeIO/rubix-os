@@ -187,7 +187,7 @@ func (d *GormDatabase) syncAfterCreateUpdateNetwork(uuid string, args api.Args) 
 			network.Message = "flow network clone not found"
 		} else {
 			cli := client.NewFlowClientCliFromFNC(fnc)
-			_, err = cli.GetQueryMarshal(urls.SingularUrl(urls.NetworkUrl, network.AutoMappingUUID), model.Device{})
+			_, err = cli.GetQueryMarshal(urls.SingularUrl(urls.NetworkUrl, network.AutoMappingUUID), model.Network{})
 			if err != nil {
 				network.Connection = connection.Broken.String()
 				network.Message = err.Error()
