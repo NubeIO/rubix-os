@@ -123,6 +123,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	autoMappingHandler := api.AutoMappingAPI{
 		DB: db,
 	}
+	syncProducerHandler := api.SyncProducerAPI{
+		DB: db,
+	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
 	authHandler := api.AuthAPI{}
@@ -482,6 +485,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			syncRoutes.GET("/writer/read/:source_uuid", syncWriterHandler.SyncWriterReadAction)
 			syncRoutes.POST("/device", syncDeviceHandler.SyncDevice)
 			syncRoutes.POST("/network", syncNetworkHandler.SyncNetwork)
+			syncRoutes.POST("/producer", syncProducerHandler.SyncProducer)
 		}
 
 		userRoutes := apiRoutes.Group("/users")

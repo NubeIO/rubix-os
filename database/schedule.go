@@ -83,6 +83,7 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	d.UpdateProducerThing(scheduleModel.UUID, scheduleModel.Name)
 	return scheduleModel, nil
 }
 

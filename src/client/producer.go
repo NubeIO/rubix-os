@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -66,4 +67,17 @@ func (inst *FlowClient) DeleteProducer(uuid string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func (inst *FlowClient) SyncProducer(body *interfaces.SyncProducer) ([]model.Consumer, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&[]model.Consumer{}).
+		SetBody(body).
+		Post("/api/sync/producer"))
+	if err != nil {
+		return nil, err
+	}
+	var out []model.Consumer
+	out = *resp.Result().(*[]model.Consumer)
+	return out, nil
 }

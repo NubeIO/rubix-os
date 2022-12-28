@@ -151,6 +151,9 @@ func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
 	if args.ProducerUUID != nil {
 		query = query.Where("producer_uuid = ?", *args.ProducerUUID)
 	}
+	if args.ProducerThingUUID != nil {
+		query = query.Where("producer_thing_uuid = ?", *args.ProducerThingUUID)
+	}
 	return query
 }
 

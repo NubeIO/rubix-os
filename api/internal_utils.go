@@ -69,6 +69,11 @@ func getBODYProducer(ctx *gin.Context) (dto *model.Producer, err error) {
 	return dto, err
 }
 
+func getBodySyncProducer(ctx *gin.Context) (dto *interfaces.SyncProducer, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBODYConsumer(ctx *gin.Context) (dto *model.Consumer, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
