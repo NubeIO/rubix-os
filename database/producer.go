@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -102,6 +103,7 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 			return nil, err
 		}
 	}
+	syncConsumer := body.ProducerThingName != producerModel.ProducerThingName
 	if err := d.DB.Model(&producerModel).Updates(body).Error; err != nil {
 		return nil, err
 	}
@@ -110,7 +112,29 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 			return nil, err
 		}
 	}
+	if syncConsumer {
+		stream, _ := d.GetStream(producerModel.StreamUUID, api.Args{WithFlowNetworks: true})
+		syncBody := interfaces.SyncProducer{
+			ProducerUUID:      producerModel.UUID,
+			ProducerThingUUID: producerModel.ProducerThingUUID,
+			ProducerThingName: producerModel.ProducerThingName,
+		}
+		for _, fn := range stream.FlowNetworks {
+			cli := client.NewFlowClientCliFromFN(fn)
+			_, _ = cli.SyncProducer(&syncBody)
+		}
+	}
 	return producerModel, nil
+}
+
+func (d *GormDatabase) UpdateProducerThing(producerThingUUID string, producerThingName string) {
+	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: nils.NewString(producerThingUUID)})
+	for _, producer := range producers {
+		if producer.ProducerThingName != producerThingName {
+			producer.ProducerThingName = producerThingName
+			go d.UpdateProducer(producer.UUID, producer)
+		}
+	}
 }
 
 func (d *GormDatabase) DeleteProducer(uuid string) (bool, error) {

@@ -154,9 +154,8 @@ func (d *GormDatabase) createPointAutoMappingProducer(streamUUID string, pointUU
 		producerModel.EnableHistory = boolean.NewFalse()
 		return d.CreateProducer(producerModel)
 	}
-	if producer.ProducerThingName != pointName {
+	if producer.Name != pointName {
 		producer.Name = pointName
-		producer.ProducerThingName = pointName
 		return d.UpdateProducer(producer.UUID, producer)
 	}
 	return producer, nil
@@ -211,9 +210,8 @@ func (d *GormDatabase) createPointAutoMappingConsumer(streamUUID string, produce
 		consumerModel.ConsumerApplication = "mapping"
 		return d.CreateConsumer(consumerModel)
 	}
-	if consumer.ProducerThingName != pointName {
+	if consumer.Name != pointName {
 		consumer.Name = pointName
-		consumer.ProducerThingName = pointName
 		return d.UpdateConsumer(consumer.UUID, consumer)
 	}
 	return consumer, nil
