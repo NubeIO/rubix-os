@@ -103,7 +103,7 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 			return nil, err
 		}
 	}
-	syncConsumer := body.ProducerThingName != producerModel.ProducerThingName
+	syncConsumer := body.ProducerThingName != "" && body.ProducerThingName != producerModel.ProducerThingName
 	if err := d.DB.Model(&producerModel).Updates(body).Error; err != nil {
 		return nil, err
 	}
