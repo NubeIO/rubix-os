@@ -173,7 +173,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	}
 
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
-	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil)
+	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil, false)
 	if publishPointList {
 		d.PublishPointsList("")
 	}
@@ -189,7 +189,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 }
 
 func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlugin bool, afterRealDeviceUpdate bool,
-	currentWriterUUID *string) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange,
+	currentWriterUUID *string, forceWrite bool) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange,
 	isPriorityChanged bool, err error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
@@ -203,11 +203,13 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlug
 		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
 	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err :=
-		d.updatePointValue(pointModel, body.Priority, fromPlugin, afterRealDeviceUpdate, currentWriterUUID)
+		d.updatePointValue(pointModel, body.Priority, fromPlugin, afterRealDeviceUpdate, currentWriterUUID, forceWrite)
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
-func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool, afterRealDeviceUpdate bool, currentWriterUUID *string) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
+func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool,
+	afterRealDeviceUpdate bool, currentWriterUUID *string, forceWrite bool) (returnPoint *model.Point,
+	isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
@@ -265,7 +267,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	// Examples are: modbus, edge28 plugins
 	// So for such cases, to trigger that value we do this comparison
 	isWriteValueChange = !float.ComparePtrValues(pointModel.WriteValue, writeValue)
-	isChange := isPresentValueChange || isWriteValueChange || isPriorityChanged
+	isChange := isPresentValueChange || isWriteValueChange || isPriorityChanged || forceWrite
 
 	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
 	// but PresentValue should not change
@@ -349,7 +351,7 @@ func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName strin
 	if err != nil {
 		return nil, err
 	}
-	write, _, _, _, err := d.PointWrite(point.UUID, body, fromPlugin, false, nil)
+	write, _, _, _, err := d.PointWrite(point.UUID, body, fromPlugin, false, nil, false)
 	if err != nil {
 		return nil, err
 	}

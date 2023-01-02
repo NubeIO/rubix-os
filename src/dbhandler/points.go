@@ -52,7 +52,7 @@ func (h *Handler) UpdatePoint(uuid string, body *model.Point, fromPlugin bool, a
 
 func (h *Handler) PointWrite(uuid string, pointWriter *model.PointWriter, afterRealDeviceUpdate bool) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
-	return getDb().PointWrite(uuid, pointWriter, true, afterRealDeviceUpdate, nil)
+	return getDb().PointWrite(uuid, pointWriter, true, afterRealDeviceUpdate, nil, false)
 }
 
 // UpdatePointErrors will only update the error properties of the point, all other properties will not be updated.
