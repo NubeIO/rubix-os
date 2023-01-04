@@ -41,6 +41,17 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"system"`
 	} `json:"plugin_name"`
+}
+
+type Device struct {
+	Enable EnableStruct `json:"enable"`
+	Name   struct {
+		Type        string `json:"type" default:"string"`
+		Required    bool   `json:"required" default:"true"`
+		Default     string `json:"default" default:"dev"`
+		DisplayName string `json:"display_name" default:"Device Name"`
+	} `json:"name"`
+	Description       DescriptionStruct `json:"description"`
 	AutoMappingEnable struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
@@ -53,17 +64,6 @@ type Network struct {
 		Options  []string `json:"options" default:"[]"`
 		Default  string   `json:"default" default:""`
 	} `json:"auto_mapping_flow_network_name"`
-}
-
-type Device struct {
-	Enable EnableStruct `json:"enable"`
-	Name   struct {
-		Type        string `json:"type" default:"string"`
-		Required    bool   `json:"required" default:"true"`
-		Default     string `json:"default" default:"dev"`
-		DisplayName string `json:"display_name" default:"Device Name"`
-	} `json:"name"`
-	Description DescriptionStruct `json:"description"`
 }
 
 type Point struct {

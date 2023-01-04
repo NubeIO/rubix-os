@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/plugin/compat"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -78,7 +76,6 @@ func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*mod
 	if err = d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
-	_ = d.syncAfterCreateUpdateNetwork(body.UUID, api.Args{})
 	return body, nil
 }
 
@@ -97,7 +94,7 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugi
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	_ = d.syncAfterCreateUpdateNetwork(body.UUID, api.Args{WithDevices: true, WithPoints: true})
+	_ = d.syncAfterUpdateNetwork(body.UUID, api.Args{WithDevices: true, WithPoints: true})
 	return networkModel, nil
 }
 
@@ -118,17 +115,13 @@ func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
 		return false, err
 	}
 	for _, device := range networkModel.Devices {
-		_, _ = d.DeleteDevice(device.UUID)
-	}
-	if boolean.IsTrue(networkModel.AutoMappingEnable) {
-		stream, _ := d.GetStreamByArgs(api.Args{AutoMappingUUID: nils.NewString(networkModel.UUID)})
-		if stream != nil {
-			_, _ = d.DeleteStream(stream.UUID)
+		if boolean.IsTrue(device.AutoMappingEnable) {
+			fn, _ := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
+			cli := client.NewFlowClientCliFromFN(fn)
+			url := urls.SingularUrlByArg(urls.NetworkUrl, aType.AutoMappingUUID, networkModel.UUID)
+			_ = cli.DeleteQuery(url)
 		}
-		fn, _ := d.selectFlowNetwork(networkModel.AutoMappingFlowNetworkName, networkModel.AutoMappingFlowNetworkUUID)
-		cli := client.NewFlowClientCliFromFN(fn)
-		url := urls.SingularUrlByArg(urls.NetworkUrl, aType.AutoMappingUUID, networkModel.UUID)
-		_ = cli.DeleteQuery(url)
+		_, _ = d.DeleteDevice(device.UUID)
 	}
 	query := d.DB.Delete(&networkModel)
 	return d.deleteResponseBuilder(query)
@@ -154,51 +147,37 @@ func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	return info
 }
 
-func (d *GormDatabase) syncAfterCreateUpdateNetwork(uuid string, args api.Args) error {
+func (d *GormDatabase) syncAfterUpdateNetwork(uuid string, args api.Args) error {
 	network, err := d.GetNetwork(uuid, args)
 	if err != nil {
 		return err
 	}
-	if boolean.IsTrue(network.AutoMappingEnable) {
-		fn, err := d.selectFlowNetwork(network.AutoMappingFlowNetworkName, network.AutoMappingFlowNetworkUUID)
-		if err != nil {
-			return err
-		}
-		cli := client.NewFlowClientCliFromFN(fn)
-		syncBody := model.SyncNetwork{
-			NetworkUUID:     network.UUID,
-			NetworkName:     network.Name,
-			FlowNetworkUUID: fn.UUID,
-			IsLocal:         boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave),
-		}
-		_, err = cli.SyncNetwork(&syncBody)
-		if err != nil {
-			return err
-		}
-		if args.WithDevices {
-			go d.SyncNetworkDevices(network.UUID, args)
-		}
-	} else if network.AutoMappingUUID != "" {
-		network.Connection = connection.Connected.String()
-		network.Message = nstring.NotAvailable
-		fnc, err := d.GetFlowNetworkClone(network.AutoMappingFlowNetworkUUID, api.Args{})
-		if err != nil {
-			network.Connection = connection.Broken.String()
-			network.Message = "flow network clone not found"
-		} else {
-			cli := client.NewFlowClientCliFromFNC(fnc)
-			_, err = cli.GetQueryMarshal(urls.SingularUrl(urls.NetworkUrl, network.AutoMappingUUID), model.Network{})
-			if err != nil {
-				network.Connection = connection.Broken.String()
-				network.Message = err.Error()
+	if args.WithDevices {
+		for _, device := range network.Devices {
+			if boolean.IsTrue(device.AutoMappingEnable) {
+				fn, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
+				if err != nil {
+					return err
+				}
+				cli := client.NewFlowClientCliFromFN(fn)
+				syncBody := model.SyncNetwork{
+					NetworkUUID:     network.UUID,
+					NetworkName:     network.Name,
+					FlowNetworkUUID: fn.UUID,
+					IsLocal:         boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave),
+				}
+				_, err = cli.SyncNetwork(&syncBody)
+				if err != nil {
+					return err
+				}
 			}
 		}
-		_ = d.UpdateNetworkErrors(network.UUID, network)
-		if args.WithDevices {
-			go d.SyncNetworkDevices(network.UUID, args)
+		_, err = d.SyncNetworkDevices(network.UUID, args)
+		if err != nil {
+			return err
 		}
 	}
-	return err
+	return nil
 }
 
 func (d *GormDatabase) SyncNetworks(args api.Args) ([]*interfaces.SyncModel, error) {
@@ -222,12 +201,8 @@ func (d *GormDatabase) syncNetwork(localCli *client.FlowClient, network *model.N
 	_, err := d.UpdateNetwork(network.UUID, network, false)
 	var output interfaces.SyncModel
 	if err != nil {
-		network.Connection = connection.Broken.String()
-		network.Message = err.Error()
 		output = interfaces.SyncModel{UUID: network.UUID, IsError: true, Message: nstring.New(err.Error())}
 	} else {
-		network.Connection = connection.Connected.String()
-		network.Message = nstring.NotAvailable
 		output = interfaces.SyncModel{UUID: network.UUID, IsError: false}
 	}
 	// This is for syncing child descendants
@@ -235,7 +210,6 @@ func (d *GormDatabase) syncNetwork(localCli *client.FlowClient, network *model.N
 		url := urls.GetUrl(urls.NetworkDevicesSyncUrl, network.UUID) + params
 		_, _ = localCli.GetQuery(url)
 	}
-	d.DB.Where("uuid = ?", network.UUID).Updates(network)
 	channel <- &output
 }
 
