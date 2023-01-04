@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -86,7 +87,7 @@ func (inst *FlowClient) DeleteDevice(uuid string) (bool, error) {
 	return true, nil
 }
 
-func (inst *FlowClient) SyncDevice(body *model.SyncDevice) (*model.Device, error) {
+func (inst *FlowClient) SyncDevice(body *interfaces.SyncDevice) (*model.Device, error) {
 	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&model.Device{}).
 		SetBody(body).

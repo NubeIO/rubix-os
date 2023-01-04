@@ -59,7 +59,7 @@ func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
 	return dto, err
 }
 
-func getBodySyncDevice(ctx *gin.Context) (dto *model.SyncDevice, err error) {
+func getBodySyncDevice(ctx *gin.Context) (dto *interfaces.SyncDevice, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

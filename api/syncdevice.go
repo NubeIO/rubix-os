@@ -1,12 +1,13 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
 
 type SyncDeviceDatabase interface {
-	SyncDevice(fn *model.SyncDevice) (*model.Device, error)
+	SyncDevice(fn *interfaces.SyncDevice) (*model.Device, error)
 }
 
 type SyncDeviceAPI struct {

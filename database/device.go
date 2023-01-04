@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/interfaces/connection"
@@ -9,6 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -83,12 +85,17 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 	for _, point := range deviceModel.Points {
 		_, _ = d.DeletePoint(point.UUID)
 	}
-	network, err := d.GetNetworkByDeviceUUID(deviceModel.UUID, api.Args{})
-	if err != nil {
-		return false, err
-	}
-	if boolean.IsTrue(network.AutoMappingEnable) {
-		fn, _ := d.selectFlowNetwork(network.AutoMappingFlowNetworkName, network.AutoMappingFlowNetworkUUID)
+	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
+		networkModel, err := d.GetNetworkByDeviceUUID(deviceModel.UUID, api.Args{})
+		if err != nil {
+			return false, err
+		}
+		autoMappingUUID := fmt.Sprintf("%s:%s", networkModel.UUID, deviceModel.UUID)
+		stream, _ := d.GetStreamByArgs(api.Args{AutoMappingUUID: nils.NewString(autoMappingUUID)})
+		if stream != nil {
+			_, _ = d.DeleteStream(stream.UUID)
+		}
+		fn, _ := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, deviceModel.AutoMappingFlowNetworkUUID)
 		cli := client.NewFlowClientCliFromFN(fn)
 		url := urls.SingularUrlByArg(urls.DeviceUrl, aType.AutoMappingUUID, deviceModel.UUID)
 		_ = cli.DeleteQuery(url)
@@ -131,13 +138,13 @@ func (d *GormDatabase) syncAfterCreateUpdateDevice(uuid string, args api.Args) e
 	if err != nil {
 		return err
 	}
-	if boolean.IsTrue(network.AutoMappingEnable) {
-		fn, err := d.selectFlowNetwork(network.AutoMappingFlowNetworkName, network.AutoMappingFlowNetworkUUID)
+	if boolean.IsTrue(device.AutoMappingEnable) {
+		fn, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
 		if err != nil {
 			return err
 		}
 		cli := client.NewFlowClientCliFromFN(fn)
-		syncBody := model.SyncDevice{
+		syncBody := interfaces.SyncDevice{
 			NetworkUUID:     network.UUID,
 			NetworkName:     network.Name,
 			DeviceUUID:      device.UUID,
@@ -155,7 +162,7 @@ func (d *GormDatabase) syncAfterCreateUpdateDevice(uuid string, args api.Args) e
 	} else if device.AutoMappingUUID != "" {
 		device.Connection = connection.Connected.String()
 		device.Message = nstring.NotAvailable
-		fnc, err := d.GetFlowNetworkClone(network.AutoMappingFlowNetworkUUID, api.Args{})
+		fnc, err := d.GetFlowNetworkClone(device.AutoMappingFlowNetworkUUID, api.Args{})
 		if err != nil {
 			device.Connection = connection.Broken.String()
 			device.Message = "flow network clone not found"
