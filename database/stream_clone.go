@@ -42,8 +42,14 @@ func (d *GormDatabase) GetStreamClone(uuid string, args api.Args) (*model.Stream
 }
 
 func (d *GormDatabase) DeleteStreamClone(uuid string) (bool, error) {
-	var streamCloneModel *model.StreamClone
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&streamCloneModel)
+	streamCloneModel, err := d.GetStreamClone(uuid, api.Args{WithConsumers: true})
+	if err != nil {
+		return false, err
+	}
+	for _, streamClones := range streamCloneModel.Consumers {
+		_, _ = d.DeleteConsumer(streamClones.UUID)
+	}
+	query := d.DB.Delete(&streamCloneModel)
 	return d.deleteResponseBuilder(query)
 }
 

@@ -77,8 +77,14 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 }
 
 func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
-	var consumerModel *model.Consumer
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&consumerModel)
+	consumerModel, err := d.GetConsumer(uuid, api.Args{WithWriters: true})
+	if err != nil {
+		return false, err
+	}
+	for _, writer := range consumerModel.Writers {
+		_, _ = d.DeleteWriter(writer.UUID)
+	}
+	query := d.DB.Delete(&consumerModel)
 	return d.deleteResponseBuilder(query)
 }
 

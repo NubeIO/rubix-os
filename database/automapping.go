@@ -223,9 +223,6 @@ func (d *GormDatabase) createPointAutoMappingWriter(consumerUUID string, pointUU
 		writerModel.WriterThingName = pointName
 		return d.CreateWriter(writerModel)
 	}
-	if writer.WriterThingName != pointName {
-		writer.WriterThingName = pointName
-		return d.UpdateWriter(writer.UUID, writer)
-	}
-	return writer, nil
+	writer.WriterThingName = pointName
+	return d.UpdateWriter(writer.UUID, writer) // note: to create writer clone in case of it does not exist
 }
