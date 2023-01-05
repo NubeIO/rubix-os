@@ -21,7 +21,7 @@ env:
 jobs:
 
   context:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
 
     outputs:
       shouldBuild: ${{ steps.context.outputs.decision_build }}
@@ -56,7 +56,7 @@ jobs:
           defaultBranch: master
 
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs: context
     if: needs.context.outputs.shouldBuild == 'true'
     services:
@@ -349,7 +349,7 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./maplora-amd64.so
           artifact=maplora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./maplora-armv7.so
-      
+
       - name: Create Release
         if: ${{ needs.context.outputs.isRelease == 'true' }}
         uses: softprops/action-gh-release@v1
