@@ -33,8 +33,14 @@ func (d *GormDatabase) GetFlowNetworkClone(uuid string, args api.Args) (*model.F
 }
 
 func (d *GormDatabase) DeleteFlowNetworkClone(uuid string) (bool, error) {
-	var flowNetworkCloneModel *model.FlowNetworkClone
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&flowNetworkCloneModel)
+	flowNetworkCloneModel, err := d.GetFlowNetworkClone(uuid, api.Args{WithStreamClones: true})
+	if err != nil {
+		return false, err
+	}
+	for _, streamClones := range flowNetworkCloneModel.StreamClones {
+		_, _ = d.DeleteStreamClone(streamClones.UUID)
+	}
+	query := d.DB.Delete(&flowNetworkCloneModel)
 	return d.deleteResponseBuilder(query)
 }
 
