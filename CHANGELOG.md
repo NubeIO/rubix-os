@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v0.9.21](https://github.com/NubeIO/flow-framework/tree/v0.9.21) (2022-01-05)
+
+- Improvement: MQTT points list update only on point name changes
+- Add auto-mapping
+- Sync details on the producer
+- Fix: Present value and priority array discrepancies
+- Remove the magic string from configs
+
 ## [v0.9.20](https://github.com/NubeIO/flow-framework/tree/v0.9.20) (2022-12-20)
 
 - bump version
