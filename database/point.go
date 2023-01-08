@@ -275,7 +275,11 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.PresentValue = presentValue
 	}
 	pointModel.WriteValue = writeValue
-
+	// last update was ok
+	pointModel.MessageLevel = model.MessageLevel.Info
+	pointModel.MessageCode = model.CommonFaultCode.Ok
+	pointModel.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
+	pointModel.LastOk = time.Now()
 	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 	if isChange {
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange,
