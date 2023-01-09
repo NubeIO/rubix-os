@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"sync"
 )
 
 func (d *GormDatabase) GetFlowNetworkClones(args api.Args) ([]*model.FlowNetworkClone, error) {
@@ -37,9 +38,16 @@ func (d *GormDatabase) DeleteFlowNetworkClone(uuid string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	for _, streamClones := range flowNetworkCloneModel.StreamClones {
-		_, _ = d.DeleteStreamClone(streamClones.UUID)
+	var wg sync.WaitGroup
+	for _, streamClone := range flowNetworkCloneModel.StreamClones {
+		wg.Add(1)
+		streamClone := streamClone
+		go func() {
+			defer wg.Done()
+			_, _ = d.DeleteStreamClone(streamClone.UUID)
+		}()
 	}
+	wg.Wait()
 	query := d.DB.Delete(&flowNetworkCloneModel)
 	return d.deleteResponseBuilder(query)
 }
