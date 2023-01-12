@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"sync"
 )
 
 func (d *GormDatabase) GetDevices(args api.Args) ([]*model.Device, error) {
@@ -82,9 +83,17 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	var wg sync.WaitGroup
 	for _, point := range deviceModel.Points {
-		_, _ = d.DeletePoint(point.UUID)
+		wg.Add(1)
+		point := point
+		go func() {
+			defer wg.Done()
+			_, _ = d.DeletePoint(point.UUID)
+		}()
 	}
+	wg.Wait()
+
 	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
 		networkModel, err := d.GetNetworkByDeviceUUID(deviceModel.UUID, api.Args{})
 		if err != nil {
