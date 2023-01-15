@@ -2,6 +2,7 @@ module github.com/NubeIO/flow-framework
 
 //replace github.com/NubeDev/bacnet => /home/aidan/code/go/nube/bacnet
 //replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-models-go
+//replace github.com/NubeIO/lib-schema => /Users/raibnod/Enviro/lib-schema
 
 require (
 	github.com/NubeDev/location v0.0.2
@@ -42,7 +43,7 @@ require (
 require (
 	github.com/NubeDev/bacnet v0.1.2
 	github.com/NubeIO/lib-networking v0.0.6
-	github.com/NubeIO/lib-schema v0.1.6
+	github.com/NubeIO/lib-schema v0.1.7
 	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
 	github.com/amenzhinsky/iothub v0.9.0
 	github.com/go-gota/gota v0.12.0
