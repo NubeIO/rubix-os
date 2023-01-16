@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v0.9.22](https://github.com/NubeIO/flow-framework/tree/v0.9.22) (2022-01-16)
+
+- add point write message ok
+- Improvements: add waits on loop delete
+- Improvements: add waits on loraraw add device points
+- added api for bacnet whois
+- Add an auto_mapping example for lora and system plugins
+
 ## [v0.9.21](https://github.com/NubeIO/flow-framework/tree/v0.9.21) (2022-01-05)
 
 - Improvement: MQTT points list update only on point name changes
