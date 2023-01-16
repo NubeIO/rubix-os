@@ -104,7 +104,10 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 		if stream != nil {
 			_, _ = d.DeleteStream(stream.UUID)
 		}
-		fn, _ := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, deviceModel.AutoMappingFlowNetworkUUID)
+		fn, err := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, deviceModel.AutoMappingFlowNetworkUUID)
+		if err != nil {
+			return false, err
+		}
 		cli := client.NewFlowClientCliFromFN(fn)
 		url := urls.SingularUrlByArg(urls.DeviceUrl, aType.AutoMappingUUID, deviceModel.UUID)
 		_ = cli.DeleteQuery(url)

@@ -122,7 +122,10 @@ func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
 		go func() {
 			defer wg.Done()
 			if boolean.IsTrue(device.AutoMappingEnable) {
-				fn, _ := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
+				fn, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
+				if err != nil {
+					return
+				}
 				cli := client.NewFlowClientCliFromFN(fn)
 				url := urls.SingularUrlByArg(urls.NetworkUrl, aType.AutoMappingUUID, networkModel.UUID)
 				_ = cli.DeleteQuery(url)

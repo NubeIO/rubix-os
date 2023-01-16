@@ -352,7 +352,10 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 		return false, err
 	}
 	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
-		fn, _ := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, deviceModel.AutoMappingFlowNetworkUUID)
+		fn, err := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, deviceModel.AutoMappingFlowNetworkUUID)
+		if err != nil {
+			return false, err
+		}
 		cli := client.NewFlowClientCliFromFN(fn)
 		url := urls.SingularUrlByArg(urls.PointUrl, aType.AutoMappingUUID, point.UUID)
 		_ = cli.DeleteQuery(url)
