@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
+	"sync"
 	"time"
 
 	"github.com/NubeIO/flow-framework/api"
@@ -315,15 +316,29 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	}
 	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &point.UUID})
 	if producers != nil {
+		var wg sync.WaitGroup
 		for _, producer := range producers {
-			_, _ = d.DeleteProducer(producer.UUID)
+			wg.Add(1)
+			producer := producer
+			go func() {
+				defer wg.Done()
+				_, _ = d.DeleteProducer(producer.UUID)
+			}()
 		}
+		wg.Wait()
 	}
 	writers, _ := d.GetWriters(api.Args{WriterThingUUID: &point.UUID})
 	if writers != nil {
+		var wg sync.WaitGroup
 		for _, writer := range writers {
-			_, _ = d.DeleteWriter(writer.UUID)
+			wg.Add(1)
+			writer := writer
+			go func() {
+				defer wg.Done()
+				_, _ = d.DeleteWriter(writer.UUID)
+			}()
 		}
+		wg.Wait()
 	}
 	query := d.DB.Delete(&point)
 	if query.Error != nil {

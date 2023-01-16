@@ -147,7 +147,18 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, loraschema.GetNetworkSchema())
 	})
 	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, loraschema.GetDeviceSchema())
+		fns, err := inst.db.GetFlowNetworks(api.Args{})
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		fnsNames := make([]string, 0)
+		for _, fn := range fns {
+			fnsNames = append(fnsNames, fn.Name)
+		}
+		deviceSchema := loraschema.GetDeviceSchema()
+		deviceSchema.AutoMappingFlowNetworkName.Options = fnsNames
+		ctx.JSON(http.StatusOK, deviceSchema)
 	})
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, loraschema.GetPointSchema())

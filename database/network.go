@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"sync"
 )
 
 func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
@@ -114,15 +115,22 @@ func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
 	if err != nil {
 		return false, err
 	}
+	var wg sync.WaitGroup
 	for _, device := range networkModel.Devices {
-		if boolean.IsTrue(device.AutoMappingEnable) {
-			fn, _ := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
-			cli := client.NewFlowClientCliFromFN(fn)
-			url := urls.SingularUrlByArg(urls.NetworkUrl, aType.AutoMappingUUID, networkModel.UUID)
-			_ = cli.DeleteQuery(url)
-		}
-		_, _ = d.DeleteDevice(device.UUID)
+		wg.Add(1)
+		device := device
+		go func() {
+			defer wg.Done()
+			if boolean.IsTrue(device.AutoMappingEnable) {
+				fn, _ := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
+				cli := client.NewFlowClientCliFromFN(fn)
+				url := urls.SingularUrlByArg(urls.NetworkUrl, aType.AutoMappingUUID, networkModel.UUID)
+				_ = cli.DeleteQuery(url)
+			}
+			_, _ = d.DeleteDevice(device.UUID)
+		}()
 	}
+	wg.Wait()
 	query := d.DB.Delete(&networkModel)
 	return d.deleteResponseBuilder(query)
 }

@@ -91,6 +91,11 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		resp, err := inst.whoIs(uuid, body, add)
 		api.ResponseHandler(resp, err, ctx)
 	})
+	mux.POST("/master/whois", func(ctx *gin.Context) {
+		body, _ := bodyMasterWhoIs(ctx)
+		resp, err := inst.masterWhoIs(body)
+		api.ResponseHandler(resp, err, ctx)
+	})
 	mux.POST(discoverPoints+"/:uuid", func(ctx *gin.Context) {
 		uuid := resolveID(ctx)
 		addPoints := ctx.Query("add_points")

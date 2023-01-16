@@ -7,6 +7,7 @@ import (
 	"golang.org/x/text/language"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/NubeIO/flow-framework/utils/integer"
@@ -214,33 +215,29 @@ func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
 		return errors.New("loraraw: addDevicePoints() no device description or points found for this device")
 	}
 	pointsRefl := reflect.ValueOf(points)
-
-	// kinda poor repeating this but oh well
-	pointName := getStructFieldJSONNameByName(decoder.CommonValues{}, "Rssi")
-	point := new(model.Point)
-	inst.setNewPointFields(deviceBody, point, pointName)
-	_, err = inst.addPoint(point)
-	if err != nil {
-		log.Errorf("loraraw: issue on addPoint: %v\n", err)
-		return err
-	}
-	pointName = getStructFieldJSONNameByName(decoder.CommonValues{}, "Snr")
-	inst.setNewPointFields(deviceBody, point, pointName)
-	_, err = inst.addPoint(point)
-	if err != nil {
-		log.Errorf("loraraw: issue on addPoint: %v\n", err)
-		return err
-	}
-	return inst.addPointsFromStruct(deviceBody, pointsRefl, "")
+	inst.addPointsFromName(deviceBody, "Rssi", "Snr")
+	inst.addPointsFromStruct(deviceBody, pointsRefl, "")
+	return nil
 }
 
-func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl reflect.Value, postfix string) error {
-	point := new(model.Point)
+func (inst *Instance) addPointsFromName(deviceBody *model.Device, names ...string) {
+	var points []*model.Point
+	for _, name := range names {
+		pointName := getStructFieldJSONNameByName(decoder.CommonValues{}, name)
+		point := new(model.Point)
+		inst.setNewPointFields(deviceBody, point, pointName)
+		points = append(points, point)
+	}
+	inst.savePoints(points)
+}
+
+func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl reflect.Value, postfix string) {
+	var points []*model.Point
 	for i := 0; i < pointsRefl.NumField(); i++ {
 		field := pointsRefl.Field(i)
 		if field.Kind() == reflect.Struct {
 			if _, ok := field.Interface().(decoder.CommonValues); !ok {
-				_ = inst.addPointsFromStruct(deviceBody, pointsRefl.Field(i), postfix)
+				inst.addPointsFromStruct(deviceBody, pointsRefl.Field(i), postfix)
 			}
 			continue
 		} else if field.Kind() == reflect.Array || field.Kind() == reflect.Slice {
@@ -255,14 +252,27 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 		if postfix != "" {
 			pointName = fmt.Sprintf("%s%s", pointName, postfix)
 		}
+		point := new(model.Point)
 		inst.setNewPointFields(deviceBody, point, pointName)
-		_, err := inst.addPoint(point)
-		if err != nil {
-			log.Errorf("loraraw: issue on addPoint: %v\n", err)
-			return err
-		}
+		points = append(points, point)
 	}
-	return nil
+	inst.savePoints(points)
+}
+
+func (inst *Instance) savePoints(points []*model.Point) {
+	var wg sync.WaitGroup
+	for _, point := range points {
+		wg.Add(1)
+		point := point
+		go func() {
+			defer wg.Done()
+			_, err := inst.addPoint(point)
+			if err != nil {
+				log.Errorf("loraraw: issue on addPoint: %v\n", err)
+			}
+		}()
+	}
+	wg.Wait()
 }
 
 func (inst *Instance) setNewPointFields(deviceBody *model.Device, pointBody *model.Point, name string) {
