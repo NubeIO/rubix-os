@@ -195,6 +195,22 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 	}
 }
 
+func (d *GormDatabase) WriterActionByName(flownNetworkCloneName string, streamCloneName string, consumerName string,
+	writerThingName string, body *model.WriterBody) *model.WriterActionOutput {
+	var uuid *model.CommonUUID
+	d.DB.Table("flow_network_clones").
+		Select("writers.uuid").
+		Joins("INNER JOIN stream_clones ON flow_network_clones.uuid = stream_clones.flow_network_clone_uuid").
+		Joins("INNER JOIN consumers ON stream_clones.uuid = consumers.stream_clone_uuid").
+		Joins("INNER JOIN writers ON consumers.uuid = writers.consumer_uuid").
+		Where("flow_network_clones.name = ?", flownNetworkCloneName).
+		Where("stream_clones.name = ?", streamCloneName).
+		Where("consumers.name = ?", consumerName).
+		Where("writers.writer_thing_name = ?", writerThingName).
+		Find(&uuid)
+	return d.WriterAction(uuid.UUID, body)
+}
+
 func (d *GormDatabase) WriterBulkAction(body []*model.WriterBulkBody) []*model.WriterActionOutput {
 	arr := make([]*model.WriterActionOutput, len(body))
 	for index, singleWriterBulkBody := range body {

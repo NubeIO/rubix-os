@@ -473,6 +473,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		}
 
 		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)
+		apiRoutes.POST("/writers/action/name/:flow_network_clone_name/:stream_clone_name/:consumer_name/:writer_thing_name", writerHandler.WriterActionByName)
 		apiRoutes.POST("/writers/action/bulk", writerHandler.WriterBulkAction)
 
 		syncRoutes := apiRoutes.Group("/sync")
