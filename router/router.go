@@ -409,6 +409,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 				consumerWriterRoutes.GET("", writerHandler.GetWriters)
 				consumerWriterRoutes.POST("", writerHandler.CreateWriter)
 				consumerWriterRoutes.GET("/:uuid", writerHandler.GetWriter)
+				consumerWriterRoutes.GET("/name/:flow_network_clone_name/:stream_clone_name/:consumer_name/:writer_thing_name", writerHandler.GetWriterByName)
 				consumerWriterRoutes.PATCH("/:uuid", writerHandler.UpdateWriter)
 				consumerWriterRoutes.DELETE("/:uuid", writerHandler.DeleteWriter)
 			}

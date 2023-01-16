@@ -1,19 +1,22 @@
 package api
 
 import (
+	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 )
 
 type WriterDatabase interface {
-	GetWriter(uuid string) (*model.Writer, error)
 	GetWriters(args Args) ([]*model.Writer, error)
+	GetWriter(uuid string) (*model.Writer, error)
+	GetWriterByName(flowNetworkCloneName string, streamCloneName string, consumerName string,
+		writerThingName string) (*model.Writer, error)
 	CreateWriter(body *model.Writer) (*model.Writer, error)
 	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
 	WriterAction(uuid string, body *model.WriterBody) *model.WriterActionOutput
-	WriterActionByName(flownNetworkCloneName string, streamCloneName string, consumerName string,
+	WriterActionByName(flowNetworkCloneName string, streamCloneName string, consumerName string,
 		writerThingName string, body *model.WriterBody) *model.WriterActionOutput
 	WriterBulkAction(body []*model.WriterBulkBody) []*model.WriterActionOutput
 }
@@ -22,15 +25,25 @@ type WriterAPI struct {
 	DB WriterDatabase
 }
 
+func (j *WriterAPI) GetWriters(ctx *gin.Context) {
+	args := buildWriterArgs(ctx)
+	q, err := j.DB.GetWriters(args)
+	ResponseHandler(q, err, ctx)
+}
+
 func (j *WriterAPI) GetWriter(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := j.DB.GetWriter(uuid)
 	ResponseHandler(q, err, ctx)
 }
 
-func (j *WriterAPI) GetWriters(ctx *gin.Context) {
-	args := buildWriterArgs(ctx)
-	q, err := j.DB.GetWriters(args)
+func (j *WriterAPI) GetWriterByName(ctx *gin.Context) {
+	flowNetworkCloneName := resolveFlowNetworkCloneName(ctx)
+	streamCloneName := resolveStreamCloneName(ctx)
+	consumerName := resolveConsumerName(ctx)
+	writerThingName := resolveWriterThingName(ctx)
+	fmt.Println("here i am", flowNetworkCloneName, streamCloneName, consumerName, writerThingName)
+	q, err := j.DB.GetWriterByName(flowNetworkCloneName, streamCloneName, consumerName, writerThingName)
 	ResponseHandler(q, err, ctx)
 }
 
@@ -65,7 +78,7 @@ func (j *WriterAPI) WriterAction(ctx *gin.Context) {
 }
 
 func (j *WriterAPI) WriterActionByName(ctx *gin.Context) {
-	flowNetworkCloneName := resolveFlownNetworkCloneName(ctx)
+	flowNetworkCloneName := resolveFlowNetworkCloneName(ctx)
 	streamCloneName := resolveStreamCloneName(ctx)
 	consumerName := resolveConsumerName(ctx)
 	writerThingName := resolveWriterThingName(ctx)

@@ -270,7 +270,7 @@ func resolvePointName(ctx *gin.Context) string {
 	return ctx.Param("point_name")
 }
 
-func resolveFlownNetworkCloneName(ctx *gin.Context) string {
+func resolveFlowNetworkCloneName(ctx *gin.Context) string {
 	return ctx.Param("flow_network_clone_name")
 }
 

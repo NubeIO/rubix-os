@@ -3,6 +3,7 @@ package database
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
@@ -64,6 +65,23 @@ func (d *GormDatabase) GetWriter(uuid string) (*model.Writer, error) {
 	query := d.DB.Where("uuid = ? ", uuid).First(&writerModel)
 	if query.Error != nil {
 		return nil, query.Error
+	}
+	return writerModel, nil
+}
+
+func (d *GormDatabase) GetWriterByName(flowNetworkCloneName string, streamCloneName string, consumerName string,
+	writerThingName string) (*model.Writer, error) {
+	var writerModel *model.Writer
+	if err := d.DB.Joins("JOIN consumers ON writers.consumer_uuid = consumers.uuid").
+		Joins("JOIN stream_clones ON consumers.stream_clone_uuid = stream_clones.uuid").
+		Joins("JOIN flow_network_clones ON stream_clones.flow_network_clone_uuid = flow_network_clones.uuid").
+		Where("flow_network_clones.name = ?", flowNetworkCloneName).
+		Where("stream_clones.name = ?", streamCloneName).
+		Where("consumers.name = ?", consumerName).
+		Where("writers.writer_thing_name = ?", writerThingName).
+		First(&writerModel).Error; err != nil {
+		fmt.Println("err", err)
+		return nil, err
 	}
 	return writerModel, nil
 }
@@ -195,7 +213,7 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 	}
 }
 
-func (d *GormDatabase) WriterActionByName(flownNetworkCloneName string, streamCloneName string, consumerName string,
+func (d *GormDatabase) WriterActionByName(flowNetworkCloneName string, streamCloneName string, consumerName string,
 	writerThingName string, body *model.WriterBody) *model.WriterActionOutput {
 	var uuid *model.CommonUUID
 	d.DB.Table("flow_network_clones").
@@ -203,7 +221,7 @@ func (d *GormDatabase) WriterActionByName(flownNetworkCloneName string, streamCl
 		Joins("INNER JOIN stream_clones ON flow_network_clones.uuid = stream_clones.flow_network_clone_uuid").
 		Joins("INNER JOIN consumers ON stream_clones.uuid = consumers.stream_clone_uuid").
 		Joins("INNER JOIN writers ON consumers.uuid = writers.consumer_uuid").
-		Where("flow_network_clones.name = ?", flownNetworkCloneName).
+		Where("flow_network_clones.name = ?", flowNetworkCloneName).
 		Where("stream_clones.name = ?", streamCloneName).
 		Where("consumers.name = ?", consumerName).
 		Where("writers.writer_thing_name = ?", writerThingName).
