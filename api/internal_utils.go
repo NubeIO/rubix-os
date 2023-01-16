@@ -270,6 +270,22 @@ func resolvePointName(ctx *gin.Context) string {
 	return ctx.Param("point_name")
 }
 
+func resolveFlownNetworkCloneName(ctx *gin.Context) string {
+	return ctx.Param("flow_network_clone_name")
+}
+
+func resolveStreamCloneName(ctx *gin.Context) string {
+	return ctx.Param("stream_clone_name")
+}
+
+func resolveConsumerName(ctx *gin.Context) string {
+	return ctx.Param("consumer_name")
+}
+
+func resolveWriterThingName(ctx *gin.Context) string {
+	return ctx.Param("writer_thing_name")
+}
+
 func toBool(value string) (bool, error) {
 	if value == "" {
 		return false, nil
