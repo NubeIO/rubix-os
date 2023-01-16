@@ -2,6 +2,7 @@ package smod
 
 import (
 	"encoding/binary"
+	"fmt"
 	"math"
 )
 
@@ -26,6 +27,10 @@ func uint16sToBytes(endianness Endianness, in []uint16) (out []byte) {
 }
 
 func bytesToUint16(endianness Endianness, in []byte) (out uint16) {
+	if math.Mod(float64(len(in)), 2) != 0 {
+		fmt.Println("MODBUS CONVERSION ERROR bytesToUint16(): length of input []byte is less than 2")
+		return uint16(0)
+	}
 	switch endianness {
 	case BigEndian:
 		out = binary.BigEndian.Uint16(in)
@@ -37,6 +42,10 @@ func bytesToUint16(endianness Endianness, in []byte) (out uint16) {
 }
 
 func bytesToUint16s(endianness Endianness, in []byte) (out []uint16) {
+	if math.Mod(float64(len(in)), 2) != 0 {
+		fmt.Println("MODBUS CONVERSION ERROR bytesToUint16s(): length of input []byte is less than 2")
+		return []uint16{uint16(0)}
+	}
 	for i := 0; i < len(in); i += 2 {
 		out = append(out, bytesToUint16(endianness, in[i:i+2]))
 	}
@@ -45,6 +54,10 @@ func bytesToUint16s(endianness Endianness, in []byte) (out []uint16) {
 }
 
 func bytesToInt16s(endianness Endianness, in []byte) (out []int16) {
+	if math.Mod(float64(len(in)), 2) != 0 {
+		fmt.Println("MODBUS CONVERSION ERROR bytesToInt16s(): length of input []byte is less than 2")
+		return []int16{int16(0)}
+	}
 	for i := 0; i < len(in); i += 2 {
 		out = append(out, int16(bytesToUint16(endianness, in[i:i+2])))
 	}
@@ -55,6 +68,10 @@ func bytesToInt16s(endianness Endianness, in []byte) (out []int16) {
 func bytesToUint32s(endianness Endianness, wordOrder WordOrder, in []byte) (out []uint32) {
 	var u32 uint32
 
+	if math.Mod(float64(len(in)), 4) != 0 {
+		fmt.Println("MODBUS CONVERSION ERROR bytesToUint32s(): length of input []byte is less than 4")
+		return []uint32{uint32(0)}
+	}
 	for i := 0; i < len(in); i += 4 {
 		switch endianness {
 		case BigEndian:
@@ -62,14 +79,14 @@ func bytesToUint32s(endianness Endianness, wordOrder WordOrder, in []byte) (out 
 				u32 = binary.BigEndian.Uint32(in[i : i+4])
 			} else {
 				u32 = binary.BigEndian.Uint32(
-					[]byte{in[i+2], in[i+3], in[i+0], in[i+1]})
+					[]byte{in[i+2], in[i+3], in[i+0], in[i+1]}) // This line panics if the length of the in ([]byte) is too short.
 			}
 		case LittleEndian:
 			if wordOrder == LowWordFirst {
 				u32 = binary.LittleEndian.Uint32(in[i : i+4])
 			} else {
 				u32 = binary.LittleEndian.Uint32(
-					[]byte{in[i+2], in[i+3], in[i+0], in[i+1]})
+					[]byte{in[i+2], in[i+3], in[i+0], in[i+1]}) // This line panics if the length of the in ([]byte) is too short.
 			}
 		}
 
@@ -82,6 +99,10 @@ func bytesToUint32s(endianness Endianness, wordOrder WordOrder, in []byte) (out 
 func bytesToInt32s(endianness Endianness, wordOrder WordOrder, in []byte) (out []int32) {
 	var i32 int32
 
+	if math.Mod(float64(len(in)), 4) != 0 {
+		fmt.Println("MODBUS CONVERSION ERROR bytesToInt32s(): length of input []byte is less than 4")
+		return []int32{int32(0)}
+	}
 	for i := 0; i < len(in); i += 4 {
 		switch endianness {
 		case BigEndian:
@@ -89,14 +110,14 @@ func bytesToInt32s(endianness Endianness, wordOrder WordOrder, in []byte) (out [
 				i32 = int32(binary.BigEndian.Uint32(in[i : i+4]))
 			} else {
 				i32 = int32(binary.BigEndian.Uint32(
-					[]byte{in[i+2], in[i+3], in[i+0], in[i+1]}))
+					[]byte{in[i+2], in[i+3], in[i+0], in[i+1]})) // This line panics if the length of the in ([]byte) is too short.
 			}
 		case LittleEndian:
 			if wordOrder == LowWordFirst {
 				i32 = int32(binary.LittleEndian.Uint32(in[i : i+4]))
 			} else {
 				i32 = int32(binary.LittleEndian.Uint32(
-					[]byte{in[i+2], in[i+3], in[i+0], in[i+1]}))
+					[]byte{in[i+2], in[i+3], in[i+0], in[i+1]})) // This line panics if the length of the in ([]byte) is too short.
 			}
 		}
 
@@ -150,6 +171,11 @@ func float32ToBytes(endianness Endianness, wordOrder WordOrder, in float32) (out
 func bytesToUint64s(endianness Endianness, wordOrder WordOrder, in []byte) (out []uint64) {
 	var u64 uint64
 
+	if math.Mod(float64(len(in)), 8) != 0 {
+		fmt.Println("MODBUS CONVERSION ERROR bytesToUint64s(): length of input []byte is less than 8")
+		return []uint64{uint64(0)}
+	}
+
 	for i := 0; i < len(in); i += 8 {
 		switch endianness {
 		case BigEndian:
@@ -178,6 +204,11 @@ func bytesToUint64s(endianness Endianness, wordOrder WordOrder, in []byte) (out 
 
 func bytesToInt64s(endianness Endianness, wordOrder WordOrder, in []byte) (out []int64) {
 	var i64 int64
+
+	if math.Mod(float64(len(in)), 8) != 0 {
+		fmt.Println("MODBUS CONVERSION ERROR bytesToInt64s(): length of input []byte is less than 8")
+		return []int64{int64(0)}
+	}
 
 	for i := 0; i < len(in); i += 8 {
 		switch endianness {
