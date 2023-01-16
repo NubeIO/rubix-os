@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -40,7 +39,6 @@ func (j *WriterAPI) GetWriterByName(ctx *gin.Context) {
 	streamCloneName := resolveStreamCloneName(ctx)
 	consumerName := resolveConsumerName(ctx)
 	writerThingName := resolveWriterThingName(ctx)
-	fmt.Println("here i am", flowNetworkCloneName, streamCloneName, consumerName, writerThingName)
 	q, err := j.DB.GetWriterByName(flowNetworkCloneName, streamCloneName, consumerName, writerThingName)
 	ResponseHandler(q, err, ctx)
 }
