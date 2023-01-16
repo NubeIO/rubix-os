@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.9.23](https://github.com/NubeIO/flow-framework/tree/v0.9.23) (2022-01-16)
+
+- Fix: FN selection doesn't exist issue
+- Upgrade lib-schema to v0.1.8
+- Get writer by name
+
 ## [v0.9.22](https://github.com/NubeIO/flow-framework/tree/v0.9.22) (2022-01-16)
 
 - add point write message ok
@@ -7,6 +13,7 @@
 - Improvements: add waits on loraraw add device points
 - added api for bacnet whois
 - Add an auto_mapping example for lora and system plugins
+- adds safety to modbus byte conversions
 
 ## [v0.9.21](https://github.com/NubeIO/flow-framework/tree/v0.9.21) (2022-01-05)
 
