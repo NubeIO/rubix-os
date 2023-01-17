@@ -114,7 +114,7 @@ func getInterface(networkInterface string) (networking.NetworkInterfaces, error)
 		}
 		return networking.NetworkInterfaces{}, errors.New("network interface can not be empty try, eth0")
 	} else {
-		return nets.GetNetworkByIface(name)
+		return nets.GetNetworkByIface(networkInterface)
 	}
 }
 
