@@ -42,7 +42,7 @@ require (
 
 require (
 	github.com/NubeDev/bacnet v0.1.2
-	github.com/NubeIO/lib-networking v0.0.6
+	github.com/NubeIO/lib-networking v0.1.0
 	github.com/NubeIO/lib-schema v0.1.8
 	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
 	github.com/amenzhinsky/iothub v0.9.0
@@ -75,6 +75,7 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.10.0 // indirect
 	github.com/jackc/pgx/v4 v4.15.0 // indirect
+	github.com/jackpal/gateway v1.0.7 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
