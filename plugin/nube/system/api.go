@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/system/smodel"
 	"github.com/NubeIO/lib-schema/systemschema"
 	"net/http"
@@ -64,12 +65,8 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusBadRequest, err)
 			return
 		}
-		fnsNames := make([]string, 0)
-		for _, fn := range fns {
-			fnsNames = append(fnsNames, fn.Name)
-		}
 		deviceSchema := systemschema.GetDeviceSchema()
-		deviceSchema.AutoMappingFlowNetworkName.Options = fnsNames
+		deviceSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
 		ctx.JSON(http.StatusOK, deviceSchema)
 	})
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {

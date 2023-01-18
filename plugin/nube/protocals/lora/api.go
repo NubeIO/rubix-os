@@ -152,12 +152,8 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusBadRequest, err)
 			return
 		}
-		fnsNames := make([]string, 0)
-		for _, fn := range fns {
-			fnsNames = append(fnsNames, fn.Name)
-		}
 		deviceSchema := loraschema.GetDeviceSchema()
-		deviceSchema.AutoMappingFlowNetworkName.Options = fnsNames
+		deviceSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
 		ctx.JSON(http.StatusOK, deviceSchema)
 	})
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {

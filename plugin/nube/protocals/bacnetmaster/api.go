@@ -119,7 +119,14 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, masterschema.GetNetworkSchema())
 	})
 	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, masterschema.GetDeviceSchema())
+		fns, err := inst.db.GetFlowNetworks(api.Args{})
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		deviceSchema := masterschema.GetDeviceSchema()
+		deviceSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
+		ctx.JSON(http.StatusOK, deviceSchema)
 	})
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, masterschema.GetPointSchema())
