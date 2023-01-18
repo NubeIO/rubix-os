@@ -304,15 +304,16 @@ func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isM
 			tx.Rollback()
 			return nil, err
 		}
-		bodyToSync.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
-		bodyToSync.FlowIP = nstring.NewStringAddress(localStorageFlowNetwork.FlowIP)
 		if boolean.IsTrue(body.IsTokenAuth) {
-			conf := config.Get()
-			body.FlowPort = integer.New(conf.Server.Port)
+			bodyToSync.FlowHTTPS = body.FlowHTTSLocal
+			bodyToSync.FlowIP = body.FlowIPLocal
+			bodyToSync.FlowPort = body.FlowPortLocal
 			bodyToSync.FlowUsername = nil
 			bodyToSync.FlowPassword = nil
 			bodyToSync.FlowToken = body.FlowTokenLocal
 		} else {
+			bodyToSync.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
+			bodyToSync.FlowIP = nstring.NewStringAddress(localStorageFlowNetwork.FlowIP)
 			bodyToSync.FlowPort = integer.New(localStorageFlowNetwork.FlowPort)
 			bodyToSync.FlowUsername = nstring.NewStringAddress(localStorageFlowNetwork.FlowUsername)
 			bodyToSync.FlowPassword = nstring.NewStringAddress(localStorageFlowNetwork.FlowPassword)

@@ -83,8 +83,8 @@ github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.6/go.mod h1:iDKguImeSi6yhQlBK
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7 h1:QKgcOjDkVujyAXWK+OysVFnQKzpZx335vGPG95UNXuI=
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7/go.mod h1:oLI6n9wuko0KIEzrLc8saOquiQvtMUUBrUjXf0TLDVQ=
 github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.4/go.mod h1:A1BPuc3UpE1EF3ugdf+8QIIKTT8s3eK+pfUcheJX2JM=
-github.com/NubeIO/nubeio-rubix-lib-models-go v1.4.9 h1:KLOBerFg0A6c6QfhLVmwacjR673/CGDS3HNmhD/7FaM=
-github.com/NubeIO/nubeio-rubix-lib-models-go v1.4.9/go.mod h1:J0Xy/dX/f/xIhEnW6ZhkE2LiyuRk2H9gCb0Uk+2SSSk=
+github.com/NubeIO/nubeio-rubix-lib-models-go v1.4.10 h1:DRyh28bIU8SdzFH7eY96Y6C8adrn5Ximra/Ox523muo=
+github.com/NubeIO/nubeio-rubix-lib-models-go v1.4.10/go.mod h1:J0Xy/dX/f/xIhEnW6ZhkE2LiyuRk2H9gCb0Uk+2SSSk=
 github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.6 h1:vQRoKT3vVv+cbI2Sb1Djfgc7etZ93nxmFa83J35C4zA=
 github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.6/go.mod h1:lRsVVVKF9T3b2l5tL39jpeF6NaqLELYuM4qiof9MShc=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
