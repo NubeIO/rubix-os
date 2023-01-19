@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [v0.9.24](https://github.com/NubeIO/flow-framework/tree/v0.9.24) (2022-01-19)
+
+- update modbus schema #819
+- Add flow_https_local,flow_ip_local and flow_port_local #818
+- added api's for mapping for all protocals #815
+- added api for bacnet whois #814
+
 ## [v0.9.23](https://github.com/NubeIO/flow-framework/tree/v0.9.23) (2022-01-16)
 
 - Fix: FN selection doesn't exist issue
