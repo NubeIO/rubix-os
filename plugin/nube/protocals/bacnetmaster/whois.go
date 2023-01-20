@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeDev/bacnet"
+	"github.com/NubeDev/bacnet/btypes"
 	"github.com/NubeDev/bacnet/btypes/segmentation"
 	"github.com/NubeDev/bacnet/network"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -18,6 +19,7 @@ import (
 )
 
 type WhoIsOpts struct {
+	WhoIs           bool   `json:"who_is"`
 	InterfacePort   string `json:"interface_port"`
 	LocalDeviceIP   string `json:"local_device_ip"`
 	LocalDevicePort int    `json:"local_device_port"`
@@ -56,19 +58,35 @@ func (inst *Instance) masterWhoIs(opts *WhoIsOpts) (resp []*model.Device, err er
 	}
 	defer localDevice.NetworkClose()
 	go localDevice.NetworkRun()
-
-	devices, err := localDevice.NetworkDiscover(&bacnet.WhoIsOpts{
-		Low:             opts.Low,
-		High:            opts.Low,
-		GlobalBroadcast: true,
-		NetworkNumber:   opts.NetworkNumber,
-	})
-	if err != nil {
-		fmt.Println(err)
-		return
+	var devices []btypes.Device
+	if opts.WhoIs {
+		devices, err = localDevice.Whois(&bacnet.WhoIsOpts{
+			Low:             opts.Low,
+			High:            opts.Low,
+			GlobalBroadcast: true,
+			NetworkNumber:   opts.NetworkNumber,
+		})
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	} else {
+		devices, err = localDevice.NetworkDiscover(&bacnet.WhoIsOpts{
+			Low:             opts.Low,
+			High:            opts.Low,
+			GlobalBroadcast: true,
+			NetworkNumber:   opts.NetworkNumber,
+		})
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 	var devicesList []*model.Device
 	for _, device := range devices {
+		if device.DeviceName == "" {
+			device.DeviceName = fmt.Sprintf("deviceId_%d_networkNum_%d", device.DeviceID, device.NetworkNumber)
+		}
 		newDevice := &model.Device{
 			CommonUUID: model.CommonUUID{
 				UUID: uuid.SmallUUID(),
