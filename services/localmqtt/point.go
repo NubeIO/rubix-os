@@ -37,7 +37,7 @@ func Init(ip string, conf *config.Configuration) error {
 		AutoReconnect:  conf.MQTT.AutoReconnect,
 	})
 	if err != nil {
-		log.Println("MQTT connection error:", err)
+		log.Info("MQTT connection error:", err)
 		return err
 	}
 	pm.Client = c
