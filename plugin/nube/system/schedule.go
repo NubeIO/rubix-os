@@ -28,11 +28,15 @@ func (inst *Instance) runSchedule() {
 		scheduleNameToCheck := "ALL" // TODO: we need a way to specify the schedule name that is being checked for.
 
 		timezone := ScheduleJSON.Config.TimeZone
+		if timezone == "" {
+			log.Error("system-plugin-schedule: CheckWeeklyScheduleCollection(): no timezone pass in from user")
+		}
 		_, err = time.LoadLocation(timezone)
 		if err != nil || timezone == "" { // If timezone field is not assigned or invalid, get timezone from System Time
-			log.Error("system-plugin-schedule: CheckWeeklyScheduleCollection(): invalid schedule timezone. checking with system time.")
+			if err != nil {
+				log.Error("system-plugin-schedule: CheckWeeklyScheduleCollection(): err on check timezone")
+			}
 			systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
-			// fmt.Println("systemTimezone 2: ", systemTimezone)
 			if systemTimezone == "" {
 				zone, _ := utilstime.GetHardwareTZ()
 				timezone = zone
@@ -67,7 +71,7 @@ func (inst *Instance) runSchedule() {
 			log.Errorf("system-plugin-schedule: issue on ApplyExceptionSchedule %v\n", err)
 		}
 
-		log.Printf("system-plugin-schedule: finalResult: %+v\n", finalResult.IsActive)
+		log.Infof("system-plugin-schedule: finalResult: %+v timezone: %s", finalResult.IsActive, timezone)
 
 		if sch != nil {
 			inst.store.Set(sch.Name, finalResult, -1)
