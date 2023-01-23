@@ -1,13 +1,13 @@
 package database
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/flow-framework/utils/structs"
-	"gorm.io/gorm"
-
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"gorm.io/gorm"
 )
 
 func truncateString(str string, num int) string {
@@ -97,4 +97,17 @@ func (d *GormDatabase) deleteResponseBuilder(query *gorm.DB) (bool, error) {
 	} else {
 		return true, nil
 	}
+}
+
+func metaTagsArgsToKeyValues(metaTags string) [][]interface{} {
+	mapMetaTags := map[string]string{}
+	var keyValues [][]interface{}
+	_ = json.Unmarshal([]byte(metaTags), &mapMetaTags)
+	for k, v := range mapMetaTags {
+		keyValues = append(keyValues, []interface{}{k, v})
+	}
+	if keyValues == nil {
+		keyValues = append(keyValues, []interface{}{"", ""})
+	}
+	return keyValues
 }
