@@ -206,6 +206,14 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 	if args.AutoMappingUUID != nil {
 		query = query.Where("auto_mapping_uuid = ?", args.AutoMappingUUID)
 	}
+	if args.MetaTags != nil {
+		keyValues := metaTagsArgsToKeyValues(*args.MetaTags)
+		subQuery := d.DB.Table("network_meta_tags").Select("network_uuid").
+			Where("(key, value) IN ?", keyValues).
+			Group("network_uuid").
+			Having("COUNT(network_uuid) = ?", len(keyValues))
+		query = query.Where("uuid IN (?)", subQuery)
+	}
 	return query
 }
 
@@ -238,6 +246,14 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
 	}
+	if args.MetaTags != nil {
+		keyValues := metaTagsArgsToKeyValues(*args.MetaTags)
+		subQuery := d.DB.Table("device_meta_tags").Select("device_uuid").
+			Where("(key, value) IN ?", keyValues).
+			Group("device_uuid").
+			Having("COUNT(device_uuid) = ?", len(keyValues))
+		query = query.Where("uuid IN (?)", subQuery)
+	}
 	return query
 }
 
@@ -269,6 +285,14 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	}
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
+	}
+	if args.MetaTags != nil {
+		keyValues := metaTagsArgsToKeyValues(*args.MetaTags)
+		subQuery := d.DB.Table("point_meta_tags").Select("point_uuid").
+			Where("(key, value) IN ?", keyValues).
+			Group("point_uuid").
+			Having("COUNT(point_uuid) = ?", len(keyValues))
+		query = query.Where("uuid IN (?)", subQuery)
 	}
 	return query
 }

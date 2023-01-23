@@ -139,6 +139,9 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.AutoMappingUUID); ok {
 		args.AutoMappingUUID = &value
 	}
+	if value, ok := ctx.GetQuery(aType.MetaTags); ok {
+		args.MetaTags = &value
+	}
 	return args
 }
 
@@ -155,6 +158,9 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	}
 	if value, ok := ctx.GetQuery(aType.AutoMappingUUID); ok {
 		args.AutoMappingUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.MetaTags); ok {
+		args.MetaTags = &value
 	}
 	return args
 }
@@ -177,6 +183,9 @@ func buildPointArgs(ctx *gin.Context) Args {
 	}
 	if value, ok := ctx.GetQuery(aType.ObjectType); ok {
 		args.ObjectType = &value
+	}
+	if value, ok := ctx.GetQuery(aType.MetaTags); ok {
+		args.MetaTags = &value
 	}
 	return args
 }

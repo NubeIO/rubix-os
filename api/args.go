@@ -67,6 +67,7 @@ type Args struct {
 	WithMetaTags         bool
 	AutoMappingUUID      *string
 	AutoMappingEnable    *bool
+	MetaTags             *string
 }
 
 var ArgsType = struct {
@@ -136,6 +137,7 @@ var ArgsType = struct {
 	WithMetaTags         string
 	AutoMappingUUID      string
 	AutoMappingEnable    string
+	MetaTags             string
 }{
 	Sort:                 "sort",
 	Order:                "order",
@@ -203,6 +205,7 @@ var ArgsType = struct {
 	WithMetaTags:         "with_meta_tags",
 	AutoMappingUUID:      "auto_mapping_uuid",
 	AutoMappingEnable:    "auto_mapping_enable",
+	MetaTags:             "meta_tags",
 }
 
 var ArgsDefault = struct {
@@ -250,6 +253,7 @@ var ArgsDefault = struct {
 	WithMetaTags      string
 	AutoMappingUUID   string
 	AutoMappingEnable string
+	MetaTags          string
 }{
 	Sort:              "ID",
 	Order:             "DESC", // ASC or DESC
@@ -294,4 +298,5 @@ var ArgsDefault = struct {
 	WithMetaTags:      "false",
 	AutoMappingUUID:   "",
 	AutoMappingEnable: "false",
+	MetaTags:          "",
 }
