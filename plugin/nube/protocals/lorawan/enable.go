@@ -29,14 +29,10 @@ func (inst *Instance) Enable() error {
 	}
 
 	inst.csConnected = false
-	token, err := inst.GetChirpstackToken(inst.config.ChirpstackUsername, inst.config.ChirpstackPassword)
-	if err != nil || token == nil && token.Token == "" {
-		log.Error("createAndActivateChirpstackDevices() err: ", err)
-		return nil
-	}
-	inst.REST = csrest.InitRest(inst.config.CSAddress, inst.config.CSPort, token.Token)
-	inst.REST.SetDeviceLimit(inst.config.DeviceLimit)
 	err = inst.connectToCS()
+	if err != nil {
+		return err
+	}
 	inst.ctx, inst.cancel = context.WithCancel(context.Background())
 	if csrest.IsCSConnectionError(err) {
 		go inst.connectToCSLoop(inst.ctx)

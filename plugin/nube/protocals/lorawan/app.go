@@ -36,30 +36,26 @@ func (inst *Instance) syncChirpstackDevices() {
 		log.Warn("lorawan: Failed to sync devices due to CS connection error")
 		return
 	}
+	if len(devices.Result) == 0 {
+		log.Warn("lorawan: No devices in CS to sync")
+		return
+	}
 	inst.syncAddMissingDevices(devices.Result)
 	inst.syncRemoveOldDevices(devices.Result)
 	inst.syncUpdateDevices(devices.Result)
 }
 
 func (inst *Instance) syncAddMissingDevices(csDevices []csmodel.Device) {
-	if len(csDevices) <= 0 {
-		log.Error("lorawan: syncAddMissingDevices() empty csdevice array")
-		return
-	}
 	for _, csDev := range csDevices {
 		currDev, _ := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
 		if currDev == nil {
 			inst.createDeviceFromCSDevice(&csDev)
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(20 * time.Millisecond)
 		}
 	}
 }
 
 func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
-	if len(csDevices) <= 0 {
-		log.Error("lorawan: syncRemoveOldDevices() empty csdevice array")
-		return
-	}
 	currNetwork, err := inst.db.GetNetwork(inst.networkUUID, api.Args{WithDevices: true})
 	if err != nil || currNetwork == nil {
 		return
@@ -68,7 +64,7 @@ func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
 	for _, currDev := range currDevices {
 		found := false
 		for _, csDev := range csDevices {
-			if csDev.DevEUI == *currDev.CommonDevice.AddressUUID {
+			if csDev.DevEUI == *currDev.AddressUUID {
 				found = true
 				break
 			}
@@ -76,17 +72,13 @@ func (inst *Instance) syncRemoveOldDevices(csDevices []csmodel.Device) {
 		if found {
 			continue
 		}
-		log.Warn("lorawan: Removing old device. EUI=", *currDev.CommonDevice.AddressUUID)
+		log.Warn("lorawan: Removing old device. EUI=", *currDev.AddressUUID)
 		inst.db.DeleteDevice(currDev.UUID)
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(20 * time.Millisecond)
 	}
 }
 
 func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
-	if len(csDevices) <= 0 {
-		log.Error("lorawan: syncUpdateDevices() empty csdevice array")
-		return
-	}
 	for _, csDev := range csDevices {
 		currDev, err := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
 		if err != nil || currDev == nil {
@@ -94,22 +86,32 @@ func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
 			continue
 		}
 		if currDev.Name != csDev.Name &&
-			currDev.CommonDescription.Description != csDev.Description {
+			currDev.Description != csDev.Description {
 			currDev.Name = csDev.Name
-			currDev.CommonDescription.Description = csDev.Description
+			currDev.Description = csDev.Description
 			_, err = inst.db.UpdateDevice(currDev.UUID, currDev, true)
 			if err != nil {
 				log.Error("lorawan: Error updating device during sync: ", err)
 			} else {
 				log.Debugf("lorawan: Updated device during sync: EUI=%s UUID=%s", csDev.DevEUI, currDev.UUID)
 			}
-			time.Sleep(50 * time.Millisecond)
+			time.Sleep(20 * time.Millisecond)
 		}
 	}
 }
 
 func (inst *Instance) connectToCS() error {
-	err := inst.REST.Connect()
+	inst.REST = csrest.InitRest(inst.config.CSAddress, inst.config.CSPort)
+	inst.REST.SetDeviceLimit(inst.config.DeviceLimit)
+	if inst.config.CSToken == "" {
+		err := inst.REST.Login(inst.config.CSUsername, inst.config.CSPassword)
+		if err != nil {
+			return err
+		}
+	} else {
+		inst.REST.SetToken(inst.config.CSToken)
+	}
+	err := inst.REST.ConnectTest()
 	if err == nil {
 		inst.setCSConnected()
 	} else if !csrest.IsCSConnectionError(err) {
@@ -125,7 +127,7 @@ func (inst *Instance) connectToCSLoop(ctx context.Context) error {
 			log.Debug("lorawan: Stopping main loop")
 			return ctx.Err()
 		default:
-			time.Sleep(5 * time.Second)
+			time.Sleep(10 * time.Second)
 			err := inst.connectToCS()
 			if !csrest.IsCSConnectionError(err) {
 				return err

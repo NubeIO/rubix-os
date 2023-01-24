@@ -14,15 +14,6 @@ import (
 
 var limit = "200"
 
-type ChirpstackCredentials struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type ChirpstackToken struct {
-	Token string `json:"jwt"`
-}
-
 func (a *RestClient) SetDeviceLimit(newLimit int) {
 	limit = strconv.Itoa(newLimit)
 }
@@ -41,6 +32,7 @@ func checkResponse(resp *resty.Response, err error) error {
 // i.e. "401 Unauthorised" or "connection refused"
 func IsCSConnectionError(err error) bool {
 	return err != nil && (strings.Contains(err.Error(), "401") ||
+		strings.Contains(err.Error(), "authentication failed") ||
 		strings.Contains(err.Error(), "connection refused") ||
 		strings.Contains(err.Error(), "no route to host") ||
 		strings.Contains(err.Error(), "501 Not Implemented"))
