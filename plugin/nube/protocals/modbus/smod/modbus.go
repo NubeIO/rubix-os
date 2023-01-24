@@ -1,7 +1,6 @@
 package smod
 
 import (
-	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
 	"strings"
@@ -122,7 +121,7 @@ func (mc *ModbusClient) ReadInputRegisters(addr uint16, quantity uint16, dataTyp
 		log.Errorf("modbus-function: failed to ReadInputRegisters: %v\n", err)
 		return
 	}
-	fmt.Println("ReadInputRegisters()  RESPONSE raw:", raw)
+	// fmt.Println("ReadInputRegisters()  RESPONSE raw:", raw)
 
 	switch dataType {
 	case string(model.TypeInt16):
@@ -178,7 +177,7 @@ func (mc *ModbusClient) ReadHoldingRegisters(addr uint16, quantity uint16, dataT
 		log.Errorf("modbus-function: failed to ReadHoldingRegisters  addr:%d  quantity:%d error: %v\n", addr, quantity, err)
 		return
 	}
-	fmt.Println("ReadHoldingRegisters()  RESPONSE raw:", raw)
+	// fmt.Println("ReadHoldingRegisters()  RESPONSE raw:", raw)
 	switch dataType {
 	case string(model.TypeInt16):
 		// decode payload bytes as int16s
@@ -314,7 +313,7 @@ func (mc *ModbusClient) WriteSingleRegister(addr uint16, value uint16) (raw []by
 			err = nil
 		}
 	}
-	fmt.Println("WriteSingleRegister()  RESPONSE raw:", raw)
+	// fmt.Println("WriteSingleRegister()  RESPONSE raw:", raw)
 	out = float64(value)
 	return
 }
