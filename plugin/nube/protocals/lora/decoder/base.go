@@ -35,11 +35,11 @@ func DecodeAddress(data string) string {
 func decodeCommonValues(payload *CommonValues, data string, sensor string) {
 	payload.Sensor = sensor
 	payload.ID = DecodeAddress(data)
-	payload.Rssi = decodeRSSI(data)
+	payload.Rssi = DecodeRSSI(data)
 	payload.Snr = decodeSNR(data)
 }
 
-func decodeRSSI(data string) int {
+func DecodeRSSI(data string) int {
 	dataLen := len(data)
 	v, _ := strconv.ParseInt(data[dataLen-4:dataLen-2], 16, 0)
 	v = v * -1

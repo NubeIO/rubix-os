@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/thermistor"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"reflect"
@@ -71,6 +72,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
 	body.ObjectType = "analog_input"
+	body.IoType = string(model.IOTypeRAW)
 	body.Name = strings.ToLower(body.Name)
 	point, err = inst.db.CreatePoint(body, true, true)
 	if err != nil {
@@ -156,6 +158,9 @@ func (inst *Instance) handleSerialPayload(data string) {
 	log.Debug("loraraw: Uplink: ", data)
 	device := inst.getDeviceByLoRaAddress(decoder.DecodeAddress(data))
 	if device == nil {
+		id := decoder.DecodeAddress(data) // show user messages from lora
+		rssi := decoder.DecodeRSSI(data)
+		log.Infof("lora-raw: message from sensor id: %s rssi: %d", id, rssi)
 		return
 	}
 	devDesc := decoder.GetDeviceDescription(device)
@@ -166,11 +171,11 @@ func (inst *Instance) handleSerialPayload(data string) {
 	if commonData == nil {
 		return
 	}
-	deviceUUID := commonData.ID
-	if deviceUUID != "" {
-		dev, err := inst.db.GetDeviceByArgs(api.Args{AddressUUID: nils.NewString(deviceUUID)})
+	deviceId := commonData.ID
+	if deviceId != "" {
+		dev, err := inst.db.GetDeviceByArgs(api.Args{AddressUUID: nils.NewString(deviceId)})
 		if err != nil {
-			errMsg := fmt.Sprintf("loraraw: issue on failed to find device: %v id: %s\n", err.Error(), deviceUUID)
+			errMsg := fmt.Sprintf("lora-raw: issue on failed to find device: %v id: %s\n", err.Error(), deviceId)
 			log.Errorf(errMsg)
 			if dev != nil {
 				_ = inst.deviceUpdateErr(dev.UUID, errors.New(errMsg))
@@ -178,11 +183,10 @@ func (inst *Instance) handleSerialPayload(data string) {
 			return
 		}
 		if dev != nil {
-			log.Println("loraraw: sensor-found", deviceUUID, "rssi:", commonData.Rssi, "snr:", commonData.Snr)
+			log.Infof("lora-raw: sensor found id: %s rssi: %d type: %s", commonData.ID, commonData.Rssi, commonData.Sensor)
 			_ = inst.deviceUpdateSuccess(dev.UUID)
 		}
 	}
-
 	if fullData != nil {
 		inst.updateDevicePointValues(commonData, fullData)
 	}
@@ -315,16 +319,37 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 		return err
 	}
 	priority := map[string]*float64{"_16": &value}
+
 	if pnt.IoType != "" && pnt.IoType != string(model.IOTypeRAW) {
 		if body.PresentValue == nil {
 			priority["_16"] = nil
 		}
-		priority["_16"] = float.New(decoder.MicroEdgePointType(pnt.IoType, *body.PresentValue))
+		if pnt.IoType == string(model.IOTypeThermistor10K) {
+			var r float64
+			var newMicroEdge bool
+			// newMicroEdge = true
+			if newMicroEdge {
+				v := value / 1023 * 3.29
+				r = (10000 * v) / (3.29 - v)
+			} else {
+				r = ((16620 * value) - (1023 * 3300)) / (1023 - value)
+			}
+			f, err := thermistor.ResistanceToTemperature(r, thermistor.T210K)
+			// fmt.Println("R", r)
+			// fmt.Println("temp", f)
+			if err != nil {
+				log.Errorf("lora-raw: issue on decode temperture err: %s id: %s: %s", err.Error(), *body.AddressUUID, body.IoNumber)
+			}
+			priority["_16"] = float.New(f)
+		} else {
+			priority["_16"] = float.New(decoder.MicroEdgePointType(pnt.IoType, value))
+		}
+
 	}
 	pointWriter := model.PointWriter{Priority: &priority}
 	_, _, _, _, err = inst.db.PointWrite(pnt.UUID, &pointWriter, true)
 	if err != nil {
-		log.Error("loraraw: UpdatePointValue()", err)
+		log.Error("lora-raw: UpdatePointValue()", err)
 	}
 	return err
 }
