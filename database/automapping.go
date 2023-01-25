@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"reflect"
 )
 
 func (d *GormDatabase) CreatePointAutoMapping(point *model.Point) error {
@@ -52,11 +53,13 @@ func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) er
 		return err
 	}
 	device, err := d.createPointAutoMappingDevice(autoMapping.NetworkUUID, autoMapping.NetworkName,
-		autoMapping.DeviceUUID, autoMapping.DeviceName, autoMapping.FlowNetworkUUID, autoMapping.IsLocal)
+		autoMapping.NetworkTags, autoMapping.DeviceUUID, autoMapping.DeviceName, autoMapping.DeviceTags,
+		autoMapping.FlowNetworkUUID, autoMapping.IsLocal)
 	if err != nil {
 		return err
 	}
-	point, err := d.createPointAutoMappingPoint(device.UUID, autoMapping.PointUUID, autoMapping.PointName)
+	point, err := d.createPointAutoMappingPoint(device.UUID, autoMapping.PointUUID, autoMapping.PointName,
+		autoMapping.PointTags)
 	if err != nil {
 		return err
 	}
@@ -68,7 +71,7 @@ func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) er
 }
 
 func (d *GormDatabase) createUpdatePointAutoMapping(point *model.Point) error {
-	device, err := d.GetDevice(point.DeviceUUID, api.Args{})
+	device, err := d.GetDevice(point.DeviceUUID, api.Args{WithTags: true})
 	if err != nil {
 		return err
 	}
@@ -77,7 +80,7 @@ func (d *GormDatabase) createUpdatePointAutoMapping(point *model.Point) error {
 		if err != nil {
 			return err
 		}
-		network, err := d.GetNetwork(device.NetworkUUID, api.Args{})
+		network, err := d.GetNetwork(device.NetworkUUID, api.Args{WithTags: true})
 		if err != nil {
 			return err
 		}
@@ -98,10 +101,13 @@ func (d *GormDatabase) createUpdatePointAutoMapping(point *model.Point) error {
 			ProducerUUID:    producer.UUID,
 			NetworkUUID:     network.UUID,
 			NetworkName:     network.Name,
+			NetworkTags:     network.Tags,
 			DeviceUUID:      device.UUID,
 			DeviceName:      device.Name,
+			DeviceTags:      device.Tags,
 			PointUUID:       point.UUID,
 			PointName:       point.Name,
+			PointTags:       point.Tags,
 			IsLocal:         boolean.IsFalse(flowNetwork.IsRemote) && boolean.IsFalse(flowNetwork.IsMasterSlave),
 		}
 		_, err = cli.AddAutoMapping(body)
@@ -155,19 +161,23 @@ func (d *GormDatabase) createPointAutoMappingProducer(streamUUID string, pointUU
 	return producer, nil
 }
 
-func (d *GormDatabase) createPointAutoMappingDevice(networkUUID string, networkName string, deviceUUID string,
-	deviceName string, flowNetworkUUID string, isLocal bool) (*model.Device, error) {
+func (d *GormDatabase) createPointAutoMappingDevice(networkUUID string, networkName string, networkTags []*model.Tag,
+	deviceUUID string, deviceName string, deviceTags []*model.Tag, flowNetworkUUID string, isLocal bool) (
+	*model.Device, error) {
 	syncDevice := &interfaces.SyncDevice{
 		NetworkUUID:     networkUUID,
 		NetworkName:     networkName,
+		NetworkTags:     networkTags,
 		DeviceUUID:      deviceUUID,
 		DeviceName:      deviceName,
+		DeviceTags:      deviceTags,
 		FlowNetworkUUID: flowNetworkUUID,
 		IsLocal:         isLocal}
 	return d.SyncDevice(syncDevice)
 }
 
-func (d *GormDatabase) createPointAutoMappingPoint(deviceUUID string, pointUUID string, pointName string) (
+func (d *GormDatabase) createPointAutoMappingPoint(deviceUUID string, pointUUID string, pointName string,
+	pointTags []*model.Tag) (
 	point *model.Point, err error) {
 	point, err = d.GetOnePointByArgs(api.Args{AutoMappingUUID: nils.NewString(pointUUID)})
 	if point == nil {
@@ -178,10 +188,12 @@ func (d *GormDatabase) createPointAutoMappingPoint(deviceUUID string, pointUUID 
 		pointModel.ThingClass = "point"
 		pointModel.ThingType = ""
 		pointModel.AutoMappingUUID = pointUUID
+		pointModel.Tags = pointTags
 		return d.CreatePoint(pointModel, false)
 	}
-	if point.Name != pointName {
+	if point.Name != pointName || !reflect.DeepEqual(point.Tags, pointTags) {
 		point.Name = pointName
+		point.Tags = pointTags
 		return d.UpdatePoint(point.UUID, point, false, false)
 	}
 	return point, err

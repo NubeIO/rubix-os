@@ -6,16 +6,17 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"reflect"
 )
 
 func (d *GormDatabase) SyncDevice(body *interfaces.SyncDevice) (*model.Device, error) {
 	syncNetwork := &model.SyncNetwork{NetworkUUID: body.NetworkUUID, NetworkName: body.NetworkName,
-		FlowNetworkUUID: body.FlowNetworkUUID, IsLocal: body.IsLocal}
+		NetworkTags: body.NetworkTags, FlowNetworkUUID: body.FlowNetworkUUID, IsLocal: body.IsLocal}
 	network, err := d.SyncNetwork(syncNetwork)
 	if err != nil {
 		return nil, err
 	}
-	device, err := d.GetOneDeviceByArgs(api.Args{AutoMappingUUID: nils.NewString(body.DeviceUUID)})
+	device, err := d.GetOneDeviceByArgs(api.Args{AutoMappingUUID: nils.NewString(body.DeviceUUID), WithTags: true})
 	if err != nil {
 		fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{SourceUUID: nils.NewString(body.FlowNetworkUUID)})
 		if err != nil {
@@ -28,10 +29,12 @@ func (d *GormDatabase) SyncDevice(body *interfaces.SyncDevice) (*model.Device, e
 		deviceModel.AutoMappingUUID = body.DeviceUUID
 		deviceModel.AutoMappingFlowNetworkUUID = fnc.UUID
 		deviceModel.AutoMappingFlowNetworkName = fnc.Name
+		deviceModel.Tags = body.DeviceTags
 		return d.CreateDevice(deviceModel)
 	}
-	if device.Name != body.DeviceName {
+	if device.Name != body.DeviceName || !reflect.DeepEqual(device.Tags, body.DeviceTags) {
 		device.Name = body.DeviceName
+		device.Tags = body.DeviceTags
 		return d.UpdateDevice(device.UUID, device, false)
 	}
 	return device, nil

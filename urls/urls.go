@@ -66,5 +66,6 @@ func GenerateNetworkUrlParams(args api.Args) string {
 	var aType = api.ArgsType
 	params += fmt.Sprintf("%s=%v", aType.WithDevices, args.WithDevices)
 	params += fmt.Sprintf("&%s=%v", aType.WithPoints, args.WithPoints)
+	params += fmt.Sprintf("&%s=%v", aType.WithTags, args.WithTags)
 	return params
 }

@@ -44,7 +44,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
-	_ = d.syncAfterCreateUpdateDevice(body.UUID, api.Args{})
+	_ = d.syncAfterCreateUpdateDevice(body.UUID, api.Args{WithTags: true})
 	return body, query.Error
 }
 
@@ -63,7 +63,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device, fromPlugin 
 	if err := d.DB.Model(&deviceModel).Select("*").Updates(body).Error; err != nil {
 		return nil, err
 	}
-	_ = d.syncAfterCreateUpdateDevice(body.UUID, api.Args{WithPoints: true})
+	_ = d.syncAfterCreateUpdateDevice(body.UUID, api.Args{WithTags: true, WithPoints: true})
 	return deviceModel, nil
 }
 
@@ -127,7 +127,7 @@ func (d *GormDatabase) DeleteOneDeviceByArgs(args api.Args) (bool, error) {
 }
 
 func (d *GormDatabase) SyncDevicePoints(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
-	device, _ := d.GetDevice(uuid, api.Args{WithPoints: true})
+	device, _ := d.GetDevice(uuid, args)
 	var outputs []*interfaces.SyncModel
 	channel := make(chan *interfaces.SyncModel)
 	defer close(channel)
@@ -146,30 +146,33 @@ func (d *GormDatabase) syncAfterCreateUpdateDevice(uuid string, args api.Args) e
 	if err != nil {
 		return err
 	}
-	network, err := d.GetNetworkByDeviceUUID(device.UUID, api.Args{})
-	if err != nil {
-		return err
-	}
 	if boolean.IsTrue(device.AutoMappingEnable) {
-		fn, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
-		if err != nil {
-			return err
-		}
-		cli := client.NewFlowClientCliFromFN(fn)
-		syncBody := interfaces.SyncDevice{
-			NetworkUUID:     network.UUID,
-			NetworkName:     network.Name,
-			DeviceUUID:      device.UUID,
-			DeviceName:      device.Name,
-			FlowNetworkUUID: fn.UUID,
-			IsLocal:         boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave),
-		}
-		_, err = cli.SyncDevice(&syncBody)
-		if err != nil {
-			return err
-		}
 		if args.WithPoints {
 			_, _ = d.SyncDevicePoints(device.UUID, args)
+		} else if len(device.Points) == 0 {
+			fn, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
+			if err != nil {
+				return err
+			}
+			cli := client.NewFlowClientCliFromFN(fn)
+			network, err := d.GetNetworkByDeviceUUID(device.UUID, api.Args{WithTags: true})
+			if err != nil {
+				return err
+			}
+			syncBody := interfaces.SyncDevice{
+				NetworkUUID:     network.UUID,
+				NetworkName:     network.Name,
+				NetworkTags:     network.Tags,
+				DeviceUUID:      device.UUID,
+				DeviceName:      device.Name,
+				DeviceTags:      device.Tags,
+				FlowNetworkUUID: fn.UUID,
+				IsLocal:         boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave),
+			}
+			_, err = cli.SyncDevice(&syncBody)
+			if err != nil {
+				return err
+			}
 		}
 	} else if device.AutoMappingUUID != "" {
 		device.Connection = connection.Connected.String()
