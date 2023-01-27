@@ -1,12 +1,13 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
 
 type SyncNetworkDatabase interface {
-	SyncNetwork(fn *model.SyncNetwork) (*model.Network, error)
+	SyncNetwork(fn *interfaces.SyncNetwork) (*model.Network, error)
 }
 
 type SyncNetworkAPI struct {

@@ -137,7 +137,8 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool, afterRealDeviceUpdate bool) (
 	*model.Point, error) {
 	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).Preload("Tags").Preload("Priority").First(&pointModel)
+	query := d.DB.Where("uuid = ?", uuid).Preload("Tags").Preload("MetaTags").
+		Preload("Priority").First(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

@@ -63,7 +63,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device, fromPlugin 
 	if err := d.DB.Model(&deviceModel).Select("*").Updates(body).Error; err != nil {
 		return nil, err
 	}
-	_ = d.syncAfterCreateUpdateDevice(body.UUID, api.Args{WithTags: true, WithPoints: true})
+	_ = d.syncAfterCreateUpdateDevice(body.UUID, api.Args{WithTags: true, WithMetaTags: true, WithPoints: true})
 	return deviceModel, nil
 }
 
@@ -155,7 +155,7 @@ func (d *GormDatabase) syncAfterCreateUpdateDevice(uuid string, args api.Args) e
 				return err
 			}
 			cli := client.NewFlowClientCliFromFN(fn)
-			network, err := d.GetNetworkByDeviceUUID(device.UUID, api.Args{WithTags: true})
+			network, err := d.GetNetworkByDeviceUUID(device.UUID, api.Args{WithTags: true, WithMetaTags: true})
 			if err != nil {
 				return err
 			}
@@ -163,9 +163,11 @@ func (d *GormDatabase) syncAfterCreateUpdateDevice(uuid string, args api.Args) e
 				NetworkUUID:     network.UUID,
 				NetworkName:     network.Name,
 				NetworkTags:     network.Tags,
+				NetworkMetaTags: network.MetaTags,
 				DeviceUUID:      device.UUID,
 				DeviceName:      device.Name,
 				DeviceTags:      device.Tags,
+				DeviceMetaTags:  device.MetaTags,
 				FlowNetworkUUID: fn.UUID,
 				IsLocal:         boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave),
 			}
@@ -190,9 +192,6 @@ func (d *GormDatabase) syncAfterCreateUpdateDevice(uuid string, args api.Args) e
 			}
 		}
 		_ = d.UpdateDeviceErrors(device.UUID, device)
-		if args.WithPoints {
-			_, _ = d.SyncDevicePoints(device.UUID, args)
-		}
 	}
 	return err
 }

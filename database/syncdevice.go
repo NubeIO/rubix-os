@@ -10,8 +10,8 @@ import (
 )
 
 func (d *GormDatabase) SyncDevice(body *interfaces.SyncDevice) (*model.Device, error) {
-	syncNetwork := &model.SyncNetwork{NetworkUUID: body.NetworkUUID, NetworkName: body.NetworkName,
-		NetworkTags: body.NetworkTags, FlowNetworkUUID: body.FlowNetworkUUID, IsLocal: body.IsLocal}
+	syncNetwork := &interfaces.SyncNetwork{NetworkUUID: body.NetworkUUID, NetworkName: body.NetworkName,
+		NetworkTags: body.NetworkTags, NetworkMetaTags: body.NetworkMetaTags, FlowNetworkUUID: body.FlowNetworkUUID, IsLocal: body.IsLocal}
 	network, err := d.SyncNetwork(syncNetwork)
 	if err != nil {
 		return nil, err
@@ -30,8 +30,10 @@ func (d *GormDatabase) SyncDevice(body *interfaces.SyncDevice) (*model.Device, e
 		deviceModel.AutoMappingFlowNetworkUUID = fnc.UUID
 		deviceModel.AutoMappingFlowNetworkName = fnc.Name
 		deviceModel.Tags = body.DeviceTags
+		deviceModel.MetaTags = body.DeviceMetaTags
 		return d.CreateDevice(deviceModel)
 	}
+	_, _ = d.CreateDeviceMetaTags(device.UUID, body.DeviceMetaTags)
 	if device.Name != body.DeviceName || !reflect.DeepEqual(device.Tags, body.DeviceTags) {
 		device.Name = body.DeviceName
 		device.Tags = body.DeviceTags

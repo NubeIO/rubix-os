@@ -39,7 +39,7 @@ func getBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
 	return dto, err
 }
 
-func getBodySyncNetwork(ctx *gin.Context) (dto *model.SyncNetwork, err error) {
+func getBodySyncNetwork(ctx *gin.Context) (dto *interfaces.SyncNetwork, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

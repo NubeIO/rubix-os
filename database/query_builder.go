@@ -224,6 +224,9 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 		if args.WithTags {
 			query = query.Preload("Points.Tags")
 		}
+		if args.WithMetaTags {
+			query = query.Preload("Points.MetaTags")
+		}
 	}
 	if args.WithTags {
 		query = query.Preload("Tags")

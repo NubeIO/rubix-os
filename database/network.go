@@ -95,7 +95,8 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugi
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	_ = d.syncAfterUpdateNetwork(body.UUID, api.Args{WithDevices: true, WithPoints: true})
+	_ = d.syncAfterUpdateNetwork(body.UUID, api.Args{WithTags: true, WithDevices: true,
+		WithPoints: true})
 	return networkModel, nil
 }
 
@@ -206,7 +207,7 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, args api.Args) ([]*interf
 	channel := make(chan *interfaces.SyncModel)
 	defer close(channel)
 	for _, device := range network.Devices {
-		go d.syncDevice(device, channel)
+		go d.syncDevice(device, args, channel)
 	}
 	for range network.Devices {
 		outputs = append(outputs, <-channel)
@@ -214,8 +215,8 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, args api.Args) ([]*interf
 	return outputs, nil
 }
 
-func (d *GormDatabase) syncDevice(device *model.Device, channel chan *interfaces.SyncModel) {
-	_, err := d.UpdateDevice(device.UUID, device, false)
+func (d *GormDatabase) syncDevice(device *model.Device, args api.Args, channel chan *interfaces.SyncModel) {
+	err := d.syncAfterCreateUpdateDevice(device.UUID, args)
 	var output interfaces.SyncModel
 	if err != nil {
 		output = interfaces.SyncModel{UUID: device.UUID, IsError: true, Message: nstring.New(err.Error())}
