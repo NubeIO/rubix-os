@@ -8,7 +8,7 @@ import (
 func (inst *Instance) schedule() {
 	j, ok := jobs.GetJobService()
 	if ok {
-		_, err := j.Every(60).Second().Do(inst.runSchedule)
+		_, err := j.Every(10).Second().Do(inst.runSchedule)
 		if err != nil {
 			log.Infof("system-plugin-schedule: error on create job %v\n", err)
 		}
