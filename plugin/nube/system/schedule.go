@@ -4,7 +4,6 @@ import (
 	"github.com/NubeIO/flow-framework/src/schedule"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"
@@ -13,7 +12,10 @@ import (
 func (inst *Instance) runSchedule() {
 	schedules, err := inst.db.GetSchedules()
 	if err != nil {
+		log.Errorf("system-plugin-schedule: GetSchedules %s", err.Error())
 		return
+	} else {
+		log.Infof("system-plugin-schedule: run schedule executaion, schedule count: %d", len(schedules))
 	}
 	for _, sch := range schedules {
 		ScheduleJSON, err := schedule.DecodeSchedule(sch.Schedule)
@@ -33,9 +35,6 @@ func (inst *Instance) runSchedule() {
 		}
 		_, err = time.LoadLocation(timezone)
 		if err != nil || timezone == "" { // If timezone field is not assigned or invalid, get timezone from System Time
-			if err != nil {
-				log.Error("system-plugin-schedule: CheckWeeklyScheduleCollection(): err on check timezone")
-			}
 			systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
 			if systemTimezone == "" {
 				zone, _ := utilstime.GetHardwareTZ()
@@ -49,44 +48,51 @@ func (inst *Instance) runSchedule() {
 		weeklyResult, err := schedule.WeeklyCheck(ScheduleJSON.Schedules.Weekly, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
 			log.Errorf("system-plugin-schedule: issue on WeeklyCheck %v\n", err)
+		} else {
+			log.Infof("system-plugin-schedule: weekly schedule: %s  is-active: %t", weeklyResult.Name, weeklyResult.IsActive)
 		}
 		// CHECK EVENT SCHEDULES
 		eventResult, err := schedule.EventCheck(ScheduleJSON.Schedules.Events, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
-			log.Errorf("system-plugin-schedule: issue on EventCheck %v\n", err)
+			log.Errorf("system-plugin-schedule: issue on eventResult %s", err.Error())
+		} else {
+			log.Infof("system-plugin-schedule: event schedule: %s  is-active: %t", eventResult.Name, eventResult.IsActive)
 		}
 		// Combine Event and Weekly schedule results.
 		weeklyAndEventResult, err := schedule.CombineScheduleCheckerResults(weeklyResult, eventResult)
+		if err != nil {
+			log.Errorf("system-plugin-schedule: issue on weeklyAndEventResult %s", err.Error())
+		} else {
+			log.Infof("system-plugin-schedule: weekly & event schedule: %s  is-active: %t", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive)
+		}
+		//
 		// CHECK EXCEPTION SCHEDULES
 		exceptionResult, err := schedule.ExceptionCheck(ScheduleJSON.Schedules.Exceptions, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
-			log.Errorf("system-plugin-schedule: issue on ExceptionCheck %v\n", err)
+			log.Errorf("system-plugin-schedule: issue on exceptionResult %s", err.Error())
+		} else {
+			log.Infof("system-plugin-schedule: exception schedule: %s  is-active: %t", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive)
 		}
 		if exceptionResult.CheckIfEmpty() {
-			log.Println("system-plugin-schedule: Exception schedule is empty")
+			log.Infof("system-plugin-schedule: exception schedule is empty: %s", exceptionResult.Name)
 		}
 
 		finalResult, err := schedule.ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult) // This applies the exception schedule to mask the combined weekly and event schedules.
 		if err != nil {
-			log.Errorf("system-plugin-schedule: issue on ApplyExceptionSchedule %v\n", err)
+			log.Errorf("system-plugin-schedule: final-result: %s", err.Error())
 		}
-
-		log.Infof("system-plugin-schedule: finalResult: %+v timezone: %s", finalResult.IsActive, timezone)
+		log.Infof("system-plugin-schedule: final-result: %s  is-active: %t timezone: %s", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive, timezone)
 
 		if sch != nil {
 			inst.store.Set(sch.Name, finalResult, -1)
-			s := new(model.Schedule)
 			if finalResult.IsActive {
-				s.IsActive = boolean.NewTrue()
+				sch.IsActive = boolean.NewTrue()
 			} else {
-				s.IsActive = boolean.NewFalse()
+				sch.IsActive = boolean.NewFalse()
 			}
-			if boolean.IsTrue(s.IsActive) != boolean.IsTrue(sch.IsActive) {
-				log.Printf("system-plugin-schedule: UPDATE SCHEDULE IN DB %v\n", sch.Name)
-				_, err = inst.db.UpdateSchedule(sch.UUID, s)
-				if err != nil {
-					log.Errorf("system-plugin-schedule: issue on UpdateSchedule %v\n", sch.UUID)
-				}
+			_, err = inst.db.UpdateSchedule(sch.UUID, sch)
+			if err != nil {
+				log.Errorf("system-plugin-schedule: issue on UpdateSchedule %s", sch.UUID)
 			}
 		}
 	}
