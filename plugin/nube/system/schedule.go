@@ -29,12 +29,13 @@ func (inst *Instance) runSchedule() {
 		}
 		scheduleNameToCheck := "ALL" // TODO: we need a way to specify the schedule name that is being checked for.
 
-		timezone := ScheduleJSON.Config.TimeZone
+		var timezone = ScheduleJSON.Config.TimeZone
 		if timezone == "" {
-			log.Error("system-plugin-schedule: CheckWeeklyScheduleCollection(): no timezone pass in from user")
+			timezone = sch.TimeZone
 		}
 		_, err = time.LoadLocation(timezone)
-		if err != nil || timezone == "" { // If timezone field is not assigned or invalid, get timezone from System Time
+		if timezone == "" || err != nil {
+			log.Error("system-plugin-schedule: CheckWeeklyScheduleCollection(): no timezone pass in from user")
 			systemTimezone := strings.Split((*utilstime.SystemTime()).HardwareClock.Timezone, " ")[0]
 			if systemTimezone == "" {
 				zone, _ := utilstime.GetHardwareTZ()
@@ -42,8 +43,8 @@ func (inst *Instance) runSchedule() {
 			} else {
 				timezone = systemTimezone
 			}
+			sch.TimeZone = timezone
 		}
-
 		// CHECK WEEKLY SCHEDULES
 		weeklyResult, err := schedule.WeeklyCheck(ScheduleJSON.Schedules.Weekly, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
@@ -82,14 +83,12 @@ func (inst *Instance) runSchedule() {
 			log.Errorf("system-plugin-schedule: final-result: %s", err.Error())
 		}
 		log.Infof("system-plugin-schedule: final-result: %s  is-active: %t timezone: %s", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive, timezone)
-
 		if sch != nil {
 			inst.store.Set(sch.Name, finalResult, -1)
-			if finalResult.IsActive {
-				sch.IsActive = boolean.NewTrue()
-			} else {
-				sch.IsActive = boolean.NewFalse()
-			}
+			sch.IsActive = boolean.New(finalResult.IsActive)
+			sch.ActiveWeekly = weeklyResult.IsActive
+			sch.ActiveException = exceptionResult.IsActive
+			sch.ActiveEvent = eventResult.IsActive
 			_, err = inst.db.UpdateSchedule(sch.UUID, sch)
 			if err != nil {
 				log.Errorf("system-plugin-schedule: issue on UpdateSchedule %s", sch.UUID)
