@@ -82,6 +82,7 @@ func main() {
 			go db.PublishPointsList("")
 			go db.RePublishPointsCov()
 			go db.PublishPointsListListener()
+			go db.PublishSchedulesListener()
 			go db.PublishDeviceInfo()
 			go db.PublishFetchPointListener()
 			go db.PublishPointWriteListener()

@@ -14,11 +14,12 @@ import (
 )
 
 const (
-	separator        = "/"
-	mqttTopic        = "rubix/points/value"
-	fetchPointsTopic = "rubix/platform/points/publish"
-	mqttTopicCov     = "cov"
-	mqttTopicCovAll  = "all"
+	separator           = "/"
+	mqttTopic           = "rubix/points/value"
+	fetchPointsTopic    = "rubix/platform/points/publish"
+	fetchSchedulesTopic = "rubix/platform/schedules/publish"
+	mqttTopicCov        = "cov"
+	mqttTopicCovAll     = "all"
 )
 
 var pointMqtt *PointMqtt
