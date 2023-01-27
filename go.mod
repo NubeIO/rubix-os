@@ -31,7 +31,7 @@ require go.bug.st/serial v1.3.2
 
 require (
 	github.com/NubeDev/modbus v0.0.2
-	github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.6
+	github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.9
 	github.com/PaesslerAG/gval v1.1.1
 	github.com/grid-x/modbus v0.0.0-20220829110112-006eee73392e
 	github.com/influxdata/influxdb-client-go/v2 v2.5.1
