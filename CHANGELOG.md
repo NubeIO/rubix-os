@@ -1,13 +1,14 @@
 # CHANGELOG
+## [v0.9.26](https://github.com/NubeIO/flow-framework/tree/v0.9.26) (2022-01-28)
+
+- Added mqtt api for schedules
+
 ## [v0.9.25](https://github.com/NubeIO/flow-framework/tree/v0.9.25) (2022-01-25)
 
 - Add meta tags query param on network, device and point #824
 - Lora updates v1 #825
 - small updates to schedule #822
 - update to bacnet master #821
-
-
-
 
 
 ## [v0.9.24](https://github.com/NubeIO/flow-framework/tree/v0.9.24) (2022-01-19)
