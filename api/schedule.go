@@ -8,6 +8,8 @@ import (
 type ScheduleDatabase interface {
 	GetSchedules() ([]*model.Schedule, error)
 	GetSchedule(uuid string) (*model.Schedule, error)
+	GetSchedulesResult() ([]*model.Schedule, error)
+	GetScheduleResult(uuid string) (*model.Schedule, error)
 	GetOneScheduleByArgs(Args) (*model.Schedule, error)
 	CreateSchedule(body *model.Schedule) (*model.Schedule, error)
 	UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error)
@@ -19,20 +21,31 @@ type ScheduleAPI struct {
 	DB ScheduleDatabase
 }
 
+func (a *ScheduleAPI) GetSchedules(ctx *gin.Context) {
+	q, err := a.DB.GetSchedules()
+	ResponseHandler(q, err, ctx)
+}
+
 func (a *ScheduleAPI) GetSchedule(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.GetSchedule(uuid)
 	ResponseHandler(q, err, ctx)
 }
 
-func (a *ScheduleAPI) GetOneScheduleByArgs(ctx *gin.Context) {
-	args := buildScheduleArgs(ctx)
-	q, err := a.DB.GetOneScheduleByArgs(args)
+func (a *ScheduleAPI) GetSchedulesResult(ctx *gin.Context) {
+	q, err := a.DB.GetSchedulesResult()
 	ResponseHandler(q, err, ctx)
 }
 
-func (a *ScheduleAPI) GetSchedules(ctx *gin.Context) {
-	q, err := a.DB.GetSchedules()
+func (a *ScheduleAPI) GetScheduleResult(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := a.DB.GetScheduleResult(uuid)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *ScheduleAPI) GetOneScheduleByArgs(ctx *gin.Context) {
+	args := buildScheduleArgs(ctx)
+	q, err := a.DB.GetOneScheduleByArgs(args)
 	ResponseHandler(q, err, ctx)
 }
 

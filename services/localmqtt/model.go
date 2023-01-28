@@ -12,6 +12,11 @@ type PointListPayload struct {
 	Name string `json:"name"`
 }
 
+type ScheduleList struct {
+	UUID string `json:"uuid"`
+	Name string `json:"name"`
+}
+
 type PointCovPayload struct {
 	Value    *float64 `json:"value"`
 	ValueRaw *float64 `json:"value_raw"`

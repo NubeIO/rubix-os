@@ -86,9 +86,9 @@ func (inst *Instance) runSchedule() {
 		if sch != nil {
 			inst.store.Set(sch.Name, finalResult, -1)
 			sch.IsActive = boolean.New(finalResult.IsActive)
-			sch.ActiveWeekly = weeklyResult.IsActive
-			sch.ActiveException = exceptionResult.IsActive
-			sch.ActiveEvent = eventResult.IsActive
+			sch.ActiveWeekly = boolean.New(weeklyResult.IsActive)
+			sch.ActiveException = boolean.New(exceptionResult.IsActive)
+			sch.ActiveEvent = boolean.New(eventResult.IsActive)
 			_, err = inst.db.UpdateSchedule(sch.UUID, sch)
 			if err != nil {
 				log.Errorf("system-plugin-schedule: issue on UpdateSchedule %s", sch.UUID)

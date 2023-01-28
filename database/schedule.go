@@ -25,6 +25,28 @@ func (d *GormDatabase) GetSchedule(uuid string) (*model.Schedule, error) {
 	return scheduleModel, nil
 }
 
+func (d *GormDatabase) GetSchedulesResult() ([]*model.Schedule, error) {
+	var scheduleModel []*model.Schedule
+	query := d.DB.Find(&scheduleModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	for _, schedule := range scheduleModel {
+		schedule.Schedule = nil
+	}
+	return scheduleModel, nil
+}
+
+func (d *GormDatabase) GetScheduleResult(uuid string) (*model.Schedule, error) {
+	var scheduleModel *model.Schedule
+	query := d.DB.Where("uuid = ? ", uuid).First(&scheduleModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	scheduleModel.Schedule = nil
+	return scheduleModel, nil
+}
+
 func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, error) {
 	var scheduleModel *model.Schedule
 	query := d.buildScheduleQuery(args)

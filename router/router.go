@@ -445,8 +445,10 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		schRoutes := apiRoutes.Group("/schedules")
 		{
 			schRoutes.GET("", schHandler.GetSchedules)
-			schRoutes.POST("", schHandler.CreateSchedule)
 			schRoutes.GET("/:uuid", schHandler.GetSchedule)
+			schRoutes.GET("/result", schHandler.GetSchedulesResult)
+			schRoutes.GET("/result/:uuid", schHandler.GetScheduleResult)
+			schRoutes.POST("", schHandler.CreateSchedule)
 			schRoutes.GET("/one/args", schHandler.GetOneScheduleByArgs)
 			schRoutes.PATCH("/:uuid", schHandler.UpdateSchedule)
 			schRoutes.PATCH("/write/:uuid", schHandler.ScheduleWrite)
