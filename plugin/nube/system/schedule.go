@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/src/schedule"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	pprint "github.com/NubeIO/lib-networking/print"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	log "github.com/sirupsen/logrus"
 	"strings"
@@ -84,11 +85,17 @@ func (inst *Instance) runSchedule() {
 		}
 		log.Infof("system-plugin-schedule: final-result: %s  is-active: %t timezone: %s", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive, timezone)
 		if sch != nil {
+			pprint.PrintJOSN(finalResult)
 			inst.store.Set(sch.Name, finalResult, -1)
 			sch.IsActive = boolean.New(finalResult.IsActive)
 			sch.ActiveWeekly = boolean.New(weeklyResult.IsActive)
 			sch.ActiveException = boolean.New(exceptionResult.IsActive)
 			sch.ActiveEvent = boolean.New(eventResult.IsActive)
+			sch.Payload = finalResult.Payload
+			sch.PeriodStartString = finalResult.PeriodStartString
+			sch.PeriodStopString = finalResult.PeriodStopString
+			sch.NextStartString = finalResult.NextStartString
+			sch.NextStopString = finalResult.NextStopString
 			_, err = inst.db.UpdateSchedule(sch.UUID, sch)
 			if err != nil {
 				log.Errorf("system-plugin-schedule: issue on UpdateSchedule %s", sch.UUID)
