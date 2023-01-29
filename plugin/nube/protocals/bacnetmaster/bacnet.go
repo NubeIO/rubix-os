@@ -21,7 +21,7 @@ import (
 )
 
 func (inst *Instance) bacnetNetworkInit() {
-	log.Infof("bacnet-master bacnetNetworkInit enable network")
+	log.Infof("bacnet-master bacnetNetworkInit enable network plg-uuid: %s", inst.pluginUUID)
 	networks, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true})
 	if err != nil {
 		log.Errorln("bacnet-master bacnetNetworkInit err:", err.Error())
@@ -30,18 +30,18 @@ func (inst *Instance) bacnetNetworkInit() {
 	for _, net := range networks {
 		err := inst.bacnetStoreNetwork(net)
 		if err != nil {
-			log.Errorln("bacnet-master init network error:", err)
+			log.Errorf("bacnet-master init network error: %s name: %s", err.Error(), net.Name)
 			continue
 		} else {
-			log.Infof("bacnet-master init network:%s", net.Name)
+			log.Infof("bacnet-master init network: %s", net.Name)
 		}
 		for _, dev := range net.Devices {
 			err := inst.bacnetStoreDevice(dev)
 			if err != nil {
-				log.Errorln("bacnet-master init device error:", err)
+				log.Errorf("bacnet-master init device error: %s name: %s", err.Error(), dev.Name)
 				continue
 			} else {
-				log.Infof("bacnet-master init device:%s", dev.Name)
+				log.Infof("bacnet-master init device: %s", dev.Name)
 			}
 		}
 	}
@@ -77,7 +77,7 @@ func (inst *Instance) closeBacnetStoreNetwork(networkUUID string) (bool, error) 
 	if err != nil {
 		return false, err
 	}
-	net.NetworkClose()
+	net.NetworkClose(false)
 	return true, nil
 }
 
