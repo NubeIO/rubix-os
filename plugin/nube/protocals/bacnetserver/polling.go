@@ -154,7 +154,7 @@ func (inst *Instance) SyncFFPointWithBACnetServerPoint(pnt *model.Point, devUUID
 		}
 		pnt, err = inst.pointUpdate(pnt, writeVal, true, true)
 		return pnt, nil
-	} else { // Do these actions fort AV, AO, BV, BO
+	} else { // Do these actions for AV, AO, BV, BO
 		// We need to read the priority array of our FF point, and the BACnet Server point, then update the FF point and BACnet Server point
 
 		// Get Priority array of FF

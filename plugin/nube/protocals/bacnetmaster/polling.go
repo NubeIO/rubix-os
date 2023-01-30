@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/NubeDev/bacnet/btypes/priority"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/services/pollqueue"
 	"github.com/NubeIO/flow-framework/src/poller"
@@ -150,11 +151,13 @@ func (inst *Instance) BACnetMasterPolling() error {
 
 			// inst.bacnetDebugMsg(fmt.Sprintf("BACNET POLL! : Priority: %s, Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s, WriteRequired: %t, ReadRequired: %t", pp.PollPriority, net.UUID, dev.UUID, pnt.UUID, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
 
+			/* TODO: This has been removed as we are now writing all priorities on every cycle
 			if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
 				inst.bacnetDebugMsg("polling not required on this point")
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.NORMAL_RETRY, callback)
 				continue
 			}
+			*/
 
 			writemode.SetPriorityArrayModeBasedOnWriteMode(pnt) // ensures the point PointPriorityArrayMode is set correctly
 
@@ -197,59 +200,70 @@ func (inst *Instance) BACnetMasterPolling() error {
 				}
 			*/
 
-			var responseValue float64
+			var highestPriorityValue *float64
 			writeSuccess := false
-			if writemode.IsWriteable(pnt.WriteMode) && boolean.IsTrue(pnt.WritePollRequired) { // DO WRITE IF REQUIRED
+			readSuccess := false
+			// if writemode.IsWriteable(pnt.WriteMode) && boolean.IsTrue(pnt.WritePollRequired) { // DO WRITE IF REQUIRED  // TODO: this was removed because we are now writing to every priority on each cycle
+			if writemode.IsWriteable(pnt.WriteMode) { // DO WRITE IF REQUIRED
 				inst.bacnetDebugMsg(fmt.Sprintf("bacnet write point: %+v", pnt))
 				// pnt.PrintPointValues()
-				if pnt.WriteValue != nil {
-					err = inst.doWrite(pnt, net.UUID, dev.UUID)
-					if err != nil {
-						inst.bacnetErrorMsg("point write error: ", err)
-						err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-						netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
-						continue
-					}
-					responseValue = float.NonNil(pnt.WriteValue)
-					writeSuccess = true
-					inst.bacnetDebugMsg(fmt.Sprintf("bacnet-write response: responseValue %f, point UUID: %s", responseValue, pnt.UUID))
-				} else {
-					writeSuccess = true // successful because there is no value to write.  Otherwise the point will short cycle.
-					inst.bacnetDebugMsg("bacnet write point error: no value in priority array to write")
-				}
-			}
-
-			readSuccess := false
-			if boolean.IsTrue(pnt.ReadPollRequired) { // DO READ IF REQUIRED
-				responseValue, err = inst.doReadValue(pnt, net.UUID, dev.UUID)
+				highestPriorityValue, err = inst.doWriteAllValues(pnt, net.UUID, dev.UUID)
 				if err != nil {
-					inst.bacnetErrorMsg("point read error: ", err)
-					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
+					inst.bacnetErrorMsg("point write error: ", err)
+					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 					netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
 					continue
 				}
-				isChange := !float.ComparePtrValues(pnt.PresentValue, &responseValue)
-				if isChange {
-					if err != nil {
-						netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, true, false, pollqueue.NORMAL_RETRY, callback)
-						continue
+				writeSuccess = true
+				if highestPriorityValue == nil {
+					inst.bacnetDebugMsg(fmt.Sprintf("bacnet write point highestPriorityValue: %+v", highestPriorityValue))
+				} else {
+					inst.bacnetDebugMsg(fmt.Sprintf("bacnet write point highestPriorityValue: %+v", *highestPriorityValue))
+				}
+
+				_, err = inst.pointUpdate(pnt, highestPriorityValue, true, true)
+
+			} else {
+				// Get Priority Array of BACnet Point
+				var currentBACServPriority *priority.Float32
+				currentBACServPriority, err = inst.doReadPriority(pnt, net.UUID, dev.UUID)
+				if err != nil {
+					inst.bacnetErrorMsg("BACnetMasterPolling(): doReadPriority error:", err)
+					inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
+					netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+					continue
+				}
+				if currentBACServPriority == nil {
+					inst.bacnetErrorMsg("BACnetServerPolling(): BACnet Server Point returned an empty priority array; skipped")
+					inst.pointUpdateErr(pnt, "BACnet Server Point returned an empty priority array", model.MessageLevel.Fail, model.CommonFaultCode.PointError)
+					netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+					continue
+				}
+				currentValueF32 := currentBACServPriority.HighestFloat32()
+				if currentValueF32 == nil {
+					highestPriorityValue = nil
+				} else {
+					highestPriorityValue = float.New(float64(*currentValueF32))
+				}
+				currentBACServPriorityMap := ConvertPriorityToMap(*currentBACServPriority)
+				for key, val := range currentBACServPriorityMap {
+					if val == nil {
+						inst.bacnetDebugMsg("BACnetServerPolling() BACnetServerPoint: key: ", key, "val", val)
+					} else {
+						inst.bacnetDebugMsg("BACnetServerPolling() BACnetServerPoint: key: ", key, "val", *val)
 					}
 				}
 				readSuccess = true
-				inst.bacnetDebugMsg(fmt.Sprintf("bacnet-read response: responseValue %f, point UUID: %s", responseValue, pnt.UUID))
+				inst.bacnetDebugMsg(fmt.Sprintf("bacnet write point currentBACServPriorityMap: %+v", currentBACServPriorityMap))
+				_, err = inst.pointUpdateFromPriorityArray(pnt, currentBACServPriorityMap, highestPriorityValue, true)
+
 			}
 
-			// update point in DB if required
-			// For write_once and write_always type, write value should become present value
-			writeValueToPresentVal := (pnt.WriteMode == model.WriteOnce || pnt.WriteMode == model.WriteAlways) && writeSuccess && pnt.WriteValue != nil
-
-			if readSuccess || writeValueToPresentVal {
-				if writeValueToPresentVal {
-					responseValue = *pnt.WriteValue
-					fmt.Println("BACnetPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
-					readSuccess = true
-				}
-				_, err = inst.pointUpdate(pnt, responseValue, readSuccess, true)
+			if !readSuccess && !writeSuccess {
+				inst.bacnetErrorMsg("no read/write performed: ", err)
+				err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+				continue
 			}
 
 			/*

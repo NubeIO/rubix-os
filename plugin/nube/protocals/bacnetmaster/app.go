@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/services/pollqueue"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	address "github.com/NubeIO/lib-networking/ip"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
@@ -548,11 +549,22 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess, clearFaults bool) (*model.Point, error) {
+func (inst *Instance) pointUpdate(point *model.Point, value *float64, readSuccess, clearFaults bool) (*model.Point, error) {
 	if readSuccess {
-		point.OriginalValue = float.New(value)
+		point.OriginalValue = value
 	}
 	point, err := inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
+	if err != nil {
+		inst.bacnetDebugMsg("UpdatePoint() error: ", err)
+		return nil, err
+	}
+	return point, nil
+}
+
+func (inst *Instance) pointUpdateFromPriorityArray(point *model.Point, priorityArray map[string]*float64, presentValue *float64, clearFaults bool) (*model.Point, error) {
+	point, err := priorityarray.ApplyMapToPriorityArray(point, &priorityArray)
+	point.OriginalValue = presentValue
+	point, err = inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
 	if err != nil {
 		inst.bacnetDebugMsg("UpdatePoint() error: ", err)
 		return nil, err
