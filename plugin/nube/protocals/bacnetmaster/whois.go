@@ -53,10 +53,15 @@ func (inst *Instance) masterWhoIs(opts *WhoIsOpts) (resp []*model.Device, err er
 	log.Infof("run bacnet whoIs interface: %s ip: %s port: %d deviceID %d", interfaceName, localDeviceIP, localDevicePort, localDeviceId)
 	localDevice, err := network.New(&network.Network{Interface: interfaceName, Port: localDevicePort})
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		return
 	}
-	defer localDevice.NetworkClose()
+	defer func(localDevice *network.Network, closeLogs bool) {
+		err := localDevice.NetworkClose(closeLogs)
+		if err != nil {
+			log.Error(err)
+		}
+	}(localDevice, false)
 	go localDevice.NetworkRun()
 	var devices []btypes.Device
 	if opts.WhoIs {
@@ -67,7 +72,7 @@ func (inst *Instance) masterWhoIs(opts *WhoIsOpts) (resp []*model.Device, err er
 			NetworkNumber:   opts.NetworkNumber,
 		})
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 			return
 		}
 	} else {
@@ -78,7 +83,7 @@ func (inst *Instance) masterWhoIs(opts *WhoIsOpts) (resp []*model.Device, err er
 			NetworkNumber:   opts.NetworkNumber,
 		})
 		if err != nil {
-			fmt.Println(err)
+			log.Error(err)
 			return
 		}
 	}
