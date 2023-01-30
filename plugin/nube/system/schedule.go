@@ -24,10 +24,10 @@ func (inst *Instance) runSchedule() {
 			return
 		}
 		if !boolean.IsTrue(sch.Enable) {
-			log.Infoln("system-plugin-schedule: runSchedule() sch is not enabled so skip logic name:", sch.Name)
+			log.Infoln("system-plugin-schedule: runSchedule() sch is not enabled so skip logic. name:", sch.Name)
 			continue
 		}
-		scheduleNameToCheck := "ALL" // TODO: we need a way to specify the schedule name that is being checked for.
+		scheduleNameToCheck := "ALL" // TODO: we may need a way to specify the schedule name that is being checked for.
 
 		var timezone = ScheduleJSON.Config.TimeZone
 		if timezone == "" {

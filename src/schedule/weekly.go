@@ -108,22 +108,24 @@ func CheckWeeklyScheduleCollection(scheduleMap TypeWeekly, scheduleName, timezon
 	count := 0
 	var err error
 	for _, scheduleEntry := range scheduleMap {
-		if scheduleName == "ANY" || scheduleName == "ALL" || scheduleEntry.Name == scheduleName {
-			scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
-			// fmt.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
-			singleResult = CheckWeeklyScheduleEntry(scheduleEntry, timezone)
-			singleResult.Name = scheduleName
-			// fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)
-			if count == 0 {
-				finalResult = singleResult
-			} else {
-				finalResult, err = CombineScheduleCheckerResults(finalResult, singleResult)
-				if err != nil {
-					log.Errorf("CheckEventScheduleEntry %v\n", err)
+		if scheduleEntry.Enable == nil || (scheduleEntry.Enable != nil && *scheduleEntry.Enable) {
+			if scheduleName == "ANY" || scheduleName == "ALL" || scheduleEntry.Name == scheduleName {
+				scheduleEntry = ConvertDaysStringsToInt(scheduleEntry)
+				// fmt.Println("WEEKLY SCHEDULE ", i, ": ", scheduleEntry)
+				singleResult = CheckWeeklyScheduleEntry(scheduleEntry, timezone)
+				singleResult.Name = scheduleName
+				// fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)
+				if count == 0 {
+					finalResult = singleResult
+				} else {
+					finalResult, err = CombineScheduleCheckerResults(finalResult, singleResult)
+					if err != nil {
+						log.Errorf("CheckEventScheduleEntry %v\n", err)
+					}
 				}
+				// fmt.Println("finalResult ", finalResult)
+				count++
 			}
-			// fmt.Println("finalResult ", finalResult)
-			count++
 		}
 	}
 	AddHumanReadableDatetimes(&finalResult)

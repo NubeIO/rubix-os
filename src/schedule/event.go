@@ -70,19 +70,21 @@ func CheckEventScheduleEntry(entry EventScheduleEntry, timezone string) (Schedul
 func CheckEventScheduleCollection(scheduleMap TypeEvents, scheduleName, timezone string) ScheduleCheckerResult {
 	finalResult := ScheduleCheckerResult{}
 	for _, scheduleEntry := range scheduleMap {
-		if scheduleName == "ANY" || scheduleName == "ALL" || scheduleEntry.Name == scheduleName {
-			// fmt.Println("EVENT SCHEDULE ", i, ": ", scheduleEntry)
-			singleResult, err := CheckEventScheduleEntry(scheduleEntry, timezone)
-			singleResult.Name = scheduleName
-			// fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)
-			if err != nil {
-				log.Errorf("CheckEventScheduleEntry %v\n", err)
-			}
+		if scheduleEntry.Enable == nil || (scheduleEntry.Enable != nil && *scheduleEntry.Enable) {
+			if scheduleName == "ANY" || scheduleName == "ALL" || scheduleEntry.Name == scheduleName {
+				// fmt.Println("EVENT SCHEDULE ", i, ": ", scheduleEntry)
+				singleResult, err := CheckEventScheduleEntry(scheduleEntry, timezone)
+				singleResult.Name = scheduleName
+				// fmt.Println("finalResult ", finalResult, "singleResult: ", singleResult)
+				if err != nil {
+					log.Errorf("CheckEventScheduleEntry %v\n", err)
+				}
 
-			finalResult, err = CombineScheduleCheckerResults(finalResult, singleResult)
-			// fmt.Println("finalResult ", finalResult)
-			if err != nil {
-				log.Errorf("CheckEventScheduleEntry %v\n", err)
+				finalResult, err = CombineScheduleCheckerResults(finalResult, singleResult)
+				// fmt.Println("finalResult ", finalResult)
+				if err != nil {
+					log.Errorf("CheckEventScheduleEntry %v\n", err)
+				}
 			}
 		}
 	}
