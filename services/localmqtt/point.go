@@ -26,7 +26,7 @@ var pointMqtt *PointMqtt
 var retainMessage bool
 var globalBroadcast bool
 
-func Init(ip string, conf *config.Configuration) error {
+func Init(ip string, conf *config.Configuration, onConnected interface{}) error {
 	pm := new(PointMqtt)
 	pm.QOS = mqttclient.QOS(conf.MQTT.QOS)
 	c, err := mqttclient.NewClient(mqttclient.ClientOptions{
@@ -39,7 +39,7 @@ func Init(ip string, conf *config.Configuration) error {
 		ConnectRetryInterval: conf.MQTT.ConnectRetryInterval,
 		AutoReconnect:        conf.MQTT.AutoReconnect,
 		MaxReconnectInterval: conf.MQTT.MaxReconnectInterval,
-	})
+	}, onConnected)
 	if err != nil {
 		log.Info("MQTT connection error:", err)
 		return err
