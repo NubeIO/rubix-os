@@ -203,15 +203,9 @@ type Point struct {
 	WriteMode struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
-		Options  []string `json:"options" default:"[\"read_once\",\"read_only\",\"write_once\",\"write_once_read_once\",\"write_always\",\"write_once_then_read\",\"write_and_maintain\"]"`
+		Options  []string `json:"options" default:"[\"read_only\",\"write_always\"]"`
 		Default  string   `json:"default" default:"read_only"`
 	} `json:"write_mode"`
-	WritePriority struct {
-		Type     string `json:"type" default:"int"`
-		Required bool   `json:"required" default:"false"`
-		Options  []int  `json:"options" default:"[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]"`
-		Default  int    `json:"default" default:"16"`
-	} `json:"write_priority"`
 	PollPriority struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"true"`
