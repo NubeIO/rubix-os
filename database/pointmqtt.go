@@ -257,7 +257,7 @@ func (d *GormDatabase) PublishPointCov(uuid string) error {
 	if err != nil {
 		return err
 	}
-	localmqtt.PublishPointCov(network, device, point)
+	go localmqtt.PublishPointCov(network, device, point)
 	return nil
 }
 

@@ -3,6 +3,7 @@ package mqttclient
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -49,13 +50,16 @@ type Client struct {
 
 // ClientOptions is the list of options used to create c client
 type ClientOptions struct {
-	Servers        []string // The list of broker hostnames to connect to
-	ClientID       string   // If left empty c uuid will automatically be generated
-	Username       string   // If not set then authentication will not be used
-	Password       string   // Will only be used if the username is set
-	SetKeepAlive   time.Duration
-	SetPingTimeout time.Duration
-	AutoReconnect  bool // If the client should automatically try to reconnect when the connection is lost
+	Servers              []string // The list of broker hostnames to connect to
+	ClientID             string   // If left empty c uuid will automatically be generated
+	Username             string   // If not set then authentication will not be used
+	Password             string   // Will only be used if the username is set
+	SetKeepAlive         time.Duration
+	SetPingTimeout       time.Duration
+	ConnectRetry         *bool // Automatically retry the connection in the event of a failure
+	ConnectRetryInterval time.Duration
+	AutoReconnect        *bool // If the client should automatically try to reconnect when the connection is lost
+	MaxReconnectInterval time.Duration
 }
 
 type consumer struct {
@@ -142,8 +146,17 @@ func NewClient(options ClientOptions) (c *Client, err error) {
 	if options.SetPingTimeout == 0 {
 		options.SetPingTimeout = 5
 	}
+	if options.ConnectRetryInterval == 0 {
+		options.ConnectRetryInterval = 10
+	}
+	if options.MaxReconnectInterval == 0 {
+		options.MaxReconnectInterval = 10
+	}
 
-	opts.SetAutoReconnect(options.AutoReconnect)
+	opts.SetConnectRetry(boolean.TrueNil(options.ConnectRetry))
+	opts.SetConnectRetryInterval(options.ConnectRetryInterval * time.Second)
+	opts.SetAutoReconnect(boolean.TrueNil(options.AutoReconnect))
+	opts.SetMaxReconnectInterval(options.MaxReconnectInterval * time.Second)
 	opts.SetKeepAlive(options.SetKeepAlive * time.Second)
 	opts.SetPingTimeout(options.SetPingTimeout * time.Second)
 

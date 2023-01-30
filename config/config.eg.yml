@@ -53,7 +53,10 @@ mqtt:
   password: ""
   setkeepalive: "0s"
   setpingtimeout: "0s"
-  autoreconnect: false
+  connectretry: true
+  connectretryinterval: "0s"
+  autoreconnect: true
+  maxreconnectinterval: "0s"
   qos: 1
   retain: true
   globalbroadcast: false

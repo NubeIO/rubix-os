@@ -58,17 +58,20 @@ type Configuration struct {
 	}
 	SecretKey string
 	MQTT      struct {
-		Enable          *bool         `default:"true"`
-		Address         string        `default:"localhost"`
-		Port            int           `default:"1883"`
-		Username        string        `default:""`
-		Password        string        `default:""`
-		SetKeepAlive    time.Duration `default:"0s"`
-		SetPingTimeout  time.Duration `default:"0s"`
-		AutoReconnect   bool          `default:"true"`
-		QOS             int           `default:"1"`
-		Retain          *bool         `default:"true"`
-		GlobalBroadcast *bool         `default:"false"` // if set to true will include the plat details in the topic
+		Enable               *bool         `default:"true"`
+		Address              string        `default:"localhost"`
+		Port                 int           `default:"1883"`
+		Username             string        `default:""`
+		Password             string        `default:""`
+		SetKeepAlive         time.Duration `default:"0s"`
+		SetPingTimeout       time.Duration `default:"0s"`
+		ConnectRetry         *bool         `default:"true"`
+		ConnectRetryInterval time.Duration `default:"10s"`
+		AutoReconnect        *bool         `default:"true"`
+		MaxReconnectInterval time.Duration `default:"10s"`
+		QOS                  int           `default:"1"`
+		Retain               *bool         `default:"true"`
+		GlobalBroadcast      *bool         `default:"false"` // if set to true will include the plat details in the topic
 	}
 }
 
