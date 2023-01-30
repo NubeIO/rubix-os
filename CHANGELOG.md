@@ -1,4 +1,10 @@
 # CHANGELOG
+
+## [v0.9.28](https://github.com/NubeIO/flow-framework/tree/v0.9.28) (2023-01-30)
+
+- Add mqtt connect retry and auto reconnect
+- Fix: MQTT subscribers listening
+
 ## [v0.9.27](https://github.com/NubeIO/flow-framework/tree/v0.9.27) (2023-01-30)
 
 - Updated bacnetmaster to use all priorities
