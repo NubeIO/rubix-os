@@ -41,3 +41,10 @@ func NonNil(b *bool) bool {
 	}
 	return *b
 }
+
+func TrueNil(b *bool) bool {
+	if b == nil {
+		return true
+	}
+	return *b
+}
