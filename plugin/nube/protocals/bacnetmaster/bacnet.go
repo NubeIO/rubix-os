@@ -5,18 +5,22 @@ import (
 	"fmt"
 	"github.com/NubeDev/bacnet"
 	"github.com/NubeDev/bacnet/btypes"
+	"github.com/NubeDev/bacnet/btypes/priority"
 	"github.com/NubeDev/bacnet/btypes/segmentation"
 	"github.com/NubeDev/bacnet/network"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	address "github.com/NubeIO/lib-networking/ip"
 	"github.com/NubeIO/lib-networking/networking"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/iancoleman/strcase"
 	log "github.com/sirupsen/logrus"
+	"reflect"
+	"regexp"
 	"strconv"
 )
 
@@ -201,6 +205,57 @@ func (inst *Instance) doReadValue(pnt *model.Point, networkUUID, deviceUUID stri
 	return outValue, nil
 }
 
+func (inst *Instance) doReadPriority(pnt *model.Point, networkUUID, deviceUUID string) (pri *priority.Float32, err error) {
+	object, _, _, _ := setObjectType(pnt.ObjectType)
+	bp := &network.Point{
+		ObjectID:   btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
+		ObjectType: object,
+	}
+	// get network
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	if err != nil {
+		return nil, err
+	}
+	go net.NetworkRun()
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
+	if err != nil {
+		return nil, err
+	}
+	inst.bacnetDebugMsg("about to do dev.PointReadPriority(bp)")
+	return dev.PointReadPriority(bp)
+}
+
+func (inst *Instance) doRelease(pnt *model.Point, networkUUID, deviceUUID string, priority uint8) error {
+	object, _, _, _ := setObjectType(pnt.ObjectType)
+	if priority <= 0 || priority > 16 {
+		return errors.New("invalid priority to doRelease()")
+	}
+	bp := &network.Point{
+		ObjectID:         btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
+		ObjectType:       object,
+		WriteNull:        false,
+		WritePriority:    priority,
+		ReadPresentValue: false,
+		ReadPriority:     false,
+	}
+	net, err := inst.getBacnetStoreNetwork(networkUUID)
+	if err != nil {
+		return err
+	}
+	go net.NetworkRun()
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
+	if err != nil {
+		return err
+	}
+	err = dev.PointReleasePriority(bp, priority)
+	if err != nil {
+		inst.bacnetErrorMsg("release-priority:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " priority:", priority, " error:", err)
+		return err
+	}
+	inst.bacnetDebugMsg("POINT-RELEASE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " priority:", priority)
+	return nil
+}
+
 func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) error {
 	if pnt.WriteValue == nil {
 		return errors.New("bacnet-write: point has no WriteValue")
@@ -253,6 +308,83 @@ func (inst *Instance) doWrite(pnt *model.Point, networkUUID, deviceUUID string) 
 	}
 	log.Infoln("bacnet-master-POINT-WRITE:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
 	return nil
+}
+
+func (inst *Instance) doWriteAllValues(pnt *model.Point, networkUUID, deviceUUID string) (highestPriorityValue *float64, err error) {
+	object, isWrite, isBool, _ := setObjectType(pnt.ObjectType)
+	if !isWrite {
+		return nil, errors.New("bacnet-write: point is not a writeable type (AI/BI)")
+	}
+
+	// get network // TODO: Maybe this has to be run for each write?
+	net, err := inst.buildBacnetForAction(networkUUID, "read")
+	if err != nil {
+		return nil, err
+	}
+	go net.NetworkRun()
+	dev, err := inst.getBacnetStoreDevice(deviceUUID)
+	if err != nil {
+		return nil, errors.New("bacnet-write: error getting BACnet device details")
+	}
+
+	priorityArray := pnt.Priority
+	if priorityArray == nil {
+		return nil, errors.New("bacnet-write: point has no PriorityArray")
+	}
+	priorityMap := priorityarray.ConvertToMap(*pnt.Priority)
+	var writePriority int
+	var bp *network.Point
+	highestPriorityWithValue := 16
+
+	for key, val := range priorityMap {
+		writePriority, _ = strconv.Atoi(regexp.MustCompile("[0-9]+").FindString(key))
+		if writePriority <= 0 || writePriority > 16 {
+			writePriority = 16
+		}
+		bp = &network.Point{
+			ObjectID:         btypes.ObjectInstance(integer.NonNil(pnt.ObjectId)),
+			ObjectType:       object,
+			WriteNull:        false,
+			WritePriority:    uint8(writePriority),
+			ReadPresentValue: false,
+			ReadPriority:     false,
+		}
+
+		if val == nil {
+			err = dev.PointReleasePriority(bp, uint8(writePriority))
+			if err != nil {
+				inst.bacnetErrorMsg("bacnet-master-write-release-priority:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
+				continue
+			}
+			log.Infoln("bacnet-master-point-release-priority:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
+		} else {
+			if isBool {
+				err = dev.PointWriteBool(bp, float64ToUint32(*val))
+				if err != nil {
+					inst.bacnetErrorMsg("bacnet-master-write-bool:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", *val, " writePriority", writePriority, " error:", err)
+					continue
+				}
+			} else if pnt.ObjectType == "multi_state_output" || pnt.ObjectType == "multi_state_value" {
+				err = dev.PointWriteMultiState(bp, float64ToUint32(*val))
+				if err != nil {
+					inst.bacnetErrorMsg("bacnet-master-write-multi-state:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", *val, " writePriority", writePriority, " error:", err)
+					continue
+				}
+			} else {
+				err = dev.PointWriteAnalogue(bp, float64ToFloat32(*val))
+				if err != nil {
+					inst.bacnetErrorMsg("bacnet-master-write-analogue:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", *val, " writePriority", writePriority, " error:", err)
+					continue
+				}
+			}
+			log.Infoln("bacnet-master-point-write:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", *val, " writePriority", writePriority)
+			if writePriority < highestPriorityWithValue {
+				highestPriorityWithValue = writePriority
+				highestPriorityValue = val
+			}
+		}
+	}
+	return highestPriorityValue, nil
 }
 
 func setObjectType(object string) (obj btypes.ObjectType, isWritable, isBool bool, asString string) {
@@ -487,4 +619,24 @@ func float64ToUint32(value float64) uint32 {
 func float64ToFloat32(value float64) float32 {
 	var y = float32(value)
 	return y
+}
+
+func ConvertPriorityToMap(priority priority.Float32) map[string]*float64 {
+	priorityMap := map[string]*float64{}
+	priorityValue := reflect.ValueOf(priority)
+	typeOfPriority := priorityValue.Type()
+	for i := 0; i < priorityValue.NumField(); i++ {
+		if priorityValue.Field(i).Type().Kind().String() == "ptr" {
+			key := typeOfPriority.Field(i).Tag.Get("json")
+			val := priorityValue.Field(i).Interface().(*float32)
+			var val64 *float64
+			if val == nil {
+				val64 = nil
+			} else {
+				val64 = float.New(float64(*val))
+			}
+			priorityMap[key] = val64
+		}
+	}
+	return priorityMap
 }
