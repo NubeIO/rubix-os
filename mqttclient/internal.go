@@ -11,7 +11,7 @@ var m *Client
 func InternalMQTT(ip string) (bool, error) {
 	c, err := NewClient(ClientOptions{
 		Servers: []string{ip},
-	})
+	}, nil)
 	if err != nil {
 		log.Println("MQTT connection error:", err)
 		return false, err
