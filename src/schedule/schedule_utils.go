@@ -38,6 +38,7 @@ type WeeklyScheduleEntry struct {
 	// Timezone string  `json:"timezone"`
 	Value  float64 `json:"value"`
 	Colour string  `json:"color"`
+	Enable *bool   `json:"enable"`
 }
 
 type EventScheduleEntry struct {
@@ -45,6 +46,7 @@ type EventScheduleEntry struct {
 	Dates  []EventStartStopTimestamps `json:"dates"`
 	Value  float64                    `json:"value"`
 	Colour string                     `json:"color"`
+	Enable *bool                      `json:"enable"`
 }
 
 type EventStartStopTimestamps struct {
