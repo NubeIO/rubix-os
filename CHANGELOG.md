@@ -1,9 +1,14 @@
 # CHANGELOG
-## [v0.9.26](https://github.com/NubeIO/flow-framework/tree/v0.9.26) (2022-01-28)
+## [v0.9.27](https://github.com/NubeIO/flow-framework/tree/v0.9.27) (2023-01-30)
+
+- Updated bacnetmaster to use all priorities
+- Updates to schedules
+
+## [v0.9.26](https://github.com/NubeIO/flow-framework/tree/v0.9.26) (2023-01-28)
 
 - Added mqtt api for schedules
 
-## [v0.9.25](https://github.com/NubeIO/flow-framework/tree/v0.9.25) (2022-01-25)
+## [v0.9.25](https://github.com/NubeIO/flow-framework/tree/v0.9.25) (2023-01-25)
 
 - Add meta tags query param on network, device and point #824
 - Lora updates v1 #825
@@ -11,20 +16,20 @@
 - update to bacnet master #821
 
 
-## [v0.9.24](https://github.com/NubeIO/flow-framework/tree/v0.9.24) (2022-01-19)
+## [v0.9.24](https://github.com/NubeIO/flow-framework/tree/v0.9.24) (2023-01-19)
 
 - update modbus schema #819
 - Add flow_https_local,flow_ip_local and flow_port_local #818
 - added api's for mapping for all protocals #815
 - added api for bacnet whois #814
 
-## [v0.9.23](https://github.com/NubeIO/flow-framework/tree/v0.9.23) (2022-01-16)
+## [v0.9.23](https://github.com/NubeIO/flow-framework/tree/v0.9.23) (2023-01-16)
 
 - Fix: FN selection doesn't exist issue
 - Upgrade lib-schema to v0.1.8
 - Get writer by name
 
-## [v0.9.22](https://github.com/NubeIO/flow-framework/tree/v0.9.22) (2022-01-16)
+## [v0.9.22](https://github.com/NubeIO/flow-framework/tree/v0.9.22) (2023-01-16)
 
 - add point write message ok
 - Improvements: add waits on loop delete
@@ -33,7 +38,7 @@
 - Add an auto_mapping example for lora and system plugins
 - adds safety to modbus byte conversions
 
-## [v0.9.21](https://github.com/NubeIO/flow-framework/tree/v0.9.21) (2022-01-05)
+## [v0.9.21](https://github.com/NubeIO/flow-framework/tree/v0.9.21) (2023-01-05)
 
 - Improvement: MQTT points list update only on point name changes
 - Add auto-mapping
