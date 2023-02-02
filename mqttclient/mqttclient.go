@@ -3,6 +3,7 @@ package mqttclient
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -49,13 +50,16 @@ type Client struct {
 
 // ClientOptions is the list of options used to create c client
 type ClientOptions struct {
-	Servers        []string // The list of broker hostnames to connect to
-	ClientID       string   // If left empty c uuid will automatically be generated
-	Username       string   // If not set then authentication will not be used
-	Password       string   // Will only be used if the username is set
-	SetKeepAlive   time.Duration
-	SetPingTimeout time.Duration
-	AutoReconnect  bool // If the client should automatically try to reconnect when the connection is lost
+	Servers              []string // The list of broker hostnames to connect to
+	ClientID             string   // If left empty c uuid will automatically be generated
+	Username             string   // If not set then authentication will not be used
+	Password             string   // Will only be used if the username is set
+	SetKeepAlive         time.Duration
+	SetPingTimeout       time.Duration
+	ConnectRetry         *bool // Automatically retry the connection in the event of a failure
+	ConnectRetryInterval time.Duration
+	AutoReconnect        *bool // If the client should automatically try to reconnect when the connection is lost
+	MaxReconnectInterval time.Duration
 }
 
 type consumer struct {
@@ -91,17 +95,6 @@ func (c *Client) Unsubscribe(topic string) error {
 	return token.Error()
 }
 
-// // SubscribeMultiple subscribes to multiple topics and errors if this fails.
-// func (c *Client) SubscribeMultiple(ctx context.Context, consumers map[string]QOS) error {
-//	subs := make(map[string]byte, len(consumers))
-//	for topic, qos := range consumers {
-//		subs[topic] = byte(qos)
-//	}
-//	token := c.client.SubscribeMultiple(subs, nil)
-//	err := tokenWithContext(ctx, token)
-//	return err
-// }
-
 // Publish things
 func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) (err error) {
 	token := c.client.Publish(topic, byte(qos), retain, payload)
@@ -115,7 +108,7 @@ func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) (er
 }
 
 // NewClient creates an mqttClient client
-func NewClient(options ClientOptions) (c *Client, err error) {
+func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err error) {
 	c = &Client{}
 	opts := mqtt.NewClientOptions()
 	// brokers
@@ -142,8 +135,17 @@ func NewClient(options ClientOptions) (c *Client, err error) {
 	if options.SetPingTimeout == 0 {
 		options.SetPingTimeout = 5
 	}
+	if options.ConnectRetryInterval == 0 {
+		options.ConnectRetryInterval = 10
+	}
+	if options.MaxReconnectInterval == 0 {
+		options.MaxReconnectInterval = 10
+	}
 
-	opts.SetAutoReconnect(options.AutoReconnect)
+	opts.SetConnectRetry(boolean.TrueNil(options.ConnectRetry))
+	opts.SetConnectRetryInterval(options.ConnectRetryInterval * time.Second)
+	opts.SetAutoReconnect(boolean.TrueNil(options.AutoReconnect))
+	opts.SetMaxReconnectInterval(options.MaxReconnectInterval * time.Second)
 	opts.SetKeepAlive(options.SetKeepAlive * time.Second)
 	opts.SetPingTimeout(options.SetPingTimeout * time.Second)
 
@@ -160,6 +162,12 @@ func NewClient(options ClientOptions) (c *Client, err error) {
 				topicLog{"error", "failed to subscribe", token.Error()}.logErr()
 			}
 			topicLog{"topic", "Resubscribe", nil}.logInfo()
+		}
+		if onConnected != nil {
+			switch onConnected.(type) {
+			case func():
+				onConnected.(func())()
+			}
 		}
 	}
 	c.client = mqtt.NewClient(opts)

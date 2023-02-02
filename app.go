@@ -52,6 +52,8 @@ func initHistorySchedulers(db *database.GormDatabase, conf *config.Configuration
 	}
 }
 
+var db *database.GormDatabase
+
 func main() {
 	conf := config.CreateApp()
 	logger.SetLogger(conf.LogLevel)
@@ -70,23 +72,14 @@ func main() {
 		log.Errorln(err)
 	}
 	eventbus.Init()
-	db, err := database.New(conf.Database.Dialect, connection, conf.Database.LogLevel)
+	db, err = database.New(conf.Database.Dialect, connection, conf.Database.LogLevel)
 	if err != nil {
 		panic(err)
 	}
 	if *conf.MQTT.Enable {
-		err = localmqtt.Init(mqttBroker, conf)
+		err = localmqtt.Init(mqttBroker, conf, onConnected)
 		if err != nil {
 			log.Errorln(err)
-		} else {
-			go db.PublishPointsList("")
-			go db.RePublishPointsCov()
-			go db.PublishPointsListListener()
-			go db.PublishSchedulesListener()
-			go db.PublishDeviceInfo()
-			go db.PublishFetchPointListener()
-			go db.PublishPointWriteListener()
-			go db.RePublishSelectedPointsCovListener()
 		}
 	}
 	intHandler(db)
@@ -95,4 +88,15 @@ func main() {
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)
 	runner.Run(engine, conf)
+}
+
+func onConnected() {
+	go db.PublishPointsList("")
+	go db.RePublishPointsCov()
+	go db.PublishPointsListListener()
+	go db.PublishSchedulesListener()
+	go db.PublishDeviceInfo()
+	go db.PublishFetchPointListener()
+	go db.PublishPointWriteListener()
+	go db.RePublishSelectedPointsCovListener()
 }

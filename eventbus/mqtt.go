@@ -13,7 +13,7 @@ import (
 func publishMQTT(sensorStruct model.ProducerBody) {
 	a, _ := mqttclient.NewClient(mqttclient.ClientOptions{
 		Servers: []string{"tcp://0.0.0.0:1883"},
-	})
+	}, nil)
 	err := a.Connect()
 	if err != nil {
 		log.Error(err)

@@ -70,7 +70,7 @@ func (inst *Instance) closeBacnetStoreNetwork(networkUUID string) (bool, error) 
 	if err != nil {
 		return false, err
 	}
-	net.NetworkClose()
+	net.NetworkClose(false)
 	return true, nil
 }
 
