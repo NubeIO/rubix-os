@@ -18,7 +18,7 @@ func ExceptionCheck(exceptions TypeEvents, scheduleName, timezone string) (Sched
 
 // ApplyExceptionSchedule Combines ScheduleCheckerResults with an Exception ScheduleCheckerResults.  The IsException flag must be set for the Exception ScheduleCheckerResult.
 // This function will mask the Exception schedule period and return the updated ScheduleCheckerResult.
-func ApplyExceptionSchedule(current ScheduleCheckerResult, exception ScheduleCheckerResult) (ScheduleCheckerResult, error) {
+func ApplyExceptionSchedule(current ScheduleCheckerResult, exception ScheduleCheckerResult, timezone string) (ScheduleCheckerResult, error) {
 	// log.Println("ApplyExceptionSchedule()")
 	result := ScheduleCheckerResult{}
 	var err error
@@ -118,6 +118,6 @@ func ApplyExceptionSchedule(current ScheduleCheckerResult, exception ScheduleChe
 	} else {
 		result.IsActive = false
 	}
-	AddHumanReadableDatetimes(&result)
+	AddHumanReadableDatetimes(&result, timezone)
 	return result, nil
 }

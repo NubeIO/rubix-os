@@ -60,7 +60,7 @@ func (inst *Instance) runSchedule() {
 			log.Infof("system-plugin-schedule: event schedule: %s  is-active: %t", eventResult.Name, eventResult.IsActive)
 		}
 		// Combine Event and Weekly schedule results.
-		weeklyAndEventResult, err := schedule.CombineScheduleCheckerResults(weeklyResult, eventResult)
+		weeklyAndEventResult, err := schedule.CombineScheduleCheckerResults(weeklyResult, eventResult, timezone)
 		if err != nil {
 			log.Errorf("system-plugin-schedule: issue on weeklyAndEventResult %s", err.Error())
 		} else {
@@ -78,7 +78,7 @@ func (inst *Instance) runSchedule() {
 			log.Infof("system-plugin-schedule: exception schedule is empty: %s", exceptionResult.Name)
 		}
 
-		finalResult, err := schedule.ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult) // This applies the exception schedule to mask the combined weekly and event schedules.
+		finalResult, err := schedule.ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult, timezone) // This applies the exception schedule to mask the combined weekly and event schedules.
 		if err != nil {
 			log.Errorf("system-plugin-schedule: final-result: %s", err.Error())
 		}
