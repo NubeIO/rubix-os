@@ -51,7 +51,7 @@ func ScheduleTest() {
 	fmt.Printf("%+v\n", eventResult)
 
 	// Combine Event and Weekly schedule results.
-	weeklyAndEventResult, err := CombineScheduleCheckerResults(weeklyResult, eventResult)
+	weeklyAndEventResult, err := CombineScheduleCheckerResults(weeklyResult, eventResult, timezone)
 	fmt.Println("weeklyAndEventResult")
 	fmt.Printf("%+v\n", weeklyAndEventResult)
 
@@ -67,7 +67,7 @@ func ScheduleTest() {
 		fmt.Println("Exception schedule is empty")
 	}
 
-	finalResult, err := ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult) // This applies the exception schedule to mask the combined weekly and event schedules.
+	finalResult, err := ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult, timezone) // This applies the exception schedule to mask the combined weekly and event schedules.
 	if err != nil {
 		log.Errorf("system-plugin-schedule: issue on ApplyExceptionSchedule %v\n", err)
 	}

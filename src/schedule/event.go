@@ -56,13 +56,13 @@ func CheckEventScheduleEntry(entry EventScheduleEntry, timezone string) (Schedul
 			toCombine.PeriodStop = entryStop.Unix()
 
 			// combine current StartStopPair with results
-			result, err = CombineScheduleCheckerResults(result, toCombine)
+			result, err = CombineScheduleCheckerResults(result, toCombine, timezone)
 			if err != nil {
 				log.Errorf("CheckEventScheduleEntry %v\n", err)
 			}
 		}
 	}
-	AddHumanReadableDatetimes(&result)
+	AddHumanReadableDatetimes(&result, timezone)
 	return result, nil
 }
 
@@ -80,7 +80,7 @@ func CheckEventScheduleCollection(scheduleMap TypeEvents, scheduleName, timezone
 					log.Errorf("CheckEventScheduleEntry %v\n", err)
 				}
 
-				finalResult, err = CombineScheduleCheckerResults(finalResult, singleResult)
+				finalResult, err = CombineScheduleCheckerResults(finalResult, singleResult, timezone)
 				// fmt.Println("finalResult ", finalResult)
 				if err != nil {
 					log.Errorf("CheckEventScheduleEntry %v\n", err)
@@ -88,7 +88,7 @@ func CheckEventScheduleCollection(scheduleMap TypeEvents, scheduleName, timezone
 			}
 		}
 	}
-	AddHumanReadableDatetimes(&finalResult)
+	AddHumanReadableDatetimes(&finalResult, timezone)
 	return finalResult
 }
 

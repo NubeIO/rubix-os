@@ -99,17 +99,23 @@ type ScheduleCheckerResult struct {
 	ErrorStrings      []string `json:"error_strings"`
 }
 
-func AddHumanReadableDatetimes(existing *ScheduleCheckerResult) {
+func AddHumanReadableDatetimes(existing *ScheduleCheckerResult, timezone string) {
+	location, _ := time.LoadLocation(timezone)
 	existing.ErrorStrings = make([]string, len(existing.ErrorStrings))
-	existing.PeriodStartString = ConvertToHumanDatetime(existing.PeriodStart)
-	existing.PeriodStopString = ConvertToHumanDatetime(existing.PeriodStop)
-	existing.NextStartString = ConvertToHumanDatetime(existing.NextStart)
-	existing.NextStopString = ConvertToHumanDatetime(existing.NextStop)
-	existing.CheckTimeString = ConvertToHumanDatetime(existing.CheckTime)
+	existing.PeriodStartString = ConvertToHumanDatetimeWithLocation(existing.PeriodStart, location)
+	existing.PeriodStopString = ConvertToHumanDatetimeWithLocation(existing.PeriodStop, location)
+	existing.NextStartString = ConvertToHumanDatetimeWithLocation(existing.NextStart, location)
+	existing.NextStopString = ConvertToHumanDatetimeWithLocation(existing.NextStop, location)
+	existing.CheckTimeString = ConvertToHumanDatetimeWithLocation(existing.CheckTime, location)
 }
 
 func ConvertToHumanDatetime(unixTime int64) string {
 	result := time.Unix(unixTime, int64(0)).String()
+	return result
+}
+
+func ConvertToHumanDatetimeWithLocation(unixTime int64, location *time.Location) string {
+	result := time.Unix(unixTime, int64(0)).In(location).String()
 	return result
 }
 
@@ -138,7 +144,7 @@ func DecodeSchedule(scheduleJsonInput datatypes.JSON) (SchJSON, error) {
 }
 
 // CombineScheduleCheckerResults Combines 2 ScheduleCheckerResults into a single ScheduleCheckerResult, calculating PeriodStart, and PeriodStop times of the combined ScheduleCheckerResult.
-func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCheckerResult) (ScheduleCheckerResult, error) {
+func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCheckerResult, timezone string) (ScheduleCheckerResult, error) {
 	// log.Println("CombineScheduleCheckerResults()")
 	result := ScheduleCheckerResult{}
 	var err error
@@ -247,7 +253,7 @@ func CombineScheduleCheckerResults(current ScheduleCheckerResult, new ScheduleCh
 		result.AlertFlag = true
 		result.ErrorStrings = append(result.ErrorStrings, "Multiple Payload Values For Active Schedule Period")
 	}
-	AddHumanReadableDatetimes(&result)
+	AddHumanReadableDatetimes(&result, timezone)
 	return result, nil
 }
 
