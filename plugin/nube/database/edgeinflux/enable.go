@@ -8,6 +8,7 @@ import (
 var cron *gocron.Scheduler
 
 func (inst *Instance) Enable() error {
+	inst.edgeinfluxDebugMsg("EDGEINFLUX Plugin Enable()")
 	inst.enabled = true
 	inst.setUUID()
 	cron = gocron.NewScheduler(time.UTC)
@@ -21,6 +22,7 @@ func (inst *Instance) Enable() error {
 }
 
 func (inst *Instance) Disable() error {
+	inst.edgeinfluxDebugMsg("EDGEINFLUX Plugin Disable()")
 	inst.enabled = false
 	if inst.mqttCancel != nil {
 		inst.mqttCancel()
