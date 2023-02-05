@@ -12,18 +12,10 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 	"strconv"
 	"time"
 )
-
-type polling struct {
-	enable        bool
-	loopDelay     time.Duration
-	delayNetworks time.Duration
-	delayDevices  time.Duration
-	delayPoints   time.Duration
-	isRunning     bool
-}
 
 func delays() (deviceDelay, pointDelay time.Duration) {
 	deviceDelay = 100 * time.Millisecond
@@ -43,6 +35,11 @@ func (inst *Instance) BACnetServerPolling() error {
 		counter++
 		// fmt.Println("\n \n")
 		inst.bacnetDebugMsg("LOOP COUNT: ", counter)
+		inst.bacnetDebugMsg("LOOP COUNT: ", counter)
+		if inst.BacStore == nil {
+			log.Error("bacnet:master polling started with no bacnet store")
+			inst.initBacStore()
+		}
 		if bacnetStarted {
 			inst.bacnetErrorMsg("-----------------------------------------")
 			inst.bacnetErrorMsg("BACNET JUST STARTED")

@@ -51,7 +51,7 @@ func (inst *Instance) masterWhoIs(opts *WhoIsOpts) (resp []*model.Device, err er
 	}
 	interfaceName := interfaces.Interface
 	log.Infof("run bacnet whoIs interface: %s ip: %s port: %d deviceID %d", interfaceName, localDeviceIP, localDevicePort, localDeviceId)
-	localDevice, err := network.New(&network.Network{Interface: interfaceName, Port: localDevicePort})
+	localDevice, err := network.New(&network.Network{Interface: interfaceName, Port: localDevicePort, Store: inst.BacStore})
 	if err != nil {
 		log.Error(err)
 		return

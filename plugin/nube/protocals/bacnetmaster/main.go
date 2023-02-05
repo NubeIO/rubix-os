@@ -9,7 +9,6 @@ import (
 	"github.com/NubeIO/flow-framework/services/pollqueue"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/flow-framework/src/dbhandler"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
 
@@ -29,15 +28,15 @@ const transportType = "ip" // serial, ip
 
 // Instance is plugin instance
 type Instance struct {
-	config              *Config
-	enabled             bool
-	basePath            string
-	db                  dbhandler.Handler
-	store               cachestore.Handler
-	bus                 eventbus.BusService
-	pluginUUID          string
-	pluginName          string
-	networks            []*model.Network
+	config     *Config
+	enabled    bool
+	basePath   string
+	db         dbhandler.Handler
+	store      cachestore.Handler
+	bus        eventbus.BusService
+	pluginUUID string
+	pluginName string
+	// networks            []*model.Network
 	pollingEnabled      bool
 	BacStore            *network.Store
 	pollingCancel       func()

@@ -119,8 +119,8 @@ jobs:
           cd ../../../../plugin/nube/protocals/lora
           go build -buildmode=plugin -o lora-amd64.so *.go  && cp lora-amd64.so ../../../../
 
-          cd ../../../../plugin/nube/protocals/bacnetserver
-          go build -buildmode=plugin -o bacnetserver-amd64.so *.go  && cp bacnetserver-amd64.so ../../../../
+#          cd ../../../../plugin/nube/protocals/bacnetserver
+#          go build -buildmode=plugin -o bacnetserver-amd64.so *.go  && cp bacnetserver-amd64.so ../../../../
 
           cd ../../../../plugin/nube/protocals/bacnetmaster
           go build -buildmode=plugin -o bacnetmaster-amd64.so *.go  && cp bacnetmaster-amd64.so ../../../../
@@ -192,8 +192,8 @@ jobs:
           cd ../../../../plugin/nube/protocals/lora
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o lora-armv7.so *.go  && cp lora-armv7.so ../../../../
 
-          cd ../../../../plugin/nube/protocals/bacnetserver
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o bacnetserver-armv7.so *.go  && cp bacnetserver-armv7.so ../../../../
+#          cd ../../../../plugin/nube/protocals/bacnetserver
+#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o bacnetserver-armv7.so *.go  && cp bacnetserver-armv7.so ../../../../
 
           cd ../../../../plugin/nube/protocals/bacnetmaster
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o bacnetmaster-armv7.so *.go  && cp bacnetmaster-armv7.so ../../../../
@@ -285,10 +285,10 @@ jobs:
           artifact=lora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./lora-armv7.so
 
-          artifact=bacnetserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./bacnetserver-amd64.so
-          artifact=bacnetserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./bacnetserver-armv7.so
+#          artifact=bacnetserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+#          zip -r /tmp/zip/$artifact.zip ./bacnetserver-amd64.so
+#          artifact=bacnetserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+#          zip -r /tmp/zip/$artifact.zip ./bacnetserver-armv7.so
 
           artifact=bacnetmaster-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./bacnetmaster-amd64.so

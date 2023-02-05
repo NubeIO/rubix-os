@@ -30,7 +30,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		}
 		return nil, errors.New("failed to create bacnet network")
 	}
-	err = inst.bacnetStoreNetwork(network)
+	err = inst.makeBacnetStoreNetwork(network)
 	if err != nil {
 		inst.bacnetErrorMsg("addNetwork(): issue on add bacnet-network to store err ", err.Error())
 		// fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error())
@@ -47,7 +47,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		err = inst.networkUpdateErr(network, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.NetworkError)
 		err = inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.NetworkError, true)
 	}
-	return network, nil
+	return network, err
 }
 
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
@@ -86,8 +86,8 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	}
 	err = inst.bacnetStoreDevice(device)
 	if err != nil {
-		inst.bacnetDebugMsg("addDevice(): issue on add bacnet-device to store")
-		return nil, errors.New("issue on add bacnet-device to store")
+		inst.bacnetDebugMsg(fmt.Sprintf("bacnet-device: add device to store err: %s", err.Error()))
+		return nil, errors.New(fmt.Sprintf("bacnet-device: add device to store err: %s", err.Error()))
 	}
 	inst.bacnetDebugMsg("addDevice(): ", body.UUID)
 
@@ -189,9 +189,9 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.bacnetDebugMsg("updateNetwork(): cannot find NetworkPollManager for network: ", network.UUID)
 		return
 	}
-	err = inst.bacnetStoreNetwork(network)
+	err = inst.makeBacnetStoreNetwork(network)
 	if err != nil {
-		inst.bacnetDebugMsg("updateNetwork(): bacnetStoreNetwork: ", network.UUID)
+		inst.bacnetDebugMsg("updateNetwork(): makeBacnetStoreNetwork: , err: ", network.UUID, err)
 	}
 
 	if boolean.IsFalse(network.Enable) && netPollMan.Enable {
@@ -242,6 +242,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 
 	err = inst.bacnetStoreDevice(device)
 	if err != nil {
+		inst.bacnetDebugMsg(fmt.Sprintf("bacnet-device: update device to store err: %s", err.Error()))
 		return nil, err
 	}
 
