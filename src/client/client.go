@@ -38,8 +38,8 @@ var transport = http.Transport{
 }
 
 func GetFlowToken(ip string, port int, username string, password string) (*string, error) {
-	mutex.RLock()
-	defer mutex.RUnlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), ip, port)
 	flowClient, found := flowClients[url]
 	if !found {
@@ -59,8 +59,8 @@ func GetFlowToken(ip string, port int, username string, password string) (*strin
 }
 
 func NewLocalClient() *FlowClient {
-	mutex.RLock()
-	defer mutex.RUnlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 	port := config.Get().Server.Port
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), "0.0.0.0", port)
 	if flowClient, found := flowClients[url]; found {
@@ -103,8 +103,8 @@ func NewFlowClientCliFromFNC(fnc *model.FlowNetworkClone) *FlowClient {
 }
 
 func newSessionWithToken(ip string, port int, token string, isTokenAuth bool) *FlowClient {
-	mutex.RLock()
-	defer mutex.RUnlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 	url := fmt.Sprintf("%s://%s:%d/ff", getSchema(port), ip, port)
 	if isTokenAuth {
 		url = fmt.Sprintf("%s://%s:%d", getSchema(port), ip, port)
@@ -126,8 +126,8 @@ func newSessionWithToken(ip string, port int, token string, isTokenAuth bool) *F
 }
 
 func NewMasterToSlaveSession(globalUUID string) *FlowClient {
-	mutex.RLock()
-	defer mutex.RUnlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", conf.Server.RSPort, globalUUID)
 	if flowClient, found := flowClients[url]; found {
@@ -146,8 +146,8 @@ func NewMasterToSlaveSession(globalUUID string) *FlowClient {
 }
 
 func newSlaveToMasterCallSession() *FlowClient {
-	mutex.RLock()
-	defer mutex.RUnlock()
+	mutex.Lock()
+	defer mutex.Unlock()
 	conf := config.Get()
 	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", conf.Server.RSPort)
 	if flowClient, found := flowClients[url]; found {
