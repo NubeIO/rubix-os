@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	defaultPort = 47809
+	defaultPort = 47807
 )
 
 func (inst *Instance) bacnetNetworkInit() {
@@ -51,12 +51,8 @@ func (inst *Instance) initBacStore() {
 
 // bacnetStoreNetwork add or update an instance a bacnet network that is cached in bacnet lib
 func (inst *Instance) bacnetStoreNetwork(net *model.Network) error {
-	bacnetNet := &network.Network{
-		Interface: net.NetworkInterface,
-		Port:      integer.NonNil(net.Port),
-		StoreID:   net.UUID,
-	}
-	return inst.BacStore.UpdateNetwork(net.UUID, bacnetNet)
+
+	return inst.BacStore.NewNetwork(net.UUID, net.NetworkInterface, net.IP, integer.NonNil(net.Port), 0)
 }
 
 // getBacnetStoreNetwork get an instance of a created bacnet network that is cached in bacnet lib

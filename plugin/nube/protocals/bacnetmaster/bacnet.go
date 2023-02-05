@@ -32,12 +32,12 @@ func (inst *Instance) bacnetNetworkInit() {
 		return
 	}
 	for _, net := range networks {
-		err := inst.bacnetStoreNetwork(net)
+		err := inst.makeBacnetStoreNetwork(net)
 		if err != nil {
 			log.Errorf("bacnet-master init network error: %s name: %s", err.Error(), net.Name)
 			continue
 		} else {
-			log.Infof("bacnet-master init network: %s", net.Name)
+			log.Infof("bacnet-master init network: %s uuid: %s", net.Name, net.UUID)
 		}
 		for _, dev := range net.Devices {
 			err := inst.bacnetStoreDevice(dev)
@@ -45,7 +45,7 @@ func (inst *Instance) bacnetNetworkInit() {
 				log.Errorf("bacnet-master init device error: %s name: %s", err.Error(), dev.Name)
 				continue
 			} else {
-				log.Infof("bacnet-master init device: %s", dev.Name)
+				log.Infof("bacnet-master init device: %s uuid: %s", dev.Name, dev.UUID)
 			}
 		}
 	}
@@ -53,6 +53,7 @@ func (inst *Instance) bacnetNetworkInit() {
 
 func (inst *Instance) initBacStore() {
 	if inst.BacStore == nil {
+		log.Errorf("bacnet:master initBacStore bacnet store was empty")
 		inst.BacStore = network.NewStore()
 		inst.bacnetNetworkInit()
 	} else {
@@ -60,19 +61,21 @@ func (inst *Instance) initBacStore() {
 	}
 }
 
-// bacnetNetwork add or update an instance a bacnet network that is cached in bacnet lib
-func (inst *Instance) bacnetStoreNetwork(net *model.Network) error {
-	bacnetNet := &network.Network{
-		Interface: net.NetworkInterface,
-		Port:      integer.NonNil(net.Port),
-		StoreID:   net.UUID,
-	}
-	return inst.BacStore.UpdateNetwork(net.UUID, bacnetNet)
+// makeBacnetStoreNetwork add or update an instance a bacnet network that is cached in bacnet lib
+func (inst *Instance) makeBacnetStoreNetwork(net *model.Network) error {
+	return inst.BacStore.NewNetwork(net.UUID, net.NetworkInterface, net.IP, integer.NonNil(net.Port), 0)
 }
 
 // getBacnetNetwork get an instance of a created bacnet network that is cached in bacnet lib
 func (inst *Instance) getBacnetStoreNetwork(networkUUID string) (*network.Network, error) {
-	return inst.BacStore.GetNetwork(networkUUID)
+	net, err := inst.BacStore.GetNetwork(networkUUID)
+	if err != nil {
+		log.Errorf("bacnet-master: network getBacnetStoreNetwork() err: %s", err.Error())
+	}
+	if net == nil {
+		log.Errorf("bacnet-master: network getBacnetStoreNetwork() network was empty")
+	}
+	return net, err
 }
 
 // closeBacnetNetwork delete the instance of a created bacnet network that is cached in bacnet lib
@@ -114,11 +117,15 @@ func (inst *Instance) bacnetStoreDevice(dev *model.Device) error {
 		if getNetwork == nil {
 			return errors.New("failed to find network to init bacnet network")
 		}
-		err = inst.bacnetStoreNetwork(getNetwork)
 		if err != nil {
-			return errors.New("network can not be empty")
+			errMes := fmt.Sprintf("bacnet-master get network: %s name: %s", err.Error(), dev.Name)
+			return errors.New(errMes)
 		}
-
+		err = inst.makeBacnetStoreNetwork(getNetwork)
+		if err != nil {
+			errMes := fmt.Sprintf("bacnet-master init device add/update bacnet error: %s name: %s", err.Error(), dev.Name)
+			return errors.New(errMes)
+		}
 	}
 	return inst.BacStore.UpdateDevice(dev.UUID, net, d)
 }
@@ -317,16 +324,16 @@ func (inst *Instance) doWriteAllValues(pnt *model.Point, networkUUID, deviceUUID
 	}
 
 	// get network // TODO: Maybe this has to be run for each write?
-	net, err := inst.buildBacnetForAction(networkUUID, "read")
+	net, err := inst.buildBacnetForAction(networkUUID, "write")
 	if err != nil {
 		return nil, err
 	}
 	go net.NetworkRun()
 	dev, err := inst.getBacnetStoreDevice(deviceUUID)
 	if err != nil {
+		log.Error(fmt.Sprintf("get bacnet device err: %s", err.Error()))
 		return nil, errors.New("bacnet-write: error getting BACnet device details")
 	}
-
 	priorityArray := pnt.Priority
 	if priorityArray == nil {
 		return nil, errors.New("bacnet-write: point has no PriorityArray")

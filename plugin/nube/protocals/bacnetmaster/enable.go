@@ -4,6 +4,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/services/pollqueue"
 	"github.com/NubeIO/flow-framework/utils/float"
+	log "github.com/sirupsen/logrus"
 )
 
 func (inst *Instance) Enable() error {
@@ -13,11 +14,10 @@ func (inst *Instance) Enable() error {
 	inst.setUUID()
 
 	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
-	if nets != nil {
-		inst.networks = nets
-	} else if err != nil {
-		inst.networks = nil
+	if err != nil {
+		inst.bacnetErrorMsg("enable plugin get networks: %v\n", err)
 	}
+	log.Infof("bacnet-master: enable plugin networks count: %d pluginUUID: %s", len(nets), inst.pluginUUID)
 	inst.initBacStore()
 
 	if inst.config.EnablePolling {

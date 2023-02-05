@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -53,6 +54,11 @@ func (inst *Instance) BACnetMasterPolling() error {
 		counter++
 		// fmt.Println("\n \n")
 		inst.bacnetDebugMsg("LOOP COUNT: ", counter)
+		if inst.BacStore == nil {
+			log.Error("bacnet:master polling started with no bacnet store")
+			inst.initBacStore()
+		}
+
 		var netArg api.Args
 		/*
 			nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, netArg)
