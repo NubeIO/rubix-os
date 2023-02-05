@@ -98,14 +98,14 @@ jobs:
           cd ../../../plugin/nube/projects/galvintmv
           go build -buildmode=plugin -o galvintmv-amd64.so *.go  && cp galvintmv-amd64.so ../../../../
           
-          cd ../../../../plugin/nube/projects/thresholdalerts
-          go build -buildmode=plugin -o thresholdalerts-amd64.so *.go  && cp thresholdalerts-amd64.so ../../../../
-          
-          cd ../../../../plugin/nube/projects/flatlinealerts
-          go build -buildmode=plugin -o flatlinealerts-amd64.so *.go  && cp flatlinealerts-amd64.so ../../../../
-          
-          cd ../../../../plugin/nube/projects/statusmismatchalerts
-          go build -buildmode=plugin -o statusmismatchalerts-amd64.so *.go  && cp statusmismatchalerts-amd64.so ../../../../
+#          cd ../../../../plugin/nube/projects/thresholdalerts
+#          go build -buildmode=plugin -o thresholdalerts-amd64.so *.go  && cp thresholdalerts-amd64.so ../../../../
+#
+#          cd ../../../../plugin/nube/projects/flatlinealerts
+#          go build -buildmode=plugin -o flatlinealerts-amd64.so *.go  && cp flatlinealerts-amd64.so ../../../../
+#
+#          cd ../../../../plugin/nube/projects/statusmismatchalerts
+#          go build -buildmode=plugin -o statusmismatchalerts-amd64.so *.go  && cp statusmismatchalerts-amd64.so ../../../../
           
           cd ../../../../plugin/nube/protocals/edge28
           go build -buildmode=plugin -o edge28-amd64.so *.go  && cp edge28-amd64.so ../../../../
@@ -128,8 +128,8 @@ jobs:
           cd ../../../../plugin/nube/protocals/rubixio
           go build -buildmode=plugin -o rubixio-amd64.so *.go  && cp rubixio-amd64.so ../../../../
 
-          cd ../../../../plugin/nube/protocals/modbusserver
-          go build -buildmode=plugin -o modbusserver-amd64.so *.go  && cp modbusserver-amd64.so ../../../../
+#          cd ../../../../plugin/nube/protocals/modbusserver
+#          go build -buildmode=plugin -o modbusserver-amd64.so *.go  && cp modbusserver-amd64.so ../../../../
           
           cd ../../../../plugin/nube/protocals/rubixpointsync
           go build -buildmode=plugin -o rubixpointsync-amd64.so *.go  && cp rubixpointsync-amd64.so ../../../../
@@ -140,8 +140,8 @@ jobs:
           cd ../../../../plugin/nube/database/edgeinflux
           go build -buildmode=plugin -o edgeinflux-amd64.so *.go  && cp edgeinflux-amd64.so ../../../../
           
-          cd ../../../../plugin/nube/database/edgeazure
-          go build -buildmode=plugin -o edgeazure-amd64.so *.go  && cp edgeazure-amd64.so ../../../../
+#          cd ../../../../plugin/nube/database/edgeazure
+#          go build -buildmode=plugin -o edgeazure-amd64.so *.go  && cp edgeazure-amd64.so ../../../../
 
           cd ../../../../plugin/nube/database/history
           go build -buildmode=plugin -o history-amd64.so *.go  && cp history-amd64.so ../../../../
@@ -171,14 +171,14 @@ jobs:
           cd ../../../plugin/nube/projects/galvintmv
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o galvintmv-armv7.so *.go  && cp galvintmv-armv7.so ../../../../
           
-          cd ../../../../plugin/nube/projects/thresholdalerts
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o thresholdalerts-armv7.so *.go  && cp thresholdalerts-armv7.so ../../../../
-          
-          cd ../../../../plugin/nube/projects/flatlinealerts
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o flatlinealerts-armv7.so *.go  && cp flatlinealerts-armv7.so ../../../../
-          
-          cd ../../../../plugin/nube/projects/statusmismatchalerts
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o statusmismatchalerts-armv7.so *.go  && cp statusmismatchalerts-armv7.so ../../../../
+#          cd ../../../../plugin/nube/projects/thresholdalerts
+#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o thresholdalerts-armv7.so *.go  && cp thresholdalerts-armv7.so ../../../../
+#
+#          cd ../../../../plugin/nube/projects/flatlinealerts
+#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o flatlinealerts-armv7.so *.go  && cp flatlinealerts-armv7.so ../../../../
+#
+#          cd ../../../../plugin/nube/projects/statusmismatchalerts
+#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o statusmismatchalerts-armv7.so *.go  && cp statusmismatchalerts-armv7.so ../../../../
           
           cd ../../../../plugin/nube/protocals/edge28
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edge28-armv7.so *.go  && cp edge28-armv7.so ../../../../
@@ -201,8 +201,8 @@ jobs:
           cd ../../../../plugin/nube/protocals/rubixio
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o rubixio-armv7.so *.go  && cp rubixio-armv7.so ../../../../
 
-          cd ../../../../plugin/nube/protocals/modbusserver
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o modbusserver-armv7.so *.go  && cp modbusserver-armv7.so ../../../../
+#          cd ../../../../plugin/nube/protocals/modbusserver
+#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o modbusserver-armv7.so *.go  && cp modbusserver-armv7.so ../../../../
 
           cd ../../../../plugin/nube/protocals/rubixpointsync
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o rubixpointsync-armv7.so *.go  && cp rubixpointsync-armv7.so ../../../../
@@ -213,8 +213,8 @@ jobs:
           cd ../../../../plugin/nube/database/edgeinflux
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edgeinflux-armv7.so *.go  && cp edgeinflux-armv7.so ../../../../
 
-          cd ../../../../plugin/nube/database/edgeazure
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edgeazure-armv7.so *.go  && cp edgeazure-armv7.so ../../../../
+#          cd ../../../../plugin/nube/database/edgeazure
+#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edgeazure-armv7.so *.go  && cp edgeazure-armv7.so ../../../../
 
           cd ../../../../plugin/nube/database/history
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o history-armv7.so *.go  && cp history-armv7.so ../../../../
@@ -250,20 +250,20 @@ jobs:
           artifact=galvintmv-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./galvintmv-armv7.so
           
-          artifact=thresholdalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./thresholdalerts-amd64.so
-          artifact=thresholdalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./thresholdalerts-armv7.so
-          
-          artifact=flatlinealerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./flatlinealerts-amd64.so
-          artifact=flatlinealerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./flatlinealerts-armv7.so
-          
-          artifact=statusmismatchalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./statusmismatchalerts-amd64.so
-          artifact=statusmismatchalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./statusmismatchalerts-armv7.so
+#          artifact=thresholdalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+#          zip -r /tmp/zip/$artifact.zip ./thresholdalerts-amd64.so
+#          artifact=thresholdalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+#          zip -r /tmp/zip/$artifact.zip ./thresholdalerts-armv7.so
+#
+#          artifact=flatlinealerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+#          zip -r /tmp/zip/$artifact.zip ./flatlinealerts-amd64.so
+#          artifact=flatlinealerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+#          zip -r /tmp/zip/$artifact.zip ./flatlinealerts-armv7.so
+#
+#          artifact=statusmismatchalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+#          zip -r /tmp/zip/$artifact.zip ./statusmismatchalerts-amd64.so
+#          artifact=statusmismatchalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+#          zip -r /tmp/zip/$artifact.zip ./statusmismatchalerts-armv7.so
           
           artifact=edge28-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./edge28-amd64.so
@@ -300,10 +300,10 @@ jobs:
           artifact=rubixio-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./rubixio-armv7.so
 
-          artifact=modbusserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./modbusserver-amd64.so
-          artifact=modbusserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./modbusserver-armv7.so
+#          artifact=modbusserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+#          zip -r /tmp/zip/$artifact.zip ./modbusserver-amd64.so
+#          artifact=modbusserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+#          zip -r /tmp/zip/$artifact.zip ./modbusserver-armv7.so
           
           artifact=rubixpointsync-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./rubixpointsync-amd64.so
@@ -320,10 +320,10 @@ jobs:
           artifact=edgeinflux-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./edgeinflux-armv7.so
           
-          artifact=edgeazure-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./edgeazure-amd64.so
-          artifact=edgeazure-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./edgeazure-armv7.so
+#          artifact=edgeazure-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+#          zip -r /tmp/zip/$artifact.zip ./edgeazure-amd64.so
+#          artifact=edgeazure-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+#          zip -r /tmp/zip/$artifact.zip ./edgeazure-armv7.so
 
           artifact=history-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./history-amd64.so
