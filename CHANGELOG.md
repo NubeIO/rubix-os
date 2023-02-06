@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## [v0.9.29](https://github.com/NubeIO/flow-framework/tree/v0.9.29) (2023-02-06)
+
+- Applies schedule timezone to the timestamps
+- Fix: concurrent map writes
+- Clean up of bacnet master
+- Don't build unused plugins
+- Build edge28 & rubixio for only armv7
+
 ## [v0.9.28](https://github.com/NubeIO/flow-framework/tree/v0.9.28) (2023-01-30)
 
 - Add mqtt connect retry and auto reconnect
