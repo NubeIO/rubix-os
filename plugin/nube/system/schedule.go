@@ -12,7 +12,7 @@ import (
 func (inst *Instance) runSchedule() {
 	schedules, err := inst.db.GetSchedules()
 	if err != nil {
-		log.Errorf("system-plugin-schedule: GetSchedules %s", err.Error())
+		inst.systemErrorMsg("system-plugin-schedule: GetSchedules %s", err.Error())
 		return
 	} else {
 		log.Infof("system-plugin-schedule: run schedule executaion, schedule count: %d", len(schedules))
@@ -20,11 +20,11 @@ func (inst *Instance) runSchedule() {
 	for _, sch := range schedules {
 		ScheduleJSON, err := schedule.DecodeSchedule(sch.Schedule)
 		if err != nil {
-			log.Errorf("system-plugin-schedule: issue on DecodeSchedule %v\n", err)
+			inst.systemErrorMsg("system-plugin-schedule: issue on DecodeSchedule %v\n", err)
 			return
 		}
 		if !boolean.IsTrue(sch.Enable) {
-			log.Infoln("system-plugin-schedule: runSchedule() sch is not enabled so skip logic. name:", sch.Name)
+			inst.systemDebugMsg("system-plugin-schedule: runSchedule() sch is not enabled so skip logic. name:", sch.Name)
 			continue
 		}
 		scheduleNameToCheck := "ALL" // TODO: we may need a way to specify the schedule name that is being checked for.
@@ -48,21 +48,21 @@ func (inst *Instance) runSchedule() {
 		// CHECK WEEKLY SCHEDULES
 		weeklyResult, err := schedule.WeeklyCheck(ScheduleJSON.Schedules.Weekly, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
-			log.Errorf("system-plugin-schedule: issue on WeeklyCheck %v\n", err)
+			inst.systemErrorMsg("system-plugin-schedule: issue on WeeklyCheck %v\n", err)
 		} else {
 			log.Infof("system-plugin-schedule: weekly schedule: %s  is-active: %t", weeklyResult.Name, weeklyResult.IsActive)
 		}
 		// CHECK EVENT SCHEDULES
 		eventResult, err := schedule.EventCheck(ScheduleJSON.Schedules.Events, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
-			log.Errorf("system-plugin-schedule: issue on eventResult %s", err.Error())
+			inst.systemErrorMsg("system-plugin-schedule: issue on eventResult %s", err.Error())
 		} else {
 			log.Infof("system-plugin-schedule: event schedule: %s  is-active: %t", eventResult.Name, eventResult.IsActive)
 		}
 		// Combine Event and Weekly schedule results.
 		weeklyAndEventResult, err := schedule.CombineScheduleCheckerResults(weeklyResult, eventResult, timezone)
 		if err != nil {
-			log.Errorf("system-plugin-schedule: issue on weeklyAndEventResult %s", err.Error())
+			inst.systemErrorMsg("system-plugin-schedule: issue on weeklyAndEventResult %s", err.Error())
 		} else {
 			log.Infof("system-plugin-schedule: weekly & event schedule: %s  is-active: %t", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive)
 		}
@@ -70,7 +70,7 @@ func (inst *Instance) runSchedule() {
 		// CHECK EXCEPTION SCHEDULES
 		exceptionResult, err := schedule.ExceptionCheck(ScheduleJSON.Schedules.Exceptions, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
-			log.Errorf("system-plugin-schedule: issue on exceptionResult %s", err.Error())
+			inst.systemErrorMsg("system-plugin-schedule: issue on exceptionResult %s", err.Error())
 		} else {
 			log.Infof("system-plugin-schedule: exception schedule: %s  is-active: %t", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive)
 		}
@@ -80,7 +80,7 @@ func (inst *Instance) runSchedule() {
 
 		finalResult, err := schedule.ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult, timezone) // This applies the exception schedule to mask the combined weekly and event schedules.
 		if err != nil {
-			log.Errorf("system-plugin-schedule: final-result: %s", err.Error())
+			inst.systemErrorMsg("system-plugin-schedule: final-result: %s", err.Error())
 		}
 		log.Infof("system-plugin-schedule: final-result: %s  is-active: %t timezone: %s", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive, timezone)
 		if sch != nil {
@@ -96,7 +96,7 @@ func (inst *Instance) runSchedule() {
 			sch.NextStopString = finalResult.NextStopString
 			_, err = inst.db.UpdateSchedule(sch.UUID, sch)
 			if err != nil {
-				log.Errorf("system-plugin-schedule: issue on UpdateSchedule %s", sch.UUID)
+				inst.systemErrorMsg("system-plugin-schedule: issue on UpdateSchedule %s", sch.UUID)
 			}
 		}
 	}

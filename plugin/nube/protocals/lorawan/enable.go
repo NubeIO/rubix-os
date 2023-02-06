@@ -9,6 +9,7 @@ import (
 )
 
 func (inst *Instance) Enable() error {
+	log.Info("LORAWAN Plugin Enable()")
 	inst.enabled = true
 	inst.setUUID()
 	inst.BusServ()
@@ -42,6 +43,7 @@ func (inst *Instance) Enable() error {
 }
 
 func (inst *Instance) Disable() error {
+	log.Info("LORAWAN Plugin Disable()")
 	inst.enabled = false
 	if inst.cancel != nil {
 		inst.cancel()

@@ -7,7 +7,7 @@ import (
 )
 
 func (inst *Instance) Enable() error {
-	inst.modbusDebugMsg("MODBUS Enable()")
+	inst.modbusDebugMsg("MODBUS Plugin Enable()")
 	inst.enabled = true
 	inst.pluginName = name
 	inst.setUUID()
@@ -49,7 +49,7 @@ func (inst *Instance) Enable() error {
 }
 
 func (inst *Instance) Disable() error {
-	inst.modbusDebugMsg("MODBUS Disable()")
+	inst.modbusDebugMsg("MODBUS Plugin Disable()")
 	inst.enabled = false
 	if inst.pollingEnabled {
 		inst.pollingEnabled = false

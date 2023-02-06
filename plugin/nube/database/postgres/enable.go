@@ -10,6 +10,7 @@ import (
 var cron *gocron.Scheduler
 
 func (inst *Instance) Enable() error {
+	log.Info("POSTGRES Plugin Enable()")
 	inst.enabled = true
 	inst.setUUID()
 	inst.initializePostgresSetting()
@@ -22,12 +23,12 @@ func (inst *Instance) Enable() error {
 }
 
 func (inst *Instance) Disable() error {
+	log.Info("POSTGRES Plugin Disable()")
 	inst.enabled = false
 	cron.Clear()
 	if postgresConnectionInstance != nil {
 		conn, _ := postgresConnectionInstance.db.DB()
 		_ = conn.Close()
 	}
-	log.Info(fmt.Sprintf("%s disabled", name))
 	return nil
 }
