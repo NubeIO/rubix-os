@@ -91,64 +91,46 @@ jobs:
         run: |
           go mod tidy
           go build -o app-amd64 app.go
-
+          
           cd ./plugin/nube/system
           go build -buildmode=plugin -o system-amd64.so *.go  && cp system-amd64.so ../../../
-
+          
           cd ../../../plugin/nube/projects/galvintmv
           go build -buildmode=plugin -o galvintmv-amd64.so *.go  && cp galvintmv-amd64.so ../../../../
           
-#          cd ../../../../plugin/nube/projects/thresholdalerts
-#          go build -buildmode=plugin -o thresholdalerts-amd64.so *.go  && cp thresholdalerts-amd64.so ../../../../
-#
-#          cd ../../../../plugin/nube/projects/flatlinealerts
-#          go build -buildmode=plugin -o flatlinealerts-amd64.so *.go  && cp flatlinealerts-amd64.so ../../../../
-#
-#          cd ../../../../plugin/nube/projects/statusmismatchalerts
-#          go build -buildmode=plugin -o statusmismatchalerts-amd64.so *.go  && cp statusmismatchalerts-amd64.so ../../../../
-          
           cd ../../../../plugin/nube/protocals/edge28
           go build -buildmode=plugin -o edge28-amd64.so *.go  && cp edge28-amd64.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/lorawan
           go build -buildmode=plugin -o lorawan-amd64.so *.go  && cp lorawan-amd64.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/modbus
           go build -buildmode=plugin -o modbus-amd64.so *.go  && cp modbus-amd64.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/lora
           go build -buildmode=plugin -o lora-amd64.so *.go  && cp lora-amd64.so ../../../../
-
-#          cd ../../../../plugin/nube/protocals/bacnetserver
-#          go build -buildmode=plugin -o bacnetserver-amd64.so *.go  && cp bacnetserver-amd64.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/bacnetmaster
           go build -buildmode=plugin -o bacnetmaster-amd64.so *.go  && cp bacnetmaster-amd64.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/rubixio
           go build -buildmode=plugin -o rubixio-amd64.so *.go  && cp rubixio-amd64.so ../../../../
-
-#          cd ../../../../plugin/nube/protocals/modbusserver
-#          go build -buildmode=plugin -o modbusserver-amd64.so *.go  && cp modbusserver-amd64.so ../../../../
           
           cd ../../../../plugin/nube/protocals/rubixpointsync
           go build -buildmode=plugin -o rubixpointsync-amd64.so *.go  && cp rubixpointsync-amd64.so ../../../../
-
+          
           cd ../../../../plugin/nube/database/influx
           go build -buildmode=plugin -o influx-amd64.so *.go  && cp influx-amd64.so ../../../../
           
           cd ../../../../plugin/nube/database/edgeinflux
           go build -buildmode=plugin -o edgeinflux-amd64.so *.go  && cp edgeinflux-amd64.so ../../../../
           
-#          cd ../../../../plugin/nube/database/edgeazure
-#          go build -buildmode=plugin -o edgeazure-amd64.so *.go  && cp edgeazure-amd64.so ../../../../
-
           cd ../../../../plugin/nube/database/history
           go build -buildmode=plugin -o history-amd64.so *.go  && cp history-amd64.so ../../../../
-
+          
           cd ../../../../plugin/nube/database/postgres
           go build -buildmode=plugin -o postgres-amd64.so *.go  && cp postgres-amd64.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/networklinker
           go build -buildmode=plugin -o networklinker-amd64.so *.go  && cp networklinker-amd64.so ../../../../
           
@@ -164,67 +146,49 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -o app-armv7 app.go
-
+          
           cd ./plugin/nube/system
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o system-armv7.so *.go  && cp system-armv7.so ../../../
           
           cd ../../../plugin/nube/projects/galvintmv
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o galvintmv-armv7.so *.go  && cp galvintmv-armv7.so ../../../../
           
-#          cd ../../../../plugin/nube/projects/thresholdalerts
-#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o thresholdalerts-armv7.so *.go  && cp thresholdalerts-armv7.so ../../../../
-#
-#          cd ../../../../plugin/nube/projects/flatlinealerts
-#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o flatlinealerts-armv7.so *.go  && cp flatlinealerts-armv7.so ../../../../
-#
-#          cd ../../../../plugin/nube/projects/statusmismatchalerts
-#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o statusmismatchalerts-armv7.so *.go  && cp statusmismatchalerts-armv7.so ../../../../
-          
           cd ../../../../plugin/nube/protocals/edge28
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edge28-armv7.so *.go  && cp edge28-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/lorawan
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o lorawan-armv7.so *.go  && cp lorawan-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/modbus
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o modbus-armv7.so *.go  && cp modbus-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/lora
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o lora-armv7.so *.go  && cp lora-armv7.so ../../../../
-
-#          cd ../../../../plugin/nube/protocals/bacnetserver
-#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o bacnetserver-armv7.so *.go  && cp bacnetserver-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/bacnetmaster
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o bacnetmaster-armv7.so *.go  && cp bacnetmaster-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/rubixio
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o rubixio-armv7.so *.go  && cp rubixio-armv7.so ../../../../
-
-#          cd ../../../../plugin/nube/protocals/modbusserver
-#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o modbusserver-armv7.so *.go  && cp modbusserver-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/rubixpointsync
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o rubixpointsync-armv7.so *.go  && cp rubixpointsync-armv7.so ../../../../
           
           cd ../../../../plugin/nube/database/influx
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o influx-armv7.so *.go  && cp influx-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/database/edgeinflux
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edgeinflux-armv7.so *.go  && cp edgeinflux-armv7.so ../../../../
-
-#          cd ../../../../plugin/nube/database/edgeazure
-#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edgeazure-armv7.so *.go  && cp edgeazure-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/database/history
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o history-armv7.so *.go  && cp history-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/database/postgres
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o postgres-armv7.so *.go  && cp postgres-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/networklinker
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o networklinker-armv7.so *.go  && cp networklinker-armv7.so ../../../../
-
+          
           cd ../../../../plugin/nube/protocals/mapmodbus
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o mapmodbus-armv7.so *.go  && cp mapmodbus-armv7.so ../../../../
           
@@ -239,77 +203,52 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./app-armv7
           artifact=${{ needs.context.outputs.fqn }}.amd64
           zip -r /tmp/zip/$artifact.zip ./app-amd64
-
+          
           artifact=system-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./system-amd64.so
           artifact=system-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./system-armv7.so
-
+          
           artifact=galvintmv-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./galvintmv-amd64.so
           artifact=galvintmv-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./galvintmv-armv7.so
           
-#          artifact=thresholdalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-#          zip -r /tmp/zip/$artifact.zip ./thresholdalerts-amd64.so
-#          artifact=thresholdalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-#          zip -r /tmp/zip/$artifact.zip ./thresholdalerts-armv7.so
-#
-#          artifact=flatlinealerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-#          zip -r /tmp/zip/$artifact.zip ./flatlinealerts-amd64.so
-#          artifact=flatlinealerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-#          zip -r /tmp/zip/$artifact.zip ./flatlinealerts-armv7.so
-#
-#          artifact=statusmismatchalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-#          zip -r /tmp/zip/$artifact.zip ./statusmismatchalerts-amd64.so
-#          artifact=statusmismatchalerts-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-#          zip -r /tmp/zip/$artifact.zip ./statusmismatchalerts-armv7.so
-          
           artifact=edge28-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./edge28-amd64.so
           artifact=edge28-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./edge28-armv7.so
-
+          
           artifact=lorawan-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./lorawan-amd64.so
           artifact=lorawan-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./lorawan-armv7.so
-
+          
           artifact=modbus-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./modbus-amd64.so
           artifact=modbus-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./modbus-armv7.so
-
+          
           artifact=lora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./lora-amd64.so
           artifact=lora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./lora-armv7.so
-
-#          artifact=bacnetserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-#          zip -r /tmp/zip/$artifact.zip ./bacnetserver-amd64.so
-#          artifact=bacnetserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-#          zip -r /tmp/zip/$artifact.zip ./bacnetserver-armv7.so
-
+          
           artifact=bacnetmaster-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./bacnetmaster-amd64.so
           artifact=bacnetmaster-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./bacnetmaster-armv7.so
-
+          
           artifact=rubixio-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./rubixio-amd64.so
           artifact=rubixio-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./rubixio-armv7.so
-
-#          artifact=modbusserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-#          zip -r /tmp/zip/$artifact.zip ./modbusserver-amd64.so
-#          artifact=modbusserver-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-#          zip -r /tmp/zip/$artifact.zip ./modbusserver-armv7.so
           
           artifact=rubixpointsync-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./rubixpointsync-amd64.so
           artifact=rubixpointsync-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./rubixpointsync-armv7.so
-
+          
           artifact=influx-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./influx-amd64.so
           artifact=influx-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
@@ -320,21 +259,16 @@ jobs:
           artifact=edgeinflux-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./edgeinflux-armv7.so
           
-#          artifact=edgeazure-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-#          zip -r /tmp/zip/$artifact.zip ./edgeazure-amd64.so
-#          artifact=edgeazure-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-#          zip -r /tmp/zip/$artifact.zip ./edgeazure-armv7.so
-
           artifact=history-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./history-amd64.so
           artifact=history-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./history-armv7.so
-
+          
           artifact=postgres-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./postgres-amd64.so
           artifact=postgres-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./postgres-armv7.so
-
+          
           artifact=networklinker-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./networklinker-amd64.so
           artifact=networklinker-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
