@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.9.30](https://github.com/NubeIO/flow-framework/tree/v0.9.30) (2023-02-07)
+
+- Modifies BACnet Master point write strategy 
+
 ## [v0.9.29](https://github.com/NubeIO/flow-framework/tree/v0.9.29) (2023-02-06)
 
 - Applies schedule timezone to the timestamps
