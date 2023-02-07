@@ -411,6 +411,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 					var foundSolenoidAllowPoint *model.Point
 					var foundCalibrationPoint *model.Point
 					var foundRTCPoint *model.Point
+					var foundRTCTZOffsetPoint *model.Point
 					if foundModbusDevice.Points != nil {
 						for _, modbusPoint := range foundModbusDevice.Points {
 							switch modbusPoint.Name {
@@ -684,6 +685,51 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCPoint update err: ", err)
 									}
 								}
+							case "RTC_TZ_OFFSET":
+								foundRTCTZOffsetPoint = modbusPoint
+								pointUpdateReq := false
+								if boolean.NonNil(foundRTCTZOffsetPoint.Enable) != true {
+									pointUpdateReq = true
+									foundRTCTZOffsetPoint.Enable = boolean.NewTrue()
+								}
+								if integer.NonNil(foundRTCTZOffsetPoint.AddressID) != 10009 {
+									pointUpdateReq = true
+									foundRTCTZOffsetPoint.AddressID = integer.New(10009)
+								}
+								if foundRTCTZOffsetPoint.ObjectType != string(model.ObjTypeWriteHolding) {
+									pointUpdateReq = true
+									foundRTCTZOffsetPoint.ObjectType = string(model.ObjTypeWriteHolding)
+								}
+								if foundRTCTZOffsetPoint.WriteMode != model.WriteOnce {
+									pointUpdateReq = true
+									foundRTCTZOffsetPoint.WriteMode = model.WriteOnce
+								}
+								if foundRTCTZOffsetPoint.DataType != string(model.TypeUint32) {
+									pointUpdateReq = true
+									foundRTCTZOffsetPoint.DataType = string(model.TypeUint32)
+								}
+								if foundRTCTZOffsetPoint.PollRate != model.RATE_SLOW {
+									pointUpdateReq = true
+									foundRTCTZOffsetPoint.PollRate = model.RATE_SLOW
+								}
+								if foundRTCTZOffsetPoint.PollPriority != model.PRIORITY_HIGH {
+									pointUpdateReq = true
+									foundRTCTZOffsetPoint.PollPriority = model.PRIORITY_HIGH
+								}
+								if foundRTCTZOffsetPoint.HistoryType != model.HistoryTypeCovAndInterval {
+									pointUpdateReq = true
+									foundRTCTZOffsetPoint.HistoryType = model.HistoryTypeCovAndInterval
+								}
+								if foundRTCTZOffsetPoint.HistoryInterval == nil || *foundRTCTZOffsetPoint.HistoryInterval != 60 {
+									pointUpdateReq = true
+									foundRTCTZOffsetPoint.HistoryInterval = float.New(60)
+								}
+								if pointUpdateReq {
+									foundRTCTZOffsetPoint, err = inst.db.UpdatePoint(foundRTCTZOffsetPoint.UUID, foundRTCTZOffsetPoint, false, false)
+									if err != nil {
+										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCPoint update err: ", err)
+									}
+								}
 							}
 							time.Sleep(50 * time.Millisecond)
 						}
@@ -824,6 +870,26 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundRTCPoint, err = inst.db.CreatePoint(foundRTCPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCPoint create err: ", err)
+						}
+						time.Sleep(50 * time.Millisecond)
+					}
+					if foundRTCTZOffsetPoint == nil {
+						foundRTCTZOffsetPoint = &model.Point{}
+						foundRTCTZOffsetPoint.DeviceUUID = foundModbusDevice.UUID
+						foundRTCTZOffsetPoint.Name = "RTC_TZ_OFFSET"
+						foundRTCTZOffsetPoint.Enable = boolean.NewTrue()
+						foundRTCTZOffsetPoint.AddressID = integer.New(10009)
+						foundRTCTZOffsetPoint.ObjectType = string(model.ObjTypeWriteHolding)
+						foundRTCTZOffsetPoint.WriteMode = model.WriteOnce
+						foundRTCTZOffsetPoint.DataType = string(model.TypeUint32)
+						foundRTCTZOffsetPoint.PollRate = model.RATE_SLOW
+						foundRTCTZOffsetPoint.PollPriority = model.PRIORITY_HIGH
+						foundRTCTZOffsetPoint.WritePollRequired = boolean.NewFalse()
+						foundRTCTZOffsetPoint.HistoryType = model.HistoryTypeCovAndInterval
+						foundRTCTZOffsetPoint.HistoryInterval = float.New(60)
+						foundRTCTZOffsetPoint, err = inst.db.CreatePoint(foundRTCTZOffsetPoint, false, true)
+						if err != nil {
+							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCTZOffsetPoint create err: ", err)
 						}
 						time.Sleep(50 * time.Millisecond)
 					}
