@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 func (inst *Instance) bacnetNetworkInit() {
@@ -383,6 +384,9 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 	currentBACServPriority, err = inst.doReadPriority(pnt, networkUUID, deviceUUID)
 	if err != nil {
 		inst.bacnetErrorMsg("BACnetMasterPolling(): doReadAllThenWriteDiff141516() doReadPriority() error:", err)
+		if strings.Contains(err.Error(), "receive timed out") {
+			return nil, nil, false, false, nil
+		}
 		inst.bacnetErrorMsg("BACnetMasterPolling(): couldn't read priority array, attempting to write at priority16. see error logging for more details", err)
 		// If the priority array read fails, then write only in16 (if it's a writable point), then just read the present value.
 		if pnt.Priority != nil && writemode.IsWriteable(pnt.WriteMode) && isWrite {
@@ -438,20 +442,24 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 			}
 
 			var currentBACnetServPriorityVal *float64
+			var pointerToBACServPriority **float32
 			switch writePriority {
 			case 14:
+				pointerToBACServPriority = &currentBACServPriority.P14
 				if currentBACServPriority.P14 == nil {
 					currentBACnetServPriorityVal = nil
 				} else {
 					currentBACnetServPriorityVal = float.New(float64(*currentBACServPriority.P14))
 				}
 			case 15:
+				pointerToBACServPriority = &currentBACServPriority.P15
 				if currentBACServPriority.P15 == nil {
 					currentBACnetServPriorityVal = nil
 				} else {
 					currentBACnetServPriorityVal = float.New(float64(*currentBACServPriority.P15))
 				}
 			case 16:
+				pointerToBACServPriority = &currentBACServPriority.P16
 				if currentBACServPriority.P16 == nil {
 					currentBACnetServPriorityVal = nil
 				} else {
@@ -460,6 +468,7 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 
 			}
 			if val == nil && currentBACnetServPriorityVal == nil || (val != nil && currentBACnetServPriorityVal != nil && *val == *currentBACnetServPriorityVal) {
+				writeSuccess = true // write not required
 				continue
 			}
 
@@ -478,6 +487,7 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 					inst.bacnetErrorMsg("bacnet-master-write-release-priority:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority, " error:", err)
 					continue
 				}
+				*pointerToBACServPriority = nil
 				log.Infoln("bacnet-master-point-release-priority:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
 			} else {
 				if isBool {
@@ -503,6 +513,8 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 					writeSuccess = true
 				}
 				log.Infoln("bacnet-master-point-write:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", *val, " writePriority", writePriority)
+				newF32 := float32(*val)
+				*pointerToBACServPriority = &newF32
 			}
 		}
 	}
