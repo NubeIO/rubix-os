@@ -387,9 +387,9 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 		if strings.Contains(err.Error(), "receive timed out") {
 			return nil, nil, false, false, nil
 		}
-		inst.bacnetErrorMsg("BACnetMasterPolling(): couldn't read priority array, attempting to write at priority16. see error logging for more details", err)
 		// If the priority array read fails, then write only in16 (if it's a writable point), then just read the present value.
 		if pnt.Priority != nil && writemode.IsWriteable(pnt.WriteMode) && isWrite {
+			inst.bacnetErrorMsg("BACnetMasterPolling(): couldn't read priority array, attempting to write at priority16. see error logging for more details", err)
 			err = inst.doWriteAtPriority(pnt, networkUUID, deviceUUID, pnt.Priority.P16, 16)
 			if err != nil {
 				inst.bacnetErrorMsg("BACnetMasterPolling(): doReadAllThenWriteDiff141516() doWriteAtPriority() error:", err)

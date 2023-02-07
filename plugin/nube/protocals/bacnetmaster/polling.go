@@ -224,6 +224,8 @@ func (inst *Instance) BACnetMasterPolling() error {
 				if err != nil {
 					inst.bacnetDebugMsg("BACnetMasterPolling() pointUpdateFromPriorityArray err: ", err)
 				}
+			} else {
+				inst.pointUpdate(pnt, highestPriorityValue, readSuccess, false)
 			}
 
 			if !readSuccess && !writeSuccess {
