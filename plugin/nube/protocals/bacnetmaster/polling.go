@@ -213,6 +213,7 @@ func (inst *Instance) BACnetMasterPolling() error {
 
 			if currentBACServPriority != nil {
 				currentBACServPriorityMap := ConvertPriorityToMap(*currentBACServPriority)
+				/*  prints each priority array value
 				for key, val := range currentBACServPriorityMap {
 					if val == nil {
 						inst.bacnetDebugMsg("BACnetMasterPolling() BACnetServerPoint: key: ", key, "val", val)
@@ -220,13 +221,17 @@ func (inst *Instance) BACnetMasterPolling() error {
 						inst.bacnetDebugMsg("BACnetMasterPolling() BACnetServerPoint: key: ", key, "val", *val)
 					}
 				}
+				*/
 				_, err = inst.pointUpdateFromPriorityArray(pnt, currentBACServPriorityMap, highestPriorityValue, true)
 				if err != nil {
 					inst.bacnetDebugMsg("BACnetMasterPolling() pointUpdateFromPriorityArray err: ", err)
 				}
 			} else {
 				inst.pointUpdate(pnt, highestPriorityValue, readSuccess, false)
-				inst.bacnetDebugMsg("updated bacnet point present value.  point: ", pnt.Name, " bacnet-id: ", pnt.ObjectType, pnt.ObjectId)
+				if pnt.ObjectId != nil {
+					inst.bacnetDebugMsg("updated bacnet point present value.  point: ", pnt.Name, " bacnet-id: ", pnt.ObjectType, *pnt.ObjectId)
+				}
+
 			}
 
 			if !readSuccess && !writeSuccess {
@@ -247,7 +252,9 @@ func (inst *Instance) BACnetMasterPolling() error {
 			*/
 
 			// This callback function triggers the PollManager to evaluate whether the point should be re-added to the PollQueue (Never, Immediately, or after the Poll Rate Delay)
-			inst.bacnetDebugMsg("BACnetMasterPolling() success.  point: ", pnt.Name, " bacnet-id: ", pnt.ObjectType, pnt.ObjectId)
+			if pnt.ObjectId != nil {
+				inst.bacnetDebugMsg("BACnetMasterPolling() success.  point: ", pnt.Name, " bacnet-id: ", pnt.ObjectType, *pnt.ObjectId)
+			}
 			netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, true, false, pollqueue.NORMAL_RETRY, callback)
 
 		}

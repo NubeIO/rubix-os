@@ -229,7 +229,6 @@ func (inst *Instance) doReadPriority(pnt *model.Point, networkUUID, deviceUUID s
 	if err != nil {
 		return nil, err
 	}
-	inst.bacnetDebugMsg("about to do dev.PointReadPriority(bp)")
 	return dev.PointReadPriority(bp)
 }
 
