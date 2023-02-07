@@ -1005,6 +1005,10 @@ func (inst *Instance) updateIOModuleRTC() error {
 					inst.tmvDebugMsg("updateIOModuleRTC() rtcPointWrite() device: ", dev.Name)
 					inst.rtcPointWrite(pnt)
 					time.Sleep(30 * time.Second)
+				} else if pnt.Name == "RTC_TZ_OFFSET" {
+					inst.tmvDebugMsg("updateIOModuleRTC() rtcTZOffsetPointWrite() device: ", dev.Name)
+					inst.rtcTZOffsetPointWrite(pnt)
+					time.Sleep(30 * time.Second)
 				}
 			}
 		}
@@ -1022,6 +1026,21 @@ func (inst *Instance) rtcPointWrite(rtcPoint *model.Point) error {
 	_, _, _, _, err := inst.db.PointWrite(rtcPoint.UUID, &pointWriter, false)
 	if err != nil {
 		inst.tmvErrorMsg("rtcPointWrite() PointWrite() error: ", err)
+		return err
+	}
+	return nil
+}
+
+func (inst *Instance) rtcTZOffsetPointWrite(rtcTZOffsetPoint *model.Point) error {
+	_, offset := time.Now().Local().Zone()
+	inst.tmvDebugMsg("rtcTZOffsetPointWrite() offset: ", offset)
+	pointUpdateMap := make(map[string]*float64)
+	pointUpdateMap["_1"] = float.New(float64(offset))
+	pointWriter := model.PointWriter{Priority: &pointUpdateMap}
+
+	_, _, _, _, err := inst.db.PointWrite(rtcTZOffsetPoint.UUID, &pointWriter, false)
+	if err != nil {
+		inst.tmvErrorMsg("rtcTZOffsetPointWrite() PointWrite() error: ", err)
 		return err
 	}
 	return nil
