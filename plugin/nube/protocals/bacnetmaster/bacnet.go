@@ -383,17 +383,18 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 	// Get Priority Array of BACnet Point
 	currentBACServPriority, err = inst.doReadPriority(pnt, networkUUID, deviceUUID)
 	if err != nil {
-		inst.bacnetErrorMsg("BACnetMasterPolling(): doReadAllThenWriteDiff141516() doReadPriority() error:", err)
+		inst.bacnetDebugMsg("BACnetMasterPolling(): doReadAllThenWriteDiff141516() doReadPriority() error:", err)
 		if strings.Contains(err.Error(), "receive timed out") {
 			return nil, nil, false, false, nil
 		}
+		inst.bacnetErrorMsg("BACnetMasterPolling(): failed to read BACnet priority array")
 		// If the priority array read fails, then write only in16 (if it's a writable point), then just read the present value.
 		if pnt.Priority != nil && writemode.IsWriteable(pnt.WriteMode) && isWrite {
-			inst.bacnetErrorMsg("BACnetMasterPolling(): couldn't read priority array, attempting to write at priority16. see error logging for more details", err)
 			err = inst.doWriteAtPriority(pnt, networkUUID, deviceUUID, pnt.Priority.P16, 16)
 			if err != nil {
-				inst.bacnetErrorMsg("BACnetMasterPolling(): doReadAllThenWriteDiff141516() doWriteAtPriority() error:", err)
+				inst.bacnetErrorMsg("BACnetMasterPolling(): doReadAllThenWriteDiff141516() priority 16 write error:", err)
 			} else {
+				inst.bacnetDebugMsg("BACnetMasterPolling(): successfully wrote to priority 16")
 				writeSuccess = true
 			}
 		}
@@ -401,6 +402,7 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 		if err != nil {
 			inst.bacnetErrorMsg("BACnetMasterPolling(): doReadAllThenWriteDiff141516() doReadValue() error:", err)
 		} else {
+			inst.bacnetDebugMsg("Successfully read bacnet point present value")
 			readSuccess = true
 		}
 		highestPriorityValue = float.New(readValue)
@@ -424,7 +426,7 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 		go net.NetworkRun()
 		dev, err := inst.getBacnetStoreDevice(deviceUUID)
 		if err != nil {
-			log.Error(fmt.Sprintf("get bacnet device err: %s", err.Error()))
+			inst.bacnetErrorMsg(fmt.Sprintf("get bacnet device err: %s", err.Error()))
 			return nil, nil, readSuccess, writeSuccess, errors.New("bacnet-write: error getting BACnet device details")
 		}
 		priorityArray := pnt.Priority
@@ -488,7 +490,7 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 					continue
 				}
 				*pointerToBACServPriority = nil
-				log.Infoln("bacnet-master-point-release-priority:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
+				inst.bacnetDebugMsg("bacnet-master-point-release-priority:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", val, " writePriority", writePriority)
 			} else {
 				if isBool {
 					err = dev.PointWriteBool(bp, float64ToUint32(*val))
@@ -512,7 +514,7 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 					}
 					writeSuccess = true
 				}
-				log.Infoln("bacnet-master-point-write:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", *val, " writePriority", writePriority)
+				inst.bacnetDebugMsg("bacnet-master-point-write:", "type:", pnt.ObjectType, "id", integer.NonNil(pnt.ObjectId), " value:", *val, " writePriority", writePriority)
 				newF32 := float32(*val)
 				*pointerToBACServPriority = &newF32
 			}

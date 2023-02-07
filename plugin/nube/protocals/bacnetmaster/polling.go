@@ -226,6 +226,7 @@ func (inst *Instance) BACnetMasterPolling() error {
 				}
 			} else {
 				inst.pointUpdate(pnt, highestPriorityValue, readSuccess, false)
+				inst.bacnetDebugMsg("updated bacnet point present value.  point: ", pnt.Name, " bacnet-id: ", pnt.ObjectType, pnt.ObjectId)
 			}
 
 			if !readSuccess && !writeSuccess {
@@ -246,6 +247,7 @@ func (inst *Instance) BACnetMasterPolling() error {
 			*/
 
 			// This callback function triggers the PollManager to evaluate whether the point should be re-added to the PollQueue (Never, Immediately, or after the Poll Rate Delay)
+			inst.bacnetDebugMsg("BACnetMasterPolling() success.  point: ", pnt.Name, " bacnet-id: ", pnt.ObjectType, pnt.ObjectId)
 			netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, true, false, pollqueue.NORMAL_RETRY, callback)
 
 		}
