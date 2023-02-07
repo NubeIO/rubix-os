@@ -155,12 +155,12 @@ func (inst *Instance) BACnetMasterPolling() error {
 
 			// inst.bacnetDebugMsg(fmt.Sprintf("BACNET POLL! : Priority: %s, Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s, WriteRequired: %t, ReadRequired: %t", pp.PollPriority, net.UUID, dev.UUID, pnt.UUID, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
 
-			/* TODO: This has been removed as we are now writing all priorities on every cycle
-			if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
-				inst.bacnetDebugMsg("polling not required on this point")
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.NORMAL_RETRY, callback)
-				continue
-			}
+			/*
+				if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
+					inst.bacnetDebugMsg("polling not required on this point")
+					netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.NORMAL_RETRY, callback)
+					continue
+				}
 			*/
 
 			writemode.SetPriorityArrayModeBasedOnWriteMode(pnt) // ensures the point PointPriorityArrayMode is set correctly
@@ -211,16 +211,18 @@ func (inst *Instance) BACnetMasterPolling() error {
 				continue
 			}
 
-			currentBACServPriorityMap := ConvertPriorityToMap(*currentBACServPriority)
-			for key, val := range currentBACServPriorityMap {
-				if val == nil {
-					inst.bacnetDebugMsg("BACnetServerPolling() BACnetServerPoint: key: ", key, "val", val)
-				} else {
-					inst.bacnetDebugMsg("BACnetServerPolling() BACnetServerPoint: key: ", key, "val", *val)
+			if currentBACServPriority != nil {
+				currentBACServPriorityMap := ConvertPriorityToMap(*currentBACServPriority)
+				for key, val := range currentBACServPriorityMap {
+					if val == nil {
+						inst.bacnetDebugMsg("BACnetServerPolling() BACnetServerPoint: key: ", key, "val", val)
+					} else {
+						inst.bacnetDebugMsg("BACnetServerPolling() BACnetServerPoint: key: ", key, "val", *val)
+					}
 				}
+				inst.bacnetDebugMsg(fmt.Sprintf("bacnet write point currentBACServPriorityMap: %+v", currentBACServPriorityMap))
+				_, err = inst.pointUpdateFromPriorityArray(pnt, currentBACServPriorityMap, highestPriorityValue, true)
 			}
-			inst.bacnetDebugMsg(fmt.Sprintf("bacnet write point currentBACServPriorityMap: %+v", currentBACServPriorityMap))
-			_, err = inst.pointUpdateFromPriorityArray(pnt, currentBACServPriorityMap, highestPriorityValue, true)
 
 			if !readSuccess && !writeSuccess {
 				inst.bacnetErrorMsg("no read/write performed: ", err)
