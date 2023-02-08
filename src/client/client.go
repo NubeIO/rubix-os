@@ -38,6 +38,15 @@ var transport = http.Transport{
 }
 
 func GetFlowToken(ip string, port int, username string, password string) (*string, error) {
+	flowClient := getNewFlowClientCli(ip, port)
+	token, err := flowClient.Login(&model.LoginBody{Username: username, Password: password})
+	if err != nil {
+		return nil, err
+	}
+	return &token.AccessToken, nil
+}
+
+func getNewFlowClientCli(ip string, port int) *FlowClient {
 	mutex.Lock()
 	defer mutex.Unlock()
 	url := fmt.Sprintf("%s://%s:%d", getSchema(port), ip, port)
@@ -51,11 +60,7 @@ func GetFlowToken(ip string, port int, username string, password string) (*strin
 		flowClient = &FlowClient{client: client}
 		flowClients[url] = flowClient
 	}
-	token, err := flowClient.Login(&model.LoginBody{Username: username, Password: password})
-	if err != nil {
-		return nil, err
-	}
-	return &token.AccessToken, nil
+	return flowClient
 }
 
 func NewLocalClient() *FlowClient {
