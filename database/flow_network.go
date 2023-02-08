@@ -299,11 +299,6 @@ func (d *GormDatabase) resetHostAndCredential(body *model.FlowNetwork) {
 func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isMasterSlave bool, cli *client.FlowClient, isRemote bool, tx *gorm.DB) (*model.FlowNetwork, error) {
 	bodyToSync := *body
 	if !isMasterSlave && isRemote {
-		var localStorageFlowNetwork *model.LocalStorageFlowNetwork
-		if err := d.DB.First(&localStorageFlowNetwork).Error; err != nil {
-			tx.Rollback()
-			return nil, err
-		}
 		if boolean.IsTrue(body.IsTokenAuth) {
 			bodyToSync.FlowHTTPS = body.FlowHTTSLocal
 			bodyToSync.FlowIP = body.FlowIPLocal
@@ -312,6 +307,11 @@ func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isM
 			bodyToSync.FlowPassword = nil
 			bodyToSync.FlowToken = body.FlowTokenLocal
 		} else {
+			var localStorageFlowNetwork *model.LocalStorageFlowNetwork
+			if err := d.DB.First(&localStorageFlowNetwork).Error; err != nil {
+				tx.Rollback()
+				return nil, err
+			}
 			bodyToSync.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
 			bodyToSync.FlowIP = nstring.NewStringAddress(localStorageFlowNetwork.FlowIP)
 			bodyToSync.FlowPort = integer.New(localStorageFlowNetwork.FlowPort)

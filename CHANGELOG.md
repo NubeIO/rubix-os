@@ -1,8 +1,14 @@
 # CHANGELOG
 
+## [v0.9.31](https://github.com/NubeIO/flow-framework/tree/v0.9.31) (2023-02-08)
+
+- Adds rtc timezone point
+- Updates rtc timezone offset
+- Fix: database lock issue
+
 ## [v0.9.30](https://github.com/NubeIO/flow-framework/tree/v0.9.30) (2023-02-07)
 
-- Modifies BACnet Master point write strategy 
+- Modifies BACnet Master point write strategy
 
 ## [v0.9.29](https://github.com/NubeIO/flow-framework/tree/v0.9.29) (2023-02-06)
 
