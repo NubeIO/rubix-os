@@ -26,9 +26,6 @@ const FlowNetworkCloneStreamClonesSyncUrl string = "/api/flow_network_clones/:uu
 const StreamCloneConsumersSyncUrl string = "/api/stream_clones/:uuid/sync/consumers"
 const ConsumerWritersSyncUrl string = "/api/consumers/:uuid/sync/writers"
 
-const NetworkDevicesSyncUrl string = "/api/networks/:uuid/sync/devices"
-const DevicePointsSyncUrl string = "api/devices/:uuid/sync/points"
-
 func SingularUrl(url, uuid string) string {
 	return fmt.Sprintf("%s/%s", url, uuid)
 }
@@ -58,13 +55,5 @@ func GenerateFNCUrlParams(args api.Args) string {
 	var aType = api.ArgsType
 	params += fmt.Sprintf("%s=%v", aType.WithConsumers, args.WithConsumers)
 	params += fmt.Sprintf("&%s=%v", aType.WithWriters, args.WithWriters)
-	return params
-}
-
-func GenerateNetworkUrlParams(args api.Args) string {
-	params := "?"
-	var aType = api.ArgsType
-	params += fmt.Sprintf("%s=%v", aType.WithDevices, args.WithDevices)
-	params += fmt.Sprintf("&%s=%v", aType.WithPoints, args.WithPoints)
 	return params
 }

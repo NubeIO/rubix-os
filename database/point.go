@@ -137,7 +137,8 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool, afterRealDeviceUpdate bool) (
 	*model.Point, error) {
 	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
+	query := d.DB.Where("uuid = ?", uuid).Preload("Tags").Preload("MetaTags").
+		Preload("Priority").First(&pointModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -179,7 +180,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		go d.PublishPointsList("")
 	}
 	d.UpdateProducerThing(pointModel.UUID, pointModel.Name)
-	err = d.UpdatePointAutoMapping(body)
+	err = d.UpdatePointAutoMapping(pointModel)
 	if err != nil {
 		log.Errorln("points.db.UpdatePointAutoMapping() failed to make auto mapping")
 		return nil, err

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm/clause"
 	"strings"
@@ -36,6 +37,7 @@ func (d *GormDatabase) CreateDeviceMetaTags(deviceUUID string, body []*model.Dev
 		return nil, err
 	}
 	tx.Commit()
+	_ = d.syncAfterCreateUpdateDevice(deviceUUID, api.Args{WithMetaTags: true})
 	return body, nil
 }
 

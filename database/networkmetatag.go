@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm/clause"
 	"strings"
@@ -36,6 +37,7 @@ func (d *GormDatabase) CreateNetworkMetaTags(networkUUID string, body []*model.N
 		return nil, err
 	}
 	tx.Commit()
+	_ = d.syncAfterUpdateNetwork(networkUUID, api.Args{WithDevices: true})
 	return body, nil
 }
 
