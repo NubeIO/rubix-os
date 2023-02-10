@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.9.32](https://github.com/NubeIO/flow-framework/tree/v0.9.32) (2023-02-10)
+
+- support for known lorawan string payloads
+
 ## [v0.9.31](https://github.com/NubeIO/flow-framework/tree/v0.9.31) (2023-02-08)
 
 - Adds rtc timezone point
