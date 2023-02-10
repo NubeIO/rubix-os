@@ -249,3 +249,41 @@ func InEqualIgnoreCase(str string, args ...string) bool {
 	}
 	return false
 }
+
+func ConvertKnownStringToFloat(str string) (float64, error) {
+	strLower := strings.ToLower(str)
+	stringToFloatMap := map[string]float64{
+		"true":     1,
+		"yes":      1,
+		"on":       1,
+		"closed":   1,
+		"close":    1,
+		"enabled":  1,
+		"start":    1,
+		"1":        1,
+		"active":   1,
+		"high":     1,
+		"positive": 1,
+		"running":  1,
+		"alive":    1,
+		"trigger":  1,
+		"false":    0,
+		"no":       0,
+		"off":      0,
+		"open":     0,
+		"disabled": 0,
+		"stop":     0,
+		"stopped":  0,
+		"low":      0,
+		"negative": 0,
+		"dead":     0,
+		"0":        0,
+		"idle":     0,
+	}
+	val, ok := stringToFloatMap[strLower]
+	if ok {
+		return val, nil
+	} else {
+		return 0, errors.New("no matching string values")
+	}
+}
