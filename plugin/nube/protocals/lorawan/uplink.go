@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils/nstring"
 	"reflect"
 	"strings"
 
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
@@ -43,6 +43,8 @@ func (inst *Instance) handleMqttUplink(body mqtt.Message) {
 		}
 	}
 	inst.parseUplinkData(&payload.Object, currDev)
+	inst.updateOrCreatePoint("rssi", float64(payload.RxInfo[0].Rssi), currDev)
+	inst.updateOrCreatePoint("snr", float64(payload.RxInfo[0].LoRaSNR), currDev)
 }
 
 // checkMqttTopicUplink checks the topic is a CS uplink event
@@ -83,14 +85,19 @@ func (inst *Instance) parseUplinkData(data *map[string]interface{}, device *mode
 			inst.lorawanErrorMsg(fmt.Sprintf("lorawan: parseUplinkData unsupported value type: %T = %v", t, v))
 			continue
 		}
-		point := inst.getPointByAddressUUID(k, *device.AddressUUID, device.Points)
-		if point == nil {
-			point, err = inst.createNewPoint(k, *device.AddressUUID, device.UUID)
-			if err != nil {
-				continue
-			}
-		}
-		inst.lorawanDebugMsg(fmt.Sprintf("lorawan: Update point %s value=%f", *point.AddressUUID, value))
-		inst.pointWrite(point.UUID, value)
+		inst.updateOrCreatePoint(k, value, device)
 	}
+}
+
+func (inst *Instance) updateOrCreatePoint(pointName string, value float64, device *model.Device) (err error) {
+	point := inst.getPointByAddressUUID(pointName, *device.AddressUUID, device.Points)
+	if point == nil {
+		point, err = inst.createNewPoint(pointName, *device.AddressUUID, device.UUID)
+		if err != nil {
+			return err
+		}
+	}
+	inst.lorawanDebugMsg(fmt.Sprintf("lorawan: Update point %s value=%f", *point.AddressUUID, value))
+	inst.pointWrite(point.UUID, value)
+	return nil
 }
