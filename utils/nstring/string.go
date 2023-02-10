@@ -278,6 +278,7 @@ func ConvertKnownStringToFloat(str string) (float64, error) {
 		"negative": 0,
 		"dead":     0,
 		"0":        0,
+		"idle":     0,
 	}
 	val, ok := stringToFloatMap[strLower]
 	if ok {
