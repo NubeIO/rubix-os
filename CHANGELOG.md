@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.9.33](https://github.com/NubeIO/flow-framework/tree/v0.9.33) (2023-02-13)
+
+- Sync meta-tags and tags
+
 ## [v0.9.32](https://github.com/NubeIO/flow-framework/tree/v0.9.32) (2023-02-10)
 
 - support for known lorawan string payloads
