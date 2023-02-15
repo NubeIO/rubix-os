@@ -11,6 +11,7 @@ func (inst *Instance) Enable() error {
 	inst.edgeinfluxDebugMsg("EDGEINFLUX Plugin Enable()")
 	inst.enabled = true
 	inst.fault = false
+	inst.running = false
 	inst.setUUID()
 	cron = gocron.NewScheduler(time.UTC)
 	influxDetails := inst.initializeInfluxSettings()

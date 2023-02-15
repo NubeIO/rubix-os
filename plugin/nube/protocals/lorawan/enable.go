@@ -15,6 +15,8 @@ var cron *gocron.Scheduler
 func (inst *Instance) Enable() error {
 	log.Info("LORAWAN Plugin Enable()")
 	inst.enabled = true
+	inst.running = false
+	inst.fault = false
 	inst.setUUID()
 	inst.BusServ()
 
