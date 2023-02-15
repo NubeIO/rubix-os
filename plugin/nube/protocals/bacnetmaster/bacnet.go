@@ -376,7 +376,7 @@ func (inst *Instance) doWriteAtPriority(pnt *model.Point, networkUUID, deviceUUI
 	return nil
 }
 
-func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID, deviceUUID string) (currentBACServPriority *priority.Float32, highestPriorityValue *float64, readSuccess, writeSuccess bool, err error) {
+func (inst *Instance) doReadAllThenWriteDiff7141516(pnt *model.Point, networkUUID, deviceUUID string) (currentBACServPriority *priority.Float32, highestPriorityValue *float64, readSuccess, writeSuccess bool, err error) {
 	object, isWrite, isBool, _ := setObjectType(pnt.ObjectType)
 
 	// Get Priority Array of BACnet Point
@@ -438,13 +438,20 @@ func (inst *Instance) doReadAllThenWriteDiff141516(pnt *model.Point, networkUUID
 
 		for key, val := range priorityMap {
 			writePriority, _ = strconv.Atoi(regexp.MustCompile("[0-9]+").FindString(key))
-			if writePriority < 14 || writePriority > 16 { // We only write to priorities 14, 15, and 16
+			if writePriority != 7 && writePriority != 14 && writePriority != 15 && writePriority != 16 { // We only write to priorities 7, 14, 15, and 16
 				continue
 			}
 
 			var currentBACnetServPriorityVal *float64
 			var pointerToBACServPriority **float32
 			switch writePriority {
+			case 7:
+				pointerToBACServPriority = &currentBACServPriority.P7
+				if currentBACServPriority.P7 == nil {
+					currentBACnetServPriorityVal = nil
+				} else {
+					currentBACnetServPriorityVal = float.New(float64(*currentBACServPriority.P7))
+				}
 			case 14:
 				pointerToBACServPriority = &currentBACServPriority.P14
 				if currentBACServPriority.P14 == nil {

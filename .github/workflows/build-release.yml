@@ -128,11 +128,11 @@ jobs:
           cd ../../../../plugin/nube/protocals/networklinker
           go build -buildmode=plugin -o networklinker-amd64.so *.go  && cp networklinker-amd64.so ../../../../
           
-          cd ../../../../plugin/nube/protocals/mapmodbus
-          go build -buildmode=plugin -o mapmodbus-amd64.so *.go  && cp mapmodbus-amd64.so ../../../../
+#          cd ../../../../plugin/nube/protocals/mapmodbus
+#          go build -buildmode=plugin -o mapmodbus-amd64.so *.go  && cp mapmodbus-amd64.so ../../../../
           
-          cd ../../../../plugin/nube/protocals/maplora
-          go build -buildmode=plugin -o maplora-amd64.so *.go  && cp maplora-amd64.so ../../../../
+#          cd ../../../../plugin/nube/protocals/maplora
+#          go build -buildmode=plugin -o maplora-amd64.so *.go  && cp maplora-amd64.so ../../../../
 
       - name: Build armv7
         if: ${{ needs.context.outputs.isRelease == 'true' }}
@@ -183,11 +183,11 @@ jobs:
           cd ../../../../plugin/nube/protocals/networklinker
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o networklinker-armv7.so *.go  && cp networklinker-armv7.so ../../../../
           
-          cd ../../../../plugin/nube/protocals/mapmodbus
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o mapmodbus-armv7.so *.go  && cp mapmodbus-armv7.so ../../../../
-          
-          cd ../../../../plugin/nube/protocals/maplora
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o maplora-armv7.so *.go  && cp maplora-armv7.so ../../../../
+#          cd ../../../../plugin/nube/protocals/mapmodbus
+#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o mapmodbus-armv7.so *.go  && cp mapmodbus-armv7.so ../../../../
+#
+#          cd ../../../../plugin/nube/protocals/maplora
+#          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o maplora-armv7.so *.go  && cp maplora-armv7.so ../../../../
 
       - name: Zip artifacts
         if: ${{ needs.context.outputs.isRelease == 'true' }}
@@ -264,15 +264,15 @@ jobs:
           artifact=networklinker-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./networklinker-armv7.so
           
-          artifact=mapmodbus-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./mapmodbus-amd64.so
-          artifact=mapmodbus-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./mapmodbus-armv7.so
+#          artifact=mapmodbus-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+#          zip -r /tmp/zip/$artifact.zip ./mapmodbus-amd64.so
+#          artifact=mapmodbus-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+#          zip -r /tmp/zip/$artifact.zip ./mapmodbus-armv7.so
           
-          artifact=maplora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./maplora-amd64.so
-          artifact=maplora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./maplora-armv7.so
+#          artifact=maplora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+#          zip -r /tmp/zip/$artifact.zip ./maplora-amd64.so
+#          artifact=maplora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+#          zip -r /tmp/zip/$artifact.zip ./maplora-armv7.so
 
       - name: Create Release
         if: ${{ needs.context.outputs.isRelease == 'true' }}
