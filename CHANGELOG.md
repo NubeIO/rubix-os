@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.9.34](https://github.com/NubeIO/flow-framework/tree/v0.9.34) (2023-02-16)
+
+- bacnet master: adds priority 7 as write
+- adds running and fault properties to most plugins
+
 ## [v0.9.33](https://github.com/NubeIO/flow-framework/tree/v0.9.33) (2023-02-13)
 
 - Sync meta-tags and tags
