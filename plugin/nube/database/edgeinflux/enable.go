@@ -10,6 +10,7 @@ var cron *gocron.Scheduler
 func (inst *Instance) Enable() error {
 	inst.edgeinfluxDebugMsg("EDGEINFLUX Plugin Enable()")
 	inst.enabled = true
+	inst.fault = false
 	inst.setUUID()
 	cron = gocron.NewScheduler(time.UTC)
 	influxDetails := inst.initializeInfluxSettings()
@@ -17,7 +18,7 @@ func (inst *Instance) Enable() error {
 	_, _ = cron.Every(inst.config.Job.Frequency).Tag("SyncInflux").Do(inst.syncInflux, influxDetails)
 	cron.StartAsync()
 	inst.StartMQTTSubscribeCOV() // this runs in a go routine with cancel on mqttCancel()
-
+	inst.running = true
 	return nil
 }
 
@@ -31,5 +32,7 @@ func (inst *Instance) Disable() error {
 	for _, influxConnectionInstance := range influxConnectionInstances {
 		influxConnectionInstance.client.Close()
 	}
+	inst.running = false
+	inst.fault = false
 	return nil
 }

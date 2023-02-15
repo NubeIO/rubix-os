@@ -27,6 +27,8 @@ const transportType = "ip" // serial, ip
 type Instance struct {
 	config         *config.Config
 	enabled        bool
+	running        bool
+	fault          bool
 	basePath       string
 	db             dbhandler.Handler
 	store          cachestore.Handler

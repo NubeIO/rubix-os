@@ -11,12 +11,15 @@ var cron *gocron.Scheduler
 func (inst *Instance) Enable() error {
 	inst.tmvDebugMsg("TMV Plugin Enable()")
 	inst.enabled = true
+	inst.fault = false
+	inst.running = false
 	inst.pluginName = name
 	inst.setUUID()
 	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
 	if nets != nil {
 		inst.networks = nets
 	} else if err != nil {
+		inst.fault = true
 		inst.networks = nil
 	}
 
@@ -29,6 +32,7 @@ func (inst *Instance) Enable() error {
 	cron.StartAsync()
 	_, next := cron.NextRun()
 	inst.tmvDebugMsg("Next CRON job @ ", next.String())
+	inst.running = true
 	return nil
 }
 
@@ -41,5 +45,7 @@ func (inst *Instance) Disable() error {
 		inst.pollingCancel()
 		inst.pollingCancel = nil
 	}
+	inst.fault = false
+	inst.running = false
 	return nil
 }

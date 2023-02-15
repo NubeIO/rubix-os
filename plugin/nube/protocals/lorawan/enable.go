@@ -14,6 +14,7 @@ var cron *gocron.Scheduler
 
 func (inst *Instance) Enable() error {
 	log.Info("LORAWAN Plugin Enable()")
+	inst.enabled = true
 	inst.setUUID()
 	inst.BusServ()
 
@@ -25,21 +26,24 @@ func (inst *Instance) Enable() error {
 
 func (inst *Instance) Disable() error {
 	log.Info("LORAWAN Plugin Disable()")
+	inst.enabled = false
 	cron.Clear()
 	if inst.cancel != nil {
 		inst.cancel()
 	}
-	inst.enabled = false
+	inst.running = false
+	inst.fault = false
 	return nil
 }
 
 func (inst *Instance) SetupLorawanPlugin() error {
 	inst.lorawanDebugMsg("SetupLorawanPlugin()")
-	if !inst.enabled {
+	if !inst.running {
 		err := inst.GetOrMakeLorawanNetwork()
 		if err == nil {
 			inst.lorawanDebugMsg("Plugin Enable Success!")
-			inst.enabled = true
+			inst.running = true
+			inst.fault = false
 			inst.csConnected = false
 			err = inst.connectToCS()
 			if err != nil {
@@ -51,6 +55,7 @@ func (inst *Instance) SetupLorawanPlugin() error {
 			}
 			go inst.syncChirpstackDevicesLoop(inst.ctx)
 		} else {
+			inst.fault = true
 			inst.lorawanErrorMsg("Couldn't start lorawan plugin, problem getting/creating lorawan network")
 		}
 	}

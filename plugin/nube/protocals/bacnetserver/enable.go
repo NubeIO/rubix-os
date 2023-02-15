@@ -7,6 +7,8 @@ import (
 func (inst *Instance) Enable() error {
 	inst.bacnetDebugMsg("Polling Enable()")
 	inst.enabled = true
+	inst.running = false
+	inst.fault = false
 	inst.pluginName = name
 	inst.setUUID()
 	inst.BusServ()
@@ -18,8 +20,12 @@ func (inst *Instance) Enable() error {
 
 	if !inst.pollingEnabled {
 		inst.pollingEnabled = true
+		inst.running = true
+		inst.fault = false
 		err := inst.BACnetServerPolling()
 		if err != nil {
+			inst.running = false
+			inst.fault = true
 			inst.bacnetErrorMsg("POLLING ERROR on routine: %v\n", err)
 		}
 		go inst.initPointsNames()
@@ -35,5 +41,7 @@ func (inst *Instance) Disable() error {
 		inst.pollingCancel()
 		inst.pollingCancel = nil
 	}
+	inst.running = false
+	inst.fault = false
 	return nil
 }
