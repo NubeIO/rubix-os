@@ -7,6 +7,8 @@ import (
 func (inst *Instance) Enable() error {
 	inst.edge28DebugMsg("Edge28 Enable()")
 	inst.enabled = true
+	inst.running = false
+	inst.fault = false
 	inst.pluginName = name
 	inst.setUUID()
 	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
@@ -21,9 +23,11 @@ func (inst *Instance) Enable() error {
 			var arg polling
 			inst.pollingEnabled = true
 			arg.enable = true
-
+			inst.running = true
 			err := inst.Edge28Polling()
 			if err != nil {
+				inst.fault = true
+				inst.running = false
 				inst.edge28ErrorMsg("POLLING ERROR on routine: %v\n", err)
 			}
 		}
@@ -41,5 +45,7 @@ func (inst *Instance) Disable() error {
 		inst.pollingCancel()
 		inst.pollingCancel = nil
 	}
+	inst.running = false
+	inst.fault = false
 	return nil
 }

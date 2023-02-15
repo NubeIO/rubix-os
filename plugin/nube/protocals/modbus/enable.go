@@ -9,6 +9,7 @@ import (
 func (inst *Instance) Enable() error {
 	inst.modbusDebugMsg("MODBUS Plugin Enable()")
 	inst.enabled = true
+	inst.fault = false
 	inst.pluginName = name
 	inst.setUUID()
 
@@ -38,9 +39,11 @@ func (inst *Instance) Enable() error {
 				pollManager.StartPolling()
 				inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
 			}
-
+			inst.running = true
 			err := inst.ModbusPolling()
 			if err != nil {
+				inst.fault = true
+				inst.running = false
 				inst.modbusErrorMsg("POLLING ERROR on routine: %v\n", err)
 			}
 		}
@@ -60,5 +63,7 @@ func (inst *Instance) Disable() error {
 		}
 		inst.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0)
 	}
+	inst.running = false
+	inst.fault = false
 	return nil
 }

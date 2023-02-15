@@ -14,6 +14,11 @@ func (inst *Instance) Enable() error {
 	inst.interruptChan = make(chan struct{}, 1)
 	if err == nil {
 		go inst.run()
+		inst.running = true
+		inst.fault = false
+	} else {
+		inst.running = false
+		inst.fault = true
 	}
 	return nil
 }
@@ -24,5 +29,7 @@ func (inst *Instance) Disable() error {
 	case inst.interruptChan <- struct{}{}:
 	default:
 	}
+	inst.running = false
+	inst.fault = false
 	return nil
 }

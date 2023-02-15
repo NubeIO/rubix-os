@@ -10,11 +10,14 @@ import (
 func (inst *Instance) Enable() error {
 	inst.bacnetDebugMsg("Polling Enable()")
 	inst.enabled = true
+	inst.fault = false
+	inst.running = false
 	inst.pluginName = name
 	inst.setUUID()
 
 	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
 	if err != nil {
+		inst.fault = true
 		inst.bacnetErrorMsg("enable plugin get networks: %v\n", err)
 	}
 	log.Infof("bacnet-master: enable plugin networks count: %d pluginUUID: %s", len(nets), inst.pluginUUID)
@@ -37,8 +40,11 @@ func (inst *Instance) Enable() error {
 			}
 
 			// TODO: VERIFY POLLING WITHOUT GO ROUTINE WRAPPER
+			inst.running = true
 			err := inst.BACnetMasterPolling()
 			if err != nil {
+				inst.running = false
+				inst.fault = true
 				inst.bacnetErrorMsg("POLLING ERROR on routine: %v\n", err)
 			}
 		}
@@ -59,5 +65,7 @@ func (inst *Instance) Disable() error {
 		}
 		inst.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0)
 	}
+	inst.running = false
+	inst.fault = false
 	return nil
 }
