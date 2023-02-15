@@ -204,7 +204,7 @@ func (inst *Instance) BACnetMasterPolling() error {
 				}
 			*/
 
-			currentBACServPriority, highestPriorityValue, readSuccess, writeSuccess, err := inst.doReadAllThenWriteDiff141516(pnt, net.UUID, dev.UUID)
+			currentBACServPriority, highestPriorityValue, readSuccess, writeSuccess, err := inst.doReadAllThenWriteDiff7141516(pnt, net.UUID, dev.UUID)
 			if err != nil {
 				err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
