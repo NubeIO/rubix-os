@@ -179,7 +179,8 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	if publishPointList {
 		go d.PublishPointsList("")
 	}
-	d.UpdateProducerThing(pointModel.UUID, pointModel.Name)
+	d.UpdateProducerByProducerThingUUID(pointModel.UUID, pointModel.Name, pointModel.HistoryEnable,
+		pointModel.HistoryType, pointModel.HistoryInterval)
 	err = d.UpdatePointAutoMapping(pointModel)
 	if err != nil {
 		log.Errorln("points.db.UpdatePointAutoMapping() failed to make auto mapping")

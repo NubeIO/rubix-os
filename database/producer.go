@@ -70,6 +70,9 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 			return nil, errors.New("point not found, please supply a valid point producer_thing_uuid")
 		}
 		producerThingName = pnt.Name
+		body.EnableHistory = pnt.HistoryEnable
+		body.HistoryType = pnt.HistoryType
+		body.HistoryInterval = pnt.HistoryInterval
 	case model.ThingClass.Schedule:
 		sch, err := d.GetSchedule(body.ProducerThingUUID)
 		if err != nil {
@@ -127,11 +130,16 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 	return producerModel, nil
 }
 
-func (d *GormDatabase) UpdateProducerThing(producerThingUUID string, producerThingName string) {
+func (d *GormDatabase) UpdateProducerByProducerThingUUID(producerThingUUID string, producerThingName string,
+	enableHistory *bool, historyType model.HistoryType, historyInterval *int) {
 	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: nils.NewString(producerThingUUID)})
 	for _, producer := range producers {
-		if producer.ProducerThingName != producerThingName {
+		if producer.ProducerThingName != producerThingName || producer.EnableHistory != enableHistory ||
+			producer.HistoryType != historyType || producer.HistoryInterval != historyInterval {
 			producer.ProducerThingName = producerThingName
+			producer.EnableHistory = enableHistory
+			producer.HistoryType = historyType
+			producer.HistoryInterval = historyInterval
 			go d.UpdateProducer(producer.UUID, producer)
 		}
 	}
