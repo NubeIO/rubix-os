@@ -24,7 +24,11 @@ func (inst *Instance) Enable() error {
 		log.Error("system-plugin: error on enable system-plugin")
 	}
 	cron = gocron.NewScheduler(time.UTC)
-	_, _ = cron.Every(inst.config.Schedule.Frequency).Tag("ScheduleCheck").Do(inst.runSchedule)
+	var frequency = "60s"
+	if inst.config.Schedule.Frequency != "" {
+		frequency = inst.config.Schedule.Frequency
+	}
+	_, _ = cron.Every(frequency).Tag("ScheduleCheck").Do(inst.runSchedule)
 	cron.StartAsync()
 	return nil
 }
