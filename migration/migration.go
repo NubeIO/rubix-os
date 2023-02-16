@@ -36,6 +36,16 @@ func AutoMigrate(db *gorm.DB) error {
 		err := db.Migrator().DropIndex(&model.Point{}, "name_device_composite_index")
 		log.Error(err)
 	}
+	if db.Migrator().HasColumn(&model.Point{}, "history_interval") {
+		columnTypes, _ := db.Migrator().ColumnTypes(&model.Point{})
+		for _, columnType := range columnTypes {
+			if columnType.Name() == "history_interval" && columnType.DatabaseTypeName() == "real" {
+				err := db.Migrator().DropColumn(&model.Point{}, "history_interval")
+				log.Error(err)
+				break
+			}
+		}
+	}
 	interfaces := versions.GetInitInterfaces()
 	for _, s := range interfaces {
 		if err := db.AutoMigrate(s); err != nil {

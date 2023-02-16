@@ -105,7 +105,7 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	d.UpdateProducerThing(scheduleModel.UUID, scheduleModel.Name)
+	d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name, nil, "", nil)
 	return scheduleModel, nil
 }
 
