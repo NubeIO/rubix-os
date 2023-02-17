@@ -33,9 +33,9 @@ func (d *GormDatabase) PublishPointWriteListener() {
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
-			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+			log.Errorf("localmqtt-broker subscribe: %s err: %s", topic, err.Error())
 		} else {
-			log.Infof("localmqtt-broker subscribe:%s", topic)
+			log.Infof("localmqtt-broker subscribe: %s", topic)
 		}
 	}
 }
@@ -77,9 +77,9 @@ func (d *GormDatabase) PublishFetchPointListener() {
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
-			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+			log.Errorf("localmqtt-broker subscribe: %s err: %s", topic, err.Error())
 		} else {
-			log.Infof("localmqtt-broker subscribe:%s", topic)
+			log.Infof("localmqtt-broker subscribe: %s", topic)
 		}
 	}
 }
@@ -93,9 +93,9 @@ func (d *GormDatabase) PublishPointsListListener() {
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
-			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+			log.Errorf("localmqtt-broker subscribe: %s err: %s", topic, err.Error())
 		} else {
-			log.Infof("localmqtt-broker subscribe:%s", topic)
+			log.Infof("localmqtt-broker subscribe: %s", topic)
 		}
 	}
 }
@@ -109,7 +109,7 @@ func (d *GormDatabase) RePublishPointsCovListener() {
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
-			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+			log.Errorf("localmqtt-broker subscribe: %s err: %s", topic, err.Error())
 		} else {
 			log.Infof("localmqtt-broker subscribe:%s", topic)
 		}
@@ -125,16 +125,15 @@ func (d *GormDatabase) RePublishSelectedPointsCovListener() {
 				d.RePublishSelectedPointsCov(body)
 			}
 		}
-
 	}
 	topic := fetchSelectedPointsCOVTopic
 	mqttClient := localmqtt.GetPointMqtt().Client
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
-			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+			log.Errorf("localmqtt-broker subscribe: %s err: %s", topic, err.Error())
 		} else {
-			log.Infof("localmqtt-broker subscribe:%s", topic)
+			log.Infof("localmqtt-broker subscribe: %s", topic)
 		}
 	}
 }
@@ -148,9 +147,9 @@ func (d *GormDatabase) PublishDeviceInfo() {
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(fetchDeviceInfo, 1, callback)
 		if err != nil {
-			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+			log.Errorf("localmqtt-broker subscribe: %s err: %s", topic, err.Error())
 		} else {
-			log.Infof("localmqtt-broker subscribe:%s", topic)
+			log.Infof("localmqtt-broker subscribe: %s", topic)
 		}
 	}
 }
@@ -159,17 +158,20 @@ func (d *GormDatabase) PublishPoint(details *interfaces.MqttPoint) {
 	if details.PointUUID != "" {
 		point, err := d.GetPoint(details.PointUUID, api.Args{WithPriority: true})
 		if err != nil {
-			log.Error("PublishPointsList error:", err)
+			log.Errorf("PublishPoint error: %s", err)
 			return
 		}
 		localmqtt.PublishPoint(point)
 	} else {
-		networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true})
-		if err != nil {
-			log.Error("PublishPointsList error:", err)
+		if details == nil {
 			return
 		}
-		localmqtt.PublishPointByName(networks, details)
+		point, err := d.GetPointByName(details.NetworkName, details.DeviceName, details.PointName, api.Args{})
+		if err != nil {
+			log.Errorf("Error on finding point: %s", err)
+			return
+		}
+		localmqtt.PublishPoint(point)
 	}
 }
 
@@ -270,9 +272,9 @@ func (d *GormDatabase) PublishSchedulesListener() {
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
-			log.Errorf("localmqtt-broker subscribe:%s err:%s", topic, err.Error())
+			log.Errorf("localmqtt-broker subscribe: %s err: %s", topic, err.Error())
 		} else {
-			log.Infof("localmqtt-broker subscribe:%s", topic)
+			log.Infof("localmqtt-broker subscribe: %s", topic)
 		}
 	}
 }

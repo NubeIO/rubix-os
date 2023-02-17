@@ -8,6 +8,7 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -23,7 +24,7 @@ func (l topicLog) logInfo() {
 }
 
 func (l topicLog) logErr() {
-	msg := fmt.Sprintf("MQTT: %s - %s -%v", l.field, l.msg, l.error)
+	msg := fmt.Sprintf("MQTT: %s - %s - %v", l.field, l.msg, l.error)
 	log.Info(msg)
 }
 
@@ -97,6 +98,7 @@ func (c *Client) Unsubscribe(topic string) error {
 
 // Publish things
 func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) (err error) {
+	topic = strings.Replace(strings.Replace(topic, " ", "", -1), "\t", "", -1)
 	token := c.client.Publish(topic, byte(qos), retain, payload)
 	if token.WaitTimeout(2*time.Second) == false {
 		return errors.New("MQTT publish timout")
@@ -150,7 +152,7 @@ func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err e
 	opts.SetPingTimeout(options.SetPingTimeout * time.Second)
 
 	opts.OnConnectionLost = func(c mqtt.Client, err error) {
-		topicLog{"error", "Lost connection", nil}.logErr()
+		topicLog{"error", "Lost connection", err}.logErr()
 	}
 	opts.OnConnect = func(cc mqtt.Client) {
 		topicLog{"msg", "connected", nil}.logInfo()
@@ -161,7 +163,7 @@ func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err e
 			if token := cc.Subscribe(s.topic, 2, s.handler); token.Wait() && token.Error() != nil {
 				topicLog{"error", "failed to subscribe", token.Error()}.logErr()
 			}
-			topicLog{"topic", "Resubscribe", nil}.logInfo()
+			topicLog{"topic", "Resubscribe", nil}.logInfo() //
 		}
 		if onConnected != nil {
 			switch onConnected.(type) {

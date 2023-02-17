@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/NubeIO/flow-framework/config"
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
@@ -57,42 +56,6 @@ func Init(ip string, conf *config.Configuration, onConnected interface{}) error 
 
 func GetPointMqtt() *PointMqtt {
 	return pointMqtt
-}
-
-func PublishPointByName(networks []*model.Network, details *interfaces.MqttPoint) {
-	var pointPayload *model.Point
-	if details == nil {
-		return
-	}
-	networkName := details.NetworkName
-	deviceName := details.DeviceName
-	pointName := details.PointName
-	for _, network := range networks {
-		for _, device := range network.Devices {
-			for _, point := range device.Points {
-				if networkName == network.Name {
-					if deviceName == device.Name {
-						if pointName == point.Name {
-							pointPayload = point
-						}
-					}
-				}
-			}
-		}
-	}
-	if pointPayload == nil {
-		return
-	}
-	payload, err := json.Marshal(pointPayload)
-	if err != nil {
-		log.Error(err)
-		return
-	}
-	topic := fmt.Sprintf("rubix/platform/point/publish")
-	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
-	if err != nil {
-		log.Error(err)
-	}
 }
 
 func PublishPoint(point *model.Point) {
