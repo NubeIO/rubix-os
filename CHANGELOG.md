@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [v0.9.35](https://github.com/NubeIO/flow-framework/tree/v0.9.35) (2023-02-17)
+
+- Use point HistoryEnable, HistoryType and HistoryInterval on producer (#866)
+- update to default sch freq
+- updates to galvintmv plugin for commissioning
+- Fix: MQTT connection reset by peer issue
+
 ## [v0.9.34](https://github.com/NubeIO/flow-framework/tree/v0.9.34) (2023-02-16)
 
 - bacnet master: adds priority 7 as write

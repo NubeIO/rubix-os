@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/integer"
 
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
@@ -95,7 +96,7 @@ func (inst *Instance) createNewPoint(name string, deviceEUI string, deviceUUID s
 		HistoryConfig: model.HistoryConfig{
 			HistoryEnable:       boolean.NewTrue(),
 			HistoryType:         model.HistoryTypeCovAndInterval,
-			HistoryInterval:     float.New(60),
+			HistoryInterval:     integer.New(60),
 			HistoryCOVThreshold: float.New(0.1),
 		},
 	}
