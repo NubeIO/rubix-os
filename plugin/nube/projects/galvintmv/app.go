@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/plugin/nube/projects/galvintmv/chirpstackrest"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
@@ -252,9 +253,204 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 
 func (inst *Instance) runSetupSteps() error {
 	err := inst.createAndActivateChirpstackDevices()
+	if err != nil {
+		inst.tmvErrorMsg("runSetupSteps() createAndActivateChirpstackDevices() err:", err.Error())
+	}
 	err = inst.updatePointNames()
+	if err != nil {
+		inst.tmvErrorMsg("runSetupSteps() updatePointNames() err:", err.Error())
+	}
 	err = inst.createModbusNetworkDevicesAndPoints()
+	if err != nil {
+		inst.tmvErrorMsg("runSetupSteps() createModbusNetworkDevicesAndPoints() err:", err.Error())
+	}
+	err = inst.updateIOModuleRTC()
+	if err != nil {
+		inst.tmvErrorMsg("runSetupSteps() updateIOModuleRTC() err:", err.Error())
+	}
+
+	// CANCEL THE SETUP STEPS AFTER 12 HOURS
+	if time.Unix(inst.startTime, 0).Add(12 * time.Hour).Before(time.Now()) {
+		inst.tmvDebugMsg("STOP SETUP STEPS (AFTER 12 HOURS)")
+		err = cron.RemoveByTag("runSetupSteps")
+		if err != nil {
+			inst.tmvErrorMsg("runSetupSteps() STOP SETUP STEPS err:", err.Error())
+		}
+
+		// WRITE THIS TO THE CONFIG YML ONCE BINOD SHOWS ME HOW
+		inst.config.Job.EnableConfigSteps = false
+		/*
+			pluginConf, err := inst.db.GetPlugin(inst.pluginUUID)
+			if err != nil {
+				inst.tmvErrorMsg("checkComissioningPoints() GET PLUGIN CONF err:", err.Error())
+			}
+
+			inst.config.Job.EnableConfigSteps = false
+			pluginConf.Config, err = yaml.Marshal(inst.config)
+			if err != nil {
+				inst.tmvErrorMsg("checkComissioningPoints() PARSE PLUGIN CONF TO BYTES err:", err.Error())
+			}
+
+			fmt.Println(fmt.Sprintf("PLUGIN CONFIG: %+v ", pluginConf))
+			err = inst.db.DB.UpdatePluginConf(pluginConf)
+			if err != nil {
+				inst.tmvErrorMsg("checkComissioningPoints() UPDATE PLUGIN CONF err:", err.Error())
+			}
+		*/
+
+	}
 	return err
+}
+
+func (inst *Instance) checkComissioningPoints() error {
+	// CREATE/UPDATE THE FLOW TEMPERATURE MODBUS POINTS (set them all disabled)
+	inst.tmvDebugMsg("checkComissioningPoints() CREATE/UPDATE THE FLOW TEMPERATURE MODBUS POINTS (set them all disabled)")
+
+	nets, err := inst.db.GetNetworksByPluginName("modbus", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return err
+	}
+
+	for _, net := range nets {
+		inst.tmvDebugMsg("checkComissioningPoints() Net: ", net.Name)
+		for _, dev := range net.Devices {
+			inst.tmvDebugMsg("checkComissioningPoints() Dev: ", dev.Name)
+			// modbus device exists now, so create the required points
+			var foundFlowTempPoint *model.Point
+			if dev.Points != nil {
+				for _, modbusPoint := range dev.Points {
+					if modbusPoint.Name == "FLOW_TEMP" {
+						inst.tmvDebugMsg("checkComissioningPoints() FLOW_TEMP point found")
+						foundFlowTempPoint = modbusPoint
+						pointUpdateReq := false
+						if boolean.NonNil(foundFlowTempPoint.Enable) != false {
+							pointUpdateReq = true
+							foundFlowTempPoint.Enable = boolean.NewFalse()
+						}
+						if integer.NonNil(foundFlowTempPoint.AddressID) != 1015 {
+							pointUpdateReq = true
+							foundFlowTempPoint.AddressID = integer.New(1015)
+						}
+						if foundFlowTempPoint.ObjectType != string(model.ObjTypeReadHolding) {
+							pointUpdateReq = true
+							foundFlowTempPoint.ObjectType = string(model.ObjTypeReadHolding)
+						}
+						if foundFlowTempPoint.WriteMode != model.ReadOnly {
+							pointUpdateReq = true
+							foundFlowTempPoint.WriteMode = model.ReadOnly
+						}
+						if foundFlowTempPoint.DataType != string(model.TypeFloat64) {
+							pointUpdateReq = true
+							foundFlowTempPoint.DataType = string(model.TypeFloat64)
+						}
+						if foundFlowTempPoint.PollRate != model.RATE_FAST {
+							pointUpdateReq = true
+							foundFlowTempPoint.PollRate = model.RATE_FAST
+						}
+						if foundFlowTempPoint.PollPriority != model.PRIORITY_HIGH {
+							pointUpdateReq = true
+							foundFlowTempPoint.PollPriority = model.PRIORITY_HIGH
+						}
+						if foundFlowTempPoint.HistoryType != model.HistoryTypeCovAndInterval {
+							pointUpdateReq = true
+							foundFlowTempPoint.HistoryType = model.HistoryTypeCovAndInterval
+						}
+						if foundFlowTempPoint.HistoryInterval == nil || *foundFlowTempPoint.HistoryInterval != 60 {
+							pointUpdateReq = true
+							foundFlowTempPoint.HistoryInterval = float.New(60)
+						}
+						if pointUpdateReq {
+							inst.tmvDebugMsg("checkComissioningPoints() updating FLOW_TEMP point")
+							foundFlowTempPoint, err = inst.db.UpdatePoint(foundFlowTempPoint.UUID, foundFlowTempPoint, false, false)
+							if err != nil {
+								inst.tmvErrorMsg("checkComissioningPoints() FLOW_TEMP Point update err: ", err)
+							}
+							break
+						}
+					}
+				}
+				if foundFlowTempPoint == nil {
+					foundFlowTempPoint = &model.Point{}
+					foundFlowTempPoint.DeviceUUID = dev.UUID
+					foundFlowTempPoint.Name = "FLOW_TEMP"
+					foundFlowTempPoint.Enable = boolean.NewFalse()
+					foundFlowTempPoint.AddressID = integer.New(1015)
+					foundFlowTempPoint.ObjectType = string(model.ObjTypeReadHolding)
+					foundFlowTempPoint.WriteMode = model.ReadOnly
+					foundFlowTempPoint.DataType = string(model.TypeFloat64)
+					foundFlowTempPoint.PollRate = model.RATE_FAST
+					foundFlowTempPoint.PollPriority = model.PRIORITY_HIGH
+					foundFlowTempPoint.Fallback = nil
+					foundFlowTempPoint.Priority = &model.Priority{}
+					foundFlowTempPoint.WritePollRequired = boolean.NewFalse()
+					foundFlowTempPoint.HistoryType = model.HistoryTypeCovAndInterval
+					foundFlowTempPoint.HistoryInterval = float.New(60)
+					foundFlowTempPoint, err = inst.db.CreatePoint(foundFlowTempPoint, false, true)
+					if err != nil {
+						inst.tmvErrorMsg("checkComissioningPoints() FLOW_TEMP Point create err: ", err)
+					}
+					time.Sleep(50 * time.Millisecond)
+				}
+			}
+		}
+	}
+
+	// SET THE COMMISSIONING POINTS BACK TO NORMAL (no reads or writes) AFTER 12 HOURS
+	if time.Unix(inst.startTime, 0).Add(12 * time.Hour).Before(time.Now()) {
+		inst.DisableCommissioningPoints()
+
+		err = cron.RemoveByTag("checkComissioningPoints")
+		if err != nil {
+			inst.tmvErrorMsg("checkComissioningPoints() STOP COMMISSIONING MODE err:", err.Error())
+		}
+
+		inst.config.Job.EnableCommissioning = false
+		/*
+			pluginConf, err := inst.db.GetPlugin(inst.pluginUUID)
+			if err != nil {
+				inst.tmvErrorMsg("checkComissioningPoints() GET PLUGIN CONF err:", err.Error())
+			}
+
+			inst.config.Job.EnableCommissioning = false
+			pluginConf.Config, err = yaml.Marshal(inst.config)
+			if err != nil {
+				inst.tmvErrorMsg("checkComissioningPoints() PARSE PLUGIN CONF TO BYTES err:", err.Error())
+			}
+
+			fmt.Println(fmt.Sprintf("PLUGIN CONFIG: %+v ", pluginConf))
+			err = inst.db.DB.UpdatePluginConf(pluginConf)
+			if err != nil {
+				inst.tmvErrorMsg("checkComissioningPoints() UPDATE PLUGIN CONF err:", err.Error())
+			}
+		*/
+	}
+	return err
+}
+
+func (inst *Instance) DisableCommissioningPoints() error {
+	inst.tmvDebugMsg("DISABLE COMMISSIONING MODE: SET THE FLOW_TEMP MODBUS POINTS BACK TO NORMAL (disabled)")
+
+	nets, err := inst.db.GetNetworksByPluginName("modbus", api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return err
+	}
+	for _, net := range nets {
+		inst.tmvDebugMsg("DisableCommissioningPoints() Net: ", net.Name)
+		for _, dev := range net.Devices {
+			for _, pnt := range dev.Points {
+				if pnt.Name == "FLOW_TEMP" {
+					inst.tmvDebugMsg("DisableCommissioningPoints() device: ", dev.Name)
+					pnt.Enable = boolean.NewFalse()
+					_, err = inst.db.UpdatePoint(pnt.UUID, pnt, false, false)
+					if err != nil {
+						inst.tmvErrorMsg("DisableCommissioningPoints() DISABLE FLOW_TEMP UpdatePoint() error: ", err)
+					}
+					time.Sleep(1 * time.Second)
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func (inst *Instance) updatePointNames() error {
@@ -923,7 +1119,7 @@ func (inst *Instance) createModbusNetworkIfItNeeded(reqNetName string) (*model.N
 	newModbusNet.PluginPath = "modbus"
 	newModbusNet.Name = reqNetName
 	newModbusNet.Enable = boolean.NewTrue()
-	serialPort := "/data/socat/ptyLORAWAN"
+	serialPort := "/data/socat/ptyLORAWAN-1"
 	newModbusNet.SerialPort = &serialPort
 	newModbusNet.SerialTimeout = integer.New(8)
 	newModbusNet.MaxPollRate = float.New(10)
@@ -946,11 +1142,7 @@ func (inst *Instance) createAndActivateChirpstackDevices() error {
 	var tmvDevices TMVDevices
 	json.Unmarshal(byteValue, &tmvDevices.Devices)
 
-	token, err := inst.GetChirpstackToken(inst.config.Job.ChirpstackUsername, inst.config.Job.ChirpstackPassword)
-	if err != nil {
-		inst.tmvDebugMsg("createAndActivateChirpstackDevices() err: ", err)
-		return nil
-	}
+	token := &chirpstackrest.ChirpstackToken{Token: inst.config.Job.ChirpstackToken}
 	if token != nil && token.Token != "" {
 		inst.tmvDebugMsg("createAndActivateChirpstackDevices() token: ", token.Token)
 		profileUUID, err := inst.GetChirpstackDeviceProfileUUID(token.Token)
@@ -1034,6 +1226,9 @@ func (inst *Instance) rtcPointWrite(rtcPoint *model.Point) error {
 func (inst *Instance) rtcTZOffsetPointWrite(rtcTZOffsetPoint *model.Point) error {
 	_, offset := time.Now().Local().Zone()
 	inst.tmvDebugMsg("rtcTZOffsetPointWrite() offset: ", offset)
+	if rtcTZOffsetPoint.PresentValue != nil && *rtcTZOffsetPoint.PresentValue == float64(offset) {
+		return nil
+	}
 	pointUpdateMap := make(map[string]*float64)
 	pointUpdateMap["_1"] = float.New(float64(offset))
 	pointWriter := model.PointWriter{Priority: &pointUpdateMap}
