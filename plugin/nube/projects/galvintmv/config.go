@@ -6,14 +6,14 @@ type Config struct {
 }
 
 type Job struct {
-	EnableConfigSteps bool   `yaml:"enable_config_steps"`
-	Frequency         string `yaml:"frequency"`
-	// ChirpstackHost              string  `yaml:"chirpstack_host"`
+	EnableConfigSteps   bool   `yaml:"enable_config_steps"`
+	EnableCommissioning bool   `yaml:"enable_commissioning"`
+	Frequency           string `yaml:"frequency"`
+	ChirpstackHost      string `yaml:"chirpstack_host"`
 	// ChirpstackPort              float64 `yaml:"chirpstack_port"`
 	ChirpstackApplicationNumber int    `yaml:"chirpstack_application_number"`
 	ChirpstackNetworkKey        string `yaml:"chirpstack_network_key"`
-	ChirpstackUsername          string `yaml:"chirpstack_username"`
-	ChirpstackPassword          string `yaml:"chirpstack_password"`
+	ChirpstackToken             string `yaml:"chirpstack_token"`
 	TMVJSONFilePath             string `yaml:"tmv_json_file_path"`
 	// LorawanBridgeMapFilePath    string `yaml:"lorawan_bridge_map_file_path"`
 }
@@ -22,7 +22,7 @@ func (inst *Instance) DefaultConfig() interface{} {
 	job := Job{
 		EnableConfigSteps: false,
 		Frequency:         "30m",
-		// ChirpstackHost:              "0.0.0.0",
+		ChirpstackHost:    "0.0.0.0",
 		// ChirpstackPort:              8080,
 		ChirpstackApplicationNumber: 1,
 		TMVJSONFilePath:             "/home/pi/test.json",

@@ -8,8 +8,8 @@ import (
 
 func (inst *Instance) GetChirpstackToken(user, pass string) (*chirpstackrest.ChirpstackToken, error) {
 	inst.tmvDebugMsg("GetChirpstackToken()")
-	// host := inst.config.Job.ChirpstackHost
-	host := "0.0.0.0"
+	host := inst.config.Job.ChirpstackHost
+	// host := "0.0.0.0"
 	if host == "" {
 		host = "0.0.0.0"
 	}
@@ -31,8 +31,8 @@ func (inst *Instance) GetChirpstackToken(user, pass string) (*chirpstackrest.Chi
 
 func (inst *Instance) GetChirpstackDeviceProfileUUID(chirpstackToken string) (string, error) {
 	inst.tmvDebugMsg("GetChirpstackDeviceProfileUUID()")
-	// host := inst.config.Job.ChirpstackHost
-	host := "0.0.0.0"
+	host := inst.config.Job.ChirpstackHost
+	// host := "0.0.0.0"
 	if host == "" {
 		host = "0.0.0.0"
 	}
@@ -58,8 +58,8 @@ func (inst *Instance) GetChirpstackDeviceProfileUUID(chirpstackToken string) (st
 
 func (inst *Instance) AddChirpstackDevice(chirpstackAppNum, modbusAddress int, deviceName, lorawanDeviceEUI, chirpstackDeviceProfileUUID, token string) error {
 	inst.tmvDebugMsg("AddChirpstackDevice()")
-	// host := inst.config.Job.ChirpstackHost
-	host := "0.0.0.0"
+	host := inst.config.Job.ChirpstackHost
+	// host := "0.0.0.0"
 	if host == "" {
 		host = "0.0.0.0"
 	}
@@ -78,8 +78,8 @@ func (inst *Instance) AddChirpstackDevice(chirpstackAppNum, modbusAddress int, d
 
 func (inst *Instance) ActivateChirpstackDevice(applicationKey, lorawanDeviceEUI, token, lorawanNetworkKey string) error {
 	inst.tmvDebugMsg("ActivateChirpstackDevice(): ", lorawanDeviceEUI)
-	// host := inst.config.Job.ChirpstackHost
-	host := "0.0.0.0"
+	host := inst.config.Job.ChirpstackHost
+	// host := "0.0.0.0"
 	if host == "" {
 		host = "0.0.0.0"
 	}

@@ -39,6 +39,7 @@ type Instance struct {
 	networks       []*model.Network
 	pollingEnabled bool
 	pollingCancel  func()
+	startTime      int64
 }
 
 // GetFlowPluginInfo returns plugin info.

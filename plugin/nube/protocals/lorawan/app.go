@@ -140,12 +140,15 @@ func (inst *Instance) setCSConnected() {
 	inst.csConnected = true
 	log.Info("lorawan: Connected to Chirpstack")
 	net := model.Network{
+		CommonUUID: model.CommonUUID{
+			UUID: inst.networkUUID,
+		},
 		CommonFault: model.CommonFault{
 			InFault: false,
 			Message: "",
 		},
 	}
-	inst.db.UpdateNetwork(inst.networkUUID, &net, true)
+	inst.db.UpdateNetworkErrors(inst.networkUUID, &net)
 }
 
 func (inst *Instance) setCSDisconnected(err error) {

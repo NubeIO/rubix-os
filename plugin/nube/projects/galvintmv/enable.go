@@ -23,11 +23,17 @@ func (inst *Instance) Enable() error {
 		inst.networks = nil
 	}
 
+	inst.startTime = time.Now().Unix()
 	cron = gocron.NewScheduler(time.Local)
 	if inst.config.Job.EnableConfigSteps {
 		_, _ = cron.Every(inst.config.Job.Frequency).Tag("runSetupSteps").Do(inst.runSetupSteps)
 	}
+	if inst.config.Job.EnableCommissioning {
+		_, _ = cron.Every(inst.config.Job.Frequency).Tag("checkComissioningPoints").Do(inst.checkComissioningPoints)
+	}
+
 	_, _ = cron.Every(1).Day().At("02:00").Tag("UpdateIOModuleRTC").Do(inst.updateIOModuleRTC)
+	_, _ = cron.Every(1).Day().At("02:00").Tag("DisableCommissioningPoints").Do(inst.DisableCommissioningPoints)
 	// _, _ = cron.Every(inst.config.Job.Frequency).Tag("UpdateIOModuleRTC").Do(inst.updateIOModuleRTC)
 	cron.StartAsync()
 	_, next := cron.NextRun()
