@@ -357,7 +357,7 @@ func (inst *Instance) checkComissioningPoints() error {
 						}
 						if foundFlowTempPoint.HistoryInterval == nil || *foundFlowTempPoint.HistoryInterval != 60 {
 							pointUpdateReq = true
-							foundFlowTempPoint.HistoryInterval = float.New(60)
+							foundFlowTempPoint.HistoryInterval = integer.New(60)
 						}
 						if pointUpdateReq {
 							inst.tmvDebugMsg("checkComissioningPoints() updating FLOW_TEMP point")
@@ -384,7 +384,7 @@ func (inst *Instance) checkComissioningPoints() error {
 					foundFlowTempPoint.Priority = &model.Priority{}
 					foundFlowTempPoint.WritePollRequired = boolean.NewFalse()
 					foundFlowTempPoint.HistoryType = model.HistoryTypeCovAndInterval
-					foundFlowTempPoint.HistoryInterval = float.New(60)
+					foundFlowTempPoint.HistoryInterval = integer.New(60)
 					foundFlowTempPoint, err = inst.db.CreatePoint(foundFlowTempPoint, false, true)
 					if err != nil {
 						inst.tmvErrorMsg("checkComissioningPoints() FLOW_TEMP Point create err: ", err)
@@ -648,7 +648,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 								}
 								if foundEnablePoint.HistoryInterval == nil || *foundEnablePoint.HistoryInterval != 60 {
 									pointUpdateReq = true
-									foundEnablePoint.HistoryInterval = float.New(60)
+									foundEnablePoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
 									foundEnablePoint, err = inst.db.UpdatePoint(foundEnablePoint.UUID, foundEnablePoint, false, false)
@@ -693,7 +693,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 								}
 								if foundSetpointPoint.HistoryInterval == nil || *foundSetpointPoint.HistoryInterval != 60 {
 									pointUpdateReq = true
-									foundSetpointPoint.HistoryInterval = float.New(60)
+									foundSetpointPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
 									foundSetpointPoint, err = inst.db.UpdatePoint(foundSetpointPoint.UUID, foundSetpointPoint, false, false)
@@ -738,7 +738,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 								}
 								if foundSolenoidAllowPoint.HistoryInterval == nil || *foundSolenoidAllowPoint.HistoryInterval != 60 {
 									pointUpdateReq = true
-									foundSolenoidAllowPoint.HistoryInterval = float.New(60)
+									foundSolenoidAllowPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
 									foundSolenoidAllowPoint, err = inst.db.UpdatePoint(foundSolenoidAllowPoint.UUID, foundSolenoidAllowPoint, false, false)
@@ -783,7 +783,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 								}
 								if foundCalibrationPoint.HistoryInterval == nil || *foundCalibrationPoint.HistoryInterval != 60 {
 									pointUpdateReq = true
-									foundCalibrationPoint.HistoryInterval = float.New(60)
+									foundCalibrationPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
 									foundCalibrationPoint, err = inst.db.UpdatePoint(foundCalibrationPoint.UUID, foundCalibrationPoint, false, false)
@@ -828,7 +828,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 								}
 								if foundResetPoint.HistoryInterval == nil || *foundResetPoint.HistoryInterval != 60 {
 									pointUpdateReq = true
-									foundResetPoint.HistoryInterval = float.New(60)
+									foundResetPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
 									foundResetPoint, err = inst.db.UpdatePoint(foundResetPoint.UUID, foundResetPoint, false, false)
@@ -873,7 +873,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 								}
 								if foundRTCPoint.HistoryInterval == nil || *foundRTCPoint.HistoryInterval != 60 {
 									pointUpdateReq = true
-									foundRTCPoint.HistoryInterval = float.New(60)
+									foundRTCPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
 									foundRTCPoint, err = inst.db.UpdatePoint(foundRTCPoint.UUID, foundRTCPoint, false, false)
@@ -918,7 +918,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 								}
 								if foundRTCTZOffsetPoint.HistoryInterval == nil || *foundRTCTZOffsetPoint.HistoryInterval != 60 {
 									pointUpdateReq = true
-									foundRTCTZOffsetPoint.HistoryInterval = float.New(60)
+									foundRTCTZOffsetPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
 									foundRTCTZOffsetPoint, err = inst.db.UpdatePoint(foundRTCTZOffsetPoint.UUID, foundRTCTZOffsetPoint, false, false)
@@ -946,7 +946,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundEnablePoint.Priority.P3 = float.New(1)
 						foundEnablePoint.WritePollRequired = boolean.NewTrue()
 						foundEnablePoint.HistoryType = model.HistoryTypeCovAndInterval
-						foundEnablePoint.HistoryInterval = float.New(60)
+						foundEnablePoint.HistoryInterval = integer.New(60)
 						foundEnablePoint, err = inst.db.CreatePoint(foundEnablePoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() EnablePoint create err: ", err)
@@ -969,7 +969,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundSetpointPoint.Priority.P3 = float.New(tmvDevice.TemperatureSetpoint)
 						foundSetpointPoint.WritePollRequired = boolean.NewTrue()
 						foundSetpointPoint.HistoryType = model.HistoryTypeCovAndInterval
-						foundSetpointPoint.HistoryInterval = float.New(60)
+						foundSetpointPoint.HistoryInterval = integer.New(60)
 						foundSetpointPoint, err = inst.db.CreatePoint(foundSetpointPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SetpointPoint create err: ", err)
@@ -992,7 +992,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundResetPoint.Priority.P3 = float.New(0)
 						foundResetPoint.WritePollRequired = boolean.NewFalse()
 						foundResetPoint.HistoryType = model.HistoryTypeCovAndInterval
-						foundResetPoint.HistoryInterval = float.New(60)
+						foundResetPoint.HistoryInterval = integer.New(60)
 						foundResetPoint, err = inst.db.CreatePoint(foundResetPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() ResetPoint create err: ", err)
@@ -1019,7 +1019,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundSolenoidAllowPoint.Priority.P3 = float.New(fallbackFloat)
 						foundSolenoidAllowPoint.WritePollRequired = boolean.NewTrue()
 						foundSolenoidAllowPoint.HistoryType = model.HistoryTypeCovAndInterval
-						foundSolenoidAllowPoint.HistoryInterval = float.New(60)
+						foundSolenoidAllowPoint.HistoryInterval = integer.New(60)
 						foundSolenoidAllowPoint, err = inst.db.CreatePoint(foundSolenoidAllowPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SolenoidAllowPoint create err: ", err)
@@ -1042,7 +1042,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundCalibrationPoint.Priority.P3 = float.New(0)
 						foundCalibrationPoint.WritePollRequired = boolean.NewFalse()
 						foundCalibrationPoint.HistoryType = model.HistoryTypeCovAndInterval
-						foundCalibrationPoint.HistoryInterval = float.New(60)
+						foundCalibrationPoint.HistoryInterval = integer.New(60)
 						foundCalibrationPoint, err = inst.db.CreatePoint(foundCalibrationPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() CalibrationPoint create err: ", err)
@@ -1062,7 +1062,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundRTCPoint.PollPriority = model.PRIORITY_HIGH
 						foundRTCPoint.WritePollRequired = boolean.NewFalse()
 						foundRTCPoint.HistoryType = model.HistoryTypeCovAndInterval
-						foundRTCPoint.HistoryInterval = float.New(60)
+						foundRTCPoint.HistoryInterval = integer.New(60)
 						foundRTCPoint, err = inst.db.CreatePoint(foundRTCPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCPoint create err: ", err)
@@ -1082,7 +1082,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 						foundRTCTZOffsetPoint.PollPriority = model.PRIORITY_HIGH
 						foundRTCTZOffsetPoint.WritePollRequired = boolean.NewFalse()
 						foundRTCTZOffsetPoint.HistoryType = model.HistoryTypeCovAndInterval
-						foundRTCTZOffsetPoint.HistoryInterval = float.New(60)
+						foundRTCTZOffsetPoint.HistoryInterval = integer.New(60)
 						foundRTCTZOffsetPoint, err = inst.db.CreatePoint(foundRTCTZOffsetPoint, false, true)
 						if err != nil {
 							inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCTZOffsetPoint create err: ", err)
