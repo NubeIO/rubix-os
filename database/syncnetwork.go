@@ -10,6 +10,7 @@ import (
 )
 
 func (d *GormDatabase) SyncNetwork(body *interfaces.SyncNetwork) (*model.Network, error) {
+	d.mutex.Lock()
 	network, _ := d.GetNetworkByAutoMappingUUID(body.NetworkUUID, api.Args{WithTags: true})
 	networkName := body.NetworkName
 	if body.IsLocal {
@@ -23,13 +24,18 @@ func (d *GormDatabase) SyncNetwork(body *interfaces.SyncNetwork) (*model.Network
 		networkModel.PluginPath = "system"
 		networkModel.Tags = body.NetworkTags
 		networkModel.MetaTags = body.NetworkMetaTags
-		return d.CreateNetwork(networkModel, false)
+		network, err := d.CreateNetwork(networkModel, false)
+		d.mutex.Unlock()
+		return network, err
 	}
 	_, _ = d.CreateNetworkMetaTags(network.UUID, body.NetworkMetaTags)
 	if network.Name != networkName || !reflect.DeepEqual(network.Tags, body.NetworkTags) {
 		network.Name = networkName
 		network.Tags = body.NetworkTags
-		return d.UpdateNetwork(network.UUID, network, false)
+		network, err := d.UpdateNetwork(network.UUID, network, false)
+		d.mutex.Unlock()
+		return network, err
 	}
+	d.mutex.Unlock()
 	return network, nil
 }

@@ -16,6 +16,7 @@ func (d *GormDatabase) SyncDevice(body *interfaces.SyncDevice) (*model.Device, e
 	if err != nil {
 		return nil, err
 	}
+	d.mutex.Lock()
 	device, err := d.GetOneDeviceByArgs(api.Args{AutoMappingUUID: nils.NewString(body.DeviceUUID), WithTags: true})
 	if err != nil {
 		fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{SourceUUID: nils.NewString(body.FlowNetworkUUID)})
@@ -31,13 +32,18 @@ func (d *GormDatabase) SyncDevice(body *interfaces.SyncDevice) (*model.Device, e
 		deviceModel.AutoMappingFlowNetworkName = fnc.Name
 		deviceModel.Tags = body.DeviceTags
 		deviceModel.MetaTags = body.DeviceMetaTags
-		return d.CreateDevice(deviceModel)
+		device, err = d.CreateDevice(deviceModel)
+		d.mutex.Unlock()
+		return device, err
 	}
 	_, _ = d.CreateDeviceMetaTags(device.UUID, body.DeviceMetaTags)
 	if device.Name != body.DeviceName || !reflect.DeepEqual(device.Tags, body.DeviceTags) {
 		device.Name = body.DeviceName
 		device.Tags = body.DeviceTags
-		return d.UpdateDevice(device.UUID, device, false)
+		device, err = d.UpdateDevice(device.UUID, device, false)
+		d.mutex.Unlock()
+		return device, err
 	}
+	d.mutex.Unlock()
 	return device, nil
 }
