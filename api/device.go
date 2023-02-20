@@ -94,6 +94,7 @@ func (a *DeviceAPI) CreateDeviceMetaTags(ctx *gin.Context) {
 func (a *DeviceAPI) SyncDevicePoints(ctx *gin.Context) {
 	deviceUUID := resolveID(ctx)
 	args := buildDeviceArgs(ctx)
+	args.WithPoints = true
 	q, err := a.DB.SyncDevicePoints(deviceUUID, args)
 	ResponseHandler(q, err, ctx)
 }
