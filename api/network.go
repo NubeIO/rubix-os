@@ -128,6 +128,7 @@ func (a *NetworksAPI) SyncNetworks(ctx *gin.Context) {
 func (a *NetworksAPI) SyncNetworkDevices(ctx *gin.Context) {
 	networkUUID := resolveID(ctx)
 	args := buildNetworkArgs(ctx)
+	args.WithDevices = true
 	q, err := a.DB.SyncNetworkDevices(networkUUID, args)
 	ResponseHandler(q, err, ctx)
 }
