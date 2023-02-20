@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/services/localmqtt"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 )
@@ -176,6 +178,9 @@ func (d *GormDatabase) PublishPoint(details *interfaces.MqttPoint) {
 }
 
 func (d *GormDatabase) PublishPointsList(topic string) {
+	if boolean.IsFalse(config.Get().MQTT.Enable) {
+		return
+	}
 	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		log.Error("PublishPointsList error:", err)
@@ -247,6 +252,9 @@ func (d *GormDatabase) RePublishSelectedPointsCov(selectedPoints *[]interfaces.M
 }
 
 func (d *GormDatabase) PublishPointCov(uuid string) error {
+	if boolean.IsFalse(config.Get().MQTT.Enable) {
+		return nil
+	}
 	point, err := d.GetPoint(uuid, api.Args{WithPriority: true})
 	if err != nil {
 		return err

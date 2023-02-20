@@ -3,7 +3,6 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
@@ -295,7 +294,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 			Where("writer_thing_uuid = ?", pointModel.UUID).
 			Update("present_value", pointModel.PresentValue)
 
-		if isPresentValueChange && boolean.IsTrue(config.Get().MQTT.Enable) {
+		if isPresentValueChange {
 			err = d.PublishPointCov(pointModel.UUID)
 		}
 	}
