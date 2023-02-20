@@ -10,6 +10,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/NubeIO/flow-framework/logger"
@@ -84,6 +85,7 @@ type GormDatabase struct {
 	Store         cachestore.Handler
 	Bus           eventbus.BusService
 	PluginManager *plugin.Manager
+	mutex         sync.Mutex
 }
 
 // Close closes the gorm database connection.
