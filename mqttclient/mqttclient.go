@@ -163,7 +163,7 @@ func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err e
 			if token := cc.Subscribe(s.topic, 2, s.handler); token.Wait() && token.Error() != nil {
 				topicLog{"error", "failed to subscribe", token.Error()}.logErr()
 			}
-			topicLog{"topic", "Resubscribe", nil}.logInfo() //
+			topicLog{"topic", "Resubscribe", nil}.logInfo()
 		}
 		if onConnected != nil {
 			switch onConnected.(type) {

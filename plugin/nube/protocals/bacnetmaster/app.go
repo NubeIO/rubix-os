@@ -432,7 +432,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 							point.ReadPollRequired = boolean.NewFalse()
 						}
 					} else {
-						netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = false //
+						netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = false
 						point.WritePollRequired = boolean.NewFalse()
 					}
 					point, err = inst.db.UpdatePoint(point.UUID, point, true, true)

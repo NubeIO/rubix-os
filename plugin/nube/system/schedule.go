@@ -66,7 +66,6 @@ func (inst *Instance) runSchedule() {
 		} else {
 			log.Infof("system-plugin-schedule: weekly & event schedule: %s  is-active: %t", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive)
 		}
-		//
 		// CHECK EXCEPTION SCHEDULES
 		exceptionResult, err := schedule.ExceptionCheck(ScheduleJSON.Schedules.Exceptions, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
