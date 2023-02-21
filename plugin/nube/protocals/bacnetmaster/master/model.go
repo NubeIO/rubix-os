@@ -218,6 +218,12 @@ type Point struct {
 		Options  []string `json:"options" default:"[\"fast\",\"normal\",\"slow\"]"`
 		Default  string   `json:"default" default:"normal"`
 	} `json:"poll_rate"`
+	MultiplicationFactor struct {
+		Type        string `json:"type" default:"float"`
+		Required    bool   `json:"required" default:"false"`
+		Default     string `json:"default" default:"1"`
+		DisplayName string `json:"display_name" default:"Multiplication Factor"`
+	} `json:"multiplication_factor"`
 	ScaleEnable struct {
 		Type        string `json:"type" default:"bool"`
 		Required    bool   `json:"required" default:"true"`
@@ -248,12 +254,6 @@ type Point struct {
 		Default     string `json:"default" default:"0"`
 		DisplayName string `json:"display_name" default:"Scale/Limit: Output Max"`
 	} `json:"scale_out_max"`
-	MultiplicationFactor struct {
-		Type        string `json:"type" default:"float"`
-		Required    bool   `json:"required" default:"false"`
-		Default     string `json:"default" default:"1"`
-		DisplayName string `json:"display_name" default:"Multiplication Factor"`
-	} `json:"multiplication_factor"`
 	Offset struct {
 		Type        string `json:"type" default:"float"`
 		Required    bool   `json:"required" default:"false"`
