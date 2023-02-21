@@ -104,6 +104,10 @@ func PointScale(presentValue, scaleInMin, scaleInMax, scaleOutMin, scaleOutMax *
 		if *scaleInMin == 0 && *scaleInMax == 0 && *scaleOutMin == 0 && *scaleOutMax == 0 {
 			return presentValue
 		}
+		if *scaleInMin == 0 && *scaleInMax == 0 {
+			out := nmath.LimitToRange(*presentValue, *scaleOutMin, *scaleOutMax)
+			return &out
+		}
 		out := nmath.Scale(*presentValue, *scaleInMin, *scaleInMax, *scaleOutMin, *scaleOutMax)
 		return &out
 	}
@@ -142,8 +146,8 @@ func PointValueTransformOnRead(originalValue *float64, scaleEnable *bool, factor
 	// perform scaling and limit operations
 	scaledAndLimited := factored
 	if boolean.IsTrue(scaleEnable) {
-		if !float.IsNil(scaleOutMin) && !float.IsNil(scaleOutMax) {
-			if !float.IsNil(scaleInMin) && !float.IsNil(scaleInMax) { // scale with all 4 configs
+		if float.NonNil(scaleOutMin) != 0 || float.NonNil(scaleOutMax) != 0 {
+			if float.NonNil(scaleInMin) != 0 || float.NonNil(scaleInMax) != 0 { // scale with all 4 configs
 				scaledAndLimited = float.NonNil(PointScale(float.New(factored), scaleInMin, scaleInMax, scaleOutMin,
 					scaleOutMax))
 			} else { // do limit with only scaleOutMin and scaleOutMin
@@ -169,8 +173,8 @@ func PointValueTransformOnWrite(originalValue *float64, scaleEnable *bool, facto
 	// reverse scaling and limit operations
 	unscaledAndUnlimited := unoffsetted
 	if boolean.IsTrue(scaleEnable) {
-		if !float.IsNil(scaleOutMin) && !float.IsNil(scaleOutMax) {
-			if !float.IsNil(scaleInMin) && !float.IsNil(scaleInMax) { // scale with all 4 configs
+		if float.NonNil(scaleOutMin) != 0 || float.NonNil(scaleOutMax) != 0 {
+			if float.NonNil(scaleInMin) != 0 || float.NonNil(scaleInMax) != 0 { // scale with all 4 configs
 				unscaledAndUnlimited = float.NonNil(PointScale(float.New(unoffsetted), scaleOutMin, scaleOutMax,
 					scaleInMin, scaleInMax))
 			} else { // do limit with only scaleOutMin and scaleOutMin

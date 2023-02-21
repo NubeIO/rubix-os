@@ -20,6 +20,9 @@ func LimitToRange(value float64, range1 float64, range2 float64) float64 {
 
 // Scale returns the (float64) input value (between inputMin and inputMax) scaled to a value between outputMin and outputMax
 func Scale(value float64, inMin float64, inMax float64, outMin float64, outMax float64) float64 {
+	if inMin == 0 && inMax == 0 {
+		return value
+	}
 	scaled := ((value-inMin)/(inMax-inMin))*(outMax-outMin) + outMin
 	if scaled > math.Max(outMin, outMax) {
 		return math.Max(outMin, outMax)
