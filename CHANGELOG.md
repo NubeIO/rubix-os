@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [v0.10.0](https://github.com/NubeIO/flow-framework/tree/v0.10.0) (2023-02-24)
+
+- Fix: runtime issue
+- Fix: parallel sync network and device
+- Attach default args of SynNetworkDevices & SyncDevicePoints
+- fixes NaN crash on transformations
+- Buffer implementation on UpdatePoint and PointWrite
+- Improvements on automapping logs
+- Have a common UpdatePoint function to send fromPlugin flag
+  - galvintmv plugin was attaching fromPlugin=false
+
 ## [v0.9.35](https://github.com/NubeIO/flow-framework/tree/v0.9.35) (2023-02-17)
 
 - Use point HistoryEnable, HistoryType and HistoryInterval on producer (#866)
@@ -58,7 +69,6 @@
 - Lora updates v1 #825
 - small updates to schedule #822
 - update to bacnet master #821
-
 
 ## [v0.9.24](https://github.com/NubeIO/flow-framework/tree/v0.9.24) (2023-01-19)
 
