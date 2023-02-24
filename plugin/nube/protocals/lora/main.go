@@ -1,6 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"math"
+	"math/rand"
 	"time"
 
 	"github.com/NubeIO/flow-framework/eventbus"
@@ -64,8 +69,35 @@ func main() {
 	panic("this should be built as plugin")
 }
 
+func randFloats(min, max float64, n int) []float64 {
+	res := make([]float64, n)
+	for i := range res {
+		res[i] = float64(int(math.Round(min + rand.Float64()*(max-min))))
+	}
+	return res
+}
+
 // run LoRa plugin loop
 func (inst *Instance) run() {
+	points, err := inst.db.GetPoints(api.Args{})
+	fmt.Println("points", points, err)
+	for {
+		for _, point := range points {
+			val := randFloats(1, 2, 1)[0]
+			go func() {
+				pointWriter := model.PointWriter{Priority: &map[string]*float64{"_16": &val}}
+				returnedPoint, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := inst.db.PointWrite(point.UUID, &pointWriter, true)
+				fmt.Println("val", val)
+				fmt.Println("returnedPoint", returnedPoint)
+				fmt.Println("isPresentValueChange", isPresentValueChange)
+				fmt.Println("isWriteValueChange", isWriteValueChange)
+				fmt.Println("isPriorityChanged", isPriorityChanged)
+				fmt.Println("err", err)
+			}()
+			time.Sleep(1 * time.Millisecond)
+		}
+		time.Sleep(1 * time.Millisecond)
+	}
 	defer inst.SerialClose()
 
 	for {
