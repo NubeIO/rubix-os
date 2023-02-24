@@ -146,6 +146,8 @@ func (d *GormDatabase) FlushPointUpdateBuffers() {
 	pointUpdateBuffers = nil
 	d.mutex.Unlock()
 	for _, tb := range tempBuffers {
+		fmt.Println("tempBuffers", tempBuffers)
+		fmt.Println("updating>>>>>>>>>...", tb.UUID)
 		_, _ = d.UpdatePoint(tb.UUID, tb.Body, false, tb.AfterRealDeviceUpdate)
 	}
 	log.Info("Finished flush point update buffers process")

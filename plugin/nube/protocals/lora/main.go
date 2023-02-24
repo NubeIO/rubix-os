@@ -85,14 +85,11 @@ func (inst *Instance) run() {
 		for _, point := range points {
 			val := randFloats(1, 2, 1)[0]
 			go func() {
-				pointWriter := model.PointWriter{Priority: &map[string]*float64{"_16": &val}}
-				returnedPoint, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := inst.db.PointWrite(point.UUID, &pointWriter, true)
-				fmt.Println("val", val)
-				fmt.Println("returnedPoint", returnedPoint)
-				fmt.Println("isPresentValueChange", isPresentValueChange)
-				fmt.Println("isWriteValueChange", isWriteValueChange)
-				fmt.Println("isPriorityChanged", isPriorityChanged)
-				fmt.Println("err", err)
+				point.Priority = &model.Priority{P16: &val}
+				_, _ = inst.db.UpdatePoint(point.UUID, point, true, false)
+				//p, err := inst.db.UpdatePoint(point.UUID, point, true, false)
+				//fmt.Println("p", p)
+				//fmt.Println("err", err)
 			}()
 			time.Sleep(1 * time.Millisecond)
 		}

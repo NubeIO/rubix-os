@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"sync"
 	"time"
@@ -15,7 +16,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nmath"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
-	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -135,6 +135,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	start := time.Now()
 	existingName, existingAddrID := d.pointNameExists(body)
 	if existingAddrID && boolean.IsTrue(body.IsBitwise) && body.BitwiseIndex != nil && *body.BitwiseIndex >= 0 {
 		existingAddrID = false
@@ -168,9 +169,16 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	} else {
 		pointModel.Priority = body.Priority
 	}
+
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
-	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil, false)
 	if !fromPlugin {
+		elapsed := time.Since(start)
+		fmt.Println("Binomial took", elapsed)
+	}
+	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil, false)
+
+	if !fromPlugin {
+
 		if publishPointList {
 			go d.PublishPointsList("")
 		}
@@ -180,6 +188,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		if err != nil {
 			return nil, err
 		}
+
 	} else {
 		d.bufferPointUpdate(uuid, body, afterRealDeviceUpdate)
 	}
