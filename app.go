@@ -23,7 +23,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var flushBufferInterval = 10 * time.Second
+var flushBufferInterval = 5 * time.Second
 
 func intHandler(db *database.GormDatabase) {
 	dh := new(dbhandler.Handler)

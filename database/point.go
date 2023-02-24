@@ -137,7 +137,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool, afterRealDeviceUpdate bool) (
 	*model.Point, error) {
 	var pointModel *model.Point
-	var err error
 	query := d.DB.Where("uuid = ?", uuid).Preload("Tags").Preload("MetaTags").
 		Preload("Priority").First(&pointModel)
 	if query.Error != nil {
@@ -176,10 +175,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	} else {
 		pointModel.Priority = body.Priority
 	}
-	pnt := pointModel
+	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
+	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil, false)
 	if !fromPlugin {
-		priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
-		pnt, _, _, _, err = d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil, false)
 		if publishPointList {
 			go d.PublishPointsList("")
 		}

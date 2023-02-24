@@ -136,19 +136,35 @@ func (d *GormDatabase) bufferPointWrite(uuid string, body *model.PointWriter, af
 
 func (d *GormDatabase) FlushPointUpdateBuffers() {
 	log.Info("Flush point update buffers has is been called...")
-	for _, bpu := range pointUpdateBuffers {
-		_, _ = d.UpdatePoint(bpu.UUID, bpu.Body, false, bpu.AfterRealDeviceUpdate)
+	if len(pointUpdateBuffers) == 0 {
+		log.Info("Point update buffers not found")
+		return
 	}
+	d.mutex.Lock()
+	var tempBuffers []interfaces.PointUpdateBuffer
+	tempBuffers = append(tempBuffers, pointUpdateBuffers...)
 	pointUpdateBuffers = nil
+	d.mutex.Unlock()
+	for _, tb := range tempBuffers {
+		_, _ = d.UpdatePoint(tb.UUID, tb.Body, false, tb.AfterRealDeviceUpdate)
+	}
 	log.Info("Finished flush point update buffers process")
 }
 
 func (d *GormDatabase) FlushPointWriteBuffers() {
 	log.Info("Flush point write buffers has is been called...")
-	for _, bpw := range pointWriteBuffers {
-		_, _, _, _, _ = d.PointWrite(bpw.UUID, bpw.Body, false, bpw.AfterRealDeviceUpdate,
-			bpw.CurrentWriterUUID, bpw.ForceWrite)
+	if len(pointWriteBuffers) == 0 {
+		log.Info("Point write buffers not found")
+		return
 	}
+	d.mutex.Lock()
+	var tempBuffers []interfaces.PointWriteBuffer
+	tempBuffers = append(tempBuffers, pointWriteBuffers...)
 	pointWriteBuffers = nil
+	d.mutex.Unlock()
+	for _, tb := range tempBuffers {
+		_, _, _, _, _ = d.PointWrite(tb.UUID, tb.Body, false, tb.AfterRealDeviceUpdate,
+			tb.CurrentWriterUUID, tb.ForceWrite)
+	}
 	log.Info("Finished flush point write buffers process")
 }
