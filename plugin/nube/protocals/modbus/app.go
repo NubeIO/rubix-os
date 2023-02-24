@@ -285,7 +285,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
-	point, err = inst.db.UpdatePoint(body.UUID, body, true, true)
+	point, err = inst.db.UpdatePoint(body.UUID, body, true)
 	if err != nil || point == nil {
 		inst.modbusDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -385,7 +385,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 						netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = false
 						point.WritePollRequired = boolean.NewFalse()
 					}
-					point, err = inst.db.UpdatePoint(point.UUID, point, true, true)
+					point, err = inst.db.UpdatePoint(point.UUID, point, true)
 					if err != nil || point == nil {
 						inst.modbusDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
 						inst.pointUpdateErr(point, fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
@@ -408,7 +408,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			} else {
 				point.ReadPollRequired = boolean.NewFalse()
 			}
-			point, err = inst.db.UpdatePoint(point.UUID, point, true, true)
+			point, err = inst.db.UpdatePoint(point.UUID, point, true)
 
 			pp.PollPriority = model.PRIORITY_ASAP                                                                               // TODO: this line look sus.
 			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false, pollqueue.NORMAL_RETRY, false, false) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
@@ -516,7 +516,7 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess
 	if readSuccess {
 		point.OriginalValue = float.New(value)
 	}
-	_, err := inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
+	_, err := inst.db.UpdatePoint(point.UUID, point, clearFaults)
 	if err != nil {
 		inst.modbusDebugMsg("MODBUS UPDATE POINT UpdatePointPresentValue() error: ", err)
 		return nil, err

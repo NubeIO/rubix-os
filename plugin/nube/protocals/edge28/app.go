@@ -160,7 +160,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	inst.edge28DebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
 	inst.edge28DebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
 
-	point, err = inst.db.UpdatePoint(body.UUID, body, true, false)
+	point, err = inst.db.UpdatePoint(body.UUID, body, false)
 	if err != nil || point == nil {
 		inst.edge28DebugMsg("updatePoint(): bad response from UpdatePoint()")
 	}
@@ -247,7 +247,7 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess
 	if readSuccess {
 		point.OriginalValue = float.New(value)
 	}
-	_, err := inst.db.UpdatePoint(point.UUID, point, true, true)
+	_, err := inst.db.UpdatePoint(point.UUID, point, true)
 	if err != nil {
 		inst.edge28DebugMsg("EDGE28 UPDATE POINT UpdatePointPresentValue() error: ", err)
 		return nil, err

@@ -10,13 +10,17 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"strings"
+	"sync"
+	"time"
 )
+
+const ChuckSize = 5
 
 var pointUpdateBuffers []interfaces.PointUpdateBuffer
 var pointWriteBuffers []interfaces.PointWriteBuffer
 
 // updatePriority it updates priority array of point model
-// it attaches the point model fields values for updating it on it's parent function
+// it attaches the point model fields values for updating it on its parent function
 func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool) (
 	*model.Point, *map[string]*float64, *float64, *float64, bool) {
 	isPriorityChanged := false
@@ -140,13 +144,25 @@ func (d *GormDatabase) FlushPointUpdateBuffers() {
 		log.Info("Point update buffers not found")
 		return
 	}
+
 	d.mutex.Lock()
-	var tempBuffers []interfaces.PointUpdateBuffer
-	tempBuffers = append(tempBuffers, pointUpdateBuffers...)
+	var tempPointUpdateBuffers []interfaces.PointUpdateBuffer
+	tempPointUpdateBuffers = append(tempPointUpdateBuffers, pointUpdateBuffers...)
 	pointUpdateBuffers = nil
 	d.mutex.Unlock()
-	for _, tb := range tempBuffers {
-		_, _ = d.UpdatePoint(tb.UUID, tb.Body, false, tb.AfterRealDeviceUpdate)
+
+	chuckPointUpdateBuffers := ChuckPointUpdateBuffer(tempPointUpdateBuffers, ChuckSize)
+	for _, chuckPointUpdateBuffer := range chuckPointUpdateBuffers {
+		wg := &sync.WaitGroup{}
+		for _, point := range chuckPointUpdateBuffer {
+			wg.Add(1)
+			go func(point interfaces.PointUpdateBuffer) {
+				defer wg.Done()
+				_, _ = d.UpdatePoint(point.UUID, point.Body, false, point.AfterRealDeviceUpdate)
+			}(point)
+			time.Sleep(200 * time.Millisecond) // for don't let them call at once
+		}
+		wg.Wait()
 	}
 	log.Info("Finished flush point update buffers process")
 }
@@ -157,14 +173,49 @@ func (d *GormDatabase) FlushPointWriteBuffers() {
 		log.Info("Point write buffers not found")
 		return
 	}
+
 	d.mutex.Lock()
-	var tempBuffers []interfaces.PointWriteBuffer
-	tempBuffers = append(tempBuffers, pointWriteBuffers...)
+	var tempPointWriteBuffers []interfaces.PointWriteBuffer
+	tempPointWriteBuffers = append(tempPointWriteBuffers, pointWriteBuffers...)
 	pointWriteBuffers = nil
 	d.mutex.Unlock()
-	for _, tb := range tempBuffers {
-		_, _, _, _, _ = d.PointWrite(tb.UUID, tb.Body, false, tb.AfterRealDeviceUpdate,
-			tb.CurrentWriterUUID, tb.ForceWrite)
+
+	chuckPointWriteBuffers := ChuckPointWriteBuffer(tempPointWriteBuffers, ChuckSize)
+	for _, chuckPointWriteBuffer := range chuckPointWriteBuffers {
+		wg := &sync.WaitGroup{}
+		for _, point := range chuckPointWriteBuffer {
+			wg.Add(1)
+			go func(point interfaces.PointWriteBuffer) {
+				_, _, _, _, _ = d.PointWrite(point.UUID, point.Body, false, point.AfterRealDeviceUpdate,
+					point.CurrentWriterUUID, point.ForceWrite)
+			}(point)
+			time.Sleep(200 * time.Millisecond) // for don't let them call at once
+		}
+		wg.Wait()
 	}
 	log.Info("Finished flush point write buffers process")
+}
+
+func ChuckPointUpdateBuffer(array []interfaces.PointUpdateBuffer, chunkSize int) [][]interfaces.PointUpdateBuffer {
+	var chucks [][]interfaces.PointUpdateBuffer
+	for i := 0; i < len(array); i += chunkSize {
+		end := i + chunkSize
+		if end > len(array) {
+			end = len(array)
+		}
+		chucks = append(chucks, array[i:end])
+	}
+	return chucks
+}
+
+func ChuckPointWriteBuffer(array []interfaces.PointWriteBuffer, chunkSize int) [][]interfaces.PointWriteBuffer {
+	var chucks [][]interfaces.PointWriteBuffer
+	for i := 0; i < len(array); i += chunkSize {
+		end := i + chunkSize
+		if end > len(array) {
+			end = len(array)
+		}
+		chucks = append(chucks, array[i:end])
+	}
+	return chucks
 }
