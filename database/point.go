@@ -18,7 +18,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
@@ -124,13 +123,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	}
 
 	go d.PublishPointsList("")
-	err = d.CreatePointAutoMapping(body)
-	if err != nil {
-		log.Errorln("points.db.CreatePointAutoMapping() failed to make auto mapping")
-		return nil, err
-	} else {
-		log.Println("points.db.CreatePointAutoMapping() added point new mapping")
-	}
+	d.CreatePointAutoMapping(body)
 	return body, nil
 }
 
@@ -157,14 +150,16 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, errors.New(eMsg)
 		}
 	}
-	if len(body.Tags) > 0 {
+	if len(body.Tags) > 0 && !fromPlugin {
 		if err := d.updateTags(&pointModel, body.Tags); err != nil {
 			return nil, err
 		}
 	}
 	publishPointList := body.Name != pointModel.Name
-	if err := d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
-		return nil, err
+	if !fromPlugin {
+		if err := d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
+			return nil, err
+		}
 	}
 
 	// TODO: we need to decide if a read only point needs to have a priority array or if it should just be nil.
@@ -173,20 +168,20 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	} else {
 		pointModel.Priority = body.Priority
 	}
-
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
 	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil, false)
-	if publishPointList {
-		go d.PublishPointsList("")
-	}
-	d.UpdateProducerByProducerThingUUID(pointModel.UUID, pointModel.Name, pointModel.HistoryEnable,
-		pointModel.HistoryType, pointModel.HistoryInterval)
-	err = d.UpdatePointAutoMapping(pointModel)
-	if err != nil {
-		log.Errorln("points.db.UpdatePointAutoMapping() failed to make auto mapping")
-		return nil, err
+	if !fromPlugin {
+		if publishPointList {
+			go d.PublishPointsList("")
+		}
+		d.UpdateProducerByProducerThingUUID(pointModel.UUID, pointModel.Name, pointModel.HistoryEnable,
+			pointModel.HistoryType, pointModel.HistoryInterval)
+		err = d.UpdatePointAutoMapping(pointModel)
+		if err != nil {
+			return nil, err
+		}
 	} else {
-		log.Println("points.db.UpdatePointAutoMapping() added point new mapping")
+		d.bufferPointUpdate(uuid, body, afterRealDeviceUpdate)
 	}
 	return pnt, err
 }
@@ -207,6 +202,9 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlug
 	}
 	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err :=
 		d.updatePointValue(pointModel, body.Priority, fromPlugin, afterRealDeviceUpdate, currentWriterUUID, forceWrite)
+	if fromPlugin {
+		d.bufferPointWrite(uuid, body, afterRealDeviceUpdate, currentWriterUUID, forceWrite)
+	}
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
@@ -217,7 +215,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
 
-	pointModel, priority, presentValue, writeValue, isPriorityChanged := d.updatePriority(pointModel, priority)
+	pointModel, priority, presentValue, writeValue, isPriorityChanged := d.updatePriority(pointModel, priority, fromPlugin)
 	ov := float.Copy(presentValue)
 	pointModel.OriginalValue = ov
 	wv := float.Copy(writeValue)
@@ -250,7 +248,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	// example for wires and modbus:
 	// if a new value is written from wires then set this to false so the modbus knows on the next poll to write a new
 	// value to the modbus point
-	if fromPlugin && afterRealDeviceUpdate {
+	if afterRealDeviceUpdate {
 		pointModel.InSync = boolean.NewTrue() // TODO: do we still use InSync?
 		// pointModel.WritePollRequired = boolean.NewFalse()  // WritePollRequired should be set by the plugins (they know best)
 	} else {
@@ -283,8 +281,10 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	pointModel.MessageCode = model.CommonFaultCode.Ok
 	pointModel.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
 	pointModel.LastOk = time.Now()
-	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
-	if isChange {
+	if !fromPlugin {
+		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
+	}
+	if isChange && !fromPlugin {
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange,
 			currentWriterUUID)
 		if err != nil {
