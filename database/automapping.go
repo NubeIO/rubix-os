@@ -12,16 +12,38 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 	"reflect"
 )
 
-func (d *GormDatabase) CreatePointAutoMapping(point *model.Point) error {
-	return d.createUpdatePointAutoMapping(point)
+func (d *GormDatabase) CreatePointAutoMapping(point *model.Point) {
+	device, err := d.GetDevice(point.DeviceUUID, api.Args{WithTags: true, WithMetaTags: true})
+	if err != nil {
+		return
+	}
+	if boolean.IsTrue(device.AutoMappingEnable) {
+		err = d.createUpdatePointAutoMapping(device, point)
+		if err != nil {
+			log.Errorln("points.db.CreatePointAutoMapping() failed to make auto mapping")
+		} else {
+			log.Println("points.db.CreatePointAutoMapping() added point new mapping")
+		}
+	}
 }
 
 func (d *GormDatabase) UpdatePointAutoMapping(point *model.Point) error {
-	if err := d.createUpdatePointAutoMapping(point); err != nil {
+	device, err := d.GetDevice(point.DeviceUUID, api.Args{WithTags: true, WithMetaTags: true})
+	if err != nil {
 		return err
+	}
+	if boolean.IsTrue(device.AutoMappingEnable) {
+		err := d.createUpdatePointAutoMapping(device, point)
+		if err != nil {
+			log.Errorln("points.db.UpdatePointAutoMapping() failed to make auto mapping")
+			return err
+		} else {
+			log.Println("points.db.UpdatePointAutoMapping() added point new mapping")
+		}
 	}
 	if point.AutoMappingUUID != "" {
 		point.Connection = connection.Connected.String()
@@ -70,53 +92,47 @@ func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) er
 	return nil
 }
 
-func (d *GormDatabase) createUpdatePointAutoMapping(point *model.Point) error {
-	device, err := d.GetDevice(point.DeviceUUID, api.Args{WithTags: true, WithMetaTags: true})
+func (d *GormDatabase) createUpdatePointAutoMapping(device *model.Device, point *model.Point) error {
+	flowNetwork, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
 	if err != nil {
 		return err
 	}
-	if boolean.IsTrue(device.AutoMappingEnable) {
-		flowNetwork, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
-		if err != nil {
-			return err
-		}
-		network, err := d.GetNetwork(device.NetworkUUID, api.Args{WithTags: true, WithMetaTags: true})
-		if err != nil {
-			return err
-		}
-		// edge
-		stream, err := d.createPointAutoMappingStream(flowNetwork, network.UUID, network.Name, device.UUID, device.Name)
-		if err != nil {
-			return err
-		}
-		producer, err := d.createPointAutoMappingProducer(stream.UUID, point.UUID, point.Name)
-		if err != nil {
-			return err
-		}
-		// cloud
-		cli := client.NewFlowClientCliFromFN(flowNetwork)
-		body := &interfaces.AutoMapping{
-			FlowNetworkUUID: flowNetwork.UUID,
-			StreamUUID:      stream.UUID,
-			ProducerUUID:    producer.UUID,
-			NetworkUUID:     network.UUID,
-			NetworkName:     network.Name,
-			NetworkTags:     network.Tags,
-			NetworkMetaTags: network.MetaTags,
-			DeviceUUID:      device.UUID,
-			DeviceName:      device.Name,
-			DeviceTags:      device.Tags,
-			DeviceMetaTags:  device.MetaTags,
-			PointUUID:       point.UUID,
-			PointName:       point.Name,
-			PointTags:       point.Tags,
-			PointMetaTags:   point.MetaTags,
-			IsLocal:         boolean.IsFalse(flowNetwork.IsRemote) && boolean.IsFalse(flowNetwork.IsMasterSlave),
-		}
-		_, err = cli.AddAutoMapping(body)
-		if err != nil {
-			return err
-		}
+	network, err := d.GetNetwork(device.NetworkUUID, api.Args{WithTags: true, WithMetaTags: true})
+	if err != nil {
+		return err
+	}
+	// edge
+	stream, err := d.createPointAutoMappingStream(flowNetwork, network.UUID, network.Name, device.UUID, device.Name)
+	if err != nil {
+		return err
+	}
+	producer, err := d.createPointAutoMappingProducer(stream.UUID, point.UUID, point.Name)
+	if err != nil {
+		return err
+	}
+	// cloud
+	cli := client.NewFlowClientCliFromFN(flowNetwork)
+	body := &interfaces.AutoMapping{
+		FlowNetworkUUID: flowNetwork.UUID,
+		StreamUUID:      stream.UUID,
+		ProducerUUID:    producer.UUID,
+		NetworkUUID:     network.UUID,
+		NetworkName:     network.Name,
+		NetworkTags:     network.Tags,
+		NetworkMetaTags: network.MetaTags,
+		DeviceUUID:      device.UUID,
+		DeviceName:      device.Name,
+		DeviceTags:      device.Tags,
+		DeviceMetaTags:  device.MetaTags,
+		PointUUID:       point.UUID,
+		PointName:       point.Name,
+		PointTags:       point.Tags,
+		PointMetaTags:   point.MetaTags,
+		IsLocal:         boolean.IsFalse(flowNetwork.IsRemote) && boolean.IsFalse(flowNetwork.IsMasterSlave),
+	}
+	_, err = cli.AddAutoMapping(body)
+	if err != nil {
+		return err
 	}
 	return nil
 }

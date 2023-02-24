@@ -18,7 +18,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 )
 
 func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
@@ -124,13 +123,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	}
 
 	go d.PublishPointsList("")
-	err = d.CreatePointAutoMapping(body)
-	if err != nil {
-		log.Errorln("points.db.CreatePointAutoMapping() failed to make auto mapping")
-		return nil, err
-	} else {
-		log.Println("points.db.CreatePointAutoMapping() added point new mapping")
-	}
+	d.CreatePointAutoMapping(body)
 	return body, nil
 }
 
@@ -185,10 +178,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			pointModel.HistoryType, pointModel.HistoryInterval)
 		err = d.UpdatePointAutoMapping(pointModel)
 		if err != nil {
-			log.Errorln("points.db.UpdatePointAutoMapping() failed to make auto mapping")
 			return nil, err
-		} else {
-			log.Println("points.db.UpdatePointAutoMapping() added point new mapping")
 		}
 	} else {
 		d.bufferPointUpdate(uuid, body, afterRealDeviceUpdate)
