@@ -67,7 +67,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.PATCH(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
-		point, err := inst.db.UpdatePoint(body.UUID, body, true, false)
+		point, err := inst.db.UpdatePoint(body.UUID, body, false)
 		api.ResponseHandler(point, err, ctx)
 	})
 	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {

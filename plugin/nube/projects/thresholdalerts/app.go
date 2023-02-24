@@ -138,7 +138,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
-	point, err = inst.db.UpdatePoint(body.UUID, body, true, true)
+	point, err = inst.db.UpdatePoint(body.UUID, body, true)
 	if err != nil || point == nil {
 		inst.thresholdalertsDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err

@@ -247,7 +247,7 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 			continue
 		} else if field.Kind() == reflect.Array || field.Kind() == reflect.Slice {
 			for j := 0; j < field.Len(); j++ {
-				pf := fmt.Sprintf("%s_%d", postfix, (j + 1))
+				pf := fmt.Sprintf("%s_%d", postfix, j+1)
 				v := field.Index(j)
 				inst.addPointsFromStruct(deviceBody, v, pf)
 			}
@@ -301,7 +301,7 @@ func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
 	}
 	for _, pt := range dev.Points {
 		pt.AddressUUID = body.AddressUUID
-		_, err = inst.db.UpdatePoint(pt.UUID, pt, true, false)
+		_, err = inst.db.UpdatePoint(pt.UUID, pt, false)
 		if err != nil {
 			log.Errorf("loraraw: issue on UpdatePoint updateDevicePointsAddress(): %v\n", err)
 			return err
@@ -401,7 +401,7 @@ func (inst *Instance) updateDevicePointValuesStruct(deviceID string, sensorStruc
 			fallthrough
 		case reflect.Slice:
 			for j := 0; j < field.Len(); j++ {
-				pf := fmt.Sprintf("%s_%d", postfix, (j + 1))
+				pf := fmt.Sprintf("%s_%d", postfix, j+1)
 				v := field.Index(j).Interface()
 				inst.updateDevicePointValuesStruct(deviceID, v, pf)
 			}

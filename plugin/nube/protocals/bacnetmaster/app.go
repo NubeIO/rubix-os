@@ -335,7 +335,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
-	point, err = inst.db.UpdatePoint(body.UUID, body, true, true)
+	point, err = inst.db.UpdatePoint(body.UUID, body, true)
 	if err != nil || point == nil {
 		inst.bacnetDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -435,7 +435,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 						netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = false
 						point.WritePollRequired = boolean.NewFalse()
 					}
-					point, err = inst.db.UpdatePoint(point.UUID, point, true, true)
+					point, err = inst.db.UpdatePoint(point.UUID, point, true)
 					if err != nil || point == nil {
 						inst.bacnetDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
 						inst.pointUpdateErr(point, fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
@@ -554,7 +554,7 @@ func (inst *Instance) pointUpdate(point *model.Point, value *float64, readSucces
 	if readSuccess {
 		point.OriginalValue = value
 	}
-	point, err := inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
+	point, err := inst.db.UpdatePoint(point.UUID, point, clearFaults)
 	if err != nil {
 		inst.bacnetDebugMsg("UpdatePoint() error: ", err)
 		return nil, err
@@ -565,7 +565,7 @@ func (inst *Instance) pointUpdate(point *model.Point, value *float64, readSucces
 func (inst *Instance) pointUpdateFromPriorityArray(point *model.Point, priorityArray map[string]*float64, presentValue *float64, clearFaults bool) (*model.Point, error) {
 	point, err := priorityarray.ApplyMapToPriorityArray(point, &priorityArray)
 	point.OriginalValue = presentValue
-	point, err = inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
+	point, err = inst.db.UpdatePoint(point.UUID, point, clearFaults)
 	if err != nil {
 		inst.bacnetDebugMsg("UpdatePoint() error: ", err)
 		return nil, err

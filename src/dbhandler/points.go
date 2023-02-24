@@ -45,9 +45,8 @@ func (h *Handler) CreatePoint(body *model.Point, fromPlugin, updatePoint bool) (
 	return pnt, nil
 }
 
-func (h *Handler) UpdatePoint(uuid string, body *model.Point, fromPlugin bool, afterRealDeviceUpdate bool) (
-	*model.Point, error) {
-	return getDb().UpdatePoint(uuid, body, fromPlugin, afterRealDeviceUpdate)
+func (h *Handler) UpdatePoint(uuid string, body *model.Point, afterRealDeviceUpdate bool) (*model.Point, error) {
+	return getDb().UpdatePoint(uuid, body, true, afterRealDeviceUpdate)
 }
 
 func (h *Handler) PointWrite(uuid string, pointWriter *model.PointWriter, afterRealDeviceUpdate bool) (

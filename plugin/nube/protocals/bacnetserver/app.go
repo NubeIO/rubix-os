@@ -275,7 +275,7 @@ func (inst *Instance) updatePoint(body *model.Point) (*model.Point, error) {
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
-	point, err := inst.db.UpdatePoint(body.UUID, body, true, false)
+	point, err := inst.db.UpdatePoint(body.UUID, body, false)
 	if err != nil {
 		inst.bacnetDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -322,12 +322,12 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			inst.bacnetErrorMsg(err)
 			if isWriteValueChange {
 				point.WritePollRequired = boolean.NewTrue()
-				point, err = inst.db.UpdatePoint(point.UUID, point, true, false)
+				point, err = inst.db.UpdatePoint(point.UUID, point, false)
 			}
 		}
 		return point, nil
 	}
-	point, err = inst.db.UpdatePoint(point.UUID, point, true, true)
+	point, err = inst.db.UpdatePoint(point.UUID, point, true)
 	if err != nil || point == nil {
 		inst.bacnetDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
 		inst.pointUpdateErr(point, fmt.Sprint("writePoint(): bad response from UpdatePoint() err:", err), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
@@ -410,7 +410,7 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, readWriteSu
 		point.OriginalValue = float.New(value)
 		point.WritePollRequired = boolean.NewFalse()
 	}
-	point, err := inst.db.UpdatePoint(point.UUID, point, true, clearFaults)
+	point, err := inst.db.UpdatePoint(point.UUID, point, clearFaults)
 	if err != nil {
 		inst.bacnetDebugMsg("UpdatePoint() error: ", err)
 		return nil, err
