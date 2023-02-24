@@ -23,6 +23,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var flushBufferInterval = 10 * time.Second
+
 func intHandler(db *database.GormDatabase) {
 	dh := new(dbhandler.Handler)
 	dh.DB = db
@@ -50,6 +52,21 @@ func initHistorySchedulers(db *database.GormDatabase, conf *config.Configuration
 	if *conf.ProducerHistory.Enable && *conf.ProducerHistory.IntervalHistoryCreator.Enable {
 		h.InitIntervalHistoryCreator(conf.ProducerHistory.IntervalHistoryCreator.Frequency)
 	}
+}
+
+func initFlushBuffers(db *database.GormDatabase) {
+	go func() {
+		for {
+			time.Sleep(flushBufferInterval)
+			db.FlushPointUpdateBuffers()
+		}
+	}()
+	go func() {
+		for {
+			time.Sleep(flushBufferInterval)
+			db.FlushPointWriteBuffers()
+		}
+	}()
 }
 
 var db *database.GormDatabase
@@ -87,6 +104,7 @@ func main() {
 	engine := router.Create(db, conf)
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)
+	initFlushBuffers(db)
 	runner.Run(engine, conf)
 }
 
