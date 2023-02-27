@@ -319,8 +319,8 @@ func (inst *Instance) checkComissioningPoints() error {
 			var foundFlowTempPoint *model.Point
 			if dev.Points != nil {
 				for _, modbusPoint := range dev.Points {
-					if modbusPoint.Name == "FLOW_TEMP" {
-						inst.tmvDebugMsg("checkComissioningPoints() FLOW_TEMP point found")
+					if modbusPoint.Name == "FLOW_TEMPERATURE" {
+						inst.tmvDebugMsg("checkComissioningPoints() FLOW_TEMPERATURE point found")
 						foundFlowTempPoint = modbusPoint
 						pointUpdateReq := false
 						if boolean.NonNil(foundFlowTempPoint.Enable) != false {
@@ -360,10 +360,10 @@ func (inst *Instance) checkComissioningPoints() error {
 							foundFlowTempPoint.HistoryInterval = integer.New(60)
 						}
 						if pointUpdateReq {
-							inst.tmvDebugMsg("checkComissioningPoints() updating FLOW_TEMP point")
+							inst.tmvDebugMsg("checkComissioningPoints() updating FLOW_TEMPERATURE point")
 							foundFlowTempPoint, err = inst.db.UpdatePoint(foundFlowTempPoint.UUID, foundFlowTempPoint, false)
 							if err != nil {
-								inst.tmvErrorMsg("checkComissioningPoints() FLOW_TEMP Point update err: ", err)
+								inst.tmvErrorMsg("checkComissioningPoints() FLOW_TEMPERATURE Point update err: ", err)
 							}
 							break
 						}
@@ -372,7 +372,7 @@ func (inst *Instance) checkComissioningPoints() error {
 				if foundFlowTempPoint == nil {
 					foundFlowTempPoint = &model.Point{}
 					foundFlowTempPoint.DeviceUUID = dev.UUID
-					foundFlowTempPoint.Name = "FLOW_TEMP"
+					foundFlowTempPoint.Name = "FLOW_TEMPERATURE"
 					foundFlowTempPoint.Enable = boolean.NewFalse()
 					foundFlowTempPoint.AddressID = integer.New(1015)
 					foundFlowTempPoint.ObjectType = string(model.ObjTypeReadHolding)
@@ -387,7 +387,7 @@ func (inst *Instance) checkComissioningPoints() error {
 					foundFlowTempPoint.HistoryInterval = integer.New(60)
 					foundFlowTempPoint, err = inst.db.CreatePoint(foundFlowTempPoint, false, true)
 					if err != nil {
-						inst.tmvErrorMsg("checkComissioningPoints() FLOW_TEMP Point create err: ", err)
+						inst.tmvErrorMsg("checkComissioningPoints() FLOW_TEMPERATURE Point create err: ", err)
 					}
 					time.Sleep(50 * time.Millisecond)
 				}
@@ -428,7 +428,7 @@ func (inst *Instance) checkComissioningPoints() error {
 }
 
 func (inst *Instance) DisableCommissioningPoints() error {
-	inst.tmvDebugMsg("DISABLE COMMISSIONING MODE: SET THE FLOW_TEMP MODBUS POINTS BACK TO NORMAL (disabled)")
+	inst.tmvDebugMsg("DISABLE COMMISSIONING MODE: SET THE FLOW_TEMPERATURE MODBUS POINTS BACK TO NORMAL (disabled)")
 
 	nets, err := inst.db.GetNetworksByPluginName("modbus", api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
@@ -438,12 +438,12 @@ func (inst *Instance) DisableCommissioningPoints() error {
 		inst.tmvDebugMsg("DisableCommissioningPoints() Net: ", net.Name)
 		for _, dev := range net.Devices {
 			for _, pnt := range dev.Points {
-				if pnt.Name == "FLOW_TEMP" {
+				if pnt.Name == "FLOW_TEMPERATURE" {
 					inst.tmvDebugMsg("DisableCommissioningPoints() device: ", dev.Name)
 					pnt.Enable = boolean.NewFalse()
 					_, err = inst.db.UpdatePoint(pnt.UUID, pnt, false)
 					if err != nil {
-						inst.tmvErrorMsg("DisableCommissioningPoints() DISABLE FLOW_TEMP UpdatePoint() error: ", err)
+						inst.tmvErrorMsg("DisableCommissioningPoints() DISABLE FLOW_TEMPERATURE UpdatePoint() error: ", err)
 					}
 					time.Sleep(1 * time.Second)
 				}
