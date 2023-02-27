@@ -97,7 +97,7 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 }
 
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	point, _, writeValueChange, _, err := inst.db.PointWrite(pntUUID, body, false)
+	point, _, writeValueChange, _, err := inst.db.PointWrite(pntUUID, body)
 	if point == nil || err != nil {
 		return point, err
 	}
@@ -130,7 +130,7 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 func (inst *Instance) pointWrite(uuid string, value float64) error {
 	priority := map[string]*float64{"_16": &value}
 	pointWriter := model.PointWriter{Priority: &priority}
-	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter, true)
+	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter) // TODO: look on it, faults messages were cleared out
 	if err != nil {
 		log.Error("edge28-app: pointWrite()", err)
 	}

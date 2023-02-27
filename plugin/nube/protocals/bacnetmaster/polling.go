@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/writemode"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -222,16 +223,20 @@ func (inst *Instance) BACnetMasterPolling() error {
 					}
 				}
 				*/
-				_, err = inst.pointUpdateFromPriorityArray(pnt, currentBACServPriorityMap, highestPriorityValue, true)
+				pnt.CommonFault.InFault = false
+				pnt.CommonFault.MessageLevel = model.MessageLevel.Info
+				pnt.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+				pnt.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+				pnt.CommonFault.LastOk = time.Now().UTC()
+				_, err = inst.pointUpdateFromPriorityArray(pnt, currentBACServPriorityMap, highestPriorityValue)
 				if err != nil {
 					inst.bacnetDebugMsg("BACnetMasterPolling() pointUpdateFromPriorityArray err: ", err)
 				}
 			} else {
-				inst.pointUpdate(pnt, highestPriorityValue, readSuccess, false)
+				inst.pointUpdate(pnt, highestPriorityValue, readSuccess)
 				if pnt.ObjectId != nil {
 					inst.bacnetDebugMsg("updated bacnet point present value.  point: ", pnt.Name, " bacnet-id: ", pnt.ObjectType, *pnt.ObjectId)
 				}
-
 			}
 
 			if !readSuccess && !writeSuccess {
@@ -256,7 +261,6 @@ func (inst *Instance) BACnetMasterPolling() error {
 				inst.bacnetDebugMsg("BACnetMasterPolling() success.  point: ", pnt.Name, " bacnet-id: ", pnt.ObjectType, *pnt.ObjectId)
 			}
 			netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, true, false, pollqueue.NORMAL_RETRY, callback)
-
 		}
 		return false, nil
 	}

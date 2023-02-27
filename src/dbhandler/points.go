@@ -37,7 +37,7 @@ func (h *Handler) CreatePoint(body *model.Point, fromPlugin, updatePoint bool) (
 		return nil, err
 	}
 	if updatePoint {
-		pnt, err = getDb().UpdatePoint(pnt.UUID, pnt, fromPlugin, false) // MARC: UpdatePoint is called here so that the PresentValue and Priority are updated to use the fallback value.  Otherwise they are left as Null and the Edge28 Outputs are left floating.
+		pnt, err = getDb().UpdatePoint(pnt.UUID, pnt, fromPlugin) // MARC: UpdatePoint is called here so that the PresentValue and Priority are updated to use the fallback value. Otherwise, they are left as Null and the Edge28 Outputs are left floating.
 		if err != nil {
 			return nil, err
 		}
@@ -45,13 +45,13 @@ func (h *Handler) CreatePoint(body *model.Point, fromPlugin, updatePoint bool) (
 	return pnt, nil
 }
 
-func (h *Handler) UpdatePoint(uuid string, body *model.Point, afterRealDeviceUpdate bool) (*model.Point, error) {
-	return getDb().UpdatePoint(uuid, body, true, afterRealDeviceUpdate)
+func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
+	return getDb().UpdatePoint(uuid, body, true)
 }
 
-func (h *Handler) PointWrite(uuid string, pointWriter *model.PointWriter, afterRealDeviceUpdate bool) (
+func (h *Handler) PointWrite(uuid string, pointWriter *model.PointWriter) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
-	return getDb().PointWrite(uuid, pointWriter, afterRealDeviceUpdate, nil, false)
+	return getDb().PointWrite(uuid, pointWriter, nil, false)
 }
 
 // UpdatePointErrors will only update the error properties of the point, all other properties will not be updated.

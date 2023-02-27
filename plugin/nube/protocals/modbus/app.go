@@ -10,6 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
 	"time"
@@ -284,8 +285,12 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.Message = "point disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
-
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
+	point.CommonFault.InFault = false
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	point.CommonFault.LastOk = time.Now().UTC()
+	point, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.modbusDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -349,7 +354,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			return point, nil
 	*/
 
-	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body, false)
+	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body)
 	if err != nil {
 		inst.modbusDebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err
@@ -385,7 +390,12 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 						netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = false
 						point.WritePollRequired = boolean.NewFalse()
 					}
-					point, err = inst.db.UpdatePoint(point.UUID, point, true)
+					point.CommonFault.InFault = false
+					point.CommonFault.MessageLevel = model.MessageLevel.Info
+					point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+					point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+					point.CommonFault.LastOk = time.Now().UTC()
+					point, err = inst.db.UpdatePoint(point.UUID, point)
 					if err != nil || point == nil {
 						inst.modbusDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
 						inst.pointUpdateErr(point, fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
@@ -408,7 +418,12 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			} else {
 				point.ReadPollRequired = boolean.NewFalse()
 			}
-			point, err = inst.db.UpdatePoint(point.UUID, point, true)
+			point.CommonFault.InFault = false
+			point.CommonFault.MessageLevel = model.MessageLevel.Info
+			point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+			point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+			point.CommonFault.LastOk = time.Now().UTC()
+			point, err = inst.db.UpdatePoint(point.UUID, point)
 
 			pp.PollPriority = model.PRIORITY_ASAP                                                                               // TODO: this line look sus.
 			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false, pollqueue.NORMAL_RETRY, false, false) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
@@ -512,11 +527,11 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 }
 
 // THE FOLLOWING FUNCTIONS ARE CALLED FROM WITHIN THE PLUGIN
-func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess, clearFaults bool) (*model.Point, error) {
+func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess bool) (*model.Point, error) {
 	if readSuccess {
 		point.OriginalValue = float.New(value)
 	}
-	_, err := inst.db.UpdatePoint(point.UUID, point, clearFaults)
+	_, err := inst.db.UpdatePoint(point.UUID, point)
 	if err != nil {
 		inst.modbusDebugMsg("MODBUS UPDATE POINT UpdatePointPresentValue() error: ", err)
 		return nil, err

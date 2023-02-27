@@ -47,7 +47,7 @@ func (d *GormDatabase) publishPointWrite(details *interfaces.MqttPoint) {
 		return
 	}
 	if details.PointUUID != "" {
-		_, _, _, _, err := d.PointWrite(details.PointUUID, details.Priority, false, nil, false)
+		_, _, _, _, err := d.PointWrite(details.PointUUID, details.Priority, nil, false)
 		if err != nil {
 			log.Error("mqtt write point by uuid: error:", err)
 			return

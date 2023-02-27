@@ -100,13 +100,12 @@ func (d *GormDatabase) priorityMapToPatch(priorityMap *map[string]*float64) map[
 	return priorityMapToPatch
 }
 
-func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point, afterRealDeviceUpdate bool) {
+func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	pointUpdateBuffer := interfaces.PointUpdateBuffer{
-		UUID:                  uuid,
-		Body:                  body,
-		AfterRealDeviceUpdate: afterRealDeviceUpdate,
+		UUID: uuid,
+		Body: body,
 	}
 	for index, pub := range pointUpdateBuffers {
 		if pub.UUID == uuid {
@@ -137,7 +136,7 @@ func (d *GormDatabase) FlushPointUpdateBuffers() {
 			wg.Add(1)
 			go func(point interfaces.PointUpdateBuffer) {
 				defer wg.Done()
-				_, _ = d.UpdatePoint(point.UUID, point.Body, false, point.AfterRealDeviceUpdate)
+				_, _ = d.UpdatePoint(point.UUID, point.Body, false)
 			}(point)
 			time.Sleep(200 * time.Millisecond) // for don't let them call at once
 		}

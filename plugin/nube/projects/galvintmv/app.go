@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"io/ioutil"
 	"os"
@@ -176,8 +177,12 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.Message = "point disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
-
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
+	point.CommonFault.InFault = false
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	point.CommonFault.LastOk = time.Now().UTC()
+	point, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.tmvDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -198,7 +203,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	inst.tmvDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
 	inst.tmvDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
 
-	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
+	point, _, _, _, err = inst.db.PointWrite(pntUUID, body)
 	if err != nil {
 		inst.tmvDebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err
@@ -361,7 +366,7 @@ func (inst *Instance) checkComissioningPoints() error {
 						}
 						if pointUpdateReq {
 							inst.tmvDebugMsg("checkComissioningPoints() updating FLOW_TEMP point")
-							foundFlowTempPoint, err = inst.db.UpdatePoint(foundFlowTempPoint.UUID, foundFlowTempPoint, false)
+							foundFlowTempPoint, err = inst.db.UpdatePoint(foundFlowTempPoint.UUID, foundFlowTempPoint)
 							if err != nil {
 								inst.tmvErrorMsg("checkComissioningPoints() FLOW_TEMP Point update err: ", err)
 							}
@@ -441,7 +446,7 @@ func (inst *Instance) DisableCommissioningPoints() error {
 				if pnt.Name == "FLOW_TEMP" {
 					inst.tmvDebugMsg("DisableCommissioningPoints() device: ", dev.Name)
 					pnt.Enable = boolean.NewFalse()
-					_, err = inst.db.UpdatePoint(pnt.UUID, pnt, false)
+					_, err = inst.db.UpdatePoint(pnt.UUID, pnt)
 					if err != nil {
 						inst.tmvErrorMsg("DisableCommissioningPoints() DISABLE FLOW_TEMP UpdatePoint() error: ", err)
 					}
@@ -527,7 +532,7 @@ func (inst *Instance) updatePointNames() error {
 				if newPointName != "" {
 					inst.tmvDebugMsg("NEW  Name: ", newPointName)
 					pnt.Name = newPointName
-					pnt, err = inst.db.UpdatePoint(pnt.UUID, pnt, false)
+					pnt, err = inst.db.UpdatePoint(pnt.UUID, pnt)
 				}
 			}
 		}
@@ -651,7 +656,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 									foundEnablePoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
-									foundEnablePoint, err = inst.db.UpdatePoint(foundEnablePoint.UUID, foundEnablePoint, false)
+									foundEnablePoint, err = inst.db.UpdatePoint(foundEnablePoint.UUID, foundEnablePoint)
 									if err != nil {
 										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() EnablePoint update err: ", err)
 									}
@@ -696,7 +701,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 									foundSetpointPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
-									foundSetpointPoint, err = inst.db.UpdatePoint(foundSetpointPoint.UUID, foundSetpointPoint, false)
+									foundSetpointPoint, err = inst.db.UpdatePoint(foundSetpointPoint.UUID, foundSetpointPoint)
 									if err != nil {
 										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SetpointPoint update err: ", err)
 									}
@@ -741,7 +746,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 									foundSolenoidAllowPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
-									foundSolenoidAllowPoint, err = inst.db.UpdatePoint(foundSolenoidAllowPoint.UUID, foundSolenoidAllowPoint, false)
+									foundSolenoidAllowPoint, err = inst.db.UpdatePoint(foundSolenoidAllowPoint.UUID, foundSolenoidAllowPoint)
 									if err != nil {
 										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() SolenoidAllowPoint update err: ", err)
 									}
@@ -786,7 +791,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 									foundCalibrationPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
-									foundCalibrationPoint, err = inst.db.UpdatePoint(foundCalibrationPoint.UUID, foundCalibrationPoint, false)
+									foundCalibrationPoint, err = inst.db.UpdatePoint(foundCalibrationPoint.UUID, foundCalibrationPoint)
 									if err != nil {
 										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() CalibrationPoint update err: ", err)
 									}
@@ -831,7 +836,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 									foundResetPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
-									foundResetPoint, err = inst.db.UpdatePoint(foundResetPoint.UUID, foundResetPoint, false)
+									foundResetPoint, err = inst.db.UpdatePoint(foundResetPoint.UUID, foundResetPoint)
 									if err != nil {
 										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() ResetPoint update err: ", err)
 									}
@@ -876,7 +881,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 									foundRTCPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
-									foundRTCPoint, err = inst.db.UpdatePoint(foundRTCPoint.UUID, foundRTCPoint, false)
+									foundRTCPoint, err = inst.db.UpdatePoint(foundRTCPoint.UUID, foundRTCPoint)
 									if err != nil {
 										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCPoint update err: ", err)
 									}
@@ -921,7 +926,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 									foundRTCTZOffsetPoint.HistoryInterval = integer.New(60)
 								}
 								if pointUpdateReq {
-									foundRTCTZOffsetPoint, err = inst.db.UpdatePoint(foundRTCTZOffsetPoint.UUID, foundRTCTZOffsetPoint, false)
+									foundRTCTZOffsetPoint, err = inst.db.UpdatePoint(foundRTCTZOffsetPoint.UUID, foundRTCTZOffsetPoint)
 									if err != nil {
 										inst.tmvErrorMsg("createModbusNetworkDevicesAndPoints() RTCPoint update err: ", err)
 									}
@@ -1215,7 +1220,7 @@ func (inst *Instance) rtcPointWrite(rtcPoint *model.Point) error {
 	pointUpdateMap["_1"] = float.New(float64(now))
 	pointWriter := model.PointWriter{Priority: &pointUpdateMap}
 
-	_, _, _, _, err := inst.db.PointWrite(rtcPoint.UUID, &pointWriter, false)
+	_, _, _, _, err := inst.db.PointWrite(rtcPoint.UUID, &pointWriter)
 	if err != nil {
 		inst.tmvErrorMsg("rtcPointWrite() PointWrite() error: ", err)
 		return err
@@ -1233,7 +1238,7 @@ func (inst *Instance) rtcTZOffsetPointWrite(rtcTZOffsetPoint *model.Point) error
 	pointUpdateMap["_1"] = float.New(float64(offset))
 	pointWriter := model.PointWriter{Priority: &pointUpdateMap}
 
-	_, _, _, _, err := inst.db.PointWrite(rtcTZOffsetPoint.UUID, &pointWriter, false)
+	_, _, _, _, err := inst.db.PointWrite(rtcTZOffsetPoint.UUID, &pointWriter)
 	if err != nil {
 		inst.tmvErrorMsg("rtcTZOffsetPointWrite() PointWrite() error: ", err)
 		return err

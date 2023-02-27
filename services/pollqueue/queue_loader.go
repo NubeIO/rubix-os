@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -410,7 +411,14 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 	// point.PrintPointValues()
 	// TODO: WOULD BE GOOD IF THIS COULD BE MOVED TO app.go
 	resetFaults := readSuccess || writeSuccess
-	point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point, resetFaults)
+	if resetFaults {
+		point.CommonFault.InFault = false
+		point.CommonFault.MessageLevel = model.MessageLevel.Info
+		point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+		point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+		point.CommonFault.LastOk = time.Now().UTC()
+	}
+	point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point)
 	// printPointDebugInfo(point)
 
 }
@@ -464,7 +472,7 @@ func (pm *NetworkPollManager) MakePollingPointRepollCallback(pp *PollingPoint, w
 
 		// TODO: WOULD BE GOOD IF THIS COULD BE MOVED TO app.go
 		// pm.pollQueueDebugMsg(fmt.Sprintf("pm.DBHandlerRef: %+v", pm.DBHandlerRef))
-		point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point, false)
+		point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point)
 		if err != nil || point == nil {
 			pm.pollQueueErrorMsg(fmt.Sprintf("point DB UPDATE FAILED Err: %+v", err))
 			return
@@ -581,5 +589,5 @@ func (pm *NetworkPollManager) SetPointPollRequiredFlagsBasedOnWriteMode(point *m
 	pm.pollQueueDebugMsg("MODBUS SetPointPollRequiredFlagsBasedOnWriteMode(): PRIORITY")
 	pm.pollQueueDebugMsg("%+v\n", point.Priority)
 
-	pm.DBHandlerRef.UpdatePoint(point.UUID, point, false)
+	pm.DBHandlerRef.UpdatePoint(point.UUID, point)
 }

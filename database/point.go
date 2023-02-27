@@ -127,7 +127,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	return body, nil
 }
 
-func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool, afterRealDeviceUpdate bool) (
+func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (
 	*model.Point, error) {
 	writeOnDB := !fromPlugin
 	var pointModel *model.Point
@@ -170,7 +170,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		pointModel.Priority = body.Priority
 	}
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
-	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, afterRealDeviceUpdate, nil, false, writeOnDB)
+	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, nil, false, writeOnDB)
 	if writeOnDB {
 		if publishPointList {
 			go d.PublishPointsList("")
@@ -182,13 +182,12 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, err
 		}
 	} else {
-		d.bufferPointUpdate(uuid, body, afterRealDeviceUpdate)
+		d.bufferPointUpdate(uuid, body)
 	}
 	return pnt, err
 }
 
-func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, afterRealDeviceUpdate bool,
-	currentWriterUUID *string, forceWrite bool) (
+func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, currentWriterUUID *string, forceWrite bool) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
@@ -202,13 +201,12 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, afterRea
 		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
 	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err :=
-		d.updatePointValue(pointModel, body.Priority, afterRealDeviceUpdate, currentWriterUUID, forceWrite, true)
+		d.updatePointValue(pointModel, body.Priority, currentWriterUUID, forceWrite, true)
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
-func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64,
-	afterRealDeviceUpdate bool, currentWriterUUID *string, forceWrite, writeOnDB bool) (returnPoint *model.Point,
-	isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
+func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64, currentWriterUUID *string, forceWrite, writeOnDB bool) (
+	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
@@ -222,13 +220,6 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	presentValueTransformFault := false
 	transform := PointValueTransformOnRead(presentValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor,
 		pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
-	if afterRealDeviceUpdate {
-		pointModel.CommonFault.InFault = false
-		pointModel.CommonFault.MessageLevel = model.MessageLevel.Info
-		pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
-		pointModel.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
-		pointModel.CommonFault.LastOk = time.Now().UTC()
-	}
 	presentValue = transform
 	val, err := pointUnits(presentValue, pointModel.Unit, pointModel.UnitTo)
 	if err != nil {
@@ -357,7 +348,7 @@ func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName strin
 	if err != nil {
 		return nil, err
 	}
-	write, _, _, _, err := d.PointWrite(point.UUID, body, false, nil, false)
+	write, _, _, _, err := d.PointWrite(point.UUID, body, nil, false)
 	if err != nil {
 		return nil, err
 	}
