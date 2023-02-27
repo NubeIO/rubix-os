@@ -61,12 +61,6 @@ func initFlushBuffers(db *database.GormDatabase) {
 			db.FlushPointUpdateBuffers()
 		}
 	}()
-	go func() {
-		for {
-			time.Sleep(flushBufferInterval)
-			db.FlushPointWriteBuffers()
-		}
-	}()
 }
 
 var db *database.GormDatabase

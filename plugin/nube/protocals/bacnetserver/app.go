@@ -7,7 +7,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/integer"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -416,34 +415,6 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, readWriteSu
 		return nil, err
 	}
 	return point, nil
-}
-
-// THIS SHOULD NOT BE USED, CHANGE TO pointUpdate() (Above)
-func (inst *Instance) pointWrite(uuid string, value float64) error {
-	inst.bacnetErrorMsg("pointWrite() DON'T USE THIS FUNCTION: ")
-	priority := map[string]*float64{"_16": &value}
-	pointWriter := model.PointWriter{Priority: &priority}
-	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter, true)
-	if err != nil {
-		inst.bacnetErrorMsg("bacnet-server: pointWrite()", err)
-	}
-	return err
-}
-
-// THIS SHOULD NOT BE USED, CHANGE TO pointUpdate() (Above)
-func (inst *Instance) pointUpdateSuccess(uuid string) error {
-	var point model.Point
-	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
-	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
-	point.CommonFault.LastOk = time.Now().UTC()
-	point.InSync = boolean.NewTrue()
-	err := inst.db.UpdatePointErrors(uuid, &point)
-	if err != nil {
-		inst.bacnetErrorMsg("bacnet-server: pointUpdateSuccess()", err)
-	}
-	return err
 }
 
 func (inst *Instance) pointUpdateErr(point *model.Point, message string, messageLevel string, messageCode string) error {

@@ -129,6 +129,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool, afterRealDeviceUpdate bool) (
 	*model.Point, error) {
+	writeOnDB := !fromPlugin
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Tags").Preload("MetaTags").
 		Preload("Priority").First(&pointModel)
@@ -150,13 +151,13 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, errors.New(eMsg)
 		}
 	}
-	if len(body.Tags) > 0 && !fromPlugin {
+	if len(body.Tags) > 0 && writeOnDB {
 		if err := d.updateTags(&pointModel, body.Tags); err != nil {
 			return nil, err
 		}
 	}
 	publishPointList := body.Name != pointModel.Name
-	if !fromPlugin {
+	if writeOnDB {
 		if err := d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
 			return nil, err
 		}
@@ -169,8 +170,8 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		pointModel.Priority = body.Priority
 	}
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
-	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, fromPlugin, afterRealDeviceUpdate, nil, false)
-	if !fromPlugin {
+	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, afterRealDeviceUpdate, nil, false, writeOnDB)
+	if writeOnDB {
 		if publishPointList {
 			go d.PublishPointsList("")
 		}
@@ -201,21 +202,18 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlug
 		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
 	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err :=
-		d.updatePointValue(pointModel, body.Priority, fromPlugin, afterRealDeviceUpdate, currentWriterUUID, forceWrite)
-	if fromPlugin {
-		d.bufferPointWrite(uuid, body, afterRealDeviceUpdate, currentWriterUUID, forceWrite)
-	}
+		d.updatePointValue(pointModel, body.Priority, afterRealDeviceUpdate, currentWriterUUID, forceWrite, true)
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
-func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool,
-	afterRealDeviceUpdate bool, currentWriterUUID *string, forceWrite bool) (returnPoint *model.Point,
+func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64,
+	afterRealDeviceUpdate bool, currentWriterUUID *string, forceWrite, writeOnDB bool) (returnPoint *model.Point,
 	isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
 
-	pointModel, priority, presentValue, writeValue, isPriorityChanged := d.updatePriority(pointModel, priority, fromPlugin)
+	pointModel, priority, presentValue, writeValue, isPriorityChanged := d.updatePriority(pointModel, priority, writeOnDB)
 	ov := float.Copy(presentValue)
 	pointModel.OriginalValue = ov
 	wv := float.Copy(writeValue)
@@ -245,17 +243,6 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	}
 	writeValue = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
 
-	// example for wires and modbus:
-	// if a new value is written from wires then set this to false so the modbus knows on the next poll to write a new
-	// value to the modbus point
-	if afterRealDeviceUpdate {
-		pointModel.InSync = boolean.NewTrue() // TODO: do we still use InSync?
-		// pointModel.WritePollRequired = boolean.NewFalse()  // WritePollRequired should be set by the plugins (they know best)
-	} else {
-		pointModel.InSync = boolean.NewFalse() // TODO: do we still use InSync?
-		// pointModel.WritePollRequired = boolean.NewTrue()  // WritePollRequired should be set by the plugins (they know best)
-	}
-
 	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
 		value := nmath.RoundTo(*presentValue, *pointModel.Decimal)
 		presentValue = &value
@@ -281,10 +268,10 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	pointModel.MessageCode = model.CommonFaultCode.Ok
 	pointModel.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
 	pointModel.LastOk = time.Now()
-	if !fromPlugin {
+	if !writeOnDB {
 		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 	}
-	if isChange && !fromPlugin {
+	if isChange && !writeOnDB {
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange,
 			currentWriterUUID)
 		if err != nil {
