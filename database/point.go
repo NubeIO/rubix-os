@@ -187,9 +187,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 	return pnt, err
 }
 
-func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, fromPlugin bool, afterRealDeviceUpdate bool,
-	currentWriterUUID *string, forceWrite bool) (returnPoint *model.Point, isPresentValueChange, isWriteValueChange,
-	isPriorityChanged bool, err error) {
+func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, afterRealDeviceUpdate bool,
+	currentWriterUUID *string, forceWrite bool) (
+	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
 	if query.Error != nil {
@@ -352,13 +352,12 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	return r != 0, nil
 }
 
-func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter,
-	fromPlugin bool) (*model.Point, error) {
+func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter) (*model.Point, error) {
 	point, err := d.GetPointByName(networkName, deviceName, pointName, api.Args{})
 	if err != nil {
 		return nil, err
 	}
-	write, _, _, _, err := d.PointWrite(point.UUID, body, fromPlugin, false, nil, false)
+	write, _, _, _, err := d.PointWrite(point.UUID, body, false, nil, false)
 	if err != nil {
 		return nil, err
 	}
