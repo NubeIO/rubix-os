@@ -239,7 +239,7 @@ type Point struct {
 	ObjectEncoding struct {
 		Type     string   `json:"type" default:"array"`
 		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[\"leb_lew\",\"leb_bew\",\"beb_lew\",\"beb_bew\"]"`
+		Options  []string `json:"options" default:"[\"beb_lew\",\"beb_bew\",\"leb_lew\",\"leb_bew\"]"`
 		Default  string   `json:"default" default:"beb_lew"`
 	} `json:"object_encoding"`
 	MultiplicationFactor struct {

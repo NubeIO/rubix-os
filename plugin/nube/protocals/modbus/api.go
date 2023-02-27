@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
@@ -195,8 +196,9 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			return
 		}
 	})
-	mux.GET("/modbus/polling/stats", func(ctx *gin.Context) {
-		stats, err := inst.getPollingStats()
+	mux.GET("/polling/stats/network/:name", func(ctx *gin.Context) {
+		networkName := ctx.Param("name")
+		stats, err := inst.getPollingStats(networkName)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 			return
@@ -233,82 +235,16 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 }
 
-// wizard make a network/dev/pnt
-func (inst *Instance) getPollingStats() (result []interface{}, error error) {
+func (inst *Instance) getPollingStats(networkName string) (result interface{}, error error) { // TODO: probably need to change the return type
 	if len(inst.NetworkPollManagers) == 0 {
-		return nil, nil
+		return nil, errors.New("couldn't find any plugin network poll managers")
 	}
-	type Stats struct {
-		NetworkName                   string
-		MaxPollExecuteTimeSecs        float64 // time in seconds for polling to complete (poll response time, doesn't include the time in queue).
-		AveragePollExecuteTimeSecs    float64 // time in seconds for polling to complete (poll response time, doesn't include the time in queue).
-		MinPollExecuteTimeSecs        float64 // time in seconds for polling to complete (poll response time, doesn't include the time in queue).
-		TotalPollQueueLength          int64   // number of polling points in the current queue.
-		TotalStandbyPointsLength      int64   // number of polling points in the standby list.
-		TotalPointsOutForPolling      int64   // number of points currently out for polling (currently being handled by the protocol plugin).
-		ASAPPriorityPollQueueLength   int64   // number of ASAP priority polling points in the current queue.
-		HighPriorityPollQueueLength   int64   // number of High priority polling points in the current queue.
-		NormalPriorityPollQueueLength int64   // number of Normal priority polling points in the current queue.
-		LowPriorityPollQueueLength    int64   // number of Low priority polling points in the current queue.
-		ASAPPriorityAveragePollTime   float64 // average time in seconds between ASAP priority polling point added to current queue, and polling complete.
-		HighPriorityAveragePollTime   float64 // average time in seconds between High priority polling point added to current queue, and polling complete.
-		NormalPriorityAveragePollTime float64 // average time in seconds between Normal priority polling point added to current queue, and polling complete.
-		LowPriorityAveragePollTime    float64 // average time in seconds between Low priority polling point added to current queue, and polling complete.
-		TotalPollCount                int64   // total number of polls completed.
-		ASAPPriorityPollCount         int64   // total number of ASAP priority polls completed.
-		HighPriorityPollCount         int64   // total number of High priority polls completed.
-		NormalPriorityPollCount       int64   // total number of Normal priority polls completed.
-		LowPriorityPollCount          int64   // total number of Low priority polls completed.
-		ASAPPriorityMaxCycleTime      float64 // threshold setting for triggering a lockup alert for ASAP priority.
-		HighPriorityMaxCycleTime      float64 // threshold setting for triggering a lockup alert for High priority.
-		NormalPriorityMaxCycleTime    float64 // threshold setting for triggering a lockup alert for Normal priority.
-		LowPriorityMaxCycleTime       float64 // threshold setting for triggering a lockup alert for Low priority.
-		ASAPPriorityLockupAlert       bool    // alert if poll time has exceeded the ASAPPriorityMaxCycleTime
-		HighPriorityLockupAlert       bool    // alert if poll time has exceeded the HighPriorityMaxCycleTime
-		NormalPriorityLockupAlert     bool    // alert if poll time has exceeded the NormalPriorityMaxCycleTime
-		LowPriorityLockupAlert        bool    // alert if poll time has exceeded the LowPriorityMaxCycleTime
-		BusyTime                      float64 // percent of the time that the plugin is actively polling.
-		EnabledTime                   float64 // time in seconds that the statistics have been running for.
-		PortUnavailableTime           float64 // time in seconds that the serial port has been unavailable.
-	}
-
 	for _, netPollMan := range inst.NetworkPollManagers {
-		var netArg api.Args
-		net, _ := inst.db.GetNetwork(netPollMan.FFNetworkUUID, netArg)
-		pmResult := Stats{
-			NetworkName:                   net.Name,
-			MaxPollExecuteTimeSecs:        netPollMan.MaxPollExecuteTimeSecs,
-			AveragePollExecuteTimeSecs:    netPollMan.AveragePollExecuteTimeSecs,
-			MinPollExecuteTimeSecs:        netPollMan.MinPollExecuteTimeSecs,
-			TotalPollQueueLength:          netPollMan.TotalPollQueueLength,
-			TotalStandbyPointsLength:      netPollMan.TotalStandbyPointsLength,
-			TotalPointsOutForPolling:      netPollMan.TotalPointsOutForPolling,
-			ASAPPriorityPollQueueLength:   netPollMan.ASAPPriorityPollQueueLength,
-			HighPriorityPollQueueLength:   netPollMan.HighPriorityPollQueueLength,
-			NormalPriorityPollQueueLength: netPollMan.NormalPriorityPollQueueLength,
-			LowPriorityPollQueueLength:    netPollMan.LowPriorityPollQueueLength,
-			ASAPPriorityAveragePollTime:   netPollMan.ASAPPriorityAveragePollTime,
-			HighPriorityAveragePollTime:   netPollMan.HighPriorityAveragePollTime,
-			NormalPriorityAveragePollTime: netPollMan.NormalPriorityAveragePollTime,
-			LowPriorityAveragePollTime:    netPollMan.LowPriorityAveragePollTime,
-			TotalPollCount:                netPollMan.TotalPollCount,
-			ASAPPriorityPollCount:         netPollMan.ASAPPriorityPollCount,
-			HighPriorityPollCount:         netPollMan.HighPriorityPollCount,
-			NormalPriorityPollCount:       netPollMan.NormalPriorityPollCount,
-			LowPriorityPollCount:          netPollMan.LowPriorityPollCount,
-			ASAPPriorityMaxCycleTime:      netPollMan.ASAPPriorityMaxCycleTime.Seconds(),
-			HighPriorityMaxCycleTime:      netPollMan.HighPriorityMaxCycleTime.Seconds(),
-			NormalPriorityMaxCycleTime:    netPollMan.NormalPriorityMaxCycleTime.Seconds(),
-			LowPriorityMaxCycleTime:       netPollMan.LowPriorityMaxCycleTime.Seconds(),
-			ASAPPriorityLockupAlert:       netPollMan.ASAPPriorityLockupAlert,
-			HighPriorityLockupAlert:       netPollMan.HighPriorityLockupAlert,
-			NormalPriorityLockupAlert:     netPollMan.NormalPriorityLockupAlert,
-			LowPriorityLockupAlert:        netPollMan.LowPriorityLockupAlert,
-			BusyTime:                      netPollMan.BusyTime,
-			EnabledTime:                   netPollMan.EnabledTime,
-			PortUnavailableTime:           netPollMan.PortUnavailableTime,
+		if netPollMan == nil || netPollMan.NetworkName != networkName {
+			continue
 		}
-		result = append(result, pmResult)
+		result = netPollMan.GetPollingQueueStatistics()
+		return result, nil
 	}
-	return result, nil
+	return nil, errors.New(fmt.Sprintf("couldn't find network %s for polling statistics", networkName))
 }

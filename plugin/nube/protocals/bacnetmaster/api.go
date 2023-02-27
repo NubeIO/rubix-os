@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetmaster/master"
@@ -106,6 +108,18 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		api.ResponseHandler(resp, err, ctx)
 	})
 
+	mux.GET("/polling/stats/network/:name", func(ctx *gin.Context) {
+		networkName := ctx.Param("name")
+		stats, err := inst.getPollingStats(networkName)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		} else {
+			ctx.JSON(http.StatusOK, stats)
+			return
+		}
+	})
+
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, master.GetNetworkSchema())
 	})
@@ -131,4 +145,18 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, masterschema.GetPointSchema())
 	})
+}
+
+func (inst *Instance) getPollingStats(networkName string) (result interface{}, error error) { // TODO: probably need to change the return type
+	if len(inst.NetworkPollManagers) == 0 {
+		return nil, errors.New("couldn't find any plugin network poll managers")
+	}
+	for _, netPollMan := range inst.NetworkPollManagers {
+		if netPollMan == nil || netPollMan.NetworkName != networkName {
+			continue
+		}
+		result = netPollMan.GetPollingQueueStatistics()
+		return result, nil
+	}
+	return nil, errors.New(fmt.Sprintf("couldn't find network %s for polling statistics", networkName))
 }

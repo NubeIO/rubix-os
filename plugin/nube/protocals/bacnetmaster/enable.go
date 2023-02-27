@@ -30,7 +30,7 @@ func (inst *Instance) Enable() error {
 			for _, net := range nets {                                          // Create a new Poll Manager for each network in the plugin.
 				conf := inst.GetConfig().(*Config)
 				pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
-				pollManager := NewPollManager(&pollQueueConfig, &inst.db, net.UUID, inst.pluginUUID, inst.pluginName, float.NonNil(net.MaxPollRate))
+				pollManager := NewPollManager(&pollQueueConfig, &inst.db, net.UUID, net.Name, inst.pluginUUID, inst.pluginName, float.NonNil(net.MaxPollRate))
 				// inst.modbusDebugMsg("net")
 				// inst.modbusDebugMsg("%+v\n", net)
 				// inst.modbusDebugMsg("pollManager")
