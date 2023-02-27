@@ -148,7 +148,7 @@ func (inst *Instance) createPointAndUpdate(devUUID string, name string, uuid1 *s
 
 func (inst *Instance) relinkPointAndUpdate(point *model.Point, uuid1 *string, uuid2 *string, net1 *model.Network, net2 *model.Network) *model.Point {
 	*point.AddressUUID = fmt.Sprintf("%s%s%s", *uuid1, INTERNAL_SEPARATOR, *uuid2)
-	inst.db.UpdatePoint(point.UUID, point, false)
+	inst.db.UpdatePoint(point.UUID, point)
 	inst.syncPoint(point, net1, net2)
 	return point
 }
@@ -192,7 +192,7 @@ func (inst *Instance) syncPointSelected(point *model.Point, linkedUUID string) *
 	origPoint.DeviceUUID = point.DeviceUUID
 	origPoint.Name = point.Name
 	origPoint.Enable = point.Enable
-	point, _ = inst.db.UpdatePoint(point.UUID, origPoint, false)
+	point, _ = inst.db.UpdatePoint(point.UUID, origPoint)
 	return point
 }
 

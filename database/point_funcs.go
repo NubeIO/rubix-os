@@ -17,11 +17,10 @@ import (
 const ChuckSize = 5
 
 var pointUpdateBuffers []interfaces.PointUpdateBuffer
-var pointWriteBuffers []interfaces.PointWriteBuffer
 
 // updatePriority it updates priority array of point model
 // it attaches the point model fields values for updating it on its parent function
-func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64, fromPlugin bool) (
+func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64, writeOnDB bool) (
 	*model.Point, *map[string]*float64, *float64, *float64, bool) {
 	isPriorityChanged := false
 	var presentValue *float64
@@ -50,7 +49,7 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 		pointModel.Priority.P14 = nil
 		pointModel.Priority.P15 = nil
 		pointModel.Priority.P16 = nil
-		if !fromPlugin {
+		if writeOnDB {
 			d.DB.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&pointModel.Priority)
 		}
 	}
@@ -79,7 +78,7 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 			}
 		}
 		priorityMapToPatch := d.priorityMapToPatch(priorityMap)
-		if !fromPlugin {
+		if writeOnDB {
 			d.DB.Model(&pointModel.Priority).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMapToPatch)
 		}
 	}
@@ -101,13 +100,12 @@ func (d *GormDatabase) priorityMapToPatch(priorityMap *map[string]*float64) map[
 	return priorityMapToPatch
 }
 
-func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point, afterRealDeviceUpdate bool) {
+func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	pointUpdateBuffer := interfaces.PointUpdateBuffer{
-		UUID:                  uuid,
-		Body:                  body,
-		AfterRealDeviceUpdate: afterRealDeviceUpdate,
+		UUID: uuid,
+		Body: body,
 	}
 	for index, pub := range pointUpdateBuffers {
 		if pub.UUID == uuid {
@@ -116,26 +114,6 @@ func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point, afterRe
 		}
 	}
 	pointUpdateBuffers = append(pointUpdateBuffers, pointUpdateBuffer)
-}
-
-func (d *GormDatabase) bufferPointWrite(uuid string, body *model.PointWriter, afterRealDeviceUpdate bool,
-	currentWriterUUID *string, forceWrite bool) {
-	d.mutex.Lock()
-	defer d.mutex.Unlock()
-	pointWriteBuffer := interfaces.PointWriteBuffer{
-		UUID:                  uuid,
-		Body:                  body,
-		AfterRealDeviceUpdate: afterRealDeviceUpdate,
-		CurrentWriterUUID:     currentWriterUUID,
-		ForceWrite:            forceWrite,
-	}
-	for index, pwb := range pointWriteBuffers {
-		if pwb.UUID == uuid {
-			pointWriteBuffers[index] = pointWriteBuffer
-			return
-		}
-	}
-	pointWriteBuffers = append(pointWriteBuffers, pointWriteBuffer)
 }
 
 func (d *GormDatabase) FlushPointUpdateBuffers() {
@@ -158,7 +136,7 @@ func (d *GormDatabase) FlushPointUpdateBuffers() {
 			wg.Add(1)
 			go func(point interfaces.PointUpdateBuffer) {
 				defer wg.Done()
-				_, _ = d.UpdatePoint(point.UUID, point.Body, false, point.AfterRealDeviceUpdate)
+				_, _ = d.UpdatePoint(point.UUID, point.Body, false)
 			}(point)
 			time.Sleep(200 * time.Millisecond) // for don't let them call at once
 		}
@@ -167,49 +145,8 @@ func (d *GormDatabase) FlushPointUpdateBuffers() {
 	log.Info("Finished flush point update buffers process")
 }
 
-func (d *GormDatabase) FlushPointWriteBuffers() {
-	log.Info("Flush point write buffers has is been called...")
-	if len(pointWriteBuffers) == 0 {
-		log.Info("Point write buffers not found")
-		return
-	}
-
-	d.mutex.Lock()
-	var tempPointWriteBuffers []interfaces.PointWriteBuffer
-	tempPointWriteBuffers = append(tempPointWriteBuffers, pointWriteBuffers...)
-	pointWriteBuffers = nil
-	d.mutex.Unlock()
-
-	chuckPointWriteBuffers := ChuckPointWriteBuffer(tempPointWriteBuffers, ChuckSize)
-	for _, chuckPointWriteBuffer := range chuckPointWriteBuffers {
-		wg := &sync.WaitGroup{}
-		for _, point := range chuckPointWriteBuffer {
-			wg.Add(1)
-			go func(point interfaces.PointWriteBuffer) {
-				_, _, _, _, _ = d.PointWrite(point.UUID, point.Body, false, point.AfterRealDeviceUpdate,
-					point.CurrentWriterUUID, point.ForceWrite)
-			}(point)
-			time.Sleep(200 * time.Millisecond) // for don't let them call at once
-		}
-		wg.Wait()
-	}
-	log.Info("Finished flush point write buffers process")
-}
-
 func ChuckPointUpdateBuffer(array []interfaces.PointUpdateBuffer, chunkSize int) [][]interfaces.PointUpdateBuffer {
 	var chucks [][]interfaces.PointUpdateBuffer
-	for i := 0; i < len(array); i += chunkSize {
-		end := i + chunkSize
-		if end > len(array) {
-			end = len(array)
-		}
-		chucks = append(chucks, array[i:end])
-	}
-	return chucks
-}
-
-func ChuckPointWriteBuffer(array []interfaces.PointWriteBuffer, chunkSize int) [][]interfaces.PointWriteBuffer {
-	var chucks [][]interfaces.PointWriteBuffer
 	for i := 0; i < len(array); i += chunkSize {
 		end := i + chunkSize
 		if end > len(array) {

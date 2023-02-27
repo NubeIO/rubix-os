@@ -301,7 +301,7 @@ func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
 	}
 	for _, pt := range dev.Points {
 		pt.AddressUUID = body.AddressUUID
-		_, err = inst.db.UpdatePoint(pt.UUID, pt, false)
+		_, err = inst.db.UpdatePoint(pt.UUID, pt)
 		if err != nil {
 			log.Errorf("loraraw: issue on UpdatePoint updateDevicePointsAddress(): %v\n", err)
 			return err
@@ -347,7 +347,7 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 
 	}
 	pointWriter := model.PointWriter{Priority: &priority}
-	_, _, _, _, err = inst.db.PointWrite(pnt.UUID, &pointWriter, true)
+	_, _, _, _, err = inst.db.PointWrite(pnt.UUID, &pointWriter) // TODO: look on it, faults messages were cleared out
 	if err != nil {
 		log.Error("lora-raw: UpdatePointValue()", err)
 	}

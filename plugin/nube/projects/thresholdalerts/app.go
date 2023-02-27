@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -137,8 +138,12 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.Message = "point disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
-
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
+	point.CommonFault.InFault = false
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	point.CommonFault.LastOk = time.Now().UTC()
+	point, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.thresholdalertsDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -159,7 +164,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	inst.thresholdalertsDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
 	inst.thresholdalertsDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
 
-	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
+	point, _, _, _, err = inst.db.PointWrite(pntUUID, body)
 	if err != nil {
 		inst.thresholdalertsDebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err

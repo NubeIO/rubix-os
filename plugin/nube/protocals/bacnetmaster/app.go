@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	address "github.com/NubeIO/lib-networking/ip"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -334,8 +335,12 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.Message = "point disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
-
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
+	point.CommonFault.InFault = false
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	point.CommonFault.LastOk = time.Now().UTC()
+	point, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.bacnetDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -399,7 +404,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			return point, nil
 	*/
 
-	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body, false)
+	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body)
 	if err != nil || point == nil {
 		inst.bacnetDebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err
@@ -435,7 +440,12 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 						netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = false
 						point.WritePollRequired = boolean.NewFalse()
 					}
-					point, err = inst.db.UpdatePoint(point.UUID, point, true)
+					point.CommonFault.InFault = false
+					point.CommonFault.MessageLevel = model.MessageLevel.Info
+					point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+					point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+					point.CommonFault.LastOk = time.Now().UTC()
+					point, err = inst.db.UpdatePoint(point.UUID, point)
 					if err != nil || point == nil {
 						inst.bacnetDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
 						inst.pointUpdateErr(point, fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
@@ -550,11 +560,11 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 	return ok, nil
 }
 
-func (inst *Instance) pointUpdate(point *model.Point, value *float64, readSuccess, clearFaults bool) (*model.Point, error) {
+func (inst *Instance) pointUpdate(point *model.Point, value *float64, readSuccess bool) (*model.Point, error) {
 	if readSuccess {
 		point.OriginalValue = value
 	}
-	point, err := inst.db.UpdatePoint(point.UUID, point, clearFaults)
+	point, err := inst.db.UpdatePoint(point.UUID, point)
 	if err != nil {
 		inst.bacnetDebugMsg("UpdatePoint() error: ", err)
 		return nil, err
@@ -562,10 +572,10 @@ func (inst *Instance) pointUpdate(point *model.Point, value *float64, readSucces
 	return point, nil
 }
 
-func (inst *Instance) pointUpdateFromPriorityArray(point *model.Point, priorityArray map[string]*float64, presentValue *float64, clearFaults bool) (*model.Point, error) {
+func (inst *Instance) pointUpdateFromPriorityArray(point *model.Point, priorityArray map[string]*float64, presentValue *float64) (*model.Point, error) {
 	point, err := priorityarray.ApplyMapToPriorityArray(point, &priorityArray)
 	point.OriginalValue = presentValue
-	point, err = inst.db.UpdatePoint(point.UUID, point, clearFaults)
+	point, err = inst.db.UpdatePoint(point.UUID, point)
 	if err != nil {
 		inst.bacnetDebugMsg("UpdatePoint() error: ", err)
 		return nil, err

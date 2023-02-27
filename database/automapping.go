@@ -218,7 +218,7 @@ func (d *GormDatabase) createPointAutoMappingPoint(deviceUUID string, pointUUID 
 	if point.Name != pointName || !reflect.DeepEqual(point.Tags, pointTags) {
 		point.Name = pointName
 		point.Tags = pointTags
-		return d.UpdatePoint(point.UUID, point, false, false)
+		return d.UpdatePoint(point.UUID, point, false)
 	}
 	return point, err
 }

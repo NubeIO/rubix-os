@@ -114,7 +114,7 @@ func (inst *Instance) createNewPoint(name string, deviceEUI string, deviceUUID s
 func (inst *Instance) pointWrite(uuid string, value float64) error {
 	priority := map[string]*float64{"_16": &value}
 	pointWriter := model.PointWriter{Priority: &priority}
-	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter, true)
+	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter) // TODO: look on it, faults messages were cleared out
 	if err != nil {
 		log.Error("lorawan: pointWrite ", err)
 	}

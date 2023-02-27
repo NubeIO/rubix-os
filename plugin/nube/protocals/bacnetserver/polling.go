@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/priorityarray"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"strconv"
@@ -149,7 +150,12 @@ func (inst *Instance) SyncFFPointWithBACnetServerPoint(pnt *model.Point, devUUID
 			err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 			return nil, err
 		}
-		pnt, err = inst.pointUpdate(pnt, writeVal, true, true)
+		pnt.CommonFault.InFault = false
+		pnt.CommonFault.MessageLevel = model.MessageLevel.Info
+		pnt.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+		pnt.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+		pnt.CommonFault.LastOk = time.Now().UTC()
+		pnt, err = inst.pointUpdate(pnt, writeVal, true)
 		return pnt, nil
 	} else { // Do these actions for AV, AO, BV, BO
 		// We need to read the priority array of our FF point, and the BACnet Server point, then update the FF point and BACnet Server point
@@ -245,7 +251,12 @@ func (inst *Instance) SyncFFPointWithBACnetServerPoint(pnt *model.Point, devUUID
 			if err != nil {
 				inst.bacnetErrorMsg("BACnetServerPolling(): doReadValue error:", err)
 			} else {
-				pnt, err = inst.pointUpdate(pnt, readFloat, true, true)
+				pnt.CommonFault.InFault = false
+				pnt.CommonFault.MessageLevel = model.MessageLevel.Info
+				pnt.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+				pnt.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+				pnt.CommonFault.LastOk = time.Now().UTC()
+				pnt, err = inst.pointUpdate(pnt, readFloat, true)
 				if err != nil {
 					inst.bacnetErrorMsg("BACnetServerPolling(): pointUpdate() error:", err)
 				}

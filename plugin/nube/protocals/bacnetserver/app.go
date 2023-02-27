@@ -275,7 +275,7 @@ func (inst *Instance) updatePoint(body *model.Point) (*model.Point, error) {
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
-	point, err := inst.db.UpdatePoint(body.UUID, body, false)
+	point, err := inst.db.UpdatePoint(body.UUID, body)
 	if err != nil {
 		inst.bacnetDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -300,7 +300,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	inst.bacnetDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
 	inst.bacnetDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
 
-	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body, false)
+	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body)
 	if err != nil || point == nil {
 		inst.bacnetDebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err
@@ -322,12 +322,17 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			inst.bacnetErrorMsg(err)
 			if isWriteValueChange {
 				point.WritePollRequired = boolean.NewTrue()
-				point, err = inst.db.UpdatePoint(point.UUID, point, false)
+				point, err = inst.db.UpdatePoint(point.UUID, point)
 			}
 		}
 		return point, nil
 	}
-	point, err = inst.db.UpdatePoint(point.UUID, point, true)
+	point.CommonFault.InFault = false
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	point.CommonFault.LastOk = time.Now().UTC()
+	point, err = inst.db.UpdatePoint(point.UUID, point)
 	if err != nil || point == nil {
 		inst.bacnetDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
 		inst.pointUpdateErr(point, fmt.Sprint("writePoint(): bad response from UpdatePoint() err:", err), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
@@ -405,45 +410,17 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 }
 
 // THE FOLLOWING FUNCTIONS ARE CALLED FROM WITHIN THE PLUGIN
-func (inst *Instance) pointUpdate(point *model.Point, value float64, readWriteSuccess, clearFaults bool) (*model.Point, error) {
+func (inst *Instance) pointUpdate(point *model.Point, value float64, readWriteSuccess bool) (*model.Point, error) {
 	if readWriteSuccess {
 		point.OriginalValue = float.New(value)
 		point.WritePollRequired = boolean.NewFalse()
 	}
-	point, err := inst.db.UpdatePoint(point.UUID, point, clearFaults)
+	point, err := inst.db.UpdatePoint(point.UUID, point)
 	if err != nil {
 		inst.bacnetDebugMsg("UpdatePoint() error: ", err)
 		return nil, err
 	}
 	return point, nil
-}
-
-// THIS SHOULD NOT BE USED, CHANGE TO pointUpdate() (Above)
-func (inst *Instance) pointWrite(uuid string, value float64) error {
-	inst.bacnetErrorMsg("pointWrite() DON'T USE THIS FUNCTION: ")
-	priority := map[string]*float64{"_16": &value}
-	pointWriter := model.PointWriter{Priority: &priority}
-	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter, true)
-	if err != nil {
-		inst.bacnetErrorMsg("bacnet-server: pointWrite()", err)
-	}
-	return err
-}
-
-// THIS SHOULD NOT BE USED, CHANGE TO pointUpdate() (Above)
-func (inst *Instance) pointUpdateSuccess(uuid string) error {
-	var point model.Point
-	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
-	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
-	point.CommonFault.LastOk = time.Now().UTC()
-	point.InSync = boolean.NewTrue()
-	err := inst.db.UpdatePointErrors(uuid, &point)
-	if err != nil {
-		inst.bacnetErrorMsg("bacnet-server: pointUpdateSuccess()", err)
-	}
-	return err
 }
 
 func (inst *Instance) pointUpdateErr(point *model.Point, message string, messageLevel string, messageCode string) error {

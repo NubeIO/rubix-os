@@ -10,13 +10,12 @@ type PointDatabase interface {
 	GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point, error)
 	GetPoint(uuid string, args Args) (*model.Point, error)
 	CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error)
-	UpdatePoint(uuid string, body *model.Point, fromPlugin bool, afterRealDeviceUpdate bool) (*model.Point, error)
-	PointWrite(uuid string, body *model.PointWriter, fromPlugin bool, afterRealDeviceUpdate bool,
-		currentWriterUUID *string, forceWrite bool) (*model.Point, bool, bool, bool, error)
+	UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (*model.Point, error)
+	PointWrite(uuid string, body *model.PointWriter, currentWriterUUID *string, forceWrite bool) (*model.Point, bool, bool, bool, error)
 	GetOnePointByArgs(args Args) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
 	GetPointByName(networkName, deviceName, pointName string, args Args) (*model.Point, error)
-	PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter, fromPlugin bool) (*model.Point, error)
+	PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter) (*model.Point, error)
 	DeleteOnePointByArgs(args Args) (bool, error)
 
 	CreatePointPlugin(body *model.Point) (*model.Point, error)
@@ -99,7 +98,7 @@ func (a *PointAPI) GetPointByName(ctx *gin.Context) {
 func (a *PointAPI) PointWriteByNameArgs(ctx *gin.Context) {
 	body, _ := getBODYPointWriter(ctx)
 	networkName, deviceName, pointName := networkDevicePointNames(ctx)
-	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body, false)
+	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body)
 	ResponseHandler(q, err, ctx)
 }
 
@@ -108,7 +107,7 @@ func (a *PointAPI) PointWriteByName(ctx *gin.Context) {
 	networkName := resolveNetworkName(ctx)
 	deviceName := resolveDeviceName(ctx)
 	pointName := resolvePointName(ctx)
-	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body, false)
+	q, err := a.DB.PointWriteByName(networkName, deviceName, pointName, body)
 	ResponseHandler(q, err, ctx)
 }
 

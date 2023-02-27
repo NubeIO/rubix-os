@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [v0.10.1](https://github.com/NubeIO/flow-framework/tree/v0.10.1) (2023-02-27)
+
+- Remove point write buffers
+  - They need to be straightforwardly written & as they are not frequently called too
+- Remove fromPlugin flag on PointWrite
+- Remove the afterRealDeviceUpdate flag, it's making things confusing
+
 ## [v0.10.0](https://github.com/NubeIO/flow-framework/tree/v0.10.0) (2023-02-24)
 
 - Fix: runtime issue

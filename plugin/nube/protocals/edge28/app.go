@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -160,7 +161,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	inst.edge28DebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
 	inst.edge28DebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
 
-	point, err = inst.db.UpdatePoint(body.UUID, body, false)
+	point, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.edge28DebugMsg("updatePoint(): bad response from UpdatePoint()")
 	}
@@ -196,7 +197,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 
 	// body.WritePollRequired = utils.NewTrue() // TODO: commented out this section, seems like useless
 
-	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
+	point, _, _, _, err = inst.db.PointWrite(pntUUID, body)
 	if err != nil {
 		inst.edge28DebugMsg("writePoint(): bad response from WritePoint(), ", err)
 	}
@@ -247,7 +248,12 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess
 	if readSuccess {
 		point.OriginalValue = float.New(value)
 	}
-	_, err := inst.db.UpdatePoint(point.UUID, point, true)
+	point.CommonFault.InFault = false
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	point.CommonFault.LastOk = time.Now().UTC()
+	_, err := inst.db.UpdatePoint(point.UUID, point)
 	if err != nil {
 		inst.edge28DebugMsg("EDGE28 UPDATE POINT UpdatePointPresentValue() error: ", err)
 		return nil, err
