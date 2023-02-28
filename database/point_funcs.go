@@ -1,7 +1,9 @@
 package database
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
@@ -17,6 +19,32 @@ import (
 const ChuckSize = 5
 
 var pointUpdateBuffers []interfaces.PointUpdateBuffer
+
+func CreatePointDeepCopy(point model.Point) model.Point {
+	var outputPoint model.Point
+	out, _ := json.Marshal(point)
+	_ = json.Unmarshal(out, &outputPoint)
+	return outputPoint
+}
+
+func GetPoint(uuid string, args api.Args) *model.Point {
+	for _, pub := range pointUpdateBuffers {
+		if pub.UUID == uuid {
+			point := CreatePointDeepCopy(*pub.Point)
+			if !args.WithPriority {
+				point.Priority = nil
+			}
+			if !args.WithTags {
+				point.Tags = nil
+			}
+			if !args.WithMetaTags {
+				point.MetaTags = nil
+			}
+			return &point
+		}
+	}
+	return nil
+}
 
 // updatePriority it updates priority array of point model
 // it attaches the point model fields values for updating it on its parent function
@@ -100,12 +128,13 @@ func (d *GormDatabase) priorityMapToPatch(priorityMap *map[string]*float64) map[
 	return priorityMapToPatch
 }
 
-func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point) {
+func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point, point *model.Point) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	pointUpdateBuffer := interfaces.PointUpdateBuffer{
-		UUID: uuid,
-		Body: body,
+		UUID:  uuid,
+		Body:  body,
+		Point: point,
 	}
 	for index, pub := range pointUpdateBuffers {
 		if pub.UUID == uuid {

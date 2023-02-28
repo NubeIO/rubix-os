@@ -46,6 +46,10 @@ func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point,
 }
 
 func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error) {
+	point := GetPoint(uuid, args)
+	if point != nil {
+		return point, nil
+	}
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&pointModel).Error; err != nil {
@@ -130,11 +134,9 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) (
 	*model.Point, error) {
 	writeOnDB := !buffer
-	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).Preload("Tags").Preload("MetaTags").
-		Preload("Priority").First(&pointModel)
-	if query.Error != nil {
-		return nil, query.Error
+	pointModel, err := d.GetPoint(uuid, api.Args{WithTags: true, WithMetaTags: true, WithPriority: true})
+	if err != nil {
+		return nil, err
 	}
 	existingName, existingAddrID := d.pointNameExists(body)
 	if existingAddrID && boolean.IsTrue(body.IsBitwise) && body.BitwiseIndex != nil && *body.BitwiseIndex >= 0 {
@@ -182,7 +184,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 			return nil, err
 		}
 	} else {
-		d.bufferPointUpdate(uuid, body)
+		d.bufferPointUpdate(uuid, body, pnt)
 	}
 	return pnt, err
 }
