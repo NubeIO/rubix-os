@@ -285,12 +285,12 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.Message = "point disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
-	point.CommonFault.InFault = false
-	point.CommonFault.MessageLevel = model.MessageLevel.Info
-	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
-	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
-	point.CommonFault.LastOk = time.Now().UTC()
-	point, err = inst.db.UpdatePoint(body.UUID, body)
+	body.CommonFault.InFault = false
+	body.CommonFault.MessageLevel = model.MessageLevel.Info
+	body.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	body.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	body.CommonFault.LastOk = time.Now().UTC()
+	body, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.modbusDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
