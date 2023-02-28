@@ -235,7 +235,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 }
 
-func (inst *Instance) getPollingStats(networkName string) (result interface{}, error error) { // TODO: probably need to change the return type
+func (inst *Instance) getPollingStats(networkName string) (result *model.PollQueueStatistics, error error) {
 	if len(inst.NetworkPollManagers) == 0 {
 		return nil, errors.New("couldn't find any plugin network poll managers")
 	}

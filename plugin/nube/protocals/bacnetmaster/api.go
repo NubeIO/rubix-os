@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/bacnetmaster/master"
 	"github.com/NubeIO/lib-schema/masterschema"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -147,7 +148,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 }
 
-func (inst *Instance) getPollingStats(networkName string) (result interface{}, error error) { // TODO: probably need to change the return type
+func (inst *Instance) getPollingStats(networkName string) (result *model.PollQueueStatistics, error error) {
 	if len(inst.NetworkPollManagers) == 0 {
 		return nil, errors.New("couldn't find any plugin network poll managers")
 	}
