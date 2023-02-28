@@ -30,14 +30,14 @@ func (h *Handler) GetPoint(uuid string, args api.Args) (*model.Point, error) {
 	return q, nil
 }
 
-func (h *Handler) CreatePoint(body *model.Point, fromPlugin, updatePoint bool) (
+func (h *Handler) CreatePoint(body *model.Point, updatePoint bool) (
 	*model.Point, error) {
-	pnt, err := getDb().CreatePoint(body, fromPlugin)
+	pnt, err := getDb().CreatePoint(body)
 	if err != nil {
 		return nil, err
 	}
 	if updatePoint {
-		pnt, err = getDb().UpdatePoint(pnt.UUID, pnt, fromPlugin) // MARC: UpdatePoint is called here so that the PresentValue and Priority are updated to use the fallback value. Otherwise, they are left as Null and the Edge28 Outputs are left floating.
+		pnt, err = getDb().UpdatePoint(pnt.UUID, pnt, false) // MARC: UpdatePoint is called here so that the PresentValue and Priority are updated to use the fallback value. Otherwise, they are left as Null and the Edge28 Outputs are left floating.
 		if err != nil {
 			return nil, err
 		}

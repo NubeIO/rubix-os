@@ -24,7 +24,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		}
 	}
 	body.NumberOfNetworksPermitted = nils.NewInt(1)
-	network, err = inst.db.CreateNetwork(body, true)
+	network, err = inst.db.CreateNetwork(body)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	body.IsOutput = nils.NewBool(isOutput)
 	body.IsTypeBool = nils.NewBool(isTypeBool)
-	point, err = inst.db.CreatePoint(body, true, true)
+	point, err = inst.db.CreatePoint(body, true)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 }
 
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
-	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, body)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 }
 
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
-	device, err = inst.db.UpdateDevice(body.UUID, body, true)
+	device, err = inst.db.UpdateDevice(body.UUID, body)
 	if err != nil {
 		return nil, err
 	}

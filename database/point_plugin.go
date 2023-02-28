@@ -14,7 +14,7 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 	}
 	pluginName := network.PluginPath
 	if pluginName == "system" {
-		point, err = d.CreatePoint(body, false)
+		point, err = d.CreatePoint(body)
 		if err != nil {
 			return nil, err
 		}

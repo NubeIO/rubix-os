@@ -48,7 +48,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	return body, query.Error
 }
 
-func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device, fromPlugin bool) (*model.Device, error) {
+func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
 	var deviceModel *model.Device
 	query := d.DB.Where("uuid = ?", uuid).First(&deviceModel)
 	if query.Error != nil {

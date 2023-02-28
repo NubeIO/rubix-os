@@ -52,7 +52,7 @@ func (d *GormDatabase) GetNetworkByField(field string, value string, withDevices
 	}
 }
 
-func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*model.Network, error) {
+func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Network)
 	body.ThingClass = model.ThingClass.Network
 	transport, err := checkTransport(body.TransportType)
@@ -80,7 +80,7 @@ func (d *GormDatabase) CreateNetwork(body *model.Network, fromPlugin bool) (*mod
 	return body, nil
 }
 
-func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network, fromPlugin bool) (*model.Network, error) {
+func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.DB.Where("uuid = ?", uuid).First(&networkModel)
 	if query.Error != nil {
@@ -188,7 +188,7 @@ func (d *GormDatabase) SyncNetworks(args api.Args) ([]*interfaces.SyncModel, err
 }
 
 func (d *GormDatabase) syncNetwork(network *model.Network, channel chan *interfaces.SyncModel) {
-	_, err := d.UpdateNetwork(network.UUID, network, false)
+	_, err := d.UpdateNetwork(network.UUID, network)
 	var output interfaces.SyncModel
 	if err != nil {
 		output = interfaces.SyncModel{UUID: network.UUID, IsError: true, Message: nstring.New(err.Error())}

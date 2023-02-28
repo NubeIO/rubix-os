@@ -21,7 +21,7 @@ func (inst *Instance) createNetwork(body *model.Network) (*model.Network, error)
 		return nil, errors.New("both networks cannot be \"writers\"")
 	}
 	body.AddressUUID = fmt.Sprint(net1.UUID, INTERNAL_SEPARATOR, net2.UUID)
-	body, err := inst.db.CreateNetwork(body, true)
+	body, err := inst.db.CreateNetwork(body)
 
 	for _, dev1 := range net1.Devices {
 		for _, dev2 := range net2.Devices {
@@ -166,7 +166,7 @@ func (inst *Instance) createPoint(devUUID string, name string, uuid1 *string, uu
 		AddressUUID:  &addr,
 		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
-	inst.db.CreatePoint(&p, true, false)
+	inst.db.CreatePoint(&p, false)
 	return p
 }
 

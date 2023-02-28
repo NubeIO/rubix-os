@@ -24,12 +24,12 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
 	mux.PATCH(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
-		network, err := inst.db.UpdateNetwork(body.UUID, body, true)
+		network, err := inst.db.UpdateNetwork(body.UUID, body)
 		api.ResponseHandler(network, err, ctx)
 	})
 	mux.PATCH(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
-		device, err := inst.db.UpdateDevice(body.UUID, body, true)
+		device, err := inst.db.UpdateDevice(body.UUID, body)
 		api.ResponseHandler(device, err, ctx)
 	})
 	mux.PATCH(plugin.PointsURL, func(ctx *gin.Context) {

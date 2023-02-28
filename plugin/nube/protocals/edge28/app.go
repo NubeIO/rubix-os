@@ -18,7 +18,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		return nil, errors.New("empty network body, no network created")
 	}
 	inst.edge28DebugMsg("addNetwork(): ", body.Name)
-	network, err = inst.db.CreateNetwork(body, true)
+	network, err = inst.db.CreateNetwork(body)
 	if network == nil || err != nil {
 		inst.edge28ErrorMsg("addNetwork(): failed to create edge28 network: ", body.Name)
 		return nil, errors.New("failed to create edge28 network")
@@ -100,7 +100,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		body.WriteValue = limitValueByEdge28Type(body.IoType, body.WriteValue)
 	}
 
-	point, err = inst.db.CreatePoint(body, true, true)
+	point, err = inst.db.CreatePoint(body, true)
 	if point == nil || err != nil {
 		inst.edge28DebugMsg("addPoint(): failed to create edge28 point: ", body.Name)
 		return nil, errors.New("failed to create edge28 point")
@@ -116,7 +116,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.edge28DebugMsg("updateNetwork():  nil network object")
 		return
 	}
-	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, body)
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		return
 	}
 
-	dev, err := inst.db.UpdateDevice(body.UUID, body, true)
+	dev, err := inst.db.UpdateDevice(body.UUID, body)
 	if err != nil || dev == nil {
 		return nil, err
 	}

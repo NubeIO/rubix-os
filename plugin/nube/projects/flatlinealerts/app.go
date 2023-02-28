@@ -13,7 +13,7 @@ import (
 // THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	inst.flatlinealertsDebugMsg("addNetwork(): ", body.Name)
-	network, err = inst.db.CreateNetwork(body, true)
+	network, err = inst.db.CreateNetwork(body)
 	if err != nil {
 		inst.flatlinealertsErrorMsg("addNetwork(): failed to create network: ", body.Name)
 		return nil, errors.New("failed to create network")
@@ -42,7 +42,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	inst.flatlinealertsDebugMsg("addPoint(): ", body.Name)
 
-	point, err = inst.db.CreatePoint(body, true, true)
+	point, err = inst.db.CreatePoint(body, true)
 	if point == nil || err != nil {
 		inst.flatlinealertsDebugMsg("addPoint(): failed to create tmv point: ", body.Name)
 		return nil, errors.New("failed to create tmv point")
@@ -59,7 +59,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.flatlinealertsDebugMsg("updateNetwork():  nil network object")
 		return
 	}
-	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, body)
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -69,7 +69,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError, true)
 	}
 
-	network, err = inst.db.UpdateNetwork(body.UUID, network, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, network)
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		body.CommonFault.LastOk = time.Now().UTC()
 	}
 
-	device, err = inst.db.UpdateDevice(body.UUID, body, true)
+	device, err = inst.db.UpdateDevice(body.UUID, body)
 	if err != nil || device == nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		device.CommonFault.LastOk = time.Now().UTC()
 	}
 
-	device, err = inst.db.UpdateDevice(device.UUID, device, true)
+	device, err = inst.db.UpdateDevice(device.UUID, device)
 	if err != nil {
 		return nil, err
 	}

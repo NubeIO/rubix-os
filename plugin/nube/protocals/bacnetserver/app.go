@@ -45,7 +45,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	}
 	body.Port = integer.New(defaultPort)
 	inst.bacnetDebugMsg("addNetwork(): ", body.Name)
-	network, err = inst.db.CreateNetwork(body, true)
+	network, err = inst.db.CreateNetwork(body)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	body.PointPriorityArrayMode = model.PriorityArrayToWriteValue
 	body.WritePriority = integer.New(16)
 	inst.bacnetDebugMsg("addPoint(): ", body.Name)
-	point, err = inst.db.CreatePoint(body, true, true)
+	point, err = inst.db.CreatePoint(body, true)
 	if point == nil || err != nil {
 		inst.bacnetDebugMsg("addPoint(): failed to create bacnet point: ", body.Name)
 		return nil, errors.New("failed to create bacnet point")
@@ -175,7 +175,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		body.CommonFault.LastOk = time.Now().UTC()
 	}
 
-	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, body)
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -191,7 +191,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.bacnetDebugMsg("updateNetwork(): bacnetStoreNetwork: ", network.UUID)
 	}
 
-	network, err = inst.db.UpdateNetwork(body.UUID, network, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, network)
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		body.CommonFault.LastOk = time.Now().UTC()
 	}
 
-	device, err = inst.db.UpdateDevice(body.UUID, body, true)
+	device, err = inst.db.UpdateDevice(body.UUID, body)
 	if err != nil {
 		return nil, err
 	}
@@ -240,7 +240,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		}
 	}
 
-	device, err = inst.db.UpdateDevice(device.UUID, body, true)
+	device, err = inst.db.UpdateDevice(device.UUID, body)
 	if err != nil {
 		return nil, err
 	}

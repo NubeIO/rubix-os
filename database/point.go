@@ -76,7 +76,7 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	return pointModel, nil
 }
 
-func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
+func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
 	if body.Decimal == nil {
 		body.Decimal = nils.NewUint32(2)
@@ -127,9 +127,9 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	return body, nil
 }
 
-func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (
+func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) (
 	*model.Point, error) {
-	writeOnDB := !fromPlugin
+	writeOnDB := !buffer
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Tags").Preload("MetaTags").
 		Preload("Priority").First(&pointModel)
