@@ -45,6 +45,10 @@ func (h *Handler) CreatePoint(body *model.Point, updatePoint bool) (
 	return pnt, nil
 }
 
+func (h *Handler) UpdatePointWithoutBuffering(uuid string, body *model.Point) (*model.Point, error) {
+	return getDb().UpdatePoint(uuid, body, false)
+}
+
 func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
 	return getDb().UpdatePoint(uuid, body, true)
 }
