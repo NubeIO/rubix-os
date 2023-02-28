@@ -64,7 +64,7 @@ func NewFlowPluginInstance() pluginapi.Plugin {
 	return &Instance{}
 }
 
-func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID, pluginName string, maxPollRate float64) *pollqueue.NetworkPollManager {
+func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffNetworkName, ffPluginUUID, pluginName string, maxPollRate float64) *pollqueue.NetworkPollManager {
 	// Make the main priority polling queue
 	queue := make([]*pollqueue.PollingPoint, 0)
 	pq := &pollqueue.PriorityPollQueue{PriorityQueue: queue}
@@ -88,6 +88,7 @@ func NewPollManager(conf *pollqueue.Config, dbHandler *dbhandler.Handler, ffNetw
 	pm.DBHandlerRef = dbHandler
 	pm.MaxPollRate, _ = time.ParseDuration(fmt.Sprintf("%fs", maxPollRate))
 	pm.FFNetworkUUID = ffNetworkUUID
+	pm.NetworkName = ffNetworkName
 	pm.FFPluginUUID = ffPluginUUID
 	pm.PluginName = pluginName
 	pm.ASAPPriorityMaxCycleTime, _ = time.ParseDuration("2m")

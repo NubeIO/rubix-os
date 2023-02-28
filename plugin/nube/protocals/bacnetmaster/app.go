@@ -41,7 +41,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	if boolean.IsTrue(network.Enable) {
 		conf := inst.GetConfig().(*Config)
 		pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
-		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, inst.pluginUUID, inst.pluginName, float.NonNil(network.MaxPollRate))
+		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, network.Name, inst.pluginUUID, inst.pluginName, float.NonNil(network.MaxPollRate))
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
 	} else {
@@ -190,6 +190,11 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.bacnetDebugMsg("updateNetwork(): cannot find NetworkPollManager for network: ", network.UUID)
 		return
 	}
+
+	if netPollMan.NetworkName != network.Name {
+		netPollMan.NetworkName = network.Name
+	}
+
 	err = inst.makeBacnetStoreNetwork(network)
 	if err != nil {
 		inst.bacnetDebugMsg("updateNetwork(): makeBacnetStoreNetwork: , err: ", network.UUID, err)
