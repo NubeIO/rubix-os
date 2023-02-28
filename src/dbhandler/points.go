@@ -53,11 +53,6 @@ func createPointDeepCopy(point model.Point) model.Point {
 	return outputPoint
 }
 
-//func (h *Handler) UpdatePointWithBuffering(uuid string, body *model.Point) (*model.Point, error) {
-//	pointDeepCopy := createPointDeepCopy(*body)
-//	return getDb().UpdatePoint(uuid, &pointDeepCopy, true)
-//}
-
 func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
 	return getDb().UpdatePoint(uuid, body, true)
 }
