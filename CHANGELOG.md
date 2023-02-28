@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.10.2](https://github.com/NubeIO/flow-framework/tree/v0.10.2) (2023-02-28)
+
+- Fix: update point issue
+- Remove fromPlugin flag & add a buffer flag
+- Adding buffer with point cache
+
 ## [v0.10.1](https://github.com/NubeIO/flow-framework/tree/v0.10.1) (2023-02-27)
 
 - Remove point write buffers

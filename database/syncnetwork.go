@@ -24,7 +24,7 @@ func (d *GormDatabase) SyncNetwork(body *interfaces.SyncNetwork) (*model.Network
 		networkModel.PluginPath = "system"
 		networkModel.Tags = body.NetworkTags
 		networkModel.MetaTags = body.NetworkMetaTags
-		network, err := d.CreateNetwork(networkModel, false)
+		network, err := d.CreateNetwork(networkModel)
 		d.mutex.Unlock()
 		return network, err
 	}
@@ -32,7 +32,7 @@ func (d *GormDatabase) SyncNetwork(body *interfaces.SyncNetwork) (*model.Network
 	if network.Name != networkName || !reflect.DeepEqual(network.Tags, body.NetworkTags) {
 		network.Name = networkName
 		network.Tags = body.NetworkTags
-		network, err := d.UpdateNetwork(network.UUID, network, false)
+		network, err := d.UpdateNetwork(network.UUID, network)
 		d.mutex.Unlock()
 		return network, err
 	}

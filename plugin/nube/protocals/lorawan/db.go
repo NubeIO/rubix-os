@@ -39,7 +39,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		return nil, errors.New(errMsg)
 	}
 	body.Enable = boolean.NewTrue()
-	body, err = inst.db.CreateNetwork(body, true)
+	body, err = inst.db.CreateNetwork(body)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (inst *Instance) createNewPoint(name string, deviceEUI string, deviceUUID s
 		},
 	}
 	point.HistoryEnable = boolean.NewTrue()
-	point, err = inst.db.CreatePoint(point, true, true)
+	point, err = inst.db.CreatePoint(point, true)
 	if err != nil {
 		log.Errorf("lorawan: Error creating point %s. Error: %s", addressUUID, err)
 	} else {

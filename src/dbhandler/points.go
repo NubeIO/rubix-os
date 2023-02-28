@@ -1,6 +1,7 @@
 package dbhandler
 
 import (
+	"encoding/json"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -30,19 +31,26 @@ func (h *Handler) GetPoint(uuid string, args api.Args) (*model.Point, error) {
 	return q, nil
 }
 
-func (h *Handler) CreatePoint(body *model.Point, fromPlugin, updatePoint bool) (
+func (h *Handler) CreatePoint(body *model.Point, updatePoint bool) (
 	*model.Point, error) {
-	pnt, err := getDb().CreatePoint(body, fromPlugin)
+	pnt, err := getDb().CreatePoint(body)
 	if err != nil {
 		return nil, err
 	}
 	if updatePoint {
-		pnt, err = getDb().UpdatePoint(pnt.UUID, pnt, fromPlugin) // MARC: UpdatePoint is called here so that the PresentValue and Priority are updated to use the fallback value. Otherwise, they are left as Null and the Edge28 Outputs are left floating.
+		pnt, err = h.UpdatePoint(pnt.UUID, pnt) // MARC: UpdatePoint is called here so that the PresentValue and Priority are updated to use the fallback value. Otherwise, they are left as Null and the Edge28 Outputs are left floating.
 		if err != nil {
 			return nil, err
 		}
 	}
 	return pnt, nil
+}
+
+func createPointDeepCopy(point model.Point) model.Point {
+	var outputPoint model.Point
+	out, _ := json.Marshal(point)
+	_ = json.Unmarshal(out, &outputPoint)
+	return outputPoint
 }
 
 func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {

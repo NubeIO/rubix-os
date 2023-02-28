@@ -40,7 +40,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	if integer.IsUnitNil(body.SerialBaudRate) {
 		body.SerialBaudRate = integer.NewUint(38400)
 	}
-	network, err = inst.db.CreateNetwork(body, true)
+	network, err = inst.db.CreateNetwork(body)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	body.ObjectType = "analog_input"
 	body.IoType = string(model.IOTypeRAW)
 	body.Name = strings.ToLower(body.Name)
-	point, err = inst.db.CreatePoint(body, true, true)
+	point, err = inst.db.CreatePoint(body, true)
 	if err != nil {
 		return nil, err
 	}

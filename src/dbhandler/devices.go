@@ -56,9 +56,9 @@ func (h *Handler) UpdateDeviceErrors(uuid string, body *model.Device) error {
 	return nil
 }
 
-func (h *Handler) UpdateDevice(uuid string, body *model.Device, fromPlugin bool) (*model.Device, error) {
+func (h *Handler) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
 	body.Model = strings.ToUpper(body.Model)
-	q, err := getDb().UpdateDevice(uuid, body, fromPlugin)
+	q, err := getDb().UpdateDevice(uuid, body)
 	if err != nil {
 		return nil, err
 	}

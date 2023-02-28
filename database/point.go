@@ -20,6 +20,8 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
+var mutexPointMap = map[string]sync.Mutex{}
+
 func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
 	var pointsModel []*model.Point
 	query := d.buildPointQuery(args)
@@ -46,6 +48,20 @@ func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point,
 }
 
 func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error) {
+	m, ok := mutexPointMap[uuid]
+	if ok {
+		m.Lock()
+		defer m.Unlock()
+	} else {
+		mutex := sync.Mutex{}
+		mutexPointMap[uuid] = sync.Mutex{}
+		mutex.Lock()
+		defer mutex.Unlock()
+	}
+	point := GetPoint(uuid, args)
+	if point != nil {
+		return point, nil
+	}
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&pointModel).Error; err != nil {
@@ -76,7 +92,7 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	return pointModel, nil
 }
 
-func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.Point, error) {
+func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
 	if body.Decimal == nil {
 		body.Decimal = nils.NewUint32(2)
@@ -127,14 +143,21 @@ func (d *GormDatabase) CreatePoint(body *model.Point, fromPlugin bool) (*model.P
 	return body, nil
 }
 
-func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bool) (
-	*model.Point, error) {
-	writeOnDB := !fromPlugin
-	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).Preload("Tags").Preload("MetaTags").
-		Preload("Priority").First(&pointModel)
-	if query.Error != nil {
-		return nil, query.Error
+func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) (*model.Point, error) {
+	writeOnDB := !buffer
+	m, ok := mutexPointMap[uuid]
+	if ok {
+		m.Lock()
+		defer m.Unlock()
+	} else {
+		mutex := sync.Mutex{}
+		mutexPointMap[uuid] = sync.Mutex{}
+		mutex.Lock()
+		defer mutex.Unlock()
+	}
+	pointModel, err := d.GetPoint(uuid, api.Args{WithTags: true, WithMetaTags: true, WithPriority: true})
+	if err != nil {
+		return nil, err
 	}
 	existingName, existingAddrID := d.pointNameExists(body)
 	if existingAddrID && boolean.IsTrue(body.IsBitwise) && body.BitwiseIndex != nil && *body.BitwiseIndex >= 0 {
@@ -161,6 +184,17 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 		if err := d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
 			return nil, err
 		}
+	} else {
+		if body.Priority == nil {
+			body.Priority = pointModel.Priority
+		}
+		if body.Tags == nil {
+			body.Tags = pointModel.Tags
+		}
+		if body.MetaTags == nil {
+			body.MetaTags = pointModel.MetaTags
+		}
+		pointModel = body
 	}
 
 	// TODO: we need to decide if a read only point needs to have a priority array or if it should just be nil.
@@ -182,7 +216,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, fromPlugin bo
 			return nil, err
 		}
 	} else {
-		d.bufferPointUpdate(uuid, body)
+		d.bufferPointUpdate(uuid, body, pnt)
 	}
 	return pnt, err
 }
