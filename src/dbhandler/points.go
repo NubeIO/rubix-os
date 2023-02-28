@@ -1,6 +1,7 @@
 package dbhandler
 
 import (
+	"encoding/json"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -37,7 +38,7 @@ func (h *Handler) CreatePoint(body *model.Point, updatePoint bool) (
 		return nil, err
 	}
 	if updatePoint {
-		pnt, err = getDb().UpdatePoint(pnt.UUID, pnt, false) // MARC: UpdatePoint is called here so that the PresentValue and Priority are updated to use the fallback value. Otherwise, they are left as Null and the Edge28 Outputs are left floating.
+		pnt, err = h.UpdatePoint(pnt.UUID, pnt) // MARC: UpdatePoint is called here so that the PresentValue and Priority are updated to use the fallback value. Otherwise, they are left as Null and the Edge28 Outputs are left floating.
 		if err != nil {
 			return nil, err
 		}
@@ -45,12 +46,20 @@ func (h *Handler) CreatePoint(body *model.Point, updatePoint bool) (
 	return pnt, nil
 }
 
-func (h *Handler) UpdatePointWithoutBuffering(uuid string, body *model.Point) (*model.Point, error) {
-	return getDb().UpdatePoint(uuid, body, false)
+func createPointDeepCopy(point model.Point) model.Point {
+	var outputPoint model.Point
+	out, _ := json.Marshal(point)
+	_ = json.Unmarshal(out, &outputPoint)
+	return outputPoint
+}
+
+func (h *Handler) UpdatePointWithBuffering(uuid string, body *model.Point) (*model.Point, error) {
+	pointDeepCopy := createPointDeepCopy(*body)
+	return getDb().UpdatePoint(uuid, &pointDeepCopy, true)
 }
 
 func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
-	return getDb().UpdatePoint(uuid, body, true)
+	return getDb().UpdatePoint(uuid, body, false)
 }
 
 func (h *Handler) PointWrite(uuid string, pointWriter *model.PointWriter) (

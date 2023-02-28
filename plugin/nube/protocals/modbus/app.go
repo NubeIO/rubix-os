@@ -290,7 +290,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	body.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
 	body.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
 	body.CommonFault.LastOk = time.Now().UTC()
-	body, err = inst.db.UpdatePointWithoutBuffering(body.UUID, body)
+	body, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.modbusDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err

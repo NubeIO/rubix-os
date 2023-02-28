@@ -275,7 +275,7 @@ func (inst *Instance) updatePoint(body *model.Point) (*model.Point, error) {
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
 
-	point, err := inst.db.UpdatePointWithoutBuffering(body.UUID, body)
+	point, err := inst.db.UpdatePoint(body.UUID, body)
 	if err != nil {
 		inst.bacnetDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
