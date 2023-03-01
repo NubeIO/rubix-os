@@ -302,6 +302,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		if err != nil {
 			return nil, false, false, false, err
 		}
+		d.ConsumersPointWrite(pointModel.UUID, priority)
 		d.DB.Model(&model.Writer{}).
 			Where("writer_thing_uuid = ?", pointModel.UUID).
 			Update("present_value", pointModel.PresentValue)
