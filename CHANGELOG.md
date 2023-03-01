@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.10.3](https://github.com/NubeIO/flow-framework/tree/v0.10.3) (2023-03-01)
+
+- Fix: present value write
+- Adds api calls for polling stats
+
 ## [v0.10.2](https://github.com/NubeIO/flow-framework/tree/v0.10.2) (2023-02-28)
 
 - Fix: update point issue

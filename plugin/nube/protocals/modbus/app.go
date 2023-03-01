@@ -19,6 +19,10 @@ import (
 // THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	inst.modbusDebugMsg("addNetwork(): ", body.Name)
+
+	// indicates that ui should display polling statistics
+	body.HasPollingStatistics = true
+
 	network, err = inst.db.CreateNetwork(body)
 	if err != nil {
 		inst.modbusErrorMsg("addNetwork(): failed to create modbus network: ", body.Name)
@@ -121,6 +125,9 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.modbusDebugMsg("updateNetwork():  nil network object")
 		return
 	}
+
+	// indicates that ui should display polling statistics
+	body.HasPollingStatistics = true
 
 	if boolean.IsFalse(body.Enable) {
 		body.CommonFault.InFault = true

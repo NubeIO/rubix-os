@@ -297,12 +297,13 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	if !writeOnDB {
 		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 	}
-	if isChange && !writeOnDB {
+	if isChange && writeOnDB {
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange,
 			currentWriterUUID)
 		if err != nil {
 			return nil, false, false, false, err
 		}
+		d.ConsumersPointWrite(pointModel.UUID, priority)
 		d.DB.Model(&model.Writer{}).
 			Where("writer_thing_uuid = ?", pointModel.UUID).
 			Update("present_value", pointModel.PresentValue)
@@ -317,7 +318,6 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 // UpdatePointErrors will only update the CommonFault properties of the point, all other properties will not be updated.
 // Does not update `LastOk`.
 func (d *GormDatabase) UpdatePointErrors(uuid string, body *model.Point) error {
-	fmt.Println("(d *GormDatabase) UpdatePointErrors")
 	return d.DB.Model(&body).
 		Where("uuid = ?", uuid).
 		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync", "Connection").
