@@ -204,7 +204,7 @@ func (inst *Instance) networkWrite(mbClient smod.ModbusClient, pnt *model.Point)
 
 	writeValue := *pnt.WriteValue
 
-	inst.modbusDebugMsg(fmt.Sprintf("modbus-write: ObjectType: %s  Addr: %d WriteValue: %v\n", objectType, address, writeValue))
+	inst.modbusPollingMsg(fmt.Sprintf("WRITE-POLL: ObjectType: %s  Addr: %d WriteValue: %v", objectType, address, writeValue))
 
 	switch objectType {
 	// WRITE COILS

@@ -15,7 +15,7 @@ func (inst *Instance) runSchedule() {
 		inst.systemErrorMsg("system-plugin-schedule: GetSchedules %s", err.Error())
 		return
 	} else {
-		log.Infof("system-plugin-schedule: run schedule executaion, schedule count: %d", len(schedules))
+		log.Debugf("system-plugin-schedule: run schedule executaion, schedule count: %d", len(schedules))
 	}
 	for _, sch := range schedules {
 		ScheduleJSON, err := schedule.DecodeSchedule(sch.Schedule)
@@ -50,38 +50,38 @@ func (inst *Instance) runSchedule() {
 		if err != nil {
 			inst.systemErrorMsg("system-plugin-schedule: issue on WeeklyCheck %v\n", err)
 		} else {
-			log.Infof("system-plugin-schedule: weekly schedule: %s  is-active: %t", weeklyResult.Name, weeklyResult.IsActive)
+			log.Debugf("system-plugin-schedule: weekly schedule: %s  is-active: %t", weeklyResult.Name, weeklyResult.IsActive)
 		}
 		// CHECK EVENT SCHEDULES
 		eventResult, err := schedule.EventCheck(ScheduleJSON.Schedules.Events, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
 			inst.systemErrorMsg("system-plugin-schedule: issue on eventResult %s", err.Error())
 		} else {
-			log.Infof("system-plugin-schedule: event schedule: %s  is-active: %t", eventResult.Name, eventResult.IsActive)
+			log.Debugf("system-plugin-schedule: event schedule: %s  is-active: %t", eventResult.Name, eventResult.IsActive)
 		}
 		// Combine Event and Weekly schedule results.
 		weeklyAndEventResult, err := schedule.CombineScheduleCheckerResults(weeklyResult, eventResult, timezone)
 		if err != nil {
 			inst.systemErrorMsg("system-plugin-schedule: issue on weeklyAndEventResult %s", err.Error())
 		} else {
-			log.Infof("system-plugin-schedule: weekly & event schedule: %s  is-active: %t", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive)
+			log.Debugf("system-plugin-schedule: weekly & event schedule: %s  is-active: %t", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive)
 		}
 		// CHECK EXCEPTION SCHEDULES
 		exceptionResult, err := schedule.ExceptionCheck(ScheduleJSON.Schedules.Exceptions, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 		if err != nil {
 			inst.systemErrorMsg("system-plugin-schedule: issue on exceptionResult %s", err.Error())
 		} else {
-			log.Infof("system-plugin-schedule: exception schedule: %s  is-active: %t", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive)
+			log.Debugf("system-plugin-schedule: exception schedule: %s  is-active: %t", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive)
 		}
 		if exceptionResult.CheckIfEmpty() {
-			log.Infof("system-plugin-schedule: exception schedule is empty: %s", exceptionResult.Name)
+			log.Debugf("system-plugin-schedule: exception schedule is empty: %s", exceptionResult.Name)
 		}
 
 		finalResult, err := schedule.ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult, timezone) // This applies the exception schedule to mask the combined weekly and event schedules.
 		if err != nil {
 			inst.systemErrorMsg("system-plugin-schedule: final-result: %s", err.Error())
 		}
-		log.Infof("system-plugin-schedule: final-result: %s  is-active: %t timezone: %s", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive, timezone)
+		log.Debugf("system-plugin-schedule: final-result: %s  is-active: %t timezone: %s", weeklyAndEventResult.Name, weeklyAndEventResult.IsActive, timezone)
 		if sch != nil {
 			inst.store.Set(sch.Name, finalResult, -1)
 			sch.IsActive = boolean.New(finalResult.IsActive)

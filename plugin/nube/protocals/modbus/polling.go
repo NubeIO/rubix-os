@@ -141,7 +141,8 @@ func (inst *Instance) ModbusPolling() error {
 				continue
 			}
 
-			inst.modbusDebugMsg(fmt.Sprintf("MODBUS POLL! : Network: %s, Device: %s, Point: %s, Priority: %s, Device-Add: %d, Point-Add: %d, Point Type: %s, WriteRequired: %t, ReadRequired: %t", net.Name, dev.Name, pnt.Name, pnt.PollPriority, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
+			inst.modbusPollingMsg("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+			inst.modbusPollingMsg(fmt.Sprintf("NEXT POLL DRAWN! : Network: %s, Device: %s, Point: %s, Priority: %s, Device-Add: %d, Point-Add: %d, Point Type: %s, WriteRequired: %t, ReadRequired: %t", net.Name, dev.Name, pnt.Name, pnt.PollPriority, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
 
 			if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
 				inst.modbusDebugMsg("polling not required on this point")
@@ -221,7 +222,7 @@ func (inst *Instance) ModbusPolling() error {
 					}
 				}
 				readSuccess = true
-				inst.modbusDebugMsg(fmt.Sprintf("modbus-read response: responseValue %f, point UUID: %s, response: %+v ", readResponseValue, pnt.UUID, readResponse))
+				inst.modbusPollingMsg(fmt.Sprintf("READ-RESPONSE: responseValue %f, point UUID: %s, response: %+v ", readResponseValue, pnt.UUID, readResponse))
 			}
 
 			writeSuccess := false
@@ -264,7 +265,7 @@ func (inst *Instance) ModbusPolling() error {
 					}
 					writeSuccess = true
 
-					inst.modbusDebugMsg(fmt.Sprintf("modbus-write response: responseValue %f, point UUID: %s, response: %+v", writeResponseValue, pnt.UUID, writeResponse))
+					inst.modbusPollingMsg(fmt.Sprintf("WRITE-RESPONSE: responseValue %f, point UUID: %s, response: %+v", writeResponseValue, pnt.UUID, writeResponse))
 				} else {
 					writeSuccess = true // successful because there is no value to write.  Otherwise the point will short cycle.
 					inst.modbusDebugMsg("modbus write point error: no value in priority array to write")
@@ -284,7 +285,7 @@ func (inst *Instance) ModbusPolling() error {
 				newValue = float.NonNil(pnt.PresentValue)
 			}
 
-			isChange := !float.ComparePtrValues(pnt.PresentValue, &newValue)
+			isChange := !float.ComparePtrValues(pnt.OriginalValue, &newValue)
 			if isChange {
 				if err != nil {
 					netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, true, false, pollqueue.NORMAL_RETRY, callback)
@@ -296,7 +297,7 @@ func (inst *Instance) ModbusPolling() error {
 			// For write_once and write_always type, write value should become present value
 			writeValueToPresentVal := (pnt.WriteMode == model.WriteOnce || pnt.WriteMode == model.WriteAlways) && writeSuccess && pnt.WriteValue != nil
 
-			if readSuccess || writeValueToPresentVal {
+			if readSuccess || writeSuccess || writeValueToPresentVal {
 				if writeValueToPresentVal {
 					// fmt.Println("ModbusPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
 					readSuccess = true
@@ -306,7 +307,10 @@ func (inst *Instance) ModbusPolling() error {
 				pnt.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
 				pnt.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
 				pnt.CommonFault.LastOk = time.Now().UTC()
-				_, err = inst.pointUpdate(pnt, newValue, readSuccess)
+				point, _ := inst.pointUpdate(pnt, newValue, readSuccess || writeSuccess)
+				// inst.modbusPollingMsg(fmt.Sprintf("point: %+v", point))
+				inst.modbusPollingMsg(fmt.Sprintf("point.OriginalValue: %+v", *point.OriginalValue))
+				inst.modbusPollingMsg(fmt.Sprintf("point.WriteValue: %+v", *point.WriteValue))
 			}
 
 			/*

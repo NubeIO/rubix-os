@@ -8,7 +8,7 @@ import (
 )
 
 func (inst *Instance) Enable() error {
-	inst.bacnetDebugMsg("Polling Enable()")
+	inst.bacnetPollingMsg("Polling Enable()")
 	inst.enabled = true
 	inst.fault = false
 	inst.running = false
@@ -53,7 +53,7 @@ func (inst *Instance) Enable() error {
 }
 
 func (inst *Instance) Disable() error {
-	inst.bacnetDebugMsg("Polling Disable()")
+	inst.bacnetPollingMsg("Polling Disable()")
 	inst.enabled = false
 	if inst.pollingEnabled {
 		inst.pollingEnabled = false

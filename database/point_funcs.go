@@ -146,9 +146,9 @@ func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point, point *
 }
 
 func (d *GormDatabase) FlushPointUpdateBuffers() {
-	log.Info("Flush point update buffers has is been called...")
+	log.Debug("Flush point update buffers has is been called...")
 	if len(pointUpdateBuffers) == 0 {
-		log.Info("Point update buffers not found")
+		log.Debug("Point update buffers not found")
 		return
 	}
 
@@ -171,7 +171,7 @@ func (d *GormDatabase) FlushPointUpdateBuffers() {
 		}
 		wg.Wait()
 	}
-	log.Info("Finished flush point update buffers process")
+	log.Debug("Finished flush point update buffers process")
 }
 
 func ChuckPointUpdateBuffer(array []interfaces.PointUpdateBuffer, chunkSize int) [][]interfaces.PointUpdateBuffer {

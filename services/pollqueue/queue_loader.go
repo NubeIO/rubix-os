@@ -55,17 +55,21 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	return nil
 }
 
-func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool, retryType PollRetryType, actualPoll, pollingWasNotRequired bool) {
-	pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification Point UUID: %s, writeSuccess: %t, readSuccess: %t, pointUpdate: %t, actualPoll: %t, pollingWasNotRequired: %t, retryType: %s, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, pointUpdate, actualPoll, pollingWasNotRequired, retryType, pollTimeSecs))
+func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool, retryType PollRetryType, actualPoll, pollingWasNotRequired, justToReAdd bool) {
+	if !justToReAdd {
+		pm.pollQueuePollingMsg(fmt.Sprintf("POLLING COMPLETE: Point UUID: %s, writeSuccess: %t, readSuccess: %t, pointUpdate: %t, actualPoll: %t, pollingWasNotRequired: %t, justToReAdd: %t, retryType: %s, pollTime: %f", pp.FFPointUUID, writeSuccess, readSuccess, pointUpdate, actualPoll, pollingWasNotRequired, justToReAdd, retryType, pollTimeSecs))
+	}
 
-	if !actualPoll { // This posts the next polling point immediately (faster than the MaxPollRate) because no poll was actually made.
+	if !actualPoll && !justToReAdd { // This posts the next polling point immediately (faster than the MaxPollRate) because no poll was actually made.
 		pm.postNextPointCallback()
 	}
 
-	_, success := pm.PollQueue.OutstandingPollingPoints.RemovePollingPointByPointUUID(pp.FFPointUUID)
-	if !success {
-		// It's ok to get this error message when adding/re-adding points.
-		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find polling point in OutstandingPollingPoints, %s", pp.FFPointUUID)
+	if !justToReAdd {
+		_, success := pm.PollQueue.OutstandingPollingPoints.RemovePollingPointByPointUUID(pp.FFPointUUID)
+		if !success {
+			// It's ok to get this error message when adding/re-adding points.
+			pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find polling point in OutstandingPollingPoints, %s", pp.FFPointUUID)
+		}
 	}
 
 	if !pointUpdate {
@@ -94,7 +98,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		}
 	}
 
-	// pm.pollQueueDebugMsg(fmt.Sprintf("PollingPointCompleteNotification: point %+v", point))
+	// pm.pollQueuePollingMsg(fmt.Sprintf("PollingPointCompleteNotification: point %+v", point))
 	// pm.PrintPointDebugInfo(point)
 
 	// If the device was deleted while this point was being polled, discard the PollingPoint
@@ -368,15 +372,18 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 			}
 			break
 		}
+		// pm.pollQueuePollingMsg(fmt.Sprintf("PollingPointCompleteNotification point: %+v", point))
+		pm.pollQueuePollingMsg(fmt.Sprintf("PollingPointCompleteNotification point.OriginalValue: %+v", *point.OriginalValue))
+		pm.pollQueuePollingMsg(fmt.Sprintf("PollingPointCompleteNotification point.WriteValue: %+v", *point.WriteValue))
 		if point.WriteValue != nil {
 			// pm.pollQueueDebugMsg(fmt.Sprintf("WriteAndMaintain WriteValue %+v\n", float.NonNil(point.WriteValue)))
 			noPV := true
-			var presentValue float64
-			if point.PresentValue != nil {
+			var readValue float64
+			if point.OriginalValue != nil {
 				noPV = false
-				presentValue = *point.PresentValue
+				readValue = *point.OriginalValue
 			}
-			if noPV || presentValue != *point.WriteValue {
+			if noPV || readValue != *point.WriteValue {
 				if pp.RepollTimer != nil {
 					pp.RepollTimer.Stop()
 					pp.RepollTimer = nil
@@ -420,7 +427,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 	}
 	point, err = pm.DBHandlerRef.UpdatePoint(point.UUID, point)
 	// printPointDebugInfo(point)
-
+	pm.pollQueuePollingMsg("-------------------------------------------------------------------------------------------------------------------------------------")
 }
 
 func (pm *NetworkPollManager) MakePollingPointRepollCallback(pp *PollingPoint, writeMode model.WriteMode) func() {

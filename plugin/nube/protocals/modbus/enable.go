@@ -7,7 +7,7 @@ import (
 )
 
 func (inst *Instance) Enable() error {
-	inst.modbusDebugMsg("MODBUS Plugin Enable()")
+	inst.modbusPollingMsg("MODBUS Plugin Enable()")
 	inst.enabled = true
 	inst.fault = false
 	inst.pluginName = name
@@ -27,7 +27,7 @@ func (inst *Instance) Enable() error {
 			inst.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0) // This will delete any existing NetworkPollManagers (if enable is called multiple times, it will rebuild the queues).
 			for _, net := range nets {                                          // Create a new Poll Manager for each network in the plugin.
 				conf := inst.GetConfig().(*Config)
-				if conf.PollQueueLogLevel != "ERROR" && conf.PollQueueLogLevel != "DEBUG" {
+				if conf.PollQueueLogLevel != "ERROR" && conf.PollQueueLogLevel != "DEBUG" && conf.PollQueueLogLevel != "POLLING" {
 					conf.PollQueueLogLevel = "ERROR"
 				}
 				pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.PollQueueLogLevel}
@@ -52,7 +52,7 @@ func (inst *Instance) Enable() error {
 }
 
 func (inst *Instance) Disable() error {
-	inst.modbusDebugMsg("MODBUS Plugin Disable()")
+	inst.modbusPollingMsg("MODBUS Plugin Disable()")
 	inst.enabled = false
 	if inst.pollingEnabled {
 		inst.pollingEnabled = false

@@ -236,11 +236,11 @@ func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUI
 	return duration
 }
 
-func (pm *NetworkPollManager) PollingFinished(pp *PollingPoint, pollStartTime time.Time, writeSuccess, readSuccess, actualPoll, pollingWasNotRequired bool, retryType PollRetryType, callback func(pp *PollingPoint, writeSuccess bool, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool, retryType PollRetryType, actualPoll, pollingWasNotRequired bool)) {
+func (pm *NetworkPollManager) PollingFinished(pp *PollingPoint, pollStartTime time.Time, writeSuccess, readSuccess, actualPoll, pollingWasNotRequired bool, retryType PollRetryType, callback func(pp *PollingPoint, writeSuccess bool, readSuccess bool, pollTimeSecs float64, pointUpdate, resetToConfiguredPriority bool, retryType PollRetryType, actualPoll, pollingWasNotRequired, justToReAdd bool)) {
 	pollEndTime := time.Now()
 	pollDuration := pollEndTime.Sub(pollStartTime)
 	pollTimeSecs := pollDuration.Seconds()
-	callback(pp, writeSuccess, readSuccess, pollTimeSecs, false, true, retryType, actualPoll, pollingWasNotRequired) // (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool)
+	callback(pp, writeSuccess, readSuccess, pollTimeSecs, false, true, retryType, actualPoll, pollingWasNotRequired, false) // (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint, writeSuccess, readSuccess bool)
 }
 
 func (pm *NetworkPollManager) PollQueueErrorChecking() {
@@ -292,7 +292,7 @@ func (pm *NetworkPollManager) PollQueueErrorChecking() {
 						if pp == nil || err != nil {
 							pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Polling point doesn't exist for point ", pnt.Name)
 							pp = NewPollingPoint(pnt.UUID, pnt.DeviceUUID, dev.NetworkUUID, pm.FFPluginUUID)
-							pm.PollingPointCompleteNotification(pp, false, false, 0, true, true, NORMAL_RETRY, false, false) // This will perform the queue re-add actions based on Point WriteMode.
+							pm.PollingPointCompleteNotification(pp, false, false, 0, true, true, NORMAL_RETRY, false, false, true) // This will perform the queue re-add actions based on Point WriteMode.
 						}
 						continue
 					}

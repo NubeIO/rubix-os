@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"sync"
 	"time"
 
@@ -289,10 +288,12 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	}
 	pointModel.WriteValue = writeValue
 	// last update was ok
-	pointModel.MessageLevel = model.MessageLevel.Info
-	pointModel.MessageCode = model.CommonFaultCode.Ok
-	pointModel.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
-	pointModel.LastOk = time.Now()
+	/*
+		pointModel.MessageLevel = model.MessageLevel.Info
+		pointModel.MessageCode = model.CommonFaultCode.Ok
+		pointModel.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
+		pointModel.LastOk = time.Now()
+	*/
 	if !writeOnDB {
 		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 	}
@@ -316,6 +317,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 // UpdatePointErrors will only update the CommonFault properties of the point, all other properties will not be updated.
 // Does not update `LastOk`.
 func (d *GormDatabase) UpdatePointErrors(uuid string, body *model.Point) error {
+	fmt.Println("(d *GormDatabase) UpdatePointErrors")
 	return d.DB.Model(&body).
 		Where("uuid = ?", uuid).
 		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync", "Connection").

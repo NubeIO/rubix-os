@@ -14,6 +14,14 @@ func (inst *Instance) modbusDebugMsg(args ...interface{}) {
 	}
 }
 
+// modbusPollingMsg prints only debug messages relevant to polling (more limited than DEBUG)
+func (inst *Instance) modbusPollingMsg(args ...interface{}) {
+	if nstring.InEqualIgnoreCase(inst.config.LogLevel, "POLLING") || nstring.InEqualIgnoreCase(inst.config.LogLevel, "DEBUG") {
+		prefix := "Modbus Polling: "
+		log.Info(prefix, args)
+	}
+}
+
 func (inst *Instance) modbusErrorMsg(args ...interface{}) {
 	prefix := "Modbus: "
 	log.Error(prefix, args)
