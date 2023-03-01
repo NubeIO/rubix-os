@@ -23,6 +23,10 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	}
 
 	inst.bacnetDebugMsg("addNetwork(): ", body.Name)
+
+	// indicates that ui should display polling statistics
+	body.HasPollingStatistics = true
+
 	network, err = inst.db.CreateNetwork(body)
 	if network == nil || err != nil {
 		inst.bacnetErrorMsg("addNetwork(): failed to create bacnet network: ", body.Name)
@@ -160,6 +164,9 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.bacnetDebugMsg("updateNetwork():  nil network object")
 		return
 	}
+
+	// indicates that ui should display polling statistics
+	body.HasPollingStatistics = true
 
 	if boolean.IsFalse(body.Enable) {
 		body.CommonFault.InFault = true
