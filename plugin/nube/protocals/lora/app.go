@@ -40,7 +40,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	if integer.IsUnitNil(body.SerialBaudRate) {
 		body.SerialBaudRate = integer.NewUint(38400)
 	}
-	network, err = inst.db.CreateNetwork(body, true)
+	network, err = inst.db.CreateNetwork(body)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	body.ObjectType = "analog_input"
 	body.IoType = string(model.IOTypeRAW)
 	body.Name = strings.ToLower(body.Name)
-	point, err = inst.db.CreatePoint(body, true, true)
+	point, err = inst.db.CreatePoint(body, true)
 	if err != nil {
 		return nil, err
 	}
@@ -301,7 +301,7 @@ func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
 	}
 	for _, pt := range dev.Points {
 		pt.AddressUUID = body.AddressUUID
-		_, err = inst.db.UpdatePoint(pt.UUID, pt, false)
+		_, err = inst.db.UpdatePoint(pt.UUID, pt)
 		if err != nil {
 			log.Errorf("loraraw: issue on UpdatePoint updateDevicePointsAddress(): %v\n", err)
 			return err
@@ -347,7 +347,7 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 
 	}
 	pointWriter := model.PointWriter{Priority: &priority}
-	_, _, _, _, err = inst.db.PointWrite(pnt.UUID, &pointWriter, true)
+	_, _, _, _, err = inst.db.PointWrite(pnt.UUID, &pointWriter) // TODO: look on it, faults messages were cleared out
 	if err != nil {
 		log.Error("lora-raw: UpdatePointValue()", err)
 	}

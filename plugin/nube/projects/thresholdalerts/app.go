@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -12,7 +13,7 @@ import (
 // THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	inst.thresholdalertsDebugMsg("addNetwork(): ", body.Name)
-	network, err = inst.db.CreateNetwork(body, true)
+	network, err = inst.db.CreateNetwork(body)
 	if err != nil {
 		inst.thresholdalertsErrorMsg("addNetwork(): failed to create network: ", body.Name)
 		return nil, errors.New("failed to create network")
@@ -41,7 +42,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	inst.thresholdalertsDebugMsg("addPoint(): ", body.Name)
 
-	point, err = inst.db.CreatePoint(body, true, true)
+	point, err = inst.db.CreatePoint(body, true)
 	if point == nil || err != nil {
 		inst.thresholdalertsDebugMsg("addPoint(): failed to create tmv point: ", body.Name)
 		return nil, errors.New("failed to create tmv point")
@@ -58,7 +59,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.thresholdalertsDebugMsg("updateNetwork():  nil network object")
 		return
 	}
-	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, body)
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.db.SetErrorsForAllDevicesOnNetwork(network.UUID, "network disabled", model.MessageLevel.Warning, model.CommonFaultCode.DeviceError, true)
 	}
 
-	network, err = inst.db.UpdateNetwork(body.UUID, network, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, network)
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -96,7 +97,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		body.CommonFault.LastOk = time.Now().UTC()
 	}
 
-	device, err = inst.db.UpdateDevice(body.UUID, body, true)
+	device, err = inst.db.UpdateDevice(body.UUID, body)
 	if err != nil || device == nil {
 		return nil, err
 	}
@@ -113,7 +114,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		device.CommonFault.LastOk = time.Now().UTC()
 	}
 
-	device, err = inst.db.UpdateDevice(device.UUID, device, true)
+	device, err = inst.db.UpdateDevice(device.UUID, device)
 	if err != nil {
 		return nil, err
 	}
@@ -137,8 +138,12 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.Message = "point disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
-
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
+	body.CommonFault.InFault = false
+	body.CommonFault.MessageLevel = model.MessageLevel.Info
+	body.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	body.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	body.CommonFault.LastOk = time.Now().UTC()
+	point, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.thresholdalertsDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -159,7 +164,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	inst.thresholdalertsDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
 	inst.thresholdalertsDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
 
-	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
+	point, _, _, _, err = inst.db.PointWrite(pntUUID, body)
 	if err != nil {
 		inst.thresholdalertsDebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err

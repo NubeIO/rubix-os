@@ -21,7 +21,7 @@ func (inst *Instance) createNetwork(body *model.Network) (*model.Network, error)
 		return nil, errors.New("both networks cannot be \"writers\"")
 	}
 	body.AddressUUID = fmt.Sprint(net1.UUID, INTERNAL_SEPARATOR, net2.UUID)
-	body, err := inst.db.CreateNetwork(body, true)
+	body, err := inst.db.CreateNetwork(body)
 
 	for _, dev1 := range net1.Devices {
 		for _, dev2 := range net2.Devices {
@@ -148,7 +148,7 @@ func (inst *Instance) createPointAndUpdate(devUUID string, name string, uuid1 *s
 
 func (inst *Instance) relinkPointAndUpdate(point *model.Point, uuid1 *string, uuid2 *string, net1 *model.Network, net2 *model.Network) *model.Point {
 	*point.AddressUUID = fmt.Sprintf("%s%s%s", *uuid1, INTERNAL_SEPARATOR, *uuid2)
-	inst.db.UpdatePoint(point.UUID, point, false)
+	inst.db.UpdatePoint(point.UUID, point)
 	inst.syncPoint(point, net1, net2)
 	return point
 }
@@ -166,7 +166,7 @@ func (inst *Instance) createPoint(devUUID string, name string, uuid1 *string, uu
 		AddressUUID:  &addr,
 		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
-	inst.db.CreatePoint(&p, true, false)
+	inst.db.CreatePoint(&p, false)
 	return p
 }
 
@@ -192,7 +192,7 @@ func (inst *Instance) syncPointSelected(point *model.Point, linkedUUID string) *
 	origPoint.DeviceUUID = point.DeviceUUID
 	origPoint.Name = point.Name
 	origPoint.Enable = point.Enable
-	point, _ = inst.db.UpdatePoint(point.UUID, origPoint, false)
+	point, _ = inst.db.UpdatePoint(point.UUID, origPoint)
 	return point
 }
 

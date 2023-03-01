@@ -5,8 +5,8 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-func (h *Handler) CreateNetwork(body *model.Network, fromPlugin bool) (*model.Network, error) {
-	q, err := getDb().CreateNetwork(body, fromPlugin)
+func (h *Handler) CreateNetwork(body *model.Network) (*model.Network, error) {
+	q, err := getDb().CreateNetwork(body)
 	if err != nil {
 		return nil, err
 	}
@@ -22,8 +22,8 @@ func (h *Handler) UpdateNetworkErrors(uuid string, body *model.Network) error {
 	return nil
 }
 
-func (h *Handler) UpdateNetwork(uuid string, body *model.Network, fromPlugin bool) (*model.Network, error) {
-	return getDb().UpdateNetwork(uuid, body, fromPlugin)
+func (h *Handler) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
+	return getDb().UpdateNetwork(uuid, body)
 }
 
 func (h *Handler) GetNetwork(uuid string, args api.Args) (*model.Network, error) {

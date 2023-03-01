@@ -99,7 +99,7 @@ func (inst *Instance) addLoRaNetworkFromLegacyNetwork(legacyNet *legacylorarest.
 	timeout := int(legacyNet.Timeout)
 	network.SerialTimeout = &timeout
 
-	network, err = inst.db.CreateNetwork(network, false)
+	network, err = inst.db.CreateNetwork(network)
 	if err != nil {
 		inst.maploraErrorMsg("addLoRaNetworkFromLegacyNetwork(): failed to create tmv network")
 		return nil, errors.New("failed to create lora network")

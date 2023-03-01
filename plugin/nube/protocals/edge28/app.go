@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -17,7 +18,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		return nil, errors.New("empty network body, no network created")
 	}
 	inst.edge28DebugMsg("addNetwork(): ", body.Name)
-	network, err = inst.db.CreateNetwork(body, true)
+	network, err = inst.db.CreateNetwork(body)
 	if network == nil || err != nil {
 		inst.edge28ErrorMsg("addNetwork(): failed to create edge28 network: ", body.Name)
 		return nil, errors.New("failed to create edge28 network")
@@ -99,7 +100,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 		body.WriteValue = limitValueByEdge28Type(body.IoType, body.WriteValue)
 	}
 
-	point, err = inst.db.CreatePoint(body, true, true)
+	point, err = inst.db.CreatePoint(body, true)
 	if point == nil || err != nil {
 		inst.edge28DebugMsg("addPoint(): failed to create edge28 point: ", body.Name)
 		return nil, errors.New("failed to create edge28 point")
@@ -115,7 +116,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.edge28DebugMsg("updateNetwork():  nil network object")
 		return
 	}
-	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, body)
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -129,7 +130,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		return
 	}
 
-	dev, err := inst.db.UpdateDevice(body.UUID, body, true)
+	dev, err := inst.db.UpdateDevice(body.UUID, body)
 	if err != nil || dev == nil {
 		return nil, err
 	}
@@ -160,7 +161,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	inst.edge28DebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
 	inst.edge28DebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
 
-	point, err = inst.db.UpdatePoint(body.UUID, body, false)
+	point, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.edge28DebugMsg("updatePoint(): bad response from UpdatePoint()")
 	}
@@ -196,7 +197,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 
 	// body.WritePollRequired = utils.NewTrue() // TODO: commented out this section, seems like useless
 
-	point, _, _, _, err = inst.db.PointWrite(pntUUID, body, false)
+	point, _, _, _, err = inst.db.PointWrite(pntUUID, body)
 	if err != nil {
 		inst.edge28DebugMsg("writePoint(): bad response from WritePoint(), ", err)
 	}
@@ -247,7 +248,12 @@ func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess
 	if readSuccess {
 		point.OriginalValue = float.New(value)
 	}
-	_, err := inst.db.UpdatePoint(point.UUID, point, true)
+	point.CommonFault.InFault = false
+	point.CommonFault.MessageLevel = model.MessageLevel.Info
+	point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	point.CommonFault.LastOk = time.Now().UTC()
+	_, err := inst.db.UpdatePoint(point.UUID, point)
 	if err != nil {
 		inst.edge28DebugMsg("EDGE28 UPDATE POINT UpdatePointPresentValue() error: ", err)
 		return nil, err

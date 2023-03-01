@@ -40,7 +40,7 @@ func (d *GormDatabase) SyncDevice(body *interfaces.SyncDevice) (*model.Device, e
 	if device.Name != body.DeviceName || !reflect.DeepEqual(device.Tags, body.DeviceTags) {
 		device.Name = body.DeviceName
 		device.Tags = body.DeviceTags
-		device, err = d.UpdateDevice(device.UUID, device, false)
+		device, err = d.UpdateDevice(device.UUID, device)
 		d.mutex.Unlock()
 		return device, err
 	}

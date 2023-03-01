@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/nurl"
 	"github.com/NubeIO/flow-framework/utils/writemode"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"math"
 	"strconv"
@@ -300,7 +301,12 @@ func (inst *Instance) ModbusPolling() error {
 					// fmt.Println("ModbusPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
 					readSuccess = true
 				}
-				_, err = inst.pointUpdate(pnt, newValue, readSuccess, true)
+				pnt.CommonFault.InFault = false
+				pnt.CommonFault.MessageLevel = model.MessageLevel.Info
+				pnt.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+				pnt.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+				pnt.CommonFault.LastOk = time.Now().UTC()
+				_, err = inst.pointUpdate(pnt, newValue, readSuccess)
 			}
 
 			/*

@@ -8,7 +8,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"math"
 	"time"
 )
 
@@ -31,6 +30,7 @@ type NetworkPollManager struct {
 
 	// References
 	FFNetworkUUID string
+	NetworkName   string
 	FFPluginUUID  string
 	PluginName    string
 
@@ -144,7 +144,7 @@ func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { // This is tri
 	}
 }
 
-func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffPluginUUID, pluginName string, maxPollRate float64) *NetworkPollManager {
+func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, ffNetworkName, ffPluginUUID, pluginName string, maxPollRate float64) *NetworkPollManager {
 	// Make the main priority polling queue
 	queue := make([]*PollingPoint, 0)
 	pq := &PriorityPollQueue{queue}
@@ -166,6 +166,7 @@ func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, f
 	pm.DBHandlerRef = dbHandler
 	pm.MaxPollRate, _ = time.ParseDuration(fmt.Sprintf("%fs", maxPollRate))
 	pm.FFNetworkUUID = ffNetworkUUID
+	pm.NetworkName = ffNetworkName
 	pm.FFPluginUUID = ffPluginUUID
 	pm.PluginName = pluginName
 	pm.ASAPPriorityMaxCycleTime, _ = time.ParseDuration("2m")
@@ -335,148 +336,6 @@ func (pm *NetworkPollManager) StopQueueCheckerAndStats() {
 	pm.QueueCheckerTimer = nil
 	pm.QueueCheckerCancelChannel <- true
 	pm.QueueCheckerCancelChannel = nil
-}
-
-func (pm *NetworkPollManager) StartPollingStatistics() {
-	pm.pollQueueDebugMsg("StartPollingStatistics()")
-	pm.PollingStartTimeUnix = time.Now().Unix()
-	pm.AveragePollExecuteTimeSecs = 0
-	pm.MaxPollExecuteTimeSecs = 0
-	pm.MinPollExecuteTimeSecs = 0
-	pm.ASAPPriorityAveragePollTime = 0
-	pm.HighPriorityAveragePollTime = 0
-	pm.NormalPriorityAveragePollTime = 0
-	pm.LowPriorityAveragePollTime = 0
-	pm.TotalPollCount = 0
-	pm.ASAPPriorityPollCount = 0
-	pm.HighPriorityPollCount = 0
-	pm.NormalPriorityPollCount = 0
-	pm.LowPriorityPollCount = 0
-	pm.ASAPPriorityPollCountForAvg = 0
-	pm.HighPriorityPollCountForAvg = 0
-	pm.NormalPriorityPollCountForAvg = 0
-	pm.LowPriorityPollCountForAvg = 0
-	pm.ASAPPriorityLockupAlert = false
-	pm.HighPriorityLockupAlert = false
-	pm.NormalPriorityLockupAlert = false
-	pm.LowPriorityLockupAlert = false
-	pm.PortUnavailableTime = 0
-	pm.PortUnavailableStartTime = 0
-}
-
-func (pm *NetworkPollManager) PollCompleteStatsUpdate(pp *PollingPoint, pollTimeSecs float64) {
-	pm.pollQueueDebugMsg("PollCompleteStatsUpdate()")
-
-	if pm.MaxPollExecuteTimeSecs == 0 || pollTimeSecs > pm.MaxPollExecuteTimeSecs {
-		pm.MaxPollExecuteTimeSecs = pollTimeSecs
-	}
-	if pm.MinPollExecuteTimeSecs == 0 || pollTimeSecs < pm.MinPollExecuteTimeSecs {
-		pm.MinPollExecuteTimeSecs = pollTimeSecs
-	}
-	pm.AveragePollExecuteTimeSecs = ((pm.AveragePollExecuteTimeSecs * float64(pm.TotalPollCount)) + pollTimeSecs) / (float64(pm.TotalPollCount) + 1)
-	pm.TotalPollCount++
-	pm.EnabledTime = time.Since(time.Unix(pm.PollingStartTimeUnix, 0)).Seconds()
-	pm.BusyTime = math.Round((((pm.AveragePollExecuteTimeSecs*float64(pm.TotalPollCount))/pm.EnabledTime)*100)*1000) / 1000 // percentage rounded to 3 decimal places
-
-	pm.TotalPollQueueLength = int64(pm.PollQueue.PriorityQueue.Len())
-	pm.TotalStandbyPointsLength = int64(pm.PollQueue.StandbyPollingPoints.Len())
-	pm.TotalPointsOutForPolling = int64(pm.PollQueue.OutstandingPollingPoints.Len())
-
-	pm.ASAPPriorityPollQueueLength = 0
-	pm.HighPriorityPollQueueLength = 0
-	pm.NormalPriorityPollQueueLength = 0
-	pm.LowPriorityPollQueueLength = 0
-
-	for _, pp := range pm.PollQueue.PriorityQueue.PriorityQueue {
-		if pp != nil {
-			switch pp.PollPriority {
-			case model.PRIORITY_ASAP:
-				pm.ASAPPriorityPollQueueLength++
-			case model.PRIORITY_HIGH:
-				pm.HighPriorityPollQueueLength++
-			case model.PRIORITY_NORMAL:
-				pm.NormalPriorityPollQueueLength++
-			case model.PRIORITY_LOW:
-				pm.LowPriorityPollQueueLength++
-			}
-		}
-	}
-	pm.TotalPollQueueLength = int64(pm.PollQueue.PriorityQueue.Len())
-
-	switch pp.PollPriority {
-	case model.PRIORITY_ASAP:
-		pm.ASAPPriorityPollCount++
-		if pp.QueueEntryTime <= 0 {
-			return
-		}
-		pollTime := float64(time.Now().Unix() - pp.QueueEntryTime)
-		pm.ASAPPriorityAveragePollTime = ((pm.ASAPPriorityAveragePollTime * float64(pm.ASAPPriorityPollCountForAvg)) + pollTime) / (float64(pm.ASAPPriorityPollCountForAvg) + 1)
-		pm.ASAPPriorityPollCountForAvg++
-
-	case model.PRIORITY_HIGH:
-		pm.HighPriorityPollCount++
-		if pp.QueueEntryTime <= 0 {
-			return
-		}
-		pollTime := float64(time.Now().Unix() - pp.QueueEntryTime)
-		pm.HighPriorityAveragePollTime = ((pm.HighPriorityAveragePollTime * float64(pm.HighPriorityPollCountForAvg)) + pollTime) / (float64(pm.HighPriorityPollCountForAvg) + 1)
-		pm.HighPriorityPollCountForAvg++
-
-	case model.PRIORITY_NORMAL:
-		pm.NormalPriorityPollCount++
-		if pp.QueueEntryTime <= 0 {
-			return
-		}
-		pollTime := float64(time.Now().Unix() - pp.QueueEntryTime)
-		pm.NormalPriorityAveragePollTime = ((pm.NormalPriorityAveragePollTime * float64(pm.NormalPriorityPollCountForAvg)) + pollTime) / (float64(pm.NormalPriorityPollCountForAvg) + 1)
-		pm.NormalPriorityPollCountForAvg++
-
-	case model.PRIORITY_LOW:
-		pm.LowPriorityPollCount++
-		if pp.QueueEntryTime <= 0 {
-			return
-		}
-		pollTime := float64(time.Now().Unix() - pp.QueueEntryTime)
-		pm.LowPriorityAveragePollTime = ((pm.LowPriorityAveragePollTime * float64(pm.LowPriorityPollCountForAvg)) + pollTime) / (float64(pm.LowPriorityPollCountForAvg) + 1)
-		pm.LowPriorityPollCountForAvg++
-
-	}
-
-}
-
-func (pm *NetworkPollManager) PartialPollStatsUpdate() {
-	pm.pollQueueDebugMsg("PartialPollStatsUpdate()")
-	pm.TotalPollQueueLength = int64(pm.PollQueue.PriorityQueue.Len())
-	pm.TotalStandbyPointsLength = int64(pm.PollQueue.StandbyPollingPoints.Len())
-	pm.TotalPointsOutForPolling = int64(pm.PollQueue.OutstandingPollingPoints.Len())
-
-	pm.EnabledTime = time.Since(time.Unix(pm.PollingStartTimeUnix, 0)).Seconds()
-
-	if pm.PortUnavailableTimeout != nil {
-		pm.PortUnavailableTime += time.Since(time.Unix(pm.PortUnavailableStartTime, 0)).Seconds()
-		pm.PortUnavailableStartTime = time.Now().Unix()
-	}
-
-	pm.ASAPPriorityPollQueueLength = 0
-	pm.HighPriorityPollQueueLength = 0
-	pm.NormalPriorityPollQueueLength = 0
-	pm.LowPriorityPollQueueLength = 0
-
-	for _, pp := range pm.PollQueue.PriorityQueue.PriorityQueue {
-		if pp != nil {
-			switch pp.PollPriority {
-			case model.PRIORITY_ASAP:
-				pm.ASAPPriorityPollQueueLength++
-			case model.PRIORITY_HIGH:
-				pm.HighPriorityPollQueueLength++
-			case model.PRIORITY_NORMAL:
-				pm.NormalPriorityPollQueueLength++
-			case model.PRIORITY_LOW:
-				pm.LowPriorityPollQueueLength++
-			}
-		}
-	}
-	pm.TotalPollQueueLength = int64(pm.PollQueue.PriorityQueue.Len())
 }
 
 func (pm *NetworkPollManager) PortUnavailable() {

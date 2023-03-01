@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## [v0.10.3](https://github.com/NubeIO/flow-framework/tree/v0.10.3) (2023-03-01)
+
+- Fix: present value write
+- Adds api calls for polling stats
+
+## [v0.10.2](https://github.com/NubeIO/flow-framework/tree/v0.10.2) (2023-02-28)
+
+- Fix: update point issue
+- Remove fromPlugin flag & add a buffer flag
+- Adding buffer with point cache
+
+## [v0.10.1](https://github.com/NubeIO/flow-framework/tree/v0.10.1) (2023-02-27)
+
+- Remove point write buffers
+  - They need to be straightforwardly written & as they are not frequently called too
+- Remove fromPlugin flag on PointWrite
+- Remove the afterRealDeviceUpdate flag, it's making things confusing
+
 ## [v0.10.0](https://github.com/NubeIO/flow-framework/tree/v0.10.0) (2023-02-24)
 
 - Fix: runtime issue

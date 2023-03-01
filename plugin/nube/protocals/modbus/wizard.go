@@ -67,7 +67,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 		net.PluginPath = "modbus"
 
 		net.PluginConfId = inst.pluginUUID
-		_, err := inst.db.CreateNetwork(&net, false)
+		_, err := inst.db.CreateNetwork(&net)
 		if err != nil {
 			inst.modbusErrorMsg(fmt.Sprintf("network creation failure: %s", err))
 		}
@@ -97,7 +97,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 			pnt.PollPriority = model.PRIORITY_NORMAL
 			pnt.PollRate = model.RATE_NORMAL
 			pnt.WriteMode = model.ReadOnly
-			_, err = inst.db.CreatePoint(&pnt, false, true)
+			_, err = inst.db.CreatePoint(&pnt, true)
 			if err != nil {
 				inst.modbusErrorMsg(fmt.Sprintf("consumer point creation failure: %s", err))
 			}
@@ -142,7 +142,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 		net.PluginPath = "modbus"
 
 		net.PluginConfId = inst.pluginUUID
-		_, err := inst.db.CreateNetwork(&net, false)
+		_, err := inst.db.CreateNetwork(&net)
 		if err != nil {
 			inst.modbusErrorMsg(fmt.Sprintf("network creation failure: %s", err))
 		}
@@ -181,7 +181,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 					pnt.PollPriority = model.PRIORITY_HIGH
 				}
 				pnt.WriteMode = model.ReadOnly
-				_, err = inst.db.CreatePoint(&pnt, false, true)
+				_, err = inst.db.CreatePoint(&pnt, true)
 				if err != nil {
 					inst.modbusErrorMsg(fmt.Sprintf("consumer point creation failure: %s", err))
 				}
@@ -198,7 +198,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 		net.MaxPollRate = float.New(0.1)
 
 		net.PluginConfId = inst.pluginUUID
-		_, err := inst.db.CreateNetwork(&net, false)
+		_, err := inst.db.CreateNetwork(&net)
 		if err != nil {
 			inst.modbusErrorMsg(fmt.Sprintf("network creation failure: %s", err))
 		}
@@ -236,7 +236,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 				pnt.PollRate = model.RATE_NORMAL
 				pnt.WriteMode = model.ReadOnly
 				pnt.PointPriorityArrayMode = model.ReadOnlyNoPriorityArrayRequired
-				_, err = inst.db.CreatePoint(&pnt, false, true)
+				_, err = inst.db.CreatePoint(&pnt, true)
 				if err != nil {
 					inst.modbusErrorMsg(fmt.Sprintf("consumer point creation failure: %s", err))
 				}

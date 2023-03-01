@@ -24,7 +24,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		}
 	}
 	body.NumberOfNetworksPermitted = nils.NewInt(1)
-	network, err = inst.db.CreateNetwork(body, true)
+	network, err = inst.db.CreateNetwork(body)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	body.IsOutput = nils.NewBool(isOutput)
 	body.IsTypeBool = nils.NewBool(isTypeBool)
-	point, err = inst.db.CreatePoint(body, true, true)
+	point, err = inst.db.CreatePoint(body, true)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 }
 
 func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
-	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, body)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 }
 
 func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
-	device, err = inst.db.UpdateDevice(body.UUID, body, true)
+	device, err = inst.db.UpdateDevice(body.UUID, body)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 }
 
 func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
-	point, _, writeValueChange, _, err := inst.db.PointWrite(pntUUID, body, false)
+	point, _, writeValueChange, _, err := inst.db.PointWrite(pntUUID, body)
 	if point == nil || err != nil {
 		return point, err
 	}
@@ -130,7 +130,7 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 func (inst *Instance) pointWrite(uuid string, value float64) error {
 	priority := map[string]*float64{"_16": &value}
 	pointWriter := model.PointWriter{Priority: &priority}
-	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter, true)
+	_, _, _, _, err := inst.db.PointWrite(uuid, &pointWriter) // TODO: look on it, faults messages were cleared out
 	if err != nil {
 		log.Error("edge28-app: pointWrite()", err)
 	}

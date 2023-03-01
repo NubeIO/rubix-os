@@ -47,7 +47,7 @@ func (d *GormDatabase) UpdateDevicePlugin(uuid string, body *model.Device) (devi
 	}
 	pluginName := network.PluginPath
 	if pluginName == "system" {
-		device, err = d.UpdateDevice(uuid, body, false)
+		device, err = d.UpdateDevice(uuid, body)
 		if err != nil {
 			return nil, err
 		}

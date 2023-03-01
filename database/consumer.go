@@ -120,6 +120,17 @@ func (d *GormDatabase) DeleteConsumers(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
+func (d *GormDatabase) ConsumersPointWrite(uuid string, priority *map[string]*float64) {
+	writer, _ := d.GetOneWriterByArgs(api.Args{WriterThingUUID: &uuid})
+	if writer != nil {
+		body := &model.WriterBody{
+			Action:   "writer",
+			Priority: priority,
+		}
+		_ = d.WriterAction(writer.UUID, body)
+	}
+}
+
 func (d *GormDatabase) SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel, error) {
 	consumer, _ := d.GetConsumer(uuid, api.Args{WithWriters: true})
 	var outputs []*interfaces.SyncModel

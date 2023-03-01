@@ -14,11 +14,11 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 	}
 	pluginName := network.PluginPath
 	if pluginName == "system" {
-		point, err = d.CreatePoint(body, false)
+		point, err = d.CreatePoint(body)
 		if err != nil {
 			return nil, err
 		}
-		point, err = d.UpdatePoint(point.UUID, point, false, false)
+		point, err = d.UpdatePoint(point.UUID, point, false)
 		return
 	}
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
@@ -43,7 +43,7 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 	}
 	pluginName := network.PluginPath
 	if pluginName == "system" {
-		point, err = d.UpdatePoint(uuid, body, false, false)
+		point, err = d.UpdatePoint(uuid, body, false)
 		if err != nil {
 			return nil, err
 		}
@@ -64,7 +64,7 @@ func (d *GormDatabase) WritePointPlugin(uuid string, body *model.PointWriter) (p
 	}
 	pluginName := network.PluginPath
 	if pluginName == "system" {
-		point, _, _, _, err = d.PointWrite(uuid, body, false, false, nil, false)
+		point, _, _, _, err = d.PointWrite(uuid, body, nil, false)
 		if err != nil {
 			return nil, err
 		}

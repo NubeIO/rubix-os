@@ -12,7 +12,7 @@ type DeviceDatabase interface {
 	GetOneDeviceByArgs(args Args) (*model.Device, error)
 	GetDeviceByName(networkName string, deviceName string, args Args) (*model.Device, error)
 	CreateDevice(body *model.Device) (*model.Device, error)
-	UpdateDevice(uuid string, body *model.Device, fromPlugin bool) (*model.Device, error)
+	UpdateDevice(uuid string, body *model.Device) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
 	DeleteOneDeviceByArgs(args Args) (bool, error)
 

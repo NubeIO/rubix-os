@@ -10,6 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"go.bug.st/serial"
 	"time"
@@ -18,7 +19,11 @@ import (
 // THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	inst.modbusDebugMsg("addNetwork(): ", body.Name)
-	network, err = inst.db.CreateNetwork(body, true)
+
+	// indicates that ui should display polling statistics
+	body.HasPollingStatistics = true
+
+	network, err = inst.db.CreateNetwork(body)
 	if err != nil {
 		inst.modbusErrorMsg("addNetwork(): failed to create modbus network: ", body.Name)
 		return nil, errors.New("failed to create modbus network")
@@ -27,7 +32,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	if boolean.IsTrue(network.Enable) {
 		conf := inst.GetConfig().(*Config)
 		pollQueueConfig := pollqueue.Config{EnablePolling: conf.EnablePolling, LogLevel: conf.LogLevel}
-		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, inst.pluginUUID, inst.pluginName, float.NonNil(network.MaxPollRate))
+		pollManager := NewPollManager(&pollQueueConfig, &inst.db, network.UUID, network.Name, inst.pluginUUID, inst.pluginName, float.NonNil(network.MaxPollRate))
 		pollManager.StartPolling()
 		inst.NetworkPollManagers = append(inst.NetworkPollManagers, pollManager)
 	} else {
@@ -81,7 +86,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	isOutput := checkForOutputType(body.ObjectType)
 	body.IsOutput = nils.NewBool(isOutput)
 
-	point, err = inst.db.CreatePoint(body, true, true)
+	point, err = inst.db.CreatePoint(body, true)
 	if point == nil || err != nil {
 		inst.modbusDebugMsg("addPoint(): failed to create modbus point: ", body.Name)
 		return nil, errors.New(fmt.Sprint("failed to create modbus point. err: ", err))
@@ -121,6 +126,9 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		return
 	}
 
+	// indicates that ui should display polling statistics
+	body.HasPollingStatistics = true
+
 	if boolean.IsFalse(body.Enable) {
 		body.CommonFault.InFault = true
 		body.CommonFault.MessageLevel = model.MessageLevel.Warning
@@ -135,7 +143,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		body.CommonFault.LastOk = time.Now().UTC()
 	}
 
-	network, err = inst.db.UpdateNetwork(body.UUID, body, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, body)
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -151,6 +159,10 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		return
 	}
 
+	if netPollMan.NetworkName != network.Name {
+		netPollMan.NetworkName = network.Name
+	}
+
 	if boolean.IsFalse(network.Enable) && netPollMan.Enable == true {
 		// DO POLLING DISABLE ACTIONS
 		netPollMan.StopPolling()
@@ -164,7 +176,7 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 		inst.db.ClearErrorsForAllDevicesOnNetwork(network.UUID, true)
 	}
 
-	network, err = inst.db.UpdateNetwork(body.UUID, network, true)
+	network, err = inst.db.UpdateNetwork(body.UUID, network)
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -192,7 +204,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 		body.CommonFault.LastOk = time.Now().UTC()
 	}
 
-	device, err = inst.db.UpdateDevice(body.UUID, body, true)
+	device, err = inst.db.UpdateDevice(body.UUID, body)
 	if err != nil || device == nil {
 		return nil, err
 	}
@@ -246,7 +258,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	}
 	// TODO: NEED TO ACCOUNT FOR OTHER CHANGES ON DEVICE.  It would be useful to have a way to know if the device polling rates were changed.
 
-	device, err = inst.db.UpdateDevice(device.UUID, device, true)
+	device, err = inst.db.UpdateDevice(device.UUID, device)
 	if err != nil {
 		return nil, err
 	}
@@ -284,8 +296,12 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		body.CommonFault.Message = "point disabled"
 		body.CommonFault.LastFail = time.Now().UTC()
 	}
-
-	point, err = inst.db.UpdatePoint(body.UUID, body, true)
+	body.CommonFault.InFault = false
+	body.CommonFault.MessageLevel = model.MessageLevel.Info
+	body.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	body.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	body.CommonFault.LastOk = time.Now().UTC()
+	body, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.modbusDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
@@ -349,7 +365,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			return point, nil
 	*/
 
-	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body, false)
+	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body)
 	if err != nil {
 		inst.modbusDebugMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err
@@ -385,7 +401,12 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 						netPollMan.PollQueue.PointsUpdatedWhilePolling[point.UUID] = false
 						point.WritePollRequired = boolean.NewFalse()
 					}
-					point, err = inst.db.UpdatePoint(point.UUID, point, true)
+					point.CommonFault.InFault = false
+					point.CommonFault.MessageLevel = model.MessageLevel.Info
+					point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+					point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+					point.CommonFault.LastOk = time.Now().UTC()
+					point, err = inst.db.UpdatePoint(point.UUID, point)
 					if err != nil || point == nil {
 						inst.modbusDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
 						inst.pointUpdateErr(point, fmt.Sprint("writePoint(): cannot find PollingPoint for point: ", point.UUID), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
@@ -408,7 +429,12 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			} else {
 				point.ReadPollRequired = boolean.NewFalse()
 			}
-			point, err = inst.db.UpdatePoint(point.UUID, point, true)
+			point.CommonFault.InFault = false
+			point.CommonFault.MessageLevel = model.MessageLevel.Info
+			point.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+			point.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+			point.CommonFault.LastOk = time.Now().UTC()
+			point, err = inst.db.UpdatePoint(point.UUID, point)
 
 			pp.PollPriority = model.PRIORITY_ASAP                                                                               // TODO: this line look sus.
 			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false, pollqueue.NORMAL_RETRY, false, false) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
@@ -512,11 +538,11 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 }
 
 // THE FOLLOWING FUNCTIONS ARE CALLED FROM WITHIN THE PLUGIN
-func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess, clearFaults bool) (*model.Point, error) {
+func (inst *Instance) pointUpdate(point *model.Point, value float64, readSuccess bool) (*model.Point, error) {
 	if readSuccess {
 		point.OriginalValue = float.New(value)
 	}
-	_, err := inst.db.UpdatePoint(point.UUID, point, clearFaults)
+	_, err := inst.db.UpdatePoint(point.UUID, point)
 	if err != nil {
 		inst.modbusDebugMsg("MODBUS UPDATE POINT UpdatePointPresentValue() error: ", err)
 		return nil, err

@@ -56,24 +56,24 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.PATCH(plugin.NetworksURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYNetwork(ctx)
-		network, err := inst.db.UpdateNetwork(body.UUID, body, true)
+		network, err := inst.db.UpdateNetwork(body.UUID, body)
 		api.ResponseHandler(network, err, ctx)
 	})
 	mux.PATCH(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
-		device, err := inst.db.UpdateDevice(body.UUID, body, true)
+		device, err := inst.db.UpdateDevice(body.UUID, body)
 		inst.updateDevicePointsAddress(device)
 		api.ResponseHandler(device, err, ctx)
 	})
 	mux.PATCH(plugin.PointsURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYPoint(ctx)
-		point, err := inst.db.UpdatePoint(body.UUID, body, false)
+		point, err := inst.db.UpdatePoint(body.UUID, body)
 		api.ResponseHandler(point, err, ctx)
 	})
 	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBodyPointWriter(ctx)
 		uuid := plugin.ResolveID(ctx)
-		point, _, _, _, err := inst.db.PointWrite(uuid, body, false)
+		point, _, _, _, err := inst.db.PointWrite(uuid, body)
 		api.ResponseHandler(point, err, ctx)
 	})
 	mux.DELETE(plugin.NetworksURL, func(ctx *gin.Context) {

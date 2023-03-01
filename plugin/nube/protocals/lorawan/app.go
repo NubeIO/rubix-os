@@ -89,7 +89,7 @@ func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
 			currDev.Description != csDev.Description {
 			currDev.Name = csDev.Name
 			currDev.Description = csDev.Description
-			_, err = inst.db.UpdateDevice(currDev.UUID, currDev, true)
+			_, err = inst.db.UpdateDevice(currDev.UUID, currDev)
 			if err != nil {
 				log.Error("lorawan: Error updating device during sync: ", err)
 			} else {
@@ -160,7 +160,7 @@ func (inst *Instance) setCSDisconnected(err error) {
 			Message: err.Error(),
 		},
 	}
-	inst.db.UpdateNetwork(inst.networkUUID, &net, true)
+	inst.db.UpdateNetwork(inst.networkUUID, &net)
 	go inst.connectToCSLoop(inst.ctx)
 }
 
