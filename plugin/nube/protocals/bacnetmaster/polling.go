@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/flow-framework/src/poller"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/writemode"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -210,9 +211,13 @@ func (inst *Instance) BACnetMasterPolling() error {
 			currentBACServPriority, highestPriorityValue, readSuccess, writeSuccess, err := inst.doReadAllThenWriteDiff7141516(pnt, net.UUID, dev.UUID)
 			if err != nil {
 				err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-				netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+				netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.NORMAL_RETRY, callback)
 				continue
 			}
+
+			// this resets IsTypeBool to correct setting (fixes issues from points created before this was fixed in updatePoint()
+			isTypeBool := checkForBooleanType(pnt.ObjectType, pnt.DataType)
+			pnt.IsTypeBool = nils.NewBool(isTypeBool)
 
 			if currentBACServPriority != nil {
 				currentBACServPriorityMap := ConvertPriorityToMap(*currentBACServPriority)

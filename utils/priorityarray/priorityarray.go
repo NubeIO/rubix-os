@@ -95,10 +95,10 @@ func ParsePriority(originalPointPriority *model.Priority, newPriorityMapPtr *map
 			//   true => point.priority: `{"_15": 10, "16": 11}` and body.priority: `{"_15": null, "16": 11}`
 			if ok {
 				doesPriorityExist = true
-				val = v
 				if !float.ComparePtrValues(v, val) {
 					isPriorityChanged = true
 				}
+				val = v
 			}
 			if val == nil {
 				resultPriorityMap[key] = nil

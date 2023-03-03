@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/nurl"
 	"github.com/NubeIO/flow-framework/utils/writemode"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"math"
@@ -141,10 +142,10 @@ func (inst *Instance) ModbusPolling() error {
 				continue
 			}
 
-			inst.modbusPollingMsg("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+			inst.modbusPollingMsg("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
 			inst.modbusPollingMsg(fmt.Sprintf("NEXT POLL DRAWN! : Network: %s, Device: %s, Point: %s, Priority: %s, Device-Add: %d, Point-Add: %d, Point Type: %s, WriteRequired: %t, ReadRequired: %t", net.Name, dev.Name, pnt.Name, pnt.PollPriority, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
 
-			if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
+			if boolean.IsFalse(pnt.WritePollRequired) && boolean.IsFalse(pnt.ReadPollRequired) {
 				inst.modbusDebugMsg("polling not required on this point")
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.NORMAL_RETRY, callback)
 				continue
@@ -203,7 +204,7 @@ func (inst *Instance) ModbusPolling() error {
 				readResponse, readResponseValue, err = inst.networkRead(mbClient, pnt)
 				if err != nil {
 					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
-					netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+					netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.IMMEDIATE_RETRY, callback)
 					continue
 				}
 				if bitwiseType {
@@ -253,7 +254,7 @@ func (inst *Instance) ModbusPolling() error {
 					writeResponse, writeResponseValue, err = inst.networkWrite(mbClient, pnt)
 					if err != nil {
 						err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
-						netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.DELAYED_RETRY, callback)
+						netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.IMMEDIATE_RETRY, callback)
 						continue
 					}
 					if bitwiseType {
@@ -286,7 +287,7 @@ func (inst *Instance) ModbusPolling() error {
 			}
 
 			isChange := !float.ComparePtrValues(pnt.OriginalValue, &newValue)
-			if isChange {
+			if isChange { // no change so just complete the polling (no point update required)
 				if err != nil {
 					netPollMan.PollingFinished(pp, pollStartTime, writeSuccess, readSuccess, true, false, pollqueue.NORMAL_RETRY, callback)
 					continue
@@ -302,15 +303,20 @@ func (inst *Instance) ModbusPolling() error {
 					// fmt.Println("ModbusPolling: writeOnceWriteValueToPresentVal responseValue: ", responseValue)
 					readSuccess = true
 				}
+
+				// this resets IsTypeBool to correct setting (fixes issues from points created before this was fixed in updatePoint()
+				isTypeBool := checkForBooleanType(pnt.ObjectType, pnt.DataType)
+				pnt.IsTypeBool = nils.NewBool(isTypeBool)
+
 				pnt.CommonFault.InFault = false
 				pnt.CommonFault.MessageLevel = model.MessageLevel.Info
 				pnt.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
 				pnt.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
 				pnt.CommonFault.LastOk = time.Now().UTC()
-				point, _ := inst.pointUpdate(pnt, newValue, readSuccess || writeSuccess)
+				inst.pointUpdate(pnt, newValue, readSuccess || writeSuccess)
 				// inst.modbusPollingMsg(fmt.Sprintf("point: %+v", point))
-				inst.modbusPollingMsg(fmt.Sprintf("point.OriginalValue: %+v", *point.OriginalValue))
-				inst.modbusPollingMsg(fmt.Sprintf("point.WriteValue: %+v", *point.WriteValue))
+				// inst.modbusPollingMsg(fmt.Sprintf("point.OriginalValue: %+v", *point.OriginalValue))
+				// inst.modbusPollingMsg(fmt.Sprintf("point.WriteValue: %+v", *point.WriteValue))
 			}
 
 			/*

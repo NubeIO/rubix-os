@@ -335,7 +335,12 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 
 	if !isWriteable(body.WriteMode, body.ObjectType) { // clear writeable point properties if point is not writeable
 		body = writemode.ResetWriteableProperties(body)
+	} else {
+		body.WritePollRequired = boolean.NewTrue()
 	}
+
+	isTypeBool := checkForBooleanType(body.ObjectType, body.DataType)
+	body.IsTypeBool = nils.NewBool(isTypeBool)
 
 	inst.bacnetDebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
 	inst.bacnetDebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
@@ -493,7 +498,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			}
 			return point, nil
 
-			pp.PollPriority = model.PRIORITY_ASAP
+			// pp.PollPriority = model.PRIORITY_ASAP  // TODO: THIS NEEDS TO BE IMPLEMENTED SO THAT ONLY MANUAL WRITES ARE PROMOTED TO ASAP PRIORITY
 			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false, pollqueue.NORMAL_RETRY, false, false, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 			// netPollMan.PollQueue.AddPollingPoint(pp)
 			// netPollMan.PollQueue.UpdatePollingPointByPointUUID(point.UUID, model.PRIORITY_ASAP)

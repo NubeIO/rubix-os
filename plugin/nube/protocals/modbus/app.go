@@ -279,12 +279,16 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 			netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
 			continue
 		}
-
 	*/
 
 	if !isWriteable(body.WriteMode, body.ObjectType) { // clear writeable point properties if point is not writeable
 		body = writemode.ResetWriteableProperties(body)
+	} else {
+		body.WritePollRequired = boolean.NewTrue()
 	}
+
+	isTypeBool := checkForBooleanType(body.ObjectType, body.DataType)
+	body.IsTypeBool = nils.NewBool(isTypeBool)
 
 	inst.modbusDebugMsg(fmt.Sprintf("updatePoint() body: %+v\n", body))
 	inst.modbusDebugMsg(fmt.Sprintf("updatePoint() priority: %+v\n", body.Priority))
@@ -301,21 +305,21 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	body.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
 	body.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
 	body.CommonFault.LastOk = time.Now().UTC()
-	body, err = inst.db.UpdatePoint(body.UUID, body)
+	point, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
-		inst.modbusDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
+		inst.modbusErrorMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
 	}
 
 	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	if err != nil || dev == nil {
-		inst.modbusDebugMsg("updatePoint(): bad response from GetDevice()")
+		inst.modbusErrorMsg("updatePoint(): bad response from GetDevice()")
 		return nil, err
 	}
 
 	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
 	if netPollMan == nil || err != nil {
-		inst.modbusDebugMsg("updatePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
+		inst.modbusErrorMsg("updatePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
 		_ = inst.pointUpdateErr(point, "cannot find NetworkPollManager for network", model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return
 	}
@@ -344,9 +348,6 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		inst.modbusDebugMsg("writePoint(): nil point object")
 		return
 	}
-
-	inst.modbusDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
-	inst.modbusDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
 
 	/*
 		point, err = inst.db.GetPoint(pntUUID, api.Args{})
@@ -385,7 +386,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	}
 
 	if boolean.IsTrue(point.Enable) {
-		if isWriteValueChange || ((point.WriteMode == model.WriteOnceThenRead || point.WriteMode == model.WriteOnceReadOnce) && *point.WriteValue != *point.OriginalValue) { // if the write value has changed, we need to re-add the point so that it is polled asap (if required)
+		if isWriteValueChange || point.WriteMode == model.WriteOnceReadOnce || point.WriteMode == model.WriteOnce || (point.WriteMode == model.WriteOnceThenRead && *point.WriteValue != *point.OriginalValue) { // if the write value has changed, we need to re-add the point so that it is polled asap (if required)
 			pp, _ := netPollMan.PollQueue.RemovePollingPointByPointUUID(point.UUID)
 			if pp == nil {
 				if netPollMan.PollQueue.OutstandingPollingPoints.GetPollingPointIndexByPointUUID(point.UUID) > -1 {
@@ -440,9 +441,8 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 				inst.pointUpdateErr(point, fmt.Sprint("writePoint(): bad response from UpdatePoint() err:", err), model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 				return point, err
 			}
-			return point, nil
 
-			pp.PollPriority = model.PRIORITY_ASAP
+			// pp.PollPriority = model.PRIORITY_ASAP   // TODO: THIS NEEDS TO BE IMPLEMENTED SO THAT ONLY MANUAL WRITES ARE PROMOTED TO ASAP PRIORITY
 			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false, pollqueue.IMMEDIATE_RETRY, false, false, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 			// netPollMan.PollQueue.AddPollingPoint(pp)
 			// netPollMan.PollQueue.UpdatePollingPointByPointUUID(point.UUID, model.PRIORITY_ASAP)
