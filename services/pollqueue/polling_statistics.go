@@ -52,8 +52,7 @@ func (pm *NetworkPollManager) GetPollingQueueStatistics() *model.PollQueueStatis
 	stats.HighPriorityLockupAlert = pm.HighPriorityLockupAlert
 	stats.NormalPriorityLockupAlert = pm.NormalPriorityLockupAlert
 	stats.LowPriorityLockupAlert = pm.LowPriorityLockupAlert
-	BusyTime, _ := time.ParseDuration(fmt.Sprintf("%fs", pm.BusyTime))
-	stats.BusyTime = BusyTime.String()
+	stats.BusyTime = fmt.Sprintf("%.1f%%", pm.BusyTime)
 	EnabledTime, _ := time.ParseDuration(fmt.Sprintf("%fs", pm.EnabledTime))
 	stats.EnabledTime = EnabledTime.String()
 	PortUnavailableTime, _ := time.ParseDuration(fmt.Sprintf("%fs", pm.PortUnavailableTime))

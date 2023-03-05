@@ -14,6 +14,13 @@ func (pm *NetworkPollManager) pollQueueDebugMsg(args ...interface{}) {
 	}
 }
 
+func (pm *NetworkPollManager) pollQueuePollingMsg(args ...interface{}) {
+	if nstring.InEqualIgnoreCase(pm.Config.LogLevel, "POLLING") || nstring.InEqualIgnoreCase(pm.Config.LogLevel, "DEBUG") {
+		prefix := fmt.Sprintf("%s Poll Queue: ", pm.PluginName)
+		log.Info(prefix, args)
+	}
+}
+
 func (pm *NetworkPollManager) pollQueueErrorMsg(args ...interface{}) {
 	prefix := fmt.Sprintf("%s Poll Queue: ", pm.PluginName)
 	log.Error(prefix, args)

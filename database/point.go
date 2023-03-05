@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"sync"
 	"time"
 
@@ -289,11 +288,13 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	}
 	pointModel.WriteValue = writeValue
 	// last update was ok
-	pointModel.MessageLevel = model.MessageLevel.Info
-	pointModel.MessageCode = model.CommonFaultCode.Ok
-	pointModel.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
-	pointModel.LastOk = time.Now()
-	if writeOnDB {
+	/*
+		pointModel.MessageLevel = model.MessageLevel.Info
+		pointModel.MessageCode = model.CommonFaultCode.Ok
+		pointModel.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
+		pointModel.LastOk = time.Now()
+	*/
+	if !writeOnDB {
 		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 	}
 	if isChange && writeOnDB {

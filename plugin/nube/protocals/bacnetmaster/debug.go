@@ -14,6 +14,14 @@ func (inst *Instance) bacnetDebugMsg(args ...interface{}) {
 	}
 }
 
+// bacnetPollingMsg prints only debug messages relevant to polling (more limited than DEBUG)
+func (inst *Instance) bacnetPollingMsg(args ...interface{}) {
+	if nstring.InEqualIgnoreCase(inst.config.LogLevel, "POLLING") || nstring.InEqualIgnoreCase(inst.config.LogLevel, "DEBUG") {
+		prefix := "BACnet Master Polling: "
+		log.Info(prefix, args)
+	}
+}
+
 func (inst *Instance) bacnetErrorMsg(args ...interface{}) {
 	prefix := "BACnet Master: "
 	log.Error(prefix, args)

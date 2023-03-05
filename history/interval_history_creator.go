@@ -15,7 +15,7 @@ func (h *History) InitIntervalHistoryCreator(syncPeriod int) {
 }
 
 func (h *History) createIntervalHistories() {
-	log.Info("Create interval histories has been called...")
+	log.Debug("Create interval histories has been called...")
 	var producerHistories []*model.ProducerHistory
 	currentDate := time.Now().UTC()
 	producers, err := h.DB.GetProducersForCreateInterval()
@@ -45,5 +45,5 @@ func (h *History) createIntervalHistories() {
 			log.Error(err)
 		}
 	}
-	log.Info("Finished create interval histories process")
+	log.Debug("Finished create interval histories process")
 }
