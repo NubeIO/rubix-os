@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.10.4](https://github.com/NubeIO/flow-framework/tree/v0.10.4) (2023-03-05)
+
+- improvements to modbus and bacnet polling
+- fix for owens point issues
+
 ## [v0.10.3](https://github.com/NubeIO/flow-framework/tree/v0.10.3) (2023-03-01)
 
 - Fix: present value write
