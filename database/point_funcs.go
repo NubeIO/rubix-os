@@ -18,7 +18,7 @@ import (
 
 const ChuckSize = 5
 
-var pointUpdateBuffers []interfaces.PointUpdateBuffer
+var pointUpdateBuffers []*interfaces.PointUpdateBuffer
 
 func CreatePointDeepCopy(point model.Point) model.Point {
 	var outputPoint model.Point
@@ -28,6 +28,16 @@ func CreatePointDeepCopy(point model.Point) model.Point {
 }
 
 func GetPoint(uuid string, args api.Args) *model.Point {
+	m, ok := mutexPointMap[uuid]
+	if ok {
+		m.Lock()
+		defer m.Unlock()
+	} else {
+		mutex := sync.Mutex{}
+		mutexPointMap[uuid] = sync.Mutex{}
+		mutex.Lock()
+		defer mutex.Unlock()
+	}
 	for _, pub := range pointUpdateBuffers {
 		if pub.UUID == uuid {
 			point := CreatePointDeepCopy(*pub.Point)
@@ -129,12 +139,13 @@ func (d *GormDatabase) priorityMapToPatch(priorityMap *map[string]*float64) map[
 }
 
 func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point, point *model.Point) {
-	d.mutex.Lock()
-	defer d.mutex.Unlock()
-	pointUpdateBuffer := interfaces.PointUpdateBuffer{
+	d.pointBuffersMutex.Lock()
+	defer d.pointBuffersMutex.Unlock()
+	pointUpdateBuffer := &interfaces.PointUpdateBuffer{
 		UUID:  uuid,
 		Body:  body,
 		Point: point,
+		State: interfaces.Created,
 	}
 	for index, pub := range pointUpdateBuffers {
 		if pub.UUID == uuid {
@@ -152,20 +163,21 @@ func (d *GormDatabase) FlushPointUpdateBuffers() {
 		return
 	}
 
-	d.mutex.Lock()
-	var tempPointUpdateBuffers []interfaces.PointUpdateBuffer
+	d.pointBuffersMutex.Lock()
+	var tempPointUpdateBuffers []*interfaces.PointUpdateBuffer
 	tempPointUpdateBuffers = append(tempPointUpdateBuffers, pointUpdateBuffers...)
-	pointUpdateBuffers = nil
-	d.mutex.Unlock()
+	d.pointBuffersMutex.Unlock()
 
 	chuckPointUpdateBuffers := ChuckPointUpdateBuffer(tempPointUpdateBuffers, ChuckSize)
 	for _, chuckPointUpdateBuffer := range chuckPointUpdateBuffers {
 		wg := &sync.WaitGroup{}
 		for _, point := range chuckPointUpdateBuffer {
+			d.updateUpdatePointBufferState(point.UUID, interfaces.Updating)
 			wg.Add(1)
-			go func(point interfaces.PointUpdateBuffer) {
+			go func(point *interfaces.PointUpdateBuffer) {
 				defer wg.Done()
 				_, _ = d.UpdatePoint(point.UUID, point.Body, false)
+				d.removeUpdatePointBuffer(point.UUID)
 			}(point)
 			time.Sleep(200 * time.Millisecond) // for don't let them call at once
 		}
@@ -174,8 +186,8 @@ func (d *GormDatabase) FlushPointUpdateBuffers() {
 	log.Debug("Finished flush point update buffers process")
 }
 
-func ChuckPointUpdateBuffer(array []interfaces.PointUpdateBuffer, chunkSize int) [][]interfaces.PointUpdateBuffer {
-	var chucks [][]interfaces.PointUpdateBuffer
+func ChuckPointUpdateBuffer(array []*interfaces.PointUpdateBuffer, chunkSize int) [][]*interfaces.PointUpdateBuffer {
+	var chucks [][]*interfaces.PointUpdateBuffer
 	for i := 0; i < len(array); i += chunkSize {
 		end := i + chunkSize
 		if end > len(array) {
@@ -184,4 +196,33 @@ func ChuckPointUpdateBuffer(array []interfaces.PointUpdateBuffer, chunkSize int)
 		chucks = append(chucks, array[i:end])
 	}
 	return chucks
+}
+
+func (d *GormDatabase) updateUpdatePointBufferState(uuid string, state interfaces.State) {
+	d.pointBuffersMutex.Lock()
+	defer d.pointBuffersMutex.Unlock()
+	for _, pub := range pointUpdateBuffers {
+		if pub.UUID == uuid {
+			pub.State = state
+			return
+		}
+	}
+}
+
+// There is also a chance of next update request when it's updating, so for such case don't remove that record
+func (d *GormDatabase) removeUpdatePointBuffer(uuid string) {
+	d.pointBuffersMutex.Lock()
+	defer d.pointBuffersMutex.Unlock()
+	for i, pub := range pointUpdateBuffers {
+		if pub.UUID == uuid {
+			if pub.State == interfaces.Updating {
+				pointUpdateBuffers = d.removeIndex(i)
+			}
+			return
+		}
+	}
+}
+
+func (d *GormDatabase) removeIndex(index int) []*interfaces.PointUpdateBuffer {
+	return append(pointUpdateBuffers[:index], pointUpdateBuffers[index+1:]...)
 }
