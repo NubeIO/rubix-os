@@ -100,7 +100,11 @@ func (c *Client) Unsubscribe(topic string) error {
 func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) (err error) {
 	topic = strings.Replace(strings.Replace(topic, " ", "", -1), "\t", "", -1)
 	token := c.client.Publish(topic, byte(qos), retain, payload)
-	if token.WaitTimeout(2*time.Second) == false {
+	fmt.Println("topic>>>>: ", topic)
+	fmt.Println("payload>>>>: ", payload)
+	if token.WaitTimeout(30*time.Second) == false {
+		log.Warn("topic: ", topic)
+		log.Warn("payload: ", payload)
 		return errors.New("MQTT publish timout")
 	}
 	if token.Error() != nil {
@@ -150,6 +154,7 @@ func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err e
 	opts.SetMaxReconnectInterval(options.MaxReconnectInterval * time.Second)
 	opts.SetKeepAlive(options.SetKeepAlive * time.Second)
 	opts.SetPingTimeout(options.SetPingTimeout * time.Second)
+	opts.SetWriteTimeout(30 * time.Second)
 
 	opts.OnConnectionLost = func(c mqtt.Client, err error) {
 		topicLog{"error", "Lost connection", err}.logErr()
@@ -163,7 +168,7 @@ func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err e
 			if token := cc.Subscribe(s.topic, 2, s.handler); token.Wait() && token.Error() != nil {
 				topicLog{"error", "failed to subscribe", token.Error()}.logErr()
 			}
-			topicLog{"topic", "Resubscribe", nil}.logInfo()
+			topicLog{"topic", fmt.Sprintf("Resubscribe %s", s.topic), nil}.logInfo()
 		}
 		if onConnected != nil {
 			switch onConnected.(type) {
