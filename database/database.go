@@ -81,11 +81,12 @@ func createDirectoryIfSqlite(dialect, connection string) {
 
 // GormDatabase is a wrapper for the gorm framework.
 type GormDatabase struct {
-	DB            *gorm.DB
-	Store         cachestore.Handler
-	Bus           eventbus.BusService
-	PluginManager *plugin.Manager
-	mutex         sync.Mutex
+	DB                *gorm.DB
+	Store             cachestore.Handler
+	Bus               eventbus.BusService
+	PluginManager     *plugin.Manager
+	mutex             sync.Mutex
+	pointBuffersMutex sync.Mutex
 }
 
 // Close closes the gorm database connection.

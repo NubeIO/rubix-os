@@ -27,12 +27,23 @@ func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
 	if err := query.Find(&pointsModel).Error; err != nil {
 		return nil, err
 	}
+	marshallCachePoints(pointsModel, args)
 	return pointsModel, nil
+}
+
+func marshallCachePoints(points []*model.Point, args api.Args) {
+	for i, point := range points {
+		pnt := GetPoint(point.UUID, args)
+		if pnt != nil {
+			points[i] = pnt
+		}
+	}
 }
 
 func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point, error) {
 	var pointsModel []*model.Point
-	points, err := d.GetPoints(api.Args{WithPriority: true})
+	args := api.Args{WithPriority: true}
+	points, err := d.GetPoints(args)
 	if err != nil {
 		return nil, err
 	}
@@ -43,20 +54,11 @@ func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point,
 			}
 		}
 	}
+	marshallCachePoints(pointsModel, args)
 	return pointsModel, nil
 }
 
 func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error) {
-	m, ok := mutexPointMap[uuid]
-	if ok {
-		m.Lock()
-		defer m.Unlock()
-	} else {
-		mutex := sync.Mutex{}
-		mutexPointMap[uuid] = sync.Mutex{}
-		mutex.Lock()
-		defer mutex.Unlock()
-	}
 	point := GetPoint(uuid, args)
 	if point != nil {
 		return point, nil
@@ -287,13 +289,6 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.PresentValue = presentValue
 	}
 	pointModel.WriteValue = writeValue
-	// last update was ok
-	/*
-		pointModel.MessageLevel = model.MessageLevel.Info
-		pointModel.MessageCode = model.CommonFaultCode.Ok
-		pointModel.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
-		pointModel.LastOk = time.Now()
-	*/
 	if writeOnDB {
 		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 	}
