@@ -333,10 +333,11 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 
 	*/
 
-	if !isWriteable(body.WriteMode, body.ObjectType) { // clear writeable point properties if point is not writeable
-		body = writemode.ResetWriteableProperties(body)
-	} else {
+	if isWriteable(body.WriteMode, body.ObjectType) {
 		body.WritePollRequired = boolean.NewTrue()
+		body.EnableWriteable = boolean.NewTrue()
+	} else {
+		body = writemode.ResetWriteableProperties(body)
 	}
 
 	isTypeBool := checkForBooleanType(body.ObjectType, body.DataType)

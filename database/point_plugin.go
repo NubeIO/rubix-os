@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"time"
 )
@@ -14,6 +15,7 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 	}
 	pluginName := network.PluginPath
 	if pluginName == "system" {
+		body.EnableWriteable = boolean.NewTrue()
 		point, err = d.CreatePoint(body)
 		if err != nil {
 			return nil, err
@@ -43,6 +45,7 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 	}
 	pluginName := network.PluginPath
 	if pluginName == "system" {
+		point.EnableWriteable = boolean.NewTrue()
 		point, err = d.UpdatePoint(uuid, body, false)
 		if err != nil {
 			return nil, err

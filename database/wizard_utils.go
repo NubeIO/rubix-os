@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -39,6 +40,7 @@ func (d *GormDatabase) WizardNewNetworkDevicePoint(plugin string, network *model
 
 	if point != nil {
 		point.DeviceUUID = dev.UUID
+		point.EnableWriteable = boolean.NewTrue()
 		_, err = d.CreatePoint(point)
 		if err != nil {
 			return nil, fmt.Errorf("consumer point creation failure: %s", err)

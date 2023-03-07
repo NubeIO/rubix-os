@@ -74,6 +74,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	body.ObjectType = "analog_input"
 	body.IoType = string(model.IOTypeRAW)
 	body.Name = strings.ToLower(body.Name)
+	body.EnableWriteable = boolean.NewFalse()
 	point, err = inst.db.CreatePoint(body, true)
 	if err != nil {
 		return nil, err
@@ -231,6 +232,7 @@ func (inst *Instance) addPointsFromName(deviceBody *model.Device, names ...strin
 		pointName := getStructFieldJSONNameByName(decoder.CommonValues{}, name)
 		point := new(model.Point)
 		inst.setNewPointFields(deviceBody, point, pointName)
+		point.EnableWriteable = boolean.NewFalse()
 		points = append(points, point)
 	}
 	inst.savePoints(points)
@@ -259,6 +261,7 @@ func (inst *Instance) addPointsFromStruct(deviceBody *model.Device, pointsRefl r
 		}
 		point := new(model.Point)
 		inst.setNewPointFields(deviceBody, point, pointName)
+		point.EnableWriteable = boolean.NewFalse()
 		points = append(points, point)
 	}
 	inst.savePoints(points)
@@ -271,6 +274,7 @@ func (inst *Instance) savePoints(points []*model.Point) {
 		point := point
 		go func() {
 			defer wg.Done()
+			point.EnableWriteable = boolean.NewFalse()
 			_, err := inst.addPoint(point)
 			if err != nil {
 				log.Errorf("loraraw: issue on addPoint: %v\n", err)
@@ -301,6 +305,7 @@ func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
 	}
 	for _, pt := range dev.Points {
 		pt.AddressUUID = body.AddressUUID
+		pt.EnableWriteable = boolean.NewFalse()
 		_, err = inst.db.UpdatePoint(pt.UUID, pt)
 		if err != nil {
 			log.Errorf("loraraw: issue on UpdatePoint updateDevicePointsAddress(): %v\n", err)
