@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.10.5](https://github.com/NubeIO/flow-framework/tree/v0.10.5) (2023-03-07)
+
+- Adds support for updated modbus ObjectTypes
+- Adds support for EnableWriteable on points
+- Fix: runtime issue (#897)
+
 ## [v0.10.4](https://github.com/NubeIO/flow-framework/tree/v0.10.4) (2023-03-05)
 
 - Improvements to modbus and bacnet polling
