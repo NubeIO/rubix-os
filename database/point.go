@@ -294,7 +294,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 		pointModel.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
 		pointModel.LastOk = time.Now()
 	*/
-	if !writeOnDB {
+	if writeOnDB {
 		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 	}
 	if isChange && writeOnDB {
