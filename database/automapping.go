@@ -212,6 +212,7 @@ func (d *GormDatabase) createPointAutoMappingPoint(deviceUUID string, pointUUID 
 		pointModel.AutoMappingUUID = pointUUID
 		pointModel.Tags = pointTags
 		pointModel.MetaTags = pointMetaTags
+		pointModel.EnableWriteable = boolean.NewTrue()
 		return d.CreatePoint(pointModel)
 	}
 	_, _ = d.CreatePointMetaTags(point.UUID, pointMetaTags)

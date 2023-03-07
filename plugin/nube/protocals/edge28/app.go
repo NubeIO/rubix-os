@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
@@ -42,7 +43,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 
 	// CREATE ALL EDGE28 POINTS
 	inst.edge28DebugMsg("addDevice(): ADDING ALL POINTS")
-	//for _, e := range pointsAll() {
+	// for _, e := range pointsAll() {
 	//	inst.edge28DebugMsg(e)
 	//	var pnt model.Point
 	//	pnt.DeviceUUID = device.UUID
@@ -59,7 +60,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	//	if err != nil || point.UUID == "" {
 	//		inst.edge28ErrorMsg("addDevice(): ", "failed to create a new point")
 	//	}
-	//}
+	// }
 	return device, nil
 }
 
@@ -78,6 +79,12 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	objectType, isOutput := selectObjectType(body.IoNumber)
 	isTypeBool := checkForBooleanType(body.IoType)
+
+	if isOutput {
+		body.EnableWriteable = boolean.NewTrue()
+	} else {
+		body.EnableWriteable = boolean.NewFalse()
+	}
 
 	body.ObjectType = objectType
 	if objectType == "" {
@@ -153,6 +160,12 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	isTypeBool := checkForBooleanType(body.IoType)
 	body.IsOutput = nils.NewBool(isOutput)
 	body.IsTypeBool = nils.NewBool(isTypeBool)
+
+	if isOutput {
+		body.EnableWriteable = boolean.NewTrue()
+	} else {
+		body.EnableWriteable = boolean.NewFalse()
+	}
 
 	if body.WriteValue != nil {
 		body.WriteValue = limitValueByEdge28Type(body.IoType, body.WriteValue)
