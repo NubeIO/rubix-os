@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/plugin/compat"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -86,6 +88,13 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	} else {
 		return nil, errors.New("provide a plugin name ie: system, lora, modbus, lorawan, bacnet")
 	}
+	if body.GlobalUUID == "" {
+		deviceInfo, err := deviceinfo.GetDeviceInfo()
+		if err != nil {
+			return nil, err
+		}
+		body.GlobalUUID = deviceInfo.GlobalUUID
+	}
 	if err = d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
@@ -108,8 +117,6 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	_ = d.syncAfterUpdateNetwork(body.UUID, api.Args{WithTags: true, WithDevices: true,
-		WithPoints: true})
 	return networkModel, nil
 }
 
@@ -124,7 +131,6 @@ func (d *GormDatabase) UpdateNetworkErrors(uuid string, body *model.Network) err
 }
 
 func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
-	var aType = api.ArgsType
 	networkModel, err := d.GetNetwork(uuid, api.Args{WithDevices: true})
 	if err != nil {
 		return false, err
@@ -136,12 +142,16 @@ func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
 		go func() {
 			defer wg.Done()
 			if boolean.IsTrue(device.AutoMappingEnable) {
-				fn, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
+				fn, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, "")
 				if err != nil {
 					return
 				}
 				cli := client.NewFlowClientCliFromFN(fn)
-				url := urls.SingularUrlByArg(urls.NetworkUrl, aType.AutoMappingUUID, networkModel.UUID)
+				networkName := networkModel.Name
+				if boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave) {
+					networkName = generateLocalNetworkName(networkName)
+				}
+				url := urls.SingularUrl(urls.NetworkNameUrl, networkName)
 				_ = cli.DeleteQuery(url)
 			}
 			_, _ = d.DeleteDevice(device.UUID)
@@ -172,27 +182,13 @@ func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	return info
 }
 
-func (d *GormDatabase) syncAfterUpdateNetwork(uuid string, args api.Args) error {
-	network, err := d.GetNetwork(uuid, args)
-	if err != nil {
-		return err
-	}
-	if args.WithDevices {
-		_, err = d.SyncNetworkDevices(network.UUID, args)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (d *GormDatabase) SyncNetworks(args api.Args) ([]*interfaces.SyncModel, error) {
 	networks, _ := d.GetNetworks(args)
 	var outputs []*interfaces.SyncModel
 	channel := make(chan *interfaces.SyncModel)
 	defer close(channel)
 	for _, network := range networks {
-		go d.syncNetwork(network, channel)
+		go d.syncNetwork(network.UUID, args, channel)
 	}
 	for range networks {
 		outputs = append(outputs, <-channel)
@@ -200,13 +196,17 @@ func (d *GormDatabase) SyncNetworks(args api.Args) ([]*interfaces.SyncModel, err
 	return outputs, nil
 }
 
-func (d *GormDatabase) syncNetwork(network *model.Network, channel chan *interfaces.SyncModel) {
-	_, err := d.UpdateNetwork(network.UUID, network)
-	var output interfaces.SyncModel
+func (d *GormDatabase) syncNetwork(networkUUID string, args api.Args, channel chan *interfaces.SyncModel) {
+	// This is for syncing child descendants
+	syncModels, err := d.SyncNetworkDevices(networkUUID, args)
+	output := interfaces.SyncModel{UUID: networkUUID, IsError: false}
 	if err != nil {
-		output = interfaces.SyncModel{UUID: network.UUID, IsError: true, Message: nstring.New(err.Error())}
-	} else {
-		output = interfaces.SyncModel{UUID: network.UUID, IsError: false}
+		output = interfaces.SyncModel{UUID: networkUUID, IsError: true, Message: nstring.New(err.Error())}
+	}
+	for _, syncModel := range syncModels {
+		if syncModel.IsError {
+			output = interfaces.SyncModel{UUID: networkUUID, IsError: true, Message: syncModel.Message}
+		}
 	}
 	channel <- &output
 }
@@ -229,12 +229,41 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, args api.Args) ([]*interf
 }
 
 func (d *GormDatabase) syncDevice(device *model.Device, args api.Args, channel chan *interfaces.SyncModel) {
-	err := d.syncAfterCreateUpdateDevice(device.UUID, args)
-	var output interfaces.SyncModel
+	output := interfaces.SyncModel{UUID: device.UUID, IsError: false}
+	if boolean.IsTrue(device.CreatedFromAutoMapping) {
+		device.Connection = connection.Connected.String()
+		device.Message = nstring.NotAvailable
+		fnc, err := d.selectFlowNetworkClone(device.AutoMappingFlowNetworkName, "")
+		if err != nil {
+			device.Connection = connection.Broken.String()
+			device.Message = "flow network clone not found"
+		} else {
+			network, _ := d.GetNetworkByDeviceUUID(device.UUID, api.Args{})
+			cli := client.NewFlowClientCliFromFNC(fnc)
+			rawDevice, err := cli.GetQueryMarshal(urls.SingularUrl(urls.DeviceNameUrl, fmt.Sprintf("%s/%s",
+				strings.Replace(network.Name, "mapping_", "", -1), device.Name)), model.Device{})
+			if err != nil {
+				device.Connection = connection.Broken.String()
+				device.Message = err.Error()
+			} else {
+				if boolean.IsFalse(rawDevice.(*model.Device).AutoMappingEnable) {
+					_, _ = d.DeleteDevice(device.UUID)
+					channel <- &output
+					return
+				}
+			}
+		}
+		_ = d.UpdateDeviceErrors(device.UUID, device)
+	}
+	// This is for syncing child descendants
+	syncModels, err := d.SyncDevicePoints(device.UUID, args)
 	if err != nil {
 		output = interfaces.SyncModel{UUID: device.UUID, IsError: true, Message: nstring.New(err.Error())}
-	} else {
-		output = interfaces.SyncModel{UUID: device.UUID, IsError: false}
+	}
+	for _, syncModel := range syncModels {
+		if syncModel.IsError {
+			output = interfaces.SyncModel{UUID: device.UUID, IsError: true, Message: syncModel.Message}
+		}
 	}
 	channel <- &output
 }

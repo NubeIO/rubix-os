@@ -140,7 +140,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	}
 
 	go d.PublishPointsList("")
-	d.CreatePointAutoMapping(body)
 	return body, nil
 }
 
@@ -209,10 +208,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 		}
 		d.UpdateProducerByProducerThingUUID(pointModel.UUID, pointModel.Name, pointModel.HistoryEnable,
 			pointModel.HistoryType, pointModel.HistoryInterval)
-		err = d.UpdatePointAutoMapping(pointModel)
-		if err != nil {
-			return nil, err
-		}
 	} else {
 		d.bufferPointUpdate(uuid, body, pnt)
 	}
@@ -357,18 +352,23 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	}
 	r := query.RowsAffected
 	go d.PublishPointsList("")
-	var aType = api.ArgsType
 	deviceModel, err := d.GetDevice(point.DeviceUUID, api.Args{})
 	if err != nil {
 		return false, err
 	}
 	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
-		fn, err := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, deviceModel.AutoMappingFlowNetworkUUID)
+		fn, err := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, "")
 		if err != nil {
 			return false, err
 		}
 		cli := client.NewFlowClientCliFromFN(fn)
-		url := urls.SingularUrlByArg(urls.PointUrl, aType.AutoMappingUUID, point.UUID)
+		networkModel, _ := d.GetNetworkByDeviceUUID(deviceModel.UUID, api.Args{})
+		networkName := networkModel.Name
+		if boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave) {
+			networkName = generateLocalNetworkName(networkName)
+		}
+		url := urls.SingularUrl(urls.PointNameUrl, fmt.Sprintf("%s/%s/%s", networkName, deviceModel.Name,
+			point.Name))
 		_ = cli.DeleteQuery(url)
 	}
 	return r != 0, nil

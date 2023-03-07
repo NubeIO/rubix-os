@@ -111,3 +111,7 @@ func metaTagsArgsToKeyValues(metaTags string) [][]interface{} {
 	}
 	return keyValues
 }
+
+func generateLocalNetworkName(name string) string {
+	return fmt.Sprintf("mapping_%s", name)
+}

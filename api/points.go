@@ -17,6 +17,7 @@ type PointDatabase interface {
 	GetPointByName(networkName, deviceName, pointName string, args Args) (*model.Point, error)
 	PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter) (*model.Point, error)
 	DeleteOnePointByArgs(args Args) (bool, error)
+	DeletePointByName(networkName, deviceName, pointName string, args Args) (bool, error)
 
 	CreatePointPlugin(body *model.Point) (*model.Point, error)
 	UpdatePointPlugin(uuid string, body *model.Point) (*model.Point, error)
@@ -134,5 +135,14 @@ func (a *PointAPI) CreatePointMetaTags(ctx *gin.Context) {
 func (a *PointAPI) DeleteOnePointByArgs(ctx *gin.Context) {
 	args := buildDeviceArgs(ctx)
 	q, err := a.DB.DeleteOnePointByArgs(args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *PointAPI) DeletePointByName(ctx *gin.Context) {
+	networkName := resolveNetworkName(ctx)
+	deviceName := resolveDeviceName(ctx)
+	pointName := resolvePointName(ctx)
+	args := buildPointArgs(ctx)
+	q, err := a.DB.DeletePointByName(networkName, deviceName, pointName, args)
 	ResponseHandler(q, err, ctx)
 }

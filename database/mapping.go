@@ -185,6 +185,27 @@ func (d *GormDatabase) selectFlowNetwork(flowNetworkName, flowNetworkUUID string
 	return
 }
 
+func (d *GormDatabase) selectFlowNetworkClone(flowNetworkCloneName, flowNetworkCloneUUID string) (flowNetworkClone *model.FlowNetworkClone, err error) {
+	if flowNetworkCloneUUID != "" {
+		flowNetworkClone, err = d.GetFlowNetworkClone(flowNetworkCloneUUID, api.Args{})
+		if err != nil || flowNetworkClone == nil {
+			log.Errorln("mapping.db.selectFlowNetworkClone(): select by uuid missing flow network clone please add uuid:", flowNetworkCloneUUID)
+			return nil, errors.New(fmt.Sprintf("failed to find a flow-network-clone with uuid: %s", flowNetworkCloneUUID))
+		}
+	} else {
+		name := "local"
+		if flowNetworkCloneName != "" {
+			name = flowNetworkCloneName
+		}
+		flowNetworkClone, err = d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nils.NewString(name)})
+		if err != nil || flowNetworkClone == nil {
+			log.Errorln("mapping.db.selectFlowNetworkClone(): select by name missing flow network clone please add name:", name)
+			return nil, errors.New(fmt.Sprintf("failed to find a flow-network-clone with name: %s", name))
+		}
+	}
+	return
+}
+
 func (d *GormDatabase) createPointMappingStream(deviceName, networkName string, flowNetwork *model.FlowNetwork) (stream *model.Stream, err error) {
 	streamModel := &model.Stream{}
 	streamModel.Enable = boolean.NewTrue()

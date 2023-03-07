@@ -1,7 +1,7 @@
 package database
 
 import (
-	"fmt"
+	"errors"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -11,31 +11,32 @@ import (
 
 func (d *GormDatabase) SyncNetwork(body *interfaces.SyncNetwork) (*model.Network, error) {
 	d.mutex.Lock()
-	network, _ := d.GetNetworkByAutoMappingUUID(body.NetworkUUID, api.Args{WithTags: true})
-	networkName := body.NetworkName
+	defer d.mutex.Unlock()
 	if body.IsLocal {
-		networkName = fmt.Sprintf("mapping_%s", networkName)
+		body.NetworkName = generateLocalNetworkName(body.NetworkName)
 	}
+	network, _ := d.GetNetworkByName(body.NetworkName, api.Args{WithTags: true})
 	if network == nil {
 		networkModel := &model.Network{}
-		networkModel.Name = networkName
-		networkModel.AutoMappingUUID = body.NetworkUUID
+		networkModel.Name = body.NetworkName
 		networkModel.Enable = boolean.NewTrue()
 		networkModel.PluginPath = "system"
+		networkModel.GlobalUUID = body.NetworkGlobalUUID
+		networkModel.CreatedFromAutoMapping = boolean.NewTrue()
 		networkModel.Tags = body.NetworkTags
 		networkModel.MetaTags = body.NetworkMetaTags
 		network, err := d.CreateNetwork(networkModel)
-		d.mutex.Unlock()
 		return network, err
+	}
+	if network.GlobalUUID != body.NetworkGlobalUUID {
+		return nil, errors.New("network.name already exists")
 	}
 	_, _ = d.CreateNetworkMetaTags(network.UUID, body.NetworkMetaTags)
-	if network.Name != networkName || !reflect.DeepEqual(network.Tags, body.NetworkTags) {
-		network.Name = networkName
+	if network.Name != body.NetworkName || !reflect.DeepEqual(network.Tags, body.NetworkTags) {
+		network.Name = body.NetworkName
 		network.Tags = body.NetworkTags
 		network, err := d.UpdateNetwork(network.UUID, network)
-		d.mutex.Unlock()
 		return network, err
 	}
-	d.mutex.Unlock()
 	return network, nil
 }

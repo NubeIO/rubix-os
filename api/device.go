@@ -15,6 +15,7 @@ type DeviceDatabase interface {
 	UpdateDevice(uuid string, body *model.Device) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
 	DeleteOneDeviceByArgs(args Args) (bool, error)
+	DeleteDeviceByName(networkName string, deviceName string, args Args) (bool, error)
 
 	CreateDevicePlugin(body *model.Device) (*model.Device, error)
 	UpdateDevicePlugin(uuid string, body *model.Device) (*model.Device, error)
@@ -77,6 +78,14 @@ func (a *DeviceAPI) DeleteDevice(ctx *gin.Context) {
 func (a *DeviceAPI) DeleteOneDeviceByArgs(ctx *gin.Context) {
 	args := buildDeviceArgs(ctx)
 	q, err := a.DB.DeleteOneDeviceByArgs(args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *DeviceAPI) DeleteDeviceByName(ctx *gin.Context) {
+	networkName := resolveNetworkName(ctx)
+	deviceName := resolveDeviceName(ctx)
+	args := buildDeviceArgs(ctx)
+	q, err := a.DB.DeleteDeviceByName(networkName, deviceName, args)
 	ResponseHandler(q, err, ctx)
 }
 

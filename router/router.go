@@ -329,6 +329,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			networkRoutes.PATCH("/:uuid", networkHandler.UpdateNetwork)
 			networkRoutes.DELETE("/:uuid", networkHandler.DeleteNetwork)
 			networkRoutes.DELETE("/one/args", networkHandler.DeleteOneNetworkByArgs)
+			networkRoutes.DELETE("/name/:name", networkHandler.DeleteNetworkByName)
 			networkRoutes.PUT("/meta_tags/uuid/:uuid", networkHandler.CreateNetworkMetaTags)
 			networkRoutes.GET("/sync", networkHandler.SyncNetworks)
 			networkRoutes.GET("/:uuid/sync/devices", networkHandler.SyncNetworkDevices)
@@ -344,6 +345,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			deviceRoutes.PATCH("/:uuid", deviceHandler.UpdateDevice)
 			deviceRoutes.DELETE("/:uuid", deviceHandler.DeleteDevice)
 			deviceRoutes.DELETE("/one/args", deviceHandler.DeleteOneDeviceByArgs)
+			deviceRoutes.DELETE("/name/:network_name/:device_name", deviceHandler.DeleteDeviceByName)
 			deviceRoutes.PUT("/meta_tags/uuid/:uuid", deviceHandler.CreateDeviceMetaTags)
 			deviceRoutes.GET("/:uuid/sync/points", deviceHandler.SyncDevicePoints)
 		}
@@ -361,6 +363,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			pointRoutes.PATCH("/write/:uuid", pointHandler.PointWrite)
 			pointRoutes.DELETE("/:uuid", pointHandler.DeletePoint)
 			pointRoutes.DELETE("/one/args", pointHandler.DeleteOnePointByArgs)
+			pointRoutes.DELETE("/name/:network_name/:device_name/:point_name", pointHandler.DeletePointByName)
 			pointRoutes.PATCH("/name", pointHandler.PointWriteByNameArgs) // TODO remove
 			pointRoutes.PATCH("/name/:network_name/:device_name/:point_name", pointHandler.PointWriteByName)
 			pointRoutes.PUT("/meta_tags/uuid/:uuid", pointHandler.CreatePointMetaTags)

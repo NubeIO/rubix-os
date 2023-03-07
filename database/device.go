@@ -54,7 +54,6 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
-	_ = d.syncAfterCreateUpdateDevice(body.UUID, api.Args{WithTags: true})
 	return body, query.Error
 }
 
@@ -74,7 +73,6 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	if err := d.DB.Model(&deviceModel).Select("*").Updates(body).Error; err != nil {
 		return nil, err
 	}
-	_ = d.syncAfterCreateUpdateDevice(body.UUID, api.Args{WithTags: true, WithMetaTags: true, WithPoints: true})
 	return deviceModel, nil
 }
 
@@ -89,7 +87,6 @@ func (d *GormDatabase) UpdateDeviceErrors(uuid string, body *model.Device) error
 }
 
 func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
-	var aType = api.ArgsType
 	deviceModel, err := d.GetDevice(uuid, api.Args{WithPoints: true})
 	if err != nil {
 		return false, err
@@ -110,17 +107,21 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		autoMappingUUID := fmt.Sprintf("%s:%s", networkModel.UUID, deviceModel.UUID)
-		stream, _ := d.GetStreamByArgs(api.Args{AutoMappingUUID: nils.NewString(autoMappingUUID)})
+		streamName := fmt.Sprintf("%s:%s", networkModel.Name, deviceModel.Name)
+		stream, _ := d.GetStreamByArgs(api.Args{Name: nils.NewString(streamName)})
 		if stream != nil {
 			_, _ = d.DeleteStream(stream.UUID)
 		}
-		fn, err := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, deviceModel.AutoMappingFlowNetworkUUID)
+		fn, err := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, "")
 		if err != nil {
 			return false, err
 		}
 		cli := client.NewFlowClientCliFromFN(fn)
-		url := urls.SingularUrlByArg(urls.DeviceUrl, aType.AutoMappingUUID, deviceModel.UUID)
+		networkName := networkModel.Name
+		if boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave) {
+			networkName = generateLocalNetworkName(networkName)
+		}
+		url := urls.SingularUrl(urls.DeviceNameUrl, fmt.Sprintf("%s/%s", networkName, deviceModel.Name))
 		_ = cli.DeleteQuery(url)
 	}
 	query := d.DB.Delete(&deviceModel)
@@ -144,7 +145,7 @@ func (d *GormDatabase) SyncDevicePoints(uuid string, args api.Args) ([]*interfac
 	defer close(channel)
 	// This is for syncing child descendants
 	for _, point := range device.Points {
-		go d.syncPoint(point, channel)
+		go d.syncPoint(device, point, channel)
 	}
 	for range device.Points {
 		outputs = append(outputs, <-channel)
@@ -152,64 +153,38 @@ func (d *GormDatabase) SyncDevicePoints(uuid string, args api.Args) ([]*interfac
 	return outputs, nil
 }
 
-func (d *GormDatabase) syncAfterCreateUpdateDevice(uuid string, args api.Args) error {
-	device, err := d.GetDevice(uuid, args)
-	if err != nil {
-		return err
-	}
-	if boolean.IsTrue(device.AutoMappingEnable) {
-		if args.WithPoints {
-			_, _ = d.SyncDevicePoints(device.UUID, args)
-		} else if len(device.Points) == 0 {
-			fn, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, device.AutoMappingFlowNetworkUUID)
-			if err != nil {
-				return err
-			}
-			cli := client.NewFlowClientCliFromFN(fn)
-			network, err := d.GetNetworkByDeviceUUID(device.UUID, api.Args{WithTags: true, WithMetaTags: true})
-			if err != nil {
-				return err
-			}
-			syncBody := interfaces.SyncDevice{
-				NetworkUUID:     network.UUID,
-				NetworkName:     network.Name,
-				NetworkTags:     network.Tags,
-				NetworkMetaTags: network.MetaTags,
-				DeviceUUID:      device.UUID,
-				DeviceName:      device.Name,
-				DeviceTags:      device.Tags,
-				DeviceMetaTags:  device.MetaTags,
-				FlowNetworkUUID: fn.UUID,
-				IsLocal:         boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave),
-			}
-			_, err = cli.SyncDevice(&syncBody)
-			if err != nil {
-				return err
-			}
-		}
-	} else if device.AutoMappingUUID != "" {
-		device.Connection = connection.Connected.String()
-		device.Message = nstring.NotAvailable
-		fnc, err := d.GetFlowNetworkClone(device.AutoMappingFlowNetworkUUID, api.Args{})
-		if err != nil {
-			device.Connection = connection.Broken.String()
-			device.Message = "flow network clone not found"
-		} else {
-			cli := client.NewFlowClientCliFromFNC(fnc)
-			_, err = cli.GetQueryMarshal(urls.SingularUrl(urls.DeviceUrl, device.AutoMappingUUID), model.Device{})
-			if err != nil {
-				device.Connection = connection.Broken.String()
-				device.Message = err.Error()
-			}
-		}
-		_ = d.UpdateDeviceErrors(device.UUID, device)
-	}
-	return err
-}
-
-func (d *GormDatabase) syncPoint(point *model.Point, channel chan *interfaces.SyncModel) {
-	err := d.UpdatePointAutoMapping(point)
+func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, channel chan *interfaces.SyncModel) {
 	var output interfaces.SyncModel
+	if boolean.IsTrue(point.CreatedFromAutoMapping) {
+		point.Connection = connection.Connected.String()
+		point.Message = nstring.NotAvailable
+		_, err := d.GetOneWriterByArgs(api.Args{WriterThingUUID: nils.NewString(point.UUID)})
+		if err != nil {
+			point.Connection = connection.Broken.String()
+			point.Message = "writer not found"
+		} else {
+			network, _ := d.GetNetworkByDeviceUUID(device.UUID, api.Args{})
+			flowNetworkClone, _ := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
+			if flowNetworkClone != nil {
+				cli := client.NewFlowClientCliFromFNC(flowNetworkClone)
+				rawPoint, err := cli.GetQueryMarshal(urls.SingularUrl(urls.PointNameUrl,
+					fmt.Sprintf("%s/%s/%s", strings.Replace(network.Name, "mapping_", "", -1),
+						device.Name, point.Name)), model.Point{})
+				if err != nil {
+					point.Connection = connection.Broken.String()
+					point.Message = err.Error()
+				} else {
+					if boolean.IsFalse(rawPoint.(*model.Point).AutoMappingEnable) {
+						_, _ = d.DeletePoint(point.UUID)
+						channel <- &output
+						return
+					}
+				}
+			}
+		}
+		_ = d.UpdatePointErrors(point.UUID, point)
+	}
+	err := d.CreatePointAutoMapping(point)
 	if err != nil {
 		output = interfaces.SyncModel{UUID: point.UUID, IsError: true, Message: nstring.New(err.Error())}
 	} else {

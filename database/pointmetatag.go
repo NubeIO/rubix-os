@@ -1,7 +1,6 @@
 package database
 
 import (
-	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm/clause"
 	"strings"
@@ -37,8 +36,6 @@ func (d *GormDatabase) CreatePointMetaTags(pointUUID string, body []*model.Point
 		return nil, err
 	}
 	tx.Commit()
-	point, _ := d.GetPoint(pointUUID, api.Args{WithMetaTags: true})
-	_ = d.UpdatePointAutoMapping(point)
 	return body, nil
 }
 

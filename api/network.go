@@ -19,6 +19,7 @@ type NetworkDatabase interface {
 	UpdateNetwork(uuid string, body *model.Network) (*model.Network, error)
 	DeleteNetwork(uuid string) (bool, error)
 	DeleteOneNetworkByArgs(args Args) (bool, error)
+	DeleteNetworkByName(name string, args Args) (bool, error)
 
 	CreateNetworkPlugin(network *model.Network) (*model.Network, error)
 	UpdateNetworkPlugin(uuid string, body *model.Network) (*model.Network, error)
@@ -105,6 +106,13 @@ func (a *NetworksAPI) DeleteNetwork(ctx *gin.Context) {
 func (a *NetworksAPI) DeleteOneNetworkByArgs(ctx *gin.Context) {
 	args := buildNetworkArgs(ctx)
 	q, err := a.DB.DeleteOneNetworkByArgs(args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *NetworksAPI) DeleteNetworkByName(ctx *gin.Context) {
+	name := resolveName(ctx)
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.DeleteNetworkByName(name, args)
 	ResponseHandler(q, err, ctx)
 }
 

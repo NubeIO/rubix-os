@@ -7,7 +7,7 @@ import (
 )
 
 type SyncDeviceDatabase interface {
-	SyncDevice(fn *interfaces.SyncDevice) (*model.Device, error)
+	SyncDevice(fn *interfaces.SyncDevice) (*model.Network, *model.Device, error)
 }
 
 type SyncDeviceAPI struct {
@@ -16,6 +16,6 @@ type SyncDeviceAPI struct {
 
 func (a *SyncDeviceAPI) SyncDevice(ctx *gin.Context) {
 	body, _ := getBodySyncDevice(ctx)
-	q, err := a.DB.SyncDevice(body)
+	_, q, err := a.DB.SyncDevice(body)
 	ResponseHandler(q, err, ctx)
 }
