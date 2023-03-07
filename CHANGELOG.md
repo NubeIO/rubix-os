@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.10.6](https://github.com/NubeIO/flow-framework/tree/v0.10.6) (2023-03-07)
+
+- Fix: points values are not written correctly
+- Improvements in cache buffers
+
 ## [v0.10.5](https://github.com/NubeIO/flow-framework/tree/v0.10.5) (2023-03-07)
 
 - Adds support for updated modbus ObjectTypes
