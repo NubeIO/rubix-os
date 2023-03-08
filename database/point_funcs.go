@@ -210,6 +210,7 @@ func (d *GormDatabase) updateUpdatePointBufferState(uuid string, state interface
 }
 
 // There is also a chance of next update request when it's updating, so for such case don't remove that record
+// For eg: when it's updating the record, update new request been called, so don't remove those recently created record
 func (d *GormDatabase) removeUpdatePointBuffer(uuid string) {
 	d.pointBuffersMutex.Lock()
 	defer d.pointBuffersMutex.Unlock()
