@@ -379,11 +379,11 @@ func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName strin
 	if err != nil {
 		return nil, err
 	}
-	write, _, _, _, err := d.PointWrite(point.UUID, body, nil, false)
+	point, err = d.WritePointPlugin(point.UUID, body)
 	if err != nil {
 		return nil, err
 	}
-	return write, nil
+	return point, nil
 }
 
 func (d *GormDatabase) DeleteOnePointByArgs(args api.Args) (bool, error) {
