@@ -23,7 +23,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var flushBufferInterval = 5 * time.Second
+var flushPointUpdateBufferInterval = 5 * time.Second
+var flushMqttPublishBufferInterval = 200 * time.Millisecond
 
 func intHandler(db *database.GormDatabase) {
 	dh := new(dbhandler.Handler)
@@ -57,8 +58,14 @@ func initHistorySchedulers(db *database.GormDatabase, conf *config.Configuration
 func initFlushBuffers(db *database.GormDatabase) {
 	go func() {
 		for {
-			time.Sleep(flushBufferInterval)
+			time.Sleep(flushPointUpdateBufferInterval)
 			db.FlushPointUpdateBuffers()
+		}
+	}()
+	go func() {
+		for {
+			time.Sleep(flushMqttPublishBufferInterval)
+			localmqtt.GetPointMqtt().Client.FlushMqttPublishBuffers()
 		}
 	}()
 }

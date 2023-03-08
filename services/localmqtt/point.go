@@ -68,10 +68,7 @@ func PublishPoint(point *model.Point) {
 		return
 	}
 	topic := fmt.Sprintf("rubix/platform/point/publish")
-	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
-	if err != nil {
-		log.Error(err)
-	}
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 }
 
 func PublishPointsList(networks []*model.Network, topic string) {
@@ -92,10 +89,7 @@ func PublishPointsList(networks []*model.Network, topic string) {
 		log.Error(err)
 		return
 	}
-	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
-	if err != nil {
-		log.Error(err)
-	}
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 }
 
 func PublishPointCov(network *model.Network, device *model.Device, point *model.Point) {
@@ -112,10 +106,7 @@ func PublishPointCov(network *model.Network, device *model.Device, point *model.
 		log.Error(err)
 		return
 	}
-	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
-	if err != nil {
-		log.Error(err)
-	}
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 }
 
 func ifEmpty(in string) string {

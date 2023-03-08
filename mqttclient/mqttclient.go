@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -42,11 +43,14 @@ const (
 
 // Client runs an mqttClient client
 type Client struct {
-	client     mqtt.Client
-	clientID   string
-	connected  bool
-	terminated bool
-	consumers  []consumer
+	client                  mqtt.Client
+	clientID                string
+	connected               bool
+	terminated              bool
+	consumers               []consumer
+	mqttPublishBuffers      []*MqttPublishBuffer
+	mqttPublishBuffersMutex sync.Mutex
+	chuckSize               int
 }
 
 // ClientOptions is the list of options used to create c client
@@ -61,6 +65,13 @@ type ClientOptions struct {
 	ConnectRetryInterval time.Duration
 	AutoReconnect        *bool // If the client should automatically try to reconnect when the connection is lost
 	MaxReconnectInterval time.Duration
+}
+
+type MqttPublishBuffer struct {
+	Topic   string `json:"string"`
+	Qos     QOS    `json:"qos"`
+	Retain  bool   `json:"retain"`
+	Payload string `json:"payload"`
 }
 
 type consumer struct {
@@ -97,21 +108,43 @@ func (c *Client) Unsubscribe(topic string) error {
 }
 
 // Publish things
-func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) (err error) {
-	topic = strings.Replace(strings.Replace(topic, " ", "", -1), "\t", "", -1)
-	token := c.client.Publish(topic, byte(qos), retain, payload)
-	if token.WaitTimeout(2*time.Second) == false {
-		return errors.New("MQTT publish timout")
+func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) {
+	topic = strings.Trim(strings.Trim(topic, " "), "\t")
+	c.bufferMqttPublish(&MqttPublishBuffer{Topic: topic, Qos: qos, Retain: retain, Payload: payload})
+}
+
+func (c *Client) FlushMqttPublishBuffers() {
+	log.Debug("Flush mqtt publish buffers has is been called...")
+	if len(c.mqttPublishBuffers) == 0 {
+		log.Debug("MQTT publish buffers not found")
+		return
 	}
-	if token.Error() != nil {
-		return token.Error()
+	c.mqttPublishBuffersMutex.Lock()
+	chuckMqttPublishBuffers := ChuckMqttPublishBuffer(c.mqttPublishBuffers, c.chuckSize)
+	c.mqttPublishBuffers = nil
+	c.mqttPublishBuffersMutex.Unlock()
+	for _, chuckMqttPublishBuffer := range chuckMqttPublishBuffers {
+		wg := &sync.WaitGroup{}
+		for _, record := range chuckMqttPublishBuffer {
+			wg.Add(1)
+			go func(record *MqttPublishBuffer) {
+				defer wg.Done()
+				log.Debugf("Publishing topic: %s", record.Topic)
+				token := c.client.Publish(record.Topic, byte(record.Qos), record.Retain, record.Payload)
+				if token.Error() != nil {
+					log.Errorf("MQTT issue on publishing, topic: %s, error: %s", record.Topic, token.Error())
+				}
+			}(record)
+			time.Sleep(200 * time.Millisecond) // for don't let them call at once
+		}
+		wg.Wait()
 	}
-	return nil
+	log.Debug("Finished MQTT publish buffers process")
 }
 
 // NewClient creates an mqttClient client
 func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err error) {
-	c = &Client{}
+	c = &Client{chuckSize: 5}
 	opts := mqtt.NewClientOptions()
 	// brokers
 	if options.Servers != nil && len(options.Servers) > 0 {
@@ -201,4 +234,32 @@ func (c *Client) IsConnected() bool {
 
 func (c *Client) IsTerminated() bool {
 	return c.terminated
+}
+
+func (c *Client) bufferMqttPublish(buffer *MqttPublishBuffer) {
+	c.mqttPublishBuffersMutex.Lock()
+	defer c.mqttPublishBuffersMutex.Unlock()
+	for index, mpb := range c.mqttPublishBuffers {
+		if mpb.Topic == buffer.Topic {
+			c.mqttPublishBuffers[index] = buffer
+			return
+		}
+	}
+	c.mqttPublishBuffers = append(c.mqttPublishBuffers, buffer)
+}
+
+func (c *Client) removeIndex(index int) []*MqttPublishBuffer {
+	return append(c.mqttPublishBuffers[:index], c.mqttPublishBuffers[index+1:]...)
+}
+
+func ChuckMqttPublishBuffer(array []*MqttPublishBuffer, chunkSize int) [][]*MqttPublishBuffer {
+	var chucks [][]*MqttPublishBuffer
+	for i := 0; i < len(array); i += chunkSize {
+		end := i + chunkSize
+		if end > len(array) {
+			end = len(array)
+		}
+		chucks = append(chucks, array[i:end])
+	}
+	return chucks
 }
