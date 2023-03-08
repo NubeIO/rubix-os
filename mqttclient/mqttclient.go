@@ -135,7 +135,7 @@ func (c *Client) FlushMqttPublishBuffers() {
 					log.Errorf("MQTT issue on publishing, topic: %s, error: %s", record.Topic, token.Error())
 				}
 			}(record)
-			time.Sleep(200 * time.Millisecond) // for don't let them call at once
+			time.Sleep(1 * time.Millisecond) // for don't let them call at once
 		}
 		wg.Wait()
 	}
@@ -144,7 +144,7 @@ func (c *Client) FlushMqttPublishBuffers() {
 
 // NewClient creates an mqttClient client
 func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err error) {
-	c = &Client{chuckSize: 5}
+	c = &Client{chuckSize: 50}
 	opts := mqtt.NewClientOptions()
 	// brokers
 	if options.Servers != nil && len(options.Servers) > 0 {

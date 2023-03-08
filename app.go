@@ -24,7 +24,7 @@ import (
 )
 
 var flushPointUpdateBufferInterval = 5 * time.Second
-var flushMqttPublishBufferInterval = 200 * time.Millisecond
+var flushMqttPublishBufferInterval = 1 * time.Second
 
 func intHandler(db *database.GormDatabase) {
 	dh := new(dbhandler.Handler)
