@@ -12,6 +12,7 @@ type ProducerHistoryDatabase interface {
 	GetProducerHistoriesByProducerName(name string) ([]*model.ProducerHistory, int64, error)
 	GetLatestProducerHistoryByProducerName(name string) (*model.ProducerHistory, error)
 	GetLatestProducerHistoryByProducerUUID(pUuid string) (*model.ProducerHistory, error)
+	GetProducerHistoriesByPointUUIDs(pointUUIDs []string, args Args) ([]*model.ProducerHistory, error)
 	GetProducerHistoriesPoints(args Args) ([]*model.History, error)
 	GetProducerHistoriesPointsForSync(id string, timeStamp string) ([]*model.History, error)
 	DeleteProducerHistoriesByProducerUUID(pUuid string, args Args) (bool, error)
@@ -63,6 +64,14 @@ func (a *HistoriesAPI) GetLatestProducerHistoryByProducerName(ctx *gin.Context) 
 func (a *HistoriesAPI) GetLatestProducerHistoryByProducerUUID(ctx *gin.Context) {
 	pUuid := resolveProducerUUID(ctx)
 	q, err := a.DB.GetLatestProducerHistoryByProducerUUID(pUuid)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *HistoriesAPI) GetProducerHistoriesByPointUUIDs(ctx *gin.Context) {
+	args := buildProducerHistoryArgs(ctx)
+	var pointUUIDs []string
+	err := ctx.ShouldBindJSON(&pointUUIDs)
+	q, err := a.DB.GetProducerHistoriesByPointUUIDs(pointUUIDs, args)
 	ResponseHandler(q, err, ctx)
 }
 

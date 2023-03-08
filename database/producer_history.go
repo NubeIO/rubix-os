@@ -70,6 +70,18 @@ func (d *GormDatabase) GetLatestProducerHistoryByProducerUUID(pUuid string) (*mo
 	return historyModel, nil
 }
 
+// GetProducerHistoriesByPointUUIDs returns producer histories of PointUUIDs
+func (d *GormDatabase) GetProducerHistoriesByPointUUIDs(pointUUIDs []string, args api.Args) ([]*model.ProducerHistory, error) {
+	var proHistoriesModel []*model.ProducerHistory
+	subQuery := d.DB.Model(&model.Producer{}).Select("uuid").Where("producer_thing_uuid IN ?", pointUUIDs)
+	query := d.buildProducerHistoryQuery(args)
+	query = query.Where("producer_uuid in (?)", subQuery).Find(&proHistoriesModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return proHistoriesModel, nil
+}
+
 // GetProducerHistoriesPoints returns point histories of producer histories
 func (d *GormDatabase) GetProducerHistoriesPoints(args api.Args) ([]*model.History, error) {
 	var historiesModel []*model.History
