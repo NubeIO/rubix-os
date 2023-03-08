@@ -26,7 +26,6 @@ func ApplyMapToPriorityArray(pnt *model.Point, updatedPriorityMap *map[string]*f
 	if updatedPriorityMap != nil && pnt.Priority != nil {
 		for key, val := range *updatedPriorityMap {
 			newVal := float.Copy(val)
-
 			switch key {
 			case "_1":
 				pnt.Priority.P1 = newVal
@@ -64,7 +63,7 @@ func ApplyMapToPriorityArray(pnt *model.Point, updatedPriorityMap *map[string]*f
 		}
 		return pnt, nil
 	}
-	return pnt, errors.New("Invalid priority map. not applied to point.")
+	return pnt, errors.New("invalid priority map, not applicable to point")
 }
 
 func ParsePriority(originalPointPriority *model.Priority, newPriorityMapPtr *map[string]*float64, isTypeBool bool) (

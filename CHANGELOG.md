@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.10.7](https://github.com/NubeIO/flow-framework/tree/v0.10.7) (2023-03-08)
+
+- Fix: point write issue from MQTT
+
 ## [v0.10.6](https://github.com/NubeIO/flow-framework/tree/v0.10.6) (2023-03-07)
 
 - Fix: points values are not written correctly
