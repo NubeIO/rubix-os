@@ -304,7 +304,6 @@ func (pm *NetworkPollManager) PollQueueErrorChecking() {
 
 func (pm *NetworkPollManager) StartQueueCheckerAndStats() {
 	period := 30 * time.Second
-	pm.MaxPollRate = period
 	if pm.QueueCheckerTimer != nil {
 		pm.QueueCheckerTimer.Stop()
 	}
