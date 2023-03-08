@@ -8,7 +8,6 @@ import (
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 	"os"
-	"strings"
 	"sync"
 	"time"
 )
@@ -107,9 +106,8 @@ func (c *Client) Unsubscribe(topic string) error {
 	return token.Error()
 }
 
-// Publish things
+// Publish method buffers the list here and schedules it for later
 func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) {
-	topic = strings.Trim(strings.Trim(topic, " "), "\t")
 	c.bufferMqttPublish(&MqttPublishBuffer{Topic: topic, Qos: qos, Retain: retain, Payload: payload})
 }
 
