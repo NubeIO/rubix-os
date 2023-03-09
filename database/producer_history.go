@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm/clause"
@@ -71,11 +72,15 @@ func (d *GormDatabase) GetLatestProducerHistoryByProducerUUID(pUuid string) (*mo
 }
 
 // GetProducerHistoriesByPointUUIDs returns producer histories of PointUUIDs
-func (d *GormDatabase) GetProducerHistoriesByPointUUIDs(pointUUIDs []string, args api.Args) ([]*model.ProducerHistory, error) {
-	var proHistoriesModel []*model.ProducerHistory
+func (d *GormDatabase) GetProducerHistoriesByPointUUIDs(pointUUIDs []string, args api.Args) (
+	[]*interfaces.ProducerHistoryByPointUUID, error) {
+	var proHistoriesModel []*interfaces.ProducerHistoryByPointUUID
 	subQuery := d.DB.Model(&model.Producer{}).Select("uuid").Where("producer_thing_uuid IN ?", pointUUIDs)
-	query := d.buildProducerHistoryQuery(args)
-	query = query.Where("producer_uuid in (?)", subQuery).Find(&proHistoriesModel)
+	query := d.buildProducerHistoryQuery(args).Model(model.ProducerHistory{})
+	query = query.Select("producers.producer_thing_uuid AS point_uuid, producer_histories.*").
+		Joins("JOIN producers ON producer_histories.producer_uuid = producers.uuid").
+		Where("producer_uuid in (?)", subQuery).
+		Find(&proHistoriesModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

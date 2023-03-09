@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
@@ -12,7 +13,7 @@ type ProducerHistoryDatabase interface {
 	GetProducerHistoriesByProducerName(name string) ([]*model.ProducerHistory, int64, error)
 	GetLatestProducerHistoryByProducerName(name string) (*model.ProducerHistory, error)
 	GetLatestProducerHistoryByProducerUUID(pUuid string) (*model.ProducerHistory, error)
-	GetProducerHistoriesByPointUUIDs(pointUUIDs []string, args Args) ([]*model.ProducerHistory, error)
+	GetProducerHistoriesByPointUUIDs(pointUUIDs []string, args Args) ([]*interfaces.ProducerHistoryByPointUUID, error)
 	GetProducerHistoriesPoints(args Args) ([]*model.History, error)
 	GetProducerHistoriesPointsForSync(id string, timeStamp string) ([]*model.History, error)
 	DeleteProducerHistoriesByProducerUUID(pUuid string, args Args) (bool, error)
