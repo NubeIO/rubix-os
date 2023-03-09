@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/services/localmqtt"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
 	"os"
 	"path"
@@ -62,12 +63,14 @@ func initFlushBuffers(db *database.GormDatabase) {
 			db.FlushPointUpdateBuffers()
 		}
 	}()
-	go func() {
-		for {
-			time.Sleep(flushMqttPublishBufferInterval)
-			localmqtt.GetPointMqtt().Client.FlushMqttPublishBuffers()
-		}
-	}()
+	if boolean.IsTrue(config.Get().MQTT.Enable) {
+		go func() {
+			for {
+				time.Sleep(flushMqttPublishBufferInterval)
+				localmqtt.GetPointMqtt().Client.FlushMqttPublishBuffers()
+			}
+		}()
+	}
 }
 
 var db *database.GormDatabase
