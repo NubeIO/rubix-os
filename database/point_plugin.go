@@ -45,7 +45,7 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 	}
 	pluginName := network.PluginPath
 	if pluginName == "system" {
-		point.EnableWriteable = boolean.NewTrue()
+		body.EnableWriteable = boolean.NewTrue()
 		point, err = d.UpdatePoint(uuid, body, false)
 		if err != nil {
 			return nil, err
