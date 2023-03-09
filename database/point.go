@@ -19,8 +19,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-var mutexPointMap = map[string]sync.Mutex{}
-
 func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
 	var pointsModel []*model.Point
 	query := d.buildPointQuery(args)
@@ -146,19 +144,14 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) (*model.Point, error) {
 	writeOnDB := !buffer
-	m, ok := mutexPointMap[uuid]
-	if ok {
-		m.Lock()
-		defer m.Unlock()
-	} else {
-		mutex := sync.Mutex{}
-		mutexPointMap[uuid] = sync.Mutex{}
-		mutex.Lock()
-		defer mutex.Unlock()
-	}
-	pointModel, err := d.GetPoint(uuid, api.Args{WithTags: true, WithMetaTags: true, WithPriority: true})
-	if err != nil {
-		return nil, err
+	var pointModel *model.Point
+	query := d.DB.Where("uuid = ?", uuid).
+		Preload("Tags").
+		Preload("MetaTags").
+		Preload("Priority").First(&pointModel)
+	fmt.Println("pointModel", pointModel.Priority)
+	if query.Error != nil {
+		return nil, query.Error
 	}
 	existingName, existingAddrID := d.pointNameExists(body)
 	if existingAddrID && boolean.IsTrue(body.IsBitwise) && body.BitwiseIndex != nil && *body.BitwiseIndex >= 0 {
@@ -181,20 +174,22 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 		}
 	}
 	publishPointList := body.Name != pointModel.Name
+	// Don't replace these on nil updates
+	// TODO: we either need to remove this (`rubix-ui` needs to send all these values) or that `.Select(*)`
+	if body.Priority == nil {
+		body.Priority = pointModel.Priority
+	}
+	if body.Tags == nil {
+		body.Tags = pointModel.Tags
+	}
+	if body.MetaTags == nil {
+		body.MetaTags = pointModel.MetaTags
+	}
 	if writeOnDB {
 		if err := d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
 			return nil, err
 		}
 	} else {
-		if body.Priority == nil {
-			body.Priority = pointModel.Priority
-		}
-		if body.Tags == nil {
-			body.Tags = pointModel.Tags
-		}
-		if body.MetaTags == nil {
-			body.MetaTags = pointModel.MetaTags
-		}
 		pointModel = body
 	}
 
@@ -230,18 +225,20 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, currentW
 		return nil, false, false, false, query.Error
 	}
 	if body == nil || body.Priority == nil {
-		return nil, false, false, false,
-			errors.New("no priority value is been sent")
+		return nil, false, false, false, errors.New("no priority value is been sent")
 	} else {
 		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
+	d.updateUpdatePointBufferPointWriter(uuid, body.Priority)
 	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err :=
 		d.updatePointValue(pointModel, body.Priority, currentWriterUUID, forceWrite, true)
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
-func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[string]*float64, currentWriterUUID *string, forceWrite, writeOnDB bool) (
+func (d *GormDatabase) updatePointValue(
+	pointModel *model.Point, priority *map[string]*float64, currentWriterUUID *string, forceWrite, writeOnDB bool) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
+
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
@@ -291,10 +288,11 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, priority *map[s
 	pointModel.WriteValue = writeValue
 	if writeOnDB {
 		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
+		// when point write gets called it should change the cache values too, otherwise it will return wrong values
+		d.updateUpdatePointBufferPoint(pointModel)
 	}
 	if isChange && writeOnDB {
-		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange,
-			currentWriterUUID)
+		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange, currentWriterUUID)
 		if err != nil {
 			return nil, false, false, false, err
 		}

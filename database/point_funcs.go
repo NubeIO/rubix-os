@@ -28,16 +28,6 @@ func CreatePointDeepCopy(point model.Point) model.Point {
 }
 
 func GetPoint(uuid string, args api.Args) *model.Point {
-	m, ok := mutexPointMap[uuid]
-	if ok {
-		m.Lock()
-		defer m.Unlock()
-	} else {
-		mutex := sync.Mutex{}
-		mutexPointMap[uuid] = sync.Mutex{}
-		mutex.Lock()
-		defer mutex.Unlock()
-	}
 	for _, pub := range pointUpdateBuffers {
 		if pub.UUID == uuid {
 			point := CreatePointDeepCopy(*pub.Point)
@@ -196,6 +186,31 @@ func ChuckPointUpdateBuffer(array []*interfaces.PointUpdateBuffer, chunkSize int
 		chucks = append(chucks, array[i:end])
 	}
 	return chucks
+}
+
+func (d *GormDatabase) updateUpdatePointBufferPointWriter(uuid string, priority *map[string]*float64) {
+	d.pointBuffersMutex.Lock()
+	defer d.pointBuffersMutex.Unlock()
+	for _, pub := range pointUpdateBuffers {
+		if pub.UUID == uuid {
+			_, _ = priorityarray.ApplyMapToPriorityArray(pub.Body, priority)
+			return
+		}
+	}
+}
+
+func (d *GormDatabase) updateUpdatePointBufferPoint(point *model.Point) {
+	d.pointBuffersMutex.Lock()
+	defer d.pointBuffersMutex.Unlock()
+	for _, pub := range pointUpdateBuffers {
+		if pub.UUID == point.UUID {
+			// keep tags and meta_tags as is, this will be called from point write where these attributes don't exist
+			point.MetaTags = pub.Point.MetaTags
+			point.Tags = pub.Point.Tags
+			pub.Point = point
+			return
+		}
+	}
 }
 
 func (d *GormDatabase) updateUpdatePointBufferState(uuid string, state interfaces.State) {
