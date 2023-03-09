@@ -17,10 +17,7 @@ func PublishSchedule(schedule *model.Schedule) {
 		return
 	}
 	topic := fmt.Sprintf("rubix/platform/schedule/publish")
-	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
-	if err != nil {
-		log.Error(err)
-	}
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 }
 
 func PublishSchedules(schedules []*model.Schedule, topic string) {
@@ -32,8 +29,5 @@ func PublishSchedules(schedules []*model.Schedule, topic string) {
 		log.Error(err)
 		return
 	}
-	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
-	if err != nil {
-		log.Error(err)
-	}
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 }

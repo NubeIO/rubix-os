@@ -23,10 +23,7 @@ func publishMQTT(sensorStruct model.ProducerBody) {
 	if err != nil {
 		log.Error(err)
 	}
-	err = a.Publish(topic, mqttclient.AtMostOnce, false, string(data))
-	if err != nil {
-		log.Error(err)
-	}
+	a.Publish(topic, mqttclient.AtMostOnce, false, string(data))
 }
 
 var debug = false

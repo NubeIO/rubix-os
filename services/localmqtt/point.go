@@ -68,10 +68,7 @@ func PublishPoint(point *model.Point) {
 		return
 	}
 	topic := fmt.Sprintf("rubix/platform/point/publish")
-	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
-	if err != nil {
-		log.Error(err)
-	}
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 }
 
 func PublishPointsList(networks []*model.Network, topic string) {
@@ -92,10 +89,7 @@ func PublishPointsList(networks []*model.Network, topic string) {
 		log.Error(err)
 		return
 	}
-	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
-	if err != nil {
-		log.Error(err)
-	}
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 }
 
 func PublishPointCov(network *model.Network, device *model.Device, point *model.Point) {
@@ -105,17 +99,18 @@ func PublishPointCov(network *model.Network, device *model.Device, point *model.
 		Priority: point.CurrentPriority,
 		Ts:       point.UpdatedAt.String(),
 	}
-	topic := MakeTopic([]string{mqttTopic, mqttTopicCov, mqttTopicCovAll, network.PluginPath, network.UUID,
-		network.Name, device.UUID, device.Name, point.UUID, point.Name})
+	networkName := strings.Trim(strings.Trim(network.Name, " "), "\t")
+	deviceName := strings.Trim(strings.Trim(device.Name, " "), "\t")
+	pointName := strings.Trim(strings.Trim(point.Name, " "), "\t")
+	topic := MakeTopic([]string{mqttTopic, mqttTopicCov, mqttTopicCovAll, network.PluginPath, network.UUID, networkName,
+		device.UUID, deviceName, point.UUID, pointName})
+
 	payload, err := json.Marshal(pointCovPayload)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	err = pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
-	if err != nil {
-		log.Error(err)
-	}
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 }
 
 func ifEmpty(in string) string {
