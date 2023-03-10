@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.10.10](https://github.com/NubeIO/flow-framework/tree/v0.10.10) (2023-03-10)
+
+- Remove MaxPollRate override
+- bump library versions
+- remove prints
+
 ## [v0.10.9](https://github.com/NubeIO/flow-framework/tree/v0.10.9) (2023-03-10)
 
 - Fix: runtime breaking issue
