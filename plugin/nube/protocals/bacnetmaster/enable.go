@@ -65,6 +65,24 @@ func (inst *Instance) Disable() error {
 		}
 		inst.NetworkPollManagers = make([]*pollqueue.NetworkPollManager, 0)
 	}
+
+	/*
+		networks, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
+		if err != nil {
+			inst.bacnetErrorMsg("Disable() GetNetworksByPlugin() err:", err.Error())
+		} else {
+			for _, net := range networks {
+				_, err = inst.closeBacnetStoreNetwork(net.UUID)
+				if err != nil {
+					inst.bacnetErrorMsg("Disable() bacnetNetworkClose error: %s name: %s", err.Error(), net.Name)
+					continue
+				} else {
+					inst.bacnetDebugMsg("Disable() bacnetNetworkClose() network: %s uuid: %s", net.Name, net.UUID)
+				}
+			}
+		}
+	*/
+
 	inst.running = false
 	inst.fault = false
 	return nil

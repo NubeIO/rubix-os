@@ -34,8 +34,6 @@ func (inst *Instance) BACnetServerPolling() error {
 	var counter = 0
 	f := func() (bool, error) {
 		counter++
-		// fmt.Println("\n \n")
-		inst.bacnetDebugMsg("LOOP COUNT: ", counter)
 		inst.bacnetDebugMsg("LOOP COUNT: ", counter)
 		if inst.BacStore == nil {
 			log.Error("bacnet:master polling started with no bacnet store")

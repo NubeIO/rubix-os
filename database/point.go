@@ -149,7 +149,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 		Preload("Tags").
 		Preload("MetaTags").
 		Preload("Priority").First(&pointModel)
-	fmt.Println("pointModel", pointModel.Priority)
 	if query.Error != nil {
 		return nil, query.Error
 	}
