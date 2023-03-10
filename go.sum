@@ -75,8 +75,8 @@ github.com/NubeIO/configor v0.0.3/go.mod h1:HGAnJTAwAntKAi5EGMQUQHWE4o4fMYKyByWX
 github.com/NubeIO/lib-networking v0.0.6/go.mod h1:wO04Ul6Wdr5w/7s8UMZzV1/HMXuVSVFzqq7h5A3Vl6k=
 github.com/NubeIO/lib-networking v0.1.0 h1:XhhG8lTGjsULgcI8ZuJ/R3xyXIQlVQ3Tspig/7f0ce8=
 github.com/NubeIO/lib-networking v0.1.0/go.mod h1:WVj1zTKJ4qYijtzNvu7N5w8+cXFlCjy+HxjnIvSFgNA=
-github.com/NubeIO/lib-schema v0.2.9 h1:Ls3VccsKtAu42sVBX7/bU1vfyYef+HRwe7/Jb/i5ZbQ=
-github.com/NubeIO/lib-schema v0.2.9/go.mod h1:TGKDA6IIWHDwr5Aabawj6FF7NXUWXqu4ozWfph/hIjw=
+github.com/NubeIO/lib-schema v0.2.10 h1:h1+2aiYNcQNL1LziPoZQamSTOwNqgt4KoPuESs9NXKY=
+github.com/NubeIO/lib-schema v0.2.10/go.mod h1:TGKDA6IIWHDwr5Aabawj6FF7NXUWXqu4ozWfph/hIjw=
 github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3 h1:BG93vRFMgL+b7BDX0IgTot8S9eE9GPbj40nb8qzHy1Y=
 github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3/go.mod h1:5dAKp8Ut9uNzXKUkyX19R547vHcbrUFvpqt78kSl7oE=
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.6/go.mod h1:iDKguImeSi6yhQlBKynEnOIKPOM6E9hPuxq2CnFHbpg=

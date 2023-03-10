@@ -159,7 +159,6 @@ func (inst *Instance) buildBacnetForAction(networkUUID, action string) (*network
 		return nil, err
 	}
 	return net, err
-
 }
 
 // getDev get an instance of a created bacnet device that is cached in bacnet lib
