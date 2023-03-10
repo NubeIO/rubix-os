@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## [v0.10.9](https://github.com/NubeIO/flow-framework/tree/v0.10.9) (2023-03-10)
+
+- Fix: runtime breaking issue
+- Fix: don't call flush mqtt publish buffer on MQTT disabled case
+- Add api endpoint to get producer histories by point uuids
+- Fix: don't replace write priority values with update point buffer
+
 ## [v0.10.8](https://github.com/NubeIO/flow-framework/tree/v0.10.8) (2023-03-08)
 
 - Implementation of MQTT publish buffer
