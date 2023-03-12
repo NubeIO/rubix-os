@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/nstring"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"sync"
 	"time"
@@ -357,9 +359,10 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 		return false, err
 	}
 	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
-		fn, err := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, "")
+		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(deviceModel.AutoMappingFlowNetworkName)})
 		if err != nil {
-			return false, err
+			log.Errorf("failed to find flow network with name %s", deviceModel.AutoMappingFlowNetworkName)
+			return false, fmt.Errorf("failed to find flow network with name %s", deviceModel.AutoMappingFlowNetworkName)
 		}
 		cli := client.NewFlowClientCliFromFN(fn)
 		networkModel, _ := d.GetNetworkByDeviceUUID(deviceModel.UUID, api.Args{})

@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"sync"
 )
@@ -112,9 +113,10 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 		if stream != nil {
 			_, _ = d.DeleteStream(stream.UUID)
 		}
-		fn, err := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, "")
+		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(deviceModel.AutoMappingFlowNetworkName)})
 		if err != nil {
-			return false, err
+			log.Errorf("failed to find flow network with name %s", deviceModel.AutoMappingFlowNetworkName)
+			return false, fmt.Errorf("failed to find flow network with name %s", deviceModel.AutoMappingFlowNetworkName)
 		}
 		cli := client.NewFlowClientCliFromFN(fn)
 		networkName := networkModel.Name
@@ -164,9 +166,12 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, chann
 			point.Message = "writer not found"
 		} else {
 			network, _ := d.GetNetworkByDeviceUUID(device.UUID, api.Args{})
-			flowNetworkClone, _ := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
-			if flowNetworkClone != nil {
-				cli := client.NewFlowClientCliFromFNC(flowNetworkClone)
+			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
+			if err != nil {
+				point.Connection = connection.Broken.String()
+				point.Message = "flow network clone not found"
+			} else {
+				cli := client.NewFlowClientCliFromFNC(fnc)
 				rawPoint, err := cli.GetQueryMarshal(urls.SingularUrl(urls.PointNameUrl,
 					fmt.Sprintf("%s/%s/%s", strings.Replace(network.Name, "mapping_", "", -1),
 						device.Name, point.Name)), model.Point{})

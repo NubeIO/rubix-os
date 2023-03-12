@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -84,14 +85,15 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 		return nil, err
 	}
 
-	flowNetwork, err := d.selectFlowNetwork(body.AutoMappingFlowNetworkName, body.AutoMappingFlowNetworkUUID)
+	flowNetwork, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(body.AutoMappingFlowNetworkUUID)})
 	if err != nil {
-		return nil, err
+		log.Errorf("failed to find flow network with name %s", body.AutoMappingFlowNetworkUUID)
+		return nil, fmt.Errorf("failed to find flow network with name %s", body.AutoMappingFlowNetworkUUID)
 	}
 
-	flowNetworkClone, err := d.GetOneFlowNetworkCloneByArgs(api.Args{SourceUUID: nils.NewString(flowNetwork.UUID)})
-	if err != nil || flowNetworkClone == nil {
-		log.Errorln("mapping.db.selectFlowNetwork(): missing flow network clone")
+	_, err = d.GetOneFlowNetworkCloneByArgs(api.Args{SourceUUID: nils.NewString(flowNetwork.UUID)})
+	if err != nil {
+		log.Errorln("mapping.db.GetOneFlowNetworkCloneByArgs(): missing flow network clone")
 		return nil, errors.New(fmt.Sprintf("missing flow network clone"))
 	}
 	// create a new stream or use existing
@@ -162,48 +164,6 @@ func (d *GormDatabase) CreatePointMapping(body *model.PointMapping) (*model.Poin
 	}
 	// make new point for the producer
 	return body, nil
-}
-
-func (d *GormDatabase) selectFlowNetwork(flowNetworkName, flowNetworkUUID string) (flowNetwork *model.FlowNetwork, err error) {
-	if flowNetworkUUID != "" {
-		flowNetwork, err = d.GetFlowNetwork(flowNetworkUUID, api.Args{})
-		if err != nil || flowNetwork == nil {
-			log.Errorln("mapping.db.selectFlowNetwork(): select by uuid missing flow network please add uuid:", flowNetworkUUID)
-			return nil, errors.New(fmt.Sprintf("failed to find a flow-network with uuid: %s", flowNetworkUUID))
-		}
-	} else {
-		name := "local"
-		if flowNetworkName != "" {
-			name = flowNetworkName
-		}
-		flowNetwork, err = d.GetOneFlowNetworkByArgs(api.Args{Name: nils.NewString(name)})
-		if err != nil || flowNetwork == nil {
-			log.Errorln("mapping.db.selectFlowNetwork(): select by name missing flow network please add name:", name)
-			return nil, errors.New(fmt.Sprintf("failed to find a flow-network with name: %s", name))
-		}
-	}
-	return
-}
-
-func (d *GormDatabase) selectFlowNetworkClone(flowNetworkCloneName, flowNetworkCloneUUID string) (flowNetworkClone *model.FlowNetworkClone, err error) {
-	if flowNetworkCloneUUID != "" {
-		flowNetworkClone, err = d.GetFlowNetworkClone(flowNetworkCloneUUID, api.Args{})
-		if err != nil || flowNetworkClone == nil {
-			log.Errorln("mapping.db.selectFlowNetworkClone(): select by uuid missing flow network clone please add uuid:", flowNetworkCloneUUID)
-			return nil, errors.New(fmt.Sprintf("failed to find a flow-network-clone with uuid: %s", flowNetworkCloneUUID))
-		}
-	} else {
-		name := "local"
-		if flowNetworkCloneName != "" {
-			name = flowNetworkCloneName
-		}
-		flowNetworkClone, err = d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nils.NewString(name)})
-		if err != nil || flowNetworkClone == nil {
-			log.Errorln("mapping.db.selectFlowNetworkClone(): select by name missing flow network clone please add name:", name)
-			return nil, errors.New(fmt.Sprintf("failed to find a flow-network-clone with name: %s", name))
-		}
-	}
-	return
 }
 
 func (d *GormDatabase) createPointMappingStream(deviceName, networkName string, flowNetwork *model.FlowNetwork) (stream *model.Stream, err error) {

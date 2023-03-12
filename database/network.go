@@ -14,6 +14,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"sync"
 )
@@ -142,8 +143,9 @@ func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
 		go func() {
 			defer wg.Done()
 			if boolean.IsTrue(device.AutoMappingEnable) {
-				fn, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, "")
+				fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
 				if err != nil {
+					log.Errorf("failed to find flow network with name %s", device.AutoMappingFlowNetworkName)
 					return
 				}
 				cli := client.NewFlowClientCliFromFN(fn)
@@ -233,7 +235,7 @@ func (d *GormDatabase) syncDevice(device *model.Device, args api.Args, channel c
 	if boolean.IsTrue(device.CreatedFromAutoMapping) {
 		device.Connection = connection.Connected.String()
 		device.Message = nstring.NotAvailable
-		fnc, err := d.selectFlowNetworkClone(device.AutoMappingFlowNetworkName, "")
+		fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
 		if err != nil {
 			device.Connection = connection.Broken.String()
 			device.Message = "flow network clone not found"

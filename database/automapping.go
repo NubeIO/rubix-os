@@ -1,13 +1,14 @@
 package database
 
 import (
-	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
@@ -23,7 +24,7 @@ func (d *GormDatabase) CreatePointAutoMapping(point *model.Point) error {
 		if boolean.IsTrue(device.AutoMappingEnable) {
 			err := d.createUpdatePointAutoMapping(device, point)
 			if err != nil {
-				log.Errorln("points.db.CreatePointAutoMapping() failed to make auto mapping")
+				log.Errorln("points.db.CreatePointAutoMapping() failed to make auto mapping", err)
 				return err
 			}
 			log.Println("points.db.CreatePointAutoMapping() added point new mapping")
@@ -40,7 +41,7 @@ func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) er
 	}
 	network, err := d.GetNetworkByName(networkName, api.Args{})
 	if network != nil && network.GlobalUUID != autoMapping.NetworkGlobalUUID {
-		return errors.New("network.name already exists")
+		return fmt.Errorf("network.name %s already exists", network.Name)
 	}
 	consumer, err := d.createPointAutoMappingConsumer(autoMapping.StreamUUID, autoMapping.ProducerUUID,
 		autoMapping.PointName)
@@ -66,16 +67,17 @@ func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) er
 }
 
 func (d *GormDatabase) createUpdatePointAutoMapping(device *model.Device, point *model.Point) error {
-	flowNetwork, err := d.selectFlowNetwork(device.AutoMappingFlowNetworkName, "")
+	fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
 	if err != nil {
-		return err
+		log.Errorf("failed to find flow network with name %s", device.AutoMappingFlowNetworkName)
+		return fmt.Errorf("failed to find flow network with name %s", device.AutoMappingFlowNetworkName)
 	}
 	network, err := d.GetNetwork(device.NetworkUUID, api.Args{WithTags: true, WithMetaTags: true})
 	if err != nil {
 		return err
 	}
 	// edge
-	stream, err := d.createPointAutoMappingStream(flowNetwork, network.Name, device.Name)
+	stream, err := d.createPointAutoMappingStream(fn, network.Name, device.Name)
 	if err != nil {
 		return err
 	}
@@ -84,12 +86,13 @@ func (d *GormDatabase) createUpdatePointAutoMapping(device *model.Device, point 
 		return err
 	}
 	// cloud
-	cli := client.NewFlowClientCliFromFN(flowNetwork)
+	deviceInfo, _ := deviceinfo.GetDeviceInfo()
+	cli := client.NewFlowClientCliFromFN(fn)
 	body := &interfaces.AutoMapping{
-		FlowNetworkUUID:   flowNetwork.UUID,
+		FlowNetworkUUID:   fn.UUID,
 		StreamUUID:        stream.UUID,
 		ProducerUUID:      producer.UUID,
-		NetworkGlobalUUID: network.GlobalUUID,
+		NetworkGlobalUUID: deviceInfo.GlobalUUID,
 		NetworkName:       network.Name,
 		NetworkTags:       network.Tags,
 		NetworkMetaTags:   network.MetaTags,
@@ -99,7 +102,7 @@ func (d *GormDatabase) createUpdatePointAutoMapping(device *model.Device, point 
 		PointName:         point.Name,
 		PointTags:         point.Tags,
 		PointMetaTags:     point.MetaTags,
-		IsLocal:           boolean.IsFalse(flowNetwork.IsRemote) && boolean.IsFalse(flowNetwork.IsMasterSlave),
+		IsLocal:           boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave),
 	}
 	_, err = cli.AddAutoMapping(body)
 	if err != nil {
