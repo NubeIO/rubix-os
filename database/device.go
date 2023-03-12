@@ -82,7 +82,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 func (d *GormDatabase) UpdateDeviceErrors(uuid string, body *model.Device) error {
 	return d.DB.Model(&body).
 		Where("uuid = ?", uuid).
-		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync", "Connection").
+		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
 		Updates(&body).
 		Error
 }
@@ -159,17 +159,18 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, chann
 	var output interfaces.SyncModel
 	if boolean.IsTrue(point.CreatedFromAutoMapping) {
 		point.Connection = connection.Connected.String()
-		point.Message = nstring.NotAvailable
+		point.ConnectionMessage = nstring.New(nstring.NotAvailable)
 		_, err := d.GetOneWriterByArgs(api.Args{WriterThingUUID: nils.NewString(point.UUID)})
 		if err != nil {
 			point.Connection = connection.Broken.String()
+			point.ConnectionMessage = nstring.New("writer not found")
 			point.Message = "writer not found"
 		} else {
 			network, _ := d.GetNetworkByDeviceUUID(device.UUID, api.Args{})
 			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
 			if err != nil {
 				point.Connection = connection.Broken.String()
-				point.Message = "flow network clone not found"
+				point.ConnectionMessage = nstring.New("flow network clone not found")
 			} else {
 				cli := client.NewFlowClientCliFromFNC(fnc)
 				rawPoint, err := cli.GetQueryMarshal(urls.SingularUrl(urls.PointNameUrl,
@@ -177,7 +178,7 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, chann
 						device.Name, point.Name)), model.Point{})
 				if err != nil {
 					point.Connection = connection.Broken.String()
-					point.Message = err.Error()
+					point.ConnectionMessage = nstring.New(err.Error())
 				} else {
 					if boolean.IsFalse(rawPoint.(*model.Point).AutoMappingEnable) {
 						_, _ = d.DeletePoint(point.UUID)
@@ -195,5 +196,17 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, chann
 	} else {
 		output = interfaces.SyncModel{UUID: point.UUID, IsError: false}
 	}
+	pointModel := model.Point{}
+	if output.IsError {
+		pointModel.Connection = connection.Broken.String()
+		pointModel.ConnectionMessage = output.Message
+	} else {
+		pointModel.Connection = connection.Connected.String()
+		pointModel.ConnectionMessage = nstring.New(nstring.NotAvailable)
+	}
+	d.DB.Model(&model.Point{}).
+		Where("uuid = ?", output.UUID).
+		Select("Connection", "ConnectionMessage").
+		Updates(&pointModel)
 	channel <- &output
 }

@@ -312,7 +312,7 @@ func (d *GormDatabase) updatePointValue(
 func (d *GormDatabase) UpdatePointErrors(uuid string, body *model.Point) error {
 	return d.DB.Model(&body).
 		Where("uuid = ?", uuid).
-		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync", "Connection").
+		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
 		Updates(&body).
 		Error
 }

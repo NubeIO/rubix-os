@@ -126,7 +126,7 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 func (d *GormDatabase) UpdateNetworkErrors(uuid string, body *model.Network) error {
 	return d.DB.Model(&body).
 		Where("uuid = ?", uuid).
-		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync", "Connection").
+		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
 		Updates(&body).
 		Error
 }
@@ -210,6 +210,18 @@ func (d *GormDatabase) syncNetwork(networkUUID string, args api.Args, channel ch
 			output = interfaces.SyncModel{UUID: networkUUID, IsError: true, Message: syncModel.Message}
 		}
 	}
+	networkModel := model.Network{}
+	if output.IsError {
+		networkModel.Connection = connection.Broken.String()
+		networkModel.ConnectionMessage = output.Message
+	} else {
+		networkModel.Connection = connection.Connected.String()
+		networkModel.ConnectionMessage = nstring.New(nstring.NotAvailable)
+	}
+	d.DB.Model(&model.Network{}).
+		Where("uuid = ?", output.UUID).
+		Select("Connection", "ConnectionMessage").
+		Updates(&networkModel)
 	channel <- &output
 }
 
@@ -234,11 +246,11 @@ func (d *GormDatabase) syncDevice(device *model.Device, args api.Args, channel c
 	output := interfaces.SyncModel{UUID: device.UUID, IsError: false}
 	if boolean.IsTrue(device.CreatedFromAutoMapping) {
 		device.Connection = connection.Connected.String()
-		device.Message = nstring.NotAvailable
+		device.ConnectionMessage = nstring.New(nstring.NotAvailable)
 		fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
 		if err != nil {
 			device.Connection = connection.Broken.String()
-			device.Message = "flow network clone not found"
+			device.ConnectionMessage = nstring.New("flow network clone not found")
 		} else {
 			network, _ := d.GetNetworkByDeviceUUID(device.UUID, api.Args{})
 			cli := client.NewFlowClientCliFromFNC(fnc)
@@ -246,7 +258,7 @@ func (d *GormDatabase) syncDevice(device *model.Device, args api.Args, channel c
 				strings.Replace(network.Name, "mapping_", "", -1), device.Name)), model.Device{})
 			if err != nil {
 				device.Connection = connection.Broken.String()
-				device.Message = err.Error()
+				device.ConnectionMessage = nstring.New(err.Error())
 			} else {
 				if boolean.IsFalse(rawDevice.(*model.Device).AutoMappingEnable) {
 					_, _ = d.DeleteDevice(device.UUID)
@@ -267,5 +279,17 @@ func (d *GormDatabase) syncDevice(device *model.Device, args api.Args, channel c
 			output = interfaces.SyncModel{UUID: device.UUID, IsError: true, Message: syncModel.Message}
 		}
 	}
+	deviceModel := model.Device{}
+	if output.IsError {
+		deviceModel.Connection = connection.Broken.String()
+		deviceModel.ConnectionMessage = output.Message
+	} else {
+		deviceModel.Connection = connection.Connected.String()
+		deviceModel.ConnectionMessage = nstring.New(nstring.NotAvailable)
+	}
+	d.DB.Model(&model.Device{}).
+		Where("uuid = ?", output.UUID).
+		Select("Connection", "ConnectionMessage").
+		Updates(&deviceModel)
 	channel <- &output
 }
