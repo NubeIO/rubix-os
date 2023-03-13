@@ -39,11 +39,6 @@ func getBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
 	return dto, err
 }
 
-func getBodySyncNetwork(ctx *gin.Context) (dto *interfaces.SyncNetwork, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
 func getBodyHistory(ctx *gin.Context) (dto *model.ProducerHistory, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -55,11 +50,6 @@ func getBodyBulkHistory(ctx *gin.Context) (dto []*model.ProducerHistory, err err
 }
 
 func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBodySyncDevice(ctx *gin.Context) (dto *interfaces.SyncDevice, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

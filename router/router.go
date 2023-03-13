@@ -114,12 +114,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	syncWriterHandler := api.SyncWriterAPI{
 		DB: db,
 	}
-	syncDeviceHandler := api.SyncDeviceAPI{
-		DB: db,
-	}
-	syncNetworkHandler := api.SyncNetworkAPI{
-		DB: db,
-	}
 	autoMappingHandler := api.AutoMappingAPI{
 		DB: db,
 	}
@@ -490,8 +484,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			syncRoutes.POST("/cov/:writer_uuid", syncWriterHandler.SyncCOV) // clone ---> source side
 			syncRoutes.POST("/writer/write/:source_uuid", syncWriterHandler.SyncWriterWriteAction)
 			syncRoutes.GET("/writer/read/:source_uuid", syncWriterHandler.SyncWriterReadAction)
-			syncRoutes.POST("/device", syncDeviceHandler.SyncDevice)
-			syncRoutes.POST("/network", syncNetworkHandler.SyncNetwork)
 			syncRoutes.POST("/producer", syncProducerHandler.SyncProducer)
 		}
 

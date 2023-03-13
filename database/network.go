@@ -131,35 +131,34 @@ func (d *GormDatabase) UpdateNetworkErrors(uuid string, body *model.Network) err
 		Error
 }
 
-func (d *GormDatabase) DeleteNetwork(uuid string) (ok bool, err error) {
+func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
 	networkModel, err := d.GetNetwork(uuid, api.Args{WithDevices: true})
 	if err != nil {
 		return false, err
 	}
-	var wg sync.WaitGroup
-	for _, device := range networkModel.Devices {
-		wg.Add(1)
-		device := device
-		go func() {
-			defer wg.Done()
-			if boolean.IsTrue(device.AutoMappingEnable) {
-				fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
-				if err != nil {
-					log.Errorf("failed to find flow network with name %s", device.AutoMappingFlowNetworkName)
-					return
-				}
-				cli := client.NewFlowClientCliFromFN(fn)
+	if boolean.IsTrue(networkModel.AutoMappingEnable) {
+		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(networkModel.AutoMappingFlowNetworkName)})
+		if err != nil {
+			log.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
+			return false, err
+		}
+		cli := client.NewFlowClientCliFromFN(fn)
+		var wg sync.WaitGroup
+		for _, device := range networkModel.Devices {
+			wg.Add(1)
+			go func(device *model.Device) {
+				defer wg.Done()
 				networkName := networkModel.Name
 				if boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave) {
 					networkName = generateLocalNetworkName(networkName)
 				}
 				url := urls.SingularUrl(urls.NetworkNameUrl, networkName)
 				_ = cli.DeleteQuery(url)
-			}
-			_, _ = d.DeleteDevice(device.UUID)
-		}()
+				_, _ = d.DeleteDevice(device.UUID)
+			}(device)
+		}
+		wg.Wait()
 	}
-	wg.Wait()
 	query := d.DB.Delete(&networkModel)
 	return d.deleteResponseBuilder(query)
 }
@@ -236,7 +235,7 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, removeUnused bool, args a
 	channel := make(chan *interfaces.SyncModel)
 	defer close(channel)
 	for _, device := range network.Devices {
-		go d.syncDevice(device, args, channel)
+		go d.syncDevice(network.AutoMappingFlowNetworkName, device, args, channel)
 	}
 	for range network.Devices {
 		outputs = append(outputs, <-channel)
@@ -248,12 +247,12 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, removeUnused bool, args a
 	return outputs, nil
 }
 
-func (d *GormDatabase) syncDevice(device *model.Device, args api.Args, channel chan *interfaces.SyncModel) {
+func (d *GormDatabase) syncDevice(flowNetworkName string, device *model.Device, args api.Args, channel chan *interfaces.SyncModel) {
 	output := interfaces.SyncModel{UUID: device.UUID, IsError: false}
 	if boolean.IsTrue(device.CreatedFromAutoMapping) {
 		device.Connection = connection.Connected.String()
 		device.ConnectionMessage = nstring.New(nstring.NotAvailable)
-		fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
+		fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(flowNetworkName)})
 		if err != nil {
 			device.Connection = connection.Broken.String()
 			device.ConnectionMessage = nstring.New("flow network clone not found")
@@ -328,14 +327,14 @@ func (d *GormDatabase) removeUnusedAutoMappedDevices() {
 	}
 	for _, device := range devices {
 		if boolean.IsTrue(device.CreatedFromAutoMapping) {
-			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
+			network, err := d.GetNetwork(device.NetworkUUID, api.Args{})
+			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(network.AutoMappingFlowNetworkName)})
 			if err != nil {
 				_, err := d.DeleteDevice(device.UUID)
 				if err != nil {
 					log.Errorf(err.Error())
 				}
 			}
-			network, err := d.GetNetwork(device.NetworkUUID, api.Args{})
 			cli := client.NewFlowClientCliFromFNC(fnc)
 			networkName := network.Name
 			if boolean.IsFalse(fnc.IsRemote) {

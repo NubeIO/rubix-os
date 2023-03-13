@@ -354,25 +354,24 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	}
 	r := query.RowsAffected
 	go d.PublishPointsList("")
-	deviceModel, err := d.GetDevice(point.DeviceUUID, api.Args{})
-	if err != nil {
-		return false, err
-	}
+	deviceModel, _ := d.GetDevice(point.DeviceUUID, api.Args{})
 	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
-		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(deviceModel.AutoMappingFlowNetworkName)})
-		if err != nil {
-			log.Errorf("failed to find flow network with name %s", deviceModel.AutoMappingFlowNetworkName)
-			return false, fmt.Errorf("failed to find flow network with name %s", deviceModel.AutoMappingFlowNetworkName)
+		networkModel, _ := d.GetNetwork(deviceModel.NetworkUUID, api.Args{})
+		if boolean.IsTrue(networkModel.AutoMappingEnable) {
+			fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(networkModel.AutoMappingFlowNetworkName)})
+			if err != nil {
+				log.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
+				return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
+			}
+			cli := client.NewFlowClientCliFromFN(fn)
+			networkName := networkModel.Name
+			if boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave) {
+				networkName = generateLocalNetworkName(networkName)
+			}
+			url := urls.SingularUrl(urls.PointNameUrl, fmt.Sprintf("%s/%s/%s", networkName, deviceModel.Name,
+				point.Name))
+			_ = cli.DeleteQuery(url)
 		}
-		cli := client.NewFlowClientCliFromFN(fn)
-		networkModel, _ := d.GetNetworkByDeviceUUID(deviceModel.UUID, api.Args{})
-		networkName := networkModel.Name
-		if boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave) {
-			networkName = generateLocalNetworkName(networkName)
-		}
-		url := urls.SingularUrl(urls.PointNameUrl, fmt.Sprintf("%s/%s/%s", networkName, deviceModel.Name,
-			point.Name))
-		_ = cli.DeleteQuery(url)
 	}
 	return r != 0, nil
 }

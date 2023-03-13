@@ -95,11 +95,10 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 	var wg sync.WaitGroup
 	for _, point := range deviceModel.Points {
 		wg.Add(1)
-		point := point
-		go func() {
+		go func(point *model.Point) {
 			defer wg.Done()
 			_, _ = d.DeletePoint(point.UUID)
-		}()
+		}(point)
 	}
 	wg.Wait()
 
@@ -113,10 +112,10 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 		if stream != nil {
 			_, _ = d.DeleteStream(stream.UUID)
 		}
-		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(deviceModel.AutoMappingFlowNetworkName)})
+		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(networkModel.AutoMappingFlowNetworkName)})
 		if err != nil {
-			log.Errorf("failed to find flow network with name %s", deviceModel.AutoMappingFlowNetworkName)
-			return false, fmt.Errorf("failed to find flow network with name %s", deviceModel.AutoMappingFlowNetworkName)
+			log.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
+			return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
 		}
 		cli := client.NewFlowClientCliFromFN(fn)
 		networkName := networkModel.Name
@@ -170,7 +169,7 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, chann
 			point.Message = "writer not found"
 		} else {
 			network, _ := d.GetNetworkByDeviceUUID(device.UUID, api.Args{})
-			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
+			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(network.AutoMappingFlowNetworkName)})
 			if err != nil {
 				point.Connection = connection.Broken.String()
 				point.ConnectionMessage = nstring.New("flow network clone not found")
