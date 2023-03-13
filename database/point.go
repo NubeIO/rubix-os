@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"strings"
 	"sync"
 	"time"
 
@@ -93,6 +94,7 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 
 func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
+	body.Name = strings.TrimSpace(body.Name)
 	if body.Decimal == nil {
 		body.Decimal = nils.NewUint32(2)
 	}
@@ -172,6 +174,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 			return nil, err
 		}
 	}
+	body.Name = strings.TrimSpace(body.Name)
 	publishPointList := body.Name != pointModel.Name
 	// Don't replace these on nil updates
 	// TODO: we either need to remove this (`rubix-ui` needs to send all these values) or that `.Select(*)`
