@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/NubeIO/lib-schema/networklinkerschema"
 	"net/http"
 	"net/http/httputil"
 	"strings"
@@ -68,21 +69,71 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, inst.GetNetworkSchema())
 	})
 	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, inst.GetDeviceSchema())
+		fns, err := inst.db.GetFlowNetworks(api.Args{})
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		fnsNames := make([]string, 0)
+		for _, fn := range fns {
+			fnsNames = append(fnsNames, fn.Name)
+		}
+		deviceSchema := inst.GetDeviceSchema()
+		deviceSchema.AutoMappingFlowNetworkName.Options = fnsNames
+		ctx.JSON(http.StatusOK, deviceSchema)
 	})
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, inst.GetPointSchema())
 	})
+
+	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
+		networkSchema := networklinkerschema.GetNetworkSchema()
+		networkSchema.AddressUUID.Options = inst.GetNetworkAddressUuidOption()
+		ctx.JSON(http.StatusOK, networkSchema)
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		fns, err := inst.db.GetFlowNetworks(api.Args{})
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		deviceSchema := networklinkerschema.GetDeviceSchema()
+		deviceSchema.AddressUUID.Options = inst.GetDeviceAddressUuidOptions()
+		deviceSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
+		ctx.JSON(http.StatusOK, deviceSchema)
+	})
+	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, networklinkerschema.GetPointSchema())
+	})
 }
 
 func (inst *Instance) GetNetworkSchema() *linkmodel.SchemaNetwork {
+	netSchema := &linkmodel.SchemaNetwork{}
+	defaults.Set(netSchema)
+	netSchema.AddressUUID.Options = inst.GetNetworkAddressUuidOption()
+	return netSchema
+}
+
+func (inst *Instance) GetDeviceSchema() *linkmodel.SchemaDevice {
+	devSchema := &linkmodel.SchemaDevice{}
+	defaults.Set(devSchema)
+	devSchema.AddressUUID.Options = inst.GetDeviceAddressUuidOptions()
+	return devSchema
+}
+
+func (inst *Instance) GetPointSchema() *linkmodel.SchemaPoint {
+	point := &linkmodel.SchemaPoint{}
+	defaults.Set(point)
+	return point
+}
+
+func (inst *Instance) GetNetworkAddressUuidOption() []string {
+	var options []string
 	currNets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
 	currNetIDs := make([][]string, len(currNets))
 	for i, currNw := range currNets {
 		currNetIDs[i] = strings.Split(currNw.AddressUUID, INTERNAL_SEPARATOR)
 	}
-	netSchema := &linkmodel.SchemaNetwork{}
-	defaults.Set(netSchema)
 	nets, _ := inst.db.GetNetworks(api.Args{})
 	inner := 1
 	for _, n := range nets {
@@ -107,18 +158,16 @@ func (inst *Instance) GetNetworkSchema() *linkmodel.SchemaNetwork {
 			if exists {
 				continue
 			}
-			net_map := fmt.Sprintf("%s%s%s", n.Name, UI_SEPARATOR, nets[j].Name)
-			netSchema.AddressUUID.Options = append(netSchema.AddressUUID.Options, net_map)
+			netMap := fmt.Sprintf("%s%s%s", n.Name, UI_SEPARATOR, nets[j].Name)
+			options = append(options, netMap)
 		}
 		inner++
 	}
-	return netSchema
+	return options
 }
 
-func (inst *Instance) GetDeviceSchema() *linkmodel.SchemaDevice {
-	// TODO: remove existing links
-	devSchema := &linkmodel.SchemaDevice{}
-	defaults.Set(devSchema)
+func (inst *Instance) GetDeviceAddressUuidOptions() []string {
+	var options []string
 	nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
 	for i := range nets {
 		netSplit := strings.Split(nets[i].AddressUUID, INTERNAL_SEPARATOR)
@@ -126,18 +175,12 @@ func (inst *Instance) GetDeviceSchema() *linkmodel.SchemaDevice {
 		net2, _ := inst.db.GetNetwork(netSplit[1], api.Args{WithDevices: true})
 		for i := range net1.Devices {
 			for j := range net2.Devices {
-				dev_map := fmt.Sprintf("%s%s%s", net1.Devices[i].Name, UI_SEPARATOR, net2.Devices[j].Name)
-				devSchema.AddressUUID.Options = append(devSchema.AddressUUID.Options, dev_map)
+				devMap := fmt.Sprintf("%s%s%s", net1.Devices[i].Name, UI_SEPARATOR, net2.Devices[j].Name)
+				options = append(options, devMap)
 			}
 		}
 	}
-	return devSchema
-}
-
-func (inst *Instance) GetPointSchema() *linkmodel.SchemaPoint {
-	point := &linkmodel.SchemaPoint{}
-	defaults.Set(point)
-	return point
+	return options
 }
 
 func (inst *Instance) handlePointWriteProxy(ctx *gin.Context) {

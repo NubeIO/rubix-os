@@ -82,6 +82,11 @@ type Point struct {
 		DisplayName string   `json:"display_name" default:"Fallback Value"`
 		Nullable    bool     `json:"nullable" default:"true"`
 	} `json:"fallback"`
+	AutoMappingEnable struct {
+		Type    string `json:"type" default:"bool"`
+		Options bool   `json:"options" default:"false"`
+		Default *bool  `json:"default" default:"true"`
+	} `json:"auto_mapping_enable"`
 }
 
 func GetNetworkSchema() *Network {
