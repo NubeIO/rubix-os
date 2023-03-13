@@ -28,7 +28,7 @@ type NetworkDatabase interface {
 	CreateNetworkMetaTags(networkUUID string, networkMetaTags []*model.NetworkMetaTag) ([]*model.NetworkMetaTag, error)
 
 	SyncNetworks(args Args) ([]*interfaces.SyncModel, error)
-	SyncNetworkDevices(uuid string, args Args) ([]*interfaces.SyncModel, error)
+	SyncNetworkDevices(uuid string, removeUnused bool, args Args) ([]*interfaces.SyncModel, error)
 }
 type NetworksAPI struct {
 	DB     NetworkDatabase
@@ -137,6 +137,6 @@ func (a *NetworksAPI) SyncNetworkDevices(ctx *gin.Context) {
 	networkUUID := resolveID(ctx)
 	args := buildNetworkArgs(ctx)
 	args.WithDevices = true
-	q, err := a.DB.SyncNetworkDevices(networkUUID, args)
+	q, err := a.DB.SyncNetworkDevices(networkUUID, true, args)
 	ResponseHandler(q, err, ctx)
 }

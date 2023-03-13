@@ -195,12 +195,13 @@ func (d *GormDatabase) SyncNetworks(args api.Args) ([]*interfaces.SyncModel, err
 	for range networks {
 		outputs = append(outputs, <-channel)
 	}
+	d.removeUnusedAutoMappedStreams()
 	return outputs, nil
 }
 
 func (d *GormDatabase) syncNetwork(networkUUID string, args api.Args, channel chan *interfaces.SyncModel) {
 	// This is for syncing child descendants
-	syncModels, err := d.SyncNetworkDevices(networkUUID, args)
+	syncModels, err := d.SyncNetworkDevices(networkUUID, false, args)
 	output := interfaces.SyncModel{UUID: networkUUID, IsError: false}
 	if err != nil {
 		output = interfaces.SyncModel{UUID: networkUUID, IsError: true, Message: nstring.New(err.Error())}
@@ -225,7 +226,7 @@ func (d *GormDatabase) syncNetwork(networkUUID string, args api.Args, channel ch
 	channel <- &output
 }
 
-func (d *GormDatabase) SyncNetworkDevices(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
+func (d *GormDatabase) SyncNetworkDevices(uuid string, removeUnused bool, args api.Args) ([]*interfaces.SyncModel, error) {
 	network, _ := d.GetNetwork(uuid, args)
 	var outputs []*interfaces.SyncModel
 	if network == nil {
@@ -238,6 +239,9 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, args api.Args) ([]*interf
 	}
 	for range network.Devices {
 		outputs = append(outputs, <-channel)
+	}
+	if removeUnused {
+		d.removeUnusedAutoMappedStreams()
 	}
 	return outputs, nil
 }
@@ -270,7 +274,7 @@ func (d *GormDatabase) syncDevice(device *model.Device, args api.Args, channel c
 		_ = d.UpdateDeviceErrors(device.UUID, device)
 	}
 	// This is for syncing child descendants
-	syncModels, err := d.SyncDevicePoints(device.UUID, args)
+	syncModels, err := d.SyncDevicePoints(device.UUID, false, args)
 	if err != nil {
 		output = interfaces.SyncModel{UUID: device.UUID, IsError: true, Message: nstring.New(err.Error())}
 	}
@@ -292,4 +296,25 @@ func (d *GormDatabase) syncDevice(device *model.Device, args api.Args, channel c
 		Select("Connection", "ConnectionMessage").
 		Updates(&deviceModel)
 	channel <- &output
+}
+
+func (d *GormDatabase) removeUnusedAutoMappedStreams() {
+	streams, err := d.GetStreams(api.Args{})
+	if err != nil {
+		log.Errorf(err.Error())
+	}
+	for _, stream := range streams {
+		if boolean.IsTrue(stream.CreatedFromAutoMapping) {
+			parts := strings.Split(stream.Name, ":")
+			if len(parts) == 2 {
+				device, _ := d.GetDeviceByName(parts[0], parts[1], api.Args{})
+				if device == nil {
+					_, err := d.DeleteStream(stream.UUID)
+					if err != nil {
+						log.Errorf(err.Error())
+					}
+				}
+			}
+		}
+	}
 }

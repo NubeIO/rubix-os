@@ -120,10 +120,12 @@ func (d *GormDatabase) createPointAutoMappingStream(flowNetwork *model.FlowNetwo
 		streamModel.Enable = boolean.NewTrue()
 		streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 		streamModel.Name = name
+		streamModel.CreatedFromAutoMapping = boolean.NewTrue()
 		return d.CreateStream(streamModel)
 	}
 	stream.Name = name
 	stream.FlowNetworks = []*model.FlowNetwork{flowNetwork}
+	stream.CreatedFromAutoMapping = boolean.NewTrue()
 	return d.UpdateStream(stream.UUID, stream) // note: to create stream clone in case of it does not exist
 }
 

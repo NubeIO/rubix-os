@@ -140,7 +140,7 @@ func (d *GormDatabase) DeleteOneDeviceByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncDevicePoints(uuid string, args api.Args) ([]*interfaces.SyncModel, error) {
+func (d *GormDatabase) SyncDevicePoints(uuid string, removeUnused bool, args api.Args) ([]*interfaces.SyncModel, error) {
 	device, _ := d.GetDevice(uuid, args)
 	var outputs []*interfaces.SyncModel
 	channel := make(chan *interfaces.SyncModel)
@@ -151,6 +151,9 @@ func (d *GormDatabase) SyncDevicePoints(uuid string, args api.Args) ([]*interfac
 	}
 	for range device.Points {
 		outputs = append(outputs, <-channel)
+	}
+	if removeUnused {
+		d.removeUnusedAutoMappedStreams()
 	}
 	return outputs, nil
 }
