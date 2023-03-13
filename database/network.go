@@ -196,6 +196,7 @@ func (d *GormDatabase) SyncNetworks(args api.Args) ([]*interfaces.SyncModel, err
 		outputs = append(outputs, <-channel)
 	}
 	d.removeUnusedAutoMappedStreams()
+	d.removeUnusedAutoMappedDevices()
 	return outputs, nil
 }
 
@@ -242,6 +243,7 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, removeUnused bool, args a
 	}
 	if removeUnused {
 		d.removeUnusedAutoMappedStreams()
+		d.removeUnusedAutoMappedDevices()
 	}
 	return outputs, nil
 }
@@ -313,6 +315,37 @@ func (d *GormDatabase) removeUnusedAutoMappedStreams() {
 					if err != nil {
 						log.Errorf(err.Error())
 					}
+				}
+			}
+		}
+	}
+}
+
+func (d *GormDatabase) removeUnusedAutoMappedDevices() {
+	devices, err := d.GetDevices(api.Args{})
+	if err != nil {
+		log.Errorf(err.Error())
+	}
+	for _, device := range devices {
+		if boolean.IsTrue(device.CreatedFromAutoMapping) {
+			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(device.AutoMappingFlowNetworkName)})
+			if err != nil {
+				_, err := d.DeleteDevice(device.UUID)
+				if err != nil {
+					log.Errorf(err.Error())
+				}
+			}
+			network, err := d.GetNetwork(device.NetworkUUID, api.Args{})
+			cli := client.NewFlowClientCliFromFNC(fnc)
+			networkName := network.Name
+			if boolean.IsFalse(fnc.IsRemote) {
+				networkName = strings.Replace(networkName, "mapping_", "", 1)
+			}
+			_, err = cli.GetDeviceByName(networkName, device.Name)
+			if err != nil {
+				_, err := d.DeleteDevice(device.UUID)
+				if err != nil {
+					log.Errorf(err.Error())
 				}
 			}
 		}
