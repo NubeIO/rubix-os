@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"strings"
 	"sync"
 )
 
@@ -64,6 +65,7 @@ func (d *GormDatabase) GetNetworkByField(field string, value string, withDevices
 
 func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Network)
+	body.Name = strings.TrimSpace(body.Name)
 	body.ThingClass = model.ThingClass.Network
 	transport, err := checkTransport(body.TransportType)
 	if err != nil {
@@ -101,6 +103,7 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 			return nil, err
 		}
 	}
+	body.Name = strings.TrimSpace(body.Name)
 	query = d.DB.Model(&networkModel).Select("*").Updates(&body)
 	if query.Error != nil {
 		return nil, query.Error

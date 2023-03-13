@@ -12,6 +12,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"strings"
 	"sync"
 )
 
@@ -48,6 +49,7 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 		return nil, query.Error
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Device)
+	body.Name = strings.TrimSpace(body.Name)
 	body.ThingClass = model.ThingClass.Device
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
@@ -67,6 +69,7 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 			return nil, err
 		}
 	}
+	body.Name = strings.TrimSpace(body.Name)
 	body.ThingClass = model.ThingClass.Device
 	if err := d.DB.Model(&deviceModel).Select("*").Updates(body).Error; err != nil {
 		return nil, err
