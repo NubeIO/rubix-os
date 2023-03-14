@@ -41,6 +41,18 @@ type Network struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"system"`
 	} `json:"plugin_name"`
+	AutoMappingEnable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"false"`
+	} `json:"auto_mapping_enable"`
+	AutoMappingFlowNetworkName struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[]"`
+		Default  string   `json:"default" default:""`
+	} `json:"auto_mapping_flow_network_name"`
 }
 
 type Device struct {
@@ -56,14 +68,8 @@ type Device struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
 		Options  bool   `json:"options" default:"false"`
-		Default  *bool  `json:"default" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
 	} `json:"auto_mapping_enable"`
-	AutoMappingFlowNetworkName struct {
-		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[]"`
-		Default  string   `json:"default" default:""`
-	} `json:"auto_mapping_flow_network_name"`
 }
 
 type Point struct {
@@ -83,9 +89,10 @@ type Point struct {
 		Nullable    bool     `json:"nullable" default:"true"`
 	} `json:"fallback"`
 	AutoMappingEnable struct {
-		Type    string `json:"type" default:"bool"`
-		Options bool   `json:"options" default:"false"`
-		Default *bool  `json:"default" default:"true"`
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
 	} `json:"auto_mapping_enable"`
 }
 

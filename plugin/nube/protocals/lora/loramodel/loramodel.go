@@ -60,6 +60,18 @@ type Network struct {
 		Options  []int  `json:"options" default:"[9600, 14400, 19200, 38400, 57600, 115200]"`
 		Default  int    `json:"default" default:"38400"`
 	} `json:"serial_baud_rate"`
+	AutoMappingEnable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"false"`
+	} `json:"auto_mapping_enable"`
+	AutoMappingFlowNetworkName struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[]"`
+		Default  string   `json:"default" default:""`
+	} `json:"auto_mapping_flow_network_name"`
 }
 
 type Device struct {
@@ -83,14 +95,8 @@ type Device struct {
 		Type     string `json:"type" default:"bool"`
 		Required bool   `json:"required" default:"true"`
 		Options  bool   `json:"options" default:"false"`
-		Default  *bool  `json:"default" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
 	} `json:"auto_mapping_enable"`
-	AutoMappingFlowNetworkName struct {
-		Type     string   `json:"type" default:"array"`
-		Required bool     `json:"required" default:"false"`
-		Options  []string `json:"options" default:"[]"`
-		Default  string   `json:"default" default:""`
-	} `json:"auto_mapping_flow_network_name"`
 }
 
 type Point struct {
@@ -129,6 +135,12 @@ type Point struct {
 		Required bool     `json:"required" default:"true"`
 		Options  []string `json:"options" default:"[\"point\"]"`
 	} `json:"thing_type"`
+	AutoMappingEnable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
+	} `json:"auto_mapping_enable"`
 }
 
 func GetNetworkSchema() *Network {
