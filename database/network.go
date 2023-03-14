@@ -349,7 +349,9 @@ func (d *GormDatabase) removeUnlinkedAutoMappedNetworks() {
 				network.Connection = connection.Broken.String()
 				network.ConnectionMessage = nstring.New(err.Error())
 				_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
-			} else if remoteNetwork == nil || boolean.IsFalse(remoteNetwork.AutoMappingEnable) {
+			} else if remoteNetwork == nil ||
+				boolean.IsFalse(remoteNetwork.AutoMappingEnable) ||
+				remoteNetwork.AutoMappingFlowNetworkName != network.AutoMappingFlowNetworkName {
 				_, err := d.DeleteNetwork(network.UUID)
 				if err != nil {
 					log.Errorf(err.Error())
