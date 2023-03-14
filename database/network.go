@@ -231,8 +231,8 @@ func (d *GormDatabase) syncNetwork(networkUUID string, args api.Args, channel ch
 
 func (d *GormDatabase) SyncNetworkDevices(uuid string, removeUnlinked bool, args api.Args) ([]*interfaces.SyncModel, error) {
 	if removeUnlinked {
-		d.removeUnlinkedAutoMappedStreams()
 		d.removeUnlinkedAutoMappedDevices()
+		d.removeUnlinkedAutoMappedStreams()
 	}
 	network, _ := d.GetNetwork(uuid, args)
 	var outputs []*interfaces.SyncModel
