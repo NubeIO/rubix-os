@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.11.0](https://github.com/NubeIO/flow-framework/tree/v0.11.0) (2023-03-15)
+
+- Trim networks, devices, and points names before inserting/updating
+- Auto-mapping by names
+
 ## [v0.10.10](https://github.com/NubeIO/flow-framework/tree/v0.10.10) (2023-03-10)
 
 - Remove MaxPollRate override
