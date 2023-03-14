@@ -28,7 +28,7 @@ type NetworkDatabase interface {
 	CreateNetworkMetaTags(networkUUID string, networkMetaTags []*model.NetworkMetaTag) ([]*model.NetworkMetaTag, error)
 
 	SyncNetworks(args Args) ([]*interfaces.SyncModel, error)
-	SyncNetworkDevices(uuid string, removeUnused bool, args Args) ([]*interfaces.SyncModel, error)
+	SyncNetworkDevices(uuid string, removeUnlinked bool, args Args) ([]*interfaces.SyncModel, error)
 }
 type NetworksAPI struct {
 	DB     NetworkDatabase

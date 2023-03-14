@@ -52,3 +52,21 @@ func composeErrorMsg(resp *resty.Response) error {
 	e := fmt.Errorf(message.Message)
 	return e
 }
+
+func FormatRestyV2Response(resp *resty.Response, err error) (res *resty.Response, connectionError error, requestError error) {
+	// it catches errors:
+	// => when we don't have host server (i/o timeout)
+	//    -> e.g: `Post \"http://10.8.1.9:1616/api/users/login\": dial tcp 10.8.1.9:1616: i/o timeout`
+	// => when we don't have app running (connection refused) etc...
+	//    -> e.g: `Post \"http://10.8.1.9:1616/api/users/login\": dial tcp 10.8.1.9:1616: connect: connection refused`
+	if err != nil {
+		return resp, err, nil
+	}
+	if resp.IsError() && resp.StatusCode() != 404 {
+		return nil, composeErrorMsg(resp), nil
+	}
+	if resp.IsError() {
+		return nil, nil, composeErrorMsg(resp)
+	}
+	return resp, nil, nil
+}

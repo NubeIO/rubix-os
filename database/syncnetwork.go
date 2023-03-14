@@ -13,9 +13,7 @@ import (
 func (d *GormDatabase) SyncNetwork(body *interfaces.SyncNetwork) (*model.Network, error) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
-	if body.IsLocal {
-		body.NetworkName = generateLocalNetworkName(body.NetworkName)
-	}
+	body.NetworkName = getAutoMappedNetworkName(body.NetworkName, body.IsLocal)
 	network, _ := d.GetNetworkByName(body.NetworkName, api.Args{WithTags: true})
 	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{SourceUUID: nils.NewString(body.FlowNetworkUUID)})
 	if err != nil {

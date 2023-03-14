@@ -35,10 +35,7 @@ func (d *GormDatabase) CreatePointAutoMapping(point *model.Point) error {
 }
 
 func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) error {
-	networkName := autoMapping.NetworkName
-	if autoMapping.IsLocal {
-		networkName = generateLocalNetworkName(networkName)
-	}
+	networkName := getAutoMappedNetworkName(autoMapping.NetworkName, autoMapping.IsLocal)
 	network, err := d.GetNetworkByName(networkName, api.Args{})
 	if network != nil && network.GlobalUUID != autoMapping.NetworkGlobalUUID {
 		return fmt.Errorf("network.name %s already exists", network.Name)

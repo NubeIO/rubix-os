@@ -23,7 +23,7 @@ type DeviceDatabase interface {
 
 	CreateDeviceMetaTags(deviceUUID string, deviceMetaTags []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error)
 
-	SyncDevicePoints(deviceUUID string, removeUnused bool, args Args) ([]*interfaces.SyncModel, error)
+	SyncDevicePoints(deviceUUID string, removeUnlinked bool, args Args) ([]*interfaces.SyncModel, error)
 }
 type DeviceAPI struct {
 	DB DeviceDatabase

@@ -13,7 +13,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
-	"strings"
 	"sync"
 )
 
@@ -87,6 +86,14 @@ func (d *GormDatabase) UpdateDeviceErrors(uuid string, body *model.Device) error
 		Error
 }
 
+func (d *GormDatabase) UpdateDeviceConnectionErrors(uuid string, device *model.Device) error {
+	return d.DB.Model(&model.Device{}).
+		Where("uuid = ?", uuid).
+		Select("Connection", "ConnectionMessage").
+		Updates(&device).
+		Error
+}
+
 func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 	deviceModel, err := d.GetDevice(uuid, api.Args{WithPoints: true})
 	if err != nil {
@@ -118,10 +125,7 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 			return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
 		}
 		cli := client.NewFlowClientCliFromFN(fn)
-		networkName := networkModel.Name
-		if boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave) {
-			networkName = generateLocalNetworkName(networkName)
-		}
+		networkName := getAutoMappedNetworkName(networkModel.Name, boolean.IsFalse(fn.IsRemote))
 		url := urls.SingularUrl(urls.DeviceNameUrl, fmt.Sprintf("%s/%s", networkName, deviceModel.Name))
 		_ = cli.DeleteQuery(url)
 	}
@@ -139,7 +143,10 @@ func (d *GormDatabase) DeleteOneDeviceByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncDevicePoints(uuid string, removeUnused bool, args api.Args) ([]*interfaces.SyncModel, error) {
+func (d *GormDatabase) SyncDevicePoints(uuid string, removeUnlinked bool, args api.Args) ([]*interfaces.SyncModel, error) {
+	if removeUnlinked {
+		d.removeUnlinkedAutoMappedStreams()
+	}
 	device, _ := d.GetDevice(uuid, args)
 	var outputs []*interfaces.SyncModel
 	channel := make(chan *interfaces.SyncModel)
@@ -150,9 +157,6 @@ func (d *GormDatabase) SyncDevicePoints(uuid string, removeUnused bool, args api
 	}
 	for range device.Points {
 		outputs = append(outputs, <-channel)
-	}
-	if removeUnused {
-		d.removeUnusedAutoMappedStreams()
 	}
 	return outputs, nil
 }
@@ -174,15 +178,14 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, chann
 				point.Connection = connection.Broken.String()
 				point.ConnectionMessage = nstring.New("flow network clone not found")
 			} else {
+				networkName := getAutoMappedOriginalNetworkName(network.Name, boolean.IsFalse(fnc.IsRemote))
 				cli := client.NewFlowClientCliFromFNC(fnc)
-				rawPoint, err := cli.GetQueryMarshal(urls.SingularUrl(urls.PointNameUrl,
-					fmt.Sprintf("%s/%s/%s", strings.Replace(network.Name, "mapping_", "", -1),
-						device.Name, point.Name)), model.Point{})
-				if err != nil {
+				point_, connectionErr, _ := cli.GetPointByName(networkName, device.Name, point.Name)
+				if connectionErr != nil {
 					point.Connection = connection.Broken.String()
 					point.ConnectionMessage = nstring.New(err.Error())
 				} else {
-					if boolean.IsFalse(rawPoint.(*model.Point).AutoMappingEnable) {
+					if point_ == nil || boolean.IsFalse(point_.AutoMappingEnable) {
 						_, _ = d.DeletePoint(point.UUID)
 						channel <- &output
 						return
@@ -190,7 +193,6 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, chann
 				}
 			}
 		}
-		_ = d.UpdatePointErrors(point.UUID, point)
 	}
 	err := d.CreatePointAutoMapping(point)
 	if err != nil {
@@ -206,9 +208,6 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, chann
 		pointModel.Connection = connection.Connected.String()
 		pointModel.ConnectionMessage = nstring.New(nstring.NotAvailable)
 	}
-	d.DB.Model(&model.Point{}).
-		Where("uuid = ?", output.UUID).
-		Select("Connection", "ConnectionMessage").
-		Updates(&pointModel)
+	_ = d.UpdatePointConnectionErrors(output.UUID, &pointModel)
 	channel <- &output
 }

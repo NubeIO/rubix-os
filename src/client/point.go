@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -37,6 +38,17 @@ func (inst *FlowClient) GetPoint(uuid string) (*model.Point, error) {
 		return nil, err
 	}
 	return resp.Result().(*model.Point), nil
+}
+
+func (inst *FlowClient) GetPointByName(networkName, deviceName, pointName string) (*model.Point, error, error) {
+	url := fmt.Sprintf("/api/points/name/%s/%s/%s", networkName, deviceName, pointName)
+	resp, connectionErr, requestErr := nresty.FormatRestyV2Response(inst.client.R().
+		SetResult(&model.Point{}).
+		Get(url))
+	if connectionErr != nil || requestErr != nil {
+		return nil, connectionErr, requestErr
+	}
+	return resp.Result().(*model.Point), nil, nil
 }
 
 func (inst *FlowClient) DeletePoint(uuid string) (bool, error) {

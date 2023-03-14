@@ -64,15 +64,15 @@ func (inst *FlowClient) GetDevice(uuid string, withPoints ...bool) (*model.Devic
 	return resp.Result().(*model.Device), nil
 }
 
-func (inst *FlowClient) GetDeviceByName(networkName, deviceName string) (*model.Device, error) {
+func (inst *FlowClient) GetDeviceByName(networkName, deviceName string) (*model.Device, error, error) {
 	url := fmt.Sprintf("/api/devices/name/%s/%s", networkName, deviceName)
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
+	resp, connectionErr, requestErr := nresty.FormatRestyV2Response(inst.client.R().
 		SetResult(&model.Device{}).
 		Get(url))
-	if err != nil {
-		return nil, err
+	if connectionErr != nil || requestErr != nil {
+		return nil, connectionErr, requestErr
 	}
-	return resp.Result().(*model.Device), nil
+	return resp.Result().(*model.Device), nil, nil
 }
 
 func (inst *FlowClient) EditDevice(uuid string, device *model.Device) (*model.Device, error) {

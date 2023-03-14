@@ -131,6 +131,14 @@ func (d *GormDatabase) UpdateNetworkErrors(uuid string, body *model.Network) err
 		Error
 }
 
+func (d *GormDatabase) UpdateNetworkConnectionErrors(uuid string, network *model.Network) error {
+	return d.DB.Model(&model.Network{}).
+		Where("uuid = ?", uuid).
+		Select("Connection", "ConnectionMessage").
+		Updates(&network).
+		Error
+}
+
 func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
 	networkModel, err := d.GetNetwork(uuid, api.Args{WithDevices: true})
 	if err != nil {
@@ -148,10 +156,7 @@ func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
 			wg.Add(1)
 			go func(device *model.Device) {
 				defer wg.Done()
-				networkName := networkModel.Name
-				if boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave) {
-					networkName = generateLocalNetworkName(networkName)
-				}
+				networkName := getAutoMappedNetworkName(networkModel.Name, boolean.IsFalse(fn.IsRemote))
 				url := urls.SingularUrl(urls.NetworkNameUrl, networkName)
 				_ = cli.DeleteQuery(url)
 				_, _ = d.DeleteDevice(device.UUID)
@@ -184,6 +189,9 @@ func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 }
 
 func (d *GormDatabase) SyncNetworks(args api.Args) ([]*interfaces.SyncModel, error) {
+	d.removeUnlinkedAutoMappedNetworks()
+	d.removeUnlinkedAutoMappedDevices()
+	d.removeUnlinkedAutoMappedStreams()
 	networks, _ := d.GetNetworks(args)
 	var outputs []*interfaces.SyncModel
 	channel := make(chan *interfaces.SyncModel)
@@ -194,8 +202,6 @@ func (d *GormDatabase) SyncNetworks(args api.Args) ([]*interfaces.SyncModel, err
 	for range networks {
 		outputs = append(outputs, <-channel)
 	}
-	d.removeUnusedAutoMappedStreams()
-	d.removeUnusedAutoMappedDevices()
 	return outputs, nil
 }
 
@@ -219,14 +225,15 @@ func (d *GormDatabase) syncNetwork(networkUUID string, args api.Args, channel ch
 		networkModel.Connection = connection.Connected.String()
 		networkModel.ConnectionMessage = nstring.New(nstring.NotAvailable)
 	}
-	d.DB.Model(&model.Network{}).
-		Where("uuid = ?", output.UUID).
-		Select("Connection", "ConnectionMessage").
-		Updates(&networkModel)
+	_ = d.UpdateNetworkConnectionErrors(output.UUID, &networkModel)
 	channel <- &output
 }
 
-func (d *GormDatabase) SyncNetworkDevices(uuid string, removeUnused bool, args api.Args) ([]*interfaces.SyncModel, error) {
+func (d *GormDatabase) SyncNetworkDevices(uuid string, removeUnlinked bool, args api.Args) ([]*interfaces.SyncModel, error) {
+	if removeUnlinked {
+		d.removeUnlinkedAutoMappedStreams()
+		d.removeUnlinkedAutoMappedDevices()
+	}
 	network, _ := d.GetNetwork(uuid, args)
 	var outputs []*interfaces.SyncModel
 	if network == nil {
@@ -239,10 +246,6 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, removeUnused bool, args a
 	}
 	for range network.Devices {
 		outputs = append(outputs, <-channel)
-	}
-	if removeUnused {
-		d.removeUnusedAutoMappedStreams()
-		d.removeUnusedAutoMappedDevices()
 	}
 	return outputs, nil
 }
@@ -292,14 +295,11 @@ func (d *GormDatabase) syncDevice(flowNetworkName string, device *model.Device, 
 		deviceModel.Connection = connection.Connected.String()
 		deviceModel.ConnectionMessage = nstring.New(nstring.NotAvailable)
 	}
-	d.DB.Model(&model.Device{}).
-		Where("uuid = ?", output.UUID).
-		Select("Connection", "ConnectionMessage").
-		Updates(&deviceModel)
+	_ = d.UpdateDeviceConnectionErrors(output.UUID, &deviceModel)
 	channel <- &output
 }
 
-func (d *GormDatabase) removeUnusedAutoMappedStreams() {
+func (d *GormDatabase) removeUnlinkedAutoMappedStreams() {
 	streams, err := d.GetStreams(api.Args{})
 	if err != nil {
 		log.Errorf(err.Error())
@@ -314,13 +314,52 @@ func (d *GormDatabase) removeUnusedAutoMappedStreams() {
 					if err != nil {
 						log.Errorf(err.Error())
 					}
+				} else {
+					network, _ := d.GetNetwork(device.NetworkUUID, api.Args{})
+					if boolean.IsFalse(network.AutoMappingEnable) || boolean.IsFalse(device.AutoMappingEnable) {
+						_, err := d.DeleteStream(stream.UUID)
+						if err != nil {
+							log.Errorf(err.Error())
+						}
+					}
 				}
 			}
 		}
 	}
 }
 
-func (d *GormDatabase) removeUnusedAutoMappedDevices() {
+func (d *GormDatabase) removeUnlinkedAutoMappedNetworks() {
+	networks, err := d.GetNetworks(api.Args{})
+	if err != nil {
+		log.Errorf(err.Error())
+	}
+	for _, network := range networks {
+		if boolean.IsTrue(network.CreatedFromAutoMapping) {
+			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(network.AutoMappingFlowNetworkName)})
+			if err != nil {
+				_, err := d.DeleteNetwork(network.UUID)
+				if err != nil {
+					log.Errorf(err.Error())
+				}
+			}
+			cli := client.NewFlowClientCliFromFNC(fnc)
+			networkName := getAutoMappedOriginalNetworkName(network.Name, boolean.IsFalse(fnc.IsRemote))
+			remoteNetwork, connectionErr, _ := cli.GetNetworkByName(networkName)
+			if connectionErr != nil {
+				network.Connection = connection.Broken.String()
+				network.ConnectionMessage = nstring.New(err.Error())
+				_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
+			} else if remoteNetwork == nil || boolean.IsFalse(remoteNetwork.AutoMappingEnable) {
+				_, err := d.DeleteNetwork(network.UUID)
+				if err != nil {
+					log.Errorf(err.Error())
+				}
+			}
+		}
+	}
+}
+
+func (d *GormDatabase) removeUnlinkedAutoMappedDevices() {
 	devices, err := d.GetDevices(api.Args{})
 	if err != nil {
 		log.Errorf(err.Error())
@@ -336,12 +375,13 @@ func (d *GormDatabase) removeUnusedAutoMappedDevices() {
 				}
 			}
 			cli := client.NewFlowClientCliFromFNC(fnc)
-			networkName := network.Name
-			if boolean.IsFalse(fnc.IsRemote) {
-				networkName = strings.Replace(networkName, "mapping_", "", 1)
-			}
-			_, err = cli.GetDeviceByName(networkName, device.Name)
-			if err != nil {
+			networkName := getAutoMappedOriginalNetworkName(network.Name, boolean.IsFalse(fnc.IsRemote))
+			remoteDevice, connectionErr, _ := cli.GetDeviceByName(networkName, device.Name)
+			if connectionErr != nil {
+				device.Connection = connection.Broken.String()
+				device.ConnectionMessage = nstring.New(err.Error())
+				_ = d.UpdateDeviceConnectionErrors(device.UUID, device)
+			} else if remoteDevice == nil || boolean.IsFalse(remoteDevice.AutoMappingEnable) {
 				_, err := d.DeleteDevice(device.UUID)
 				if err != nil {
 					log.Errorf(err.Error())

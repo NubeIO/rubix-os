@@ -317,6 +317,14 @@ func (d *GormDatabase) UpdatePointErrors(uuid string, body *model.Point) error {
 		Error
 }
 
+func (d *GormDatabase) UpdatePointConnectionErrors(uuid string, point *model.Point) error {
+	return d.DB.Model(&model.Point{}).
+		Where("uuid = ?", uuid).
+		Select("Connection", "ConnectionMessage").
+		Updates(&point).
+		Error
+}
+
 func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	point, err := d.GetPoint(uuid, api.Args{})
 	if err != nil {
@@ -364,10 +372,7 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 				return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
 			}
 			cli := client.NewFlowClientCliFromFN(fn)
-			networkName := networkModel.Name
-			if boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave) {
-				networkName = generateLocalNetworkName(networkName)
-			}
+			networkName := getAutoMappedNetworkName(networkModel.Name, boolean.IsFalse(fn.IsRemote))
 			url := urls.SingularUrl(urls.PointNameUrl, fmt.Sprintf("%s/%s/%s", networkName, deviceModel.Name,
 				point.Name))
 			_ = cli.DeleteQuery(url)
