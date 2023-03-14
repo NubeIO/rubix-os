@@ -92,16 +92,6 @@ func (d *GormDatabase) GetNetworkByDeviceUUID(devUUID string, args api.Args) (ne
 	return d.GetNetwork(device.NetworkUUID, args)
 }
 
-// GetNetworkByAutoMappingUUID returns a network by passing in the auto mapping UUID.
-func (d *GormDatabase) GetNetworkByAutoMappingUUID(autoMappingUUID string, args api.Args) (*model.Network, error) {
-	var networksModel *model.Network
-	query := d.buildNetworkQuery(args)
-	if err := query.Where("auto_mapping_uuid = ? ", autoMappingUUID).First(&networksModel).Error; err != nil {
-		return nil, err
-	}
-	return networksModel, nil
-}
-
 // SetErrorsForAllDevicesOnNetwork sets the fault/error properties of all devices for a specific network. Optional to set the points of each device also.
 // messageLevel = model.MessageLevel
 // messageCode = model.CommonFaultCode
@@ -148,4 +138,14 @@ func (d *GormDatabase) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doP
 		}
 	}
 	return nil
+}
+
+func (d *GormDatabase) DeleteNetworkByName(name string, args api.Args) (bool, error) {
+	var networksModel *model.Network
+	query := d.buildNetworkQuery(args)
+	if err := query.Where("name = ? ", name).First(&networksModel).Error; err != nil {
+		return false, err
+	}
+	query = query.Delete(networksModel)
+	return d.deleteResponseBuilder(query)
 }

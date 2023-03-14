@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -121,13 +120,13 @@ func (inst *FlowClient) GetNetwork(uuid string) (*model.Network, error) {
 	return resp.Result().(*model.Network), nil
 }
 
-func (inst *FlowClient) SyncNetwork(body *interfaces.SyncNetwork) (*model.Network, error) {
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
+func (inst *FlowClient) GetNetworkByName(networkName string) (*model.Network, error, error) {
+	url := fmt.Sprintf("/api/networks/name/%s", networkName)
+	resp, connectionErr, requestErr := nresty.FormatRestyV2Response(inst.client.R().
 		SetResult(&model.Network{}).
-		SetBody(body).
-		Post("/api/sync/network"))
-	if err != nil {
-		return nil, err
+		Get(url))
+	if connectionErr != nil || requestErr != nil {
+		return nil, connectionErr, requestErr
 	}
-	return resp.Result().(*model.Network), nil
+	return resp.Result().(*model.Network), nil, nil
 }

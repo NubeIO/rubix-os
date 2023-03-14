@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -65,6 +64,17 @@ func (inst *FlowClient) GetDevice(uuid string, withPoints ...bool) (*model.Devic
 	return resp.Result().(*model.Device), nil
 }
 
+func (inst *FlowClient) GetDeviceByName(networkName, deviceName string) (*model.Device, error, error) {
+	url := fmt.Sprintf("/api/devices/name/%s/%s", networkName, deviceName)
+	resp, connectionErr, requestErr := nresty.FormatRestyV2Response(inst.client.R().
+		SetResult(&model.Device{}).
+		Get(url))
+	if connectionErr != nil || requestErr != nil {
+		return nil, connectionErr, requestErr
+	}
+	return resp.Result().(*model.Device), nil, nil
+}
+
 func (inst *FlowClient) EditDevice(uuid string, device *model.Device) (*model.Device, error) {
 	url := fmt.Sprintf("/api/devices/%s", uuid)
 	resp, err := nresty.FormatRestyResponse(inst.client.R().
@@ -85,15 +95,4 @@ func (inst *FlowClient) DeleteDevice(uuid string) (bool, error) {
 		return false, err
 	}
 	return true, nil
-}
-
-func (inst *FlowClient) SyncDevice(body *interfaces.SyncDevice) (*model.Device, error) {
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(&model.Device{}).
-		SetBody(body).
-		Post("/api/sync/device"))
-	if err != nil {
-		return nil, err
-	}
-	return resp.Result().(*model.Device), nil
 }

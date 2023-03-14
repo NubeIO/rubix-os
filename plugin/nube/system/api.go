@@ -37,9 +37,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, smodel.GetNetworkSchema())
-	})
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
 		fns, err := inst.db.GetFlowNetworks(api.Args{})
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
@@ -49,25 +46,29 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		for _, fn := range fns {
 			fnsNames = append(fnsNames, fn.Name)
 		}
-		deviceSchema := smodel.GetDeviceSchema()
-		deviceSchema.AutoMappingFlowNetworkName.Options = fnsNames
-		ctx.JSON(http.StatusOK, deviceSchema)
+		networkSchema := smodel.GetNetworkSchema()
+		networkSchema.AutoMappingFlowNetworkName.Options = fnsNames
+		ctx.JSON(http.StatusOK, networkSchema)
+	})
+	mux.GET(schemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, smodel.GetDeviceSchema())
 	})
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, smodel.GetPointSchema())
 	})
+
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, systemschema.GetNetworkSchema())
-	})
-	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
 		fns, err := inst.db.GetFlowNetworks(api.Args{})
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 			return
 		}
-		deviceSchema := systemschema.GetDeviceSchema()
-		deviceSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
-		ctx.JSON(http.StatusOK, deviceSchema)
+		networkSchema := systemschema.GetNetworkSchema()
+		networkSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
+		ctx.JSON(http.StatusOK, networkSchema)
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, systemschema.GetDeviceSchema())
 	})
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, systemschema.GetPointSchema())

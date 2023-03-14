@@ -35,6 +35,7 @@ type Args struct {
 	SourceUUID           *string
 	ProducerThingUUID    *string
 	WriterThingUUID      *string
+	WriterThingName      *string
 	ByPluginName         bool
 	TimestampGt          *string
 	TimestampLt          *string
@@ -65,7 +66,6 @@ type Args struct {
 	NetworkUUID          *string
 	DeviceUUID           *string
 	WithMetaTags         bool
-	AutoMappingUUID      *string
 	AutoMappingEnable    *bool
 	MetaTags             *string
 }
@@ -105,6 +105,7 @@ var ArgsType = struct {
 	SourceUUID           string
 	ProducerThingUUID    string
 	WriterThingUUID      string
+	WriterThingName      string
 	ByPluginName         string
 	TimestampGt          string
 	TimestampLt          string
@@ -135,7 +136,6 @@ var ArgsType = struct {
 	NetworkUUID          string
 	DeviceUUID           string
 	WithMetaTags         string
-	AutoMappingUUID      string
 	AutoMappingEnable    string
 	MetaTags             string
 }{
@@ -172,7 +172,8 @@ var ArgsType = struct {
 	WriterThingClass:     "writer_thing_class",
 	SourceUUID:           "source_uuid",
 	ProducerThingUUID:    "producer_thing_uuid",
-	WriterThingUUID:      "writer_thing_uuid",
+	WriterThingUUID:      "writer_thing_name",
+	WriterThingName:      "writer_thing_uuid",
 	ByPluginName:         "by_plugin_name",
 	TimestampGt:          "timestamp_gt",
 	TimestampLt:          "timestamp_lt",
@@ -203,7 +204,6 @@ var ArgsType = struct {
 	NetworkUUID:          "network_uuid",
 	DeviceUUID:           "device_uuid",
 	WithMetaTags:         "with_meta_tags",
-	AutoMappingUUID:      "auto_mapping_uuid",
 	AutoMappingEnable:    "auto_mapping_enable",
 	MetaTags:             "meta_tags",
 }
@@ -251,7 +251,6 @@ var ArgsDefault = struct {
 	NetworkUUID       string
 	DeviceUUID        string
 	WithMetaTags      string
-	AutoMappingUUID   string
 	AutoMappingEnable string
 	MetaTags          string
 }{
@@ -296,7 +295,6 @@ var ArgsDefault = struct {
 	NetworkUUID:       "",
 	DeviceUUID:        "",
 	WithMetaTags:      "false",
-	AutoMappingUUID:   "",
 	AutoMappingEnable: "false",
 	MetaTags:          "",
 }

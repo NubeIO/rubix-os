@@ -8,6 +8,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/structs"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm"
+	"strings"
 )
 
 func truncateString(str string, num int) string {
@@ -110,4 +111,18 @@ func metaTagsArgsToKeyValues(metaTags string) [][]interface{} {
 		keyValues = append(keyValues, []interface{}{"", ""})
 	}
 	return keyValues
+}
+
+func getAutoMappedNetworkName(networkName string, isLocal bool) string {
+	if isLocal {
+		return fmt.Sprintf("mapping_%s", networkName)
+	}
+	return networkName
+}
+
+func getAutoMappedOriginalNetworkName(networkName string, isLocal bool) string {
+	if isLocal {
+		return strings.Replace(networkName, "mapping_", "", 1)
+	}
+	return networkName
 }

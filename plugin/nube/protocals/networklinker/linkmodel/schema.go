@@ -38,15 +38,39 @@ type SchemaNetwork struct {
 		Required bool   `json:"required" default:"true"`
 		Default  string `json:"default" default:"networklinker"`
 	} `json:"plugin_name"`
+	AutoMappingEnable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"false"`
+	} `json:"auto_mapping_enable"`
+	AutoMappingFlowNetworkName struct {
+		Type     string   `json:"type" default:"array"`
+		Required bool     `json:"required" default:"false"`
+		Options  []string `json:"options" default:"[]"`
+		Default  string   `json:"default" default:""`
+	} `json:"auto_mapping_flow_network_name"`
 }
 
 type SchemaDevice struct {
-	Enable      EnableStruct `json:"enable"`
-	Name        NameStruct   `json:"name"`
-	AddressUUID Dropdown     `json:"address_uuid"`
+	Enable            EnableStruct `json:"enable"`
+	Name              NameStruct   `json:"name"`
+	AddressUUID       Dropdown     `json:"address_uuid"`
+	AutoMappingEnable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
+	} `json:"auto_mapping_enable"`
 }
 
 type SchemaPoint struct {
-	Enable EnableStruct `json:"enable"`
-	Name   NameStruct   `json:"name"`
+	Enable            EnableStruct `json:"enable"`
+	Name              NameStruct   `json:"name"`
+	AutoMappingEnable struct {
+		Type     string `json:"type" default:"bool"`
+		Required bool   `json:"required" default:"true"`
+		Options  bool   `json:"options" default:"false"`
+		Default  *bool  `json:"default" default:"true"`
+	} `json:"auto_mapping_enable"`
 }

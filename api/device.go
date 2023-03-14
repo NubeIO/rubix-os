@@ -15,6 +15,7 @@ type DeviceDatabase interface {
 	UpdateDevice(uuid string, body *model.Device) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
 	DeleteOneDeviceByArgs(args Args) (bool, error)
+	DeleteDeviceByName(networkName string, deviceName string, args Args) (bool, error)
 
 	CreateDevicePlugin(body *model.Device) (*model.Device, error)
 	UpdateDevicePlugin(uuid string, body *model.Device) (*model.Device, error)
@@ -22,7 +23,7 @@ type DeviceDatabase interface {
 
 	CreateDeviceMetaTags(deviceUUID string, deviceMetaTags []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error)
 
-	SyncDevicePoints(deviceUUID string, args Args) ([]*interfaces.SyncModel, error)
+	SyncDevicePoints(deviceUUID string, removeUnlinked bool, args Args) ([]*interfaces.SyncModel, error)
 }
 type DeviceAPI struct {
 	DB DeviceDatabase
@@ -80,6 +81,14 @@ func (a *DeviceAPI) DeleteOneDeviceByArgs(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
+func (a *DeviceAPI) DeleteDeviceByName(ctx *gin.Context) {
+	networkName := resolveNetworkName(ctx)
+	deviceName := resolveDeviceName(ctx)
+	args := buildDeviceArgs(ctx)
+	q, err := a.DB.DeleteDeviceByName(networkName, deviceName, args)
+	ResponseHandler(q, err, ctx)
+}
+
 func (a *DeviceAPI) CreateDeviceMetaTags(ctx *gin.Context) {
 	deviceUUID := resolveID(ctx)
 	body, _ := getBodyBulkDeviceMetaTag(ctx)
@@ -95,6 +104,6 @@ func (a *DeviceAPI) SyncDevicePoints(ctx *gin.Context) {
 	deviceUUID := resolveID(ctx)
 	args := buildDeviceArgs(ctx)
 	args.WithPoints = true
-	q, err := a.DB.SyncDevicePoints(deviceUUID, args)
+	q, err := a.DB.SyncDevicePoints(deviceUUID, true, args)
 	ResponseHandler(q, err, ctx)
 }

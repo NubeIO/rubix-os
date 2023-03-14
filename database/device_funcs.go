@@ -108,3 +108,15 @@ func (d *GormDatabase) ClearErrorsForAllPointsOnDevice(deviceUUID string) error 
 	}
 	return nil
 }
+
+func (d *GormDatabase) DeleteDeviceByName(networkName string, deviceName string, args api.Args) (bool, error) {
+	var deviceModel *model.Device
+	query := d.buildDeviceQuery(args)
+	if err := query.Joins("JOIN networks ON devices.network_uuid = networks.uuid").
+		Where("networks.name = ?", networkName).Where("devices.name = ?", deviceName).
+		First(&deviceModel).Error; err != nil {
+		return false, err
+	}
+	query = query.Delete(&deviceModel)
+	return d.deleteResponseBuilder(query)
+}

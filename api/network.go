@@ -19,6 +19,7 @@ type NetworkDatabase interface {
 	UpdateNetwork(uuid string, body *model.Network) (*model.Network, error)
 	DeleteNetwork(uuid string) (bool, error)
 	DeleteOneNetworkByArgs(args Args) (bool, error)
+	DeleteNetworkByName(name string, args Args) (bool, error)
 
 	CreateNetworkPlugin(network *model.Network) (*model.Network, error)
 	UpdateNetworkPlugin(uuid string, body *model.Network) (*model.Network, error)
@@ -27,7 +28,7 @@ type NetworkDatabase interface {
 	CreateNetworkMetaTags(networkUUID string, networkMetaTags []*model.NetworkMetaTag) ([]*model.NetworkMetaTag, error)
 
 	SyncNetworks(args Args) ([]*interfaces.SyncModel, error)
-	SyncNetworkDevices(uuid string, args Args) ([]*interfaces.SyncModel, error)
+	SyncNetworkDevices(uuid string, removeUnlinked bool, args Args) ([]*interfaces.SyncModel, error)
 }
 type NetworksAPI struct {
 	DB     NetworkDatabase
@@ -108,6 +109,13 @@ func (a *NetworksAPI) DeleteOneNetworkByArgs(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
+func (a *NetworksAPI) DeleteNetworkByName(ctx *gin.Context) {
+	name := resolveName(ctx)
+	args := buildNetworkArgs(ctx)
+	q, err := a.DB.DeleteNetworkByName(name, args)
+	ResponseHandler(q, err, ctx)
+}
+
 func (a *NetworksAPI) CreateNetworkMetaTags(ctx *gin.Context) {
 	networkUUID := resolveID(ctx)
 	body, _ := getBodyBulkNetworkMetaTags(ctx)
@@ -129,6 +137,6 @@ func (a *NetworksAPI) SyncNetworkDevices(ctx *gin.Context) {
 	networkUUID := resolveID(ctx)
 	args := buildNetworkArgs(ctx)
 	args.WithDevices = true
-	q, err := a.DB.SyncNetworkDevices(networkUUID, args)
+	q, err := a.DB.SyncNetworkDevices(networkUUID, true, args)
 	ResponseHandler(q, err, ctx)
 }

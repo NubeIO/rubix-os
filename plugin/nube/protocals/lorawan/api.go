@@ -69,17 +69,17 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, lorawanschema.GetNetworkSchema())
-	})
-	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
 		fns, err := inst.db.GetFlowNetworks(api.Args{})
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 			return
 		}
-		deviceSchema := lorawanschema.GetDeviceSchema()
-		deviceSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
-		ctx.JSON(http.StatusOK, deviceSchema)
+		networkSchema := lorawanschema.GetNetworkSchema()
+		networkSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
+		ctx.JSON(http.StatusOK, networkSchema)
+	})
+	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, lorawanschema.GetDeviceSchema())
 	})
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, lorawanschema.GetPointSchema())

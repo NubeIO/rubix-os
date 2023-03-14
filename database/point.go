@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/nstring"
+	log "github.com/sirupsen/logrus"
 	"strings"
 	"sync"
 	"time"
@@ -140,7 +142,6 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	}
 
 	go d.PublishPointsList("")
-	d.CreatePointAutoMapping(body)
 	return body, nil
 }
 
@@ -209,10 +210,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 		}
 		d.UpdateProducerByProducerThingUUID(pointModel.UUID, pointModel.Name, pointModel.HistoryEnable,
 			pointModel.HistoryType, pointModel.HistoryInterval)
-		err = d.UpdatePointAutoMapping(pointModel)
-		if err != nil {
-			return nil, err
-		}
 	} else {
 		d.bufferPointUpdate(uuid, body, pnt)
 	}
@@ -315,8 +312,16 @@ func (d *GormDatabase) updatePointValue(
 func (d *GormDatabase) UpdatePointErrors(uuid string, body *model.Point) error {
 	return d.DB.Model(&body).
 		Where("uuid = ?", uuid).
-		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync", "Connection").
+		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
 		Updates(&body).
+		Error
+}
+
+func (d *GormDatabase) UpdatePointConnectionErrors(uuid string, point *model.Point) error {
+	return d.DB.Model(&model.Point{}).
+		Where("uuid = ?", uuid).
+		Select("Connection", "ConnectionMessage").
+		Updates(&point).
 		Error
 }
 
@@ -357,19 +362,21 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	}
 	r := query.RowsAffected
 	go d.PublishPointsList("")
-	var aType = api.ArgsType
-	deviceModel, err := d.GetDevice(point.DeviceUUID, api.Args{})
-	if err != nil {
-		return false, err
-	}
+	deviceModel, _ := d.GetDevice(point.DeviceUUID, api.Args{})
 	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
-		fn, err := d.selectFlowNetwork(deviceModel.AutoMappingFlowNetworkName, deviceModel.AutoMappingFlowNetworkUUID)
-		if err != nil {
-			return false, err
+		networkModel, _ := d.GetNetwork(deviceModel.NetworkUUID, api.Args{})
+		if boolean.IsTrue(networkModel.AutoMappingEnable) {
+			fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(networkModel.AutoMappingFlowNetworkName)})
+			if err != nil {
+				log.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
+				return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
+			}
+			cli := client.NewFlowClientCliFromFN(fn)
+			networkName := getAutoMappedNetworkName(networkModel.Name, boolean.IsFalse(fn.IsRemote))
+			url := urls.SingularUrl(urls.PointNameUrl, fmt.Sprintf("%s/%s/%s", networkName, deviceModel.Name,
+				point.Name))
+			_ = cli.DeleteQuery(url)
 		}
-		cli := client.NewFlowClientCliFromFN(fn)
-		url := urls.SingularUrlByArg(urls.PointUrl, aType.AutoMappingUUID, point.UUID)
-		_ = cli.DeleteQuery(url)
 	}
 	return r != 0, nil
 }

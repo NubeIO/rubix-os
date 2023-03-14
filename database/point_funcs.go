@@ -242,3 +242,17 @@ func (d *GormDatabase) removeUpdatePointBuffer(uuid string) {
 func (d *GormDatabase) removeIndex(index int) []*interfaces.PointUpdateBuffer {
 	return append(pointUpdateBuffers[:index], pointUpdateBuffers[index+1:]...)
 }
+
+func (d *GormDatabase) DeletePointByName(networkName, deviceName, pointName string, args api.Args) (bool, error) {
+	var pointModel *model.Point
+	query := d.buildPointQuery(args)
+	if err := query.Joins("JOIN devices ON points.device_uuid = devices.uuid").
+		Joins("JOIN networks ON devices.network_uuid = networks.uuid").
+		Where("networks.name = ?", networkName).Where("devices.name = ?", deviceName).
+		Where("points.name = ?", pointName).
+		First(&pointModel).Error; err != nil {
+		return false, err
+	}
+	query = query.Delete(pointModel)
+	return d.deleteResponseBuilder(query)
+}
