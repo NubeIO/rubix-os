@@ -220,6 +220,10 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point) *inte
 
 func ChuckPoints(points []*model.Point, chunkSize int) [][]*model.Point {
 	var chucks [][]*model.Point
+	if len(points) > 0 { // executes first for creating the stream and all setup & other points won't try to create
+		chucks = append(chucks, points[0:1])
+		points = points[1:(len(points))]
+	}
 	for i := 0; i < len(points); i += chunkSize {
 		end := i + chunkSize
 		if end > len(points) {

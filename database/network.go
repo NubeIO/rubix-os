@@ -197,15 +197,12 @@ func (d *GormDatabase) SyncNetworks(args api.Args) ([]*interfaces.SyncModel, err
 	channel := make(chan *interfaces.SyncModel)
 	defer close(channel)
 	for _, network := range networks {
-		go d.syncNetwork(network.UUID, args, channel)
-	}
-	for range networks {
-		outputs = append(outputs, <-channel)
+		outputs = append(outputs, d.syncNetwork(network.UUID, args))
 	}
 	return outputs, nil
 }
 
-func (d *GormDatabase) syncNetwork(networkUUID string, args api.Args, channel chan *interfaces.SyncModel) {
+func (d *GormDatabase) syncNetwork(networkUUID string, args api.Args) *interfaces.SyncModel {
 	// This is for syncing child descendants
 	syncModels, err := d.SyncNetworkDevices(networkUUID, false, args)
 	output := interfaces.SyncModel{UUID: networkUUID, IsError: false}
@@ -226,7 +223,7 @@ func (d *GormDatabase) syncNetwork(networkUUID string, args api.Args, channel ch
 		networkModel.ConnectionMessage = nstring.New(nstring.NotAvailable)
 	}
 	_ = d.UpdateNetworkConnectionErrors(output.UUID, &networkModel)
-	channel <- &output
+	return &output
 }
 
 func (d *GormDatabase) SyncNetworkDevices(uuid string, removeUnlinked bool, args api.Args) ([]*interfaces.SyncModel, error) {
@@ -242,15 +239,12 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, removeUnlinked bool, args
 	channel := make(chan *interfaces.SyncModel)
 	defer close(channel)
 	for _, device := range network.Devices {
-		go d.syncDevice(network.AutoMappingFlowNetworkName, device, args, channel)
-	}
-	for range network.Devices {
-		outputs = append(outputs, <-channel)
+		outputs = append(outputs, d.syncDevice(network.AutoMappingFlowNetworkName, device, args))
 	}
 	return outputs, nil
 }
 
-func (d *GormDatabase) syncDevice(flowNetworkName string, device *model.Device, args api.Args, channel chan *interfaces.SyncModel) {
+func (d *GormDatabase) syncDevice(flowNetworkName string, device *model.Device, args api.Args) *interfaces.SyncModel {
 	output := interfaces.SyncModel{UUID: device.UUID, IsError: false}
 	if boolean.IsTrue(device.CreatedFromAutoMapping) {
 		device.Connection = connection.Connected.String()
@@ -270,8 +264,7 @@ func (d *GormDatabase) syncDevice(flowNetworkName string, device *model.Device, 
 			} else {
 				if boolean.IsFalse(rawDevice.(*model.Device).AutoMappingEnable) {
 					_, _ = d.DeleteDevice(device.UUID)
-					channel <- &output
-					return
+					return &output
 				}
 			}
 		}
@@ -296,7 +289,7 @@ func (d *GormDatabase) syncDevice(flowNetworkName string, device *model.Device, 
 		deviceModel.ConnectionMessage = nstring.New(nstring.NotAvailable)
 	}
 	_ = d.UpdateDeviceConnectionErrors(output.UUID, &deviceModel)
-	channel <- &output
+	return &output
 }
 
 func (d *GormDatabase) removeUnlinkedAutoMappedStreams() {
