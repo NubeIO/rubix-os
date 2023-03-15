@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.11.1](https://github.com/NubeIO/flow-framework/tree/v0.11.1) (2023-03-15)
+
+- Limit point parallel mappings (temporary fix)
+
 ## [v0.11.0](https://github.com/NubeIO/flow-framework/tree/v0.11.0) (2023-03-15)
 
 - Trim networks, devices, and points names before inserting/updating
