@@ -153,16 +153,22 @@ func (d *GormDatabase) SyncDevicePoints(uuid string, removeUnlinked bool, args a
 	channel := make(chan *interfaces.SyncModel)
 	defer close(channel)
 	// This is for syncing child descendants
-	for _, point := range device.Points {
-		go d.syncPoint(device, point, channel)
-	}
-	for range device.Points {
-		outputs = append(outputs, <-channel)
+	chuckPoints := ChuckPoints(device.Points, 20)
+	for _, chuckPoint := range chuckPoints {
+		wg := &sync.WaitGroup{}
+		for _, point := range chuckPoint {
+			wg.Add(1)
+			go func(point *model.Point) {
+				defer wg.Done()
+				outputs = append(outputs, d.syncPoint(device, point))
+			}(point)
+		}
+		wg.Wait()
 	}
 	return outputs, nil
 }
 
-func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, channel chan *interfaces.SyncModel) {
+func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point) *interfaces.SyncModel {
 	var output interfaces.SyncModel
 	if boolean.IsTrue(point.CreatedFromAutoMapping) {
 		point.Connection = connection.Connected.String()
@@ -188,8 +194,7 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, chann
 				} else {
 					if point_ == nil || boolean.IsFalse(point_.AutoMappingEnable) {
 						_, _ = d.DeletePoint(point.UUID)
-						channel <- &output
-						return
+						return &output
 					}
 				}
 			}
@@ -210,5 +215,17 @@ func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point, chann
 		pointModel.ConnectionMessage = nstring.New(nstring.NotAvailable)
 	}
 	_ = d.UpdatePointConnectionErrors(output.UUID, &pointModel)
-	channel <- &output
+	return &output
+}
+
+func ChuckPoints(points []*model.Point, chunkSize int) [][]*model.Point {
+	var chucks [][]*model.Point
+	for i := 0; i < len(points); i += chunkSize {
+		end := i + chunkSize
+		if end > len(points) {
+			end = len(points)
+		}
+		chucks = append(chucks, points[i:end])
+	}
+	return chucks
 }
