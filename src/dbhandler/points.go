@@ -67,6 +67,11 @@ func (h *Handler) UpdatePointErrors(uuid string, body *model.Point) error {
 	return getDb().UpdatePointErrors(uuid, body)
 }
 
+// UpdatePointSuccess will only update the error properties of the point, all other properties will not be updated.
+func (h *Handler) UpdatePointSuccess(uuid string, body *model.Point) error {
+	return getDb().UpdatePointSuccess(uuid, body)
+}
+
 func (h *Handler) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	return getDb().GetOnePointByArgs(args)
 }
