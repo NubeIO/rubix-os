@@ -317,6 +317,16 @@ func (d *GormDatabase) UpdatePointErrors(uuid string, body *model.Point) error {
 		Error
 }
 
+// UpdatePointSuccess will only update the CommonFault properties of the point, all other properties will not be updated.
+// Does not update `LastFail`.
+func (d *GormDatabase) UpdatePointSuccess(uuid string, body *model.Point) error {
+	return d.DB.Model(&body).
+		Where("uuid = ?", uuid).
+		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastOk", "InSync").
+		Updates(&body).
+		Error
+}
+
 func (d *GormDatabase) UpdatePointConnectionErrors(uuid string, point *model.Point) error {
 	return d.DB.Model(&model.Point{}).
 		Where("uuid = ?", uuid).

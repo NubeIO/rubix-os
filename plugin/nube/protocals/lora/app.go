@@ -149,6 +149,21 @@ func (inst *Instance) deviceUpdateErr(uuid string, err error) error {
 	return err
 }
 
+func (inst *Instance) pointUpdateSuccess(point *model.Point) error {
+	if point == nil {
+		return errors.New("lora-plugin: nil point to pointUpdateSuccess()")
+	}
+	point.InFault = false
+	point.MessageLevel = model.MessageLevel.Info
+	point.MessageCode = model.CommonFaultCode.Ok
+	point.Message = fmt.Sprintf("lastMessage: %s", utilstime.TimeStamp())
+	err := inst.db.UpdatePointSuccess(point.UUID, point)
+	if err != nil {
+		log.Error("lora-app UpdatePointSuccess()", err)
+	}
+	return err
+}
+
 func (inst *Instance) handleSerialPayload(data string) {
 	if inst.networkUUID == "" {
 		return
@@ -352,10 +367,12 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 
 	}
 	pointWriter := model.PointWriter{Priority: &priority}
-	_, _, _, _, err = inst.db.PointWrite(pnt.UUID, &pointWriter) // TODO: look on it, faults messages were cleared out
+	point, _, _, _, err := inst.db.PointWrite(pnt.UUID, &pointWriter) // TODO: look on it, faults messages were cleared out
 	if err != nil {
 		log.Error("lora-raw: UpdatePointValue()", err)
+		return err
 	}
+	err = inst.pointUpdateSuccess(point)
 	return err
 }
 
