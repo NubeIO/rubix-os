@@ -57,6 +57,11 @@ func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, err
 	return getDb().UpdatePoint(uuid, body, true)
 }
 
+// TODO: This was only added to allow for the EnableWriteable property to be updated.  It can be removed (along with the code at the bottom of SYSTEM plugin enable().
+func (h *Handler) UpdatePointPlugin(uuid string, body *model.Point) (*model.Point, error) {
+	return getDb().UpdatePointPlugin(uuid, body)
+}
+
 func (h *Handler) PointWrite(uuid string, pointWriter *model.PointWriter) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	return getDb().PointWrite(uuid, pointWriter, nil, false)

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/go-co-op/gocron"
 	log "github.com/sirupsen/logrus"
@@ -30,6 +31,22 @@ func (inst *Instance) Enable() error {
 	}
 	_, _ = cron.Every(frequency).Tag("ScheduleCheck").Do(inst.runSchedule)
 	cron.StartAsync()
+
+	// TODO: this is added just to update the EnableWriteable property on legacy points.  It should be removed in future versions
+	networks, err := inst.db.GetNetworks(api.Args{WithDevices: true, WithPoints: true, WithPriority: true})
+	if err != nil {
+		log.Error("SYSTEM Enable() GetNetworks error:", err)
+		return nil
+	}
+	fmt.Println("SYSTEM PLUGIN ENABLE: TEMPORARY CODE TO SET EnableWriteable PROPERTY ON EVERY POINT.  REMOVE IN FUTURE RELEASES")
+	for _, network := range networks {
+		for _, device := range network.Devices {
+			for _, point := range device.Points {
+				fmt.Println("SYSTEM PLUGIN ENABLE point: ", point.Name)
+				inst.db.UpdatePointPlugin(point.UUID, point)
+			}
+		}
+	}
 	return nil
 }
 
