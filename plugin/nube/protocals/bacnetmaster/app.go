@@ -360,19 +360,19 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	body.CommonFault.LastOk = time.Now().UTC()
 	point, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
-		inst.bacnetDebugMsg("updatePoint(): bad response from UpdatePoint() err:", err)
+		inst.bacnetErrorMsg("updatePoint(): bad response from UpdatePoint() err:", err)
 		return nil, err
 	}
 	// err = inst.updatePointName(body)  //TODO: Does this need to be added (from BACnet Server)
 	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
 	if err != nil || dev == nil {
-		inst.bacnetDebugMsg("updatePoint(): bad response from GetDevice()")
+		inst.bacnetErrorMsg("updatePoint(): bad response from GetDevice()")
 		return nil, err
 	}
 
 	netPollMan, err := inst.getNetworkPollManagerByUUID(dev.NetworkUUID)
 	if netPollMan == nil || err != nil {
-		inst.bacnetDebugMsg("updatePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
+		inst.bacnetErrorMsg("updatePoint(): cannot find NetworkPollManager for network: ", dev.NetworkUUID)
 		_ = inst.pointUpdateErr(point, "cannot find NetworkPollManager for network", model.MessageLevel.Fail, model.CommonFaultCode.SystemError)
 		return
 	}
@@ -500,7 +500,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 			return point, nil
 
 			// pp.PollPriority = model.PRIORITY_ASAP  // TODO: THIS NEEDS TO BE IMPLEMENTED SO THAT ONLY MANUAL WRITES ARE PROMOTED TO ASAP PRIORITY
-			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false, pollqueue.NORMAL_RETRY, false, false, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
+			netPollMan.PollingPointCompleteNotification(pp, false, false, 0, true, false, pollqueue.IMMEDIATE_RETRY, false, false, true) // This will perform the queue re-add actions based on Point WriteMode. TODO: check function of pointUpdate argument.
 			// netPollMan.PollQueue.AddPollingPoint(pp)
 			// netPollMan.PollQueue.UpdatePollingPointByPointUUID(point.UUID, model.PRIORITY_ASAP)
 
