@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.11.2](https://github.com/NubeIO/flow-framework/tree/v0.11.2) (2023-03-20)
+
+- set EnableWriteable for all point on system enable (temporary)
+- set lora message on data received
+- fix EnableWriteable on BACnet points
+
 ## [v0.11.1](https://github.com/NubeIO/flow-framework/tree/v0.11.1) (2023-03-15)
 
 - Limit point parallel mappings (temporary fix)
