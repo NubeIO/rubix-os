@@ -142,11 +142,11 @@ func (inst *Instance) BACnetMasterPolling() error {
 				continue
 			}
 
+			pointToUpdate := model.Point{CommonUUID: model.CommonUUID{UUID: pnt.UUID}}
 			inst.printPointDebugInfo(pnt)
 
 			if pnt.Priority == nil {
 				inst.bacnetErrorMsg("BACnetMasterPolling: HAD TO ADD PRIORITY ARRAY")
-				pnt.Priority = &model.Priority{}
 			}
 
 			if !boolean.IsTrue(pnt.Enable) {
@@ -221,7 +221,7 @@ func (inst *Instance) BACnetMasterPolling() error {
 
 			// this resets IsTypeBool to correct setting (fixes issues from points created before this was fixed in updatePoint()
 			isTypeBool := checkForBooleanType(pnt.ObjectType, pnt.DataType)
-			pnt.IsTypeBool = nils.NewBool(isTypeBool)
+			pointToUpdate.IsTypeBool = nils.NewBool(isTypeBool)
 
 			if currentBACServPriority != nil {
 				currentBACServPriorityMap := ConvertPriorityToMap(*currentBACServPriority)
@@ -244,7 +244,7 @@ func (inst *Instance) BACnetMasterPolling() error {
 					inst.bacnetDebugMsg("BACnetMasterPolling() pointUpdateFromPriorityArray err: ", err)
 				}
 			} else {
-				inst.pointUpdate(pnt, highestPriorityValue, readSuccess)
+				inst.pointUpdate(&pointToUpdate, highestPriorityValue, readSuccess)
 				if pnt.ObjectId != nil {
 					inst.bacnetDebugMsg("updated bacnet point present value.  point: ", pnt.Name, " bacnet-id: ", pnt.ObjectType, *pnt.ObjectId)
 				}

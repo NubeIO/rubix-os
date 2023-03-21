@@ -146,7 +146,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 }
 
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) (*model.Point, error) {
-	writeOnDB := !buffer
+	writeOnDB := true
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).
 		Preload("Tags").
@@ -189,7 +189,8 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 		body.MetaTags = pointModel.MetaTags
 	}
 	if writeOnDB {
-		if err := d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
+		pointModel = &model.Point{CommonUUID: model.CommonUUID{UUID: uuid}}
+		if err := d.DB.Model(&pointModel).Updates(&body).Error; err != nil {
 			return nil, err
 		}
 	} else {
@@ -286,7 +287,7 @@ func (d *GormDatabase) updatePointValue(
 	}
 	pointModel.WriteValue = writeValue
 	if writeOnDB {
-		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
+		_ = d.DB.Model(&pointModel).Updates(&pointModel)
 		// when point write gets called it should change the cache values too, otherwise it will return wrong values
 		d.updateUpdatePointBufferPoint(pointModel)
 	}
