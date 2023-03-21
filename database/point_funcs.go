@@ -156,13 +156,14 @@ func (d *GormDatabase) FlushPointUpdateBuffers() {
 	d.pointBuffersMutex.Lock()
 	var tempPointUpdateBuffers []*interfaces.PointUpdateBuffer
 	tempPointUpdateBuffers = append(tempPointUpdateBuffers, pointUpdateBuffers...)
-	d.pointBuffersMutex.Unlock()
-
+	for _, pub := range pointUpdateBuffers {
+		pub.State = interfaces.Updating
+	}
 	chuckPointUpdateBuffers := ChuckPointUpdateBuffer(tempPointUpdateBuffers, ChuckSize)
+	d.pointBuffersMutex.Unlock()
 	for _, chuckPointUpdateBuffer := range chuckPointUpdateBuffers {
 		wg := &sync.WaitGroup{}
 		for _, point := range chuckPointUpdateBuffer {
-			d.updateUpdatePointBufferState(point.UUID, interfaces.Updating)
 			wg.Add(1)
 			go func(point *interfaces.PointUpdateBuffer) {
 				defer wg.Done()
@@ -208,17 +209,6 @@ func (d *GormDatabase) updateUpdatePointBufferPoint(point *model.Point) {
 			point.MetaTags = pub.Point.MetaTags
 			point.Tags = pub.Point.Tags
 			pub.Point = point
-			return
-		}
-	}
-}
-
-func (d *GormDatabase) updateUpdatePointBufferState(uuid string, state interfaces.State) {
-	d.pointBuffersMutex.Lock()
-	defer d.pointBuffersMutex.Unlock()
-	for _, pub := range pointUpdateBuffers {
-		if pub.UUID == uuid {
-			pub.State = state
 			return
 		}
 	}
