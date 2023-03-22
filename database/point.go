@@ -164,13 +164,9 @@ func mergeStructs(dst, src interface{}) error {
 
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) (*model.Point, error) {
 	writeOnDB := !buffer
-	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).
-		Preload("Tags").
-		Preload("MetaTags").
-		Preload("Priority").First(&pointModel)
-	if query.Error != nil {
-		return nil, query.Error
+	pointModel, err := d.GetPoint(uuid, api.Args{WithTags: true, WithMetaTags: true, WithPriority: true})
+	if err != nil {
+		return nil, err
 	}
 	existingName, existingAddrID := d.pointNameExists(body)
 	if existingAddrID && boolean.IsTrue(body.IsBitwise) && body.BitwiseIndex != nil && *body.BitwiseIndex >= 0 {
@@ -196,14 +192,21 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 	publishPointList := body.Name != pointModel.Name
 	if writeOnDB {
 		pointModel = &model.Point{CommonUUID: model.CommonUUID{UUID: uuid}}
+		fmt.Println("pointModel???????????=========>>> start ", pointModel.WriteMode)
+		fmt.Println("body ?????????=========>>> start ", body.WriteMode)
 		if err := d.DB.Model(&pointModel).Updates(&body).Error; err != nil {
 			return nil, err
 		}
+		fmt.Println("pointModel????????=========>>> end ", pointModel.WriteMode)
+
 	} else {
+		fmt.Println("pointModel=========>>> start ", pointModel.WriteMode)
+		fmt.Println("body =========>>> start ", body.WriteMode)
 		err := mergeStructs(pointModel, body)
 		if err != nil {
 			log.Errorf("merge struct issue: %s", err.Error())
 		}
+		fmt.Println("pointModel=========>>> end ", pointModel.WriteMode)
 	}
 
 	// TODO: we need to decide if a read only point needs to have a priority array or if it should just be nil.
