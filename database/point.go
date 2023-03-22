@@ -94,7 +94,7 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	return pointModel, nil
 }
 
-func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
+func (d *GormDatabase) CreatePoint(body *model.Point, publishPointList bool) (*model.Point, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
 	body.Name = strings.TrimSpace(body.Name)
 	if body.Decimal == nil {
@@ -140,8 +140,9 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
-
-	go d.PublishPointsList("")
+	if publishPointList {
+		go d.PublishPointsList("")
+	}
 	return body, nil
 }
 
@@ -214,6 +215,23 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 		d.bufferPointUpdate(uuid, body, pnt)
 	}
 	return pnt, err
+}
+
+func (d *GormDatabase) UpdatePointName(uuid string, name string) (*model.Point, error) {
+	var pointModel *model.Point
+	query := d.DB.Where("uuid = ?", uuid).First(&pointModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	existingName := d.pointNameExistsInDevice(name, pointModel.DeviceUUID)
+	if existingName {
+		eMsg := fmt.Sprintf("a point with existing name: %s exists", name)
+		return nil, errors.New(eMsg)
+	}
+	if err := d.DB.Model(&pointModel).Update("name", name).Error; err != nil {
+		return nil, err
+	}
+	return pointModel, nil
 }
 
 func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, currentWriterUUID *string, forceWrite bool) (
@@ -335,7 +353,15 @@ func (d *GormDatabase) UpdatePointConnectionErrors(uuid string, point *model.Poi
 		Error
 }
 
-func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
+func (d *GormDatabase) UpdatePointConnectionErrorsByName(name string, point *model.Point) error {
+	return d.DB.Model(&model.Point{}).
+		Where("name = ?", name).
+		Select("Connection", "ConnectionMessage").
+		Updates(&point).
+		Error
+}
+
+func (d *GormDatabase) DeletePoint(uuid string, publishPointList bool) (bool, error) {
 	point, err := d.GetPoint(uuid, api.Args{})
 	if err != nil {
 		return false, err
@@ -371,7 +397,9 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 		return false, query.Error
 	}
 	r := query.RowsAffected
-	go d.PublishPointsList("")
+	if publishPointList {
+		go d.PublishPointsList("")
+	}
 	deviceModel, _ := d.GetDevice(point.DeviceUUID, api.Args{})
 	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
 		networkModel, _ := d.GetNetwork(deviceModel.NetworkUUID, api.Args{})
@@ -382,7 +410,7 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 				return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
 			}
 			cli := client.NewFlowClientCliFromFN(fn)
-			networkName := getAutoMappedNetworkName(networkModel.Name, boolean.IsFalse(fn.IsRemote))
+			networkName := getAutoMappedNetworkName(networkModel.Name, fn.Name)
 			url := urls.SingularUrl(urls.PointNameUrl, fmt.Sprintf("%s/%s/%s", networkName, deviceModel.Name,
 				point.Name))
 			_ = cli.DeleteQuery(url)

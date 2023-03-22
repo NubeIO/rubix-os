@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
@@ -71,15 +72,12 @@ func PublishPoint(point *model.Point) {
 	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
 }
 
-func PublishPointsList(networks []*model.Network, topic string) {
+func PublishPointsList(publishPointList []*interfaces.PublishPointList, topic string) {
 	var pointPayload []*PointListPayload
-	for _, network := range networks {
-		for _, device := range network.Devices {
-			for _, point := range device.Points {
-				pointPayload = append(pointPayload, &PointListPayload{UUID: point.UUID,
-					Name: fmt.Sprintf("%s:%s:%s:%s", network.PluginPath, network.Name, device.Name, point.Name)})
-			}
-		}
+	for _, publishPoint := range publishPointList {
+		pointPayload = append(pointPayload, &PointListPayload{UUID: publishPoint.PointUUID,
+			Name: fmt.Sprintf("%s:%s:%s:%s", publishPoint.PluginPath, publishPoint.NetworkName,
+				publishPoint.DeviceName, publishPoint.PointName)})
 	}
 	if topic == "" {
 		topic = MakeTopic([]string{fetchPointsTopic})

@@ -2,19 +2,55 @@ package interfaces
 
 import "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 
-type AutoMapping struct {
-	FlowNetworkUUID   string                  `json:"flown_network_uuid"`
-	StreamUUID        string                  `json:"stream_uuid"`
-	ProducerUUID      string                  `json:"product_uuid"`
-	NetworkGlobalUUID string                  `json:"network_global_uuid"`
-	NetworkName       string                  `json:"network_name"`
-	NetworkTags       []*model.Tag            `json:"network_tags"`
-	NetworkMetaTags   []*model.NetworkMetaTag `json:"network_meta_tags"`
-	DeviceName        string                  `json:"device_name"`
-	DeviceTags        []*model.Tag            `json:"device_tags"`
-	DeviceMetaTags    []*model.DeviceMetaTag  `jso:"device_meta_tags"`
-	PointName         string                  `json:"point_name"`
-	PointTags         []*model.Tag            `json:"point_tags"`
-	PointMetaTags     []*model.PointMetaTag   `json:"point_meta_tags"`
-	IsLocal           bool                    `json:"is_local"`
+type AutoMappingNetwork struct {
+	GlobalUUID      string                  `json:"global_uuid"`
+	Name            string                  `json:"name"`
+	Tags            []*model.Tag            `json:"tags"`
+	MetaTags        []*model.NetworkMetaTag `json:"meta_tags"`
+	Devices         []*AutoMappingDevice    `json:"devices"`
+	FlowNetworkUUID string                  `json:"flown_network_uuid"`
+}
+
+type AutoMappingNetworkError struct {
+	Name    string                    `json:"name"`
+	Error   *string                   `json:"error"`
+	Devices []*AutoMappingDeviceError `json:"devices"`
+}
+
+type AutoMappingDevice struct {
+	Name       string                 `json:"name"`
+	Tags       []*model.Tag           `json:"tags"`
+	MetaTags   []*model.DeviceMetaTag `json:"meta_tags"`
+	Points     []*AutoMappingPoint    `json:"points"`
+	StreamUUID string                 `json:"stream_uuid"`
+}
+
+type AutoMappingDeviceError struct {
+	Name      string                      `json:"device_name"`
+	Error     *string                     `json:"error"`
+	Points    []*AutoMappingPointError    `json:"points"`
+	Consumers []*AutoMappingConsumerError `json:"consumers"`
+	Writers   []*AutoMappingWriterError   `json:"writers"`
+}
+
+type AutoMappingPoint struct {
+	Name         string                `json:"name"`
+	Tags         []*model.Tag          `json:"tags"`
+	MetaTags     []*model.PointMetaTag `json:"meta_tags"`
+	ProducerUUID string                `json:"product_uuid"`
+}
+
+type AutoMappingPointError struct {
+	Name  string  `json:"name"`
+	Error *string `json:"error"`
+}
+
+type AutoMappingConsumerError struct {
+	Name  string  `json:"name"`
+	Error *string `json:"error"`
+}
+
+type AutoMappingWriterError struct {
+	Name  string  `json:"name"`
+	Error *string `json:"error"`
 }

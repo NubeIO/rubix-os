@@ -23,7 +23,7 @@ type DeviceDatabase interface {
 
 	CreateDeviceMetaTags(deviceUUID string, deviceMetaTags []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error)
 
-	SyncDevicePoints(deviceUUID string, removeUnlinked bool, args Args) ([]*interfaces.SyncModel, error)
+	SyncDevicePoints(deviceUUID string, network *model.Network, removeUnlinked bool, args Args) *interfaces.AutoMappingNetworkError
 }
 type DeviceAPI struct {
 	DB DeviceDatabase
@@ -104,6 +104,6 @@ func (a *DeviceAPI) SyncDevicePoints(ctx *gin.Context) {
 	deviceUUID := resolveID(ctx)
 	args := buildDeviceArgs(ctx)
 	args.WithPoints = true
-	q, err := a.DB.SyncDevicePoints(deviceUUID, true, args)
-	ResponseHandler(q, err, ctx)
+	q := a.DB.SyncDevicePoints(deviceUUID, nil, true, args)
+	ResponseHandler(q, nil, ctx)
 }

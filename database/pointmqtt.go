@@ -181,7 +181,7 @@ func (d *GormDatabase) PublishPointsList(topic string) {
 	if boolean.IsFalse(config.Get().MQTT.Enable) {
 		return
 	}
-	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true})
+	networks, err := d.GetPublishPointList()
 	if err != nil {
 		log.Error("PublishPointsList error:", err)
 		return

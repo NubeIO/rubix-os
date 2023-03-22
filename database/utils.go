@@ -113,16 +113,10 @@ func metaTagsArgsToKeyValues(metaTags string) [][]interface{} {
 	return keyValues
 }
 
-func getAutoMappedNetworkName(networkName string, isLocal bool) string {
-	if isLocal {
-		return fmt.Sprintf("mapping_%s", networkName)
-	}
-	return networkName
+func getAutoMappedNetworkName(networkName string, flowNetworkCloneName string) string {
+	return fmt.Sprintf("%s_%s", flowNetworkCloneName, networkName)
 }
 
-func getAutoMappedOriginalNetworkName(networkName string, isLocal bool) string {
-	if isLocal {
-		return strings.Replace(networkName, "mapping_", "", 1)
-	}
-	return networkName
+func getAutoMappedOriginalNetworkName(networkName string, flowNetworkCloneName string) string {
+	return strings.Replace(networkName, fmt.Sprintf("%s_", flowNetworkCloneName), "", 1)
 }

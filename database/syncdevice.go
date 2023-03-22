@@ -8,7 +8,7 @@ import (
 	"reflect"
 )
 
-func (d *GormDatabase) SyncDevice(body *interfaces.SyncDevice, network *model.Network) (*model.Network, *model.Device, error) {
+func (d *GormDatabase) SyncDevice(body *interfaces.SyncDevice, network *model.Network) (*model.Device, error) {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 	device, err := d.GetDeviceByName(network.Name, body.DeviceName, api.Args{WithTags: true})
@@ -21,14 +21,11 @@ func (d *GormDatabase) SyncDevice(body *interfaces.SyncDevice, network *model.Ne
 		deviceModel.Tags = body.DeviceTags
 		deviceModel.MetaTags = body.DeviceMetaTags
 		device, err = d.CreateDevice(deviceModel)
-		return network, device, err
+		return device, err
 	}
 	_, _ = d.CreateDeviceMetaTags(device.UUID, body.DeviceMetaTags)
-	if device.Name != body.DeviceName || !reflect.DeepEqual(device.Tags, body.DeviceTags) {
-		device.Name = body.DeviceName
-		device.Tags = body.DeviceTags
-		device, err = d.UpdateDevice(device.UUID, device)
-		return network, device, err
+	if !reflect.DeepEqual(device.Tags, body.DeviceTags) {
+		_ = d.updateTags(&device, body.DeviceTags)
 	}
-	return network, device, nil
+	return device, nil
 }

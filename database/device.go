@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -95,6 +94,14 @@ func (d *GormDatabase) UpdateDeviceConnectionErrors(uuid string, device *model.D
 		Error
 }
 
+func (d *GormDatabase) UpdateDeviceConnectionErrorsByName(name string, device *model.Device) error {
+	return d.DB.Model(&model.Device{}).
+		Where("name = ?", name).
+		Select("Connection", "ConnectionMessage").
+		Updates(&device).
+		Error
+}
+
 func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 	deviceModel, err := d.GetDevice(uuid, api.Args{WithPoints: true})
 	if err != nil {
@@ -105,11 +112,11 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 		wg.Add(1)
 		go func(point *model.Point) {
 			defer wg.Done()
-			_, _ = d.DeletePoint(point.UUID)
+			_, _ = d.DeletePoint(point.UUID, false)
 		}(point)
 	}
 	wg.Wait()
-
+	go d.PublishPointsList("")
 	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
 		networkModel, err := d.GetNetworkByDeviceUUID(deviceModel.UUID, api.Args{})
 		if err != nil {
@@ -126,7 +133,7 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 			return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
 		}
 		cli := client.NewFlowClientCliFromFN(fn)
-		networkName := getAutoMappedNetworkName(networkModel.Name, boolean.IsFalse(fn.IsRemote))
+		networkName := getAutoMappedNetworkName(networkModel.Name, fn.Name)
 		url := urls.SingularUrl(urls.DeviceNameUrl, fmt.Sprintf("%s/%s", networkName, deviceModel.Name))
 		_ = cli.DeleteQuery(url)
 	}
@@ -144,92 +151,15 @@ func (d *GormDatabase) DeleteOneDeviceByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncDevicePoints(uuid string, removeUnlinked bool, args api.Args) ([]*interfaces.SyncModel, error) {
+func (d *GormDatabase) SyncDevicePoints(uuid string, network *model.Network, removeUnlinked bool, args api.Args) *interfaces.AutoMappingNetworkError {
 	if removeUnlinked {
+		d.removeUnlinkedAutoMappedPoints()
 		d.removeUnlinkedAutoMappedStreams()
 	}
-	device, _ := d.GetDevice(uuid, args)
-	var outputs []*interfaces.SyncModel
-	channel := make(chan *interfaces.SyncModel)
-	defer close(channel)
-	// This is for syncing child descendants
-	chuckPoints := ChuckPoints(device.Points, 20)
-	for _, chuckPoint := range chuckPoints {
-		wg := &sync.WaitGroup{}
-		for _, point := range chuckPoint {
-			wg.Add(1)
-			go func(point *model.Point) {
-				defer wg.Done()
-				outputs = append(outputs, d.syncPoint(device, point))
-			}(point)
-		}
-		wg.Wait()
+	if network == nil {
+		network, _ = d.GetNetworkByDeviceUUID(uuid, api.Args{})
+		device, _ := d.GetDevice(uuid, args)
+		network.Devices = append(network.Devices, device)
 	}
-	return outputs, nil
-}
-
-func (d *GormDatabase) syncPoint(device *model.Device, point *model.Point) *interfaces.SyncModel {
-	var output interfaces.SyncModel
-	if boolean.IsTrue(point.CreatedFromAutoMapping) {
-		point.Connection = connection.Connected.String()
-		point.ConnectionMessage = nstring.New(nstring.NotAvailable)
-		_, err := d.GetOneWriterByArgs(api.Args{WriterThingUUID: nils.NewString(point.UUID)})
-		if err != nil {
-			point.Connection = connection.Broken.String()
-			point.ConnectionMessage = nstring.New("writer not found")
-			point.Message = "writer not found"
-		} else {
-			network, _ := d.GetNetworkByDeviceUUID(device.UUID, api.Args{})
-			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(network.AutoMappingFlowNetworkName)})
-			if err != nil {
-				point.Connection = connection.Broken.String()
-				point.ConnectionMessage = nstring.New("flow network clone not found")
-			} else {
-				networkName := getAutoMappedOriginalNetworkName(network.Name, boolean.IsFalse(fnc.IsRemote))
-				cli := client.NewFlowClientCliFromFNC(fnc)
-				point_, connectionErr, _ := cli.GetPointByName(networkName, device.Name, point.Name)
-				if connectionErr != nil {
-					point.Connection = connection.Broken.String()
-					point.ConnectionMessage = nstring.New(err.Error())
-				} else {
-					if point_ == nil || boolean.IsFalse(point_.AutoMappingEnable) {
-						_, _ = d.DeletePoint(point.UUID)
-						return &output
-					}
-				}
-			}
-		}
-	}
-	err := d.CreatePointAutoMapping(point)
-	if err != nil {
-		output = interfaces.SyncModel{UUID: point.UUID, IsError: true, Message: nstring.New(err.Error())}
-	} else {
-		output = interfaces.SyncModel{UUID: point.UUID, IsError: false}
-	}
-	pointModel := model.Point{}
-	if output.IsError {
-		pointModel.Connection = connection.Broken.String()
-		pointModel.ConnectionMessage = output.Message
-	} else {
-		pointModel.Connection = connection.Connected.String()
-		pointModel.ConnectionMessage = nstring.New(nstring.NotAvailable)
-	}
-	_ = d.UpdatePointConnectionErrors(output.UUID, &pointModel)
-	return &output
-}
-
-func ChuckPoints(points []*model.Point, chunkSize int) [][]*model.Point {
-	var chucks [][]*model.Point
-	if len(points) > 0 { // executes first for creating the stream and all setup & other points won't try to create
-		chucks = append(chucks, points[0:1])
-		points = points[1:(len(points))]
-	}
-	for i := 0; i < len(points); i += chunkSize {
-		end := i + chunkSize
-		if end > len(points) {
-			end = len(points)
-		}
-		chucks = append(chucks, points[i:end])
-	}
-	return chucks
+	return d.CreateNetworkAutoMappings(network)
 }

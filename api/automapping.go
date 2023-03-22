@@ -6,7 +6,7 @@ import (
 )
 
 type AutoMappingDatabase interface {
-	CreateAutoMapping(body *interfaces.AutoMapping) error
+	CreateAutoMapping(body *interfaces.AutoMappingNetwork) *interfaces.AutoMappingNetworkError
 }
 
 type AutoMappingAPI struct {
@@ -15,10 +15,6 @@ type AutoMappingAPI struct {
 
 func (a *AutoMappingAPI) CreateAutoMapping(ctx *gin.Context) {
 	body, _ := getBodyAutoMapping(ctx)
-	err := a.DB.CreateAutoMapping(body)
-	if err != nil {
-		ResponseHandler(false, err, ctx)
-		return
-	}
-	ResponseHandler(true, err, ctx)
+	resp := a.DB.CreateAutoMapping(body)
+	ResponseHandler(resp, nil, ctx)
 }
