@@ -146,6 +146,20 @@ func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point, point *
 	pointUpdateBuffers = append(pointUpdateBuffers, pointUpdateBuffer)
 }
 
+func (d *GormDatabase) bufferPointUpdateBody(uuid string, body *model.Point) {
+	pointUpdateBuffer := &interfaces.PointUpdateBuffer{
+		Body:  body,
+		State: interfaces.Initialize,
+	}
+	for index, pub := range pointUpdateBuffers {
+		if pub.UUID == uuid {
+			pointUpdateBuffers[index].Body = body
+			return
+		}
+	}
+	pointUpdateBuffers = append(pointUpdateBuffers, pointUpdateBuffer)
+}
+
 func (d *GormDatabase) FlushPointUpdateBuffers() {
 	log.Debug("Flush point update buffers has is been called...")
 	if len(pointUpdateBuffers) == 0 {
@@ -157,20 +171,24 @@ func (d *GormDatabase) FlushPointUpdateBuffers() {
 	var tempPointUpdateBuffers []*interfaces.PointUpdateBuffer
 	tempPointUpdateBuffers = append(tempPointUpdateBuffers, pointUpdateBuffers...)
 	for _, pub := range pointUpdateBuffers {
-		pub.State = interfaces.Updating
+		if pub.State != interfaces.Initialize {
+			pub.State = interfaces.Updating
+		}
 	}
 	chuckPointUpdateBuffers := ChuckPointUpdateBuffer(tempPointUpdateBuffers, ChuckSize)
 	d.pointBuffersMutex.Unlock()
 	for _, chuckPointUpdateBuffer := range chuckPointUpdateBuffers {
 		wg := &sync.WaitGroup{}
 		for _, point := range chuckPointUpdateBuffer {
-			wg.Add(1)
-			go func(point *interfaces.PointUpdateBuffer) {
-				defer wg.Done()
-				_, _ = d.UpdatePoint(point.UUID, point.Body, false)
-				d.removeUpdatePointBuffer(point.UUID)
-			}(point)
-			time.Sleep(200 * time.Millisecond) // for don't let them call at once
+			if point.State != interfaces.Initialize {
+				wg.Add(1)
+				go func(point *interfaces.PointUpdateBuffer) {
+					defer wg.Done()
+					_, _ = d.UpdatePoint(point.UUID, point.Body, false)
+					d.removeUpdatePointBuffer(point.UUID)
+				}(point)
+				time.Sleep(200 * time.Millisecond) // for don't let them call at once
+			}
 		}
 		wg.Wait()
 	}
@@ -248,8 +266,6 @@ func (d *GormDatabase) DeletePointByName(networkName, deviceName, pointName stri
 }
 
 func (d *GormDatabase) getUpdatePointBufferBody(uuid string) *model.Point {
-	d.pointBuffersMutex.Lock()
-	defer d.pointBuffersMutex.Unlock()
 	for _, pub := range pointUpdateBuffers {
 		if pub.UUID == uuid {
 			return pub.Body

@@ -7,8 +7,9 @@ import (
 type State string
 
 const (
-	Created  State = "Created"
-	Updating State = "Updating"
+	Initialize State = "Initialize"
+	Created    State = "Created"
+	Updating   State = "Updating"
 )
 
 type PointUpdateBuffer struct {
