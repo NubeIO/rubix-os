@@ -246,3 +246,14 @@ func (d *GormDatabase) DeletePointByName(networkName, deviceName, pointName stri
 	query = query.Delete(pointModel)
 	return d.deleteResponseBuilder(query)
 }
+
+func (d *GormDatabase) getUpdatePointBufferBody(uuid string) *model.Point {
+	d.pointBuffersMutex.Lock()
+	defer d.pointBuffersMutex.Unlock()
+	for _, pub := range pointUpdateBuffers {
+		if pub.UUID == uuid {
+			return pub.Body
+		}
+	}
+	return nil
+}

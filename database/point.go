@@ -203,6 +203,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 		fmt.Println("pointModel=========>>> start ", pointModel.WriteMode)
 		fmt.Println("body =========>>> start ", body.WriteMode)
 		err := mergeStructs(pointModel, body)
+		d.pointBuffersMutex.Lock()
+		d.getUpdatePointBufferBody(uuid)
+		mergeStructs(body, d.getUpdatePointBufferBody(uuid))
 		if err != nil {
 			log.Errorf("merge struct issue: %s", err.Error())
 		}
@@ -225,6 +228,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 			pointModel.HistoryType, pointModel.HistoryInterval)
 	} else {
 		d.bufferPointUpdate(uuid, body, pnt)
+		d.pointBuffersMutex.Unlock()
 	}
 	return pnt, err
 }
