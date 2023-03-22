@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	log "github.com/sirupsen/logrus"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -145,8 +146,24 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	return body, nil
 }
 
+func mergeStructs(dst, src interface{}) error {
+	dstValue := reflect.ValueOf(dst).Elem()
+	srcValue := reflect.ValueOf(src).Elem()
+
+	for i := 0; i < dstValue.NumField(); i++ {
+		dstField := dstValue.Field(i)
+		srcField := srcValue.Field(i)
+
+		if !srcField.IsZero() {
+			dstField.Set(srcField)
+		}
+	}
+
+	return nil
+}
+
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) (*model.Point, error) {
-	writeOnDB := true
+	writeOnDB := !buffer
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).
 		Preload("Tags").
@@ -177,24 +194,16 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 	}
 	body.Name = strings.TrimSpace(body.Name)
 	publishPointList := body.Name != pointModel.Name
-	// Don't replace these on nil updates
-	// TODO: we either need to remove this (`rubix-ui` needs to send all these values) or that `.Select(*)`
-	if body.Priority == nil {
-		body.Priority = pointModel.Priority
-	}
-	if body.Tags == nil {
-		body.Tags = pointModel.Tags
-	}
-	if body.MetaTags == nil {
-		body.MetaTags = pointModel.MetaTags
-	}
 	if writeOnDB {
 		pointModel = &model.Point{CommonUUID: model.CommonUUID{UUID: uuid}}
 		if err := d.DB.Model(&pointModel).Updates(&body).Error; err != nil {
 			return nil, err
 		}
 	} else {
-		pointModel = body
+		err := mergeStructs(pointModel, body)
+		if err != nil {
+			log.Errorf("merge struct issue: %s", err.Error())
+		}
 	}
 
 	// TODO: we need to decide if a read only point needs to have a priority array or if it should just be nil.
