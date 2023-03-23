@@ -113,10 +113,14 @@ func metaTagsArgsToKeyValues(metaTags string) [][]interface{} {
 	return keyValues
 }
 
-func getAutoMappedNetworkName(networkName string, flowNetworkCloneName string) string {
+func getAutoMappedNetworkName(flowNetworkCloneName, networkName string) string {
 	return fmt.Sprintf("%s_%s", flowNetworkCloneName, networkName)
 }
 
-func getAutoMappedOriginalNetworkName(networkName string, flowNetworkCloneName string) string {
+func getAutoMappedOriginalNetworkName(flowNetworkCloneName, networkName string) string {
 	return strings.Replace(networkName, fmt.Sprintf("%s_", flowNetworkCloneName), "", 1)
+}
+
+func getAutoMappedStreamName(flowNetworkCloneName, networkName, deviceName string) string {
+	return fmt.Sprintf("%s:%s:%s", flowNetworkCloneName, networkName, deviceName)
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 	"reflect"
 )
 
@@ -21,8 +20,14 @@ func (d *GormDatabase) CreateNetworkAutoMappings(network *model.Network) *interf
 		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(network.AutoMappingFlowNetworkName)})
 		if err != nil {
 			errMessage := fmt.Sprintf("failed to find flow network with name %s", network.AutoMappingFlowNetworkName)
-			log.Error(errMessage)
+			network.Connection = connection.Broken.String()
+			network.ConnectionMessage = nstring.New(errMessage)
+			_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
 			return &interfaces.AutoMappingNetworkError{Name: network.Name, Error: nstring.New(errMessage)}
+		} else {
+			network.Connection = connection.Connected.String()
+			network.ConnectionMessage = nstring.New(nstring.NotAvailable)
+			_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
 		}
 		var amDevices []*interfaces.AutoMappingDevice
 		for _, device := range network.Devices {
@@ -114,7 +119,7 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 		amNetworkError.Error = nstring.New(err.Error())
 		return amNetworkError
 	}
-	network, err := d.GetNetworkByName(getAutoMappedNetworkName(amNetwork.Name, fnc.Name), api.Args{})
+	network, err := d.GetNetworkByName(getAutoMappedNetworkName(fnc.Name, amNetwork.Name), api.Args{})
 	if network != nil && network.GlobalUUID != amNetwork.GlobalUUID {
 		amNetworkError.Error = nstring.New(fmt.Sprintf("network.name %s already exists", network.Name))
 		return amNetworkError
@@ -143,17 +148,17 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 
 func (d *GormDatabase) createPointAutoMappingStream(flowNetwork *model.FlowNetwork, networkName string,
 	deviceName string) (stream *model.Stream, err error) {
-	name := fmt.Sprintf("%s:%s", networkName, deviceName)
-	stream, _ = d.GetStreamByArgs(api.Args{Name: nils.NewString(name), WithFlowNetworks: true})
+	streamName := getAutoMappedStreamName(flowNetwork.Name, networkName, deviceName)
+	stream, _ = d.GetStreamByArgs(api.Args{Name: nils.NewString(streamName), WithFlowNetworks: true})
 	if stream == nil {
 		streamModel := &model.Stream{}
 		streamModel.Enable = boolean.NewTrue()
 		streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
-		streamModel.Name = name
+		streamModel.Name = streamName
 		streamModel.CreatedFromAutoMapping = boolean.NewTrue()
 		return d.CreateStream(streamModel)
 	}
-	stream.Name = name
+	stream.Name = streamName
 	stream.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 	stream.CreatedFromAutoMapping = boolean.NewTrue()
 	return d.UpdateStream(stream.UUID, stream) // note: to create stream clone in case of it does not exist

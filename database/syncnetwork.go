@@ -17,7 +17,7 @@ func (d *GormDatabase) SyncNetwork(body *interfaces.SyncNetwork) (*model.Network
 	if err != nil {
 		return nil, err
 	}
-	body.NetworkName = getAutoMappedNetworkName(body.NetworkName, fnc.Name)
+	body.NetworkName = getAutoMappedNetworkName(fnc.Name, body.NetworkName)
 	network, _ := d.GetNetworkByName(body.NetworkName, api.Args{WithTags: true})
 	if network == nil {
 		networkModel := &model.Network{}

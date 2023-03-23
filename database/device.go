@@ -1,13 +1,13 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -122,18 +122,18 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		streamName := fmt.Sprintf("%s:%s", networkModel.Name, deviceModel.Name)
-		stream, _ := d.GetStreamByArgs(api.Args{Name: nils.NewString(streamName)})
-		if stream != nil {
-			_, _ = d.DeleteStream(stream.UUID)
-		}
-		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(networkModel.AutoMappingFlowNetworkName)})
+		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: &networkModel.AutoMappingFlowNetworkName})
 		if err != nil {
 			log.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
 			return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
 		}
+		streamName := getAutoMappedStreamName(fn.Name, networkModel.Name, deviceModel.Name)
+		stream, _ := d.GetStreamByArgs(api.Args{Name: nils.NewString(streamName)})
+		if stream != nil {
+			_, _ = d.DeleteStream(stream.UUID)
+		}
 		cli := client.NewFlowClientCliFromFN(fn)
-		networkName := getAutoMappedNetworkName(networkModel.Name, fn.Name)
+		networkName := getAutoMappedNetworkName(fn.Name, networkModel.Name)
 		url := urls.SingularUrl(urls.DeviceNameUrl, fmt.Sprintf("%s/%s", networkName, deviceModel.Name))
 		_ = cli.DeleteQuery(url)
 	}
@@ -151,15 +151,21 @@ func (d *GormDatabase) DeleteOneDeviceByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncDevicePoints(uuid string, network *model.Network, removeUnlinked bool, args api.Args) *interfaces.AutoMappingNetworkError {
+func (d *GormDatabase) SyncDevicePoints(uuid string, network *model.Network, removeUnlinked bool, args api.Args) (*interfaces.AutoMappingNetworkError, error) {
 	if removeUnlinked {
 		d.removeUnlinkedAutoMappedPoints()
 		d.removeUnlinkedAutoMappedStreams()
 	}
 	if network == nil {
 		network, _ = d.GetNetworkByDeviceUUID(uuid, api.Args{})
+		if network == nil {
+			return nil, errors.New("network doesn't exist")
+		}
 		device, _ := d.GetDevice(uuid, args)
 		network.Devices = append(network.Devices, device)
 	}
-	return d.CreateNetworkAutoMappings(network)
+	if network == nil {
+		return nil, errors.New("network doesn't exist")
+	}
+	return d.CreateNetworkAutoMappings(network), nil
 }

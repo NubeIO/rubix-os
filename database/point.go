@@ -410,7 +410,7 @@ func (d *GormDatabase) DeletePoint(uuid string, publishPointList bool) (bool, er
 				return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
 			}
 			cli := client.NewFlowClientCliFromFN(fn)
-			networkName := getAutoMappedNetworkName(networkModel.Name, fn.Name)
+			networkName := getAutoMappedNetworkName(fn.Name, networkModel.Name)
 			url := urls.SingularUrl(urls.PointNameUrl, fmt.Sprintf("%s/%s/%s", networkName, deviceModel.Name,
 				point.Name))
 			_ = cli.DeleteQuery(url)
