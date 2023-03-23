@@ -29,7 +29,7 @@ func CreatePointDeepCopy(point model.Point) model.Point {
 
 func GetPoint(uuid string, args api.Args) *model.Point {
 	for _, pub := range pointUpdateBuffers {
-		if pub.UUID == uuid {
+		if pub.UUID == uuid && pub.State != interfaces.Initialize {
 			point := CreatePointDeepCopy(*pub.Point)
 			if !args.WithPriority {
 				point.Priority = nil
@@ -148,7 +148,9 @@ func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point, point *
 
 func (d *GormDatabase) bufferPointUpdateBody(uuid string, body *model.Point) {
 	pointUpdateBuffer := &interfaces.PointUpdateBuffer{
+		UUID:  uuid,
 		Body:  body,
+		Point: nil,
 		State: interfaces.Initialize,
 	}
 	for index, pub := range pointUpdateBuffers {
