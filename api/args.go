@@ -33,6 +33,7 @@ type Args struct {
 	DeviceId             *string
 	WriterThingClass     *string
 	SourceUUID           *string
+	AutoMappingUUID      *string
 	ProducerThingUUID    *string
 	WriterThingUUID      *string
 	WriterThingName      *string
@@ -103,6 +104,7 @@ var ArgsType = struct {
 	DeviceId             string
 	WriterThingClass     string
 	SourceUUID           string
+	AutoMappingUUID      string
 	ProducerThingUUID    string
 	WriterThingUUID      string
 	WriterThingName      string
@@ -171,6 +173,7 @@ var ArgsType = struct {
 	DeviceId:             "device_id",
 	WriterThingClass:     "writer_thing_class",
 	SourceUUID:           "source_uuid",
+	AutoMappingUUID:      "auto_mapping_uuid",
 	ProducerThingUUID:    "producer_thing_uuid",
 	WriterThingUUID:      "writer_thing_name",
 	WriterThingName:      "writer_thing_uuid",

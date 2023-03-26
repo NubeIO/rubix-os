@@ -4,6 +4,7 @@ import "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 
 type AutoMappingNetwork struct {
 	GlobalUUID      string                  `json:"global_uuid"`
+	UUID            string                  `json:"uuid"`
 	Name            string                  `json:"name"`
 	Tags            []*model.Tag            `json:"tags"`
 	MetaTags        []*model.NetworkMetaTag `json:"meta_tags"`
@@ -12,12 +13,13 @@ type AutoMappingNetwork struct {
 }
 
 type AutoMappingNetworkError struct {
-	Name    string                    `json:"name"`
+	UUID    string                    `json:"uuid"`
 	Error   *string                   `json:"error"`
 	Devices []*AutoMappingDeviceError `json:"devices"`
 }
 
 type AutoMappingDevice struct {
+	UUID       string                 `json:"uuid"`
 	Name       string                 `json:"name"`
 	Tags       []*model.Tag           `json:"tags"`
 	MetaTags   []*model.DeviceMetaTag `json:"meta_tags"`
@@ -34,6 +36,7 @@ type AutoMappingDeviceError struct {
 }
 
 type AutoMappingPoint struct {
+	UUID         string                `json:"uuid"`
 	Name         string                `json:"name"`
 	Tags         []*model.Tag          `json:"tags"`
 	MetaTags     []*model.PointMetaTag `json:"meta_tags"`

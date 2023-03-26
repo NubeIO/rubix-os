@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/plugin/compat"
 	"github.com/NubeIO/flow-framework/src/client"
@@ -139,14 +138,6 @@ func (d *GormDatabase) UpdateNetworkConnectionErrors(uuid string, network *model
 		Error
 }
 
-func (d *GormDatabase) UpdateNetworkConnectionErrorsByName(name string, network *model.Network) error {
-	return d.DB.Model(&model.Network{}).
-		Where("name = ?", name).
-		Select("Connection", "ConnectionMessage").
-		Updates(&network).
-		Error
-}
-
 func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
 	networkModel, err := d.GetNetwork(uuid, api.Args{WithDevices: true})
 	if err != nil {
@@ -196,24 +187,25 @@ func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	return info
 }
 
-func (d *GormDatabase) SyncNetworks(args api.Args) ([]*interfaces.AutoMappingNetworkError, error) {
+func (d *GormDatabase) SyncNetworks(args api.Args) error {
 	d.removeUnlinkedAutoMappedNetworks()
 	d.removeUnlinkedAutoMappedDevices()
 	d.removeUnlinkedAutoMappedPoints()
 	d.removeUnlinkedAutoMappedStreams()
 	networks, err := d.GetNetworks(args)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	var outputs []*interfaces.AutoMappingNetworkError
 	for _, network := range networks {
-		output, _ := d.SyncNetworkDevices(network.UUID, network, false, args) // we never get err on here
-		outputs = append(outputs, output)
+		err = d.SyncNetworkDevices(network.UUID, network, false, args)
+		if err != nil {
+			return err
+		}
 	}
-	return outputs, nil
+	return nil
 }
 
-func (d *GormDatabase) SyncNetworkDevices(uuid string, network *model.Network, removeUnlinked bool, args api.Args) (*interfaces.AutoMappingNetworkError, error) {
+func (d *GormDatabase) SyncNetworkDevices(uuid string, network *model.Network, removeUnlinked bool, args api.Args) error {
 	if removeUnlinked {
 		d.removeUnlinkedAutoMappedDevices()
 		d.removeUnlinkedAutoMappedPoints()
@@ -223,7 +215,7 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, network *model.Network, r
 		network, _ = d.GetNetwork(uuid, args)
 	}
 	if network == nil {
-		return nil, errors.New("network doesn't exist")
+		return errors.New("network doesn't exist")
 	}
 	return d.SyncDevicePoints(uuid, network, false, args)
 }

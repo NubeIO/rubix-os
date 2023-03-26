@@ -72,7 +72,7 @@ func checkHistoryType(t string) (model.HistoryType, error) {
 	}
 	historyType := model.HistoryType(t)
 	if _, ok := model.HistoryTypeMap[historyType]; !ok {
-		return "", errors.New("please provide a valid history type ie: COV , INTERVAL or COV_AND_INTERVAL")
+		return "", errors.New("please provide a valid history type ie: COV, INTERVAL or COV_AND_INTERVAL")
 	}
 	return historyType, nil
 }
@@ -123,4 +123,12 @@ func getAutoMappedOriginalNetworkName(flowNetworkCloneName, networkName string) 
 
 func getAutoMappedStreamName(flowNetworkCloneName, networkName, deviceName string) string {
 	return fmt.Sprintf("%s:%s:%s", flowNetworkCloneName, networkName, deviceName)
+}
+
+func getAutoMapperName(name string) string {
+	return fmt.Sprintf("__temp_mapper__%s", name)
+}
+
+func getAutoMapperOriginalName(name string) string {
+	return strings.Replace(name, "__temp_mapper__", "", 1)
 }

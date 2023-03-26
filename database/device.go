@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -12,6 +11,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"strings"
 	"sync"
 )
@@ -86,12 +86,16 @@ func (d *GormDatabase) UpdateDeviceErrors(uuid string, body *model.Device) error
 		Error
 }
 
-func (d *GormDatabase) UpdateDeviceConnectionErrors(uuid string, device *model.Device) error {
-	return d.DB.Model(&model.Device{}).
+func (d *GormDatabase) UpdateDeviceConnectionErrorsTransaction(db *gorm.DB, uuid string, device *model.Device) error {
+	return db.Model(&model.Device{}).
 		Where("uuid = ?", uuid).
 		Select("Connection", "ConnectionMessage").
 		Updates(&device).
 		Error
+}
+
+func (d *GormDatabase) UpdateDeviceConnectionErrors(uuid string, device *model.Device) error {
+	return d.UpdateDeviceConnectionErrorsTransaction(d.DB, uuid, device)
 }
 
 func (d *GormDatabase) UpdateDeviceConnectionErrorsByName(name string, device *model.Device) error {
@@ -151,7 +155,7 @@ func (d *GormDatabase) DeleteOneDeviceByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncDevicePoints(uuid string, network *model.Network, removeUnlinked bool, args api.Args) (*interfaces.AutoMappingNetworkError, error) {
+func (d *GormDatabase) SyncDevicePoints(uuid string, network *model.Network, removeUnlinked bool, args api.Args) error {
 	if removeUnlinked {
 		d.removeUnlinkedAutoMappedPoints()
 		d.removeUnlinkedAutoMappedStreams()
@@ -159,13 +163,13 @@ func (d *GormDatabase) SyncDevicePoints(uuid string, network *model.Network, rem
 	if network == nil {
 		network, _ = d.GetNetworkByDeviceUUID(uuid, api.Args{})
 		if network == nil {
-			return nil, errors.New("network doesn't exist")
+			return errors.New("network doesn't exist")
 		}
 		device, _ := d.GetDevice(uuid, args)
 		network.Devices = append(network.Devices, device)
 	}
 	if network == nil {
-		return nil, errors.New("network doesn't exist")
+		return errors.New("network doesn't exist")
 	}
-	return d.CreateNetworkAutoMappings(network), nil
+	return d.CreateNetworkAutoMappings(network)
 }
