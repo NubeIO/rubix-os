@@ -8,10 +8,10 @@ import (
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
-	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 	"reflect"
 )
 
@@ -35,21 +35,12 @@ func (d *GormDatabase) CreateNetworkAutoMappings(network *model.Network) *interf
 				var amPoints []*interfaces.AutoMappingPoint
 				stream, err := d.createPointAutoMappingStream(fn, network.Name, device.Name)
 				if err != nil {
+					log.Error(err)
 					continue
 				}
-				for _, point := range device.Points {
-					if boolean.IsTrue(point.AutoMappingEnable) {
-						producer, err := d.createPointAutoMappingProducer(stream.UUID, point.UUID, point.Name)
-						if err != nil {
-							continue
-						}
-						amPoints = append(amPoints, &interfaces.AutoMappingPoint{
-							Name:         point.Name,
-							Tags:         point.Tags,
-							MetaTags:     point.MetaTags,
-							ProducerUUID: producer.UUID,
-						})
-					}
+				if err := d.createPointsAutoMappingProducers(stream.UUID, device.Points); err != nil {
+					log.Error(err)
+					continue
 				}
 				amDevices = append(amDevices, &interfaces.AutoMappingDevice{
 					Name:       device.Name,
@@ -164,30 +155,51 @@ func (d *GormDatabase) createPointAutoMappingStream(flowNetwork *model.FlowNetwo
 	return d.UpdateStream(stream.UUID, stream) // note: to create stream clone in case of it does not exist
 }
 
-func (d *GormDatabase) createPointAutoMappingProducer(streamUUID string, pointUUID string, pointName string) (
-	producer *model.Producer, err error) {
-	producer, _ = d.GetOneProducerByArgs(api.Args{StreamUUID: nils.NewString(streamUUID), Name: nils.NewString(pointName)})
-	if producer == nil {
-		producerModel := &model.Producer{}
-		producerModel.Enable = boolean.NewTrue()
-		producerModel.Name = pointName
-		producerModel.StreamUUID = streamUUID
-		producerModel.ProducerThingUUID = pointUUID
-		producerModel.ProducerThingName = pointName
-		producerModel.ProducerThingClass = "point"
-		producerModel.ProducerApplication = "mapping"
-		producerModel.EnableHistory = boolean.NewFalse()
-		producerModel.HistoryType = model.HistoryTypeInterval
-		producerModel.HistoryInterval = integer.New(15)
-		producerModel.EnableHistory = boolean.NewFalse()
-		return d.CreateProducer(producerModel)
+func (d *GormDatabase) createPointsAutoMappingProducers(streamUUID string, points []*model.Point) error {
+	tx := d.DB.Begin()
+	for _, point := range points {
+		if boolean.IsTrue(point.AutoMappingEnable) {
+			producer, _ := d.GetOneProducerByArgs(api.Args{StreamUUID: nils.NewString(streamUUID), ProducerThingUUID: nils.NewString(point.UUID)})
+			if producer == nil {
+				producerModel := model.Producer{}
+				d.setProducerModel(streamUUID, point, &producerModel)
+				if err := tx.Create(&producerModel).Error; err != nil {
+					tx.Rollback()
+					return err
+				}
+			} else {
+				d.setProducerModel(streamUUID, point, producer)
+				if err := tx.Save(producer).Error; err != nil {
+					tx.Rollback()
+					return err
+				}
+			}
+		}
 	}
-	if producer.Name != pointName || producer.ProducerThingUUID != pointUUID {
-		producer.Name = pointName
-		producer.ProducerThingUUID = pointUUID
-		return d.UpdateProducer(producer.UUID, producer)
+	for _, point := range points {
+		if boolean.IsTrue(point.AutoMappingEnable) {
+			q := tx.Model(&model.Producer{}).Where("producer_thing_uuid = ?", point.UUID).Update("name", point.Name)
+			if q.Error != nil {
+				tx.Rollback()
+				return q.Error
+			}
+		}
 	}
-	return producer, nil
+	tx.Commit()
+	return nil
+}
+
+func (d *GormDatabase) setProducerModel(streamUUID string, point *model.Point, producerModel *model.Producer) {
+	producerModel.Enable = boolean.NewTrue()
+	producerModel.Name = getAutoMapperName(point.Name)
+	producerModel.StreamUUID = streamUUID
+	producerModel.ProducerThingUUID = point.UUID
+	producerModel.ProducerThingName = point.Name
+	producerModel.ProducerThingClass = "point"
+	producerModel.ProducerApplication = "mapping"
+	producerModel.EnableHistory = point.HistoryEnable
+	producerModel.HistoryType = point.HistoryType
+	producerModel.HistoryInterval = point.HistoryInterval
 }
 
 func (d *GormDatabase) createPointAutoMappingNetwork(amNetwork *interfaces.AutoMappingNetwork) (
