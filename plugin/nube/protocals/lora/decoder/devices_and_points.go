@@ -3,6 +3,7 @@ package decoder
 import (
 	"strings"
 
+	"github.com/NubeIO/lib-schema/loraschema"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -39,42 +40,42 @@ func NilLoRaDeviceDescriptionGetPointsStruct() interface{} {
 var LoRaDeviceDescriptions = [...]LoRaDeviceDescription{
 	{
 		DeviceName:      "MicroEdge",
-		Model:           "MicroEdge",
+		Model:           loraschema.DeviceModelMicroEdgeV1,
+		CheckLength:     CheckPayloadLengthME,
+		Decode:          DecodeME,
+		GetPointsStruct: GetPointsStructME,
+	},
+	{
+		DeviceName:      "MicroEdge",
+		Model:           loraschema.DeviceModelMicroEdgeV2,
 		CheckLength:     CheckPayloadLengthME,
 		Decode:          DecodeME,
 		GetPointsStruct: GetPointsStructME,
 	},
 	{
 		DeviceName:      "Droplet",
-		Model:           "THLM",
+		Model:           loraschema.DeviceModelTHLM,
 		CheckLength:     CheckPayloadLengthDroplet,
 		Decode:          DecodeDropletTHLM,
 		GetPointsStruct: GetPointsStructTHLM,
 	},
 	{
 		DeviceName:      "Droplet",
-		Model:           "TH",
-		CheckLength:     CheckPayloadLengthDroplet,
-		Decode:          DecodeDropletTH,
-		GetPointsStruct: GetPointsStructTH,
-	},
-	{
-		DeviceName:      "Droplet",
-		Model:           "THL",
+		Model:           loraschema.DeviceModelTHL,
 		CheckLength:     CheckPayloadLengthDroplet,
 		Decode:          DecodeDropletTHL,
 		GetPointsStruct: GetPointsStructTHL,
 	},
 	{
 		DeviceName:      "Droplet",
-		Model:           "THLM",
+		Model:           loraschema.DeviceModelTH,
 		CheckLength:     CheckPayloadLengthDroplet,
-		Decode:          DecodeDropletTHLM,
-		GetPointsStruct: GetPointsStructTHLM,
+		Decode:          DecodeDropletTH,
+		GetPointsStruct: GetPointsStructTH,
 	},
 	{
 		DeviceName:      "ZipHydroTap",
-		Model:           "ZipHydroTap",
+		Model:           loraschema.DeviceModelZiptHydroTap,
 		CheckLength:     CheckPayloadLengthZHT,
 		Decode:          DecodeZHT,
 		GetPointsStruct: GetPointsStructZHT,

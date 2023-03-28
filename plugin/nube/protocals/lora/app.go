@@ -3,13 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/thermistor"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/NubeIO/flow-framework/utils/integer"
 
@@ -57,7 +57,6 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		log.Errorf(errMsg)
 		return nil, errors.New(errMsg)
 	}
-	body.Model = strings.ToUpper(body.Model)
 	device, err = inst.db.CreateDevice(body)
 	if err != nil {
 		return nil, err
@@ -204,7 +203,7 @@ func (inst *Instance) handleSerialPayload(data string) {
 		}
 	}
 	if fullData != nil {
-		inst.updateDevicePointValues(commonData, fullData)
+		inst.updateDevicePointValues(commonData, fullData, device)
 	}
 }
 
@@ -331,39 +330,17 @@ func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
 }
 
 // TODO: update to make more efficient for updating just the value (incl fault etc.)
-func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
+func (inst *Instance) updatePointValue(body *model.Point, value float64, device *model.Device) error {
 	// TODO: fix this so don't need to request the point for the UUID before hand
 	pnt, err := inst.db.GetOnePointByArgs(api.Args{AddressUUID: body.AddressUUID, IoNumber: &body.IoNumber})
 	if err != nil {
 		log.Errorf("loraraw: issue on failed to find point: %v name: %s IO-ID:%s\n", err, body.AddressUUID, body.IoNumber)
 		return err
 	}
-	priority := map[string]*float64{"_16": &value}
 
+	priority := map[string]*float64{"_16": &value}
 	if pnt.IoType != "" && pnt.IoType != string(model.IOTypeRAW) {
-		if body.PresentValue == nil {
-			priority["_16"] = nil
-		}
-		if pnt.IoType == string(model.IOTypeThermistor10K) {
-			var r float64
-			var newMicroEdge bool
-			// newMicroEdge = true
-			if newMicroEdge {
-				v := value / 1023 * 3.29
-				r = (10000 * v) / (3.29 - v)
-			} else {
-				r = ((16620 * value) - (1023 * 3300)) / (1023 - value)
-			}
-			f, err := thermistor.ResistanceToTemperature(r, thermistor.T210K)
-			// fmt.Println("R", r)
-			// fmt.Println("temp", f)
-			if err != nil {
-				log.Errorf("lora-raw: issue on decode temperture err: %s id: %s: %s", err.Error(), *body.AddressUUID, body.IoNumber)
-			}
-			priority["_16"] = float.New(f)
-		} else {
-			priority["_16"] = float.New(decoder.MicroEdgePointType(pnt.IoType, value))
-		}
+		priority["_16"] = float.New(decoder.MicroEdgePointType(pnt.IoType, value, device.Model))
 
 	}
 	pointWriter := model.PointWriter{Priority: &priority}
@@ -377,25 +354,25 @@ func (inst *Instance) updatePointValue(body *model.Point, value float64) error {
 }
 
 // updateDevicePointValues update all points under a device within commonSensorData and sensorStruct
-func (inst *Instance) updateDevicePointValues(commonValues *decoder.CommonValues, sensorStruct interface{}) {
+func (inst *Instance) updateDevicePointValues(commonValues *decoder.CommonValues, sensorStruct interface{}, device *model.Device) {
 	// manually update rssi + any other CommonValues
 	pnt := new(model.Point)
 	pnt.AddressUUID = &commonValues.ID
 	pnt.IoNumber = getStructFieldJSONNameByName(sensorStruct, "Rssi")
-	err := inst.updatePointValue(pnt, float64(commonValues.Rssi))
+	err := inst.updatePointValue(pnt, float64(commonValues.Rssi), device)
 	if err != nil {
 		return
 	}
 	pnt.IoNumber = getStructFieldJSONNameByName(sensorStruct, "Snr")
-	err = inst.updatePointValue(pnt, float64(commonValues.Snr))
+	err = inst.updatePointValue(pnt, float64(commonValues.Snr), device)
 	if err != nil {
 		return
 	}
 	// update all other fields in sensorStruct
-	inst.updateDevicePointValuesStruct(commonValues.ID, sensorStruct, "")
+	inst.updateDevicePointValuesStruct(commonValues.ID, sensorStruct, "", device)
 }
 
-func (inst *Instance) updateDevicePointValuesStruct(deviceID string, sensorStruct interface{}, postfix string) {
+func (inst *Instance) updateDevicePointValuesStruct(deviceID string, sensorStruct interface{}, postfix string, device *model.Device) {
 	pnt := new(model.Point)
 	pnt.AddressUUID = &deviceID
 	sensorRefl := reflect.ValueOf(sensorStruct)
@@ -416,7 +393,7 @@ func (inst *Instance) updateDevicePointValuesStruct(deviceID string, sensorStruc
 			value = float64(field.Uint())
 		case reflect.Struct:
 			if _, ok := field.Interface().(decoder.CommonValues); !ok {
-				inst.updateDevicePointValuesStruct(deviceID, field.Interface(), postfix)
+				inst.updateDevicePointValuesStruct(deviceID, field.Interface(), postfix, device)
 			}
 			continue
 		case reflect.Array:
@@ -425,14 +402,14 @@ func (inst *Instance) updateDevicePointValuesStruct(deviceID string, sensorStruc
 			for j := 0; j < field.Len(); j++ {
 				pf := fmt.Sprintf("%s_%d", postfix, j+1)
 				v := field.Index(j).Interface()
-				inst.updateDevicePointValuesStruct(deviceID, v, pf)
+				inst.updateDevicePointValuesStruct(deviceID, v, pf, device)
 			}
 			continue
 		default:
 			continue
 		}
 
-		err := inst.updatePointValue(pnt, value)
+		err := inst.updatePointValue(pnt, value, device)
 		if err != nil {
 			return
 		}
