@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/interfaces/connection"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/plugin/compat"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
@@ -14,6 +14,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"strings"
 	"sync"
 )
@@ -46,6 +47,16 @@ func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, e
 	return networkModel, nil
 }
 
+func (d *GormDatabase) GetNetworkByArgs(args api.Args) (*model.Network, error) {
+	var networkModel *model.Network
+	query := d.buildNetworkQuery(args)
+	if err := query.First(&networkModel).Error; err != nil {
+		return nil, err
+	}
+	marshallCacheDevices(networkModel.Devices, args)
+	return networkModel, nil
+}
+
 // GetNetworkByField returns the network for the given field ie name or nil.
 func (d *GormDatabase) GetNetworkByField(field string, value string, withDevices bool) (*model.Network, error) {
 	var networkModel *model.Network
@@ -65,7 +76,7 @@ func (d *GormDatabase) GetNetworkByField(field string, value string, withDevices
 	}
 }
 
-func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
+func (d *GormDatabase) CreateNetworkTransaction(db *gorm.DB, body *model.Network) (*model.Network, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Network)
 	body.Name = strings.TrimSpace(body.Name)
 	body.ThingClass = model.ThingClass.Network
@@ -95,15 +106,19 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 		}
 		body.GlobalUUID = deviceInfo.GlobalUUID
 	}
-	if err = d.DB.Create(&body).Error; err != nil {
+	if err = db.Create(&body).Error; err != nil {
 		return nil, err
 	}
 	return body, nil
 }
 
-func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
+func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
+	return d.CreateNetworkTransaction(d.DB, body)
+}
+
+func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *model.Network) (*model.Network, error) {
 	var networkModel *model.Network
-	query := d.DB.Where("uuid = ?", uuid).First(&networkModel)
+	query := db.Where("uuid = ?", uuid).First(&networkModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -113,11 +128,15 @@ func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.N
 		}
 	}
 	body.Name = strings.TrimSpace(body.Name)
-	query = d.DB.Model(&networkModel).Select("*").Updates(&body)
+	query = db.Model(&networkModel).Select("*").Updates(&body)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	return networkModel, nil
+}
+
+func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
+	return d.UpdateNetworkTransaction(d.DB, uuid, body)
 }
 
 // UpdateNetworkErrors will only update the CommonFault properties of the network, all other properties won't be updated.
@@ -130,12 +149,16 @@ func (d *GormDatabase) UpdateNetworkErrors(uuid string, body *model.Network) err
 		Error
 }
 
-func (d *GormDatabase) UpdateNetworkConnectionErrors(uuid string, network *model.Network) error {
-	return d.DB.Model(&model.Network{}).
+func UpdateNetworkConnectionErrorsTransaction(db *gorm.DB, uuid string, network *model.Network) error {
+	return db.Model(&model.Network{}).
 		Where("uuid = ?", uuid).
 		Select("Connection", "ConnectionMessage").
 		Updates(&network).
 		Error
+}
+
+func (d *GormDatabase) UpdateNetworkConnectionErrors(uuid string, network *model.Network) error {
+	return UpdateNetworkConnectionErrorsTransaction(d.DB, uuid, network)
 }
 
 func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
@@ -187,17 +210,13 @@ func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	return info
 }
 
-func (d *GormDatabase) SyncNetworks(args api.Args) error {
-	d.removeUnlinkedAutoMappedNetworks()
-	d.removeUnlinkedAutoMappedDevices()
-	d.removeUnlinkedAutoMappedPoints()
-	d.removeUnlinkedAutoMappedStreams()
+func (d *GormDatabase) SyncNetworks(level interfaces.Level, args api.Args) error {
 	networks, err := d.GetNetworks(args)
 	if err != nil {
 		return err
 	}
 	for _, network := range networks {
-		err = d.SyncNetworkDevices(network.UUID, network, false, args)
+		err = d.SyncNetworkDevices(network.UUID, network, level, args)
 		if err != nil {
 			return err
 		}
@@ -205,151 +224,12 @@ func (d *GormDatabase) SyncNetworks(args api.Args) error {
 	return nil
 }
 
-func (d *GormDatabase) SyncNetworkDevices(uuid string, network *model.Network, removeUnlinked bool, args api.Args) error {
-	if removeUnlinked {
-		d.removeUnlinkedAutoMappedDevices()
-		d.removeUnlinkedAutoMappedPoints()
-		d.removeUnlinkedAutoMappedStreams()
-	}
+func (d *GormDatabase) SyncNetworkDevices(uuid string, network *model.Network, level interfaces.Level, args api.Args) error {
 	if network == nil {
 		network, _ = d.GetNetwork(uuid, args)
 	}
 	if network == nil {
 		return errors.New("network doesn't exist")
 	}
-	return d.SyncDevicePoints(uuid, network, false, args)
-}
-
-func (d *GormDatabase) removeUnlinkedAutoMappedStreams() {
-	streams, err := d.GetStreams(api.Args{})
-	if err != nil {
-		log.Errorf(err.Error())
-	}
-	for _, stream := range streams {
-		if boolean.IsTrue(stream.CreatedFromAutoMapping) {
-			parts := strings.Split(stream.Name, ":")
-			if len(parts) == 3 {
-				fn, _ := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(parts[0])})
-				device, _ := d.GetDeviceByName(parts[1], parts[2], api.Args{})
-				if device == nil || fn == nil {
-					_, err := d.DeleteStream(stream.UUID)
-					if err != nil {
-						log.Errorf(err.Error())
-					}
-				} else {
-					network, _ := d.GetNetwork(device.NetworkUUID, api.Args{})
-					if boolean.IsFalse(network.AutoMappingEnable) || boolean.IsFalse(device.AutoMappingEnable) {
-						_, err := d.DeleteStream(stream.UUID)
-						if err != nil {
-							log.Errorf(err.Error())
-						}
-					}
-				}
-			} else {
-				_, err := d.DeleteStream(stream.UUID)
-				if err != nil {
-					log.Errorf(err.Error())
-				}
-			}
-		}
-	}
-}
-
-func (d *GormDatabase) removeUnlinkedAutoMappedNetworks() {
-	networks, err := d.GetNetworks(api.Args{})
-	if err != nil {
-		log.Errorf(err.Error())
-	}
-	for _, network := range networks {
-		if boolean.IsTrue(network.CreatedFromAutoMapping) {
-			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(network.AutoMappingFlowNetworkName)})
-			if err != nil {
-				_, err := d.DeleteNetwork(network.UUID)
-				if err != nil {
-					log.Errorf(err.Error())
-				}
-			}
-			cli := client.NewFlowClientCliFromFNC(fnc)
-			networkName := getAutoMappedOriginalNetworkName(fnc.Name, network.Name)
-			remoteNetwork, connectionErr, _ := cli.GetNetworkByName(networkName)
-			if connectionErr != nil {
-				network.Connection = connection.Broken.String()
-				network.ConnectionMessage = nstring.New(err.Error())
-				_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
-			} else if remoteNetwork == nil ||
-				boolean.IsFalse(remoteNetwork.AutoMappingEnable) ||
-				remoteNetwork.AutoMappingFlowNetworkName != network.AutoMappingFlowNetworkName {
-				_, err := d.DeleteNetwork(network.UUID)
-				if err != nil {
-					log.Errorf(err.Error())
-				}
-			}
-		}
-	}
-}
-
-func (d *GormDatabase) removeUnlinkedAutoMappedDevices() {
-	devices, err := d.GetDevices(api.Args{})
-	if err != nil {
-		log.Errorf(err.Error())
-	}
-	for _, device := range devices {
-		if boolean.IsTrue(device.CreatedFromAutoMapping) {
-			network, err := d.GetNetwork(device.NetworkUUID, api.Args{})
-			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(network.AutoMappingFlowNetworkName)})
-			if err != nil {
-				_, err := d.DeleteDevice(device.UUID)
-				if err != nil {
-					log.Errorf(err.Error())
-				}
-			}
-			cli := client.NewFlowClientCliFromFNC(fnc)
-			networkName := getAutoMappedOriginalNetworkName(fnc.Name, network.Name)
-			remoteDevice, connectionErr, _ := cli.GetDeviceByName(networkName, device.Name)
-			if connectionErr != nil {
-				device.Connection = connection.Broken.String()
-				device.ConnectionMessage = nstring.New(err.Error())
-				_ = d.UpdateDeviceConnectionErrors(device.UUID, device)
-			} else if remoteDevice == nil || boolean.IsFalse(remoteDevice.AutoMappingEnable) {
-				_, err := d.DeleteDevice(device.UUID)
-				if err != nil {
-					log.Errorf(err.Error())
-				}
-			}
-		}
-	}
-}
-
-func (d *GormDatabase) removeUnlinkedAutoMappedPoints() {
-	points, err := d.GetPoints(api.Args{})
-	if err != nil {
-		log.Errorf(err.Error())
-	}
-	for _, point := range points {
-		if boolean.IsTrue(point.CreatedFromAutoMapping) {
-			device, _ := d.GetDevice(point.DeviceUUID, api.Args{})
-			network, _ := d.GetNetwork(device.NetworkUUID, api.Args{})
-			fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: nstring.New(network.AutoMappingFlowNetworkName)})
-			if err != nil {
-				_, err := d.DeletePoint(point.UUID, false)
-				if err != nil {
-					log.Errorf(err.Error())
-				}
-			}
-			cli := client.NewFlowClientCliFromFNC(fnc)
-			networkName := getAutoMappedOriginalNetworkName(fnc.Name, network.Name)
-			remotePoint, connectionErr, _ := cli.GetPointByName(networkName, device.Name, point.Name)
-			if connectionErr != nil {
-				point.Connection = connection.Broken.String()
-				point.ConnectionMessage = nstring.New(err.Error())
-				_ = d.UpdatePointConnectionErrors(point.UUID, point)
-			} else if remotePoint == nil || boolean.IsFalse(remotePoint.AutoMappingEnable) {
-				_, err := d.DeletePoint(point.UUID, false)
-				if err != nil {
-					log.Errorf(err.Error())
-				}
-			}
-		}
-	}
-	go d.PublishPointsList("")
+	return d.SyncDevicePoints(uuid, network, level, args)
 }

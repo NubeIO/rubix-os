@@ -65,6 +65,7 @@ func (d *GormDatabase) updateNetworkBody(err error, body *model.Network) (*model
 	}
 	if boolean.IsTrue(network.CreatedFromAutoMapping) {
 		body.AutoMappingEnable = boolean.NewFalse()
+		body.AutoMappingUUID = network.AutoMappingUUID
 	}
 	return body, nil
 }

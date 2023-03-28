@@ -211,6 +211,12 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 			Having("COUNT(network_uuid) = ?", len(keyValues))
 		query = query.Where("uuid IN (?)", subQuery)
 	}
+	if args.AutoMappingUUID != nil {
+		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
+	}
+	if args.GlobalUUID != nil {
+		query = query.Where("global_uuid = ?", *args.GlobalUUID)
+	}
 	return query
 }
 
@@ -242,6 +248,9 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	}
 	if args.AutoMappingEnable != nil {
 		query = query.Where("auto_mapping_enable = ?", args.AutoMappingEnable)
+	}
+	if args.AutoMappingUUID != nil {
+		query = query.Where("auto_mapping_uuid = ?", args.AutoMappingUUID)
 	}
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
@@ -279,6 +288,9 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	}
 	if args.DeviceUUID != nil {
 		query = query.Where("device_uuid = ?", *args.DeviceUUID)
+	}
+	if args.AutoMappingUUID != nil {
+		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
 	}
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")

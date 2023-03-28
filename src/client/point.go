@@ -40,6 +40,17 @@ func (inst *FlowClient) GetPoint(uuid string) (*model.Point, error) {
 	return resp.Result().(*model.Point), nil
 }
 
+func (inst *FlowClient) GetPointV2(uuid string) (*model.Point, error, error) {
+	resp, connectionErr, requestErr := nresty.FormatRestyV2Response(inst.client.R().
+		SetResult(&model.Point{}).
+		SetPathParams(map[string]string{"uuid": uuid}).
+		Get("/api/points/{uuid}"))
+	if connectionErr != nil || requestErr != nil {
+		return nil, connectionErr, requestErr
+	}
+	return resp.Result().(*model.Point), nil, nil
+}
+
 func (inst *FlowClient) GetPointByName(networkName, deviceName, pointName string) (*model.Point, error, error) {
 	url := fmt.Sprintf("/api/points/name/%s/%s/%s", networkName, deviceName, pointName)
 	resp, connectionErr, requestErr := nresty.FormatRestyV2Response(inst.client.R().

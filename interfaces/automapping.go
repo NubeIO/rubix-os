@@ -2,6 +2,24 @@ package interfaces
 
 import "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 
+type Level int
+
+const (
+	Network Level = iota
+	Device
+	Point
+)
+
+func (s Level) String() string {
+	switch s {
+	case Network:
+		return "Network"
+	case Device:
+		return "Device"
+	}
+	return "Point"
+}
+
 type AutoMappingNetwork struct {
 	GlobalUUID      string                  `json:"global_uuid"`
 	UUID            string                  `json:"uuid"`
@@ -12,10 +30,13 @@ type AutoMappingNetwork struct {
 	FlowNetworkUUID string                  `json:"flown_network_uuid"`
 }
 
-type AutoMappingNetworkError struct {
-	UUID    string                    `json:"uuid"`
-	Error   *string                   `json:"error"`
-	Devices []*AutoMappingDeviceError `json:"devices"`
+type AutoMappingError struct {
+	NetworkUUID string `json:"network_uuid"`
+	DeviceUUID  string `json:"device_uuid"`
+	PointUUID   string `json:"point_uuid"`
+	HasError    bool   `json:"has_error"`
+	Error       string `json:"error"`
+	Level       Level  `json:"level"`
 }
 
 type AutoMappingDevice struct {
@@ -27,33 +48,10 @@ type AutoMappingDevice struct {
 	StreamUUID string                 `json:"stream_uuid"`
 }
 
-type AutoMappingDeviceError struct {
-	Name      string                      `json:"device_name"`
-	Error     *string                     `json:"error"`
-	Points    []*AutoMappingPointError    `json:"points"`
-	Consumers []*AutoMappingConsumerError `json:"consumers"`
-	Writers   []*AutoMappingWriterError   `json:"writers"`
-}
-
 type AutoMappingPoint struct {
 	UUID         string                `json:"uuid"`
 	Name         string                `json:"name"`
 	Tags         []*model.Tag          `json:"tags"`
 	MetaTags     []*model.PointMetaTag `json:"meta_tags"`
 	ProducerUUID string                `json:"product_uuid"`
-}
-
-type AutoMappingPointError struct {
-	Name  string  `json:"name"`
-	Error *string `json:"error"`
-}
-
-type AutoMappingConsumerError struct {
-	Name  string  `json:"name"`
-	Error *string `json:"error"`
-}
-
-type AutoMappingWriterError struct {
-	Name  string  `json:"name"`
-	Error *string `json:"error"`
 }

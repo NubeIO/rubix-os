@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -42,24 +43,28 @@ func (d *GormDatabase) GetDevice(uuid string, args api.Args) (*model.Device, err
 	return deviceModel, nil
 }
 
-func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
+func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device) (*model.Device, error) {
 	var net *model.Network
-	query := d.DB.Where("uuid = ? ", body.NetworkUUID).First(&net)
+	query := db.Where("uuid = ? ", body.NetworkUUID).First(&net)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Device)
 	body.Name = strings.TrimSpace(body.Name)
 	body.ThingClass = model.ThingClass.Device
-	if err := d.DB.Create(&body).Error; err != nil {
+	if err := db.Create(&body).Error; err != nil {
 		return nil, err
 	}
 	return body, query.Error
 }
 
-func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
+func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
+	return d.CreateDeviceTransaction(d.DB, body)
+}
+
+func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *model.Device) (*model.Device, error) {
 	var deviceModel *model.Device
-	query := d.DB.Where("uuid = ?", uuid).First(&deviceModel)
+	query := db.Where("uuid = ?", uuid).First(&deviceModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
@@ -70,10 +75,14 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 	}
 	body.Name = strings.TrimSpace(body.Name)
 	body.ThingClass = model.ThingClass.Device
-	if err := d.DB.Model(&deviceModel).Select("*").Updates(body).Error; err != nil {
+	if err := db.Model(&deviceModel).Select("*").Updates(body).Error; err != nil {
 		return nil, err
 	}
 	return deviceModel, nil
+}
+
+func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
+	return d.UpdateDeviceTransaction(d.DB, uuid, body)
 }
 
 // UpdateDeviceErrors will only update the CommonFault properties of the device, all other properties won't be updated
@@ -86,7 +95,7 @@ func (d *GormDatabase) UpdateDeviceErrors(uuid string, body *model.Device) error
 		Error
 }
 
-func (d *GormDatabase) UpdateDeviceConnectionErrorsTransaction(db *gorm.DB, uuid string, device *model.Device) error {
+func UpdateDeviceConnectionErrorsTransaction(db *gorm.DB, uuid string, device *model.Device) error {
 	return db.Model(&model.Device{}).
 		Where("uuid = ?", uuid).
 		Select("Connection", "ConnectionMessage").
@@ -95,7 +104,7 @@ func (d *GormDatabase) UpdateDeviceConnectionErrorsTransaction(db *gorm.DB, uuid
 }
 
 func (d *GormDatabase) UpdateDeviceConnectionErrors(uuid string, device *model.Device) error {
-	return d.UpdateDeviceConnectionErrorsTransaction(d.DB, uuid, device)
+	return UpdateDeviceConnectionErrorsTransaction(d.DB, uuid, device)
 }
 
 func (d *GormDatabase) UpdateDeviceConnectionErrorsByName(name string, device *model.Device) error {
@@ -155,11 +164,7 @@ func (d *GormDatabase) DeleteOneDeviceByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncDevicePoints(uuid string, network *model.Network, removeUnlinked bool, args api.Args) error {
-	if removeUnlinked {
-		d.removeUnlinkedAutoMappedPoints()
-		d.removeUnlinkedAutoMappedStreams()
-	}
+func (d *GormDatabase) SyncDevicePoints(uuid string, network *model.Network, level interfaces.Level, args api.Args) error {
 	if network == nil {
 		network, _ = d.GetNetworkByDeviceUUID(uuid, api.Args{})
 		if network == nil {
@@ -171,5 +176,5 @@ func (d *GormDatabase) SyncDevicePoints(uuid string, network *model.Network, rem
 	if network == nil {
 		return errors.New("network doesn't exist")
 	}
-	return d.CreateNetworkAutoMappings(network)
+	return d.CreateNetworkAutoMappings(network, level)
 }

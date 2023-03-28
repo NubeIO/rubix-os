@@ -3,16 +3,15 @@ package client
 import (
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/utils/nstring"
 )
 
-func (inst *FlowClient) AddAutoMappings(body *interfaces.AutoMappingNetwork) *interfaces.AutoMappingNetworkError {
+func (inst *FlowClient) CreateAutoMapping(body *interfaces.AutoMappingNetwork) *interfaces.AutoMappingError {
 	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(&interfaces.AutoMappingNetworkError{}).
+		SetResult(&interfaces.AutoMappingError{}).
 		SetBody(body).
 		Post("/api/auto_mappings"))
 	if err != nil {
-		return &interfaces.AutoMappingNetworkError{Name: body.Name, Error: nstring.New(err.Error())}
+		return &interfaces.AutoMappingError{NetworkUUID: body.UUID, Error: err.Error(), Level: interfaces.Network}
 	}
-	return resp.Result().(*interfaces.AutoMappingNetworkError)
+	return resp.Result().(*interfaces.AutoMappingError)
 }

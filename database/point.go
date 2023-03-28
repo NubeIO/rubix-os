@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"strings"
 	"sync"
 	"time"
@@ -94,7 +95,7 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	return pointModel, nil
 }
 
-func (d *GormDatabase) CreatePoint(body *model.Point, publishPointList bool) (*model.Point, error) {
+func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point) (*model.Point, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
 	body.Name = strings.TrimSpace(body.Name)
 	if body.Decimal == nil {
@@ -137,13 +138,36 @@ func (d *GormDatabase) CreatePoint(body *model.Point, publishPointList bool) (*m
 	if body.PollPriority == "" {
 		body.PollPriority = model.PRIORITY_NORMAL
 	}
-	if err := d.DB.Create(&body).Error; err != nil {
+	if err := db.Create(&body).Error; err != nil {
+		return nil, err
+	}
+
+	return body, nil
+}
+
+func (d *GormDatabase) CreatePoint(body *model.Point, publishPointList bool) (*model.Point, error) {
+	pnt, err := d.CreatePointTransaction(d.DB, body)
+	if err != nil {
 		return nil, err
 	}
 	if publishPointList {
 		go d.PublishPointsList("")
 	}
-	return body, nil
+	return pnt, nil
+}
+
+func (d *GormDatabase) UpdatePointTransactionForAutoMapping(db *gorm.DB, uuid string, body *model.Point) (*model.Point, error) {
+	pointModel := model.Point{CommonUUID: model.CommonUUID{UUID: uuid}}
+	if len(body.Tags) > 0 {
+		if err := db.Model(&pointModel).Association("Tags").Replace(body.Tags); err != nil {
+			return nil, err
+		}
+	}
+	body.Name = strings.TrimSpace(body.Name)
+	if err := db.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
+		return nil, err
+	}
+	return &pointModel, nil
 }
 
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) (*model.Point, error) {
@@ -345,12 +369,16 @@ func (d *GormDatabase) UpdatePointSuccess(uuid string, body *model.Point) error 
 		Error
 }
 
-func (d *GormDatabase) UpdatePointConnectionErrors(uuid string, point *model.Point) error {
-	return d.DB.Model(&model.Point{}).
+func UpdatePointConnectionErrorsTransaction(db *gorm.DB, uuid string, point *model.Point) error {
+	return db.Model(&model.Point{}).
 		Where("uuid = ?", uuid).
 		Select("Connection", "ConnectionMessage").
 		Updates(&point).
 		Error
+}
+
+func (d *GormDatabase) UpdatePointConnectionErrors(uuid string, point *model.Point) error {
+	return UpdatePointConnectionErrorsTransaction(d.DB, uuid, point)
 }
 
 func (d *GormDatabase) UpdatePointConnectionErrorsByName(name string, point *model.Point) error {

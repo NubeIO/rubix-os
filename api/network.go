@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
@@ -26,8 +27,8 @@ type NetworkDatabase interface {
 
 	CreateNetworkMetaTags(networkUUID string, networkMetaTags []*model.NetworkMetaTag) ([]*model.NetworkMetaTag, error)
 
-	SyncNetworks(args Args) error
-	SyncNetworkDevices(uuid string, network *model.Network, removeUnlinked bool, args Args) error
+	SyncNetworks(level interfaces.Level, args Args) error
+	SyncNetworkDevices(uuid string, network *model.Network, level interfaces.Level, args Args) error
 }
 type NetworksAPI struct {
 	DB     NetworkDatabase
@@ -128,7 +129,7 @@ func (a *NetworksAPI) CreateNetworkMetaTags(ctx *gin.Context) {
 
 func (a *NetworksAPI) SyncNetworks(ctx *gin.Context) {
 	args := buildNetworkArgs(ctx)
-	err := a.DB.SyncNetworks(args)
+	err := a.DB.SyncNetworks(interfaces.Network, args)
 	ResponseHandler(model.Message{Message: "synced successfully"}, err, ctx)
 }
 
@@ -136,6 +137,6 @@ func (a *NetworksAPI) SyncNetworkDevices(ctx *gin.Context) {
 	networkUUID := resolveID(ctx)
 	args := buildNetworkArgs(ctx)
 	args.WithDevices = true
-	err := a.DB.SyncNetworkDevices(networkUUID, nil, true, args)
+	err := a.DB.SyncNetworkDevices(networkUUID, nil, interfaces.Device, args)
 	ResponseHandler(model.Message{Message: "synced successfully"}, err, ctx)
 }

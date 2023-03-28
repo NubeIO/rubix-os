@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-func (d *GormDatabase) CreateDeviceMetaTags(deviceUUID string, body []*model.DeviceMetaTag) ([]*model.DeviceMetaTag,
-	error) {
+func (d *GormDatabase) CreateDeviceMetaTags(deviceUUID string, body []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error) {
 	tx := d.DB.Begin()
 	var keys []string
 	for _, b := range body {
