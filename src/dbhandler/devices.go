@@ -3,7 +3,6 @@ package dbhandler
 import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"strings"
 )
 
 func (h *Handler) GetDevices(args api.Args) ([]*model.Device, error) {
@@ -57,7 +56,6 @@ func (h *Handler) UpdateDeviceErrors(uuid string, body *model.Device) error {
 }
 
 func (h *Handler) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
-	body.Model = strings.ToUpper(body.Model)
 	q, err := getDb().UpdateDevice(uuid, body)
 	if err != nil {
 		return nil, err

@@ -1,9 +1,10 @@
 package decoder
 
 import (
-	"math"
 	"strconv"
 
+	"github.com/NubeIO/lib-schema/loraschema"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/thermistor"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -71,28 +72,26 @@ func voltage(data string) float64 {
 	return v_
 }
 
-func MicroEdgePointType(pointType string, value float64) float64 {
+func MicroEdgePointType(pointType string, value float64, deviceModel string) float64 {
 	switch model.IOType(pointType) {
 	case model.IOTypeRAW:
 		return value
 	case model.IOTypeDigital:
-		if value == 0 || value >= 1000 {
+		if value >= 1000 {
 			return 0
 		} else {
 			return 1
 		}
 	case model.IOTypeThermistor10K:
-		vlt := 3.34
-		v := (value / 1024) * vlt
-		R0 := 10000.0
-		R := (R0 * v) / (vlt - v)
-		t0 := 273.0 + 25.0
-		b := 3850.0
-		var ml float64
-		ml = math.Log(R / R0)
-		T := 1.0 / (1.0/t0 + (1.0/b)*ml)
-		output := T - 273.15
-		return output
+		var r float64
+		if deviceModel == loraschema.DeviceModelMicroEdgeV2 {
+			v := value / 1023 * 3.29
+			r = (10000 * v) / (3.29 - v)
+		} else {
+			r = ((16620 * value) - (1023 * 3300)) / (1023 - value)
+		}
+		f, _ := thermistor.ResistanceToTemperature(r, thermistor.T210K)
+		return f
 	case model.IOTypeVoltageDC:
 		output := (value / 1024) * 10
 		return output
