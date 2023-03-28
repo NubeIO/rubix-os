@@ -45,7 +45,7 @@ require (
 require (
 	github.com/NubeDev/bacnet v0.1.7
 	github.com/NubeIO/lib-networking v0.1.0
-	github.com/NubeIO/lib-schema v0.2.12
+	github.com/NubeIO/lib-schema v0.2.14
 	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
 	github.com/amenzhinsky/iothub v0.9.0
 	github.com/go-gota/gota v0.12.0
