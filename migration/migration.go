@@ -2,6 +2,7 @@ package migration
 
 import (
 	"github.com/NubeIO/flow-framework/migration/versions"
+	"github.com/NubeIO/lib-schema/loraschema"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -47,6 +48,12 @@ func AutoMigrate(db *gorm.DB) error {
 	//		}
 	//	}
 	//}
+	deviceModel := model.Device{CommonDevice: model.CommonDevice{Model: loraschema.DeviceModelMicroEdgeV1}}
+	db.Model(&model.Device{}).
+		Select("Model").
+		Where("model = ? OR model = ?", "MicroEdge", "MICROEDGE").
+		Updates(&deviceModel)
+
 	interfaces := versions.GetInitInterfaces()
 	for _, s := range interfaces {
 		if err := db.AutoMigrate(s); err != nil {
