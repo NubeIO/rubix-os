@@ -310,7 +310,7 @@ func (d *GormDatabase) createPointAutoMappingStreams(flowNetwork *model.FlowNetw
 	for _, device := range devices {
 		if boolean.IsTrue(device.AutoMappingEnable) {
 			streamName := getAutoMappedStreamName(flowNetwork.Name, networkName, device.Name)
-			tempStreamName := getAutoMapperName(streamName)
+			tempStreamName := getTempAutoMappedName(streamName)
 			q := tx.Model(&model.Stream{}).Where("name = ?", tempStreamName).Update("name", streamName)
 			if q.Error != nil {
 				tx.Rollback()
@@ -333,7 +333,7 @@ func (d *GormDatabase) createPointAutoMappingStreams(flowNetwork *model.FlowNetw
 
 func (d *GormDatabase) setStreamModel(flowNetwork *model.FlowNetwork, device *model.Device, streamName string, streamModel *model.Stream) {
 	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
-	streamModel.Name = getAutoMapperName(streamName)
+	streamModel.Name = getTempAutoMappedName(streamName)
 	streamModel.Enable = boolean.NewTrue()
 	streamModel.CreatedFromAutoMapping = boolean.NewTrue()
 	streamModel.AutoMappingUUID = nstring.New(device.UUID)
@@ -396,7 +396,7 @@ func (d *GormDatabase) createPointsAutoMappingProducers(streamUUID string, point
 }
 
 func (d *GormDatabase) setProducerModel(streamUUID string, point *model.Point, producerModel *model.Producer) {
-	producerModel.Name = getAutoMapperName(point.Name)
+	producerModel.Name = getTempAutoMappedName(point.Name)
 	producerModel.Enable = boolean.NewTrue()
 	producerModel.StreamUUID = streamUUID
 	producerModel.ProducerThingUUID = point.UUID

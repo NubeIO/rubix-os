@@ -8,7 +8,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/structs"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm"
-	"strings"
 )
 
 func truncateString(str string, num int) string {
@@ -117,18 +116,10 @@ func getAutoMappedNetworkName(flowNetworkCloneName, networkName string) string {
 	return fmt.Sprintf("%s_%s", flowNetworkCloneName, networkName)
 }
 
-func getAutoMappedOriginalNetworkName(flowNetworkCloneName, networkName string) string {
-	return strings.Replace(networkName, fmt.Sprintf("%s_", flowNetworkCloneName), "", 1)
-}
-
 func getAutoMappedStreamName(flowNetworkCloneName, networkName, deviceName string) string {
 	return fmt.Sprintf("%s:%s:%s", flowNetworkCloneName, networkName, deviceName)
 }
 
-func getAutoMapperName(name string) string {
+func getTempAutoMappedName(name string) string {
 	return fmt.Sprintf("__temp_mapper__%s", name)
-}
-
-func getAutoMapperOriginalName(name string) string {
-	return strings.Replace(name, "__temp_mapper__", "", 1)
 }
