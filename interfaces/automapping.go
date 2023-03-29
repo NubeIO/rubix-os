@@ -21,12 +21,20 @@ func (s Level) String() string {
 }
 
 type AutoMappingResponse struct {
-	NetworkUUID string `json:"network_uuid"`
-	DeviceUUID  string `json:"device_uuid"`
-	PointUUID   string `json:"point_uuid"`
-	HasError    bool   `json:"has_error"`
-	Error       string `json:"error"`
-	Level       Level  `json:"level"`
+	NetworkUUID string        `json:"network_uuid"`
+	DeviceUUID  string        `json:"device_uuid"`
+	PointUUID   string        `json:"point_uuid"`
+	HasError    bool          `json:"has_error"`
+	Error       string        `json:"error"`
+	Level       Level         `json:"level"`
+	SyncWriters []*SyncWriter `json:"sync_writers"`
+}
+
+type SyncWriter struct {
+	ProducerUUID string
+	WriterUUID   string
+	PointUUID    string
+	PointName    string
 }
 
 type AutoMappingNetwork struct {

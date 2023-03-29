@@ -25,6 +25,11 @@ func (d *GormDatabase) CreateNetworkAutoMappings(network *model.Network, level i
 		}
 	}
 	if boolean.IsTrue(network.AutoMappingEnable) {
+		amRes := interfaces.AutoMappingResponse{
+			NetworkUUID: network.UUID,
+			HasError:    true,
+			Level:       interfaces.Network,
+		}
 		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(network.AutoMappingFlowNetworkName)})
 		if err != nil {
 			errMessage := fmt.Sprintf("failed to find flow network with name %s", network.AutoMappingFlowNetworkName)
@@ -41,6 +46,8 @@ func (d *GormDatabase) CreateNetworkAutoMappings(network *model.Network, level i
 		var amDevices []*interfaces.AutoMappingDevice
 		deviceUUIDToStreamUUIDMap, err := d.createPointAutoMappingStreams(fn, network.Name, network.Devices)
 		if err != nil {
+			amRes.Error = err.Error()
+			d.updateCascadeConnectionError(d.DB, &amRes)
 			log.Error(err)
 			return err
 		}
@@ -49,6 +56,9 @@ func (d *GormDatabase) CreateNetworkAutoMappings(network *model.Network, level i
 				streamUUID, _ := deviceUUIDToStreamUUIDMap[device.UUID]
 				pointUUIDToProducerUUIDMap, err := d.createPointsAutoMappingProducers(streamUUID, device.Points)
 				if err != nil {
+					amRes.DeviceUUID = device.UUID
+					amRes.Level = interfaces.Device
+					d.updateCascadeConnectionError(d.DB, &amRes)
 					log.Error(err)
 					return err
 				}
@@ -84,9 +94,19 @@ func (d *GormDatabase) CreateNetworkAutoMappings(network *model.Network, level i
 			Devices:         amDevices,
 			FlowNetworkUUID: fn.UUID,
 		}
-		amRes := cli.CreateAutoMapping(amNetwork)
-		d.updateAutoMappingErrors(amRes)
-		return nil
+		amRes = cli.CreateAutoMapping(amNetwork)
+		if amRes.HasError {
+			errMsg := fmt.Sprintf("Flow Network Clone side: %s", amRes.Error)
+			amRes.Error = errMsg
+			d.updateCascadeConnectionError(d.DB, &amRes)
+		} else {
+			pointUUID, err := d.createWriterClones(amRes.SyncWriters)
+			if pointUUID != nil && err != nil {
+				amRes.PointUUID = *pointUUID
+				amRes.Level = interfaces.Point
+				d.updateCascadeConnectionError(d.DB, &amRes)
+			}
+		}
 	}
 	return nil
 }
@@ -328,22 +348,28 @@ func (d *GormDatabase) createPointsAutoMappingProducers(streamUUID string, point
 	return pointUUIDToProducerUUIDMap, nil
 }
 
-func (d *GormDatabase) updateAutoMappingErrors(amRes *interfaces.AutoMappingResponse) {
+func (d *GormDatabase) createWriterClones(syncWriters []*interfaces.SyncWriter) (*string, error) {
 	tx := d.DB.Begin()
-	if tx.Error != nil {
-		log.Error("error beginning transaction: ", tx.Error)
-		return
+	for _, syncWriter := range syncWriters {
+		wc, _ := d.GetOneWriterCloneByArgs(api.Args{SourceUUID: &syncWriter.WriterUUID})
+		if wc == nil {
+			wc = &model.WriterClone{}
+			wc.UUID = nuuid.MakeTopicUUID(model.CommonNaming.StreamClone)
+			d.setWriterCloneModel(syncWriter, wc)
+			if err := tx.Create(&wc).Error; err != nil {
+				tx.Rollback()
+				return &syncWriter.PointUUID, err
+			}
+		} else {
+			d.setWriterCloneModel(syncWriter, wc)
+			if err := tx.Model(&wc).Where("uuid = ?", wc.UUID).Updates(&wc).Error; err != nil {
+				tx.Rollback()
+				return &syncWriter.PointUUID, err
+			}
+		}
 	}
-
-	if amRes == nil || !amRes.HasError {
-		tx.Commit()
-		return
-	}
-
-	errMsg := fmt.Sprintf("Flow Network Clone side: %s", amRes.Error)
-	amRes.Error = errMsg
-	d.updateCascadeConnectionError(tx, amRes)
 	tx.Commit()
+	return nil, nil
 }
 
 func (d *GormDatabase) updateCascadeConnectionError(tx *gorm.DB, amRes *interfaces.AutoMappingResponse) {
@@ -393,4 +419,12 @@ func (d *GormDatabase) setProducerModel(streamUUID string, point *model.Point, p
 	producerModel.EnableHistory = point.HistoryEnable
 	producerModel.HistoryType = point.HistoryType
 	producerModel.HistoryInterval = point.HistoryInterval
+}
+
+func (d *GormDatabase) setWriterCloneModel(syncWriter *interfaces.SyncWriter, writerClone *model.WriterClone) {
+	writerClone.WriterThingName = syncWriter.PointName
+	writerClone.WriterThingClass = "point"
+	writerClone.WriterThingUUID = syncWriter.PointUUID
+	writerClone.ProducerUUID = syncWriter.ProducerUUID
+	writerClone.SourceUUID = syncWriter.WriterUUID
 }

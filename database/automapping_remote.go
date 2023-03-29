@@ -68,6 +68,7 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 		}
 	}
 
+	var syncWriters []*interfaces.SyncWriter
 	for _, amDevice := range amNetwork.Devices {
 		amRes.DeviceUUID = amDevice.UUID
 		amRes.Level = interfaces.Device
@@ -172,6 +173,13 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 					return amRes
 				}
 			}
+
+			syncWriters = append(syncWriters, &interfaces.SyncWriter{
+				ProducerUUID: amPoint.ProducerUUID,
+				WriterUUID:   writer.UUID,
+				PointUUID:    amPoint.UUID,
+				PointName:    amPoint.Name,
+			})
 		}
 	}
 
@@ -186,7 +194,8 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 	d.PublishPointsList("")
 
 	return &interfaces.AutoMappingResponse{
-		HasError: false,
+		HasError:    false,
+		SyncWriters: syncWriters,
 	}
 }
 
