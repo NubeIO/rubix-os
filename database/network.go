@@ -47,7 +47,7 @@ func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, e
 	return networkModel, nil
 }
 
-func (d *GormDatabase) GetNetworkByArgs(args api.Args) (*model.Network, error) {
+func (d *GormDatabase) GetOneNetworkByArgs(args api.Args) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.First(&networkModel).Error; err != nil {
