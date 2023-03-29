@@ -32,7 +32,7 @@ func (d *GormDatabase) GetStream(uuid string, args api.Args) (*model.Stream, err
 	return streamModel, nil
 }
 
-func (d *GormDatabase) GetStreamByArgs(args api.Args) (*model.Stream, error) {
+func (d *GormDatabase) GetOneStreamByArgs(args api.Args) (*model.Stream, error) {
 	var streamModel *model.Stream
 	query := d.buildStreamQuery(args)
 	if err := query.First(&streamModel).Error; err != nil {
@@ -42,7 +42,7 @@ func (d *GormDatabase) GetStreamByArgs(args api.Args) (*model.Stream, error) {
 }
 
 func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
-	stream, _ := d.GetStreamByArgs(api.Args{Name: nils.NewString(body.Name)})
+	stream, _ := d.GetOneStreamByArgs(api.Args{Name: nils.NewString(body.Name)})
 	if stream != nil {
 		return stream, errors.New("an existing stream with this name exists")
 	}

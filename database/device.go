@@ -141,7 +141,7 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 			return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
 		}
 		streamName := getAutoMappedStreamName(fn.Name, networkModel.Name, deviceModel.Name)
-		stream, _ := d.GetStreamByArgs(api.Args{Name: nils.NewString(streamName)})
+		stream, _ := d.GetOneStreamByArgs(api.Args{Name: nils.NewString(streamName)})
 		if stream != nil {
 			_, _ = d.DeleteStream(stream.UUID)
 		}

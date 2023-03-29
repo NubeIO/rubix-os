@@ -20,6 +20,15 @@ func (s Level) String() string {
 	return "Point"
 }
 
+type AutoMappingResponse struct {
+	NetworkUUID string `json:"network_uuid"`
+	DeviceUUID  string `json:"device_uuid"`
+	PointUUID   string `json:"point_uuid"`
+	HasError    bool   `json:"has_error"`
+	Error       string `json:"error"`
+	Level       Level  `json:"level"`
+}
+
 type AutoMappingNetwork struct {
 	GlobalUUID      string                  `json:"global_uuid"`
 	UUID            string                  `json:"uuid"`
@@ -28,15 +37,6 @@ type AutoMappingNetwork struct {
 	MetaTags        []*model.NetworkMetaTag `json:"meta_tags"`
 	Devices         []*AutoMappingDevice    `json:"devices"`
 	FlowNetworkUUID string                  `json:"flown_network_uuid"`
-}
-
-type AutoMappingError struct {
-	NetworkUUID string `json:"network_uuid"`
-	DeviceUUID  string `json:"device_uuid"`
-	PointUUID   string `json:"point_uuid"`
-	HasError    bool   `json:"has_error"`
-	Error       string `json:"error"`
-	Level       Level  `json:"level"`
 }
 
 type AutoMappingDevice struct {

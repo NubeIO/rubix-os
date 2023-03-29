@@ -172,7 +172,7 @@ func (d *GormDatabase) createPointMappingStream(deviceName, networkName string, 
 	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 	streamModel.Name = fmt.Sprintf("%s_%s", networkName, deviceName)
 	log.Info("Try and make anew stream or select existing with name: ", streamModel.Name)
-	stream, err = d.GetStreamByArgs(api.Args{SourceUUID: nils.NewString(streamModel.Name)})
+	stream, err = d.GetOneStreamByArgs(api.Args{SourceUUID: nils.NewString(streamModel.Name)})
 	if stream != nil {
 		log.Warning("mapping.db.CreatePointMapping(): an existing stream with this name exists name:", stream.Name)
 		return stream, nil
@@ -194,7 +194,7 @@ func (d *GormDatabase) createPointMappingStreamClone(deviceName, networkName str
 	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
 	streamModel.Name = fmt.Sprintf("%s_%s", networkName, deviceName)
 	log.Info("Try and make anew stream or select existing with name: ", streamModel.Name)
-	stream, err = d.GetStreamByArgs(api.Args{SourceUUID: nils.NewString(streamModel.Name)})
+	stream, err = d.GetOneStreamByArgs(api.Args{SourceUUID: nils.NewString(streamModel.Name)})
 	if stream != nil {
 		log.Warning("mapping.db.CreatePointMapping(): an existing stream with this name exists name:", stream.Name)
 		return stream, nil

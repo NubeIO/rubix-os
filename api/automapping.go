@@ -6,7 +6,7 @@ import (
 )
 
 type AutoMappingDatabase interface {
-	CreateAutoMapping(body *interfaces.AutoMappingNetwork) *interfaces.AutoMappingError
+	CreateAutoMapping(body *interfaces.AutoMappingNetwork) *interfaces.AutoMappingResponse
 }
 
 type AutoMappingAPI struct {
