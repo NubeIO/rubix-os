@@ -303,10 +303,12 @@ func (d *GormDatabase) createPointAutoMappingStreams(flowNetwork *model.FlowNetw
 		if boolean.IsTrue(device.AutoMappingEnable) {
 			streamName := getAutoMappedStreamName(flowNetwork.Name, networkName, device.Name)
 			tempStreamName := getTempAutoMappedName(streamName)
-			q := tx.Model(&model.Stream{}).Where("name = ?", tempStreamName).Update("name", streamName)
-			if q.Error != nil {
+			if err := tx.Model(&model.Stream{}).
+				Where("name = ? AND created_from_auto_mapping IS TRUE", tempStreamName).
+				Update("name", streamName).
+				Error; err != nil {
 				tx.Rollback()
-				errMsg := fmt.Sprintf("update stream: %s", q.Error.Error())
+				errMsg := fmt.Sprintf("update stream: %s", err.Error())
 				amRes := interfaces.AutoMappingResponse{
 					NetworkUUID: device.NetworkUUID,
 					DeviceUUID:  device.UUID,
@@ -315,7 +317,7 @@ func (d *GormDatabase) createPointAutoMappingStreams(flowNetwork *model.FlowNetw
 					Level:       interfaces.Device,
 				}
 				d.updateCascadeConnectionError(d.DB, &amRes)
-				return nil, q.Error
+				return nil, err
 			}
 		}
 	}
@@ -352,10 +354,12 @@ func (d *GormDatabase) createPointsAutoMappingProducers(streamUUID string, point
 	// swap back the names
 	for _, point := range points {
 		if boolean.IsTrue(point.AutoMappingEnable) {
-			q := tx.Model(&model.Producer{}).Where("producer_thing_uuid = ?", point.UUID).Update("name", point.Name)
-			if q.Error != nil {
+			if err := tx.Model(&model.Producer{}).
+				Where("producer_thing_uuid = ? AND created_from_auto_mapping IS TRUE", point.UUID).
+				Update("name", point.Name).
+				Error; err != nil {
 				tx.Rollback()
-				return nil, q.Error
+				return nil, err
 			}
 		}
 	}
@@ -434,6 +438,7 @@ func (d *GormDatabase) setProducerModel(streamUUID string, point *model.Point, p
 	producerModel.EnableHistory = point.HistoryEnable
 	producerModel.HistoryType = point.HistoryType
 	producerModel.HistoryInterval = point.HistoryInterval
+	producerModel.CreatedFromAutoMapping = boolean.NewTrue()
 }
 
 func (d *GormDatabase) setWriterCloneModel(syncWriter *interfaces.SyncWriter, writerClone *model.WriterClone) {
@@ -442,4 +447,5 @@ func (d *GormDatabase) setWriterCloneModel(syncWriter *interfaces.SyncWriter, wr
 	writerClone.WriterThingUUID = syncWriter.PointUUID
 	writerClone.ProducerUUID = syncWriter.ProducerUUID
 	writerClone.SourceUUID = syncWriter.WriterUUID
+	writerClone.CreatedFromAutoMapping = boolean.NewTrue()
 }

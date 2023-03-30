@@ -258,7 +258,7 @@ func (d *GormDatabase) swapMapperNames(db *gorm.DB, amNetwork *interfaces.AutoMa
 			}
 
 			if err := db.Model(&model.Consumer{}).
-				Where("producer_thing_uuid = ?", amPoint.UUID).
+				Where("producer_thing_uuid = ? AND created_from_auto_mapping IS TRUE", amPoint.UUID).
 				Update("name", amPoint.Name).
 				Error; err != nil {
 				return &interfaces.AutoMappingResponse{
@@ -273,7 +273,7 @@ func (d *GormDatabase) swapMapperNames(db *gorm.DB, amNetwork *interfaces.AutoMa
 
 			writer := model.Writer{}
 			if err := db.Model(&writer).
-				Where("writer_thing_uuid = ?", pointModel.UUID).
+				Where("writer_thing_uuid = ? AND created_from_auto_mapping IS TRUE", pointModel.UUID).
 				Update("writer_thing_name", amPoint.Name).
 				Error; err != nil {
 				return &interfaces.AutoMappingResponse{
@@ -321,6 +321,7 @@ func (d *GormDatabase) setDeviceModel(networkUUID string, amDevice *interfaces.A
 func (d *GormDatabase) setPointModel(deviceUUID string, amPoint *interfaces.AutoMappingPoint, pointModel *model.Point) {
 	pointModel.Name = getTempAutoMappedName(amPoint.Name)
 	pointModel.DeviceUUID = deviceUUID
+	pointModel.EnableWriteable = boolean.NewTrue()
 	pointModel.CreatedFromAutoMapping = boolean.NewTrue()
 	pointModel.AutoMappingUUID = &amPoint.UUID
 }
@@ -333,6 +334,7 @@ func (d *GormDatabase) setConsumerModel(amPoint *interfaces.AutoMappingPoint, st
 	consumerModel.ProducerThingName = pointName
 	consumerModel.ProducerThingUUID = amPoint.UUID
 	consumerModel.ProducerThingClass = "point"
+	consumerModel.CreatedFromAutoMapping = boolean.NewTrue()
 }
 
 func (d *GormDatabase) setWriterModel(pointName, pointUUID, consumerUUID string, writer *model.Writer) {
@@ -340,4 +342,5 @@ func (d *GormDatabase) setWriterModel(pointName, pointUUID, consumerUUID string,
 	writer.WriterThingClass = "point"
 	writer.WriterThingUUID = pointUUID
 	writer.ConsumerUUID = consumerUUID
+	writer.CreatedFromAutoMapping = boolean.NewTrue()
 }
