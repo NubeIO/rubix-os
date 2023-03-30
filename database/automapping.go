@@ -15,6 +15,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"sync"
 )
 
 func (d *GormDatabase) CreateNetworkAutoMappings(network *model.Network, level interfaces.Level) error {
@@ -150,57 +151,71 @@ func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network
 }
 
 func (d *GormDatabase) updateDevicesConnectionsInCloneSide(cli *client.FlowClient, network *model.Network) {
+	var wg sync.WaitGroup
+	tx := d.DB.Begin()
 	for _, device := range network.Devices {
-		dev, connectionErr, _ := cli.GetDeviceV2(*device.AutoMappingUUID)
-		if dev == nil && connectionErr == nil {
-			amRes := interfaces.AutoMappingResponse{
-				NetworkUUID: network.UUID,
-				DeviceUUID:  device.UUID,
-				HasError:    true,
-				Error:       "Its Device creator has been already deleted, manually delete it",
-				Level:       interfaces.Device,
-			}
-			d.updateCascadeConnectionError(d.DB, &amRes)
-		} else {
-			amRes := interfaces.AutoMappingResponse{
-				NetworkUUID: network.UUID,
-				DeviceUUID:  device.UUID,
-				HasError:    false,
-				Error:       nstring.NotAvailable,
-				Level:       interfaces.Device,
-			}
-			d.updateCascadeConnectionError(d.DB, &amRes)
+		wg.Add(1)
+		go func(device *model.Device, tx *gorm.DB) {
+			defer wg.Done()
+			dev, connectionErr, _ := cli.GetDeviceV2(*device.AutoMappingUUID)
+			if dev == nil && connectionErr == nil {
+				amRes := interfaces.AutoMappingResponse{
+					NetworkUUID: network.UUID,
+					DeviceUUID:  device.UUID,
+					HasError:    true,
+					Error:       "Its Device creator has been already deleted, manually delete it",
+					Level:       interfaces.Device,
+				}
+				d.updateCascadeConnectionError(tx, &amRes)
+			} else {
+				amRes := interfaces.AutoMappingResponse{
+					NetworkUUID: network.UUID,
+					DeviceUUID:  device.UUID,
+					HasError:    false,
+					Error:       nstring.NotAvailable,
+					Level:       interfaces.Device,
+				}
+				d.updateCascadeConnectionError(tx, &amRes)
 
-			d.updatePointsConnectionsInCloneSide(cli, network, device)
-		}
+				d.updatePointsConnectionsInCloneSide(tx, cli, network, device)
+			}
+		}(device, tx)
+		wg.Wait()
 	}
+	tx.Commit()
 }
 
-func (d *GormDatabase) updatePointsConnectionsInCloneSide(cli *client.FlowClient, network *model.Network, device *model.Device) {
+func (d *GormDatabase) updatePointsConnectionsInCloneSide(tx *gorm.DB, cli *client.FlowClient, network *model.Network, device *model.Device) {
+	var wg sync.WaitGroup
 	for _, point := range device.Points {
-		pnt, connectionErr, _ := cli.GetPointV2(*point.AutoMappingUUID)
-		if pnt == nil && connectionErr == nil {
-			amRes := interfaces.AutoMappingResponse{
-				NetworkUUID: network.UUID,
-				DeviceUUID:  device.UUID,
-				PointUUID:   point.UUID,
-				HasError:    true,
-				Error:       "Its Point creator has been already deleted, manually delete it",
-				Level:       interfaces.Point,
+		wg.Add(1)
+		go func(point *model.Point, tx *gorm.DB) {
+			defer wg.Done()
+			pnt, connectionErr, _ := cli.GetPointV2(*point.AutoMappingUUID)
+			if pnt == nil && connectionErr == nil {
+				amRes := interfaces.AutoMappingResponse{
+					NetworkUUID: network.UUID,
+					DeviceUUID:  device.UUID,
+					PointUUID:   point.UUID,
+					HasError:    true,
+					Error:       "Its Point creator has been already deleted, manually delete it",
+					Level:       interfaces.Point,
+				}
+				d.updateCascadeConnectionError(tx, &amRes)
+			} else {
+				amRes := interfaces.AutoMappingResponse{
+					NetworkUUID: network.UUID,
+					DeviceUUID:  device.UUID,
+					PointUUID:   point.UUID,
+					HasError:    false,
+					Error:       nstring.NotAvailable,
+					Level:       interfaces.Point,
+				}
+				d.updateCascadeConnectionError(tx, &amRes)
 			}
-			d.updateCascadeConnectionError(d.DB, &amRes)
-		} else {
-			amRes := interfaces.AutoMappingResponse{
-				NetworkUUID: network.UUID,
-				DeviceUUID:  device.UUID,
-				PointUUID:   point.UUID,
-				HasError:    false,
-				Error:       nstring.NotAvailable,
-				Level:       interfaces.Point,
-			}
-			d.updateCascadeConnectionError(d.DB, &amRes)
-		}
+		}(point, tx)
 	}
+	wg.Wait()
 }
 
 func (d *GormDatabase) createPointAutoMappingStreams(flowNetwork *model.FlowNetwork, networkName string, devices []*model.Device) (map[string]string, error) {
