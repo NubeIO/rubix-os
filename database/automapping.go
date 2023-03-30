@@ -370,7 +370,8 @@ func (d *GormDatabase) createPointsAutoMappingProducers(streamUUID string, point
 func (d *GormDatabase) createWriterClones(syncWriters []*interfaces.SyncWriter) (*string, error) {
 	tx := d.DB.Begin()
 	for _, syncWriter := range syncWriters {
-		wc, _ := d.GetOneWriterCloneByArgs(api.Args{SourceUUID: &syncWriter.WriterUUID})
+		// it will restrict duplicate creation of writer_clone
+		wc, _ := d.GetOneWriterCloneByArgs(api.Args{ProducerUUID: &syncWriter.ProducerUUID, CreatedFromAutoMapping: boolean.NewTrue()})
 		if wc == nil {
 			wc = &model.WriterClone{}
 			wc.UUID = nuuid.MakeTopicUUID(model.CommonNaming.StreamClone)
@@ -444,6 +445,7 @@ func (d *GormDatabase) setProducerModel(streamUUID string, point *model.Point, p
 func (d *GormDatabase) setWriterCloneModel(syncWriter *interfaces.SyncWriter, writerClone *model.WriterClone) {
 	writerClone.WriterThingName = syncWriter.PointName
 	writerClone.WriterThingClass = "point"
+	writerClone.FlowFrameworkUUID = syncWriter.FlowFrameworkUUID
 	writerClone.WriterThingUUID = syncWriter.PointUUID
 	writerClone.ProducerUUID = syncWriter.ProducerUUID
 	writerClone.SourceUUID = syncWriter.WriterUUID

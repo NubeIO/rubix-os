@@ -334,6 +334,9 @@ func (d *GormDatabase) buildWriterCloneQuery(args api.Args) *gorm.DB {
 	if args.SourceUUID != nil {
 		query = query.Where("source_uuid = ?", *args.SourceUUID)
 	}
+	if args.CreatedFromAutoMapping != nil {
+		query = query.Where("created_from_auto_mapping = ?", *args.CreatedFromAutoMapping)
+	}
 	return query
 }
 

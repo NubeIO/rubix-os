@@ -175,10 +175,11 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 			}
 
 			syncWriters = append(syncWriters, &interfaces.SyncWriter{
-				ProducerUUID: amPoint.ProducerUUID,
-				WriterUUID:   writer.UUID,
-				PointUUID:    amPoint.UUID,
-				PointName:    amPoint.Name,
+				ProducerUUID:      amPoint.ProducerUUID,
+				WriterUUID:        writer.UUID,
+				FlowFrameworkUUID: fnc.SourceUUID,
+				PointUUID:         amPoint.UUID,
+				PointName:         amPoint.Name,
 			})
 		}
 	}

@@ -31,10 +31,11 @@ type AutoMappingResponse struct {
 }
 
 type SyncWriter struct {
-	ProducerUUID string
-	WriterUUID   string
-	PointUUID    string
-	PointName    string
+	ProducerUUID      string
+	WriterUUID        string
+	FlowFrameworkUUID string
+	PointUUID         string
+	PointName         string
 }
 
 type AutoMappingNetwork struct {
