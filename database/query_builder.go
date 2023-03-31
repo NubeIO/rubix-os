@@ -114,8 +114,11 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
 	}
-	if args.AutoMappingUUID != nil {
-		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
+	if args.AutoMappingNetworkUUID != nil {
+		query = query.Where("auto_mapping_network_uuid = ?", *args.AutoMappingNetworkUUID)
+	}
+	if args.AutoMappingDeviceUUID != nil {
+		query = query.Where("auto_mapping_device_uuid = ?", *args.AutoMappingDeviceUUID)
 	}
 	return query
 }

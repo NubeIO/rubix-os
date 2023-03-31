@@ -101,6 +101,7 @@ func (d *GormDatabase) CreateNetworkAutoMappings(network *model.Network, level i
 			amRes.Error = errMsg
 			d.updateCascadeConnectionError(d.DB, &amRes)
 		} else {
+			d.clearConnectionError(amNetwork)
 			pointUUID, err := d.createWriterClones(amRes.SyncWriters)
 			if pointUUID != nil && err != nil {
 				amRes.PointUUID = *pointUUID
@@ -115,13 +116,9 @@ func (d *GormDatabase) CreateNetworkAutoMappings(network *model.Network, level i
 func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network) error {
 	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: &network.AutoMappingFlowNetworkName})
 	if err != nil {
-		amRes := interfaces.AutoMappingResponse{
-			NetworkUUID: network.UUID,
-			HasError:    true,
-			Error:       err.Error(),
-			Level:       interfaces.Network,
-		}
-		d.updateCascadeConnectionError(d.DB, &amRes)
+		network.Connection = connection.Broken.String()
+		network.ConnectionMessage = nstring.New(err.Error())
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
 		return err
 	}
 
@@ -129,21 +126,13 @@ func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network
 
 	net, connectionErr, _ := cli.GetNetworkV2(*network.AutoMappingUUID)
 	if net == nil && connectionErr == nil {
-		amRes := interfaces.AutoMappingResponse{
-			NetworkUUID: network.UUID,
-			HasError:    true,
-			Error:       "Its Network creator has been already deleted, manually delete it",
-			Level:       interfaces.Network,
-		}
-		d.updateCascadeConnectionError(d.DB, &amRes)
+		network.Connection = connection.Broken.String()
+		network.ConnectionMessage = nstring.New("Its Network creator has been already deleted, manually delete it")
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
 	} else {
-		amRes := interfaces.AutoMappingResponse{
-			NetworkUUID: network.UUID,
-			HasError:    false,
-			Error:       nstring.NotAvailable,
-			Level:       interfaces.Network,
-		}
-		d.updateCascadeConnectionError(d.DB, &amRes)
+		network.Connection = connection.Connected.String()
+		network.ConnectionMessage = nstring.New(nstring.NotAvailable)
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
 	}
 
 	d.updateDevicesConnectionsInCloneSide(cli, network)
@@ -159,28 +148,29 @@ func (d *GormDatabase) updateDevicesConnectionsInCloneSide(cli *client.FlowClien
 			defer wg.Done()
 			dev, connectionErr, _ := cli.GetDeviceV2(*device.AutoMappingUUID)
 			if dev == nil && connectionErr == nil {
-				amRes := interfaces.AutoMappingResponse{
-					NetworkUUID: network.UUID,
-					DeviceUUID:  device.UUID,
-					HasError:    true,
-					Error:       "Its Device creator has been already deleted, manually delete it",
-					Level:       interfaces.Device,
-				}
-				d.updateCascadeConnectionError(tx, &amRes)
+				device.Connection = connection.Broken.String()
+				device.ConnectionMessage = nstring.New("Its Device creator has been already deleted, manually delete it")
+				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
 			} else {
-				amRes := interfaces.AutoMappingResponse{
-					NetworkUUID: network.UUID,
-					DeviceUUID:  device.UUID,
-					HasError:    false,
-					Error:       nstring.NotAvailable,
-					Level:       interfaces.Device,
-				}
-				d.updateCascadeConnectionError(tx, &amRes)
+				device.Connection = connection.Connected.String()
+				device.ConnectionMessage = nstring.New(nstring.NotAvailable)
+				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
 
 				d.updatePointsConnectionsInCloneSide(tx, cli, network, device)
 			}
 		}(device, tx)
 		wg.Wait()
+	}
+
+	// update parent with its child error
+	var networkModel []*model.Network
+	var deviceModel []*model.Device
+	tx.Where("uuid = ? AND connection = ?", network.UUID, connection.Connected.String()).Find(&networkModel)
+	tx.Where("network_uuid = ? AND connection = ?", network.UUID, connection.Broken.String()).Find(&deviceModel)
+	if len(networkModel) > 0 && len(deviceModel) > 0 {
+		networkModel[0].Connection = connection.Broken.String()
+		networkModel[0].ConnectionMessage = deviceModel[0].ConnectionMessage
+		_ = UpdateNetworkConnectionErrorsTransaction(tx, network.UUID, networkModel[0])
 	}
 	tx.Commit()
 }
@@ -193,29 +183,28 @@ func (d *GormDatabase) updatePointsConnectionsInCloneSide(tx *gorm.DB, cli *clie
 			defer wg.Done()
 			pnt, connectionErr, _ := cli.GetPointV2(*point.AutoMappingUUID)
 			if pnt == nil && connectionErr == nil {
-				amRes := interfaces.AutoMappingResponse{
-					NetworkUUID: network.UUID,
-					DeviceUUID:  device.UUID,
-					PointUUID:   point.UUID,
-					HasError:    true,
-					Error:       "Its Point creator has been already deleted, manually delete it",
-					Level:       interfaces.Point,
-				}
-				d.updateCascadeConnectionError(tx, &amRes)
+				point.Connection = connection.Broken.String()
+				point.ConnectionMessage = nstring.New("Its Point creator has been already deleted, manually delete it")
+				_ = UpdatePointConnectionErrorsTransaction(tx, point.UUID, point)
 			} else {
-				amRes := interfaces.AutoMappingResponse{
-					NetworkUUID: network.UUID,
-					DeviceUUID:  device.UUID,
-					PointUUID:   point.UUID,
-					HasError:    false,
-					Error:       nstring.NotAvailable,
-					Level:       interfaces.Point,
-				}
-				d.updateCascadeConnectionError(tx, &amRes)
+				point.Connection = connection.Connected.String()
+				point.ConnectionMessage = nstring.New(nstring.NotAvailable)
+				_ = UpdatePointConnectionErrorsTransaction(tx, point.UUID, point)
 			}
 		}(point, tx)
 	}
 	wg.Wait()
+
+	// update parent with its child error
+	var deviceModel []*model.Device
+	var pointModel []*model.Point
+	tx.Where("uuid = ? AND connection = ?", device.UUID, connection.Connected.String()).Find(&deviceModel)
+	tx.Where("device_uuid = ? AND connection = ?", device.UUID, connection.Broken.String()).Find(&pointModel)
+	if len(deviceModel) > 0 && len(pointModel) > 0 {
+		deviceModel[0].Connection = connection.Broken.String()
+		deviceModel[0].ConnectionMessage = pointModel[0].ConnectionMessage
+		_ = UpdateDeviceConnectionErrorsTransaction(tx, network.UUID, deviceModel[0])
+	}
 }
 
 func (d *GormDatabase) createPointAutoMappingStreams(flowNetwork *model.FlowNetwork, networkName string, devices []*model.Device) (map[string]string, error) {
@@ -240,7 +229,7 @@ func (d *GormDatabase) createPointAutoMappingStreams(flowNetwork *model.FlowNetw
 					return nil, errors.New(errMsg)
 				}
 			}
-			stream, _ = d.GetOneStreamByArgs(api.Args{AutoMappingUUID: nstring.New(device.UUID), WithFlowNetworks: true})
+			stream, _ = d.GetOneStreamByArgs(api.Args{AutoMappingDeviceUUID: nstring.New(device.UUID), WithFlowNetworks: true})
 			if stream == nil {
 				stream = &model.Stream{}
 				stream.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Stream)
@@ -392,6 +381,31 @@ func (d *GormDatabase) createWriterClones(syncWriters []*interfaces.SyncWriter) 
 	return nil, nil
 }
 
+func (d *GormDatabase) clearConnectionError(amNetwork *interfaces.AutoMappingNetwork) {
+	tx := d.DB.Begin()
+	networkModel := model.Network{
+		Connection:        connection.Connected.String(),
+		ConnectionMessage: nstring.New(nstring.NotAvailable),
+	}
+	deviceModel := model.Device{
+		Connection:        connection.Connected.String(),
+		ConnectionMessage: nstring.New(nstring.NotAvailable),
+	}
+	pointModel := model.Point{
+		Connection:        connection.Connected.String(),
+		ConnectionMessage: nstring.New(nstring.NotAvailable),
+	}
+
+	_ = UpdateNetworkConnectionErrorsTransaction(tx, amNetwork.UUID, &networkModel)
+	for _, amDevice := range amNetwork.Devices {
+		_ = UpdateDeviceConnectionErrorsTransaction(tx, amDevice.UUID, &deviceModel)
+		for _, amPoint := range amDevice.Points {
+			_ = UpdatePointConnectionErrorsTransaction(tx, amPoint.UUID, &pointModel)
+		}
+	}
+	tx.Commit()
+}
+
 func (d *GormDatabase) updateCascadeConnectionError(tx *gorm.DB, amRes *interfaces.AutoMappingResponse) {
 	networkModel := model.Network{}
 	deviceModel := model.Device{}
@@ -425,7 +439,8 @@ func (d *GormDatabase) setStreamModel(flowNetwork *model.FlowNetwork, device *mo
 	streamModel.Name = getTempAutoMappedName(streamName)
 	streamModel.Enable = boolean.NewTrue()
 	streamModel.CreatedFromAutoMapping = boolean.NewTrue()
-	streamModel.AutoMappingUUID = nstring.New(device.UUID)
+	streamModel.AutoMappingNetworkUUID = nstring.New(device.NetworkUUID)
+	streamModel.AutoMappingDeviceUUID = nstring.New(device.UUID)
 }
 
 func (d *GormDatabase) setProducerModel(streamUUID string, point *model.Point, producerModel *model.Producer) {

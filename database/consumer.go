@@ -10,7 +10,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"sync"
 )
 
 type Consumers struct {
@@ -78,21 +77,7 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 }
 
 func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
-	consumerModel, err := d.GetConsumer(uuid, api.Args{WithWriters: true})
-	if err != nil {
-		return false, err
-	}
-	var wg sync.WaitGroup
-	for _, writer := range consumerModel.Writers {
-		wg.Add(1)
-		writer := writer
-		go func() {
-			defer wg.Done()
-			_, _ = d.DeleteWriter(writer.UUID)
-		}()
-	}
-	wg.Wait()
-	query := d.DB.Delete(&consumerModel)
+	query := d.DB.Where("uuid = ?", uuid).Delete(&model.Consumer{})
 	return d.deleteResponseBuilder(query)
 }
 

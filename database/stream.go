@@ -32,6 +32,15 @@ func (d *GormDatabase) GetStream(uuid string, args api.Args) (*model.Stream, err
 	return streamModel, nil
 }
 
+func (d *GormDatabase) GetStreamByArgs(args api.Args) ([]*model.Stream, error) {
+	var streamsModel []*model.Stream
+	query := d.buildStreamQuery(args)
+	if err := query.Find(&streamsModel).Error; err != nil {
+		return nil, err
+	}
+	return streamsModel, nil
+}
+
 func (d *GormDatabase) GetOneStreamByArgs(args api.Args) (*model.Stream, error) {
 	var streamModel *model.Stream
 	query := d.buildStreamQuery(args)

@@ -16,7 +16,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strings"
-	"sync"
 )
 
 func marshallCacheNetworks(networks []*model.Network, args api.Args) {
@@ -164,29 +163,43 @@ func (d *GormDatabase) UpdateNetworkConnectionErrors(uuid string, network *model
 func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
 	networkModel, err := d.GetNetwork(uuid, api.Args{WithDevices: true})
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to get network: %w", err)
 	}
+
 	if boolean.IsTrue(networkModel.AutoMappingEnable) {
+		var cli *client.FlowClient
+
 		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(networkModel.AutoMappingFlowNetworkName)})
 		if err != nil {
 			log.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
-			return false, err
+		} else {
+			cli = client.NewFlowClientCliFromFN(fn)
 		}
-		cli := client.NewFlowClientCliFromFN(fn)
-		var wg sync.WaitGroup
-		for _, device := range networkModel.Devices {
-			wg.Add(1)
-			go func(device *model.Device) {
-				defer wg.Done()
-				networkName := getAutoMappedNetworkName(fn.Name, networkModel.Name)
-				url := urls.SingularUrl(urls.NetworkNameUrl, networkName)
-				_ = cli.DeleteQuery(url)
-				_, _ = d.DeleteDevice(device.UUID)
-			}(device)
+
+		if cli != nil {
+			aType := api.ArgsType
+			url := urls.SingularUrlByArg(urls.NetworksUrl, aType.AutoMappingUUID, networkModel.UUID)
+			_ = cli.DeleteQuery(url)
+
+			streams, _ := d.GetStreamByArgs(api.Args{AutoMappingNetworkUUID: &networkModel.UUID})
+			if streams != nil {
+				for _, stream := range streams { // todo: create bulk stream delete API
+					url := urls.SingularUrlByArg(urls.StreamCloneUrl, aType.SourceUUID, stream.UUID)
+					_ = cli.DeleteQuery(url)
+				}
+				d.DB.Delete(&streams)
+			}
 		}
-		wg.Wait()
 	}
+
+	if boolean.IsTrue(networkModel.CreatedFromAutoMapping) {
+		d.DB.
+			Where("auto_mapping_network_uuid = ? AND created_from_auto_mapping IS TRUE", networkModel.UUID).
+			Delete(&model.StreamClone{})
+	}
+
 	query := d.DB.Delete(&networkModel)
+	go d.PublishPointsList("")
 	return d.deleteResponseBuilder(query)
 }
 

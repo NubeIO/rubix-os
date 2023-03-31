@@ -9,12 +9,10 @@ import (
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
-	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strings"
-	"sync"
 )
 
 func (d *GormDatabase) GetDevices(args api.Args) ([]*model.Device, error) {
@@ -118,39 +116,39 @@ func (d *GormDatabase) UpdateDeviceConnectionErrorsByName(name string, device *m
 func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 	deviceModel, err := d.GetDevice(uuid, api.Args{WithPoints: true})
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("failed to get device: %w", err)
 	}
-	var wg sync.WaitGroup
-	for _, point := range deviceModel.Points {
-		wg.Add(1)
-		go func(point *model.Point) {
-			defer wg.Done()
-			_, _ = d.DeletePoint(point.UUID, false)
-		}(point)
-	}
-	wg.Wait()
-	go d.PublishPointsList("")
+
 	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
-		networkModel, err := d.GetNetworkByDeviceUUID(deviceModel.UUID, api.Args{})
-		if err != nil {
-			return false, err
-		}
+		var cli *client.FlowClient
+		networkModel, _ := d.GetNetworkByDeviceUUID(deviceModel.UUID, api.Args{})
+
 		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: &networkModel.AutoMappingFlowNetworkName})
 		if err != nil {
 			log.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
-			return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
+		} else {
+			cli = client.NewFlowClientCliFromFN(fn)
 		}
-		streamName := getAutoMappedStreamName(fn.Name, networkModel.Name, deviceModel.Name)
-		stream, _ := d.GetOneStreamByArgs(api.Args{Name: nils.NewString(streamName)})
-		if stream != nil {
-			_, _ = d.DeleteStream(stream.UUID)
+
+		if cli != nil {
+			stream, _ := d.GetOneStreamByArgs(api.Args{AutoMappingDeviceUUID: &deviceModel.UUID})
+			if stream != nil { // todo: maybe replace it by d.DeleteStream(<uuid>)
+				aType := api.ArgsType
+				url := urls.SingularUrlByArg(urls.StreamCloneUrl, aType.SourceUUID, stream.UUID)
+				_ = cli.DeleteQuery(url)
+				d.DB.Delete(&stream)
+			}
 		}
-		cli := client.NewFlowClientCliFromFN(fn)
-		networkName := getAutoMappedNetworkName(fn.Name, networkModel.Name)
-		url := urls.SingularUrl(urls.DeviceNameUrl, fmt.Sprintf("%s/%s", networkName, deviceModel.Name))
-		_ = cli.DeleteQuery(url)
 	}
+
+	if boolean.IsTrue(deviceModel.CreatedFromAutoMapping) {
+		d.DB.
+			Where("auto_mapping_device_uuid = ? AND created_from_auto_mapping IS TRUE", deviceModel.UUID).
+			Delete(&model.StreamClone{})
+	}
+
 	query := d.DB.Delete(&deviceModel)
+	go d.PublishPointsList("")
 	return d.deleteResponseBuilder(query)
 }
 

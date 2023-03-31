@@ -70,6 +70,8 @@ type Args struct {
 	AutoMappingEnable      *bool
 	MetaTags               *string
 	CreatedFromAutoMapping *bool
+	AutoMappingNetworkUUID *string
+	AutoMappingDeviceUUID  *string
 }
 
 var ArgsType = struct {
