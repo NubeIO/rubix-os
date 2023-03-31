@@ -3,13 +3,8 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/urls"
-	"github.com/NubeIO/flow-framework/utils/nstring"
-	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/NubeIO/flow-framework/api"
@@ -390,61 +385,11 @@ func (d *GormDatabase) UpdatePointConnectionErrorsByName(name string, point *mod
 }
 
 func (d *GormDatabase) DeletePoint(uuid string, publishPointList bool) (bool, error) {
-	point, err := d.GetPoint(uuid, api.Args{})
-	if err != nil {
-		return false, err
-	}
-	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &point.UUID})
-	if producers != nil {
-		var wg sync.WaitGroup
-		for _, producer := range producers {
-			wg.Add(1)
-			producer := producer
-			go func() {
-				defer wg.Done()
-				_, _ = d.DeleteProducer(producer.UUID)
-			}()
-		}
-		wg.Wait()
-	}
-	writers, _ := d.GetWriters(api.Args{WriterThingUUID: &point.UUID})
-	if writers != nil {
-		var wg sync.WaitGroup
-		for _, writer := range writers {
-			wg.Add(1)
-			writer := writer
-			go func() {
-				defer wg.Done()
-				_, _ = d.DeleteWriter(writer.UUID)
-			}()
-		}
-		wg.Wait()
-	}
-	query := d.DB.Delete(&point)
-	if query.Error != nil {
-		return false, query.Error
-	}
-	r := query.RowsAffected
+	query := d.DB.Where("uuid = ?", uuid).Delete(&model.Point{})
 	if publishPointList {
 		go d.PublishPointsList("")
 	}
-	deviceModel, _ := d.GetDevice(point.DeviceUUID, api.Args{})
-	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
-		networkModel, _ := d.GetNetwork(deviceModel.NetworkUUID, api.Args{})
-		if boolean.IsTrue(networkModel.AutoMappingEnable) {
-			fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(networkModel.AutoMappingFlowNetworkName)})
-			if err != nil {
-				log.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
-				return false, fmt.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
-			}
-			cli := client.NewFlowClientCliFromFN(fn)
-			networkName := getAutoMappedNetworkName(fn.Name, networkModel.Name)
-			url := urls.SingularUrl(urls.PointNameUrl, fmt.Sprintf("%s/%s/%s", networkName, deviceModel.Name,
-				point.Name))
-			_ = cli.DeleteQuery(url)
-		}
-	}
-	return r != 0, nil
+	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter) (*model.Point, error) {

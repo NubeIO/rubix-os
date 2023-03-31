@@ -1,16 +1,10 @@
 package database
 
 import (
-	"errors"
-	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/urls"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -114,65 +108,26 @@ func (d *GormDatabase) UpdateDeviceConnectionErrorsByName(name string, device *m
 }
 
 func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
-	deviceModel, err := d.GetDevice(uuid, api.Args{WithPoints: true})
-	if err != nil {
-		return false, fmt.Errorf("failed to get device: %w", err)
-	}
-
-	if boolean.IsTrue(deviceModel.AutoMappingEnable) {
-		var cli *client.FlowClient
-		networkModel, _ := d.GetNetworkByDeviceUUID(deviceModel.UUID, api.Args{})
-
-		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: &networkModel.AutoMappingFlowNetworkName})
-		if err != nil {
-			log.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
-		} else {
-			cli = client.NewFlowClientCliFromFN(fn)
-		}
-
-		if cli != nil {
-			stream, _ := d.GetOneStreamByArgs(api.Args{AutoMappingDeviceUUID: &deviceModel.UUID})
-			if stream != nil { // todo: maybe replace it by d.DeleteStream(<uuid>)
-				aType := api.ArgsType
-				url := urls.SingularUrlByArg(urls.StreamCloneUrl, aType.SourceUUID, stream.UUID)
-				_ = cli.DeleteQuery(url)
-				d.DB.Delete(&stream)
-			}
-		}
-	}
-
-	if boolean.IsTrue(deviceModel.CreatedFromAutoMapping) {
-		d.DB.
-			Where("auto_mapping_device_uuid = ? AND created_from_auto_mapping IS TRUE", deviceModel.UUID).
-			Delete(&model.StreamClone{})
-	}
-
-	query := d.DB.Delete(&deviceModel)
+	query := d.DB.Where("uuid = ?", uuid).Model(&model.Device{})
 	go d.PublishPointsList("")
 	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) DeleteOneDeviceByArgs(args api.Args) (bool, error) {
 	var deviceModel *model.Device
-	query := d.buildDeviceQuery(args)
-	if err := query.First(&deviceModel).Error; err != nil {
-		return false, err
-	}
-	query = query.Delete(&deviceModel)
+	query := d.buildDeviceQuery(args).Delete(&deviceModel)
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncDevicePoints(uuid string, network *model.Network, level interfaces.Level, args api.Args) error {
-	if network == nil {
-		network, _ = d.GetNetworkByDeviceUUID(uuid, api.Args{})
-		if network == nil {
-			return errors.New("network doesn't exist")
-		}
-		device, _ := d.GetDevice(uuid, args)
-		network.Devices = append(network.Devices, device)
+func (d *GormDatabase) SyncDevicePoints(uuid string, args api.Args) error {
+	device, err := d.GetDevice(uuid, args)
+	if err != nil {
+		return err
 	}
-	if network == nil {
-		return errors.New("network doesn't exist")
-	}
-	return d.CreateNetworkAutoMappings(network, level)
+	args.WithDevices = true
+	args.WithPoints = true
+	network, _ := d.GetNetwork(device.NetworkUUID, args)
+	networks := make([]*model.Network, 0)
+	networks = append(networks, network)
+	return d.CreateNetworkAutoMappings(network.AutoMappingFlowNetworkName, networks, interfaces.Point)
 }

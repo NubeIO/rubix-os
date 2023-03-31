@@ -1,7 +1,6 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 )
@@ -23,7 +22,7 @@ type DeviceDatabase interface {
 
 	CreateDeviceMetaTags(deviceUUID string, deviceMetaTags []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error)
 
-	SyncDevicePoints(deviceUUID string, network *model.Network, level interfaces.Level, args Args) error
+	SyncDevicePoints(deviceUUID string, args Args) error
 }
 type DeviceAPI struct {
 	DB DeviceDatabase
@@ -104,6 +103,6 @@ func (a *DeviceAPI) SyncDevicePoints(ctx *gin.Context) {
 	deviceUUID := resolveID(ctx)
 	args := buildDeviceArgs(ctx)
 	args.WithPoints = true
-	err := a.DB.SyncDevicePoints(deviceUUID, nil, interfaces.Point, args)
+	err := a.DB.SyncDevicePoints(deviceUUID, args)
 	ResponseHandler(model.Message{Message: "synced successfully"}, err, ctx)
 }

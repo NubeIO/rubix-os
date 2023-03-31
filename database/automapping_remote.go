@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwork) *interfaces.AutoMappingResponse {
+func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) *interfaces.AutoMappingResponse {
 	tx := d.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -21,13 +21,71 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 		}
 	}()
 
+	// level => network (it has all networks)
+	//    doesn't exist:
+	//       - delete stream_clones (it does cascade delete of consumers and writers)
+	//       - delete writer_clones on fn side
+	//       - delete networks
+	//       - delete devices
+	//       - delete points
+	//    exists:
+	//       - stream_clones.enable = <boolean>
+	//       - consumers.enable = <boolean>
+	//       - network.enable = <boolean>
+	//       - device.enable = <boolean>
+	//       - point.enable = <boolean>
+	//
+	// level => device (it has all devices)
+	//    doesn't exist:
+	//       - delete stream_clones (it does cascade delete of consumers and writers)
+	//       - delete streams writers on other side
+	//       - delete devices
+	//       - delete points
+	//    exists:
+	//       - stream_clones.enable = <boolean>
+	//       - consumers.enable = <boolean>
+	//       - device.enable = <boolean>
+	//       - point.enable = <boolean>
+	//
+	// level => point (it has all points)
+	//    doesn't exist:
+	//       - delete points
+	//       - delete consumers (it does cascade delete of writer)
+	//       - delete writer_clones on fn side
+	//    exists:
+	//       - stream_clones.enable = <boolean>
+	//       - consumers.enable = <boolean>
+	//       - device.enable = <boolean>
+	//       - point.enable = <boolean>
+
+	var syncWriters []*interfaces.SyncWriter
+	for _, amNetwork := range autoMapping.Networks {
+		amRes := d.createNetworkAutoMapping(tx, amNetwork, autoMapping.FlowNetworkUUID, autoMapping.GlobalUUID)
+		if amRes.HasError {
+			tx.Rollback()
+			return amRes
+		}
+		syncWriters = append(syncWriters, amRes.SyncWriters...)
+	}
+
+	tx.Commit()
+
+	d.PublishPointsList("")
+
+	return &interfaces.AutoMappingResponse{
+		HasError:    false,
+		SyncWriters: syncWriters,
+	}
+}
+
+func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfaces.AutoMappingNetwork, fnUUID, globalUUID string) *interfaces.AutoMappingResponse {
 	amRes := &interfaces.AutoMappingResponse{
 		NetworkUUID: amNetwork.UUID,
 		HasError:    true,
 		Level:       interfaces.Network,
 	}
 
-	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{SourceUUID: nstring.New(amNetwork.FlowNetworkUUID)})
+	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{SourceUUID: nstring.New(fnUUID)})
 	if err != nil {
 		amRes.Error = err.Error()
 		return amRes
@@ -37,7 +95,7 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 
 	network, err := d.GetNetworkByName(networkName, api.Args{})
 	if network != nil {
-		if network.GlobalUUID != amNetwork.GlobalUUID {
+		if network.GlobalUUID != globalUUID {
 			amRes.Error = fmt.Sprintf("network.name %s already exists in fnc side with different global_uuid", network.Name)
 			return amRes
 		} else if boolean.IsFalse(network.CreatedFromAutoMapping) {
@@ -46,23 +104,21 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 		}
 	}
 
-	network, _ = d.GetOneNetworkByArgs(api.Args{AutoMappingUUID: nstring.New(amNetwork.UUID), GlobalUUID: nstring.New(amNetwork.GlobalUUID)})
+	network, _ = d.GetOneNetworkByArgs(api.Args{AutoMappingUUID: nstring.New(amNetwork.UUID), GlobalUUID: nstring.New(globalUUID)})
 	if network == nil {
 		network = &model.Network{}
 		network.Name = getTempAutoMappedName(networkName)
-		d.setNetworkModel(fnc, amNetwork, network)
+		d.setNetworkModel(fnc, amNetwork, network, globalUUID)
 		network, err = d.CreateNetworkTransaction(tx, network) //todo meta-tags
 		if err != nil {
-			tx.Rollback()
 			amRes.Error = err.Error()
 			return amRes
 		}
 	} else {
 		network.Name = getTempAutoMappedName(networkName)
-		d.setNetworkModel(fnc, amNetwork, network)
+		d.setNetworkModel(fnc, amNetwork, network, globalUUID)
 		network, err = d.UpdateNetworkTransaction(tx, network.UUID, network) //todo meta-tags
 		if err != nil {
-			tx.Rollback()
 			amRes.Error = err.Error()
 			return amRes
 		}
@@ -79,7 +135,6 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 			device.Name = getTempAutoMappedName(amDevice.Name)
 			d.setDeviceModel(network.UUID, amDevice, device) //todo meta-tags
 			if device, err = d.CreateDeviceTransaction(tx, device); err != nil {
-				tx.Rollback()
 				amRes.Error = err.Error()
 				return amRes
 			}
@@ -87,7 +142,6 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 			device.Name = getTempAutoMappedName(amDevice.Name)
 			d.setDeviceModel(network.UUID, amDevice, device) //todo meta-tags
 			if device, err = d.UpdateDeviceTransaction(tx, device.UUID, device); err != nil {
-				tx.Rollback()
 				amRes.Error = err.Error()
 				return amRes
 			}
@@ -102,14 +156,12 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 			streamClone.UUID = nuuid.MakeTopicUUID(model.CommonNaming.StreamClone)
 			d.setStreamCloneModel(streamCloneName, fnc.UUID, amDevice.StreamUUID, device, streamClone)
 			if err = tx.Create(&streamClone).Error; err != nil {
-				tx.Rollback()
 				return amRes
 			}
 			amDevice.StreamCloneUUID = streamClone.UUID
 		} else {
 			d.setStreamCloneModel(streamCloneName, fnc.UUID, amDevice.StreamUUID, device, streamClone)
 			if err = tx.Model(&streamClone).Where("uuid = ?", streamClone.UUID).Updates(streamClone).Error; err != nil {
-				tx.Rollback()
 				return amRes
 			}
 			amDevice.StreamCloneUUID = streamClone.UUID
@@ -123,14 +175,12 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 				point = &model.Point{}
 				d.setPointModel(device.UUID, amPoint, point) //todo meta-tags
 				if _, err = d.CreatePointTransaction(tx, point); err != nil {
-					tx.Rollback()
 					amRes.Error = err.Error()
 					return amRes
 				}
 			} else {
 				d.setPointModel(device.UUID, amPoint, point) //todo meta-tags
 				if point, err = d.UpdatePointTransactionForAutoMapping(tx, point.UUID, point); err != nil {
-					tx.Rollback()
 					amRes.Error = err.Error()
 					return amRes
 				}
@@ -142,14 +192,12 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 				consumer.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Consumer)
 				d.setConsumerModel(amPoint, streamClone.UUID, amPoint.Name, consumer)
 				if err = tx.Create(&consumer).Error; err != nil {
-					tx.Rollback()
 					amRes.Error = err.Error()
 					return amRes
 				}
 			} else {
 				d.setConsumerModel(amPoint, streamClone.UUID, amPoint.Name, consumer)
 				if err = tx.Model(&consumer).Where("uuid = ?", consumer.UUID).Updates(consumer).Error; err != nil {
-					tx.Rollback()
 					amRes.Error = err.Error()
 					return amRes
 				}
@@ -161,14 +209,12 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 				writer.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Writer)
 				d.setWriterModel(amPoint.Name, point.UUID, consumer.UUID, writer)
 				if err = tx.Create(&writer).Error; err != nil {
-					tx.Rollback()
 					amRes.Error = err.Error()
 					return amRes
 				}
 			} else {
 				d.setWriterModel(amPoint.Name, point.UUID, consumer.UUID, writer)
 				if err = tx.Model(&writer).Where("uuid = ?", consumer.UUID).Updates(writer).Error; err != nil {
-					tx.Rollback()
 					amRes.Error = err.Error()
 					return amRes
 				}
@@ -186,13 +232,8 @@ func (d *GormDatabase) CreateAutoMapping(amNetwork *interfaces.AutoMappingNetwor
 
 	amRes_ := d.swapMapperNames(tx, amNetwork, fnc.Name, networkName)
 	if amRes_ != nil {
-		tx.Rollback()
 		return amRes_
 	}
-
-	tx.Commit()
-
-	d.PublishPointsList("")
 
 	return &interfaces.AutoMappingResponse{
 		HasError:    false,
@@ -301,10 +342,10 @@ func (d *GormDatabase) setStreamCloneModel(streamCloneName, fncUUID, sourceUUID 
 	streamClone.AutoMappingDeviceUUID = nstring.New(device.UUID)
 }
 
-func (d *GormDatabase) setNetworkModel(fnc *model.FlowNetworkClone, amNetwork *interfaces.AutoMappingNetwork, networkModel *model.Network) {
+func (d *GormDatabase) setNetworkModel(fnc *model.FlowNetworkClone, amNetwork *interfaces.AutoMappingNetwork, networkModel *model.Network, globalUUID string) {
 	networkModel.Enable = boolean.NewTrue()
 	networkModel.PluginPath = "system"
-	networkModel.GlobalUUID = amNetwork.GlobalUUID
+	networkModel.GlobalUUID = globalUUID
 	networkModel.AutoMappingFlowNetworkName = fnc.Name
 	networkModel.CreatedFromAutoMapping = boolean.NewTrue()
 	networkModel.AutoMappingUUID = &amNetwork.UUID

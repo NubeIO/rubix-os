@@ -199,7 +199,7 @@ func getP2PBody(ctx *gin.Context) (dto *model.P2PBody, err error) {
 	return dto, err
 }
 
-func getBodyAutoMapping(ctx *gin.Context) (dto *interfaces.AutoMappingNetwork, err error) {
+func getBodyAutoMapping(ctx *gin.Context) (dto *interfaces.AutoMapping, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

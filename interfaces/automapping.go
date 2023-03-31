@@ -38,17 +38,24 @@ type SyncWriter struct {
 	PointName         string
 }
 
+type AutoMapping struct {
+	GlobalUUID      string                `json:"global_uuid"`
+	FlowNetworkUUID string                `json:"flow_network_uuid"`
+	Level           Level                 `json:"level"`
+	Networks        []*AutoMappingNetwork `json:"networks"`
+}
+
 type AutoMappingNetwork struct {
-	GlobalUUID      string                  `json:"global_uuid"`
-	UUID            string                  `json:"uuid"`
-	Name            string                  `json:"name"`
-	Tags            []*model.Tag            `json:"tags"`
-	MetaTags        []*model.NetworkMetaTag `json:"meta_tags"`
-	Devices         []*AutoMappingDevice    `json:"devices"`
-	FlowNetworkUUID string                  `json:"flown_network_uuid"`
+	Enable   bool                    `json:"enable"`
+	UUID     string                  `json:"uuid"`
+	Name     string                  `json:"name"`
+	Tags     []*model.Tag            `json:"tags"`
+	MetaTags []*model.NetworkMetaTag `json:"meta_tags"`
+	Devices  []*AutoMappingDevice    `json:"devices"`
 }
 
 type AutoMappingDevice struct {
+	Enable          bool                   `json:"enable"`
 	UUID            string                 `json:"uuid"`
 	Name            string                 `json:"name"`
 	Tags            []*model.Tag           `json:"tags"`
@@ -59,6 +66,7 @@ type AutoMappingDevice struct {
 }
 
 type AutoMappingPoint struct {
+	Enable       bool                  `json:"enable"`
 	UUID         string                `json:"uuid"`
 	Name         string                `json:"name"`
 	Tags         []*model.Tag          `json:"tags"`

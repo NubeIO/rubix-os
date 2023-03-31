@@ -6,14 +6,9 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/plugin/compat"
-	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/urls"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
-	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -161,55 +156,14 @@ func (d *GormDatabase) UpdateNetworkConnectionErrors(uuid string, network *model
 }
 
 func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
-	networkModel, err := d.GetNetwork(uuid, api.Args{WithDevices: true})
-	if err != nil {
-		return false, fmt.Errorf("failed to get network: %w", err)
-	}
-
-	if boolean.IsTrue(networkModel.AutoMappingEnable) {
-		var cli *client.FlowClient
-
-		fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(networkModel.AutoMappingFlowNetworkName)})
-		if err != nil {
-			log.Errorf("failed to find flow network with name %s", networkModel.AutoMappingFlowNetworkName)
-		} else {
-			cli = client.NewFlowClientCliFromFN(fn)
-		}
-
-		if cli != nil {
-			aType := api.ArgsType
-			url := urls.SingularUrlByArg(urls.NetworksUrl, aType.AutoMappingUUID, networkModel.UUID)
-			_ = cli.DeleteQuery(url)
-
-			streams, _ := d.GetStreamByArgs(api.Args{AutoMappingNetworkUUID: &networkModel.UUID})
-			if streams != nil {
-				for _, stream := range streams { // todo: create bulk stream delete API
-					url := urls.SingularUrlByArg(urls.StreamCloneUrl, aType.SourceUUID, stream.UUID)
-					_ = cli.DeleteQuery(url)
-				}
-				d.DB.Delete(&streams)
-			}
-		}
-	}
-
-	if boolean.IsTrue(networkModel.CreatedFromAutoMapping) {
-		d.DB.
-			Where("auto_mapping_network_uuid = ? AND created_from_auto_mapping IS TRUE", networkModel.UUID).
-			Delete(&model.StreamClone{})
-	}
-
-	query := d.DB.Delete(&networkModel)
+	query := d.DB.Where("uuid = ?", uuid).Delete(&model.Network{})
 	go d.PublishPointsList("")
 	return d.deleteResponseBuilder(query)
 }
 
 func (d *GormDatabase) DeleteOneNetworkByArgs(args api.Args) (bool, error) {
 	var networkModel *model.Network
-	query := d.buildNetworkQuery(args)
-	if err := query.First(&networkModel).Error; err != nil {
-		return false, err
-	}
-	query = query.Delete(&networkModel)
+	query := d.buildNetworkQuery(args).Delete(&networkModel)
 	return d.deleteResponseBuilder(query)
 }
 
@@ -223,13 +177,14 @@ func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	return info
 }
 
-func (d *GormDatabase) SyncNetworks(level interfaces.Level, args api.Args) error {
+func (d *GormDatabase) SyncNetworks(args api.Args) error {
 	networks, err := d.GetNetworks(args)
 	if err != nil {
 		return err
 	}
-	for _, network := range networks {
-		err = d.SyncNetworkDevices(network.UUID, network, level, args)
+	uniqueAutoMappingFlowNetworkNames := GetUniqueAutoMappingFlowNetworkNames(networks)
+	for _, fnName := range uniqueAutoMappingFlowNetworkNames {
+		err = d.CreateNetworkAutoMappings(fnName, networks, interfaces.Network)
 		if err != nil {
 			return err
 		}
@@ -237,12 +192,27 @@ func (d *GormDatabase) SyncNetworks(level interfaces.Level, args api.Args) error
 	return nil
 }
 
-func (d *GormDatabase) SyncNetworkDevices(uuid string, network *model.Network, level interfaces.Level, args api.Args) error {
-	if network == nil {
-		network, _ = d.GetNetwork(uuid, args)
+func (d *GormDatabase) SyncNetworkDevices(uuid string, args api.Args) error {
+	args.WithDevices = true
+	network, err := d.GetNetwork(uuid, args)
+	if err != nil {
+		return err
 	}
-	if network == nil {
-		return errors.New("network doesn't exist")
+	networks := make([]*model.Network, 0)
+	networks = append(networks, network)
+	return d.CreateNetworkAutoMappings(network.AutoMappingFlowNetworkName, networks, interfaces.Device)
+}
+
+func GetUniqueAutoMappingFlowNetworkNames(networks []*model.Network) []string {
+	uniqueAutoMappingFlowNetworkNamesMap := make(map[string]struct{})
+	var uniqueAutoMappingFlowNetworkNames []string
+
+	for _, network := range networks {
+		if _, ok := uniqueAutoMappingFlowNetworkNamesMap[network.AutoMappingFlowNetworkName]; !ok {
+			uniqueAutoMappingFlowNetworkNamesMap[network.AutoMappingFlowNetworkName] = struct{}{}
+			uniqueAutoMappingFlowNetworkNames = append(uniqueAutoMappingFlowNetworkNames, network.AutoMappingFlowNetworkName)
+		}
 	}
-	return d.SyncDevicePoints(uuid, network, level, args)
+
+	return uniqueAutoMappingFlowNetworkNames
 }
