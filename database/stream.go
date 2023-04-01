@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
@@ -83,6 +84,9 @@ func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Str
 	if err := d.DB.Preload("FlowNetworks").Where("uuid = ?", uuid).First(&streamModel).Error; err != nil {
 		return nil, err
 	}
+	if boolean.IsTrue(streamModel.CreatedFromAutoMapping) {
+		return nil, errors.New("can't update auto-mapped stream")
+	}
 	if len(body.FlowNetworks) > 0 {
 		if err := d.DB.Model(&streamModel).Association("FlowNetworks").Replace(body.FlowNetworks); err != nil {
 			return nil, err
@@ -101,11 +105,14 @@ func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Str
 }
 
 func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
-	var aType = api.ArgsType
 	streamModel, err := d.GetStream(uuid, api.Args{WithFlowNetworks: true})
 	if err != nil {
 		return false, err
 	}
+	if boolean.IsTrue(streamModel.CreatedFromAutoMapping) {
+		return false, errors.New("can't delete auto-mapped stream")
+	}
+	var aType = api.ArgsType
 	for _, fn := range streamModel.FlowNetworks {
 		cli := client.NewFlowClientCliFromFN(fn)
 		url := urls.SingularUrlByArg(urls.StreamCloneUrl, aType.SourceUUID, streamModel.UUID)

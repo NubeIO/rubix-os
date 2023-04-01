@@ -50,6 +50,13 @@ func (d *GormDatabase) GetOneProducerByArgs(args api.Args) (*model.Producer, err
 }
 
 func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, error) {
+	stream, err := d.GetStream(body.StreamUUID, api.Args{})
+	if err != nil {
+		return nil, fmt.Errorf("no such parent stream with uuid %s", body.StreamUUID)
+	}
+	if boolean.IsTrue(stream.CreatedFromAutoMapping) {
+		return nil, errors.New("can't create a producer for the auto-mapped stream")
+	}
 	if body.ProducerThingUUID == "" {
 		return nil, errors.New("please pass in a producer_thing_uuid i.e. uuid of that class")
 	}
@@ -82,10 +89,6 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	default:
 		return nil, errors.New("we are not supporting producer_thing_class other than point & schedule")
 	}
-	_, err = d.GetStream(body.StreamUUID, api.Args{})
-	if err != nil {
-		return nil, err
-	}
 	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Producer)
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = nuuid.MakeUUID()
@@ -100,6 +103,9 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model
 	var producerModel *model.Producer
 	if err := d.DB.Where("uuid = ?", uuid).First(&producerModel).Error; err != nil {
 		return nil, err
+	}
+	if boolean.IsTrue(producerModel.CreatedFromAutoMapping) {
+		return nil, errors.New("can't update auto-mapped producer")
 	}
 	if len(body.Tags) > 0 {
 		if err := d.updateTags(&producerModel, body.Tags); err != nil {
@@ -149,6 +155,9 @@ func (d *GormDatabase) DeleteProducer(uuid string) (bool, error) {
 	producer, err := d.GetProducer(uuid, api.Args{})
 	if err != nil {
 		return false, err
+	}
+	if boolean.IsTrue(producer.CreatedFromAutoMapping) {
+		return false, errors.New("can't delete auto-mapped producer")
 	}
 	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
 	aType := api.ArgsType

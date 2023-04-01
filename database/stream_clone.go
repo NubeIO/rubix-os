@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm"
@@ -57,7 +58,14 @@ func (d *GormDatabase) GetStreamClone(uuid string, args api.Args) (*model.Stream
 }
 
 func (d *GormDatabase) DeleteStreamClone(uuid string) (bool, error) {
-	query := d.DB.Where("uuid = ?", uuid).Delete(&model.StreamClone{})
+	streamCloneModel, err := d.GetStreamClone(uuid, api.Args{})
+	if err != nil {
+		return false, err
+	}
+	if boolean.IsTrue(streamCloneModel.CreatedFromAutoMapping) {
+		return false, errors.New("can't delete auto-mapped stream clone")
+	}
+	query := d.DB.Delete(&streamCloneModel)
 	return d.deleteResponseBuilder(query)
 }
 

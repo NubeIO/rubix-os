@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -28,6 +29,13 @@ func (d *GormDatabase) GetWriters(args api.Args) ([]*model.Writer, error) {
 }
 
 func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
+	consumer, err := d.GetConsumer(body.ConsumerUUID, api.Args{})
+	if err != nil {
+		return nil, fmt.Errorf("no such parent consumer with uuid %s", body.ConsumerUUID)
+	}
+	if boolean.IsTrue(consumer.CreatedFromAutoMapping) {
+		return nil, errors.New("can't create a writer for the auto-mapped consumer")
+	}
 	name := ""
 	switch body.WriterThingClass {
 	case model.ThingClass.Point:
@@ -54,7 +62,7 @@ func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	err := d.syncAfterCreateUpdateWriter(body)
+	err = d.syncAfterCreateUpdateWriter(body)
 	if err != nil {
 		return nil, err
 	}
@@ -115,6 +123,9 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	if boolean.IsTrue(writer.CreatedFromAutoMapping) {
+		return false, errors.New("can't delete auto-mapped writer")
+	}
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
@@ -126,11 +137,20 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 }
 
 func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
-	writerModel, err := d.updateWriterWithoutSync(uuid, body)
-	if err != nil {
-		return nil, err
+	var writerModel *model.Writer
+	query := d.DB.Where("uuid = ?", uuid).First(&writerModel)
+	if query.Error != nil {
+		return nil, query.Error
 	}
-	err = d.syncAfterCreateUpdateWriter(writerModel)
+	if boolean.IsTrue(writerModel.CreatedFromAutoMapping) {
+		return nil, errors.New("can't update auto-mapped writer")
+	}
+	body.DataStore = nil
+	query = d.DB.Model(&writerModel).Updates(body)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	err := d.syncAfterCreateUpdateWriter(writerModel)
 	if err != nil {
 		return nil, err
 	}

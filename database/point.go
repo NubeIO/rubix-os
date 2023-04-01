@@ -99,7 +99,15 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	return pointModel, nil
 }
 
-func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point) (*model.Point, error) {
+func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point, fromAm bool) (*model.Point, error) {
+	var device *model.Device
+	query := db.Where("uuid = ? ", body.DeviceUUID).First(&device)
+	if query.Error != nil {
+		return nil, fmt.Errorf("no such parent device with uuid %s", body.DeviceUUID)
+	}
+	if boolean.IsTrue(device.CreatedFromAutoMapping) && !fromAm {
+		return nil, errors.New("can't create a point for the auto-mapped device")
+	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
 	body.Name = strings.TrimSpace(body.Name)
 	if body.Decimal == nil {
@@ -150,7 +158,7 @@ func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point) (*
 }
 
 func (d *GormDatabase) CreatePoint(body *model.Point, publishPointList bool) (*model.Point, error) {
-	pnt, err := d.CreatePointTransaction(d.DB, body)
+	pnt, err := d.CreatePointTransaction(d.DB, body, false)
 	if err != nil {
 		return nil, err
 	}

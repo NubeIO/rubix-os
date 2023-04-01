@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/plugin/compat"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -110,11 +111,14 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	return d.CreateNetworkTransaction(d.DB, body)
 }
 
-func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *model.Network) (*model.Network, error) {
+func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *model.Network, fromAm bool) (*model.Network, error) {
 	var networkModel *model.Network
 	query := db.Where("uuid = ?", uuid).First(&networkModel)
 	if query.Error != nil {
 		return nil, query.Error
+	}
+	if boolean.IsTrue(networkModel.CreatedFromAutoMapping) && !fromAm {
+		return nil, errors.New("can't update auto-mapped network")
 	}
 	if len(body.Tags) > 0 {
 		if err := d.updateTags(&networkModel, body.Tags); err != nil {
@@ -130,7 +134,7 @@ func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *
 }
 
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
-	return d.UpdateNetworkTransaction(d.DB, uuid, body)
+	return d.UpdateNetworkTransaction(d.DB, uuid, body, false)
 }
 
 // UpdateNetworkErrors will only update the CommonFault properties of the network, all other properties won't be updated.

@@ -1,8 +1,11 @@
 package database
 
 import (
+	"errors"
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm"
@@ -35,11 +38,14 @@ func (d *GormDatabase) GetDevice(uuid string, args api.Args) (*model.Device, err
 	return deviceModel, nil
 }
 
-func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device) (*model.Device, error) {
-	var net *model.Network
-	query := db.Where("uuid = ? ", body.NetworkUUID).First(&net)
+func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device, fromAm bool) (*model.Device, error) {
+	var network *model.Network
+	query := db.Where("uuid = ? ", body.NetworkUUID).First(&network)
 	if query.Error != nil {
-		return nil, query.Error
+		return nil, fmt.Errorf("no such parent network with uuid %s", body.NetworkUUID)
+	}
+	if boolean.IsTrue(network.CreatedFromAutoMapping) && !fromAm {
+		return nil, errors.New("can't create a device for the auto-mapped network")
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Device)
 	body.Name = strings.TrimSpace(body.Name)
@@ -51,14 +57,17 @@ func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device) 
 }
 
 func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
-	return d.CreateDeviceTransaction(d.DB, body)
+	return d.CreateDeviceTransaction(d.DB, body, false)
 }
 
-func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *model.Device) (*model.Device, error) {
+func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *model.Device, fromAm bool) (*model.Device, error) {
 	var deviceModel *model.Device
 	query := db.Where("uuid = ?", uuid).First(&deviceModel)
 	if query.Error != nil {
 		return nil, query.Error
+	}
+	if boolean.IsTrue(deviceModel.CreatedFromAutoMapping) && !fromAm {
+		return nil, errors.New("can't update auto-mapped device")
 	}
 	if len(body.Tags) > 0 {
 		if err := d.updateTags(&deviceModel, body.Tags); err != nil {
@@ -74,7 +83,7 @@ func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *m
 }
 
 func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
-	return d.UpdateDeviceTransaction(d.DB, uuid, body)
+	return d.UpdateDeviceTransaction(d.DB, uuid, body, false)
 }
 
 // UpdateDeviceErrors will only update the CommonFault properties of the device, all other properties won't be updated
