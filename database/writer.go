@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type Writer struct {
@@ -95,13 +96,17 @@ func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer
 	return writerModel, nil
 }
 
-func (d *GormDatabase) GetOneWriterByArgs(args api.Args) (*model.Writer, error) {
+func GetOneWriterByArgsTransaction(db *gorm.DB, args api.Args) (*model.Writer, error) {
 	var writerModel *model.Writer
-	query := d.buildWriterQuery(args)
+	query := buildWriterQueryTransaction(db, args)
 	if err := query.First(&writerModel).Error; err != nil {
 		return nil, err
 	}
 	return writerModel, nil
+}
+
+func (d *GormDatabase) GetOneWriterByArgs(args api.Args) (*model.Writer, error) {
+	return GetOneWriterByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
@@ -256,6 +261,7 @@ func (d *GormDatabase) syncAfterCreateUpdateWriter(body *model.Writer) error {
 		ProducerUUID:      consumer.ProducerUUID,
 		WriterUUID:        body.UUID,
 		FlowFrameworkUUID: fnc.SourceUUID,
+		StreamUUID:        streamClone.SourceUUID,
 	}
 	_, err := cli.SyncWriter(&syncWriterBody)
 	return err

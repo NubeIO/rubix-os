@@ -10,6 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"gorm.io/gorm"
 )
 
 type Consumers struct {
@@ -34,13 +35,17 @@ func (d *GormDatabase) GetConsumer(uuid string, args api.Args) (*model.Consumer,
 	return consumerModel, nil
 }
 
-func (d *GormDatabase) GetOneConsumerByArgs(args api.Args) (*model.Consumer, error) {
+func GetOneConsumerByArgsTransaction(db *gorm.DB, args api.Args) (*model.Consumer, error) {
 	var consumerModel *model.Consumer
-	query := d.buildConsumerQuery(args)
+	query := buildConsumerQueryTransaction(db, args)
 	if err := query.First(&consumerModel).Error; err != nil {
 		return nil, err
 	}
 	return consumerModel, nil
+}
+
+func (d *GormDatabase) GetOneConsumerByArgs(args api.Args) (*model.Consumer, error) {
+	return GetOneConsumerByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, error) {

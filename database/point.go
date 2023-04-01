@@ -81,6 +81,15 @@ func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string,
 	return pointModel, nil
 }
 
+func (d *GormDatabase) GetOnePointByArgsTransaction(db *gorm.DB, args api.Args) (*model.Point, error) {
+	var pointModel *model.Point
+	query := buildPointQueryTransaction(db, args)
+	if err := query.First(&pointModel).Error; err != nil {
+		return nil, err
+	}
+	return pointModel, nil
+}
+
 func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)

@@ -108,7 +108,7 @@ func (d *GormDatabase) UpdateDeviceConnectionErrorsByName(name string, device *m
 }
 
 func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
-	query := d.DB.Where("uuid = ?", uuid).Model(&model.Device{})
+	query := d.DB.Where("uuid = ?", uuid).Delete(&model.Device{})
 	go d.PublishPointsList("")
 	return d.deleteResponseBuilder(query)
 }

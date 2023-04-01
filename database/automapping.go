@@ -33,6 +33,8 @@ func (d *GormDatabase) CreateNetworkAutoMappings(fnName string, networks []*mode
 		return nil
 	}
 
+	d.clearStreamsAndProducers()
+
 	for _, network := range networks {
 		if boolean.IsTrue(network.CreatedFromAutoMapping) && network.AutoMappingFlowNetworkName == fnName {
 			err := d.updateNetworkConnectionInCloneSide(network)
@@ -144,8 +146,12 @@ func (d *GormDatabase) CreateNetworkAutoMappings(fnName string, networks []*mode
 		d.updateCascadeConnectionError(d.DB, &amRes)
 	} else {
 		for _, amNetwork := range autoMapping.Networks {
-			d.clearConnectionError(amNetwork)
+			err := d.clearConnectionError(amNetwork)
+			if err != nil {
+				return err
+			}
 		}
+
 		pointUUID, err := d.createWriterClones(amRes.SyncWriters)
 		if pointUUID != nil && err != nil {
 			amRes.PointUUID = *pointUUID
@@ -155,6 +161,19 @@ func (d *GormDatabase) CreateNetworkAutoMappings(fnName string, networks []*mode
 	}
 
 	return nil
+}
+
+func (d *GormDatabase) clearStreamsAndProducers() {
+	// delete those which is not deleted when we delete network, device & points
+	d.DB.Where("created_from_auto_mapping IS TRUE AND auto_mapping_network_uuid NOT IN (?)",
+		d.DB.Where("created_from_auto_mapping IS TRUE").Model(&model.Network{}).Select("uuid")).
+		Delete(&model.Stream{})
+	d.DB.Where("created_from_auto_mapping IS TRUE AND auto_mapping_device_uuid NOT IN (?)",
+		d.DB.Where("created_from_auto_mapping IS TRUE").Model(&model.Device{}).Select("uuid")).
+		Delete(&model.Stream{})
+	d.DB.Where("created_from_auto_mapping IS TRUE AND producer_thing_uuid NOT IN (?)",
+		d.DB.Where("created_from_auto_mapping IS TRUE").Model(&model.Point{}).Select("uuid")).
+		Delete(&model.Producer{})
 }
 
 func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network) error {
@@ -425,7 +444,7 @@ func (d *GormDatabase) createWriterClones(syncWriters []*interfaces.SyncWriter) 
 	return nil, nil
 }
 
-func (d *GormDatabase) clearConnectionError(amNetwork *interfaces.AutoMappingNetwork) {
+func (d *GormDatabase) clearConnectionError(amNetwork *interfaces.AutoMappingNetwork) error {
 	tx := d.DB.Begin()
 	networkModel := model.Network{
 		Connection:        connection.Connected.String(),
@@ -439,15 +458,27 @@ func (d *GormDatabase) clearConnectionError(amNetwork *interfaces.AutoMappingNet
 		Connection:        connection.Connected.String(),
 		ConnectionMessage: nstring.New(nstring.NotAvailable),
 	}
-
-	_ = UpdateNetworkConnectionErrorsTransaction(tx, amNetwork.UUID, &networkModel)
+	err := UpdateNetworkConnectionErrorsTransaction(tx, amNetwork.UUID, &networkModel)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 	for _, amDevice := range amNetwork.Devices {
-		_ = UpdateDeviceConnectionErrorsTransaction(tx, amDevice.UUID, &deviceModel)
+		err = UpdateDeviceConnectionErrorsTransaction(tx, amDevice.UUID, &deviceModel)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
 		for _, amPoint := range amDevice.Points {
-			_ = UpdatePointConnectionErrorsTransaction(tx, amPoint.UUID, &pointModel)
+			err = UpdatePointConnectionErrorsTransaction(tx, amPoint.UUID, &pointModel)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
 		}
 	}
 	tx.Commit()
+	return nil
 }
 
 func (d *GormDatabase) updateCascadeConnectionError(tx *gorm.DB, amRes *interfaces.AutoMappingResponse) {

@@ -123,8 +123,8 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
-	query := d.DB
+func buildStreamCloneQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.WithConsumers {
 		query = query.Preload("Consumers")
 		if args.WithWriters {
@@ -143,8 +143,12 @@ func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
-	query := d.DB
+func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
+	return buildStreamCloneQueryTransaction(d.DB, args)
+}
+
+func buildConsumerQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.WithWriters {
 		query = query.Preload("Writers")
 	}
@@ -158,6 +162,10 @@ func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
 		query = query.Where("producer_thing_uuid = ?", *args.ProducerThingUUID)
 	}
 	return query
+}
+
+func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
+	return buildConsumerQueryTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
@@ -269,8 +277,8 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
-	query := d.DB
+func buildPointQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.WithPriority {
 		query = query.Preload("Priority")
 	}
@@ -300,7 +308,7 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	}
 	if args.MetaTags != nil {
 		keyValues := metaTagsArgsToKeyValues(*args.MetaTags)
-		subQuery := d.DB.Table("point_meta_tags").Select("point_uuid").
+		subQuery := db.Table("point_meta_tags").Select("point_uuid").
 			Where("(key, value) IN ?", keyValues).
 			Group("point_uuid").
 			Having("COUNT(point_uuid) = ?", len(keyValues))
@@ -309,8 +317,12 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
-	query := d.DB
+func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
+	return buildPointQueryTransaction(d.DB, args)
+}
+
+func buildWriterQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.ConsumerUUID != nil {
 		query = query.Where("consumer_uuid = ?", *args.ConsumerUUID)
 	}
@@ -324,6 +336,10 @@ func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
 		query = query.Where("writer_thing_name = ?", *args.WriterThingName)
 	}
 	return query
+}
+
+func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
+	return buildWriterQueryTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) buildWriterCloneQuery(args api.Args) *gorm.DB {

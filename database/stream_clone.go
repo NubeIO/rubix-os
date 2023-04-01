@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"gorm.io/gorm"
 )
 
 func (d *GormDatabase) GetStreamClones(args api.Args) ([]*model.StreamClone, error) {
@@ -31,14 +32,18 @@ func (d *GormDatabase) GetStreamCloneByArg(args api.Args) (*model.StreamClone, e
 	return streamClonesModel, nil
 }
 
-func (d *GormDatabase) GetOneStreamCloneByArg(args api.Args) (*model.StreamClone, error) {
+func GetOneStreamCloneByArgTransaction(db *gorm.DB, args api.Args) (*model.StreamClone, error) {
 	var streamClonesModel *model.StreamClone
-	query := d.buildStreamCloneQuery(args)
+	query := buildStreamCloneQueryTransaction(db, args)
 	query.First(&streamClonesModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	return streamClonesModel, nil
+}
+
+func (d *GormDatabase) GetOneStreamCloneByArg(args api.Args) (*model.StreamClone, error) {
+	return GetOneStreamCloneByArgTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) GetStreamClone(uuid string, args api.Args) (*model.StreamClone, error) {
