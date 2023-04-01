@@ -123,10 +123,10 @@ func (d *GormDatabase) cleanAutoMappedModels(tx *gorm.DB, autoMapping *interface
 		}
 	}
 
-	d.clearStreamClonesConsumers(tx)
+	d.clearStreamClonesAndConsumers(tx)
 }
 
-func (d *GormDatabase) clearStreamClonesConsumers(tx *gorm.DB) {
+func (d *GormDatabase) clearStreamClonesAndConsumers(tx *gorm.DB) {
 	// delete those which is not deleted when we delete network, device & points
 	tx.Where("created_from_auto_mapping IS TRUE AND auto_mapping_network_uuid NOT IN (?)",
 		tx.Where("created_from_auto_mapping IS TRUE").Model(&model.Network{}).Select("uuid")).
