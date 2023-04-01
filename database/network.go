@@ -188,7 +188,7 @@ func (d *GormDatabase) SyncNetworks(args api.Args) error {
 	}
 	uniqueAutoMappingFlowNetworkNames := GetUniqueAutoMappingFlowNetworkNames(networks)
 	for _, fnName := range uniqueAutoMappingFlowNetworkNames {
-		err = d.CreateNetworkAutoMappings(fnName, networks, interfaces.Network)
+		err = d.CreateNetworksAutoMappings(fnName, networks, interfaces.Network)
 		if err != nil {
 			return err
 		}
@@ -204,7 +204,7 @@ func (d *GormDatabase) SyncNetworkDevices(uuid string, args api.Args) error {
 	}
 	networks := make([]*model.Network, 0)
 	networks = append(networks, network)
-	return d.CreateNetworkAutoMappings(network.AutoMappingFlowNetworkName, networks, interfaces.Device)
+	return d.CreateNetworksAutoMappings(network.AutoMappingFlowNetworkName, networks, interfaces.Device)
 }
 
 func GetUniqueAutoMappingFlowNetworkNames(networks []*model.Network) []string {

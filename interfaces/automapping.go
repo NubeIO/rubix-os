@@ -55,14 +55,13 @@ type AutoMappingNetwork struct {
 }
 
 type AutoMappingDevice struct {
-	Enable          bool                   `json:"enable"`
-	UUID            string                 `json:"uuid"`
-	Name            string                 `json:"name"`
-	Tags            []*model.Tag           `json:"tags"`
-	MetaTags        []*model.DeviceMetaTag `json:"meta_tags"`
-	Points          []*AutoMappingPoint    `json:"points"`
-	StreamUUID      string                 `json:"stream_uuid"`
-	StreamCloneUUID string                 `json:"stream_clone_uuid"`
+	Enable     bool                   `json:"enable"`
+	UUID       string                 `json:"uuid"`
+	Name       string                 `json:"name"`
+	Tags       []*model.Tag           `json:"tags"`
+	MetaTags   []*model.DeviceMetaTag `json:"meta_tags"`
+	Points     []*AutoMappingPoint    `json:"points"`
+	StreamUUID string                 `json:"stream_uuid"`
 }
 
 type AutoMappingPoint struct {

@@ -18,7 +18,7 @@ import (
 	"sync"
 )
 
-func (d *GormDatabase) CreateNetworkAutoMappings(fnName string, networks []*model.Network, level interfaces.Level) error {
+func (d *GormDatabase) CreateNetworksAutoMappings(fnName string, networks []*model.Network, level interfaces.Level) error {
 	// level => network
 	//    - delete all stream if it doesn't exist
 	//    - disable stream if enable_auto_mapping = false
@@ -35,6 +35,11 @@ func (d *GormDatabase) CreateNetworkAutoMappings(fnName string, networks []*mode
 
 	d.clearStreamsAndProducers()
 
+	err := d.createNetworksAutoMappings(fnName, networks, level)
+	if err != nil {
+		return err
+	}
+
 	for _, network := range networks {
 		if boolean.IsTrue(network.CreatedFromAutoMapping) && network.AutoMappingFlowNetworkName == fnName {
 			err := d.updateNetworkConnectionInCloneSide(network)
@@ -43,7 +48,10 @@ func (d *GormDatabase) CreateNetworkAutoMappings(fnName string, networks []*mode
 			}
 		}
 	}
+	return nil
+}
 
+func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*model.Network, level interfaces.Level) error {
 	var amNetworks []*interfaces.AutoMappingNetwork
 	fn, fnError := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(fnName)})
 
@@ -129,6 +137,16 @@ func (d *GormDatabase) CreateNetworkAutoMappings(fnName string, networks []*mode
 		amNetworks = append(amNetworks, amNetwork)
 	}
 
+	// this occurs when there is:
+	//    - no fn exist with that <fn.name> &
+	//    - such <fn.name> exist only on network which is created_from_auto_mapping
+	// when we have this:
+	//    - when we rename the <fn.name>
+	// so, treat such errors as non-error
+	if fnError != nil {
+		return nil
+	}
+
 	deviceInfo, _ := deviceinfo.GetDeviceInfo()
 	autoMapping := &interfaces.AutoMapping{
 		GlobalUUID:      deviceInfo.GlobalUUID,
@@ -159,20 +177,19 @@ func (d *GormDatabase) CreateNetworkAutoMappings(fnName string, networks []*mode
 			d.updateCascadeConnectionError(d.DB, &amRes)
 		}
 	}
-
 	return nil
 }
 
 func (d *GormDatabase) clearStreamsAndProducers() {
 	// delete those which is not deleted when we delete network, device & points
 	d.DB.Where("created_from_auto_mapping IS TRUE AND auto_mapping_network_uuid NOT IN (?)",
-		d.DB.Where("created_from_auto_mapping IS TRUE").Model(&model.Network{}).Select("uuid")).
+		d.DB.Model(&model.Network{}).Select("uuid")).
 		Delete(&model.Stream{})
 	d.DB.Where("created_from_auto_mapping IS TRUE AND auto_mapping_device_uuid NOT IN (?)",
-		d.DB.Where("created_from_auto_mapping IS TRUE").Model(&model.Device{}).Select("uuid")).
+		d.DB.Model(&model.Device{}).Select("uuid")).
 		Delete(&model.Stream{})
 	d.DB.Where("created_from_auto_mapping IS TRUE AND producer_thing_uuid NOT IN (?)",
-		d.DB.Where("created_from_auto_mapping IS TRUE").Model(&model.Point{}).Select("uuid")).
+		d.DB.Model(&model.Point{}).Select("uuid")).
 		Delete(&model.Producer{})
 }
 
@@ -292,6 +309,7 @@ func (d *GormDatabase) createPointAutoMappingStreams(flowNetwork *model.FlowNetw
 					return nil, errors.New(errMsg)
 				}
 			}
+
 			stream, _ = d.GetOneStreamByArgs(api.Args{AutoMappingDeviceUUID: nstring.New(device.UUID), WithFlowNetworks: true})
 			if stream == nil {
 				stream = &model.Stream{}
