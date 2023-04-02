@@ -99,12 +99,12 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	return body, nil
 }
 
-func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error) {
+func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer, checkAutoMap bool) (*model.Producer, error) {
 	var producerModel *model.Producer
 	if err := d.DB.Where("uuid = ?", uuid).First(&producerModel).Error; err != nil {
 		return nil, err
 	}
-	if boolean.IsTrue(producerModel.CreatedFromAutoMapping) {
+	if boolean.IsTrue(producerModel.CreatedFromAutoMapping) && checkAutoMap {
 		return nil, errors.New("can't update auto-mapped producer")
 	}
 	if len(body.Tags) > 0 {
@@ -146,7 +146,7 @@ func (d *GormDatabase) UpdateProducerByProducerThingUUID(producerThingUUID strin
 			producer.EnableHistory = enableHistory
 			producer.HistoryType = historyType
 			producer.HistoryInterval = historyInterval
-			go d.UpdateProducer(producer.UUID, producer)
+			go d.UpdateProducer(producer.UUID, producer, false)
 		}
 	}
 }
@@ -244,7 +244,7 @@ func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*fl
 
 func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*float64, presentValue *float64,
 	producerModelBody *model.Producer, createCOVHistory bool) error {
-	producerModel, err := d.UpdateProducer(uuid, producerModelBody)
+	producerModel, err := d.UpdateProducer(uuid, producerModelBody, false)
 	if err != nil {
 		log.Errorf("producer: issue on update producer err: %v\n", err)
 		return errors.New("issue on update producer")
@@ -284,7 +284,7 @@ func (d *GormDatabase) ProducersScheduleWrite(uuid string, body *model.ScheduleD
 }
 
 func (d *GormDatabase) producerScheduleWrite(uuid string, scheduleData *model.ScheduleData, producerModelBody *model.Producer) error {
-	producerModel, err := d.UpdateProducer(uuid, producerModelBody)
+	producerModel, err := d.UpdateProducer(uuid, producerModelBody, false)
 	if err != nil {
 		log.Errorf("producer: issue on update producer err: %v\n", err)
 		return errors.New("issue on update producer")

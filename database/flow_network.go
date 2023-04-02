@@ -212,7 +212,7 @@ func (d *GormDatabase) SyncFlowNetworkStreams(uuid string, args api.Args) ([]*in
 
 func (d *GormDatabase) syncStream(localCli *client.FlowClient, stream *model.Stream, args api.Args, params string,
 	channel chan *interfaces.SyncModel) {
-	_, err := d.UpdateStream(stream.UUID, stream)
+	_, err := d.UpdateStream(stream.UUID, stream, false)
 	// This is for syncing child descendants
 	if args.WithProducers == true {
 		url := urls.GetUrl(urls.StreamProducersSyncUrl, stream.UUID) + params

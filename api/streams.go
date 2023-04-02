@@ -10,7 +10,7 @@ type StreamDatabase interface {
 	GetStreams(args Args) ([]*model.Stream, error)
 	GetStream(uuid string, args Args) (*model.Stream, error)
 	CreateStream(body *model.Stream) (*model.Stream, error)
-	UpdateStream(uuid string, body *model.Stream) (*model.Stream, error)
+	UpdateStream(uuid string, body *model.Stream, checkAm bool) (*model.Stream, error)
 	DeleteStream(uuid string) (bool, error)
 	SyncStreamProducers(uuid string, args Args) ([]*interfaces.SyncModel, error)
 }
@@ -41,7 +41,7 @@ func (j *StreamAPI) CreateStream(ctx *gin.Context) {
 func (j *StreamAPI) UpdateStream(ctx *gin.Context) {
 	body, _ := getBODYStream(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateStream(uuid, body)
+	q, err := j.DB.UpdateStream(uuid, body, true)
 	ResponseHandler(q, err, ctx)
 }
 

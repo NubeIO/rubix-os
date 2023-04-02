@@ -12,7 +12,7 @@ type WriterDatabase interface {
 	GetWriterByName(flowNetworkCloneName string, streamCloneName string, consumerName string,
 		writerThingName string) (*model.Writer, error)
 	CreateWriter(body *model.Writer) (*model.Writer, error)
-	UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error)
+	UpdateWriter(uuid string, body *model.Writer, checkAm bool) (*model.Writer, error)
 	DeleteWriter(uuid string) (bool, error)
 	WriterAction(uuid string, body *model.WriterBody) *model.WriterActionOutput
 	WriterBulkAction(body []*model.WriterBulkBody) []*model.WriterActionOutput
@@ -56,7 +56,7 @@ func (j *WriterAPI) CreateWriter(ctx *gin.Context) {
 func (j *WriterAPI) UpdateWriter(ctx *gin.Context) {
 	body, _ := getBODYWriter(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateWriter(uuid, body)
+	q, err := j.DB.UpdateWriter(uuid, body, true)
 	ResponseHandler(q, err, ctx)
 }
 

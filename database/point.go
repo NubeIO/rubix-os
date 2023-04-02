@@ -99,13 +99,13 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 	return pointModel, nil
 }
 
-func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point, fromAm bool) (*model.Point, error) {
+func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point, checkAm bool) (*model.Point, error) {
 	var device *model.Device
 	query := db.Where("uuid = ? ", body.DeviceUUID).First(&device)
 	if query.Error != nil {
 		return nil, fmt.Errorf("no such parent device with uuid %s", body.DeviceUUID)
 	}
-	if boolean.IsTrue(device.CreatedFromAutoMapping) && !fromAm {
+	if boolean.IsTrue(device.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't create a point for the auto-mapped device")
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
@@ -158,7 +158,7 @@ func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point, fr
 }
 
 func (d *GormDatabase) CreatePoint(body *model.Point, publishPointList bool) (*model.Point, error) {
-	pnt, err := d.CreatePointTransaction(d.DB, body, false)
+	pnt, err := d.CreatePointTransaction(d.DB, body, true)
 	if err != nil {
 		return nil, err
 	}
@@ -189,6 +189,9 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 		Preload("Tags").
 		Preload("MetaTags").
 		Preload("Priority").First(&pointModel)
+	if boolean.IsTrue(pointModel.CreatedFromAutoMapping) {
+		return nil, errors.New("can't update auto-mapped point")
+	}
 	if query.Error != nil {
 		return nil, query.Error
 	}

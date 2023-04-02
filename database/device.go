@@ -38,13 +38,13 @@ func (d *GormDatabase) GetDevice(uuid string, args api.Args) (*model.Device, err
 	return deviceModel, nil
 }
 
-func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device, fromAm bool) (*model.Device, error) {
+func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device, checkAm bool) (*model.Device, error) {
 	var network *model.Network
 	query := db.Where("uuid = ? ", body.NetworkUUID).First(&network)
 	if query.Error != nil {
 		return nil, fmt.Errorf("no such parent network with uuid %s", body.NetworkUUID)
 	}
-	if boolean.IsTrue(network.CreatedFromAutoMapping) && !fromAm {
+	if boolean.IsTrue(network.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't create a device for the auto-mapped network")
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Device)
@@ -57,16 +57,16 @@ func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device, 
 }
 
 func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
-	return d.CreateDeviceTransaction(d.DB, body, false)
+	return d.CreateDeviceTransaction(d.DB, body, true)
 }
 
-func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *model.Device, fromAm bool) (*model.Device, error) {
+func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *model.Device, checkAm bool) (*model.Device, error) {
 	var deviceModel *model.Device
 	query := db.Where("uuid = ?", uuid).First(&deviceModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if boolean.IsTrue(deviceModel.CreatedFromAutoMapping) && !fromAm {
+	if boolean.IsTrue(deviceModel.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't update auto-mapped device")
 	}
 	if len(body.Tags) > 0 {
@@ -83,7 +83,7 @@ func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *m
 }
 
 func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Device, error) {
-	return d.UpdateDeviceTransaction(d.DB, uuid, body, false)
+	return d.UpdateDeviceTransaction(d.DB, uuid, body, true)
 }
 
 // UpdateDeviceErrors will only update the CommonFault properties of the device, all other properties won't be updated

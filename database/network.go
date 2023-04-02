@@ -111,13 +111,13 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 	return d.CreateNetworkTransaction(d.DB, body)
 }
 
-func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *model.Network, fromAm bool) (*model.Network, error) {
+func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *model.Network, checkAm bool) (*model.Network, error) {
 	var networkModel *model.Network
 	query := db.Where("uuid = ?", uuid).First(&networkModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if boolean.IsTrue(networkModel.CreatedFromAutoMapping) && !fromAm {
+	if boolean.IsTrue(networkModel.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't update auto-mapped network")
 	}
 	if len(body.Tags) > 0 {
@@ -134,7 +134,7 @@ func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *
 }
 
 func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
-	return d.UpdateNetworkTransaction(d.DB, uuid, body, false)
+	return d.UpdateNetworkTransaction(d.DB, uuid, body, true)
 }
 
 // UpdateNetworkErrors will only update the CommonFault properties of the network, all other properties won't be updated.

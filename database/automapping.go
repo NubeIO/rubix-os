@@ -42,6 +42,7 @@ func (d *GormDatabase) CreateNetworksAutoMappings(fnName string, networks []*mod
 }
 
 func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*model.Network, level interfaces.Level) error {
+	doAutoMapping := false
 	var amNetworks []*interfaces.AutoMappingNetwork
 	fn, fnError := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(fnName)})
 
@@ -75,6 +76,8 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 			network.ConnectionMessage = nstring.New(nstring.NotAvailable)
 			_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
 		}
+
+		doAutoMapping = true // this is the case where it has auto_mapping creator with valid flow_network
 
 		var amDevices []*interfaces.AutoMappingDevice
 		deviceUUIDToStreamUUIDMap, err := d.createAutoMappingStreams(fn, network, network.Devices)
@@ -141,13 +144,7 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 		amNetworks = append(amNetworks, amNetwork)
 	}
 
-	// this occurs when there is:
-	//    - no fn exist with that <fn.name> &
-	//    - such <fn.name> exist only on network which is created_from_auto_mapping
-	// when we have this:
-	//    - when we rename the <fn.name>
-	// so, treat such errors as non-error
-	if fnError != nil {
+	if !doAutoMapping {
 		return nil
 	}
 
@@ -264,7 +261,7 @@ func (d *GormDatabase) updateDevicesConnectionsInCloneSide(cli *client.FlowClien
 				device.ConnectionMessage = nstring.New(nstring.NotAvailable)
 				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
 
-				d.updatePointsConnectionsInCloneSide(tx, cli, network, device)
+				d.updatePointsConnectionsInCloneSide(tx, cli, device)
 			}
 		}(device, tx)
 		wg.Wait()
@@ -283,7 +280,7 @@ func (d *GormDatabase) updateDevicesConnectionsInCloneSide(cli *client.FlowClien
 	tx.Commit()
 }
 
-func (d *GormDatabase) updatePointsConnectionsInCloneSide(tx *gorm.DB, cli *client.FlowClient, network *model.Network, device *model.Device) {
+func (d *GormDatabase) updatePointsConnectionsInCloneSide(tx *gorm.DB, cli *client.FlowClient, device *model.Device) {
 	var wg sync.WaitGroup
 	for _, point := range device.Points {
 		wg.Add(1)
@@ -295,7 +292,6 @@ func (d *GormDatabase) updatePointsConnectionsInCloneSide(tx *gorm.DB, cli *clie
 				point.ConnectionMessage = nstring.New("Its point creator has been already deleted, manually delete it")
 				_ = UpdatePointConnectionErrorsTransaction(tx, point.UUID, point)
 			} else if boolean.IsFalse(point.AutoMappingEnable) && boolean.IsTrue(point.CreatedFromAutoMapping) {
-				fmt.Println("Here I am....", point.UUID)
 				point.Connection = connection.Broken.String()
 				point.ConnectionMessage = nstring.New("Its point parent auto-mapping is turned off, delete manually if you want")
 				_ = UpdatePointConnectionErrorsTransaction(tx, point.UUID, point)
@@ -403,25 +399,23 @@ func (d *GormDatabase) createAutoMappingStreams(flowNetwork *model.FlowNetwork, 
 
 	// swap back the names
 	for _, device := range devices {
-		if boolean.IsTrue(device.AutoMappingEnable) {
-			streamName := getAutoMappedStreamName(flowNetwork.Name, network.Name, device.Name)
-			tempStreamName := getTempAutoMappedName(streamName)
-			if err := tx.Model(&model.Stream{}).
-				Where("name = ? AND created_from_auto_mapping IS TRUE", tempStreamName).
-				Update("name", streamName).
-				Error; err != nil {
-				tx.Rollback()
-				errMsg := fmt.Sprintf("update stream: %s", err.Error())
-				amRes := interfaces.AutoMappingResponse{
-					NetworkUUID: device.NetworkUUID,
-					DeviceUUID:  device.UUID,
-					HasError:    true,
-					Error:       errMsg,
-					Level:       interfaces.Device,
-				}
-				d.updateCascadeConnectionError(d.DB, &amRes)
-				return nil, err
+		streamName := getAutoMappedStreamName(flowNetwork.Name, network.Name, device.Name)
+		tempStreamName := getTempAutoMappedName(streamName)
+		if err := tx.Model(&model.Stream{}).
+			Where("name = ? AND created_from_auto_mapping IS TRUE", tempStreamName).
+			Update("name", streamName).
+			Error; err != nil {
+			tx.Rollback()
+			errMsg := fmt.Sprintf("update stream: %s", err.Error())
+			amRes := interfaces.AutoMappingResponse{
+				NetworkUUID: device.NetworkUUID,
+				DeviceUUID:  device.UUID,
+				HasError:    true,
+				Error:       errMsg,
+				Level:       interfaces.Device,
 			}
+			d.updateCascadeConnectionError(d.DB, &amRes)
+			return nil, err
 		}
 	}
 	tx.Commit()
@@ -457,14 +451,12 @@ func (d *GormDatabase) createPointsAutoMappingProducers(streamUUID string, point
 
 	// swap back the names
 	for _, point := range points {
-		if boolean.IsTrue(point.AutoMappingEnable) {
-			if err := tx.Model(&model.Producer{}).
-				Where("producer_thing_uuid = ? AND created_from_auto_mapping IS TRUE", point.UUID).
-				Update("name", point.Name).
-				Error; err != nil {
-				tx.Rollback()
-				return nil, err
-			}
+		if err := tx.Model(&model.Producer{}).
+			Where("producer_thing_uuid = ? AND created_from_auto_mapping IS TRUE", point.UUID).
+			Update("name", point.Name).
+			Error; err != nil {
+			tx.Rollback()
+			return nil, err
 		}
 	}
 	tx.Commit()

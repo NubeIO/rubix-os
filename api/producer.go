@@ -34,7 +34,7 @@ type ProducerDatabase interface {
 	GetProducer(uuid string, args Args) (*model.Producer, error)
 	GetOneProducerByArgs(args Args) (*model.Producer, error)
 	CreateProducer(body *model.Producer) (*model.Producer, error)
-	UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error)
+	UpdateProducer(uuid string, body *model.Producer, checkAutoMap bool) (*model.Producer, error)
 	DeleteProducer(uuid string) (bool, error)
 	SyncProducerWriterClones(uuid string) ([]*interfaces.SyncModel, error)
 }
@@ -74,7 +74,7 @@ func (j *ProducerAPI) CreateProducer(ctx *gin.Context) {
 func (j *ProducerAPI) UpdateProducer(ctx *gin.Context) {
 	body, _ := getBODYProducer(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateProducer(uuid, body)
+	q, err := j.DB.UpdateProducer(uuid, body, true)
 	ResponseHandler(q, err, ctx)
 }
 

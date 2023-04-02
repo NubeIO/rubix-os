@@ -98,12 +98,12 @@ func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error) {
+func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer, checkAm bool) (*model.Consumer, error) {
 	var consumerModel *model.Consumer
 	if err := d.DB.Where("uuid = ?", uuid).First(&consumerModel).Error; err != nil {
 		return nil, err
 	}
-	if boolean.IsTrue(consumerModel.CreatedFromAutoMapping) {
+	if boolean.IsTrue(consumerModel.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't update auto-mapped consumer")
 	}
 	if len(body.Tags) > 0 {
@@ -154,7 +154,7 @@ func (d *GormDatabase) SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel
 }
 
 func (d *GormDatabase) syncWriter(writer *model.Writer, channel chan *interfaces.SyncModel) {
-	_, err := d.UpdateWriter(writer.UUID, writer)
+	_, err := d.UpdateWriter(writer.UUID, writer, false)
 	var output interfaces.SyncModel
 	if err != nil {
 		writer.Connection = connection.Broken.String()

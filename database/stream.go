@@ -79,12 +79,12 @@ func (d *GormDatabase) GetFlowNetworksFromStreamUUID(streamUUID string) (*[]mode
 	return flowNetworks, nil
 }
 
-func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Stream, error) {
+func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream, checkAm bool) (*model.Stream, error) {
 	var streamModel *model.Stream
 	if err := d.DB.Preload("FlowNetworks").Where("uuid = ?", uuid).First(&streamModel).Error; err != nil {
 		return nil, err
 	}
-	if boolean.IsTrue(streamModel.CreatedFromAutoMapping) {
+	if boolean.IsTrue(streamModel.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't update auto-mapped stream")
 	}
 	if len(body.FlowNetworks) > 0 {

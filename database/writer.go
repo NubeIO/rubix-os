@@ -136,13 +136,13 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
+func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer, checkAm bool) (*model.Writer, error) {
 	var writerModel *model.Writer
 	query := d.DB.Where("uuid = ?", uuid).First(&writerModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if boolean.IsTrue(writerModel.CreatedFromAutoMapping) {
+	if boolean.IsTrue(writerModel.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't update auto-mapped writer")
 	}
 	body.DataStore = nil
