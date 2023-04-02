@@ -46,29 +46,33 @@ type AutoMapping struct {
 }
 
 type AutoMappingNetwork struct {
-	Enable   bool                    `json:"enable"`
-	UUID     string                  `json:"uuid"`
-	Name     string                  `json:"name"`
-	Tags     []*model.Tag            `json:"tags"`
-	MetaTags []*model.NetworkMetaTag `json:"meta_tags"`
-	Devices  []*AutoMappingDevice    `json:"devices"`
+	Enable            bool                    `json:"enable"`
+	AutoMappingEnable bool                    `json:"auto_mapping_enable"`
+	UUID              string                  `json:"uuid"`
+	Name              string                  `json:"name"`
+	Tags              []*model.Tag            `json:"tags"`
+	MetaTags          []*model.NetworkMetaTag `json:"meta_tags"`
+	Devices           []*AutoMappingDevice    `json:"devices"`
 }
 
 type AutoMappingDevice struct {
-	Enable     bool                   `json:"enable"`
-	UUID       string                 `json:"uuid"`
-	Name       string                 `json:"name"`
-	Tags       []*model.Tag           `json:"tags"`
-	MetaTags   []*model.DeviceMetaTag `json:"meta_tags"`
-	Points     []*AutoMappingPoint    `json:"points"`
-	StreamUUID string                 `json:"stream_uuid"`
+	Enable            bool                   `json:"enable"`
+	AutoMappingEnable bool                   `json:"auto_mapping_enable"`
+	UUID              string                 `json:"uuid"`
+	Name              string                 `json:"name"`
+	Tags              []*model.Tag           `json:"tags"`
+	MetaTags          []*model.DeviceMetaTag `json:"meta_tags"`
+	Points            []*AutoMappingPoint    `json:"points"`
+	StreamUUID        string                 `json:"stream_uuid"`
 }
 
 type AutoMappingPoint struct {
-	Enable       bool                  `json:"enable"`
-	UUID         string                `json:"uuid"`
-	Name         string                `json:"name"`
-	Tags         []*model.Tag          `json:"tags"`
-	MetaTags     []*model.PointMetaTag `json:"meta_tags"`
-	ProducerUUID string                `json:"product_uuid"`
+	Enable            bool                  `json:"enable"`
+	AutoMappingEnable bool                  `json:"auto_mapping_enable"`
+	EnableWriteable   bool                  `json:"enable_writeable"`
+	UUID              string                `json:"uuid"`
+	Name              string                `json:"name"`
+	Tags              []*model.Tag          `json:"tags"`
+	MetaTags          []*model.PointMetaTag `json:"meta_tags"`
+	ProducerUUID      string                `json:"product_uuid"`
 }
