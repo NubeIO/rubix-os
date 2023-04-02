@@ -11,7 +11,7 @@ func (inst *FlowClient) CreateAutoMapping(body *interfaces.AutoMapping) interfac
 		SetBody(body).
 		Post("/api/auto_mappings"))
 	if err != nil {
-		return interfaces.AutoMappingResponse{HasError: true, Error: err.Error()}
+		return interfaces.AutoMappingResponse{HasError: true, NetworkUUID: body.Networks[0].UUID, Error: err.Error()}
 	}
 	return *resp.Result().(*interfaces.AutoMappingResponse)
 }

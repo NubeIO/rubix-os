@@ -53,6 +53,7 @@ type AutoMappingNetwork struct {
 	Tags              []*model.Tag            `json:"tags"`
 	MetaTags          []*model.NetworkMetaTag `json:"meta_tags"`
 	Devices           []*AutoMappingDevice    `json:"devices"`
+	CreateNetwork     bool                    `json:"create_network"`
 }
 
 type AutoMappingDevice struct {

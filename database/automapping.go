@@ -19,10 +19,6 @@ import (
 )
 
 func (d *GormDatabase) CreateNetworksAutoMappings(fnName string, networks []*model.Network, level interfaces.Level) error {
-	// delete all stream if it doesn't exist
-	// disable stream if enable_auto_mapping = false
-	// disable producer if enable_auto_mapping = false
-
 	if fnName == "" {
 		return nil
 	}
@@ -62,6 +58,7 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 				Tags:              network.Tags,
 				MetaTags:          network.MetaTags,
 				Devices:           nil,
+				CreateNetwork:     false,
 			}
 			amNetworks = append(amNetworks, amNetwork)
 			continue
@@ -149,6 +146,7 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 			Tags:              network.Tags,
 			MetaTags:          network.MetaTags,
 			Devices:           amDevices,
+			CreateNetwork:     true,
 		}
 		amNetworks = append(amNetworks, amNetwork)
 	}
@@ -233,7 +231,15 @@ func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network
 	net, connectionErr, _ := cli.GetNetworkV2(*network.AutoMappingUUID)
 	if net == nil && connectionErr == nil {
 		network.Connection = connection.Broken.String()
-		network.ConnectionMessage = nstring.New("Its network creator has been already deleted, manually delete it")
+		network.ConnectionMessage = nstring.New("Its network creator has been already deleted, delete manually if you want")
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
+	} else if net != nil && net.AutoMappingFlowNetworkName != network.AutoMappingFlowNetworkName {
+		network.Connection = connection.Broken.String()
+		msg := fmt.Sprintf(
+			"Its network creator '%s' is pointing different '%s' flow network, delete manually if you want",
+			net.Name, net.AutoMappingFlowNetworkName,
+		)
+		network.ConnectionMessage = nstring.New(msg)
 		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
 	} else if boolean.IsFalse(network.AutoMappingEnable) && boolean.IsTrue(network.CreatedFromAutoMapping) {
 		network.Connection = connection.Broken.String()

@@ -21,42 +21,6 @@ func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) *i
 		}
 	}()
 
-	// level => network (it has all networks)
-	//    doesn't exist:
-	//       - delete stream_clones (it does cascade delete of consumers and writers)
-	//       - delete networks
-	//       - delete devices
-	//       - delete points
-	//    exists:
-	//       - stream_clones.enable = <boolean>
-	//       - consumers.enable = <boolean>
-	//       - network.enable = <boolean>
-	//       - device.enable = <boolean>
-	//       - point.enable = <boolean>
-	//
-	// level => device (it has all devices)
-	//    doesn't exist:
-	//       - delete stream_clones (it does cascade delete of consumers and writers)
-	//       - delete streams writers on other side (not needed, coz it already gets deleted)
-	//       - delete devices
-	//       - delete points
-	//    exists:
-	//       - stream_clones.enable = <boolean>
-	//       - consumers.enable = <boolean>
-	//       - device.enable = <boolean>
-	//       - point.enable = <boolean>
-	//
-	// level => point (it has all points)
-	//    doesn't exist:
-	//       - delete points
-	//       - delete consumers (it does cascade delete of writer)
-	//       - delete writer_clones on fn side
-	//    exists:
-	//       - stream_clones.enable = <boolean>
-	//       - consumers.enable = <boolean>
-	//       - device.enable = <boolean>
-	//       - point.enable = <boolean>
-
 	d.cleanAutoMappedModels(tx, autoMapping)
 	d.clearStreamClonesAndConsumers(tx)
 
@@ -83,11 +47,9 @@ func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) *i
 func (d *GormDatabase) cleanAutoMappedModels(tx *gorm.DB, autoMapping *interfaces.AutoMapping) {
 	// delete those which is not deleted when we delete edge
 	// level => network (it has all networks)
-	//    doesn't exist:
-	//       - delete stream_clones (it does cascade delete of consumers and writers)
-	//       - delete networks
-	//       - delete devices
-	//       - delete points
+	//    - delete networks
+	//    - delete devices
+	//    - delete points
 	var edgeNetworks []string
 	var edgeDevices []string
 	var edgePoints []string
@@ -169,7 +131,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 
 	network, _ = d.GetOneNetworkByArgs(api.Args{AutoMappingUUID: nstring.New(amNetwork.UUID), GlobalUUID: nstring.New(globalUUID)})
 	if network == nil {
-		if amNetwork.AutoMappingEnable {
+		if amNetwork.AutoMappingEnable && amNetwork.CreateNetwork {
 			network = &model.Network{}
 			network.Name = getTempAutoMappedName(networkName)
 			d.setNetworkModel(fnc, amNetwork, network, globalUUID)
