@@ -232,7 +232,7 @@ func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*fl
 	createCOVHistory bool, currentWriterUUID *string) error {
 	producerModelBody := new(model.Producer)
 	producerModelBody.CurrentWriterUUID = currentWriterUUID
-	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &uuid})
+	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &uuid, Enable: boolean.NewTrue()})
 	for _, producer := range producers {
 		err := d.producerPointWrite(producer.UUID, priority, presentValue, producerModelBody, createCOVHistory)
 		if err != nil {
@@ -313,7 +313,7 @@ func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Produce
 	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
 	for _, fn := range stream.FlowNetworks {
 		// TODO: wc.FlowFrameworkUUID == "" remove from condition; it's here coz old deployment doesn't used to have that value
-		if wc.FlowFrameworkUUID == "" || fn.UUID == wc.FlowFrameworkUUID {
+		if (wc.FlowFrameworkUUID == "" || fn.UUID == wc.FlowFrameworkUUID) && boolean.IsTrue(stream.Enable) {
 			cli := client.NewFlowClientCliFromFN(fn)
 			_ = cli.SyncCOV(wc.SourceUUID, body)
 		}

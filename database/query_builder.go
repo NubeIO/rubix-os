@@ -120,6 +120,13 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	if args.AutoMappingDeviceUUID != nil {
 		query = query.Where("auto_mapping_device_uuid = ?", *args.AutoMappingDeviceUUID)
 	}
+	if args.Enable != nil {
+		if *args.Enable {
+			query = query.Where("enable IS TRUE")
+		} else {
+			query = query.Where("enable IS FALSE")
+		}
+	}
 	return query
 }
 
@@ -161,6 +168,13 @@ func buildConsumerQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
 	if args.ProducerThingUUID != nil {
 		query = query.Where("producer_thing_uuid = ?", *args.ProducerThingUUID)
 	}
+	if args.Enable != nil {
+		if *args.Enable {
+			query = query.Where("enable IS TRUE")
+		} else {
+			query = query.Where("enable IS FALSE")
+		}
+	}
 	return query
 }
 
@@ -184,6 +198,13 @@ func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 	}
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
+	}
+	if args.Enable != nil {
+		if *args.Enable {
+			query = query.Where("enable IS TRUE")
+		} else {
+			query = query.Where("enable IS FALSE")
+		}
 	}
 	return query
 }

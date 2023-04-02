@@ -1,6 +1,7 @@
 package api
 
 type Args struct {
+	Enable                 *bool
 	Sort                   string
 	Order                  string
 	Offset                 string

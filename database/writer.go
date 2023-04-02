@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -177,12 +178,27 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 	output.UUID = uuid
 	output.Action = body.Action
 	if err != nil {
+		log.Warn(err.Error())
 		output.IsError = true
 		output.Message = nstring.NewStringAddress(err.Error())
 		return output
 	}
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
+	if boolean.IsFalse(consumer.Enable) {
+		msg := fmt.Sprintf("consumer %s with uuid %s is not enable to write", consumer.ProducerThingName, consumer.UUID)
+		log.Warn(msg)
+		output.IsError = true
+		output.Message = nstring.New(msg)
+		return output
+	}
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
+	if boolean.IsFalse(streamClone.Enable) {
+		msg := fmt.Sprintf("stream clone %s with uuid %s is not enable to write", streamClone.Name, streamClone.UUID)
+		log.Warn(msg)
+		output.IsError = true
+		output.Message = nstring.New(msg)
+		return output
+	}
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	cli := client.NewFlowClientCliFromFNC(fnc)
 	if body.Action == model.CommonNaming.Sync {
