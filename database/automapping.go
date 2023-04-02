@@ -231,7 +231,11 @@ func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network
 	cli := client.NewFlowClientCliFromFNC(fnc)
 
 	net, connectionErr, _ := cli.GetNetworkV2(*network.AutoMappingUUID)
-	if net == nil && connectionErr == nil {
+	if connectionErr != nil {
+		network.Connection = connection.Broken.String()
+		network.ConnectionMessage = nstring.New("connection error: " + connectionErr.Error())
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
+	} else if net == nil {
 		network.Connection = connection.Broken.String()
 		network.ConnectionMessage = nstring.New("Its network creator has been already deleted, delete manually if you want")
 		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
@@ -252,20 +256,26 @@ func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network
 		network.ConnectionMessage = nstring.New(nstring.NotAvailable)
 		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
 	}
-
-	d.updateDevicesConnectionsInCloneSide(cli, network)
+	tx := d.DB.Begin()
+	updateDevicesConnectionsInCloneSide(tx, cli, network)
+	tx.Commit()
 	return nil
 }
 
-func (d *GormDatabase) updateDevicesConnectionsInCloneSide(cli *client.FlowClient, network *model.Network) {
+func updateDevicesConnectionsInCloneSide(tx *gorm.DB, cli *client.FlowClient, network *model.Network) {
 	var wg sync.WaitGroup
-	tx := d.DB.Begin()
+	pointsUUIDs, pointConnectionErr, _ := cli.GetPointsBulkUUIDs()
+
 	for _, device := range network.Devices {
 		wg.Add(1)
 		go func(device *model.Device, tx *gorm.DB) {
 			defer wg.Done()
 			dev, connectionErr, _ := cli.GetDeviceV2(*device.AutoMappingUUID)
-			if dev == nil && connectionErr == nil {
+			if connectionErr != nil {
+				device.Connection = connection.Broken.String()
+				device.ConnectionMessage = nstring.New("connection error: " + connectionErr.Error())
+				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
+			} else if dev == nil {
 				device.Connection = connection.Broken.String()
 				device.ConnectionMessage = nstring.New("Its device creator has been already deleted, manually delete it")
 				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
@@ -278,7 +288,7 @@ func (d *GormDatabase) updateDevicesConnectionsInCloneSide(cli *client.FlowClien
 				device.ConnectionMessage = nstring.New(nstring.NotAvailable)
 				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
 
-				d.updatePointsConnectionsInCloneSide(tx, cli, device)
+				updatePointsConnectionsInCloneSide(tx, device, pointsUUIDs, pointConnectionErr)
 			}
 		}(device, tx)
 		wg.Wait()
@@ -294,32 +304,25 @@ func (d *GormDatabase) updateDevicesConnectionsInCloneSide(cli *client.FlowClien
 		networkModel[0].ConnectionMessage = deviceModel[0].ConnectionMessage
 		_ = UpdateNetworkConnectionErrorsTransaction(tx, network.UUID, networkModel[0])
 	}
-	tx.Commit()
 }
 
-func (d *GormDatabase) updatePointsConnectionsInCloneSide(tx *gorm.DB, cli *client.FlowClient, device *model.Device) {
-	var wg sync.WaitGroup
+func updatePointsConnectionsInCloneSide(tx *gorm.DB, device *model.Device, pointsUUIDs *[]string, pointConnectionErr error) {
 	for _, point := range device.Points {
-		wg.Add(1)
-		go func(point *model.Point, tx *gorm.DB) {
-			defer wg.Done()
-			pnt, connectionErr, _ := cli.GetPointV2(*point.AutoMappingUUID)
-			if pnt == nil && connectionErr == nil {
-				point.Connection = connection.Broken.String()
-				point.ConnectionMessage = nstring.New("Its point creator has been already deleted, manually delete it")
-				_ = UpdatePointConnectionErrorsTransaction(tx, point.UUID, point)
-			} else if boolean.IsFalse(point.AutoMappingEnable) && boolean.IsTrue(point.CreatedFromAutoMapping) {
-				point.Connection = connection.Broken.String()
-				point.ConnectionMessage = nstring.New("Its point parent auto-mapping is turned off, delete manually if you want")
-				_ = UpdatePointConnectionErrorsTransaction(tx, point.UUID, point)
-			} else {
-				point.Connection = connection.Connected.String()
-				point.ConnectionMessage = nstring.New(nstring.NotAvailable)
-				_ = UpdatePointConnectionErrorsTransaction(tx, point.UUID, point)
-			}
-		}(point, tx)
+		if pointConnectionErr != nil {
+			point.Connection = connection.Broken.String()
+			point.ConnectionMessage = nstring.New("connection error: " + pointConnectionErr.Error())
+		} else if pointsUUIDs == nil || !nstring.ContainsString(*pointsUUIDs, *point.AutoMappingUUID) {
+			point.Connection = connection.Broken.String()
+			point.ConnectionMessage = nstring.New("Its point creator has been already deleted, manually delete it")
+		} else if boolean.IsFalse(point.AutoMappingEnable) && boolean.IsTrue(point.CreatedFromAutoMapping) {
+			point.Connection = connection.Broken.String()
+			point.ConnectionMessage = nstring.New("Its point parent auto-mapping is turned off, delete manually if you want")
+		} else {
+			point.Connection = connection.Connected.String()
+			point.ConnectionMessage = nstring.New(nstring.NotAvailable)
+		}
+		_ = UpdatePointConnectionErrorsTransaction(tx, point.UUID, point)
 	}
-	wg.Wait()
 
 	// update parent with its child error
 	var deviceModel []*model.Device

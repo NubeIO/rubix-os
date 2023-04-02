@@ -347,6 +347,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		pointRoutes := apiRoutes.Group("/points")
 		{
 			pointRoutes.GET("", pointHandler.GetPoints)
+			pointRoutes.GET("/bulk/uuids", pointHandler.GetPointsBulkUUIs)
 			pointRoutes.POST("/bulk", pointHandler.GetPointsBulk)
 			pointRoutes.GET("/:uuid", pointHandler.GetPoint)
 			pointRoutes.GET("/name", pointHandler.GetPointByNameArgs) // TODO remove

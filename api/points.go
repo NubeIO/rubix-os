@@ -8,6 +8,7 @@ import (
 type PointDatabase interface {
 	GetPoints(args Args) ([]*model.Point, error)
 	GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point, error)
+	GetPointsBulkUUIs() ([]string, error)
 	GetPoint(uuid string, args Args) (*model.Point, error)
 	CreatePoint(body *model.Point) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point, buffer bool) (*model.Point, error)
@@ -33,6 +34,11 @@ type PointAPI struct {
 func (a *PointAPI) GetPoints(ctx *gin.Context) {
 	args := buildPointArgs(ctx)
 	q, err := a.DB.GetPoints(args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *PointAPI) GetPointsBulkUUIs(ctx *gin.Context) {
+	q, err := a.DB.GetPointsBulkUUIs()
 	ResponseHandler(q, err, ctx)
 }
 

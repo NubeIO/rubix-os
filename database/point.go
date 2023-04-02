@@ -37,6 +37,14 @@ func marshallCachePoints(points []*model.Point, args api.Args) {
 	}
 }
 
+func (d *GormDatabase) GetPointsBulkUUIs() ([]string, error) {
+	var uuids []string
+	if err := d.DB.Model(&model.Point{}).Select("uuid").Find(&uuids).Error; err != nil {
+		return nil, err
+	}
+	return uuids, nil
+}
+
 func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point, error) {
 	var pointsModel []*model.Point
 	args := api.Args{WithPriority: true}
