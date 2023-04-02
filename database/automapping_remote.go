@@ -451,7 +451,7 @@ func (d *GormDatabase) setDeviceModel(networkUUID string, amDevice *interfaces.A
 
 func (d *GormDatabase) setStreamCloneModel(fnc *model.FlowNetworkClone, device *model.Device,
 	amNetwork *interfaces.AutoMappingNetwork, amDevice *interfaces.AutoMappingDevice, streamClone *model.StreamClone) {
-	streamClone.Name = getAutoMappedStreamName(fnc.Name, amNetwork.Name, amDevice.Name)
+	streamClone.Name = getTempAutoMappedName(getAutoMappedStreamName(fnc.Name, amNetwork.Name, amDevice.Name))
 	streamClone.Enable = boolean.New(amNetwork.Enable && amNetwork.AutoMappingEnable && amDevice.Enable && amDevice.AutoMappingEnable)
 	streamClone.SourceUUID = amDevice.StreamUUID
 	streamClone.FlowNetworkCloneUUID = fnc.UUID

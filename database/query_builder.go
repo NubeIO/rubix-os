@@ -94,8 +94,8 @@ func (d *GormDatabase) buildFlowNetworkCloneQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
-	query := d.DB
+func buildStreamQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.WithFlowNetworks {
 		query = query.Preload("FlowNetworks")
 	}
@@ -128,6 +128,10 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 		}
 	}
 	return query
+}
+
+func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
+	return buildStreamQueryTransaction(d.DB, args)
 }
 
 func buildStreamCloneQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {

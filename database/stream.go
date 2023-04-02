@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"gorm.io/gorm"
 )
 
 func (d *GormDatabase) GetStreams(args api.Args) ([]*model.Stream, error) {
@@ -42,13 +43,17 @@ func (d *GormDatabase) GetStreamByArgs(args api.Args) ([]*model.Stream, error) {
 	return streamsModel, nil
 }
 
-func (d *GormDatabase) GetOneStreamByArgs(args api.Args) (*model.Stream, error) {
+func GetOneStreamByArgsTransaction(db *gorm.DB, args api.Args) (*model.Stream, error) {
 	var streamModel *model.Stream
-	query := d.buildStreamQuery(args)
+	query := buildStreamQueryTransaction(db, args)
 	if err := query.First(&streamModel).Error; err != nil {
 		return nil, err
 	}
 	return streamModel, nil
+}
+
+func (d *GormDatabase) GetOneStreamByArgs(args api.Args) (*model.Stream, error) {
+	return GetOneStreamByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
