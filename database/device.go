@@ -135,6 +135,8 @@ func (d *GormDatabase) SyncDevicePoints(uuid string, args api.Args) error {
 	}
 	args.WithDevices = true
 	args.WithPoints = true
+	args.WithTags = true
+	args.WithMetaTags = true
 	network, _ := d.GetNetwork(device.NetworkUUID, args)
 	networks := make([]*model.Network, 0)
 	networks = append(networks, network)

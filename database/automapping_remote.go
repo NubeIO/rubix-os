@@ -173,7 +173,12 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 			network = &model.Network{}
 			network.Name = getTempAutoMappedName(networkName)
 			d.setNetworkModel(fnc, amNetwork, network, globalUUID)
-			network, err = d.CreateNetworkTransaction(tx, network) //todo meta-tags
+			network, err = d.CreateNetworkTransaction(tx, network)
+			if err != nil {
+				amRes.Error = err.Error()
+				return amRes
+			}
+			_, err = CreateNetworkMetaTagsTransaction(tx, network.UUID, amNetwork.MetaTags)
 			if err != nil {
 				amRes.Error = err.Error()
 				return amRes
@@ -187,7 +192,12 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 	} else {
 		network.Name = getTempAutoMappedName(networkName)
 		d.setNetworkModel(fnc, amNetwork, network, globalUUID)
-		network, err = d.UpdateNetworkTransaction(tx, network.UUID, network, false) //todo meta-tags
+		network, err = d.UpdateNetworkTransaction(tx, network.UUID, network, false)
+		if err != nil {
+			amRes.Error = err.Error()
+			return amRes
+		}
+		_, err = CreateNetworkMetaTagsTransaction(tx, network.UUID, amNetwork.MetaTags)
 		if err != nil {
 			amRes.Error = err.Error()
 			return amRes
@@ -204,8 +214,13 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 			if amDevice.AutoMappingEnable {
 				device = &model.Device{}
 				device.Name = getTempAutoMappedName(amDevice.Name)
-				d.setDeviceModel(network.UUID, amDevice, device) //todo meta-tags
+				d.setDeviceModel(network.UUID, amDevice, device)
 				if device, err = d.CreateDeviceTransaction(tx, device, false); err != nil {
+					amRes.Error = err.Error()
+					return amRes
+				}
+				_, err = CreateDeviceMetaTagsTransaction(tx, device.UUID, amDevice.MetaTags)
+				if err != nil {
 					amRes.Error = err.Error()
 					return amRes
 				}
@@ -214,12 +229,16 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 			}
 		} else {
 			device.Name = getTempAutoMappedName(amDevice.Name)
-			d.setDeviceModel(network.UUID, amDevice, device) //todo meta-tags
+			d.setDeviceModel(network.UUID, amDevice, device)
 			if device, err = d.UpdateDeviceTransaction(tx, device.UUID, device, false); err != nil {
 				amRes.Error = err.Error()
 				return amRes
 			}
-			//_, _ = d.CreateDeviceMetaTags(device.UUID, amDevice.MetaTags)//todo meta-tags
+			_, err = CreateDeviceMetaTagsTransaction(tx, device.UUID, amDevice.MetaTags)
+			if err != nil {
+				amRes.Error = err.Error()
+				return amRes
+			}
 		}
 
 		streamClone, _ := GetOneStreamCloneByArgTransaction(tx, api.Args{SourceUUID: nstring.New(amDevice.StreamUUID)})
@@ -245,8 +264,13 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 			if point == nil {
 				if amPoint.AutoMappingEnable {
 					point = &model.Point{}
-					d.setPointModel(device.UUID, amPoint, point) //todo meta-tags
+					d.setPointModel(device.UUID, amPoint, point)
 					if _, err = d.CreatePointTransaction(tx, point, false); err != nil {
+						amRes.Error = err.Error()
+						return amRes
+					}
+					_, err = CreatePointMetaTagsTransaction(tx, point.UUID, amPoint.MetaTags)
+					if err != nil {
 						amRes.Error = err.Error()
 						return amRes
 					}
@@ -254,8 +278,13 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 					continue
 				}
 			} else {
-				d.setPointModel(device.UUID, amPoint, point) //todo meta-tags
+				d.setPointModel(device.UUID, amPoint, point)
 				if point, err = d.UpdatePointTransactionForAutoMapping(tx, point.UUID, point); err != nil {
+					amRes.Error = err.Error()
+					return amRes
+				}
+				_, err = CreatePointMetaTagsTransaction(tx, point.UUID, amPoint.MetaTags)
+				if err != nil {
 					amRes.Error = err.Error()
 					return amRes
 				}

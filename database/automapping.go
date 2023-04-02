@@ -58,6 +58,8 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 				AutoMappingEnable: boolean.IsTrue(network.AutoMappingEnable),
 				UUID:              network.UUID,
 				Name:              network.Name,
+				Tags:              network.Tags,
+				MetaTags:          network.MetaTags,
 				Devices:           nil,
 			}
 			amNetworks = append(amNetworks, amNetwork)
@@ -139,6 +141,8 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 			AutoMappingEnable: boolean.IsTrue(network.AutoMappingEnable),
 			UUID:              network.UUID,
 			Name:              network.Name,
+			Tags:              network.Tags,
+			MetaTags:          network.MetaTags,
 			Devices:           amDevices,
 		}
 		amNetworks = append(amNetworks, amNetwork)
