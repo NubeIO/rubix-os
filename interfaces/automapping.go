@@ -75,4 +75,5 @@ type AutoMappingPoint struct {
 	Tags              []*model.Tag          `json:"tags"`
 	MetaTags          []*model.PointMetaTag `json:"meta_tags"`
 	ProducerUUID      string                `json:"product_uuid"`
+	Priority          model.Priority        `json:"priority"`
 }

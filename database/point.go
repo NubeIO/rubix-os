@@ -291,6 +291,51 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, currentW
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
+// TODO: update this with better code
+func updateSoftPointValueTransaction(db *gorm.DB, pointModel *model.Point, priority model.Priority) {
+	priorityMap := priorityarray.ConvertToMap(priority)
+
+	if pointModel.PointPriorityArrayMode == "" {
+		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
+	}
+
+	pointModel, _, presentValue, writeValue, _ := updatePriorityTransaction(db, pointModel, &priorityMap, true)
+	ov := float.Copy(presentValue)
+	pointModel.OriginalValue = ov
+	wv := float.Copy(writeValue)
+	pointModel.WriteValueOriginal = wv
+
+	presentValueTransformFault := false
+	transform := PointValueTransformOnRead(presentValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor,
+		pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
+	presentValue = transform
+	val, err := pointUnits(presentValue, pointModel.Unit, pointModel.UnitTo)
+	if err != nil {
+		pointModel.CommonFault.InFault = true
+		pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
+		pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
+		pointModel.CommonFault.Message = fmt.Sprint("point.db updatePointValue() invalid point units. error:", err)
+		pointModel.CommonFault.LastFail = time.Now().UTC()
+		presentValueTransformFault = true
+	} else {
+		presentValue = val
+	}
+	writeValue = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
+
+	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
+		value := nmath.RoundTo(*presentValue, *pointModel.Decimal)
+		presentValue = &value
+	}
+
+	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
+	// but PresentValue should not change
+	if !presentValueTransformFault {
+		pointModel.PresentValue = presentValue
+	}
+	pointModel.WriteValue = writeValue
+	_ = db.Model(&pointModel).Select("*").Updates(&pointModel)
+}
+
 func (d *GormDatabase) updatePointValue(
 	pointModel *model.Point, priority *map[string]*float64, currentWriterUUID *string, forceWrite, writeOnDB bool) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
@@ -347,6 +392,7 @@ func (d *GormDatabase) updatePointValue(
 		// when point write gets called it should change the cache values too, otherwise it will return wrong values
 		d.updateUpdatePointBufferPoint(pointModel)
 	}
+
 	if isChange && writeOnDB {
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange, currentWriterUUID)
 		if err != nil {

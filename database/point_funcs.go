@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"strings"
 	"sync"
 	"time"
@@ -48,7 +49,7 @@ func GetPoint(uuid string, args api.Args) *model.Point {
 
 // updatePriority it updates priority array of point model
 // it attaches the point model fields values for updating it on its parent function
-func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64, writeOnDB bool) (
+func updatePriorityTransaction(db *gorm.DB, pointModel *model.Point, priority *map[string]*float64, writeOnDB bool) (
 	*model.Point, *map[string]*float64, *float64, *float64, bool) {
 	isPriorityChanged := false
 	var presentValue *float64
@@ -78,7 +79,7 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 		pointModel.Priority.P15 = nil
 		pointModel.Priority.P16 = nil
 		if writeOnDB {
-			d.DB.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&pointModel.Priority)
+			db.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&pointModel.Priority)
 		}
 	}
 
@@ -105,9 +106,9 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 				writeValue = highestValue
 			}
 		}
-		priorityMapToPatch := d.priorityMapToPatch(priorityMap)
+		priorityMapToPatch_ := priorityMapToPatch(priorityMap)
 		if writeOnDB {
-			d.DB.Model(&pointModel.Priority).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMapToPatch)
+			db.Model(&pointModel.Priority).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMapToPatch_)
 		}
 	}
 	if !presentValueFromPriority {
@@ -118,14 +119,19 @@ func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[str
 	return pointModel, priorityMap, presentValue, writeValue, isPriorityChanged
 }
 
-func (d *GormDatabase) priorityMapToPatch(priorityMap *map[string]*float64) map[string]interface{} {
-	priorityMapToPatch := map[string]interface{}{}
+func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64, writeOnDB bool) (
+	*model.Point, *map[string]*float64, *float64, *float64, bool) {
+	return updatePriorityTransaction(d.DB, pointModel, priority, writeOnDB)
+}
+
+func priorityMapToPatch(priorityMap *map[string]*float64) map[string]interface{} {
+	priorityMapToPatch_ := map[string]interface{}{}
 	if priorityMap != nil {
 		for k, v := range *priorityMap {
-			priorityMapToPatch[fmt.Sprintf("P%s", strings.Replace(k, "_", "", -1))] = v
+			priorityMapToPatch_[fmt.Sprintf("P%s", strings.Replace(k, "_", "", -1))] = v
 		}
 	}
-	return priorityMapToPatch
+	return priorityMapToPatch_
 }
 
 func (d *GormDatabase) bufferPointUpdate(uuid string, body *model.Point, point *model.Point) {

@@ -182,6 +182,8 @@ func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 }
 
 func (d *GormDatabase) SyncNetworks(args api.Args) error {
+	args.WithDevices = true
+	args.WithPoints = true
 	args.WithTags = true
 	args.WithMetaTags = true
 	networks, err := d.GetNetworks(args)
@@ -200,6 +202,7 @@ func (d *GormDatabase) SyncNetworks(args api.Args) error {
 
 func (d *GormDatabase) SyncNetworkDevices(uuid string, args api.Args) error {
 	args.WithDevices = true
+	args.WithPoints = true
 	args.WithTags = true
 	args.WithMetaTags = true
 	network, err := d.GetNetwork(uuid, args)

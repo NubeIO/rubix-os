@@ -38,6 +38,7 @@ func (d *GormDatabase) CreateNetworksAutoMappings(fnName string, networks []*mod
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -123,6 +124,7 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 					Tags:              point.Tags,
 					MetaTags:          point.MetaTags,
 					ProducerUUID:      producerUUID,
+					Priority:          *point.Priority,
 				})
 			}
 			amDevices = append(amDevices, &interfaces.AutoMappingDevice{

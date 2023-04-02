@@ -178,11 +178,6 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 				amRes.Error = err.Error()
 				return amRes
 			}
-			_, err = CreateNetworkMetaTagsTransaction(tx, network.UUID, amNetwork.MetaTags)
-			if err != nil {
-				amRes.Error = err.Error()
-				return amRes
-			}
 		} else {
 			return &interfaces.AutoMappingResponse{
 				HasError:    false,
@@ -197,11 +192,12 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 			amRes.Error = err.Error()
 			return amRes
 		}
-		_, err = CreateNetworkMetaTagsTransaction(tx, network.UUID, amNetwork.MetaTags)
-		if err != nil {
-			amRes.Error = err.Error()
-			return amRes
-		}
+	}
+
+	_, err = CreateNetworkMetaTagsTransaction(tx, network.UUID, amNetwork.MetaTags)
+	if err != nil {
+		amRes.Error = err.Error()
+		return amRes
 	}
 
 	var syncWriters []*interfaces.SyncWriter
@@ -219,11 +215,6 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 					amRes.Error = err.Error()
 					return amRes
 				}
-				_, err = CreateDeviceMetaTagsTransaction(tx, device.UUID, amDevice.MetaTags)
-				if err != nil {
-					amRes.Error = err.Error()
-					return amRes
-				}
 			} else {
 				continue
 			}
@@ -234,11 +225,12 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 				amRes.Error = err.Error()
 				return amRes
 			}
-			_, err = CreateDeviceMetaTagsTransaction(tx, device.UUID, amDevice.MetaTags)
-			if err != nil {
-				amRes.Error = err.Error()
-				return amRes
-			}
+		}
+
+		_, err = CreateDeviceMetaTagsTransaction(tx, device.UUID, amDevice.MetaTags)
+		if err != nil {
+			amRes.Error = err.Error()
+			return amRes
 		}
 
 		streamClone, _ := GetOneStreamCloneByArgTransaction(tx, api.Args{SourceUUID: nstring.New(amDevice.StreamUUID)})
@@ -269,11 +261,6 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 						amRes.Error = err.Error()
 						return amRes
 					}
-					_, err = CreatePointMetaTagsTransaction(tx, point.UUID, amPoint.MetaTags)
-					if err != nil {
-						amRes.Error = err.Error()
-						return amRes
-					}
 				} else {
 					continue
 				}
@@ -283,12 +270,16 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 					amRes.Error = err.Error()
 					return amRes
 				}
-				_, err = CreatePointMetaTagsTransaction(tx, point.UUID, amPoint.MetaTags)
-				if err != nil {
-					amRes.Error = err.Error()
-					return amRes
-				}
 			}
+
+			_, err = CreatePointMetaTagsTransaction(tx, point.UUID, amPoint.MetaTags)
+			if err != nil {
+				amRes.Error = err.Error()
+				return amRes
+			}
+
+			tx.Where("uuid = ?", point.UUID).Preload("Priority").First(&point) // to get it with priority
+			updateSoftPointValueTransaction(tx, point, amPoint.Priority)
 
 			consumer, _ := GetOneConsumerByArgsTransaction(tx, api.Args{ProducerThingUUID: nstring.New(amPoint.UUID)})
 			if consumer == nil {
