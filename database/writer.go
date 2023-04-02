@@ -297,7 +297,6 @@ func (d *GormDatabase) syncAfterCreateUpdateWriter(body *model.Writer) error {
 		ProducerUUID:      consumer.ProducerUUID,
 		WriterUUID:        body.UUID,
 		FlowFrameworkUUID: fnc.SourceUUID,
-		StreamUUID:        streamClone.SourceUUID,
 	}
 	_, err := cli.SyncWriter(&syncWriterBody)
 	return err
