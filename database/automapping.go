@@ -1,236 +1,604 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
-	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nstring"
+	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
-	"reflect"
+	"gorm.io/gorm"
+	"sync"
 )
 
-func (d *GormDatabase) CreatePointAutoMapping(point *model.Point) error {
-	if boolean.IsTrue(point.AutoMappingEnable) {
-		device, _ := d.GetDevice(point.DeviceUUID, api.Args{WithTags: true, WithMetaTags: true})
-		if boolean.IsTrue(device.AutoMappingEnable) {
-			network, _ := d.GetNetwork(device.NetworkUUID, api.Args{WithTags: true, WithMetaTags: true})
-			if boolean.IsTrue(network.AutoMappingEnable) {
-				err := d.createUpdatePointAutoMapping(network, device, point)
+func (d *GormDatabase) CreateNetworksAutoMappings(fnName string, networks []*model.Network, level interfaces.Level) error {
+	if fnName == "" {
+		return nil
+	}
+
+	d.clearStreamsAndProducers()
+
+	err := d.createNetworksAutoMappings(fnName, networks, level)
+	if err != nil {
+		return err
+	}
+
+	err = d.updateNetworksConnectionInCloneSide(fnName)
+	if err != nil {
+		return err
+	}
+
+	go d.PublishPointsList("")
+
+	return nil
+}
+
+func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*model.Network, level interfaces.Level) error {
+	doAutoMapping := false
+	var amNetworks []*interfaces.AutoMappingNetwork
+	fn, fnError := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(fnName)})
+
+	for _, network := range networks {
+		if boolean.IsTrue(network.CreatedFromAutoMapping) {
+			continue
+		}
+
+		// we are sending extra networks to make sure whether it's available or not in fn side
+		if network.AutoMappingFlowNetworkName != fnName {
+			amNetwork := &interfaces.AutoMappingNetwork{
+				Enable:            boolean.IsTrue(network.Enable),
+				AutoMappingEnable: boolean.IsTrue(network.AutoMappingEnable),
+				UUID:              network.UUID,
+				Name:              network.Name,
+				Tags:              network.Tags,
+				MetaTags:          network.MetaTags,
+				Devices:           nil,
+				CreateNetwork:     false,
+			}
+			amNetworks = append(amNetworks, amNetwork)
+			continue
+		}
+
+		// if fnError has issue then return that just right away
+		if fnError != nil {
+			errMessage := fmt.Sprintf("failed to find flow network with name %s", network.AutoMappingFlowNetworkName)
+			network.Connection = connection.Broken.String()
+			network.ConnectionMessage = nstring.New(errMessage)
+			_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
+			return errors.New(errMessage)
+		} else {
+			network.Connection = connection.Connected.String()
+			network.ConnectionMessage = nstring.New(nstring.NotAvailable)
+			_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
+		}
+
+		doAutoMapping = true // this is the case where it has auto_mapping creator with valid flow_network
+
+		tx := d.DB.Begin()
+		deviceUUIDToStreamUUIDMap, err := createAutoMappingStreamsTransaction(tx, fn, network, network.Devices)
+		if err != nil {
+			tx.Rollback()
+			log.Error(err)
+			return err
+		}
+		tx.Commit()
+
+		var amDevices []*interfaces.AutoMappingDevice
+		for _, device := range network.Devices {
+			streamUUID, ok := deviceUUIDToStreamUUIDMap[device.UUID]
+			if !ok {
+				log.Warn("device is auto-mapping already turned off, we can't go further on depth")
+				continue
+			}
+			pointUUIDToProducerUUIDMap, err := d.createPointsAutoMappingProducers(streamUUID, device.Points)
+			if err != nil {
+				amRes := interfaces.AutoMappingResponse{
+					HasError:    true,
+					NetworkUUID: network.UUID,
+					DeviceUUID:  device.UUID,
+					Level:       interfaces.Device,
+				}
+				updateCascadeConnectionError(d.DB, &amRes)
+				log.Error(err)
+				return err
+			}
+
+			var amPoints []*interfaces.AutoMappingPoint
+			for _, point := range device.Points {
+				producerUUID, ok := pointUUIDToProducerUUIDMap[point.UUID]
+				if !ok {
+					log.Warn("point is auto-mapping already turned off, we can't go further on depth")
+					continue
+				}
+				amPoints = append(amPoints, &interfaces.AutoMappingPoint{
+					Enable:            boolean.IsTrue(point.Enable),
+					AutoMappingEnable: boolean.IsTrue(point.AutoMappingEnable),
+					EnableWriteable:   boolean.IsTrue(point.EnableWriteable),
+					UUID:              point.UUID,
+					Name:              point.Name,
+					Tags:              point.Tags,
+					MetaTags:          point.MetaTags,
+					ProducerUUID:      producerUUID,
+					Priority:          *point.Priority,
+				})
+			}
+			amDevices = append(amDevices, &interfaces.AutoMappingDevice{
+				Enable:            boolean.IsTrue(device.Enable),
+				AutoMappingEnable: boolean.IsTrue(device.AutoMappingEnable),
+				UUID:              device.UUID,
+				Name:              device.Name,
+				Tags:              device.Tags,
+				MetaTags:          device.MetaTags,
+				Points:            amPoints,
+				StreamUUID:        streamUUID,
+			})
+		}
+		amNetwork := &interfaces.AutoMappingNetwork{
+			Enable:            boolean.IsTrue(network.Enable),
+			AutoMappingEnable: boolean.IsTrue(network.AutoMappingEnable),
+			UUID:              network.UUID,
+			Name:              network.Name,
+			Tags:              network.Tags,
+			MetaTags:          network.MetaTags,
+			Devices:           amDevices,
+			CreateNetwork:     true,
+		}
+		amNetworks = append(amNetworks, amNetwork)
+	}
+
+	if !doAutoMapping {
+		return nil
+	}
+
+	deviceInfo, _ := deviceinfo.GetDeviceInfo()
+	autoMapping := &interfaces.AutoMapping{
+		GlobalUUID:      deviceInfo.GlobalUUID,
+		FlowNetworkUUID: fn.UUID,
+		Level:           level,
+		Networks:        amNetworks,
+	}
+
+	cli := client.NewFlowClientCliFromFN(fn)
+	amRes := cli.CreateAutoMapping(autoMapping)
+	if amRes.HasError {
+		errMsg := fmt.Sprintf("Flow Network Clone side: %s", amRes.Error)
+		log.Error(errMsg)
+		amRes.Error = errMsg
+		updateCascadeConnectionError(d.DB, &amRes)
+	} else {
+		for _, amNetwork := range autoMapping.Networks {
+			if amNetwork.CreateNetwork { // just update its own network
+				err := d.clearConnectionError(amNetwork)
 				if err != nil {
-					log.Errorln("points.db.CreatePointAutoMapping() failed to make auto mapping", err)
 					return err
 				}
-				log.Println("points.db.CreatePointAutoMapping() added point new mapping")
-				return nil
+			}
+		}
+
+		pointUUID, err := d.createWriterClones(amRes.SyncWriters)
+		if pointUUID != nil && err != nil {
+			amRes.PointUUID = *pointUUID
+			amRes.Level = interfaces.Point
+			updateCascadeConnectionError(d.DB, &amRes)
+		}
+	}
+	return nil
+}
+
+func (d *GormDatabase) clearStreamsAndProducers() {
+	// delete those which is not deleted when we delete network, device & points
+	d.DB.Where("created_from_auto_mapping IS TRUE AND auto_mapping_network_uuid NOT IN (?)",
+		d.DB.Model(&model.Network{}).Select("uuid")).
+		Delete(&model.Stream{})
+	d.DB.Where("created_from_auto_mapping IS TRUE AND auto_mapping_device_uuid NOT IN (?)",
+		d.DB.Model(&model.Device{}).Select("uuid")).
+		Delete(&model.Stream{})
+	d.DB.Where("created_from_auto_mapping IS TRUE AND producer_thing_uuid NOT IN (?)",
+		d.DB.Model(&model.Point{}).Select("uuid")).
+		Delete(&model.Producer{})
+}
+
+func (d *GormDatabase) updateNetworksConnectionInCloneSide(fnName string) error {
+	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true})
+	if err != nil {
+		return err
+	}
+	for _, network := range networks {
+		if boolean.IsTrue(network.CreatedFromAutoMapping) && network.AutoMappingFlowNetworkName == fnName {
+			err = d.updateNetworkConnectionInCloneSide(network)
+			if err != nil {
+				return err
 			}
 		}
 	}
 	return nil
 }
 
-func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) error {
-	networkName := getAutoMappedNetworkName(autoMapping.NetworkName, autoMapping.IsLocal)
-	network, err := d.GetNetworkByName(networkName, api.Args{})
-	if network != nil && network.GlobalUUID != autoMapping.NetworkGlobalUUID {
-		return fmt.Errorf("network.name %s already exists", network.Name)
-	}
-	consumer, err := d.createPointAutoMappingConsumer(autoMapping.StreamUUID, autoMapping.ProducerUUID, autoMapping.PointName)
+func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network) error {
+	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: &network.AutoMappingFlowNetworkName})
 	if err != nil {
+		network.Connection = connection.Broken.String()
+		network.ConnectionMessage = nstring.New(err.Error())
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
 		return err
 	}
-	network, device, err := d.createPointAutoMapping(autoMapping)
-	if err != nil {
-		return err
+
+	cli := client.NewFlowClientCliFromFNC(fnc)
+
+	net, connectionErr, _ := cli.GetNetworkV2(*network.AutoMappingUUID)
+	if connectionErr != nil {
+		network.Connection = connection.Broken.String()
+		network.ConnectionMessage = nstring.New("connection error: " + connectionErr.Error())
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
+	} else if net == nil {
+		network.Connection = connection.Broken.String()
+		network.ConnectionMessage = nstring.New("Its network creator has been already deleted, delete manually if you want")
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
+	} else if net != nil && net.AutoMappingFlowNetworkName != network.AutoMappingFlowNetworkName {
+		network.Connection = connection.Broken.String()
+		msg := fmt.Sprintf(
+			"Its network creator '%s' is pointing different '%s' flow network, delete manually if you want",
+			net.Name, net.AutoMappingFlowNetworkName,
+		)
+		network.ConnectionMessage = nstring.New(msg)
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
+	} else if boolean.IsFalse(network.AutoMappingEnable) && boolean.IsTrue(network.CreatedFromAutoMapping) {
+		network.Connection = connection.Broken.String()
+		network.ConnectionMessage = nstring.New("Its network parent auto-mapping is turned off, delete manually if you want")
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
+	} else {
+		network.Connection = connection.Connected.String()
+		network.ConnectionMessage = nstring.New(nstring.NotAvailable)
+		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
 	}
-	point, err := d.createPointAutoMappingPoint(network.Name, device.UUID, device.Name, autoMapping.PointName,
-		autoMapping.PointTags, autoMapping.PointMetaTags)
-	if err != nil {
-		return err
-	}
-	_, err = d.createPointAutoMappingWriter(consumer.UUID, point.UUID, point.Name)
-	if err != nil {
-		return err
-	}
+	tx := d.DB.Begin()
+	updateDevicesConnectionsInCloneSide(tx, cli, network)
+	tx.Commit()
 	return nil
 }
 
-func (d *GormDatabase) createUpdatePointAutoMapping(network *model.Network, device *model.Device, point *model.Point) error {
-	fn, err := d.GetOneFlowNetworkByArgs(api.Args{Name: nstring.New(network.AutoMappingFlowNetworkName)})
-	if err != nil {
-		log.Errorf("failed to find flow network with name %s", network.AutoMappingFlowNetworkName)
-		return fmt.Errorf("failed to find flow network with name %s", network.AutoMappingFlowNetworkName)
+func updateDevicesConnectionsInCloneSide(tx *gorm.DB, cli *client.FlowClient, network *model.Network) {
+	var wg sync.WaitGroup
+	pointsUUIDs, pointConnectionErr, _ := cli.GetPointsBulkUUIDs()
+
+	for _, device := range network.Devices {
+		wg.Add(1)
+		go func(device *model.Device, tx *gorm.DB) {
+			defer wg.Done()
+			dev, connectionErr, _ := cli.GetDeviceV2(*device.AutoMappingUUID)
+			if connectionErr != nil {
+				device.Connection = connection.Broken.String()
+				device.ConnectionMessage = nstring.New("connection error: " + connectionErr.Error())
+				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
+			} else if dev == nil {
+				device.Connection = connection.Broken.String()
+				device.ConnectionMessage = nstring.New("Its device creator has been already deleted, manually delete it")
+				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
+			} else if boolean.IsFalse(device.AutoMappingEnable) && boolean.IsTrue(device.CreatedFromAutoMapping) {
+				device.Connection = connection.Broken.String()
+				device.ConnectionMessage = nstring.New("Its device parent auto-mapping is turned off, delete manually if you want")
+				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
+			} else {
+				device.Connection = connection.Connected.String()
+				device.ConnectionMessage = nstring.New(nstring.NotAvailable)
+				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
+
+				updatePointsConnectionsInCloneSide(tx, device, pointsUUIDs, pointConnectionErr)
+			}
+		}(device, tx)
+		wg.Wait()
 	}
-	// edge
-	stream, err := d.createPointAutoMappingStream(fn, network.Name, device.Name)
+
+	// update parent with its child error
+	var networkModel []*model.Network
+	var deviceModel []*model.Device
+	tx.Where("uuid = ? AND connection = ?", network.UUID, connection.Connected.String()).Find(&networkModel)
+	tx.Where("network_uuid = ? AND connection = ?", network.UUID, connection.Broken.String()).Find(&deviceModel)
+	if len(networkModel) > 0 && len(deviceModel) > 0 {
+		networkModel[0].Connection = connection.Broken.String()
+		networkModel[0].ConnectionMessage = deviceModel[0].ConnectionMessage
+		_ = UpdateNetworkConnectionErrorsTransaction(tx, network.UUID, networkModel[0])
+	}
+}
+
+func updatePointsConnectionsInCloneSide(tx *gorm.DB, device *model.Device, pointsUUIDs *[]string, pointConnectionErr error) {
+	for _, point := range device.Points {
+		if pointConnectionErr != nil {
+			point.Connection = connection.Broken.String()
+			point.ConnectionMessage = nstring.New("connection error: " + pointConnectionErr.Error())
+		} else if pointsUUIDs == nil || !nstring.ContainsString(*pointsUUIDs, *point.AutoMappingUUID) {
+			point.Connection = connection.Broken.String()
+			point.ConnectionMessage = nstring.New("Its point creator has been already deleted, manually delete it")
+		} else if boolean.IsFalse(point.AutoMappingEnable) && boolean.IsTrue(point.CreatedFromAutoMapping) {
+			point.Connection = connection.Broken.String()
+			point.ConnectionMessage = nstring.New("Its point parent auto-mapping is turned off, delete manually if you want")
+		} else {
+			point.Connection = connection.Connected.String()
+			point.ConnectionMessage = nstring.New(nstring.NotAvailable)
+		}
+		_ = UpdatePointConnectionErrorsTransaction(tx, point.UUID, point)
+	}
+
+	// update parent with its child error
+	var deviceModel []*model.Device
+	var pointModel []*model.Point
+	tx.Where("uuid = ? AND connection = ?", device.UUID, connection.Connected.String()).Find(&deviceModel)
+	tx.Where("device_uuid = ? AND connection = ?", device.UUID, connection.Broken.String()).Find(&pointModel)
+	if len(deviceModel) > 0 && len(pointModel) > 0 {
+		deviceModel[0].Connection = connection.Broken.String()
+		deviceModel[0].ConnectionMessage = pointModel[0].ConnectionMessage
+		_ = UpdateDeviceConnectionErrorsTransaction(tx, deviceModel[0].UUID, deviceModel[0])
+	}
+}
+
+func createAutoMappingStreamsTransaction(tx *gorm.DB, flowNetwork *model.FlowNetwork, network *model.Network,
+	devices []*model.Device) (map[string]string, error) {
+
+	deviceUUIDToStreamUUIDMap := map[string]string{}
+	for _, device := range devices {
+		streamName := getAutoMappedStreamName(flowNetwork.Name, network.Name, device.Name)
+		stream, _ := GetOneStreamByArgsTransaction(tx, api.Args{Name: nils.NewString(streamName)})
+		if stream != nil {
+			if boolean.IsFalse(stream.CreatedFromAutoMapping) {
+				errMsg := fmt.Sprintf("manually created stream_name %s already exists", streamName)
+				amRes := interfaces.AutoMappingResponse{
+					NetworkUUID: device.NetworkUUID,
+					DeviceUUID:  device.UUID,
+					HasError:    true,
+					Error:       errMsg,
+					Level:       interfaces.Device,
+				}
+				updateCascadeConnectionError(tx, &amRes)
+				return nil, errors.New(errMsg)
+			}
+		}
+
+		stream, _ = GetOneStreamByArgsTransaction(tx, api.Args{AutoMappingDeviceUUID: nstring.New(device.UUID), WithFlowNetworks: true})
+		if stream == nil {
+			if boolean.IsTrue(device.AutoMappingEnable) { // create stream only when auto_mapping is enabled
+				stream = &model.Stream{}
+				stream.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Stream)
+				setStreamModel(flowNetwork, network, device, stream)
+				if err := tx.Create(&stream).Error; err != nil {
+					device.Connection = connection.Broken.String()
+					errMsg := fmt.Sprintf("create stream: %s", err.Error())
+					amRes := interfaces.AutoMappingResponse{
+						NetworkUUID: device.NetworkUUID,
+						DeviceUUID:  device.UUID,
+						HasError:    true,
+						Error:       errMsg,
+						Level:       interfaces.Device,
+					}
+					updateCascadeConnectionError(tx, &amRes)
+					return nil, errors.New(errMsg)
+				}
+				deviceUUIDToStreamUUIDMap[device.UUID] = stream.UUID
+			} else {
+				continue
+			}
+		} else {
+			device.Connection = connection.Connected.String()
+			device.ConnectionMessage = nstring.New(nstring.NotAvailable)
+			_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
+			if err := tx.Model(&stream).Association("FlowNetworks").Replace([]*model.FlowNetwork{flowNetwork}); err != nil {
+				errMsg := fmt.Sprintf("update flow_networks on stream: %s", err.Error())
+				amRes := interfaces.AutoMappingResponse{
+					NetworkUUID: device.NetworkUUID,
+					DeviceUUID:  device.UUID,
+					HasError:    true,
+					Error:       errMsg,
+					Level:       interfaces.Device,
+				}
+				updateCascadeConnectionError(tx, &amRes)
+				return nil, err
+			}
+			setStreamModel(flowNetwork, network, device, stream)
+			if err := tx.Model(&stream).Updates(&stream).Error; err != nil {
+				errMsg := fmt.Sprintf("update stream: %s", err.Error())
+				amRes := interfaces.AutoMappingResponse{
+					NetworkUUID: device.NetworkUUID,
+					DeviceUUID:  device.UUID,
+					HasError:    true,
+					Error:       errMsg,
+					Level:       interfaces.Device,
+				}
+				updateCascadeConnectionError(tx, &amRes)
+				return nil, err
+			}
+			deviceUUIDToStreamUUIDMap[device.UUID] = stream.UUID
+		}
+	}
+
+	// swap back the names
+	for _, device := range devices {
+		streamName := getAutoMappedStreamName(flowNetwork.Name, network.Name, device.Name)
+		if err := tx.Model(&model.Stream{}).
+			Where("auto_mapping_device_uuid = ? AND created_from_auto_mapping IS TRUE", device.UUID).
+			Update("name", streamName).
+			Error; err != nil {
+			errMsg := fmt.Sprintf("update stream: %s", err.Error())
+			amRes := interfaces.AutoMappingResponse{
+				NetworkUUID: device.NetworkUUID,
+				DeviceUUID:  device.UUID,
+				HasError:    true,
+				Error:       errMsg,
+				Level:       interfaces.Device,
+			}
+			updateCascadeConnectionError(tx, &amRes)
+			return nil, err
+		}
+	}
+	return deviceUUIDToStreamUUIDMap, nil
+}
+
+func (d *GormDatabase) createPointsAutoMappingProducers(streamUUID string, points []*model.Point) (map[string]string, error) {
+	pointUUIDToProducerUUIDMap := map[string]string{}
+	tx := d.DB.Begin()
+	for _, point := range points {
+		producer, _ := d.GetOneProducerByArgs(api.Args{StreamUUID: nils.NewString(streamUUID), ProducerThingUUID: nils.NewString(point.UUID)})
+		if producer == nil {
+			if boolean.IsTrue(point.AutoMappingEnable) { // create stream only when auto_mapping is enabled
+				producer = &model.Producer{}
+				producer.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Producer)
+				d.setProducerModel(streamUUID, point, producer)
+				if err := tx.Create(&producer).Error; err != nil {
+					tx.Rollback()
+					return nil, err
+				}
+				pointUUIDToProducerUUIDMap[point.UUID] = producer.UUID
+			}
+			continue
+		} else {
+			d.setProducerModel(streamUUID, point, producer)
+			if err := tx.Save(producer).Error; err != nil {
+				tx.Rollback()
+				return nil, err
+			}
+			pointUUIDToProducerUUIDMap[point.UUID] = producer.UUID
+		}
+	}
+
+	// swap back the names
+	for _, point := range points {
+		if err := tx.Model(&model.Producer{}).
+			Where("producer_thing_uuid = ? AND created_from_auto_mapping IS TRUE", point.UUID).
+			Update("name", point.Name).
+			Error; err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+	tx.Commit()
+	return pointUUIDToProducerUUIDMap, nil
+}
+
+func (d *GormDatabase) createWriterClones(syncWriters []*interfaces.SyncWriter) (*string, error) {
+	tx := d.DB.Begin()
+	for _, syncWriter := range syncWriters {
+		// it will restrict duplicate creation of writer_clone
+		wc, _ := d.GetOneWriterCloneByArgs(api.Args{ProducerUUID: &syncWriter.ProducerUUID, CreatedFromAutoMapping: boolean.NewTrue()})
+		if wc == nil {
+			wc = &model.WriterClone{}
+			wc.UUID = nuuid.MakeTopicUUID(model.CommonNaming.StreamClone)
+			d.setWriterCloneModel(syncWriter, wc)
+			if err := tx.Create(&wc).Error; err != nil {
+				tx.Rollback()
+				return &syncWriter.PointUUID, err
+			}
+		} else {
+			d.setWriterCloneModel(syncWriter, wc)
+			if err := tx.Model(&wc).Where("uuid = ?", wc.UUID).Updates(&wc).Error; err != nil {
+				tx.Rollback()
+				return &syncWriter.PointUUID, err
+			}
+		}
+	}
+	tx.Commit()
+	return nil, nil
+}
+
+func (d *GormDatabase) clearConnectionError(amNetwork *interfaces.AutoMappingNetwork) error {
+	tx := d.DB.Begin()
+	networkModel := model.Network{
+		Connection:        connection.Connected.String(),
+		ConnectionMessage: nstring.New(nstring.NotAvailable),
+	}
+	deviceModel := model.Device{
+		Connection:        connection.Connected.String(),
+		ConnectionMessage: nstring.New(nstring.NotAvailable),
+	}
+	pointModel := model.Point{
+		Connection:        connection.Connected.String(),
+		ConnectionMessage: nstring.New(nstring.NotAvailable),
+	}
+	err := UpdateNetworkConnectionErrorsTransaction(tx, amNetwork.UUID, &networkModel)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
-	producer, err := d.createPointAutoMappingProducer(stream.UUID, point.UUID, point.Name)
-	if err != nil {
-		return err
+	for _, amDevice := range amNetwork.Devices {
+		err = UpdateDeviceConnectionErrorsTransaction(tx, amDevice.UUID, &deviceModel)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+		for _, amPoint := range amDevice.Points {
+			err = UpdatePointConnectionErrorsTransaction(tx, amPoint.UUID, &pointModel)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
 	}
-	// cloud
-	deviceInfo, _ := deviceinfo.GetDeviceInfo()
-	cli := client.NewFlowClientCliFromFN(fn)
-	body := &interfaces.AutoMapping{
-		FlowNetworkUUID:   fn.UUID,
-		StreamUUID:        stream.UUID,
-		ProducerUUID:      producer.UUID,
-		NetworkGlobalUUID: deviceInfo.GlobalUUID,
-		NetworkName:       network.Name,
-		NetworkTags:       network.Tags,
-		NetworkMetaTags:   network.MetaTags,
-		DeviceName:        device.Name,
-		DeviceTags:        device.Tags,
-		DeviceMetaTags:    device.MetaTags,
-		PointName:         point.Name,
-		PointTags:         point.Tags,
-		PointMetaTags:     point.MetaTags,
-		IsLocal:           boolean.IsFalse(fn.IsRemote) && boolean.IsFalse(fn.IsMasterSlave),
-	}
-	_, err = cli.AddAutoMapping(body)
-	if err != nil {
-		return err
-	}
+	tx.Commit()
 	return nil
 }
 
-func (d *GormDatabase) createPointAutoMappingStream(flowNetwork *model.FlowNetwork, networkName string,
-	deviceName string) (stream *model.Stream, err error) {
-	name := fmt.Sprintf("%s:%s", networkName, deviceName)
-	stream, _ = d.GetStreamByArgs(api.Args{Name: nils.NewString(name), WithFlowNetworks: true})
-	if stream == nil {
-		streamModel := &model.Stream{}
-		streamModel.Enable = boolean.NewTrue()
-		streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
-		streamModel.Name = name
-		streamModel.CreatedFromAutoMapping = boolean.NewTrue()
-		return d.CreateStream(streamModel)
+func updateCascadeConnectionError(tx *gorm.DB, amRes *interfaces.AutoMappingResponse) {
+	networkModel := model.Network{}
+	deviceModel := model.Device{}
+	pointModel := model.Point{}
+
+	connection_ := connection.Connected.String()
+	if amRes.HasError {
+		connection_ = connection.Broken.String()
 	}
-	stream.Name = name
-	stream.FlowNetworks = []*model.FlowNetwork{flowNetwork}
-	stream.CreatedFromAutoMapping = boolean.NewTrue()
-	return d.UpdateStream(stream.UUID, stream) // note: to create stream clone in case of it does not exist
+
+	switch amRes.Level {
+	case interfaces.Point:
+		pointModel.Connection = connection_
+		pointModel.ConnectionMessage = &amRes.Error
+		_ = UpdatePointConnectionErrorsTransaction(tx, amRes.PointUUID, &pointModel)
+		fallthrough
+	case interfaces.Device:
+		deviceModel.Connection = connection_
+		deviceModel.ConnectionMessage = &amRes.Error
+		_ = UpdateDeviceConnectionErrorsTransaction(tx, amRes.DeviceUUID, &deviceModel)
+		fallthrough
+	case interfaces.Network:
+		networkModel.Connection = connection_
+		networkModel.ConnectionMessage = &amRes.Error
+		_ = UpdateNetworkConnectionErrorsTransaction(tx, amRes.NetworkUUID, &networkModel)
+	}
 }
 
-func (d *GormDatabase) createPointAutoMappingProducer(streamUUID string, pointUUID string, pointName string) (
-	producer *model.Producer, err error) {
-	producer, _ = d.GetOneProducerByArgs(api.Args{StreamUUID: nils.NewString(streamUUID), Name: nils.NewString(pointName)})
-	if producer == nil {
-		producerModel := &model.Producer{}
-		producerModel.Enable = boolean.NewTrue()
-		producerModel.Name = pointName
-		producerModel.StreamUUID = streamUUID
-		producerModel.ProducerThingUUID = pointUUID
-		producerModel.ProducerThingName = pointName
-		producerModel.ProducerThingClass = "point"
-		producerModel.ProducerApplication = "mapping"
-		producerModel.EnableHistory = boolean.NewFalse()
-		producerModel.HistoryType = model.HistoryTypeInterval
-		producerModel.HistoryInterval = integer.New(15)
-		producerModel.EnableHistory = boolean.NewFalse()
-		return d.CreateProducer(producerModel)
-	}
-	if producer.Name != pointName || producer.ProducerThingUUID != pointUUID {
-		producer.Name = pointName
-		producer.ProducerThingUUID = pointUUID
-		return d.UpdateProducer(producer.UUID, producer)
-	}
-	return producer, nil
+func setStreamModel(flowNetwork *model.FlowNetwork, network *model.Network, device *model.Device, streamModel *model.Stream) {
+	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
+	streamModel.Name = getTempAutoMappedName(getAutoMappedStreamName(flowNetwork.Name, network.Name, device.Name))
+	streamModel.Enable = boolean.New(boolean.IsTrue(network.Enable) && boolean.IsTrue(network.AutoMappingEnable) &&
+		boolean.IsTrue(device.Enable) && boolean.IsTrue(device.AutoMappingEnable))
+	streamModel.CreatedFromAutoMapping = boolean.NewTrue()
+	streamModel.AutoMappingNetworkUUID = nstring.New(device.NetworkUUID)
+	streamModel.AutoMappingDeviceUUID = nstring.New(device.UUID)
 }
 
-func (d *GormDatabase) createPointAutoMapping(autoMapping *interfaces.AutoMapping) (*model.Network, *model.Device, error) {
-	syncNetwork := &interfaces.SyncNetwork{
-		NetworkGlobalUUID: autoMapping.NetworkGlobalUUID,
-		NetworkName:       autoMapping.NetworkName,
-		NetworkTags:       autoMapping.NetworkTags,
-		NetworkMetaTags:   autoMapping.NetworkMetaTags,
-		FlowNetworkUUID:   autoMapping.FlowNetworkUUID,
-		IsLocal:           autoMapping.IsLocal,
-	}
-	network, err := d.SyncNetwork(syncNetwork)
-	if err != nil {
-		return nil, nil, err
-	}
-	syncDevice := &interfaces.SyncDevice{
-		DeviceName:      autoMapping.DeviceName,
-		DeviceTags:      autoMapping.DeviceTags,
-		DeviceMetaTags:  autoMapping.DeviceMetaTags,
-		FlowNetworkUUID: autoMapping.FlowNetworkUUID,
-		IsLocal:         autoMapping.IsLocal,
-	}
-	return d.SyncDevice(syncDevice, network)
+func (d *GormDatabase) setProducerModel(streamUUID string, point *model.Point, producerModel *model.Producer) {
+	producerModel.Name = getTempAutoMappedName(point.Name)
+	producerModel.Enable = boolean.New(boolean.IsTrue(point.Enable) && boolean.IsTrue(point.AutoMappingEnable))
+	producerModel.StreamUUID = streamUUID
+	producerModel.ProducerThingUUID = point.UUID
+	producerModel.ProducerThingName = point.Name
+	producerModel.ProducerThingClass = "point"
+	producerModel.ProducerApplication = "mapping"
+	producerModel.EnableHistory = point.HistoryEnable
+	producerModel.HistoryType = point.HistoryType
+	producerModel.HistoryInterval = point.HistoryInterval
+	producerModel.CreatedFromAutoMapping = boolean.NewTrue()
 }
 
-func (d *GormDatabase) createPointAutoMappingPoint(networkName, deviceUUID string, deviceName string, pointName string,
-	pointTags []*model.Tag, pointMetaTags []*model.PointMetaTag) (
-	point *model.Point, err error) {
-	point, err = d.GetPointByName(networkName, deviceName, pointName, api.Args{})
-	if point == nil {
-		pointModel := &model.Point{}
-		pointModel.Enable = boolean.NewTrue()
-		pointModel.Name = pointName
-		pointModel.DeviceUUID = deviceUUID
-		pointModel.ThingClass = "point"
-		pointModel.ThingType = ""
-		pointModel.Tags = pointTags
-		pointModel.MetaTags = pointMetaTags
-		pointModel.CreatedFromAutoMapping = boolean.NewTrue()
-		pointModel.EnableWriteable = boolean.NewTrue()
-		return d.CreatePoint(pointModel)
-	}
-	_, _ = d.CreatePointMetaTags(point.UUID, pointMetaTags)
-	if point.Name != pointName || !reflect.DeepEqual(point.Tags, pointTags) {
-		point.Name = pointName
-		point.Tags = pointTags
-		return d.UpdatePoint(point.UUID, point, false)
-	}
-	return point, err
-}
-
-func (d *GormDatabase) createPointAutoMappingConsumer(streamUUID string, producerUUID string, pointName string) (
-	consumer *model.Consumer, err error) {
-	streamClone, err := d.GetStreamCloneByArg(api.Args{SourceUUID: nils.NewString(streamUUID)})
-	if err != nil {
-		return nil, err
-	}
-	consumer, _ = d.GetOneConsumerByArgs(api.Args{ProducerUUID: nils.NewString(producerUUID)})
-	if consumer == nil {
-		consumerModel := &model.Consumer{}
-		consumerModel.StreamCloneUUID = streamClone.UUID
-		consumerModel.Enable = boolean.NewTrue()
-		consumerModel.Name = pointName
-		consumerModel.ProducerUUID = producerUUID
-		consumerModel.ProducerThingName = pointName
-		consumerModel.ConsumerApplication = "mapping"
-		return d.CreateConsumer(consumerModel)
-	}
-	if consumer.Name != pointName {
-		consumer.Name = pointName
-		return d.UpdateConsumer(consumer.UUID, consumer)
-	}
-	return consumer, nil
-}
-
-func (d *GormDatabase) createPointAutoMappingWriter(consumerUUID string, pointUUID string, pointName string) (
-	writer *model.Writer, err error) {
-	writer, err = d.GetOneWriterByArgs(api.Args{ConsumerUUID: nils.NewString(consumerUUID),
-		WriterThingName: nils.NewString(pointName)})
-	if err != nil {
-		writerModel := &model.Writer{}
-		writerModel.ConsumerUUID = consumerUUID
-		writerModel.WriterThingClass = "point"
-		writerModel.WriterThingUUID = pointUUID
-		writerModel.WriterThingName = pointName
-		return d.CreateWriter(writerModel)
-	}
-	writer.WriterThingName = pointName
-	writer.WriterThingUUID = pointUUID
-	return d.UpdateWriter(writer.UUID, writer) // note: to create writer clone in case of it does not exist
+func (d *GormDatabase) setWriterCloneModel(syncWriter *interfaces.SyncWriter, writerClone *model.WriterClone) {
+	writerClone.WriterThingName = syncWriter.PointName
+	writerClone.WriterThingClass = "point"
+	writerClone.FlowFrameworkUUID = syncWriter.FlowFrameworkUUID
+	writerClone.WriterThingUUID = syncWriter.PointUUID
+	writerClone.ProducerUUID = syncWriter.ProducerUUID
+	writerClone.SourceUUID = syncWriter.WriterUUID
+	writerClone.CreatedFromAutoMapping = boolean.NewTrue()
 }

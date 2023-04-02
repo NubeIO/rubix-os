@@ -120,6 +120,17 @@ func (inst *FlowClient) GetNetwork(uuid string) (*model.Network, error) {
 	return resp.Result().(*model.Network), nil
 }
 
+func (inst *FlowClient) GetNetworkV2(uuid string) (*model.Network, error, error) {
+	resp, connectionErr, requestErr := nresty.FormatRestyV2Response(inst.client.R().
+		SetResult(&model.Network{}).
+		SetPathParams(map[string]string{"uuid": uuid}).
+		Get("/api/networks/{uuid}"))
+	if connectionErr != nil || requestErr != nil {
+		return nil, connectionErr, requestErr
+	}
+	return resp.Result().(*model.Network), nil, nil
+}
+
 func (inst *FlowClient) GetNetworkByName(networkName string) (*model.Network, error, error) {
 	url := fmt.Sprintf("/api/networks/name/%s", networkName)
 	resp, connectionErr, requestErr := nresty.FormatRestyV2Response(inst.client.R().

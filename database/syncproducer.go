@@ -16,7 +16,7 @@ func (d *GormDatabase) SyncProducer(body *interfaces.SyncProducer) ([]*model.Con
 	}
 	for _, consumer := range consumers {
 		consumer.ProducerThingName = body.ProducerThingName
-		_, _ = d.UpdateConsumer(consumer.UUID, consumer)
+		_, _ = d.UpdateConsumer(consumer.UUID, consumer, false)
 	}
 	return consumers, nil
 }

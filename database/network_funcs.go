@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -148,4 +149,18 @@ func (d *GormDatabase) DeleteNetworkByName(name string, args api.Args) (bool, er
 	}
 	query = query.Delete(networksModel)
 	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) GetPublishPointList() ([]*interfaces.PublishPointList, error) {
+	var publishPointListModel []*interfaces.PublishPointList
+	query := d.DB.Table("networks").
+		Select("networks.plugin_path, networks.name AS network_name, devices.name AS device_name, " +
+			"points.uuid AS point_uuid, points.name AS point_name").
+		Joins("INNER JOIN devices ON devices.network_uuid = networks.uuid").
+		Joins("INNER JOIN points ON points.device_uuid = devices.uuid").
+		Scan(&publishPointListModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return publishPointListModel, nil
 }

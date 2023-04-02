@@ -7,9 +7,10 @@ import (
 	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"sync"
+	"gorm.io/gorm"
 )
 
 func (d *GormDatabase) GetStreamClones(args api.Args) ([]*model.StreamClone, error) {
@@ -32,6 +33,20 @@ func (d *GormDatabase) GetStreamCloneByArg(args api.Args) (*model.StreamClone, e
 	return streamClonesModel, nil
 }
 
+func GetOneStreamCloneByArgTransaction(db *gorm.DB, args api.Args) (*model.StreamClone, error) {
+	var streamClonesModel *model.StreamClone
+	query := buildStreamCloneQueryTransaction(db, args)
+	query.First(&streamClonesModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return streamClonesModel, nil
+}
+
+func (d *GormDatabase) GetOneStreamCloneByArg(args api.Args) (*model.StreamClone, error) {
+	return GetOneStreamCloneByArgTransaction(d.DB, args)
+}
+
 func (d *GormDatabase) GetStreamClone(uuid string, args api.Args) (*model.StreamClone, error) {
 	var streamCloneModel *model.StreamClone
 	query := d.buildStreamCloneQuery(args)
@@ -43,20 +58,13 @@ func (d *GormDatabase) GetStreamClone(uuid string, args api.Args) (*model.Stream
 }
 
 func (d *GormDatabase) DeleteStreamClone(uuid string) (bool, error) {
-	streamCloneModel, err := d.GetStreamClone(uuid, api.Args{WithConsumers: true})
+	streamCloneModel, err := d.GetStreamClone(uuid, api.Args{})
 	if err != nil {
 		return false, err
 	}
-	var wg sync.WaitGroup
-	for _, consumer := range streamCloneModel.Consumers {
-		wg.Add(1)
-		consumer := consumer
-		go func() {
-			defer wg.Done()
-			_, _ = d.DeleteConsumer(consumer.UUID)
-		}()
+	if boolean.IsTrue(streamCloneModel.CreatedFromAutoMapping) {
+		return false, errors.New("can't delete auto-mapped stream clone")
 	}
-	wg.Wait()
 	query := d.DB.Delete(&streamCloneModel)
 	return d.deleteResponseBuilder(query)
 }

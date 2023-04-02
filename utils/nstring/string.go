@@ -287,3 +287,12 @@ func ConvertKnownStringToFloat(str string) (float64, error) {
 		return 0, errors.New("no matching string values")
 	}
 }
+
+func ContainsString(arr []string, target string) bool {
+	for _, s := range arr {
+		if s == target {
+			return true
+		}
+	}
+	return false
+}

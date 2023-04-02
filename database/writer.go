@@ -7,10 +7,13 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type Writer struct {
@@ -27,6 +30,13 @@ func (d *GormDatabase) GetWriters(args api.Args) ([]*model.Writer, error) {
 }
 
 func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
+	consumer, err := d.GetConsumer(body.ConsumerUUID, api.Args{})
+	if err != nil {
+		return nil, fmt.Errorf("no such parent consumer with uuid %s", body.ConsumerUUID)
+	}
+	if boolean.IsTrue(consumer.CreatedFromAutoMapping) {
+		return nil, errors.New("can't create a writer for the auto-mapped consumer")
+	}
 	name := ""
 	switch body.WriterThingClass {
 	case model.ThingClass.Point:
@@ -53,7 +63,7 @@ func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	err := d.syncAfterCreateUpdateWriter(body)
+	err = d.syncAfterCreateUpdateWriter(body)
 	if err != nil {
 		return nil, err
 	}
@@ -95,13 +105,17 @@ func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer
 	return writerModel, nil
 }
 
-func (d *GormDatabase) GetOneWriterByArgs(args api.Args) (*model.Writer, error) {
+func GetOneWriterByArgsTransaction(db *gorm.DB, args api.Args) (*model.Writer, error) {
 	var writerModel *model.Writer
-	query := d.buildWriterQuery(args)
+	query := buildWriterQueryTransaction(db, args)
 	if err := query.First(&writerModel).Error; err != nil {
 		return nil, err
 	}
 	return writerModel, nil
+}
+
+func (d *GormDatabase) GetOneWriterByArgs(args api.Args) (*model.Writer, error) {
+	return GetOneWriterByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
@@ -109,6 +123,9 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	writer, err := d.GetWriter(uuid)
 	if err != nil {
 		return false, err
+	}
+	if boolean.IsTrue(writer.CreatedFromAutoMapping) {
+		return false, errors.New("can't delete auto-mapped writer")
 	}
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
@@ -120,12 +137,21 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer) (*model.Writer, error) {
-	writerModel, err := d.updateWriterWithoutSync(uuid, body)
-	if err != nil {
-		return nil, err
+func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer, checkAm bool) (*model.Writer, error) {
+	var writerModel *model.Writer
+	query := d.DB.Where("uuid = ?", uuid).First(&writerModel)
+	if query.Error != nil {
+		return nil, query.Error
 	}
-	err = d.syncAfterCreateUpdateWriter(writerModel)
+	if boolean.IsTrue(writerModel.CreatedFromAutoMapping) && checkAm {
+		return nil, errors.New("can't update auto-mapped writer")
+	}
+	body.DataStore = nil
+	query = d.DB.Model(&writerModel).Updates(body)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	err := d.syncAfterCreateUpdateWriter(writerModel)
 	if err != nil {
 		return nil, err
 	}
@@ -152,12 +178,27 @@ func (d *GormDatabase) WriterAction(uuid string, body *model.WriterBody) *model.
 	output.UUID = uuid
 	output.Action = body.Action
 	if err != nil {
+		log.Warn(err.Error())
 		output.IsError = true
 		output.Message = nstring.NewStringAddress(err.Error())
 		return output
 	}
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
+	if boolean.IsFalse(consumer.Enable) {
+		msg := fmt.Sprintf("consumer %s with uuid %s is not enable to write", consumer.ProducerThingName, consumer.UUID)
+		log.Warn(msg)
+		output.IsError = true
+		output.Message = nstring.New(msg)
+		return output
+	}
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
+	if boolean.IsFalse(streamClone.Enable) {
+		msg := fmt.Sprintf("stream clone %s with uuid %s is not enable to write", streamClone.Name, streamClone.UUID)
+		log.Warn(msg)
+		output.IsError = true
+		output.Message = nstring.New(msg)
+		return output
+	}
 	fnc, _ := d.GetFlowNetworkClone(streamClone.FlowNetworkCloneUUID, api.Args{})
 	cli := client.NewFlowClientCliFromFNC(fnc)
 	if body.Action == model.CommonNaming.Sync {

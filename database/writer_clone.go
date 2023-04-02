@@ -1,7 +1,9 @@
 package database
 
 import (
+	"errors"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
@@ -48,8 +50,14 @@ func (d *GormDatabase) CreateWriterClone(body *model.WriterClone) (*model.Writer
 }
 
 func (d *GormDatabase) DeleteWriterClone(uuid string) (bool, error) {
-	var wcm *model.WriterClone
-	query := d.DB.Where("uuid = ? ", uuid).Delete(&wcm)
+	wc, err := d.GetWriterClone(uuid)
+	if err != nil {
+		return false, err
+	}
+	if boolean.IsTrue(wc.CreatedFromAutoMapping) {
+		return false, errors.New("can't delete auto-mapped writer clone")
+	}
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&wc)
 	return d.deleteResponseBuilder(query)
 }
 

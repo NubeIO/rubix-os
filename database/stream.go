@@ -6,10 +6,12 @@ import (
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"gorm.io/gorm"
 )
 
 func (d *GormDatabase) GetStreams(args api.Args) ([]*model.Stream, error) {
@@ -32,17 +34,30 @@ func (d *GormDatabase) GetStream(uuid string, args api.Args) (*model.Stream, err
 	return streamModel, nil
 }
 
-func (d *GormDatabase) GetStreamByArgs(args api.Args) (*model.Stream, error) {
-	var streamModel *model.Stream
+func (d *GormDatabase) GetStreamByArgs(args api.Args) ([]*model.Stream, error) {
+	var streamsModel []*model.Stream
 	query := d.buildStreamQuery(args)
+	if err := query.Find(&streamsModel).Error; err != nil {
+		return nil, err
+	}
+	return streamsModel, nil
+}
+
+func GetOneStreamByArgsTransaction(db *gorm.DB, args api.Args) (*model.Stream, error) {
+	var streamModel *model.Stream
+	query := buildStreamQueryTransaction(db, args)
 	if err := query.First(&streamModel).Error; err != nil {
 		return nil, err
 	}
 	return streamModel, nil
 }
 
+func (d *GormDatabase) GetOneStreamByArgs(args api.Args) (*model.Stream, error) {
+	return GetOneStreamByArgsTransaction(d.DB, args)
+}
+
 func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {
-	stream, _ := d.GetStreamByArgs(api.Args{Name: nils.NewString(body.Name)})
+	stream, _ := d.GetOneStreamByArgs(api.Args{Name: nils.NewString(body.Name)})
 	if stream != nil {
 		return stream, errors.New("an existing stream with this name exists")
 	}
@@ -69,10 +84,13 @@ func (d *GormDatabase) GetFlowNetworksFromStreamUUID(streamUUID string) (*[]mode
 	return flowNetworks, nil
 }
 
-func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Stream, error) {
+func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream, checkAm bool) (*model.Stream, error) {
 	var streamModel *model.Stream
 	if err := d.DB.Preload("FlowNetworks").Where("uuid = ?", uuid).First(&streamModel).Error; err != nil {
 		return nil, err
+	}
+	if boolean.IsTrue(streamModel.CreatedFromAutoMapping) && checkAm {
+		return nil, errors.New("can't update auto-mapped stream")
 	}
 	if len(body.FlowNetworks) > 0 {
 		if err := d.DB.Model(&streamModel).Association("FlowNetworks").Replace(body.FlowNetworks); err != nil {
@@ -92,11 +110,14 @@ func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream) (*model.Str
 }
 
 func (d *GormDatabase) DeleteStream(uuid string) (bool, error) {
-	var aType = api.ArgsType
 	streamModel, err := d.GetStream(uuid, api.Args{WithFlowNetworks: true})
 	if err != nil {
 		return false, err
 	}
+	if boolean.IsTrue(streamModel.CreatedFromAutoMapping) {
+		return false, errors.New("can't delete auto-mapped stream")
+	}
+	var aType = api.ArgsType
 	for _, fn := range streamModel.FlowNetworks {
 		cli := client.NewFlowClientCliFromFN(fn)
 		url := urls.SingularUrlByArg(urls.StreamCloneUrl, aType.SourceUUID, streamModel.UUID)

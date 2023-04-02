@@ -8,5 +8,4 @@ type SyncNetwork struct {
 	NetworkTags       []*model.Tag
 	NetworkMetaTags   []*model.NetworkMetaTag
 	FlowNetworkUUID   string
-	IsLocal           bool
 }

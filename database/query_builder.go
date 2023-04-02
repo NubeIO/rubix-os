@@ -94,8 +94,8 @@ func (d *GormDatabase) buildFlowNetworkCloneQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
-	query := d.DB
+func buildStreamQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.WithFlowNetworks {
 		query = query.Preload("FlowNetworks")
 	}
@@ -114,11 +114,28 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
 	}
+	if args.AutoMappingNetworkUUID != nil {
+		query = query.Where("auto_mapping_network_uuid = ?", *args.AutoMappingNetworkUUID)
+	}
+	if args.AutoMappingDeviceUUID != nil {
+		query = query.Where("auto_mapping_device_uuid = ?", *args.AutoMappingDeviceUUID)
+	}
+	if args.Enable != nil {
+		if *args.Enable {
+			query = query.Where("enable IS TRUE")
+		} else {
+			query = query.Where("enable IS FALSE")
+		}
+	}
 	return query
 }
 
-func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
-	query := d.DB
+func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
+	return buildStreamQueryTransaction(d.DB, args)
+}
+
+func buildStreamCloneQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.WithConsumers {
 		query = query.Preload("Consumers")
 		if args.WithWriters {
@@ -137,8 +154,12 @@ func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
-	query := d.DB
+func (d *GormDatabase) buildStreamCloneQuery(args api.Args) *gorm.DB {
+	return buildStreamCloneQueryTransaction(d.DB, args)
+}
+
+func buildConsumerQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.WithWriters {
 		query = query.Preload("Writers")
 	}
@@ -151,7 +172,18 @@ func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
 	if args.ProducerThingUUID != nil {
 		query = query.Where("producer_thing_uuid = ?", *args.ProducerThingUUID)
 	}
+	if args.Enable != nil {
+		if *args.Enable {
+			query = query.Where("enable IS TRUE")
+		} else {
+			query = query.Where("enable IS FALSE")
+		}
+	}
 	return query
+}
+
+func (d *GormDatabase) buildConsumerQuery(args api.Args) *gorm.DB {
+	return buildConsumerQueryTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
@@ -170,6 +202,13 @@ func (d *GormDatabase) buildProducerQuery(args api.Args) *gorm.DB {
 	}
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
+	}
+	if args.Enable != nil {
+		if *args.Enable {
+			query = query.Where("enable IS TRUE")
+		} else {
+			query = query.Where("enable IS FALSE")
+		}
 	}
 	return query
 }
@@ -208,6 +247,12 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 			Having("COUNT(network_uuid) = ?", len(keyValues))
 		query = query.Where("uuid IN (?)", subQuery)
 	}
+	if args.AutoMappingUUID != nil {
+		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
+	}
+	if args.GlobalUUID != nil {
+		query = query.Where("global_uuid = ?", *args.GlobalUUID)
+	}
 	return query
 }
 
@@ -240,6 +285,9 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	if args.AutoMappingEnable != nil {
 		query = query.Where("auto_mapping_enable = ?", args.AutoMappingEnable)
 	}
+	if args.AutoMappingUUID != nil {
+		query = query.Where("auto_mapping_uuid = ?", args.AutoMappingUUID)
+	}
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
 	}
@@ -254,8 +302,8 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
-	query := d.DB
+func buildPointQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.WithPriority {
 		query = query.Preload("Priority")
 	}
@@ -277,12 +325,15 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	if args.DeviceUUID != nil {
 		query = query.Where("device_uuid = ?", *args.DeviceUUID)
 	}
+	if args.AutoMappingUUID != nil {
+		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
+	}
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
 	}
 	if args.MetaTags != nil {
 		keyValues := metaTagsArgsToKeyValues(*args.MetaTags)
-		subQuery := d.DB.Table("point_meta_tags").Select("point_uuid").
+		subQuery := db.Table("point_meta_tags").Select("point_uuid").
 			Where("(key, value) IN ?", keyValues).
 			Group("point_uuid").
 			Having("COUNT(point_uuid) = ?", len(keyValues))
@@ -291,8 +342,12 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
-	query := d.DB
+func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
+	return buildPointQueryTransaction(d.DB, args)
+}
+
+func buildWriterQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.ConsumerUUID != nil {
 		query = query.Where("consumer_uuid = ?", *args.ConsumerUUID)
 	}
@@ -308,6 +363,10 @@ func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
 	return query
 }
 
+func (d *GormDatabase) buildWriterQuery(args api.Args) *gorm.DB {
+	return buildWriterQueryTransaction(d.DB, args)
+}
+
 func (d *GormDatabase) buildWriterCloneQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.ProducerUUID != nil {
@@ -318,6 +377,9 @@ func (d *GormDatabase) buildWriterCloneQuery(args api.Args) *gorm.DB {
 	}
 	if args.SourceUUID != nil {
 		query = query.Where("source_uuid = ?", *args.SourceUUID)
+	}
+	if args.CreatedFromAutoMapping != nil {
+		query = query.Where("created_from_auto_mapping = ?", *args.CreatedFromAutoMapping)
 	}
 	return query
 }

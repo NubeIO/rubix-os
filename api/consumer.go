@@ -11,7 +11,7 @@ type ConsumersDatabase interface {
 	GetConsumers(args Args) ([]*model.Consumer, error)
 	GetConsumer(uuid string, args Args) (*model.Consumer, error)
 	CreateConsumer(body *model.Consumer) (*model.Consumer, error)
-	UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error)
+	UpdateConsumer(uuid string, body *model.Consumer, checkAm bool) (*model.Consumer, error)
 	DeleteConsumer(uuid string) (bool, error)
 	DeleteConsumers(args Args) (bool, error)
 	SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel, error)
@@ -46,7 +46,7 @@ func (j *ConsumersAPI) CreateConsumer(ctx *gin.Context) {
 func (j *ConsumersAPI) UpdateConsumer(ctx *gin.Context) {
 	body, _ := getBODYConsumer(ctx)
 	uuid := resolveID(ctx)
-	q, err := j.DB.UpdateConsumer(uuid, body)
+	q, err := j.DB.UpdateConsumer(uuid, body, true)
 	ResponseHandler(q, err, ctx)
 }
 

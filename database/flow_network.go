@@ -17,6 +17,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"strings"
 )
 
 func (d *GormDatabase) GetFlowNetworks(args api.Args) ([]*model.FlowNetwork, error) {
@@ -62,6 +63,7 @@ CreateFlowNetwork
 */
 func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNetwork, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.FlowNetwork)
+	body.Name = strings.TrimSpace(body.Name)
 	isMasterSlave, cli, isRemote, tx, err := d.editFlowNetworkBody(body)
 	if err != nil {
 		return nil, err
@@ -92,6 +94,7 @@ func (d *GormDatabase) UpdateFlowNetwork(uuid string, body *model.FlowNetwork) (
 		// we just either edit flow_network or assign stream
 		return d.updateStreamsOnFlowNetwork(fn, body.Streams)
 	}
+	body.Name = strings.TrimSpace(body.Name)
 	// restrict to create multiple flow-networks, so it doesn't break existing local flows
 	// this is needed because local flows don't have rollback
 	if boolean.IsFalse(body.IsRemote) {
@@ -212,7 +215,7 @@ func (d *GormDatabase) SyncFlowNetworkStreams(uuid string, args api.Args) ([]*in
 
 func (d *GormDatabase) syncStream(localCli *client.FlowClient, stream *model.Stream, args api.Args, params string,
 	channel chan *interfaces.SyncModel) {
-	_, err := d.UpdateStream(stream.UUID, stream)
+	_, err := d.UpdateStream(stream.UUID, stream, false)
 	// This is for syncing child descendants
 	if args.WithProducers == true {
 		url := urls.GetUrl(urls.StreamProducersSyncUrl, stream.UUID) + params

@@ -8,7 +8,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/structs"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm"
-	"strings"
 )
 
 func truncateString(str string, num int) string {
@@ -72,7 +71,7 @@ func checkHistoryType(t string) (model.HistoryType, error) {
 	}
 	historyType := model.HistoryType(t)
 	if _, ok := model.HistoryTypeMap[historyType]; !ok {
-		return "", errors.New("please provide a valid history type ie: COV , INTERVAL or COV_AND_INTERVAL")
+		return "", errors.New("please provide a valid history type ie: COV, INTERVAL or COV_AND_INTERVAL")
 	}
 	return historyType, nil
 }
@@ -113,16 +112,14 @@ func metaTagsArgsToKeyValues(metaTags string) [][]interface{} {
 	return keyValues
 }
 
-func getAutoMappedNetworkName(networkName string, isLocal bool) string {
-	if isLocal {
-		return fmt.Sprintf("mapping_%s", networkName)
-	}
-	return networkName
+func getAutoMappedNetworkName(flowNetworkCloneName, networkName string) string {
+	return fmt.Sprintf("%s_%s", flowNetworkCloneName, networkName)
 }
 
-func getAutoMappedOriginalNetworkName(networkName string, isLocal bool) string {
-	if isLocal {
-		return strings.Replace(networkName, "mapping_", "", 1)
-	}
-	return networkName
+func getAutoMappedStreamName(flowNetworkCloneName, networkName, deviceName string) string {
+	return fmt.Sprintf("%s:%s:%s", flowNetworkCloneName, networkName, deviceName)
+}
+
+func getTempAutoMappedName(name string) string {
+	return fmt.Sprintf("__temp_mapper__%s", name)
 }

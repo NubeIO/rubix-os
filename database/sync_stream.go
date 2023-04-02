@@ -28,18 +28,6 @@ func (d *GormDatabase) SyncStream(body *model.SyncStream) (*model.StreamClone, e
 		return nil, err
 	}
 	if len(streamClonesModel) == 0 {
-		// Stream clone suppose to delete with stream deletion. But when we do mapping changes and sync process
-		// sometimes stream gets deleted whereas stream_clone doesn't get deleted, so when we sync again it shows the
-		// conflict. And this block of code avoids such cases.
-		if err = d.DB.
-			Where("name = ? ", streamClone.Name).
-			Where("created_from_auto_mapping IS TRUE").
-			Find(&streamClonesModel).Error; err != nil {
-			return nil, err
-		}
-		for _, scm := range streamClonesModel {
-			d.DB.Delete(&scm)
-		}
 		streamClone.UUID = nuuid.MakeTopicUUID(model.CommonNaming.StreamClone)
 		if err = d.DB.Create(&streamClone).Error; err != nil {
 			return nil, err

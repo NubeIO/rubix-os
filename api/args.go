@@ -1,73 +1,78 @@
 package api
 
 type Args struct {
-	Sort                 string
-	Order                string
-	Offset               string
-	Limit                string
-	Search               string
-	AskRefresh           string
-	AskResponse          string
-	Write                string
-	ThingType            string
-	UUID                 *string
-	FlowNetworkUUID      string
-	FlowNetworkCloneUUID *string
-	WriteHistory         string
-	WriteConsumer        string
-	Field                string
-	Value                string
-	UpdateProducer       string
-	CompactPayload       string
-	CompactWithName      string
-	FlowUUID             string
-	Name                 *string
-	StreamUUID           *string
-	ProducerUUID         *string
-	ConsumerUUID         *string
-	WriterUUID           string
-	AddToParent          string
-	GlobalUUID           *string
-	ClientId             *string
-	SiteId               *string
-	DeviceId             *string
-	WriterThingClass     *string
-	SourceUUID           *string
-	ProducerThingUUID    *string
-	WriterThingUUID      *string
-	WriterThingName      *string
-	ByPluginName         bool
-	TimestampGt          *string
-	TimestampLt          *string
-	WithFlowNetworks     bool
-	WithStreams          bool
-	WithStreamClones     bool
-	WithProducers        bool
-	WithConsumers        bool
-	WithCommandGroups    bool
-	WithWriters          bool
-	WithWriterClones     bool
-	Networks             bool
-	WithDevices          bool
-	WithPoints           bool
-	WithPriority         bool
-	WithTags             bool
-	PluginName           string
-	NetworkName          *string
-	DeviceName           *string
-	PointName            *string
-	AddressUUID          *string
-	AddressID            *string
-	ObjectType           *string
-	IoNumber             *string
-	IdGt                 *string
-	IsRemote             *bool
-	IsMetadata           bool
-	NetworkUUID          *string
-	DeviceUUID           *string
-	WithMetaTags         bool
-	AutoMappingEnable    *bool
-	MetaTags             *string
+	Enable                 *bool
+	Sort                   string
+	Order                  string
+	Offset                 string
+	Limit                  string
+	Search                 string
+	AskRefresh             string
+	AskResponse            string
+	Write                  string
+	ThingType              string
+	UUID                   *string
+	FlowNetworkUUID        string
+	FlowNetworkCloneUUID   *string
+	WriteHistory           string
+	WriteConsumer          string
+	Field                  string
+	Value                  string
+	UpdateProducer         string
+	CompactPayload         string
+	CompactWithName        string
+	FlowUUID               string
+	Name                   *string
+	StreamUUID             *string
+	ProducerUUID           *string
+	ConsumerUUID           *string
+	WriterUUID             string
+	AddToParent            string
+	GlobalUUID             *string
+	ClientId               *string
+	SiteId                 *string
+	DeviceId               *string
+	WriterThingClass       *string
+	SourceUUID             *string
+	AutoMappingUUID        *string
+	ProducerThingUUID      *string
+	WriterThingUUID        *string
+	WriterThingName        *string
+	ByPluginName           bool
+	TimestampGt            *string
+	TimestampLt            *string
+	WithFlowNetworks       bool
+	WithStreams            bool
+	WithStreamClones       bool
+	WithProducers          bool
+	WithConsumers          bool
+	WithCommandGroups      bool
+	WithWriters            bool
+	WithWriterClones       bool
+	Networks               bool
+	WithDevices            bool
+	WithPoints             bool
+	WithPriority           bool
+	WithTags               bool
+	PluginName             string
+	NetworkName            *string
+	DeviceName             *string
+	PointName              *string
+	AddressUUID            *string
+	AddressID              *string
+	ObjectType             *string
+	IoNumber               *string
+	IdGt                   *string
+	IsRemote               *bool
+	IsMetadata             bool
+	NetworkUUID            *string
+	DeviceUUID             *string
+	WithMetaTags           bool
+	AutoMappingEnable      *bool
+	MetaTags               *string
+	CreatedFromAutoMapping *bool
+	AutoMappingNetworkUUID *string
+	AutoMappingDeviceUUID  *string
 }
 
 var ArgsType = struct {
@@ -103,6 +108,7 @@ var ArgsType = struct {
 	DeviceId             string
 	WriterThingClass     string
 	SourceUUID           string
+	AutoMappingUUID      string
 	ProducerThingUUID    string
 	WriterThingUUID      string
 	WriterThingName      string
@@ -171,6 +177,7 @@ var ArgsType = struct {
 	DeviceId:             "device_id",
 	WriterThingClass:     "writer_thing_class",
 	SourceUUID:           "source_uuid",
+	AutoMappingUUID:      "auto_mapping_uuid",
 	ProducerThingUUID:    "producer_thing_uuid",
 	WriterThingUUID:      "writer_thing_name",
 	WriterThingName:      "writer_thing_uuid",

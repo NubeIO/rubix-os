@@ -50,6 +50,13 @@ func (d *GormDatabase) GetOneProducerByArgs(args api.Args) (*model.Producer, err
 }
 
 func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, error) {
+	stream, err := d.GetStream(body.StreamUUID, api.Args{})
+	if err != nil {
+		return nil, fmt.Errorf("no such parent stream with uuid %s", body.StreamUUID)
+	}
+	if boolean.IsTrue(stream.CreatedFromAutoMapping) {
+		return nil, errors.New("can't create a producer for the auto-mapped stream")
+	}
 	if body.ProducerThingUUID == "" {
 		return nil, errors.New("please pass in a producer_thing_uuid i.e. uuid of that class")
 	}
@@ -82,10 +89,6 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	default:
 		return nil, errors.New("we are not supporting producer_thing_class other than point & schedule")
 	}
-	_, err = d.GetStream(body.StreamUUID, api.Args{})
-	if err != nil {
-		return nil, err
-	}
 	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Producer)
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = nuuid.MakeUUID()
@@ -96,10 +99,13 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	return body, nil
 }
 
-func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer) (*model.Producer, error) {
+func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer, checkAutoMap bool) (*model.Producer, error) {
 	var producerModel *model.Producer
 	if err := d.DB.Where("uuid = ?", uuid).First(&producerModel).Error; err != nil {
 		return nil, err
+	}
+	if boolean.IsTrue(producerModel.CreatedFromAutoMapping) && checkAutoMap {
+		return nil, errors.New("can't update auto-mapped producer")
 	}
 	if len(body.Tags) > 0 {
 		if err := d.updateTags(&producerModel, body.Tags); err != nil {
@@ -140,7 +146,7 @@ func (d *GormDatabase) UpdateProducerByProducerThingUUID(producerThingUUID strin
 			producer.EnableHistory = enableHistory
 			producer.HistoryType = historyType
 			producer.HistoryInterval = historyInterval
-			go d.UpdateProducer(producer.UUID, producer)
+			go d.UpdateProducer(producer.UUID, producer, false)
 		}
 	}
 }
@@ -149,6 +155,9 @@ func (d *GormDatabase) DeleteProducer(uuid string) (bool, error) {
 	producer, err := d.GetProducer(uuid, api.Args{})
 	if err != nil {
 		return false, err
+	}
+	if boolean.IsTrue(producer.CreatedFromAutoMapping) {
+		return false, errors.New("can't delete auto-mapped producer")
 	}
 	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
 	aType := api.ArgsType
@@ -223,7 +232,7 @@ func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*fl
 	createCOVHistory bool, currentWriterUUID *string) error {
 	producerModelBody := new(model.Producer)
 	producerModelBody.CurrentWriterUUID = currentWriterUUID
-	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &uuid})
+	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &uuid, Enable: boolean.NewTrue()})
 	for _, producer := range producers {
 		err := d.producerPointWrite(producer.UUID, priority, presentValue, producerModelBody, createCOVHistory)
 		if err != nil {
@@ -235,7 +244,7 @@ func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*fl
 
 func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*float64, presentValue *float64,
 	producerModelBody *model.Producer, createCOVHistory bool) error {
-	producerModel, err := d.UpdateProducer(uuid, producerModelBody)
+	producerModel, err := d.UpdateProducer(uuid, producerModelBody, false)
 	if err != nil {
 		log.Errorf("producer: issue on update producer err: %v\n", err)
 		return errors.New("issue on update producer")
@@ -275,7 +284,7 @@ func (d *GormDatabase) ProducersScheduleWrite(uuid string, body *model.ScheduleD
 }
 
 func (d *GormDatabase) producerScheduleWrite(uuid string, scheduleData *model.ScheduleData, producerModelBody *model.Producer) error {
-	producerModel, err := d.UpdateProducer(uuid, producerModelBody)
+	producerModel, err := d.UpdateProducer(uuid, producerModelBody, false)
 	if err != nil {
 		log.Errorf("producer: issue on update producer err: %v\n", err)
 		return errors.New("issue on update producer")
@@ -304,7 +313,7 @@ func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Produce
 	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
 	for _, fn := range stream.FlowNetworks {
 		// TODO: wc.FlowFrameworkUUID == "" remove from condition; it's here coz old deployment doesn't used to have that value
-		if wc.FlowFrameworkUUID == "" || fn.UUID == wc.FlowFrameworkUUID {
+		if (wc.FlowFrameworkUUID == "" || fn.UUID == wc.FlowFrameworkUUID) && boolean.IsTrue(stream.Enable) {
 			cli := client.NewFlowClientCliFromFN(fn)
 			_ = cli.SyncCOV(wc.SourceUUID, body)
 		}

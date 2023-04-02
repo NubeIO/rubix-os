@@ -5,12 +5,25 @@ import (
 	"github.com/NubeIO/flow-framework/nresty"
 )
 
-func (inst *FlowClient) AddAutoMapping(body *interfaces.AutoMapping) (bool, error) {
-	_, err := nresty.FormatRestyResponse(inst.client.R().
+func (inst *FlowClient) CreateAutoMapping(body *interfaces.AutoMapping) interfaces.AutoMappingResponse {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&interfaces.AutoMappingResponse{}).
 		SetBody(body).
 		Post("/api/auto_mappings"))
 	if err != nil {
-		return false, err
+		networkUUID := "" // pick first valid network
+		for _, network := range body.Networks {
+			if network.CreateNetwork {
+				networkUUID = network.UUID
+				break
+			}
+		}
+		return interfaces.AutoMappingResponse{
+			HasError:    true,
+			NetworkUUID: networkUUID,
+			Error:       err.Error(),
+			Level:       interfaces.Network,
+		}
 	}
-	return true, nil
+	return *resp.Result().(*interfaces.AutoMappingResponse)
 }

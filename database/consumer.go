@@ -2,15 +2,17 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/flow-framework/urls"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"sync"
+	"gorm.io/gorm"
 )
 
 type Consumers struct {
@@ -35,19 +37,26 @@ func (d *GormDatabase) GetConsumer(uuid string, args api.Args) (*model.Consumer,
 	return consumerModel, nil
 }
 
-func (d *GormDatabase) GetOneConsumerByArgs(args api.Args) (*model.Consumer, error) {
+func GetOneConsumerByArgsTransaction(db *gorm.DB, args api.Args) (*model.Consumer, error) {
 	var consumerModel *model.Consumer
-	query := d.buildConsumerQuery(args)
+	query := buildConsumerQueryTransaction(db, args)
 	if err := query.First(&consumerModel).Error; err != nil {
 		return nil, err
 	}
 	return consumerModel, nil
 }
 
+func (d *GormDatabase) GetOneConsumerByArgs(args api.Args) (*model.Consumer, error) {
+	return GetOneConsumerByArgsTransaction(d.DB, args)
+}
+
 func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, error) {
 	streamClone, err := d.GetStreamClone(body.StreamCloneUUID, api.Args{})
 	if err != nil {
-		return nil, newError("GetStreamClone", "error on trying to get validate the stream_clone_uuid")
+		return nil, fmt.Errorf("no such parent stream clone with uuid %s", body.StreamCloneUUID)
+	}
+	if boolean.IsTrue(streamClone.CreatedFromAutoMapping) {
+		return nil, errors.New("can't create a consumer for the auto-mapped stream clone")
 	}
 	flowNetworkCloneUUID := streamClone.FlowNetworkCloneUUID
 	fnc, err := d.GetFlowNetworkClone(flowNetworkCloneUUID, api.Args{})
@@ -78,28 +87,24 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 }
 
 func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
-	consumerModel, err := d.GetConsumer(uuid, api.Args{WithWriters: true})
+	consumerModel, err := d.GetConsumer(uuid, api.Args{})
 	if err != nil {
 		return false, err
 	}
-	var wg sync.WaitGroup
-	for _, writer := range consumerModel.Writers {
-		wg.Add(1)
-		writer := writer
-		go func() {
-			defer wg.Done()
-			_, _ = d.DeleteWriter(writer.UUID)
-		}()
+	if boolean.IsTrue(consumerModel.CreatedFromAutoMapping) {
+		return false, errors.New("can't delete auto-mapped consumer")
 	}
-	wg.Wait()
 	query := d.DB.Delete(&consumerModel)
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer) (*model.Consumer, error) {
+func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer, checkAm bool) (*model.Consumer, error) {
 	var consumerModel *model.Consumer
 	if err := d.DB.Where("uuid = ?", uuid).First(&consumerModel).Error; err != nil {
 		return nil, err
+	}
+	if boolean.IsTrue(consumerModel.CreatedFromAutoMapping) && checkAm {
+		return nil, errors.New("can't update auto-mapped consumer")
 	}
 	if len(body.Tags) > 0 {
 		if err := d.updateTags(&consumerModel, body.Tags); err != nil {
@@ -149,7 +154,7 @@ func (d *GormDatabase) SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel
 }
 
 func (d *GormDatabase) syncWriter(writer *model.Writer, channel chan *interfaces.SyncModel) {
-	_, err := d.UpdateWriter(writer.UUID, writer)
+	_, err := d.UpdateWriter(writer.UUID, writer, false)
 	var output interfaces.SyncModel
 	if err != nil {
 		writer.Connection = connection.Broken.String()
