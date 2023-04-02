@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.12.0](https://github.com/NubeIO/flow-framework/tree/v0.12.0) (2023-04-02)
+
+- Auto mapping improvements
+
 ## [v0.11.3](https://github.com/NubeIO/flow-framework/tree/v0.11.3) (2023-03-29)
 
 - fix override priority array
