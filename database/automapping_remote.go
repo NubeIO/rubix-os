@@ -36,7 +36,7 @@ func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) *i
 
 	tx.Commit()
 
-	d.PublishPointsList("")
+	go d.PublishPointsList("")
 
 	return &interfaces.AutoMappingResponse{
 		HasError:    false,

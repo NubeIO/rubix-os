@@ -35,6 +35,8 @@ func (d *GormDatabase) CreateNetworksAutoMappings(fnName string, networks []*mod
 		return err
 	}
 
+	go d.PublishPointsList("")
+
 	return nil
 }
 

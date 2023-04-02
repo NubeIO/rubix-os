@@ -157,14 +157,12 @@ func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point, ch
 	return body, nil
 }
 
-func (d *GormDatabase) CreatePoint(body *model.Point, publishPointList bool) (*model.Point, error) {
+func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	pnt, err := d.CreatePointTransaction(d.DB, body, true)
 	if err != nil {
 		return nil, err
 	}
-	if publishPointList {
-		go d.PublishPointsList("")
-	}
+	go d.PublishPointsList("")
 	return pnt, nil
 }
 
@@ -450,11 +448,9 @@ func (d *GormDatabase) UpdatePointConnectionErrorsByName(name string, point *mod
 		Error
 }
 
-func (d *GormDatabase) DeletePoint(uuid string, publishPointList bool) (bool, error) {
+func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 	query := d.DB.Where("uuid = ?", uuid).Delete(&model.Point{})
-	if publishPointList {
-		go d.PublishPointsList("")
-	}
+	go d.PublishPointsList("")
 	return d.deleteResponseBuilder(query)
 }
 

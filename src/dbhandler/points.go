@@ -33,7 +33,7 @@ func (h *Handler) GetPoint(uuid string, args api.Args) (*model.Point, error) {
 
 func (h *Handler) CreatePoint(body *model.Point, updatePoint bool) (
 	*model.Point, error) {
-	pnt, err := getDb().CreatePoint(body, true)
+	pnt, err := getDb().CreatePoint(body)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (h *Handler) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 }
 
 func (h *Handler) DeletePoint(uuid string) (bool, error) {
-	_, err := getDb().DeletePoint(uuid, true)
+	_, err := getDb().DeletePoint(uuid)
 	if err != nil {
 		return false, err
 	}
