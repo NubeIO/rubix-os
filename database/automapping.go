@@ -174,9 +174,11 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 		updateCascadeConnectionError(d.DB, &amRes)
 	} else {
 		for _, amNetwork := range autoMapping.Networks {
-			err := d.clearConnectionError(amNetwork)
-			if err != nil {
-				return err
+			if amNetwork.CreateNetwork { // just update its own network
+				err := d.clearConnectionError(amNetwork)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
