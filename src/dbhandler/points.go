@@ -54,7 +54,7 @@ func createPointDeepCopy(point model.Point) model.Point {
 }
 
 func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
-	return getDb().UpdatePoint(uuid, body, true)
+	return getDb().UpdatePoint(uuid, body)
 }
 
 // TODO: This was only added to allow for the EnableWriteable property to be updated.  It can be removed (along with the code at the bottom of SYSTEM plugin enable().

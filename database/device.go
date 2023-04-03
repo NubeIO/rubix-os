@@ -18,14 +18,7 @@ func (d *GormDatabase) GetDevices(args api.Args) ([]*model.Device, error) {
 	if err := query.Find(&devicesModel).Error; err != nil {
 		return nil, err
 	}
-	marshallCacheDevices(devicesModel, args)
 	return devicesModel, nil
-}
-
-func marshallCacheDevices(devices []*model.Device, args api.Args) {
-	for _, device := range devices {
-		marshallCachePoints(device.Points, args)
-	}
 }
 
 func (d *GormDatabase) GetDevice(uuid string, args api.Args) (*model.Device, error) {
@@ -34,7 +27,6 @@ func (d *GormDatabase) GetDevice(uuid string, args api.Args) (*model.Device, err
 	if err := query.Where("uuid = ? ", uuid).First(&deviceModel).Error; err != nil {
 		return nil, err
 	}
-	marshallCachePoints(deviceModel.Points, args)
 	return deviceModel, nil
 }
 

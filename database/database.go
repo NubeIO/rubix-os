@@ -10,7 +10,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 
 	"github.com/NubeIO/flow-framework/logger"
@@ -81,12 +80,10 @@ func createDirectoryIfSqlite(dialect, connection string) {
 
 // GormDatabase is a wrapper for the gorm framework.
 type GormDatabase struct {
-	DB                *gorm.DB
-	Store             cachestore.Handler
-	Bus               eventbus.BusService
-	PluginManager     *plugin.Manager
-	mutex             sync.Mutex
-	pointBuffersMutex sync.Mutex
+	DB            *gorm.DB
+	Store         cachestore.Handler
+	Bus           eventbus.BusService
+	PluginManager *plugin.Manager
 }
 
 // Close closes the gorm database connection.

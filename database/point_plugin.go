@@ -20,7 +20,7 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 		if err != nil {
 			return nil, err
 		}
-		point, err = d.UpdatePoint(point.UUID, point, false)
+		point, err = d.UpdatePoint(point.UUID, point)
 		return
 	}
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
@@ -46,7 +46,7 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 	pluginName := network.PluginPath
 	if pluginName == "system" {
 		body.EnableWriteable = boolean.NewTrue()
-		point, err = d.UpdatePoint(uuid, body, false)
+		point, err = d.UpdatePoint(uuid, body)
 		if err != nil {
 			return nil, err
 		}
