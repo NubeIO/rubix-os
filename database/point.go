@@ -146,7 +146,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 }
 
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) (*model.Point, error) {
-	writeOnDB := !buffer
+	writeOnDB := true
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).
 		Preload("Tags").
