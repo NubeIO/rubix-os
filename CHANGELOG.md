@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.12.1](https://github.com/NubeIO/flow-framework/tree/v0.12.1) (2023-04-04)
+
+- Remove point update buffer as it's using ~2x CPU power
+  - It also fixes the slow MQTT publish issue
+- Improvement to run auto-mapping for all different fns
+
 ## [v0.12.0](https://github.com/NubeIO/flow-framework/tree/v0.12.0) (2023-04-02)
 
 - Auto mapping improvements
