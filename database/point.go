@@ -24,17 +24,7 @@ func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
 	if err := query.Find(&pointsModel).Error; err != nil {
 		return nil, err
 	}
-	marshallCachePoints(pointsModel, args)
 	return pointsModel, nil
-}
-
-func marshallCachePoints(points []*model.Point, args api.Args) {
-	for i, point := range points {
-		pnt := GetPoint(point.UUID, args)
-		if pnt != nil {
-			points[i] = pnt
-		}
-	}
 }
 
 func (d *GormDatabase) GetPointsBulkUUIs() ([]string, error) {
@@ -47,8 +37,7 @@ func (d *GormDatabase) GetPointsBulkUUIs() ([]string, error) {
 
 func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point, error) {
 	var pointsModel []*model.Point
-	args := api.Args{WithPriority: true}
-	points, err := d.GetPoints(args)
+	points, err := d.GetPoints(api.Args{WithPriority: true})
 	if err != nil {
 		return nil, err
 	}
@@ -59,15 +48,10 @@ func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point,
 			}
 		}
 	}
-	marshallCachePoints(pointsModel, args)
 	return pointsModel, nil
 }
 
 func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error) {
-	point := GetPoint(uuid, args)
-	if point != nil {
-		return point, nil
-	}
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&pointModel).Error; err != nil {
@@ -188,18 +172,13 @@ func (d *GormDatabase) UpdatePointTransactionForAutoMapping(db *gorm.DB, uuid st
 	return &pointModel, nil
 }
 
-func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) (*model.Point, error) {
-	writeOnDB := !buffer
-	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).
-		Preload("Tags").
-		Preload("MetaTags").
-		Preload("Priority").First(&pointModel)
+func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
+	pointModel, err := d.GetPoint(uuid, api.Args{WithPriority: true})
+	if err != nil {
+		return nil, err
+	}
 	if boolean.IsTrue(pointModel.CreatedFromAutoMapping) {
 		return nil, errors.New("can't update auto-mapped point")
-	}
-	if query.Error != nil {
-		return nil, query.Error
 	}
 	existingName, existingAddrID := d.pointNameExists(body)
 	if existingAddrID && boolean.IsTrue(body.IsBitwise) && body.BitwiseIndex != nil && *body.BitwiseIndex >= 0 {
@@ -216,30 +195,15 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 			return nil, errors.New(eMsg)
 		}
 	}
-	if len(body.Tags) > 0 && writeOnDB {
-		if err := d.updateTags(&pointModel, body.Tags); err != nil {
+	if len(body.Tags) > 0 {
+		if err = d.updateTags(&pointModel, body.Tags); err != nil {
 			return nil, err
 		}
 	}
 	body.Name = strings.TrimSpace(body.Name)
 	publishPointList := body.Name != pointModel.Name
-	// Don't replace these on nil updates
-	// TODO: we either need to remove this (`rubix-ui` needs to send all these values) or that `.Select(*)`
-	if body.Priority == nil {
-		body.Priority = pointModel.Priority
-	}
-	if body.Tags == nil {
-		body.Tags = pointModel.Tags
-	}
-	if body.MetaTags == nil {
-		body.MetaTags = pointModel.MetaTags
-	}
-	if writeOnDB {
-		if err := d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
-			return nil, err
-		}
-	} else {
-		pointModel = body
+	if err = d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
+		return nil, err
 	}
 
 	// TODO: we need to decide if a read only point needs to have a priority array or if it should just be nil.
@@ -249,34 +213,12 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point, buffer bool) 
 		pointModel.Priority = body.Priority
 	}
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
-	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, nil, false, writeOnDB)
-	if writeOnDB {
-		if publishPointList {
-			go d.PublishPointsList("")
-		}
-		d.UpdateProducerByProducerThingUUID(pointModel.UUID, pointModel.Name, pointModel.HistoryEnable,
-			pointModel.HistoryType, pointModel.HistoryInterval)
-	} else {
-		d.bufferPointUpdate(uuid, body, pnt)
+	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, nil, false)
+	if publishPointList {
+		go d.PublishPointsList("")
 	}
+	d.UpdateProducerByProducerThingUUID(pointModel.UUID, pointModel.Name, pointModel.HistoryEnable, pointModel.HistoryType, pointModel.HistoryInterval)
 	return pnt, err
-}
-
-func (d *GormDatabase) UpdatePointName(uuid string, name string) (*model.Point, error) {
-	var pointModel *model.Point
-	query := d.DB.Where("uuid = ?", uuid).First(&pointModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	existingName := d.pointNameExistsInDevice(name, pointModel.DeviceUUID)
-	if existingName {
-		eMsg := fmt.Sprintf("a point with existing name: %s exists", name)
-		return nil, errors.New(eMsg)
-	}
-	if err := d.DB.Model(&pointModel).Update("name", name).Error; err != nil {
-		return nil, err
-	}
-	return pointModel, nil
 }
 
 func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, currentWriterUUID *string, forceWrite bool) (
@@ -291,9 +233,8 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, currentW
 	} else {
 		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
-	d.updateUpdatePointBufferPointWriter(uuid, body.Priority)
 	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err :=
-		d.updatePointValue(pointModel, body.Priority, currentWriterUUID, forceWrite, true)
+		d.updatePointValue(pointModel, body.Priority, currentWriterUUID, forceWrite)
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
@@ -305,7 +246,7 @@ func updateSoftPointValueTransaction(db *gorm.DB, pointModel *model.Point, prior
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
 
-	pointModel, _, presentValue, writeValue, _ := updatePriorityTransaction(db, pointModel, &priorityMap, true)
+	pointModel, _, presentValue, writeValue, _ := updatePriorityTransaction(db, pointModel, &priorityMap)
 	ov := float.Copy(presentValue)
 	pointModel.OriginalValue = ov
 	wv := float.Copy(writeValue)
@@ -343,14 +284,14 @@ func updateSoftPointValueTransaction(db *gorm.DB, pointModel *model.Point, prior
 }
 
 func (d *GormDatabase) updatePointValue(
-	pointModel *model.Point, priority *map[string]*float64, currentWriterUUID *string, forceWrite, writeOnDB bool) (
+	pointModel *model.Point, priority *map[string]*float64, currentWriterUUID *string, forceWrite bool) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
 
-	pointModel, priority, presentValue, writeValue, isPriorityChanged := d.updatePriority(pointModel, priority, writeOnDB)
+	pointModel, priority, presentValue, writeValue, isPriorityChanged := d.updatePriority(pointModel, priority)
 	ov := float.Copy(presentValue)
 	pointModel.OriginalValue = ov
 	wv := float.Copy(writeValue)
@@ -393,13 +334,9 @@ func (d *GormDatabase) updatePointValue(
 		pointModel.PresentValue = presentValue
 	}
 	pointModel.WriteValue = writeValue
-	if writeOnDB {
-		_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
-		// when point write gets called it should change the cache values too, otherwise it will return wrong values
-		d.updateUpdatePointBufferPoint(pointModel)
-	}
+	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 
-	if isChange && writeOnDB {
+	if isChange {
 		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange, currentWriterUUID)
 		if err != nil {
 			return nil, false, false, false, err
@@ -408,10 +345,9 @@ func (d *GormDatabase) updatePointValue(
 		d.DB.Model(&model.Writer{}).
 			Where("writer_thing_uuid = ?", pointModel.UUID).
 			Update("present_value", pointModel.PresentValue)
-
-		if isPresentValueChange {
-			err = d.PublishPointCov(pointModel.UUID)
-		}
+	}
+	if isPresentValueChange {
+		err = d.PublishPointCov(pointModel.UUID)
 	}
 	return pointModel, isPresentValueChange, isWriteValueChange, isPriorityChanged, nil
 }
@@ -481,5 +417,19 @@ func (d *GormDatabase) DeleteOnePointByArgs(args api.Args) (bool, error) {
 		return false, err
 	}
 	query = query.Delete(&pointModel)
+	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) DeletePointByName(networkName, deviceName, pointName string, args api.Args) (bool, error) {
+	var pointModel *model.Point
+	query := d.buildPointQuery(args)
+	if err := query.Joins("JOIN devices ON points.device_uuid = devices.uuid").
+		Joins("JOIN networks ON devices.network_uuid = networks.uuid").
+		Where("networks.name = ?", networkName).Where("devices.name = ?", deviceName).
+		Where("points.name = ?", pointName).
+		First(&pointModel).Error; err != nil {
+		return false, err
+	}
+	query = query.Delete(pointModel)
 	return d.deleteResponseBuilder(query)
 }

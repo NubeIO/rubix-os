@@ -24,7 +24,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var flushPointUpdateBufferInterval = 5 * time.Second
 var flushMqttPublishBufferInterval = 1 * time.Second
 
 func intHandler(db *database.GormDatabase) {
@@ -56,13 +55,7 @@ func initHistorySchedulers(db *database.GormDatabase, conf *config.Configuration
 	}
 }
 
-func initFlushBuffers(db *database.GormDatabase) {
-	go func() {
-		for {
-			time.Sleep(flushPointUpdateBufferInterval)
-			db.FlushPointUpdateBuffers()
-		}
-	}()
+func initFlushBuffers() {
 	if boolean.IsTrue(config.Get().MQTT.Enable) {
 		go func() {
 			for {
@@ -108,7 +101,7 @@ func main() {
 	engine := router.Create(db, conf)
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)
-	initFlushBuffers(db)
+	initFlushBuffers()
 	runner.Run(engine, conf)
 }
 

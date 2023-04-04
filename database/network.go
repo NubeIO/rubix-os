@@ -14,31 +14,20 @@ import (
 	"strings"
 )
 
-func marshallCacheNetworks(networks []*model.Network, args api.Args) {
-	for _, network := range networks {
-		for _, device := range network.Devices {
-			marshallCachePoints(device.Points, args)
-		}
-	}
-}
-
 func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
 	var networksModel []*model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.Find(&networksModel).Error; err != nil {
 		return nil, err
 	}
-	marshallCacheNetworks(networksModel, args)
 	return networksModel, nil
 }
-
 func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&networkModel).Error; err != nil {
 		return nil, err
 	}
-	marshallCacheDevices(networkModel.Devices, args)
 	return networkModel, nil
 }
 
@@ -48,7 +37,6 @@ func (d *GormDatabase) GetOneNetworkByArgs(args api.Args) (*model.Network, error
 	if err := query.First(&networkModel).Error; err != nil {
 		return nil, err
 	}
-	marshallCacheDevices(networkModel.Devices, args)
 	return networkModel, nil
 }
 
