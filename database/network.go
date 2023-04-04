@@ -10,6 +10,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -175,6 +176,7 @@ func (d *GormDatabase) SyncNetworks(args api.Args) error {
 	args.WithTags = true
 	args.WithMetaTags = true
 	networks, err := d.GetNetworks(args)
+	var firstErr error
 	if err != nil {
 		return err
 	}
@@ -182,10 +184,10 @@ func (d *GormDatabase) SyncNetworks(args api.Args) error {
 	for _, fnName := range uniqueAutoMappingFlowNetworkNames {
 		err = d.CreateNetworksAutoMappings(fnName, networks, interfaces.Network)
 		if err != nil {
-			return err
+			log.Error("Auto mapping error: ", err)
 		}
 	}
-	return nil
+	return firstErr
 }
 
 func (d *GormDatabase) SyncNetworkDevices(uuid string, args api.Args) error {
