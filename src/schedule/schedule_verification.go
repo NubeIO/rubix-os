@@ -36,43 +36,43 @@ func ScheduleTest() {
 
 	weeklyResult, err := WeeklyCheck(ScheduleJSON.Schedules.Weekly, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 	if err != nil {
-		log.Errorf("system-plugin-schedule: issue on WeeklyCheck %v\n", err)
+		log.Errorf("Schedule Checks: issue on WeeklyCheck %v\n", err)
 	}
-	fmt.Println("weeklyResult")
-	fmt.Printf("%+v\n", weeklyResult)
+	// fmt.Println("weeklyResult")
+	// fmt.Printf("%+v\n", weeklyResult)
 
 	// CHECK EVENT SCHEDULES
 	// eventResult, err := schedule.EventCheck(decodeSchedule.Events, "ANY")  //This will check for any active schedules with any name
 	eventResult, err := EventCheck(ScheduleJSON.Schedules.Events, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 	if err != nil {
-		log.Errorf("system-plugin-schedule: issue on EventCheck %v\n", err)
+		log.Errorf("Schedule Checks: issue on EventCheck %v\n", err)
 	}
-	fmt.Println("eventResult")
-	fmt.Printf("%+v\n", eventResult)
+	// fmt.Println("eventResult")
+	// fmt.Printf("%+v\n", eventResult)
 
 	// Combine Event and Weekly schedule results.
 	weeklyAndEventResult, err := CombineScheduleCheckerResults(weeklyResult, eventResult, timezone)
-	fmt.Println("weeklyAndEventResult")
-	fmt.Printf("%+v\n", weeklyAndEventResult)
+	// fmt.Println("weeklyAndEventResult")
+	// fmt.Printf("%+v\n", weeklyAndEventResult)
 
 	// CHECK EXCEPTION SCHEDULES
 	// exceptionResult, err := schedule.ExceptionCheck(decodeSchedule.Exceptions, "ANY")  //This will check for any active schedules with any name
 	exceptionResult, err := ExceptionCheck(ScheduleJSON.Schedules.Exceptions, scheduleNameToCheck, timezone) // This will check for any active schedules with defined name.
 	if err != nil {
-		log.Errorf("system-plugin-schedule: issue on ExceptionCheck %v\n", err)
+		log.Errorf("Schedule Checks: issue on ExceptionCheck %v\n", err)
 	}
-	fmt.Println("exceptionResult")
-	fmt.Printf("%+v\n", exceptionResult)
+	// fmt.Println("exceptionResult")
+	// fmt.Printf("%+v\n", exceptionResult)
 	if exceptionResult.CheckIfEmpty() {
-		fmt.Println("Exception schedule is empty")
+		// fmt.Println("Exception schedule is empty")
 	}
 
 	finalResult, err := ApplyExceptionSchedule(weeklyAndEventResult, exceptionResult, timezone) // This applies the exception schedule to mask the combined weekly and event schedules.
 	if err != nil {
-		log.Errorf("system-plugin-schedule: issue on ApplyExceptionSchedule %v\n", err)
+		log.Errorf("Schedule Checks: issue on ApplyExceptionSchedule %v\n", err)
 	}
 	fmt.Println("finalResult")
 	fmt.Printf("%+v\n", finalResult)
 
-	fmt.Println("schedule is ", finalResult.IsActive)
+	// fmt.Println("schedule is ", finalResult.IsActive)
 }

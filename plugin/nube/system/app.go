@@ -10,7 +10,7 @@ func (inst *Instance) schedule() {
 	if ok {
 		_, err := j.Every(30).Second().Do(inst.runSchedule)
 		if err != nil {
-			log.Debugf("system-plugin-schedule: error on create job %v\n", err)
+			log.Debugf("Schedule Checks: error on create job %v\n", err)
 		}
 	}
 }
