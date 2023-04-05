@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.12.3](https://github.com/NubeIO/flow-framework/tree/v0.12.3) (2023-04-05)
+
+- Improvement on CORs by default setting
+- Fix: fallback get priority on doing point update
+
 ## [v0.12.2](https://github.com/NubeIO/flow-framework/tree/v0.12.2) (2023-04-05)
 
 - Fixes event and exception schedules
