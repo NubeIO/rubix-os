@@ -82,8 +82,8 @@ func ConvertScheduleJsonToModbusSchedule(scheduleJSON SchTypes, scheduleName, ti
 			log.Errorf("system-plugin-modbus-schedule: issue on GetWeeklyPeriodsFromWeeklyScheduleCollection %v\n", err)
 		}
 	*/
-	fmt.Println("weeklyResult")
-	fmt.Printf("%+v\n", result)
+	// fmt.Println("weeklyResult")
+	// fmt.Printf("%+v\n", result)
 	if !includeEventSchedules {
 		return result
 	}
@@ -91,10 +91,10 @@ func ConvertScheduleJsonToModbusSchedule(scheduleJSON SchTypes, scheduleName, ti
 	// CHECK EVENT SCHEDULES
 	eventResult, err := EventCheck(scheduleJSON.Events, scheduleName, timezone) // This will check for any active schedules with defined name.
 	if err != nil {
-		log.Errorf("system-plugin-schedule: issue on EventCheck %v\n", err)
+		log.Errorf("Schedule Checks: issue on EventCheck %v\n", err)
 	}
-	fmt.Println("eventResult")
-	fmt.Printf("%+v\n", eventResult)
+	// fmt.Println("eventResult")
+	// fmt.Printf("%+v\n", eventResult)
 
 	result.EventScheduleIsActive = eventResult.IsActive
 
@@ -102,12 +102,12 @@ func ConvertScheduleJsonToModbusSchedule(scheduleJSON SchTypes, scheduleName, ti
 	// exceptionResult, err := schedule.ExceptionCheck(decodeSchedule.Exceptions, "ANY")  //This will check for any active schedules with any name
 	exceptionResult, err := ExceptionCheck(scheduleJSON.Exceptions, scheduleName, timezone) // This will check for any active schedules with defined name.
 	if err != nil {
-		log.Errorf("system-plugin-schedule: issue on ExceptionCheck %v\n", err)
+		log.Errorf("Schedule Checks: issue on ExceptionCheck %v\n", err)
 	}
-	fmt.Println("exceptionResult")
-	fmt.Printf("%+v\n", exceptionResult)
+	// fmt.Println("exceptionResult")
+	// fmt.Printf("%+v\n", exceptionResult)
 	if exceptionResult.CheckIfEmpty() {
-		fmt.Println("Exception schedule is empty")
+		// fmt.Println("Exception schedule is empty")
 	} else {
 		if exceptionResult.IsActive {
 			result.ExceptionScheduleIsActive = true

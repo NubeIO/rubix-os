@@ -101,7 +101,9 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	query = d.DB.Model(&scheduleModel).Updates(body)
+
+	query = d.DB.Model(&scheduleModel).Select("*").Updates(body)
+	// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
 	if query.Error != nil {
 		return nil, query.Error
 	}
