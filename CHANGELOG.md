@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.12.2](https://github.com/NubeIO/flow-framework/tree/v0.12.2) (2023-04-05)
+
+- Fixes event and exception schedules
+
 ## [v0.12.1](https://github.com/NubeIO/flow-framework/tree/v0.12.1) (2023-04-04)
 
 - Remove point update buffer as it's using ~2x CPU power
