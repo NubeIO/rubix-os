@@ -33,7 +33,7 @@ func (d *GormDatabase) GetHistoriesForPostgresSync(lastSyncId int) ([]*model.His
 
 // CreateBulkHistory bulk creates a thing.
 func (d *GormDatabase) CreateBulkHistory(histories []*model.History) (bool, error) {
-	if err := d.DB.Clauses(clause.OnConflict{UpdateAll: true}).CreateInBatches(histories, 1000).Error; err != nil {
+	if err := d.DB.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(histories, 1000).Error; err != nil {
 		log.Error("Issue on creating bulk histories")
 		return false, err
 	}
