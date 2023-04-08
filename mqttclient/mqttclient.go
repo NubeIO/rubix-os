@@ -143,6 +143,25 @@ func (c *Client) FlushMqttPublishBuffers() {
 // NewClient creates an mqttClient client
 func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err error) {
 	c = &Client{chuckSize: 50}
+
+	if options.SetKeepAlive == 0 {
+		options.SetKeepAlive = 5 * time.Second
+	}
+	if options.SetPingTimeout == 0 {
+		options.SetPingTimeout = 5 * time.Second
+	}
+	if options.ConnectRetryInterval == 0 {
+		options.ConnectRetryInterval = 10 * time.Second
+	}
+	if options.MaxReconnectInterval == 0 {
+		options.MaxReconnectInterval = 10 * time.Second
+	}
+	if options.ClientID == "" {
+		options.ClientID, _ = nuuid.MakeUUID()
+	}
+
+	c.clientID = options.ClientID
+
 	opts := mqtt.NewClientOptions()
 	// brokers
 	if options.Servers != nil && len(options.Servers) > 0 {
@@ -154,37 +173,22 @@ func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err e
 		return nil, err
 	}
 
-	if options.ClientID == "" {
-		options.ClientID, _ = nuuid.MakeUUID()
-	}
-	c.clientID = options.ClientID
 	if options.Username != "" {
 		opts.SetUsername(options.Username)
 		opts.SetPassword(options.Password)
 	}
-	if options.SetKeepAlive == 0 {
-		options.SetKeepAlive = 5
-	}
-	if options.SetPingTimeout == 0 {
-		options.SetPingTimeout = 5
-	}
-	if options.ConnectRetryInterval == 0 {
-		options.ConnectRetryInterval = 10
-	}
-	if options.MaxReconnectInterval == 0 {
-		options.MaxReconnectInterval = 10
-	}
 
-	opts.SetConnectRetry(boolean.TrueNil(options.ConnectRetry))
-	opts.SetConnectRetryInterval(options.ConnectRetryInterval * time.Second)
-	opts.SetAutoReconnect(boolean.TrueNil(options.AutoReconnect))
-	opts.SetMaxReconnectInterval(options.MaxReconnectInterval * time.Second)
-	opts.SetKeepAlive(options.SetKeepAlive * time.Second)
-	opts.SetPingTimeout(options.SetPingTimeout * time.Second)
+	opts.SetConnectRetry(boolean.IsTrue(options.ConnectRetry))
+	opts.SetConnectRetryInterval(options.ConnectRetryInterval)
+	opts.SetAutoReconnect(boolean.IsTrue(options.AutoReconnect))
+	opts.SetMaxReconnectInterval(options.MaxReconnectInterval)
+	opts.SetKeepAlive(options.SetKeepAlive)
+	opts.SetPingTimeout(options.SetPingTimeout)
 
 	opts.OnConnectionLost = func(c mqtt.Client, err error) {
 		topicLog{"error", "Lost connection", err}.logErr()
 	}
+
 	opts.OnConnect = func(cc mqtt.Client) {
 		topicLog{"msg", "connected", nil}.logInfo()
 		c.connected = true
@@ -203,13 +207,16 @@ func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err e
 			}
 		}
 	}
+
 	c.client = mqtt.NewClient(opts)
+
 	go func() {
 		done := make(chan os.Signal)
 		<-done
 		topicLog{"msg", "close down client", nil}.logInfo()
 		c.Close()
 	}()
+
 	return c, nil
 }
 

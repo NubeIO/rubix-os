@@ -23,12 +23,12 @@ const (
 )
 
 var pointMqtt *PointMqtt
-var retainMessage bool
-var globalBroadcast bool
 
 func Init(ip string, conf *config.Configuration, onConnected interface{}) error {
 	pm := new(PointMqtt)
 	pm.QOS = mqttclient.QOS(conf.MQTT.QOS)
+	pm.Retain = boolean.IsTrue(conf.MQTT.Retain)
+	pm.GlobalBroadcast = boolean.IsTrue(conf.MQTT.GlobalBroadcast)
 	c, err := mqttclient.NewClient(mqttclient.ClientOptions{
 		Servers:              []string{ip},
 		Username:             conf.MQTT.Username,
@@ -50,8 +50,6 @@ func Init(ip string, conf *config.Configuration, onConnected interface{}) error 
 	if err != nil {
 		return err
 	}
-	retainMessage = boolean.NonNil(conf.MQTT.Retain)
-	globalBroadcast = boolean.NonNil(conf.MQTT.GlobalBroadcast)
 	return nil
 }
 
@@ -69,7 +67,7 @@ func PublishPoint(point *model.Point) {
 		return
 	}
 	topic := fmt.Sprintf("rubix/platform/point/publish")
-	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, pointMqtt.Retain, string(payload))
 }
 
 func PublishPointsList(publishPointList []*interfaces.PublishPointList, topic string) {
@@ -87,7 +85,7 @@ func PublishPointsList(publishPointList []*interfaces.PublishPointList, topic st
 		log.Error(err)
 		return
 	}
-	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, pointMqtt.Retain, string(payload))
 }
 
 func PublishPointCov(network *model.Network, device *model.Device, point *model.Point) {
@@ -102,13 +100,12 @@ func PublishPointCov(network *model.Network, device *model.Device, point *model.
 	pointName := strings.Trim(strings.Trim(point.Name, " "), "\t")
 	topic := MakeTopic([]string{mqttTopic, mqttTopicCov, mqttTopicCovAll, network.PluginPath, network.UUID, networkName,
 		device.UUID, deviceName, point.UUID, pointName})
-
 	payload, err := json.Marshal(pointCovPayload)
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	pointMqtt.Client.Publish(topic, pointMqtt.QOS, retainMessage, string(payload))
+	pointMqtt.Client.Publish(topic, pointMqtt.QOS, pointMqtt.Retain, string(payload))
 }
 
 func ifEmpty(in string) string {
@@ -129,9 +126,8 @@ func MakeTopic(parts []string) string {
 	prefixTopic := []string{ifEmpty(clientId), ifEmpty(clientName), ifEmpty(siteId), ifEmpty(siteName),
 		ifEmpty(deviceId), ifEmpty(deviceName)}
 
-	if globalBroadcast {
+	if pointMqtt.GlobalBroadcast {
 		return strings.Join(append(prefixTopic, parts...), separator)
 	}
 	return strings.Join(append(parts), separator)
-
 }

@@ -1,30 +1,10 @@
 package eventbus
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/NubeIO/flow-framework/mqttclient"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 )
-
-func publishMQTT(sensorStruct model.ProducerBody) {
-	a, _ := mqttclient.NewClient(mqttclient.ClientOptions{
-		Servers: []string{"tcp://0.0.0.0:1883"},
-	}, nil)
-	err := a.Connect()
-	if err != nil {
-		log.Error(err)
-	}
-	topic := fmt.Sprintf("rubix/%s", sensorStruct.ProducerUUID)
-	data, err := json.Marshal(sensorStruct)
-	if err != nil {
-		log.Error(err)
-	}
-	a.Publish(topic, mqttclient.AtMostOnce, false, string(data))
-}
 
 var debug = false
 

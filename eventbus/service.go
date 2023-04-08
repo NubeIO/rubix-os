@@ -7,15 +7,13 @@ import (
 	"log"
 )
 
-type (
-	// BusService :nodoc:
-	BusService interface {
-		EmitString(ctx context.Context, topicName string, data string) error
-		Emit(ctx context.Context, topicName string, data interface{}) error
-		RegisterTopic(topic string)
-		RegisterTopicParent(parent string, child string)
-	}
-)
+// BusService :nodoc:
+type BusService interface {
+	EmitString(ctx context.Context, topicName string, data string) error
+	Emit(ctx context.Context, topicName string, data interface{}) error
+	RegisterTopic(topic string)
+	RegisterTopicParent(parent string, child string)
+}
 
 var bu *bus.Bus
 var busContext context.Context
@@ -48,8 +46,6 @@ func NewService(eb *bus.Bus) BusService {
 	ns := &notificationService{
 		eb: eb,
 	}
-	ns.registerPointsProducer() // add as types needed
-	ns.registerProducer()
 	bs = ns
 	return ns
 }
