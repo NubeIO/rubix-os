@@ -2,11 +2,9 @@ package database
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/migration"
 	"github.com/NubeIO/flow-framework/src/cachestore"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"os"
 	"path/filepath"
@@ -14,7 +12,6 @@ import (
 
 	"github.com/NubeIO/flow-framework/logger"
 	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -44,18 +41,6 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 
 	if err = migration.AutoMigrate(db); err != nil {
 		panic("failed to AutoMigrate")
-	}
-
-	var lsFlowNetworkCount int64 = 0
-	conf := config.Get()
-	lsFlowNetwork := model.LocalStorageFlowNetwork{
-		FlowIP:    conf.Server.ListenAddr,
-		FlowPort:  conf.Server.RSPort,
-		FlowHTTPS: boolean.NewFalse(),
-	}
-	db.Find(&model.LocalStorageFlowNetwork{}).Count(&lsFlowNetworkCount)
-	if lsFlowNetworkCount == 0 {
-		db.Create(&lsFlowNetwork)
 	}
 
 	user_, _ := user.GetUser()

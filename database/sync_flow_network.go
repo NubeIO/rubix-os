@@ -11,15 +11,6 @@ import (
 )
 
 func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetworkClone, error) {
-	if !boolean.IsTrue(body.IsMasterSlave) {
-		if boolean.IsTrue(body.IsRemote) && boolean.IsFalse(body.IsTokenAuth) {
-			accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
-			if err != nil {
-				return nil, err
-			}
-			body.FlowToken = accessToken
-		}
-	}
 	cli := client.NewFlowClientCliFromFN(body)
 	// In this case it's even though FN, this is clone side & need to communicate with slave device from master
 	if boolean.IsTrue(body.IsMasterSlave) {

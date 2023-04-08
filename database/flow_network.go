@@ -3,7 +3,6 @@ package database
 import (
 	"errors"
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/interfaces/connection"
 	"github.com/NubeIO/flow-framework/nerrors"
@@ -11,7 +10,6 @@ import (
 	"github.com/NubeIO/flow-framework/urls"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
-	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -50,12 +48,11 @@ func (d *GormDatabase) GetOneFlowNetworkByArgs(args api.Args) (*model.FlowNetwor
 /*
 CreateFlowNetwork
 - Create UUID
-- Create Name if doesn't exist
+- Create Name if it doesn't exist
 - Create SyncUUID
 - If it's pointing local device make that is_remote=false forcefully (straightforward: 0.0.0.0 can be remote)
 - If local then don't apply rollback feature, it leads deadlock
 - Create flow_network
-- Edit body with localstorage FlowNetwork details
 - Edit body with device_info
 - Create FlowNetworkClone
 - Update FlowNetwork with FlowNetworkClone details
@@ -68,6 +65,7 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 	if err != nil {
 		return nil, err
 	}
+
 	// restrict to create multiple flow-networks, so it doesn't break existing local flows
 	// this is needed because local flows don't have rollback
 	if boolean.IsFalse(body.IsRemote) {
@@ -76,12 +74,14 @@ func (d *GormDatabase) CreateFlowNetwork(body *model.FlowNetwork) (*model.FlowNe
 			return nil, nerrors.NewErrConflict("you already have a local flow-network")
 		}
 	}
+
 	if err := tx.Create(&body).Error; err != nil {
 		if isRemote {
 			tx.Rollback()
 		}
 		return nil, err
 	}
+
 	return d.afterCreateUpdateFlowNetwork(body, isMasterSlave, cli, isRemote, tx)
 }
 
@@ -238,31 +238,11 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 	if err != nil {
 		return false, nil, false, nil, err
 	}
+
 	if isMasterSlave {
 		d.resetHostAndCredential(body)
 	} else if boolean.IsFalse(body.IsRemote) {
 		d.resetHostAndCredential(body)
-	} else {
-		conf := config.Get()
-		if body.FlowIP == nil {
-			body.FlowIP = &conf.Server.ListenAddr
-		}
-		if body.FlowPort == nil {
-			body.FlowPort = &conf.Server.Port
-		}
-		if boolean.IsFalse(body.IsTokenAuth) {
-			if body.FlowUsername == nil {
-				return false, nil, false, nil, errors.New("FlowUsername can't be null when we it's not master/slave flow network")
-			}
-			if body.FlowPassword == nil {
-				return false, nil, false, nil, errors.New("FlowPassword can't be null when we it's not master/slave flow network")
-			}
-			accessToken, err := client.GetFlowToken(*body.FlowIP, *body.FlowPort, *body.FlowUsername, *body.FlowPassword)
-			if err != nil {
-				return false, nil, false, nil, err
-			}
-			body.FlowToken = accessToken
-		}
 	}
 
 	cli := client.NewFlowClientCliFromFN(body)
@@ -274,7 +254,6 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 			body.IsRemote = boolean.NewFalse()
 			if !isMasterSlave {
 				d.resetHostAndCredential(body)
-				body.IsRemote = boolean.NewFalse()
 			}
 		} else {
 			body.IsRemote = boolean.NewTrue()
@@ -302,26 +281,12 @@ func (d *GormDatabase) resetHostAndCredential(body *model.FlowNetwork) {
 func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isMasterSlave bool, cli *client.FlowClient, isRemote bool, tx *gorm.DB) (*model.FlowNetwork, error) {
 	bodyToSync := *body
 	if !isMasterSlave && isRemote {
-		if boolean.IsTrue(body.IsTokenAuth) {
-			bodyToSync.FlowHTTPS = body.FlowHTTSLocal
-			bodyToSync.FlowIP = body.FlowIPLocal
-			bodyToSync.FlowPort = body.FlowPortLocal
-			bodyToSync.FlowUsername = nil
-			bodyToSync.FlowPassword = nil
-			bodyToSync.FlowToken = body.FlowTokenLocal
-		} else {
-			var localStorageFlowNetwork *model.LocalStorageFlowNetwork
-			if err := d.DB.First(&localStorageFlowNetwork).Error; err != nil {
-				tx.Rollback()
-				return nil, err
-			}
-			bodyToSync.FlowHTTPS = localStorageFlowNetwork.FlowHTTPS
-			bodyToSync.FlowIP = nstring.NewStringAddress(localStorageFlowNetwork.FlowIP)
-			bodyToSync.FlowPort = integer.New(localStorageFlowNetwork.FlowPort)
-			bodyToSync.FlowUsername = nstring.NewStringAddress(localStorageFlowNetwork.FlowUsername)
-			bodyToSync.FlowPassword = nstring.NewStringAddress(localStorageFlowNetwork.FlowPassword)
-			bodyToSync.FlowToken = nstring.NewStringAddress(localStorageFlowNetwork.FlowToken)
-		}
+		bodyToSync.FlowHTTPS = body.FlowHTTSLocal
+		bodyToSync.FlowIP = body.FlowIPLocal
+		bodyToSync.FlowPort = body.FlowPortLocal
+		bodyToSync.FlowUsername = nil
+		bodyToSync.FlowPassword = nil
+		bodyToSync.FlowToken = body.FlowTokenLocal
 	}
 	err := d.syncAndEditFlowNetwork(cli, body, &bodyToSync)
 	if err != nil {
