@@ -323,13 +323,14 @@ func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Produce
 
 func (d *GormDatabase) GetProducersForCreateInterval() ([]*interfaces.ProducerIntervalHistory, error) {
 	var producerIntervalHistory []*interfaces.ProducerIntervalHistory
-	query := fmt.Sprintf("SELECT p.uuid,p.producer_thing_class,p.history_interval,ph.timestamp AS timestamp,pt.present_value "+
+	query := fmt.Sprintf("SELECT p.uuid, p.producer_thing_class, p.history_interval, ph.timestamp AS timestamp, pt.present_value "+
 		"FROM producers p "+
 		"LEFT JOIN (SELECT producer_uuid, MAX(timestamp) AS timestamp FROM producer_histories GROUP BY producer_uuid) ph "+
 		"ON p.uuid = ph.producer_uuid "+
 		"INNER JOIN points pt "+
 		"ON p.producer_thing_uuid = pt.uuid "+
-		"WHERE p.enable_history = %v AND p.history_type != '%s' AND p.history_interval > %d", true, model.HistoryTypeCov, 0)
+		"WHERE p.enable_history = %v AND p.history_type != '%s' AND p.history_interval > %d AND p.producer_thing_uuid = '%s'",
+		true, model.HistoryTypeCov, 0, "point")
 	if err := d.DB.Raw(query).Scan(&producerIntervalHistory).Error; err != nil {
 		return nil, err
 	}
