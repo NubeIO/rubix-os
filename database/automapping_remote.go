@@ -209,7 +209,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 			}
 		} else {
 			d.setStreamCloneModel(fnc, device, amNetwork, amDevice, streamClone)
-			if err = tx.Model(&streamClone).Where("uuid = ?", streamClone.UUID).Updates(streamClone).Error; err != nil {
+			if err = tx.Model(&streamClone).Updates(streamClone).Error; err != nil {
 				return amRes
 			}
 		}
@@ -257,7 +257,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 				}
 			} else {
 				d.setConsumerModel(amPoint, streamClone.UUID, amPoint.Name, consumer)
-				if err = tx.Model(&consumer).Where("uuid = ?", consumer.UUID).Updates(consumer).Error; err != nil {
+				if err = tx.Model(&consumer).Updates(consumer).Error; err != nil {
 					amRes.Error = err.Error()
 					return amRes
 				}
@@ -274,7 +274,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 				}
 			} else {
 				d.setWriterModel(amPoint.Name, point.UUID, consumer.UUID, writer)
-				if err = tx.Model(&writer).Where("uuid = ?", consumer.UUID).Updates(writer).Error; err != nil {
+				if err = tx.Model(&writer).Updates(writer).Error; err != nil {
 					amRes.Error = err.Error()
 					return amRes
 				}

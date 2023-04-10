@@ -490,7 +490,7 @@ func (d *GormDatabase) createWriterClones(syncWriters []*interfaces.SyncWriter) 
 			}
 		} else {
 			d.setWriterCloneModel(syncWriter, wc)
-			if err := tx.Model(&wc).Where("uuid = ?", wc.UUID).Updates(&wc).Error; err != nil {
+			if err := tx.Model(&wc).Updates(&wc).Error; err != nil {
 				tx.Rollback()
 				return &syncWriter.PointUUID, err
 			}
