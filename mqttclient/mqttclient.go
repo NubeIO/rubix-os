@@ -54,16 +54,12 @@ type Client struct {
 
 // ClientOptions is the list of options used to create c client
 type ClientOptions struct {
-	Servers              []string // The list of broker hostnames to connect to
-	ClientID             string   // If left empty c uuid will automatically be generated
-	Username             string   // If not set then authentication will not be used
-	Password             string   // Will only be used if the username is set
-	SetKeepAlive         time.Duration
-	SetPingTimeout       time.Duration
-	ConnectRetry         *bool // Automatically retry the connection in the event of a failure
-	ConnectRetryInterval time.Duration
-	AutoReconnect        *bool // If the client should automatically try to reconnect when the connection is lost
-	MaxReconnectInterval time.Duration
+	Servers       []string // The list of broker hostnames to connect to
+	ClientID      string   // If left empty c uuid will automatically be generated
+	Username      string   // If not set then authentication will not be used
+	Password      string   // Will only be used if the username is set
+	AutoReconnect *bool    // If the client should automatically try to reconnect when the connection is lost
+	ConnectRetry  *bool    // Automatically retry the connection in the event of a failure
 }
 
 type MqttPublishBuffer struct {
@@ -144,18 +140,6 @@ func (c *Client) FlushMqttPublishBuffers() {
 func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err error) {
 	c = &Client{chuckSize: 50}
 
-	if options.SetKeepAlive == 0 {
-		options.SetKeepAlive = 5 * time.Second
-	}
-	if options.SetPingTimeout == 0 {
-		options.SetPingTimeout = 5 * time.Second
-	}
-	if options.ConnectRetryInterval == 0 {
-		options.ConnectRetryInterval = 10 * time.Second
-	}
-	if options.MaxReconnectInterval == 0 {
-		options.MaxReconnectInterval = 10 * time.Second
-	}
 	if options.ClientID == "" {
 		options.ClientID, _ = nuuid.MakeUUID()
 	}
@@ -178,12 +162,8 @@ func NewClient(options ClientOptions, onConnected interface{}) (c *Client, err e
 		opts.SetPassword(options.Password)
 	}
 
-	opts.SetConnectRetry(boolean.IsTrue(options.ConnectRetry))
-	opts.SetConnectRetryInterval(options.ConnectRetryInterval)
 	opts.SetAutoReconnect(boolean.IsTrue(options.AutoReconnect))
-	opts.SetMaxReconnectInterval(options.MaxReconnectInterval)
-	opts.SetKeepAlive(options.SetKeepAlive)
-	opts.SetPingTimeout(options.SetPingTimeout)
+	opts.SetConnectRetry(boolean.IsTrue(options.ConnectRetry))
 
 	opts.OnConnectionLost = func(c mqtt.Client, err error) {
 		topicLog{"error", "Lost connection", err}.logErr()

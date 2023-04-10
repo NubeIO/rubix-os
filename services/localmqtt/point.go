@@ -30,15 +30,11 @@ func Init(ip string, conf *config.Configuration, onConnected interface{}) error 
 	pm.Retain = boolean.IsTrue(conf.MQTT.Retain)
 	pm.GlobalBroadcast = boolean.IsTrue(conf.MQTT.GlobalBroadcast)
 	c, err := mqttclient.NewClient(mqttclient.ClientOptions{
-		Servers:              []string{ip},
-		Username:             conf.MQTT.Username,
-		Password:             conf.MQTT.Password,
-		SetKeepAlive:         conf.MQTT.SetKeepAlive,
-		SetPingTimeout:       conf.MQTT.SetPingTimeout,
-		ConnectRetry:         conf.MQTT.ConnectRetry,
-		ConnectRetryInterval: conf.MQTT.ConnectRetryInterval,
-		AutoReconnect:        conf.MQTT.AutoReconnect,
-		MaxReconnectInterval: conf.MQTT.MaxReconnectInterval,
+		Servers:       []string{ip},
+		Username:      conf.MQTT.Username,
+		Password:      conf.MQTT.Password,
+		AutoReconnect: conf.MQTT.AutoReconnect,
+		ConnectRetry:  conf.MQTT.ConnectRetry,
 	}, onConnected)
 	if err != nil {
 		log.Info("MQTT connection error:", err)
