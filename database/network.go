@@ -170,12 +170,8 @@ func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	return info
 }
 
-func (d *GormDatabase) SyncNetworks(args api.Args) error {
-	args.WithDevices = true
-	args.WithPoints = true
-	args.WithTags = true
-	args.WithMetaTags = true
-	networks, err := d.GetNetworks(args)
+func (d *GormDatabase) SyncNetworks() error {
+	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true, WithPriority: true, WithTags: true, WithMetaTags: true})
 	var firstErr error
 	if err != nil {
 		return err
@@ -190,12 +186,8 @@ func (d *GormDatabase) SyncNetworks(args api.Args) error {
 	return firstErr
 }
 
-func (d *GormDatabase) SyncNetworkDevices(uuid string, args api.Args) error {
-	args.WithDevices = true
-	args.WithPoints = true
-	args.WithTags = true
-	args.WithMetaTags = true
-	network, err := d.GetNetwork(uuid, args)
+func (d *GormDatabase) SyncNetworkDevices(uuid string) error {
+	network, err := d.GetNetwork(uuid, api.Args{WithDevices: true, WithPoints: true, WithPriority: true, WithTags: true, WithMetaTags: true})
 	if err != nil {
 		return err
 	}

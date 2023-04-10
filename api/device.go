@@ -22,7 +22,7 @@ type DeviceDatabase interface {
 
 	CreateDeviceMetaTags(deviceUUID string, deviceMetaTags []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error)
 
-	SyncDevicePoints(deviceUUID string, args Args) error
+	SyncDevicePoints(deviceUUID string) error
 }
 type DeviceAPI struct {
 	DB DeviceDatabase
@@ -101,8 +101,6 @@ func (a *DeviceAPI) CreateDeviceMetaTags(ctx *gin.Context) {
 
 func (a *DeviceAPI) SyncDevicePoints(ctx *gin.Context) {
 	deviceUUID := resolveID(ctx)
-	args := buildDeviceArgs(ctx)
-	args.WithPoints = true
-	err := a.DB.SyncDevicePoints(deviceUUID, args)
+	err := a.DB.SyncDevicePoints(deviceUUID)
 	ResponseHandler(model.Message{Message: "synced successfully"}, err, ctx)
 }

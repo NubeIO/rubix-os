@@ -26,6 +26,9 @@ func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) *i
 
 	var syncWriters []*interfaces.SyncWriter
 	for _, amNetwork := range autoMapping.Networks {
+		if amNetwork.Devices == nil { // network which doesn't have devices are just sent for meta-data
+			continue
+		}
 		amRes := d.createNetworkAutoMapping(tx, amNetwork, autoMapping.FlowNetworkUUID, autoMapping.GlobalUUID)
 		if amRes.HasError {
 			tx.Rollback()
@@ -112,7 +115,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 
 	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{SourceUUID: nstring.New(fnUUID)})
 	if err != nil {
-		amRes.Error = err.Error()
+		amRes.Error = fmt.Sprintf("flow network clone doesn't exist source uuid %s", fnUUID)
 		return amRes
 	}
 
