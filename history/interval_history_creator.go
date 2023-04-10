@@ -24,9 +24,6 @@ func (h *History) createIntervalHistories() {
 		return
 	}
 	for _, producer := range producers {
-		if producer.ProducerThingClass != "point" { // TODO: CreateProducerHistory for ProducerThingClass == "schedule"
-			continue
-		}
 		timestamp, _ := time.Parse("2006-01-02 15:04:05+00:00", producer.Timestamp)
 		if timestamp.IsZero() || currentDate.Sub(timestamp).Seconds() >= float64(*producer.HistoryInterval*60) {
 			latestPH := new(model.ProducerHistory)

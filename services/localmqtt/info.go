@@ -17,5 +17,5 @@ func PublishInfo() {
 	if err != nil {
 		return
 	}
-	pointMqtt.Client.Publish(fetchDeviceInfo, pointMqtt.QOS, retainMessage, string(marshal))
+	pointMqtt.Client.Publish(fetchDeviceInfo, pointMqtt.QOS, pointMqtt.Retain, string(marshal))
 }

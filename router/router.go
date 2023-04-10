@@ -33,9 +33,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		Manager: pluginManager,
 		DB:      db,
 	}
-	localStorageFlowNetworkHandler := api.LocalStorageFlowNetworkAPI{
-		DB: db,
-	}
 	networkHandler := api.NetworksAPI{
 		DB:     db,
 		Bus:    eventBus,
@@ -125,8 +122,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	authHandler := api.AuthAPI{}
 
 	dbGroup.SyncTopics()
-	// for the custom plugin endpoints you need to use the plugin token
 
+	// for the custom plugin endpoints you need to use the plugin token
 	engine.GET("/api/system/ping", healthHandler.Health)
 	engine.POST("/api/users/login", userHandler.Login)
 	engine.Static("/image", conf.GetAbsUploadedImagesDir())
@@ -178,24 +175,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 				plugins.POST("/restart/name/:name", pluginHandler.RestartPluginByName)
 				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
 			}
-		}
-
-		databaseRoutes := apiRoutes.Group("/database")
-		{
-			databaseWizard := databaseRoutes.Group("wizard")
-			{
-				databaseWizard.POST("/mappings/p2p/points", dbGroup.WizardP2PMapping)
-				databaseWizard.POST("/mappings/master_slave/points", dbGroup.WizardMasterSlavePointMapping)
-				databaseWizard.POST("/mapping/master_slave/points/consumer/:global_uuid", dbGroup.WizardMasterSlavePointMappingOnConsumerSideByProducerSide) // supplementary API for remote_mapping
-				databaseWizard.POST("/mapping/p2p/points/consumer/:global_uuid", dbGroup.WizardP2PMappingOnConsumerSideByProducerSide)                       // supplementary API for remote_mapping
-			}
-		}
-
-		localStorageFlowNetworkRoutes := apiRoutes.Group("/localstorage_flow_network")
-		{
-			localStorageFlowNetworkRoutes.GET("", localStorageFlowNetworkHandler.GetLocalStorageFlowNetwork)
-			localStorageFlowNetworkRoutes.PATCH("", localStorageFlowNetworkHandler.UpdateLocalStorageFlowNetwork)
-			localStorageFlowNetworkRoutes.GET("/refresh_flow_token", localStorageFlowNetworkHandler.RefreshLocalStorageFlowToken)
 		}
 
 		historyProducerRoutes := apiRoutes.Group("/histories/producers")

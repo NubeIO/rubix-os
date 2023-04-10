@@ -37,9 +37,6 @@ func intHandler(db *database.GormDatabase) {
 
 	j := new(jobs.Jobs)
 	j.InitCron()
-	if err := j.RefreshTokenJobAdd(); err != nil {
-		panic(err)
-	}
 }
 
 func initHistorySchedulers(db *database.GormDatabase, conf *config.Configuration) {
@@ -69,35 +66,43 @@ func initFlushBuffers() {
 var db *database.GormDatabase
 
 func main() {
+	defer db.Close()
 	conf := config.CreateApp()
+
 	logger.SetLogger(conf.LogLevel)
 	logger.SetGinMode(conf.LogLevel)
+
 	if err := os.MkdirAll(conf.GetAbsPluginDir(), 0755); err != nil {
 		panic(err)
 	}
 	if err := os.MkdirAll(conf.GetAbsUploadedImagesDir(), 0755); err != nil {
 		panic(err)
 	}
+
 	internaltoken.CreateInternalTokenIfDoesNotExist()
-	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
+
 	mqttBroker := "tcp://" + conf.MQTT.Address + ":" + strconv.Itoa(conf.MQTT.Port)
 	_, err := mqttclient.InternalMQTT(mqttBroker)
 	if err != nil {
 		log.Errorln(err)
 	}
+
 	eventbus.Init()
+
+	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
 	db, err = database.New(conf.Database.Dialect, connection, conf.Database.LogLevel)
 	if err != nil {
 		panic(err)
 	}
+
 	if *conf.MQTT.Enable {
 		err = localmqtt.Init(mqttBroker, conf, onConnected)
 		if err != nil {
 			log.Errorln(err)
 		}
 	}
+
 	intHandler(db)
-	defer db.Close()
 	engine := router.Create(db, conf)
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)

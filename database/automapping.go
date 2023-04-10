@@ -19,10 +19,6 @@ import (
 )
 
 func (d *GormDatabase) CreateNetworksAutoMappings(fnName string, networks []*model.Network, level interfaces.Level) error {
-	if fnName == "" {
-		return nil
-	}
-
 	d.clearStreamsAndProducers()
 
 	err := d.createNetworksAutoMappings(fnName, networks, level)
@@ -68,7 +64,7 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 
 		// if fnError has issue then return that just right away
 		if fnError != nil {
-			errMessage := fmt.Sprintf("failed to find flow network with name %s", network.AutoMappingFlowNetworkName)
+			errMessage := fmt.Sprintf("failed to find flow network with name '%s'", network.AutoMappingFlowNetworkName)
 			network.Connection = connection.Broken.String()
 			network.ConnectionMessage = nstring.New(errMessage)
 			_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
@@ -494,7 +490,7 @@ func (d *GormDatabase) createWriterClones(syncWriters []*interfaces.SyncWriter) 
 			}
 		} else {
 			d.setWriterCloneModel(syncWriter, wc)
-			if err := tx.Model(&wc).Where("uuid = ?", wc.UUID).Updates(&wc).Error; err != nil {
+			if err := tx.Model(&wc).Updates(&wc).Error; err != nil {
 				tx.Rollback()
 				return &syncWriter.PointUUID, err
 			}

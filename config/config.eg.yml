@@ -51,12 +51,8 @@ mqtt:
   port: 1883
   username: ""
   password: ""
-  setkeepalive: "0s"
-  setpingtimeout: "0s"
-  connectretry: true
-  connectretryinterval: "0s"
   autoreconnect: true
-  maxreconnectinterval: "0s"
+  connectretry: true
   qos: 1
   retain: true
   globalbroadcast: false

@@ -120,16 +120,16 @@ func (d *GormDatabase) DeleteOneDeviceByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncDevicePoints(uuid string, args api.Args) error {
-	device, err := d.GetDevice(uuid, args)
+func (d *GormDatabase) SyncDevicePoints(uuid string) error {
+	device, err := d.GetDevice(uuid, api.Args{WithPoints: true, WithPriority: true, WithTags: true, WithMetaTags: true})
 	if err != nil {
 		return err
 	}
-	args.WithDevices = true
-	args.WithPoints = true
-	args.WithTags = true
-	args.WithMetaTags = true
-	network, _ := d.GetNetwork(device.NetworkUUID, args)
+	devices := make([]*model.Device, 0)
+	devices = append(devices, device)
+
+	network, _ := d.GetNetwork(device.NetworkUUID, api.Args{WithTags: true, WithMetaTags: true})
+	network.Devices = devices // doing this for just to sync one device points
 	networks := make([]*model.Network, 0)
 	networks = append(networks, network)
 	return d.CreateNetworksAutoMappings(network.AutoMappingFlowNetworkName, networks, interfaces.Point)
