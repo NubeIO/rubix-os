@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.12.4](https://github.com/NubeIO/flow-framework/tree/v0.12.4) (2023-04-12)
+
+- Fixes to schedule zero values on API schedule updates
+
 ## [v0.12.3](https://github.com/NubeIO/flow-framework/tree/v0.12.3) (2023-04-05)
 
 - Improvement on CORs by default setting
