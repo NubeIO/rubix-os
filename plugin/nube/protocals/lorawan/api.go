@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
 	"github.com/NubeIO/lib-schema/lorawanschema"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -19,6 +20,24 @@ const (
 	jsonSchemaDevice  = "/schema/json/device"
 	jsonSchemaPoint   = "/schema/json/point"
 )
+
+func resolveID(ctx *gin.Context) string {
+	return ctx.Param("eui")
+}
+
+func bodyDevice(ctx *gin.Context) (dto *csrest.Device, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+func bodyActivateDevice(ctx *gin.Context) (dto *csrest.DeviceActivation, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func bodyDeviceKey(ctx *gin.Context) (dto *csrest.DeviceKey, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
 
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
@@ -84,4 +103,150 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, lorawanschema.GetPointSchema())
 	})
+
+	// ---------------------- CS APIs ------------------------------
+
+	mux.GET("/cs/applications", func(ctx *gin.Context) {
+		p, err := inst.REST.GetApplications()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	mux.GET("/cs/device-profiles", func(ctx *gin.Context) {
+		p, err := inst.REST.GetDeviceProfiles()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	mux.GET("/cs/service-profiles", func(ctx *gin.Context) {
+		p, err := inst.REST.GetServiceProfiles()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	mux.GET("/cs/gateway-profiles", func(ctx *gin.Context) {
+		p, err := inst.REST.GetGatewayProfiles()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	mux.GET("/cs/devices", func(ctx *gin.Context) {
+		p, err := inst.REST.GetDevices()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	mux.GET("/cs/devices/:eui", func(ctx *gin.Context) {
+		eui := resolveID(ctx)
+		p, err := inst.REST.GetDevice(eui)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	// add device
+	mux.POST("/cs/devices", func(ctx *gin.Context) {
+		device, err := bodyDevice(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		p, err := inst.REST.AddDevice(device)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	// edit device
+	mux.PATCH("/cs/devices:eui", func(ctx *gin.Context) {
+		eui := resolveID(ctx)
+		device, err := bodyDevice(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		p, err := inst.REST.EditDevice(eui, device)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	// delete device
+	mux.DELETE("/cs/devices:eui", func(ctx *gin.Context) {
+		eui := resolveID(ctx)
+		p, err := inst.REST.DeleteDevice(eui)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	// activate device
+	mux.PUT("/cs/devices/activate:eui", func(ctx *gin.Context) {
+		eui := resolveID(ctx)
+		device, err := bodyActivateDevice(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		p, err := inst.REST.ActivateDevice(eui, device)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	mux.POST("/cs/devices/keys:eui", func(ctx *gin.Context) {
+		eui := resolveID(ctx)
+		device, err := bodyDeviceKey(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		p, err := inst.REST.DeviceOTAKeysUpdate(eui, device)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	mux.PUT("/cs/devices/keys:eui", func(ctx *gin.Context) {
+		eui := resolveID(ctx)
+		device, err := bodyDeviceKey(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		p, err := inst.REST.DeviceOTAKeys(eui, device)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
 }

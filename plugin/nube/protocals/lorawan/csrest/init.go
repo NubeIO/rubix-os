@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type RestClient struct {
+type ChirpClient struct {
 	client      *resty.Client
 	ClientToken string
 }
@@ -31,27 +31,27 @@ type CSLoginToken struct {
 var csApplications CSApplications
 
 // InitRest Set constant CS REST params
-func InitRest(address string, port int) RestClient {
+func InitRest(address string, port int) ChirpClient {
 	client := resty.New()
 	client.SetDebug(false)
 	url := fmt.Sprintf("http://%s:%d/api", address, port)
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Content-Type", "application/json")
-	return RestClient{client: client}
+	return ChirpClient{client: client}
 }
 
 // SetToken set the REST auth token
-func (a *RestClient) SetToken(token string) {
-	a.ClientToken = token
-	a.client.SetHeader("Grpc-Metadata-Authorization", token)
+func (inst *ChirpClient) SetToken(token string) {
+	inst.ClientToken = token
+	inst.client.SetHeader("Grpc-Metadata-Authorization", token)
 }
 
 // Login login to CS with username and password to get token if not provided in config
-func (a *RestClient) Login(user string, pass string) error {
+func (inst *ChirpClient) Login(user string, pass string) error {
 	token := CSLoginToken{}
 	csURLConnect := "/internal/login"
-	resp, err := a.client.R().
+	resp, err := inst.client.R().
 		SetBody(CSCredentials{
 			Email:    user,
 			Password: pass,
@@ -62,16 +62,16 @@ func (a *RestClient) Login(user string, pass string) error {
 	if err != nil {
 		log.Warn("lorawan: Login error: ", err)
 	} else {
-		a.SetToken(token.Token)
+		inst.SetToken(token.Token)
 	}
 	return err
 }
 
 // Connect test CS connection with API token
-func (a *RestClient) ConnectTest() error {
-	log.Infof("lorawan: Connecting to chirpstack at %s", a.client.BaseURL)
+func (inst *ChirpClient) ConnectTest() error {
+	log.Infof("lorawan: Connecting to chirpstack at %s", inst.client.BaseURL)
 	csURLConnect := fmt.Sprintf("/applications?limit=%s", limit)
-	resp, err := a.client.R().
+	resp, err := inst.client.R().
 		SetResult(&csApplications).
 		Get(csURLConnect)
 	err = checkResponse(resp, err)

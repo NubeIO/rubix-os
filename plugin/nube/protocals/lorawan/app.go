@@ -101,15 +101,21 @@ func (inst *Instance) syncUpdateDevices(csDevices []csmodel.Device) {
 }
 
 func (inst *Instance) connectToCS() error {
-	inst.REST = csrest.InitRest(inst.config.CSAddress, inst.config.CSPort)
+	port := inst.config.CSPort
+	addr := inst.config.CSAddress
+	token := inst.config.CSToken
+	// port = 8080
+	// addr = "192.168.15.15"
+	// token = ""
+	inst.REST = csrest.InitRest(addr, port)
 	inst.REST.SetDeviceLimit(inst.config.DeviceLimit)
-	if inst.config.CSToken == "" {
+	if token == "" {
 		err := inst.REST.Login(inst.config.CSUsername, inst.config.CSPassword)
 		if err != nil {
 			return err
 		}
 	} else {
-		inst.REST.SetToken(inst.config.CSToken)
+		inst.REST.SetToken(token)
 	}
 	err := inst.REST.ConnectTest()
 	if err == nil {

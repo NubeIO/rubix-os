@@ -38,7 +38,7 @@ type Instance struct {
 	networkUUID string
 	ctx         context.Context
 	cancel      func()
-	REST        csrest.RestClient
+	REST        csrest.ChirpClient
 	csConnected bool
 	deviceEUIs  []string
 }
