@@ -2,7 +2,6 @@ package database
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
@@ -92,7 +91,6 @@ func (d *GormDatabase) validateSchedule(schedule *model.Schedule) ([]byte, error
 }
 
 func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error) {
-	fmt.Println(fmt.Sprintf("UpdateSchedule() body: %+v", *body))
 	var scheduleModel *model.Schedule
 	if uuid == "" {
 		return nil, errors.New("UpdateSchedule() requires a valid schedule UUID.")
@@ -109,15 +107,15 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	fmt.Println(fmt.Sprintf("UpdateSchedule() scheduleModel: %+v", *scheduleModel))
 	if body.Name == "" {
 		body.Name = scheduleModel.Name
 	}
 	if body.Enable == nil {
 		if scheduleModel.Enable == nil {
 			body.Enable = boolean.NewFalse()
+		} else {
+			body.Enable = scheduleModel.Enable
 		}
-		body.Enable = scheduleModel.Enable
 	}
 	if body.TimeZone == "" {
 		body.TimeZone = scheduleModel.TimeZone
