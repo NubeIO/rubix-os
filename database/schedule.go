@@ -2,9 +2,12 @@ package database
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/pkg/errors"
 )
 
 func (d *GormDatabase) GetSchedules() ([]*model.Schedule, error) {
@@ -89,7 +92,12 @@ func (d *GormDatabase) validateSchedule(schedule *model.Schedule) ([]byte, error
 }
 
 func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error) {
+	fmt.Println(fmt.Sprintf("UpdateSchedule() body: %+v", *body))
 	var scheduleModel *model.Schedule
+	if uuid == "" {
+		return nil, errors.New("UpdateSchedule() requires a valid schedule UUID.")
+	}
+	body.UUID = uuid
 	validSchedule, err := d.validateSchedule(body)
 	if err != nil {
 		return nil, err
@@ -101,8 +109,51 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	fmt.Println(fmt.Sprintf("UpdateSchedule() scheduleModel: %+v", *scheduleModel))
+	if body.Name == "" {
+		body.Name = scheduleModel.Name
+	}
+	if body.Enable == nil {
+		if scheduleModel.Enable == nil {
+			body.Enable = boolean.NewFalse()
+		}
+		body.Enable = scheduleModel.Enable
+	}
+	if body.TimeZone == "" {
+		body.TimeZone = scheduleModel.TimeZone
+	}
 
-	query = d.DB.Model(&scheduleModel).Select("*").Updates(body)
+	query = d.DB.Model(&scheduleModel).Select("*").Omit("IsActive", "ActiveWeekly", "ActiveException", "ActiveEvent", "Payload", "PeriodStart", "PeriodStop", "NextStart", "NextStop", "PeriodStartString", "PeriodStopString", "NextStartString", "NextStopString", "CreatedAt").Updates(&body)
+	// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name, nil, "", nil)
+	return scheduleModel, nil
+}
+
+func (d *GormDatabase) UpdateScheduleAllProps(uuid string, body *model.Schedule) (*model.Schedule, error) {
+	var scheduleModel *model.Schedule
+	if uuid == "" {
+		return nil, errors.New("UpdateScheduleAllProps() requires a valid schedule UUID.")
+	}
+	body.UUID = uuid
+	validSchedule, err := d.validateSchedule(body)
+	if err != nil {
+		return nil, err
+	}
+	body.Schedule = validSchedule
+	body.ThingClass = model.ThingClass.Schedule
+	body.ThingType = model.ThingClass.Schedule
+	query := d.DB.Where("uuid = ?", uuid).First(&scheduleModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	if body.Name == "" {
+		body.Name = scheduleModel.Name
+	}
+
+	query = d.DB.Model(&scheduleModel).Select("*").Updates(&body)
 	// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
 	if query.Error != nil {
 		return nil, query.Error

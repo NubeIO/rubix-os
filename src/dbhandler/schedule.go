@@ -32,3 +32,11 @@ func (h *Handler) UpdateSchedule(uuid string, body *model.Schedule) (*model.Sche
 	}
 	return q, nil
 }
+
+func (h *Handler) UpdateScheduleAllProps(uuid string, body *model.Schedule) (*model.Schedule, error) {
+	q, err := getDb().UpdateScheduleAllProps(uuid, body)
+	if err != nil {
+		return nil, err
+	}
+	return q, nil
+}

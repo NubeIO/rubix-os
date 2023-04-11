@@ -126,9 +126,9 @@ func (inst *Instance) runSchedule() {
 				sch.NextStopString = finalResult.NextStopString
 			}
 
-			_, err = inst.db.UpdateSchedule(sch.UUID, sch)
+			_, err = inst.db.UpdateScheduleAllProps(sch.UUID, sch)
 			if err != nil {
-				inst.systemErrorMsg(fmt.Sprintf("Schedule Checks: issue on UpdateSchedule %s", sch.UUID))
+				inst.systemErrorMsg(fmt.Sprintf("Schedule Checks: issue on UpdateSchedule %s, error: %v", sch.UUID, err))
 			}
 		}
 	}
