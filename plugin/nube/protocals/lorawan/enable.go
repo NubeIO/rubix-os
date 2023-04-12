@@ -82,5 +82,4 @@ func (inst *Instance) GetOrMakeLorawanNetwork() error {
 	} else {
 		return errors.New("lorawan: Error creating default network")
 	}
-	return errors.New("123")
 }
