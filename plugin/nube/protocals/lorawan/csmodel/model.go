@@ -1,9 +1,22 @@
 package csmodel
 
+import "time"
+
 type Device struct {
-	DevEUI      string `json:"devEUI"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	DevEUI                              string    `json:"devEUI"`
+	Name                                string    `json:"name"`
+	ApplicationID                       string    `json:"applicationID"`
+	Description                         string    `json:"description"`
+	DeviceProfileID                     string    `json:"deviceProfileID"`
+	DeviceProfileName                   string    `json:"deviceProfileName"`
+	DeviceStatusBattery                 int       `json:"deviceStatusBattery"`
+	DeviceStatusMargin                  int       `json:"deviceStatusMargin"`
+	DeviceStatusExternalPowerSource     bool      `json:"deviceStatusExternalPowerSource"`
+	DeviceStatusBatteryLevelUnavailable bool      `json:"deviceStatusBatteryLevelUnavailable"`
+	DeviceStatusBatteryLevel            int       `json:"deviceStatusBatteryLevel"`
+	LastSeenAt                          time.Time `json:"lastSeenAt"`
+	LastSeenAtTime                      string    `json:"lastSeenAtTime"`
+	LastSeenAtReadable                  string    `json:"lastSeenAtReadable"`
 }
 
 type Devices struct {

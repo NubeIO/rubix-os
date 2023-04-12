@@ -88,6 +88,27 @@ type Device struct {
 	Location            interface{} `json:"location"`
 }
 
+// type DeviceAdd struct {
+// 	Device *DeviceBody `json:"device"`
+// }
+
+type DeviceAdd struct {
+	Device struct {
+		DevEUI            string `json:"devEUI"`
+		Name              string `json:"name"`
+		ApplicationID     string `json:"applicationID"`
+		Description       string `json:"description"`
+		DeviceProfileID   string `json:"deviceProfileID"`
+		SkipFCntCheck     bool   `json:"skipFCntCheck"`
+		ReferenceAltitude int    `json:"referenceAltitude"`
+		Variables         struct {
+		} `json:"variables"`
+		Tags struct {
+		} `json:"tags"`
+		IsDisabled bool `json:"isDisabled"`
+	} `json:"device"`
+}
+
 type DeviceKey struct {
 	DeviceKeys struct {
 		DevEUI    string `json:"devEUI"`

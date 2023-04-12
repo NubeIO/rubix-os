@@ -29,6 +29,12 @@ func bodyDevice(ctx *gin.Context) (dto *csrest.Device, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
+
+func bodyDeviceAdd(ctx *gin.Context) (dto *csrest.DeviceAdd, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func bodyActivateDevice(ctx *gin.Context) (dto *csrest.DeviceActivation, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -115,6 +121,15 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 
+	mux.GET("/cs/gateways", func(ctx *gin.Context) {
+		p, err := inst.REST.GetGateways()
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
 	mux.GET("/cs/device-profiles", func(ctx *gin.Context) {
 		p, err := inst.REST.GetDeviceProfiles()
 		if err != nil {
@@ -177,9 +192,10 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	// edit device
-	mux.PATCH("/cs/devices:eui", func(ctx *gin.Context) {
+	mux.PUT("/cs/devices/:eui", func(ctx *gin.Context) {
 		eui := resolveID(ctx)
 		device, err := bodyDevice(ctx)
+		device.Device.ApplicationID = "1"
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 			return
@@ -193,7 +209,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	// delete device
-	mux.DELETE("/cs/devices:eui", func(ctx *gin.Context) {
+	mux.DELETE("/cs/devices/:eui", func(ctx *gin.Context) {
 		eui := resolveID(ctx)
 		p, err := inst.REST.DeleteDevice(eui)
 		if err != nil {
@@ -203,23 +219,8 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 
-	// activate device
-	mux.PUT("/cs/devices/activate:eui", func(ctx *gin.Context) {
-		eui := resolveID(ctx)
-		device, err := bodyActivateDevice(ctx)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		}
-		p, err := inst.REST.ActivateDevice(eui, device)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-		} else {
-			ctx.JSON(http.StatusOK, p)
-		}
-	})
-
-	mux.POST("/cs/devices/keys:eui", func(ctx *gin.Context) {
+	// DeviceOTAKeysUpdate
+	mux.PUT("/cs/devices/keys/:eui", func(ctx *gin.Context) {
 		eui := resolveID(ctx)
 		device, err := bodyDeviceKey(ctx)
 		if err != nil {
@@ -234,7 +235,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		}
 	})
 
-	mux.PUT("/cs/devices/keys:eui", func(ctx *gin.Context) {
+	mux.POST("/cs/devices/keys/:eui", func(ctx *gin.Context) {
 		eui := resolveID(ctx)
 		device, err := bodyDeviceKey(ctx)
 		if err != nil {
@@ -242,6 +243,22 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			return
 		}
 		p, err := inst.REST.DeviceOTAKeys(eui, device)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+		} else {
+			ctx.JSON(http.StatusOK, p)
+		}
+	})
+
+	// // activate device
+	mux.PUT("/cs/devices/activate/:eui", func(ctx *gin.Context) {
+		eui := resolveID(ctx)
+		device, err := bodyActivateDevice(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, err)
+			return
+		}
+		p, err := inst.REST.ActivateDevice(eui, device)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, err)
 		} else {
