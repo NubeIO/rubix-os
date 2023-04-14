@@ -107,10 +107,8 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer, checkAu
 	if boolean.IsTrue(producerModel.CreatedFromAutoMapping) && checkAutoMap {
 		return nil, errors.New("can't update auto-mapped producer")
 	}
-	if len(body.Tags) > 0 {
-		if err := d.updateTags(&producerModel, body.Tags); err != nil {
-			return nil, err
-		}
+	if err := d.updateTags(&producerModel, body.Tags); err != nil {
+		return nil, err
 	}
 	syncConsumer := body.ProducerThingName != "" && body.ProducerThingName != producerModel.ProducerThingName
 	if err := d.DB.Model(&producerModel).Updates(body).Error; err != nil {

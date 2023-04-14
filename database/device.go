@@ -61,10 +61,8 @@ func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *m
 	if boolean.IsTrue(deviceModel.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't update auto-mapped device")
 	}
-	if len(body.Tags) > 0 {
-		if err := updateTagsTransaction(db, &deviceModel, body.Tags); err != nil {
-			return nil, err
-		}
+	if err := updateTagsTransaction(db, &deviceModel, body.Tags); err != nil {
+		return nil, err
 	}
 	body.Name = strings.TrimSpace(body.Name)
 	body.ThingClass = model.ThingClass.Device

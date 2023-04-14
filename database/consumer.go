@@ -106,10 +106,8 @@ func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer, checkAm
 	if boolean.IsTrue(consumerModel.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't update auto-mapped consumer")
 	}
-	if len(body.Tags) > 0 {
-		if err := d.updateTags(&consumerModel, body.Tags); err != nil {
-			return nil, err
-		}
+	if err := d.updateTags(&consumerModel, body.Tags); err != nil {
+		return nil, err
 	}
 	if err := d.DB.Model(&consumerModel).Updates(body).Error; err != nil {
 		return nil, err

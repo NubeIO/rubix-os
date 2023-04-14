@@ -109,10 +109,8 @@ func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *
 	if boolean.IsTrue(networkModel.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't update auto-mapped network")
 	}
-	if len(body.Tags) > 0 {
-		if err := updateTagsTransaction(db, &networkModel, body.Tags); err != nil {
-			return nil, err
-		}
+	if err := updateTagsTransaction(db, &networkModel, body.Tags); err != nil {
+		return nil, err
 	}
 	body.Name = strings.TrimSpace(body.Name)
 	query = db.Model(&networkModel).Select("*").Updates(&body)
