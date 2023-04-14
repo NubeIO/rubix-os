@@ -1,4 +1,7 @@
 # CHANGELOG
+## [v0.12.5](https://github.com/NubeIO/flow-framework/tree/v0.12.5) (2023-04-14)
+
+- Added chirpstack apis to the lorawan plugin
 
 ## [v0.12.4](https://github.com/NubeIO/flow-framework/tree/v0.12.4) (2023-04-12)
 
