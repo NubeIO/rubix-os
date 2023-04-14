@@ -109,10 +109,8 @@ func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *
 	if boolean.IsTrue(networkModel.CreatedFromAutoMapping) && checkAm {
 		return nil, errors.New("can't update auto-mapped network")
 	}
-	if len(body.Tags) > 0 {
-		if err := d.updateTags(&networkModel, body.Tags); err != nil {
-			return nil, err
-		}
+	if err := updateTagsTransaction(db, &networkModel, body.Tags); err != nil {
+		return nil, err
 	}
 	body.Name = strings.TrimSpace(body.Name)
 	query = db.Model(&networkModel).Select("*").Updates(&body)
@@ -187,6 +185,7 @@ func (d *GormDatabase) SyncNetworks() error {
 }
 
 func (d *GormDatabase) SyncNetworkDevices(uuid string) error {
+	return nil
 	network, err := d.GetNetwork(uuid, api.Args{WithDevices: true, WithPoints: true, WithPriority: true, WithTags: true, WithMetaTags: true})
 	if err != nil {
 		return err

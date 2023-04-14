@@ -160,10 +160,8 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 
 func (d *GormDatabase) UpdatePointTransactionForAutoMapping(db *gorm.DB, uuid string, body *model.Point) (*model.Point, error) {
 	pointModel := model.Point{CommonUUID: model.CommonUUID{UUID: uuid}}
-	if len(body.Tags) > 0 {
-		if err := db.Model(&pointModel).Association("Tags").Replace(body.Tags); err != nil {
-			return nil, err
-		}
+	if err := updateTagsTransaction(db, &pointModel, body.Tags); err != nil {
+		return nil, err
 	}
 	body.Name = strings.TrimSpace(body.Name)
 	if err := db.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
@@ -195,10 +193,8 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 			return nil, errors.New(eMsg)
 		}
 	}
-	if len(body.Tags) > 0 {
-		if err = d.updateTags(&pointModel, body.Tags); err != nil {
-			return nil, err
-		}
+	if err = d.updateTags(&pointModel, body.Tags); err != nil {
+		return nil, err
 	}
 	body.Name = strings.TrimSpace(body.Name)
 	publishPointList := body.Name != pointModel.Name

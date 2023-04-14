@@ -97,10 +97,8 @@ func (d *GormDatabase) UpdateStream(uuid string, body *model.Stream, checkAm boo
 			return nil, err
 		}
 	}
-	if len(body.Tags) > 0 {
-		if err := d.updateTags(&streamModel, body.Tags); err != nil {
-			return nil, err
-		}
+	if err := d.updateTags(&streamModel, body.Tags); err != nil {
+		return nil, err
 	}
 	if err := d.DB.Model(&streamModel).Updates(body).Error; err != nil {
 		return nil, err

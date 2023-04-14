@@ -1,10 +1,19 @@
 # CHANGELOG
+
+## [v0.12.6](https://github.com/NubeIO/flow-framework/tree/v0.12.6) (2023-04-14)
+
+- Fix: update tags database lock issue
+- Support complete tags deletions
+
 ## [v0.12.5](https://github.com/NubeIO/flow-framework/tree/v0.12.5) (2023-04-14)
 
 - Added chirpstack apis to the lorawan plugin
 
 ## [v0.12.4](https://github.com/NubeIO/flow-framework/tree/v0.12.4) (2023-04-12)
 
+- MQTT connection config settings improvements
+- Remove localstorage & its flow-network type
+- Improvement on auto_mappings
 - Fixes to schedule zero values on API schedule updates
 
 ## [v0.12.3](https://github.com/NubeIO/flow-framework/tree/v0.12.3) (2023-04-05)
