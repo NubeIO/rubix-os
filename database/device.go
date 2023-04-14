@@ -62,7 +62,7 @@ func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *m
 		return nil, errors.New("can't update auto-mapped device")
 	}
 	if len(body.Tags) > 0 {
-		if err := d.updateTags(&deviceModel, body.Tags); err != nil {
+		if err := updateTagsTransaction(db, &deviceModel, body.Tags); err != nil {
 			return nil, err
 		}
 	}

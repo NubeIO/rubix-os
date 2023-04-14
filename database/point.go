@@ -161,7 +161,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 func (d *GormDatabase) UpdatePointTransactionForAutoMapping(db *gorm.DB, uuid string, body *model.Point) (*model.Point, error) {
 	pointModel := model.Point{CommonUUID: model.CommonUUID{UUID: uuid}}
 	if len(body.Tags) > 0 {
-		if err := db.Model(&pointModel).Association("Tags").Replace(body.Tags); err != nil {
+		if err := updateTagsTransaction(db, &pointModel, body.Tags); err != nil {
 			return nil, err
 		}
 	}

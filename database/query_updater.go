@@ -1,5 +1,11 @@
 package database
 
+import "gorm.io/gorm"
+
+func updateTagsTransaction(db *gorm.DB, model, tags interface{}) error {
+	return db.Model(model).Association("Tags").Replace(tags)
+}
+
 func (d *GormDatabase) updateTags(model, tags interface{}) error {
-	return d.DB.Model(model).Association("Tags").Replace(tags)
+	return updateTagsTransaction(d.DB, model, tags)
 }
