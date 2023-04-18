@@ -8,6 +8,7 @@ type Config struct {
 type Job struct {
 	EnableConfigSteps   bool   `yaml:"enable_config_steps"`
 	EnableCommissioning bool   `yaml:"enable_commissioning"`
+	EnableBACnet        bool   `yaml:"enable_bacnet"`
 	Frequency           string `yaml:"frequency"`
 	ChirpstackHost      string `yaml:"chirpstack_host"`
 	// ChirpstackPort              float64 `yaml:"chirpstack_port"`
