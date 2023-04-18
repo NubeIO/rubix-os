@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.12.7](https://github.com/NubeIO/flow-framework/tree/v0.12.7) (2023-04-18)
+
+- Adds logs for MQTT debugging
+
 ## [v0.12.6](https://github.com/NubeIO/flow-framework/tree/v0.12.6) (2023-04-14)
 
 - Fix: update tags database lock issue
