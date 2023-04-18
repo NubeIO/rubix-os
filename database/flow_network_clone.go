@@ -11,6 +11,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"sync"
 )
 
@@ -52,13 +53,17 @@ func (d *GormDatabase) DeleteFlowNetworkClone(uuid string) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) GetOneFlowNetworkCloneByArgs(args api.Args) (*model.FlowNetworkClone, error) {
+func (d *GormDatabase) GetOneFlowNetworkCloneByArgsTransaction(db *gorm.DB, args api.Args) (*model.FlowNetworkClone, error) {
 	var flowNetworkCloneModel *model.FlowNetworkClone
-	query := d.buildFlowNetworkCloneQuery(args)
+	query := buildFlownNetworkCloneQueryTransaction(db, args)
 	if err := query.First(&flowNetworkCloneModel).Error; err != nil {
 		return nil, err
 	}
 	return flowNetworkCloneModel, nil
+}
+
+func (d *GormDatabase) GetOneFlowNetworkCloneByArgs(args api.Args) (*model.FlowNetworkClone, error) {
+	return d.GetOneFlowNetworkCloneByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) DeleteOneFlowNetworkCloneByArgs(args api.Args) (bool, error) {

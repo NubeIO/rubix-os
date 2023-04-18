@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -31,13 +32,17 @@ func (d *GormDatabase) GetDeviceByPointUUID(pntUUID string) (*model.Device, erro
 	return device, nil
 }
 
-func (d *GormDatabase) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
+func (d *GormDatabase) GetOneDeviceByArgsTransaction(db *gorm.DB, args api.Args) (*model.Device, error) {
 	var deviceModel *model.Device
-	query := d.buildDeviceQuery(args)
+	query := buildDeviceQueryTransaction(db, args)
 	if err := query.First(&deviceModel).Error; err != nil {
 		return nil, err
 	}
 	return deviceModel, nil
+}
+
+func (d *GormDatabase) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
+	return d.GetOneDeviceByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) GetDeviceByName(networkName string, deviceName string, args api.Args) (*model.Device, error) {

@@ -15,14 +15,19 @@ import (
 	"strings"
 )
 
-func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
+func (d *GormDatabase) GetNetworksTransaction(db *gorm.DB, args api.Args) ([]*model.Network, error) {
 	var networksModel []*model.Network
-	query := d.buildNetworkQuery(args)
+	query := buildNetworkQueryTransaction(db, args)
 	if err := query.Find(&networksModel).Error; err != nil {
 		return nil, err
 	}
 	return networksModel, nil
 }
+
+func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
+	return d.GetNetworksTransaction(d.DB, args)
+}
+
 func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.buildNetworkQuery(args)
@@ -32,13 +37,17 @@ func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, e
 	return networkModel, nil
 }
 
-func (d *GormDatabase) GetOneNetworkByArgs(args api.Args) (*model.Network, error) {
+func (d *GormDatabase) GetOneNetworkByArgsTransaction(db *gorm.DB, args api.Args) (*model.Network, error) {
 	var networkModel *model.Network
-	query := d.buildNetworkQuery(args)
+	query := buildNetworkQueryTransaction(db, args)
 	if err := query.First(&networkModel).Error; err != nil {
 		return nil, err
 	}
 	return networkModel, nil
+}
+
+func (d *GormDatabase) GetOneNetworkByArgs(args api.Args) (*model.Network, error) {
+	return d.GetOneNetworkByArgsTransaction(d.DB, args)
 }
 
 // GetNetworkByField returns the network for the given field ie name or nil.
@@ -71,7 +80,7 @@ func (d *GormDatabase) CreateNetworkTransaction(db *gorm.DB, body *model.Network
 	body.TransportType = transport
 	if body.PluginPath != "" || body.PluginConfId != "" {
 		if body.PluginConfId == "" {
-			plugin, err := d.GetPluginByPath(body.PluginPath)
+			plugin, err := d.GetPluginByPathTransaction(db, body.PluginPath)
 			if err != nil {
 				return nil, errors.New("failed to find a valid plugin")
 			}

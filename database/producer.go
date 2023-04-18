@@ -15,6 +15,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -40,13 +41,17 @@ func (d *GormDatabase) GetProducer(uuid string, args api.Args) (*model.Producer,
 	return producerModel, nil
 }
 
-func (d *GormDatabase) GetOneProducerByArgs(args api.Args) (*model.Producer, error) {
+func (d *GormDatabase) GetOneProducerByArgsTransaction(db *gorm.DB, args api.Args) (*model.Producer, error) {
 	var producerModel *model.Producer
-	query := d.buildProducerQuery(args)
+	query := buildProducerQueryTransaction(db, args)
 	if err := query.First(&producerModel).Error; err != nil {
 		return nil, err
 	}
 	return producerModel, nil
+}
+
+func (d *GormDatabase) GetOneProducerByArgs(args api.Args) (*model.Producer, error) {
+	return d.GetOneProducerByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, error) {

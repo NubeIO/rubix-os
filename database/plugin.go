@@ -15,13 +15,17 @@ func (d *GormDatabase) GetPlugins() ([]*model.PluginConf, error) {
 	return plugins, nil
 }
 
-func (d *GormDatabase) GetPluginByPath(path string) (*model.PluginConf, error) {
+func (d *GormDatabase) GetPluginByPathTransaction(db *gorm.DB, path string) (*model.PluginConf, error) {
 	var plugin *model.PluginConf
-	query := d.DB.Where("module_path = ? ", path).First(&plugin)
+	query := db.Where("module_path = ? ", path).First(&plugin)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	return plugin, nil
+}
+
+func (d *GormDatabase) GetPluginByPath(path string) (*model.PluginConf, error) {
+	return d.GetPluginByPathTransaction(d.DB, path)
 }
 
 func (d *GormDatabase) CreatePlugin(p *model.PluginConf) error {

@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -48,14 +49,18 @@ func (d *GormDatabase) GetNetworksByPlugin(pluginUUID string, args api.Args) ([]
 	return networksModel, nil
 }
 
-// GetNetworkByName returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworkByName(name string, args api.Args) (*model.Network, error) {
+func (d *GormDatabase) GetNetworkByNameTransaction(db *gorm.DB, name string, args api.Args) (*model.Network, error) {
 	var networksModel *model.Network
-	query := d.buildNetworkQuery(args)
+	query := buildNetworkQueryTransaction(db, args)
 	if err := query.Where("name = ? ", name).First(&networksModel).Error; err != nil {
 		return nil, err
 	}
 	return networksModel, nil
+}
+
+// GetNetworkByName returns the network for the given id or nil.
+func (d *GormDatabase) GetNetworkByName(name string, args api.Args) (*model.Network, error) {
+	return d.GetNetworkByNameTransaction(d.DB, name, args)
 }
 
 // GetNetworkByPoint returns a network by passing in the pointUUID.
