@@ -205,9 +205,11 @@ func (d *GormDatabase) RePublishPointsCov() {
 }
 
 func (d *GormDatabase) RePublishSelectedPointsCov(selectedPoints *[]interfaces.MqttPoint) {
+	log.Infof("RePublishSelectedPointsCov()")
 	if selectedPoints == nil {
 		return
 	}
+	log.Infof("RePublishSelectedPointsCov() selectedPoints: %+v", selectedPoints)
 
 	/*  TODO: only used if we don't want to use the existing COV topics
 	var pointReqArray []*model.Point
@@ -243,6 +245,7 @@ func (d *GormDatabase) RePublishSelectedPointsCov(selectedPoints *[]interfaces.M
 			for _, point := range device.Points {
 				for _, val := range *selectedPoints {
 					if val.PointUUID == point.UUID {
+						log.Infof("RePublishSelectedPointsCov() network: %v, device: %v, point: %v, pointUUID:%v", network.Name, device.Name, point.Name, point.UUID)
 						localmqtt.PublishPointCov(network, device, point)
 					}
 				}
