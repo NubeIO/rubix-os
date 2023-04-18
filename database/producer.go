@@ -327,7 +327,7 @@ func (d *GormDatabase) GetProducersForCreateInterval() ([]*interfaces.ProducerIn
 		"ON p.uuid = ph.producer_uuid "+
 		"INNER JOIN points pt "+
 		"ON p.producer_thing_uuid = pt.uuid "+
-		"WHERE p.enable_history = %v AND p.history_type != '%s' AND p.history_interval > %d AND p.producer_thing_uuid = '%s'",
+		"WHERE p.enable_history = %v AND p.history_type != '%s' AND p.history_interval > %d AND p.producer_thing_class = '%s'",
 		true, model.HistoryTypeCov, 0, "point")
 	if err := d.DB.Raw(query).Scan(&producerIntervalHistory).Error; err != nil {
 		return nil, err
