@@ -46,8 +46,33 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 			continue
 		}
 
-		// we are sending extra networks to make sure whether it's available or not in fn side
-		if network.AutoMappingFlowNetworkName != fnName {
+		// we are sending extra networks, devices, points to make sure whether it's available or not in fn side
+		if network.AutoMappingFlowNetworkName != fnName || boolean.IsFalse(network.AutoMappingEnable) {
+			var amDevices []*interfaces.AutoMappingDevice
+			for _, device := range network.Devices {
+				var amPoints []*interfaces.AutoMappingPoint
+				for _, point := range device.Points {
+					amPoints = append(amPoints, &interfaces.AutoMappingPoint{
+						Enable:            boolean.IsTrue(point.Enable),
+						AutoMappingEnable: boolean.IsTrue(point.AutoMappingEnable),
+						EnableWriteable:   boolean.IsTrue(point.EnableWriteable),
+						UUID:              point.UUID,
+						Name:              point.Name,
+						Tags:              point.Tags,
+						MetaTags:          point.MetaTags,
+						Priority:          *point.Priority,
+					})
+				}
+				amDevices = append(amDevices, &interfaces.AutoMappingDevice{
+					Enable:            boolean.IsTrue(device.Enable),
+					AutoMappingEnable: boolean.IsTrue(device.AutoMappingEnable),
+					UUID:              device.UUID,
+					Name:              device.Name,
+					Tags:              device.Tags,
+					MetaTags:          device.MetaTags,
+					Points:            amPoints,
+				})
+			}
 			amNetwork := &interfaces.AutoMappingNetwork{
 				Enable:            boolean.IsTrue(network.Enable),
 				AutoMappingEnable: boolean.IsTrue(network.AutoMappingEnable),
@@ -55,10 +80,16 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 				Name:              network.Name,
 				Tags:              network.Tags,
 				MetaTags:          network.MetaTags,
-				Devices:           nil,
+				Devices:           amDevices,
 				CreateNetwork:     false,
 			}
 			amNetworks = append(amNetworks, amNetwork)
+
+			if boolean.IsFalse(network.AutoMappingEnable) {
+				network.Connection = connection.Connected.String()
+				network.ConnectionMessage = nstring.New(nstring.NotAvailable)
+				_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
+			}
 			continue
 		}
 

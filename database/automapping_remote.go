@@ -26,15 +26,14 @@ func (d *GormDatabase) CreateAutoMapping(autoMapping *interfaces.AutoMapping) *i
 
 	var syncWriters []*interfaces.SyncWriter
 	for _, amNetwork := range autoMapping.Networks {
-		if amNetwork.Devices == nil { // network which doesn't have devices are just sent for meta-data
-			continue
+		if amNetwork.CreateNetwork {
+			amRes := d.createNetworkAutoMapping(tx, amNetwork, autoMapping.FlowNetworkUUID, autoMapping.GlobalUUID)
+			if amRes.HasError {
+				tx.Rollback()
+				return amRes
+			}
+			syncWriters = append(syncWriters, amRes.SyncWriters...)
 		}
-		amRes := d.createNetworkAutoMapping(tx, amNetwork, autoMapping.FlowNetworkUUID, autoMapping.GlobalUUID)
-		if amRes.HasError {
-			tx.Rollback()
-			return amRes
-		}
-		syncWriters = append(syncWriters, amRes.SyncWriters...)
 	}
 
 	tx.Commit()
@@ -78,14 +77,16 @@ func (d *GormDatabase) cleanAutoMappedModels(tx *gorm.DB, autoMapping *interface
 		for _, device := range network.Devices {
 			if autoMapping.Level == interfaces.Network || autoMapping.Level == interfaces.Device {
 				if boolean.IsTrue(device.CreatedFromAutoMapping) &&
-					device.AutoMappingUUID != nil && !nstring.ContainsString(edgeDevices, *device.AutoMappingUUID) {
+					device.AutoMappingUUID != nil &&
+					(nstring.ContainsString(edgeNetworks, *network.AutoMappingUUID) && !nstring.ContainsString(edgeDevices, *device.AutoMappingUUID)) {
 					tx.Delete(&device)
 				}
 			}
 
 			for _, point := range device.Points {
 				if boolean.IsTrue(point.CreatedFromAutoMapping) &&
-					point.AutoMappingUUID != nil && !nstring.ContainsString(edgePoints, *point.AutoMappingUUID) {
+					point.AutoMappingUUID != nil &&
+					(nstring.ContainsString(edgeDevices, *device.AutoMappingUUID) && !nstring.ContainsString(edgePoints, *point.AutoMappingUUID)) {
 					tx.Delete(&point)
 				}
 			}
@@ -134,7 +135,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 
 	network, _ = d.GetOneNetworkByArgs(api.Args{AutoMappingUUID: nstring.New(amNetwork.UUID), GlobalUUID: nstring.New(globalUUID)})
 	if network == nil {
-		if amNetwork.AutoMappingEnable && amNetwork.CreateNetwork {
+		if amNetwork.AutoMappingEnable {
 			network = &model.Network{}
 			network.Name = getTempAutoMappedName(networkName)
 			d.setNetworkModel(fnc, amNetwork, network, globalUUID)
