@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.12.9](https://github.com/NubeIO/flow-framework/tree/v0.12.9) (2023-04-19)
+
+- Improvement in the auto-mapping error log messages
+- Fix: wrong deletion issue of devices & points in the auto-mapping
+
 ## [v0.12.8](https://github.com/NubeIO/flow-framework/tree/v0.12.8) (2023-04-18)
 
 - Fix: interval history creation
