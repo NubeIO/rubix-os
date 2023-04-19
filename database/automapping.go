@@ -64,11 +64,16 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 
 		// if fnError has issue then return that just right away
 		if fnError != nil {
-			errMessage := fmt.Sprintf("failed to find flow network with name '%s'", network.AutoMappingFlowNetworkName)
+			var msg string
+			if network.AutoMappingFlowNetworkName == "" {
+				msg = fmt.Sprintf("No flow-network has been selected for the enabled auto-mapping network.")
+			} else {
+				msg = fmt.Sprintf("The flow network with the name '%s' could not be found.", network.AutoMappingFlowNetworkName)
+			}
 			network.Connection = connection.Broken.String()
-			network.ConnectionMessage = nstring.New(errMessage)
+			network.ConnectionMessage = nstring.New(msg)
 			_ = d.UpdateNetworkConnectionErrors(network.UUID, network)
-			return errors.New(errMessage)
+			return errors.New(msg)
 		} else {
 			network.Connection = connection.Connected.String()
 			network.ConnectionMessage = nstring.New(nstring.NotAvailable)
@@ -90,7 +95,7 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 		for _, device := range network.Devices {
 			streamUUID, ok := deviceUUIDToStreamUUIDMap[device.UUID]
 			if !ok {
-				log.Warn("device is auto-mapping already turned off, we can't go further on depth")
+				log.Warn("device is auto-mapping already been disabled, we can't go further on depth")
 				continue
 			}
 			pointUUIDToProducerUUIDMap, err := d.createPointsAutoMappingProducers(streamUUID, device.Points)
@@ -110,7 +115,7 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 			for _, point := range device.Points {
 				producerUUID, ok := pointUUIDToProducerUUIDMap[point.UUID]
 				if !ok {
-					log.Warn("point is auto-mapping already turned off, we can't go further on depth")
+					log.Warn("point is auto-mapping already been disabled, we can't go further on depth")
 					continue
 				}
 				amPoints = append(amPoints, &interfaces.AutoMappingPoint{
@@ -164,7 +169,7 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 	cli := client.NewFlowClientCliFromFN(fn)
 	amRes := cli.CreateAutoMapping(autoMapping)
 	if amRes.HasError {
-		errMsg := fmt.Sprintf("Flow Network Clone side: %s", amRes.Error)
+		errMsg := fmt.Sprintf("Flow network clone side: %s", amRes.Error)
 		log.Error(errMsg)
 		amRes.Error = errMsg
 		updateCascadeConnectionError(d.DB, &amRes)
@@ -235,19 +240,24 @@ func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network
 		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
 	} else if net == nil {
 		network.Connection = connection.Broken.String()
-		network.ConnectionMessage = nstring.New("Its network creator has been already deleted, delete manually if you want")
+		network.ConnectionMessage = nstring.New("The network creator has already been deleted. Delete manually if needed.")
 		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
-	} else if net != nil && net.AutoMappingFlowNetworkName != network.AutoMappingFlowNetworkName {
+	} else if boolean.IsFalse(net.AutoMappingEnable) && boolean.IsTrue(network.CreatedFromAutoMapping) {
+		// here we use 'net' instead 'network' because network wouldn't get updated in auto-mapped disabled case
+		// where on 'devices' and 'points', it is fine to use its own model
 		network.Connection = connection.Broken.String()
-		msg := fmt.Sprintf(
-			"Its network creator '%s' is pointing different '%s' flow network, delete manually if you want",
-			net.Name, net.AutoMappingFlowNetworkName,
-		)
+		msg := fmt.Sprintf("The auto-mapping feature for the network creator '%s' is currently disabled. Delete manually if needed.", net.Name)
 		network.ConnectionMessage = nstring.New(msg)
 		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
-	} else if boolean.IsFalse(network.AutoMappingEnable) && boolean.IsTrue(network.CreatedFromAutoMapping) {
+	} else if net.AutoMappingFlowNetworkName != network.AutoMappingFlowNetworkName {
 		network.Connection = connection.Broken.String()
-		network.ConnectionMessage = nstring.New("Its network parent auto-mapping is turned off, delete manually if you want")
+		var msg string
+		if net.AutoMappingFlowNetworkName != "" {
+			msg = fmt.Sprintf("The network creator '%s' is attached to a different flow network named '%s'. Delete manually if needed.", net.Name, net.AutoMappingFlowNetworkName)
+		} else {
+			msg = fmt.Sprintf("The network creator '%s' isn't attached with any flow network. Delete manually if needed.", net.Name)
+		}
+		network.ConnectionMessage = nstring.New(msg)
 		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
 	} else {
 		network.Connection = connection.Connected.String()
@@ -275,11 +285,12 @@ func updateDevicesConnectionsInCloneSide(tx *gorm.DB, cli *client.FlowClient, ne
 				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
 			} else if dev == nil {
 				device.Connection = connection.Broken.String()
-				device.ConnectionMessage = nstring.New("Its device creator has been already deleted, manually delete it")
+				device.ConnectionMessage = nstring.New("The device creator has already been deleted. Delete manually if needed.")
 				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
-			} else if boolean.IsFalse(device.AutoMappingEnable) && boolean.IsTrue(device.CreatedFromAutoMapping) {
+			} else if boolean.IsFalse(dev.AutoMappingEnable) && boolean.IsTrue(device.CreatedFromAutoMapping) {
 				device.Connection = connection.Broken.String()
-				device.ConnectionMessage = nstring.New("Its device parent auto-mapping is turned off, delete manually if you want")
+				msg := fmt.Sprintf("The auto-mapping feature for the device creator '%s' is currently disabled. Delete manually if needed.", dev.Name)
+				device.ConnectionMessage = nstring.New(msg)
 				_ = UpdateDeviceConnectionErrorsTransaction(tx, device.UUID, device)
 			} else {
 				device.Connection = connection.Connected.String()
@@ -311,10 +322,11 @@ func updatePointsConnectionsInCloneSide(tx *gorm.DB, device *model.Device, point
 			point.ConnectionMessage = nstring.New("connection error: " + pointConnectionErr.Error())
 		} else if pointsUUIDs == nil || !nstring.ContainsString(*pointsUUIDs, *point.AutoMappingUUID) {
 			point.Connection = connection.Broken.String()
-			point.ConnectionMessage = nstring.New("Its point creator has been already deleted, manually delete it")
+			point.ConnectionMessage = nstring.New("The point creator has already been deleted. Delete manually if needed.")
 		} else if boolean.IsFalse(point.AutoMappingEnable) && boolean.IsTrue(point.CreatedFromAutoMapping) {
 			point.Connection = connection.Broken.String()
-			point.ConnectionMessage = nstring.New("Its point parent auto-mapping is turned off, delete manually if you want")
+			msg := fmt.Sprintf("The auto-mapping feature for the point creator '%s' is currently disabled. Delete manually if needed.", point.Name)
+			point.ConnectionMessage = nstring.New(msg)
 		} else {
 			point.Connection = connection.Connected.String()
 			point.ConnectionMessage = nstring.New(nstring.NotAvailable)
