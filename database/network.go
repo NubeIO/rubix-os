@@ -185,7 +185,6 @@ func (d *GormDatabase) SyncNetworks() error {
 }
 
 func (d *GormDatabase) SyncNetworkDevices(uuid string) error {
-	return nil
 	network, err := d.GetNetwork(uuid, api.Args{WithDevices: true, WithPoints: true, WithPriority: true, WithTags: true, WithMetaTags: true})
 	if err != nil {
 		return err
