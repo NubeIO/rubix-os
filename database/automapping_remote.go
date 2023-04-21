@@ -65,7 +65,7 @@ func (d *GormDatabase) cleanAutoMappedModels(tx *gorm.DB, autoMapping *interface
 		}
 	}
 
-	networks, _ := d.GetNetworks(api.Args{GlobalUUID: &autoMapping.GlobalUUID, WithDevices: true, WithPoints: true})
+	networks, _ := d.GetNetworksTransaction(tx, api.Args{GlobalUUID: &autoMapping.GlobalUUID, WithDevices: true, WithPoints: true})
 	for _, network := range networks {
 		if autoMapping.Level == interfaces.Network {
 			if boolean.IsTrue(network.CreatedFromAutoMapping) &&
@@ -114,7 +114,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 		Level:       interfaces.Network,
 	}
 
-	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{SourceUUID: nstring.New(fnUUID)})
+	fnc, err := d.GetOneFlowNetworkCloneByArgsTransaction(tx, api.Args{SourceUUID: nstring.New(fnUUID)})
 	if err != nil {
 		amRes.Error = fmt.Sprintf("flow network clone doesn't exist source uuid %s", fnUUID)
 		return amRes
@@ -122,7 +122,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 
 	networkName := getAutoMappedNetworkName(fnc.Name, amNetwork.Name)
 
-	network, err := d.GetNetworkByName(networkName, api.Args{})
+	network, err := d.GetNetworkByNameTransaction(tx, networkName, api.Args{})
 	if network != nil {
 		if network.GlobalUUID != globalUUID {
 			amRes.Error = fmt.Sprintf("network.name %s already exists in fnc side with different global_uuid", network.Name)
@@ -133,7 +133,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 		}
 	}
 
-	network, _ = d.GetOneNetworkByArgs(api.Args{AutoMappingUUID: nstring.New(amNetwork.UUID), GlobalUUID: nstring.New(globalUUID)})
+	network, _ = d.GetOneNetworkByArgsTransaction(tx, api.Args{AutoMappingUUID: nstring.New(amNetwork.UUID), GlobalUUID: nstring.New(globalUUID)})
 	if network == nil {
 		if amNetwork.AutoMappingEnable {
 			network = &model.Network{}
@@ -171,7 +171,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 		amRes.DeviceUUID = amDevice.UUID
 		amRes.Level = interfaces.Device
 
-		device, _ := d.GetOneDeviceByArgs(api.Args{AutoMappingUUID: nstring.New(amDevice.UUID)})
+		device, _ := d.GetOneDeviceByArgsTransaction(tx, api.Args{AutoMappingUUID: nstring.New(amDevice.UUID)})
 		if device == nil {
 			if amDevice.AutoMappingEnable {
 				device = &model.Device{}

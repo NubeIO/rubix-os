@@ -39,6 +39,14 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 		panic("failed to connect database")
 	}
 
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic("invalid database")
+	}
+	sqlDB.SetMaxIdleConns(1)
+	sqlDB.SetMaxOpenConns(1)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
 	if err = migration.AutoMigrate(db); err != nil {
 		panic("failed to AutoMigrate")
 	}

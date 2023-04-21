@@ -207,7 +207,7 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 	} else {
 		for _, amNetwork := range autoMapping.Networks {
 			if amNetwork.CreateNetwork { // just update its own network
-				err := d.clearConnectionError(amNetwork)
+				err := d.clearConnectionErrorTransaction(d.DB, amNetwork)
 				if err != nil {
 					return err
 				}
@@ -238,7 +238,7 @@ func (d *GormDatabase) clearStreamsAndProducers() {
 }
 
 func (d *GormDatabase) updateNetworksConnectionInCloneSide(fnName string) error {
-	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true})
+	networks, err := d.GetNetworksTransaction(d.DB, api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err
 	}
@@ -254,7 +254,7 @@ func (d *GormDatabase) updateNetworksConnectionInCloneSide(fnName string) error 
 }
 
 func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network) error {
-	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{Name: &network.AutoMappingFlowNetworkName})
+	fnc, err := d.GetOneFlowNetworkCloneByArgsTransaction(d.DB, api.Args{Name: &network.AutoMappingFlowNetworkName})
 	if err != nil {
 		network.Connection = connection.Broken.String()
 		network.ConnectionMessage = nstring.New(err.Error())
@@ -295,16 +295,13 @@ func (d *GormDatabase) updateNetworkConnectionInCloneSide(network *model.Network
 		network.ConnectionMessage = nstring.New(nstring.NotAvailable)
 		_ = UpdateNetworkConnectionErrorsTransaction(d.DB, network.UUID, network)
 	}
-	tx := d.DB.Begin()
-	updateDevicesConnectionsInCloneSide(tx, cli, network)
-	tx.Commit()
+	updateDevicesConnectionsInCloneSide(d.DB, cli, network)
 	return nil
 }
 
 func updateDevicesConnectionsInCloneSide(tx *gorm.DB, cli *client.FlowClient, network *model.Network) {
 	var wg sync.WaitGroup
 	pointsUUIDs, pointConnectionErr, _ := cli.GetPointsBulkUUIDs()
-
 	for _, device := range network.Devices {
 		wg.Add(1)
 		go func(device *model.Device, tx *gorm.DB) {
@@ -481,7 +478,7 @@ func (d *GormDatabase) createPointsAutoMappingProducers(streamUUID string, point
 	pointUUIDToProducerUUIDMap := map[string]string{}
 	tx := d.DB.Begin()
 	for _, point := range points {
-		producer, _ := d.GetOneProducerByArgs(api.Args{StreamUUID: nils.NewString(streamUUID), ProducerThingUUID: nils.NewString(point.UUID)})
+		producer, _ := d.GetOneProducerByArgsTransaction(tx, api.Args{StreamUUID: nils.NewString(streamUUID), ProducerThingUUID: nils.NewString(point.UUID)})
 		if producer == nil {
 			if boolean.IsTrue(point.AutoMappingEnable) { // create stream only when auto_mapping is enabled
 				producer = &model.Producer{}
@@ -522,7 +519,7 @@ func (d *GormDatabase) createWriterClones(syncWriters []*interfaces.SyncWriter) 
 	tx := d.DB.Begin()
 	for _, syncWriter := range syncWriters {
 		// it will restrict duplicate creation of writer_clone
-		wc, _ := d.GetOneWriterCloneByArgs(api.Args{ProducerUUID: &syncWriter.ProducerUUID, CreatedFromAutoMapping: boolean.NewTrue()})
+		wc, _ := d.GetOneWriterCloneByArgsTransaction(tx, api.Args{ProducerUUID: &syncWriter.ProducerUUID, CreatedFromAutoMapping: boolean.NewTrue()})
 		if wc == nil {
 			wc = &model.WriterClone{}
 			wc.UUID = nuuid.MakeTopicUUID(model.CommonNaming.StreamClone)
@@ -543,8 +540,8 @@ func (d *GormDatabase) createWriterClones(syncWriters []*interfaces.SyncWriter) 
 	return nil, nil
 }
 
-func (d *GormDatabase) clearConnectionError(amNetwork *interfaces.AutoMappingNetwork) error {
-	tx := d.DB.Begin()
+func (d *GormDatabase) clearConnectionErrorTransaction(db *gorm.DB, amNetwork *interfaces.AutoMappingNetwork) error {
+	tx := db.Begin()
 	networkModel := model.Network{
 		Connection:        connection.Connected.String(),
 		ConnectionMessage: nstring.New(nstring.NotAvailable),
