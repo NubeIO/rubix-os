@@ -6,10 +6,12 @@ on:
     branches:
       - main
       - master
+      - hotfix/0.9.25
   push:
     branches:
       - main
       - master
+      - hotfix/0.9.25
     tags:
       - 'v*'
 
