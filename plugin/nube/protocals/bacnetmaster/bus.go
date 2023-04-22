@@ -21,9 +21,9 @@ func (inst *Instance) BusServ() {
 			go func() {
 				message, _ := e.Data.(mqtt.Message)
 				if messageWhois(message.Topic()) {
-					devices, err := decodeWhois(message)
+					devicesFound, err := decodeWhois(message)
 					fmt.Println(err)
-					pprint.PrintJOSN(devices)
+					pprint.PrintJOSN(devicesFound)
 				}
 				if messageRead(message.Topic()) {
 					readType, _, _, _ := getReadType(message.Topic())
@@ -61,15 +61,8 @@ const (
 	mqttTypeReadPV = "pv"
 )
 
-func decode(topicType string) {
-	switch topicType {
-	case mqttTypeName:
-		fmt.Println("one")
-	case mqttTypePri:
-		fmt.Println("two")
-	case mqttTypeReadPV:
-		fmt.Println("three")
-	}
+type devices struct {
+	Devices []device `json:"devices"`
 }
 
 type whoIsRaw struct {
@@ -78,8 +71,9 @@ type whoIsRaw struct {
 
 type device struct {
 	DeviceId      int    `json:"device_id"`
-	MacAddress    string `json:"mac_address"`
-	NetworkNumber int    `json:"snet"`
+	Ip            string `json:"ip"`
+	Port          int    `json:"port"`
+	NetworkNumber int    `json:"network_number"`
 	Apdu          int    `json:"apdu"`
 }
 
@@ -124,13 +118,25 @@ type payloadPointName struct {
 	Value          string `json:"value"`
 }
 
-func decodeWhois(msg mqtt.Message) (*whoIsRaw, error) {
+func decodeWhois(msg mqtt.Message) (*devices, error) {
 	var payload *whoIsRaw
 	err := json.Unmarshal(msg.Payload(), &payload)
 	if err != nil {
-		return payload, err
+		return nil, err
 	}
-	return payload, err
+	var out *devices
+	for _, dev := range payload.Value {
+		ip, port := decodeMac(dev.MacAddress)
+		newDev := device{
+			DeviceId:      s2iNoErr(dev.DeviceId),
+			Ip:            ip,
+			Port:          port,
+			NetworkNumber: s2iNoErr(dev.Snet),
+			Apdu:          s2iNoErr(dev.Apdu),
+		}
+		out.Devices = append(out.Devices, newDev)
+	}
+	return out, err
 }
 
 func decodePointPri(msg mqtt.Message) (*payloadPri, error) {

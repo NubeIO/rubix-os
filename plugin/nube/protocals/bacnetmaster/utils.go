@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
+	"strings"
 )
 
 func s2f(v string) (float64, error) {
@@ -13,6 +14,20 @@ func s2f(v string) (float64, error) {
 
 func s2i(v string) (int, error) {
 	return strconv.Atoi(v)
+}
+
+func s2iNoErr(v string) int {
+	i, _ := strconv.Atoi(v)
+	return i
+}
+
+func decodeMac(mac string) (string, int) {
+	parts := strings.Split(mac, ":")
+	if len(parts) >= 2 {
+		return parts[0], s2iNoErr(parts[1])
+	} else {
+		return "", 0
+	}
 }
 
 func checkForBooleanType(ObjectType, DataType string) (isTypeBool bool) {
