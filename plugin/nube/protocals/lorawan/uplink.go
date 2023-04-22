@@ -3,9 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
-	"strings"
-
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
 	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
@@ -13,6 +10,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
+	"reflect"
 )
 
 // handleMqttUplink parse CS MQTT uplink data
@@ -45,12 +43,6 @@ func (inst *Instance) handleMqttUplink(body mqtt.Message) {
 	inst.parseUplinkData(&payload.Object, currDev)
 	inst.updateOrCreatePoint("rssi", float64(payload.RxInfo[0].Rssi), currDev)
 	inst.updateOrCreatePoint("snr", float64(payload.RxInfo[0].LoRaSNR), currDev)
-}
-
-// checkMqttTopicUplink checks the topic is a CS uplink event
-func checkMqttTopicUplink(topic string) bool {
-	s := strings.Split(topic, "/")
-	return len(s) == 6 && s[0] == "application" && s[2] == "device" && s[4] == "event" && s[5] == "up"
 }
 
 func (inst *Instance) parseUplinkData(data *map[string]interface{}, device *model.Device) {

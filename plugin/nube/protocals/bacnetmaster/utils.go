@@ -3,7 +3,16 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"strconv"
 )
+
+func s2f(v string) (float64, error) {
+	return strconv.ParseFloat(v, 64)
+}
+
+func s2i(v string) (int, error) {
+	return strconv.Atoi(v)
+}
 
 func checkForBooleanType(ObjectType, DataType string) (isTypeBool bool) {
 	isTypeBool = false
@@ -34,8 +43,8 @@ func checkForOutputType(ObjectType string) (isOutput bool) {
 		string(model.ObjTypeEnumValue),
 		string(model.ObjAnalogOutput),
 		string(model.ObjAnalogValue),
-		string(model.ObjEnumOutput), //MSO
-		string(model.ObjEnumValue),  //MSV
+		string(model.ObjEnumOutput), // MSO
+		string(model.ObjEnumValue),  // MSV
 		string(model.ObjBinaryOutput),
 		string(model.ObjBinaryValue):
 		isOutput = true

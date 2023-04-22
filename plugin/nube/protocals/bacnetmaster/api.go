@@ -10,7 +10,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 const (
@@ -87,12 +86,12 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	mux.POST(whois+"/:uuid", func(ctx *gin.Context) {
-		body, _ := master.BodyWhoIs(ctx)
-		uuid := resolveID(ctx)
-		addDevices := ctx.Query("add_devices")
-		add, _ := strconv.ParseBool(addDevices)
-		resp, err := inst.whoIs(uuid, body, add)
-		api.ResponseHandler(resp, err, ctx)
+		// body, _ := master.BodyWhoIs(ctx)
+		// uuid := resolveID(ctx)
+		// addDevices := ctx.Query("add_devices")
+		// add, _ := strconv.ParseBool(addDevices)
+		// resp, err := inst.whoIs(uuid, body, add)
+		// api.ResponseHandler(resp, err, ctx)
 	})
 	mux.POST("/master/whois", func(ctx *gin.Context) {
 		body, _ := bodyMasterWhoIs(ctx)
@@ -100,13 +99,13 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		api.ResponseHandler(resp, err, ctx)
 	})
 	mux.POST(discoverPoints+"/:uuid", func(ctx *gin.Context) {
-		uuid := resolveID(ctx)
-		addPoints := ctx.Query("add_points")
-		add, _ := strconv.ParseBool(addPoints)
-		makeWriteablePoints := ctx.Query("writeable_points")
-		writeable, _ := strconv.ParseBool(makeWriteablePoints)
-		resp, err := inst.devicePoints(uuid, add, writeable)
-		api.ResponseHandler(resp, err, ctx)
+		// uuid := resolveID(ctx)
+		// addPoints := ctx.Query("add_points")
+		// add, _ := strconv.ParseBool(addPoints)
+		// makeWriteablePoints := ctx.Query("writeable_points")
+		// writeable, _ := strconv.ParseBool(makeWriteablePoints)
+		// resp, err := inst.devicePoints(uuid, add, writeable)
+		// api.ResponseHandler(resp, err, ctx)
 	})
 
 	mux.GET("/polling/stats/network/:name", func(ctx *gin.Context) {

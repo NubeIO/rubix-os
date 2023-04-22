@@ -35,11 +35,11 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		}
 		return nil, errors.New("failed to create bacnet network")
 	}
-	err = inst.makeBacnetStoreNetwork(network)
-	if err != nil {
-		inst.bacnetErrorMsg("addNetwork(): issue on add bacnet-network to store err ", err.Error())
-		// fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error())
-	}
+	// err = inst.makeBacnetStoreNetwork(network)
+	// if err != nil {
+	// 	inst.bacnetErrorMsg("addNetwork(): issue on add bacnet-network to store err ", err.Error())
+	// 	// fmt.Sprintf("issue on add bacnet-device to store err:%s", err.Error())
+	// }
 	body.MaxPollRate = float.New(0.1)
 	body.TransportType = "ip"
 	if boolean.IsTrue(network.Enable) {
@@ -66,11 +66,8 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		inst.bacnetDebugMsg("addDevice(): failed to create bacnet device: ", body.Name)
 		return nil, errors.New("failed to create bacnet device")
 	}
-	if body.Host == "" {
-		body.Host = "192.168.15.100"
-	}
 	if body.Host == "0.0.0.0" {
-		body.Host = "192.168.15.100"
+		body.Host = "192.168.15.10"
 	}
 	if body.Port == 0 {
 		body.Port = 47808
@@ -89,11 +86,11 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		inst.bacnetDebugMsg("addDevice(): nil device object")
 		return nil, errors.New(fmt.Sprintf("invalid ip addr %s", body.Host))
 	}
-	err = inst.bacnetStoreDevice(device)
-	if err != nil {
-		inst.bacnetDebugMsg(fmt.Sprintf("bacnet-device: add device to store err: %s", err.Error()))
-		return nil, errors.New(fmt.Sprintf("bacnet-device: add device to store err: %s", err.Error()))
-	}
+	// err = inst.bacnetStoreDevice(device)
+	// if err != nil {
+	// 	inst.bacnetDebugMsg(fmt.Sprintf("bacnet-device: add device to store err: %s", err.Error()))
+	// 	return nil, errors.New(fmt.Sprintf("bacnet-device: add device to store err: %s", err.Error()))
+	// }
 	inst.bacnetDebugMsg("addDevice(): ", body.UUID)
 
 	if boolean.IsFalse(device.Enable) {
@@ -201,8 +198,6 @@ func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network
 	if netPollMan.NetworkName != network.Name {
 		netPollMan.NetworkName = network.Name
 	}
-
-	err = inst.makeBacnetStoreNetwork(network)
 	if err != nil {
 		inst.bacnetDebugMsg("updateNetwork(): makeBacnetStoreNetwork: , err: ", network.UUID, err)
 	}
@@ -250,12 +245,6 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 
 	device, err = inst.db.UpdateDevice(body.UUID, body)
 	if err != nil {
-		return nil, err
-	}
-
-	err = inst.bacnetStoreDevice(device)
-	if err != nil {
-		inst.bacnetDebugMsg(fmt.Sprintf("bacnet-device: update device to store err: %s", err.Error()))
 		return nil, err
 	}
 
@@ -322,16 +311,6 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		inst.bacnetDebugMsg("updatePoint(): nil point object")
 		return
 	}
-
-	/*
-		pnt, err := inst.db.GetPoint(body.UUID, api.Args{WithPriority: true})
-		if pnt == nil || err != nil {
-			inst.bacnetErrorMsg("could not find pointID: ", pp.FFPointUUID)
-			netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
-			continue
-		}
-
-	*/
 
 	if isWriteable(body.WriteMode, body.ObjectType) {
 		body.WritePollRequired = boolean.NewTrue()
@@ -401,26 +380,8 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		inst.bacnetDebugMsg("writePoint(): nil point object")
 		return
 	}
-
 	inst.bacnetDebugMsg(fmt.Sprintf("writePoint() body: %+v", body))
 	inst.bacnetDebugMsg(fmt.Sprintf("writePoint() priority: %+v", body.Priority))
-
-	/*
-		point, err = inst.db.GetPoint(pntUUID, api.Args{})
-		if err != nil || point == nil {
-			inst.modbusErrorMsg("writePoint(): bad response from GetPoint(), ", err)
-			return nil, err
-		}
-
-		if !isWriteable(point.WriteMode, point.ObjectType) { // if point isn't writeable then reset writeable properties and do `UpdatePoint()`
-			point = resetWriteableProperties(point)
-			point, err = inst.db.UpdatePoint(pntUUID, point, true, false)
-			if err != nil || point == nil {
-				inst.modbusDebugMsg("writePoint(): bad response from UpdatePoint() err:", err)
-				return nil, err
-			}
-			return point, nil
-	*/
 
 	point, _, isWriteValueChange, _, err := inst.db.PointWrite(pntUUID, body)
 	if err != nil || point == nil {
@@ -544,7 +505,6 @@ func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
 	if err != nil {
 		return false, err
 	}
-	ok, err = inst.closeBacnetStoreNetwork(body.UUID)
 	return ok, nil
 }
 

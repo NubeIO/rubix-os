@@ -12,7 +12,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	log "github.com/sirupsen/logrus"
 	"time"
 )
 
@@ -54,18 +53,8 @@ func (inst *Instance) BACnetMasterPolling() error {
 		counter++
 		// fmt.Println("\n \n")
 		inst.bacnetDebugMsg("LOOP COUNT: ", counter)
-		if inst.BacStore == nil {
-			log.Error("bacnet:master polling started with no bacnet store")
-			inst.initBacStore()
-		}
 
 		var netArg api.Args
-		/*
-			nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, netArg)
-			if err != nil {
-				return false, err
-			}
-		*/
 
 		if len(inst.NetworkPollManagers) == 0 {
 			inst.bacnetDebugMsg("NO BACNET NETWORKS FOUND")
@@ -126,15 +115,6 @@ func (inst *Instance) BACnetMasterPolling() error {
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.NEVER_RETRY, callback)
 				continue
 			}
-			/*
-				if dev.AddressId <= 0 || dev.AddressId >= 4194303 {
-					inst.bacnetErrorMsg("address is not valid.  bacnet addresses must be between 1 and 4194303")
-					inst.db.SetErrorsForAllPointsOnDevice(dev.UUID, "address out of range", model.MessageLevel.Critical, model.CommonFaultCode.ConfigError)
-					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
-					continue
-				}
-			*/
-
 			pnt, err := inst.db.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
 			if pnt == nil || err != nil {
 				inst.bacnetErrorMsg("could not find pointID: ", pp.FFPointUUID)
@@ -155,64 +135,15 @@ func (inst *Instance) BACnetMasterPolling() error {
 				continue
 			}
 
-			inst.bacnetPollingMsg("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
 			if pnt.AddressID == nil {
 				inst.bacnetPollingMsg(fmt.Sprintf("NEXT POLL DRAWN! : Network: %s, Device: %s, Point: %s, Priority: %s, Device-Add: %d, Point-Add: %d, Point Type: %s, WriteRequired: %t, ReadRequired: %t", net.Name, dev.Name, pnt.Name, pnt.PollPriority, dev.AddressId, pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
 			} else {
 				inst.bacnetPollingMsg(fmt.Sprintf("NEXT POLL DRAWN! : Network: %s, Device: %s, Point: %s, Priority: %s, Device-Add: %d, Point-Add: %d, Point Type: %s, WriteRequired: %t, ReadRequired: %t", net.Name, dev.Name, pnt.Name, pnt.PollPriority, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
 			}
-			// inst.bacnetDebugMsg(fmt.Sprintf("BACNET POLL! : Priority: %s, Network: %s Device: %s Point: %s Device-Add: %d Point-Add: %d Point Type: %s, WriteRequired: %t, ReadRequired: %t", pp.PollPriority, net.UUID, dev.UUID, pnt.UUID, dev.AddressId, *pnt.AddressID, pnt.ObjectType, boolean.IsTrue(pnt.WritePollRequired), boolean.IsTrue(pnt.ReadPollRequired)))
-
-			/*
-				if !boolean.IsTrue(pnt.WritePollRequired) && !boolean.IsTrue(pnt.ReadPollRequired) {
-					inst.bacnetDebugMsg("polling not required on this point")
-					netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.NORMAL_RETRY, callback)
-					continue
-				}
-			*/
 
 			writemode.SetPriorityArrayModeBasedOnWriteMode(pnt) // ensures the point PointPriorityArrayMode is set correctly
 
-			// SETUP BACNET CLIENT CONNECTION
-			// This section doesn't look to be used for BACnet, should probably be implemented later
-			/*
-				var mbClient smod.BACnetClient
-				// var dCheck devCheck
-				// dCheck.devUUID = dev.UUID
-				mbClient, err = inst.setClient(net, dev, true)
-				if err != nil {
-					inst.bacnetErrorMsg(fmt.Sprintf("failed to set client error: %v. network name:%s", err, net.Name))
-					if mbClient.PortUnavailable {
-						netPollMan.PortUnavailable()
-						unpauseFunc := func() {
-							netPollMan.PortAvailable()
-						}
-						netPollMan.PortUnavailableTimeout = time.AfterFunc(10*time.Second, unpauseFunc)
-					}
-					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
-					continue
-				}
-				if net.TransportType == model.TransType.Serial || net.TransportType == model.TransType.LoRa {
-					if dev.AddressId >= 1 {
-						mbClient.RTUClientHandler.SlaveID = byte(dev.AddressId)
-					}
-				} else if dev.TransportType == model.TransType.IP {
-					url, err := nurl.JoinIPPort(nurl.Parts{Host: dev.Host, Port: strconv.Itoa(dev.Port)})
-					if err != nil {
-						inst.bacnetErrorMsg("failed to validate device IP", url)
-						netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
-						continue
-					}
-					mbClient.TCPClientHandler.Address = url
-					mbClient.TCPClientHandler.SlaveID = byte(dev.AddressId)
-				} else {
-					inst.bacnetDebugMsg(fmt.Sprintf("failed to validate device and network %v %s", err, dev.Name))
-					netPollMan.PollingFinished(pp, pollStartTime, false, false, callback)
-					continue
-				}
-			*/
-
-			currentBACServPriority, highestPriorityValue, readSuccess, writeSuccess, err := inst.doReadAllThenWriteDiff7141516(pnt, net.UUID, dev.UUID)
+			currentBACServPriority, highestPriorityValue, readSuccess, writeSuccess, err := inst.doRead(pnt, net.UUID, dev.UUID)
 			if err != nil {
 				err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointWriteError)
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, true, false, pollqueue.IMMEDIATE_RETRY, callback)
@@ -225,15 +156,6 @@ func (inst *Instance) BACnetMasterPolling() error {
 
 			if currentBACServPriority != nil {
 				currentBACServPriorityMap := ConvertPriorityToMap(*currentBACServPriority)
-				/*  prints each priority array value
-				for key, val := range currentBACServPriorityMap {
-					if val == nil {
-						inst.bacnetDebugMsg("BACnetMasterPolling() BACnetServerPoint: key: ", key, "val", val)
-					} else {
-						inst.bacnetDebugMsg("BACnetMasterPolling() BACnetServerPoint: key: ", key, "val", *val)
-					}
-				}
-				*/
 				pnt.CommonFault.InFault = false
 				pnt.CommonFault.MessageLevel = model.MessageLevel.Info
 				pnt.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
@@ -251,7 +173,7 @@ func (inst *Instance) BACnetMasterPolling() error {
 			}
 
 			if !readSuccess && !writeSuccess {
-				inst.bacnetErrorMsg("no read/write performed: ", err)
+				// inst.bacnetErrorMsg("no read/write performed: ", err)
 				if err != nil {
 					err = inst.pointUpdateErr(pnt, err.Error(), model.MessageLevel.Fail, model.CommonFaultCode.PointError)
 				}

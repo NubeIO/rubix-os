@@ -14,14 +14,13 @@ func (inst *Instance) Enable() error {
 	inst.running = false
 	inst.pluginName = name
 	inst.setUUID()
-
+	inst.BusServ()
 	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
 	if err != nil {
 		inst.fault = true
 		inst.bacnetErrorMsg("enable plugin get networks: %v\n", err)
 	}
 	log.Infof("bacnet-master: enable plugin networks count: %d pluginUUID: %s", len(nets), inst.pluginUUID)
-	inst.initBacStore()
 
 	if inst.config.EnablePolling {
 		if !inst.pollingEnabled {

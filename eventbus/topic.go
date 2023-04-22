@@ -17,6 +17,8 @@ const (
 	MQTTCreated = "MQTT.created"
 	MQTTUpdated = "MQTT.updated"
 
+	BACnetMQTTMessage = "MQTT.bacnet.master"
+
 	JobTrigger = "job.trigger"
 	JobCreated = "job.created"
 	JobUpdated = "job.updated"
@@ -99,5 +101,6 @@ func BusTopics() []string {
 		ProducerEvent,
 		MQTTCreated,
 		MQTTUpdated,
+		BACnetMQTTMessage,
 	}
 }
