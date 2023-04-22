@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"strconv"
@@ -82,4 +83,60 @@ func isWriteableObjectType(objectType string) bool {
 		return true
 	}
 	return false
+}
+
+type PriArray struct {
+	P1  *float64 `json:"_1"`
+	P2  *float64 `json:"_2"`
+	P3  *float64 `json:"_3"`
+	P4  *float64 `json:"_4"`
+	P5  *float64 `json:"_5"`
+	P6  *float64 `json:"_6"`
+	P7  *float64 `json:"_7"`
+	P8  *float64 `json:"_8"`
+	P9  *float64 `json:"_9"`
+	P10 *float64 `json:"_10"`
+	P11 *float64 `json:"_11"`
+	P12 *float64 `json:"_12"`
+	P13 *float64 `json:"_13"`
+	P14 *float64 `json:"_14"`
+	P15 *float64 `json:"_15"`
+	P16 *float64 `json:"_16"`
+}
+
+func set(part string) *float64 {
+	if part == "Null" {
+		return nil
+	} else {
+		f, err := strconv.ParseFloat(part, 64)
+		if err != nil {
+			return nil
+		}
+		return float.New(f)
+	}
+}
+
+func cleanArray(payload []string) *PriArray {
+	if len(payload) != 16 {
+		return nil
+	}
+	arr := &PriArray{
+		P1:  set(payload[0]),
+		P2:  set(payload[1]),
+		P3:  set(payload[2]),
+		P4:  set(payload[3]),
+		P5:  set(payload[4]),
+		P6:  set(payload[5]),
+		P7:  set(payload[6]),
+		P8:  set(payload[7]),
+		P9:  set(payload[8]),
+		P10: set(payload[9]),
+		P11: set(payload[10]),
+		P12: set(payload[11]),
+		P13: set(payload[12]),
+		P14: set(payload[13]),
+		P15: set(payload[14]),
+		P16: set(payload[15]),
+	}
+	return arr
 }

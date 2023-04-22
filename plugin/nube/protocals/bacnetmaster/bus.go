@@ -21,14 +21,27 @@ func (inst *Instance) BusServ() {
 			go func() {
 				message, _ := e.Data.(mqtt.Message)
 				if messageWhois(message.Topic()) {
-
+					devices, err := decodeWhois(message)
+					fmt.Println(err)
+					pprint.PrintJOSN(devices)
 				}
 				if messageRead(message.Topic()) {
 					readType, _, _, _ := getReadType(message.Topic())
-					if readType == mqttTypeReadPV {
+					if readType == mqttTypeReadPV { // present value
 						pv, err := decodePointPV(message)
 						fmt.Println(err)
 						pprint.PrintJOSN(pv)
+					}
+					if readType == mqttTypePri { // priority array
+						fmt.Println(string(message.Payload()))
+						pri, err := decodePointPri(message)
+						fmt.Println(err)
+						pprint.PrintJOSN(pri)
+					}
+					if readType == mqttTypeName { // pointName
+						details, err := decodePointName(message)
+						fmt.Println(err)
+						pprint.PrintJOSN(details)
 					}
 
 				}
@@ -59,9 +72,37 @@ func decode(topicType string) {
 	}
 }
 
+type whoIsRaw struct {
+	Value []deviceRaw `json:"value"`
+}
+
+type device struct {
+	DeviceId      int    `json:"device_id"`
+	MacAddress    string `json:"mac_address"`
+	NetworkNumber int    `json:"snet"`
+	Apdu          int    `json:"apdu"`
+}
+
+type deviceRaw struct {
+	DeviceId   string `json:"device_id"`   // 1
+	MacAddress string `json:"mac_address"` // 192.168.15.10:47808
+	Snet       string `json:"snet"`        // network number
+	Sadr       string `json:"sadr"`
+	Apdu       string `json:"apdu"` // 1476, 480, 206
+}
+
 type payloadRawPri struct {
+	IoType         string   `json:"ioType"`
+	IoNumber       int      `json:"ioNumber"`
 	Value          []string `json:"value"`
 	DeviceInstance string   `json:"deviceInstance"`
+}
+
+type payloadPri struct {
+	IoType         string    `json:"ioType"`
+	IoNumber       int       `json:"ioNumber"`
+	Value          *PriArray `json:"value"`
+	DeviceInstance int       `json:"deviceInstance"`
 }
 
 type payloadRawRead struct {
@@ -77,10 +118,39 @@ type payloadReadPV struct {
 }
 
 type payloadPointName struct {
-	ioType         string
-	ioNumber       int
-	deviceInstance int
-	value          string
+	IoType         string `json:"ioType"`
+	IoNumber       int    `json:"ioNumber"`
+	DeviceInstance int    `json:"deviceInstance"`
+	Value          string `json:"value"`
+}
+
+func decodeWhois(msg mqtt.Message) (*whoIsRaw, error) {
+	var payload *whoIsRaw
+	err := json.Unmarshal(msg.Payload(), &payload)
+	if err != nil {
+		return payload, err
+	}
+	return payload, err
+}
+
+func decodePointPri(msg mqtt.Message) (*payloadPri, error) {
+	var payload *payloadRawPri
+	err := json.Unmarshal(msg.Payload(), &payload)
+	if err != nil {
+		return nil, err
+	}
+	_, ioType, ioNumber, err := getReadType(msg.Topic())
+	if err != nil {
+		return nil, err
+	}
+	deviceInstance, err := s2i(payload.DeviceInstance)
+
+	return &payloadPri{
+		IoType:         ioType,
+		IoNumber:       ioNumber,
+		DeviceInstance: deviceInstance,
+		Value:          cleanArray(payload.Value),
+	}, err
 }
 
 func decodePointPV(msg mqtt.Message) (*payloadReadPV, error) {
@@ -104,7 +174,7 @@ func decodePointPV(msg mqtt.Message) (*payloadReadPV, error) {
 }
 
 func decodePointName(msg mqtt.Message) (*payloadPointName, error) {
-	payload := new(payloadRawRead)
+	var payload *payloadRawRead
 	err := json.Unmarshal(msg.Payload(), &payload)
 	if err != nil {
 		return nil, err
@@ -115,10 +185,10 @@ func decodePointName(msg mqtt.Message) (*payloadPointName, error) {
 	}
 	deviceInstance, err := s2i(payload.DeviceInstance)
 	return &payloadPointName{
-		ioType:         ioType,
-		ioNumber:       ioNumber,
-		deviceInstance: deviceInstance,
-		value:          payload.Value,
+		IoType:         ioType,
+		IoNumber:       ioNumber,
+		DeviceInstance: deviceInstance,
+		Value:          payload.Value,
 	}, err
 }
 
