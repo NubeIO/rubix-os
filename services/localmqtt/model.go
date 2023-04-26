@@ -2,11 +2,17 @@ package localmqtt
 
 import "github.com/NubeIO/flow-framework/mqttclient"
 
-type PointMqtt struct {
-	Client          *mqttclient.Client
-	QOS             mqttclient.QOS
-	Retain          bool
-	GlobalBroadcast bool
+type LocalMqtt struct {
+	Client                *mqttclient.Client
+	QOS                   mqttclient.QOS
+	Retain                bool
+	GlobalBroadcast       bool
+	PublishPointCOV       bool
+	PublishPointList      bool
+	PointWriteListener    bool
+	PublishScheduleCOV    bool
+	PublishScheduleList   bool
+	ScheduleWriteListener bool
 }
 
 type PointListPayload struct {

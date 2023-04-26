@@ -57,7 +57,7 @@ func initFlushBuffers() {
 		go func() {
 			for {
 				time.Sleep(flushMqttPublishBufferInterval)
-				localmqtt.GetPointMqtt().Client.FlushMqttPublishBuffers()
+				localmqtt.GetLocalMqtt().Client.FlushMqttPublishBuffers()
 			}
 		}()
 	}

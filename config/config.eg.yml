@@ -56,3 +56,9 @@ mqtt:
   qos: 1
   retain: true
   globalbroadcast: false
+  publishpointcov:      true
+  publishpointlist:      false
+  pointwritelistener:    true
+  publishschedulecov:    true
+  publishwchedulelist:   false
+  schedulewritelistener: true
