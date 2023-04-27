@@ -52,7 +52,7 @@ func (inst *Instance) subscribeToMQTTForPointCOV() {
 	// topic := fetchPointsTopicWrite
 	// rubix/points/value/cov/all/#
 	var topic = "rubix/points/value/cov/all/#"
-	mqttClient := localmqtt.GetPointMqtt().Client
+	mqttClient := localmqtt.GetLocalMqtt().Client
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {

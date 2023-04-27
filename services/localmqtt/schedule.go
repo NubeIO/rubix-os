@@ -17,10 +17,13 @@ func PublishSchedule(schedule *model.Schedule) {
 		return
 	}
 	topic := fmt.Sprintf("rubix/platform/schedule/publish")
-	pointMqtt.Client.Publish(topic, pointMqtt.QOS, pointMqtt.Retain, string(payload))
+	localMqtt.Client.Publish(topic, localMqtt.QOS, localMqtt.Retain, string(payload))
 }
 
 func PublishSchedules(schedules []*model.Schedule, topic string) {
+	if !localMqtt.PublishScheduleList {
+		return
+	}
 	if topic == "" {
 		topic = MakeTopic([]string{fetchSchedulesTopic})
 	}
@@ -29,5 +32,5 @@ func PublishSchedules(schedules []*model.Schedule, topic string) {
 		log.Error(err)
 		return
 	}
-	pointMqtt.Client.Publish(topic, pointMqtt.QOS, pointMqtt.Retain, string(payload))
+	localMqtt.Client.Publish(topic, localMqtt.QOS, localMqtt.Retain, string(payload))
 }

@@ -14,13 +14,15 @@ import (
 
 const fetchDeviceInfo = "rubix/platform/info"
 const fetchPointsTopic = "rubix/platform/points"
-const fetchSchedulesTopic = "rubix/platform/schedules"
 const fetchPointTopicWrite = "rubix/platform/point/write"
 const fetchPointTopic = "rubix/platform/point"
 const fetchAllPointsCOVTopic = "rubix/platform/points/cov/all"
 const fetchSelectedPointsCOVTopic = "rubix/platform/points/cov/selected"
 
 func (d *GormDatabase) PublishPointWriteListener() {
+	if boolean.IsFalse(config.Get().MQTT.PointWriteListener) {
+		return
+	}
 	callback := func(client mqtt.Client, message mqtt.Message) {
 		body := &interfaces.MqttPoint{}
 		err := json.Unmarshal(message.Payload(), &body)
@@ -31,7 +33,7 @@ func (d *GormDatabase) PublishPointWriteListener() {
 		}
 	}
 	topic := fetchPointTopicWrite
-	mqttClient := localmqtt.GetPointMqtt().Client
+	mqttClient := localmqtt.GetLocalMqtt().Client
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
@@ -75,7 +77,7 @@ func (d *GormDatabase) PublishFetchPointListener() {
 		}
 	}
 	topic := fetchPointTopic
-	mqttClient := localmqtt.GetPointMqtt().Client
+	mqttClient := localmqtt.GetLocalMqtt().Client
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
@@ -91,7 +93,7 @@ func (d *GormDatabase) PublishPointsListListener() {
 		d.PublishPointsList(fmt.Sprintf("%s/publish", fetchPointsTopic))
 	}
 	topic := fetchPointsTopic
-	mqttClient := localmqtt.GetPointMqtt().Client
+	mqttClient := localmqtt.GetLocalMqtt().Client
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
@@ -107,7 +109,7 @@ func (d *GormDatabase) RePublishPointsCovListener() {
 		d.RePublishPointsCov()
 	}
 	topic := fetchAllPointsCOVTopic
-	mqttClient := localmqtt.GetPointMqtt().Client
+	mqttClient := localmqtt.GetLocalMqtt().Client
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
@@ -129,7 +131,7 @@ func (d *GormDatabase) RePublishSelectedPointsCovListener() {
 		}
 	}
 	topic := fetchSelectedPointsCOVTopic
-	mqttClient := localmqtt.GetPointMqtt().Client
+	mqttClient := localmqtt.GetLocalMqtt().Client
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(topic, 1, callback)
 		if err != nil {
@@ -145,7 +147,7 @@ func (d *GormDatabase) PublishDeviceInfo() {
 		localmqtt.PublishInfo()
 	}
 	topic := fetchDeviceInfo
-	mqttClient := localmqtt.GetPointMqtt().Client
+	mqttClient := localmqtt.GetLocalMqtt().Client
 	if mqttClient != nil {
 		err := mqttClient.Subscribe(fetchDeviceInfo, 1, callback)
 		if err != nil {
@@ -178,7 +180,7 @@ func (d *GormDatabase) PublishPoint(details *interfaces.MqttPoint) {
 }
 
 func (d *GormDatabase) PublishPointsList(topic string) {
-	if boolean.IsFalse(config.Get().MQTT.Enable) {
+	if boolean.IsFalse(config.Get().MQTT.Enable) || boolean.IsFalse(config.Get().MQTT.PublishPointList) {
 		return
 	}
 	networks, err := d.GetPublishPointList()
@@ -190,6 +192,9 @@ func (d *GormDatabase) PublishPointsList(topic string) {
 }
 
 func (d *GormDatabase) RePublishPointsCov() {
+	if boolean.IsFalse(config.Get().MQTT.PublishPointList) {
+		return
+	}
 	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true, WithPriority: true})
 	if err != nil {
 		log.Error("RePublishPointsCov error:", err)
@@ -205,6 +210,9 @@ func (d *GormDatabase) RePublishPointsCov() {
 }
 
 func (d *GormDatabase) RePublishSelectedPointsCov(selectedPoints *[]interfaces.MqttPoint) {
+	if boolean.IsFalse(config.Get().MQTT.PublishPointCOV) {
+		return
+	}
 	log.Infof("RePublishSelectedPointsCov()")
 	if selectedPoints == nil {
 		return
@@ -255,7 +263,7 @@ func (d *GormDatabase) RePublishSelectedPointsCov(selectedPoints *[]interfaces.M
 }
 
 func (d *GormDatabase) PublishPointCov(uuid string) error {
-	if boolean.IsFalse(config.Get().MQTT.Enable) {
+	if boolean.IsFalse(config.Get().MQTT.Enable) || boolean.IsFalse(config.Get().MQTT.PublishPointCOV) {
 		return nil
 	}
 	point, err := d.GetPoint(uuid, api.Args{WithPriority: true})
@@ -272,29 +280,4 @@ func (d *GormDatabase) PublishPointCov(uuid string) error {
 	}
 	go localmqtt.PublishPointCov(network, device, point)
 	return nil
-}
-
-func (d *GormDatabase) PublishSchedulesListener() {
-	callback := func(client mqtt.Client, message mqtt.Message) {
-		d.PublishSchedulesList(fmt.Sprintf("%s/publish", fetchSchedulesTopic))
-	}
-	topic := fetchSchedulesTopic
-	mqttClient := localmqtt.GetPointMqtt().Client
-	if mqttClient != nil {
-		err := mqttClient.Subscribe(topic, 1, callback)
-		if err != nil {
-			log.Errorf("localmqtt-broker subscribe: %s err: %s", topic, err.Error())
-		} else {
-			log.Infof("localmqtt-broker subscribe: %s", topic)
-		}
-	}
-}
-
-func (d *GormDatabase) PublishSchedulesList(topic string) {
-	data, err := d.GetSchedulesResult()
-	if err != nil {
-		log.Error("PublishSchedulesList error:", err)
-		return
-	}
-	localmqtt.PublishSchedules(data, topic)
 }
