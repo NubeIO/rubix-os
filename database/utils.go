@@ -8,7 +8,11 @@ import (
 	"github.com/NubeIO/flow-framework/utils/structs"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm"
+	"strings"
+	"unicode"
 )
+
+const nameExcludeChars = "#+/!@%&*()\\}{[]}:;'\",.?"
 
 func truncateString(str string, num int) string {
 	ret := str
@@ -122,4 +126,22 @@ func getAutoMappedStreamName(flowNetworkCloneName, networkName, deviceName strin
 
 func getTempAutoMappedName(name string) string {
 	return fmt.Sprintf("__temp_mapper__%s", name)
+}
+
+func validateName(name string) (string, error) {
+	if name == "" {
+		return "", errors.New(fmt.Sprintf("name cannot be empty"))
+	}
+	for _, char := range nameExcludeChars {
+		if strings.Contains(name, string(char)) {
+			return "", errors.New(fmt.Sprintf("name cannot contains: %c", char))
+		}
+	}
+	for _, char := range name {
+		if unicode.IsSymbol(char) {
+			return "", errors.New(fmt.Sprintf("name cannot contains: %c", char))
+		}
+	}
+	name = strings.TrimSpace(strings.Join(strings.Fields(name), " "))
+	return name, nil
 }

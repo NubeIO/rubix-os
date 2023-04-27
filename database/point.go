@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
-	"strings"
 	"time"
 
 	"github.com/NubeIO/flow-framework/api"
@@ -92,6 +91,10 @@ func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
 }
 
 func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point, checkAm bool) (*model.Point, error) {
+	name, err := validateName(body.Name)
+	if err != nil {
+		return nil, err
+	}
 	var device *model.Device
 	query := db.Where("uuid = ? ", body.DeviceUUID).First(&device)
 	if query.Error != nil {
@@ -101,7 +104,7 @@ func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point, ch
 		return nil, errors.New("can't create a point for the auto-mapped device")
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
-	body.Name = strings.TrimSpace(body.Name)
+	body.Name = name
 	if body.Decimal == nil {
 		body.Decimal = nils.NewUint32(2)
 	}
@@ -159,11 +162,15 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 }
 
 func (d *GormDatabase) UpdatePointTransactionForAutoMapping(db *gorm.DB, uuid string, body *model.Point) (*model.Point, error) {
+	name, err := validateName(body.Name)
+	if err != nil {
+		return nil, err
+	}
 	pointModel := model.Point{CommonUUID: model.CommonUUID{UUID: uuid}}
 	if err := updateTagsTransaction(db, &pointModel, body.Tags); err != nil {
 		return nil, err
 	}
-	body.Name = strings.TrimSpace(body.Name)
+	body.Name = name
 	if err := db.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
 		return nil, err
 	}
@@ -171,6 +178,11 @@ func (d *GormDatabase) UpdatePointTransactionForAutoMapping(db *gorm.DB, uuid st
 }
 
 func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
+	name, err := validateName(body.Name)
+	if err != nil {
+		return nil, err
+	}
+	body.Name = name
 	pointModel, err := d.GetPoint(uuid, api.Args{WithPriority: true})
 	if err != nil {
 		return nil, err
@@ -196,7 +208,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 	if err = d.updateTags(&pointModel, body.Tags); err != nil {
 		return nil, err
 	}
-	body.Name = strings.TrimSpace(body.Name)
 	publishPointList := body.Name != pointModel.Name
 	if err = d.DB.Model(&pointModel).Select("*").Updates(&body).Error; err != nil {
 		return nil, err

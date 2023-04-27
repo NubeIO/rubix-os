@@ -9,7 +9,6 @@ import (
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"gorm.io/gorm"
-	"strings"
 )
 
 func (d *GormDatabase) GetDevices(args api.Args) ([]*model.Device, error) {
@@ -31,6 +30,10 @@ func (d *GormDatabase) GetDevice(uuid string, args api.Args) (*model.Device, err
 }
 
 func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device, checkAm bool) (*model.Device, error) {
+	name, err := validateName(body.Name)
+	if err != nil {
+		return nil, err
+	}
 	var network *model.Network
 	query := db.Where("uuid = ? ", body.NetworkUUID).First(&network)
 	if query.Error != nil {
@@ -40,7 +43,7 @@ func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device, 
 		return nil, errors.New("can't create a device for the auto-mapped network")
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Device)
-	body.Name = strings.TrimSpace(body.Name)
+	body.Name = name
 	body.ThingClass = model.ThingClass.Device
 	if err := db.Create(&body).Error; err != nil {
 		return nil, err
@@ -53,6 +56,10 @@ func (d *GormDatabase) CreateDevice(body *model.Device) (*model.Device, error) {
 }
 
 func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *model.Device, checkAm bool) (*model.Device, error) {
+	name, err := validateName(body.Name)
+	if err != nil {
+		return nil, err
+	}
 	var deviceModel *model.Device
 	query := db.Where("uuid = ?", uuid).First(&deviceModel)
 	if query.Error != nil {
@@ -64,7 +71,7 @@ func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *m
 	if err := updateTagsTransaction(db, &deviceModel, body.Tags); err != nil {
 		return nil, err
 	}
-	body.Name = strings.TrimSpace(body.Name)
+	body.Name = name
 	body.ThingClass = model.ThingClass.Device
 	if err := db.Model(&deviceModel).Select("*").Updates(body).Error; err != nil {
 		return nil, err

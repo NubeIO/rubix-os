@@ -12,7 +12,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"strings"
 )
 
 func (d *GormDatabase) GetNetworksTransaction(db *gorm.DB, args api.Args) ([]*model.Network, error) {
@@ -70,8 +69,12 @@ func (d *GormDatabase) GetNetworkByField(field string, value string, withDevices
 }
 
 func (d *GormDatabase) CreateNetworkTransaction(db *gorm.DB, body *model.Network) (*model.Network, error) {
+	name, err := validateName(body.Name)
+	if err != nil {
+		return nil, err
+	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Network)
-	body.Name = strings.TrimSpace(body.Name)
+	body.Name = name
 	body.ThingClass = model.ThingClass.Network
 	transport, err := checkTransport(body.TransportType)
 	if err != nil {
@@ -110,6 +113,10 @@ func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error
 }
 
 func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *model.Network, checkAm bool) (*model.Network, error) {
+	name, err := validateName(body.Name)
+	if err != nil {
+		return nil, err
+	}
 	var networkModel *model.Network
 	query := db.Where("uuid = ?", uuid).First(&networkModel)
 	if query.Error != nil {
@@ -121,7 +128,7 @@ func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *
 	if err := updateTagsTransaction(db, &networkModel, body.Tags); err != nil {
 		return nil, err
 	}
-	body.Name = strings.TrimSpace(body.Name)
+	body.Name = name
 	query = db.Model(&networkModel).Select("*").Updates(&body)
 	if query.Error != nil {
 		return nil, query.Error
