@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.13.0](https://github.com/NubeIO/flow-framework/tree/v0.13.0) (2023-05-02)
+
+- Set max open connections and max idle connections to 1
+- Add few more options in the config for MQTT
+- Add name validation for network, device and point
+
 ## [v0.12.9](https://github.com/NubeIO/flow-framework/tree/v0.12.9) (2023-04-19)
 
 - Improvement in the auto-mapping error log messages
