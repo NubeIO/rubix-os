@@ -252,7 +252,7 @@ func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*flo
 		log.Errorf("producer: issue on update producer err: %v\n", err)
 		return errors.New("issue on update producer")
 	}
-	syncCOV := model.SyncCOV{Priority: priority}
+	syncCOV := model.SyncCOV{Priority: priority, PresentValue: presentValue}
 	err = d.TriggerCOVToWriterClone(producerModel, &syncCOV)
 	if err != nil {
 		return err

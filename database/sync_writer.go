@@ -58,7 +58,8 @@ func (d *GormDatabase) SyncCOV(writerUUID string, body *model.SyncCOV) error {
 	uuid := writer.WriterThingUUID
 	if writer.WriterThingClass == model.ThingClass.Point {
 		pointModel := model.PointWriter{
-			Priority: body.Priority,
+			Priority:     body.Priority,
+			PresentValue: body.PresentValue,
 		}
 		_, _, _, _, err = d.PointWrite(uuid, &pointModel, nil, false)
 		return err

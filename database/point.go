@@ -217,7 +217,10 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 		pointModel.Priority = body.Priority
 	}
 	priorityMap := priorityarray.ConvertToMap(*pointModel.Priority)
-	pnt, _, _, _, err := d.updatePointValue(pointModel, &priorityMap, nil, false)
+	pointWriter := &model.PointWriter{
+		Priority: &priorityMap,
+	}
+	pnt, _, _, _, err := d.updatePointValue(pointModel, pointWriter, nil, false)
 	if publishPointList {
 		go d.PublishPointsList("")
 	}
@@ -238,7 +241,7 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, currentW
 		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
 	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err :=
-		d.updatePointValue(pointModel, body.Priority, currentWriterUUID, forceWrite)
+		d.updatePointValue(pointModel, body, currentWriterUUID, forceWrite)
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
@@ -288,39 +291,43 @@ func updateSoftPointValueTransaction(db *gorm.DB, pointModel *model.Point, prior
 }
 
 func (d *GormDatabase) updatePointValue(
-	pointModel *model.Point, priority *map[string]*float64, currentWriterUUID *string, forceWrite bool) (
+	pointModel *model.Point, pointWriter *model.PointWriter, currentWriterUUID *string, forceWrite bool) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
-
+	priority := pointWriter.Priority
 	if pointModel.PointPriorityArrayMode == "" {
 		pointModel.PointPriorityArrayMode = model.PriorityArrayToPresentValue // sets default priority array mode
 	}
 
 	pointModel, priority, presentValue, writeValue, isPriorityChanged := d.updatePriority(pointModel, priority)
-	ov := float.Copy(presentValue)
-	pointModel.OriginalValue = ov
-	wv := float.Copy(writeValue)
-	pointModel.WriteValueOriginal = wv
-
 	presentValueTransformFault := false
-	transform := PointValueTransformOnRead(presentValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor,
-		pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
-	presentValue = transform
-	val, err := pointUnits(presentValue, pointModel.Unit, pointModel.UnitTo)
-	if err != nil {
-		pointModel.CommonFault.InFault = true
-		pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
-		pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
-		pointModel.CommonFault.Message = fmt.Sprint("point.db updatePointValue() invalid point units. error:", err)
-		pointModel.CommonFault.LastFail = time.Now().UTC()
-		presentValueTransformFault = true
-	} else {
-		presentValue = val
-	}
-	writeValue = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
+	if pointWriter.PresentValue == nil {
+		ov := float.Copy(presentValue)
+		pointModel.OriginalValue = ov
+		wv := float.Copy(writeValue)
+		pointModel.WriteValueOriginal = wv
 
-	if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
-		value := nmath.RoundTo(*presentValue, *pointModel.Decimal)
-		presentValue = &value
+		transform := PointValueTransformOnRead(presentValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor,
+			pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
+		presentValue = transform
+		val, err := pointUnits(presentValue, pointModel.Unit, pointModel.UnitTo)
+		if err != nil {
+			pointModel.CommonFault.InFault = true
+			pointModel.CommonFault.MessageLevel = model.MessageLevel.Warning
+			pointModel.CommonFault.MessageCode = model.CommonFaultCode.PointError
+			pointModel.CommonFault.Message = fmt.Sprint("point.db updatePointValue() invalid point units. error:", err)
+			pointModel.CommonFault.LastFail = time.Now().UTC()
+			presentValueTransformFault = true
+		} else {
+			presentValue = val
+		}
+		writeValue = PointValueTransformOnWrite(writeValue, pointModel.ScaleEnable, pointModel.MultiplicationFactor, pointModel.ScaleInMin, pointModel.ScaleInMax, pointModel.ScaleOutMin, pointModel.ScaleOutMax, pointModel.Offset)
+
+		if !integer.IsUnit32Nil(pointModel.Decimal) && presentValue != nil {
+			value := nmath.RoundTo(*presentValue, *pointModel.Decimal)
+			presentValue = &value
+		}
+	} else {
+		presentValue = pointWriter.PresentValue
 	}
 
 	isPresentValueChange = !float.ComparePtrValues(pointModel.PresentValue, presentValue) // Use for createCOVHistory
