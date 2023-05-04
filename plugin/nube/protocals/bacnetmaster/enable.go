@@ -1,11 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/services/pollqueue"
 	"github.com/NubeIO/flow-framework/utils/float"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
+
+type testS struct {
+	hello string
+}
 
 func (inst *Instance) Enable() error {
 	inst.bacnetPollingMsg("Polling Enable()")
@@ -21,6 +27,8 @@ func (inst *Instance) Enable() error {
 		inst.bacnetErrorMsg("enable plugin get networks: %v\n", err)
 	}
 	log.Infof("bacnet-master: enable plugin networks count: %d pluginUUID: %s", len(nets), inst.pluginUUID)
+	fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	inst.store.Set("hello", &testS{"FUCK YA"}, 10*time.Second)
 
 	if inst.config.EnablePolling {
 		if !inst.pollingEnabled {

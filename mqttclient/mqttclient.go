@@ -107,6 +107,20 @@ func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) {
 	c.bufferMqttPublish(&MqttPublishBuffer{Topic: topic, Qos: qos, Retain: retain, Payload: payload})
 }
 
+func (c *Client) PublishNonBuffer(topic string, qos QOS, retain bool, payload interface{}) (err error) {
+	if c != nil {
+		token := c.client.Publish(topic, byte(qos), retain, payload)
+		if token.WaitTimeout(2*time.Second) == false {
+			return errors.New("MQTT Client: Publish() timout, after 2 seconds")
+		}
+		if token.Error() != nil {
+			return token.Error()
+		}
+	}
+
+	return nil
+}
+
 func (c *Client) FlushMqttPublishBuffers() {
 	log.Debug("Flush mqtt publish buffers has is been called...")
 	if len(c.mqttPublishBuffers) == 0 {

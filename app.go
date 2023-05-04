@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/services/localmqtt"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -82,6 +83,7 @@ func main() {
 	internaltoken.CreateInternalTokenIfDoesNotExist()
 
 	mqttBroker := "tcp://" + conf.MQTT.Address + ":" + strconv.Itoa(conf.MQTT.Port)
+	fmt.Println(mqttBroker)
 	_, err := mqttclient.InternalMQTT(mqttBroker)
 	if err != nil {
 		log.Errorln(err)

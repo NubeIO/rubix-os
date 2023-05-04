@@ -1,14 +1,65 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"github.com/NubeDev/bacnet/btypes/priority"
+	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"io"
 )
+
+func (inst *Instance) mqttGetPV(txnNumber int) {
+	cli, connected := mqttclient.GetMQTT()
+	fmt.Println(connected, "connected")
+
+	body := readBody{
+		ObjectType:     "1",
+		ObjectInstance: "1",
+		Property:       "85",
+		DeviceInstance: "1",
+		Mac:            "192.168.15.48:47808",
+		TxnSource:      txSource,
+		TxnNumber:      newUUID(3),
+	}
+
+	err := cli.PublishNonBuffer("test", mqttclient.AtMostOnce, false, buildPayload(body))
+	fmt.Println(connected, "connected", "err", err)
+	if err != nil {
+		return
+	}
+}
+
+func buildPayload(payload interface{}) interface{} {
+	p, err := json.Marshal(payload)
+	if err != nil {
+		return ""
+	}
+	return string(p)
+}
+
+func (inst *Instance) pvCallBack() {
+
+}
+
+func shortUUID(prefix ...string) string {
+	u := make([]byte, 16)
+	n, err := io.ReadFull(rand.Reader, u)
+	if n != len(u) || err != nil {
+		return "-error-uuid-"
+	}
+	uuid := fmt.Sprintf("%x%x", u[0:4], u[4:4])
+	if len(prefix) > 0 {
+		uuid = fmt.Sprintf("%s_%s", prefix[0], uuid)
+	}
+	return uuid
+}
 
 func (inst *Instance) doRead(point *model.Point, deviceUUID, networkUUID string) (currentBACServPriority *priority.Float32, highestPriorityValue *float64, readSuccess, writeSuccess bool, err error) {
 
-	fmt.Println(111111, deviceUUID, networkUUID)
+	// fmt.Println(111111, deviceUUID, networkUUID)
+	inst.mqttGetPV(1)
 
 	currentBACServPriority = &priority.Float32{
 		P1:  nil,

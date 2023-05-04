@@ -86,6 +86,17 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	mux.POST(whois+"/:uuid", func(ctx *gin.Context) {
+
+		d, ok := inst.store.Get("hello")
+
+		if ok {
+			fmt.Println("IS OK")
+			parse := d.(*testS)
+			fmt.Println("PARSE", parse)
+		} else {
+			fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!1IS OK")
+		}
+
 		// body, _ := master.BodyWhoIs(ctx)
 		// uuid := resolveID(ctx)
 		// addDevices := ctx.Query("add_devices")
