@@ -10,18 +10,8 @@ import (
 	"io"
 )
 
-func (inst *Instance) commandPV(txnNumber string) error {
+func (inst *Instance) commandPV(body *readBody) error {
 	cli, _ := mqttclient.GetMQTT()
-	body := readBody{
-		ObjectType:     "1",
-		ObjectInstance: "1",
-		Property:       "85",
-		DeviceInstance: "2508",
-		Mac:            "192.168.15.48:47808",
-		TxnSource:      txSource,
-		TxnNumber:      txnNumber,
-	}
-
 	err := cli.PublishNonBuffer(string(topicCommandRead), mqttclient.AtMostOnce, false, buildPayload(body))
 	return err
 }

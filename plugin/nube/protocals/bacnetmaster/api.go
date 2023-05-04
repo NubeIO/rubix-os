@@ -28,6 +28,11 @@ func resolveID(ctx *gin.Context) string {
 	return ctx.Param("uuid")
 }
 
+func getReadBody(ctx *gin.Context) (dto *readBody, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	inst.basePath = basePath
 	mux.POST(plugin.NetworksURL, func(ctx *gin.Context) {
@@ -104,12 +109,23 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.POST(readCmd, func(ctx *gin.Context) {
 		id := newUUID(6)
-		err := inst.commandPV(id)
+		body, err := getReadBody(ctx)
+		if err != nil {
+			api.ResponseHandler(nil, err, ctx)
+			return
+		}
+		body.TxnSource = txSource
+		body.TxnNumber = id
+		err = inst.commandPV(body)
 		if err != nil {
 			api.ResponseHandler(nil, err, ctx)
 			return
 		}
 		call, err := inst.readLoop(id)
+		if err != nil {
+			api.ResponseHandler(nil, err, ctx)
+			return
+		}
 		api.ResponseHandler(call, err, ctx)
 	})
 

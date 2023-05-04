@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -9,6 +10,7 @@ func (inst *Instance) parseReadLoop(id string) *payloadReadPV {
 	d, ok := inst.store.Get(id)
 	if ok {
 		parse := d.(*payloadReadPV)
+		fmt.Println(1111, parse)
 		return parse
 	} else {
 		return nil
@@ -30,7 +32,7 @@ func (inst *Instance) readLoop(id string) (*payloadReadPV, error) {
 		case <-ticker:
 			payload := inst.parseReadLoop(id)
 			if payload == nil {
-				return nil, errors.New("failed to find")
+				return nil, nil
 			} else if payload != nil {
 				return payload, nil
 			}
