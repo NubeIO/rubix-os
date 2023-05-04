@@ -6,15 +6,12 @@ import (
 	"fmt"
 	"github.com/NubeDev/bacnet/btypes/priority"
 	"github.com/NubeIO/flow-framework/mqttclient"
-	pprint "github.com/NubeIO/lib-networking/print"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"io"
 )
 
-func (inst *Instance) commandPV(txnNumber string) {
-	cli, connected := mqttclient.GetMQTT()
-	fmt.Println(connected, "connected")
-
+func (inst *Instance) commandPV(txnNumber string) error {
+	cli, _ := mqttclient.GetMQTT()
 	body := readBody{
 		ObjectType:     "1",
 		ObjectInstance: "1",
@@ -26,11 +23,7 @@ func (inst *Instance) commandPV(txnNumber string) {
 	}
 
 	err := cli.PublishNonBuffer(string(topicCommandRead), mqttclient.AtMostOnce, false, buildPayload(body))
-	fmt.Println("MQTT PUBLISH")
-	pprint.PrintJOSN(body)
-	if err != nil {
-		return
-	}
+	return err
 }
 
 func buildPayload(payload interface{}) interface{} {

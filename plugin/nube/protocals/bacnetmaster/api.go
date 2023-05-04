@@ -20,6 +20,7 @@ const (
 	jsonSchemaDevice  = "/schema/json/device"
 	jsonSchemaPoint   = "/schema/json/point"
 	whois             = "/whois"
+	readCmd           = "/read"
 	discoverPoints    = "/device/points"
 )
 
@@ -85,11 +86,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		api.ResponseHandler(ok, err, ctx)
 	})
 	mux.POST(whois+"/:uuid", func(ctx *gin.Context) {
-		id := newUUID(6)
-		inst.commandPV(id)
-		something, err := inst.readLoop(id)
-		fmt.Println("API Call back", something, err)
-		api.ResponseHandler(something, err, ctx)
+
 	})
 	mux.POST("/master/whois", func(ctx *gin.Context) {
 		body, _ := bodyMasterWhoIs(ctx)
@@ -104,6 +101,16 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		// writeable, _ := strconv.ParseBool(makeWriteablePoints)
 		// resp, err := inst.devicePoints(uuid, add, writeable)
 		// api.ResponseHandler(resp, err, ctx)
+	})
+	mux.POST(readCmd, func(ctx *gin.Context) {
+		id := newUUID(6)
+		err := inst.commandPV(id)
+		if err != nil {
+			api.ResponseHandler(nil, err, ctx)
+			return
+		}
+		call, err := inst.readLoop(id)
+		api.ResponseHandler(call, err, ctx)
 	})
 
 	mux.GET("/polling/stats/network/:name", func(ctx *gin.Context) {
