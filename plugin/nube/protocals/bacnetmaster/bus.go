@@ -8,6 +8,7 @@ import (
 	pprint "github.com/NubeIO/lib-networking/print"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
@@ -31,6 +32,10 @@ func (inst *Instance) BusServ() {
 						pv, err := decodePointPV(message)
 						fmt.Println(err)
 						pprint.PrintJOSN(pv)
+						fmt.Println("SET IN STORE", pv.TxnNumber)
+						if pv != nil {
+							inst.store.Set(pv.TxnNumber, pv, 10*time.Second)
+						}
 					}
 					if readType == mqttTypePri { // priority array
 						fmt.Println(string(message.Payload()))
@@ -102,6 +107,8 @@ type payloadPri struct {
 type payloadRawRead struct {
 	DeviceInstance string `json:"deviceInstance"`
 	Value          string `json:"value"`
+	TxnSource      string `json:"txn_source"`
+	TxnNumber      string `json:"txn_number"`
 }
 
 type payloadReadPV struct {
@@ -109,6 +116,8 @@ type payloadReadPV struct {
 	IoNumber       int     `json:"ioNumber"`
 	DeviceInstance int     `json:"deviceInstance"`
 	Value          float64 `json:"value"`
+	TxnSource      string  `json:"txn_source"`
+	TxnNumber      string  `json:"txn_number"`
 }
 
 type payloadPointName struct {
@@ -176,6 +185,8 @@ func decodePointPV(msg mqtt.Message) (*payloadReadPV, error) {
 		IoNumber:       ioNumber,
 		DeviceInstance: deviceInstance,
 		Value:          value,
+		TxnSource:      payload.TxnSource,
+		TxnNumber:      payload.TxnNumber,
 	}, err
 }
 

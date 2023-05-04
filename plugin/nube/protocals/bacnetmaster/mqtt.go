@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"github.com/NubeDev/bacnet/btypes/priority"
 	"github.com/NubeIO/flow-framework/mqttclient"
+	pprint "github.com/NubeIO/lib-networking/print"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"io"
 )
 
-func (inst *Instance) mqttGetPV(txnNumber int) {
+func (inst *Instance) commandPV(txnNumber string) {
 	cli, connected := mqttclient.GetMQTT()
 	fmt.Println(connected, "connected")
 
@@ -18,14 +19,15 @@ func (inst *Instance) mqttGetPV(txnNumber int) {
 		ObjectType:     "1",
 		ObjectInstance: "1",
 		Property:       "85",
-		DeviceInstance: "1",
+		DeviceInstance: "2508",
 		Mac:            "192.168.15.48:47808",
 		TxnSource:      txSource,
-		TxnNumber:      newUUID(3),
+		TxnNumber:      txnNumber,
 	}
 
-	err := cli.PublishNonBuffer("test", mqttclient.AtMostOnce, false, buildPayload(body))
-	fmt.Println(connected, "connected", "err", err)
+	err := cli.PublishNonBuffer(string(topicCommandRead), mqttclient.AtMostOnce, false, buildPayload(body))
+	fmt.Println("MQTT PUBLISH")
+	pprint.PrintJOSN(body)
 	if err != nil {
 		return
 	}
@@ -59,7 +61,7 @@ func shortUUID(prefix ...string) string {
 func (inst *Instance) doRead(point *model.Point, deviceUUID, networkUUID string) (currentBACServPriority *priority.Float32, highestPriorityValue *float64, readSuccess, writeSuccess bool, err error) {
 
 	// fmt.Println(111111, deviceUUID, networkUUID)
-	inst.mqttGetPV(1)
+	// inst.mqttGetPV("1")
 
 	currentBACServPriority = &priority.Float32{
 		P1:  nil,

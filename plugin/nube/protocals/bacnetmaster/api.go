@@ -84,25 +84,12 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ok, err := inst.deletePoint(body)
 		api.ResponseHandler(ok, err, ctx)
 	})
-
 	mux.POST(whois+"/:uuid", func(ctx *gin.Context) {
-
-		d, ok := inst.store.Get("hello")
-
-		if ok {
-			fmt.Println("IS OK")
-			parse := d.(*testS)
-			fmt.Println("PARSE", parse)
-		} else {
-			fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!1IS OK")
-		}
-
-		// body, _ := master.BodyWhoIs(ctx)
-		// uuid := resolveID(ctx)
-		// addDevices := ctx.Query("add_devices")
-		// add, _ := strconv.ParseBool(addDevices)
-		// resp, err := inst.whoIs(uuid, body, add)
-		// api.ResponseHandler(resp, err, ctx)
+		id := newUUID(6)
+		inst.commandPV(id)
+		something, err := inst.readLoop(id)
+		fmt.Println("API Call back", something, err)
+		api.ResponseHandler(something, err, ctx)
 	})
 	mux.POST("/master/whois", func(ctx *gin.Context) {
 		body, _ := bodyMasterWhoIs(ctx)
