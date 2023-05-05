@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.13.1](https://github.com/NubeIO/flow-framework/tree/v0.13.1) (2023-05-05)
+
+- Upgrade bacnet lib for conversion bacnet value
+
 ## [v0.13.0](https://github.com/NubeIO/flow-framework/tree/v0.13.0) (2023-05-02)
 
 - Set max open connections and max idle connections to 1

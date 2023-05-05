@@ -64,8 +64,8 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030IGemrRc=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
-github.com/NubeDev/bacnet v0.1.7 h1:0CAksg2UtgziTfCazhWCm4BaM3q0242Q87A6x2VeQfY=
-github.com/NubeDev/bacnet v0.1.7/go.mod h1:F3xK4sMMAgx4kKufhKwKU7jGx3kK6hVd3Ag8Qnr8rw8=
+github.com/NubeDev/bacnet v0.1.9 h1:PHbABuwegqkPjBB/rSqzqbhoV6ws1kZX5QtdIjcJ+RM=
+github.com/NubeDev/bacnet v0.1.9/go.mod h1:F3xK4sMMAgx4kKufhKwKU7jGx3kK6hVd3Ag8Qnr8rw8=
 github.com/NubeDev/location v0.0.2 h1:EkXOIx6g6i6DRaDPWQzTH+qjgHnJYsUlBASL/p0OPFQ=
 github.com/NubeDev/location v0.0.2/go.mod h1:wvL1deOEefQrsTv+nojlMOKbwpos4xUbEGSHQ4AKERs=
 github.com/NubeDev/modbus v0.0.2 h1:XdKbkLg3paHHrUL8sOEv+l6lxtnmzOqAigNVIQN+u+0=
@@ -83,8 +83,6 @@ github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.6/go.mod h1:iDKguImeSi6yhQlBK
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7 h1:QKgcOjDkVujyAXWK+OysVFnQKzpZx335vGPG95UNXuI=
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7/go.mod h1:oLI6n9wuko0KIEzrLc8saOquiQvtMUUBrUjXf0TLDVQ=
 github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.4/go.mod h1:A1BPuc3UpE1EF3ugdf+8QIIKTT8s3eK+pfUcheJX2JM=
-github.com/NubeIO/nubeio-rubix-lib-models-go v1.4.24 h1:+U5ipvnazolfRP+I3nAYJ2JXrYyBIjoGdmGb3AbvEaU=
-github.com/NubeIO/nubeio-rubix-lib-models-go v1.4.24/go.mod h1:J0Xy/dX/f/xIhEnW6ZhkE2LiyuRk2H9gCb0Uk+2SSSk=
 github.com/NubeIO/nubeio-rubix-lib-models-go v1.4.25 h1:YLMRTF4wYFuidsrbo+g1hW30gMuimeesIw0jCRrAwh8=
 github.com/NubeIO/nubeio-rubix-lib-models-go v1.4.25/go.mod h1:J0Xy/dX/f/xIhEnW6ZhkE2LiyuRk2H9gCb0Uk+2SSSk=
 github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.9 h1:gAAbgcy62F7IdUt/djxCVvAF1ILMc8liJ/4hJl8Ld+w=
