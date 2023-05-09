@@ -13,8 +13,9 @@ type ScheduleDatabase interface {
 	GetOneScheduleByArgs(Args) (*model.Schedule, error)
 	CreateSchedule(body *model.Schedule) (*model.Schedule, error)
 	UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error)
-	ScheduleWrite(uuid string, body *model.ScheduleData) error
+	ScheduleWrite(uuid string, body *model.ScheduleData, forceWrite bool) error
 	DeleteSchedule(uuid string) (bool, error)
+	SyncSchedules() error
 }
 
 type ScheduleAPI struct {
@@ -59,7 +60,7 @@ func (a *ScheduleAPI) UpdateSchedule(ctx *gin.Context) {
 func (a *ScheduleAPI) ScheduleWrite(ctx *gin.Context) {
 	body, _ := getBODYScheduleData(ctx)
 	uuid := resolveID(ctx)
-	err := a.DB.ScheduleWrite(uuid, body)
+	err := a.DB.ScheduleWrite(uuid, body, false)
 	ResponseHandler(nil, err, ctx)
 }
 
@@ -73,4 +74,9 @@ func (a *ScheduleAPI) DeleteSchedule(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteSchedule(uuid)
 	ResponseHandler(q, err, ctx)
+}
+
+func (a *ScheduleAPI) SyncSchedules(ctx *gin.Context) {
+	err := a.DB.SyncSchedules()
+	ResponseHandler(model.Message{Message: "synced successfully"}, err, ctx)
 }

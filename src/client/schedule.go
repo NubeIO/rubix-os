@@ -1,0 +1,17 @@
+package client
+
+import (
+	"github.com/NubeIO/flow-framework/nresty"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+)
+
+func (inst *FlowClient) GetScheduleV2(uuid string) (*model.Schedule, error, error) {
+	resp, connectionErr, requestErr := nresty.FormatRestyV2Response(inst.client.R().
+		SetResult(&model.Schedule{}).
+		SetPathParams(map[string]string{"uuid": uuid}).
+		Get("/api/schedules/{uuid}"))
+	if connectionErr != nil || requestErr != nil {
+		return nil, connectionErr, requestErr
+	}
+	return resp.Result().(*model.Schedule), nil, nil
+}

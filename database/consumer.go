@@ -134,6 +134,17 @@ func (d *GormDatabase) ConsumersPointWrite(uuid string, priority *map[string]*fl
 	}
 }
 
+func (d *GormDatabase) ConsumersScheduleWrite(uuid string, scheduleData *model.ScheduleData) {
+	writer, _ := d.GetOneWriterByArgs(api.Args{WriterThingUUID: &uuid})
+	if writer != nil {
+		body := &model.WriterBody{
+			Action:   "writer",
+			Schedule: scheduleData,
+		}
+		_ = d.WriterAction(writer.UUID, body)
+	}
+}
+
 func (d *GormDatabase) SyncConsumerWriters(uuid string) ([]*interfaces.SyncModel, error) {
 	consumer, _ := d.GetConsumer(uuid, api.Args{WithWriters: true})
 	var outputs []*interfaces.SyncModel

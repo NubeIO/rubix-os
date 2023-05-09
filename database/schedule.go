@@ -1,11 +1,16 @@
 package database
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
+	"strings"
 	"github.com/pkg/errors"
 )
 
@@ -49,6 +54,15 @@ func (d *GormDatabase) GetScheduleResult(uuid string) (*model.Schedule, error) {
 	return scheduleModel, nil
 }
 
+func (d *GormDatabase) GetSchedulesByArgs(args api.Args) ([]*model.Schedule, error) {
+	var scheduleModel []*model.Schedule
+	query := d.buildScheduleQuery(args)
+	if err := query.Find(&scheduleModel).Error; err != nil {
+		return nil, err
+	}
+	return scheduleModel, nil
+}
+
 func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, error) {
 	var scheduleModel *model.Schedule
 	query := d.buildScheduleQuery(args)
@@ -58,7 +72,7 @@ func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, err
 	return scheduleModel, nil
 }
 
-func (d *GormDatabase) CreateSchedule(body *model.Schedule) (*model.Schedule, error) {
+func (d *GormDatabase) CreateScheduleTransaction(db *gorm.DB, body *model.Schedule) (*model.Schedule, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Schedule)
 	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Schedule
@@ -68,10 +82,21 @@ func (d *GormDatabase) CreateSchedule(body *model.Schedule) (*model.Schedule, er
 		return nil, err
 	}
 	body.Schedule = validSchedule
-	if err := d.DB.Create(&body).Error; err != nil {
+	if body.GlobalUUID == "" {
+		deviceInfo, err := deviceinfo.GetDeviceInfo()
+		if err != nil {
+			return nil, err
+		}
+		body.GlobalUUID = deviceInfo.GlobalUUID
+	}
+	if err = db.Create(&body).Error; err != nil {
 		return nil, err
 	}
 	return body, nil
+}
+
+func (d *GormDatabase) CreateSchedule(body *model.Schedule) (*model.Schedule, error) {
+	return d.CreateScheduleTransaction(d.DB, body)
 }
 
 func (d *GormDatabase) validateSchedule(schedule *model.Schedule) ([]byte, error) {
@@ -88,6 +113,20 @@ func (d *GormDatabase) validateSchedule(schedule *model.Schedule) ([]byte, error
 		return nil, err
 	}
 	return validSchedule, nil
+}
+
+func (d *GormDatabase) UpdateScheduleTransactionForAutoMapping(db *gorm.DB, uuid string, body *model.Schedule) (*model.Schedule, error) {
+	validSchedule, err := d.validateSchedule(body)
+	if err != nil {
+		return nil, err
+	}
+	scheduleModel := model.Schedule{CommonUUID: model.CommonUUID{UUID: uuid}}
+	body.Name = strings.TrimSpace(body.Name)
+	body.Schedule = validSchedule
+	if err := db.Model(&scheduleModel).Select("*").Updates(&body).Error; err != nil {
+		return nil, err
+	}
+	return &scheduleModel, nil
 }
 
 func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error) {
@@ -121,12 +160,18 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 		body.TimeZone = scheduleModel.TimeZone
 	}
 
-	query = d.DB.Model(&scheduleModel).Select("*").Omit("IsActive", "ActiveWeekly", "ActiveException", "ActiveEvent", "Payload", "PeriodStart", "PeriodStop", "NextStart", "NextStop", "PeriodStartString", "PeriodStopString", "NextStartString", "NextStopString", "CreatedAt").Updates(&body)
-	// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
-	if query.Error != nil {
-		return nil, query.Error
+	scheduleData := new(model.ScheduleData)
+	_ = json.Unmarshal(body.Schedule, &scheduleData)
+	_ = d.ScheduleWrite(uuid, scheduleData, false)
+
+	if boolean.IsFalse(scheduleModel.CreatedFromAutoMapping) {
+		query = d.DB.Model(&scheduleModel).Select("*").Omit("IsActive", "ActiveWeekly", "ActiveException", "ActiveEvent", "Payload", "PeriodStart", "PeriodStop", "NextStart", "NextStop", "PeriodStartString", "PeriodStopString", "NextStartString", "NextStopString", "CreatedAt").Updates(&body)
+		// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
+		if query.Error != nil {
+			return nil, query.Error
+		}
+		d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name, nil, "", nil)
 	}
-	d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name, nil, "", nil)
 	return scheduleModel, nil
 }
 
@@ -151,25 +196,50 @@ func (d *GormDatabase) UpdateScheduleAllProps(uuid string, body *model.Schedule)
 		body.Name = scheduleModel.Name
 	}
 
-	query = d.DB.Model(&scheduleModel).Select("*").Updates(&body)
-	// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
-	if query.Error != nil {
-		return nil, query.Error
+	scheduleData := new(model.ScheduleData)
+	_ = json.Unmarshal(body.Schedule, &scheduleData)
+	_ = d.ScheduleWrite(uuid, scheduleData, false)
+
+	if boolean.IsFalse(scheduleModel.CreatedFromAutoMapping) {
+		query = d.DB.Model(&scheduleModel).Select("*").Updates(&body)
+		// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
+		if query.Error != nil {
+			return nil, query.Error
+		}
+		d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name, nil, "", nil)
 	}
-	d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name, nil, "", nil)
 	return scheduleModel, nil
 }
 
-func (d *GormDatabase) ScheduleWrite(uuid string, body *model.ScheduleData) error {
+func (d *GormDatabase) ScheduleWrite(uuid string, body *model.ScheduleData, forceWrite bool) error {
+	var scheduleModel *model.Schedule
+	query := d.DB.Where("uuid = ?", uuid).First(&scheduleModel)
+	if query.Error != nil {
+		return query.Error
+	}
+	scheduleModuleScheduleData, err := json.Marshal(scheduleModel.Schedule)
+	if err != nil {
+		return err
+	}
+
 	scheduleData, err := json.Marshal(body)
 	if err != nil {
 		return err
 	}
 	schedule := map[string]interface{}{}
 	schedule["schedule"] = scheduleData
-	err = d.DB.Model(model.Schedule{}).Where("uuid = ?", uuid).Updates(schedule).Error
-	if err != nil {
-		return err
+
+	isScheduleDataChange := !bytes.Equal(scheduleModuleScheduleData, scheduleData)
+	if forceWrite || isScheduleDataChange {
+		err = d.DB.Model(&scheduleModel).Updates(schedule).Error
+		if err != nil {
+			return err
+		}
+		d.ConsumersScheduleWrite(uuid, body)
+		err = d.ProducersScheduleWrite(uuid, body)
+		if err != nil {
+			return err
+		}
 	}
 	return d.ProducersScheduleWrite(uuid, body)
 }
@@ -193,4 +263,50 @@ func (d *GormDatabase) DeleteSchedule(uuid string) (bool, error) {
 	}
 	query := d.DB.Delete(&schedule)
 	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) SyncSchedules() error {
+	schedules, err := d.GetSchedules()
+	var firstErr error
+	if err != nil {
+		return err
+	}
+	uniqueAutoMappingFlowNetworkNames := GetUniqueAutoMappingScheduleFlowNetworkNames(schedules)
+	for _, fnName := range uniqueAutoMappingFlowNetworkNames {
+		err = d.CreateAutoMappingsSchedules(fnName, schedules)
+		if err != nil {
+			log.Error("Auto mapping error: ", err)
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+	return firstErr
+}
+
+func GetUniqueAutoMappingScheduleFlowNetworkNames(schedules []*model.Schedule) []string {
+	uniqueAutoMappingFlowNetworkNamesMap := make(map[string]struct{})
+	var uniqueAutoMappingFlowNetworkNames []string
+
+	for _, schedule := range schedules {
+		if _, ok := uniqueAutoMappingFlowNetworkNamesMap[schedule.AutoMappingFlowNetworkName]; !ok {
+			uniqueAutoMappingFlowNetworkNamesMap[schedule.AutoMappingFlowNetworkName] = struct{}{}
+			uniqueAutoMappingFlowNetworkNames = append(uniqueAutoMappingFlowNetworkNames, schedule.AutoMappingFlowNetworkName)
+		}
+	}
+
+	return uniqueAutoMappingFlowNetworkNames
+}
+
+func (d *GormDatabase) UpdateScheduleConnectionErrors(uuid string, schedule *model.Schedule) error {
+	return UpdateScheduleConnectionErrorsTransaction(d.DB, uuid, schedule)
+}
+
+func UpdateScheduleConnectionErrorsTransaction(db *gorm.DB, uuid string, schedule *model.Schedule) error {
+	return db.Model(&model.Schedule{}).
+		Where("uuid = ?", uuid).
+		Select("Connection", "ConnectionMessage").
+		Updates(&schedule).
+		Error
 }
