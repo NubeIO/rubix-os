@@ -435,6 +435,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			schRoutes.PATCH("/write/:uuid", schHandler.ScheduleWrite)
 			schRoutes.DELETE("/:uuid", schHandler.DeleteSchedule)
 			schRoutes.GET("/sync", schHandler.SyncSchedules)
+			schRoutes.GET("/sync/:uuid", schHandler.SyncSchedule)
 		}
 
 		thingRoutes := apiRoutes.Group("/things")

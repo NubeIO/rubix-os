@@ -83,7 +83,7 @@ func (d *GormDatabase) createScheduleAutoMapping(tx *gorm.DB, amSchedule *interf
 		return amRes
 	}
 
-	scheduleName := getScheduleAutoMappedStreamName(fnc.Name, amSchedule.Name)
+	scheduleName := getAutoMappedScheduleName(fnc.Name, amSchedule.Name)
 
 	schedule, err := d.GetOneScheduleByArgsTransaction(tx, api.Args{Name: nstring.New(scheduleName)})
 	if schedule != nil {
@@ -250,6 +250,11 @@ func (d *GormDatabase) setScheduleModel(fnc *model.FlowNetworkClone, amSchedule 
 	scheduleModel.AutoMappingFlowNetworkName = fnc.Name
 	scheduleModel.CreatedFromAutoMapping = boolean.NewTrue()
 	scheduleModel.AutoMappingUUID = &amSchedule.UUID
+	scheduleModel.TimeZone = amSchedule.TimeZone
+	scheduleModel.EnablePayload = amSchedule.EnablePayload
+	scheduleModel.MinPayload = amSchedule.MinPayload
+	scheduleModel.MaxPayload = amSchedule.MaxPayload
+	scheduleModel.DefaultPayload = amSchedule.DefaultPayload
 }
 
 func (d *GormDatabase) setScheduleStreamCloneModel(fnc *model.FlowNetworkClone, schedule *model.Schedule,

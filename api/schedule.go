@@ -16,6 +16,7 @@ type ScheduleDatabase interface {
 	ScheduleWrite(uuid string, body *model.ScheduleData, forceWrite bool) error
 	DeleteSchedule(uuid string) (bool, error)
 	SyncSchedules() error
+	SyncSchedule(uuid string) error
 }
 
 type ScheduleAPI struct {
@@ -78,5 +79,11 @@ func (a *ScheduleAPI) DeleteSchedule(ctx *gin.Context) {
 
 func (a *ScheduleAPI) SyncSchedules(ctx *gin.Context) {
 	err := a.DB.SyncSchedules()
+	ResponseHandler(model.Message{Message: "synced successfully"}, err, ctx)
+}
+
+func (a *ScheduleAPI) SyncSchedule(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	err := a.DB.SyncSchedule(uuid)
 	ResponseHandler(model.Message{Message: "synced successfully"}, err, ctx)
 }

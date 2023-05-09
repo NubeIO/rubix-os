@@ -273,22 +273,34 @@ func (d *GormDatabase) DeleteSchedule(uuid string) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SyncSchedules() error {
-	schedules, err := d.GetSchedules()
-	var firstErr error
+func (d *GormDatabase) SyncSchedule(uuid string) error {
+	schedule, err := d.GetSchedule(uuid)
 	if err != nil {
 		return err
 	}
+	schedules := append([]*model.Schedule{}, schedule)
+	return d.syncSchedules(schedules)
+}
+
+func (d *GormDatabase) SyncSchedules() error {
+	schedules, err := d.GetSchedules()
+	if err != nil {
+		return err
+	}
+	return d.syncSchedules(schedules)
+}
+
+func (d *GormDatabase) syncSchedules(schedules []*model.Schedule) error {
+	var firstErr error
 	uniqueAutoMappingFlowNetworkNames := GetUniqueAutoMappingScheduleFlowNetworkNames(schedules)
 	for _, fnName := range uniqueAutoMappingFlowNetworkNames {
-		err = d.CreateAutoMappingsSchedules(fnName, schedules)
+		err := d.CreateAutoMappingsSchedules(fnName, schedules)
 		if err != nil {
 			log.Error("Auto mapping error: ", err)
 		}
-	}
-
-	if err != nil {
-		return err
+		if firstErr == nil {
+			firstErr = err
+		}
 	}
 	return firstErr
 }

@@ -90,11 +90,17 @@ type AutoMappingPoint struct {
 }
 
 type AutoMappingSchedule struct {
-	Enable            bool   `json:"enable"`
-	AutoMappingEnable bool   `json:"auto_mapping_enable"`
-	UUID              string `json:"uuid"`
-	Name              string `json:"name"`
-	StreamUUID        string `json:"stream_uuid"`
-	ProducerUUID      string `json:"product_uuid"`
-	CreateSchedule    bool   `json:"create_schedule"`
+	Enable            bool    `json:"enable"`
+	AutoMappingEnable bool    `json:"auto_mapping_enable"`
+	UUID              string  `json:"uuid"`
+	Name              string  `json:"name"`
+	TimeZone          string  `json:"timezone"`
+	EnablePayload     bool    `json:"enable_payload"`
+	MinPayload        float64 `json:"min_payload"`
+	MaxPayload        float64 `json:"max_payload"`
+	Payload           float64 `json:"payload"`
+	DefaultPayload    float64 `json:"default_payload"`
+	StreamUUID        string  `json:"stream_uuid"`
+	ProducerUUID      string  `json:"product_uuid"`
+	CreateSchedule    bool    `json:"create_schedule"`
 }

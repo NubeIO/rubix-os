@@ -54,6 +54,11 @@ func (d *GormDatabase) createSchedulesAutoMappings(fnName string, schedules []*m
 				AutoMappingEnable: boolean.IsTrue(schedule.AutoMappingEnable),
 				UUID:              schedule.UUID,
 				Name:              schedule.Name,
+				TimeZone:          schedule.TimeZone,
+				EnablePayload:     schedule.EnablePayload,
+				MinPayload:        schedule.MinPayload,
+				MaxPayload:        schedule.MaxPayload,
+				DefaultPayload:    schedule.DefaultPayload,
 				CreateSchedule:    false,
 			}
 			amSchedules = append(amSchedules, amSchedule)
@@ -110,6 +115,11 @@ func (d *GormDatabase) createSchedulesAutoMappings(fnName string, schedules []*m
 			AutoMappingEnable: boolean.IsTrue(schedule.AutoMappingEnable),
 			UUID:              schedule.UUID,
 			Name:              schedule.Name,
+			TimeZone:          schedule.TimeZone,
+			EnablePayload:     schedule.EnablePayload,
+			MinPayload:        schedule.MinPayload,
+			MaxPayload:        schedule.MaxPayload,
+			DefaultPayload:    schedule.DefaultPayload,
 			StreamUUID:        streamUUIDMap,
 			ProducerUUID:      producerUUIDMap,
 			CreateSchedule:    true,
