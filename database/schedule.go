@@ -8,10 +8,10 @@ import (
 	"github.com/NubeIO/flow-framework/utils/deviceinfo"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strings"
-	"github.com/pkg/errors"
 )
 
 func (d *GormDatabase) GetSchedules() ([]*model.Schedule, error) {
@@ -54,22 +54,30 @@ func (d *GormDatabase) GetScheduleResult(uuid string) (*model.Schedule, error) {
 	return scheduleModel, nil
 }
 
-func (d *GormDatabase) GetSchedulesByArgs(args api.Args) ([]*model.Schedule, error) {
+func (d *GormDatabase) GetSchedulesByArgsTransaction(db *gorm.DB, args api.Args) ([]*model.Schedule, error) {
 	var scheduleModel []*model.Schedule
-	query := d.buildScheduleQuery(args)
+	query := d.buildScheduleQueryTransaction(db, args)
 	if err := query.Find(&scheduleModel).Error; err != nil {
 		return nil, err
 	}
 	return scheduleModel, nil
 }
 
-func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, error) {
+func (d *GormDatabase) GetSchedulesByArgs(args api.Args) ([]*model.Schedule, error) {
+	return d.GetSchedulesByArgsTransaction(d.DB, args)
+}
+
+func (d *GormDatabase) GetOneScheduleByArgsTransaction(db *gorm.DB, args api.Args) (*model.Schedule, error) {
 	var scheduleModel *model.Schedule
-	query := d.buildScheduleQuery(args)
+	query := d.buildScheduleQueryTransaction(db, args)
 	if err := query.First(&scheduleModel).Error; err != nil {
 		return nil, err
 	}
 	return scheduleModel, nil
+}
+
+func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, error) {
+	return d.GetOneScheduleByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) CreateScheduleTransaction(db *gorm.DB, body *model.Schedule) (*model.Schedule, error) {

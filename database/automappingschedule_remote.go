@@ -51,7 +51,7 @@ func (d *GormDatabase) cleanScheduleAutoMappedModels(tx *gorm.DB, autoMapping *i
 		edgeSchedules = append(edgeSchedules, schedule.UUID)
 	}
 
-	schedules, _ := d.GetSchedulesByArgs(api.Args{GlobalUUID: &autoMapping.GlobalUUID})
+	schedules, _ := d.GetSchedulesByArgsTransaction(tx, api.Args{GlobalUUID: &autoMapping.GlobalUUID})
 	for _, schedule := range schedules {
 		if boolean.IsTrue(schedule.CreatedFromAutoMapping) &&
 			schedule.AutoMappingUUID != nil && !nstring.ContainsString(edgeSchedules, *schedule.AutoMappingUUID) {
@@ -77,7 +77,7 @@ func (d *GormDatabase) createScheduleAutoMapping(tx *gorm.DB, amSchedule *interf
 		ScheduleUUID: amSchedule.UUID,
 		HasError:     true,
 	}
-	fnc, err := d.GetOneFlowNetworkCloneByArgs(api.Args{SourceUUID: nstring.New(fnUUID)})
+	fnc, err := d.GetOneFlowNetworkCloneByArgsTransaction(tx, api.Args{SourceUUID: nstring.New(fnUUID)})
 	if err != nil {
 		amRes.Error = err.Error()
 		return amRes
@@ -85,7 +85,7 @@ func (d *GormDatabase) createScheduleAutoMapping(tx *gorm.DB, amSchedule *interf
 
 	scheduleName := getScheduleAutoMappedStreamName(fnc.Name, amSchedule.Name)
 
-	schedule, err := d.GetOneScheduleByArgs(api.Args{Name: nstring.New(scheduleName)})
+	schedule, err := d.GetOneScheduleByArgsTransaction(tx, api.Args{Name: nstring.New(scheduleName)})
 	if schedule != nil {
 		if schedule.GlobalUUID != globalUUID {
 			amRes.Error = fmt.Sprintf("schedule.name %s already exists in fnc side with different global_uuid", schedule.Name)
@@ -96,7 +96,7 @@ func (d *GormDatabase) createScheduleAutoMapping(tx *gorm.DB, amSchedule *interf
 		}
 	}
 
-	schedule, _ = d.GetOneScheduleByArgs(api.Args{AutoMappingUUID: nstring.New(amSchedule.UUID), GlobalUUID: nstring.New(globalUUID)})
+	schedule, _ = d.GetOneScheduleByArgsTransaction(tx, api.Args{AutoMappingUUID: nstring.New(amSchedule.UUID), GlobalUUID: nstring.New(globalUUID)})
 	if schedule == nil {
 		if amSchedule.AutoMappingEnable {
 			schedule = &model.Schedule{}

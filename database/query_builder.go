@@ -512,7 +512,11 @@ func (d *GormDatabase) buildHistoryQuery(args api.Args) *gorm.DB {
 }
 
 func (d *GormDatabase) buildScheduleQuery(args api.Args) *gorm.DB {
-	query := d.DB
+	return d.buildScheduleQueryTransaction(d.DB, args)
+}
+
+func (d *GormDatabase) buildScheduleQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
 	}

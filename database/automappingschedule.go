@@ -234,8 +234,7 @@ func createScheduleAutoMappingStreamsTransaction(tx *gorm.DB, flowNetwork *model
 
 func (d *GormDatabase) createScheduleAutoMappingProducers(streamUUID string, schedule *model.Schedule) (string, error) {
 	tx := d.DB.Begin()
-
-	producer, _ := d.GetOneProducerByArgs(api.Args{StreamUUID: nils.NewString(streamUUID), ProducerThingUUID: nils.NewString(schedule.UUID)})
+	producer, _ := d.GetOneProducerByArgsTransaction(tx, api.Args{StreamUUID: nils.NewString(streamUUID), ProducerThingUUID: nils.NewString(schedule.UUID)})
 	if producer == nil {
 		if boolean.IsTrue(schedule.AutoMappingEnable) { // create stream only when auto_mapping is enabled
 			producer = &model.Producer{}
@@ -342,7 +341,7 @@ func (d *GormDatabase) createScheduleWriterClones(syncWriters []*interfaces.Sync
 	tx := d.DB.Begin()
 	for _, syncWriter := range syncWriters {
 		// it will restrict duplicate creation of writer_clone
-		wc, _ := d.GetOneWriterCloneByArgs(api.Args{ProducerUUID: &syncWriter.ProducerUUID, CreatedFromAutoMapping: boolean.NewTrue()})
+		wc, _ := d.GetOneWriterCloneByArgsTransaction(tx, api.Args{ProducerUUID: &syncWriter.ProducerUUID, CreatedFromAutoMapping: boolean.NewTrue()})
 		if wc == nil {
 			wc = &model.WriterClone{}
 			wc.UUID = nuuid.MakeTopicUUID(model.CommonNaming.StreamClone)
