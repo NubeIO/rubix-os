@@ -100,7 +100,7 @@ func (d *GormDatabase) createScheduleAutoMapping(tx *gorm.DB, amSchedule *interf
 	if schedule == nil {
 		if amSchedule.AutoMappingEnable {
 			schedule = &model.Schedule{}
-			schedule.Name = getTempAutoMappedName(scheduleName)
+			schedule.Name = scheduleName
 			d.setScheduleModel(fnc, amSchedule, schedule, globalUUID)
 			schedule, err = d.CreateScheduleTransaction(tx, schedule)
 			if err != nil {
@@ -114,7 +114,7 @@ func (d *GormDatabase) createScheduleAutoMapping(tx *gorm.DB, amSchedule *interf
 			}
 		}
 	} else {
-		schedule.Name = getTempAutoMappedName(scheduleName)
+		schedule.Name = scheduleName
 		d.setScheduleModel(fnc, amSchedule, schedule, globalUUID)
 		schedule, err = d.UpdateScheduleTransactionForAutoMapping(tx, schedule.UUID, schedule)
 		if err != nil {
@@ -182,63 +182,10 @@ func (d *GormDatabase) createScheduleAutoMapping(tx *gorm.DB, amSchedule *interf
 		Name:              amSchedule.Name,
 	})
 
-	amRes_ := d.swapScheduleMapperNames(tx, amSchedule, fnc.Name, scheduleName)
-	if amRes_ != nil {
-		return amRes_
-	}
-
 	return &interfaces.AutoMappingScheduleResponse{
 		HasError:    false,
 		SyncWriters: syncWriters,
 	}
-}
-
-func (d *GormDatabase) swapScheduleMapperNames(db *gorm.DB, amSchedule *interfaces.AutoMappingSchedule, fncName, scheduleName string) *interfaces.AutoMappingScheduleResponse {
-	if err := db.Model(&model.StreamClone{}).
-		Where("source_uuid = ?", amSchedule.StreamUUID).
-		Update("name", getScheduleAutoMappedStreamName(fncName, amSchedule.Name)).
-		Error; err != nil {
-		return &interfaces.AutoMappingScheduleResponse{
-			ScheduleUUID: amSchedule.UUID,
-			HasError:     true,
-			Error:        err.Error(),
-		}
-	}
-
-	if err := db.Model(&model.Schedule{}).
-		Where("auto_mapping_uuid = ?", amSchedule.UUID).
-		Update("name", scheduleName).
-		Error; err != nil {
-		return &interfaces.AutoMappingScheduleResponse{
-			ScheduleUUID: amSchedule.UUID,
-			HasError:     true,
-			Error:        err.Error(),
-		}
-	}
-
-	if err := db.Model(&model.Consumer{}).
-		Where("producer_thing_uuid = ? AND created_from_auto_mapping IS TRUE", amSchedule.UUID).
-		Update("name", amSchedule.Name).
-		Error; err != nil {
-		return &interfaces.AutoMappingScheduleResponse{
-			ScheduleUUID: amSchedule.UUID,
-			HasError:     true,
-			Error:        err.Error(),
-		}
-	}
-
-	writer := model.Writer{}
-	if err := db.Model(&writer).
-		Where("writer_thing_uuid = ? AND created_from_auto_mapping IS TRUE", amSchedule.UUID).
-		Update("writer_thing_name", amSchedule.Name).
-		Error; err != nil {
-		return &interfaces.AutoMappingScheduleResponse{
-			ScheduleUUID: amSchedule.UUID,
-			HasError:     true,
-			Error:        err.Error(),
-		}
-	}
-	return nil
 }
 
 func (d *GormDatabase) setScheduleModel(fnc *model.FlowNetworkClone, amSchedule *interfaces.AutoMappingSchedule, scheduleModel *model.Schedule, globalUUID string) {
@@ -260,7 +207,7 @@ func (d *GormDatabase) setScheduleModel(fnc *model.FlowNetworkClone, amSchedule 
 
 func (d *GormDatabase) setScheduleStreamCloneModel(fnc *model.FlowNetworkClone, schedule *model.Schedule,
 	amSchedule *interfaces.AutoMappingSchedule, streamClone *model.StreamClone) {
-	streamClone.Name = getTempAutoMappedName(getScheduleAutoMappedStreamName(fnc.Name, amSchedule.Name))
+	streamClone.Name = getScheduleAutoMappedStreamName(fnc.Name, amSchedule.Name)
 	streamClone.Enable = boolean.New(amSchedule.Enable && amSchedule.AutoMappingEnable)
 	streamClone.SourceUUID = amSchedule.StreamUUID
 	streamClone.FlowNetworkCloneUUID = fnc.UUID
@@ -269,7 +216,7 @@ func (d *GormDatabase) setScheduleStreamCloneModel(fnc *model.FlowNetworkClone, 
 }
 
 func (d *GormDatabase) setScheduleConsumerModel(amSchedule *interfaces.AutoMappingSchedule, stcUUID, scheduleName string, consumerModel *model.Consumer) {
-	consumerModel.Name = getTempAutoMappedName(scheduleName)
+	consumerModel.Name = scheduleName
 	consumerModel.Enable = boolean.New(amSchedule.Enable && amSchedule.AutoMappingEnable)
 	consumerModel.StreamCloneUUID = stcUUID
 	consumerModel.ProducerUUID = amSchedule.ProducerUUID

@@ -223,22 +223,6 @@ func createScheduleAutoMappingStreamsTransaction(tx *gorm.DB, flowNetwork *model
 			return "", err
 		}
 	}
-
-	// swap back the names
-	if err := tx.Model(&model.Stream{}).
-		Where("auto_mapping_schedule_uuid = ? AND created_from_auto_mapping IS TRUE", schedule.UUID).
-		Update("name", streamName).
-		Error; err != nil {
-		errMsg := fmt.Sprintf("update stream: %s", err.Error())
-		amRes := interfaces.AutoMappingScheduleResponse{
-			ScheduleUUID: schedule.UUID,
-			HasError:     true,
-			Error:        errMsg,
-		}
-		updateScheduleCascadeConnectionError(tx, amRes)
-		return "", err
-	}
-
 	return stream.UUID, nil
 }
 
@@ -261,15 +245,6 @@ func (d *GormDatabase) createScheduleAutoMappingProducers(streamUUID string, sch
 			tx.Rollback()
 			return "", err
 		}
-	}
-
-	// swap back the names
-	if err := tx.Model(&model.Producer{}).
-		Where("producer_thing_uuid = ? AND created_from_auto_mapping IS TRUE", schedule.UUID).
-		Update("name", schedule.Name).
-		Error; err != nil {
-		tx.Rollback()
-		return "", err
 	}
 	tx.Commit()
 	return producer.UUID, nil
@@ -403,14 +378,14 @@ func updateScheduleCascadeConnectionError(tx *gorm.DB, amsRes interfaces.AutoMap
 
 func setScheduleStreamModel(flowNetwork *model.FlowNetwork, schedule *model.Schedule, streamModel *model.Stream) {
 	streamModel.FlowNetworks = []*model.FlowNetwork{flowNetwork}
-	streamModel.Name = getTempAutoMappedName(getScheduleAutoMappedStreamName(flowNetwork.Name, schedule.Name))
+	streamModel.Name = getScheduleAutoMappedStreamName(flowNetwork.Name, schedule.Name)
 	streamModel.Enable = boolean.New(boolean.IsTrue(schedule.Enable) && boolean.IsTrue(schedule.AutoMappingEnable))
 	streamModel.CreatedFromAutoMapping = boolean.NewTrue()
 	streamModel.AutoMappingScheduleUUID = nstring.New(schedule.UUID)
 }
 
 func (d *GormDatabase) setScheduleProducerModel(streamUUID string, schedule *model.Schedule, producerModel *model.Producer) {
-	producerModel.Name = getTempAutoMappedName(schedule.Name)
+	producerModel.Name = schedule.Name
 	producerModel.Enable = boolean.New(boolean.IsTrue(schedule.Enable) && boolean.IsTrue(schedule.AutoMappingEnable))
 	producerModel.StreamUUID = streamUUID
 	producerModel.ProducerThingUUID = schedule.UUID
