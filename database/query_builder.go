@@ -124,6 +124,9 @@ func buildStreamQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
 	if args.AutoMappingDeviceUUID != nil {
 		query = query.Where("auto_mapping_device_uuid = ?", *args.AutoMappingDeviceUUID)
 	}
+	if args.AutoMappingScheduleUUID != nil {
+		query = query.Where("auto_mapping_schedule_uuid = ?", *args.AutoMappingScheduleUUID)
+	}
 	if args.Enable != nil {
 		if *args.Enable {
 			query = query.Where("enable IS TRUE")
@@ -509,9 +512,19 @@ func (d *GormDatabase) buildHistoryQuery(args api.Args) *gorm.DB {
 }
 
 func (d *GormDatabase) buildScheduleQuery(args api.Args) *gorm.DB {
-	query := d.DB
+	return d.buildScheduleQueryTransaction(d.DB, args)
+}
+
+func (d *GormDatabase) buildScheduleQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
+	query := db
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
+	}
+	if args.GlobalUUID != nil {
+		query = query.Where("global_uuid = ?", *args.GlobalUUID)
+	}
+	if args.AutoMappingUUID != nil {
+		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
 	}
 	return query
 }

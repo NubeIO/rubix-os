@@ -226,14 +226,13 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 
 func (d *GormDatabase) clearStreamsAndProducers() {
 	// delete those which is not deleted when we delete network, device & points
-	d.DB.Where("created_from_auto_mapping IS TRUE AND auto_mapping_network_uuid NOT IN (?)",
-		d.DB.Model(&model.Network{}).Select("uuid")).
+	d.DB.Where("created_from_auto_mapping IS TRUE AND IFNULL(auto_mapping_schedule_uuid,'') = '' AND "+
+		"auto_mapping_network_uuid NOT IN (?)", d.DB.Model(&model.Network{}).Select("uuid")).
 		Delete(&model.Stream{})
-	d.DB.Where("created_from_auto_mapping IS TRUE AND auto_mapping_device_uuid NOT IN (?)",
-		d.DB.Model(&model.Device{}).Select("uuid")).
-		Delete(&model.Stream{})
-	d.DB.Where("created_from_auto_mapping IS TRUE AND producer_thing_uuid NOT IN (?)",
-		d.DB.Model(&model.Point{}).Select("uuid")).
+	d.DB.Where("created_from_auto_mapping IS TRUE AND IFNULL(auto_mapping_schedule_uuid,'') = '' AND "+
+		"auto_mapping_device_uuid NOT IN (?)", d.DB.Model(&model.Device{}).Select("uuid")).Delete(&model.Stream{})
+	d.DB.Where("created_from_auto_mapping IS TRUE AND producer_thing_class = ? AND producer_thing_uuid NOT IN (?)",
+		model.ThingClass.Point, d.DB.Model(&model.Point{}).Select("uuid")).
 		Delete(&model.Producer{})
 }
 
@@ -526,13 +525,13 @@ func (d *GormDatabase) createWriterClones(syncWriters []*interfaces.SyncWriter) 
 			d.setWriterCloneModel(syncWriter, wc)
 			if err := tx.Create(&wc).Error; err != nil {
 				tx.Rollback()
-				return &syncWriter.PointUUID, err
+				return &syncWriter.UUID, err
 			}
 		} else {
 			d.setWriterCloneModel(syncWriter, wc)
 			if err := tx.Model(&wc).Updates(&wc).Error; err != nil {
 				tx.Rollback()
-				return &syncWriter.PointUUID, err
+				return &syncWriter.UUID, err
 			}
 		}
 	}
@@ -630,10 +629,10 @@ func (d *GormDatabase) setProducerModel(streamUUID string, point *model.Point, p
 }
 
 func (d *GormDatabase) setWriterCloneModel(syncWriter *interfaces.SyncWriter, writerClone *model.WriterClone) {
-	writerClone.WriterThingName = syncWriter.PointName
+	writerClone.WriterThingName = syncWriter.Name
 	writerClone.WriterThingClass = "point"
 	writerClone.FlowFrameworkUUID = syncWriter.FlowFrameworkUUID
-	writerClone.WriterThingUUID = syncWriter.PointUUID
+	writerClone.WriterThingUUID = syncWriter.UUID
 	writerClone.ProducerUUID = syncWriter.ProducerUUID
 	writerClone.SourceUUID = syncWriter.WriterUUID
 	writerClone.CreatedFromAutoMapping = boolean.NewTrue()

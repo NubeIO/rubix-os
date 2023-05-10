@@ -124,6 +124,14 @@ func getAutoMappedStreamName(flowNetworkCloneName, networkName, deviceName strin
 	return fmt.Sprintf("%s:%s:%s", flowNetworkCloneName, networkName, deviceName)
 }
 
+func getScheduleAutoMappedStreamName(flowNetworkCloneName, scheduleName string) string {
+	return fmt.Sprintf("%s:%s", flowNetworkCloneName, scheduleName)
+}
+
+func getAutoMappedScheduleName(flowNetworkCloneName, scheduleName string) string {
+	return fmt.Sprintf("%s_%s", flowNetworkCloneName, scheduleName)
+}
+
 func getTempAutoMappedName(name string) string {
 	return fmt.Sprintf("__temp_mapper__%s", name)
 }

@@ -114,6 +114,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	autoMappingHandler := api.AutoMappingAPI{
 		DB: db,
 	}
+	autoMappingScheduleHandler := api.AutoMappingScheduleAPI{
+		DB: db,
+	}
 	syncProducerHandler := api.SyncProducerAPI{
 		DB: db,
 	}
@@ -431,6 +434,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 			schRoutes.PATCH("/:uuid", schHandler.UpdateSchedule)
 			schRoutes.PATCH("/write/:uuid", schHandler.ScheduleWrite)
 			schRoutes.DELETE("/:uuid", schHandler.DeleteSchedule)
+			schRoutes.GET("/sync", schHandler.SyncSchedules)
+			schRoutes.GET("/sync/:uuid", schHandler.SyncSchedule)
 		}
 
 		thingRoutes := apiRoutes.Group("/things")
@@ -485,6 +490,11 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		autoMappingRoutes := apiRoutes.Group("/auto_mappings")
 		{
 			autoMappingRoutes.POST("", autoMappingHandler.CreateAutoMapping)
+		}
+
+		scheduleAutoMappingRoutes := apiRoutes.Group("/auto_mapping_schedules")
+		{
+			scheduleAutoMappingRoutes.POST("", autoMappingScheduleHandler.CreateAutoMappingSchedule)
 		}
 	}
 	return engine

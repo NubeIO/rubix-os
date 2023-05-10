@@ -46,6 +46,15 @@ func (d *GormDatabase) SyncWriter(body *model.SyncWriter) (*model.WriterClone, e
 			}
 			_, _, _, _, _ = d.PointWrite(writerClone.WriterThingUUID, &pointModel, nil, true)
 		}
+	} else if writerClone.WriterThingClass == model.ThingClass.Schedule {
+		schedule, _ := d.GetSchedule(writerClone.WriterThingUUID)
+		if schedule != nil {
+			scheduleDataModel := new(model.ScheduleData)
+			err := json.Unmarshal(schedule.Schedule, &scheduleDataModel)
+			if err != nil {
+				_ = d.ScheduleWrite(writerClone.WriterThingUUID, scheduleDataModel, true)
+			}
+		}
 	}
 	return &writerClone, nil
 }
@@ -64,7 +73,7 @@ func (d *GormDatabase) SyncCOV(writerUUID string, body *model.SyncCOV) error {
 		_, _, _, _, err = d.PointWrite(uuid, &pointModel, nil, false)
 		return err
 	} else {
-		return d.ScheduleWrite(writer.WriterThingUUID, body.Schedule)
+		return d.ScheduleWrite(writer.WriterThingUUID, body.Schedule, false)
 	}
 }
 
@@ -96,7 +105,7 @@ func (d *GormDatabase) SyncWriterWriteAction(sourceUUID string, body *model.Sync
 		}
 		// TODO: change this section by below commented section
 		producer, _ := d.GetProducer(writerClone.ProducerUUID, api.Args{})
-		err = d.ScheduleWrite(producer.ProducerThingUUID, body.Schedule)
+		err = d.ScheduleWrite(producer.ProducerThingUUID, body.Schedule, false)
 		// Currently, writerClone.WriterThingUUID has not valid `WriterThingUUID` on old deployments
 		// err = d.ScheduleWrite(writerClone.WriterThingUUID, body.Schedule)
 		return err

@@ -1,6 +1,9 @@
 package interfaces
 
-import "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+import (
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"gorm.io/datatypes"
+)
 
 type Level int
 
@@ -30,19 +33,27 @@ type AutoMappingResponse struct {
 	SyncWriters []*SyncWriter `json:"sync_writers"`
 }
 
+type AutoMappingScheduleResponse struct {
+	ScheduleUUID string        `json:"schedule_uuid"`
+	HasError     bool          `json:"has_error"`
+	Error        string        `json:"error"`
+	SyncWriters  []*SyncWriter `json:"sync_writers"`
+}
+
 type SyncWriter struct {
 	ProducerUUID      string
 	WriterUUID        string
 	FlowFrameworkUUID string
-	PointUUID         string
-	PointName         string
+	UUID              string
+	Name              string
 }
 
 type AutoMapping struct {
-	GlobalUUID      string                `json:"global_uuid"`
-	FlowNetworkUUID string                `json:"flow_network_uuid"`
-	Level           Level                 `json:"level"`
-	Networks        []*AutoMappingNetwork `json:"networks"`
+	GlobalUUID      string                 `json:"global_uuid"`
+	FlowNetworkUUID string                 `json:"flow_network_uuid"`
+	Level           Level                  `json:"level"`
+	Networks        []*AutoMappingNetwork  `json:"networks"`
+	Schedules       []*AutoMappingSchedule `json:"schedules"`
 }
 
 type AutoMappingNetwork struct {
@@ -77,4 +88,21 @@ type AutoMappingPoint struct {
 	MetaTags          []*model.PointMetaTag `json:"meta_tags"`
 	ProducerUUID      string                `json:"product_uuid"`
 	Priority          model.Priority        `json:"priority"`
+}
+
+type AutoMappingSchedule struct {
+	Enable            bool           `json:"enable"`
+	AutoMappingEnable bool           `json:"auto_mapping_enable"`
+	UUID              string         `json:"uuid"`
+	Name              string         `json:"name"`
+	TimeZone          string         `json:"timezone"`
+	EnablePayload     bool           `json:"enable_payload"`
+	MinPayload        float64        `json:"min_payload"`
+	MaxPayload        float64        `json:"max_payload"`
+	Payload           float64        `json:"payload"`
+	DefaultPayload    float64        `json:"default_payload"`
+	StreamUUID        string         `json:"stream_uuid"`
+	ProducerUUID      string         `json:"product_uuid"`
+	CreateSchedule    bool           `json:"create_schedule"`
+	Schedule          datatypes.JSON `json:"schedule"`
 }

@@ -96,14 +96,17 @@ func (d *GormDatabase) cleanAutoMappedModels(tx *gorm.DB, autoMapping *interface
 
 func (d *GormDatabase) clearStreamClonesAndConsumers(tx *gorm.DB) {
 	// delete those which is not deleted when we delete network, device & points
-	tx.Where("created_from_auto_mapping IS TRUE AND auto_mapping_network_uuid NOT IN (?)",
-		tx.Where("created_from_auto_mapping IS TRUE").Model(&model.Network{}).Select("uuid")).
+	tx.Where("created_from_auto_mapping IS TRUE AND IFNULL(auto_mapping_schedule_uuid,'') = '' AND "+
+		"auto_mapping_network_uuid NOT IN (?)", tx.Where("created_from_auto_mapping IS TRUE").
+		Model(&model.Network{}).Select("uuid")).
 		Delete(&model.StreamClone{})
-	tx.Where("created_from_auto_mapping IS TRUE AND auto_mapping_device_uuid NOT IN (?)",
-		tx.Where("created_from_auto_mapping IS TRUE").Model(&model.Device{}).Select("uuid")).
+	tx.Where("created_from_auto_mapping IS TRUE AND IFNULL(auto_mapping_schedule_uuid,'') = '' AND "+
+		"auto_mapping_device_uuid NOT IN (?)", tx.Where("created_from_auto_mapping IS TRUE").
+		Model(&model.Device{}).Select("uuid")).
 		Delete(&model.StreamClone{})
-	tx.Where("created_from_auto_mapping IS TRUE AND producer_thing_uuid NOT IN (?)",
-		tx.Where("created_from_auto_mapping IS TRUE").Model(&model.Point{}).Select("auto_mapping_uuid")).
+	tx.Where("created_from_auto_mapping IS TRUE AND producer_thing_class = ? AND producer_thing_uuid NOT IN (?)",
+		model.ThingClass.Point, tx.Where("created_from_auto_mapping IS TRUE").Model(&model.Point{}).
+			Select("auto_mapping_uuid")).
 		Delete(&model.Consumer{})
 }
 
@@ -285,8 +288,8 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 				ProducerUUID:      amPoint.ProducerUUID,
 				WriterUUID:        writer.UUID,
 				FlowFrameworkUUID: fnc.SourceUUID,
-				PointUUID:         amPoint.UUID,
-				PointName:         amPoint.Name,
+				UUID:              amPoint.UUID,
+				Name:              amPoint.Name,
 			})
 		}
 	}
