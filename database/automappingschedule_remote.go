@@ -255,6 +255,7 @@ func (d *GormDatabase) setScheduleModel(fnc *model.FlowNetworkClone, amSchedule 
 	scheduleModel.MinPayload = amSchedule.MinPayload
 	scheduleModel.MaxPayload = amSchedule.MaxPayload
 	scheduleModel.DefaultPayload = amSchedule.DefaultPayload
+	scheduleModel.Schedule = amSchedule.Schedule
 }
 
 func (d *GormDatabase) setScheduleStreamCloneModel(fnc *model.FlowNetworkClone, schedule *model.Schedule,

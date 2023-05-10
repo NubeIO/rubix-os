@@ -172,6 +172,7 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	_ = json.Unmarshal(body.Schedule, &scheduleData)
 	_ = d.ScheduleWrite(uuid, scheduleData, false)
 
+	// restrict to update it for mapping, we only sync values for the mapped values
 	if boolean.IsFalse(scheduleModel.CreatedFromAutoMapping) {
 		query = d.DB.Model(&scheduleModel).Select("*").Omit("IsActive", "ActiveWeekly", "ActiveException", "ActiveEvent", "Payload", "PeriodStart", "PeriodStop", "NextStart", "NextStop", "PeriodStartString", "PeriodStopString", "NextStartString", "NextStopString", "CreatedAt").Updates(&body)
 		// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
@@ -208,14 +209,13 @@ func (d *GormDatabase) UpdateScheduleAllProps(uuid string, body *model.Schedule)
 	_ = json.Unmarshal(body.Schedule, &scheduleData)
 	_ = d.ScheduleWrite(uuid, scheduleData, false)
 
-	if boolean.IsFalse(scheduleModel.CreatedFromAutoMapping) {
-		query = d.DB.Model(&scheduleModel).Select("*").Updates(&body)
-		// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name, nil, "", nil)
+	// don't restrict to update it, coz this doesn't get called from the API
+	query = d.DB.Model(&scheduleModel).Select("*").Updates(&body)
+	// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
+	if query.Error != nil {
+		return nil, query.Error
 	}
+	d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name, nil, "", nil)
 	return scheduleModel, nil
 }
 

@@ -123,6 +123,7 @@ func (d *GormDatabase) createSchedulesAutoMappings(fnName string, schedules []*m
 			StreamUUID:        streamUUIDMap,
 			ProducerUUID:      producerUUIDMap,
 			CreateSchedule:    true,
+			Schedule:          schedule.Schedule,
 		}
 		amSchedules = append(amSchedules, amSchedule)
 	}
@@ -224,7 +225,6 @@ func createScheduleAutoMappingStreamsTransaction(tx *gorm.DB, flowNetwork *model
 	}
 
 	// swap back the names
-
 	if err := tx.Model(&model.Stream{}).
 		Where("auto_mapping_schedule_uuid = ? AND created_from_auto_mapping IS TRUE", schedule.UUID).
 		Update("name", streamName).
