@@ -28,6 +28,6 @@ func RegisterMQTTBus(enableDebug bool) {
 	// TODO this needs to be removed as its for a plugin, the plugin needs to register the topics it wants the main framework to subscribe to, also unsubscribe when the plugin is disabled
 	c.Subscribe("+/+/+/+/+/+/rubix/bacnet_server/points/+/#", mqttclient.AtMostOnce, handle) // bacnet-server
 	c.Subscribe("+/+/+/+/+/+/rubix/bacnet_master/points/+/#", mqttclient.AtMostOnce, handle) // bacnet-bserver
-	c.Subscribe("application/+/device/+/event/up", mqttclient.AtMostOnce, handle)            // lorawan
+	c.Subscribe("application/+/device/+/event/+", mqttclient.AtMostOnce, handle)             // lorawan
 	c.Subscribe("bacnet/program/#", mqttclient.AtMostOnce, handle)                           // bacnet-server
 }

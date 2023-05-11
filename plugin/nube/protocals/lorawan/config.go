@@ -4,12 +4,10 @@ type Config struct {
 	CSAddress            string  `yaml:"csaddress"`
 	CSPort               int     `yaml:"csport"`
 	CSToken              string  `yaml:"cstoken"`
-	CSUsername           string  `yaml:"csusername"`
-	CSPassword           string  `yaml:"cspassword"`
+	CSTokenFilePath      string  `yaml:"cstokenfilepath"`
 	DeviceLimit          int     `yaml:"devicelimit"`
 	SyncPeriodMins       float32 `yaml:"syncperiodminutes"`
 	ReconnectTimeoutSecs int     `yaml:"reconnecttimeoutseconds"`
-	LogLevel             string  `yaml:"log_level"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
@@ -17,12 +15,10 @@ func (inst *Instance) DefaultConfig() interface{} {
 		CSAddress:            "0.0.0.0",
 		CSPort:               8080,
 		CSToken:              "",
-		CSUsername:           "",
-		CSPassword:           "",
+		CSTokenFilePath:      "/data/auth/chirpstack.txt",
 		DeviceLimit:          200,
 		SyncPeriodMins:       1,
 		ReconnectTimeoutSecs: 10,
-		LogLevel:             "ERROR", // DEBUG or ERROR
 	}
 }
 

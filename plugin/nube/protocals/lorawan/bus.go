@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/utils/nuuid"
@@ -10,23 +11,32 @@ import (
 	"github.com/mustafaturan/bus/v3"
 )
 
-func (inst *Instance) BusServ() {
+var csBusKey string = ""
+
+func (inst *Instance) busServ() {
 	handlerMQTT := bus.Handler{
-		Handle: func(ctx context.Context, e bus.Event) {
-			go func() {
-				if !inst.csConnected {
-					return
-				}
-				p, _ := e.Data.(mqtt.Message)
-				if !checkMqttTopicUplink(p.Topic()) {
-					return
-				}
-				inst.handleMqttUplink(p)
-			}()
+		Handle: func(_ context.Context, e bus.Event) {
+			if !inst.csConnected {
+				return
+			}
+			p, _ := e.Data.(mqtt.Message)
+			if !checkMqttTopicCS(p.Topic()) {
+				return
+			}
+			inst.handleMqttEvent(p)
 		},
 		Matcher: eventbus.MQTTUpdated,
 	}
 	u, _ := nuuid.MakeUUID()
-	key := fmt.Sprintf("key_%s", u)
-	eventbus.GetBus().RegisterHandler(key, handlerMQTT)
+	csBusKey = fmt.Sprintf("key_%s", u)
+	avoidErrorsOnStartActive = true
+	eventbus.GetBus().RegisterHandler(csBusKey, handlerMQTT)
+	go func() {
+		time.Sleep(5 * time.Second)
+		avoidErrorsOnStartActive = false
+	}()
+}
+
+func (inst *Instance) busDisable() {
+	eventbus.GetBus().DeregisterHandler(csBusKey)
 }

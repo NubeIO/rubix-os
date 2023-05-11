@@ -19,6 +19,14 @@ const (
 	DevicesURL     = "/devices"
 	PointsURL      = "/points"
 	PointsWriteURL = "/points/write/:uuid"
+
+	JsonSchemaNetwork = "/schema/json/network"
+	JsonSchemaDevice  = "/schema/json/device"
+	JsonSchemaPoint   = "/schema/json/point"
+
+	SchemaLegacyNetwork = "/schema/network"
+	SchemaLegacyDevice  = "/schema/device"
+	SchemaLegacyPoint   = "/schema/point"
 )
 
 func GetBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {

@@ -3,12 +3,12 @@
 ### Scope
 
 A service to sync Chirpstack data to FF devices and points.
-
-An Automatic service that continually syncs without any user input required to CRUD devices or points.
+Automatically syncs devices and points from Chirpstack.
+Can also be used the CRUD devices.
 
 ### How it works
 
-1. Login to Chirpstack (CS)
+1. Connect to Chirpstack
 2. Request all devices
 3. _Create_ or _Delete_ devices from FF to match CS device list
 4. Subscribe to MQTT CS uplink topic

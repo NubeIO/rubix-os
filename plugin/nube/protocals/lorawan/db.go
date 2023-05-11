@@ -3,22 +3,15 @@ package main
 import (
 	"errors"
 	"fmt"
+
 	"github.com/NubeIO/flow-framework/utils/integer"
 
 	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
 	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
-
-func (inst *Instance) csConvertDevice(dev *model.Device, csDev *csmodel.Device) {
-	dev.NetworkUUID = inst.networkUUID
-	dev.Name = csDev.Name
-	dev.CommonDescription.Description = csDev.Description
-	dev.CommonDevice.AddressUUID = &csDev.DevEUI
-}
 
 func (inst *Instance) getNetwork() (network *model.Network, err error) {
 	net, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
@@ -34,7 +27,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		return nil, err
 	}
 	if len(nets) > 0 {
-		errMsg := "lorawan: only max one network is allowed with lora"
+		errMsg := "lorawan: only max one network is allowed"
 		log.Error(errMsg)
 		return nil, errors.New(errMsg)
 	}
@@ -46,23 +39,16 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 	return body, nil
 }
 
-func (inst *Instance) createDeviceFromCSDevice(csDev *csmodel.Device) (device *model.Device, err error) {
-	newDev := new(model.Device)
-	inst.csConvertDevice(newDev, csDev)
-	newDev.Enable = boolean.NewTrue()
-	_, err = inst.db.CreateDevice(newDev)
+func (inst *Instance) createDevice(device *model.Device) error {
+	device.Enable = boolean.NewTrue()
+	device, err := inst.db.CreateDevice(device)
 	if err != nil {
-		log.Error("lorawan: Error adding new device: ", err)
-		log.Warn("lorawan: Trying with new name: ", csDev.DevEUI)
-		newDev.Name = fmt.Sprintf("%s_%s", csDev.Name, csDev.DevEUI)
-		_, err = inst.db.CreateDevice(newDev)
-		if err != nil {
-			log.Error("lorawan: Error adding new device: ", err)
-			return nil, err
-		}
+		log.Error("lorawan: error adding new device: ", err)
+		log.Warn("lorawan: possible DB read error: ", err)
+	} else {
+		log.Info("lorawan: added device ", *device.AddressUUID)
 	}
-	log.Info("lorawan: Added device ", csDev.DevEUI)
-	return newDev, nil
+	return err
 }
 
 // createPointAddressUUID combines name and deviceEUI to form unique string to search

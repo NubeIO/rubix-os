@@ -59,9 +59,9 @@ function buildPlugin() {
   echo -e "${DEFAULT}BUILDING $1..."
   go build -buildmode=plugin -o $1.so $2/*.go && cp $1.so $pluginDir
   if [ $? -eq 0 ]; then
-    echo -e "${GREEN}BUILD ${DEFAULT}$1"
+    echo -e "${GREEN}BUILT ${DEFAULT}$1"
   else
-    echo -e "${RED}ERROR BUILD ${DEFAULT}$1"
+    echo -e "${RED}ERROR BUILDING ${DEFAULT}$1"
     BUILD_ERROR=true
   fi
 }
@@ -146,11 +146,14 @@ fi
 popd >/dev/null
 
 if [ ${BUILD_ONLY} == true ]; then
-  exit 0
+  echo -e "${DEFAULT}BUILDING app"
+  go build app.go
+  echo -e "${GREEN}BUILT ${DEFAULT}app"
+else
+    if [ ${PRODUCTION} == true ]; then
+      go run app.go -g /data/flow-framework -d data --prod
+    else
+      go run app.go --auth=false
+    fi
 fi
 
-if [ ${PRODUCTION} == true ]; then
-  go run app.go -g /data/flow-framework -d data --prod
-else
-  go run app.go --auth=false
-fi

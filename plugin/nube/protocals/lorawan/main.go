@@ -28,8 +28,6 @@ const transportType = "ip" // serial, ip
 type Instance struct {
 	config      *Config
 	enabled     bool
-	running     bool
-	fault       bool
 	basePath    string
 	db          dbhandler.Handler
 	store       cachestore.Handler
@@ -38,7 +36,7 @@ type Instance struct {
 	networkUUID string
 	ctx         context.Context
 	cancel      func()
-	REST        csrest.ChirpClient
+	chirpStack  csrest.ChirpClient
 	csConnected bool
 	deviceEUIs  []string
 }

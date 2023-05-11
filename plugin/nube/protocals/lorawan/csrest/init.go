@@ -2,6 +2,10 @@ package csrest
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"strings"
 
 	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/go-resty/resty/v2"
@@ -11,6 +15,9 @@ import (
 type ChirpClient struct {
 	client      *resty.Client
 	ClientToken string
+	csURL       *url.URL
+	proxy       *httputil.ReverseProxy
+	basePath    string
 }
 
 type CSApplications struct {
@@ -19,52 +26,34 @@ type CSApplications struct {
 	} `json:"result"`
 }
 
-type CSCredentials struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type CSLoginToken struct {
-	Token string `json:"jwt"`
-}
-
 var csApplications CSApplications
 
+const CsURLPrefix = "/cs"
+
 // InitRest Set constant CS REST params
-func InitRest(address string, port int) ChirpClient {
+func InitRest(address string, port int, basePath string) ChirpClient {
+
 	client := resty.New()
+	chirpClient := ChirpClient{}
+	chirpClient.csURL, _ = url.Parse(fmt.Sprintf("http://%s:%d/api", address, port))
+
 	client.SetDebug(false)
-	url := fmt.Sprintf("http://%s:%d/api", address, port)
-	client.SetBaseURL(url)
+	client.SetBaseURL(chirpClient.csURL.String())
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Content-Type", "application/json")
-	return ChirpClient{client: client}
+	chirpClient.client = client
+	chirpClient.basePath = basePath
+
+	chirpClient.proxy = httputil.NewSingleHostReverseProxy(chirpClient.csURL)
+	chirpClient.proxy.Director = chirpClient.proxyDirector
+
+	return chirpClient
 }
 
 // SetToken set the REST auth token
 func (inst *ChirpClient) SetToken(token string) {
 	inst.ClientToken = token
 	inst.client.SetHeader("Grpc-Metadata-Authorization", token)
-}
-
-// Login login to CS with username and password to get token if not provided in config
-func (inst *ChirpClient) Login(user string, pass string) error {
-	token := CSLoginToken{}
-	csURLConnect := "/internal/login"
-	resp, err := inst.client.R().
-		SetBody(CSCredentials{
-			Email:    user,
-			Password: pass,
-		}).
-		SetResult(&token).
-		Post(csURLConnect)
-	err = checkResponse(resp, err)
-	if err != nil {
-		log.Warn("lorawan: Login error: ", err)
-	} else {
-		inst.SetToken(token.Token)
-	}
-	return err
 }
 
 // Connect test CS connection with API token
@@ -79,4 +68,10 @@ func (inst *ChirpClient) ConnectTest() error {
 		log.Warn("lorawan: Connection error: ", err)
 	}
 	return err
+}
+
+func (inst *ChirpClient) proxyDirector(req *http.Request) {
+	req.URL.Scheme = inst.csURL.Scheme
+	req.URL.Host = inst.csURL.Host
+	req.URL.Path = inst.csURL.Path + strings.TrimPrefix(req.URL.Path, inst.basePath+CsURLPrefix)
 }

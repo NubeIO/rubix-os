@@ -3,18 +3,23 @@ package csrest
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
-	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/NubeIO/flow-framework/nresty"
+	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
 )
 
 var limit = "200"
 
-const orgID = "1"
+func (inst *ChirpClient) Proxy(ctx *gin.Context) {
+	ctx.Request.Header.Del("Authorization")
+	ctx.Request.Header.Set("Grpc-Metadata-Authorization", inst.ClientToken)
+	inst.proxy.ServeHTTP(ctx.Writer, ctx.Request)
+}
 
 func (inst *ChirpClient) SetDeviceLimit(newLimit int) {
 	limit = strconv.Itoa(newLimit)
@@ -38,30 +43,6 @@ func IsCSConnectionError(err error) bool {
 		strings.Contains(err.Error(), "connection refused") ||
 		strings.Contains(err.Error(), "no route to host") ||
 		strings.Contains(err.Error(), "501 Not Implemented"))
-}
-
-// GetOrganizations get all
-func (inst *ChirpClient) GetOrganizations() (*Organizations, error) {
-	q := fmt.Sprintf("/organizations?limit=%s", limit)
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(Organizations{}).
-		Get(q))
-	if err != nil {
-		return nil, err
-	}
-	return resp.Result().(*Organizations), nil
-}
-
-// GetGateways get all
-func (inst *ChirpClient) GetGateways() (*Gateways, error) {
-	q := fmt.Sprintf("/gateways?limit=%s", limit)
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(Gateways{}).
-		Get(q))
-	if err != nil {
-		return nil, err
-	}
-	return resp.Result().(*Gateways), nil
 }
 
 // GetApplications get all
@@ -88,37 +69,13 @@ func (inst *ChirpClient) GetDeviceProfiles() (*DeviceProfiles, error) {
 	return resp.Result().(*DeviceProfiles), nil
 }
 
-// GetServiceProfiles get all
-func (inst *ChirpClient) GetServiceProfiles() (*ServiceProfiles, error) {
-	q := fmt.Sprintf("/service-profiles?limit=%s&organizationID=%s", limit, orgID)
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(ServiceProfiles{}).
-		Get(q))
-	if err != nil {
-		return nil, err
-	}
-	return resp.Result().(*ServiceProfiles), nil
-}
-
-// GetGatewayProfiles get all
-func (inst *ChirpClient) GetGatewayProfiles() (*GatewayProfiles, error) {
-	q := fmt.Sprintf("/gateway-profiles?limit=%s&organizationID=%s", limit, orgID)
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(GatewayProfiles{}).
-		Get(q))
-	if err != nil {
-		return nil, err
-	}
-	return resp.Result().(*GatewayProfiles), nil
-}
-
 // GetDevices all
-func (inst *ChirpClient) GetDevices() (*csmodel.Devices, error) {
-	var allDevices csmodel.Devices
+func (inst *ChirpClient) GetDevices() (*Devices, error) {
+	var allDevices Devices
 	for _, application := range csApplications.Result {
 		q := fmt.Sprintf("/devices?limit=%s&applicationID=%s", limit, application.ID)
 		resp, err := nresty.FormatRestyResponse(inst.client.R().
-			SetResult(csmodel.Devices{}).
+			SetResult(Devices{}).
 			Get(q))
 		err = checkResponse(resp, err)
 		if err != nil {
@@ -128,99 +85,95 @@ func (inst *ChirpClient) GetDevices() (*csmodel.Devices, error) {
 		if resp.Result() == nil {
 			log.Error("lorawan: rest GetDevices result nil", err)
 		}
-		currDevices := resp.Result().(*csmodel.Devices)
+		currDevices := resp.Result().(*Devices)
 		allDevices.Result = append(allDevices.Result, currDevices.Result...)
 	}
 	return &allDevices, nil
 }
 
 // GetDevice single
-func (inst *ChirpClient) GetDevice(devEui string) (*csmodel.Device, error) {
+func (inst *ChirpClient) GetDevice(devEui string) (*DeviceSingle, error) {
 	q := fmt.Sprintf("/devices/%s", devEui)
 	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(csmodel.DeviceAll{}).
+		SetResult(DeviceSingle{}).
 		Get(q))
 	err = checkResponse(resp, err)
 	if err != nil {
 		return nil, err
 	}
-	return &resp.Result().(*csmodel.DeviceAll).Device, nil
+	return resp.Result().(*DeviceSingle), nil
 }
 
-// AddDevice add all
-func (inst *ChirpClient) AddDevice(body *Device) (*Device, error) {
-	q := fmt.Sprintf("/devices")
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(Device{}).
+// AddDevice add cs device
+func (inst *ChirpClient) AddDevice(body *DeviceSingle) error {
+	q := "/devices"
+	_, err := nresty.FormatRestyResponse(inst.client.R().
 		SetBody(body).
 		Post(q))
-	if err != nil {
-		return nil, err
-	}
-	return resp.Result().(*Device), nil
+	return err
 }
 
-// EditDevice edit object
-func (inst *ChirpClient) EditDevice(devEui string, body *Device) (*Device, error) {
-	q := fmt.Sprintf("/devices/%s", devEui)
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(Device{}).
+// UpdateDevice update cs device
+func (inst *ChirpClient) UpdateDevice(body *DeviceSingle) error {
+	q := fmt.Sprintf("/devices/%s", body.Device.DevEUI)
+	_, err := nresty.FormatRestyResponse(inst.client.R().
 		SetBody(body).
 		Put(q))
-	if err != nil {
-		return nil, err
-	}
-	return resp.Result().(*Device), nil
+	return err
 }
 
 // DeleteDevice delete
-func (inst *ChirpClient) DeleteDevice(devEui string) (bool, error) {
+func (inst *ChirpClient) DeleteDevice(devEui string) error {
 	q := fmt.Sprintf("/devices/%s", devEui)
 	_, err := nresty.FormatRestyResponse(inst.client.R().
 		Delete(q))
-	if err != nil {
-		return false, err
-	}
-	return true, nil
+	return err
 }
 
-// DeviceOTAKeysUpdate active a device
-func (inst *ChirpClient) DeviceOTAKeysUpdate(devEui string, body *DeviceKey) (*DeviceKey, error) {
+// DeviceOTAAKeyGet get cs otaa device key
+func (inst *ChirpClient) DeviceOTAAKeyGet(devEui string) (string, error) {
 	q := fmt.Sprintf("/devices/%s/keys", devEui)
 	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(DeviceKey{}).
-		SetBody(body).
-		Put(q))
-	if err != nil {
-		return nil, err
-	}
-	r := resp.Result().(*DeviceKey)
-	return r, nil
+		Get(q))
+	return resp.Result().(*DeviceKey).Keys.NwkKey, err
 }
 
-// DeviceOTAKeys active a device
-func (inst *ChirpClient) DeviceOTAKeys(devEui string, body *DeviceKey) (*DeviceKey, error) {
+// DeviceOTAAKeyAdd set cs otaa device key
+func (inst *ChirpClient) DeviceOTAAKeyAdd(devEui string, key string) error {
+	keys := DeviceKey{
+		Keys: DeviceKeys{
+			AppKey: key,
+			NwkKey: key,
+		},
+	}
 	q := fmt.Sprintf("/devices/%s/keys", devEui)
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(DeviceKey{}).
-		SetBody(body).
+	_, err := nresty.FormatRestyResponse(inst.client.R().
+		SetBody(keys).
 		Post(q))
-	if err != nil {
-		return nil, err
+	return err
+}
+
+// DeviceOTAAKeyPost update cs otaa device key
+func (inst *ChirpClient) DeviceOTAAKeyUpdate(devEui string, key string) error {
+	keys := DeviceKey{
+		Keys: DeviceKeys{
+			AppKey: key,
+			NwkKey: key,
+		},
 	}
-	r := resp.Result().(*DeviceKey)
-	return r, nil
+	q := fmt.Sprintf("/devices/%s/keys", devEui)
+	_, err := nresty.FormatRestyResponse(inst.client.R().
+		SetBody(keys).
+		Put(q))
+	return err
 }
 
 // ActivateDevice activate a device
-func (inst *ChirpClient) ActivateDevice(devEui string, body *DeviceActivation) (*DeviceActivation, error) {
+func (inst *ChirpClient) ActivateDevice(devEui string, body *DeviceActivation) error {
 	q := fmt.Sprintf("/devices/%s/activate", devEui)
-	resp, err := nresty.FormatRestyResponse(inst.client.R().
-		SetResult(DeviceActivation{}).
+	_, err := nresty.FormatRestyResponse(inst.client.R().
 		SetBody(body).
 		Put(q))
-	if err != nil {
-		return nil, err
-	}
-	return resp.Result().(*DeviceActivation), nil
+	return err
 }
