@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -z ${GO_PATH+x} ]; then
+    GO_PATH=go
+fi
+
 # Console colors
 DEFAULT="\033[0m"
 RED="\033[31m"
@@ -57,7 +61,7 @@ BUILD_ERROR=false
 
 function buildPlugin() {
   echo -e "${DEFAULT}BUILDING $1..."
-  go build -buildmode=plugin -o $1.so $2/*.go && cp $1.so $pluginDir
+  $GO_PATH build -buildmode=plugin -o $1.so $2/*.go && cp $1.so $pluginDir
   if [ $? -eq 0 ]; then
     echo -e "${GREEN}BUILT ${DEFAULT}$1"
   else
@@ -156,4 +160,3 @@ else
       go run app.go --auth=false
     fi
 fi
-

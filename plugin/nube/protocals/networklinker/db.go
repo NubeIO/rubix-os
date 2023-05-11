@@ -13,26 +13,29 @@ import (
 )
 
 func (inst *Instance) createNetwork(body *model.Network) (*model.Network, error) {
-	body.Name = body.AddressUUID
-	netNames := strings.Split(body.AddressUUID, UI_SEPARATOR)
-	net1, _ := inst.db.GetNetworkByName(netNames[0], api.Args{WithDevices: true})
-	net2, _ := inst.db.GetNetworkByName(netNames[1], api.Args{WithDevices: true})
+	if body.Name == "" {
+		body.Name = strings.Replace(body.AddressUUID, INTERNAL_SEPARATOR, UI_SEPARATOR, 1)
+	}
+	netUUIDs := strings.Split(body.AddressUUID, INTERNAL_SEPARATOR)
+	net1, _ := inst.db.GetNetwork(netUUIDs[0], api.Args{WithDevices: true})
+	net2, _ := inst.db.GetNetwork(netUUIDs[1], api.Args{WithDevices: true})
 	if inst.networkIsWriter(net1) && inst.networkIsWriter(net2) {
 		return nil, errors.New("both networks cannot be \"writers\"")
 	}
 	body.AddressUUID = fmt.Sprint(net1.UUID, INTERNAL_SEPARATOR, net2.UUID)
 	body, err := inst.db.CreateNetwork(body)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, dev1 := range net1.Devices {
 		for _, dev2 := range net2.Devices {
 			if dev1.Name == dev2.Name {
-				addr := fmt.Sprintf("%s%s%s", dev1.Name, UI_SEPARATOR, dev2.Name)
 				d := model.Device{
-					Name:         dev1.Name,
-					NetworkUUID:  body.UUID,
-					CommonDevice: model.CommonDevice{AddressUUID: &addr},
+					Name:        dev1.Name,
+					NetworkUUID: body.UUID,
 				}
-				inst.createDevice(&d)
+				inst.createDevice(&d, dev1, dev2, net1, net2)
 				break
 			}
 		}
@@ -40,26 +43,30 @@ func (inst *Instance) createNetwork(body *model.Network) (*model.Network, error)
 	return body, err
 }
 
-func (inst *Instance) createDevice(body *model.Device) (*model.Device, error) {
-	devNames := strings.Split(*body.AddressUUID, UI_SEPARATOR)
-	linkNet, _ := inst.db.GetNetwork(body.NetworkUUID, api.Args{})
-	netUUIDs := strings.Split(linkNet.AddressUUID, INTERNAL_SEPARATOR)
-	net1, _ := inst.db.GetNetwork(netUUIDs[0], api.Args{WithDevices: true})
-	net2, _ := inst.db.GetNetwork(netUUIDs[1], api.Args{WithDevices: true})
-	var dev1 *model.Device = nil
-	var dev2 *model.Device = nil
-	for _, dev := range net1.Devices {
-		if dev.Name == devNames[0] || dev.Name == devNames[1] {
-			dev1 = dev
-		}
-	}
-	for _, dev := range net2.Devices {
-		if dev.Name == devNames[0] || dev.Name == devNames[1] {
-			dev2 = dev
-		}
+func (inst *Instance) createDevice(body *model.Device, dev1 *model.Device, dev2 *model.Device, net1 *model.Network, net2 *model.Network) (*model.Device, error) {
+	if net1 == nil || net2 == nil {
+		linkNet, _ := inst.db.GetNetwork(body.NetworkUUID, api.Args{})
+		netUUIDs := strings.Split(linkNet.AddressUUID, INTERNAL_SEPARATOR)
+		net1, _ = inst.db.GetNetwork(netUUIDs[0], api.Args{WithDevices: true})
+		net2, _ = inst.db.GetNetwork(netUUIDs[1], api.Args{WithDevices: true})
 	}
 	if dev1 == nil || dev2 == nil {
-		return nil, errors.New("device does not belong to correct network")
+		devUUIDs := strings.Split(*body.AddressUUID, INTERNAL_SEPARATOR)
+		for _, dev := range net1.Devices {
+			if dev.UUID == devUUIDs[0] || dev.UUID == devUUIDs[1] {
+				dev1 = dev
+				break
+			}
+		}
+		for _, dev := range net2.Devices {
+			if dev.UUID == devUUIDs[0] || dev.UUID == devUUIDs[1] {
+				dev2 = dev
+				break
+			}
+		}
+		if dev1 == nil || dev2 == nil {
+			return nil, errors.New("device does not belong to correct network")
+		}
 	}
 	addr := fmt.Sprint(dev1.UUID, INTERNAL_SEPARATOR, dev2.UUID)
 	body.AddressUUID = &addr

@@ -22,7 +22,7 @@ const networkType = "duplicate"
 const transportType = ""
 const protocolType = "link"
 
-const UI_SEPARATOR = " <-> "
+const UI_SEPARATOR = " | "
 const INTERNAL_SEPARATOR = ":"
 
 // Instance is plugin instance

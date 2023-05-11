@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/lib-schema/networklinkerschema"
 	"net/http"
 	"net/http/httputil"
 	"strings"
+
+	"github.com/NubeIO/lib-schema/networklinkerschema"
+	"github.com/NubeIO/lib-schema/schema"
 
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
@@ -36,7 +38,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 	mux.POST(plugin.DevicesURL, func(ctx *gin.Context) {
 		body, _ := plugin.GetBODYDevice(ctx)
-		body, err := inst.createDevice(body)
+		body, err := inst.createDevice(body, nil, nil, nil, nil)
 		api.ResponseHandler(body, err, ctx)
 	})
 
@@ -75,15 +77,15 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		for _, fn := range fns {
 			fnsNames = append(fnsNames, fn.Name)
 		}
-		networkSchema := inst.GetNetworkSchema()
+		networkSchema := inst.GetNetworkSchemaOLD()
 		networkSchema.AutoMappingFlowNetworkName.Options = fnsNames
 		ctx.JSON(http.StatusOK, networkSchema)
 	})
 	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, inst.GetDeviceSchema())
+		ctx.JSON(http.StatusOK, inst.GetDeviceSchemaOLD())
 	})
 	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, inst.GetPointSchema())
+		ctx.JSON(http.StatusOK, inst.GetPointSchemaOLD())
 	})
 
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
@@ -107,28 +109,34 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 }
 
-func (inst *Instance) GetNetworkSchema() *linkmodel.SchemaNetwork {
+func (inst *Instance) GetNetworkSchemaOLD() *linkmodel.SchemaNetwork {
 	netSchema := &linkmodel.SchemaNetwork{}
 	defaults.Set(netSchema)
-	netSchema.AddressUUID.Options = inst.GetNetworkAddressUuidOption()
+	options := inst.GetNetworkAddressUuidOption()
+	for i := range options {
+		netSchema.AddressUUID.Options = append(netSchema.AddressUUID.Options, options[i].Const)
+	}
 	return netSchema
 }
 
-func (inst *Instance) GetDeviceSchema() *linkmodel.SchemaDevice {
+func (inst *Instance) GetDeviceSchemaOLD() *linkmodel.SchemaDevice {
 	devSchema := &linkmodel.SchemaDevice{}
 	defaults.Set(devSchema)
-	devSchema.AddressUUID.Options = inst.GetDeviceAddressUuidOptions()
+	options := inst.GetDeviceAddressUuidOptions()
+	for i := range options {
+		devSchema.AddressUUID.Options = append(devSchema.AddressUUID.Options, options[i].Const)
+	}
 	return devSchema
 }
 
-func (inst *Instance) GetPointSchema() *linkmodel.SchemaPoint {
+func (inst *Instance) GetPointSchemaOLD() *linkmodel.SchemaPoint {
 	point := &linkmodel.SchemaPoint{}
 	defaults.Set(point)
 	return point
 }
 
-func (inst *Instance) GetNetworkAddressUuidOption() []string {
-	var options []string
+func (inst *Instance) GetNetworkAddressUuidOption() []schema.OptionOneOf {
+	var options []schema.OptionOneOf
 	currNets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
 	currNetIDs := make([][]string, len(currNets))
 	for i, currNw := range currNets {
@@ -158,16 +166,18 @@ func (inst *Instance) GetNetworkAddressUuidOption() []string {
 			if exists {
 				continue
 			}
-			netMap := fmt.Sprintf("%s%s%s", n.Name, UI_SEPARATOR, nets[j].Name)
-			options = append(options, netMap)
+			options = append(options, schema.OptionOneOf{
+				Title: fmt.Sprintf("%s%s%s", n.Name, UI_SEPARATOR, nets[j].Name),
+				Const: fmt.Sprintf("%s%s%s", n.UUID, INTERNAL_SEPARATOR, nets[j].UUID),
+			})
 		}
 		inner++
 	}
 	return options
 }
 
-func (inst *Instance) GetDeviceAddressUuidOptions() []string {
-	var options []string
+func (inst *Instance) GetDeviceAddressUuidOptions() []schema.OptionOneOf {
+	var options []schema.OptionOneOf
 	nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
 	for i := range nets {
 		netSplit := strings.Split(nets[i].AddressUUID, INTERNAL_SEPARATOR)
@@ -175,8 +185,10 @@ func (inst *Instance) GetDeviceAddressUuidOptions() []string {
 		net2, _ := inst.db.GetNetwork(netSplit[1], api.Args{WithDevices: true})
 		for i := range net1.Devices {
 			for j := range net2.Devices {
-				devMap := fmt.Sprintf("%s%s%s", net1.Devices[i].Name, UI_SEPARATOR, net2.Devices[j].Name)
-				options = append(options, devMap)
+				options = append(options, schema.OptionOneOf{
+					Title: fmt.Sprintf("%s%s%s", net1.Devices[i].Name, UI_SEPARATOR, net2.Devices[j].Name),
+					Const: fmt.Sprintf("%s%s%s", net1.Devices[i].UUID, INTERNAL_SEPARATOR, net2.Devices[j].UUID),
+				})
 			}
 		}
 	}
