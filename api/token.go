@@ -19,6 +19,12 @@ func (j *TokenAPI) GetTokens(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
+func (j *TokenAPI) GetToken(c *gin.Context) {
+	u := c.Param("uuid")
+	q, err := externaltoken.GetExternalToken(u)
+	ResponseHandler(q, err, c)
+}
+
 func (j *TokenAPI) GenerateToken(ctx *gin.Context) {
 	body, err := getBodyTokenCreate(ctx)
 	if err != nil {

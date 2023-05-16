@@ -8,18 +8,27 @@ import (
 	"github.com/NubeIO/flow-framework/config"
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/eventbus"
+	"github.com/NubeIO/flow-framework/global"
+	"github.com/NubeIO/flow-framework/installer"
 	"github.com/NubeIO/flow-framework/logger"
 	"github.com/NubeIO/flow-framework/nerrors"
 	"github.com/NubeIO/flow-framework/plugin"
+	"github.com/NubeIO/flow-framework/services/appstore"
+	"github.com/NubeIO/flow-framework/services/system"
+	"github.com/NubeIO/lib-systemctl-go/systemctl"
+	"github.com/NubeIO/rubix-registry-go/rubixregistry"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-co-op/gocron"
 )
 
-func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
+func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *gocron.Scheduler,
+	systemCtl *systemctl.SystemCtl, system_ *system.System) *gin.Engine {
 	engine := gin.New()
 	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), nerrors.Handler(), location.Default())
 	engine.NoRoute(nerrors.NotFoundHandler())
 	eventBus := eventbus.NewService(eventbus.GetBus())
+	global.Installer = installer.New(&installer.Installer{})
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
 	// http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
@@ -98,7 +107,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		DB: db,
 	}
 
-	deviceInfoHandler := api.DeviceInfoAPI{}
+	deviceInfoHandler := api.DeviceInfoAPI{
+		RubixRegistry: rubixregistry.New(),
+	}
 	writerHandler := api.WriterAPI{
 		DB: db,
 	}
@@ -120,10 +131,98 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	syncProducerHandler := api.SyncProducerAPI{
 		DB: db,
 	}
+	systemctlHandler := api.SystemctlAPI{
+		SystemCtl: systemCtl,
+	}
+	syscallHandler := api.SyscallAPI{}
+	dateHandler := api.DateAPI{
+		System: system_,
+	}
+	networkingHandler := api.NetworkingAPI{
+		System: system_,
+	}
+	fileHandler := api.FileAPI{
+		FileMode: 0755,
+	}
+	dirHandler := api.DirApi{
+		FileMode: 0755,
+	}
+	zipHandler := api.ZipApi{
+		FileMode: 0755,
+	}
+	streamLogHandler := api.StreamLogApi{
+		DB: db,
+	}
+	snapshotHandler := api.SnapshotAPI{
+		SystemCtl:     systemCtl,
+		FileMode:      0755,
+		RubixRegistry: rubixregistry.New(),
+	}
+	restartJobHandler := api.RestartJobApi{
+		SystemCtl: systemCtl,
+		Scheduler: scheduler,
+		FileMode:  0755,
+	}
+	makeStore, _ := appstore.New(&appstore.Store{})
+	appStoreHandler := api.AppStoreApi{
+		Store: makeStore,
+	}
+	pluginStoreHandler := api.PluginStoreApi{
+		Store: makeStore,
+	}
+	edgeBiosEdgeHandler := api.EdgeBiosEdgeApi{
+		DB: db,
+	}
+	edgeAppHandler := api.EdgeAppApi{
+		DB: db,
+	}
+	edgePluginHandler := api.EdgePluginApi{
+		DB: db,
+	}
+	edgeConfigHandler := api.EdgeConfigApi{
+		DB: db,
+	}
+	edgeSnapshotHandler := api.EdgeSnapshotApi{
+		DB:       db,
+		FileMode: 0755,
+	}
+	snapshotCreatLogHandler := api.SnapshotCreateLogAPI{
+		DB: db,
+	}
+	snapshotRestoreLogHandler := api.SnapshotRestoreLogAPI{
+		DB: db,
+	}
+	locationHandler := api.LocationAPI{
+		DB: db,
+	}
+	groupHandler := api.GroupAPI{
+		DB: db,
+	}
+	hostHandler := api.HostAPI{
+		DB: db,
+	}
+	hostCommentHandler := api.HostCommentAPI{
+		DB: db,
+	}
+	hostTagHandler := api.HostTagAPI{
+		DB: db,
+	}
+	systemHandler := api.SystemAPI{
+		System:    system_,
+		Scheduler: scheduler,
+		FileMode:  0755,
+	}
+	alertHandler := api.AlertAPI{
+		DB: db,
+	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
 	authHandler := api.AuthAPI{}
 
+	ffProxyHandler := api.FFProxyAPI{}
+	wiresProxyHandler := api.WiresProxyAPI{}
+	chirpProxyHandler := api.ChirpProxyAPI{}
+	hostProxyHandler := api.HostProxyAPI{}
 	dbGroup.SyncTopics()
 
 	// for the custom plugin endpoints you need to use the plugin token
@@ -138,12 +237,21 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	})
 
 	engine.Use(cors.New(auth.CorsConfig(conf)))
-	engine.OPTIONS("/*any")
 
 	handleAuth := func(c *gin.Context) { c.Next() }
 	if *conf.Auth {
 		handleAuth = authHandler.HandleAuth()
 	}
+
+	apiProxyRoutes := engine.Group("/ff", handleAuth)
+	apiProxyRoutes.Any("/*proxyPath", ffProxyHandler.FFProxy) // FLOW-FRAMEWORK PROXY
+	apiProxyWiresRoutes := engine.Group("/wires", handleAuth)
+	apiProxyWiresRoutes.Any("/*proxyPath", wiresProxyHandler.WiresProxy) // EDGE-WIRES PROXY
+	apiProxyChirpRoutes := engine.Group("/chirp", handleAuth)
+	apiProxyChirpRoutes.Any("/*proxyPath", chirpProxyHandler.ChirpProxy) // CHIRP-STACK PROXY
+	apiProxyHostRoutes := engine.Group("/proxy", handleAuth)
+	apiProxyHostRoutes.Any("/*proxyPath", hostProxyHandler.HostProxy)
+
 	apiRoutes := engine.Group("/api", handleAuth)
 	{
 		fnProxy := apiRoutes.Group("/fn")
@@ -456,6 +564,25 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		deviceInfoRoutes := apiRoutes.Group("/system")
 		{
 			deviceInfoRoutes.GET("/device_info", deviceInfoHandler.GetDeviceInfo)
+
+			deviceInfoRoutes.GET("/device", deviceInfoHandler.GetDeviceInfo)
+			deviceInfoRoutes.PATCH("/device", deviceInfoHandler.UpdateDeviceInfo)
+			deviceInfoRoutes.POST("/scanner", systemHandler.RunScanner)
+			deviceInfoRoutes.GET("/network_interfaces", systemHandler.GetNetworkInterfaces)
+			deviceInfoRoutes.POST("/reboot", systemHandler.RebootHost)
+			deviceInfoRoutes.GET("/reboot/job", systemHandler.GetRebootHostJob)
+			deviceInfoRoutes.PUT("/reboot/job", systemHandler.UpdateRebootHostJob)
+			deviceInfoRoutes.DELETE("/reboot/job", systemHandler.DeleteRebootHostJob)
+
+			deviceInfoRoutes.GET("/time", systemHandler.HostTime)
+			deviceInfoRoutes.GET("/info", systemHandler.GetSystem)
+			deviceInfoRoutes.GET("/usage", systemHandler.GetMemoryUsage)
+			deviceInfoRoutes.GET("/memory", systemHandler.GetMemory)
+			deviceInfoRoutes.GET("/processes", systemHandler.GetTopProcesses) // /processes?sort=cpu&count=3
+			deviceInfoRoutes.GET("/swap", systemHandler.GetSwap)
+			deviceInfoRoutes.GET("/disc", systemHandler.DiscUsage)
+			deviceInfoRoutes.GET("/disc/pretty", systemHandler.DiscUsagePretty)
+
 		}
 
 		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)
@@ -481,6 +608,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		tokenRoutes := apiRoutes.Group("/tokens")
 		{
 			tokenRoutes.GET("", tokenHandler.GetTokens)
+			tokenRoutes.GET("/:uuid", tokenHandler.GetToken)
 			tokenRoutes.POST("/generate", tokenHandler.GenerateToken)
 			tokenRoutes.PUT("/:uuid/block", tokenHandler.BlockToken)
 			tokenRoutes.PUT("/:uuid/regenerate", tokenHandler.RegenerateToken)
@@ -490,6 +618,271 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 		autoMappingRoutes := apiRoutes.Group("/auto_mappings")
 		{
 			autoMappingRoutes.POST("", autoMappingHandler.CreateAutoMapping)
+		}
+
+		systemctlRoutes := apiRoutes.Group("/systemctl")
+		{
+			systemctlRoutes.POST("/enable", systemctlHandler.SystemCtlEnable)
+			systemctlRoutes.POST("/disable", systemctlHandler.SystemCtlDisable)
+			systemctlRoutes.GET("/show", systemctlHandler.SystemCtlShow)
+			systemctlRoutes.POST("/start", systemctlHandler.SystemCtlStart)
+			systemctlRoutes.GET("/status", systemctlHandler.SystemCtlStatus)
+			systemctlRoutes.POST("/stop", systemctlHandler.SystemCtlStop)
+			systemctlRoutes.POST("/reset-failed", systemctlHandler.SystemCtlResetFailed)
+			systemctlRoutes.POST("/daemon-reload", systemctlHandler.SystemCtlDaemonReload)
+			systemctlRoutes.POST("/restart", systemctlHandler.SystemCtlRestart)
+			systemctlRoutes.POST("/mask", systemctlHandler.SystemCtlMask)
+			systemctlRoutes.POST("/unmask", systemctlHandler.SystemCtlUnmask)
+			systemctlRoutes.GET("/state", systemctlHandler.SystemCtlState)
+			systemctlRoutes.GET("/is-enabled", systemctlHandler.SystemCtlIsEnabled)
+			systemctlRoutes.GET("/is-active", systemctlHandler.SystemCtlIsActive)
+			systemctlRoutes.GET("/is-running", systemctlHandler.SystemCtlIsRunning)
+			systemctlRoutes.GET("/is-failed", systemctlHandler.SystemCtlIsFailed)
+			systemctlRoutes.GET("/is-installed", systemctlHandler.SystemCtlIsInstalled)
+		}
+
+		syscallRoutes := apiRoutes.Group("/syscall")
+		{
+			syscallRoutes.POST("/unlink", syscallHandler.SyscallUnlink)
+			syscallRoutes.POST("/link", syscallHandler.SyscallLink)
+		}
+
+		timeRoutes := apiRoutes.Group("/time")
+		{
+			timeRoutes.GET("", dateHandler.SystemTime)
+			timeRoutes.POST("", dateHandler.SetSystemTime)
+			timeRoutes.POST("ntp/enable", dateHandler.NTPEnable)
+			timeRoutes.POST("ntp/disable", dateHandler.NTPDisable)
+		}
+
+		timeZoneRoutes := apiRoutes.Group("/timezone")
+		{
+			timeZoneRoutes.GET("", dateHandler.GetHardwareTZ)
+			timeZoneRoutes.POST("", dateHandler.UpdateTimezone)
+			timeZoneRoutes.GET("/list", dateHandler.GetTimeZoneList)
+			timeZoneRoutes.POST("/config", dateHandler.GenerateTimeSyncConfig)
+		}
+
+		networkingRoutes := apiRoutes.Group("/networking")
+		{
+			networkingRoutes.GET("", networkingHandler.Networking)
+			networkingRoutes.GET("/interfaces", networkingHandler.GetInterfacesNames)
+			networkingRoutes.GET("/internet", networkingHandler.InternetIP)
+
+			networkingNetworkRoutes := networkingRoutes.Group("networks")
+			{
+				networkingNetworkRoutes.POST("/restart", networkingHandler.RestartNetworking)
+			}
+
+			networkingInterfaceRoutes := networkingRoutes.Group("interfaces")
+			{
+				networkingInterfaceRoutes.POST("/exists", networkingHandler.DHCPPortExists)
+				networkingInterfaceRoutes.POST("/auto", networkingHandler.DHCPSetAsAuto)
+				networkingInterfaceRoutes.POST("/static", networkingHandler.DHCPSetStaticIP)
+				networkingInterfaceRoutes.POST("/reset", networkingHandler.InterfaceUpDown) //
+				networkingInterfaceRoutes.POST("/pp", networkingHandler.InterfaceUp)
+				networkingInterfaceRoutes.POST("/down", networkingHandler.InterfaceDown)
+			}
+
+			networkingFirewallRoutes := networkingRoutes.Group("/firewall")
+			{
+				networkingFirewallRoutes.GET("", networkingHandler.UWFStatusList)
+				networkingFirewallRoutes.POST("/status", networkingHandler.UWFStatus)
+				networkingFirewallRoutes.POST("/active", networkingHandler.UWFActive)
+				networkingFirewallRoutes.POST("/enable", networkingHandler.UWFEnable)
+				networkingFirewallRoutes.POST("/disable", networkingHandler.UWFDisable)
+				networkingFirewallRoutes.POST("/port/open", networkingHandler.UWFOpenPort)
+				networkingFirewallRoutes.POST("/port/close", networkingHandler.UWFClosePort)
+			}
+		}
+
+		fileRoutes := apiRoutes.Group("/files")
+		{
+			fileRoutes.GET("/exists", fileHandler.FileExists)            // needs to be a file
+			fileRoutes.GET("/walk", fileHandler.WalkFile)                // similar as find in linux command
+			fileRoutes.GET("/list", fileHandler.ListFiles)               // list all files and folders
+			fileRoutes.POST("/create", fileHandler.CreateFile)           // create file only
+			fileRoutes.POST("/copy", fileHandler.CopyFile)               // copy either file or folder
+			fileRoutes.POST("/rename", fileHandler.RenameFile)           // rename either file or folder
+			fileRoutes.POST("/move", fileHandler.MoveFile)               // move files or folders
+			fileRoutes.POST("/upload", fileHandler.UploadFile)           // upload single file
+			fileRoutes.POST("/download", fileHandler.DownloadFile)       // download single file
+			fileRoutes.GET("/read", fileHandler.ReadFile)                // read single file
+			fileRoutes.PUT("/write", fileHandler.WriteFile)              // write single file
+			fileRoutes.DELETE("/delete", fileHandler.DeleteFile)         // delete single file
+			fileRoutes.DELETE("/delete-all", fileHandler.DeleteAllFiles) // deletes file or folder
+			fileRoutes.POST("/write/string", fileHandler.WriteStringFile)
+			fileRoutes.POST("/write/json", fileHandler.WriteFileJson)
+			fileRoutes.POST("/write/yml", fileHandler.WriteFileYml)
+		}
+
+		dirRoutes := apiRoutes.Group("/dirs")
+		{
+			dirRoutes.GET("/exists", dirHandler.DirExists)  // needs to be a folder
+			dirRoutes.POST("/create", dirHandler.CreateDir) // create folder
+		}
+
+		zipRoutes := apiRoutes.Group("/zip")
+		{
+			zipRoutes.POST("/unzip", zipHandler.Unzip)
+			zipRoutes.POST("/zip", zipHandler.ZipDir)
+		}
+
+		streamLogRoutes := apiRoutes.Group("/logs")
+		{
+			streamLogRoutes.GET("", streamLogHandler.GetStreamLogs)
+			streamLogRoutes.GET("/:uuid", streamLogHandler.GetStreamLog)
+			streamLogRoutes.POST("", streamLogHandler.CreateStreamLog)
+			streamLogRoutes.POST("/create", streamLogHandler.CreateLogAndReturn)
+			streamLogRoutes.DELETE("/:uuid", streamLogHandler.DeleteStreamLog)
+			streamLogRoutes.DELETE("", streamLogHandler.DeleteStreamLogs)
+		}
+
+		snapshotRoutes := apiRoutes.Group("/snapshots")
+		{
+			snapshotRoutes.POST("create", snapshotHandler.CreateSnapshot)
+			snapshotRoutes.POST("restore", snapshotHandler.RestoreSnapshot)
+			snapshotRoutes.GET("status", snapshotHandler.SnapshotStatus)
+		}
+
+		restartJobRoutes := apiRoutes.Group("/restart-jobs")
+		{
+			restartJobRoutes.GET("", restartJobHandler.GetRestartJob)
+			restartJobRoutes.PUT("", restartJobHandler.UpdateRestartJob)
+			restartJobRoutes.DELETE("/:unit", restartJobHandler.DeleteRestartJob)
+		}
+
+		storeRoutes := apiRoutes.Group("/store")
+		{
+			appStoreRoutes := storeRoutes.Group("/apps")
+			{
+				appStoreRoutes.POST("", appStoreHandler.UploadAddOnAppStore)
+				appStoreRoutes.GET("/exists", appStoreHandler.CheckAppExistence)
+			}
+
+			pluginStoreRoutes := storeRoutes.Group("/plugins")
+			{
+				pluginStoreRoutes.GET("", pluginStoreHandler.GetPluginsStorePlugins)
+				pluginStoreRoutes.POST("", pluginStoreHandler.UploadPluginStorePlugin)
+			}
+		}
+
+		edgeBiosAppRoutes := apiRoutes.Group("/eb/re")
+		{
+			edgeBiosAppRoutes.POST("/upload", edgeBiosEdgeHandler.EdgeBiosRubixEdgeUpload)
+			edgeBiosAppRoutes.POST("/install", edgeBiosEdgeHandler.EdgeBiosRubixEdgeInstall)
+			edgeBiosAppRoutes.GET("/version", edgeBiosEdgeHandler.EdgeBiosGetRubixEdgeVersion)
+		}
+
+		edgeRoutes := apiRoutes.Group("/edge")
+		{
+			edgeAppRoutes := edgeRoutes.Group("/apps")
+			{
+				edgeAppRoutes.POST("/upload", edgeAppHandler.EdgeAppUpload)
+				edgeAppRoutes.POST("/install", edgeAppHandler.EdgeAppInstall)
+				edgeAppRoutes.POST("/uninstall", edgeAppHandler.EdgeAppUninstall)
+				edgeAppRoutes.GET("/status", edgeAppHandler.EdgeListAppsStatus)
+				edgeAppRoutes.GET("/status/:app_name", edgeAppHandler.EdgeGetAppStatus)
+			}
+
+			edgePluginRoutes := edgeRoutes.Group("/plugins")
+			{
+				edgePluginRoutes.GET("", edgePluginHandler.EdgeListPlugins)
+				edgePluginRoutes.POST("/upload", edgePluginHandler.EdgeUploadPlugin)
+				edgePluginRoutes.POST("/move-from-download-to-install", edgePluginHandler.EdgeMoveFromDownloadToInstallPlugins)
+				edgePluginRoutes.DELETE("/name/:plugin_name", edgePluginHandler.EdgeDeletePlugin)
+				edgePluginRoutes.DELETE("/download-plugins", edgePluginHandler.EdgeDeleteDownloadPlugins)
+			}
+
+			edgeConfigRoutes := edgeRoutes.Group("/config")
+			{
+				edgeConfigRoutes.GET("", edgeConfigHandler.EdgeReadConfig)
+				edgeConfigRoutes.POST("", edgeConfigHandler.EdgeWriteConfig)
+			}
+
+			edgeSnapshotRoutes := edgeRoutes.Group("/snapshots")
+			{
+				edgeSnapshotRoutes.GET("", edgeSnapshotHandler.GetSnapshots)
+				edgeSnapshotRoutes.PATCH("/:file", edgeSnapshotHandler.UpdateSnapshot)
+				edgeSnapshotRoutes.DELETE("", edgeSnapshotHandler.DeleteSnapshot)
+				edgeSnapshotRoutes.POST("/create", edgeSnapshotHandler.CreateSnapshot)
+				edgeSnapshotRoutes.POST("/restore", edgeSnapshotHandler.RestoreSnapshot)
+				edgeSnapshotRoutes.POST("/download", edgeSnapshotHandler.DownloadSnapshot)
+				edgeSnapshotRoutes.POST("/upload", edgeSnapshotHandler.UploadSnapshot)
+
+				snapshotCreateLogRoutes := edgeSnapshotRoutes.Group("/create-logs")
+				{
+					snapshotCreateLogRoutes.GET("", snapshotCreatLogHandler.GetSnapshotCreateLogs)
+					snapshotCreateLogRoutes.PATCH("/:uuid", snapshotCreatLogHandler.UpdateSnapshotCreateLog)
+					snapshotCreateLogRoutes.DELETE("/:uuid", snapshotCreatLogHandler.DeleteSnapshotCreateLog)
+				}
+
+				snapshotRestoreLogRoutes := edgeSnapshotRoutes.Group("/restore-logs")
+				{
+					snapshotRestoreLogRoutes.GET("", snapshotRestoreLogHandler.GetSnapshotRestoreLogs)
+					snapshotRestoreLogRoutes.PATCH("/:uuid", snapshotRestoreLogHandler.UpdateSnapshotRestoreLog)
+					snapshotRestoreLogRoutes.DELETE("/:uuid", snapshotRestoreLogHandler.DeleteSnapshotRestoreLog)
+				}
+			}
+		}
+
+		locationRoutes := apiRoutes.Group("/locations")
+		{
+			locationRoutes.GET("/schema", locationHandler.GetLocationSchema)
+			locationRoutes.GET("", locationHandler.GetLocations)
+			locationRoutes.GET("/:uuid", locationHandler.GetLocation)
+			locationRoutes.POST("", locationHandler.CreateLocation)
+			locationRoutes.PATCH("/:uuid", locationHandler.UpdateLocation)
+			locationRoutes.DELETE("/:uuid", locationHandler.DeleteLocation)
+			locationRoutes.DELETE("/drop", locationHandler.DropLocations)
+		}
+
+		groupRoutes := apiRoutes.Group("/groups")
+		{
+			groupRoutes.GET("/schema", groupHandler.GetGroupSchema)
+			groupRoutes.GET("", groupHandler.GetGroups)
+			groupRoutes.GET("/:uuid", groupHandler.GetGroup)
+			groupRoutes.POST("", groupHandler.CreateGroup)
+			groupRoutes.PATCH("/:uuid", groupHandler.UpdateGroup)
+			groupRoutes.DELETE("/:uuid", groupHandler.DeleteGroup)
+			groupRoutes.DELETE("/drop", groupHandler.DropGroups)
+			groupRoutes.GET("/:uuid/update-hosts-status", groupHandler.UpdateHostsStatus)
+		}
+
+		hostRoutes := apiRoutes.Group("/hosts")
+		{
+			hostRoutes.GET("/schema", hostHandler.GetHostSchema)
+			hostRoutes.GET("", hostHandler.GetHosts)
+			hostRoutes.POST("", hostHandler.CreateHost)
+			hostRoutes.GET("/:uuid", hostHandler.GetHost)
+			hostRoutes.PATCH("/:uuid", hostHandler.UpdateHost)
+			hostRoutes.DELETE("/:uuid", hostHandler.DeleteHost)
+			hostRoutes.DELETE("/drop", hostHandler.DropHosts)
+			hostRoutes.GET("/:uuid/configure-openvpn", hostHandler.ConfigureOpenVPN)
+
+			hostTagRoutes := hostRoutes.Group("/tags")
+			{
+				hostTagRoutes.PUT("/host_uuid/:host_uuid", hostTagHandler.UpdateHostTags)
+			}
+
+			hostCommentRoutes := hostRoutes.Group("/comments")
+			{
+				hostCommentRoutes.POST("", hostCommentHandler.CreateHostComment)
+				hostCommentRoutes.PATCH("/:uuid", hostCommentHandler.UpdateHostComment)
+				hostCommentRoutes.DELETE("/:uuid", hostCommentHandler.DeleteHostComment)
+			}
+		}
+
+		alertRoutes := apiRoutes.Group("/alerts")
+		{
+			alertRoutes.GET("/schema", alertHandler.AlertsSchema)
+			alertRoutes.GET("", alertHandler.GetAlerts)
+			alertRoutes.POST("", alertHandler.CreateAlert)
+			alertRoutes.GET("/:uuid", alertHandler.GetAlert)
+			alertRoutes.GET("/host/:uuid", alertHandler.GetAlertsByHost)
+			alertRoutes.PATCH("/:uuid/status", alertHandler.UpdateAlertStatus)
+			alertRoutes.DELETE("/:uuid", alertHandler.DeleteAlert)
+			alertRoutes.DELETE("/drop", alertHandler.DropAlerts)
 		}
 
 		scheduleAutoMappingRoutes := apiRoutes.Group("/auto_mapping_schedules")

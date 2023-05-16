@@ -528,3 +528,11 @@ func (d *GormDatabase) buildScheduleQueryTransaction(db *gorm.DB, args api.Args)
 	}
 	return query
 }
+
+func (d *GormDatabase) buildGroupQuery() *gorm.DB {
+	return d.DB.Preload("Hosts")
+}
+
+func (d *GormDatabase) buildHostQuery(args api.Args) *gorm.DB {
+	return d.DB.Preload("Comments").Preload("Tags")
+}

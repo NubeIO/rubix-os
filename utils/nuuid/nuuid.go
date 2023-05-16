@@ -1,9 +1,11 @@
 package nuuid
 
 import (
+	"crypto/rand"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"io"
 )
 
 func MakeUUID() (string, error) {
@@ -38,6 +40,13 @@ func MakeTopicUUID(attribute string) string {
 	rub := "rbx" // rubix uuid
 	rxg := "rxg" // rubix global uuid
 	tok := "tok" // token uuid
+	loc := "loc" // location uuid
+	grp := "grp" // group uuid
+	hos := "hos" // host uuid
+	hoc := "hoc" // host comment uuid
+	scl := "scl" // snapshot create log uuid
+	srl := "srl" // snapshot restore log uuid
+	tea := "tea" // team uuid
 
 	switch attribute {
 	case model.CommonNaming.Plugin:
@@ -84,6 +93,33 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", rxg, divider, u)
 	case model.CommonNaming.Token:
 		return fmt.Sprintf("%s%s%s", tok, divider, u)
+	case model.CommonNaming.Location:
+		return fmt.Sprintf("%s%s%s", loc, divider, u)
+	case model.CommonNaming.Group:
+		return fmt.Sprintf("%s%s%s", grp, divider, u)
+	case model.CommonNaming.Host:
+		return fmt.Sprintf("%s%s%s", hos, divider, u)
+	case model.CommonNaming.HostComment:
+		return fmt.Sprintf("%s%s%s", hoc, divider, u)
+	case model.CommonNaming.SnapshotCreateLog:
+		return fmt.Sprintf("%s%s%s", scl, divider, u)
+	case model.CommonNaming.SnapshotRestoreLog:
+		return fmt.Sprintf("%s%s%s", srl, divider, u)
+	case model.CommonNaming.Team:
+		return fmt.Sprintf("%s%s%s", tea, divider, u)
 	}
 	return u
+}
+
+func ShortUUID(prefix ...string) string {
+	u := make([]byte, 16)
+	n, err := io.ReadFull(rand.Reader, u)
+	if n != len(u) || err != nil {
+		return "-error-uuid-"
+	}
+	uuid := fmt.Sprintf("%x%x", u[0:4], u[4:6])
+	if len(prefix) > 0 {
+		uuid = fmt.Sprintf("%s_%s", prefix[0], uuid)
+	}
+	return uuid
 }

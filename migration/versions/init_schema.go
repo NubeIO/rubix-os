@@ -33,5 +33,13 @@ func GetInitInterfaces() []interface{} {
 		&model.NetworkMetaTag{},
 		&model.DeviceMetaTag{},
 		&model.PointMetaTag{},
+		&model.Location{},
+		&model.Group{},
+		&model.Host{},
+		&model.HostTag{},
+		&model.HostComment{},
+		&model.SnapshotLog{},
+		&model.SnapshotCreateLog{},
+		&model.SnapshotRestoreLog{},
 	}
 }
