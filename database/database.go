@@ -22,7 +22,7 @@ const (
 )
 
 var mkdirAll = os.MkdirAll
-var gormDatabase *GormDatabase
+var GlobalGormDatabase *GormDatabase
 
 // New creates a new wrapper for the gorm database framework.
 func New(dialect, connection, logLevel string) (*GormDatabase, error) {
@@ -57,7 +57,7 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 	}
 
 	busService := eventbus.NewService(eventbus.GetBus())
-	gormDatabase = &GormDatabase{DB: db, Bus: busService}
+	GlobalGormDatabase = &GormDatabase{DB: db, Bus: busService}
 	return &GormDatabase{DB: db, Bus: busService}, nil
 }
 
