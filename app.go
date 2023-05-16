@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
+	"github.com/NubeIO/rubix-os/module"
 	"github.com/NubeIO/rubix-os/mqttclient"
 	"github.com/NubeIO/rubix-os/services/localmqtt"
 	"github.com/NubeIO/rubix-os/services/system"
@@ -104,13 +105,19 @@ func setupCron() (*gocron.Scheduler, *systemctl.SystemCtl, *system.System) {
 var db *database.GormDatabase
 
 func main() {
+	//gob.Register(make(map[string]interface{}))
+	//gob.Register(api.Args{})
+	//gob.Register([]*model.Network{})
 	defer db.Close()
 	conf := config.CreateApp()
 
 	logger.SetLogger(conf.LogLevel)
 	logger.SetGinMode(conf.LogLevel)
 
-	if err := os.MkdirAll(conf.GetAbsPluginDir(), 0755); err != nil {
+	if err := os.MkdirAll(conf.GetAbsPluginsDir(), 0755); err != nil {
+		panic(err)
+	}
+	if err := os.MkdirAll(conf.GetAbsModulesDir(), 0755); err != nil {
 		panic(err)
 	}
 	if err := os.MkdirAll(conf.GetAbsUploadedImagesDir(), 0755); err != nil {
@@ -148,6 +155,8 @@ func main() {
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)
 	initFlushBuffers()
+	err = module.ReLoadModulesWithDir(config.Get().GetAbsModulesDir())
+
 	runner.Run(engine, conf)
 }
 

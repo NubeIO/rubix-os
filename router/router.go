@@ -32,7 +32,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
 	// http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/api/plugins/api"))
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginsDir(), engine.Group("/api/plugins/api"))
 	if err != nil {
 		fmt.Println(err)
 		panic(err)

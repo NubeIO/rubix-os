@@ -29,6 +29,7 @@ type NetworkDatabase interface {
 	SyncNetworks() error
 	SyncNetworkDevices(uuid string) error
 }
+
 type NetworksAPI struct {
 	DB     NetworkDatabase
 	Bus    eventbus.BusService
