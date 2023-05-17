@@ -23,8 +23,6 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	Module_Init_FullMethodName = "/proto.Module/Init"
-	Module_Get_FullMethodName  = "/proto.Module/Get"
-	Module_Put_FullMethodName  = "/proto.Module/Put"
 )
 
 // ModuleClient is the client API for Module service.
@@ -32,8 +30,6 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ModuleClient interface {
 	Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*Empty, error)
-	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
-	Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type moduleClient struct {
@@ -53,31 +49,11 @@ func (c *moduleClient) Init(ctx context.Context, in *InitRequest, opts ...grpc.C
 	return out, nil
 }
 
-func (c *moduleClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error) {
-	out := new(GetResponse)
-	err := c.cc.Invoke(ctx, Module_Get_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *moduleClient) Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, Module_Put_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // ModuleServer is the server API for Module service.
 // All implementations should embed UnimplementedModuleServer
 // for forward compatibility
 type ModuleServer interface {
 	Init(context.Context, *InitRequest) (*Empty, error)
-	Get(context.Context, *GetRequest) (*GetResponse, error)
-	Put(context.Context, *PutRequest) (*Empty, error)
 }
 
 // UnimplementedModuleServer should be embedded to have forward compatible implementations.
@@ -86,12 +62,6 @@ type UnimplementedModuleServer struct {
 
 func (UnimplementedModuleServer) Init(context.Context, *InitRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Init not implemented")
-}
-func (UnimplementedModuleServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
-}
-func (UnimplementedModuleServer) Put(context.Context, *PutRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Put not implemented")
 }
 
 // UnsafeModuleServer may be embedded to opt out of forward compatibility for this service.
@@ -123,42 +93,6 @@ func _Module_Init_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Module_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ModuleServer).Get(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Module_Get_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ModuleServer).Get(ctx, req.(*GetRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Module_Put_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PutRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ModuleServer).Put(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Module_Put_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ModuleServer).Put(ctx, req.(*PutRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Module_ServiceDesc is the grpc.ServiceDesc for Module service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,30 +104,30 @@ var Module_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Init",
 			Handler:    _Module_Init_Handler,
 		},
-		{
-			MethodName: "Get",
-			Handler:    _Module_Get_Handler,
-		},
-		{
-			MethodName: "Put",
-			Handler:    _Module_Put_Handler,
-		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "module.proto",
 }
 
 const (
-	DBHelper_Sum_FullMethodName     = "/proto.DBHelper/Sum"
-	DBHelper_CallAPI_FullMethodName = "/proto.DBHelper/CallAPI"
+	DBHelper_GetList_FullMethodName = "/proto.DBHelper/GetList"
+	DBHelper_Get_FullMethodName     = "/proto.DBHelper/Get"
+	DBHelper_Post_FullMethodName    = "/proto.DBHelper/Post"
+	DBHelper_Put_FullMethodName     = "/proto.DBHelper/Put"
+	DBHelper_Patch_FullMethodName   = "/proto.DBHelper/Patch"
+	DBHelper_Delete_FullMethodName  = "/proto.DBHelper/Delete"
 )
 
 // DBHelperClient is the client API for DBHelper service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DBHelperClient interface {
-	Sum(ctx context.Context, in *SumRequest, opts ...grpc.CallOption) (*SumResponse, error)
-	CallAPI(ctx context.Context, in *APIRequest, opts ...grpc.CallOption) (*APIResponse, error)
+	GetList(ctx context.Context, in *GetListRequest, opts ...grpc.CallOption) (*Response, error)
+	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Response, error)
+	Post(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Response, error)
+	Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*Response, error)
+	Patch(ctx context.Context, in *PatchRequest, opts ...grpc.CallOption) (*Response, error)
+	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*Response, error)
 }
 
 type dBHelperClient struct {
@@ -204,18 +138,54 @@ func NewDBHelperClient(cc grpc.ClientConnInterface) DBHelperClient {
 	return &dBHelperClient{cc}
 }
 
-func (c *dBHelperClient) Sum(ctx context.Context, in *SumRequest, opts ...grpc.CallOption) (*SumResponse, error) {
-	out := new(SumResponse)
-	err := c.cc.Invoke(ctx, DBHelper_Sum_FullMethodName, in, out, opts...)
+func (c *dBHelperClient) GetList(ctx context.Context, in *GetListRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, DBHelper_GetList_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *dBHelperClient) CallAPI(ctx context.Context, in *APIRequest, opts ...grpc.CallOption) (*APIResponse, error) {
-	out := new(APIResponse)
-	err := c.cc.Invoke(ctx, DBHelper_CallAPI_FullMethodName, in, out, opts...)
+func (c *dBHelperClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, DBHelper_Get_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dBHelperClient) Post(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, DBHelper_Post_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dBHelperClient) Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, DBHelper_Put_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dBHelperClient) Patch(ctx context.Context, in *PatchRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, DBHelper_Patch_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *dBHelperClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, DBHelper_Delete_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -226,19 +196,35 @@ func (c *dBHelperClient) CallAPI(ctx context.Context, in *APIRequest, opts ...gr
 // All implementations should embed UnimplementedDBHelperServer
 // for forward compatibility
 type DBHelperServer interface {
-	Sum(context.Context, *SumRequest) (*SumResponse, error)
-	CallAPI(context.Context, *APIRequest) (*APIResponse, error)
+	GetList(context.Context, *GetListRequest) (*Response, error)
+	Get(context.Context, *GetRequest) (*Response, error)
+	Post(context.Context, *PostRequest) (*Response, error)
+	Put(context.Context, *PutRequest) (*Response, error)
+	Patch(context.Context, *PatchRequest) (*Response, error)
+	Delete(context.Context, *DeleteRequest) (*Response, error)
 }
 
 // UnimplementedDBHelperServer should be embedded to have forward compatible implementations.
 type UnimplementedDBHelperServer struct {
 }
 
-func (UnimplementedDBHelperServer) Sum(context.Context, *SumRequest) (*SumResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Sum not implemented")
+func (UnimplementedDBHelperServer) GetList(context.Context, *GetListRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetList not implemented")
 }
-func (UnimplementedDBHelperServer) CallAPI(context.Context, *APIRequest) (*APIResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CallAPI not implemented")
+func (UnimplementedDBHelperServer) Get(context.Context, *GetRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedDBHelperServer) Post(context.Context, *PostRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Post not implemented")
+}
+func (UnimplementedDBHelperServer) Put(context.Context, *PutRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Put not implemented")
+}
+func (UnimplementedDBHelperServer) Patch(context.Context, *PatchRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Patch not implemented")
+}
+func (UnimplementedDBHelperServer) Delete(context.Context, *DeleteRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 
 // UnsafeDBHelperServer may be embedded to opt out of forward compatibility for this service.
@@ -252,38 +238,110 @@ func RegisterDBHelperServer(s grpc.ServiceRegistrar, srv DBHelperServer) {
 	s.RegisterService(&DBHelper_ServiceDesc, srv)
 }
 
-func _DBHelper_Sum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SumRequest)
+func _DBHelper_GetList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBHelperServer).Sum(ctx, in)
+		return srv.(DBHelperServer).GetList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBHelper_Sum_FullMethodName,
+		FullMethod: DBHelper_GetList_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBHelperServer).Sum(ctx, req.(*SumRequest))
+		return srv.(DBHelperServer).GetList(ctx, req.(*GetListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DBHelper_CallAPI_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(APIRequest)
+func _DBHelper_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBHelperServer).CallAPI(ctx, in)
+		return srv.(DBHelperServer).Get(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBHelper_CallAPI_FullMethodName,
+		FullMethod: DBHelper_Get_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBHelperServer).CallAPI(ctx, req.(*APIRequest))
+		return srv.(DBHelperServer).Get(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DBHelper_Post_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DBHelperServer).Post(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DBHelper_Post_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DBHelperServer).Post(ctx, req.(*PostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DBHelper_Put_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DBHelperServer).Put(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DBHelper_Put_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DBHelperServer).Put(ctx, req.(*PutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DBHelper_Patch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PatchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DBHelperServer).Patch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DBHelper_Patch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DBHelperServer).Patch(ctx, req.(*PatchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DBHelper_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DBHelperServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DBHelper_Delete_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DBHelperServer).Delete(ctx, req.(*DeleteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -296,12 +354,28 @@ var DBHelper_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DBHelperServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Sum",
-			Handler:    _DBHelper_Sum_Handler,
+			MethodName: "GetList",
+			Handler:    _DBHelper_GetList_Handler,
 		},
 		{
-			MethodName: "CallAPI",
-			Handler:    _DBHelper_CallAPI_Handler,
+			MethodName: "Get",
+			Handler:    _DBHelper_Get_Handler,
+		},
+		{
+			MethodName: "Post",
+			Handler:    _DBHelper_Post_Handler,
+		},
+		{
+			MethodName: "Put",
+			Handler:    _DBHelper_Put_Handler,
+		},
+		{
+			MethodName: "Patch",
+			Handler:    _DBHelper_Patch_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _DBHelper_Delete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

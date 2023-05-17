@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path"
-	"strconv"
 	"strings"
 )
 
@@ -78,8 +77,8 @@ func LoadModuleWithLocal(path string) error {
 	module := raw.(shared.Module)
 
 	_ = module.Init(&dbHelper{})
-	_ = module.Put("test", 34)
-	a, err := module.Get("test")
-	fmt.Println("c>>>>>>>>>>", strconv.Itoa(int(a)), err)
+	// _ = module.Put("test", 34)
+	// a, err := module.Get("test")
+	// fmt.Println("c>>>>>>>>>>", strconv.Itoa(int(a)), err)
 	return nil
 }
