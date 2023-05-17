@@ -20,6 +20,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
+	log "github.com/sirupsen/logrus"
 )
 
 func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *gocron.Scheduler,
@@ -31,10 +32,23 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	global.Installer = installer.New(&installer.Installer{})
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
-	// http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginsDir(), engine.Group("/api/plugins/api"))
+
+	authHandler := api.AuthAPI{}
+	handleAuth := func(c *gin.Context) { c.Next() }
+	if *conf.Auth {
+		handleAuth = authHandler.HandleAuth()
+	}
+	apiRoutesTemp := engine.Group("/api", handleAuth) // TODO: remove this one and use the same one
+	// http://localhost:1660/api/plugins/api/system/schema/json/device
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginsDir(), apiRoutesTemp.Group("/plugins/api"))
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
+		panic(err)
+	}
+
+	err = module.ReLoadModulesWithDir(config.Get().GetAbsModulesDir(), apiRoutesTemp.Group("/modules"))
+	if err != nil {
+		log.Error(err)
 		panic(err)
 	}
 	db.PluginManager = pluginManager
@@ -241,7 +255,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
-	authHandler := api.AuthAPI{}
 
 	wiresProxyHandler := api.WiresProxyAPI{}
 	chirpProxyHandler := api.ChirpProxyAPI{}

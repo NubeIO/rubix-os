@@ -24,8 +24,6 @@ func (d *GormDatabase) GetNetworksTransaction(db *gorm.DB, args api.Args) ([]*mo
 }
 
 func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
-	log.Infof("d>>>> %v", d)
-	log.Infof("d222>>>> %v", d)
 	return d.GetNetworksTransaction(d.DB, args)
 }
 

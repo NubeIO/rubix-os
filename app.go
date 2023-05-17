@@ -152,7 +152,6 @@ func main() {
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)
 	initFlushBuffers()
-	err = module.ReLoadModulesWithDir(config.Get().GetAbsModulesDir())
 
 	runner.Run(engine, conf)
 }
