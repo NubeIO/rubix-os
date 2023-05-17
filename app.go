@@ -67,9 +67,6 @@ func initFlushBuffers() {
 var db *database.GormDatabase
 
 func main() {
-	//gob.Register(make(map[string]interface{}))
-	//gob.Register(api.Args{})
-	//gob.Register([]*model.Network{})
 	defer db.Close()
 	conf := config.CreateApp()
 

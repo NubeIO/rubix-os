@@ -8,34 +8,39 @@ import (
 	"google.golang.org/grpc"
 )
 
-// GRPCClient is an implementation of KV that talks over RPC.
+// GRPCClient is an implementation of Module that talks over RPC.
 type GRPCClient struct {
 	broker *plugin.GRPCBroker
 	client proto.ModuleClient
 }
 
-func (m *GRPCClient) Put(key string, value int64, a AddHelper) error {
-	log.Info("gRPC put client has been called...")
-	addHelperServer := &GRPCAddHelperServer{Impl: a}
-
+func (m *GRPCClient) Init(dbHelper DBHelper) error {
+	log.Infof("gRPC Init client has been called...")
+	dbHelperServer := &GRPCDBHelperServer{Impl: dbHelper}
 	var s *grpc.Server
 	serverFunc := func(opts []grpc.ServerOption) *grpc.Server {
 		s = grpc.NewServer(opts...)
-		proto.RegisterAddHelperServer(s, addHelperServer)
+		proto.RegisterDBHelperServer(s, dbHelperServer)
 
 		return s
 	}
-
 	brokerID := m.broker.NextId()
 	go m.broker.AcceptAndServe(brokerID, serverFunc)
 
-	_, err := m.client.Put(context.Background(), &proto.PutRequest{
+	_, err := m.client.Init(context.Background(), &proto.InitRequest{
 		AddServer: brokerID,
-		Key:       key,
-		Value:     value,
 	})
 
-	s.Stop()
+	// s.Stop() // TODO: we haven't closed this
+	return err
+}
+
+func (m *GRPCClient) Put(key string, value int64) error {
+	log.Info("gRPC put client has been called...")
+	_, err := m.client.Put(context.Background(), &proto.PutRequest{
+		Key:   key,
+		Value: value,
+	})
 	return err
 }
 
@@ -51,15 +56,23 @@ func (m *GRPCClient) Get(key string) (int64, error) {
 }
 
 // Here is the gRPC server that GRPCClient talks to.
-type GRPCAddHelperServer struct {
+type GRPCDBHelperServer struct {
 	// This is the real implementation
-	Impl AddHelper
+	Impl DBHelper
 }
 
-func (m *GRPCAddHelperServer) Sum(ctx context.Context, req *proto.SumRequest) (resp *proto.SumResponse, err error) {
+func (m *GRPCDBHelperServer) Sum(ctx context.Context, req *proto.SumRequest) (resp *proto.SumResponse, err error) {
 	r, err := m.Impl.Sum(req.A, req.B)
 	if err != nil {
 		return nil, err
 	}
 	return &proto.SumResponse{R: r}, err
+}
+
+func (m *GRPCDBHelperServer) CallAPI(ctx context.Context, req *proto.APIRequest) (resp *proto.APIResponse, err error) {
+	r, err := m.Impl.CallAPI(req.Path, req.Args)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.APIResponse{R: r}, err
 }
