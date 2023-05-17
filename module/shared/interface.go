@@ -13,13 +13,15 @@ var HandshakeConfig = plugin.HandshakeConfig{
 	MagicCookieValue: "hello",
 }
 
-type AddHelper interface {
+type DBHelper interface {
 	Sum(int64, int64) (int64, error)
+	CallAPI(path string, args string) ([]byte, error)
 }
 
 // Module is the interface that we're exposing as a plugin.
 type Module interface {
-	Put(key string, value int64, a AddHelper) error
+	Init(dbHelper DBHelper) error
+	Put(key string, value int64) error
 	Get(key string) (int64, error)
 }
 

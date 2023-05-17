@@ -57,7 +57,7 @@ func LoadModuleWithLocalDir(dir string) error {
 	return nil
 }
 
-var NameOfModule = "action"
+var NameOfModule = "nube-module"
 
 func LoadModuleWithLocal(path string) error {
 	client := plugin.NewClient(&plugin.ClientConfig{
@@ -75,22 +75,11 @@ func LoadModuleWithLocal(path string) error {
 	}
 
 	raw, err := rpcClient.Dispense(NameOfModule)
-	counter := raw.(shared.Module)
+	module := raw.(shared.Module)
 
-	_ = counter.Put("test", 34, &addHelper{})
-	a, err := counter.Get("test")
-	fmt.Println("c>>>>>>>>>>", strconv.Itoa(int(a)), err)
-
-	a, err = counter.Get("test")
-	fmt.Println("c>>>>>>>>>>", strconv.Itoa(int(a)), err)
-
-	a, err = counter.Get("test")
+	_ = module.Init(&dbHelper{})
+	_ = module.Put("test", 34)
+	a, err := module.Get("test")
 	fmt.Println("c>>>>>>>>>>", strconv.Itoa(int(a)), err)
 	return nil
-}
-
-type addHelper struct{}
-
-func (*addHelper) Sum(a, b int64) (int64, error) {
-	return a + b, nil
 }
