@@ -35,44 +35,56 @@ func (m *GRPCClient) Init(dbHelper DBHelper) error {
 	return err
 }
 
-func (m *GRPCClient) Put(key string, value int64) error {
-	log.Info("gRPC put client has been called...")
-	_, err := m.client.Put(context.Background(), &proto.PutRequest{
-		Key:   key,
-		Value: value,
-	})
-	return err
-}
-
-func (m *GRPCClient) Get(key string) (int64, error) {
-	resp, err := m.client.Get(context.Background(), &proto.GetRequest{
-		Key: key,
-	})
-	if err != nil {
-		return 0, err
-	}
-
-	return resp.Value, nil
-}
-
 // Here is the gRPC server that GRPCClient talks to.
 type GRPCDBHelperServer struct {
 	// This is the real implementation
 	Impl DBHelper
 }
 
-func (m *GRPCDBHelperServer) Sum(ctx context.Context, req *proto.SumRequest) (resp *proto.SumResponse, err error) {
-	r, err := m.Impl.Sum(req.A, req.B)
+func (m *GRPCDBHelperServer) GetList(ctx context.Context, req *proto.GetListRequest) (resp *proto.Response, err error) {
+	r, err := m.Impl.GetList(req.Path, req.Args)
 	if err != nil {
 		return nil, err
 	}
-	return &proto.SumResponse{R: r}, err
+	return &proto.Response{R: r}, err
 }
 
-func (m *GRPCDBHelperServer) CallAPI(ctx context.Context, req *proto.APIRequest) (resp *proto.APIResponse, err error) {
-	r, err := m.Impl.CallAPI(req.Path, req.Args)
+func (m *GRPCDBHelperServer) Get(ctx context.Context, req *proto.GetRequest) (resp *proto.Response, err error) {
+	r, err := m.Impl.Get(req.Path, req.Uuid, req.Args)
 	if err != nil {
 		return nil, err
 	}
-	return &proto.APIResponse{R: r}, err
+	return &proto.Response{R: r}, err
+}
+
+func (m *GRPCDBHelperServer) Post(ctx context.Context, req *proto.PostRequest) (resp *proto.Response, err error) {
+	r, err := m.Impl.Post(req.Path, req.Body)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Response{R: r}, err
+}
+
+func (m *GRPCDBHelperServer) Put(ctx context.Context, req *proto.PutRequest) (resp *proto.Response, err error) {
+	r, err := m.Impl.Put(req.Path, req.Uuid, req.Body)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Response{R: r}, err
+}
+
+func (m *GRPCDBHelperServer) Patch(ctx context.Context, req *proto.PatchRequest) (resp *proto.Response, err error) {
+	r, err := m.Impl.Patch(req.Path, req.Uuid, req.Body)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Response{R: r}, err
+}
+
+func (m *GRPCDBHelperServer) Delete(ctx context.Context, req *proto.DeleteRequest) (resp *proto.Response, err error) {
+	r, err := m.Impl.Delete(req.Path, req.Uuid)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Response{R: r}, err
 }

@@ -14,15 +14,17 @@ var HandshakeConfig = plugin.HandshakeConfig{
 }
 
 type DBHelper interface {
-	Sum(int64, int64) (int64, error)
-	CallAPI(path string, args string) ([]byte, error)
+	GetList(path, args string) ([]byte, error)
+	Get(path, uuid, args string) ([]byte, error)
+	Post(path string, body []byte) ([]byte, error)
+	Put(path, uuid string, body []byte) ([]byte, error)
+	Patch(path, uuid string, body []byte) ([]byte, error)
+	Delete(path, uuid string) ([]byte, error)
 }
 
 // Module is the interface that we're exposing as a plugin.
 type Module interface {
 	Init(dbHelper DBHelper) error
-	Put(key string, value int64) error
-	Get(key string) (int64, error)
 }
 
 // This is the implementation of plugin.Plugin so we can serve/consume this.

@@ -9,46 +9,54 @@ message InitRequest {
   uint32 add_server = 1;
 }
 
-message GetRequest {
-  string key = 1;
+message Empty {}
+
+message GetListRequest {
+  string path = 1;
+  string args = 3;
 }
 
-message GetResponse {
-  int64 value = 1;
+message GetRequest {
+  string path = 1;
+  string uuid = 2;
+  string args = 3;
+}
+
+message PostRequest {
+  string path = 1;
+  bytes body = 3;
 }
 
 message PutRequest {
-  string key = 2;
-  int64 value = 3;
-}
-
-message Empty {}
-
-message SumRequest {
-  int64 a = 1;
-  int64 b = 2;
-}
-
-message SumResponse {
-  int64 r = 1;
-}
-
-message APIRequest {
   string path = 1;
-  string args = 2;
+  string uuid = 2;
+  bytes body = 3;
 }
 
-message APIResponse {
+message PatchRequest {
+  string path = 1;
+  string uuid = 2;
+  bytes body = 3;
+}
+
+message DeleteRequest {
+  string path = 1;
+  string uuid = 2;
+}
+
+message Response {
   bytes r = 1;
 }
 
 service Module {
   rpc Init(InitRequest) returns (Empty){}
-  rpc Get(GetRequest) returns (GetResponse){}
-  rpc Put(PutRequest) returns (Empty){}
 }
 
 service DBHelper {
-  rpc Sum(SumRequest) returns (SumResponse);
-  rpc CallAPI(APIRequest) returns (APIResponse);
+  rpc GetList(GetListRequest) returns (Response);
+  rpc Get(GetRequest) returns (Response);
+  rpc Post(PostRequest) returns (Response);
+  rpc Put(PutRequest) returns (Response);
+  rpc Patch(PatchRequest) returns (Response);
+  rpc Delete(DeleteRequest) returns (Response);
 }

@@ -30,38 +30,79 @@ func (m *GRPCServer) Init(ctx context.Context, req *proto.InitRequest) (*proto.E
 	return &proto.Empty{}, m.Impl.Init(dbHelper)
 }
 
-func (m *GRPCServer) Put(ctx context.Context, req *proto.PutRequest) (*proto.Empty, error) {
-	log.Info("gRPC put server has been called...")
-	return &proto.Empty{}, m.Impl.Put(req.Key, req.Value)
-}
-
-func (m *GRPCServer) Get(ctx context.Context, req *proto.GetRequest) (*proto.GetResponse, error) {
-	v, err := m.Impl.Get(req.Key)
-	return &proto.GetResponse{Value: v}, err
-}
-
 // GRPCClient is an implementation of KV that talks over RPC.
 type GRPCDBHelperClient struct{ client proto.DBHelperClient }
 
-func (m *GRPCDBHelperClient) Sum(a, b int64) (int64, error) {
-	resp, err := m.client.Sum(context.Background(), &proto.SumRequest{
-		A: a,
-		B: b,
-	})
-	if err != nil {
-		hclog.Default().Info("add.Sum", "client", "start", "err", err)
-		return 0, err
-	}
-	return resp.R, err
-}
-
-func (m *GRPCDBHelperClient) CallAPI(path, args string) ([]byte, error) {
-	resp, err := m.client.CallAPI(context.Background(), &proto.APIRequest{
+func (m *GRPCDBHelperClient) GetList(path, args string) ([]byte, error) {
+	resp, err := m.client.GetList(context.Background(), &proto.GetListRequest{
 		Path: path,
 		Args: args,
 	})
 	if err != nil {
-		hclog.Default().Info("add.CallAPI", "client", "start", "err", err)
+		hclog.Default().Info("GetList", err)
+		return nil, err
+	}
+	return resp.R, err
+}
+
+func (m *GRPCDBHelperClient) Get(path, uuid, args string) ([]byte, error) {
+	resp, err := m.client.Get(context.Background(), &proto.GetRequest{
+		Path: path,
+		Uuid: uuid,
+		Args: args,
+	})
+	if err != nil {
+		hclog.Default().Info("Get", err)
+		return nil, err
+	}
+	return resp.R, err
+}
+
+func (m *GRPCDBHelperClient) Post(path string, body []byte) ([]byte, error) {
+	resp, err := m.client.Post(context.Background(), &proto.PostRequest{
+		Path: path,
+		Body: body,
+	})
+	if err != nil {
+		hclog.Default().Info("Post", err)
+		return nil, err
+	}
+	return resp.R, err
+}
+
+func (m *GRPCDBHelperClient) Put(path, uuid string, body []byte) ([]byte, error) {
+	resp, err := m.client.Put(context.Background(), &proto.PutRequest{
+		Path: path,
+		Uuid: uuid,
+		Body: body,
+	})
+	if err != nil {
+		hclog.Default().Info("Put", err)
+		return nil, err
+	}
+	return resp.R, err
+}
+
+func (m *GRPCDBHelperClient) Patch(path, uuid string, body []byte) ([]byte, error) {
+	resp, err := m.client.Patch(context.Background(), &proto.PatchRequest{
+		Path: path,
+		Uuid: uuid,
+		Body: body,
+	})
+	if err != nil {
+		hclog.Default().Info("Patch", err)
+		return nil, err
+	}
+	return resp.R, err
+}
+
+func (m *GRPCDBHelperClient) Delete(path, uuid string) ([]byte, error) {
+	resp, err := m.client.Delete(context.Background(), &proto.DeleteRequest{
+		Path: path,
+		Uuid: uuid,
+	})
+	if err != nil {
+		hclog.Default().Info("Delete", err)
 		return nil, err
 	}
 	return resp.R, err
