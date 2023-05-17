@@ -48,8 +48,18 @@ message Response {
   bytes r = 1;
 }
 
+message GetUrlPrefixResponse {
+  string r = 1;
+}
+
 service Module {
-  rpc Init(InitRequest) returns (Empty){}
+  rpc Init(InitRequest) returns (Empty);
+  rpc GetUrlPrefix(Empty) returns (GetUrlPrefixResponse);
+  rpc Get(GetRequest) returns (Response);
+  rpc Post(PostRequest) returns (Response);
+  rpc Put(PutRequest) returns (Response);
+  rpc Patch(PatchRequest) returns (Response);
+  rpc Delete(DeleteRequest) returns (Response);
 }
 
 service DBHelper {

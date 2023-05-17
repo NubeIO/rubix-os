@@ -15,7 +15,7 @@ type GRPCClient struct {
 }
 
 func (m *GRPCClient) Init(dbHelper DBHelper) error {
-	log.Infof("gRPC Init client has been called...")
+	log.Debug("gRPC Init client has been called...")
 	dbHelperServer := &GRPCDBHelperServer{Impl: dbHelper}
 	var s *grpc.Server
 	serverFunc := func(opts []grpc.ServerOption) *grpc.Server {
@@ -33,6 +33,73 @@ func (m *GRPCClient) Init(dbHelper DBHelper) error {
 
 	// s.Stop() // TODO: we haven't closed this
 	return err
+}
+
+func (m *GRPCClient) GetUrlPrefix() (string, error) {
+	log.Debug("gRPC GetUrlPrefix client has been called...")
+	resp, err := m.client.GetUrlPrefix(context.Background(), &proto.Empty{})
+	if err != nil {
+		return "", err
+	}
+	return resp.R, nil
+}
+
+func (m *GRPCClient) Get(path string) ([]byte, error) {
+	log.Debug("gRPC Get client has been called...")
+	resp, err := m.client.Get(context.Background(), &proto.GetRequest{
+		Path: path,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.R, nil
+}
+
+func (m *GRPCClient) Post(path string, body []byte) ([]byte, error) {
+	log.Debug("gRPC Post client has been called...")
+	resp, err := m.client.Post(context.Background(), &proto.PostRequest{
+		Path: path,
+		Body: body,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.R, nil
+}
+
+func (m *GRPCClient) Put(path string, body []byte) ([]byte, error) {
+	log.Debugf("gRPC Put client has been called...")
+	resp, err := m.client.Put(context.Background(), &proto.PutRequest{
+		Path: path,
+		Body: body,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.R, nil
+}
+
+func (m *GRPCClient) Patch(path string, body []byte) ([]byte, error) {
+	log.Debug("gRPC Patch client has been called...")
+	resp, err := m.client.Patch(context.Background(), &proto.PatchRequest{
+		Path: path,
+		Body: body,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.R, nil
+}
+
+func (m *GRPCClient) Delete(path string) ([]byte, error) {
+	log.Debug("gRPC Delete client has been called...")
+	resp, err := m.client.Delete(context.Background(), &proto.DeleteRequest{
+		Path: path,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resp.R, nil
 }
 
 // Here is the gRPC server that GRPCClient talks to.

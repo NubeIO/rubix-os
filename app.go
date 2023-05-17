@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/module"
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/services/localmqtt"
 	"github.com/NubeIO/flow-framework/utils/boolean"
@@ -111,7 +110,6 @@ func main() {
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)
 	initFlushBuffers()
-	err = module.ReLoadModulesWithDir(config.Get().GetAbsModulesDir())
 
 	runner.Run(engine, conf)
 }

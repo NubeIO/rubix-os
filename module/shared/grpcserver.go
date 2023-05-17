@@ -20,7 +20,7 @@ type GRPCServer struct {
 }
 
 func (m *GRPCServer) Init(ctx context.Context, req *proto.InitRequest) (*proto.Empty, error) {
-	log.Info("gRPC Init server has been called...")
+	log.Debug("gRPC Init server has been called...")
 	conn, err := m.broker.Dial(req.AddServer)
 	if err != nil {
 		return nil, err
@@ -28,6 +28,60 @@ func (m *GRPCServer) Init(ctx context.Context, req *proto.InitRequest) (*proto.E
 	// defer conn.Close() // TODO: we haven't closed this
 	dbHelper := &GRPCDBHelperClient{proto.NewDBHelperClient(conn)}
 	return &proto.Empty{}, m.Impl.Init(dbHelper)
+}
+
+func (m *GRPCServer) GetUrlPrefix(ctx context.Context, req *proto.Empty) (*proto.GetUrlPrefixResponse, error) {
+	log.Debug("gRPC GetUrlPrefix server has been called...")
+	r, err := m.Impl.GetUrlPrefix()
+	if err != nil {
+		return nil, err
+	}
+	return &proto.GetUrlPrefixResponse{R: r}, err
+}
+
+func (m *GRPCServer) Get(ctx context.Context, req *proto.GetRequest) (*proto.Response, error) {
+	log.Debug("gRPC Get server has been called...")
+	r, err := m.Impl.Get(req.Path)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Response{R: r}, err
+}
+
+func (m *GRPCServer) Post(ctx context.Context, req *proto.PostRequest) (*proto.Response, error) {
+	log.Debug("gRPC Post server has been called...")
+	r, err := m.Impl.Post(req.Path, req.Body)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Response{R: r}, err
+}
+
+func (m *GRPCServer) Put(ctx context.Context, req *proto.PutRequest) (*proto.Response, error) {
+	log.Debug("gRPC Put server has been called...")
+	r, err := m.Impl.Put(req.Path, req.Body)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Response{R: r}, err
+}
+
+func (m *GRPCServer) Patch(ctx context.Context, req *proto.PatchRequest) (*proto.Response, error) {
+	log.Debug("gRPC Patch server has been called...")
+	r, err := m.Impl.Patch(req.Path, req.Body)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Response{R: r}, err
+}
+
+func (m *GRPCServer) Delete(ctx context.Context, req *proto.DeleteRequest) (*proto.Response, error) {
+	log.Debug("gRPC Delete server has been called...")
+	r, err := m.Impl.Delete(req.Path)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Response{R: r}, err
 }
 
 // GRPCClient is an implementation of KV that talks over RPC.

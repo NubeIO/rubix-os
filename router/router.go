@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"github.com/NubeDev/location"
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/auth"
@@ -9,10 +8,12 @@ import (
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/logger"
+	"github.com/NubeIO/flow-framework/module"
 	"github.com/NubeIO/flow-framework/nerrors"
 	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
@@ -22,10 +23,23 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
-	// http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginsDir(), engine.Group("/api/plugins/api"))
+
+	authHandler := api.AuthAPI{}
+	handleAuth := func(c *gin.Context) { c.Next() }
+	if *conf.Auth {
+		handleAuth = authHandler.HandleAuth()
+	}
+	apiRoutesTemp := engine.Group("/api", handleAuth) // TODO: remove this one and use the same one
+	// http://localhost:1660/api/plugins/api/system/schema/json/device
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginsDir(), apiRoutesTemp.Group("/plugins/api"))
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
+		panic(err)
+	}
+
+	err = module.ReLoadModulesWithDir(config.Get().GetAbsModulesDir(), apiRoutesTemp.Group("/modules"))
+	if err != nil {
+		log.Error(err)
 		panic(err)
 	}
 	db.PluginManager = pluginManager
@@ -122,7 +136,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
-	authHandler := api.AuthAPI{}
 
 	dbGroup.SyncTopics()
 
@@ -138,12 +151,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration) *gin.Engine {
 	})
 
 	engine.Use(cors.New(auth.CorsConfig(conf)))
-	engine.OPTIONS("/*any")
 
-	handleAuth := func(c *gin.Context) { c.Next() }
-	if *conf.Auth {
-		handleAuth = authHandler.HandleAuth()
-	}
 	apiRoutes := engine.Group("/api", handleAuth)
 	{
 		fnProxy := apiRoutes.Group("/fn")

@@ -22,7 +22,13 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Module_Init_FullMethodName = "/proto.Module/Init"
+	Module_Init_FullMethodName         = "/proto.Module/Init"
+	Module_GetUrlPrefix_FullMethodName = "/proto.Module/GetUrlPrefix"
+	Module_Get_FullMethodName          = "/proto.Module/Get"
+	Module_Post_FullMethodName         = "/proto.Module/Post"
+	Module_Put_FullMethodName          = "/proto.Module/Put"
+	Module_Patch_FullMethodName        = "/proto.Module/Patch"
+	Module_Delete_FullMethodName       = "/proto.Module/Delete"
 )
 
 // ModuleClient is the client API for Module service.
@@ -30,6 +36,12 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ModuleClient interface {
 	Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*Empty, error)
+	GetUrlPrefix(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetUrlPrefixResponse, error)
+	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Response, error)
+	Post(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Response, error)
+	Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*Response, error)
+	Patch(ctx context.Context, in *PatchRequest, opts ...grpc.CallOption) (*Response, error)
+	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*Response, error)
 }
 
 type moduleClient struct {
@@ -49,11 +61,71 @@ func (c *moduleClient) Init(ctx context.Context, in *InitRequest, opts ...grpc.C
 	return out, nil
 }
 
+func (c *moduleClient) GetUrlPrefix(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetUrlPrefixResponse, error) {
+	out := new(GetUrlPrefixResponse)
+	err := c.cc.Invoke(ctx, Module_GetUrlPrefix_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *moduleClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, Module_Get_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *moduleClient) Post(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, Module_Post_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *moduleClient) Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, Module_Put_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *moduleClient) Patch(ctx context.Context, in *PatchRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, Module_Patch_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *moduleClient) Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, Module_Delete_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ModuleServer is the server API for Module service.
 // All implementations should embed UnimplementedModuleServer
 // for forward compatibility
 type ModuleServer interface {
 	Init(context.Context, *InitRequest) (*Empty, error)
+	GetUrlPrefix(context.Context, *Empty) (*GetUrlPrefixResponse, error)
+	Get(context.Context, *GetRequest) (*Response, error)
+	Post(context.Context, *PostRequest) (*Response, error)
+	Put(context.Context, *PutRequest) (*Response, error)
+	Patch(context.Context, *PatchRequest) (*Response, error)
+	Delete(context.Context, *DeleteRequest) (*Response, error)
 }
 
 // UnimplementedModuleServer should be embedded to have forward compatible implementations.
@@ -62,6 +134,24 @@ type UnimplementedModuleServer struct {
 
 func (UnimplementedModuleServer) Init(context.Context, *InitRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Init not implemented")
+}
+func (UnimplementedModuleServer) GetUrlPrefix(context.Context, *Empty) (*GetUrlPrefixResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUrlPrefix not implemented")
+}
+func (UnimplementedModuleServer) Get(context.Context, *GetRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
+}
+func (UnimplementedModuleServer) Post(context.Context, *PostRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Post not implemented")
+}
+func (UnimplementedModuleServer) Put(context.Context, *PutRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Put not implemented")
+}
+func (UnimplementedModuleServer) Patch(context.Context, *PatchRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Patch not implemented")
+}
+func (UnimplementedModuleServer) Delete(context.Context, *DeleteRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
 
 // UnsafeModuleServer may be embedded to opt out of forward compatibility for this service.
@@ -93,6 +183,114 @@ func _Module_Init_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Module_GetUrlPrefix_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModuleServer).GetUrlPrefix(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Module_GetUrlPrefix_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModuleServer).GetUrlPrefix(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Module_Get_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModuleServer).Get(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Module_Get_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModuleServer).Get(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Module_Post_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModuleServer).Post(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Module_Post_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModuleServer).Post(ctx, req.(*PostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Module_Put_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModuleServer).Put(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Module_Put_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModuleServer).Put(ctx, req.(*PutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Module_Patch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PatchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModuleServer).Patch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Module_Patch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModuleServer).Patch(ctx, req.(*PatchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Module_Delete_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModuleServer).Delete(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Module_Delete_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModuleServer).Delete(ctx, req.(*DeleteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Module_ServiceDesc is the grpc.ServiceDesc for Module service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -103,6 +301,30 @@ var Module_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Init",
 			Handler:    _Module_Init_Handler,
+		},
+		{
+			MethodName: "GetUrlPrefix",
+			Handler:    _Module_GetUrlPrefix_Handler,
+		},
+		{
+			MethodName: "Get",
+			Handler:    _Module_Get_Handler,
+		},
+		{
+			MethodName: "Post",
+			Handler:    _Module_Post_Handler,
+		},
+		{
+			MethodName: "Put",
+			Handler:    _Module_Put_Handler,
+		},
+		{
+			MethodName: "Patch",
+			Handler:    _Module_Patch_Handler,
+		},
+		{
+			MethodName: "Delete",
+			Handler:    _Module_Delete_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
