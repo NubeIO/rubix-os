@@ -332,19 +332,19 @@ var Module_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	DBHelper_GetList_FullMethodName = "/proto.DBHelper/GetList"
-	DBHelper_Get_FullMethodName     = "/proto.DBHelper/Get"
-	DBHelper_Post_FullMethodName    = "/proto.DBHelper/Post"
-	DBHelper_Put_FullMethodName     = "/proto.DBHelper/Put"
-	DBHelper_Patch_FullMethodName   = "/proto.DBHelper/Patch"
-	DBHelper_Delete_FullMethodName  = "/proto.DBHelper/Delete"
+	DBHelper_GetWithoutParam_FullMethodName = "/proto.DBHelper/GetWithoutParam"
+	DBHelper_Get_FullMethodName             = "/proto.DBHelper/Get"
+	DBHelper_Post_FullMethodName            = "/proto.DBHelper/Post"
+	DBHelper_Put_FullMethodName             = "/proto.DBHelper/Put"
+	DBHelper_Patch_FullMethodName           = "/proto.DBHelper/Patch"
+	DBHelper_Delete_FullMethodName          = "/proto.DBHelper/Delete"
 )
 
 // DBHelperClient is the client API for DBHelper service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DBHelperClient interface {
-	GetList(ctx context.Context, in *GetListRequest, opts ...grpc.CallOption) (*Response, error)
+	GetWithoutParam(ctx context.Context, in *GetWithoutParamRequest, opts ...grpc.CallOption) (*Response, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Response, error)
 	Post(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Response, error)
 	Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*Response, error)
@@ -360,9 +360,9 @@ func NewDBHelperClient(cc grpc.ClientConnInterface) DBHelperClient {
 	return &dBHelperClient{cc}
 }
 
-func (c *dBHelperClient) GetList(ctx context.Context, in *GetListRequest, opts ...grpc.CallOption) (*Response, error) {
+func (c *dBHelperClient) GetWithoutParam(ctx context.Context, in *GetWithoutParamRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, DBHelper_GetList_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, DBHelper_GetWithoutParam_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -418,7 +418,7 @@ func (c *dBHelperClient) Delete(ctx context.Context, in *DeleteRequest, opts ...
 // All implementations should embed UnimplementedDBHelperServer
 // for forward compatibility
 type DBHelperServer interface {
-	GetList(context.Context, *GetListRequest) (*Response, error)
+	GetWithoutParam(context.Context, *GetWithoutParamRequest) (*Response, error)
 	Get(context.Context, *GetRequest) (*Response, error)
 	Post(context.Context, *PostRequest) (*Response, error)
 	Put(context.Context, *PutRequest) (*Response, error)
@@ -430,8 +430,8 @@ type DBHelperServer interface {
 type UnimplementedDBHelperServer struct {
 }
 
-func (UnimplementedDBHelperServer) GetList(context.Context, *GetListRequest) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetList not implemented")
+func (UnimplementedDBHelperServer) GetWithoutParam(context.Context, *GetWithoutParamRequest) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWithoutParam not implemented")
 }
 func (UnimplementedDBHelperServer) Get(context.Context, *GetRequest) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -460,20 +460,20 @@ func RegisterDBHelperServer(s grpc.ServiceRegistrar, srv DBHelperServer) {
 	s.RegisterService(&DBHelper_ServiceDesc, srv)
 }
 
-func _DBHelper_GetList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetListRequest)
+func _DBHelper_GetWithoutParam_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWithoutParamRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DBHelperServer).GetList(ctx, in)
+		return srv.(DBHelperServer).GetWithoutParam(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DBHelper_GetList_FullMethodName,
+		FullMethod: DBHelper_GetWithoutParam_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DBHelperServer).GetList(ctx, req.(*GetListRequest))
+		return srv.(DBHelperServer).GetWithoutParam(ctx, req.(*GetWithoutParamRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -576,8 +576,8 @@ var DBHelper_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DBHelperServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetList",
-			Handler:    _DBHelper_GetList_Handler,
+			MethodName: "GetWithoutParam",
+			Handler:    _DBHelper_GetWithoutParam_Handler,
 		},
 		{
 			MethodName: "Get",
