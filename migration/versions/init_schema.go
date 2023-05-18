@@ -41,5 +41,7 @@ func GetInitInterfaces() []interface{} {
 		&model.SnapshotLog{},
 		&model.SnapshotCreateLog{},
 		&model.SnapshotRestoreLog{},
+		&model.Member{},
+		&model.MemberDevice{},
 	}
 }

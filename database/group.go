@@ -27,6 +27,7 @@ func (d *GormDatabase) GetGroup(uuid string) (*model.Group, error) {
 
 func (d *GormDatabase) CreateGroup(body *model.Group) (*model.Group, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Group)
+	body.Members = nil
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
