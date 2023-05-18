@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/NubeIO/flow-framework/database"
+	"github.com/NubeIO/flow-framework/module/common"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -22,6 +23,10 @@ func (*dbHelper) GetWithoutParam(path, args string) ([]byte, error) {
 		out, err = database.GlobalGormDatabase.GetPoints(apiArgs)
 	} else if path == "flow_networks" {
 		out, err = database.GlobalGormDatabase.GetFlowNetworks(apiArgs)
+	} else if path == "one_device_by_args" {
+		out, err = database.GlobalGormDatabase.GetOneDeviceByArgs(apiArgs)
+	} else if path == "one_point_by_args" {
+		out, err = database.GlobalGormDatabase.GetOneDeviceByArgs(apiArgs)
 	} else {
 		return nil, errors.New("not found")
 	}
@@ -39,7 +44,7 @@ func (*dbHelper) Get(path, uuid, args string) ([]byte, error) {
 	} else if path == "points" {
 		out, err = database.GlobalGormDatabase.GetPoint(uuid, apiArgs)
 	} else if path == "networks_by_plugin_name" {
-		out, err = database.GlobalGormDatabase.GetNetworkByPluginName(uuid, apiArgs)
+		out, err = database.GlobalGormDatabase.GetNetworksByPluginName(uuid, apiArgs)
 	} else {
 		return nil, errors.New("not found")
 	}
@@ -110,6 +115,55 @@ func (*dbHelper) Patch(path, uuid string, body []byte) ([]byte, error) {
 			return nil, err
 		}
 		out, err = database.GlobalGormDatabase.UpdatePoint(uuid, &point)
+	} else if path == "network_errors" {
+		network := model.Network{}
+		err = json.Unmarshal(body, &network)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		err = database.GlobalGormDatabase.UpdateNetworkErrors(uuid, &network)
+	} else if path == "device_errors" {
+		device := model.Device{}
+		err = json.Unmarshal(body, &device)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		err = database.GlobalGormDatabase.UpdateDeviceErrors(uuid, &device)
+	} else if path == "point_errors" {
+		point := model.Point{}
+		err = json.Unmarshal(body, &point)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		err = database.GlobalGormDatabase.UpdatePointErrors(uuid, &point)
+	} else if path == "point_success" {
+		point := model.Point{}
+		err = json.Unmarshal(body, &point)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		err = database.GlobalGormDatabase.UpdatePointSuccess(uuid, &point)
+	} else if path == "point_write" {
+		pw := model.PointWriter{}
+		err = json.Unmarshal(body, &pw)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := database.GlobalGormDatabase.PointWrite(uuid, &pw, nil, false)
+		if err != nil {
+			return nil, err
+		}
+		out = common.PointWriteResponse{
+			Point:                *point,
+			IsPresentValueChange: isPresentValueChange,
+			IsWriteValueChange:   isWriteValueChange,
+			IsPriorityChanged:    isPriorityChanged,
+		}
 	} else {
 		return nil, errors.New("not found")
 	}

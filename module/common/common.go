@@ -18,3 +18,10 @@ func GetFlowNetworkNames(fns []*model.FlowNetwork) []string {
 	}
 	return fnsNames
 }
+
+type PointWriteResponse struct {
+	Point                model.Point `json:"point"`
+	IsPresentValueChange bool        `json:"is_present_value_change"`
+	IsWriteValueChange   bool        `json:"is_write_value_change"`
+	IsPriorityChanged    bool        `json:"is_priority_changed"`
+}

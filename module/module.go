@@ -107,24 +107,24 @@ func ProxyModule(c *gin.Context) {
 		res, err = (*module).Get(proxyPath)
 	} else if method == "POST" {
 		status = http.StatusCreated
-		requestBody, err := ioutil.ReadAll(c.Request.Body)
-		if err != nil {
+		requestBody, e := ioutil.ReadAll(c.Request.Body)
+		if e != nil {
 			c.JSON(http.StatusInternalServerError, interfaces.Message{Message: err.Error()})
 			return
 		}
 		res, err = (*module).Post(proxyPath, requestBody)
 	} else if method == "PUT" {
 		status = http.StatusOK
-		requestBody, err := ioutil.ReadAll(c.Request.Body)
-		if err != nil {
+		requestBody, e := ioutil.ReadAll(c.Request.Body)
+		if e != nil {
 			c.JSON(http.StatusInternalServerError, interfaces.Message{Message: err.Error()})
 			return
 		}
 		res, err = (*module).Put(proxyPath, requestBody)
 	} else if method == "PATCH" {
 		status = http.StatusOK
-		requestBody, err := ioutil.ReadAll(c.Request.Body)
-		if err != nil {
+		requestBody, e := ioutil.ReadAll(c.Request.Body)
+		if e != nil {
 			c.JSON(http.StatusInternalServerError, interfaces.Message{Message: err.Error()})
 			return
 		}
@@ -135,7 +135,7 @@ func ProxyModule(c *gin.Context) {
 	}
 
 	if err != nil {
-		c.JSON(http.StatusNotFound, interfaces.Message{Message: err.Error()})
+		c.JSON(http.StatusInternalServerError, interfaces.Message{Message: err.Error()})
 		return
 	}
 	c.Data(status, "application/json", res)
