@@ -108,8 +108,8 @@ type GRPCDBHelperServer struct {
 	Impl DBHelper
 }
 
-func (m *GRPCDBHelperServer) GetList(ctx context.Context, req *proto.GetListRequest) (resp *proto.Response, err error) {
-	r, err := m.Impl.GetList(req.Path, req.Args)
+func (m *GRPCDBHelperServer) GetWithoutParam(ctx context.Context, req *proto.GetWithoutParamRequest) (resp *proto.Response, err error) {
+	r, err := m.Impl.GetWithoutParam(req.Path, req.Args)
 	if err != nil {
 		return nil, err
 	}

@@ -10,7 +10,7 @@ import (
 
 type dbHelper struct{}
 
-func (*dbHelper) GetList(path, args string) ([]byte, error) {
+func (*dbHelper) GetWithoutParam(path, args string) ([]byte, error) {
 	apiArgs := parseArgs(args)
 	var out interface{}
 	var err error
@@ -20,6 +20,8 @@ func (*dbHelper) GetList(path, args string) ([]byte, error) {
 		out, err = database.GlobalGormDatabase.GetDevices(apiArgs)
 	} else if path == "points" {
 		out, err = database.GlobalGormDatabase.GetPoints(apiArgs)
+	} else if path == "flow_networks" {
+		out, err = database.GlobalGormDatabase.GetFlowNetworks(apiArgs)
 	} else {
 		return nil, errors.New("not found")
 	}
@@ -36,6 +38,8 @@ func (*dbHelper) Get(path, uuid, args string) ([]byte, error) {
 		out, err = database.GlobalGormDatabase.GetNetwork(uuid, apiArgs)
 	} else if path == "points" {
 		out, err = database.GlobalGormDatabase.GetPoint(uuid, apiArgs)
+	} else if path == "networks_by_plugin_name" {
+		out, err = database.GlobalGormDatabase.GetNetworkByPluginName(uuid, apiArgs)
 	} else {
 		return nil, errors.New("not found")
 	}

@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/loramodel"
 	"github.com/NubeIO/lib-schema/loraschema"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -121,27 +120,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else {
 			ctx.JSON(http.StatusOK, serial)
 		}
-	})
-
-	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		fns, err := inst.db.GetFlowNetworks(api.Args{})
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		}
-		fnsNames := make([]string, 0)
-		for _, fn := range fns {
-			fnsNames = append(fnsNames, fn.Name)
-		}
-		deviceSchema := loramodel.GetNetworkSchema()
-		deviceSchema.AutoMappingFlowNetworkName.Options = fnsNames
-		ctx.JSON(http.StatusOK, deviceSchema)
-	})
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, loramodel.GetDeviceSchema())
-	})
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, loramodel.GetPointSchema())
 	})
 
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {

@@ -11,7 +11,7 @@ message InitRequest {
 
 message Empty {}
 
-message GetListRequest {
+message GetWithoutParamRequest {
   string path = 1;
   string args = 3;
 }
@@ -63,7 +63,7 @@ service Module {
 }
 
 service DBHelper {
-  rpc GetList(GetListRequest) returns (Response);
+  rpc GetWithoutParam(GetWithoutParamRequest) returns (Response);
   rpc Get(GetRequest) returns (Response);
   rpc Post(PostRequest) returns (Response);
   rpc Put(PutRequest) returns (Response);

@@ -14,7 +14,7 @@ var HandshakeConfig = plugin.HandshakeConfig{
 }
 
 type DBHelper interface {
-	GetList(path, args string) ([]byte, error)
+	GetWithoutParam(path, args string) ([]byte, error)
 	Get(path, uuid, args string) ([]byte, error)
 	Post(path string, body []byte) ([]byte, error)
 	Put(path, uuid string, body []byte) ([]byte, error)

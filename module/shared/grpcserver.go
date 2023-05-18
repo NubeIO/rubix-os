@@ -87,8 +87,8 @@ func (m *GRPCServer) Delete(ctx context.Context, req *proto.DeleteRequest) (*pro
 // GRPCClient is an implementation of KV that talks over RPC.
 type GRPCDBHelperClient struct{ client proto.DBHelperClient }
 
-func (m *GRPCDBHelperClient) GetList(path, args string) ([]byte, error) {
-	resp, err := m.client.GetList(context.Background(), &proto.GetListRequest{
+func (m *GRPCDBHelperClient) GetWithoutParam(path, args string) ([]byte, error) {
+	resp, err := m.client.GetWithoutParam(context.Background(), &proto.GetWithoutParamRequest{
 		Path: path,
 		Args: args,
 	})
