@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.14.1](https://github.com/NubeIO/flow-framework/tree/v0.14.1) (2023-05-19)
+
+- LoRaWAN plugin updates
+- Networklinker plugin updates
+
 ## [v0.14.0](https://github.com/NubeIO/flow-framework/tree/v0.14.0) (2023-05-10)
 
 - Add schedule auto-mapping
