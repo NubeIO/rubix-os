@@ -14,7 +14,7 @@ type GRPCClient struct {
 	client proto.ModuleClient
 }
 
-func (m *GRPCClient) Init(dbHelper DBHelper) error {
+func (m *GRPCClient) Init(dbHelper DBHelper, moduleName string) error {
 	log.Debug("gRPC Init client has been called...")
 	dbHelperServer := &GRPCDBHelperServer{Impl: dbHelper}
 	var s *grpc.Server
@@ -28,20 +28,36 @@ func (m *GRPCClient) Init(dbHelper DBHelper) error {
 	go m.broker.AcceptAndServe(brokerID, serverFunc)
 
 	_, err := m.client.Init(context.Background(), &proto.InitRequest{
-		AddServer: brokerID,
+		AddServer:  brokerID,
+		ModuleName: moduleName,
 	})
 
 	// s.Stop() // TODO: we haven't closed this
 	return err
 }
 
-func (m *GRPCClient) GetUrlPrefix() (string, error) {
+func (m *GRPCClient) GetInfo() (*Info, error) {
+	log.Debug("gRPC GetInfo client has been called...")
+	resp, err := m.client.GetInfo(context.Background(), &proto.Empty{})
+	if err != nil {
+		return nil, err
+	}
+	return &Info{
+		Name:       resp.Name,
+		Author:     resp.Author,
+		Website:    resp.Website,
+		License:    resp.License,
+		HasNetwork: resp.HasNetwork,
+	}, nil
+}
+
+func (m *GRPCClient) GetUrlPrefix() (*string, error) {
 	log.Debug("gRPC GetUrlPrefix client has been called...")
 	resp, err := m.client.GetUrlPrefix(context.Background(), &proto.Empty{})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return resp.R, nil
+	return &resp.R, nil
 }
 
 func (m *GRPCClient) Get(path string) ([]byte, error) {

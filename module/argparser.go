@@ -22,9 +22,9 @@ func parseArgs(args string) api.Args {
 				r, _ := strconv.ParseBool(argParts[1])
 				apiArgs.WithPriority = r
 			} else if argParts[0] == "address_uuid" {
-				apiArgs.AddressUUID = &argsParts[1]
+				apiArgs.AddressUUID = &argParts[1]
 			} else if argParts[0] == "io_number" {
-				apiArgs.IoNumber = &argsParts[1]
+				apiArgs.IoNumber = &argParts[1]
 			}
 		}
 	}
