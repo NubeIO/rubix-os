@@ -22,10 +22,19 @@ type DBHelper interface {
 	Delete(path, uuid string) ([]byte, error)
 }
 
+type Info struct {
+	Name       string
+	Author     string
+	Website    string
+	License    string
+	HasNetwork bool
+}
+
 // Module is the interface that we're exposing as a plugin.
 type Module interface {
-	Init(dbHelper DBHelper) error
-	GetUrlPrefix() (string, error)
+	Init(dbHelper DBHelper, moduleName string) error
+	GetInfo() (*Info, error)
+	GetUrlPrefix() (*string, error)
 	Get(path string) ([]byte, error)
 	Post(path string, body []byte) ([]byte, error)
 	Put(path string, body []byte) ([]byte, error)

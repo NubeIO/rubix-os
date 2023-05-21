@@ -7,6 +7,7 @@ option go_package = "github.com/NubeIO/flow-framework/module/proto";
 
 message InitRequest {
   uint32 add_server = 1;
+  string module_name = 2;
 }
 
 message Empty {}
@@ -48,13 +49,22 @@ message Response {
   bytes r = 1;
 }
 
-message GetUrlPrefixResponse {
+message InfoResponse {
+  string Name = 1;
+  string Author = 2;
+  string Website = 3;
+  string License = 4;
+  bool HasNetwork = 5;
+}
+
+message UrlPrefixResponse {
   string r = 1;
 }
 
 service Module {
   rpc Init(InitRequest) returns (Empty);
-  rpc GetUrlPrefix(Empty) returns (GetUrlPrefixResponse);
+  rpc GetInfo(Empty) returns (InfoResponse);
+  rpc GetUrlPrefix(Empty) returns (UrlPrefixResponse);
   rpc Get(GetRequest) returns (Response);
   rpc Post(PostRequest) returns (Response);
   rpc Put(PutRequest) returns (Response);

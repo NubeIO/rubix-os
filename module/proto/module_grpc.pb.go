@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	Module_Init_FullMethodName         = "/proto.Module/Init"
+	Module_GetInfo_FullMethodName      = "/proto.Module/GetInfo"
 	Module_GetUrlPrefix_FullMethodName = "/proto.Module/GetUrlPrefix"
 	Module_Get_FullMethodName          = "/proto.Module/Get"
 	Module_Post_FullMethodName         = "/proto.Module/Post"
@@ -36,7 +37,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ModuleClient interface {
 	Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*Empty, error)
-	GetUrlPrefix(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetUrlPrefixResponse, error)
+	GetInfo(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*InfoResponse, error)
+	GetUrlPrefix(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*UrlPrefixResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Response, error)
 	Post(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Response, error)
 	Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*Response, error)
@@ -61,8 +63,17 @@ func (c *moduleClient) Init(ctx context.Context, in *InitRequest, opts ...grpc.C
 	return out, nil
 }
 
-func (c *moduleClient) GetUrlPrefix(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetUrlPrefixResponse, error) {
-	out := new(GetUrlPrefixResponse)
+func (c *moduleClient) GetInfo(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*InfoResponse, error) {
+	out := new(InfoResponse)
+	err := c.cc.Invoke(ctx, Module_GetInfo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *moduleClient) GetUrlPrefix(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*UrlPrefixResponse, error) {
+	out := new(UrlPrefixResponse)
 	err := c.cc.Invoke(ctx, Module_GetUrlPrefix_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -120,7 +131,8 @@ func (c *moduleClient) Delete(ctx context.Context, in *DeleteRequest, opts ...gr
 // for forward compatibility
 type ModuleServer interface {
 	Init(context.Context, *InitRequest) (*Empty, error)
-	GetUrlPrefix(context.Context, *Empty) (*GetUrlPrefixResponse, error)
+	GetInfo(context.Context, *Empty) (*InfoResponse, error)
+	GetUrlPrefix(context.Context, *Empty) (*UrlPrefixResponse, error)
 	Get(context.Context, *GetRequest) (*Response, error)
 	Post(context.Context, *PostRequest) (*Response, error)
 	Put(context.Context, *PutRequest) (*Response, error)
@@ -135,7 +147,10 @@ type UnimplementedModuleServer struct {
 func (UnimplementedModuleServer) Init(context.Context, *InitRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Init not implemented")
 }
-func (UnimplementedModuleServer) GetUrlPrefix(context.Context, *Empty) (*GetUrlPrefixResponse, error) {
+func (UnimplementedModuleServer) GetInfo(context.Context, *Empty) (*InfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
+}
+func (UnimplementedModuleServer) GetUrlPrefix(context.Context, *Empty) (*UrlPrefixResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUrlPrefix not implemented")
 }
 func (UnimplementedModuleServer) Get(context.Context, *GetRequest) (*Response, error) {
@@ -179,6 +194,24 @@ func _Module_Init_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ModuleServer).Init(ctx, req.(*InitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Module_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModuleServer).GetInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Module_GetInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModuleServer).GetInfo(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -301,6 +334,10 @@ var Module_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Init",
 			Handler:    _Module_Init_Handler,
+		},
+		{
+			MethodName: "GetInfo",
+			Handler:    _Module_GetInfo_Handler,
 		},
 		{
 			MethodName: "GetUrlPrefix",

@@ -27,16 +27,31 @@ func (m *GRPCServer) Init(ctx context.Context, req *proto.InitRequest) (*proto.E
 	}
 	// defer conn.Close() // TODO: we haven't closed this
 	dbHelper := &GRPCDBHelperClient{proto.NewDBHelperClient(conn)}
-	return &proto.Empty{}, m.Impl.Init(dbHelper)
+	return &proto.Empty{}, m.Impl.Init(dbHelper, req.ModuleName)
 }
 
-func (m *GRPCServer) GetUrlPrefix(ctx context.Context, req *proto.Empty) (*proto.GetUrlPrefixResponse, error) {
+func (m *GRPCServer) GetInfo(ctx context.Context, req *proto.Empty) (*proto.InfoResponse, error) {
+	log.Debug("gRPC GetInfo server has been called...")
+	r, err := m.Impl.GetInfo()
+	if err != nil {
+		return nil, err
+	}
+	return &proto.InfoResponse{
+		Name:       r.Name,
+		Author:     r.Author,
+		Website:    r.Website,
+		License:    r.License,
+		HasNetwork: r.HasNetwork,
+	}, err
+}
+
+func (m *GRPCServer) GetUrlPrefix(ctx context.Context, req *proto.Empty) (*proto.UrlPrefixResponse, error) {
 	log.Debug("gRPC GetUrlPrefix server has been called...")
 	r, err := m.Impl.GetUrlPrefix()
 	if err != nil {
 		return nil, err
 	}
-	return &proto.GetUrlPrefixResponse{R: r}, err
+	return &proto.UrlPrefixResponse{R: *r}, err
 }
 
 func (m *GRPCServer) Get(ctx context.Context, req *proto.GetRequest) (*proto.Response, error) {

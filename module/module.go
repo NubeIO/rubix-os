@@ -2,8 +2,10 @@ package module
 
 import (
 	"fmt"
+	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/flow-framework/module/shared"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
@@ -74,18 +76,50 @@ func LoadModuleWithLocal(path string, mux *gin.RouterGroup) error {
 	raw, err := rpcClient.Dispense(NameOfModule)
 	module := raw.(shared.Module)
 
-	_ = module.Init(&dbHelper{})
+	moduleName := getModuleName(path)
+	_ = module.Init(&dbHelper{}, moduleName)
+	_, err = createPluginConf(module, moduleName)
+	if err != nil {
+		log.Error(err)
+	}
 	urlPrefix, err := module.GetUrlPrefix()
 	if err != nil {
 		log.Error(err)
-	} else if urlPrefix == "" {
+	} else if urlPrefix == nil {
 		log.Errorf("url prefix is empty for module %s", path)
 	} else {
-		clients[urlPrefix] = client
-		modules[urlPrefix] = &module
-		mux.Any(fmt.Sprintf("/%s/*proxyPath", urlPrefix), ProxyModule)
+		clients[*urlPrefix] = client
+		modules[*urlPrefix] = &module
+		mux.Any(fmt.Sprintf("/%s/*proxyPath", *urlPrefix), ProxyModule)
 	}
 	return nil
+}
+
+func createPluginConf(module shared.Module, moduleName string) (*model.PluginConf, error) {
+	info, err := module.GetInfo()
+	if err != nil {
+		return nil, err
+	}
+	pluginConf, _ := database.GlobalGormDatabase.GetPluginByPath(moduleName)
+
+	if pluginConf == nil {
+		pluginConf = &model.PluginConf{
+			Name:       info.Name,
+			ModulePath: moduleName,
+			HasNetwork: info.HasNetwork,
+		}
+		if err := database.GlobalGormDatabase.CreatePlugin(pluginConf); err != nil {
+			return nil, err
+		}
+	}
+	return pluginConf, nil
+}
+
+// moduleName, modulePath and pluginName are same
+func getModuleName(path string) string {
+	parts := strings.Split(path, "/")
+	module := parts[len(parts)-1]
+	return fmt.Sprintf("%s-module", module)
 }
 
 func ProxyModule(c *gin.Context) {
