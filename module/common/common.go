@@ -5,10 +5,10 @@ import (
 )
 
 const (
-	NetworksURL    = "/networks"
-	DevicesURL     = "/devices"
-	PointsURL      = "/points"
-	PointsWriteURL = "/points/write/:uuid"
+	NetworksURL    = "networks"
+	DevicesURL     = "devices"
+	PointsURL      = "points"
+	PointsWriteURL = "points/write"
 )
 
 func GetFlowNetworkNames(fns []*model.FlowNetwork) []string {

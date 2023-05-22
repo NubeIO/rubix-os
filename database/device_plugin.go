@@ -1,12 +1,15 @@
 package database
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/flow-framework/module/common"
 	"github.com/NubeIO/flow-framework/src/client"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"time"
 )
 
@@ -26,12 +29,29 @@ func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Dev
 		}
 		return
 	}
+
 	body.CommonFault.InFault = true
 	body.CommonFault.MessageLevel = model.MessageLevel.NoneCritical
 	body.CommonFault.MessageCode = model.CommonFaultCode.PluginNotEnabled
 	body.CommonFault.Message = model.CommonFaultMessage.PluginNotEnabled
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
+
+	if strings.HasSuffix(pluginName, "module") {
+		module := d.Modules[pluginName]
+		if module == nil {
+			return nil, moduleNotFoundError(pluginName)
+		}
+		bytes, _ := json.Marshal(body)
+		bytes, err = module.Post(common.DevicesURL, bytes)
+		if err != nil {
+			return nil, err
+		}
+		var dev *model.Device
+		_ = json.Unmarshal(bytes, &dev)
+		return dev, nil
+	}
+
 	cli := client.NewLocalClient()
 	device, err = cli.CreateDevicePlugin(body, pluginName)
 	if err != nil {
@@ -53,6 +73,22 @@ func (d *GormDatabase) UpdateDevicePlugin(uuid string, body *model.Device) (devi
 		}
 		return
 	}
+
+	if strings.HasSuffix(pluginName, "module") {
+		module := d.Modules[pluginName]
+		if module == nil {
+			return nil, moduleNotFoundError(pluginName)
+		}
+		bytes, _ := json.Marshal(body)
+		bytes, err = module.Patch(common.DevicesURL, uuid, bytes)
+		if err != nil {
+			return nil, err
+		}
+		var dev *model.Device
+		_ = json.Unmarshal(bytes, &dev)
+		return dev, nil
+	}
+
 	cli := client.NewLocalClient()
 	device, err = cli.UpdateDevicePlugin(body, pluginName)
 	if err != nil {
@@ -78,6 +114,19 @@ func (d *GormDatabase) DeleteDevicePlugin(uuid string) (ok bool, err error) {
 		}
 		return
 	}
+
+	if strings.HasSuffix(pluginName, "module") {
+		module := d.Modules[pluginName]
+		if module == nil {
+			return false, moduleNotFoundError(pluginName)
+		}
+		_, err = module.Delete(common.DevicesURL, uuid)
+		if err != nil {
+			return false, err
+		}
+		return true, nil
+	}
+
 	cli := client.NewLocalClient()
 	ok, err = cli.DeleteDevicePlugin(device, pluginName)
 	if err != nil {

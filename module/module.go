@@ -5,7 +5,6 @@ import (
 	"github.com/NubeIO/flow-framework/database"
 	"github.com/NubeIO/flow-framework/module/shared"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -15,15 +14,15 @@ import (
 )
 
 var clients = map[string]*plugin.Client{}
-var modules = map[string]*shared.Module{}
+var modules = map[string]shared.Module{}
 
-func ReLoadModulesWithDir(dir string, mux *gin.RouterGroup) error {
+func ReLoadModulesWithDir(dir string) (map[string]shared.Module, error) {
 	var failedModules []string
 	UninstallModules()
 	if len(failedModules) > 0 {
-		return fmt.Errorf("modules [%v] uninstall failed, please retry loading all module after processing", strings.Join(failedModules, ", "))
+		return nil, fmt.Errorf("modules [%v] uninstall failed, please retry loading all module after processing", strings.Join(failedModules, ", "))
 	}
-	return LoadModuleWithLocalDir(dir, mux)
+	return modules, LoadModuleWithLocalDir(dir)
 }
 
 func UninstallModules() {
@@ -37,16 +36,16 @@ func UninstallModules() {
 	}
 	log.Warningf("uninstall all modules, current working modules: %v", strings.Join(current, ";"))
 	clients = map[string]*plugin.Client{}
-	modules = map[string]*shared.Module{}
+	modules = map[string]shared.Module{}
 }
 
-func LoadModuleWithLocalDir(dir string, mux *gin.RouterGroup) error {
+func LoadModuleWithLocalDir(dir string) error {
 	fs, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return err
 	}
 	for _, f := range fs {
-		err = LoadModuleWithLocal(path.Join(dir, f.Name()), mux)
+		err = LoadModuleWithLocal(path.Join(dir, f.Name()))
 		if err != nil {
 			return err
 		}
@@ -56,7 +55,7 @@ func LoadModuleWithLocalDir(dir string, mux *gin.RouterGroup) error {
 
 var NameOfModule = "nube-module"
 
-func LoadModuleWithLocal(path string, mux *gin.RouterGroup) error {
+func LoadModuleWithLocal(path string) error {
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: shared.HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
@@ -80,16 +79,8 @@ func LoadModuleWithLocal(path string, mux *gin.RouterGroup) error {
 	if err != nil {
 		log.Error(err)
 	}
-	urlPrefix, err := module.GetUrlPrefix()
-	if err != nil {
-		log.Error(err)
-	} else if urlPrefix == nil {
-		log.Errorf("url prefix is empty for module %s", path)
-	} else {
-		clients[*urlPrefix] = client
-		modules[*urlPrefix] = &module
-		mux.Any(fmt.Sprintf("/%s/*proxyPath", *urlPrefix), ProxyModule)
-	}
+	clients[moduleName] = client
+	modules[moduleName] = module
 	return nil
 }
 

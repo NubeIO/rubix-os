@@ -37,9 +37,9 @@ type Module interface {
 	GetUrlPrefix() (*string, error)
 	Get(path string) ([]byte, error)
 	Post(path string, body []byte) ([]byte, error)
-	Put(path string, body []byte) ([]byte, error)
-	Patch(path string, body []byte) ([]byte, error)
-	Delete(path string) ([]byte, error)
+	Put(path, uuid string, body []byte) ([]byte, error)
+	Patch(path, uuid string, body []byte) ([]byte, error)
+	Delete(path, uuid string) ([]byte, error)
 }
 
 // This is the implementation of plugin.Plugin so we can serve/consume this.

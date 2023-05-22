@@ -153,3 +153,7 @@ func validateName(name string) (string, error) {
 	name = strings.TrimSpace(strings.Join(strings.Fields(name), " "))
 	return name, nil
 }
+
+func moduleNotFoundError(moduleName string) error {
+	return errors.New(fmt.Sprintf("module with module name %s doesn't exist", moduleName))
+}

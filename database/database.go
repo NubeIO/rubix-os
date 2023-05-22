@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/flow-framework/eventbus"
 	"github.com/NubeIO/flow-framework/migration"
+	"github.com/NubeIO/flow-framework/module/shared"
 	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"os"
@@ -77,6 +78,7 @@ type GormDatabase struct {
 	Store         cachestore.Handler
 	Bus           eventbus.BusService
 	PluginManager *plugin.Manager
+	Modules       map[string]shared.Module
 }
 
 // Close closes the gorm database connection.

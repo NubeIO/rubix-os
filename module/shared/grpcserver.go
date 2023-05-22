@@ -74,7 +74,7 @@ func (m *GRPCServer) Post(ctx context.Context, req *proto.PostRequest) (*proto.R
 
 func (m *GRPCServer) Put(ctx context.Context, req *proto.PutRequest) (*proto.Response, error) {
 	log.Debug("gRPC Put server has been called...")
-	r, err := m.Impl.Put(req.Path, req.Body)
+	r, err := m.Impl.Put(req.Path, req.Uuid, req.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (m *GRPCServer) Put(ctx context.Context, req *proto.PutRequest) (*proto.Res
 
 func (m *GRPCServer) Patch(ctx context.Context, req *proto.PatchRequest) (*proto.Response, error) {
 	log.Debug("gRPC Patch server has been called...")
-	r, err := m.Impl.Patch(req.Path, req.Body)
+	r, err := m.Impl.Patch(req.Path, req.Uuid, req.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +92,7 @@ func (m *GRPCServer) Patch(ctx context.Context, req *proto.PatchRequest) (*proto
 
 func (m *GRPCServer) Delete(ctx context.Context, req *proto.DeleteRequest) (*proto.Response, error) {
 	log.Debug("gRPC Delete server has been called...")
-	r, err := m.Impl.Delete(req.Path)
+	r, err := m.Impl.Delete(req.Path, req.Uuid)
 	if err != nil {
 		return nil, err
 	}
