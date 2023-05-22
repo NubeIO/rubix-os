@@ -46,11 +46,13 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 		panic(err)
 	}
 
-	err = module.ReLoadModulesWithDir(config.Get().GetAbsModulesDir(), apiRoutesTemp.Group("/modules"))
+	modules, err := module.ReLoadModulesWithDir(config.Get().GetAbsModulesDir())
 	if err != nil {
 		log.Error(err)
 		panic(err)
 	}
+	db.Modules = modules
+
 	db.PluginManager = pluginManager
 	pluginHandler := api.PluginAPI{
 		Manager: pluginManager,

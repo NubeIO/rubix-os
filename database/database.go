@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"github.com/NubeIO/rubix-os/eventbus"
 	"github.com/NubeIO/rubix-os/migration"
+	"github.com/NubeIO/rubix-os/module/shared"
 	"github.com/NubeIO/rubix-os/src/cachestore"
 	"os"
 	"path/filepath"
@@ -77,6 +78,7 @@ type GormDatabase struct {
 	Store         cachestore.Handler
 	Bus           eventbus.BusService
 	PluginManager *plugin.Manager
+	Modules       map[string]shared.Module
 }
 
 // Close closes the gorm database connection.

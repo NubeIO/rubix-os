@@ -83,10 +83,11 @@ func (m *GRPCClient) Post(path string, body []byte) ([]byte, error) {
 	return resp.R, nil
 }
 
-func (m *GRPCClient) Put(path string, body []byte) ([]byte, error) {
+func (m *GRPCClient) Put(path, uuid string, body []byte) ([]byte, error) {
 	log.Debugf("gRPC Put client has been called...")
 	resp, err := m.client.Put(context.Background(), &proto.PutRequest{
 		Path: path,
+		Uuid: uuid,
 		Body: body,
 	})
 	if err != nil {
@@ -95,10 +96,11 @@ func (m *GRPCClient) Put(path string, body []byte) ([]byte, error) {
 	return resp.R, nil
 }
 
-func (m *GRPCClient) Patch(path string, body []byte) ([]byte, error) {
+func (m *GRPCClient) Patch(path, uuid string, body []byte) ([]byte, error) {
 	log.Debug("gRPC Patch client has been called...")
 	resp, err := m.client.Patch(context.Background(), &proto.PatchRequest{
 		Path: path,
+		Uuid: uuid,
 		Body: body,
 	})
 	if err != nil {
@@ -107,10 +109,11 @@ func (m *GRPCClient) Patch(path string, body []byte) ([]byte, error) {
 	return resp.R, nil
 }
 
-func (m *GRPCClient) Delete(path string) ([]byte, error) {
+func (m *GRPCClient) Delete(path, uuid string) ([]byte, error) {
 	log.Debug("gRPC Delete client has been called...")
 	resp, err := m.client.Delete(context.Background(), &proto.DeleteRequest{
 		Path: path,
+		Uuid: uuid,
 	})
 	if err != nil {
 		return nil, err
