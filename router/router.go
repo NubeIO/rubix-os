@@ -258,7 +258,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	apiProxyHostRoutes := engine.Group("/proxy", handleAuth)
 	apiProxyHostRoutes.Any("/*proxyPath", hostProxyHandler.HostProxy)
 
-	appApiRoutes := engine.Group("/api/app")
+	appApiRoutes := engine.Group("/api/apps")
 	{
 		memberRoutes := appApiRoutes.Group("/members")
 		{
@@ -281,8 +281,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				memberDevicesRoutes.GET("", memberDeviceHandler.GetMemberDevices)
 				memberDevicesRoutes.GET("/:device_id", memberDeviceHandler.GetMemberDevice)
 				memberDevicesRoutes.POST("", memberDeviceHandler.CreateMemberDevice)
-				memberDevicesRoutes.PATCH("", memberDeviceHandler.UpdateMemberDevice)
-				memberDevicesRoutes.DELETE("/:device_id", memberDeviceHandler.DeleteMemberDevices)
+				memberDevicesRoutes.PATCH("/:device_id", memberDeviceHandler.UpdateMemberDevice)
+				memberDevicesRoutes.DELETE("/:device_id", memberDeviceHandler.DeleteMemberDevice)
 			}
 		}
 	}
@@ -928,6 +928,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 		{
 			memberRoutes.GET("", memberHandler.GetMembers)
 			memberRoutes.GET("/:uuid", memberHandler.GetMemberByUUID)
+			memberRoutes.DELETE("/:uuid", memberHandler.DeleteMemberByUUID)
 			memberRoutes.GET("/username/:username", memberHandler.GetMemberByUsername)
 			memberRoutes.POST("/verify/:username", memberHandler.VerifyMember)
 			memberRoutes.PUT("/:uuid/groups", memberHandler.UpdateMemberGroups)

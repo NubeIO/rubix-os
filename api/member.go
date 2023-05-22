@@ -12,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var invalidMemberTokenError = nerrors.NewErrUnauthorized("invalid member token")
+
 type MemberDatabase interface {
 	GetMembers() ([]*model.Member, error)
 	GetMember(uuid string) (*model.Member, error)
@@ -20,7 +22,8 @@ type MemberDatabase interface {
 	CreateMember(body *model.Member) (*model.Member, error)
 	UpdateMember(uuid string, body *model.Member) (*model.Member, error)
 	UpdateMemberGroups(uuid string, body []*string) error
-	DeleteMember(username string) (bool, error)
+	DeleteMember(uuid string) (bool, error)
+	DeleteMemberByUsername(username string) (bool, error)
 	ChangeMemberPassword(uuid string, password string) (bool, error)
 }
 
@@ -93,6 +96,12 @@ func (a *MemberAPI) GetMemberByUUID(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
+func (a *MemberAPI) DeleteMemberByUUID(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := a.DB.DeleteMember(uuid)
+	ResponseHandler(q, err, ctx)
+}
+
 func (a *MemberAPI) GetMemberByUsername(ctx *gin.Context) {
 	username := resolveUsername(ctx)
 	q, err := a.DB.GetMemberByUsername(username)
@@ -131,6 +140,10 @@ func (a *MemberAPI) UpdateMemberGroups(ctx *gin.Context) {
 
 func (a *MemberAPI) GetMember(ctx *gin.Context) {
 	username := auth.GetAuthorizedUsername(ctx.Request)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
 	q, err := a.DB.GetMemberByUsername(username)
 	if q != nil {
 		q.MaskPassword()
@@ -140,6 +153,10 @@ func (a *MemberAPI) GetMember(ctx *gin.Context) {
 
 func (a *MemberAPI) UpdateMember(ctx *gin.Context) {
 	username := auth.GetAuthorizedUsername(ctx.Request)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
 	member, err := a.DB.GetMemberByUsername(username)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
@@ -156,7 +173,11 @@ func (a *MemberAPI) UpdateMember(ctx *gin.Context) {
 
 func (a *MemberAPI) DeleteMember(ctx *gin.Context) {
 	username := auth.GetAuthorizedUsername(ctx.Request)
-	q, err := a.DB.DeleteMember(username)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
+	q, err := a.DB.DeleteMemberByUsername(username)
 	ResponseHandler(q, err, ctx)
 }
 
@@ -167,12 +188,16 @@ func (a *MemberAPI) ChangePassword(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 	}
 	username := auth.GetAuthorizedUsername(ctx.Request)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
 	member, err := a.DB.GetMemberByUsername(username)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	if member.Username != body.Username || !security.CheckPasswordHash(member.Password, body.OldPassword) {
+	if member.Username != body.Username || !security.CheckPasswordHash(member.Password, body.Password) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized("invalid username or password"), ctx)
 		return
 	}
@@ -186,6 +211,10 @@ func (a *MemberAPI) ChangePassword(ctx *gin.Context) {
 
 func (a *MemberAPI) RefreshToken(ctx *gin.Context) {
 	username := auth.GetAuthorizedUsername(ctx.Request)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
 	token, err := security.EncodeJwtToken(username)
 	if err != nil {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)

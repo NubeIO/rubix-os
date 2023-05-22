@@ -94,7 +94,13 @@ func (d *GormDatabase) UpdateMemberGroups(uuid string, body []*string) error {
 	return nil
 }
 
-func (d *GormDatabase) DeleteMember(username string) (bool, error) {
+func (d *GormDatabase) DeleteMember(uuid string) (bool, error) {
+	var memberModel *model.Member
+	query := d.DB.Where("uuid = ? ", uuid).Delete(&memberModel)
+	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) DeleteMemberByUsername(username string) (bool, error) {
 	var memberModel *model.Member
 	query := d.DB.Where("username = ? ", username).Delete(&memberModel)
 	return d.deleteResponseBuilder(query)

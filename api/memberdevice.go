@@ -25,6 +25,10 @@ type MemberDeviceAPI struct {
 
 func (a *MemberDeviceAPI) GetMemberDevices(ctx *gin.Context) {
 	username := auth.GetAuthorizedUsername(ctx.Request)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
 	member, err := a.DB.GetMemberByUsername(username)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
@@ -36,6 +40,10 @@ func (a *MemberDeviceAPI) GetMemberDevices(ctx *gin.Context) {
 
 func (a *MemberDeviceAPI) GetMemberDevice(ctx *gin.Context) {
 	username := auth.GetAuthorizedUsername(ctx.Request)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
 	member, err := a.DB.GetMemberByUsername(username)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
@@ -48,6 +56,10 @@ func (a *MemberDeviceAPI) GetMemberDevice(ctx *gin.Context) {
 
 func (a *MemberDeviceAPI) CreateMemberDevice(ctx *gin.Context) {
 	username := auth.GetAuthorizedUsername(ctx.Request)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
 	member, err := a.DB.GetMemberByUsername(username)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
@@ -67,13 +79,18 @@ func (a *MemberDeviceAPI) CreateMemberDevice(ctx *gin.Context) {
 
 func (a *MemberDeviceAPI) UpdateMemberDevice(ctx *gin.Context) {
 	username := auth.GetAuthorizedUsername(ctx.Request)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
 	member, err := a.DB.GetMemberByUsername(username)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
 	body, _ := getBodyMemberDevice(ctx)
-	args := Args{DeviceId: nstring.New(body.DeviceID), MemberUUID: nstring.New(member.UUID)}
+	deviceId := resolveDeviceId(ctx)
+	args := Args{DeviceId: &deviceId, MemberUUID: nstring.New(member.UUID)}
 	memberDevice, err := a.DB.GetOneMemberDeviceByArgs(args)
 	if memberDevice == nil {
 		ResponseHandler(nil, errors.New("device not found"), ctx)
@@ -83,8 +100,12 @@ func (a *MemberDeviceAPI) UpdateMemberDevice(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
-func (a *MemberDeviceAPI) DeleteMemberDevices(ctx *gin.Context) {
+func (a *MemberDeviceAPI) DeleteMemberDevice(ctx *gin.Context) {
 	username := auth.GetAuthorizedUsername(ctx.Request)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
 	member, err := a.DB.GetMemberByUsername(username)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
