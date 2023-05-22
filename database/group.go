@@ -16,6 +16,15 @@ func (d *GormDatabase) GetGroups() ([]*model.Group, error) {
 	return groupsModel, nil
 }
 
+func (d *GormDatabase) GetGroupsByUUIDs(uuids []*string) ([]*model.Group, error) {
+	var groupsModel []*model.Group
+	query := d.buildGroupQuery()
+	if err := query.Where("uuid IN ?", uuids).Find(&groupsModel).Error; err != nil {
+		return nil, err
+	}
+	return groupsModel, nil
+}
+
 func (d *GormDatabase) GetGroup(uuid string) (*model.Group, error) {
 	var groupModel *model.Group
 	query := d.buildGroupQuery()

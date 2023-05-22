@@ -82,12 +82,13 @@ func (d *GormDatabase) UpdateMember(uuid string, body *model.Member) (*model.Mem
 	return memberModel, nil
 }
 
-func (d *GormDatabase) UpdateMemberGroups(uuid string, body []*model.Group) error {
+func (d *GormDatabase) UpdateMemberGroups(uuid string, body []*string) error {
 	member, err := d.GetMember(uuid)
 	if err != nil {
 		return err
 	}
-	if err := d.updateGroups(&member, body); err != nil {
+	groups, _ := d.GetGroupsByUUIDs(body)
+	if err := d.updateGroups(&member, groups); err != nil {
 		return err
 	}
 	return nil

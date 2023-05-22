@@ -274,7 +274,7 @@ func getBodyMember(ctx *gin.Context) (dto *model.Member, err error) {
 	return dto, err
 }
 
-func getBodyMemberGroups(ctx *gin.Context) (dto []*model.Group, err error) {
+func getBodyMemberGroups(ctx *gin.Context) (dto []*string, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

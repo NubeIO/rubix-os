@@ -19,7 +19,7 @@ type MemberDatabase interface {
 	GetMemberByEmail(email string) (*model.Member, error)
 	CreateMember(body *model.Member) (*model.Member, error)
 	UpdateMember(uuid string, body *model.Member) (*model.Member, error)
-	UpdateMemberGroups(uuid string, body []*model.Group) error
+	UpdateMemberGroups(uuid string, body []*string) error
 	DeleteMember(username string) (bool, error)
 	ChangeMemberPassword(uuid string, password string) (bool, error)
 }
