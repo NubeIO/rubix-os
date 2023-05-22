@@ -46,7 +46,8 @@ func MakeTopicUUID(attribute string) string {
 	hoc := "hoc" // host comment uuid
 	scl := "scl" // snapshot create log uuid
 	srl := "srl" // snapshot restore log uuid
-	tea := "tea" // team uuid
+	mem := "mem" // member uuid
+	med := "med" // member device uuid
 
 	switch attribute {
 	case model.CommonNaming.Plugin:
@@ -105,8 +106,10 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", scl, divider, u)
 	case model.CommonNaming.SnapshotRestoreLog:
 		return fmt.Sprintf("%s%s%s", srl, divider, u)
-	case model.CommonNaming.Team:
-		return fmt.Sprintf("%s%s%s", tea, divider, u)
+	case model.CommonNaming.Member:
+		return fmt.Sprintf("%s%s%s", mem, divider, u)
+	case model.CommonNaming.MemberDevice:
+		return fmt.Sprintf("%s%s%s", med, divider, u)
 	}
 	return u
 }

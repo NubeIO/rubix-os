@@ -215,6 +215,12 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	alertHandler := api.AlertAPI{
 		DB: db,
 	}
+	memberHandler := api.MemberAPI{
+		DB: db,
+	}
+	memberDeviceHandler := api.MemberDeviceAPI{
+		DB: db,
+	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
 	authHandler := api.AuthAPI{}
@@ -252,6 +258,34 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	apiProxyHostRoutes := engine.Group("/proxy", handleAuth)
 	apiProxyHostRoutes.Any("/*proxyPath", hostProxyHandler.HostProxy)
 
+	appApiRoutes := engine.Group("/api/app")
+	{
+		memberRoutes := appApiRoutes.Group("/members")
+		{
+			memberRoutes.POST("", memberHandler.CreateMember)
+			memberRoutes.POST("/login", memberHandler.Login)
+			memberRoutes.GET("/check_username/:username", memberHandler.CheckUsername)
+			memberRoutes.GET("/check_email/:email", memberHandler.CheckEmail)
+		}
+
+		ownMemberRoutes := appApiRoutes.Group("/o/members")
+		{
+			ownMemberRoutes.GET("", memberHandler.GetMember)
+			ownMemberRoutes.PATCH("", memberHandler.UpdateMember)
+			ownMemberRoutes.DELETE("", memberHandler.DeleteMember)
+			ownMemberRoutes.POST("/change_password", memberHandler.ChangePassword)
+			ownMemberRoutes.POST("/refresh_token", memberHandler.RefreshToken)
+
+			memberDevicesRoutes := ownMemberRoutes.Group("/devices")
+			{
+				memberDevicesRoutes.GET("", memberDeviceHandler.GetMemberDevices)
+				memberDevicesRoutes.GET("/:device_id", memberDeviceHandler.GetMemberDevice)
+				memberDevicesRoutes.POST("", memberDeviceHandler.CreateMemberDevice)
+				memberDevicesRoutes.PATCH("", memberDeviceHandler.UpdateMemberDevice)
+				memberDevicesRoutes.DELETE("/:device_id", memberDeviceHandler.DeleteMemberDevices)
+			}
+		}
+	}
 	apiRoutes := engine.Group("/api", handleAuth)
 	{
 		fnProxy := apiRoutes.Group("/fn")
@@ -889,6 +923,16 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 		{
 			scheduleAutoMappingRoutes.POST("", autoMappingScheduleHandler.CreateAutoMappingSchedule)
 		}
+
+		memberRoutes := apiRoutes.Group("/members")
+		{
+			memberRoutes.GET("", memberHandler.GetMembers)
+			memberRoutes.GET("/:uuid", memberHandler.GetMemberByUUID)
+			memberRoutes.GET("/username/:username", memberHandler.GetMemberByUsername)
+			memberRoutes.POST("/verify/:username", memberHandler.VerifyMember)
+			memberRoutes.PUT("/:uuid/groups", memberHandler.UpdateMemberGroups)
+		}
+
 	}
 	return engine
 }

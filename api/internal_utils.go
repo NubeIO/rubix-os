@@ -269,6 +269,26 @@ func getBodyAlert(ctx *gin.Context) (dto *model.Alert, err error) {
 	return dto, err
 }
 
+func getBodyMember(ctx *gin.Context) (dto *model.Member, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyMemberGroups(ctx *gin.Context) (dto []*string, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyChangePassword(ctx *gin.Context) (dto *interfaces.ChangePassword, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyMemberDevice(ctx *gin.Context) (dto *model.MemberDevice, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func resolveGlobalUUID(ctx *gin.Context) string {
 	return ctx.Param("global_uuid")
 }
@@ -317,6 +337,10 @@ func resolveNetworkName(ctx *gin.Context) string {
 	return ctx.Param("network_name")
 }
 
+func resolveDeviceId(ctx *gin.Context) string {
+	return ctx.Param("device_id")
+}
+
 func resolveDeviceName(ctx *gin.Context) string {
 	return ctx.Param("device_name")
 }
@@ -361,6 +385,14 @@ func resolveHeaderHostID(ctx *gin.Context) string {
 
 func resolveHeaderHostName(ctx *gin.Context) string {
 	return ctx.GetHeader("host-name")
+}
+
+func resolveUsername(ctx *gin.Context) string {
+	return ctx.Param("username")
+}
+
+func resolveEmail(ctx *gin.Context) string {
+	return ctx.Param("email")
 }
 
 func matchUUID(uuid string) bool {
