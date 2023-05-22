@@ -123,3 +123,15 @@ func (conf *Configuration) GetAbsPluginDir() string {
 func (conf *Configuration) GetAbsUploadedImagesDir() string {
 	return path.Join(conf.GetAbsDataDir(), conf.Location.Data.UploadedImagesDir)
 }
+
+func (conf *Configuration) GetAbsTempDir() string {
+	return "/tmp"
+}
+
+func (conf *Configuration) GetSnapshotDir() string {
+	return "/data"
+}
+
+func (conf *Configuration) GetAbsSnapShotDir() string {
+	return path.Join(conf.GetAbsDataDir(), "snapshots")
+}

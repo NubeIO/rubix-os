@@ -3,8 +3,13 @@ package main
 import (
 	"github.com/NubeIO/flow-framework/mqttclient"
 	"github.com/NubeIO/flow-framework/services/localmqtt"
+	"github.com/NubeIO/flow-framework/services/system"
+	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/lib-systemctl-go/systemctl"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
+	"github.com/go-co-op/gocron"
+	"github.com/robfig/cron/v3"
 	"os"
 	"path"
 	"strconv"
@@ -63,6 +68,39 @@ func initFlushBuffers() {
 	}
 }
 
+func setupCron() (*gocron.Scheduler, *systemctl.SystemCtl, *system.System) {
+	scheduler := gocron.NewScheduler(time.Local)
+	systemCtl := systemctl.New(false, 30)
+	system_ := system.New(&system.System{})
+	restartJobs := utils.GetRestartJobs()
+	for _, restartJob := range restartJobs {
+		_, err := cron.ParseStandard(restartJob.Expression)
+		if err != nil {
+			log.Errorln(err)
+		} else {
+			_, err = scheduler.Cron(restartJob.Expression).Tag(restartJob.Unit).Do(func() {
+				_ = systemCtl.Restart(restartJob.Unit)
+			})
+			if err != nil {
+				log.Errorln(err)
+			}
+		}
+	}
+
+	rebootJob := utils.GetRebootJob()
+	if rebootJob != nil {
+		_, err := cron.ParseStandard(rebootJob.Expression)
+		if err != nil {
+			log.Errorln(err)
+		}
+		_, err = scheduler.Cron(rebootJob.Expression).Tag(rebootJob.Tag).Do(func() {
+			_, _ = system_.RebootHost()
+		})
+	}
+	scheduler.StartAsync()
+	return scheduler, systemCtl, system_
+}
+
 var db *database.GormDatabase
 
 func main() {
@@ -78,7 +116,9 @@ func main() {
 	if err := os.MkdirAll(conf.GetAbsUploadedImagesDir(), 0755); err != nil {
 		panic(err)
 	}
-
+	if err := os.MkdirAll(conf.GetAbsSnapShotDir(), 0755); err != nil {
+		panic(err)
+	}
 	internaltoken.CreateInternalTokenIfDoesNotExist()
 
 	mqttBroker := "tcp://" + conf.MQTT.Address + ":" + strconv.Itoa(conf.MQTT.Port)
@@ -103,7 +143,8 @@ func main() {
 	}
 
 	intHandler(db)
-	engine := router.Create(db, conf)
+	scheduler, systemCtl, system_ := setupCron()
+	engine := router.Create(db, conf, scheduler, systemCtl, system_)
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)
 	initFlushBuffers()

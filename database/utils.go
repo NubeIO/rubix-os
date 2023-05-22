@@ -91,6 +91,28 @@ func checkHistoryCovType(t string) bool {
 	return true
 }
 
+func checkMemberState(t string) (model.MemberState, error) {
+	if t == "" {
+		return model.UnVerified, nil
+	}
+	memberState := model.MemberState(t)
+	if _, ok := model.MemberStateMap[memberState]; !ok {
+		return "", errors.New("please provide a valid member state ie: VERIFIED or UNVERIFIED")
+	}
+	return memberState, nil
+}
+
+func checkMemberDevicePlatform(t string) (model.MemberDevicePlatform, error) {
+	if t == "" {
+		return model.Android, nil
+	}
+	memberDevicePlatform := model.MemberDevicePlatform(t)
+	if _, ok := model.MemberDevicePlatformMap[memberDevicePlatform]; !ok {
+		return "", errors.New("please provide a valid device platform ie: ANDROID or IOS")
+	}
+	return memberDevicePlatform, nil
+}
+
 func (d *GormDatabase) deleteResponseBuilder(query *gorm.DB) (bool, error) {
 	if query.Error != nil {
 		return false, query.Error

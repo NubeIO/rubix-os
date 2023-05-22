@@ -10,7 +10,7 @@ require (
 	github.com/NubeDev/location v0.0.2
 	github.com/NubeIO/configor v0.0.3
 	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7
-	github.com/NubeIO/nubeio-rubix-lib-models-go v1.4.26
+	github.com/NubeIO/nubeio-rubix-lib-models-go v1.5.0
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
@@ -21,7 +21,7 @@ require (
 	github.com/mustafaturan/bus/v3 v3.0.3
 	github.com/mustafaturan/monoton/v2 v2.0.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.7.1
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/datatypes v1.0.6
@@ -44,15 +44,25 @@ require (
 
 require (
 	github.com/NubeDev/bacnet v0.1.9
+	github.com/NubeIO/lib-date v0.0.6
+	github.com/NubeIO/lib-dhcpd v0.0.2
+	github.com/NubeIO/lib-files v1.0.0
 	github.com/NubeIO/lib-networking v0.1.0
 	github.com/NubeIO/lib-schema v0.2.15
-	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.0.3
+	github.com/NubeIO/lib-system v0.0.1
+	github.com/NubeIO/lib-systemctl-go v0.3.1
+	github.com/NubeIO/lib-ufw v0.0.3
+	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.1.1
+	github.com/NubeIO/rubix-registry-go v1.0.0
 	github.com/amenzhinsky/iothub v0.9.0
 	github.com/go-gota/gota v0.12.0
 	github.com/iancoleman/strcase v0.2.0
 	github.com/pkg/errors v0.9.1
+	github.com/robfig/cron/v3 v3.0.1
+	github.com/sergeymakinen/go-systemdconf/v2 v2.0.2
 	golang.org/x/exp v0.0.0-20220921164117-439092de6870
 	golang.org/x/text v0.3.7
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
 require (
@@ -89,14 +99,14 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/robfig/cron/v3 v3.0.1 // indirect
+	github.com/rvflash/elapsed v0.3.0 // indirect
+	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
 	gonum.org/v1/gonum v0.9.1 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	gorm.io/driver/mysql v1.3.2 // indirect
 )
 

@@ -74,6 +74,7 @@ type Args struct {
 	AutoMappingNetworkUUID  *string
 	AutoMappingDeviceUUID   *string
 	AutoMappingScheduleUUID *string
+	MemberUUID              *string
 }
 
 var ArgsType = struct {

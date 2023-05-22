@@ -199,6 +199,96 @@ func getBodyAutoMapping(ctx *gin.Context) (dto *interfaces.AutoMapping, err erro
 	return dto, err
 }
 
+func getBodyLocation(ctx *gin.Context) (dto *model.Location, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyGroup(ctx *gin.Context) (dto *model.Group, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyHost(ctx *gin.Context) (dto *model.Host, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyHostComment(ctx *gin.Context) (dto *model.HostComment, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyHostTags(ctx *gin.Context) (dto []*model.HostTag, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodySnapshotLog(ctx *gin.Context) (dto *model.SnapshotLog, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyCreateSnapshot(ctx *gin.Context) (dto *interfaces.CreateSnapshot, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodySnapshotCreateLog(ctx *gin.Context) (dto *model.SnapshotCreateLog, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyRestoreSnapshot(ctx *gin.Context) (dto *interfaces.RestoreSnapshot, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodySnapshotRestoreLog(ctx *gin.Context) (dto *model.SnapshotRestoreLog, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyRebootJob(ctx *gin.Context) (dto *interfaces.RebootJob, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyRestartJob(ctx *gin.Context) (dto *interfaces.RestartJob, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyStreamLog(ctx *gin.Context) (dto *interfaces.StreamLog, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyAlert(ctx *gin.Context) (dto *model.Alert, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyMember(ctx *gin.Context) (dto *model.Member, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyMemberGroups(ctx *gin.Context) (dto []*string, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyChangePassword(ctx *gin.Context) (dto *interfaces.ChangePassword, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyMemberDevice(ctx *gin.Context) (dto *model.MemberDevice, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func resolveGlobalUUID(ctx *gin.Context) string {
 	return ctx.Param("global_uuid")
 }
@@ -247,6 +337,10 @@ func resolveNetworkName(ctx *gin.Context) string {
 	return ctx.Param("network_name")
 }
 
+func resolveDeviceId(ctx *gin.Context) string {
+	return ctx.Param("device_id")
+}
+
 func resolveDeviceName(ctx *gin.Context) string {
 	return ctx.Param("device_name")
 }
@@ -283,4 +377,48 @@ func toBool(value string) (bool, error) {
 func validUsername(username string) bool {
 	re, _ := regexp.Compile("^([A-Za-z0-9_-])+$")
 	return re.FindString(username) != ""
+}
+
+func resolveHeaderHostID(ctx *gin.Context) string {
+	return ctx.GetHeader("host-uuid")
+}
+
+func resolveHeaderHostName(ctx *gin.Context) string {
+	return ctx.GetHeader("host-name")
+}
+
+func resolveUsername(ctx *gin.Context) string {
+	return ctx.Param("username")
+}
+
+func resolveEmail(ctx *gin.Context) string {
+	return ctx.Param("email")
+}
+
+func matchUUID(uuid string) bool {
+	if len(uuid) == 16 {
+		if uuid[0:4] == "hos_" {
+			return true
+		}
+	}
+	return false
+}
+
+func matchHostUUID(ctx *gin.Context) string {
+	hostID := resolveHeaderHostID(ctx)
+	if len(hostID) == 16 {
+		if matchUUID(hostID) {
+			return hostID
+		}
+	}
+	return ""
+}
+
+func matchHostName(ctx *gin.Context) string {
+	name := resolveHeaderHostName(ctx)
+	return name
+}
+
+func matchHostUUIDName(ctx *gin.Context) (string, string) {
+	return matchHostUUID(ctx), matchHostName(ctx)
 }
