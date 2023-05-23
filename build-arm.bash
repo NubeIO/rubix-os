@@ -25,10 +25,10 @@ parseCommand() {
 
 parseCommand "$@"
 set -e
-docker build --file Dockerfile.armv7 --tag go-build-flow-framework-armv7 --build-arg plugins="$*" .
-docker container create --name temp go-build-flow-framework-armv7
+docker build --file Dockerfile.armv7 --tag go-build-rubix-os-armv7 --build-arg plugins="$*" .
+docker container create --name temp go-build-rubix-os-armv7
 set +e
-docker container cp temp:/app/flow-framework.armv7.zip ./
+docker container cp temp:/app/rubix-os.armv7.zip ./
 docker container rm temp
 
-echo -e "${GREEN}OUTPUT: flow-framework.armv7.zip${DEFAULT}"
+echo -e "${GREEN}OUTPUT: rubix-os.armv7.zip${DEFAULT}"

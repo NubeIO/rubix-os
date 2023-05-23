@@ -27,22 +27,22 @@ func (inst *Installer) GetAppDataConfigPath(appName string) string {
 
 func (inst *Installer) GetAppInstallPath(appName string) string {
 	repoName := namings.GetRepoNameFromAppName(appName)
-	return path.Join(inst.AppsInstallDir, repoName) // /data/rubix-service/apps/install/wires-builds
+	return path.Join(inst.AppsInstallDir, repoName) // /data/installer/apps/install/wires-builds
 }
 
 func (inst *Installer) GetAppInstallPathWithVersion(appName, version string) string {
 	repoName := namings.GetRepoNameFromAppName(appName)
-	return path.Join(inst.AppsInstallDir, repoName, version) // /data/rubix-service/apps/install/wires-builds/v0.0.1
+	return path.Join(inst.AppsInstallDir, repoName, version) // /data/installer/apps/install/wires-builds/v0.0.1
 }
 
 func (inst *Installer) GetAppDownloadPath(appName string) string {
 	repoName := namings.GetRepoNameFromAppName(appName)
-	return path.Join(inst.AppsDownloadDir, repoName) // /data/rubix-service/apps/download/wires-builds
+	return path.Join(inst.AppsDownloadDir, repoName) // /data/installer/apps/download/wires-builds
 }
 
 func (inst *Installer) GetAppDownloadPathWithVersion(appName, version string) string {
 	repoName := namings.GetRepoNameFromAppName(appName)
-	return path.Join(inst.AppsDownloadDir, repoName, version) // /data/rubix-service/apps/download/wires-builds/v0.0.1
+	return path.Join(inst.AppsDownloadDir, repoName, version) // /data/installer/apps/download/wires-builds/v0.0.1
 }
 
 func (inst *Installer) GetEmptyNewTmpFolder() string {
@@ -60,16 +60,16 @@ func (inst *Installer) MakeTmpDirUpload() (string, error) {
 }
 
 func (inst *Installer) GetAppPluginDownloadPath() string {
-	repoName := namings.GetRepoNameFromAppName(constants.FlowFramework)
-	return path.Join(inst.AppsDownloadDir, repoName, "plugins") // /data/rubix-service/apps/download/flow-framework/plugins
+	repoName := namings.GetRepoNameFromAppName(constants.RubixOS)
+	return path.Join(inst.AppsDownloadDir, repoName, "plugins") // /data/installer/apps/download/ruibix-os/plugins
 }
 
 func (inst *Installer) GetAppPluginInstallPath() string {
-	return path.Join(inst.GetAppDataDataPath(constants.FlowFramework), "plugins") // /data/flow-framework/data/plugins
+	return path.Join(inst.GetAppDataDataPath(constants.RubixOS), "plugins") // /data/rubix-os/data/plugins
 }
 
 func (inst *Installer) GetAppPluginInstallFilePath(pluginName, arch string) string {
-	return path.Join(inst.GetAppPluginInstallPath(), fmt.Sprintf("%s-%s.so", pluginName, arch)) // /data/flow-framework/data/plugins/system-amd64.so
+	return path.Join(inst.GetAppPluginInstallPath(), fmt.Sprintf("%s-%s.so", pluginName, arch)) // /data/rubix-os/data/plugins/system-amd64.so
 }
 
 func (inst *Installer) GetAppBackupPath(appName, version string) string {

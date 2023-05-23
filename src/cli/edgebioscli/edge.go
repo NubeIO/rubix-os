@@ -20,7 +20,7 @@ import (
 const rubixEdgeName = "rubix-edge"
 
 func (inst *BiosClient) RubixEdgeUpload(body *interfaces.FileUpload) (*interfaces.Message, error) {
-	uploadLocation := fmt.Sprintf("/data/rubix-service/apps/download/%s/%s", rubixEdgeName, body.Version)
+	uploadLocation := fmt.Sprintf("/data/installer/apps/download/%s/%s", rubixEdgeName, body.Version)
 	url := fmt.Sprintf("/api/dirs/create?path=%s", uploadLocation)
 	_, _ = nresty.FormatRestyResponse(inst.Rest.R().
 		SetResult(&interfaces.Message{}).
@@ -73,15 +73,15 @@ func (inst *BiosClient) RubixEdgeUpload(body *interfaces.FileUpload) (*interface
 
 func (inst *BiosClient) RubixEdgeInstall(version string) (*interfaces.Message, error) {
 	// delete installed files
-	installationDirectory := fmt.Sprintf("/data/rubix-service/apps/install/%s", rubixEdgeName)
+	installationDirectory := fmt.Sprintf("/data/installer/apps/install/%s", rubixEdgeName)
 	url := fmt.Sprintf("/api/files/delete-all?path=%s", installationDirectory)
 	_, _ = nresty.FormatRestyResponse(inst.Rest.R().
 		SetResult(&interfaces.Message{}).
 		Delete(url))
 	log.Println("deleted installed files, if any")
 
-	downloadedFile := fmt.Sprintf("/data/rubix-service/apps/download/%s/%s/app", rubixEdgeName, version)
-	installationFile := fmt.Sprintf("/data/rubix-service/apps/install/%s/%s/app", rubixEdgeName, version)
+	downloadedFile := fmt.Sprintf("/data/installer/apps/download/%s/%s/app", rubixEdgeName, version)
+	installationFile := fmt.Sprintf("/data/installer/apps/install/%s/%s/app", rubixEdgeName, version)
 
 	// create installation directory
 	installationDirectoryWithVersion := filepath.Dir(installationFile)

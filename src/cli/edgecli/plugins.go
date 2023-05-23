@@ -58,7 +58,7 @@ func (inst *Client) PluginUpload(body *interfaces.Plugin) (*interfaces.Message, 
 }
 
 func (inst *Client) ListPlugins() ([]interfaces.Plugin, error, error) {
-	p := global.Installer.GetPluginInstallationPath(constants.FlowFramework)
+	p := global.Installer.GetPluginInstallationPath(constants.RubixOS)
 	files, connectionErr, requestErr := inst.ListFilesV2(p)
 	if connectionErr != nil || requestErr != nil {
 		return nil, connectionErr, requestErr

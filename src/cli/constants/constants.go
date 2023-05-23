@@ -1,5 +1,5 @@
 package constants
 
-const FlowFramework = "flow-framework"
+const RubixOS = "rubix-os"
 const ServiceDir = "/lib/systemd/system"
 const ServiceDirSoftLink = "/etc/systemd/system/multi-user.target.wants"

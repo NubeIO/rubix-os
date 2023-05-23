@@ -39,11 +39,11 @@ func (a *ZipApi) ZipDir(c *gin.Context) {
 	destination := c.Query("destination")
 	pathToZip := source
 	if source == "" {
-		ResponseHandler(nil, errors.New("zip source can not be empty, try /data/flow-framework"), c)
+		ResponseHandler(nil, errors.New("zip source can not be empty, try /data/rubix-os"), c)
 		return
 	}
 	if destination == "" {
-		ResponseHandler(nil, errors.New("zip destination can not be empty, try /data/test/flow-framework.zip"), c)
+		ResponseHandler(nil, errors.New("zip destination can not be empty, try /data/test/rubix-os.zip"), c)
 		return
 	}
 	exists := fileutils.DirExists(pathToZip)

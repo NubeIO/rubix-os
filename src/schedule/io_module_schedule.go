@@ -30,7 +30,7 @@ type WeeklyPeriod struct {
 }
 
 func ModbusScheduleTest() {
-	json, err := ioutil.ReadFile("/home/user/Documents/Nube/Flow_Framework/flow-framework/src/schedule/old/schTest4.json")
+	json, err := ioutil.ReadFile("./schTest4.json")
 	if err != nil {
 		log.Errorf("ReadFile %v\n", err)
 	}

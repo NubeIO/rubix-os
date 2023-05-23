@@ -225,7 +225,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	tokenHandler := api.TokenAPI{}
 	authHandler := api.AuthAPI{}
 
-	ffProxyHandler := api.FFProxyAPI{}
 	wiresProxyHandler := api.WiresProxyAPI{}
 	chirpProxyHandler := api.ChirpProxyAPI{}
 	hostProxyHandler := api.HostProxyAPI{}
@@ -249,8 +248,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 		handleAuth = authHandler.HandleAuth()
 	}
 
-	apiProxyRoutes := engine.Group("/ff", handleAuth)
-	apiProxyRoutes.Any("/*proxyPath", ffProxyHandler.FFProxy) // FLOW-FRAMEWORK PROXY
 	apiProxyWiresRoutes := engine.Group("/wires", handleAuth)
 	apiProxyWiresRoutes.Any("/*proxyPath", wiresProxyHandler.WiresProxy) // EDGE-WIRES PROXY
 	apiProxyChirpRoutes := engine.Group("/chirp", handleAuth)

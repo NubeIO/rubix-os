@@ -15,8 +15,8 @@ type Installer struct {
 	BackupDir       string // <root_dir>/backup
 	FileMode        int    // 0755
 	DefaultTimeout  int    // 30
-	AppsDownloadDir string // <root_dir>/rubix-service/apps/download
-	AppsInstallDir  string // <root_dir>/rubix-service/apps/install
+	AppsDownloadDir string // <root_dir>/installer/apps/download
+	AppsInstallDir  string // <root_dir>/installer/apps/install
 	SystemCtl       *systemctl.SystemCtl
 }
 
@@ -43,10 +43,10 @@ func New(app *Installer) *Installer {
 		app.BackupDir = path.Join(app.RootDir, "backup")
 	}
 	if app.AppsDownloadDir == "" {
-		app.AppsDownloadDir = path.Join(app.RootDir, "rubix-service/apps/download")
+		app.AppsDownloadDir = path.Join(app.RootDir, "installer/apps/download")
 	}
 	if app.AppsInstallDir == "" {
-		app.AppsInstallDir = path.Join(app.RootDir, "rubix-service/apps/install")
+		app.AppsInstallDir = path.Join(app.RootDir, "installer/apps/install")
 	}
 	app.SystemCtl = systemctl.New(false, app.DefaultTimeout)
 	return app

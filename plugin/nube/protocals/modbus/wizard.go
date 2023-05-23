@@ -55,7 +55,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 
 		_, err := inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 		if err != nil {
-			return "modbus wizard 0 error: on flow-framework add modbus TCP network wizard", err
+			return "modbus wizard 0 error: on rubix-os add modbus TCP network wizard", err
 		}
 
 		return "modbus wizard 0: added network, device, and point", err
@@ -130,7 +130,7 @@ func (inst *Instance) wizardTCP(body wizard) (string, error) {
 
 			_, err := inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 			if err != nil {
-				return "modbus wizard 1: on flow-framework add modbus TCP network wizard", err
+				return "modbus wizard 1: on rubix-os add modbus TCP network wizard", err
 			}
 		}
 		return "", errors.New("modbus wizard 1: added networks, devices, and points")
@@ -690,7 +690,7 @@ func (inst *Instance) wizardSerial(body wizard) (string, error) {
 
 	pntRet, err := inst.db.WizardNewNetworkDevicePoint("modbus", &net, &dev, &pnt)
 	if err != nil {
-		return "error: on flow-framework add modbus serial network wizard", err
+		return "error: on rubix-os add modbus serial network wizard", err
 	}
 
 	inst.modbusErrorMsg(pntRet, err)

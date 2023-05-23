@@ -9,7 +9,7 @@ import (
 )
 
 func (inst *BiosClient) GetRubixEdgeVersion() (*ebmodel.Version, error) {
-	installLocation := fmt.Sprintf("/data/rubix-service/apps/install/%s", rubixEdgeName)
+	installLocation := fmt.Sprintf("/data/installer/apps/install/%s", rubixEdgeName)
 	url := fmt.Sprintf("/api/files/list?path=%s", installLocation)
 	resp, err := nresty.FormatRestyResponse(inst.Rest.R().
 		SetResult(&[]fileutils.FileDetails{}).

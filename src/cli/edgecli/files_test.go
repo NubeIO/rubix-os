@@ -14,7 +14,7 @@ type testYml struct {
 
 func TestClient_ReadFile(t *testing.T) {
 	cli := New(&Client{})
-	data, err := cli.ReadFile("/data/flow-framework/config/.env")
+	data, err := cli.ReadFile("/data/rubix-os/config/.env")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -24,7 +24,7 @@ func TestClient_ReadFile(t *testing.T) {
 
 func TestClient_ReadFileToYml(t *testing.T) {
 	cli := New(&Client{})
-	message, err := cli.ReadFile("/data/flow-framework/config/config.yml")
+	message, err := cli.ReadFile("/data/rubix-os/config/config.yml")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -42,7 +42,7 @@ func TestClient_WriteFileYml(t *testing.T) {
 	}
 	cli := New(&Client{})
 	body := &interfaces.WriteFile{
-		FilePath: "/data/flow-framework/config/config.yml",
+		FilePath: "/data/rubix-os/config/config.yml",
 		Body:     data,
 	}
 	message, err := cli.WriteFileYml(body)
