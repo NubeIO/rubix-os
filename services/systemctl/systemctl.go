@@ -3,9 +3,9 @@ package systemctl
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/installer"
-	"github.com/NubeIO/flow-framework/utils/namings"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/installer"
+	"github.com/NubeIO/rubix-os/utils/namings"
 	"github.com/sergeymakinen/go-systemdconf/v2"
 	"github.com/sergeymakinen/go-systemdconf/v2/unit"
 	log "github.com/sirupsen/logrus"
@@ -19,7 +19,7 @@ type ServiceFile struct {
 	Version                     string   `json:"version"`
 	ServiceDescription          string   `json:"service_description"`
 	RunAsUser                   string   `json:"run_as_user"`
-	ServiceWorkingDirectory     string   `json:"service_working_directory"`        // /data/rubix-service/apps/install/flow-framework/v0.6.1/
+	ServiceWorkingDirectory     string   `json:"service_working_directory"`        // /data/installer/apps/install/rubix-os/v0.6.1/
 	ExecStart                   string   `json:"exec_start"`                       // app -p 1660 -g <data_dir> -d data -prod
 	AttachWorkingDirOnExecStart bool     `json:"attach_working_dir_on_exec_start"` // true, false
 	EnvironmentVars             []string `json:"environment_vars"`                 // Environment="g=/data/bacnet-server-c"
@@ -31,7 +31,7 @@ func GenerateServiceFile(app *ServiceFile, installer *installer.Installer) (tmpD
 		return "", "", err
 	}
 	if app.Name == "" {
-		return "", "", errors.New("app name can not be empty, try flow-framework")
+		return "", "", errors.New("app name can not be empty, try rubix-os")
 	}
 	if app.Version == "" {
 		return "", "", errors.New("app version can not be empty, try v0.6.0")

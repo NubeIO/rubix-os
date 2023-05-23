@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/plugin/nube/projects/statusmismatchalerts/ffhistoryrest"
+	"github.com/NubeIO/rubix-os/plugin/nube/projects/statusmismatchalerts/ffhistoryrest"
 )
 
 func (inst *Instance) GetFFToken(user, pass string) (*ffhistoryrest.FFToken, error) {

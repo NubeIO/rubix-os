@@ -48,7 +48,7 @@ pluginDir=$dir/data/plugins
 
 if [ ${PRODUCTION} == true ]; then
   echo -e "${YELLOW}We are running in production mode!${DEFAULT}"
-  pluginDir=/data/flow-framework/data/plugins
+  pluginDir=/data/rubix-os/data/plugins
 else
   echo -e "${YELLOW}We are running in development mode!${DEFAULT}"
 fi
@@ -155,7 +155,7 @@ if [ ${BUILD_ONLY} == true ]; then
   echo -e "${GREEN}BUILT ${DEFAULT}app"
 else
     if [ ${PRODUCTION} == true ]; then
-      go run app.go -g /data/flow-framework -d data --prod
+      go run app.go -g /data/rubix-os -d data --prod
     else
       go run app.go --auth=false
     fi

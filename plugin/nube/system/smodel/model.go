@@ -1,7 +1,7 @@
 package smodel
 
 import (
-	"github.com/NubeIO/flow-framework/plugin/defaults"
+	"github.com/NubeIO/rubix-os/plugin/defaults"
 )
 
 type EnableStruct struct {

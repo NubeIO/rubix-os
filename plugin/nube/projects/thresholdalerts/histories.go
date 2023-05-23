@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/plugin/nube/projects/thresholdalerts/ffhistoryrest"
+	"github.com/NubeIO/rubix-os/plugin/nube/projects/thresholdalerts/ffhistoryrest"
 )
 
 func (inst *Instance) GetFFToken(user, pass string) (*ffhistoryrest.FFToken, error) {

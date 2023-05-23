@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/plugin/pluginapi"
-	"github.com/NubeIO/flow-framework/src/cachestore"
-	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/eventbus"
+	"github.com/NubeIO/rubix-os/plugin/pluginapi"
+	"github.com/NubeIO/rubix-os/src/cachestore"
+	"github.com/NubeIO/rubix-os/src/dbhandler"
 	"github.com/patrickmn/go-cache"
 )
 

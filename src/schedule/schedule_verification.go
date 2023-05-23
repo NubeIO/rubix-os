@@ -10,7 +10,7 @@ import (
 )
 
 func ScheduleTest() {
-	json, err := ioutil.ReadFile("/home/user/Documents/Nube/Flow_Framework/flow-framework/src/schedule/schTestNewJSON1.json")
+	json, err := ioutil.ReadFile("./schTestNewJSON1.json")
 	if err != nil {
 		log.Errorf("ReadFile %v\n", err)
 	}

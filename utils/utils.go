@@ -3,9 +3,9 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"github.com/NubeIO/flow-framework/config"
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/config"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"io/fs"
@@ -40,8 +40,8 @@ func DeleteDir(source, parentDirectory string, depth int) error {
 
 	for _, obj := range obs {
 		fSource := path.Join(source, obj.Name())
-		if obj.IsDir() {
-			if parentDirectory == "rubix-service/apps/install" &&
+		if obj.IsDir() { // TODO: test it on snapshot, it doesn't seem good
+			if parentDirectory == "installer/apps/install" &&
 				!Contains([]string{"rubix-edge", "rubix-assist"}, obj.Name()) {
 				_ = os.RemoveAll(path.Join(parentDirectory, obj.Name()))
 			}
@@ -89,8 +89,8 @@ func CopyDir(source, dest, parentDirectory string, depth int) error {
 				"socat",
 			}
 			excludesApps := []string{
-				"rubix-service/apps/install/rubix-edge",
-				"rubix-service/apps/install/rubix-assist",
+				"installer/apps/install/rubix-edge",
+				"installer/apps/install/rubix-assist",
 			}
 			if !((Contains(excludesData, obj.Name()) && depth == 0) ||
 				(Contains(excludesApps, path.Join(parentDirectory, obj.Name())) && depth == 3)) {

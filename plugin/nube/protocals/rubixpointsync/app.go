@@ -1,6 +1,6 @@
 package main
 
-import "github.com/NubeIO/flow-framework/plugin/nube/protocals/rubixpointsync/rubixrest"
+import "github.com/NubeIO/rubix-os/plugin/nube/protocals/rubixpointsync/rubixrest"
 
 func (inst *Instance) SyncRubixToFF() (bool, error) {
 	inst.rubixpointsyncDebugMsg("SyncRubixToFF()")

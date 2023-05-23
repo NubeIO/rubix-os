@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/plugin/nube/projects/statusmismatchalerts/ffhistoryrest"
+	"github.com/NubeIO/rubix-os/plugin/nube/projects/statusmismatchalerts/ffhistoryrest"
 	"github.com/go-gota/gota/dataframe"
 )
 

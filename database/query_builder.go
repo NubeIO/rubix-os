@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/rubix-os/api"
 	"gorm.io/gorm"
 	"strings"
 )

@@ -2,7 +2,7 @@ package main
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/rubixpointsync/rubixrest"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/rubixpointsync/rubixrest"
 )
 
 func (inst *Instance) GetRubixNetworks() (*[]rubixrest.RubixNet, error) {

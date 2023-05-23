@@ -2,8 +2,8 @@ package pollqueue
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/utils/float"
 	"time"
 	// log "github.com/sirupsen/logrus"
 )

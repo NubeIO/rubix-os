@@ -2,8 +2,8 @@ package edgecli
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/global"
-	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/rubix-os/global"
+	"github.com/NubeIO/rubix-os/interfaces"
 	log "github.com/sirupsen/logrus"
 	"path"
 )

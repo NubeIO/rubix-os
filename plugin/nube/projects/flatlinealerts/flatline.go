@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin/nube/projects/flatlinealerts/ffhistoryrest"
+	"github.com/NubeIO/rubix-os/plugin/nube/projects/flatlinealerts/ffhistoryrest"
 )
 
 func (inst *Instance) FlatlineAnalysis(ffHistoryArray []ffhistoryrest.FFHistory, jobConfig Job) (flatlineAlerts []string, err error) {

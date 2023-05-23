@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
-	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/rubix-os/api"
 	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
 )

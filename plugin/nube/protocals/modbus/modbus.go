@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/smod"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/modbus/smod"
 	"github.com/grid-x/modbus"
 	"time"
 )

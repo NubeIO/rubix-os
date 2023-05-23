@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/services/system"
+	"github.com/NubeIO/rubix-os/services/system"
 )
 
 type ScannerAPI struct {

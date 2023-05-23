@@ -1,9 +1,9 @@
 package database
 
 import (
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/interfaces"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"time"

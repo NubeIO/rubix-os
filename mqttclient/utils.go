@@ -1,7 +1,7 @@
 package mqttclient
 
 import (
-	"github.com/NubeIO/flow-framework/utils/array"
+	"github.com/NubeIO/rubix-os/utils/array"
 	"strings"
 )
 

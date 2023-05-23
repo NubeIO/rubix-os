@@ -1,8 +1,8 @@
 package bserver
 
 import (
-	"github.com/NubeIO/flow-framework/plugin/defaults"
 	"github.com/NubeIO/lib-networking/networking"
+	"github.com/NubeIO/rubix-os/plugin/defaults"
 )
 
 type EnableStruct struct {

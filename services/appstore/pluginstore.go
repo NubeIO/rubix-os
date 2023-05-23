@@ -3,10 +3,10 @@ package appstore
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/global"
-	"github.com/NubeIO/flow-framework/installer"
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/global"
+	"github.com/NubeIO/rubix-os/installer"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"io/ioutil"
 	"os"
 )

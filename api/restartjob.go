@@ -3,10 +3,10 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
 )

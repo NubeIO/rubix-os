@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/services/system"
 	"github.com/NubeIO/lib-date/datectl"
+	"github.com/NubeIO/rubix-os/services/system"
 	"github.com/gin-gonic/gin"
 )
 

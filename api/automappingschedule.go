@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 

@@ -1,6 +1,6 @@
 package localmqtt
 
-import "github.com/NubeIO/flow-framework/mqttclient"
+import "github.com/NubeIO/rubix-os/mqttclient"
 
 type LocalMqtt struct {
 	Client                *mqttclient.Client

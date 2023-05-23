@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/NubeIO/flow-framework/plugin/compat"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/plugin/compat"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
 )

@@ -2,8 +2,8 @@ package edgebioscli
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/src/cli/edgebioscli/ebmodel"
+	"github.com/NubeIO/rubix-os/nresty"
+	"github.com/NubeIO/rubix-os/src/cli/edgebioscli/ebmodel"
 )
 
 func (inst *BiosClient) GetArch() (*ebmodel.Arch, error) {

@@ -2,12 +2,12 @@ package api
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/nerrors"
-	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/auth"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/utils/security"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/nerrors"
+	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 )

@@ -2,11 +2,11 @@ package edgecli
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/global"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/src/cli/constants"
-	"github.com/NubeIO/flow-framework/utils/namings"
+	"github.com/NubeIO/rubix-os/global"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/nresty"
+	"github.com/NubeIO/rubix-os/src/cli/constants"
+	"github.com/NubeIO/rubix-os/utils/namings"
 	log "github.com/sirupsen/logrus"
 	"path"
 )

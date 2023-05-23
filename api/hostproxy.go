@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils/ip"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/utils/ip"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"net/http/httputil"

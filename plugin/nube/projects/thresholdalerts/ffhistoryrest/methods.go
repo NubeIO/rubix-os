@@ -1,7 +1,7 @@
 package ffhistoryrest
 
 import (
-	"github.com/NubeIO/flow-framework/nresty"
+	"github.com/NubeIO/rubix-os/nresty"
 )
 
 type FFCredentials struct {

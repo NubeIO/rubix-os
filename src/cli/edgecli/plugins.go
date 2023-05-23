@@ -3,11 +3,11 @@ package edgecli
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/global"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/src/cli/constants"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/global"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/nresty"
+	"github.com/NubeIO/rubix-os/src/cli/constants"
 	"os"
 	"path"
 	"path/filepath"
@@ -58,7 +58,7 @@ func (inst *Client) PluginUpload(body *interfaces.Plugin) (*interfaces.Message, 
 }
 
 func (inst *Client) ListPlugins() ([]interfaces.Plugin, error, error) {
-	p := global.Installer.GetPluginInstallationPath(constants.FlowFramework)
+	p := global.Installer.GetPluginInstallationPath(constants.RubixOS)
 	files, connectionErr, requestErr := inst.ListFilesV2(p)
 	if connectionErr != nil || requestErr != nil {
 		return nil, connectionErr, requestErr

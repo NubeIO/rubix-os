@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/mbmodel"
-	"github.com/NubeIO/flow-framework/utils/array"
 	modbschema "github.com/NubeIO/lib-schema/modbuschema"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/plugin"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/modbus/mbmodel"
+	"github.com/NubeIO/rubix-os/utils/array"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

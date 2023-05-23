@@ -9,12 +9,12 @@ import (
 	"github.com/NubeIO/lib-schema/networklinkerschema"
 	"github.com/NubeIO/lib-schema/schema"
 
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/flow-framework/plugin/defaults"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/networklinker/linkmodel"
-	"github.com/NubeIO/flow-framework/utils/helpers"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/plugin"
+	"github.com/NubeIO/rubix-os/plugin/defaults"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/networklinker/linkmodel"
+	"github.com/NubeIO/rubix-os/utils/helpers"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )

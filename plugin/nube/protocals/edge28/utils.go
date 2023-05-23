@@ -3,12 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/flow-framework/utils/float"
-	"github.com/NubeIO/flow-framework/utils/structs"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/edge28"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/thermistor"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/plugin"
+	"github.com/NubeIO/rubix-os/utils/float"
+	"github.com/NubeIO/rubix-os/utils/structs"
 	"reflect"
 	"strconv"
 )
@@ -63,16 +63,16 @@ func GetValueFromGPIOForUIByType(point *model.Point, value float64) (float64, er
 	case UITypes.THERMISTOR10KT2:
 		resistance := edge28.ScaleGPIOValueToResistance(value)
 		result, err = thermistor.ResistanceToTemperature(resistance, thermistor.T210K)
-	//case UITypes.THERMISTOR10KT3:
+	// case UITypes.THERMISTOR10KT3:
 	//	resistance := edge28.ScaleGPIOValueToResistance(value)
 	//	result, err = thermistor.ResistanceToTemperature(resistance, thermistor.T310K)
-	//case UITypes.THERMISTOR20KT1:
+	// case UITypes.THERMISTOR20KT1:
 	//	resistance := edge28.ScaleGPIOValueToResistance(value)
 	//	result, err = thermistor.ResistanceToTemperature(resistance, thermistor.T120K)
-	//case UITypes.THERMISTORPT100:
+	// case UITypes.THERMISTORPT100:
 	//	resistance := edge28.ScaleGPIOValueToResistance(value)
 	//	result, err = thermistor.ResistanceToTemperature(resistance, thermistor.PT100)
-	//case UITypes.THERMISTORPT1000:
+	// case UITypes.THERMISTORPT1000:
 	//	resistance := edge28.ScaleGPIOValueToResistance(value)
 	//	result, err = thermistor.ResistanceToTemperature(resistance, thermistor.PT1000)
 	default:
@@ -164,7 +164,7 @@ func limitValueByEdge28Type(ioType string, inputVal *float64) (outputVal *float6
 		} else {
 			outputVal = inputVal
 		}
-	//case UOTypes.PERCENT, UITypes.PERCENT:
+	// case UOTypes.PERCENT, UITypes.PERCENT:
 	//	if inputValFloat <= 0 {
 	//		outputVal = float.New(0)
 	//	} else if inputValFloat >= 100 {
@@ -202,7 +202,7 @@ func limitPriorityArrayByEdge28Type(ioType string, priority *model.PointWriter) 
 					outputVal = float.New(*val)
 				}
 
-			//case UOTypes.PERCENT, UITypes.PERCENT:
+			// case UOTypes.PERCENT, UITypes.PERCENT:
 			//	if *val <= 0 {
 			//		outputVal = float.New(0)
 			//	} else if *val >= 100 {

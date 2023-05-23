@@ -3,7 +3,7 @@ package nresty
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -42,6 +42,7 @@ func composeErrorMsg(resp *resty.Response) error {
 			resp.StatusCode(),
 			rawMessage)
 	} else if message.Message == "not found" {
+		// TODO: may be we don't need this
 		// this is when rubix-service returns value as status_code 404; because of FF is stopped
 		message.Message = fmt.Sprintf("%s %s [%d]: %s",
 			resp.Request.Method,

@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/mapmodbus/legacymodbusrest"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/mapmodbus/legacymodbusrest"
 )
 
 func (inst *Instance) GetLegacyModbusNetworksAndDevices() (*[]legacymodbusrest.ModbusNet, error) {

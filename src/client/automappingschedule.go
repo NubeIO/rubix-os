@@ -1,8 +1,8 @@
 package client
 
 import (
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/nresty"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/nresty"
 )
 
 func (inst *FlowClient) CreateAutoMappingSchedule(body *interfaces.AutoMapping) interfaces.AutoMappingScheduleResponse {

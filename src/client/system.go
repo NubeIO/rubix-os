@@ -1,6 +1,6 @@
 package client
 
-import "github.com/NubeIO/flow-framework/nresty"
+import "github.com/NubeIO/rubix-os/nresty"
 
 type Ping struct {
 	Health   string `json:"health"`

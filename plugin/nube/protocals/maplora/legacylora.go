@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/maplora/legacylorarest"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/maplora/legacylorarest"
 )
 
 func (inst *Instance) GetLegacyLoRaNetwork() (*legacylorarest.LoRaNet, error) {

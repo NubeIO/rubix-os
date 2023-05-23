@@ -3,13 +3,13 @@ package edgebioscli
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/src/cli/edgebioscli/ebmodel"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/nresty"
+	"github.com/NubeIO/rubix-os/src/cli/edgebioscli/ebmodel"
 )
 
 func (inst *BiosClient) GetRubixEdgeVersion() (*ebmodel.Version, error) {
-	installLocation := fmt.Sprintf("/data/rubix-service/apps/install/%s", rubixEdgeName)
+	installLocation := fmt.Sprintf("/data/installer/apps/install/%s", rubixEdgeName)
 	url := fmt.Sprintf("/api/files/list?path=%s", installLocation)
 	resp, err := nresty.FormatRestyResponse(inst.Rest.R().
 		SetResult(&[]fileutils.FileDetails{}).

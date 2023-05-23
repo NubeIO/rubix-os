@@ -1,9 +1,9 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/plugin"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/eventbus"
+	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/gin-gonic/gin"
 	"strconv"
 )

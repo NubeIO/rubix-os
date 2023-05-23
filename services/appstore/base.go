@@ -2,7 +2,7 @@ package appstore
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/global"
+	"github.com/NubeIO/rubix-os/global"
 	"os"
 )
 

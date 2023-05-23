@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csmodel"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
 	"github.com/NubeIO/lib-schema/lorawanschema"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/plugin"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/lorawan/csmodel"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/lorawan/csrest"
 	"github.com/gin-gonic/gin"
 )
 

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/NubeIO/flow-framework/utils/nuuid"
+	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/gin-gonic/gin"
 )
 

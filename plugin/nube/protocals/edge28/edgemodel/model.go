@@ -1,6 +1,6 @@
 package edgemodel
 
-import "github.com/NubeIO/flow-framework/plugin/defaults"
+import "github.com/NubeIO/rubix-os/plugin/defaults"
 
 type EnableStruct struct {
 	Type     string `json:"type" default:"bool"`

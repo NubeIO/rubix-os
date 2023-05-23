@@ -1,8 +1,8 @@
 package client
 
 import (
-	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/nresty"
 )
 
 func (inst *FlowClient) SyncStream(body *model.SyncStream) (*model.StreamClone, error) {

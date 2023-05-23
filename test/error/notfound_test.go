@@ -1,7 +1,7 @@
 package error
 
 import (
-	"github.com/NubeIO/flow-framework/nerrors"
+	"github.com/NubeIO/rubix-os/nerrors"
 	"net/http/httptest"
 	"testing"
 

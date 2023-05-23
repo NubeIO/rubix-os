@@ -3,14 +3,14 @@ package edgecli
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/global"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/services/systemctl"
-	"github.com/NubeIO/flow-framework/src/cli/constants"
-	"github.com/NubeIO/flow-framework/src/cli/edgebioscli/ebmodel"
-	"github.com/NubeIO/flow-framework/utils/namings"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/global"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/nresty"
+	"github.com/NubeIO/rubix-os/services/systemctl"
+	"github.com/NubeIO/rubix-os/src/cli/constants"
+	"github.com/NubeIO/rubix-os/src/cli/edgebioscli/ebmodel"
+	"github.com/NubeIO/rubix-os/utils/namings"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path"
@@ -57,7 +57,7 @@ func (inst *Client) moveAppAndPluginsFromDownloadToInstallDir(app *systemctl.Ser
 		return err
 	}
 
-	if app.Name == constants.FlowFramework {
+	if app.Name == constants.RubixOS {
 		from = global.Installer.GetAppPluginDownloadPath()
 		to = global.Installer.GetAppPluginInstallPath()
 		url = fmt.Sprintf("/api/files/delete-all?path=%s", to)
@@ -172,7 +172,7 @@ func (inst *Client) backupAppDataDir(appName string) error {
 
 	from := global.Installer.GetAppDataDataPath(appName)
 	to := global.Installer.GetAppBackupPath(appName, appVersion)
-	if appName == constants.FlowFramework { // otherwise, plugins & images folders also gets copied which will be large
+	if appName == constants.RubixOS { // otherwise, plugins & images folders also gets copied which will be large
 		from = path.Join(from, "data.db")
 		to = path.Join(to, "data.db")
 	}

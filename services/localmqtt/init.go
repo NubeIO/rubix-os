@@ -1,9 +1,9 @@
 package localmqtt
 
 import (
-	"github.com/NubeIO/flow-framework/config"
-	"github.com/NubeIO/flow-framework/mqttclient"
-	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/rubix-os/config"
+	"github.com/NubeIO/rubix-os/mqttclient"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/gin-gonic/gin"
 )
 

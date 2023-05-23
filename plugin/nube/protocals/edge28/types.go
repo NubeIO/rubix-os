@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 )
 
 var UOTypes = struct {
 	// RAW  string
 	DIGITAL string
-	//PERCENT string
+	// PERCENT string
 	VOLTSDC string
 	// MILLIAMPS  string
 }{
 	// RAW:  "RAW",
 	DIGITAL: "digital",
-	//PERCENT: "PERCENT",
+	// PERCENT: "PERCENT",
 	VOLTSDC: "0-10VDC",
 	// MILLIAMPS:  "4-20mA",
 }
@@ -26,22 +26,22 @@ var UITypes = struct {
 	MILLIAMPS       string
 	RESISTANCE      string
 	THERMISTOR10KT2 string
-	//THERMISTOR10KT3  string
-	//THERMISTOR20KT1  string
-	//THERMISTORPT100  string
-	//THERMISTORPT1000 string
+	// THERMISTOR10KT3  string
+	// THERMISTOR20KT1  string
+	// THERMISTORPT100  string
+	// THERMISTORPT1000 string
 }{
 	RAW:       "raw",
 	DIGITAL:   "digital",
 	PERCENT:   "PERCENT",
 	VOLTSDC:   "voltage_dc",
 	MILLIAMPS: "current",
-	//RESISTANCE:       "RESISTANCE",
+	// RESISTANCE:       "RESISTANCE",
 	THERMISTOR10KT2: "thermistor_10k_type_2",
-	//THERMISTOR10KT3:  "THERMISTOR_10K_TYPE3",
-	//THERMISTOR20KT1:  "THERMISTOR_20K_TYPE1",
-	//THERMISTORPT100:  "THERMISTOR_PT100",
-	//THERMISTORPT1000: "THERMISTOR_PT1000",
+	// THERMISTOR10KT3:  "THERMISTOR_10K_TYPE3",
+	// THERMISTOR20KT1:  "THERMISTOR_20K_TYPE1",
+	// THERMISTORPT100:  "THERMISTOR_PT100",
+	// THERMISTORPT1000: "THERMISTOR_PT1000",
 }
 
 var Rls = []string{"R1", "R2"}

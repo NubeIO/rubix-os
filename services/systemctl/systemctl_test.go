@@ -2,7 +2,7 @@ package systemctl
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/installer"
+	"github.com/NubeIO/rubix-os/installer"
 	"testing"
 )
 

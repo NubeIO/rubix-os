@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin/nube/projects/galvintmv/chirpstackrest"
+	"github.com/NubeIO/rubix-os/plugin/nube/projects/galvintmv/chirpstackrest"
 )
 
 func (inst *Instance) GetChirpstackToken(user, pass string) (*chirpstackrest.ChirpstackToken, error) {

@@ -1,7 +1,7 @@
 package system
 
 import (
-	"github.com/NubeIO/flow-framework/utils/pprint"
+	"github.com/NubeIO/rubix-os/utils/pprint"
 	"testing"
 )
 

@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/NubeIO/flow-framework/services/localmqtt"
-	"github.com/NubeIO/flow-framework/src/gocancel"
-	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/rubix-os/services/localmqtt"
+	"github.com/NubeIO/rubix-os/src/gocancel"
+	"github.com/NubeIO/rubix-os/utils/float"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"strings"
 )
