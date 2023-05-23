@@ -616,7 +616,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			deviceInfoRoutes.GET("/swap", systemHandler.GetSwap)
 			deviceInfoRoutes.GET("/disc", systemHandler.DiscUsage)
 			deviceInfoRoutes.GET("/disc/pretty", systemHandler.DiscUsagePretty)
-
 		}
 
 		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)
@@ -652,6 +651,21 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 		autoMappingRoutes := apiRoutes.Group("/auto_mappings")
 		{
 			autoMappingRoutes.POST("", autoMappingHandler.CreateAutoMapping)
+		}
+
+		scheduleAutoMappingRoutes := apiRoutes.Group("/auto_mapping_schedules") // RE
+		{
+			scheduleAutoMappingRoutes.POST("", autoMappingScheduleHandler.CreateAutoMappingSchedule)
+		}
+
+		memberRoutes := apiRoutes.Group("/members")
+		{
+			memberRoutes.GET("", memberHandler.GetMembers)
+			memberRoutes.GET("/:uuid", memberHandler.GetMemberByUUID)
+			memberRoutes.DELETE("/:uuid", memberHandler.DeleteMemberByUUID)
+			memberRoutes.GET("/username/:username", memberHandler.GetMemberByUsername)
+			memberRoutes.POST("/verify/:username", memberHandler.VerifyMember)
+			memberRoutes.PUT("/:uuid/groups", memberHandler.UpdateMemberGroups)
 		}
 
 		systemctlRoutes := apiRoutes.Group("/systemctl")
@@ -786,6 +800,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			restartJobRoutes.DELETE("/:unit", restartJobHandler.DeleteRestartJob)
 		}
 
+		// Server APIs
+		// These APIs are just needed on server level, later we can introduce a flag to restrict exposing
+		// ----------------------------------------------------------------------------------------------
 		storeRoutes := apiRoutes.Group("/store")
 		{
 			appStoreRoutes := storeRoutes.Group("/apps")
@@ -918,22 +935,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			alertRoutes.DELETE("/:uuid", alertHandler.DeleteAlert)
 			alertRoutes.DELETE("/drop", alertHandler.DropAlerts)
 		}
-
-		scheduleAutoMappingRoutes := apiRoutes.Group("/auto_mapping_schedules")
-		{
-			scheduleAutoMappingRoutes.POST("", autoMappingScheduleHandler.CreateAutoMappingSchedule)
-		}
-
-		memberRoutes := apiRoutes.Group("/members")
-		{
-			memberRoutes.GET("", memberHandler.GetMembers)
-			memberRoutes.GET("/:uuid", memberHandler.GetMemberByUUID)
-			memberRoutes.DELETE("/:uuid", memberHandler.DeleteMemberByUUID)
-			memberRoutes.GET("/username/:username", memberHandler.GetMemberByUsername)
-			memberRoutes.POST("/verify/:username", memberHandler.VerifyMember)
-			memberRoutes.PUT("/:uuid/groups", memberHandler.UpdateMemberGroups)
-		}
-
+		// ----------------------------------------------------------------------------------------------
 	}
 	return engine
 }
