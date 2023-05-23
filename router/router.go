@@ -797,142 +797,142 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			restartJobRoutes.DELETE("/:unit", restartJobHandler.DeleteRestartJob)
 		}
 
-		// Server APIs
 		// These APIs are just needed on server level, later we can introduce a flag to restrict exposing
-		// ----------------------------------------------------------------------------------------------
-		storeRoutes := apiRoutes.Group("/store")
+		serverApiRoutes := apiRoutes.Group("")
 		{
-			appStoreRoutes := storeRoutes.Group("/apps")
+			storeRoutes := serverApiRoutes.Group("/store")
 			{
-				appStoreRoutes.POST("", appStoreHandler.UploadAddOnAppStore)
-				appStoreRoutes.GET("/exists", appStoreHandler.CheckAppExistence)
-			}
-
-			pluginStoreRoutes := storeRoutes.Group("/plugins")
-			{
-				pluginStoreRoutes.GET("", pluginStoreHandler.GetPluginsStorePlugins)
-				pluginStoreRoutes.POST("", pluginStoreHandler.UploadPluginStorePlugin)
-			}
-		}
-
-		edgeBiosAppRoutes := apiRoutes.Group("/eb/re")
-		{
-			edgeBiosAppRoutes.POST("/upload", edgeBiosEdgeHandler.EdgeBiosRubixEdgeUpload)
-			edgeBiosAppRoutes.POST("/install", edgeBiosEdgeHandler.EdgeBiosRubixEdgeInstall)
-			edgeBiosAppRoutes.GET("/version", edgeBiosEdgeHandler.EdgeBiosGetRubixEdgeVersion)
-		}
-
-		edgeRoutes := apiRoutes.Group("/edge")
-		{
-			edgeAppRoutes := edgeRoutes.Group("/apps")
-			{
-				edgeAppRoutes.POST("/upload", edgeAppHandler.EdgeAppUpload)
-				edgeAppRoutes.POST("/install", edgeAppHandler.EdgeAppInstall)
-				edgeAppRoutes.POST("/uninstall", edgeAppHandler.EdgeAppUninstall)
-				edgeAppRoutes.GET("/status", edgeAppHandler.EdgeListAppsStatus)
-				edgeAppRoutes.GET("/status/:app_name", edgeAppHandler.EdgeGetAppStatus)
-			}
-
-			edgePluginRoutes := edgeRoutes.Group("/plugins")
-			{
-				edgePluginRoutes.GET("", edgePluginHandler.EdgeListPlugins)
-				edgePluginRoutes.POST("/upload", edgePluginHandler.EdgeUploadPlugin)
-				edgePluginRoutes.POST("/move-from-download-to-install", edgePluginHandler.EdgeMoveFromDownloadToInstallPlugins)
-				edgePluginRoutes.DELETE("/name/:plugin_name", edgePluginHandler.EdgeDeletePlugin)
-				edgePluginRoutes.DELETE("/download-plugins", edgePluginHandler.EdgeDeleteDownloadPlugins)
-			}
-
-			edgeConfigRoutes := edgeRoutes.Group("/config")
-			{
-				edgeConfigRoutes.GET("", edgeConfigHandler.EdgeReadConfig)
-				edgeConfigRoutes.POST("", edgeConfigHandler.EdgeWriteConfig)
-			}
-
-			edgeSnapshotRoutes := edgeRoutes.Group("/snapshots")
-			{
-				edgeSnapshotRoutes.GET("", edgeSnapshotHandler.GetSnapshots)
-				edgeSnapshotRoutes.PATCH("/:file", edgeSnapshotHandler.UpdateSnapshot)
-				edgeSnapshotRoutes.DELETE("", edgeSnapshotHandler.DeleteSnapshot)
-				edgeSnapshotRoutes.POST("/create", edgeSnapshotHandler.CreateSnapshot)
-				edgeSnapshotRoutes.POST("/restore", edgeSnapshotHandler.RestoreSnapshot)
-				edgeSnapshotRoutes.POST("/download", edgeSnapshotHandler.DownloadSnapshot)
-				edgeSnapshotRoutes.POST("/upload", edgeSnapshotHandler.UploadSnapshot)
-
-				snapshotCreateLogRoutes := edgeSnapshotRoutes.Group("/create-logs")
+				appStoreRoutes := storeRoutes.Group("/apps")
 				{
-					snapshotCreateLogRoutes.GET("", snapshotCreatLogHandler.GetSnapshotCreateLogs)
-					snapshotCreateLogRoutes.PATCH("/:uuid", snapshotCreatLogHandler.UpdateSnapshotCreateLog)
-					snapshotCreateLogRoutes.DELETE("/:uuid", snapshotCreatLogHandler.DeleteSnapshotCreateLog)
+					appStoreRoutes.POST("", appStoreHandler.UploadAddOnAppStore)
+					appStoreRoutes.GET("/exists", appStoreHandler.CheckAppExistence)
 				}
 
-				snapshotRestoreLogRoutes := edgeSnapshotRoutes.Group("/restore-logs")
+				pluginStoreRoutes := storeRoutes.Group("/plugins")
 				{
-					snapshotRestoreLogRoutes.GET("", snapshotRestoreLogHandler.GetSnapshotRestoreLogs)
-					snapshotRestoreLogRoutes.PATCH("/:uuid", snapshotRestoreLogHandler.UpdateSnapshotRestoreLog)
-					snapshotRestoreLogRoutes.DELETE("/:uuid", snapshotRestoreLogHandler.DeleteSnapshotRestoreLog)
+					pluginStoreRoutes.GET("", pluginStoreHandler.GetPluginsStorePlugins)
+					pluginStoreRoutes.POST("", pluginStoreHandler.UploadPluginStorePlugin)
 				}
 			}
-		}
 
-		locationRoutes := apiRoutes.Group("/locations")
-		{
-			locationRoutes.GET("/schema", locationHandler.GetLocationSchema)
-			locationRoutes.GET("", locationHandler.GetLocations)
-			locationRoutes.GET("/:uuid", locationHandler.GetLocation)
-			locationRoutes.POST("", locationHandler.CreateLocation)
-			locationRoutes.PATCH("/:uuid", locationHandler.UpdateLocation)
-			locationRoutes.DELETE("/:uuid", locationHandler.DeleteLocation)
-			locationRoutes.DELETE("/drop", locationHandler.DropLocations)
-		}
-
-		groupRoutes := apiRoutes.Group("/groups")
-		{
-			groupRoutes.GET("/schema", groupHandler.GetGroupSchema)
-			groupRoutes.GET("", groupHandler.GetGroups)
-			groupRoutes.GET("/:uuid", groupHandler.GetGroup)
-			groupRoutes.POST("", groupHandler.CreateGroup)
-			groupRoutes.PATCH("/:uuid", groupHandler.UpdateGroup)
-			groupRoutes.DELETE("/:uuid", groupHandler.DeleteGroup)
-			groupRoutes.DELETE("/drop", groupHandler.DropGroups)
-			groupRoutes.GET("/:uuid/update-hosts-status", groupHandler.UpdateHostsStatus)
-		}
-
-		hostRoutes := apiRoutes.Group("/hosts")
-		{
-			hostRoutes.GET("/schema", hostHandler.GetHostSchema)
-			hostRoutes.GET("", hostHandler.GetHosts)
-			hostRoutes.POST("", hostHandler.CreateHost)
-			hostRoutes.GET("/:uuid", hostHandler.GetHost)
-			hostRoutes.PATCH("/:uuid", hostHandler.UpdateHost)
-			hostRoutes.DELETE("/:uuid", hostHandler.DeleteHost)
-			hostRoutes.DELETE("/drop", hostHandler.DropHosts)
-			hostRoutes.GET("/:uuid/configure-openvpn", hostHandler.ConfigureOpenVPN)
-
-			hostTagRoutes := hostRoutes.Group("/tags")
+			edgeBiosAppRoutes := serverApiRoutes.Group("/eb/re")
 			{
-				hostTagRoutes.PUT("/host_uuid/:host_uuid", hostTagHandler.UpdateHostTags)
+				edgeBiosAppRoutes.POST("/upload", edgeBiosEdgeHandler.EdgeBiosRubixEdgeUpload)
+				edgeBiosAppRoutes.POST("/install", edgeBiosEdgeHandler.EdgeBiosRubixEdgeInstall)
+				edgeBiosAppRoutes.GET("/version", edgeBiosEdgeHandler.EdgeBiosGetRubixEdgeVersion)
 			}
 
-			hostCommentRoutes := hostRoutes.Group("/comments")
+			edgeRoutes := serverApiRoutes.Group("/edge")
 			{
-				hostCommentRoutes.POST("", hostCommentHandler.CreateHostComment)
-				hostCommentRoutes.PATCH("/:uuid", hostCommentHandler.UpdateHostComment)
-				hostCommentRoutes.DELETE("/:uuid", hostCommentHandler.DeleteHostComment)
+				edgeAppRoutes := edgeRoutes.Group("/apps")
+				{
+					edgeAppRoutes.POST("/upload", edgeAppHandler.EdgeAppUpload)
+					edgeAppRoutes.POST("/install", edgeAppHandler.EdgeAppInstall)
+					edgeAppRoutes.POST("/uninstall", edgeAppHandler.EdgeAppUninstall)
+					edgeAppRoutes.GET("/status", edgeAppHandler.EdgeListAppsStatus)
+					edgeAppRoutes.GET("/status/:app_name", edgeAppHandler.EdgeGetAppStatus)
+				}
+
+				edgePluginRoutes := edgeRoutes.Group("/plugins")
+				{
+					edgePluginRoutes.GET("", edgePluginHandler.EdgeListPlugins)
+					edgePluginRoutes.POST("/upload", edgePluginHandler.EdgeUploadPlugin)
+					edgePluginRoutes.POST("/move-from-download-to-install", edgePluginHandler.EdgeMoveFromDownloadToInstallPlugins)
+					edgePluginRoutes.DELETE("/name/:plugin_name", edgePluginHandler.EdgeDeletePlugin)
+					edgePluginRoutes.DELETE("/download-plugins", edgePluginHandler.EdgeDeleteDownloadPlugins)
+				}
+
+				edgeConfigRoutes := edgeRoutes.Group("/config")
+				{
+					edgeConfigRoutes.GET("", edgeConfigHandler.EdgeReadConfig)
+					edgeConfigRoutes.POST("", edgeConfigHandler.EdgeWriteConfig)
+				}
+
+				edgeSnapshotRoutes := edgeRoutes.Group("/snapshots")
+				{
+					edgeSnapshotRoutes.GET("", edgeSnapshotHandler.GetSnapshots)
+					edgeSnapshotRoutes.PATCH("/:file", edgeSnapshotHandler.UpdateSnapshot)
+					edgeSnapshotRoutes.DELETE("", edgeSnapshotHandler.DeleteSnapshot)
+					edgeSnapshotRoutes.POST("/create", edgeSnapshotHandler.CreateSnapshot)
+					edgeSnapshotRoutes.POST("/restore", edgeSnapshotHandler.RestoreSnapshot)
+					edgeSnapshotRoutes.POST("/download", edgeSnapshotHandler.DownloadSnapshot)
+					edgeSnapshotRoutes.POST("/upload", edgeSnapshotHandler.UploadSnapshot)
+
+					snapshotCreateLogRoutes := edgeSnapshotRoutes.Group("/create-logs")
+					{
+						snapshotCreateLogRoutes.GET("", snapshotCreatLogHandler.GetSnapshotCreateLogs)
+						snapshotCreateLogRoutes.PATCH("/:uuid", snapshotCreatLogHandler.UpdateSnapshotCreateLog)
+						snapshotCreateLogRoutes.DELETE("/:uuid", snapshotCreatLogHandler.DeleteSnapshotCreateLog)
+					}
+
+					snapshotRestoreLogRoutes := edgeSnapshotRoutes.Group("/restore-logs")
+					{
+						snapshotRestoreLogRoutes.GET("", snapshotRestoreLogHandler.GetSnapshotRestoreLogs)
+						snapshotRestoreLogRoutes.PATCH("/:uuid", snapshotRestoreLogHandler.UpdateSnapshotRestoreLog)
+						snapshotRestoreLogRoutes.DELETE("/:uuid", snapshotRestoreLogHandler.DeleteSnapshotRestoreLog)
+					}
+				}
+			}
+
+			locationRoutes := serverApiRoutes.Group("/locations")
+			{
+				locationRoutes.GET("/schema", locationHandler.GetLocationSchema)
+				locationRoutes.GET("", locationHandler.GetLocations)
+				locationRoutes.GET("/:uuid", locationHandler.GetLocation)
+				locationRoutes.POST("", locationHandler.CreateLocation)
+				locationRoutes.PATCH("/:uuid", locationHandler.UpdateLocation)
+				locationRoutes.DELETE("/:uuid", locationHandler.DeleteLocation)
+				locationRoutes.DELETE("/drop", locationHandler.DropLocations)
+			}
+
+			groupRoutes := serverApiRoutes.Group("/groups")
+			{
+				groupRoutes.GET("/schema", groupHandler.GetGroupSchema)
+				groupRoutes.GET("", groupHandler.GetGroups)
+				groupRoutes.GET("/:uuid", groupHandler.GetGroup)
+				groupRoutes.POST("", groupHandler.CreateGroup)
+				groupRoutes.PATCH("/:uuid", groupHandler.UpdateGroup)
+				groupRoutes.DELETE("/:uuid", groupHandler.DeleteGroup)
+				groupRoutes.DELETE("/drop", groupHandler.DropGroups)
+				groupRoutes.GET("/:uuid/update-hosts-status", groupHandler.UpdateHostsStatus)
+			}
+
+			hostRoutes := serverApiRoutes.Group("/hosts")
+			{
+				hostRoutes.GET("/schema", hostHandler.GetHostSchema)
+				hostRoutes.GET("", hostHandler.GetHosts)
+				hostRoutes.POST("", hostHandler.CreateHost)
+				hostRoutes.GET("/:uuid", hostHandler.GetHost)
+				hostRoutes.PATCH("/:uuid", hostHandler.UpdateHost)
+				hostRoutes.DELETE("/:uuid", hostHandler.DeleteHost)
+				hostRoutes.DELETE("/drop", hostHandler.DropHosts)
+				hostRoutes.GET("/:uuid/configure-openvpn", hostHandler.ConfigureOpenVPN)
+
+				hostTagRoutes := hostRoutes.Group("/tags")
+				{
+					hostTagRoutes.PUT("/host_uuid/:host_uuid", hostTagHandler.UpdateHostTags)
+				}
+
+				hostCommentRoutes := hostRoutes.Group("/comments")
+				{
+					hostCommentRoutes.POST("", hostCommentHandler.CreateHostComment)
+					hostCommentRoutes.PATCH("/:uuid", hostCommentHandler.UpdateHostComment)
+					hostCommentRoutes.DELETE("/:uuid", hostCommentHandler.DeleteHostComment)
+				}
+			}
+
+			alertRoutes := serverApiRoutes.Group("/alerts")
+			{
+				alertRoutes.GET("/schema", alertHandler.AlertsSchema)
+				alertRoutes.GET("", alertHandler.GetAlerts)
+				alertRoutes.POST("", alertHandler.CreateAlert)
+				alertRoutes.GET("/:uuid", alertHandler.GetAlert)
+				alertRoutes.GET("/host/:uuid", alertHandler.GetAlertsByHost)
+				alertRoutes.PATCH("/:uuid/status", alertHandler.UpdateAlertStatus)
+				alertRoutes.DELETE("/:uuid", alertHandler.DeleteAlert)
+				alertRoutes.DELETE("/drop", alertHandler.DropAlerts)
 			}
 		}
-
-		alertRoutes := apiRoutes.Group("/alerts")
-		{
-			alertRoutes.GET("/schema", alertHandler.AlertsSchema)
-			alertRoutes.GET("", alertHandler.GetAlerts)
-			alertRoutes.POST("", alertHandler.CreateAlert)
-			alertRoutes.GET("/:uuid", alertHandler.GetAlert)
-			alertRoutes.GET("/host/:uuid", alertHandler.GetAlertsByHost)
-			alertRoutes.PATCH("/:uuid/status", alertHandler.UpdateAlertStatus)
-			alertRoutes.DELETE("/:uuid", alertHandler.DeleteAlert)
-			alertRoutes.DELETE("/drop", alertHandler.DropAlerts)
-		}
-		// ----------------------------------------------------------------------------------------------
 	}
 	return engine
 }
