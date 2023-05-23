@@ -3,9 +3,9 @@ package edgebioscli
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/src/cli/edgebioscli/ebmodel"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/nresty"
+	"github.com/NubeIO/rubix-os/src/cli/edgebioscli/ebmodel"
 )
 
 func (inst *BiosClient) GetRubixEdgeVersion() (*ebmodel.Version, error) {

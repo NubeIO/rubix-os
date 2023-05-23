@@ -2,7 +2,7 @@ package nerrors
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"net/http"
 	"strings"
 	"unicode"

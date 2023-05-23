@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/services/appstore"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/services/appstore"
 	"github.com/gin-gonic/gin"
 )
 

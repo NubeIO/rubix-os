@@ -2,8 +2,8 @@ package bioscli
 
 import (
 	"context"
-	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
+	"github.com/NubeIO/rubix-os/nresty"
 	"github.com/go-resty/resty/v2"
 	"net"
 	"net/http"

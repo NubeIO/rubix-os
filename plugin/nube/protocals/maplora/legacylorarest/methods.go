@@ -1,6 +1,6 @@
 package legacylorarest
 
-import "github.com/NubeIO/flow-framework/nresty"
+import "github.com/NubeIO/rubix-os/nresty"
 
 type LoRaNet struct {
 	Port     string  `json:"port"`

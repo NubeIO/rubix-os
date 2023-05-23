@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/database/postgres/pgmodel"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/plugin/nube/database/postgres/pgmodel"
 	log "github.com/sirupsen/logrus"
 )
 

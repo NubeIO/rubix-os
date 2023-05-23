@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/src/jobs"
+	"github.com/NubeIO/rubix-os/src/jobs"
 	log "github.com/sirupsen/logrus"
 )
 

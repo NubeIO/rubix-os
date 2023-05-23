@@ -1,7 +1,7 @@
 package eventbus
 
 import (
-	"github.com/NubeIO/flow-framework/mqttclient"
+	"github.com/NubeIO/rubix-os/mqttclient"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 )

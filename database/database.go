@@ -2,16 +2,16 @@ package database
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/migration"
-	"github.com/NubeIO/flow-framework/src/cachestore"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
+	"github.com/NubeIO/rubix-os/eventbus"
+	"github.com/NubeIO/rubix-os/migration"
+	"github.com/NubeIO/rubix-os/src/cachestore"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/NubeIO/flow-framework/logger"
-	"github.com/NubeIO/flow-framework/plugin"
+	"github.com/NubeIO/rubix-os/logger"
+	"github.com/NubeIO/rubix-os/plugin"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )

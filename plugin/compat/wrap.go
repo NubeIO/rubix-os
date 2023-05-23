@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"plugin"
 
-	"github.com/NubeIO/flow-framework/plugin/pluginapi"
+	"github.com/NubeIO/rubix-os/plugin/pluginapi"
 )
 
 // Wrap wraps around a raw go plugin to provide typesafe access.

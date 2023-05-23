@@ -3,9 +3,9 @@ package jobs
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/src/dbhandler"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/eventbus"
+	"github.com/NubeIO/rubix-os/src/dbhandler"
 	"github.com/go-co-op/gocron"
 	log "github.com/sirupsen/logrus"
 	"time"

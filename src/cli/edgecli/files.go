@@ -2,9 +2,9 @@ package edgecli
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/nresty"
 )
 
 func (inst *Client) ListFiles(path string) ([]fileutils.FileDetails, error) {

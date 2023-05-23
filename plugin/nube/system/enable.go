@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/rubix-os/api"
 	"github.com/go-co-op/gocron"
 	log "github.com/sirupsen/logrus"
 	"time"

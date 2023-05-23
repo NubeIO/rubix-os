@@ -1,6 +1,6 @@
 package main
 
-import "github.com/NubeIO/flow-framework/plugin/nube/protocals/edge28/config"
+import "github.com/NubeIO/rubix-os/plugin/nube/protocals/edge28/config"
 
 func (inst *Instance) DefaultConfig() interface{} {
 	return &config.Config{

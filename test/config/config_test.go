@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/rubix-os/config"
 	"github.com/gin-gonic/gin"
 	"os"
 	"testing"

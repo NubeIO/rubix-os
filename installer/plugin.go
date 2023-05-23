@@ -3,7 +3,7 @@ package installer
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"io/ioutil"
 	"strings"
 )

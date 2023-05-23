@@ -2,9 +2,9 @@ package installer
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/src/cli/constants"
-	"github.com/NubeIO/flow-framework/utils/namings"
-	"github.com/NubeIO/flow-framework/utils/nuuid"
+	"github.com/NubeIO/rubix-os/src/cli/constants"
+	"github.com/NubeIO/rubix-os/utils/namings"
+	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"os"
 	"path"
 	"time"

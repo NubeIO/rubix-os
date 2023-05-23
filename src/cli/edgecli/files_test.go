@@ -2,8 +2,8 @@ package edgecli
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/utils/pprint"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/utils/pprint"
 	"gopkg.in/yaml.v3"
 	"testing"
 )

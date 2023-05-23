@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/NubeIO/flow-framework/eventbus"
-	"github.com/NubeIO/flow-framework/utils/nuuid"
+	"github.com/NubeIO/rubix-os/eventbus"
+	"github.com/NubeIO/rubix-os/utils/nuuid"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/mustafaturan/bus/v3"
 )

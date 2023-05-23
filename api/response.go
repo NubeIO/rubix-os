@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/nerrors"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/nerrors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"

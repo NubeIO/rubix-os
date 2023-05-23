@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/utils/array"
-	"github.com/NubeIO/flow-framework/utils/integer"
-	"github.com/NubeIO/flow-framework/utils/nstring"
+	"github.com/NubeIO/rubix-os/utils/array"
+	"github.com/NubeIO/rubix-os/utils/integer"
+	"github.com/NubeIO/rubix-os/utils/nstring"
 	"reflect"
 	"strings"
 

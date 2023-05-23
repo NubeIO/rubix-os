@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/services/pollqueue"
-	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/services/pollqueue"
+	"github.com/NubeIO/rubix-os/utils/float"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin/nube/projects/thresholdalerts/ffhistoryrest"
+	"github.com/NubeIO/rubix-os/plugin/nube/projects/thresholdalerts/ffhistoryrest"
 )
 
 func (inst *Instance) ThresholdAnalysis(ffHistoryArray []ffhistoryrest.FFHistory, jobConfig Job) (highThresholdAlerts, lowThresholdAlerts []string, err error) {

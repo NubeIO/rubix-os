@@ -1,7 +1,7 @@
 package history
 
 import (
-	"github.com/NubeIO/flow-framework/database"
+	"github.com/NubeIO/rubix-os/database"
 	"github.com/go-co-op/gocron"
 )
 

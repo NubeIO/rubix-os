@@ -3,9 +3,9 @@ package systemctl
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/installer"
-	"github.com/NubeIO/flow-framework/utils/namings"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/installer"
+	"github.com/NubeIO/rubix-os/utils/namings"
 	"github.com/sergeymakinen/go-systemdconf/v2"
 	"github.com/sergeymakinen/go-systemdconf/v2/unit"
 	log "github.com/sirupsen/logrus"

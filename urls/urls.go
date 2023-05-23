@@ -2,7 +2,7 @@ package urls
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/rubix-os/api"
 	"strings"
 )
 

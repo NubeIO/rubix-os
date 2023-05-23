@@ -3,7 +3,7 @@ package nresty
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/go-resty/resty/v2"
 )
 

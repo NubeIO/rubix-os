@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/utils/array"
+	"github.com/NubeIO/rubix-os/utils/array"
 	"go.bug.st/serial"
 )
 

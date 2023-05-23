@@ -9,9 +9,9 @@ import (
 	"github.com/amenzhinsky/iothub/iotdevice"
 	"time"
 
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/float"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/float"
 )
 
 func (inst *Instance) syncAzure() error {

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/rubix-os/config"
 )
 
 func Run(engine http.Handler, conf *config.Configuration) {

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin/nube/projects/statusmismatchalerts/ffhistoryrest"
+	"github.com/NubeIO/rubix-os/plugin/nube/projects/statusmismatchalerts/ffhistoryrest"
 )
 
 func (inst *Instance) StatusMismatchAnalysis(ffHistoryArray []ffhistoryrest.FFHistory, jobConfig Job) (highStatusMismatchAlerts, lowStatusMismatchAlerts []string, err error) {

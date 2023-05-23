@@ -3,12 +3,12 @@ package edgecli
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/global"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/nresty"
-	"github.com/NubeIO/flow-framework/utils/helpers"
-	"github.com/NubeIO/flow-framework/utils/namings"
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
+	"github.com/NubeIO/rubix-os/global"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/nresty"
+	"github.com/NubeIO/rubix-os/utils/helpers"
+	"github.com/NubeIO/rubix-os/utils/namings"
 )
 
 func (inst *Client) AppsStatus() (*[]interfaces.AppsStatus, error) {

@@ -1,7 +1,7 @@
 package compat
 
 import (
-	"github.com/NubeIO/flow-framework/plugin/pluginapi"
+	"github.com/NubeIO/rubix-os/plugin/pluginapi"
 	"github.com/gin-gonic/gin"
 	"net/url"
 )

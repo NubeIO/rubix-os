@@ -3,9 +3,9 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/float"
 )
 
 // wizard

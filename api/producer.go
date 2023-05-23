@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 )

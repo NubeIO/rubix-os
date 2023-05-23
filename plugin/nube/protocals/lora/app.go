@@ -11,16 +11,16 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
-	"github.com/NubeIO/flow-framework/utils/integer"
+	"github.com/NubeIO/rubix-os/utils/integer"
 
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lora/decoder"
-	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/float"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/bugs"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/lora/decoder"
+	"github.com/NubeIO/rubix-os/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/float"
 	log "github.com/sirupsen/logrus"
 )
 

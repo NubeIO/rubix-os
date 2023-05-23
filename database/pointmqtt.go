@@ -3,11 +3,11 @@ package database
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/config"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/services/localmqtt"
-	"github.com/NubeIO/flow-framework/utils/boolean"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/config"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/services/localmqtt"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 )

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/NubeIO/flow-framework/utils/float"
+import "github.com/NubeIO/rubix-os/utils/float"
 
 type Config struct {
 	Job      Job    `yaml:"job"`

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/rubix-os/api"
 	log "github.com/sirupsen/logrus"
 )
 

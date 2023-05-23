@@ -2,7 +2,7 @@ package localmqtt
 
 import (
 	"encoding/json"
-	"github.com/NubeIO/flow-framework/utils/deviceinfo"
+	"github.com/NubeIO/rubix-os/utils/deviceinfo"
 	log "github.com/sirupsen/logrus"
 )
 

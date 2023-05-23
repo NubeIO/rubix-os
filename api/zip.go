@@ -3,8 +3,8 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 	"os"
 	"path/filepath"

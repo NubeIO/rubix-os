@@ -3,11 +3,11 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/global"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/services/appstore"
-	"github.com/NubeIO/flow-framework/utils/helpers"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/global"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/services/appstore"
+	"github.com/NubeIO/rubix-os/utils/helpers"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 )

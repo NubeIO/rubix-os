@@ -1,8 +1,8 @@
 package database
 
 import (
-	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
 )
 
 func (d *GormDatabase) GetTags(args api.Args) ([]*model.Tag, error) {

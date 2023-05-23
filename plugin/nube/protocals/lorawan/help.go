@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/NubeIO/flow-framework/plugin/pluginapi"
+	"github.com/NubeIO/rubix-os/plugin/pluginapi"
 )
 
 func (inst *Instance) GetDisplay(baseURL *url.URL) pluginapi.Response {

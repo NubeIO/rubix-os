@@ -1,146 +1,146 @@
 # CHANGELOG
 
-## [v0.14.1](https://github.com/NubeIO/flow-framework/tree/v0.14.1) (2023-05-19)
+## [v0.14.1](https://github.com/NubeIO/rubix-os/tree/v0.14.1) (2023-05-19)
 
 - LoRaWAN plugin updates
 - Networklinker plugin updates
 
-## [v0.14.0](https://github.com/NubeIO/flow-framework/tree/v0.14.0) (2023-05-10)
+## [v0.14.0](https://github.com/NubeIO/rubix-os/tree/v0.14.0) (2023-05-10)
 
 - Add schedule auto-mapping
 
-## [v0.13.1](https://github.com/NubeIO/flow-framework/tree/v0.13.1) (2023-05-05)
+## [v0.13.1](https://github.com/NubeIO/rubix-os/tree/v0.13.1) (2023-05-05)
 
 - Upgrade bacnet lib for conversion bacnet value
 
-## [v0.13.0](https://github.com/NubeIO/flow-framework/tree/v0.13.0) (2023-05-02)
+## [v0.13.0](https://github.com/NubeIO/rubix-os/tree/v0.13.0) (2023-05-02)
 
 - Set max open connections and max idle connections to 1
 - Add few more options in the config for MQTT
 - Add name validation for network, device and point
 
-## [v0.12.9](https://github.com/NubeIO/flow-framework/tree/v0.12.9) (2023-04-19)
+## [v0.12.9](https://github.com/NubeIO/rubix-os/tree/v0.12.9) (2023-04-19)
 
 - Improvement in the auto-mapping error log messages
 - Fix: wrong deletion issue of devices & points in the auto-mapping
 
-## [v0.12.8](https://github.com/NubeIO/flow-framework/tree/v0.12.8) (2023-04-18)
+## [v0.12.8](https://github.com/NubeIO/rubix-os/tree/v0.12.8) (2023-04-18)
 
 - Fix: interval history creation
 - Adds logs for MQTT debugging
 
-## [v0.12.6](https://github.com/NubeIO/flow-framework/tree/v0.12.6) (2023-04-14)
+## [v0.12.6](https://github.com/NubeIO/rubix-os/tree/v0.12.6) (2023-04-14)
 
 - Fix: update tags database lock issue
 - Support complete tags deletions
 
-## [v0.12.5](https://github.com/NubeIO/flow-framework/tree/v0.12.5) (2023-04-14)
+## [v0.12.5](https://github.com/NubeIO/rubix-os/tree/v0.12.5) (2023-04-14)
 
 - Added chirpstack apis to the lorawan plugin
 
-## [v0.12.4](https://github.com/NubeIO/flow-framework/tree/v0.12.4) (2023-04-12)
+## [v0.12.4](https://github.com/NubeIO/rubix-os/tree/v0.12.4) (2023-04-12)
 
 - MQTT connection config settings improvements
 - Remove localstorage & its flow-network type
 - Improvement on auto_mappings
 - Fixes to schedule zero values on API schedule updates
 
-## [v0.12.3](https://github.com/NubeIO/flow-framework/tree/v0.12.3) (2023-04-05)
+## [v0.12.3](https://github.com/NubeIO/rubix-os/tree/v0.12.3) (2023-04-05)
 
 - Improvement on CORs by default setting
 - Fix: fallback get priority on doing point update
 
-## [v0.12.2](https://github.com/NubeIO/flow-framework/tree/v0.12.2) (2023-04-05)
+## [v0.12.2](https://github.com/NubeIO/rubix-os/tree/v0.12.2) (2023-04-05)
 
 - Fixes event and exception schedules
 
-## [v0.12.1](https://github.com/NubeIO/flow-framework/tree/v0.12.1) (2023-04-04)
+## [v0.12.1](https://github.com/NubeIO/rubix-os/tree/v0.12.1) (2023-04-04)
 
 - Remove point update buffer as it's using ~2x CPU power
   - It also fixes the slow MQTT publish issue
 - Improvement to run auto-mapping for all different fns
 
-## [v0.12.0](https://github.com/NubeIO/flow-framework/tree/v0.12.0) (2023-04-02)
+## [v0.12.0](https://github.com/NubeIO/rubix-os/tree/v0.12.0) (2023-04-02)
 
 - Auto mapping improvements
 
-## [v0.11.3](https://github.com/NubeIO/flow-framework/tree/v0.11.3) (2023-03-29)
+## [v0.11.3](https://github.com/NubeIO/rubix-os/tree/v0.11.3) (2023-03-29)
 
 - fix override priority array
 - support new microedge hardware and slit microedge into 2 models
 
-## [v0.11.2](https://github.com/NubeIO/flow-framework/tree/v0.11.2) (2023-03-20)
+## [v0.11.2](https://github.com/NubeIO/rubix-os/tree/v0.11.2) (2023-03-20)
 
 - set EnableWriteable for all point on system enable (temporary)
 - set lora message on data received
 - fix EnableWriteable on BACnet points
 
-## [v0.11.1](https://github.com/NubeIO/flow-framework/tree/v0.11.1) (2023-03-15)
+## [v0.11.1](https://github.com/NubeIO/rubix-os/tree/v0.11.1) (2023-03-15)
 
 - Limit point parallel mappings (temporary fix)
 
-## [v0.11.0](https://github.com/NubeIO/flow-framework/tree/v0.11.0) (2023-03-15)
+## [v0.11.0](https://github.com/NubeIO/rubix-os/tree/v0.11.0) (2023-03-15)
 
 - Trim networks, devices, and points names before inserting/updating
 - Auto-mapping by names
 
-## [v0.10.10](https://github.com/NubeIO/flow-framework/tree/v0.10.10) (2023-03-10)
+## [v0.10.10](https://github.com/NubeIO/rubix-os/tree/v0.10.10) (2023-03-10)
 
 - Remove MaxPollRate override
 - bump library versions
 - remove prints
 
-## [v0.10.9](https://github.com/NubeIO/flow-framework/tree/v0.10.9) (2023-03-10)
+## [v0.10.9](https://github.com/NubeIO/rubix-os/tree/v0.10.9) (2023-03-10)
 
 - Fix: runtime breaking issue
 - Fix: don't call flush mqtt publish buffer on MQTT disabled case
 - Add api endpoint to get producer histories by point uuids
 - Fix: don't replace write priority values with update point buffer
 
-## [v0.10.8](https://github.com/NubeIO/flow-framework/tree/v0.10.8) (2023-03-08)
+## [v0.10.8](https://github.com/NubeIO/rubix-os/tree/v0.10.8) (2023-03-08)
 
 - Implementation of MQTT publish buffer
 
-## [v0.10.7](https://github.com/NubeIO/flow-framework/tree/v0.10.7) (2023-03-08)
+## [v0.10.7](https://github.com/NubeIO/rubix-os/tree/v0.10.7) (2023-03-08)
 
 - Fix: point write issue from MQTT
 
-## [v0.10.6](https://github.com/NubeIO/flow-framework/tree/v0.10.6) (2023-03-07)
+## [v0.10.6](https://github.com/NubeIO/rubix-os/tree/v0.10.6) (2023-03-07)
 
 - Fix: points values are not written correctly
 - Improvements in cache buffers
 
-## [v0.10.5](https://github.com/NubeIO/flow-framework/tree/v0.10.5) (2023-03-07)
+## [v0.10.5](https://github.com/NubeIO/rubix-os/tree/v0.10.5) (2023-03-07)
 
 - Adds support for updated modbus ObjectTypes
 - Adds support for EnableWriteable on points
 - Fix: runtime issue (#897)
 
-## [v0.10.4](https://github.com/NubeIO/flow-framework/tree/v0.10.4) (2023-03-05)
+## [v0.10.4](https://github.com/NubeIO/rubix-os/tree/v0.10.4) (2023-03-05)
 
 - Improvements to modbus and bacnet polling
 - Fix for owens point issues
 - Make consumer points writable
 
-## [v0.10.3](https://github.com/NubeIO/flow-framework/tree/v0.10.3) (2023-03-01)
+## [v0.10.3](https://github.com/NubeIO/rubix-os/tree/v0.10.3) (2023-03-01)
 
 - Fix: present value write
 - Adds api calls for polling stats
 
-## [v0.10.2](https://github.com/NubeIO/flow-framework/tree/v0.10.2) (2023-02-28)
+## [v0.10.2](https://github.com/NubeIO/rubix-os/tree/v0.10.2) (2023-02-28)
 
 - Fix: update point issue
 - Remove fromPlugin flag & add a buffer flag
 - Adding buffer with point cache
 
-## [v0.10.1](https://github.com/NubeIO/flow-framework/tree/v0.10.1) (2023-02-27)
+## [v0.10.1](https://github.com/NubeIO/rubix-os/tree/v0.10.1) (2023-02-27)
 
 - Remove point write buffers
   - They need to be straightforwardly written & as they are not frequently called too
 - Remove fromPlugin flag on PointWrite
 - Remove the afterRealDeviceUpdate flag, it's making things confusing
 
-## [v0.10.0](https://github.com/NubeIO/flow-framework/tree/v0.10.0) (2023-02-24)
+## [v0.10.0](https://github.com/NubeIO/rubix-os/tree/v0.10.0) (2023-02-24)
 
 - Fix: runtime issue
 - Fix: parallel sync network and device
@@ -151,37 +151,37 @@
 - Have a common UpdatePoint function to send fromPlugin flag
   - galvintmv plugin was attaching fromPlugin=false
 
-## [v0.9.35](https://github.com/NubeIO/flow-framework/tree/v0.9.35) (2023-02-17)
+## [v0.9.35](https://github.com/NubeIO/rubix-os/tree/v0.9.35) (2023-02-17)
 
 - Use point HistoryEnable, HistoryType and HistoryInterval on producer (#866)
 - update to default sch freq
 - updates to galvintmv plugin for commissioning
 - Fix: MQTT connection reset by peer issue
 
-## [v0.9.34](https://github.com/NubeIO/flow-framework/tree/v0.9.34) (2023-02-16)
+## [v0.9.34](https://github.com/NubeIO/rubix-os/tree/v0.9.34) (2023-02-16)
 
 - bacnet master: adds priority 7 as write
 - adds running and fault properties to most plugins
 
-## [v0.9.33](https://github.com/NubeIO/flow-framework/tree/v0.9.33) (2023-02-13)
+## [v0.9.33](https://github.com/NubeIO/rubix-os/tree/v0.9.33) (2023-02-13)
 
 - Sync meta-tags and tags
 
-## [v0.9.32](https://github.com/NubeIO/flow-framework/tree/v0.9.32) (2023-02-10)
+## [v0.9.32](https://github.com/NubeIO/rubix-os/tree/v0.9.32) (2023-02-10)
 
 - support for known lorawan string payloads
 
-## [v0.9.31](https://github.com/NubeIO/flow-framework/tree/v0.9.31) (2023-02-08)
+## [v0.9.31](https://github.com/NubeIO/rubix-os/tree/v0.9.31) (2023-02-08)
 
 - Adds rtc timezone point
 - Updates rtc timezone offset
 - Fix: database lock issue
 
-## [v0.9.30](https://github.com/NubeIO/flow-framework/tree/v0.9.30) (2023-02-07)
+## [v0.9.30](https://github.com/NubeIO/rubix-os/tree/v0.9.30) (2023-02-07)
 
 - Modifies BACnet Master point write strategy
 
-## [v0.9.29](https://github.com/NubeIO/flow-framework/tree/v0.9.29) (2023-02-06)
+## [v0.9.29](https://github.com/NubeIO/rubix-os/tree/v0.9.29) (2023-02-06)
 
 - Applies schedule timezone to the timestamps
 - Fix: concurrent map writes
@@ -189,41 +189,41 @@
 - Don't build unused plugins
 - Build edge28 & rubixio for only armv7
 
-## [v0.9.28](https://github.com/NubeIO/flow-framework/tree/v0.9.28) (2023-01-30)
+## [v0.9.28](https://github.com/NubeIO/rubix-os/tree/v0.9.28) (2023-01-30)
 
 - Add mqtt connect retry and auto reconnect
 - Fix: MQTT subscribers listening
 
-## [v0.9.27](https://github.com/NubeIO/flow-framework/tree/v0.9.27) (2023-01-30)
+## [v0.9.27](https://github.com/NubeIO/rubix-os/tree/v0.9.27) (2023-01-30)
 
 - Updated bacnetmaster to use all priorities
 - Updates to schedules
 
-## [v0.9.26](https://github.com/NubeIO/flow-framework/tree/v0.9.26) (2023-01-28)
+## [v0.9.26](https://github.com/NubeIO/rubix-os/tree/v0.9.26) (2023-01-28)
 
 - Added mqtt api for schedules
 
-## [v0.9.25](https://github.com/NubeIO/flow-framework/tree/v0.9.25) (2023-01-25)
+## [v0.9.25](https://github.com/NubeIO/rubix-os/tree/v0.9.25) (2023-01-25)
 
 - Add meta tags query param on network, device and point #824
 - Lora updates v1 #825
 - small updates to schedule #822
 - update to bacnet master #821
 
-## [v0.9.24](https://github.com/NubeIO/flow-framework/tree/v0.9.24) (2023-01-19)
+## [v0.9.24](https://github.com/NubeIO/rubix-os/tree/v0.9.24) (2023-01-19)
 
 - update modbus schema #819
 - Add flow_https_local,flow_ip_local and flow_port_local #818
 - added api's for mapping for all protocals #815
 - added api for bacnet whois #814
 
-## [v0.9.23](https://github.com/NubeIO/flow-framework/tree/v0.9.23) (2023-01-16)
+## [v0.9.23](https://github.com/NubeIO/rubix-os/tree/v0.9.23) (2023-01-16)
 
 - Fix: FN selection doesn't exist issue
 - Upgrade lib-schema to v0.1.8
 - Get writer by name
 
-## [v0.9.22](https://github.com/NubeIO/flow-framework/tree/v0.9.22) (2023-01-16)
+## [v0.9.22](https://github.com/NubeIO/rubix-os/tree/v0.9.22) (2023-01-16)
 
 - add point write message ok
 - Improvements: add waits on loop delete
@@ -232,7 +232,7 @@
 - Add an auto_mapping example for lora and system plugins
 - adds safety to modbus byte conversions
 
-## [v0.9.21](https://github.com/NubeIO/flow-framework/tree/v0.9.21) (2023-01-05)
+## [v0.9.21](https://github.com/NubeIO/rubix-os/tree/v0.9.21) (2023-01-05)
 
 - Improvement: MQTT points list update only on point name changes
 - Add auto-mapping
@@ -240,202 +240,202 @@
 - Fix: Present value and priority array discrepancies
 - Remove the magic string from configs
 
-## [v0.9.20](https://github.com/NubeIO/flow-framework/tree/v0.9.20) (2022-12-20)
+## [v0.9.20](https://github.com/NubeIO/rubix-os/tree/v0.9.20) (2022-12-20)
 
 - bump version
 
-## [v0.9.19](https://github.com/NubeIO/flow-framework/tree/v0.9.19) (2022-12-20)
+## [v0.9.19](https://github.com/NubeIO/rubix-os/tree/v0.9.19) (2022-12-20)
 
 - mqtt support get selected points
 
-## [v0.9.18](https://github.com/NubeIO/flow-framework/tree/v0.9.18) (2022-12-12)
+## [v0.9.18](https://github.com/NubeIO/rubix-os/tree/v0.9.18) (2022-12-12)
 
 - Remove suffix slash (/) from APIs for to support reverse proxy
 - prevents clearing of errors on poll queue re-add
 
-## [v0.9.17](https://github.com/NubeIO/flow-framework/tree/v0.9.17) (2022-12-07)
+## [v0.9.17](https://github.com/NubeIO/rubix-os/tree/v0.9.17) (2022-12-07)
 
 - Make it installable on old distribution
 
-## [v0.9.16](https://github.com/NubeIO/flow-framework/tree/v0.9.16) (2022-12-07)
+## [v0.9.16](https://github.com/NubeIO/rubix-os/tree/v0.9.16) (2022-12-07)
 
 - fixes modbus polling order.
 - adds history analysis plugins (as examples)
 
-## [v0.9.15](https://github.com/NubeIO/flow-framework/tree/v0.9.15) (2022-12-02)
+## [v0.9.15](https://github.com/NubeIO/rubix-os/tree/v0.9.15) (2022-12-02)
 
 - adds support for modbus bitwise.
 - fixed up MaxPollRate on polling
 
-## [v0.9.14](https://github.com/NubeIO/flow-framework/tree/v0.9.14) (2022-11-29)
+## [v0.9.14](https://github.com/NubeIO/rubix-os/tree/v0.9.14) (2022-11-29)
 
 - networklinker fix name overwrite #772
 
-## [v0.9.13](https://github.com/NubeIO/flow-framework/tree/v0.9.13) (2022-11-25)
+## [v0.9.13](https://github.com/NubeIO/rubix-os/tree/v0.9.13) (2022-11-25)
 
 - networklinker allow edit point name #770
 
-## [v0.9.12](https://github.com/NubeIO/flow-framework/tree/v0.9.12) (2022-11-23)
+## [v0.9.12](https://github.com/NubeIO/rubix-os/tree/v0.9.12) (2022-11-23)
 
 - fix edgeinflux cov
 - fix config file reset to default
 - improve history api query
 
-## [v0.9.11](https://github.com/NubeIO/flow-framework/tree/v0.9.11) (2022-11-21)
+## [v0.9.11](https://github.com/NubeIO/rubix-os/tree/v0.9.11) (2022-11-21)
 
 - fix edgeinflux history
 
-## [v0.9.10](https://github.com/NubeIO/flow-framework/tree/v0.9.10) (2022-11-18)
+## [v0.9.10](https://github.com/NubeIO/rubix-os/tree/v0.9.10) (2022-11-18)
 
 - adds more modbus baud rates
 
-## [v0.9.9](https://github.com/NubeIO/flow-framework/tree/v0.9.9) (2022-11-16)
+## [v0.9.9](https://github.com/NubeIO/rubix-os/tree/v0.9.9) (2022-11-16)
 
 - adds network history enable
 
-## [v0.9.8](https://github.com/NubeIO/flow-framework/tree/v0.9.8) (2022-11-16)
+## [v0.9.8](https://github.com/NubeIO/rubix-os/tree/v0.9.8) (2022-11-16)
 
 - updates network options on plugins
 - adds edgeazure (for testing)
 
-## [v0.9.7](https://github.com/NubeIO/flow-framework/tree/v0.9.7) (2022-11-09)
+## [v0.9.7](https://github.com/NubeIO/rubix-os/tree/v0.9.7) (2022-11-09)
 
 - slows lorawan and galvintmv api calls
 - lorawan plugin gets cs token at runtime
 
-## [v0.9.6](https://github.com/NubeIO/flow-framework/tree/v0.9.6) (2022-11-08)
+## [v0.9.6](https://github.com/NubeIO/rubix-os/tree/v0.9.6) (2022-11-08)
 
 - makes galvin setup steps run in order
 
-## [v0.9.5](https://github.com/NubeIO/flow-framework/tree/v0.9.5) (2022-11-08)
+## [v0.9.5](https://github.com/NubeIO/rubix-os/tree/v0.9.5) (2022-11-08)
 
 - fix nil errors on lorawan
 
-## [v0.9.4](https://github.com/NubeIO/flow-framework/tree/v0.9.4) (2022-11-08)
+## [v0.9.4](https://github.com/NubeIO/rubix-os/tree/v0.9.4) (2022-11-08)
 
 - Typo fix on galvintmv plugin
 
-## [v0.9.3](https://github.com/NubeIO/flow-framework/tree/v0.9.3) (2022-11-07)
+## [v0.9.3](https://github.com/NubeIO/rubix-os/tree/v0.9.3) (2022-11-07)
 
 - Improves maplora and mapmodbus plugins
 
-## [v0.9.2](https://github.com/NubeIO/flow-framework/tree/v0.9.2) (2022-11-07)
+## [v0.9.2](https://github.com/NubeIO/rubix-os/tree/v0.9.2) (2022-11-07)
 
 - Improves rubixpointsync plugin
 
-## [v0.9.1](https://github.com/NubeIO/flow-framework/tree/v0.9.1) (2022-11-07)
+## [v0.9.1](https://github.com/NubeIO/rubix-os/tree/v0.9.1) (2022-11-07)
 
 - Improves polling (bacnet and modbus)
 - Improves galvintmv plugin
 
-## [v0.9.0](https://github.com/NubeIO/flow-framework/tree/v0.9.0) (2022-11-07)
+## [v0.9.0](https://github.com/NubeIO/rubix-os/tree/v0.9.0) (2022-11-07)
 
 - Improves polling (bacnet and modbus)
 
-## [v0.8.9](https://github.com/NubeIO/flow-framework/tree/v0.8.9) (2022-11-04)
+## [v0.8.9](https://github.com/NubeIO/rubix-os/tree/v0.8.9) (2022-11-04)
 
 - Fixes cancel of MQTT subscribe
 - Fixes Rubix Legacy API Calls
 
-## [v0.8.8](https://github.com/NubeIO/flow-framework/tree/v0.8.8) (2022-11-04)
+## [v0.8.8](https://github.com/NubeIO/rubix-os/tree/v0.8.8) (2022-11-04)
 
 - Re adds legacy mapping plugins
 
-## [v0.8.7](https://github.com/NubeIO/flow-framework/tree/v0.8.7) (2022-11-03)
+## [v0.8.7](https://github.com/NubeIO/rubix-os/tree/v0.8.7) (2022-11-03)
 
 - Removes legacy mapping plugins
 
-## [v0.8.6](https://github.com/NubeIO/flow-framework/tree/v0.8.6) (2022-11-03)
+## [v0.8.6](https://github.com/NubeIO/rubix-os/tree/v0.8.6) (2022-11-03)
 
 - Try rebuild to fix modbus plugin (issue since 0.8.4)
 - Fixes edgeinflux plugin nil pointer
 
-## [v0.8.5](https://github.com/NubeIO/flow-framework/tree/v0.8.5) (2022-11-02)
+## [v0.8.5](https://github.com/NubeIO/rubix-os/tree/v0.8.5) (2022-11-02)
 
 - Review unique constraints (#707)
 
-## [v0.8.4](https://github.com/NubeIO/flow-framework/tree/v0.8.4) (2022-11-02)
+## [v0.8.4](https://github.com/NubeIO/rubix-os/tree/v0.8.4) (2022-11-02)
 
 - Adds plugins to convert legacy lora and modbus to FF
 
-## [v0.8.3](https://github.com/NubeIO/flow-framework/tree/v0.8.3) (2022-10-31)
+## [v0.8.3](https://github.com/NubeIO/rubix-os/tree/v0.8.3) (2022-10-31)
 
 - Fix: get the latest history for postgres sync
 
-## [v0.8.2](https://github.com/NubeIO/flow-framework/tree/v0.8.2) (2022-10-31)
+## [v0.8.2](https://github.com/NubeIO/rubix-os/tree/v0.8.2) (2022-10-31)
 
 - added mapping apis (will be removed)
 
-## [v0.8.1](https://github.com/NubeIO/flow-framework/tree/v0.8.1) (2022-10-30)
+## [v0.8.1](https://github.com/NubeIO/rubix-os/tree/v0.8.1) (2022-10-30)
 
 - Fix: postgres large data push and history mismatched order
 - Fix: galvintmv for network search
 - Fix: bug on mqtt publish cov
 
-## [v0.8.0](https://github.com/NubeIO/flow-framework/tree/v0.8.0) (2022-10-27)
+## [v0.8.0](https://github.com/NubeIO/rubix-os/tree/v0.8.0) (2022-10-27)
 
 - adds mqtt to plugins
 - adds apis for histories
 
-## [v0.7.9](https://github.com/NubeIO/flow-framework/tree/v0.7.9) (2022-10-25)
+## [v0.7.9](https://github.com/NubeIO/rubix-os/tree/v0.7.9) (2022-10-25)
 
 - capitalizes lora naming
 - adds mqtt functionality
 
-## [v0.7.8](https://github.com/NubeIO/flow-framework/tree/v0.7.8) (2022-10-17)
+## [v0.7.8](https://github.com/NubeIO/rubix-os/tree/v0.7.8) (2022-10-17)
 
 - adds rubix sync plugin
 
-## [v0.7.7](https://github.com/NubeIO/flow-framework/tree/v0.7.7) (2022-10-10)
+## [v0.7.7](https://github.com/NubeIO/rubix-os/tree/v0.7.7) (2022-10-10)
 
 - zip-hydro-tap lora fix #671
 - plugin/networklinker #670
 - updates to edgeinflux, galvintmv, and lorawan #668
 
-## [v0.7.6](https://github.com/NubeIO/flow-framework/tree/v0.7.5) (2022-10-06)
+## [v0.7.6](https://github.com/NubeIO/rubix-os/tree/v0.7.5) (2022-10-06)
 
 - minor gavlintmv plugin update
 
-## [v0.7.5](https://github.com/NubeIO/flow-framework/tree/v0.7.5) (2022-10-05)
+## [v0.7.5](https://github.com/NubeIO/rubix-os/tree/v0.7.5) (2022-10-05)
 
 - adds gavlintmv plugin
 - adds edgeinflux plugin
 
-## [v0.7.4](https://github.com/NubeIO/flow-framework/tree/v0.7.4) (2022-09-12)
+## [v0.7.4](https://github.com/NubeIO/rubix-os/tree/v0.7.4) (2022-09-12)
 
 - fix voltage error #652
 - fix bug on is mqtt connected #651
 - lorawan recurse nested maps in uplink #649
 
-## [v0.7.3](https://github.com/NubeIO/flow-framework/tree/v0.7.3) (2022-09-05)
+## [v0.7.3](https://github.com/NubeIO/rubix-os/tree/v0.7.3) (2022-09-05)
 
 - bacnetserver repost point values on server restart
 - bacnetmaster add multi-state object type support
 
-## [v0.7.2](https://github.com/NubeIO/flow-framework/tree/v0.7.2) (2022-08-31)
+## [v0.7.2](https://github.com/NubeIO/rubix-os/tree/v0.7.2) (2022-08-31)
 
 - fixed nil pointers and looping in pollqueue
 - updated lora raw defaults and payload structures
 
-## [v0.7.1](https://github.com/NubeIO/flow-framework/tree/v0.7.1) (2022-08-24)
+## [v0.7.1](https://github.com/NubeIO/rubix-os/tree/v0.7.1) (2022-08-24)
 
 - added bacnet multistate
 
-## [v0.7.0](https://github.com/NubeIO/flow-framework/tree/v0.7.0) (2022-08-22)
+## [v0.7.0](https://github.com/NubeIO/rubix-os/tree/v0.7.0) (2022-08-22)
 
 - added restart plugin api
 
-## [v0.6.9](https://github.com/NubeIO/flow-framework/tree/v0.6.9) (2022-08-22)
+## [v0.6.9](https://github.com/NubeIO/rubix-os/tree/v0.6.9) (2022-08-22)
 
 - fix bug on bacnet polling
 
-## [v0.6.8](https://github.com/NubeIO/flow-framework/tree/v0.6.8) (2022-08-22)
+## [v0.6.8](https://github.com/NubeIO/rubix-os/tree/v0.6.8) (2022-08-22)
 
 - updates to all the schemas
 - fix on bacnet-master polling
 - setup of bacnet-server
 
-## [v0.6.7](https://github.com/NubeIO/flow-framework/tree/v0.6.7) (2022-08-18)
+## [v0.6.7](https://github.com/NubeIO/rubix-os/tree/v0.6.7) (2022-08-18)
 
 - allow user to delete network if plugin is not installed
 - got bacnet-server plugin working with the new bacnet-server app
@@ -451,35 +451,35 @@
 - Fix: remove GlobalUUID unique constraint
 - Fix: remove consumer's producer_uuid unique index
 
-## [v0.6.6](https://github.com/NubeIO/flow-framework/tree/v0.6.6) (2022-08-09)
+## [v0.6.6](https://github.com/NubeIO/rubix-os/tree/v0.6.6) (2022-08-09)
 
 - Issue/producer history current writer UUID #598
 - Improvements/misc #596
 - Add central history producer enable flag #594
 
-## [v0.6.5](https://github.com/NubeIO/flow-framework/tree/v0.6.5) (2022-07-29)
+## [v0.6.5](https://github.com/NubeIO/rubix-os/tree/v0.6.5) (2022-07-29)
 
 - poll queue nil guarding
 
-## [v0.6.4](https://github.com/NubeIO/flow-framework/tree/v0.6.4) (2022-07-29)
+## [v0.6.4](https://github.com/NubeIO/rubix-os/tree/v0.6.4) (2022-07-29)
 
 - Improvements to poll queue, modbus, and bacnet
 
-## [v0.6.3](https://github.com/NubeIO/flow-framework/tree/v0.6.3) (2022-07-28)
+## [v0.6.3](https://github.com/NubeIO/rubix-os/tree/v0.6.3) (2022-07-28)
 
 - Fixed bacnet polling
 - Implemented point value transformations (factor, scale, limit, offset)
 
-## [v0.6.2](https://github.com/NubeIO/flow-framework/tree/v0.6.2) (2022-07-27)
+## [v0.6.2](https://github.com/NubeIO/rubix-os/tree/v0.6.2) (2022-07-27)
 
 - Merge pull request #579 from NubeIO/add/ff-error-drill-down-functions
 - Merge pull request #580 from NubeIO/update/seperate-database-methods-from-pollqueue
 
-## [v0.6.1](https://github.com/NubeIO/flow-framework/tree/v0.6.1) (2022-07-19)
+## [v0.6.1](https://github.com/NubeIO/rubix-os/tree/v0.6.1) (2022-07-19)
 
 - Modbus write improved
 
-## [v0.6.0](https://github.com/NubeIO/flow-framework/tree/v0.6.0) (2022-07-14)
+## [v0.6.0](https://github.com/NubeIO/rubix-os/tree/v0.6.0) (2022-07-14)
 
 - Merge pull request #528 from NubeIO/redo-lorawan
 - added api for polling stats
@@ -488,7 +488,7 @@
 - Fix: writeValue and point.WriteValue discrepancy resulting infinite looping (#566)
 - fixed edge28 and point update functions
 
-## [v0.5.9](https://github.com/NubeIO/flow-framework/tree/v0.5.9) (2022-07-12)
+## [v0.5.9](https://github.com/NubeIO/rubix-os/tree/v0.5.9) (2022-07-12)
 
 - improvements to edge28 plugin stability
 - improvements to point write for priority array modes
@@ -498,64 +498,64 @@
 - added interface errors to bacnet network
 - added new JSON schema for network, device, point
 
-## [v0.5.8](https://github.com/NubeIO/flow-framework/tree/v0.5.8) (2022-07-05)
+## [v0.5.8](https://github.com/NubeIO/rubix-os/tree/v0.5.8) (2022-07-05)
 
 - fix on PG DB resync
 - clean up of bacnet master
 
-## [v0.5.7](https://github.com/NubeIO/flow-framework/tree/v0.5.7) (2022-07-05)
+## [v0.5.7](https://github.com/NubeIO/rubix-os/tree/v0.5.7) (2022-07-05)
 
 - added history api to get histories by producer name
 - updated point self-mapping to allow enable of history on producer
 
-## [v0.5.6](https://github.com/NubeIO/flow-framework/tree/v0.5.6) (2022-06-17)
+## [v0.5.6](https://github.com/NubeIO/rubix-os/tree/v0.5.6) (2022-06-17)
 
 - minor modbus updates
 
-## [v0.5.5](https://github.com/NubeIO/flow-framework/tree/v0.5.5) (2022-06-10)
+## [v0.5.5](https://github.com/NubeIO/rubix-os/tree/v0.5.5) (2022-06-10)
 
 - redo of bacnet-server plugin
 - fix bug on lora plugin
 - reformat nil helpers
 - add in sync on flow-networks
 
-## [v0.5.4](https://github.com/NubeIO/flow-framework/tree/v0.5.4) (2022-05-24)
+## [v0.5.4](https://github.com/NubeIO/rubix-os/tree/v0.5.4) (2022-05-24)
 
 - bacnet master fix bug on select object type
 
-## [v0.5.3](https://github.com/NubeIO/flow-framework/tree/v0.5.3) (2022-05-24)
+## [v0.5.3](https://github.com/NubeIO/rubix-os/tree/v0.5.3) (2022-05-24)
 
 - cascade delete on flow networks
 - added native bacnet master plugin
 
-## [v0.5.2](https://github.com/NubeIO/flow-framework/tree/v0.5.2) (2022-05-19)
+## [v0.5.2](https://github.com/NubeIO/rubix-os/tree/v0.5.2) (2022-05-19)
 
 - Make configurable modbus log level
 
-## [v0.5.1](https://github.com/NubeIO/flow-framework/tree/v0.5.1) (2022-05-19)
+## [v0.5.1](https://github.com/NubeIO/rubix-os/tree/v0.5.1) (2022-05-19)
 
 - Minor update to polling (safeties on timeouts)
 - Added a Postgres plugin
 
-## [v0.5.0](https://github.com/NubeIO/flow-framework/tree/v0.5.0) (2022-05-17)
+## [v0.5.0](https://github.com/NubeIO/rubix-os/tree/v0.5.0) (2022-05-17)
 
 - fixed modbus point/device/network time settings
 - updated pointWrite() for modbus compatibility
 - priority array utilities added
 
-## [v0.4.9](https://github.com/NubeIO/flow-framework/tree/v0.4.9) (2022-05-13)
+## [v0.4.9](https://github.com/NubeIO/rubix-os/tree/v0.4.9) (2022-05-13)
 
 - Fix: isChange checker for COV updates
 
-## [v0.4.8](https://github.com/NubeIO/flow-framework/tree/v0.4.8) (2022-05-12)
+## [v0.4.8](https://github.com/NubeIO/rubix-os/tree/v0.4.8) (2022-05-12)
 
 - Control COV streams on point value update
 
-## [v0.4.7](https://github.com/NubeIO/flow-framework/tree/v0.4.7) (2022-05-12)
+## [v0.4.7](https://github.com/NubeIO/rubix-os/tree/v0.4.7) (2022-05-12)
 
 - update to modbus-server plugin
 
-## [v0.4.6](https://github.com/NubeIO/flow-framework/tree/v0.4.6) (2022-05-11)
+## [v0.4.6](https://github.com/NubeIO/rubix-os/tree/v0.4.6) (2022-05-11)
 
 - added new plugin modbus server
 - nullable fallback point field support
@@ -563,21 +563,21 @@
 - polling for modbus
 - bulk write api on points
 
-## [v0.4.5](https://github.com/NubeIO/flow-framework/tree/v0.4.5) (2022-05-02)
+## [v0.4.5](https://github.com/NubeIO/rubix-os/tree/v0.4.5) (2022-05-02)
 
 - get bacnet auto mapping working to rubix-io
 - fix bug on rubix-io plugin
 - fix bug on flow-network sync
 
-## [v0.4.4](https://github.com/NubeIO/flow-framework/tree/v0.4.4) (2022-04-29)
+## [v0.4.4](https://github.com/NubeIO/rubix-os/tree/v0.4.4) (2022-04-29)
 
 - add new plugin for the rubix-io
 
-## [v0.4.3](https://github.com/NubeIO/flow-framework/tree/v0.4.3) (2022-04-26)
+## [v0.4.3](https://github.com/NubeIO/rubix-os/tree/v0.4.3) (2022-04-26)
 
 - many updates since last build :)
 
-## [v0.4.2](https://github.com/NubeIO/flow-framework/tree/v0.4.2) (2022-03-23)
+## [v0.4.2](https://github.com/NubeIO/rubix-os/tree/v0.4.2) (2022-03-23)
 
 - Plugin/testing #417
 - Improvement/database plugins #415
@@ -586,7 +586,7 @@
 - updates to modbus, lora and bacnet #412
 - updates to lora and bacnet #411
 
-## [v0.4.1](https://github.com/NubeIO/flow-framework/tree/v0.4.1) (2022-03-17)
+## [v0.4.1](https://github.com/NubeIO/rubix-os/tree/v0.4.1) (2022-03-17)
 
 - Feature: add present_value on writer #405
 - small updates to lora #404
@@ -598,19 +598,19 @@
 - fix get networks #396
 - Support OR query on client_id, site_id & device_id #395
 
-## [v0.4.0](https://github.com/NubeIO/flow-framework/tree/v0.4.0) (2022-02-28)
+## [v0.4.0](https://github.com/NubeIO/rubix-os/tree/v0.4.0) (2022-02-28)
 
 - Supporting older schedule deployment
 
-## [v0.3.9](https://github.com/NubeIO/flow-framework/tree/v0.3.9) (2022-02-28)
+## [v0.3.9](https://github.com/NubeIO/rubix-os/tree/v0.3.9) (2022-02-28)
 
 - Added back GET/PATCH by point's name
 
-## [v0.3.8](https://github.com/NubeIO/flow-framework/tree/v0.3.8) (2022-02-24)
+## [v0.3.8](https://github.com/NubeIO/rubix-os/tree/v0.3.8) (2022-02-24)
 
 - Improvements/misc #385
 
-## [v0.3.7](https://github.com/NubeIO/flow-framework/tree/v0.3.7) (2022-02-24)
+## [v0.3.7](https://github.com/NubeIO/rubix-os/tree/v0.3.7) (2022-02-24)
 
 - Improvements/misc #384
 - Improvement/stream sync #383
@@ -618,7 +618,7 @@
 - Improvement/point value update #381
 - Replace modbus lib #379
 
-## [v0.3.6](https://github.com/NubeIO/flow-framework/tree/v0.3.6) (2022-02-22)
+## [v0.3.6](https://github.com/NubeIO/rubix-os/tree/v0.3.6) (2022-02-22)
 
 - Merge pull request #358 from NubeIO/bac-master-1
 - Fix: edit flow-network issue
@@ -628,7 +628,7 @@
 - Add writers write, read, sync action
 - Fix: writer action support for old deployments
 
-## [v0.3.5](https://github.com/NubeIO/flow-framework/tree/v0.3.5) (2022-02-16)
+## [v0.3.5](https://github.com/NubeIO/rubix-os/tree/v0.3.5) (2022-02-16)
 
 - Improvement: support multiple producers on a single point
 - Improvement on producer history
@@ -638,25 +638,25 @@
 - Make FlowNetwork update working
 - Fix: float pointer values comparison for COV
 
-## [v0.3.4](https://github.com/NubeIO/flow-framework/tree/v0.3.4) (2022-02-10)
+## [v0.3.4](https://github.com/NubeIO/rubix-os/tree/v0.3.4) (2022-02-10)
 
 - Sync value on COV of point
 - Fix: point.present_value comparison issue
 - Fix: database lock issue
 
-## [v0.3.3](https://github.com/NubeIO/flow-framework/tree/v0.3.3) (2022-02-10)
+## [v0.3.3](https://github.com/NubeIO/rubix-os/tree/v0.3.3) (2022-02-10)
 
 - Fix: schedule
 
-## [v0.3.2](https://github.com/NubeIO/flow-framework/tree/v0.3.2) (2022-02-10)
+## [v0.3.2](https://github.com/NubeIO/rubix-os/tree/v0.3.2) (2022-02-10)
 
 - small bug fix to schedule small fix to stop sch crashing #352
 
-## [v0.3.1](https://github.com/NubeIO/flow-framework/tree/v0.3.1) (2022-02-10)
+## [v0.3.1](https://github.com/NubeIO/rubix-os/tree/v0.3.1) (2022-02-10)
 
 - small bug fix to schedule small fix to stop sch crashing #351
 
-## [v0.3.0](https://github.com/NubeIO/flow-framework/tree/v0.3.0) (2022-02-10)
+## [v0.3.0](https://github.com/NubeIO/rubix-os/tree/v0.3.0) (2022-02-10)
 
 - Add schedule writer POC
 - Add with_priority option on device query builder
@@ -676,28 +676,28 @@
 - Marc/edge28 plugin scaling (#314)
 - Merge pull request #325 from NubeIO/improvement/return-appropriate-status-code
 
-## [v0.2.2](https://github.com/NubeIO/flow-framework/tree/v0.2.2) (2021-12-23)
+## [v0.2.2](https://github.com/NubeIO/rubix-os/tree/v0.2.2) (2021-12-23)
 
 - Improvement on schedule APIs
 - Add scheduler for refreshing token
 
-## [v0.2.1](https://github.com/NubeIO/flow-framework/tree/v0.2.1) (2021-12-18)
+## [v0.2.1](https://github.com/NubeIO/rubix-os/tree/v0.2.1) (2021-12-18)
 
 - Update: update to schedules
 
-## [v0.2.0](https://github.com/NubeIO/flow-framework/tree/v0.2.0) (2021-12-18)
+## [v0.2.0](https://github.com/NubeIO/rubix-os/tree/v0.2.0) (2021-12-18)
 
 - Update: update to schedules
 
-## [v0.1.9](https://github.com/NubeIO/flow-framework/tree/v0.1.9) (2021-12-16)
+## [v0.1.9](https://github.com/NubeIO/rubix-os/tree/v0.1.9) (2021-12-16)
 
 - Remove: rubix plugins
 
-## [v0.1.8](https://github.com/NubeIO/flow-framework/tree/v0.1.71) (2021-11-23)
+## [v0.1.8](https://github.com/NubeIO/rubix-os/tree/v0.1.71) (2021-11-23)
 
 - Fix: get config on sessions
 
-## [v0.1.71](https://github.com/NubeIO/flow-framework/tree/v0.1.71) (2021-11-22)
+## [v0.1.71](https://github.com/NubeIO/rubix-os/tree/v0.1.71) (2021-11-22)
 
 - made rubix a network #304
 - Breaking issue fix on modubs polling #302
@@ -712,75 +712,75 @@
 - Close DB connection #293
 - sample api helper #290
 
-## [v0.1.6](https://github.com/NubeIO/flow-framework/tree/v0.1.6) (2021-11-04)
+## [v0.1.6](https://github.com/NubeIO/rubix-os/tree/v0.1.6) (2021-11-04)
 
 - add APIs for proxying fn, fnc
 - serial port fix (#288)
 
-## [v0.1.5](https://github.com/NubeIO/flow-framework/tree/v0.1.5) (2021-11-01)
+## [v0.1.5](https://github.com/NubeIO/rubix-os/tree/v0.1.5) (2021-11-01)
 
 - nubeio-rubix-lib-helpers-go version upgrade to v0.1.2
 
-## [v0.1.4](https://github.com/NubeIO/flow-framework/tree/v0.1.4) (2021-10-25)
+## [v0.1.4](https://github.com/NubeIO/rubix-os/tree/v0.1.4) (2021-10-25)
 
 - rubix plugin build fix
 
-## [v0.1.3](https://github.com/NubeIO/flow-framework/tree/v0.1.3) (2021-10-25)
+## [v0.1.3](https://github.com/NubeIO/rubix-os/tree/v0.1.3) (2021-10-25)
 
 - added rubix-service api
 - fix up on schedules
 - improvement on writer & writer_clone args query
 
-## [v0.1.2](https://github.com/NubeIO/flow-framework/tree/v0.1.2) (2021-10-21)
+## [v0.1.2](https://github.com/NubeIO/rubix-os/tree/v0.1.2) (2021-10-21)
 
 - added flow network mqtt api
 
-## [v0.1.1](https://github.com/NubeIO/flow-framework/tree/v0.1.1) (2021-10-19)
+## [v0.1.1](https://github.com/NubeIO/rubix-os/tree/v0.1.1) (2021-10-19)
 
 - added api for milo db
 - clean up of bacnetserver plugin
 - added system and time api
 - added schedules api
 
-## [v0.1.0](https://github.com/NubeIO/flow-framework/tree/v0.1.0) (2021-10-12)
+## [v0.1.0](https://github.com/NubeIO/rubix-os/tree/v0.1.0) (2021-10-12)
 
 - fix issues on droplet motion
 - added writer-action as thingClass schedule
 
-## [v0.0.9](https://github.com/NubeIO/flow-framework/tree/v0.0.9) (2021-10-11)
+## [v0.0.9](https://github.com/NubeIO/rubix-os/tree/v0.0.9) (2021-10-11)
 
 - updates to lora and modbus plugins
 - added edge-28 plugin
 
-## [v0.0.8](https://github.com/NubeIO/flow-framework/tree/v0.0.8) (2021-10-08)
+## [v0.0.8](https://github.com/NubeIO/rubix-os/tree/v0.0.8) (2021-10-08)
 
 - updates to lora and modbus plugins
 
-## [v0.0.7](https://github.com/NubeIO/flow-framework/tree/v0.0.7) (2021-10-05)
+## [v0.0.7](https://github.com/NubeIO/rubix-os/tree/v0.0.7) (2021-10-05)
 
 - updates to lora and modbus plugin
 
-## [v0.0.6](https://github.com/NubeIO/flow-framework/tree/v0.0.6) (2021-10-05)
+## [v0.0.6](https://github.com/NubeIO/rubix-os/tree/v0.0.6) (2021-10-05)
 
 - fix bug on action write
 
-## [v0.0.5](https://github.com/NubeIO/flow-framework/tree/v0.0.5) (2021-10-05)
+## [v0.0.5](https://github.com/NubeIO/rubix-os/tree/v0.0.5) (2021-10-05)
 
 - added point calc's, units, and eval
 - clean up on lora and modbus plugins
 
-## [v0.0.4](https://github.com/NubeIO/flow-framework/tree/v0.0.4) (2021-10-02)
+## [v0.0.4](https://github.com/NubeIO/rubix-os/tree/v0.0.4) (2021-10-02)
 
 - added git plugin and updates to modbus
 
-## [v0.0.3](https://github.com/NubeIO/flow-framework/tree/v0.0.3) (2021-10-01)
+## [v0.0.3](https://github.com/NubeIO/rubix-os/tree/v0.0.3) (2021-10-01)
 
 - make that artifacts working for armv7
 
-## [v0.0.2](https://github.com/NubeIO/flow-framework/tree/v0.0.2) (2021-09-29)
+## [v0.0.2](https://github.com/NubeIO/rubix-os/tree/v0.0.2) (2021-09-29)
 
 - include plugins on artifacts
 
-## [v0.0.1](https://github.com/NubeIO/flow-framework/tree/v0.0.1) (2021-08-26)
+## [v0.0.1](https://github.com/NubeIO/rubix-os/tree/v0.0.1) (2021-08-26)
 
 - first initial release

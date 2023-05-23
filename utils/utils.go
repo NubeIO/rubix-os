@@ -3,9 +3,9 @@ package utils
 import (
 	"encoding/json"
 	"errors"
-	"github.com/NubeIO/flow-framework/config"
-	"github.com/NubeIO/flow-framework/interfaces"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/config"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 	"io/fs"

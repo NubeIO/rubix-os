@@ -2,8 +2,8 @@ package client
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/nresty"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/nresty"
 )
 
 func (inst *FlowClient) AddStream(body *model.Stream) (*model.Stream, error) {

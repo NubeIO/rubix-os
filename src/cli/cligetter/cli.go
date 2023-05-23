@@ -1,10 +1,10 @@
 package cligetter
 
 import (
-	"github.com/NubeIO/flow-framework/src/cli/edgebioscli"
-	"github.com/NubeIO/flow-framework/src/cli/edgecli"
-	"github.com/NubeIO/flow-framework/src/cli/openvpncli"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/src/cli/edgebioscli"
+	"github.com/NubeIO/rubix-os/src/cli/edgecli"
+	"github.com/NubeIO/rubix-os/src/cli/openvpncli"
 )
 
 func GetEdgeClient(host *model.Host) *edgecli.Client {

@@ -1,9 +1,9 @@
 package migration
 
 import (
-	"github.com/NubeIO/flow-framework/migration/versions"
 	"github.com/NubeIO/lib-schema/loraschema"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/migration/versions"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -38,7 +38,7 @@ func AutoMigrate(db *gorm.DB) error {
 		log.Error(err)
 	}
 	// TODO: if we uncomment this, it will remove the Priority sub-table from point table as well
-	//if db.Migrator().HasColumn(&model.Point{}, "history_interval") {
+	// if db.Migrator().HasColumn(&model.Point{}, "history_interval") {
 	//	columnTypes, _ := db.Migrator().ColumnTypes(&model.Point{})
 	//	for _, columnType := range columnTypes {
 	//		if columnType.Name() == "history_interval" && columnType.DatabaseTypeName() == "real" {
@@ -47,7 +47,7 @@ func AutoMigrate(db *gorm.DB) error {
 	//			break
 	//		}
 	//	}
-	//}
+	// }
 	deviceModel := model.Device{CommonDevice: model.CommonDevice{Model: loraschema.DeviceModelMicroEdgeV1}}
 	db.Model(&model.Device{}).
 		Select("Model").

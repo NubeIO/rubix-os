@@ -3,12 +3,12 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/integer"
-	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/integer"
+	"github.com/NubeIO/rubix-os/utils/nstring"
 	log "github.com/sirupsen/logrus"
 )
 

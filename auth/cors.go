@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NubeIO/flow-framework/config"
+	"github.com/NubeIO/rubix-os/config"
 	"github.com/gin-contrib/cors"
 )
 

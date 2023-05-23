@@ -4,8 +4,8 @@ import (
 	"container/heap"
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils/nstring"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/utils/nstring"
 	log "github.com/sirupsen/logrus"
 	"time"
 )

@@ -1,9 +1,9 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/externaltoken"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/gin-gonic/gin"
 )
 

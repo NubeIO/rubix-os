@@ -1,5 +1,5 @@
 package global
 
-import "github.com/NubeIO/flow-framework/installer"
+import "github.com/NubeIO/rubix-os/installer"
 
 var Installer *installer.Installer

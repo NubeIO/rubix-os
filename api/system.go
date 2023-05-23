@@ -2,10 +2,10 @@ package api
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/services/system"
-	"github.com/NubeIO/flow-framework/utils"
 	"github.com/NubeIO/lib-date/datelib"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/services/system"
+	"github.com/NubeIO/rubix-os/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
 	"strconv"

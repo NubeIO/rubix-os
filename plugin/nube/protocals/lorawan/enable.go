@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/lorawan/csrest"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/lorawan/csrest"
 	log "github.com/sirupsen/logrus"
 )
 

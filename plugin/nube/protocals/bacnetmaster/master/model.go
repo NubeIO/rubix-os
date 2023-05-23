@@ -2,8 +2,8 @@ package master
 
 import (
 	"github.com/NubeDev/bacnet"
-	"github.com/NubeIO/flow-framework/plugin/defaults"
 	"github.com/NubeIO/lib-networking/networking"
+	"github.com/NubeIO/rubix-os/plugin/defaults"
 	"github.com/gin-gonic/gin"
 )
 

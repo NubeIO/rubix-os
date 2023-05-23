@@ -3,11 +3,11 @@ package database
 import (
 	"encoding/json"
 	"errors"
-	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/deviceinfo"
-	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/src/client"
+	"github.com/NubeIO/rubix-os/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/deviceinfo"
+	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
 func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetworkClone, error) {

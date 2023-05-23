@@ -1,9 +1,9 @@
 package api
 
 import (
-	"github.com/NubeIO/flow-framework/services/system"
 	"github.com/NubeIO/lib-dhcpd/dhcpd"
 	"github.com/NubeIO/lib-networking/networking"
+	"github.com/NubeIO/rubix-os/services/system"
 	"github.com/gin-gonic/gin"
 )
 

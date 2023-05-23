@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/utils/writemode"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/utils/writemode"
 )
 
 func checkForBooleanType(ObjectType, DataType string) (isTypeBool bool) {
@@ -34,8 +34,8 @@ func checkForOutputType(ObjectType string) (isOutput bool) {
 		string(model.ObjTypeEnumValue),
 		string(model.ObjAnalogOutput),
 		string(model.ObjAnalogValue),
-		string(model.ObjEnumOutput), //MSO
-		string(model.ObjEnumValue),  //MSV
+		string(model.ObjEnumOutput), // MSO
+		string(model.ObjEnumValue),  // MSV
 		string(model.ObjBinaryOutput),
 		string(model.ObjBinaryValue):
 		isOutput = true

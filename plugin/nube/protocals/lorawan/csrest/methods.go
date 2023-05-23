@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/NubeIO/flow-framework/nresty"
+	"github.com/NubeIO/rubix-os/nresty"
 	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
 )

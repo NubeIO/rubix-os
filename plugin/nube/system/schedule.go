@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/src/schedule"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
+	"github.com/NubeIO/rubix-os/src/schedule"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"

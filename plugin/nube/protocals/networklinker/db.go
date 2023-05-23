@@ -7,9 +7,9 @@ import (
 
 	"golang.org/x/exp/slices"
 
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 )
 
 func (inst *Instance) createNetwork(body *model.Network) (*model.Network, error) {

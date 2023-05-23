@@ -1,6 +1,6 @@
 package client
 
-import "github.com/NubeIO/flow-framework/nresty"
+import "github.com/NubeIO/rubix-os/nresty"
 
 func (inst *FlowClient) GetQuery(url string) (*[]byte, error) {
 	resp, err := nresty.FormatRestyResponse(inst.client.R().

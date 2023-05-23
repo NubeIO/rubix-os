@@ -2,9 +2,9 @@ package priorityarray
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/utils/float"
-	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/utils/float"
+	"github.com/NubeIO/rubix-os/utils/integer"
 	"reflect"
 )
 

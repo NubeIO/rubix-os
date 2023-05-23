@@ -7,10 +7,10 @@ import (
 	"github.com/NubeDev/bacnet/btypes/priority"
 	"github.com/NubeDev/bacnet/btypes/segmentation"
 	"github.com/NubeDev/bacnet/network"
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/float"
-	"github.com/NubeIO/flow-framework/utils/integer"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/utils/float"
+	"github.com/NubeIO/rubix-os/utils/integer"
 	log "github.com/sirupsen/logrus"
 	"reflect"
 )

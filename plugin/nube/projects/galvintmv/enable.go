@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/rubix-os/api"
 	"github.com/go-co-op/gocron"
 	"time"
 )

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/plugin/pluginapi"
+	"github.com/NubeIO/rubix-os/plugin/pluginapi"
 	"net/url"
 )
 

@@ -6,15 +6,15 @@ import (
 	"gorm.io/gorm"
 	"time"
 
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/float"
-	"github.com/NubeIO/flow-framework/utils/integer"
-	"github.com/NubeIO/flow-framework/utils/nmath"
-	"github.com/NubeIO/flow-framework/utils/nuuid"
-	"github.com/NubeIO/flow-framework/utils/priorityarray"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/float"
+	"github.com/NubeIO/rubix-os/utils/integer"
+	"github.com/NubeIO/rubix-os/utils/nmath"
+	"github.com/NubeIO/rubix-os/utils/nuuid"
+	"github.com/NubeIO/rubix-os/utils/priorityarray"
 )
 
 func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {

@@ -1,6 +1,6 @@
 package client
 
-import "github.com/NubeIO/flow-framework/nresty"
+import "github.com/NubeIO/rubix-os/nresty"
 
 func (inst *FlowClient) WizardMasterSlavePointMappingOnConsumerSideByProducerSide(globalUUID string) (bool, error) {
 	_, err := nresty.FormatRestyResponse(inst.client.R().

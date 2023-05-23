@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/NubeIO/flow-framework/src/poller"
+	"github.com/NubeIO/rubix-os/src/poller"
 	"time"
 )
 

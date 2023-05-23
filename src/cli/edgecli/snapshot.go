@@ -2,7 +2,7 @@ package edgecli
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/nresty"
+	"github.com/NubeIO/rubix-os/nresty"
 	"mime"
 	"os"
 )

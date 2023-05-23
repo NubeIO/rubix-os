@@ -3,8 +3,8 @@ package mqttclient
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/utils/boolean"
-	"github.com/NubeIO/flow-framework/utils/nuuid"
+	"github.com/NubeIO/rubix-os/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/eclipse/paho.mqtt.golang"
 	log "github.com/sirupsen/logrus"
 	"os"

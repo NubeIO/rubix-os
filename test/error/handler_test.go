@@ -3,8 +3,8 @@ package error
 import (
 	"encoding/json"
 	"errors"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/nerrors"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/nerrors"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"

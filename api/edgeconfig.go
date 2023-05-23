@@ -2,9 +2,9 @@ package api
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/src/cli/cligetter"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/src/cli/cligetter"
 	"github.com/gin-gonic/gin"
 )
 

@@ -2,8 +2,8 @@ package dbhandler
 
 import (
 	"encoding/json"
-	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
 )
 
 func (h *Handler) GetPoints(args api.Args) ([]*model.Point, error) {

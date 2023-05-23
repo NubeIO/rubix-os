@@ -3,11 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin/nube/protocals/mapmodbus/legacymodbusrest"
-	"github.com/NubeIO/flow-framework/src/client"
-	"github.com/NubeIO/flow-framework/utils/boolean"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/plugin/nube/protocals/mapmodbus/legacymodbusrest"
+	"github.com/NubeIO/rubix-os/src/client"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 )
 
 func (inst *Instance) mapModbus(forceAddToExistingFFNetwork bool) error {

@@ -3,10 +3,10 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/utils/nuuid"
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/journalctl"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/utils/nuuid"
 	log "github.com/sirupsen/logrus"
 	"strings"
 	"time"

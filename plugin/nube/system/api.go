@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/api"
-	"github.com/NubeIO/flow-framework/plugin"
-	"github.com/NubeIO/flow-framework/plugin/nube/system/smodel"
 	"github.com/NubeIO/lib-schema/systemschema"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/plugin"
+	"github.com/NubeIO/rubix-os/plugin/nube/system/smodel"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

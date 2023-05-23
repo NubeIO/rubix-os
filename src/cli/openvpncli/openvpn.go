@@ -2,8 +2,8 @@ package openvpncli
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/interfaces"
-	"github.com/NubeIO/flow-framework/nresty"
+	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/nresty"
 	log "github.com/sirupsen/logrus"
 )
 

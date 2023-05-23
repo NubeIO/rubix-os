@@ -1,6 +1,6 @@
 package csmodel
 
-import "github.com/NubeIO/flow-framework/plugin/defaults"
+import "github.com/NubeIO/rubix-os/plugin/defaults"
 
 func GetNetworkSchema() *SchemaNetwork {
 	m := &SchemaNetwork{}

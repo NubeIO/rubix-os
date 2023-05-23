@@ -1,8 +1,8 @@
-module github.com/NubeIO/flow-framework
+module github.com/NubeIO/rubix-os
 
-//replace github.com/NubeDev/bacnet => /home/aidan/code/go/nube/bacnet
-//replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-models-go
-//replace github.com/NubeIO/lib-schema => /Users/raibnod/Enviro/lib-schema
+// replace github.com/NubeDev/bacnet => /home/aidan/code/go/nube/bacnet
+// replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-models-go
+// replace github.com/NubeIO/lib-schema => /Users/raibnod/Enviro/lib-schema
 // replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/marc/Documents/Nube/Development/Models/nubeio-rubix-lib-models-go
 // replace github.com/NubeIO/lib-schema => /home/marc/Documents/Nube/Development/Lib-Schema/lib-schema
 
