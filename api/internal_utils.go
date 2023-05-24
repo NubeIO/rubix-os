@@ -294,6 +294,11 @@ func getBodyMemberDevice(ctx *gin.Context) (dto *model.MemberDevice, err error) 
 	return dto, err
 }
 
+func getBodyTeam(ctx *gin.Context) (dto *model.Team, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func resolveGlobalUUID(ctx *gin.Context) string {
 	return ctx.Param("global_uuid")
 }

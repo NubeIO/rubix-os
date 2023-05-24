@@ -224,6 +224,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	memberDeviceHandler := api.MemberDeviceAPI{
 		DB: db,
 	}
+	teamHandler := api.TeamAPI{
+		DB: db,
+	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
 	authHandler := api.AuthAPI{}
@@ -665,7 +668,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			memberRoutes.DELETE("/:uuid", memberHandler.DeleteMemberByUUID)
 			memberRoutes.GET("/username/:username", memberHandler.GetMemberByUsername)
 			memberRoutes.POST("/verify/:username", memberHandler.VerifyMember)
-			memberRoutes.PUT("/:uuid/groups", memberHandler.UpdateMemberGroups)
+			memberRoutes.PUT("/:uuid/teams", memberHandler.UpdateMemberTeams)
 		}
 
 		systemctlRoutes := apiRoutes.Group("/systemctl")
@@ -942,6 +945,16 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				alertRoutes.PATCH("/:uuid/status", alertHandler.UpdateAlertStatus)
 				alertRoutes.DELETE("/:uuid", alertHandler.DeleteAlert)
 				alertRoutes.DELETE("/drop", alertHandler.DropAlerts)
+			}
+
+			teamRoutes := serverApiRoutes.Group("/teams")
+			{
+				teamRoutes.GET("", teamHandler.GetTeams)
+				teamRoutes.GET("/:uuid", teamHandler.GetTeam)
+				teamRoutes.POST("", teamHandler.CreateTeam)
+				teamRoutes.PATCH("/:uuid", teamHandler.UpdateTeam)
+				teamRoutes.DELETE("/:uuid", teamHandler.DeleteTeam)
+				teamRoutes.DELETE("/drop", teamHandler.DropTeams)
 			}
 		}
 	}
