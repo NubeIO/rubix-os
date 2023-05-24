@@ -43,5 +43,6 @@ func GetInitInterfaces() []interface{} {
 		&model.SnapshotRestoreLog{},
 		&model.Member{},
 		&model.MemberDevice{},
+		&model.View{},
 	}
 }

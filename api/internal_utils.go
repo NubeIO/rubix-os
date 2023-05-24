@@ -204,6 +204,11 @@ func getBodyLocation(ctx *gin.Context) (dto *model.Location, err error) {
 	return dto, err
 }
 
+func getBodyView(ctx *gin.Context) (dto *model.View, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBodyGroup(ctx *gin.Context) (dto *model.Group, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err

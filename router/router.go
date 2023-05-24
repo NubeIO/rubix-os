@@ -207,6 +207,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	hostTagHandler := api.HostTagAPI{
 		DB: db,
 	}
+	viewHandler := api.ViewAPI{
+		DB: db,
+	}
 	systemHandler := api.SystemAPI{
 		System:    system_,
 		Scheduler: scheduler,
@@ -919,6 +922,14 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 					hostCommentRoutes.PATCH("/:uuid", hostCommentHandler.UpdateHostComment)
 					hostCommentRoutes.DELETE("/:uuid", hostCommentHandler.DeleteHostComment)
 				}
+			}
+
+			viewRoutes := serverApiRoutes.Group("/views")
+			{
+				viewRoutes.GET("/:uuid", viewHandler.GetView)
+				viewRoutes.POST("", viewHandler.CreateView)
+				viewRoutes.PATCH("/:uuid", viewHandler.UpdateView)
+				viewRoutes.DELETE("/:uuid", viewHandler.DeleteView)
 			}
 
 			alertRoutes := serverApiRoutes.Group("/alerts")

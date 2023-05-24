@@ -530,11 +530,15 @@ func (d *GormDatabase) buildScheduleQueryTransaction(db *gorm.DB, args api.Args)
 }
 
 func (d *GormDatabase) buildGroupQuery() *gorm.DB {
-	return d.DB.Preload("Hosts")
+	return d.DB.Preload("Hosts").Preload("Views")
 }
 
 func (d *GormDatabase) buildHostQuery(args api.Args) *gorm.DB {
-	return d.DB.Preload("Comments").Preload("Tags")
+	query := d.DB.Preload("Comments").Preload("Tags").Preload("Hosts").Preload("Views")
+	if args.Name != nil {
+		query = query.Where("name = ?", *args.Name)
+	}
+	return query
 }
 
 func (d *GormDatabase) buildTeamQuery(args api.Args) *gorm.DB {
@@ -554,4 +558,8 @@ func (d *GormDatabase) buildMemberDeviceQuery(args api.Args) *gorm.DB {
 		query = query.Where("device_id", *args.DeviceId)
 	}
 	return query
+}
+
+func (d *GormDatabase) buildLocationQuery() *gorm.DB {
+	return d.DB.Preload("Groups").Preload("Views")
 }
