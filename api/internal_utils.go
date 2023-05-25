@@ -279,7 +279,12 @@ func getBodyMember(ctx *gin.Context) (dto *model.Member, err error) {
 	return dto, err
 }
 
-func getBodyMemberGroups(ctx *gin.Context) (dto []*string, err error) {
+func getBodyTeamMembers(ctx *gin.Context) (dto []*string, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyTeamViews(ctx *gin.Context) (dto []*string, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

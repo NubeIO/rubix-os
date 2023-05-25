@@ -10,6 +10,8 @@ type TeamDatabase interface {
 	GetTeam(uuid string) (*model.Team, error)
 	CreateTeam(body *model.Team) (*model.Team, error)
 	UpdateTeam(uuid string, body *model.Team) (*model.Team, error)
+	UpdateTeamMembers(uuid string, body []*string) ([]*model.Member, error)
+	UpdateTeamViews(teamUUID string, viewUUIDs []*string) ([]*model.TeamView, error)
 	DeleteTeam(uuid string) (bool, error)
 	DropTeams() (bool, error)
 }
@@ -39,6 +41,28 @@ func (a *TeamAPI) UpdateTeam(ctx *gin.Context) {
 	body, _ := getBodyTeam(ctx)
 	uuid := resolveID(ctx)
 	q, err := a.DB.UpdateTeam(uuid, body)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *TeamAPI) UpdateTeamMembers(ctx *gin.Context) {
+	body, _ := getBodyTeamMembers(ctx)
+	uuid := resolveID(ctx)
+	q, err := a.DB.UpdateTeamMembers(uuid, body)
+	if err != nil {
+		ResponseHandler(nil, err, ctx)
+		return
+	}
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *TeamAPI) UpdateTeamViews(ctx *gin.Context) {
+	body, _ := getBodyTeamViews(ctx)
+	uuid := resolveID(ctx)
+	q, err := a.DB.UpdateTeamViews(uuid, body)
+	if err != nil {
+		ResponseHandler(nil, err, ctx)
+		return
+	}
 	ResponseHandler(q, err, ctx)
 }
 

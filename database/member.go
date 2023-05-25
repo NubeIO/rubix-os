@@ -48,6 +48,15 @@ func (d *GormDatabase) GetMemberByEmail(email string) (*model.Member, error) {
 	return memberModel, nil
 }
 
+func (d *GormDatabase) GetMembersByUUIDs(uuids []*string) ([]*model.Member, error) {
+	var membersModel []*model.Member
+	query := d.buildMemberQuery(api.Args{})
+	if err := query.Where("uuid IN ?", uuids).Find(&membersModel).Error; err != nil {
+		return nil, err
+	}
+	return membersModel, nil
+}
+
 func (d *GormDatabase) CreateMember(body *model.Member) (*model.Member, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Member)
 	hashedPassword, err := security.GeneratePasswordHash(body.Password)
@@ -80,18 +89,6 @@ func (d *GormDatabase) UpdateMember(uuid string, body *model.Member) (*model.Mem
 		return nil, query.Error
 	}
 	return memberModel, nil
-}
-
-func (d *GormDatabase) UpdateMemberTeams(uuid string, body []*string) error {
-	member, err := d.GetMember(uuid)
-	if err != nil {
-		return err
-	}
-	groups, _ := d.GetTeamsByUUIDs(body)
-	if err := d.updateGroups(&member, groups); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (d *GormDatabase) DeleteMember(uuid string) (bool, error) {

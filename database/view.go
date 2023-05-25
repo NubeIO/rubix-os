@@ -14,6 +14,14 @@ func (d *GormDatabase) GetView(uuid string) (*model.View, error) {
 	return viewModel, nil
 }
 
+func (d *GormDatabase) GetViewsByUUIDs(uuids []*string) ([]*model.View, error) {
+	var viewsModel []*model.View
+	if err := d.DB.Where("uuid IN ?", uuids).Find(&viewsModel).Error; err != nil {
+		return nil, err
+	}
+	return viewsModel, nil
+}
+
 func (d *GormDatabase) CreateView(body *model.View) (*model.View, error) {
 	name, err := validateName(body.Name)
 	if err != nil {

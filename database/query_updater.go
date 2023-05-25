@@ -13,6 +13,6 @@ func (d *GormDatabase) updateTags(model interface{}, tags []*model.Tag) error {
 	return updateTagsTransaction(d.DB, model, tags)
 }
 
-func (d *GormDatabase) updateGroups(model interface{}, teams []*model.Team) error {
-	return d.DB.Model(model).Association("Teams").Replace(teams)
+func (d *GormDatabase) updateMembers(model interface{}, members []*model.Member) error {
+	return d.DB.Model(model).Association("Members").Replace(members)
 }

@@ -44,5 +44,7 @@ func GetInitInterfaces() []interface{} {
 		&model.Member{},
 		&model.MemberDevice{},
 		&model.View{},
+		&model.Team{},
+		&model.TeamView{},
 	}
 }

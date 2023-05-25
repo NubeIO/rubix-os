@@ -668,7 +668,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			memberRoutes.DELETE("/:uuid", memberHandler.DeleteMemberByUUID)
 			memberRoutes.GET("/username/:username", memberHandler.GetMemberByUsername)
 			memberRoutes.POST("/verify/:username", memberHandler.VerifyMember)
-			memberRoutes.PUT("/:uuid/teams", memberHandler.UpdateMemberTeams)
 		}
 
 		systemctlRoutes := apiRoutes.Group("/systemctl")
@@ -955,6 +954,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				teamRoutes.PATCH("/:uuid", teamHandler.UpdateTeam)
 				teamRoutes.DELETE("/:uuid", teamHandler.DeleteTeam)
 				teamRoutes.DELETE("/drop", teamHandler.DropTeams)
+				teamRoutes.PUT("/:uuid/members", teamHandler.UpdateTeamMembers)
+				teamRoutes.PUT("/:uuid/views", teamHandler.UpdateTeamViews)
 			}
 		}
 	}

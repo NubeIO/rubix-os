@@ -25,7 +25,7 @@ func (d *GormDatabase) GetTeamsByUUIDs(uuids []*string) ([]*model.Team, error) {
 
 func (d *GormDatabase) GetTeam(uuid string) (*model.Team, error) {
 	var teamModel *model.Team
-	query := d.buildGroupQuery()
+	query := d.buildTeamQuery()
 	if err := query.Where("uuid = ?", uuid).First(&teamModel).Error; err != nil {
 		return nil, err
 	}
@@ -47,6 +47,18 @@ func (d *GormDatabase) UpdateTeam(uuid string, body *model.Team) (*model.Team, e
 		return nil, err
 	}
 	return teamModel, nil
+}
+
+func (d *GormDatabase) UpdateTeamMembers(uuid string, body []*string) ([]*model.Member, error) {
+	team, err := d.GetTeam(uuid)
+	if err != nil {
+		return nil, err
+	}
+	members, _ := d.GetMembersByUUIDs(body)
+	if err := d.updateMembers(&team, members); err != nil {
+		return nil, err
+	}
+	return members, nil
 }
 
 func (d *GormDatabase) DeleteTeam(uuid string) (bool, error) {

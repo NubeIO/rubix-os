@@ -21,7 +21,6 @@ type MemberDatabase interface {
 	GetMemberByEmail(email string) (*model.Member, error)
 	CreateMember(body *model.Member) (*model.Member, error)
 	UpdateMember(uuid string, body *model.Member) (*model.Member, error)
-	UpdateMemberTeams(uuid string, body []*string) error
 	DeleteMember(uuid string) (bool, error)
 	DeleteMemberByUsername(username string) (bool, error)
 	ChangeMemberPassword(uuid string, password string) (bool, error)
@@ -125,17 +124,6 @@ func (a *MemberAPI) VerifyMember(ctx *gin.Context) {
 		return
 	}
 	ResponseHandler(interfaces.Message{Message: "member has been verified successfully"}, nil, ctx)
-}
-
-func (a *MemberAPI) UpdateMemberTeams(ctx *gin.Context) {
-	body, _ := getBodyMemberGroups(ctx)
-	uuid := resolveID(ctx)
-	err := a.DB.UpdateMemberTeams(uuid, body)
-	if err != nil {
-		ResponseHandler(nil, err, ctx)
-		return
-	}
-	ResponseHandler(interfaces.Message{Message: "member teams updated successfully"}, err, ctx)
 }
 
 func (a *MemberAPI) GetMember(ctx *gin.Context) {
