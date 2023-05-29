@@ -20,7 +20,7 @@ func GetHostProperties() *HostProperties {
 	m.BiosPort.Title = "bios port"
 	m.BiosPort.Default = 1659
 	m.BiosPort.ReadOnly = true
-	m.Port.Default = 1661
+	m.Port.Default = 1660
 	m.Port.ReadOnly = true
 	m.ExternalToken.Title = "external token"
 	schema.Set(m)
