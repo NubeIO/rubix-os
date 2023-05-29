@@ -245,7 +245,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 
 	wiresProxyHandler := api.WiresProxyAPI{}
 	chirpProxyHandler := api.ChirpProxyAPI{}
-	hostProxyHandler := api.HostProxyAPI{}
+	hostProxyHandler := api.HostProxyAPI{
+		DB: db,
+	}
 	dbGroup.SyncTopics()
 
 	// for the custom plugin endpoints you need to use the plugin token

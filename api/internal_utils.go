@@ -441,7 +441,7 @@ func resolveEmail(ctx *gin.Context) string {
 }
 
 func matchUUID(uuid string) bool {
-	if len(uuid) == 16 {
+	if len(uuid) == 20 {
 		if uuid[0:4] == "hos_" {
 			return true
 		}
@@ -451,7 +451,7 @@ func matchUUID(uuid string) bool {
 
 func matchHostUUID(ctx *gin.Context) string {
 	hostID := resolveHeaderHostID(ctx)
-	if len(hostID) == 16 {
+	if len(hostID) == 20 {
 		if matchUUID(hostID) {
 			return hostID
 		}

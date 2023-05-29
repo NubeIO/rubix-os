@@ -37,7 +37,7 @@ func (a *HostProxyAPI) HostProxy(ctx *gin.Context) {
 	if len(proxyPathParts) > 0 && proxyPathParts[0] == "eb" {
 		proxyPath = path.Join(proxyPathParts[1:]...)
 		remote, err = ip.Builder(host.HTTPS, host.IP, host.BiosPort)
-	} else if len(proxyPathParts) > 0 && proxyPathParts[0] == "edge" {
+	} else if len(proxyPathParts) > 0 && proxyPathParts[0] == "ros" {
 		proxyPath = path.Join(proxyPathParts[1:]...)
 		remote, err = ip.Builder(host.HTTPS, host.IP, host.Port)
 	} else {
