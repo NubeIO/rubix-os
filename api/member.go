@@ -126,6 +126,20 @@ func (a *MemberAPI) VerifyMember(ctx *gin.Context) {
 	ResponseHandler(interfaces.Message{Message: "member has been verified successfully"}, nil, ctx)
 }
 
+func (a *MemberAPI) UpdateMemberByUUID(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	body, _ := getBodyMember(ctx)
+	q, err := a.DB.UpdateMember(uuid, body)
+	if err != nil {
+		ResponseHandler(nil, err, ctx)
+		return
+	}
+	if q != nil {
+		q.MaskPassword()
+	}
+	ResponseHandler(q, nil, ctx)
+}
+
 func (a *MemberAPI) GetMember(ctx *gin.Context) {
 	username := auth.GetAuthorizedUsername(ctx.Request)
 	if username == "" {
@@ -152,6 +166,7 @@ func (a *MemberAPI) UpdateMember(ctx *gin.Context) {
 	}
 	body, _ := getBodyMember(ctx)
 	body.State = member.State
+	body.Permission = member.Permission
 	q, err := a.DB.UpdateMember(member.UUID, body)
 	if q != nil {
 		q.MaskPassword()

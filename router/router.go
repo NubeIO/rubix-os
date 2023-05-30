@@ -679,6 +679,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			memberRoutes.GET("", memberHandler.GetMembers)
 			memberRoutes.GET("/:uuid", memberHandler.GetMemberByUUID)
 			memberRoutes.DELETE("/:uuid", memberHandler.DeleteMemberByUUID)
+			memberRoutes.PATCH("/:uuid", memberHandler.UpdateMemberByUUID)
 			memberRoutes.GET("/username/:username", memberHandler.GetMemberByUsername)
 			memberRoutes.POST("/verify/:username", memberHandler.VerifyMember)
 		}

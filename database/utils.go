@@ -103,6 +103,17 @@ func checkMemberState(t string) (model.MemberState, error) {
 	return memberState, nil
 }
 
+func checkMemberPermission(t string) (model.MemberPermission, error) {
+	if t == "" {
+		return model.Read, nil
+	}
+	memberPermission := model.MemberPermission(t)
+	if _, ok := model.MemberPermissionMap[memberPermission]; !ok {
+		return "", errors.New("please provide a valid member permission ie: READ or WRITE")
+	}
+	return memberPermission, nil
+}
+
 func checkMemberDevicePlatform(t string) (model.MemberDevicePlatform, error) {
 	if t == "" {
 		return model.Android, nil

@@ -65,6 +65,7 @@ func (d *GormDatabase) CreateMember(body *model.Member) (*model.Member, error) {
 	}
 	body.Password = hashedPassword
 	body.State = nstring.New(string(model.UnVerified))
+	body.Permission = nstring.New(string(model.Read))
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
@@ -78,6 +79,13 @@ func (d *GormDatabase) UpdateMember(uuid string, body *model.Member) (*model.Mem
 			return nil, err
 		}
 		body.State = nstring.New(string(obj))
+	}
+	if body.Permission != nil {
+		obj, err := checkMemberPermission(*body.Permission)
+		if err != nil {
+			return nil, err
+		}
+		body.Permission = nstring.New(string(obj))
 	}
 	var memberModel *model.Member
 	query := d.DB.Where("uuid = ?", uuid).First(&memberModel)
