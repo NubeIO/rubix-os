@@ -63,7 +63,7 @@ func FormatRestyV2Response(resp *resty.Response, err error) (res *resty.Response
 	if err != nil {
 		return resp, err, nil
 	}
-	if resp.IsError() && resp.StatusCode() != 404 {
+	if resp.IsError() && resp.StatusCode() != 404 && resp.StatusCode() != 400 {
 		return nil, composeErrorMsg(resp), nil
 	}
 	if resp.IsError() {
