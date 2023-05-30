@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/NubeIO/rubix-os/utils/structs"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"strings"
 	"unicode"
@@ -174,4 +175,12 @@ func validateName(name string) (string, error) {
 	}
 	name = strings.TrimSpace(strings.Join(strings.Fields(name), " "))
 	return name, nil
+}
+
+func marshalJson(jsonData datatypes.JSON) []byte {
+	if jsonData == nil {
+		jsonData = datatypes.JSON{}
+	}
+	mJsonData, _ := json.Marshal(jsonData)
+	return mJsonData
 }

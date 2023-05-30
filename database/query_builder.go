@@ -567,3 +567,15 @@ func (d *GormDatabase) buildLocationQuery() *gorm.DB {
 func (d *GormDatabase) buildTeamQuery() *gorm.DB {
 	return d.DB.Preload("Members").Preload("Views")
 }
+
+func (d *GormDatabase) buildViewQuery() *gorm.DB {
+	return d.DB.Preload("Widgets")
+}
+
+func (d *GormDatabase) buildViewTemplateQuery() *gorm.DB {
+	return d.DB.Preload("ViewTemplateWidgets.ViewTemplateWidgetPointers")
+}
+
+func (d *GormDatabase) buildViewTemplateWidgetQuery() *gorm.DB {
+	return d.DB.Preload("ViewTemplateWidgetPointers")
+}

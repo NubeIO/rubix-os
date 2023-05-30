@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"gorm.io/gorm"
 	"time"
 
@@ -443,4 +444,18 @@ func (d *GormDatabase) DeletePointByName(networkName, deviceName, pointName stri
 	}
 	query = query.Delete(pointModel)
 	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) GetPointWithParent(uuid string) (*interfaces.PointWithParent, error) {
+	var pointWithParent *interfaces.PointWithParent
+	if err := d.DB.Table("points").
+		Select("points.uuid, points.name, devices.uuid AS device_uuid, devices.name AS device_name, "+
+			"networks.uuid AS network_names, networks.name AS network_name").
+		Joins("JOIN devices ON points.device_uuid = devices.uuid").
+		Joins("JOIN networks ON devices.network_uuid = networks.uuid").
+		Where("points.uuid = ?", uuid).
+		First(&pointWithParent).Error; err != nil {
+		return nil, err
+	}
+	return pointWithParent, nil
 }

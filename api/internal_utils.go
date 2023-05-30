@@ -204,7 +204,37 @@ func getBodyLocation(ctx *gin.Context) (dto *model.Location, err error) {
 	return dto, err
 }
 
+func getBodyViewWidget(ctx *gin.Context) (dto *model.ViewWidget, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBodyView(ctx *gin.Context) (dto *model.View, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyGenerateViewTemplate(ctx *gin.Context) (dto *interfaces.GenerateViewTemplate, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyAssignViewTemplate(ctx *gin.Context) (dto *interfaces.AssignViewTemplate, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyViewSetting(ctx *gin.Context) (dto *model.ViewSetting, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyViewTemplate(ctx *gin.Context) (dto *model.ViewTemplate, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyViewTemplateWidget(ctx *gin.Context) (dto *model.ViewTemplateWidget, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }

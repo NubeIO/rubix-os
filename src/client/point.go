@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/nresty"
 )
 
@@ -81,4 +82,15 @@ func (inst *FlowClient) EditPoint(uuid string, body *model.Point) (*model.Point,
 		return nil, err
 	}
 	return resp.Result().(*model.Point), nil
+}
+
+func (inst *FlowClient) GetPointWithParent(uuid string) (*interfaces.PointWithParent, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&interfaces.PointWithParent{}).
+		SetPathParams(map[string]string{"uuid": uuid}).
+		Get("/api/points/with_parent/{uuid}"))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Result().(*interfaces.PointWithParent), nil
 }

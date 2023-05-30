@@ -43,7 +43,12 @@ func GetInitInterfaces() []interface{} {
 		&model.SnapshotRestoreLog{},
 		&model.Member{},
 		&model.MemberDevice{},
+		&model.ViewSetting{},
 		&model.View{},
+		&model.ViewWidget{},
+		&model.ViewTemplate{},
+		&model.ViewTemplateWidget{},
+		&model.ViewTemplateWidgetPointer{},
 		&model.Team{},
 		&model.TeamView{},
 	}

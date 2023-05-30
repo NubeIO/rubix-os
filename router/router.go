@@ -207,7 +207,19 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	hostTagHandler := api.HostTagAPI{
 		DB: db,
 	}
+	viewSettingHandler := api.ViewSettingAPI{
+		DB: db,
+	}
+	viewTemplateHandler := api.ViewTemplateAPI{
+		DB: db,
+	}
+	viewTemplateWidgetHandler := api.ViewTemplateWidgetAPI{
+		DB: db,
+	}
 	viewHandler := api.ViewAPI{
+		DB: db,
+	}
+	viewWidgetHandler := api.ViewWidgetAPI{
 		DB: db,
 	}
 	systemHandler := api.SystemAPI{
@@ -489,6 +501,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			pointRoutes.PATCH("/name", pointHandler.PointWriteByNameArgs) // TODO remove
 			pointRoutes.PATCH("/name/:network_name/:device_name/:point_name", pointHandler.PointWriteByName)
 			pointRoutes.PUT("/meta_tags/uuid/:uuid", pointHandler.CreatePointMetaTags)
+			pointRoutes.GET("/with_parent/:uuid", pointHandler.GetPointWithParent)
 		}
 
 		commandRoutes := apiRoutes.Group("/commands")
@@ -926,12 +939,44 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				}
 			}
 
+			viewSettingRoutes := serverApiRoutes.Group("/view-settings")
+			{
+				viewSettingRoutes.GET("", viewSettingHandler.GetViewSetting)
+				viewSettingRoutes.POST("", viewSettingHandler.CreateViewSetting)
+				viewSettingRoutes.DELETE("", viewSettingHandler.DeleteViewSetting)
+			}
+
 			viewRoutes := serverApiRoutes.Group("/views")
 			{
+				viewRoutes.GET("", viewHandler.GetViews)
 				viewRoutes.GET("/:uuid", viewHandler.GetView)
 				viewRoutes.POST("", viewHandler.CreateView)
 				viewRoutes.PATCH("/:uuid", viewHandler.UpdateView)
 				viewRoutes.DELETE("/:uuid", viewHandler.DeleteView)
+				viewRoutes.POST("/generate-template", viewHandler.GenerateViewTemplate)
+				viewRoutes.POST("/assign-template", viewHandler.AssignViewTemplate)
+
+				viewWidgetRoutes := viewRoutes.Group("/widgets")
+				{
+					viewWidgetRoutes.POST("", viewWidgetHandler.CreateViewWidget)
+					viewWidgetRoutes.PATCH("/:uuid", viewWidgetHandler.UpdateViewWidget)
+					viewWidgetRoutes.DELETE("/:uuid", viewWidgetHandler.DeleteViewWidget)
+				}
+			}
+
+			viewTemplateRoutes := serverApiRoutes.Group("/view-templates")
+			{
+				viewTemplateRoutes.GET("", viewTemplateHandler.GetViewTemplates)
+				viewTemplateRoutes.GET("/:uuid", viewTemplateHandler.GetViewTemplate)
+				viewTemplateRoutes.POST("", viewTemplateHandler.CreateViewTemplate)
+				viewTemplateRoutes.PATCH("/:uuid", viewTemplateHandler.UpdateViewTemplate)
+				viewTemplateRoutes.DELETE("/:uuid", viewTemplateHandler.DeleteViewTemplate)
+
+				viewTemplateWidgetRoutes := viewTemplateRoutes.Group("/widgets")
+				{
+					viewTemplateWidgetRoutes.PATCH("/:uuid", viewTemplateWidgetHandler.UpdateViewTemplateWidget)
+					viewTemplateWidgetRoutes.DELETE("/:uuid", viewTemplateWidgetHandler.DeleteViewTemplateWidget)
+				}
 			}
 
 			alertRoutes := serverApiRoutes.Group("/alerts")

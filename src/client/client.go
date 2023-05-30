@@ -63,6 +63,10 @@ func getNewFlowClientCli(ip string, port int) *FlowClient {
 	return flowClient
 }
 
+func NewClient(ip string, port int, token string) *FlowClient {
+	return newSessionWithToken(ip, port, token)
+}
+
 func NewLocalClient() *FlowClient {
 	mutex.Lock()
 	defer mutex.Unlock()

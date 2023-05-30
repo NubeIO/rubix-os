@@ -48,7 +48,12 @@ func MakeTopicUUID(attribute string) string {
 	srl := "srl" // snapshot restore log uuid
 	mem := "mem" // member uuid
 	med := "med" // member device uuid
-	vie := "vie" // view uuid
+	viw := "viw" // view uuid
+	vwi := "vwi" // view widget uuid
+	vse := "vse" // view setting uuid
+	vte := "vte" // view template uuid
+	vtw := "vtw" // view template widget uuid
+	vtp := "vtp" // view template widget pointer uuid
 	tem := "tem" // team uuid
 
 	switch attribute {
@@ -113,7 +118,17 @@ func MakeTopicUUID(attribute string) string {
 	case model.CommonNaming.MemberDevice:
 		return fmt.Sprintf("%s%s%s", med, divider, u)
 	case model.CommonNaming.View:
-		return fmt.Sprintf("%s%s%s", vie, divider, u)
+		return fmt.Sprintf("%s%s%s", viw, divider, u)
+	case model.CommonNaming.ViewWidget:
+		return fmt.Sprintf("%s%s%s", vwi, divider, u)
+	case model.CommonNaming.ViewSetting:
+		return fmt.Sprintf("%s%s%s", vse, divider, u)
+	case model.CommonNaming.ViewTemplate:
+		return fmt.Sprintf("%s%s%s", vte, divider, u)
+	case model.CommonNaming.ViewTemplateWidget:
+		return fmt.Sprintf("%s%s%s", vtw, divider, u)
+	case model.CommonNaming.ViewTemplateWidgetPointer:
+		return fmt.Sprintf("%s%s%s", vtp, divider, u)
 	case model.CommonNaming.Team:
 		return fmt.Sprintf("%s%s%s", tem, divider, u)
 	}
