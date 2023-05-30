@@ -2,7 +2,7 @@ package installer
 
 import (
 	"fmt"
-	"strings"
+	"regexp"
 )
 
 type BuildDetails struct {
@@ -13,23 +13,15 @@ type BuildDetails struct {
 }
 
 func (inst *Installer) GetZipBuildDetails(zipName string) *BuildDetails {
-	parts := strings.Split(zipName, "-")
-	if len(parts) > 2 {
-		version := parts[len(parts)-2]
-		if !strings.Contains(version, "v") {
-			version = fmt.Sprintf("v%s", version)
-		}
-		archContent := parts[len(parts)-1]
-		archParts := strings.Split(archContent, ".")
-		arch := ""
-		if len(parts) > 1 {
-			arch = archParts[1]
-		}
-		nameParts := parts[:len(parts)-2]
-		name := strings.Join(nameParts, "-")
+	infoRegex := regexp.MustCompile(`^([\w-]+)-([\d.]+(?:-[\w\d]+)?)-(\w+)\.(\w+)\.zip$`)
+	match := infoRegex.FindStringSubmatch(zipName)
+	if match != nil {
+		name := match[1]
+		version := match[2]
+		arch := match[4]
 		return &BuildDetails{
 			Name:    name,
-			Version: version,
+			Version: fmt.Sprintf("v%s", version),
 			Arch:    arch,
 			ZipName: zipName,
 		}
