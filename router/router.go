@@ -836,11 +836,11 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				}
 			}
 
-			edgeBiosAppRoutes := serverApiRoutes.Group("/eb/re")
+			edgeBiosAppRoutes := serverApiRoutes.Group("/eb/ros")
 			{
-				edgeBiosAppRoutes.POST("/upload", edgeBiosEdgeHandler.EdgeBiosRubixEdgeUpload)
-				edgeBiosAppRoutes.POST("/install", edgeBiosEdgeHandler.EdgeBiosRubixEdgeInstall)
-				edgeBiosAppRoutes.GET("/version", edgeBiosEdgeHandler.EdgeBiosGetRubixEdgeVersion)
+				edgeBiosAppRoutes.POST("/upload", edgeBiosEdgeHandler.EdgeBiosRubixOsUpload)
+				edgeBiosAppRoutes.POST("/install", edgeBiosEdgeHandler.EdgeBiosRubixOsInstall)
+				edgeBiosAppRoutes.GET("/version", edgeBiosEdgeHandler.EdgeBiosGetRubixOsVersion)
 			}
 
 			edgeRoutes := serverApiRoutes.Group("/edge")

@@ -4,12 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/lib-files/fileutils"
+	"github.com/NubeIO/rubix-os/global"
 	"github.com/NubeIO/rubix-os/nresty"
+	"github.com/NubeIO/rubix-os/src/cli/constants"
 	"github.com/NubeIO/rubix-os/src/cli/edgebioscli/ebmodel"
 )
 
-func (inst *BiosClient) GetRubixEdgeVersion() (*ebmodel.Version, error) {
-	installLocation := fmt.Sprintf("/data/installer/apps/install/%s", rubixEdgeName)
+func (inst *BiosClient) GetEdgeRubixOsVersion() (*ebmodel.Version, error) {
+	installLocation := global.Installer.GetAppInstallPath(constants.RubixOS)
 	url := fmt.Sprintf("/api/files/list?path=%s", installLocation)
 	resp, err := nresty.FormatRestyResponse(inst.Rest.R().
 		SetResult(&[]fileutils.FileDetails{}).
