@@ -44,6 +44,9 @@ func (d *GormDatabase) CreateView(body *model.View) (*model.View, error) {
 	body.Name = name
 	body.WidgetConfig = marshalJson(body.WidgetConfig)
 	body.Theme = marshalJson(body.Theme)
+	if body.LocationUUID == nil && body.GroupUUID == nil && body.HostUUID == nil {
+		return nil, errors.New("view should assign either to the location, group or host")
+	}
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
