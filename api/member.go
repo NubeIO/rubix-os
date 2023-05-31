@@ -3,7 +3,7 @@ package api
 import (
 	"errors"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/auth"
-	"github.com/NubeIO/nubeio-rubix-lib-auth-go/utils/security"
+	"github.com/NubeIO/nubeio-rubix-lib-auth-go/security"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/nerrors"

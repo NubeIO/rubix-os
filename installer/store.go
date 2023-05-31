@@ -27,5 +27,5 @@ func (inst *Installer) GetPluginsStoreWithFile(fileName string) string {
 
 func (inst *Installer) GetPluginInstallationPath(appName string) string {
 	appDataPath := inst.GetAppDataPath(appName)
-	return path.Join(appDataPath, "data/plugins") // /data/rubix-os/plugins
+	return path.Join(appDataPath, "data/plugins") // /data/rubix-os/data/plugins
 }

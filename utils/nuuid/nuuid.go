@@ -141,9 +141,9 @@ func ShortUUID(prefix ...string) string {
 	if n != len(u) || err != nil {
 		return "-error-uuid-"
 	}
-	uuid := fmt.Sprintf("%x%x", u[0:4], u[4:6])
+	uuid_ := fmt.Sprintf("%x%x", u[0:4], u[4:6])
 	if len(prefix) > 0 {
-		uuid = fmt.Sprintf("%s_%s", prefix[0], uuid)
+		uuid_ = fmt.Sprintf("%s_%s", prefix[0], uuid_)
 	}
-	return uuid
+	return uuid_
 }

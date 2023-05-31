@@ -19,9 +19,9 @@ func GetHostProperties() *HostProperties {
 	m.IP.Default = "0.0.0.0"
 	m.BiosPort.Title = "bios port"
 	m.BiosPort.Default = 1659
-	m.BiosPort.ReadOnly = true
-	m.Port.Default = 1661
-	m.Port.ReadOnly = true
+	m.BiosPort.ReadOnly = false
+	m.Port.Default = 1660
+	m.Port.ReadOnly = false
 	m.ExternalToken.Title = "external token"
 	schema.Set(m)
 	return m

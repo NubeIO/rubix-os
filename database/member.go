@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/NubeIO/nubeio-rubix-lib-auth-go/utils/security"
+	"github.com/NubeIO/nubeio-rubix-lib-auth-go/security"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/utils/nstring"
