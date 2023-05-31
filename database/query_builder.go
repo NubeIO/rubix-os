@@ -530,15 +530,19 @@ func (d *GormDatabase) buildScheduleQueryTransaction(db *gorm.DB, args api.Args)
 }
 
 func (d *GormDatabase) buildGroupQuery() *gorm.DB {
-	return d.DB.Preload("Hosts")
+	return d.DB.Preload("Hosts").Preload("Views")
 }
 
 func (d *GormDatabase) buildHostQuery(args api.Args) *gorm.DB {
-	return d.DB.Preload("Comments").Preload("Tags")
+	query := d.DB.Preload("Comments").Preload("Tags").Preload("Views")
+	if args.Name != nil {
+		query = query.Where("name = ?", *args.Name)
+	}
+	return query
 }
 
-func (d *GormDatabase) buildTeamQuery(args api.Args) *gorm.DB {
-	query := d.DB.Preload("Groups").Preload("MemberDevices")
+func (d *GormDatabase) buildMemberQuery(args api.Args) *gorm.DB {
+	query := d.DB.Preload("MemberDevices")
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
 	}
@@ -554,4 +558,24 @@ func (d *GormDatabase) buildMemberDeviceQuery(args api.Args) *gorm.DB {
 		query = query.Where("device_id", *args.DeviceId)
 	}
 	return query
+}
+
+func (d *GormDatabase) buildLocationQuery() *gorm.DB {
+	return d.DB.Preload("Groups").Preload("Views")
+}
+
+func (d *GormDatabase) buildTeamQuery() *gorm.DB {
+	return d.DB.Preload("Members").Preload("Views")
+}
+
+func (d *GormDatabase) buildViewQuery() *gorm.DB {
+	return d.DB.Preload("Widgets")
+}
+
+func (d *GormDatabase) buildViewTemplateQuery() *gorm.DB {
+	return d.DB.Preload("ViewTemplateWidgets.ViewTemplateWidgetPointers")
+}
+
+func (d *GormDatabase) buildViewTemplateWidgetQuery() *gorm.DB {
+	return d.DB.Preload("ViewTemplateWidgetPointers")
 }

@@ -21,7 +21,6 @@ type MemberDatabase interface {
 	GetMemberByEmail(email string) (*model.Member, error)
 	CreateMember(body *model.Member) (*model.Member, error)
 	UpdateMember(uuid string, body *model.Member) (*model.Member, error)
-	UpdateMemberGroups(uuid string, body []*string) error
 	DeleteMember(uuid string) (bool, error)
 	DeleteMemberByUsername(username string) (bool, error)
 	ChangeMemberPassword(uuid string, password string) (bool, error)
@@ -127,15 +126,18 @@ func (a *MemberAPI) VerifyMember(ctx *gin.Context) {
 	ResponseHandler(interfaces.Message{Message: "member has been verified successfully"}, nil, ctx)
 }
 
-func (a *MemberAPI) UpdateMemberGroups(ctx *gin.Context) {
-	body, _ := getBodyMemberGroups(ctx)
+func (a *MemberAPI) UpdateMemberByUUID(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	err := a.DB.UpdateMemberGroups(uuid, body)
+	body, _ := getBodyMember(ctx)
+	q, err := a.DB.UpdateMember(uuid, body)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	ResponseHandler(interfaces.Message{Message: "member groups updated successfully"}, err, ctx)
+	if q != nil {
+		q.MaskPassword()
+	}
+	ResponseHandler(q, nil, ctx)
 }
 
 func (a *MemberAPI) GetMember(ctx *gin.Context) {
@@ -164,6 +166,7 @@ func (a *MemberAPI) UpdateMember(ctx *gin.Context) {
 	}
 	body, _ := getBodyMember(ctx)
 	body.State = member.State
+	body.Permission = member.Permission
 	q, err := a.DB.UpdateMember(member.UUID, body)
 	if q != nil {
 		q.MaskPassword()

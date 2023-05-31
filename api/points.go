@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,6 +20,7 @@ type PointDatabase interface {
 	PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter) (*model.Point, error)
 	DeleteOnePointByArgs(args Args) (bool, error)
 	DeletePointByName(networkName, deviceName, pointName string, args Args) (bool, error)
+	GetPointWithParent(uuid string) (*interfaces.PointWithParent, error)
 
 	CreatePointPlugin(body *model.Point) (*model.Point, error)
 	UpdatePointPlugin(uuid string, body *model.Point) (*model.Point, error)
@@ -150,5 +152,11 @@ func (a *PointAPI) DeletePointByName(ctx *gin.Context) {
 	pointName := resolvePointName(ctx)
 	args := buildPointArgs(ctx)
 	q, err := a.DB.DeletePointByName(networkName, deviceName, pointName, args)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *PointAPI) GetPointWithParent(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	q, err := a.DB.GetPointWithParent(uuid)
 	ResponseHandler(q, err, ctx)
 }

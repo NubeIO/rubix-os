@@ -7,7 +7,8 @@ import (
 
 func (d *GormDatabase) GetLocations() ([]*model.Location, error) {
 	var locationsModel []*model.Location
-	if err := d.DB.Find(&locationsModel).Error; err != nil {
+	query := d.buildLocationQuery()
+	if err := query.Find(&locationsModel).Error; err != nil {
 		return nil, err
 	}
 	return locationsModel, nil
@@ -15,7 +16,8 @@ func (d *GormDatabase) GetLocations() ([]*model.Location, error) {
 
 func (d *GormDatabase) GetLocation(uuid string) (*model.Location, error) {
 	var locationModel *model.Location
-	if err := d.DB.Where("uuid = ?", uuid).First(&locationModel).Error; err != nil {
+	query := d.buildLocationQuery()
+	if err := query.Where("uuid = ?", uuid).First(&locationModel).Error; err != nil {
 		return nil, err
 	}
 	return locationModel, nil

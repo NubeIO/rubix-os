@@ -10,7 +10,7 @@ import (
 
 func (d *GormDatabase) GetMembers() ([]*model.Member, error) {
 	var membersModel []*model.Member
-	query := d.buildTeamQuery(api.Args{})
+	query := d.buildMemberQuery(api.Args{})
 	query.Find(&membersModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -20,7 +20,7 @@ func (d *GormDatabase) GetMembers() ([]*model.Member, error) {
 
 func (d *GormDatabase) GetMember(uuid string) (*model.Member, error) {
 	var memberModel *model.Member
-	query := d.buildTeamQuery(api.Args{})
+	query := d.buildMemberQuery(api.Args{})
 	query = query.Where("uuid = ? ", uuid).First(&memberModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -30,7 +30,7 @@ func (d *GormDatabase) GetMember(uuid string) (*model.Member, error) {
 
 func (d *GormDatabase) GetMemberByUsername(username string) (*model.Member, error) {
 	var memberModel *model.Member
-	query := d.buildTeamQuery(api.Args{})
+	query := d.buildMemberQuery(api.Args{})
 	query = query.Where("username = ? ", username).First(&memberModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -40,12 +40,21 @@ func (d *GormDatabase) GetMemberByUsername(username string) (*model.Member, erro
 
 func (d *GormDatabase) GetMemberByEmail(email string) (*model.Member, error) {
 	var memberModel *model.Member
-	query := d.buildTeamQuery(api.Args{})
+	query := d.buildMemberQuery(api.Args{})
 	query = query.Where("email = ? ", email).First(&memberModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	return memberModel, nil
+}
+
+func (d *GormDatabase) GetMembersByUUIDs(uuids []*string) ([]*model.Member, error) {
+	var membersModel []*model.Member
+	query := d.buildMemberQuery(api.Args{})
+	if err := query.Where("uuid IN ?", uuids).Find(&membersModel).Error; err != nil {
+		return nil, err
+	}
+	return membersModel, nil
 }
 
 func (d *GormDatabase) CreateMember(body *model.Member) (*model.Member, error) {
@@ -56,6 +65,7 @@ func (d *GormDatabase) CreateMember(body *model.Member) (*model.Member, error) {
 	}
 	body.Password = hashedPassword
 	body.State = nstring.New(string(model.UnVerified))
+	body.Permission = nstring.New(string(model.Read))
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
@@ -70,6 +80,13 @@ func (d *GormDatabase) UpdateMember(uuid string, body *model.Member) (*model.Mem
 		}
 		body.State = nstring.New(string(obj))
 	}
+	if body.Permission != nil {
+		obj, err := checkMemberPermission(*body.Permission)
+		if err != nil {
+			return nil, err
+		}
+		body.Permission = nstring.New(string(obj))
+	}
 	var memberModel *model.Member
 	query := d.DB.Where("uuid = ?", uuid).First(&memberModel)
 	if query.Error != nil {
@@ -80,18 +97,6 @@ func (d *GormDatabase) UpdateMember(uuid string, body *model.Member) (*model.Mem
 		return nil, query.Error
 	}
 	return memberModel, nil
-}
-
-func (d *GormDatabase) UpdateMemberGroups(uuid string, body []*string) error {
-	member, err := d.GetMember(uuid)
-	if err != nil {
-		return err
-	}
-	groups, _ := d.GetGroupsByUUIDs(body)
-	if err := d.updateGroups(&member, groups); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (d *GormDatabase) DeleteMember(uuid string) (bool, error) {

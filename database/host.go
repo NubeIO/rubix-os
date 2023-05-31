@@ -22,8 +22,8 @@ func (d *GormDatabase) GetHost(uuid string) (*model.Host, error) {
 
 func (d *GormDatabase) GetHostByName(name string) (*model.Host, error) {
 	hostModel := model.Host{}
-	query := d.buildHostQuery(api.Args{})
-	if err := query.Where("name = ? ", name).First(&hostModel).Error; err != nil {
+	query := d.buildHostQuery(api.Args{Name: &name})
+	if err := query.First(&hostModel).Error; err != nil {
 		return nil, errors.New(fmt.Sprintf("no host was found with name: %s", name))
 	}
 	return &hostModel, nil

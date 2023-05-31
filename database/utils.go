@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/NubeIO/rubix-os/utils/structs"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 	"strings"
 	"unicode"
@@ -102,6 +103,17 @@ func checkMemberState(t string) (model.MemberState, error) {
 	return memberState, nil
 }
 
+func checkMemberPermission(t string) (model.MemberPermission, error) {
+	if t == "" {
+		return model.Read, nil
+	}
+	memberPermission := model.MemberPermission(t)
+	if _, ok := model.MemberPermissionMap[memberPermission]; !ok {
+		return "", errors.New("please provide a valid member permission ie: READ or WRITE")
+	}
+	return memberPermission, nil
+}
+
 func checkMemberDevicePlatform(t string) (model.MemberDevicePlatform, error) {
 	if t == "" {
 		return model.Android, nil
@@ -174,4 +186,12 @@ func validateName(name string) (string, error) {
 	}
 	name = strings.TrimSpace(strings.Join(strings.Fields(name), " "))
 	return name, nil
+}
+
+func marshalJson(jsonData datatypes.JSON) []byte {
+	if jsonData == nil {
+		jsonData = datatypes.JSON{}
+	}
+	mJsonData, _ := json.Marshal(jsonData)
+	return mJsonData
 }
