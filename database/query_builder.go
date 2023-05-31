@@ -561,7 +561,7 @@ func (d *GormDatabase) buildMemberDeviceQuery(args api.Args) *gorm.DB {
 }
 
 func (d *GormDatabase) buildLocationQuery() *gorm.DB {
-	return d.DB.Preload("Groups").Preload("Views")
+	return d.DB.Preload("Groups.Hosts").Preload("Views")
 }
 
 func (d *GormDatabase) buildTeamQuery() *gorm.DB {
