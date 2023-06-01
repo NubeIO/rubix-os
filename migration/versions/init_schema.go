@@ -13,7 +13,6 @@ func GetInitInterfaces() []interface{} {
 		&model.FlowNetwork{},
 		&model.FlowNetworkClone{},
 		&model.Priority{},
-		&model.ProducerHistory{},
 		&model.ConsumerHistory{},
 		&model.Job{},
 		&model.Stream{},
@@ -51,5 +50,6 @@ func GetInitInterfaces() []interface{} {
 		&model.ViewTemplateWidgetPointer{},
 		&model.Team{},
 		&model.TeamView{},
+		&model.PointHistory{},
 	}
 }

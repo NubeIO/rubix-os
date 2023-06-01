@@ -238,7 +238,7 @@ func buildTagArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildProducerHistoryArgs(ctx *gin.Context) Args {
+func buildPointHistoryArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
 	if value, ok := ctx.GetQuery(aType.IdGt); ok {
@@ -256,7 +256,7 @@ func buildProducerHistoryArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildProducerHistoryPointsSyncArgs(ctx *gin.Context) (string, string) {
+func buildPointHistorySyncArgs(ctx *gin.Context) (string, string) {
 	id := ""
 	timeStamp := ""
 	if value, ok := ctx.GetQuery("id"); ok {

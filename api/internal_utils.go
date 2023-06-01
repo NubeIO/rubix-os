@@ -34,16 +34,6 @@ func getBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
 	return dto, err
 }
 
-func getBodyHistory(ctx *gin.Context) (dto *model.ProducerHistory, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBodyBulkHistory(ctx *gin.Context) (dto []*model.ProducerHistory, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
 func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -354,8 +344,8 @@ func resolveWriterThingClass(ctx *gin.Context) string {
 	return ctx.Param("writer_thing_class")
 }
 
-func resolveProducerUUID(ctx *gin.Context) string {
-	return ctx.Param("producer_uuid")
+func resolvePointUUID(ctx *gin.Context) string {
+	return ctx.Param("point_uuid")
 }
 
 func getTagParam(ctx *gin.Context) string {

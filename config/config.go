@@ -40,9 +40,9 @@ type Configuration struct {
 		}
 		DeviceInfoFile string `default:"/data/rubix-registry/device_info.json"`
 	}
-	Prod            bool  `default:"false"`
-	Auth            *bool `default:"true"`
-	ProducerHistory struct {
+	Prod         bool  `default:"false"`
+	Auth         *bool `default:"true"`
+	PointHistory struct {
 		Enable  *bool `default:"true"`
 		Cleaner struct {
 			Enable              *bool `default:"true"`

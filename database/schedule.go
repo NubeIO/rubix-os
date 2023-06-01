@@ -179,7 +179,7 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 		if query.Error != nil {
 			return nil, query.Error
 		}
-		d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name, nil, "", nil)
+		d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name)
 	}
 	return scheduleModel, nil
 }
@@ -215,7 +215,7 @@ func (d *GormDatabase) UpdateScheduleAllProps(uuid string, body *model.Schedule)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name, nil, "", nil)
+	d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name)
 	return scheduleModel, nil
 }
 

@@ -389,6 +389,9 @@ func buildPointQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
 	if args.AutoMappingUUID != nil {
 		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
 	}
+	if args.Name != nil {
+		query = query.Where("name = ?", *args.Name)
+	}
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
 	}
@@ -472,7 +475,7 @@ func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildProducerHistoryQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildPointHistoryQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.IdGt != nil {
 		query = query.Where("Id > ?", args.IdGt)
