@@ -35,7 +35,7 @@ loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
 
 auth: true
 
-producerhistory:
+pointhistory:
   enable: true
   cleaner:
     enable: true
@@ -56,9 +56,9 @@ mqtt:
   qos: 1
   retain: true
   globalbroadcast: false
-  publishpointcov:      true
-  publishpointlist:      false
-  pointwritelistener:    true
-  publishschedulecov:    true
-  publishwchedulelist:   false
+  publishpointcov: true
+  publishpointlist: false
+  pointwritelistener: true
+  publishschedulecov: true
+  publishwchedulelist: false
   schedulewritelistener: true

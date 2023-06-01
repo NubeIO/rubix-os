@@ -20,7 +20,6 @@ func MakeTopicUUID(attribute string) string {
 	str := "str" // stream
 	stc := "stc" // stream clone
 	pro := "pro" // producers
-	prh := "prh" // producer history
 	wrc := "wrc" // writerClone
 	con := "con" // consumers
 	wri := "wri" // writer
@@ -85,8 +84,6 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", ing, divider, u)
 	case model.CommonNaming.WriterClone:
 		return fmt.Sprintf("%s%s%s", wrc, divider, u)
-	case model.CommonNaming.ProducerHistory:
-		return fmt.Sprintf("%s%s%s", prh, divider, u)
 	case model.CommonNaming.Consumer:
 		return fmt.Sprintf("%s%s%s", con, divider, u)
 	case model.CommonNaming.Writer:

@@ -22,7 +22,7 @@ func (inst *Instance) syncHistory() (bool, error) {
 			continue
 		}
 		cli := client.NewFlowClientCliFromFNC(fnc)
-		pHistories, err := cli.GetProducerHistoriesPointsForSync(hisLog.LastSyncID, hisLog.Timestamp)
+		pHistories, err := cli.GetPointHistoriesForSync(hisLog.LastSyncID, hisLog.Timestamp)
 		if err != nil {
 			continue
 		}

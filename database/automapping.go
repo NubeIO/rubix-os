@@ -622,9 +622,6 @@ func (d *GormDatabase) setProducerModel(streamUUID string, point *model.Point, p
 	producerModel.ProducerThingName = point.Name
 	producerModel.ProducerThingClass = "point"
 	producerModel.ProducerApplication = "mapping"
-	producerModel.EnableHistory = point.HistoryEnable
-	producerModel.HistoryType = point.HistoryType
-	producerModel.HistoryInterval = point.HistoryInterval
 	producerModel.CreatedFromAutoMapping = boolean.NewTrue()
 }
 
