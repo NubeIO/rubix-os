@@ -9,7 +9,7 @@ import (
 
 func TestStore_generateServiceFile(t *testing.T) {
 	tmpDir, absoluteServiceFileName, err := GenerateServiceFile(&ServiceFile{
-		Name:                        constants.RubixOS,
+		Name:                        constants.RubixOs,
 		Version:                     "v0.0.1",
 		ExecStart:                   "app -p 1660 -g /data/rubix-os -d data --prod",
 		AttachWorkingDirOnExecStart: true,

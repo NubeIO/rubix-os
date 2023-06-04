@@ -57,7 +57,7 @@ func (inst *Client) moveAppAndPluginsFromDownloadToInstallDir(app *systemctl.Ser
 		return err
 	}
 
-	if app.Name == constants.RubixOS {
+	if app.Name == constants.RubixOs {
 		from = global.Installer.GetAppPluginDownloadPath()
 		to = global.Installer.GetAppPluginInstallPath()
 		url = fmt.Sprintf("/api/files/delete-all?path=%s", to)
@@ -172,7 +172,7 @@ func (inst *Client) backupAppDataDir(appName string) error {
 
 	from := global.Installer.GetAppDataDataPath(appName)
 	to := global.Installer.GetAppBackupPath(appName, appVersion)
-	if appName == constants.RubixOS { // otherwise, plugins & images folders also gets copied which will be large
+	if appName == constants.RubixOs { // otherwise, plugins & images folders also gets copied which will be large
 		from = path.Join(from, "data.db")
 		to = path.Join(to, "data.db")
 	}

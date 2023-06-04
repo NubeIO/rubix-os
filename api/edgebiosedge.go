@@ -71,7 +71,7 @@ func (a *EdgeBiosEdgeApi) EdgeBiosGetRubixOsVersion(ctx *gin.Context) {
 }
 
 func (a *EdgeBiosEdgeApi) attachFileOnModel(m *interfaces.FileUpload) error {
-	storePath := global.Installer.GetAppsStoreAppPathWithArchVersion(constants.RubixOS, m.Arch, m.Version)
+	storePath := global.Installer.GetAppsStoreAppPathWithArchVersion(constants.RubixOs, m.Arch, m.Version)
 	files, err := ioutil.ReadDir(storePath)
 	if err != nil {
 		return err

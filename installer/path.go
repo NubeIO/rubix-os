@@ -60,12 +60,12 @@ func (inst *Installer) MakeTmpDirUpload() (string, error) {
 }
 
 func (inst *Installer) GetAppPluginDownloadPath() string {
-	repoName := namings.GetRepoNameFromAppName(constants.RubixOS)
+	repoName := namings.GetRepoNameFromAppName(constants.RubixOs)
 	return path.Join(inst.AppsDownloadDir, repoName, "plugins") // /data/installer/apps/download/ruibix-os/plugins
 }
 
 func (inst *Installer) GetAppPluginInstallPath() string {
-	return path.Join(inst.GetAppDataDataPath(constants.RubixOS), "plugins") // /data/rubix-os/data/plugins
+	return path.Join(inst.GetAppDataDataPath(constants.RubixOs), "plugins") // /data/rubix-os/data/plugins
 }
 
 func (inst *Installer) GetAppPluginInstallFilePath(pluginName, arch string) string {

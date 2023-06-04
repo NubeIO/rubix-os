@@ -18,7 +18,7 @@ import (
 )
 
 func (inst *BiosClient) RubixOsUpload(body *interfaces.FileUpload) (*interfaces.Message, error) {
-	uploadLocation := global.Installer.GetAppDownloadPathWithVersion(constants.RubixOS, body.Version)
+	uploadLocation := global.Installer.GetAppDownloadPathWithVersion(constants.RubixOs, body.Version)
 	url := fmt.Sprintf("/api/dirs/create?path=%s", uploadLocation)
 	_, _ = nresty.FormatRestyResponse(inst.Rest.R().
 		SetResult(&interfaces.Message{}).
@@ -71,15 +71,15 @@ func (inst *BiosClient) RubixOsUpload(body *interfaces.FileUpload) (*interfaces.
 
 func (inst *BiosClient) RubixOsInstall(version string) (*interfaces.Message, error) {
 	// delete installed files
-	installationDirectory := global.Installer.GetAppInstallPath(constants.RubixOS)
+	installationDirectory := global.Installer.GetAppInstallPath(constants.RubixOs)
 	url := fmt.Sprintf("/api/files/delete-all?path=%s", installationDirectory)
 	_, _ = nresty.FormatRestyResponse(inst.Rest.R().
 		SetResult(&interfaces.Message{}).
 		Delete(url))
 	log.Println("deleted installed files, if any")
 
-	downloadedFile := path.Join(global.Installer.GetAppDownloadPathWithVersion(constants.RubixOS, version), "app")
-	installationFile := path.Join(global.Installer.GetAppInstallPathWithVersion(constants.RubixOS, version), "app")
+	downloadedFile := path.Join(global.Installer.GetAppDownloadPathWithVersion(constants.RubixOs, version), "app")
+	installationFile := path.Join(global.Installer.GetAppInstallPathWithVersion(constants.RubixOs, version), "app")
 
 	// create installation directory
 	installationDirectoryWithVersion := filepath.Dir(installationFile)
@@ -103,7 +103,7 @@ func (inst *BiosClient) RubixOsInstall(version string) (*interfaces.Message, err
 	log.Info("moved downloaded file to installation directory")
 
 	tmpDir, absoluteServiceFileName, err := systemctl.GenerateServiceFile(&systemctl.ServiceFile{
-		Name:                        constants.RubixOS,
+		Name:                        constants.RubixOs,
 		Version:                     version,
 		ExecStart:                   "app -p 1660 -g /data/rubix-os -d data --prod",
 		AttachWorkingDirOnExecStart: true,
@@ -113,7 +113,7 @@ func (inst *BiosClient) RubixOsInstall(version string) (*interfaces.Message, err
 	}
 	log.Info("created service file locally")
 
-	message, err := inst.installServiceFile(constants.RubixOS, absoluteServiceFileName)
+	message, err := inst.installServiceFile(constants.RubixOs, absoluteServiceFileName)
 	if err != nil {
 		return message, err
 	}
