@@ -70,38 +70,6 @@ func (inst *BiosClient) RubixOsUpload(body *interfaces.FileUpload) (*interfaces.
 }
 
 func (inst *BiosClient) RubixOsInstall(version string) (*interfaces.Message, error) {
-	// delete installed files
-	installationDirectory := global.Installer.GetAppInstallPath(constants.RubixOs)
-	url := fmt.Sprintf("/api/files/delete-all?path=%s", installationDirectory)
-	_, _ = nresty.FormatRestyResponse(inst.Rest.R().
-		SetResult(&interfaces.Message{}).
-		Delete(url))
-	log.Println("deleted installed files, if any")
-
-	downloadedFile := path.Join(global.Installer.GetAppDownloadPathWithVersion(constants.RubixOs, version), "app")
-	installationFile := path.Join(global.Installer.GetAppInstallPathWithVersion(constants.RubixOs, version), "app")
-
-	// create installation directory
-	installationDirectoryWithVersion := filepath.Dir(installationFile)
-	url = fmt.Sprintf("/api/dirs/create?path=%s", installationDirectoryWithVersion)
-	_, err := nresty.FormatRestyResponse(inst.Rest.R().
-		SetResult(&interfaces.Message{}).
-		Post(url))
-	if err != nil {
-		return nil, err
-	}
-	log.Info("created installation directory")
-
-	// move downloaded file to installation directory
-	url = fmt.Sprintf("/api/files/move?from=%s&to=%s", downloadedFile, installationFile)
-	_, err = nresty.FormatRestyResponse(inst.Rest.R().
-		SetResult(&interfaces.Message{}).
-		Post(url))
-	if err != nil {
-		return nil, err
-	}
-	log.Info("moved downloaded file to installation directory")
-
 	tmpDir, absoluteServiceFileName, err := systemctl.GenerateServiceFile(&systemctl.ServiceFile{
 		Name:                        constants.RubixOs,
 		Version:                     version,

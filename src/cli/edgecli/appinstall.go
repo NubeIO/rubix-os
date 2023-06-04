@@ -22,14 +22,14 @@ func (inst *Client) AppInstall(app *systemctl.ServiceFile) (*interfaces.Message,
 		return nil, err
 	}
 
-	installPath := global.Installer.GetAppInstallPath(app.Name)
-	url := fmt.Sprintf("/api/files/delete-all?path=%s", installPath)
-	_, _ = nresty.FormatRestyResponse(inst.Rest.R().Delete(url))
-
-	err = inst.moveAppAndPluginsFromDownloadToInstallDir(app)
+	err = inst.moveAppFromDownloadToInstallDir(app)
 	if err != nil {
 		return nil, err
 	}
+
+	installPath := global.Installer.GetAppInstallPath(app.Name)
+	url := fmt.Sprintf("/api/files/delete-all?path=%s", installPath)
+	_, _ = nresty.FormatRestyResponse(inst.Rest.R().Delete(url))
 
 	tmpDir, absoluteServiceFileName, err := systemctl.GenerateServiceFile(app, global.Installer)
 	_, err = inst.installServiceFile(app.Name, absoluteServiceFileName)
@@ -44,7 +44,7 @@ func (inst *Client) AppInstall(app *systemctl.ServiceFile) (*interfaces.Message,
 	return &interfaces.Message{Message: "successfully installed the app"}, nil
 }
 
-func (inst *Client) moveAppAndPluginsFromDownloadToInstallDir(app *systemctl.ServiceFile) error {
+func (inst *Client) moveAppFromDownloadToInstallDir(app *systemctl.ServiceFile) error {
 	from := global.Installer.GetAppDownloadPathWithVersion(app.Name, app.Version)
 	to := global.Installer.GetAppInstallPathWithVersion(app.Name, app.Version)
 	url := fmt.Sprintf("/api/files/delete-all?path=%s", to)
@@ -56,60 +56,7 @@ func (inst *Client) moveAppAndPluginsFromDownloadToInstallDir(app *systemctl.Ser
 	if err != nil {
 		return err
 	}
-
-	if app.Name == constants.RubixOs {
-		from = global.Installer.GetAppPluginDownloadPath()
-		to = global.Installer.GetAppPluginInstallPath()
-		url = fmt.Sprintf("/api/files/delete-all?path=%s", to)
-		_, _ = nresty.FormatRestyResponse(inst.Rest.R().Delete(url))
-		url = fmt.Sprintf("/api/dirs/create?path=%s", path.Dir(to))
-		_, err = nresty.FormatRestyResponse(inst.Rest.R().Post(url))
-		if err != nil {
-			return err
-		}
-		url = fmt.Sprintf("/api/files/move?from=%s&to=%s", from, to)
-		_, _ = nresty.FormatRestyResponse(inst.Rest.R().Post(url)) // ignore error: sometimes from folder will be empty
-	} else {
-		if _, err = inst.MovePluginsFromDownloadToInstallDir(); err != nil {
-			return err
-		}
-	}
 	return nil
-}
-
-func (inst *Client) MovePluginsFromDownloadToInstallDir() (*interfaces.Message, error) {
-	from := global.Installer.GetAppPluginDownloadPath()
-	to := global.Installer.GetAppPluginInstallPath()
-	url := fmt.Sprintf("/api/dirs/create?path=%s", from)
-	_, err := nresty.FormatRestyResponse(inst.Rest.R().Post(url))
-	if err != nil {
-		return nil, err
-	}
-	url = fmt.Sprintf("/api/dirs/create?path=%s", to)
-	_, err = nresty.FormatRestyResponse(inst.Rest.R().Post(url))
-	if err != nil {
-		return nil, err
-	}
-	url = fmt.Sprintf("/api/files/list?path=%s", from)
-	resp, err := nresty.FormatRestyResponse(inst.Rest.R().
-		SetResult(&[]fileutils.FileDetails{}).
-		Get(url))
-	if err != nil {
-		return nil, err
-	}
-	files := (resp.Result()).(*[]fileutils.FileDetails)
-	if files != nil {
-		for _, file := range *files {
-			fromFile := path.Join(from, file.Name)
-			toFile := path.Join(to, file.Name)
-			url = fmt.Sprintf("/api/files/move?from=%s&to=%s", fromFile, toFile)
-			_, err = nresty.FormatRestyResponse(inst.Rest.R().Post(url))
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return &interfaces.Message{Message: "transferred plugins from download to install location"}, nil
 }
 
 func (inst *Client) installServiceFile(appName, absoluteServiceFileName string) (*interfaces.Message, error) {

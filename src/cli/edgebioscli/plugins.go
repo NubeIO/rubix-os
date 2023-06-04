@@ -1,4 +1,4 @@
-package edgecli
+package edgebioscli
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 )
 
-func (inst *Client) PluginUpload(body *interfaces.Plugin) (*interfaces.Message, error) {
+func (inst *BiosClient) PluginUpload(body *interfaces.Plugin) (*interfaces.Message, error) {
 	uploadLocation := global.Installer.GetAppPluginDownloadPath()
 
 	url := fmt.Sprintf("/api/dirs/create?path=%s", uploadLocation)
@@ -57,7 +57,7 @@ func (inst *Client) PluginUpload(body *interfaces.Plugin) (*interfaces.Message, 
 	return &interfaces.Message{Message: "successfully uploaded the plugin"}, nil
 }
 
-func (inst *Client) ListPlugins() ([]interfaces.Plugin, error, error) {
+func (inst *BiosClient) ListPlugins() ([]interfaces.Plugin, error, error) {
 	p := global.Installer.GetPluginInstallationPath(constants.RubixOs)
 	files, connectionErr, requestErr := inst.ListFilesV2(p)
 	if connectionErr != nil || requestErr != nil {
