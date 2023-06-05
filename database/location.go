@@ -39,12 +39,12 @@ func (d *GormDatabase) UpdateLocation(uuid string, body *model.Location) (*model
 	return locationModel, nil
 }
 
-func (d *GormDatabase) DeleteLocation(uuid string) (bool, error) {
+func (d *GormDatabase) DeleteLocation(uuid string) (*model.Message, error) {
 	query := d.DB.Where("uuid = ?", uuid).Delete(&model.Location{})
-	return d.deleteResponseBuilder(query)
+	return d.deleteResponse(query)
 }
 
-func (d *GormDatabase) DropLocations() (bool, error) {
+func (d *GormDatabase) DropLocations() (*model.Message, error) {
 	query := d.DB.Where("1 = 1").Delete(&model.Location{})
-	return d.deleteResponseBuilder(query)
+	return d.deleteResponse(query)
 }

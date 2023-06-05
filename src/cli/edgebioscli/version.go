@@ -11,7 +11,7 @@ import (
 )
 
 func (inst *BiosClient) GetEdgeRubixOsVersion() (*ebmodel.Version, error) {
-	installLocation := global.Installer.GetAppInstallPath(constants.RubixOS)
+	installLocation := global.Installer.GetAppInstallPath(constants.RubixOs)
 	url := fmt.Sprintf("/api/files/list?path=%s", installLocation)
 	resp, err := nresty.FormatRestyResponse(inst.Rest.R().
 		SetResult(&[]fileutils.FileDetails{}).

@@ -8,7 +8,7 @@ import (
 type HostCommentDatabase interface {
 	CreateHostComment(body *model.HostComment) (*model.HostComment, error)
 	UpdateHostComment(uuid string, body *model.HostComment) (*model.HostComment, error)
-	DeleteHostComment(uuid string) (bool, error)
+	DeleteHostComment(uuid string) (*model.Message, error)
 }
 
 type HostCommentAPI struct {

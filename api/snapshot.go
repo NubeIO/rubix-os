@@ -10,7 +10,9 @@ import (
 	"github.com/NubeIO/rubix-os/config"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/src/cli/bioscli"
+	"github.com/NubeIO/rubix-os/src/cli/constants"
 	"github.com/NubeIO/rubix-os/utils"
+	"github.com/NubeIO/rubix-os/utils/namings"
 	"github.com/NubeIO/rubix-registry-go/rubixregistry"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -22,7 +24,6 @@ import (
 	"time"
 )
 
-var systemPath = "/lib/systemd/system"
 var dataFolder = "data"
 var systemFolder = "system"
 
@@ -88,7 +89,7 @@ func (a *SnapshotAPI) CreateSnapshot(c *gin.Context) {
 	}
 	_ = utils.CopyDir(config.Get().GetSnapshotDir(), absDataFolder, "", 0)
 
-	systemFiles, err := filepath.Glob(path.Join(systemPath, "nubeio-*"))
+	systemFiles, err := filepath.Glob(path.Join(constants.ServiceDirSoftLink, "nubeio-*"))
 	if err != nil {
 		log.Error(err)
 		createStatus = interfaces.CreateFailed
@@ -182,13 +183,20 @@ func (a *SnapshotAPI) RestoreSnapshot(c *gin.Context) {
 
 	copySystemFiles := true // for example in macOS, we don't have systemd file & so to prevent that failure
 	services := make([]string, 0)
-	if _, err := os.Stat(systemPath); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(constants.ServiceDir); errors.Is(err, os.ErrNotExist) {
 		copySystemFiles = false
 	}
 	if copySystemFiles {
 		services, _ = fileutils.ListFiles(path.Join(unzippedFolderPath, systemFolder))
 		a.stopServices(services)
-		err = utils.CopyDir(path.Join(unzippedFolderPath, systemFolder), systemPath, "", 0)
+		err = utils.CopyDir(path.Join(unzippedFolderPath, systemFolder), constants.ServiceDir, "", 0)
+		if err != nil {
+			log.Error(err)
+			restoreStatus = interfaces.RestoreFailed
+			ResponseHandler(nil, err, c)
+			return
+		}
+		err = a.SystemCtl.DaemonReload()
 		if err != nil {
 			log.Error(err)
 			restoreStatus = interfaces.RestoreFailed
@@ -236,13 +244,22 @@ func (a *SnapshotAPI) RestoreSnapshot(c *gin.Context) {
 		log.Errorf("failed to remove file %s", unzippedFolderPath)
 	}
 	if copySystemFiles {
-		err = a.SystemCtl.DaemonReload()
-		if err != nil {
-			log.Error(err)
-			restoreStatus = interfaces.RestoreFailed
-			ResponseHandler(nil, err, c)
-			return
+		// Put nubeio-rubix-os.service file at last in order, self restart could also can happen
+		index := 0
+		exist := false
+		serviceFile := namings.GetServiceNameFromAppName(constants.RubixOs)
+		for i, str := range services {
+			if str == serviceFile {
+				exist = true
+				index = i
+				break
+			}
 		}
+		if exist {
+			services = append(services[:index], services[index+1:]...)
+			services = append(services, serviceFile)
+		}
+
 		a.enableAndRestartServices(services)
 	}
 	log.Info("snapshot is restored")

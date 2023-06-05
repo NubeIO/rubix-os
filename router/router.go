@@ -841,6 +841,15 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				edgeBiosAppRoutes.POST("/upload", edgeBiosEdgeHandler.EdgeBiosRubixOsUpload)
 				edgeBiosAppRoutes.POST("/install", edgeBiosEdgeHandler.EdgeBiosRubixOsInstall)
 				edgeBiosAppRoutes.GET("/version", edgeBiosEdgeHandler.EdgeBiosGetRubixOsVersion)
+
+				edgePluginRoutes := edgeBiosAppRoutes.Group("/plugins")
+				{
+					edgePluginRoutes.GET("", edgePluginHandler.EdgeListPlugins)
+					edgePluginRoutes.POST("/upload", edgePluginHandler.EdgeUploadPlugin)
+					edgePluginRoutes.POST("/move-from-download-to-install", edgePluginHandler.EdgeMoveFromDownloadToInstallPlugins)
+					edgePluginRoutes.DELETE("/name/:plugin_name", edgePluginHandler.EdgeDeletePlugin)
+					edgePluginRoutes.DELETE("/download-plugins", edgePluginHandler.EdgeDeleteDownloadPlugins)
+				}
 			}
 
 			edgeRoutes := serverApiRoutes.Group("/edge")
@@ -852,15 +861,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 					edgeAppRoutes.POST("/uninstall", edgeAppHandler.EdgeAppUninstall)
 					edgeAppRoutes.GET("/status", edgeAppHandler.EdgeListAppsStatus)
 					edgeAppRoutes.GET("/status/:app_name", edgeAppHandler.EdgeGetAppStatus)
-				}
-
-				edgePluginRoutes := edgeRoutes.Group("/plugins")
-				{
-					edgePluginRoutes.GET("", edgePluginHandler.EdgeListPlugins)
-					edgePluginRoutes.POST("/upload", edgePluginHandler.EdgeUploadPlugin)
-					edgePluginRoutes.POST("/move-from-download-to-install", edgePluginHandler.EdgeMoveFromDownloadToInstallPlugins)
-					edgePluginRoutes.DELETE("/name/:plugin_name", edgePluginHandler.EdgeDeletePlugin)
-					edgePluginRoutes.DELETE("/download-plugins", edgePluginHandler.EdgeDeleteDownloadPlugins)
 				}
 
 				edgeConfigRoutes := edgeRoutes.Group("/config")

@@ -33,16 +33,16 @@ func (d *GormDatabase) UpdateSnapshotLog(file string, body *model.SnapshotLog) (
 	return snapshotLogModel, nil
 }
 
-func (d *GormDatabase) DeleteSnapshotLog(file string) (bool, error) {
+func (d *GormDatabase) DeleteSnapshotLog(file string) (*model.Message, error) {
 	var snapshotLogModel *model.SnapshotLog
 	query := d.DB.Where("file = ? ", file).Delete(&snapshotLogModel)
-	return d.deleteResponseBuilder(query)
+	return d.deleteResponse(query)
 }
 
 // DeleteSnapshotLogs avoids discrepancies between snapshot raw files and logs
 // discrepancies happens when snapshot gets deleted manually
-func (d *GormDatabase) DeleteSnapshotLogs(files []string) (bool, error) {
+func (d *GormDatabase) DeleteSnapshotLogs(files []string) (*model.Message, error) {
 	var snapshotLogModel *model.SnapshotLog
 	query := d.DB.Where("file NOT IN ?", files).Delete(&snapshotLogModel)
-	return d.deleteResponseBuilder(query)
+	return d.deleteResponse(query)
 }

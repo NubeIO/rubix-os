@@ -11,8 +11,8 @@ type GroupDatabase interface {
 	GetGroup(uuid string) (*model.Group, error)
 	CreateGroup(body *model.Group) (*model.Group, error)
 	UpdateGroup(uuid string, body *model.Group) (*model.Group, error)
-	DeleteGroup(uuid string) (bool, error)
-	DropGroups() (bool, error)
+	DeleteGroup(uuid string) (*model.Message, error)
+	DropGroups() (*model.Message, error)
 	UpdateHostsStatus(uuid string) (*model.Group, error)
 }
 

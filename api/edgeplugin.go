@@ -24,7 +24,7 @@ func (a *EdgePluginApi) EdgeListPlugins(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	cli := cligetter.GetEdgeClient(host)
+	cli := cligetter.GetEdgeBiosClient(host)
 	plugins, connectionErr, requestErr := cli.ListPlugins()
 	if connectionErr != nil {
 		ctx.JSON(502, interfaces.Message{Message: connectionErr.Error()})
@@ -39,7 +39,7 @@ func (a *EdgePluginApi) EdgeUploadPlugin(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	cli := cligetter.GetEdgeClient(host)
+	cli := cligetter.GetEdgeBiosClient(host)
 	var m *interfaces.Plugin
 	err = ctx.ShouldBindJSON(&m)
 	if err != nil {
@@ -56,7 +56,7 @@ func (a *EdgePluginApi) EdgeMoveFromDownloadToInstallPlugins(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	cli := cligetter.GetEdgeClient(host)
+	cli := cligetter.GetEdgeBiosClient(host)
 	resp, err := cli.MovePluginsFromDownloadToInstallDir()
 	ResponseHandler(resp, err, ctx)
 }
@@ -69,7 +69,7 @@ func (a *EdgePluginApi) EdgeDeletePlugin(ctx *gin.Context) {
 	}
 	pluginName := ctx.Param("plugin_name")
 	arch := ctx.Query("arch")
-	cli := cligetter.GetEdgeClient(host)
+	cli := cligetter.GetEdgeBiosClient(host)
 	installPluginFilePath := global.Installer.GetAppPluginInstallFilePath(pluginName, arch)
 	_, connectionErr, requestErr := cli.DeleteFiles(installPluginFilePath)
 	if connectionErr != nil {
@@ -91,7 +91,7 @@ func (a *EdgePluginApi) EdgeDeleteDownloadPlugins(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	cli := cligetter.GetEdgeClient(host)
+	cli := cligetter.GetEdgeBiosClient(host)
 	pluginDownloadPath := global.Installer.GetAppPluginDownloadPath()
 	msg, connectionErr, requestErr := cli.DeleteFiles(pluginDownloadPath)
 	if connectionErr != nil {

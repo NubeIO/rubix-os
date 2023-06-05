@@ -55,6 +55,11 @@ func (a *EdgeBiosEdgeApi) EdgeBiosRubixOsInstall(ctx *gin.Context) {
 		return
 	}
 	cli := cligetter.GetEdgeBiosClient(host)
+	err = cli.MoveAppAndPluginsFromDownloadToInstallDir(m.Version)
+	if err != nil {
+		ResponseHandler(nil, err, ctx)
+		return
+	}
 	data, err := cli.RubixOsInstall(m.Version)
 	ResponseHandler(data, err, ctx)
 }
@@ -71,7 +76,7 @@ func (a *EdgeBiosEdgeApi) EdgeBiosGetRubixOsVersion(ctx *gin.Context) {
 }
 
 func (a *EdgeBiosEdgeApi) attachFileOnModel(m *interfaces.FileUpload) error {
-	storePath := global.Installer.GetAppsStoreAppPathWithArchVersion(constants.RubixOS, m.Arch, m.Version)
+	storePath := global.Installer.GetAppsStoreAppPathWithArchVersion(constants.RubixOs, m.Arch, m.Version)
 	files, err := ioutil.ReadDir(storePath)
 	if err != nil {
 		return err

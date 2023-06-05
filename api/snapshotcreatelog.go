@@ -9,7 +9,7 @@ type SnapshotCreteLogDatabase interface {
 	GetSnapshotCreateLogs(hostUUID string) ([]*model.SnapshotCreateLog, error)
 	CreateSnapshotCreateLog(body *model.SnapshotCreateLog) (*model.SnapshotCreateLog, error)
 	UpdateSnapshotCreateLog(uuid string, body *model.SnapshotCreateLog) (*model.SnapshotCreateLog, error)
-	DeleteSnapshotCreateLog(uuid string) (bool, error)
+	DeleteSnapshotCreateLog(uuid string) (*model.Message, error)
 
 	ResolveHost(uuid string, name string) (*model.Host, error)
 }
