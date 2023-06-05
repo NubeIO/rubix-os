@@ -1,6 +1,6 @@
 # Scope
 
-- Transfer data from `Producer Histories > History`
+- Transfer data from `Point Histories > History`
 - The collected history will be distributed to the different data sources; InfluxDB, PostgreSQL etc.
 - It uses config file for sync those histories
 

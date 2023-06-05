@@ -5,10 +5,10 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// GetHistoryLogByFlowNetworkCloneUUID return history log for the given fncUuid or nil..
-func (d *GormDatabase) GetHistoryLogByFlowNetworkCloneUUID(fncUuid string) (*model.HistoryLog, error) {
+// GetHistoryLogByHostUUID return history log for the given fncUuid or nil..
+func (d *GormDatabase) GetHistoryLogByHostUUID(hostUUID string) (*model.HistoryLog, error) {
 	var historyLogModel *model.HistoryLog
-	d.DB.Where("flow_network_clone_uuid = ?", fncUuid).First(&historyLogModel)
+	d.DB.Where("host_uuid = ?", hostUUID).First(&historyLogModel)
 	return historyLogModel, nil
 }
 
@@ -23,7 +23,7 @@ func (d *GormDatabase) CreateHistoryLog(body *model.HistoryLog) (*model.HistoryL
 // UpdateHistoryLog update/create a thing.
 func (d *GormDatabase) UpdateHistoryLog(body *model.HistoryLog) (*model.HistoryLog, error) {
 	var historyLogModel *model.HistoryLog
-	query := d.DB.Where("flow_network_clone_uuid = ?", body.FlowNetworkCloneUUID).First(&historyLogModel)
+	query := d.DB.Where("host_uuid = ?", body.HostUUID).First(&historyLogModel)
 	if historyLogModel.ID == 0 {
 		if err := d.DB.Create(&body).Error; err != nil {
 			return nil, err

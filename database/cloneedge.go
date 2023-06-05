@@ -2,15 +2,21 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
-func (d *GormDatabase) CloneEdge(globalUUID string, networks []*model.Network) error {
+func (d *GormDatabase) CloneEdge(host *model.Host) error {
+	cli := client.NewClient(host.IP, host.Port, host.ExternalToken)
+	networks, err := cli.GetNetworksForCloneEdge()
+	if err != nil {
+		return err
+	}
 	tx := d.DB.Begin()
-	_, _ = d.DeleteNetworksByGlobalUUIDTransaction(tx, globalUUID)
+	_, _ = d.DeleteNetworksByGlobalUUIDTransaction(tx, host.GlobalUUID)
 	for _, network := range networks {
-		d.setNetworkModelClone(globalUUID, network.UUID, network)
+		d.setNetworkModelClone(host.GlobalUUID, network.UUID, network)
 		for _, device := range network.Devices {
 			d.setDeviceModelClone(network.UUID, device.UUID, device)
 			for _, point := range device.Points {
@@ -18,7 +24,7 @@ func (d *GormDatabase) CloneEdge(globalUUID string, networks []*model.Network) e
 			}
 		}
 	}
-	_, err := d.CreateBulkNetworksTransaction(tx, networks)
+	_, err = d.CreateBulkNetworksTransaction(tx, networks)
 	if err != nil {
 		tx.Rollback()
 		return err

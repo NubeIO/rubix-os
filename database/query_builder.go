@@ -398,6 +398,9 @@ func buildPointQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
 	}
+	if args.SourceUUID != nil {
+		query = query.Where("source_uuid = ?", *args.SourceUUID)
+	}
 	if args.MetaTags != nil {
 		keyValues := metaTagsArgsToKeyValues(*args.MetaTags)
 		subQuery := db.Table("point_meta_tags").Select("point_uuid").
