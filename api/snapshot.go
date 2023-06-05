@@ -24,7 +24,6 @@ import (
 	"time"
 )
 
-var systemPath = "/lib/systemd/system"
 var dataFolder = "data"
 var systemFolder = "system"
 
@@ -90,7 +89,7 @@ func (a *SnapshotAPI) CreateSnapshot(c *gin.Context) {
 	}
 	_ = utils.CopyDir(config.Get().GetSnapshotDir(), absDataFolder, "", 0)
 
-	systemFiles, err := filepath.Glob(path.Join(systemPath, "nubeio-*"))
+	systemFiles, err := filepath.Glob(path.Join(constants.ServiceDirSoftLink, "nubeio-*"))
 	if err != nil {
 		log.Error(err)
 		createStatus = interfaces.CreateFailed
@@ -184,13 +183,13 @@ func (a *SnapshotAPI) RestoreSnapshot(c *gin.Context) {
 
 	copySystemFiles := true // for example in macOS, we don't have systemd file & so to prevent that failure
 	services := make([]string, 0)
-	if _, err := os.Stat(systemPath); errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat(constants.ServiceDir); errors.Is(err, os.ErrNotExist) {
 		copySystemFiles = false
 	}
 	if copySystemFiles {
 		services, _ = fileutils.ListFiles(path.Join(unzippedFolderPath, systemFolder))
 		a.stopServices(services)
-		err = utils.CopyDir(path.Join(unzippedFolderPath, systemFolder), systemPath, "", 0)
+		err = utils.CopyDir(path.Join(unzippedFolderPath, systemFolder), constants.ServiceDir, "", 0)
 		if err != nil {
 			log.Error(err)
 			restoreStatus = interfaces.RestoreFailed
