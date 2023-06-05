@@ -8,10 +8,10 @@ import (
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/plugin/compat"
 	"github.com/NubeIO/rubix-os/utils/boolean"
-	"github.com/NubeIO/rubix-os/utils/deviceinfo"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func (d *GormDatabase) GetNetworksTransaction(db *gorm.DB, args api.Args) ([]*model.Network, error) {
@@ -95,13 +95,6 @@ func (d *GormDatabase) CreateNetworkTransaction(db *gorm.DB, body *model.Network
 	} else {
 		return nil, errors.New("provide a plugin name ie: system, lora, modbus, lorawan, bacnet")
 	}
-	if body.GlobalUUID == "" {
-		deviceInfo, err := deviceinfo.GetDeviceInfo()
-		if err != nil {
-			return nil, err
-		}
-		body.GlobalUUID = deviceInfo.GlobalUUID
-	}
 	if err = db.Create(&body).Error; err != nil {
 		return nil, err
 	}
@@ -174,6 +167,11 @@ func (d *GormDatabase) DeleteOneNetworkByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
+func (d *GormDatabase) DeleteNetworksByGlobalUUIDTransaction(db *gorm.DB, globalUUID string) (bool, error) {
+	query := db.Where("global_uuid = ?", globalUUID).Delete(&model.Network{})
+	return d.deleteResponseBuilder(query)
+}
+
 func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	var pluginConf *model.PluginConf
 	query := d.DB.Where("uuid = ?", body.PluginConfId).First(&pluginConf)
@@ -222,4 +220,12 @@ func GetUniqueAutoMappingFlowNetworkNames(networks []*model.Network) []string {
 	}
 
 	return uniqueAutoMappingFlowNetworkNames
+}
+
+func (d *GormDatabase) CreateBulkNetworksTransaction(db *gorm.DB, networks []*model.Network) (bool, error) {
+	if err := db.Clauses(clause.OnConflict{DoNothing: true}).CreateInBatches(networks, 1000).Error; err != nil {
+		log.Error("Issue on creating bulk networks")
+		return false, err
+	}
+	return true, nil
 }

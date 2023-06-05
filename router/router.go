@@ -256,6 +256,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	teamHandler := api.TeamAPI{
 		DB: db,
 	}
+	cloudEdgeCloneHandler := api.CloneEdgeApi{
+		DB: db,
+	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
 
@@ -1013,6 +1016,11 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				teamRoutes.DELETE("/drop", teamHandler.DropTeams)
 				teamRoutes.PUT("/:uuid/members", teamHandler.UpdateTeamMembers)
 				teamRoutes.PUT("/:uuid/views", teamHandler.UpdateTeamViews)
+			}
+
+			edgeCloneRoutes := serverApiRoutes.Group("/clone_edges")
+			{
+				edgeCloneRoutes.GET("", cloudEdgeCloneHandler.CloneEdge)
 			}
 		}
 	}
