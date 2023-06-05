@@ -196,6 +196,13 @@ func (a *SnapshotAPI) RestoreSnapshot(c *gin.Context) {
 			ResponseHandler(nil, err, c)
 			return
 		}
+		err = a.SystemCtl.DaemonReload()
+		if err != nil {
+			log.Error(err)
+			restoreStatus = interfaces.RestoreFailed
+			ResponseHandler(nil, err, c)
+			return
+		}
 	}
 	rubixRegistryFile := path.Join(unzippedFolderPath, a.RubixRegistry.RubixRegistryDeviceInfoFile)
 	rubixRegistryFileExist := false
@@ -237,14 +244,6 @@ func (a *SnapshotAPI) RestoreSnapshot(c *gin.Context) {
 		log.Errorf("failed to remove file %s", unzippedFolderPath)
 	}
 	if copySystemFiles {
-		err = a.SystemCtl.DaemonReload()
-		if err != nil {
-			log.Error(err)
-			restoreStatus = interfaces.RestoreFailed
-			ResponseHandler(nil, err, c)
-			return
-		}
-
 		// Put nubeio-rubix-os.service file at last in order, self restart could also can happen
 		index := 0
 		exist := false
