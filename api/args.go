@@ -75,6 +75,7 @@ type Args struct {
 	AutoMappingDeviceUUID   *string
 	AutoMappingScheduleUUID *string
 	MemberUUID              *string
+	ShowCloneNetworks       bool
 }
 
 var ArgsType = struct {
@@ -146,6 +147,7 @@ var ArgsType = struct {
 	WithMetaTags         string
 	AutoMappingEnable    string
 	MetaTags             string
+	ShowCloneNetworks    string
 }{
 	Sort:                 "sort",
 	Order:                "order",
@@ -215,6 +217,7 @@ var ArgsType = struct {
 	WithMetaTags:         "with_meta_tags",
 	AutoMappingEnable:    "auto_mapping_enable",
 	MetaTags:             "meta_tags",
+	ShowCloneNetworks:    "show_clone_networks",
 }
 
 var ArgsDefault = struct {
@@ -262,6 +265,7 @@ var ArgsDefault = struct {
 	WithMetaTags      string
 	AutoMappingEnable string
 	MetaTags          string
+	ShowCloneNetworks string
 }{
 	Sort:              "ID",
 	Order:             "DESC", // ASC or DESC
@@ -306,4 +310,5 @@ var ArgsDefault = struct {
 	WithMetaTags:      "false",
 	AutoMappingEnable: "false",
 	MetaTags:          "",
+	ShowCloneNetworks: "false",
 }

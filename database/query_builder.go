@@ -264,6 +264,9 @@ func buildNetworkQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
 	if args.GlobalUUID != nil {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
 	}
+	if !args.ShowCloneNetworks {
+		query = query.Where("IFNULL(source_uuid, '') = ''").Where("IFNULL(global_uuid, '') = ''")
+	}
 	return query
 }
 

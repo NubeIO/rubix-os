@@ -142,6 +142,7 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.MetaTags); ok {
 		args.MetaTags = &value
 	}
+	args.ShowCloneNetworks, _ = toBool(ctx.DefaultQuery(aType.ShowCloneNetworks, aDefault.ShowCloneNetworks))
 	return args
 }
 
