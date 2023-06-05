@@ -22,6 +22,7 @@ func (d *GormDatabase) GetGroup(uuid string) (*model.Group, error) {
 	if err := query.Where("uuid = ?", uuid).First(&groupModel).Error; err != nil {
 		return nil, err
 	}
+	attachOpenVPN(groupModel.Hosts)
 	return groupModel, nil
 }
 

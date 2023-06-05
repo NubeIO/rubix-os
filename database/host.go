@@ -36,7 +36,7 @@ func (d *GormDatabase) GetHosts(withOpenVPN bool) ([]*model.Host, error) {
 		return nil, err
 	}
 	if withOpenVPN {
-		d.attachOpenVPN(hostsModel)
+		attachOpenVPN(hostsModel)
 	}
 	return hostsModel, nil
 }
@@ -50,42 +50,6 @@ func (d *GormDatabase) GetFirstHost() (*model.Host, error) {
 		return hostsModel[0], err
 	}
 	return nil, err
-}
-
-func (d *GormDatabase) attachOpenVPN(hosts []*model.Host) {
-	resetHostClient := func(host *model.Host) {
-		host.VirtualIP = ""
-		host.ReceivedBytes = 0
-		host.SentBytes = 0
-		host.ConnectedSince = ""
-	}
-
-	resetHostsClient := func(hosts []*model.Host) {
-		for _, host := range hosts {
-			resetHostClient(host)
-		}
-	}
-
-	oCli, _ := cligetter.GetOpenVPNClient()
-	if oCli != nil {
-		clients, _ := oCli.GetClients()
-		if clients != nil {
-			for _, host := range hosts {
-				if client, found := (*clients)[host.GlobalUUID]; found {
-					host.VirtualIP = client.VirtualIP
-					host.ReceivedBytes = client.ReceivedBytes
-					host.SentBytes = client.SentBytes
-					host.ConnectedSince = client.ConnectedSince
-				} else {
-					resetHostClient(host)
-				}
-			}
-		} else {
-			resetHostsClient(hosts)
-		}
-	} else {
-		resetHostsClient(hosts)
-	}
 }
 
 func (d *GormDatabase) CreateHost(body *model.Host) (*model.Host, error) {
@@ -192,4 +156,40 @@ func (d *GormDatabase) ResolveHost(uuid string, name string) (*model.Host, error
 		count++
 	}
 	return nil, errors.New(fmt.Sprintf("no valid host was found: host count: %d, host names found: %v uuids: %v", count, hostNames, hostUUIDs))
+}
+
+func attachOpenVPN(hosts []*model.Host) {
+	resetHostClient := func(host *model.Host) {
+		host.VirtualIP = ""
+		host.ReceivedBytes = 0
+		host.SentBytes = 0
+		host.ConnectedSince = ""
+	}
+
+	resetHostsClient := func(hosts []*model.Host) {
+		for _, host := range hosts {
+			resetHostClient(host)
+		}
+	}
+
+	oCli, _ := cligetter.GetOpenVPNClient()
+	if oCli != nil {
+		clients, _ := oCli.GetClients()
+		if clients != nil {
+			for _, host := range hosts {
+				if client, found := (*clients)[host.GlobalUUID]; found {
+					host.VirtualIP = client.VirtualIP
+					host.ReceivedBytes = client.ReceivedBytes
+					host.SentBytes = client.SentBytes
+					host.ConnectedSince = client.ConnectedSince
+				} else {
+					resetHostClient(host)
+				}
+			}
+		} else {
+			resetHostsClient(hosts)
+		}
+	} else {
+		resetHostsClient(hosts)
+	}
 }
