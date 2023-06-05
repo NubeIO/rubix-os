@@ -22,8 +22,8 @@ type AlertDatabase interface {
 	GetAlertByField(field string, value string) (*model.Alert, error)
 	CreateAlert(body *model.Alert) (*model.Alert, error)
 	UpdateAlertStatus(uuid string, status string) (alert *model.Alert, err error)
-	DeleteAlert(uuid string) (bool, error)
-	DropAlerts() (bool, error)
+	DeleteAlert(uuid string) (*model.Message, error)
+	DropAlerts() (*model.Message, error)
 }
 type AlertAPI struct {
 	DB AlertDatabase

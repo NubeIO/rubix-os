@@ -146,14 +146,14 @@ func (d *GormDatabase) UpdateAlertStatus(uuid string, status string) (alert *mod
 	return alert, query.Error
 }
 
-func (d *GormDatabase) DeleteAlert(uuid string) (bool, error) {
+func (d *GormDatabase) DeleteAlert(uuid string) (*model.Message, error) {
 	alertModel := new(model.Alert)
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&alertModel)
-	return d.deleteResponseBuilder(query)
+	return d.deleteResponse(query)
 }
 
-func (d *GormDatabase) DropAlerts() (bool, error) {
+func (d *GormDatabase) DropAlerts() (*model.Message, error) {
 	var alertModel *model.Alert
 	query := d.DB.Where("1 = 1").Delete(&alertModel)
-	return d.deleteResponseBuilder(query)
+	return d.deleteResponse(query)
 }

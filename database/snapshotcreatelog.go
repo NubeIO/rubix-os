@@ -29,7 +29,7 @@ func (d *GormDatabase) UpdateSnapshotCreateLog(uuid string, body *model.Snapshot
 	return snapshotCreateLog, nil
 }
 
-func (d *GormDatabase) DeleteSnapshotCreateLog(uuid string) (bool, error) {
+func (d *GormDatabase) DeleteSnapshotCreateLog(uuid string) (*model.Message, error) {
 	query := d.DB.Where("uuid = ?", uuid).Delete(&model.SnapshotCreateLog{})
-	return d.deleteResponseBuilder(query)
+	return d.deleteResponse(query)
 }

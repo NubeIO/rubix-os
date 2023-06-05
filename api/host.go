@@ -11,8 +11,8 @@ type HostDatabase interface {
 	GetHost(uuid string) (*model.Host, error)
 	CreateHost(body *model.Host) (*model.Host, error)
 	UpdateHost(uuid string, body *model.Host) (*model.Host, error)
-	DeleteHost(uuid string) (bool, error)
-	DropHosts() (bool, error)
+	DeleteHost(uuid string) (*model.Message, error)
+	DropHosts() (*model.Message, error)
 	ConfigureOpenVPN(uuid string) (*interfaces.Message, error)
 }
 

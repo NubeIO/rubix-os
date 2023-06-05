@@ -137,6 +137,21 @@ func (d *GormDatabase) deleteResponseBuilder(query *gorm.DB) (bool, error) {
 	}
 }
 
+func (d *GormDatabase) deleteResponse(query *gorm.DB) (*model.Message, error) {
+	msg := &model.Message{
+		Message: fmt.Sprintf("no record found, deleted count: %d", 0),
+	}
+	if query.Error != nil {
+		return msg, query.Error
+	}
+	r := query.RowsAffected
+	if r == 0 {
+		return msg, query.Error
+	}
+	msg.Message = fmt.Sprintf("deleted count: %d", query.RowsAffected)
+	return msg, nil
+}
+
 func metaTagsArgsToKeyValues(metaTags string) [][]interface{} {
 	mapMetaTags := map[string]string{}
 	var keyValues [][]interface{}

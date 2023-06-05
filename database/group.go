@@ -41,14 +41,14 @@ func (d *GormDatabase) UpdateGroup(uuid string, body *model.Group) (*model.Group
 	return groupModel, nil
 }
 
-func (d *GormDatabase) DeleteGroup(uuid string) (bool, error) {
+func (d *GormDatabase) DeleteGroup(uuid string) (*model.Message, error) {
 	query := d.DB.Where("uuid = ?", uuid).Delete(&model.Group{})
-	return d.deleteResponseBuilder(query)
+	return d.deleteResponse(query)
 }
 
-func (d *GormDatabase) DropGroups() (bool, error) {
+func (d *GormDatabase) DropGroups() (*model.Message, error) {
 	query := d.DB.Where("1 = 1").Delete(&model.Location{})
-	return d.deleteResponseBuilder(query)
+	return d.deleteResponse(query)
 }
 
 func (d *GormDatabase) UpdateHostsStatus(uuid string) (*model.Group, error) {

@@ -11,8 +11,8 @@ type LocationDatabase interface {
 	GetLocation(uuid string) (*model.Location, error)
 	CreateLocation(body *model.Location) (*model.Location, error)
 	UpdateLocation(uuid string, body *model.Location) (*model.Location, error)
-	DeleteLocation(uuid string) (bool, error)
-	DropLocations() (bool, error)
+	DeleteLocation(uuid string) (*model.Message, error)
+	DropLocations() (*model.Message, error)
 }
 
 type LocationAPI struct {
