@@ -55,6 +55,9 @@ func (a *EdgeBiosEdgeApi) EdgeBiosRubixOsInstall(ctx *gin.Context) {
 		return
 	}
 	cli := cligetter.GetEdgeBiosClient(host)
+	installPath := global.Installer.GetAppInstallPath(constants.RubixOs)
+	_, _, _ = cli.DeleteFiles(installPath)
+
 	err = cli.MoveAppAndPluginsFromDownloadToInstallDir(m.Version)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)

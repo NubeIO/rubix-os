@@ -22,14 +22,14 @@ func (inst *Client) AppInstall(app *systemctl.ServiceFile) (*interfaces.Message,
 		return nil, err
 	}
 
+	installPath := global.Installer.GetAppInstallPath(app.Name)
+	url := fmt.Sprintf("/api/files/delete-all?path=%s", installPath)
+	_, _ = nresty.FormatRestyResponse(inst.Rest.R().Delete(url))
+
 	err = inst.moveAppFromDownloadToInstallDir(app)
 	if err != nil {
 		return nil, err
 	}
-
-	installPath := global.Installer.GetAppInstallPath(app.Name)
-	url := fmt.Sprintf("/api/files/delete-all?path=%s", installPath)
-	_, _ = nresty.FormatRestyResponse(inst.Rest.R().Delete(url))
 
 	tmpDir, absoluteServiceFileName, err := systemctl.GenerateServiceFile(app, global.Installer)
 	_, err = inst.installServiceFile(app.Name, absoluteServiceFileName)
