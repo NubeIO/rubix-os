@@ -10,7 +10,9 @@ import (
 	"github.com/NubeIO/rubix-os/config"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/src/cli/bioscli"
+	"github.com/NubeIO/rubix-os/src/cli/constants"
 	"github.com/NubeIO/rubix-os/utils"
+	"github.com/NubeIO/rubix-os/utils/namings"
 	"github.com/NubeIO/rubix-registry-go/rubixregistry"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -243,6 +245,23 @@ func (a *SnapshotAPI) RestoreSnapshot(c *gin.Context) {
 			ResponseHandler(nil, err, c)
 			return
 		}
+
+		// Put nubeio-rubix-os.service file at last in order, self restart could also can happen
+		index := 0
+		exist := false
+		serviceFile := namings.GetServiceNameFromAppName(constants.RubixOs)
+		for i, str := range services {
+			if str == serviceFile {
+				exist = true
+				index = i
+				break
+			}
+		}
+		if exist {
+			services = append(services[:index], services[index+1:]...)
+			services = append(services, serviceFile)
+		}
+
 		a.enableAndRestartServices(services)
 	}
 	log.Info("snapshot is restored")

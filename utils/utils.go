@@ -18,9 +18,7 @@ import (
 )
 
 var ExcludedServices = []string{
-	"nubeio-rubix-edge-bios.service",
-	"nubeio-rubix-edge.service",
-	"nubeio-rubix-assist.service",
+	"nubeio-rubix-bios.service",
 }
 
 var RestartJobFile = "restart_job.json"
@@ -40,9 +38,8 @@ func DeleteDir(source, parentDirectory string, depth int) error {
 
 	for _, obj := range obs {
 		fSource := path.Join(source, obj.Name())
-		if obj.IsDir() { // TODO: test it on snapshot, it doesn't seem good
-			if parentDirectory == "installer/apps/install" &&
-				!Contains([]string{"rubix-edge", "rubix-assist"}, obj.Name()) {
+		if obj.IsDir() {
+			if parentDirectory == "installer/apps/install" {
 				_ = os.RemoveAll(path.Join(parentDirectory, obj.Name()))
 			}
 			err = DeleteDir(fSource, path.Join(parentDirectory, obj.Name()), depth+1)
@@ -81,17 +78,12 @@ func CopyDir(source, dest, parentDirectory string, depth int) error {
 		fDest := path.Join(dest, obj.Name())
 		if obj.IsDir() {
 			excludesData := []string{
-				"rubix-edge",
-				"rubix-assist",
 				"tmp",
 				"store",
 				"backup",
 				"socat",
 			}
-			excludesApps := []string{
-				"installer/apps/install/rubix-edge",
-				"installer/apps/install/rubix-assist",
-			}
+			var excludesApps []string
 			if !((Contains(excludesData, obj.Name()) && depth == 0) ||
 				(Contains(excludesApps, path.Join(parentDirectory, obj.Name())) && depth == 3)) {
 				err = CopyDir(fSource, fDest, path.Join(parentDirectory, obj.Name()), depth+1)
