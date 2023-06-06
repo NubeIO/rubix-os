@@ -3,7 +3,7 @@
 
 syntax = "proto3";
 package proto;
-option go_package = "github.com/NubeIO/flow-framework/module/proto";
+option go_package = "github.com/NubeIO/rubix-os/module/proto";
 
 message InitRequest {
   uint32 add_server = 1;

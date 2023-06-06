@@ -3,9 +3,9 @@ package module
 import (
 	"encoding/json"
 	"errors"
-	"github.com/NubeIO/flow-framework/database"
-	"github.com/NubeIO/flow-framework/module/common"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/database"
+	"github.com/NubeIO/rubix-os/module/common"
 	log "github.com/sirupsen/logrus"
 )
 

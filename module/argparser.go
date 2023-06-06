@@ -1,7 +1,7 @@
 package module
 
 import (
-	"github.com/NubeIO/flow-framework/api"
+	"github.com/NubeIO/rubix-os/api"
 	"strconv"
 	"strings"
 )

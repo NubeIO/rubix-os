@@ -2,7 +2,7 @@ package shared
 
 import (
 	"context"
-	"github.com/NubeIO/flow-framework/module/proto"
+	"github.com/NubeIO/rubix-os/module/proto"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"

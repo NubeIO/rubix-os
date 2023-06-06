@@ -2,7 +2,7 @@ package shared
 
 import (
 	"context"
-	"github.com/NubeIO/flow-framework/module/proto"
+	"github.com/NubeIO/rubix-os/module/proto"
 	"github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"
 )

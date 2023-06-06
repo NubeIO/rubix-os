@@ -2,9 +2,9 @@ package module
 
 import (
 	"fmt"
-	"github.com/NubeIO/flow-framework/database"
-	"github.com/NubeIO/flow-framework/module/shared"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/database"
+	"github.com/NubeIO/rubix-os/module/shared"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"

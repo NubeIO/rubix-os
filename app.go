@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
-	"github.com/NubeIO/rubix-os/module"
 	"github.com/NubeIO/rubix-os/mqttclient"
 	"github.com/NubeIO/rubix-os/services/localmqtt"
 	"github.com/NubeIO/rubix-os/services/system"

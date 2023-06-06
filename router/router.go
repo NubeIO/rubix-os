@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"github.com/NubeDev/location"
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
 	"github.com/NubeIO/rubix-os/api"
@@ -12,6 +11,7 @@ import (
 	"github.com/NubeIO/rubix-os/global"
 	"github.com/NubeIO/rubix-os/installer"
 	"github.com/NubeIO/rubix-os/logger"
+	"github.com/NubeIO/rubix-os/module"
 	"github.com/NubeIO/rubix-os/nerrors"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/services/appstore"
@@ -277,12 +277,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	})
 
 	engine.Use(cors.New(auth.CorsConfig(conf)))
-
-	handleAuth := func(c *gin.Context) { c.Next() }
-	if *conf.Auth {
-		handleAuth = authHandler.HandleAuth()
-	}
-
 	apiProxyWiresRoutes := engine.Group("/wires", handleAuth)
 	apiProxyWiresRoutes.Any("/*proxyPath", wiresProxyHandler.WiresProxy) // EDGE-WIRES PROXY
 	apiProxyChirpRoutes := engine.Group("/chirp", handleAuth)
