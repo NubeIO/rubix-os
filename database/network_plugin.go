@@ -27,7 +27,7 @@ func (d *GormDatabase) CreateNetworkPlugin(body *model.Network) (network *model.
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
 
-	if strings.HasSuffix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, "module") {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -63,7 +63,7 @@ func (d *GormDatabase) UpdateNetworkPlugin(uuid string, body *model.Network) (ne
 		return
 	}
 
-	if strings.HasSuffix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, "module") {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -103,7 +103,7 @@ func (d *GormDatabase) DeleteNetworkPlugin(uuid string) (ok bool, err error) {
 		return
 	}
 
-	if strings.HasSuffix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, "module") {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return false, moduleNotFoundError(pluginName)

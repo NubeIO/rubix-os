@@ -37,7 +37,7 @@ func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Dev
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
 
-	if strings.HasSuffix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, "module") {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -74,7 +74,7 @@ func (d *GormDatabase) UpdateDevicePlugin(uuid string, body *model.Device) (devi
 		return
 	}
 
-	if strings.HasSuffix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, "module") {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -115,7 +115,7 @@ func (d *GormDatabase) DeleteDevicePlugin(uuid string) (ok bool, err error) {
 		return
 	}
 
-	if strings.HasSuffix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, "module") {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return false, moduleNotFoundError(pluginName)

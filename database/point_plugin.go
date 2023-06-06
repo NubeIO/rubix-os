@@ -34,7 +34,7 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 	body.CommonFault.LastOk = time.Now().UTC()
 	body.CommonFault.InFault = true
 
-	if strings.HasSuffix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, "module") {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -72,7 +72,7 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 		return
 	}
 
-	if strings.HasSuffix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, "module") {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -109,7 +109,7 @@ func (d *GormDatabase) WritePointPlugin(uuid string, body *model.PointWriter) (p
 		return
 	}
 
-	if strings.HasSuffix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, "module") {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -150,7 +150,7 @@ func (d *GormDatabase) DeletePointPlugin(uuid string) (ok bool, err error) {
 		return
 	}
 
-	if strings.HasSuffix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, "module") {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return false, moduleNotFoundError(pluginName)

@@ -104,9 +104,15 @@ func createPluginConf(module shared.Module, moduleName string) (*model.PluginCon
 	return pluginConf, nil
 }
 
+// Module naming convention
+// ------------------------
+// module-core-xxx (for open module, e.g. module-core-lora)
+// module-oem-xxx (for private module, e.g. module-oem-cps)
+// module-contrib-xxx (for open module, developed by third party)
+// module-contrib-oem-xxx (for private module, developed by third party)
+//
 // moduleName, modulePath and pluginName are same
 func getModuleName(path string) string {
 	parts := strings.Split(path, "/")
-	module := parts[len(parts)-1]
-	return fmt.Sprintf("%s-module", module)
+	return parts[len(parts)-1]
 }
