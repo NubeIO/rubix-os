@@ -37,6 +37,10 @@ func AutoMigrate(db *gorm.DB) error {
 		err := db.Migrator().DropIndex(&model.Point{}, "name_device_composite_index")
 		log.Error(err)
 	}
+	if db.Migrator().HasIndex(&model.Group{}, "idx_networks_name_location_uuid") {
+		err := db.Migrator().DropIndex(&model.Group{}, "idx_networks_name_location_uuid")
+		log.Error(err)
+	}
 	// TODO: if we uncomment this, it will remove the Priority sub-table from point table as well
 	// if db.Migrator().HasColumn(&model.Point{}, "history_interval") {
 	//	columnTypes, _ := db.Migrator().ColumnTypes(&model.Point{})
