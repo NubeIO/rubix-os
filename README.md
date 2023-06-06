@@ -12,6 +12,16 @@ bash build.bash --help
 
 1660
 
+## Modules Naming
+
+```
+module-core-lora
+module-oem-cps
+module-contrib-xxx (for open module developed by third party)
+module-contrib-oem-xxx (for private module developed by third party)
+```
+`module-<TYPE>-<SPECIFICS>`
+
 ## Plugins
 
 ### See plugin docs
