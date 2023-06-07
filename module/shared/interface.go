@@ -33,6 +33,8 @@ type Info struct {
 // Module is the interface that we're exposing as a plugin.
 type Module interface {
 	Init(dbHelper DBHelper, moduleName string) error
+	Enable() error
+	Disable() error
 	GetInfo() (*Info, error)
 	GetUrlPrefix() (*string, error)
 	Get(path string) ([]byte, error)

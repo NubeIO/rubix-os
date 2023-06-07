@@ -36,6 +36,18 @@ func (m *GRPCClient) Init(dbHelper DBHelper, moduleName string) error {
 	return err
 }
 
+func (m *GRPCClient) Enable() error {
+	log.Debug("gRPC Enable client has been called...")
+	_, err := m.client.Enable(context.Background(), &proto.Empty{})
+	return err
+}
+
+func (m *GRPCClient) Disable() error {
+	log.Debug("gRPC Disable client has been called...")
+	_, err := m.client.Disable(context.Background(), &proto.Empty{})
+	return err
+}
+
 func (m *GRPCClient) GetInfo() (*Info, error) {
 	log.Debug("gRPC GetInfo client has been called...")
 	resp, err := m.client.GetInfo(context.Background(), &proto.Empty{})

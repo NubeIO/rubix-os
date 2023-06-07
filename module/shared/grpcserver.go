@@ -30,6 +30,18 @@ func (m *GRPCServer) Init(ctx context.Context, req *proto.InitRequest) (*proto.E
 	return &proto.Empty{}, m.Impl.Init(dbHelper, req.ModuleName)
 }
 
+func (m *GRPCServer) Enable(ctx context.Context, req *proto.Empty) (*proto.Empty, error) {
+	log.Debug("gRPC Enable server has been called...")
+	err := m.Impl.Enable()
+	return &proto.Empty{}, err
+}
+
+func (m *GRPCServer) Disable(ctx context.Context, req *proto.Empty) (*proto.Empty, error) {
+	log.Debug("gRPC Disable server has been called...")
+	err := m.Impl.Disable()
+	return &proto.Empty{}, err
+}
+
 func (m *GRPCServer) GetInfo(ctx context.Context, req *proto.Empty) (*proto.InfoResponse, error) {
 	log.Debug("gRPC GetInfo server has been called...")
 	r, err := m.Impl.GetInfo()

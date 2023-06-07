@@ -75,9 +75,15 @@ func LoadModuleWithLocal(path string) error {
 
 	moduleName := getModuleName(path)
 	_ = module.Init(&dbHelper{}, moduleName)
-	_, err = createPluginConf(module, moduleName)
+	pluginConf, err := createPluginConf(module, moduleName)
 	if err != nil {
 		log.Error(err)
+	}
+	if pluginConf.Enabled {
+		log.Infof("enabling module %s", moduleName)
+		if err = module.Enable(); err != nil {
+			log.Warningf("failed to enable module %s, err: %s", moduleName, err)
+		}
 	}
 	clients[moduleName] = client
 	modules[moduleName] = module
