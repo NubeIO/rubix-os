@@ -80,9 +80,9 @@ func (a *NetworksAPI) CreateNetwork(ctx *gin.Context) {
 	}
 	if restart {
 		if q.PluginConfId != "" {
-			restartPlugin, err := a.Plugin.RestartPlugin(q.PluginConfId)
+			err = a.Plugin.RestartPlugin(q.PluginConfId)
 			if err != nil {
-				ResponseHandler(restartPlugin, err, ctx)
+				ResponseHandler(nil, err, ctx)
 				return
 			}
 		}

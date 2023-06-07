@@ -88,23 +88,23 @@ func (m *Manager) SetPluginEnabled(pluginID string, enabled bool) error {
 }
 
 // RestartPlugin reboots/restart the plugin.
-func (m *Manager) RestartPlugin(pluginID string) (string, error) { // TODO update the logic to check if plugin was enabled as it dont work well if it was disabled
+func (m *Manager) RestartPlugin(pluginID string) error {
 	instance, err := m.Instance(pluginID)
 	if err != nil {
-		return "restart fail", errors.New("instance not found")
+		return errors.New("instance not found")
 	}
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	err = instance.Disable()
 	if err != nil {
-		return "restart fail", err
+		return err
 	}
 	time.Sleep(300 * time.Millisecond)
 	err = instance.Enable()
 	if err != nil {
-		return "restart fail", err
+		return err
 	}
-	return "restart ok", nil
+	return nil
 }
 
 // PluginInfo returns plugin info.

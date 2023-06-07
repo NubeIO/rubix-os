@@ -341,10 +341,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				plugins.GET("/:uuid", pluginHandler.GetPlugin)
 				plugins.GET("/config/:uuid", pluginHandler.GetConfig)
 				plugins.POST("/config/:uuid", pluginHandler.UpdateConfig)
-				plugins.GET("/display/:uuid", pluginHandler.GetDisplay)
+				plugins.GET("/display/:uuid", pluginHandler.GetDisplay) // todo: remove
 				plugins.POST("/enable/:uuid", pluginHandler.EnablePluginByUUID)
 				plugins.POST("/restart/:uuid", pluginHandler.RestartPlugin)
-				plugins.POST("/restart/name/:name", pluginHandler.RestartPluginByName)
 				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
 			}
 		}

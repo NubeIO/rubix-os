@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/module/shared"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"strings"
 
 	"github.com/NubeDev/location"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/plugin/compat"
 	"github.com/gin-gonic/gin"
@@ -136,6 +137,7 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 		}
 		if conf.Enabled == body.Enabled {
 			ResponseHandler(nil, errors.New("config is already on your state"), ctx)
+			return
 		}
 		module, found := c.Modules[conf.ModulePath]
 		if !found {
@@ -183,7 +185,7 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 	}
 }
 
-// RestartPlugin enables a plugin.
+// RestartPlugin disables and enables a plugin.
 func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
 	uuid := c.buildUUID(ctx)
 	conf, err := c.DB.GetPlugin(uuid)
@@ -194,54 +196,44 @@ func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
 		ResponseHandler("unknown plugin", err, ctx)
 		return
 	}
-	_, err = c.Manager.Instance(uuid)
-	if err != nil {
-		ResponseHandler("plugin not found", err, ctx)
+	if !conf.Enabled {
+		ResponseHandler(nil, errors.New("plugin is not enabled for doing restart"), ctx)
 		return
 	}
-	if res, err := c.Manager.RestartPlugin(uuid); err == plugin.ErrAlreadyEnabledOrDisabled {
-		ResponseHandler(res, err, ctx)
-	} else if err != nil {
-		ResponseHandler(res, nil, ctx)
-	}
-	ResponseHandler("plugin restart ok", err, ctx)
-}
 
-// RestartPluginByName restart a plugin.
-func (c *PluginAPI) RestartPluginByName(ctx *gin.Context) {
-	name := ctx.Param("name")
-	plugins, err := c.DB.GetPlugins()
-	if err != nil {
-		ResponseHandler("plugin", err, ctx)
-		return
-	}
-	for _, conf := range plugins {
-		if conf.Name == name {
-			uuid := conf.UUID
-			if success := successOrAbort(ctx, 500, err); !success {
-				return
-			}
-			if conf == nil {
-				ResponseHandler("unknown plugin", err, ctx)
-				return
-			}
-			_, err = c.Manager.Instance(uuid)
-			if err != nil {
-				ResponseHandler("plugin not found", err, ctx)
-				return
-			}
-			if res, err := c.Manager.RestartPlugin(uuid); err == plugin.ErrAlreadyEnabledOrDisabled {
-				ResponseHandler(res, err, ctx)
-			} else if err != nil {
-				ResponseHandler(res, nil, ctx)
-			}
-			ResponseHandler("plugin restart ok", err, ctx)
+	if strings.HasPrefix(conf.ModulePath, "module") {
+		module, found := c.Modules[conf.ModulePath]
+		if !found {
+			errMsg := fmt.Sprintf("not found module %s", conf.ModulePath)
+			ResponseHandler(nil, errors.New(errMsg), ctx)
 			return
 		}
+		err = module.Disable()
+		if err != nil {
+			ResponseHandler(nil, err, ctx)
+			return
+		}
+		err = module.Enable()
+		if err != nil {
+			ResponseHandler(nil, err, ctx)
+			return
+		}
+		msg := fmt.Sprintf("successfully restart the module %s", conf.ModulePath)
+		ResponseHandler(interfaces.Message{Message: msg}, nil, ctx)
+	} else {
+		_, err = c.Manager.Instance(uuid)
+		if err != nil {
+			ResponseHandler(nil, err, ctx)
+			return
+		}
+		err = c.Manager.RestartPlugin(uuid)
+		if err != nil {
+			ResponseHandler(nil, err, ctx)
+			return
+		}
+		msg := fmt.Sprintf("successfully restart the plugin %s", conf.ModulePath)
+		ResponseHandler(interfaces.Message{Message: msg}, nil, ctx)
 	}
-	ResponseHandler(fmt.Sprintf("plugin not found with that name:%s", name), nil, ctx)
-	return
-
 }
 
 // GetDisplay get display info for Displayer plugin.
@@ -261,7 +253,6 @@ func (c *PluginAPI) GetDisplay(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(200, instance.GetDisplay(location.Get(ctx)))
-
 }
 
 // GetConfig returns Configurer plugin configuration in YAML format.
