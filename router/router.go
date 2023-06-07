@@ -56,6 +56,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	db.PluginManager = pluginManager
 	pluginHandler := api.PluginAPI{
 		Manager: pluginManager,
+		Modules: modules,
 		DB:      db,
 	}
 	networkHandler := api.NetworksAPI{

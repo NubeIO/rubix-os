@@ -271,7 +271,6 @@ func (m *Manager) createPluginConf(instance compat.PluginInstance, info compat.I
 	pluginConf := &model.PluginConf{
 		Name:       info.Name,
 		ModulePath: info.ModulePath,
-		HasNetwork: info.HasNetwork,
 	}
 	if compat.HasSupport(instance, compat.Configurer) {
 		pluginConf.Config, _ = yaml.Marshal(instance.DefaultConfig())

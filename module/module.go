@@ -101,7 +101,6 @@ func createPluginConf(module shared.Module, moduleName string) (*model.PluginCon
 		pluginConf = &model.PluginConf{
 			Name:       info.Name,
 			ModulePath: moduleName,
-			HasNetwork: info.HasNetwork,
 		}
 		if err := database.GlobalGormDatabase.CreatePlugin(pluginConf); err != nil {
 			return nil, err

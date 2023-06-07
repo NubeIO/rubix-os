@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/NubeIO/rubix-os/module/shared"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
+	"strings"
 
 	"github.com/NubeDev/location"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
@@ -25,6 +28,7 @@ type PluginDatabase interface {
 // The PluginAPI provides handlers for managing plugins.
 type PluginAPI struct {
 	Manager *plugin.Manager
+	Modules map[string]shared.Module
 	DB      PluginDatabase
 }
 
@@ -48,20 +52,42 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 	}
 	result := make([]model.PluginConfExternal, 0)
 	for _, conf := range plugins {
-		if inst, err := c.Manager.Instance(conf.UUID); err == nil {
-			info := c.Manager.PluginInfo(conf.ModulePath)
-			result = append(result, model.PluginConfExternal{
-				UUID:         conf.UUID,
-				Name:         info.String(),
-				ModulePath:   conf.ModulePath,
-				Author:       info.Author,
-				Website:      info.Website,
-				License:      info.License,
-				Enabled:      conf.Enabled,
-				HasNetwork:   conf.HasNetwork,
-				Capabilities: inst.Supports().Strings(),
-			})
+		if strings.HasPrefix(conf.ModulePath, "module") {
+			if module, found := c.Modules[conf.ModulePath]; found {
+				info, err := module.GetInfo()
+				if err != nil {
+					log.Errorf("can't get info details from module %s", conf.ModulePath)
+					continue
+				}
+				result = append(result, model.PluginConfExternal{
+					UUID:         conf.UUID,
+					Name:         info.Name,
+					ModulePath:   conf.ModulePath,
+					Author:       info.Author,
+					Website:      info.Website,
+					License:      info.License,
+					Enabled:      conf.Enabled,
+					HasNetwork:   info.HasNetwork,
+					Capabilities: []string{},
+				})
+			}
+		} else {
+			if inst, err := c.Manager.Instance(conf.UUID); err == nil {
+				info := c.Manager.PluginInfo(conf.ModulePath)
+				result = append(result, model.PluginConfExternal{
+					UUID:         conf.UUID,
+					Name:         info.String(),
+					ModulePath:   conf.ModulePath,
+					Author:       info.Author,
+					Website:      info.Website,
+					License:      info.License,
+					Enabled:      conf.Enabled,
+					HasNetwork:   info.HasNetwork,
+					Capabilities: inst.Supports().Strings(),
+				})
+			}
 		}
+
 	}
 	ResponseHandler(result, err, ctx)
 }
@@ -102,17 +128,53 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 		ResponseHandler("unknown plugin", err, ctx)
 		return
 	}
-	_, err = c.Manager.Instance(uuid)
-	if err != nil {
-		ResponseHandler("plugin not found", err, ctx)
-		return
-	}
-	if err := c.Manager.SetPluginEnabled(uuid, body.Enabled); err == plugin.ErrAlreadyEnabledOrDisabled {
-		ResponseHandler(nil, err, ctx)
-		return
-	} else if err != nil {
-		ResponseHandler(nil, err, ctx)
-		return
+	if strings.HasPrefix(conf.ModulePath, "module") {
+		conf, err = c.DB.GetPlugin(conf.UUID)
+		if err != nil {
+			ResponseHandler(nil, err, ctx)
+			return
+		}
+		if conf.Enabled == body.Enabled {
+			ResponseHandler(nil, errors.New("config is already on your state"), ctx)
+		}
+		module, found := c.Modules[conf.ModulePath]
+		if !found {
+			errMsg := fmt.Sprintf("not found module %s", conf.ModulePath)
+			ResponseHandler(nil, errors.New(errMsg), ctx)
+			return
+		}
+		if body.Enabled {
+			err = module.Enable()
+			if err != nil {
+				ResponseHandler(nil, err, ctx)
+				return
+			}
+		} else {
+			err = module.Disable()
+			if err != nil {
+				ResponseHandler(nil, err, ctx)
+				return
+			}
+		}
+		conf.Enabled = body.Enabled
+		err = c.DB.UpdatePluginConf(conf)
+		if err != nil {
+			ResponseHandler(nil, err, ctx)
+			return
+		}
+	} else {
+		_, err = c.Manager.Instance(uuid)
+		if err != nil {
+			ResponseHandler("plugin not found", err, ctx)
+			return
+		}
+		if err = c.Manager.SetPluginEnabled(uuid, body.Enabled); err == plugin.ErrAlreadyEnabledOrDisabled {
+			ResponseHandler(nil, err, ctx)
+			return
+		} else if err != nil {
+			ResponseHandler(nil, err, ctx)
+			return
+		}
 	}
 	if body.Enabled {
 		ResponseHandler(map[string]string{"state": "enabled"}, err, ctx)
