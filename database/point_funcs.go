@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/NubeIO/rubix-os/utils/integer"
@@ -92,4 +93,36 @@ func priorityMapToPatch(priorityMap *map[string]*float64) map[string]interface{}
 		}
 	}
 	return priorityMapToPatch_
+}
+
+func (d *GormDatabase) GetPointsForPostgresSync() ([]*interfaces.PointForPostgresSync, error) {
+	var pointsForPostgresModel []*interfaces.PointForPostgresSync
+	query := d.DB.Table("points").
+		Select("points.source_uuid AS uuid, points.name, networks.source_uuid AS network_uuid, networks.name AS network_name, " +
+			"networks.global_uuid, devices.source_uuid AS device_uuid, devices.name AS device_name, hosts.uuid AS host_uuid, hosts.name AS host_name, " +
+			"groups.uuid AS group_uuid, groups.name AS group_name, locations.uuid AS location_uuid, locations.name AS " +
+			"location_name").
+		Joins("INNER JOIN devices ON devices.uuid = points.device_uuid").
+		Joins("INNER JOIN networks ON networks.uuid = devices.network_uuid").
+		Joins("INNER JOIN hosts ON hosts.uuid = networks.host_uuid").
+		Joins("INNER JOIN groups ON groups.uuid = hosts.group_uuid").
+		Joins("INNER JOIN locations ON locations.uuid = groups.location_uuid").
+		Scan(&pointsForPostgresModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return pointsForPostgresModel, nil
+}
+
+func (d *GormDatabase) GetPointsTagsForPostgresSync() ([]*interfaces.PointTagForPostgresSync, error) {
+	var pointTagsForPostgresModel []*interfaces.PointTagForPostgresSync
+	query := d.DB.Table("points_tags").
+		Select("points.source_uuid AS point_uuid, points_tags.tag_tag AS tag").
+		Joins("INNER JOIN points ON points.uuid = points_tags.point_uuid").
+		Where("IFNULL(points.source_uuid,'') != ''").
+		Scan(&pointTagsForPostgresModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return pointTagsForPostgresModel, nil
 }

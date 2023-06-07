@@ -3,6 +3,7 @@ package dbhandler
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/interfaces"
 )
 
 func (h *Handler) GetDevices(args api.Args) ([]*model.Device, error) {
@@ -85,4 +86,8 @@ func (h *Handler) ClearErrorsForAllPointsOnDevice(networkUUID string) error {
 		return err
 	}
 	return nil
+}
+
+func (h *Handler) GetDevicesTagsForPostgresSync() ([]*interfaces.DeviceTagForPostgresSync, error) {
+	return getDb().GetDevicesTagsForPostgresSync()
 }

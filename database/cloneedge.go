@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/src/client"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
@@ -58,6 +59,7 @@ func (d *GormDatabase) setPointModelClone(deviceUUID string, pointUUID string, p
 	point.DeviceUUID = deviceUUID
 	point.SourceUUID = nstring.New(pointUUID)
 	point.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
+	point.HistoryEnable = boolean.NewFalse()
 	for _, metaTag := range point.MetaTags {
 		metaTag.PointUUID = point.UUID
 	}

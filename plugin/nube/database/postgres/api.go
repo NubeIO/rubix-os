@@ -13,36 +13,35 @@ const (
 )
 
 var (
-	logicalOperators        = []string{"&&", "||"}
-	comparisonOperators     = []string{"=", ">", "<", "<=", ">=", "!="}
-	orderOperators          = []string{"(", ")"}
-	flowNetworkCloneColumns = []string{"global_uuid", "client_id", "client_name", "site_id", "site_name", "device_id",
-		"device_name"}
-	filterQueryMap = map[string]string{
+	logicalOperators    = []string{"&&", "||"}
+	comparisonOperators = []string{"=", ">", "<", "<=", ">=", "!="}
+	orderOperators      = []string{"(", ")"}
+	filterQueryMap      = map[string]string{
 		"timestamp":          "histories.timestamp" + operatorFormat + valueFormat,
 		"value":              "histories.value" + operatorFormat + valueFormat,
-		"rubix_network_uuid": "networks.uuid" + operatorFormat + valueFormat,
-		"rubix_network_name": "networks.name" + operatorFormat + valueFormat,
-		"rubix_device_uuid":  "devices.uuid" + operatorFormat + valueFormat,
-		"rubix_device_name":  "devices.name" + operatorFormat + valueFormat,
+		"rubix_network_uuid": "points.network_uuid" + operatorFormat + valueFormat,
+		"rubix_network_name": "points.network_name" + operatorFormat + valueFormat,
+		"rubix_device_uuid":  "points.device_uuid" + operatorFormat + valueFormat,
+		"rubix_device_name":  "points.device_name" + operatorFormat + valueFormat,
 		"rubix_point_uuid":   "points.uuid" + operatorFormat + valueFormat,
 		"rubix_point_name":   "points.name" + operatorFormat + valueFormat,
-		"global_uuid":        "flow_network_clones.global_uuid" + operatorFormat + valueFormat,
-		"client_id":          "flow_network_clones.client_id" + operatorFormat + valueFormat,
-		"client_name":        "flow_network_clones.client_name" + operatorFormat + valueFormat,
-		"site_id":            "flow_network_clones.site_id" + operatorFormat + valueFormat,
-		"site_name":          "flow_network_clones.site_name" + operatorFormat + valueFormat,
-		"device_id":          "flow_network_clones.device_id" + operatorFormat + valueFormat,
-		"tag": "(networks.uuid in (SELECT network_uuid FROM networks_tags WHERE tag_tag" +
-			operatorFormat + valueFormat + ") OR devices.uuid in (SELECT device_uuid FROM devices_tags WHERE tag_tag" +
-			operatorFormat + valueFormat + ") OR points.uuid in (SELECT point_uuid FROM points_tags WHERE tag_tag" +
+		"global_uuid":        "points.global_uuid" + operatorFormat + valueFormat,
+		"location_uuid":      "points.location_uuid" + operatorFormat + valueFormat,
+		"location_name":      "points.location_name" + operatorFormat + valueFormat,
+		"group_uuid":         "points.group_id" + operatorFormat + valueFormat,
+		"group_name":         "points.group_name" + operatorFormat + valueFormat,
+		"host_uuid":          "points.host_uuid" + operatorFormat + valueFormat,
+		"host_name":          "points.host_name" + operatorFormat + valueFormat,
+		"tag": "(points.network_uuid in (SELECT network_uuid FROM network_tags WHERE tag" +
+			operatorFormat + valueFormat + ") OR points.device_uuid in (SELECT device_uuid FROM device_tags WHERE tag" +
+			operatorFormat + valueFormat + ") OR points.uuid in (SELECT point_uuid FROM point_tags WHERE tag" +
 			operatorFormat + valueFormat + "))",
-		"meta_tag_key": "(networks.uuid in (SELECT network_uuid FROM network_meta_tags WHERE key" +
-			operatorFormat + valueFormat + ") OR devices.uuid in (SELECT device_uuid FROM device_meta_tags WHERE key" +
+		"meta_tag_key": "(points.network_uuid in (SELECT network_uuid FROM network_meta_tags WHERE key" +
+			operatorFormat + valueFormat + ") OR points.device_uuid in (SELECT device_uuid FROM device_meta_tags WHERE key" +
 			operatorFormat + valueFormat + ") OR points.uuid in (SELECT point_uuid FROM point_meta_tags WHERE key" +
 			operatorFormat + valueFormat + "))",
-		"meta_tag_value": "(networks.uuid in (SELECT network_uuid FROM network_meta_tags WHERE value" +
-			operatorFormat + valueFormat + ") OR devices.uuid in (SELECT device_uuid FROM device_meta_tags WHERE value" +
+		"meta_tag_value": "(points.network_uuid in (SELECT network_uuid FROM network_meta_tags WHERE value" +
+			operatorFormat + valueFormat + ") OR points.device_uuid in (SELECT device_uuid FROM device_meta_tags WHERE value" +
 			operatorFormat + valueFormat + ") OR points.uuid in (SELECT point_uuid FROM point_meta_tags WHERE value" +
 			operatorFormat + valueFormat + "))",
 	}

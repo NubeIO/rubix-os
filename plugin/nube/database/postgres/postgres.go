@@ -50,26 +50,29 @@ func (ps *PostgresSetting) New() error {
 }
 
 func autoMigrate(db *gorm.DB) error {
+	if db.Migrator().HasConstraint(&pgmodel.Point{}, "fk_devices_points") {
+		_ = db.Migrator().DropConstraint(&pgmodel.Point{}, "fk_devices_points")
+	}
+	if db.Migrator().HasConstraint(&pgmodel.NetworkMetaTag{}, "fk_networks_meta_tags") {
+		_ = db.Migrator().DropConstraint(&pgmodel.NetworkMetaTag{}, "fk_networks_meta_tags")
+	}
+	if db.Migrator().HasConstraint(&pgmodel.DeviceMetaTag{}, "fk_devices_meta_tags") {
+		_ = db.Migrator().DropConstraint(&pgmodel.DeviceMetaTag{}, "fk_devices_meta_tags")
+	}
+	if db.Migrator().HasConstraint(&pgmodel.PointMetaTag{}, "fk_points_meta_tags") {
+		_ = db.Migrator().DropConstraint(&pgmodel.PointMetaTag{}, "fk_points_meta_tags")
+	}
 	interfaces := []interface{}{
-		pgmodel.FlowNetworkClone{},
-		pgmodel.StreamClone{},
-		pgmodel.Consumer{},
-		pgmodel.Writer{},
-		pgmodel.Network{},
-		pgmodel.Device{},
-		pgmodel.Point{},
-		pgmodel.Tag{},
 		pgmodel.History{},
+		pgmodel.Point{},
+		pgmodel.NetworkTag{},
+		pgmodel.DeviceTag{},
+		pgmodel.PointTag{},
 		pgmodel.NetworkMetaTag{},
 		pgmodel.DeviceMetaTag{},
 		pgmodel.PointMetaTag{},
 	}
-	if (db.Migrator().HasConstraint(&pgmodel.FlowNetworkClone{}, "flow_network_clones_global_uuid_key")) {
-		_ = db.Migrator().DropConstraint(&pgmodel.FlowNetworkClone{}, "flow_network_clones_global_uuid_key")
-	}
-	if (db.Migrator().HasIndex(&pgmodel.Consumer{}, "idx_consumers_producer_uuid")) {
-		_ = db.Migrator().DropIndex(&pgmodel.Consumer{}, "idx_consumers_producer_uuid")
-	}
+
 	for _, s := range interfaces {
 		if err := db.AutoMigrate(s); err != nil {
 			return err
@@ -108,23 +111,15 @@ func (ps PostgresSetting) GetHistories(args Args) ([]*pgmodel.HistoryData, error
 }
 
 func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
-	filterQuery, hasFnc, err := buildFilterQuery(args.Filter)
+	filterQuery, err := buildFilterQuery(args.Filter)
 	if err != nil {
 		return nil, err
 	}
-	selectQuery := buildSelectQuery(hasFnc)
+	selectQuery := buildSelectQuery()
 	query := ps.postgresConnectionInstance.db
 	query = query.Table("histories").
 		Select(selectQuery).
-		Joins("INNER JOIN consumers ON consumers.producer_uuid = histories.uuid").
-		Joins("INNER JOIN writers ON writers.consumer_uuid = consumers.uuid").
-		Joins("INNER JOIN points ON points.uuid = writers.writer_thing_uuid").
-		Joins("INNER JOIN devices ON devices.uuid = points.device_uuid").
-		Joins("INNER JOIN networks ON networks.uuid = devices.network_uuid")
-	if hasFnc {
-		query = query.Joins("INNER JOIN stream_clones ON stream_clones.uuid = consumers.stream_clone_uuid").
-			Joins("INNER JOIN flow_network_clones ON flow_network_clones.uuid = stream_clones.flow_network_clone_uuid")
-	}
+		Joins("INNER JOIN points ON points.uuid = histories.uuid")
 	if args.GroupLimit != nil {
 		groupLimitQuery := fmt.Sprintf("INNER JOIN (SELECT *,row_number FROM (SELECT *,ROW_NUMBER() OVER "+
 			"(PARTITION BY UUID ORDER BY timestamp DESC) AS row_number FROM histories) _ WHERE row_number <= %s) AS "+
@@ -206,6 +201,47 @@ func (ps PostgresSetting) DeleteDeletedPointMetaTags(metaTags []*model.PointMeta
 		Delete(pgmodel.PointMetaTag{}).Error
 }
 
-func (ps PostgresSetting) updateTags(model, tags interface{}) error {
-	return ps.postgresConnectionInstance.db.Model(model).Association("Tags").Replace(tags)
+func (ps PostgresSetting) DeleteDeletedNetworkTags(tags []*pgmodel.NetworkTag) error {
+	if len(tags) == 0 {
+		return ps.postgresConnectionInstance.db.Where("true").Delete(pgmodel.NetworkTag{}).Error
+	}
+	notIn := make([][]interface{}, len(tags))
+	for i, tag := range tags {
+		ni := make([]interface{}, 2)
+		ni[0] = tag.NetworkUUID
+		ni[1] = tag.Tag
+		notIn[i] = ni
+	}
+	return ps.postgresConnectionInstance.db.Where("(network_uuid,tag) NOT IN ?", notIn).
+		Delete(pgmodel.NetworkTag{}).Error
+}
+
+func (ps PostgresSetting) DeleteDeletedDeviceTags(tags []*pgmodel.DeviceTag) error {
+	if len(tags) == 0 {
+		return ps.postgresConnectionInstance.db.Where("true").Delete(pgmodel.DeviceTag{}).Error
+	}
+	notIn := make([][]interface{}, len(tags))
+	for i, tag := range tags {
+		ni := make([]interface{}, 2)
+		ni[0] = tag.DeviceUUID
+		ni[1] = tag.Tag
+		notIn[i] = ni
+	}
+	return ps.postgresConnectionInstance.db.Where("(device_uuid,tag) NOT IN ?", notIn).
+		Delete(pgmodel.DeviceTag{}).Error
+}
+
+func (ps PostgresSetting) DeleteDeletedPointTags(tags []*pgmodel.PointTag) error {
+	if len(tags) == 0 {
+		return ps.postgresConnectionInstance.db.Where("true").Delete(pgmodel.PointTag{}).Error
+	}
+	notIn := make([][]interface{}, len(tags))
+	for i, tag := range tags {
+		ni := make([]interface{}, 2)
+		ni[0] = tag.PointUUID
+		ni[1] = tag.Tag
+		notIn[i] = ni
+	}
+	return ps.postgresConnectionInstance.db.Where("(point_uuid,tag) NOT IN ?", notIn).
+		Delete(pgmodel.PointTag{}).Error
 }

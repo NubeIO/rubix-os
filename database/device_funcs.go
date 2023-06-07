@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/integer"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -124,4 +125,17 @@ func (d *GormDatabase) DeleteDeviceByName(networkName string, deviceName string,
 	}
 	query = query.Delete(&deviceModel)
 	return d.deleteResponseBuilder(query)
+}
+
+func (d *GormDatabase) GetDevicesTagsForPostgresSync() ([]*interfaces.DeviceTagForPostgresSync, error) {
+	var deviceTagsForPostgresModel []*interfaces.DeviceTagForPostgresSync
+	query := d.DB.Table("devices_tags").
+		Select("devices.source_uuid AS device_uuid, devices_tags.tag_tag AS tag").
+		Joins("INNER JOIN devices ON devices.uuid = devices_tags.device_uuid").
+		Where("IFNULL(devices.source_uuid,'') != ''").
+		Scan(&deviceTagsForPostgresModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return deviceTagsForPostgresModel, nil
 }

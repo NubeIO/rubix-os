@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/interfaces"
 )
 
 func (h *Handler) GetPoints(args api.Args) ([]*model.Point, error) {
@@ -87,4 +88,12 @@ func (h *Handler) DeletePoint(uuid string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func (h *Handler) GetPointsForPostgresSync() ([]*interfaces.PointForPostgresSync, error) {
+	return getDb().GetPointsForPostgresSync()
+}
+
+func (h *Handler) GetPointsTagsForPostgresSync() ([]*interfaces.PointTagForPostgresSync, error) {
+	return getDb().GetPointsTagsForPostgresSync()
 }

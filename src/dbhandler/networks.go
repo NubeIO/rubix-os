@@ -3,6 +3,7 @@ package dbhandler
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/interfaces"
 )
 
 func (h *Handler) CreateNetwork(body *model.Network) (*model.Network, error) {
@@ -120,4 +121,8 @@ func (h *Handler) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints
 		return err
 	}
 	return nil
+}
+
+func (h *Handler) GetNetworksTagsForPostgresSync() ([]*interfaces.NetworkTagForPostgresSync, error) {
+	return getDb().GetNetworksTagsForPostgresSync()
 }
