@@ -48,6 +48,15 @@ func (m *GRPCClient) Disable() error {
 	return err
 }
 
+func (m *GRPCClient) ValidateAndSetConfig(config []byte) ([]byte, error) {
+	log.Debug("gRPC ValidateAndSetConfig client has been called...")
+	resp, err := m.client.ValidateAndSetConfig(context.Background(), &proto.ConfigBody{Config: config})
+	if err != nil {
+		return nil, err
+	}
+	return resp.R, nil
+}
+
 func (m *GRPCClient) GetInfo() (*Info, error) {
 	log.Debug("gRPC GetInfo client has been called...")
 	resp, err := m.client.GetInfo(context.Background(), &proto.Empty{})

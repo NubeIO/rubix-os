@@ -8,6 +8,7 @@ import (
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/module/shared"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"strings"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/plugin/compat"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/yaml.v2"
 )
 
 // The PluginDatabase interface for encapsulating database access.
@@ -266,19 +266,25 @@ func (c *PluginAPI) GetConfig(ctx *gin.Context) {
 		ctx.AbortWithError(404, errors.New("unknown plugin"))
 		return
 	}
-	instance, err := c.Manager.Instance(uuid)
-	if err != nil {
-		ctx.AbortWithError(404, errors.New("plugin instance not found"))
-		return
+	if strings.HasPrefix(conf.ModulePath, "module") {
+		_, found := c.Modules[conf.ModulePath]
+		if !found {
+			errMsg := fmt.Sprintf("not found module %s", conf.ModulePath)
+			ResponseHandler(nil, errors.New(errMsg), ctx)
+			return
+		}
+	} else {
+		instance, err := c.Manager.Instance(uuid)
+		if err != nil {
+			ctx.AbortWithError(404, errors.New("plugin instance not found"))
+			return
+		}
+		if aborted := supportOrAbort(ctx, instance, compat.Configurer); aborted {
+			return
+		}
 	}
-
-	if aborted := supportOrAbort(ctx, instance, compat.Configurer); aborted {
-		return
-	}
-
 	ctx.Header("content-type", "application/x-yaml")
 	ctx.Writer.Write(conf.Config)
-
 }
 
 // UpdateConfig updates Configurer plugin configuration in YAML format.
@@ -292,36 +298,68 @@ func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
 		ctx.AbortWithError(404, errors.New("unknown plugin"))
 		return
 	}
-	instance, err := c.Manager.Instance(uuid)
-	if err != nil {
-		ctx.AbortWithError(404, errors.New("plugin instance not found"))
-		return
-	}
 
-	if aborted := supportOrAbort(ctx, instance, compat.Configurer); aborted {
-		return
-	}
+	if strings.HasPrefix(conf.ModulePath, "module") {
+		module, found := c.Modules[conf.ModulePath]
+		if !found {
+			errMsg := fmt.Sprintf("not found module %s", conf.ModulePath)
+			ResponseHandler(nil, errors.New(errMsg), ctx)
+			return
+		}
+		newConfBytes, err := ioutil.ReadAll(ctx.Request.Body)
+		if err != nil {
+			ctx.AbortWithError(400, errors.New("invalid data"))
+			return
+		}
+		var jsonConf map[string]string
+		err = json.Unmarshal(newConfBytes, &jsonConf)
+		if err != nil {
+			ctx.AbortWithError(400, errors.New("invalid data"))
+			return
+		}
+		newConfBytesValid, err := module.ValidateAndSetConfig([]byte(jsonConf["data"]))
+		if err != nil {
+			ctx.AbortWithError(400, errors.New("invalid data"))
+			return
+		}
+		conf.Config = newConfBytesValid
+	} else {
+		instance, err := c.Manager.Instance(uuid)
+		if err != nil {
+			ctx.AbortWithError(404, errors.New("plugin instance not found"))
+			return
+		}
+		if aborted := supportOrAbort(ctx, instance, compat.Configurer); aborted {
+			return
+		}
+		newConf := instance.DefaultConfig()
+		_ = yaml.Unmarshal(conf.Config, newConf)
 
-	newConf := instance.DefaultConfig()
-	_ = yaml.Unmarshal(conf.Config, newConf)
-	newConfBytes, err := ioutil.ReadAll(ctx.Request.Body)
-	var jsonConf map[string]string
-	err = json.Unmarshal(newConfBytes, &jsonConf)
-	if err != nil {
-		ctx.AbortWithError(400, errors.New("invalid data"))
-		return
+		newConfBytes, err := ioutil.ReadAll(ctx.Request.Body)
+		if err != nil {
+			ctx.AbortWithError(400, errors.New("invalid data"))
+			return
+		}
+		var jsonConf map[string]string
+		err = json.Unmarshal(newConfBytes, &jsonConf)
+		if err != nil {
+			ctx.AbortWithError(400, errors.New("invalid data"))
+			return
+		}
+		if err := yaml.Unmarshal([]byte(jsonConf["data"]), newConf); err != nil {
+			ctx.AbortWithError(400, err)
+			return
+		}
+		if err := instance.ValidateAndSetConfig(newConf); err != nil {
+			ctx.AbortWithError(400, err)
+			return
+		}
+		config, _ := yaml.Marshal(instance.GetConfig())
+		conf.Config = config
 	}
-	if err := yaml.Unmarshal([]byte(jsonConf["data"]), newConf); err != nil {
-		ctx.AbortWithError(400, err)
-		return
+	if success := successOrAbort(ctx, 500, c.DB.UpdatePluginConf(conf)); success {
+		ctx.JSON(200, interfaces.Message{Message: "successfully updated config"})
 	}
-	if err := instance.ValidateAndSetConfig(newConf); err != nil {
-		ctx.AbortWithError(400, err)
-		return
-	}
-	config, _ := yaml.Marshal(instance.GetConfig())
-	conf.Config = config
-	successOrAbort(ctx, 500, c.DB.UpdatePluginConf(conf))
 }
 
 func supportOrAbort(ctx *gin.Context, instance compat.PluginInstance, module compat.Capability) (aborted bool) {

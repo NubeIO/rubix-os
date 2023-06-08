@@ -27,19 +27,38 @@ func (m *GRPCServer) Init(ctx context.Context, req *proto.InitRequest) (*proto.E
 	}
 	// defer conn.Close() // TODO: we haven't closed this
 	dbHelper := &GRPCDBHelperClient{proto.NewDBHelperClient(conn)}
-	return &proto.Empty{}, m.Impl.Init(dbHelper, req.ModuleName)
+	err = m.Impl.Init(dbHelper, req.ModuleName)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Empty{}, nil
 }
 
 func (m *GRPCServer) Enable(ctx context.Context, req *proto.Empty) (*proto.Empty, error) {
 	log.Debug("gRPC Enable server has been called...")
 	err := m.Impl.Enable()
-	return &proto.Empty{}, err
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Empty{}, nil
 }
 
 func (m *GRPCServer) Disable(ctx context.Context, req *proto.Empty) (*proto.Empty, error) {
 	log.Debug("gRPC Disable server has been called...")
 	err := m.Impl.Disable()
-	return &proto.Empty{}, err
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Empty{}, nil
+}
+
+func (m *GRPCServer) ValidateAndSetConfig(ctx context.Context, req *proto.ConfigBody) (*proto.Response, error) {
+	log.Debug("gRPC Disable server has been called...")
+	bytes, err := m.Impl.ValidateAndSetConfig(req.Config)
+	if err != nil {
+		return nil, err
+	}
+	return &proto.Response{R: bytes}, nil
 }
 
 func (m *GRPCServer) GetInfo(ctx context.Context, req *proto.Empty) (*proto.InfoResponse, error) {
@@ -54,7 +73,7 @@ func (m *GRPCServer) GetInfo(ctx context.Context, req *proto.Empty) (*proto.Info
 		Website:    r.Website,
 		License:    r.License,
 		HasNetwork: r.HasNetwork,
-	}, err
+	}, nil
 }
 
 func (m *GRPCServer) GetUrlPrefix(ctx context.Context, req *proto.Empty) (*proto.UrlPrefixResponse, error) {
@@ -63,7 +82,7 @@ func (m *GRPCServer) GetUrlPrefix(ctx context.Context, req *proto.Empty) (*proto
 	if err != nil {
 		return nil, err
 	}
-	return &proto.UrlPrefixResponse{R: *r}, err
+	return &proto.UrlPrefixResponse{R: *r}, nil
 }
 
 func (m *GRPCServer) Get(ctx context.Context, req *proto.GetRequest) (*proto.Response, error) {
@@ -72,7 +91,7 @@ func (m *GRPCServer) Get(ctx context.Context, req *proto.GetRequest) (*proto.Res
 	if err != nil {
 		return nil, err
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r}, nil
 }
 
 func (m *GRPCServer) Post(ctx context.Context, req *proto.PostRequest) (*proto.Response, error) {
@@ -81,7 +100,7 @@ func (m *GRPCServer) Post(ctx context.Context, req *proto.PostRequest) (*proto.R
 	if err != nil {
 		return nil, err
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r}, nil
 }
 
 func (m *GRPCServer) Put(ctx context.Context, req *proto.PutRequest) (*proto.Response, error) {
@@ -90,7 +109,7 @@ func (m *GRPCServer) Put(ctx context.Context, req *proto.PutRequest) (*proto.Res
 	if err != nil {
 		return nil, err
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r}, nil
 }
 
 func (m *GRPCServer) Patch(ctx context.Context, req *proto.PatchRequest) (*proto.Response, error) {
@@ -99,7 +118,7 @@ func (m *GRPCServer) Patch(ctx context.Context, req *proto.PatchRequest) (*proto
 	if err != nil {
 		return nil, err
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r}, nil
 }
 
 func (m *GRPCServer) Delete(ctx context.Context, req *proto.DeleteRequest) (*proto.Response, error) {
@@ -108,7 +127,7 @@ func (m *GRPCServer) Delete(ctx context.Context, req *proto.DeleteRequest) (*pro
 	if err != nil {
 		return nil, err
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r}, nil
 }
 
 // GRPCClient is an implementation of KV that talks over RPC.
@@ -123,7 +142,7 @@ func (m *GRPCDBHelperClient) GetWithoutParam(path, args string) ([]byte, error) 
 		hclog.Default().Info("GetList", err)
 		return nil, err
 	}
-	return resp.R, err
+	return resp.R, nil
 }
 
 func (m *GRPCDBHelperClient) Get(path, uuid, args string) ([]byte, error) {
@@ -136,7 +155,7 @@ func (m *GRPCDBHelperClient) Get(path, uuid, args string) ([]byte, error) {
 		hclog.Default().Info("Get", err)
 		return nil, err
 	}
-	return resp.R, err
+	return resp.R, nil
 }
 
 func (m *GRPCDBHelperClient) Post(path string, body []byte) ([]byte, error) {
@@ -148,7 +167,7 @@ func (m *GRPCDBHelperClient) Post(path string, body []byte) ([]byte, error) {
 		hclog.Default().Info("Post", err)
 		return nil, err
 	}
-	return resp.R, err
+	return resp.R, nil
 }
 
 func (m *GRPCDBHelperClient) Put(path, uuid string, body []byte) ([]byte, error) {
@@ -161,7 +180,7 @@ func (m *GRPCDBHelperClient) Put(path, uuid string, body []byte) ([]byte, error)
 		hclog.Default().Info("Put", err)
 		return nil, err
 	}
-	return resp.R, err
+	return resp.R, nil
 }
 
 func (m *GRPCDBHelperClient) Patch(path, uuid string, body []byte) ([]byte, error) {
@@ -174,7 +193,7 @@ func (m *GRPCDBHelperClient) Patch(path, uuid string, body []byte) ([]byte, erro
 		hclog.Default().Info("Patch", err)
 		return nil, err
 	}
-	return resp.R, err
+	return resp.R, nil
 }
 
 func (m *GRPCDBHelperClient) Delete(path, uuid string) ([]byte, error) {
@@ -186,5 +205,5 @@ func (m *GRPCDBHelperClient) Delete(path, uuid string) ([]byte, error) {
 		hclog.Default().Info("Delete", err)
 		return nil, err
 	}
-	return resp.R, err
+	return resp.R, nil
 }

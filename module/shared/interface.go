@@ -35,6 +35,7 @@ type Module interface {
 	Init(dbHelper DBHelper, moduleName string) error
 	Enable() error
 	Disable() error
+	ValidateAndSetConfig(config []byte) ([]byte, error)
 	GetInfo() (*Info, error)
 	GetUrlPrefix() (*string, error)
 	Get(path string) ([]byte, error)
