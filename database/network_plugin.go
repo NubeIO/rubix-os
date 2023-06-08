@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/module/common"
 	"github.com/NubeIO/rubix-os/src/client"
 	"strings"
@@ -27,7 +28,7 @@ func (d *GormDatabase) CreateNetworkPlugin(body *model.Network) (network *model.
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
 
-	if strings.HasPrefix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, constants.ModulePrefix) {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -63,7 +64,7 @@ func (d *GormDatabase) UpdateNetworkPlugin(uuid string, body *model.Network) (ne
 		return
 	}
 
-	if strings.HasPrefix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, constants.ModulePrefix) {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -103,7 +104,7 @@ func (d *GormDatabase) DeleteNetworkPlugin(uuid string) (ok bool, err error) {
 		return
 	}
 
-	if strings.HasPrefix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, constants.ModulePrefix) {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return false, moduleNotFoundError(pluginName)

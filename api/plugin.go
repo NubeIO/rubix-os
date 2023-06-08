@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/module/shared"
 	log "github.com/sirupsen/logrus"
@@ -53,7 +54,7 @@ func (c *PluginAPI) GetPlugins(ctx *gin.Context) {
 	}
 	result := make([]model.PluginConfExternal, 0)
 	for _, conf := range plugins {
-		if strings.HasPrefix(conf.ModulePath, "module") {
+		if strings.HasPrefix(conf.ModulePath, constants.ModulePrefix) {
 			if module, found := c.Modules[conf.ModulePath]; found {
 				info, err := module.GetInfo()
 				if err != nil {
@@ -129,7 +130,7 @@ func (c *PluginAPI) EnablePluginByUUID(ctx *gin.Context) {
 		ResponseHandler("unknown plugin", err, ctx)
 		return
 	}
-	if strings.HasPrefix(conf.ModulePath, "module") {
+	if strings.HasPrefix(conf.ModulePath, constants.ModulePrefix) {
 		conf, err = c.DB.GetPlugin(conf.UUID)
 		if err != nil {
 			ResponseHandler(nil, err, ctx)
@@ -201,7 +202,7 @@ func (c *PluginAPI) RestartPlugin(ctx *gin.Context) {
 		return
 	}
 
-	if strings.HasPrefix(conf.ModulePath, "module") {
+	if strings.HasPrefix(conf.ModulePath, constants.ModulePrefix) {
 		module, found := c.Modules[conf.ModulePath]
 		if !found {
 			errMsg := fmt.Sprintf("not found module %s", conf.ModulePath)
@@ -266,7 +267,7 @@ func (c *PluginAPI) GetConfig(ctx *gin.Context) {
 		ctx.AbortWithError(404, errors.New("unknown plugin"))
 		return
 	}
-	if strings.HasPrefix(conf.ModulePath, "module") {
+	if strings.HasPrefix(conf.ModulePath, constants.ModulePrefix) {
 		_, found := c.Modules[conf.ModulePath]
 		if !found {
 			errMsg := fmt.Sprintf("not found module %s", conf.ModulePath)
@@ -299,7 +300,7 @@ func (c *PluginAPI) UpdateConfig(ctx *gin.Context) {
 		return
 	}
 
-	if strings.HasPrefix(conf.ModulePath, "module") {
+	if strings.HasPrefix(conf.ModulePath, constants.ModulePrefix) {
 		module, found := c.Modules[conf.ModulePath]
 		if !found {
 			errMsg := fmt.Sprintf("not found module %s", conf.ModulePath)

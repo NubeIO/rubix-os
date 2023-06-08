@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/module/common"
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/utils/boolean"
@@ -34,7 +35,7 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 	body.CommonFault.LastOk = time.Now().UTC()
 	body.CommonFault.InFault = true
 
-	if strings.HasPrefix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, constants.ModulePrefix) {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -72,7 +73,7 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 		return
 	}
 
-	if strings.HasPrefix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, constants.ModulePrefix) {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -109,7 +110,7 @@ func (d *GormDatabase) WritePointPlugin(uuid string, body *model.PointWriter) (p
 		return
 	}
 
-	if strings.HasPrefix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, constants.ModulePrefix) {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -150,7 +151,7 @@ func (d *GormDatabase) DeletePointPlugin(uuid string) (ok bool, err error) {
 		return
 	}
 
-	if strings.HasPrefix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, constants.ModulePrefix) {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return false, moduleNotFoundError(pluginName)

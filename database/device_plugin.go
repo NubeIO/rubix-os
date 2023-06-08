@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/module/common"
 	"github.com/NubeIO/rubix-os/src/client"
 	log "github.com/sirupsen/logrus"
@@ -37,7 +38,7 @@ func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Dev
 	body.CommonFault.LastFail = time.Now().UTC()
 	body.CommonFault.LastOk = time.Now().UTC()
 
-	if strings.HasPrefix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, constants.ModulePrefix) {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -74,7 +75,7 @@ func (d *GormDatabase) UpdateDevicePlugin(uuid string, body *model.Device) (devi
 		return
 	}
 
-	if strings.HasPrefix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, constants.ModulePrefix) {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return nil, moduleNotFoundError(pluginName)
@@ -115,7 +116,7 @@ func (d *GormDatabase) DeleteDevicePlugin(uuid string) (ok bool, err error) {
 		return
 	}
 
-	if strings.HasPrefix(pluginName, "module") {
+	if strings.HasPrefix(pluginName, constants.ModulePrefix) {
 		module := d.Modules[pluginName]
 		if module == nil {
 			return false, moduleNotFoundError(pluginName)
