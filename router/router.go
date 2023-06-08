@@ -46,7 +46,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 		panic(err)
 	}
 
-	modules, err := module.ReLoadModulesWithDir(config.Get().GetAbsModulesDir())
+	modules, err := module.ReLoadModulesWithDir(config.Get().GetAbsModulesDir(), apiRoutesTemp.Group("/modules"))
 	if err != nil {
 		log.Error(err)
 		panic(err)

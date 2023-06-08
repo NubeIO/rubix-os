@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/database"
 	"github.com/NubeIO/rubix-os/module/shared"
+	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -16,13 +17,13 @@ import (
 var clients = map[string]*plugin.Client{}
 var modules = map[string]shared.Module{}
 
-func ReLoadModulesWithDir(dir string) (map[string]shared.Module, error) {
+func ReLoadModulesWithDir(dir string, mux *gin.RouterGroup) (map[string]shared.Module, error) {
 	var failedModules []string
 	UninstallModules()
 	if len(failedModules) > 0 {
 		return nil, fmt.Errorf("modules [%v] uninstall failed, please retry loading all module after processing", strings.Join(failedModules, ", "))
 	}
-	return modules, LoadModuleWithLocalDir(dir)
+	return modules, LoadModuleWithLocalDir(dir, mux)
 }
 
 func UninstallModules() {
@@ -39,13 +40,13 @@ func UninstallModules() {
 	modules = map[string]shared.Module{}
 }
 
-func LoadModuleWithLocalDir(dir string) error {
+func LoadModuleWithLocalDir(dir string, mux *gin.RouterGroup) error {
 	fs, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return err
 	}
 	for _, f := range fs {
-		err = LoadModuleWithLocal(path.Join(dir, f.Name()))
+		err = LoadModuleWithLocal(path.Join(dir, f.Name()), mux)
 		if err != nil {
 			return err
 		}
@@ -55,7 +56,7 @@ func LoadModuleWithLocalDir(dir string) error {
 
 var NameOfModule = "nube-module"
 
-func LoadModuleWithLocal(path string) error {
+func LoadModuleWithLocal(path string, mux *gin.RouterGroup) error {
 	client := plugin.NewClient(&plugin.ClientConfig{
 		HandshakeConfig: shared.HandshakeConfig,
 		Plugins: map[string]plugin.Plugin{
@@ -88,6 +89,8 @@ func LoadModuleWithLocal(path string) error {
 	}
 	clients[moduleName] = client
 	modules[moduleName] = module
+
+	mux.Any(fmt.Sprintf("/%s/*proxyPath", moduleName), ProxyModule)
 	return nil
 }
 
