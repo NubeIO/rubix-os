@@ -66,10 +66,10 @@ message UrlPrefixResponse {
 }
 
 service Module {
+  rpc ValidateAndSetConfig(ConfigBody) returns (Response);
   rpc Init(InitRequest) returns (Empty);
   rpc Enable(Empty) returns (Empty);
   rpc Disable(Empty) returns (Empty);
-  rpc ValidateAndSetConfig(ConfigBody) returns (Response);
   rpc GetInfo(Empty) returns (InfoResponse);
   rpc GetUrlPrefix(Empty) returns (UrlPrefixResponse);
   rpc Get(GetRequest) returns (Response);

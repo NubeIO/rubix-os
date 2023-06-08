@@ -74,11 +74,12 @@ func LoadModuleWithLocal(path string) error {
 	module := raw.(shared.Module)
 
 	moduleName := getModuleName(path)
-	_ = module.Init(&dbHelper{}, moduleName)
 	pluginConf, err := createPluginConf(module, moduleName)
 	if err != nil {
 		log.Error(err)
 	}
+	_, _ = module.ValidateAndSetConfig(pluginConf.Config)
+	_ = module.Init(&dbHelper{}, moduleName)
 	if pluginConf.Enabled {
 		log.Infof("enabling module %s", moduleName)
 		if err = module.Enable(); err != nil {

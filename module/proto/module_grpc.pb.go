@@ -22,10 +22,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
+	Module_ValidateAndSetConfig_FullMethodName = "/proto.Module/ValidateAndSetConfig"
 	Module_Init_FullMethodName                 = "/proto.Module/Init"
 	Module_Enable_FullMethodName               = "/proto.Module/Enable"
 	Module_Disable_FullMethodName              = "/proto.Module/Disable"
-	Module_ValidateAndSetConfig_FullMethodName = "/proto.Module/ValidateAndSetConfig"
 	Module_GetInfo_FullMethodName              = "/proto.Module/GetInfo"
 	Module_GetUrlPrefix_FullMethodName         = "/proto.Module/GetUrlPrefix"
 	Module_Get_FullMethodName                  = "/proto.Module/Get"
@@ -39,10 +39,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ModuleClient interface {
+	ValidateAndSetConfig(ctx context.Context, in *ConfigBody, opts ...grpc.CallOption) (*Response, error)
 	Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*Empty, error)
 	Enable(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 	Disable(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
-	ValidateAndSetConfig(ctx context.Context, in *ConfigBody, opts ...grpc.CallOption) (*Response, error)
 	GetInfo(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*InfoResponse, error)
 	GetUrlPrefix(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*UrlPrefixResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Response, error)
@@ -58,6 +58,15 @@ type moduleClient struct {
 
 func NewModuleClient(cc grpc.ClientConnInterface) ModuleClient {
 	return &moduleClient{cc}
+}
+
+func (c *moduleClient) ValidateAndSetConfig(ctx context.Context, in *ConfigBody, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, Module_ValidateAndSetConfig_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *moduleClient) Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*Empty, error) {
@@ -81,15 +90,6 @@ func (c *moduleClient) Enable(ctx context.Context, in *Empty, opts ...grpc.CallO
 func (c *moduleClient) Disable(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, Module_Disable_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *moduleClient) ValidateAndSetConfig(ctx context.Context, in *ConfigBody, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, Module_ValidateAndSetConfig_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -163,10 +163,10 @@ func (c *moduleClient) Delete(ctx context.Context, in *DeleteRequest, opts ...gr
 // All implementations should embed UnimplementedModuleServer
 // for forward compatibility
 type ModuleServer interface {
+	ValidateAndSetConfig(context.Context, *ConfigBody) (*Response, error)
 	Init(context.Context, *InitRequest) (*Empty, error)
 	Enable(context.Context, *Empty) (*Empty, error)
 	Disable(context.Context, *Empty) (*Empty, error)
-	ValidateAndSetConfig(context.Context, *ConfigBody) (*Response, error)
 	GetInfo(context.Context, *Empty) (*InfoResponse, error)
 	GetUrlPrefix(context.Context, *Empty) (*UrlPrefixResponse, error)
 	Get(context.Context, *GetRequest) (*Response, error)
@@ -180,6 +180,9 @@ type ModuleServer interface {
 type UnimplementedModuleServer struct {
 }
 
+func (UnimplementedModuleServer) ValidateAndSetConfig(context.Context, *ConfigBody) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateAndSetConfig not implemented")
+}
 func (UnimplementedModuleServer) Init(context.Context, *InitRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Init not implemented")
 }
@@ -188,9 +191,6 @@ func (UnimplementedModuleServer) Enable(context.Context, *Empty) (*Empty, error)
 }
 func (UnimplementedModuleServer) Disable(context.Context, *Empty) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Disable not implemented")
-}
-func (UnimplementedModuleServer) ValidateAndSetConfig(context.Context, *ConfigBody) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidateAndSetConfig not implemented")
 }
 func (UnimplementedModuleServer) GetInfo(context.Context, *Empty) (*InfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
@@ -223,6 +223,24 @@ type UnsafeModuleServer interface {
 
 func RegisterModuleServer(s grpc.ServiceRegistrar, srv ModuleServer) {
 	s.RegisterService(&Module_ServiceDesc, srv)
+}
+
+func _Module_ValidateAndSetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfigBody)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ModuleServer).ValidateAndSetConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Module_ValidateAndSetConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ModuleServer).ValidateAndSetConfig(ctx, req.(*ConfigBody))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Module_Init_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -275,24 +293,6 @@ func _Module_Disable_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ModuleServer).Disable(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Module_ValidateAndSetConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ConfigBody)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ModuleServer).ValidateAndSetConfig(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Module_ValidateAndSetConfig_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ModuleServer).ValidateAndSetConfig(ctx, req.(*ConfigBody))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -431,6 +431,10 @@ var Module_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ModuleServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "ValidateAndSetConfig",
+			Handler:    _Module_ValidateAndSetConfig_Handler,
+		},
+		{
 			MethodName: "Init",
 			Handler:    _Module_Init_Handler,
 		},
@@ -441,10 +445,6 @@ var Module_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Disable",
 			Handler:    _Module_Disable_Handler,
-		},
-		{
-			MethodName: "ValidateAndSetConfig",
-			Handler:    _Module_ValidateAndSetConfig_Handler,
 		},
 		{
 			MethodName: "GetInfo",
