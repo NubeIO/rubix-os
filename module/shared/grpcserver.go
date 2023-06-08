@@ -76,15 +76,6 @@ func (m *GRPCServer) GetInfo(ctx context.Context, req *proto.Empty) (*proto.Info
 	}, nil
 }
 
-func (m *GRPCServer) GetUrlPrefix(ctx context.Context, req *proto.Empty) (*proto.UrlPrefixResponse, error) {
-	log.Debug("gRPC GetUrlPrefix server has been called...")
-	r, err := m.Impl.GetUrlPrefix()
-	if err != nil {
-		return nil, err
-	}
-	return &proto.UrlPrefixResponse{R: *r}, nil
-}
-
 func (m *GRPCServer) Get(ctx context.Context, req *proto.GetRequest) (*proto.Response, error) {
 	log.Debug("gRPC Get server has been called...")
 	r, err := m.Impl.Get(req.Path)

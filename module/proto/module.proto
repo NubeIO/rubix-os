@@ -71,7 +71,6 @@ service Module {
   rpc Enable(Empty) returns (Empty);
   rpc Disable(Empty) returns (Empty);
   rpc GetInfo(Empty) returns (InfoResponse);
-  rpc GetUrlPrefix(Empty) returns (UrlPrefixResponse);
   rpc Get(GetRequest) returns (Response);
   rpc Post(PostRequest) returns (Response);
   rpc Put(PutRequest) returns (Response);

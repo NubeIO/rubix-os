@@ -37,7 +37,6 @@ type Module interface {
 	Enable() error
 	Disable() error
 	GetInfo() (*Info, error)
-	GetUrlPrefix() (*string, error)
 	Get(path string) ([]byte, error)
 	Post(path string, body []byte) ([]byte, error)
 	Put(path, uuid string, body []byte) ([]byte, error)

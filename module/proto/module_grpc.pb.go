@@ -27,7 +27,6 @@ const (
 	Module_Enable_FullMethodName               = "/proto.Module/Enable"
 	Module_Disable_FullMethodName              = "/proto.Module/Disable"
 	Module_GetInfo_FullMethodName              = "/proto.Module/GetInfo"
-	Module_GetUrlPrefix_FullMethodName         = "/proto.Module/GetUrlPrefix"
 	Module_Get_FullMethodName                  = "/proto.Module/Get"
 	Module_Post_FullMethodName                 = "/proto.Module/Post"
 	Module_Put_FullMethodName                  = "/proto.Module/Put"
@@ -44,7 +43,6 @@ type ModuleClient interface {
 	Enable(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 	Disable(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 	GetInfo(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*InfoResponse, error)
-	GetUrlPrefix(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*UrlPrefixResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Response, error)
 	Post(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Response, error)
 	Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*Response, error)
@@ -105,15 +103,6 @@ func (c *moduleClient) GetInfo(ctx context.Context, in *Empty, opts ...grpc.Call
 	return out, nil
 }
 
-func (c *moduleClient) GetUrlPrefix(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*UrlPrefixResponse, error) {
-	out := new(UrlPrefixResponse)
-	err := c.cc.Invoke(ctx, Module_GetUrlPrefix_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *moduleClient) Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
 	err := c.cc.Invoke(ctx, Module_Get_FullMethodName, in, out, opts...)
@@ -168,7 +157,6 @@ type ModuleServer interface {
 	Enable(context.Context, *Empty) (*Empty, error)
 	Disable(context.Context, *Empty) (*Empty, error)
 	GetInfo(context.Context, *Empty) (*InfoResponse, error)
-	GetUrlPrefix(context.Context, *Empty) (*UrlPrefixResponse, error)
 	Get(context.Context, *GetRequest) (*Response, error)
 	Post(context.Context, *PostRequest) (*Response, error)
 	Put(context.Context, *PutRequest) (*Response, error)
@@ -194,9 +182,6 @@ func (UnimplementedModuleServer) Disable(context.Context, *Empty) (*Empty, error
 }
 func (UnimplementedModuleServer) GetInfo(context.Context, *Empty) (*InfoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
-}
-func (UnimplementedModuleServer) GetUrlPrefix(context.Context, *Empty) (*UrlPrefixResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUrlPrefix not implemented")
 }
 func (UnimplementedModuleServer) Get(context.Context, *GetRequest) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -311,24 +296,6 @@ func _Module_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(inte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ModuleServer).GetInfo(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Module_GetUrlPrefix_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ModuleServer).GetUrlPrefix(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Module_GetUrlPrefix_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ModuleServer).GetUrlPrefix(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -449,10 +416,6 @@ var Module_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetInfo",
 			Handler:    _Module_GetInfo_Handler,
-		},
-		{
-			MethodName: "GetUrlPrefix",
-			Handler:    _Module_GetUrlPrefix_Handler,
 		},
 		{
 			MethodName: "Get",

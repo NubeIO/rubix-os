@@ -72,15 +72,6 @@ func (m *GRPCClient) GetInfo() (*Info, error) {
 	}, nil
 }
 
-func (m *GRPCClient) GetUrlPrefix() (*string, error) {
-	log.Debug("gRPC GetUrlPrefix client has been called...")
-	resp, err := m.client.GetUrlPrefix(context.Background(), &proto.Empty{})
-	if err != nil {
-		return nil, err
-	}
-	return &resp.R, nil
-}
-
 func (m *GRPCClient) Get(path string) ([]byte, error) {
 	log.Debug("gRPC Get client has been called...")
 	resp, err := m.client.Get(context.Background(), &proto.GetRequest{
