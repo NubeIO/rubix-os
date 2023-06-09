@@ -83,14 +83,14 @@ type HostData struct {
 }
 
 type HistoryDataResponse struct {
-	RubixNetworkUUID string             `json:"rubix_network_uuid"`
-	RubixNetworkName string             `json:"rubix_network_name"`
-	RubixDeviceUUID  string             `json:"rubix_device_uuid"`
-	RubixDeviceName  string             `json:"rubix_device_name"`
-	RubixPointUUID   string             `json:"rubix_point_uuid"`
-	RubixPointName   string             `json:"rubix_point_name"`
-	Host             *HostData          `json:"host"`
-	Histories        []*HistoryResponse `json:"histories"`
+	RubixNetworkUUID string `json:"rubix_network_uuid"`
+	RubixNetworkName string `json:"rubix_network_name"`
+	RubixDeviceUUID  string `json:"rubix_device_uuid"`
+	RubixDeviceName  string `json:"rubix_device_name"`
+	RubixPointUUID   string `json:"rubix_point_uuid"`
+	RubixPointName   string `json:"rubix_point_name"`
+	HostData
+	Histories []*HistoryResponse `json:"histories"`
 }
 
 type HistoryResponse struct {

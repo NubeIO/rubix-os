@@ -15,7 +15,7 @@
 - filter
     - Logical Operators `(make sure it is url encoded)`
         - `&&`, `||` 
-    - Comparision Operators
+    - Comparison Operators
         - `=`, `>`, `<`, `<=`, `>=`, `!=` 
     - Fields 
         - `value`
@@ -31,8 +31,8 @@
         - `host_name`
         - `group_uuid`
         - `group_name`
-        - `host_uuid`
-        - `host_name`
+        - `location_uuid`
+        - `location_name`
         - `tag`
         - `meta_tag_key`
         - `meta_tag_value`

@@ -88,8 +88,8 @@ func convertHistoryDataToResponse(historyData []*pgmodel.HistoryData) []*pgmodel
 	indexMap := make(map[string]int)
 
 	for _, history := range historyData {
-		key := fmt.Sprintf("%s-%s-%s-%s-%s-%s", history.RubixNetworkUUID, history.RubixNetworkName,
-			history.RubixDeviceUUID, history.RubixDeviceName, history.RubixPointUUID, history.RubixPointName)
+		key := fmt.Sprintf("%s-%s-%s-%s-%s-%s", history.RubixNetworkName, history.RubixDeviceName,
+			history.RubixPointName, history.HostName, history.GroupName, history.LocationName)
 
 		if index, ok := indexMap[key]; ok {
 			historyResponses[index].Histories = append(historyResponses[index].Histories, &pgmodel.HistoryResponse{
@@ -104,7 +104,7 @@ func convertHistoryDataToResponse(historyData []*pgmodel.HistoryData) []*pgmodel
 				RubixDeviceName:  history.RubixDeviceName,
 				RubixPointUUID:   history.RubixPointUUID,
 				RubixPointName:   history.RubixPointName,
-				Host: &pgmodel.HostData{
+				HostData: pgmodel.HostData{
 					GlobalUUID:   history.GlobalUUID,
 					HostUUID:     history.HostUUID,
 					HostName:     history.HostName,
