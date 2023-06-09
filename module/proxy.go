@@ -30,10 +30,8 @@ func ProxyModule(c *gin.Context) {
 	var res []byte
 	var err error
 	var status int
-	fmt.Println("method", method)
 	if method == "GET" {
 		status = http.StatusOK
-		fmt.Println("proxyPath", proxyPath)
 		res, err = module.Get(proxyPath)
 	} else if method == "POST" {
 		status = http.StatusCreated
