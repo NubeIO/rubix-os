@@ -110,7 +110,10 @@ func main() {
 	logger.SetLogger(conf.LogLevel)
 	logger.SetGinMode(conf.LogLevel)
 
-	if err := os.MkdirAll(conf.GetAbsPluginDir(), 0755); err != nil {
+	if err := os.MkdirAll(conf.GetAbsPluginsDir(), 0755); err != nil {
+		panic(err)
+	}
+	if err := os.MkdirAll(conf.GetAbsModulesDir(), 0755); err != nil {
 		panic(err)
 	}
 	if err := os.MkdirAll(conf.GetAbsUploadedImagesDir(), 0755); err != nil {
@@ -148,6 +151,7 @@ func main() {
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)
 	initFlushBuffers()
+
 	runner.Run(engine, conf)
 }
 

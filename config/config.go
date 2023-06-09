@@ -36,6 +36,7 @@ type Configuration struct {
 		DataDir   string `default:"data"`
 		Data      struct {
 			PluginsDir        string `default:"plugins"`
+			ModulesDir        string `default:"modules"`
 			UploadedImagesDir string `default:"images"`
 		}
 		DeviceInfoFile string `default:"/data/rubix-registry/device_info.json"`
@@ -116,8 +117,12 @@ func (conf *Configuration) GetAbsConfigDir() string {
 	return path.Join(conf.Location.GlobalDir, conf.Location.ConfigDir)
 }
 
-func (conf *Configuration) GetAbsPluginDir() string {
+func (conf *Configuration) GetAbsPluginsDir() string {
 	return path.Join(conf.GetAbsDataDir(), conf.Location.Data.PluginsDir)
+}
+
+func (conf *Configuration) GetAbsModulesDir() string {
+	return path.Join(conf.GetAbsDataDir(), conf.Location.Data.ModulesDir)
 }
 
 func (conf *Configuration) GetAbsUploadedImagesDir() string {

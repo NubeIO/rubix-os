@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"github.com/NubeDev/location"
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
 	"github.com/NubeIO/rubix-os/api"
@@ -12,6 +11,7 @@ import (
 	"github.com/NubeIO/rubix-os/global"
 	"github.com/NubeIO/rubix-os/installer"
 	"github.com/NubeIO/rubix-os/logger"
+	"github.com/NubeIO/rubix-os/module"
 	"github.com/NubeIO/rubix-os/nerrors"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/services/appstore"
@@ -20,6 +20,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
+	log "github.com/sirupsen/logrus"
 )
 
 func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *gocron.Scheduler,
@@ -31,15 +32,31 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	global.Installer = installer.New(&installer.Installer{})
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
-	// http://0.0.0.0:1660/plugins/api/UUID/PLUGIN_TOKEN/echo
-	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginDir(), engine.Group("/api/plugins/api"))
+
+	authHandler := api.AuthAPI{}
+	handleAuth := func(c *gin.Context) { c.Next() }
+	if *conf.Auth {
+		handleAuth = authHandler.HandleAuth()
+	}
+	apiRoutesTemp := engine.Group("/api", handleAuth) // TODO: remove this one and use the same one
+	// http://localhost:1660/api/plugins/api/system/schema/json/device
+	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginsDir(), apiRoutesTemp.Group("/plugins/api"))
 	if err != nil {
-		fmt.Println(err)
+		log.Error(err)
 		panic(err)
 	}
+
+	modules, err := module.ReLoadModulesWithDir(config.Get().GetAbsModulesDir(), apiRoutesTemp.Group("/modules"))
+	if err != nil {
+		log.Error(err)
+		panic(err)
+	}
+	db.Modules = modules
+
 	db.PluginManager = pluginManager
 	pluginHandler := api.PluginAPI{
 		Manager: pluginManager,
+		Modules: modules,
 		DB:      db,
 	}
 	networkHandler := api.NetworksAPI{
@@ -241,7 +258,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
-	authHandler := api.AuthAPI{}
 
 	wiresProxyHandler := api.WiresProxyAPI{}
 	chirpProxyHandler := api.ChirpProxyAPI{}
@@ -262,12 +278,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	})
 
 	engine.Use(cors.New(auth.CorsConfig(conf)))
-
-	handleAuth := func(c *gin.Context) { c.Next() }
-	if *conf.Auth {
-		handleAuth = authHandler.HandleAuth()
-	}
-
 	apiProxyWiresRoutes := engine.Group("/wires", handleAuth)
 	apiProxyWiresRoutes.Any("/*proxyPath", wiresProxyHandler.WiresProxy) // EDGE-WIRES PROXY
 	apiProxyChirpRoutes := engine.Group("/chirp", handleAuth)
@@ -331,10 +341,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				plugins.GET("/:uuid", pluginHandler.GetPlugin)
 				plugins.GET("/config/:uuid", pluginHandler.GetConfig)
 				plugins.POST("/config/:uuid", pluginHandler.UpdateConfig)
-				plugins.GET("/display/:uuid", pluginHandler.GetDisplay)
+				plugins.GET("/display/:uuid", pluginHandler.GetDisplay) // todo: remove
 				plugins.POST("/enable/:uuid", pluginHandler.EnablePluginByUUID)
 				plugins.POST("/restart/:uuid", pluginHandler.RestartPlugin)
-				plugins.POST("/restart/name/:name", pluginHandler.RestartPluginByName)
 				plugins.GET("/path/:path", pluginHandler.GetPluginByPath)
 			}
 		}

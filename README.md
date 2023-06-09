@@ -172,4 +172,17 @@ body by uuid
 rubix/platform/list/points/publish
 ```
 
+### Update .proto
 
+#### Pre-requisite
+
+```bash
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+```
+
+#### Command
+
+```bash
+protoc --proto_path=module/proto --go_out=module/proto --go_opt=paths=source_relative --go-grpc_out=require_unimplemented_servers=false:module/proto --go-grpc_opt=paths=source_relative module/proto/*.proto
+```

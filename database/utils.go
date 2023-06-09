@@ -210,3 +210,7 @@ func marshalJson(jsonData datatypes.JSON) []byte {
 	mJsonData, _ := json.Marshal(jsonData)
 	return mJsonData
 }
+
+func moduleNotFoundError(moduleName string) error {
+	return errors.New(fmt.Sprintf("module with module name %s doesn't exist", moduleName))
+}

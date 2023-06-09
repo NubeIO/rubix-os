@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"github.com/NubeIO/rubix-os/eventbus"
 	"github.com/NubeIO/rubix-os/migration"
+	"github.com/NubeIO/rubix-os/module/shared"
 	"github.com/NubeIO/rubix-os/src/cachestore"
 	"os"
 	"path/filepath"
@@ -22,7 +23,7 @@ const (
 )
 
 var mkdirAll = os.MkdirAll
-var gormDatabase *GormDatabase
+var GlobalGormDatabase *GormDatabase
 
 // New creates a new wrapper for the gorm database framework.
 func New(dialect, connection, logLevel string) (*GormDatabase, error) {
@@ -57,7 +58,7 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 	}
 
 	busService := eventbus.NewService(eventbus.GetBus())
-	gormDatabase = &GormDatabase{DB: db, Bus: busService}
+	GlobalGormDatabase = &GormDatabase{DB: db, Bus: busService}
 	return &GormDatabase{DB: db, Bus: busService}, nil
 }
 
@@ -77,6 +78,7 @@ type GormDatabase struct {
 	Store         cachestore.Handler
 	Bus           eventbus.BusService
 	PluginManager *plugin.Manager
+	Modules       map[string]shared.Module
 }
 
 // Close closes the gorm database connection.
