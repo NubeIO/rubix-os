@@ -37,6 +37,9 @@ type Marshaller interface {
 	DeletePoint(uuid string) error
 
 	PointWrite(uuid string, pointWriter *model.PointWriter) (*common.PointWriteResponse, error)
+
+	GetSchedules() ([]*model.Schedule, error)
+	UpdateScheduleAllProps(uuid string, body *model.Schedule) (*model.Schedule, error)
 }
 
 type GRPCMarshaller struct {
@@ -327,4 +330,35 @@ func (g *GRPCMarshaller) PointWrite(uuid string, body *model.PointWriter) (*comm
 		return nil, err
 	}
 	return pwr, nil
+}
+
+func (g *GRPCMarshaller) GetSchedules() ([]*model.Schedule, error) {
+	res, err := g.DbHelper.GetWithoutParam("schedules", "")
+	if err != nil {
+		return nil, err
+	}
+
+	var schedules []*model.Schedule
+	if err = json.Unmarshal(res, &schedules); err != nil {
+		return nil, err
+	}
+
+	return schedules, nil
+}
+
+func (g *GRPCMarshaller) UpdateScheduleAllProps(uuid string, body *model.Schedule) (*model.Schedule, error) {
+	sch, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	res, err := g.DbHelper.Patch("schedules", uuid, sch)
+	if err != nil {
+		return nil, err
+	}
+	var schedule *model.Schedule
+	err = json.Unmarshal(res, &schedule)
+	if err != nil {
+		return nil, err
+	}
+	return schedule, nil
 }
