@@ -167,8 +167,8 @@ func (d *GormDatabase) DeleteOneNetworkByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) DeleteNetworkClonesByGlobalUUIDTransaction(db *gorm.DB, globalUUID string) (bool, error) {
-	query := db.Where("global_uuid = ?", globalUUID).Where("is_clone IS TRUE").Delete(&model.Network{})
+func (d *GormDatabase) DeleteNetworkClonesByHostUUIDTransaction(db *gorm.DB, hostUUID string) (bool, error) {
+	query := db.Where("host_uuid = ?", hostUUID).Where("is_clone IS TRUE").Delete(&model.Network{})
 	return d.deleteResponseBuilder(query)
 }
 
