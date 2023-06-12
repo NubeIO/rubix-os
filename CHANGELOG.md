@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.0.1](https://github.com/NubeIO/rubix-os/tree/v0.0.1) (2023-06-12)
+
+- First initial release
+- Has module integration
+
 ## [v0.0.1-rc3](https://github.com/NubeIO/rubix-os/tree/v0.0.1-rc3) (2023-06-05)
 
 - Move ROS-related installation in BIOS part
