@@ -15,7 +15,7 @@ func (d *GormDatabase) CloneEdge(host *model.Host) error {
 		return err
 	}
 	tx := d.DB.Begin()
-	_, _ = d.DeleteNetworksByGlobalUUIDTransaction(tx, host.GlobalUUID)
+	_, _ = d.DeleteNetworkClonesByGlobalUUIDTransaction(tx, host.GlobalUUID)
 	for _, network := range networks {
 		d.setNetworkModelClone(host.UUID, host.GlobalUUID, network.UUID, network)
 		for _, device := range network.Devices {
@@ -40,6 +40,7 @@ func (d *GormDatabase) setNetworkModelClone(hostUUID, globalUUID string, network
 	network.SourceUUID = nstring.New(networkUUID)
 	network.UUID = nuuid.MakeTopicUUID(model.ThingClass.Network)
 	network.SourcePluginName = nstring.New(network.PluginPath)
+	network.IsClone = boolean.NewTrue()
 	network.PluginPath = "system"
 	for _, metaTag := range network.MetaTags {
 		metaTag.NetworkUUID = network.UUID
