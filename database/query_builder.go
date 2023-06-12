@@ -265,7 +265,7 @@ func buildNetworkQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
 	}
 	if !args.ShowCloneNetworks {
-		query = query.Where("is_clone IS FALSE")
+		query = query.Where("is_clone IS NOT TRUE") // to support older data where is_clone gets default NULL
 	}
 	return query
 }
