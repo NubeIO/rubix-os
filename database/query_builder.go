@@ -392,9 +392,6 @@ func buildPointQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
 	if args.AutoMappingUUID != nil {
 		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
 	}
-	if args.Name != nil {
-		query = query.Where("name = ?", *args.Name)
-	}
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
 	}

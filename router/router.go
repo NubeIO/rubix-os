@@ -355,8 +355,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 		{
 			pointHistoryRoutes.GET("", pointHistoryHandler.GetPointHistories)
 			pointHistoryRoutes.GET("/:point_uuid", pointHistoryHandler.GetPointHistoriesByPointUUID)
-			pointHistoryRoutes.GET("/name/:name/one", pointHistoryHandler.GetLatestPointHistoryByPointName)
-			pointHistoryRoutes.GET("/name/:name", pointHistoryHandler.GetPointHistoriesByPointName)
 			pointHistoryRoutes.GET("/:point_uuid/one", pointHistoryHandler.GetLatestPointHistoryByPointUUID)
 			pointHistoryRoutes.POST("/point_uuids", pointHistoryHandler.GetPointHistoriesByPointUUIDs)
 			pointHistoryRoutes.GET("/points", pointHistoryHandler.GetPointHistoriesPoints)

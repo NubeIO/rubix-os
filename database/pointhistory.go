@@ -28,35 +28,6 @@ func (d *GormDatabase) GetPointHistoriesByPointUUID(pUuid string, args api.Args)
 	return historiesModel, count, nil
 }
 
-func (d *GormDatabase) GetPointHistoriesByPointName(name string) ([]*model.PointHistory, int64, error) {
-	var count int64
-	var historiesModel []*model.PointHistory
-	p, err := d.GetOnePointByArgs(api.Args{Name: &name})
-	if err != nil {
-		return nil, 0, err
-	}
-	query := d.DB.Where("point_uuid = ? ", p.UUID).Order("timestamp desc")
-	if query.Error != nil {
-		return nil, 0, query.Error
-	}
-	query.Find(&historiesModel)
-	query.Count(&count)
-	return historiesModel, count, nil
-}
-
-func (d *GormDatabase) GetLatestPointHistoryByPointName(name string) (*model.PointHistory, error) {
-	var historyModel *model.PointHistory
-	p, err := d.GetOnePointByArgs(api.Args{Name: &name})
-	if err != nil {
-		return nil, err
-	}
-	query := d.DB.Where("point_uuid = ? ", p.UUID).Order("timestamp desc").First(&historyModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return historyModel, nil
-}
-
 func (d *GormDatabase) GetLatestPointHistoryByPointUUID(pUuid string) (*model.PointHistory, error) {
 	var historyModel *model.PointHistory
 	query := d.DB.Where("point_uuid = ? ", pUuid).Order("timestamp desc").First(&historyModel)
