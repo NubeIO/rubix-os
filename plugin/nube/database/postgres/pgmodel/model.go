@@ -61,36 +61,36 @@ type PointMetaTag struct {
 }
 
 type HistoryData struct {
-	Value            float64   `json:"value"`
-	Timestamp        time.Time `json:"timestamp"`
-	RubixNetworkUUID string    `json:"rubix_network_uuid"`
-	RubixNetworkName string    `json:"rubix_network_name"`
-	RubixDeviceUUID  string    `json:"rubix_device_uuid"`
-	RubixDeviceName  string    `json:"rubix_device_name"`
-	RubixPointUUID   string    `json:"rubix_point_uuid"`
-	RubixPointName   string    `json:"rubix_point_name"`
 	HostData
+	NetworkUUID string    `json:"network_uuid"`
+	NetworkName string    `json:"network_name"`
+	DeviceUUID  string    `json:"device_uuid"`
+	DeviceName  string    `json:"device_name"`
+	PointUUID   string    `json:"point_uuid"`
+	PointName   string    `json:"point_name"`
+	Value       float64   `json:"value"`
+	Timestamp   time.Time `json:"timestamp"`
 }
 
 type HostData struct {
-	GlobalUUID   string `json:"global_uuid,omitempty"`
-	HostUUID     string `json:"host_uuid,omitempty"`
-	HostName     string `json:"host_name,omitempty"`
-	GroupUUID    string `json:"group_uuid,omitempty"`
-	GroupName    string `json:"group_name,omitempty"`
 	LocationUUID string `json:"location_uuid,omitempty"`
 	LocationName string `json:"location_name,omitempty"`
+	GroupUUID    string `json:"group_uuid,omitempty"`
+	GroupName    string `json:"group_name,omitempty"`
+	HostUUID     string `json:"host_uuid,omitempty"`
+	HostName     string `json:"host_name,omitempty"`
+	GlobalUUID   string `json:"global_uuid,omitempty"`
 }
 
 type HistoryDataResponse struct {
-	RubixNetworkUUID string `json:"rubix_network_uuid"`
-	RubixNetworkName string `json:"rubix_network_name"`
-	RubixDeviceUUID  string `json:"rubix_device_uuid"`
-	RubixDeviceName  string `json:"rubix_device_name"`
-	RubixPointUUID   string `json:"rubix_point_uuid"`
-	RubixPointName   string `json:"rubix_point_name"`
 	HostData
-	Histories []*HistoryResponse `json:"histories"`
+	NetworkUUID string             `json:"network_uuid"`
+	NetworkName string             `json:"network_name"`
+	DeviceUUID  string             `json:"device_uuid"`
+	DeviceName  string             `json:"device_name"`
+	PointUUID   string             `json:"point_uuid"`
+	PointName   string             `json:"point_name"`
+	Histories   []*HistoryResponse `json:"histories"`
 }
 
 type HistoryResponse struct {

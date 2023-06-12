@@ -17,21 +17,21 @@ var (
 	comparisonOperators = []string{"=", ">", "<", "<=", ">=", "!="}
 	orderOperators      = []string{"(", ")"}
 	filterQueryMap      = map[string]string{
-		"timestamp":          "histories.timestamp" + operatorFormat + valueFormat,
-		"value":              "histories.value" + operatorFormat + valueFormat,
-		"rubix_network_uuid": "points.network_uuid" + operatorFormat + valueFormat,
-		"rubix_network_name": "points.network_name" + operatorFormat + valueFormat,
-		"rubix_device_uuid":  "points.device_uuid" + operatorFormat + valueFormat,
-		"rubix_device_name":  "points.device_name" + operatorFormat + valueFormat,
-		"rubix_point_uuid":   "points.uuid" + operatorFormat + valueFormat,
-		"rubix_point_name":   "points.name" + operatorFormat + valueFormat,
-		"global_uuid":        "points.global_uuid" + operatorFormat + valueFormat,
-		"location_uuid":      "points.location_uuid" + operatorFormat + valueFormat,
-		"location_name":      "points.location_name" + operatorFormat + valueFormat,
-		"group_uuid":         "points.group_id" + operatorFormat + valueFormat,
-		"group_name":         "points.group_name" + operatorFormat + valueFormat,
-		"host_uuid":          "points.host_uuid" + operatorFormat + valueFormat,
-		"host_name":          "points.host_name" + operatorFormat + valueFormat,
+		"location_uuid": "points.location_uuid" + operatorFormat + valueFormat,
+		"location_name": "points.location_name" + operatorFormat + valueFormat,
+		"group_uuid":    "points.group_id" + operatorFormat + valueFormat,
+		"group_name":    "points.group_name" + operatorFormat + valueFormat,
+		"host_uuid":     "points.host_uuid" + operatorFormat + valueFormat,
+		"host_name":     "points.host_name" + operatorFormat + valueFormat,
+		"global_uuid":   "points.global_uuid" + operatorFormat + valueFormat,
+		"network_uuid":  "points.network_uuid" + operatorFormat + valueFormat,
+		"network_name":  "points.network_name" + operatorFormat + valueFormat,
+		"device_uuid":   "points.device_uuid" + operatorFormat + valueFormat,
+		"device_name":   "points.device_name" + operatorFormat + valueFormat,
+		"point_uuid":    "points.uuid" + operatorFormat + valueFormat,
+		"point_name":    "points.name" + operatorFormat + valueFormat,
+		"timestamp":     "histories.timestamp" + operatorFormat + valueFormat,
+		"value":         "histories.value" + operatorFormat + valueFormat,
 		"tag": "(points.network_uuid in (SELECT network_uuid FROM network_tags WHERE tag" +
 			operatorFormat + valueFormat + ") OR points.device_uuid in (SELECT device_uuid FROM device_tags WHERE tag" +
 			operatorFormat + valueFormat + ") OR points.uuid in (SELECT point_uuid FROM point_tags WHERE tag" +
