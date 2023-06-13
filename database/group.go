@@ -26,6 +26,27 @@ func (d *GormDatabase) GetGroup(uuid string) (*model.Group, error) {
 	return groupModel, nil
 }
 
+func (d *GormDatabase) GetGroupsByUUIDs(uuids []*string) ([]*model.Group, error) {
+	var groupsModel []*model.Group
+	query := d.buildGroupQuery()
+	if err := query.Where("uuid IN ?", uuids).Find(&groupsModel).Error; err != nil {
+		return nil, err
+	}
+	return groupsModel, nil
+}
+
+func (d *GormDatabase) GetGroupsByHostUUIDs(hostUUIDs []*string) ([]*model.Group, error) {
+	var groupsModel []*model.Group
+	query := d.DB
+	if err := query.Distinct("groups.*").
+		Joins("JOIN hosts ON groups.uuid = hosts.group_uuid").
+		Where("hosts.uuid IN ?", hostUUIDs).
+		Find(&groupsModel).Error; err != nil {
+		return nil, err
+	}
+	return groupsModel, nil
+}
+
 func (d *GormDatabase) CreateGroup(body *model.Group) (*model.Group, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Group)
 	if err := d.DB.Create(&body).Error; err != nil {

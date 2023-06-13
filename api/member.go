@@ -24,6 +24,7 @@ type MemberDatabase interface {
 	DeleteMember(uuid string) (bool, error)
 	DeleteMemberByUsername(username string) (bool, error)
 	ChangeMemberPassword(uuid string, password string) (bool, error)
+	GetMemberSidebars(username string) ([]*model.Location, error)
 }
 
 type MemberAPI struct {
@@ -224,4 +225,14 @@ func (a *MemberAPI) RefreshToken(ctx *gin.Context) {
 		return
 	}
 	ResponseHandler(&model.TokenResponse{AccessToken: token, TokenType: "JWT"}, err, ctx)
+}
+
+func (a *MemberAPI) GetMemberSidebars(ctx *gin.Context) {
+	username := auth.GetAuthorizedUsername(ctx.Request)
+	if username == "" {
+		ResponseHandler(nil, invalidMemberTokenError, ctx)
+		return
+	}
+	q, err := a.DB.GetMemberSidebars(username)
+	ResponseHandler(q, err, ctx)
 }

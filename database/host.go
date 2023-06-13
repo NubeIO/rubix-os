@@ -52,6 +52,15 @@ func (d *GormDatabase) GetFirstHost() (*model.Host, error) {
 	return nil, err
 }
 
+func (d *GormDatabase) GetHostsByUUIDs(uuids []*string) ([]*model.Host, error) {
+	var groupsModel []*model.Host
+	query := d.buildHostQuery(api.Args{})
+	if err := query.Where("uuid IN ?", uuids).Find(&groupsModel).Error; err != nil {
+		return nil, err
+	}
+	return groupsModel, nil
+}
+
 func (d *GormDatabase) CreateHost(body *model.Host) (*model.Host, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Host)
 	if body.HTTPS == nil {
