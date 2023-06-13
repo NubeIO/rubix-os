@@ -305,6 +305,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			ownMemberRoutes.DELETE("", memberHandler.DeleteMember)
 			ownMemberRoutes.POST("/change_password", memberHandler.ChangePassword)
 			ownMemberRoutes.POST("/refresh_token", memberHandler.RefreshToken)
+			ownMemberRoutes.GET("/sidebars", memberHandler.GetMemberSidebars)
 
 			memberDevicesRoutes := ownMemberRoutes.Group("/devices")
 			{

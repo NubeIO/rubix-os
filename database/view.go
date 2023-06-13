@@ -35,6 +35,20 @@ func (d *GormDatabase) GetViewsByUUIDs(uuids []*string) ([]*model.View, error) {
 	return viewsModel, nil
 }
 
+func (d *GormDatabase) GetViewsByMemberUsername(memberUsername string) ([]*model.View, error) {
+	var viewsModel []*model.View
+	query := d.DB.Distinct("views.*").
+		Joins("JOIN team_views ON team_views.view_uuid = views.uuid").
+		Joins("JOIN teams ON teams.uuid = team_views.team_uuid").
+		Joins("JOIN team_members ON team_members.team_uuid = teams.uuid").
+		Joins("JOIN members ON members.uuid = team_members.member_uuid").
+		Where("members.username = ?", memberUsername)
+	if err := query.Find(&viewsModel).Error; err != nil {
+		return nil, err
+	}
+	return viewsModel, nil
+}
+
 func (d *GormDatabase) CreateView(body *model.View) (*model.View, error) {
 	name, err := validateName(body.Name)
 	if err != nil {

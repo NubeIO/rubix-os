@@ -127,3 +127,100 @@ func (d *GormDatabase) ChangeMemberPassword(uuid string, password string) (bool,
 	}
 	return true, nil
 }
+
+func (d *GormDatabase) GetMemberSidebars(username string) ([]*model.Location, error) {
+	views, err := d.GetViewsByMemberUsername(username)
+	if err != nil {
+		return nil, err
+	}
+	viewUUIDs, locationsUUIDs, groupUUIDs, hostUUIDs := getViewsUUIDs(views)
+
+	locations, _ := d.GetLocationsByUUIDs(locationsUUIDs)
+
+	// Remove groupUUIDs and hostUUIDs that are already covered by locations
+	for _, location := range locations {
+		for _, group := range location.Groups {
+			groupUUIDs = filterOutItem(groupUUIDs, nstring.New(group.UUID))
+			for _, host := range group.Hosts {
+				hostUUIDs = filterOutItem(hostUUIDs, nstring.New(host.UUID))
+			}
+		}
+	}
+
+	groupLocations, _ := d.GetLocationsByGroupAndHostUUIDs(groupUUIDs, hostUUIDs)
+	if locations != nil {
+		locations = append(locations, groupLocations...)
+	}
+	groups, _ := d.GetGroupsByUUIDs(groupUUIDs)
+	if groups != nil {
+		// Remove hostUUIDs that are already covered by groups
+		for _, group := range groups {
+			for _, host := range group.Hosts {
+				hostUUIDs = filterOutItem(hostUUIDs, nstring.New(host.UUID))
+			}
+		}
+	}
+
+	hostGroups, _ := d.GetGroupsByHostUUIDs(hostUUIDs)
+	if hostGroups != nil {
+		groups = append(groups, hostGroups...)
+	}
+
+	hosts, _ := d.GetHostsByUUIDs(hostUUIDs)
+	if hosts != nil {
+		// Update the relationships between hosts and groups, and groups and locations
+		for _, host := range hosts {
+			for i, group := range groups {
+				if group.UUID == host.GroupUUID {
+					groups[i].Hosts = append(groups[i].Hosts, host)
+				}
+			}
+		}
+	}
+
+	for _, group := range groups {
+		for i, location := range locations {
+			if location.UUID == group.LocationUUID {
+				locations[i].Groups = append(locations[i].Groups, group)
+			}
+		}
+	}
+
+	for _, location := range locations {
+		location.Views = filterViewsByViewUUIDs(location.Views, viewUUIDs)
+		for _, group := range location.Groups {
+			group.Views = filterViewsByViewUUIDs(group.Views, viewUUIDs)
+			for _, host := range group.Hosts {
+				host.Views = filterViewsByViewUUIDs(host.Views, viewUUIDs)
+			}
+		}
+	}
+	return locations, nil
+}
+
+func getViewsUUIDs(views []*model.View) (viewUUIDs []string, locationsUUIDs []*string, groupUUIDs []*string,
+	hostUUIDs []*string) {
+	for _, view := range views {
+		viewUUIDs = append(viewUUIDs, view.UUID)
+		if view.LocationUUID != nil {
+			locationsUUIDs = append(locationsUUIDs, view.LocationUUID)
+		}
+		if view.GroupUUID != nil {
+			groupUUIDs = append(groupUUIDs, view.GroupUUID)
+		}
+		if view.HostUUID != nil {
+			hostUUIDs = append(hostUUIDs, view.HostUUID)
+		}
+	}
+	return viewUUIDs, locationsUUIDs, groupUUIDs, hostUUIDs
+}
+
+func filterViewsByViewUUIDs(views []*model.View, viewUUIDs []string) []*model.View {
+	var filteredViews []*model.View
+	for _, view := range views {
+		if contains(viewUUIDs, view.UUID) {
+			filteredViews = append(filteredViews, view)
+		}
+	}
+	return filteredViews
+}

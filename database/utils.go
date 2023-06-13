@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/rubix-os/utils/structs"
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
+	"reflect"
 	"strings"
 	"unicode"
 )
@@ -213,4 +214,23 @@ func marshalJson(jsonData datatypes.JSON) []byte {
 
 func moduleNotFoundError(moduleName string) error {
 	return errors.New(fmt.Sprintf("module with module name %s doesn't exist", moduleName))
+}
+
+func filterOutItem(slice []*string, item *string) []*string {
+	filteredSlice := make([]*string, 0, len(slice))
+	for _, s := range slice {
+		if !reflect.DeepEqual(s, item) {
+			filteredSlice = append(filteredSlice, s)
+		}
+	}
+	return filteredSlice
+}
+
+func contains(slice []string, value string) bool {
+	for _, item := range slice {
+		if item == value {
+			return true
+		}
+	}
+	return false
 }
