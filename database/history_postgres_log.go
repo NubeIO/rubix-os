@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
@@ -12,14 +11,9 @@ func (d *GormDatabase) GetHistoryPostgresLogLastSyncHistoryId() (int, error) {
 	query.First(&logsModel)
 	if logsModel != nil {
 		var historiesModel *model.History
-		valueCondition := "value IS NULL"
-		if logsModel.Value != nil {
-			valueCondition = fmt.Sprintf("value = %f", *logsModel.Value)
-		}
 		query.Where("id = ?", logsModel.ID).
 			Where("point_uuid = ?", logsModel.PointUUID).
 			Where("host_uuid = ?", logsModel.HostUUID).
-			Where(valueCondition).
 			Where("datetime(timestamp) = datetime(?)", logsModel.Timestamp).
 			First(&historiesModel)
 		if query.Error != nil {
