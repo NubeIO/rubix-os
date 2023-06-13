@@ -219,7 +219,7 @@ func (inst *Instance) createNetwork() (*model.Network, error) {
 	maxNetworks := new(int)
 	*maxNetworks = maxAllowedNetworks
 	net := model.Network{
-		CommonNameUnique:          model.CommonNameUnique{Name: pluginName},
+		Name:                      pluginName,
 		CommonDescription:         model.CommonDescription{Description: "Chirpstack"},
 		CommonEnable:              model.CommonEnable{Enable: boolean.NewTrue()},
 		PluginPath:                pluginPath,

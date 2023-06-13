@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.0.2](https://github.com/NubeIO/rubix-os/tree/v0.0.2) (2023-06-13)
+
+- Rework on history
+- Add API for sidebar
+
 ## [v0.0.1](https://github.com/NubeIO/rubix-os/tree/v0.0.1) (2023-06-12)
 
 - First initial release

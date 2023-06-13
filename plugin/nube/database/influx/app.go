@@ -79,8 +79,8 @@ func (inst *Instance) syncInflux(influxSettings []*InfluxSetting) (bool, error) 
 	producerUuid := ""
 	var historyTags []*model.HistoryInfluxTag
 	for _, history := range histories {
-		if producerUuid != history.UUID {
-			producerUuid = history.UUID
+		if producerUuid != history.PointUUID { // TODO: not working, as history got changed
+			producerUuid = history.PointUUID
 			historyTags, err = inst.db.GetHistoryInfluxTags(producerUuid)
 			if err != nil || len(historyTags) == 0 {
 				log.Warn(fmt.Sprintf("influx: We unable to get the producer_uuid = %s details!", producerUuid))
