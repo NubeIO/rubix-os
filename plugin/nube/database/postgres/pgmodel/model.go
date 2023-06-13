@@ -6,20 +6,21 @@ import (
 
 type History struct {
 	ID        int       `json:"id" gorm:"primary_key"`
-	UUID      string    `json:"uuid" gorm:"primary_key"`
-	Value     float64   `json:"value" gorm:"primary_key"`
+	PointUUID string    `json:"point_uuid" gorm:"primary_key"`
+	HostUUID  string    `json:"host_uuid" gorm:"primary_key"`
+	Value     *float64  `json:"value"`
 	Timestamp time.Time `json:"timestamp" gorm:"primary_key"`
 }
 
 type Point struct {
-	UUID         string `json:"uuid" gorm:"type:varchar(255);unique;primaryKey"`
+	UUID         string `json:"uuid" gorm:"type:varchar(255);primaryKey"`
 	Name         string `json:"name"`
 	DeviceUUID   string `json:"device_uuid,omitempty"`
 	DeviceName   string `json:"device_name,omitempty"`
 	NetworkUUID  string `json:"network_uuid"`
 	NetworkName  string `json:"network_name"`
 	GlobalUUID   string `json:"global_uuid"`
-	HostUUID     string `json:"host_uuid"`
+	HostUUID     string `json:"host_uuid" gorm:"type:varchar(255);primaryKey"`
 	HostName     string `json:"host_name"`
 	GroupUUID    string `json:"group_uuid"`
 	GroupName    string `json:"group_name"`

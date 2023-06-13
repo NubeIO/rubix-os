@@ -47,24 +47,7 @@ func (d *GormDatabase) GetPointHistoriesByPointUUIDs(pointUUIDs []string, args a
 	return historiesModel, nil
 }
 
-func (d *GormDatabase) GetPointHistoriesPoints(args api.Args) ([]*model.History, error) {
-	var historiesModel []*model.History
-	pointHistories, err := d.GetPointHistories(args)
-	if err != nil {
-		return nil, nil
-	}
-	for _, pHis := range pointHistories {
-		if pHis.Value == nil {
-			continue
-		}
-		historiesModel = append(historiesModel,
-			&model.History{ID: pHis.ID, UUID: pHis.PointUUID, Value: *pHis.Value, Timestamp: pHis.Timestamp})
-	}
-	return historiesModel, nil
-}
-
-func (d *GormDatabase) GetPointHistoriesForSync(id string, timeStamp string) ([]*model.History, error) {
-	var historiesModel []*model.History
+func (d *GormDatabase) GetPointHistoriesForSync(id string, timeStamp string) ([]*model.PointHistory, error) {
 	var pointHistoriesModel []*model.PointHistory
 	query := d.DB.Where("id = ?", id).Where("datetime(timestamp) = datetime(?)", timeStamp).
 		Find(&pointHistoriesModel)
@@ -76,16 +59,9 @@ func (d *GormDatabase) GetPointHistoriesForSync(id string, timeStamp string) ([]
 	}
 	pointHistories, err := d.GetPointHistories(api.Args{IdGt: nstring.New(id)})
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
-	for _, pHis := range pointHistories {
-		if pHis.Value == nil {
-			continue
-		}
-		historiesModel = append(historiesModel,
-			&model.History{ID: pHis.ID, UUID: pHis.PointUUID, Value: *pHis.Value, Timestamp: pHis.Timestamp})
-	}
-	return historiesModel, nil
+	return pointHistories, nil
 }
 
 func (d *GormDatabase) CreatePointHistory(body *model.PointHistory) (*model.PointHistory, error) {

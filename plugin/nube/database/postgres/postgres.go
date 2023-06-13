@@ -50,18 +50,6 @@ func (ps *PostgresSetting) New() error {
 }
 
 func autoMigrate(db *gorm.DB) error {
-	if db.Migrator().HasConstraint(&pgmodel.Point{}, "fk_devices_points") {
-		_ = db.Migrator().DropConstraint(&pgmodel.Point{}, "fk_devices_points")
-	}
-	if db.Migrator().HasConstraint(&pgmodel.NetworkMetaTag{}, "fk_networks_meta_tags") {
-		_ = db.Migrator().DropConstraint(&pgmodel.NetworkMetaTag{}, "fk_networks_meta_tags")
-	}
-	if db.Migrator().HasConstraint(&pgmodel.DeviceMetaTag{}, "fk_devices_meta_tags") {
-		_ = db.Migrator().DropConstraint(&pgmodel.DeviceMetaTag{}, "fk_devices_meta_tags")
-	}
-	if db.Migrator().HasConstraint(&pgmodel.PointMetaTag{}, "fk_points_meta_tags") {
-		_ = db.Migrator().DropConstraint(&pgmodel.PointMetaTag{}, "fk_points_meta_tags")
-	}
 	interfaces := []interface{}{
 		pgmodel.History{},
 		pgmodel.Point{},
@@ -119,7 +107,7 @@ func (ps PostgresSetting) buildHistoryQuery(args Args) (*gorm.DB, error) {
 	query := ps.postgresConnectionInstance.db
 	query = query.Table("histories").
 		Select(selectQuery).
-		Joins("INNER JOIN points ON points.uuid = histories.uuid")
+		Joins("INNER JOIN points ON points.uuid = histories.uuid AND points.host_uuid = histories.host_uuid")
 	if args.GroupLimit != nil {
 		groupLimitQuery := fmt.Sprintf("INNER JOIN (SELECT *,row_number FROM (SELECT *,ROW_NUMBER() OVER "+
 			"(PARTITION BY UUID ORDER BY timestamp DESC) AS row_number FROM histories) _ WHERE row_number <= %s) AS "+

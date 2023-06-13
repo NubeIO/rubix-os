@@ -10,8 +10,7 @@ type PointHistoryDatabase interface {
 	GetPointHistoriesByPointUUID(pUuid string, args Args) ([]*model.PointHistory, int64, error)
 	GetLatestPointHistoryByPointUUID(pUuid string) (*model.PointHistory, error)
 	GetPointHistoriesByPointUUIDs(pointUUIDs []string, args Args) ([]*model.PointHistory, error)
-	GetPointHistoriesPoints(args Args) ([]*model.History, error)
-	GetPointHistoriesForSync(id string, timeStamp string) ([]*model.History, error)
+	GetPointHistoriesForSync(id string, timeStamp string) ([]*model.PointHistory, error)
 	DeletePointHistoriesByPointUUID(pUuid string, args Args) (bool, error)
 }
 type PointHistoryAPI struct {
@@ -42,12 +41,6 @@ func (a *PointHistoryAPI) GetPointHistoriesByPointUUIDs(ctx *gin.Context) {
 	var pointUUIDs []string
 	err := ctx.ShouldBindJSON(&pointUUIDs)
 	q, err := a.DB.GetPointHistoriesByPointUUIDs(pointUUIDs, args)
-	ResponseHandler(q, err, ctx)
-}
-
-func (a *PointHistoryAPI) GetPointHistoriesPoints(ctx *gin.Context) {
-	args := buildPointHistoryArgs(ctx)
-	q, err := a.DB.GetPointHistoriesPoints(args)
 	ResponseHandler(q, err, ctx)
 }
 

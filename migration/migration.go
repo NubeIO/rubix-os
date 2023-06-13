@@ -10,7 +10,8 @@ import (
 
 func AutoMigrate(db *gorm.DB) error {
 	if (db.Migrator().HasColumn(&model.History{}, "idx_histories_id") ||
-		!db.Migrator().HasColumn(&model.History{}, "history_id")) {
+		!db.Migrator().HasColumn(&model.History{}, "history_id") ||
+		!db.Migrator().HasColumn(&model.History{}, "point_uuid")) {
 		// We drop old table and create new one with composite primary_key
 		// Update of primary_key doesn't support in GORM
 		// Fore more info: https://github.com/go-gorm/gorm/issues/4742
@@ -41,6 +42,11 @@ func AutoMigrate(db *gorm.DB) error {
 		err := db.Migrator().DropIndex(&model.Group{}, "idx_networks_name_location_uuid")
 		log.Error(err)
 	}
+	if (!db.Migrator().HasColumn(&model.HistoryPostgresLog{}, "point_uuid")) {
+		err := db.Migrator().DropTable(&model.HistoryPostgresLog{})
+		log.Error(err)
+	}
+
 	// TODO: if we uncomment this, it will remove the Priority sub-table from point table as well
 	// if db.Migrator().HasColumn(&model.Point{}, "history_interval") {
 	//	columnTypes, _ := db.Migrator().ColumnTypes(&model.Point{})

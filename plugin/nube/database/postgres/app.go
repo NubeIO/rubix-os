@@ -61,7 +61,8 @@ func (inst *Instance) syncPostgres() (bool, error) {
 		lastHistory := histories[len(histories)-1]
 		historyPostgresLog := &model.HistoryPostgresLog{
 			ID:        lastHistory.ID,
-			UUID:      lastHistory.UUID,
+			PointUUID: lastHistory.PointUUID,
+			HostUUID:  lastHistory.HostUUID,
 			Value:     lastHistory.Value,
 			Timestamp: lastHistory.Timestamp,
 		}

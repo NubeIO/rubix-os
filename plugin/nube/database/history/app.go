@@ -30,14 +30,20 @@ func (inst *Instance) syncHistory() (bool, error) {
 		}
 		for k, h := range *pHistories {
 			if cloneEdge {
-				point, _ := inst.db.GetOnePointByArgs(api.Args{SourceUUID: nstring.New(h.UUID)})
+				point, _ := inst.db.GetOnePointByArgs(api.Args{SourceUUID: nstring.New(h.PointUUID)})
 				if point == nil {
 					err = inst.db.CloneEdge(host)
 					cloneEdge = err != nil
 				}
 			}
-			h := h // more: https://medium.com/swlh/use-pointer-of-for-range-loop-variable-in-go-3d3481f7ffc9
-			histories = append(histories, &h)
+			history := model.History{
+				ID:        h.ID,
+				PointUUID: h.PointUUID,
+				HostUUID:  host.UUID,
+				Value:     h.Value,
+				Timestamp: h.Timestamp,
+			}
+			histories = append(histories, &history)
 			if k == len(*pHistories)-1 { // Update History Log
 				hisLog.HostUUID = host.UUID
 				hisLog.LastSyncID = h.ID
