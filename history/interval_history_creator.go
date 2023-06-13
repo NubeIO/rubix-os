@@ -16,28 +16,29 @@ func (h *History) InitIntervalHistoryCreator(syncPeriod int) {
 
 func (h *History) createIntervalHistories() {
 	log.Debug("Create interval histories has been called...")
-	var producerHistories []*model.ProducerHistory
+	var pointHistories []*model.PointHistory
 	currentDate := time.Now().UTC()
-	producers, err := h.DB.GetProducersForCreateInterval()
+
+	points, err := h.DB.GetPointsForCreateInterval()
 	if err != nil {
 		log.Error(err)
 		return
 	}
-	for _, producer := range producers {
-		timestamp, _ := time.Parse("2006-01-02 15:04:05+00:00", producer.Timestamp)
-		if timestamp.IsZero() || currentDate.Sub(timestamp).Seconds() >= float64(*producer.HistoryInterval*60) {
-			latestPH := new(model.ProducerHistory)
+	for _, point := range points {
+		timestamp, _ := time.Parse("2006-01-02 15:04:05+00:00", point.Timestamp)
+		if timestamp.IsZero() || currentDate.Sub(timestamp).Seconds() >= float64(*point.HistoryInterval*60) {
+			latestPH := new(model.PointHistory)
 			// minutes are placing such a way if 15, then it will store values on 0, 15, 30, 45
-			minute := (currentDate.Minute() / *producer.HistoryInterval) * *producer.HistoryInterval
-			latestPH.ProducerUUID = producer.UUID
+			minute := (currentDate.Minute() / *point.HistoryInterval) * *point.HistoryInterval
+			latestPH.PointUUID = point.UUID
 			latestPH.Timestamp = time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(),
 				currentDate.Hour(), minute, 0, 0, time.UTC)
-			latestPH.PresentValue = producer.PresentValue
-			producerHistories = append(producerHistories, latestPH)
+			latestPH.Value = point.PresentValue
+			pointHistories = append(pointHistories, latestPH)
 		}
 	}
-	if len(producerHistories) > 0 {
-		_, err := h.DB.CreateBulkProducerHistory(producerHistories)
+	if len(pointHistories) > 0 {
+		_, err := h.DB.CreateBulkPointHistory(pointHistories)
 		if err != nil {
 			log.Error(err)
 		}

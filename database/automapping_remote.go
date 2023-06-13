@@ -127,7 +127,7 @@ func (d *GormDatabase) createNetworkAutoMapping(tx *gorm.DB, amNetwork *interfac
 
 	network, err := d.GetNetworkByNameTransaction(tx, networkName, api.Args{})
 	if network != nil {
-		if network.GlobalUUID != globalUUID {
+		if network.GlobalUUID != nstring.New(globalUUID) {
 			amRes.Error = fmt.Sprintf("network.name %s already exists in fnc side with different global_uuid", network.Name)
 			return amRes
 		} else if boolean.IsFalse(network.CreatedFromAutoMapping) {
@@ -400,7 +400,7 @@ func (d *GormDatabase) setNetworkModel(fnc *model.FlowNetworkClone, amNetwork *i
 	networkModel.Enable = &amNetwork.Enable
 	networkModel.AutoMappingEnable = &amNetwork.AutoMappingEnable
 	networkModel.PluginPath = "system"
-	networkModel.GlobalUUID = globalUUID
+	networkModel.GlobalUUID = nstring.New(globalUUID)
 	networkModel.AutoMappingFlowNetworkName = fnc.Name
 	networkModel.CreatedFromAutoMapping = boolean.NewTrue()
 	networkModel.AutoMappingUUID = &amNetwork.UUID

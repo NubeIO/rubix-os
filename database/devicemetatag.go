@@ -52,3 +52,16 @@ func (d *GormDatabase) GetDeviceMetaTags() ([]*model.DeviceMetaTag, error) {
 	}
 	return deviceMetaTagsModel, nil
 }
+
+func (d *GormDatabase) GetDevicesMetaTagsForPostgresSync() ([]*model.DeviceMetaTag, error) {
+	var deviceMetaTagsModel []*model.DeviceMetaTag
+	query := d.DB.Table("device_meta_tags").
+		Select("devices.source_uuid AS device_uuid, device_meta_tags.key, device_meta_tags.value").
+		Joins("INNER JOIN devices ON devices.uuid = device_meta_tags.device_uuid").
+		Where("IFNULL(devices.source_uuid,'') != ''").
+		Scan(&deviceMetaTagsModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return deviceMetaTagsModel, nil
+}

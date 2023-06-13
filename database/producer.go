@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
-	"github.com/NubeIO/rubix-os/config"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/interfaces/connection"
 	"github.com/NubeIO/rubix-os/src/client"
@@ -16,7 +15,6 @@ import (
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Producer struct {
@@ -69,11 +67,6 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 		return nil, errors.New("please pass in a producer_thing_class i.e. point, job etc")
 	}
 	producerThingName := ""
-	historyType, err := checkHistoryType(string(body.HistoryType))
-	if err != nil {
-		return nil, err
-	}
-	body.HistoryType = historyType
 
 	switch body.ProducerThingClass {
 	case model.ThingClass.Point:
@@ -82,9 +75,6 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 			return nil, errors.New("point not found, please supply a valid point producer_thing_uuid")
 		}
 		producerThingName = pnt.Name
-		body.EnableHistory = pnt.HistoryEnable
-		body.HistoryType = pnt.HistoryType
-		body.HistoryInterval = pnt.HistoryInterval
 	case model.ThingClass.Schedule:
 		sch, err := d.GetSchedule(body.ProducerThingUUID)
 		if err != nil {
@@ -139,16 +129,11 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer, checkAu
 	return producerModel, nil
 }
 
-func (d *GormDatabase) UpdateProducerByProducerThingUUID(producerThingUUID string, producerThingName string,
-	enableHistory *bool, historyType model.HistoryType, historyInterval *int) {
+func (d *GormDatabase) UpdateProducerByProducerThingUUID(producerThingUUID string, producerThingName string) {
 	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: nils.NewString(producerThingUUID)})
 	for _, producer := range producers {
-		if producer.ProducerThingName != producerThingName || producer.EnableHistory != enableHistory ||
-			producer.HistoryType != historyType || producer.HistoryInterval != historyInterval {
+		if producer.ProducerThingName != producerThingName {
 			producer.ProducerThingName = producerThingName
-			producer.EnableHistory = enableHistory
-			producer.HistoryType = historyType
-			producer.HistoryInterval = historyInterval
 			go d.UpdateProducer(producer.UUID, producer, false)
 		}
 	}
@@ -232,12 +217,12 @@ type Point struct {
 }
 
 func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*float64, presentValue *float64,
-	createCOVHistory bool, currentWriterUUID *string) error {
+	currentWriterUUID *string) error {
 	producerModelBody := new(model.Producer)
 	producerModelBody.CurrentWriterUUID = currentWriterUUID
 	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &uuid, Enable: boolean.NewTrue()})
 	for _, producer := range producers {
-		err := d.producerPointWrite(producer.UUID, priority, presentValue, producerModelBody, createCOVHistory)
+		err := d.producerPointWrite(producer.UUID, priority, presentValue, producerModelBody)
 		if err != nil {
 			return err
 		}
@@ -246,7 +231,7 @@ func (d *GormDatabase) ProducersPointWrite(uuid string, priority *map[string]*fl
 }
 
 func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*float64, presentValue *float64,
-	producerModelBody *model.Producer, createCOVHistory bool) error {
+	producerModelBody *model.Producer) error {
 	producerModel, err := d.UpdateProducer(uuid, producerModelBody, false)
 	if err != nil {
 		log.Errorf("producer: issue on update producer err: %v\n", err)
@@ -256,19 +241,6 @@ func (d *GormDatabase) producerPointWrite(uuid string, priority *map[string]*flo
 	err = d.TriggerCOVToWriterClone(producerModel, &syncCOV)
 	if err != nil {
 		return err
-	}
-	if boolean.IsTrue(config.Get().ProducerHistory.Enable) && createCOVHistory &&
-		boolean.IsTrue(producerModel.EnableHistory) && checkHistoryCovType(string(producerModel.HistoryType)) {
-		ph := new(model.ProducerHistory)
-		ph.ProducerUUID = uuid
-		ph.CurrentWriterUUID = producerModel.CurrentWriterUUID
-		ph.PresentValue = presentValue
-		ph.Timestamp = time.Now().UTC()
-		_, err = d.CreateProducerHistory(ph)
-		if err != nil {
-			log.Errorf("producer: issue on write history ProducerWriteHist: %v\n", err)
-			return errors.New("issue on write history for point")
-		}
 	}
 	return nil
 }
@@ -322,20 +294,4 @@ func (d *GormDatabase) TriggerCOVFromWriterCloneToWriter(producer *model.Produce
 		}
 	}
 	return nil
-}
-
-func (d *GormDatabase) GetProducersForCreateInterval() ([]*interfaces.ProducerIntervalHistory, error) {
-	var producerIntervalHistory []*interfaces.ProducerIntervalHistory
-	query := fmt.Sprintf("SELECT p.uuid, p.producer_thing_class, p.history_interval, ph.timestamp AS timestamp, pt.present_value "+
-		"FROM producers p "+
-		"LEFT JOIN (SELECT producer_uuid, MAX(timestamp) AS timestamp FROM producer_histories GROUP BY producer_uuid) ph "+
-		"ON p.uuid = ph.producer_uuid "+
-		"INNER JOIN points pt "+
-		"ON p.producer_thing_uuid = pt.uuid "+
-		"WHERE p.enable_history = %v AND p.history_type != '%s' AND p.history_interval > %d AND p.producer_thing_class = '%s'",
-		true, model.HistoryTypeCov, 0, "point")
-	if err := d.DB.Raw(query).Scan(&producerIntervalHistory).Error; err != nil {
-		return nil, err
-	}
-	return producerIntervalHistory, nil
 }

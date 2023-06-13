@@ -15,33 +15,33 @@
 - filter
     - Logical Operators `(make sure it is url encoded)`
         - `&&`, `||` 
-    - Comparision Operators
+    - Comparison Operators
         - `=`, `>`, `<`, `<=`, `>=`, `!=` 
     - Fields 
         - `value`
         - `timestamp`
-        - `rubix_network_uuid`
-        - `rubix_network_name`
-        - `rubix_device_uuid`
-        - `rubix_device_name`
-        - `rubix_point_uuid`
-        - `rubix_point_name`
-        - `global_uuid`
-        - `client_id`
-        - `client_name`
-        - `site_id`
-        - `site_name`
-        - `device_id`
+        - `network_uuid`
+        - `network_name`
+        - `device_uuid`
         - `device_name`
-        - `tag`     
+        - `point_uuid`
+        - `point_name`
+        - `global_uuid`
+        - `host_uuid`
+        - `host_name`
+        - `group_uuid`
+        - `group_name`
+        - `location_uuid`
+        - `location_name`
+        - `tag`
         - `meta_tag_key`
         - `meta_tag_value`
     - Filter examples:   
         ```
-        1. rubix_network_name={network_name}&&rubix_device_name={device_name}&&rubix_point_name={point_name}&&site_id={site_id}
-        2. (site_name={site_name}&&timestamp>{timestamp})||rubix_point_uuid!={point_uuid}
+        1. network_name={network_name}&&device_name={device_name}&&point_name={point_name}&&host_uuid={host_uuid}
+        2. (host_name={host_name}&&timestamp>{timestamp})||point_uuid!={point_uuid}
         3. (tag={tag}&&value>={value})||(tag={tag}&&value<={value})
-        4. rubix_point_uuid=<{point_uuid}||rubix_point_uuid={point_uuid}
+        4. point_uuid=<{point_uuid}||point_uuid={point_uuid}
         5. (meta_tag_key={meta_tag_key}&&value>={value})
         6. (meta_tag_value={meta_tag_value}&&value<={value})
         7. (meta_tag_key={meta_tag_key}&&meta_tag_value={meta_tag_value}&&value>={value})

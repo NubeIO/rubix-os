@@ -3,7 +3,9 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/rubix-os/config"
 	"github.com/NubeIO/rubix-os/interfaces"
+	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"time"
 
@@ -225,7 +227,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 	if publishPointList {
 		go d.PublishPointsList("")
 	}
-	d.UpdateProducerByProducerThingUUID(pointModel.UUID, pointModel.Name, pointModel.HistoryEnable, pointModel.HistoryType, pointModel.HistoryInterval)
+	d.UpdateProducerByProducerThingUUID(pointModel.UUID, pointModel.Name)
 	return pnt, err
 }
 
@@ -349,7 +351,21 @@ func (d *GormDatabase) updatePointValue(
 	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 
 	if isChange {
-		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, isPresentValueChange, currentWriterUUID)
+		if boolean.IsTrue(config.Get().PointHistory.Enable) && boolean.IsTrue(pointModel.HistoryEnable) &&
+			checkHistoryCovType(string(pointModel.HistoryType)) {
+			pointHistory := &model.PointHistory{
+				PointUUID: pointModel.UUID,
+				Value:     pointModel.PresentValue,
+				Timestamp: time.Now().UTC(),
+			}
+			_, err = d.CreatePointHistory(pointHistory)
+			if err != nil {
+				log.Errorf("point: issue on write history for point: %v\n", err)
+				return nil, false, false, false, err
+			}
+		}
+
+		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, currentWriterUUID)
 		if err != nil {
 			return nil, false, false, false, err
 		}
@@ -458,4 +474,18 @@ func (d *GormDatabase) GetPointWithParent(uuid string) (*interfaces.PointWithPar
 		return nil, err
 	}
 	return pointWithParent, nil
+}
+
+func (d *GormDatabase) GetPointsForCreateInterval() ([]*interfaces.PointHistoryInterval, error) {
+	var pointIntervalHistory []*interfaces.PointHistoryInterval
+	query := fmt.Sprintf("SELECT p.uuid, p.history_interval, ph.timestamp AS timestamp, p.present_value "+
+		"FROM points p "+
+		"LEFT JOIN (SELECT point_uuid, MAX(timestamp) AS timestamp FROM point_histories GROUP BY point_uuid) ph "+
+		"ON p.uuid = ph.point_uuid "+
+		"WHERE p.history_enable AND p.history_type != '%s' AND p.history_interval > %d",
+		model.HistoryTypeCov, 0)
+	if err := d.DB.Raw(query).Scan(&pointIntervalHistory).Error; err != nil {
+		return nil, err
+	}
+	return pointIntervalHistory, nil
 }

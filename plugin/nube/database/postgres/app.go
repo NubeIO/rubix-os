@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin/nube/database/postgres/pgmodel"
 	log "github.com/sirupsen/logrus"
 )
@@ -46,32 +45,7 @@ func (inst *Instance) syncPostgres() (bool, error) {
 		return false, err
 	}
 	if len(histories) > 0 {
-		// bulk write to postgres
-		if err = inst.createFlowNetworkCloneBulk(); err != nil {
-			log.Error(err)
-			return false, err
-		}
-		if err = inst.createStreamCloneBulk(); err != nil {
-			log.Error(err)
-			return false, err
-		}
-		if err = inst.createConsumerBulk(); err != nil {
-			log.Error(err)
-			return false, err
-		}
-		if err = inst.createWriterBulk(); err != nil {
-			log.Error(err)
-			return false, err
-		}
-		if err = inst.createNetworkBulk(); err != nil {
-			log.Error(err)
-			return false, err
-		}
-		if err = inst.createDeviceBulk(); err != nil {
-			log.Error(err)
-			return false, err
-		}
-		if err = inst.createPointBulk(); err != nil {
+		if err = inst.createPointsBulk(); err != nil {
 			log.Error(err)
 			return false, err
 		}
@@ -87,7 +61,8 @@ func (inst *Instance) syncPostgres() (bool, error) {
 		lastHistory := histories[len(histories)-1]
 		historyPostgresLog := &model.HistoryPostgresLog{
 			ID:        lastHistory.ID,
-			UUID:      lastHistory.UUID,
+			PointUUID: lastHistory.PointUUID,
+			HostUUID:  lastHistory.HostUUID,
 			Value:     lastHistory.Value,
 			Timestamp: lastHistory.Timestamp,
 		}
@@ -99,7 +74,7 @@ func (inst *Instance) syncPostgres() (bool, error) {
 	return true, nil
 }
 
-func (inst *Instance) getHistories(args Args) ([]*pgmodel.HistoryData, error) {
+func (inst *Instance) getHistories(args Args) ([]*pgmodel.HistoryDataResponse, error) {
 	if postgresSetting.postgresConnectionInstance.db == nil {
 		err := postgresSetting.New()
 		if err != nil {
@@ -107,143 +82,16 @@ func (inst *Instance) getHistories(args Args) ([]*pgmodel.HistoryData, error) {
 			return nil, err
 		}
 	}
-	return postgresSetting.GetHistories(args)
+	histories, err := postgresSetting.GetHistories(args)
+	if err != nil {
+		return nil, err
+	}
+	historiesResponse := convertHistoryDataToResponse(histories)
+	return historiesResponse, nil
 }
 
-func (inst *Instance) createFlowNetworkCloneBulk() error {
-	flowNetworkClones, err := inst.db.GetFlowNetworkClones(api.Args{WithTags: true})
-	if err != nil {
-		return err
-	}
-	var flowNetworkClonesModel []*pgmodel.FlowNetworkClone
-	if err = convertData(flowNetworkClones, &flowNetworkClonesModel); err != nil {
-		return err
-	}
-	return postgresSetting.WriteToPostgresDb(flowNetworkClonesModel)
-}
-
-func (inst *Instance) createStreamCloneBulk() error {
-	streamClones, err := inst.db.GetStreamClones(api.Args{WithTags: true})
-	if err != nil {
-		return err
-	}
-	var streamClonesModel []*pgmodel.StreamClone
-	if err = convertData(streamClones, &streamClonesModel); err != nil {
-		return err
-	}
-	if err = postgresSetting.WriteToPostgresDb(streamClonesModel); err != nil {
-		return err
-	}
-	// tags
-	for _, streamCloneModel := range streamClonesModel {
-		if err = postgresSetting.updateTags(streamCloneModel, streamCloneModel.Tags); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (inst *Instance) createConsumerBulk() error {
-	consumers, err := inst.db.GetConsumers(api.Args{WithTags: true})
-	if err != nil {
-		return err
-	}
-	var consumersModel []*pgmodel.Consumer
-	if err = convertData(consumers, &consumersModel); err != nil {
-		return err
-	}
-	if err = postgresSetting.WriteToPostgresDb(consumersModel); err != nil {
-		return err
-	}
-	// tags
-	for _, consumerModel := range consumersModel {
-		if err = postgresSetting.updateTags(consumerModel, consumerModel.Tags); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (inst *Instance) createWriterBulk() error {
-	writers, err := inst.db.GetWriters(api.Args{})
-	if err != nil {
-		return err
-	}
-	var writersModel []*pgmodel.Writer
-	if err = convertData(writers, &writersModel); err != nil {
-		return err
-	}
-	return postgresSetting.WriteToPostgresDb(writersModel)
-}
-
-func (inst *Instance) createNetworkBulk() error {
-	networks, err := inst.db.GetNetworks(api.Args{WithTags: true})
-	if err != nil {
-		return err
-	}
-	var networksModel []*pgmodel.Network
-	if err = convertData(networks, &networksModel); err != nil {
-		return err
-	}
-	if err = postgresSetting.WriteToPostgresDb(networksModel); err != nil {
-		return err
-	}
-	// tags
-	for _, networkModel := range networksModel {
-		if err = postgresSetting.updateTags(networkModel, networkModel.Tags); err != nil {
-			return err
-		}
-	}
-	// meta tags
-	networkMetaTags, err := inst.db.GetNetworkMetaTags()
-	if err != nil {
-		return err
-	}
-	if err = postgresSetting.DeleteDeletedNetworkMetaTags(networkMetaTags); err != nil {
-		return err
-	}
-	var networkMetaTagsModel []*pgmodel.NetworkMetaTag
-	if err = convertData(networkMetaTags, &networkMetaTagsModel); err != nil {
-		return err
-	}
-	return postgresSetting.WriteToPostgresDb(networkMetaTagsModel)
-}
-
-func (inst *Instance) createDeviceBulk() error {
-	devices, err := inst.db.GetDevices(api.Args{WithTags: true})
-	if err != nil {
-		return err
-	}
-	var devicesModel []*pgmodel.Device
-	if err = convertData(devices, &devicesModel); err != nil {
-		return err
-	}
-	if err = postgresSetting.WriteToPostgresDb(devicesModel); err != nil {
-		return err
-	}
-	// tags
-	for _, deviceModel := range devicesModel {
-		if err = postgresSetting.updateTags(deviceModel, deviceModel.Tags); err != nil {
-			return err
-		}
-	}
-	// meta tags
-	deviceMetaTags, err := inst.db.GetDeviceMetaTags()
-	if err != nil {
-		return err
-	}
-	if err := postgresSetting.DeleteDeletedDeviceMetaTags(deviceMetaTags); err != nil {
-		return err
-	}
-	var deviceMetaTagsModel []*pgmodel.DeviceMetaTag
-	if err = convertData(deviceMetaTags, &deviceMetaTagsModel); err != nil {
-		return err
-	}
-	return postgresSetting.WriteToPostgresDb(deviceMetaTagsModel)
-}
-
-func (inst *Instance) createPointBulk() error {
-	points, err := inst.db.GetPoints(api.Args{WithTags: true})
+func (inst *Instance) createPointsBulk() error {
+	points, err := inst.db.GetPointsForPostgresSync()
 	if err != nil {
 		return err
 	}
@@ -254,23 +102,107 @@ func (inst *Instance) createPointBulk() error {
 	if err = postgresSetting.WriteToPostgresDb(pointsModel); err != nil {
 		return err
 	}
-	// tags
-	for _, pointModel := range pointsModel {
-		if err = postgresSetting.updateTags(pointModel, pointModel.Tags); err != nil {
-			return err
-		}
+	if err = inst.createTags(); err != nil {
+		return err
 	}
-	// meta tags
-	pointMetaTags, err := inst.db.GetPointMetaTags()
+	if err = inst.createMetaTags(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (inst *Instance) createTags() error {
+	networkTags, err := inst.db.GetNetworksTagsForPostgresSync()
 	if err != nil {
 		return err
 	}
-	if err = postgresSetting.DeleteDeletedPointMetaTags(pointMetaTags); err != nil {
+	var networkTagsModel []*pgmodel.NetworkTag
+	if err = convertData(networkTags, &networkTagsModel); err != nil {
 		return err
 	}
-	var pointMetaTagsModel []*pgmodel.PointMetaTag
-	if err = convertData(pointMetaTags, &pointMetaTagsModel); err != nil {
+	if err := postgresSetting.DeleteDeletedNetworkTags(networkTagsModel); err != nil {
 		return err
 	}
-	return postgresSetting.WriteToPostgresDb(pointMetaTagsModel)
+	if len(networkTagsModel) > 0 {
+		if err := postgresSetting.WriteToPostgresDb(networkTagsModel); err != nil {
+			return err
+		}
+	}
+
+	deviceTags, err := inst.db.GetDevicesTagsForPostgresSync()
+	if err != nil {
+		return err
+	}
+	var deviceTagsModel []*pgmodel.DeviceTag
+	if err = convertData(deviceTags, &deviceTagsModel); err != nil {
+		return err
+	}
+	if err := postgresSetting.DeleteDeletedDeviceTags(deviceTagsModel); err != nil {
+		return err
+	}
+	if len(deviceTagsModel) > 0 {
+		if err := postgresSetting.WriteToPostgresDb(deviceTagsModel); err != nil {
+			return err
+		}
+	}
+
+	pointTags, err := inst.db.GetPointsTagsForPostgresSync()
+	if err != nil {
+		return err
+	}
+	var pointTagsModel []*pgmodel.PointTag
+	if err = convertData(pointTags, &pointTagsModel); err != nil {
+		return err
+	}
+	if err := postgresSetting.DeleteDeletedPointTags(pointTagsModel); err != nil {
+		return err
+	}
+	if len(pointTagsModel) > 0 {
+		if err := postgresSetting.WriteToPostgresDb(pointTagsModel); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (inst *Instance) createMetaTags() error {
+	networkMetaTags, err := inst.db.GetNetworksMetaTagsForPostgresSync()
+	if err != nil {
+		return err
+	}
+	if err := postgresSetting.DeleteDeletedNetworkMetaTags(networkMetaTags); err != nil {
+		return err
+	}
+	if len(networkMetaTags) > 0 {
+		if err := postgresSetting.WriteToPostgresDb(networkMetaTags); err != nil {
+			return err
+		}
+	}
+
+	deviceMetaTags, err := inst.db.GetDevicesMetaTagsForPostgresSync()
+	if err != nil {
+		return err
+	}
+	if err := postgresSetting.DeleteDeletedDeviceMetaTags(deviceMetaTags); err != nil {
+		return err
+	}
+	if len(deviceMetaTags) > 0 {
+		if err := postgresSetting.WriteToPostgresDb(deviceMetaTags); err != nil {
+			return err
+		}
+	}
+
+	pointMetaTags, err := inst.db.GetPointsMetaTagsForPostgresSync()
+	if err != nil {
+		return err
+	}
+	if err := postgresSetting.DeleteDeletedPointMetaTags(pointMetaTags); err != nil {
+		return err
+	}
+	if len(pointMetaTags) > 0 {
+		if err := postgresSetting.WriteToPostgresDb(pointMetaTags); err != nil {
+			return err
+		}
+	}
+	return nil
 }

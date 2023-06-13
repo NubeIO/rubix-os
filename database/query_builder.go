@@ -264,6 +264,9 @@ func buildNetworkQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
 	if args.GlobalUUID != nil {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
 	}
+	if !args.ShowCloneNetworks {
+		query = query.Where("is_clone IS NOT TRUE") // to support older data where is_clone gets default NULL
+	}
 	return query
 }
 
@@ -392,6 +395,9 @@ func buildPointQueryTransaction(db *gorm.DB, args api.Args) *gorm.DB {
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
 	}
+	if args.SourceUUID != nil {
+		query = query.Where("source_uuid = ?", *args.SourceUUID)
+	}
 	if args.MetaTags != nil {
 		keyValues := metaTagsArgsToKeyValues(*args.MetaTags)
 		subQuery := db.Table("point_meta_tags").Select("point_uuid").
@@ -472,7 +478,7 @@ func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildProducerHistoryQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildPointHistoryQuery(args api.Args) *gorm.DB {
 	query := d.DB
 	if args.IdGt != nil {
 		query = query.Where("Id > ?", args.IdGt)

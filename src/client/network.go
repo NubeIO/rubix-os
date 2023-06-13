@@ -108,6 +108,19 @@ func (inst *FlowClient) GetNetworks(withDevices ...bool) ([]model.Network, error
 	return out, nil
 }
 
+func (inst *FlowClient) GetNetworksForCloneEdge() ([]*model.Network, error) {
+	url := fmt.Sprintf("/api/networks?with_devices=true&with_points=true&with_tags=true&with_meta_tags=true")
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetResult(&[]*model.Network{}).
+		Get(url))
+	if err != nil {
+		return nil, err
+	}
+	var out []*model.Network
+	out = *resp.Result().(*[]*model.Network)
+	return out, nil
+}
+
 // GetNetwork an object
 func (inst *FlowClient) GetNetwork(uuid string) (*model.Network, error) {
 	resp, err := nresty.FormatRestyResponse(inst.client.R().

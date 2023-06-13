@@ -70,7 +70,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	pointHandler := api.PointAPI{
 		DB: db,
 	}
-	historyHandler := api.HistoriesAPI{
+	pointHistoryHandler := api.PointHistoryAPI{
 		DB: db,
 	}
 	jobHandler := api.JobAPI{
@@ -256,6 +256,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	teamHandler := api.TeamAPI{
 		DB: db,
 	}
+	cloudEdgeCloneHandler := api.CloneEdgeApi{
+		DB: db,
+	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
 
@@ -348,17 +351,14 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			}
 		}
 
-		historyProducerRoutes := apiRoutes.Group("/histories/producers")
+		pointHistoryRoutes := apiRoutes.Group("/histories/points")
 		{
-			historyProducerRoutes.GET("", historyHandler.GetProducerHistories)
-			historyProducerRoutes.GET("/:producer_uuid", historyHandler.GetProducerHistoriesByProducerUUID)
-			historyProducerRoutes.GET("/name/:name/one", historyHandler.GetLatestProducerHistoryByProducerName)
-			historyProducerRoutes.GET("/name/:name", historyHandler.GetProducerHistoriesByProducerName)
-			historyProducerRoutes.GET("/:producer_uuid/one", historyHandler.GetLatestProducerHistoryByProducerUUID)
-			historyProducerRoutes.POST("/point_uuids", historyHandler.GetProducerHistoriesByPointUUIDs)
-			historyProducerRoutes.GET("/points", historyHandler.GetProducerHistoriesPoints)
-			historyProducerRoutes.GET("/points_for_sync", historyHandler.GetProducerHistoriesPointsForSync)
-			historyProducerRoutes.DELETE("/:producer_uuid", historyHandler.DeleteProducerHistoriesByProducerUUID)
+			pointHistoryRoutes.GET("", pointHistoryHandler.GetPointHistories)
+			pointHistoryRoutes.GET("/:point_uuid", pointHistoryHandler.GetPointHistoriesByPointUUID)
+			pointHistoryRoutes.GET("/:point_uuid/one", pointHistoryHandler.GetLatestPointHistoryByPointUUID)
+			pointHistoryRoutes.POST("/point_uuids", pointHistoryHandler.GetPointHistoriesByPointUUIDs)
+			pointHistoryRoutes.GET("/sync", pointHistoryHandler.GetPointHistoriesForSync)
+			pointHistoryRoutes.DELETE("/:point_uuid", pointHistoryHandler.DeletePointHistoriesByPointUUID)
 		}
 
 		flowNetworkRoutes := apiRoutes.Group("/flow_networks")
@@ -1013,6 +1013,11 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				teamRoutes.DELETE("/drop", teamHandler.DropTeams)
 				teamRoutes.PUT("/:uuid/members", teamHandler.UpdateTeamMembers)
 				teamRoutes.PUT("/:uuid/views", teamHandler.UpdateTeamViews)
+			}
+
+			edgeCloneRoutes := serverApiRoutes.Group("/clone_edges")
+			{
+				edgeCloneRoutes.GET("", cloudEdgeCloneHandler.CloneEdge)
 			}
 		}
 	}

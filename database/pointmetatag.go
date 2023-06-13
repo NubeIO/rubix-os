@@ -52,3 +52,16 @@ func (d *GormDatabase) GetPointMetaTags() ([]*model.PointMetaTag, error) {
 	}
 	return pointMetaTagsModel, nil
 }
+
+func (d *GormDatabase) GetPointsMetaTagsForPostgresSync() ([]*model.PointMetaTag, error) {
+	var pointMetaTagsModel []*model.PointMetaTag
+	query := d.DB.Table("point_meta_tags").
+		Select("points.source_uuid AS point_uuid, point_meta_tags.key, point_meta_tags.value").
+		Joins("INNER JOIN points ON points.uuid = point_meta_tags.point_uuid").
+		Where("IFNULL(points.source_uuid,'') != ''").
+		Scan(&pointMetaTagsModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return pointMetaTagsModel, nil
+}

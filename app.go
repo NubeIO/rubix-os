@@ -47,13 +47,11 @@ func intHandler(db *database.GormDatabase) {
 func initHistorySchedulers(db *database.GormDatabase, conf *config.Configuration) {
 	h := new(history.History)
 	h.DB = db
-	if *conf.ProducerHistory.Enable && *conf.ProducerHistory.Cleaner.Enable {
-		h.InitProducerHistoryCleaner(
-			conf.ProducerHistory.Cleaner.Frequency,
-			conf.ProducerHistory.Cleaner.DataPersistingHours)
+	if *conf.PointHistory.Enable && *conf.PointHistory.Cleaner.Enable {
+		h.InitPointHistoryCleaner(conf.PointHistory.Cleaner.Frequency, conf.PointHistory.Cleaner.DataPersistingHours)
 	}
-	if *conf.ProducerHistory.Enable && *conf.ProducerHistory.IntervalHistoryCreator.Enable {
-		h.InitIntervalHistoryCreator(conf.ProducerHistory.IntervalHistoryCreator.Frequency)
+	if *conf.PointHistory.Enable && *conf.PointHistory.IntervalHistoryCreator.Enable {
+		h.InitIntervalHistoryCreator(conf.PointHistory.IntervalHistoryCreator.Frequency)
 	}
 }
 
