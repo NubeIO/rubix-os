@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,6 +29,8 @@ type PointDatabase interface {
 	DeletePointPlugin(uuid string) (bool, error)
 
 	CreatePointMetaTags(pointUUID string, pointMetaTags []*model.PointMetaTag) ([]*model.PointMetaTag, error)
+
+	ResolveHost(uuid string, name string) (*model.Host, error)
 }
 type PointAPI struct {
 	DB PointDatabase
@@ -159,4 +162,36 @@ func (a *PointAPI) GetPointWithParent(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.GetPointWithParent(uuid)
 	ResponseHandler(q, err, ctx)
+}
+
+func (a *PointAPI) GetPointByHost(ctx *gin.Context) {
+	cli, err := a.resolveClient(ctx)
+	if err != nil {
+		ResponseHandler(nil, err, ctx)
+		return
+	}
+	uuid := resolveID(ctx)
+	q, err := cli.GetPoint(uuid)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *PointAPI) WritePointByHost(ctx *gin.Context) {
+	cli, err := a.resolveClient(ctx)
+	if err != nil {
+		ResponseHandler(nil, err, ctx)
+		return
+	}
+	uuid := resolveID(ctx)
+	body, _ := getBODYPointWriter(ctx)
+	q, err := cli.WritePoint(uuid, body)
+	ResponseHandler(q, err, ctx)
+}
+
+func (a *PointAPI) resolveClient(ctx *gin.Context) (*client.FlowClient, error) {
+	matchHostUUIDName(ctx)
+	host, err := a.DB.ResolveHost(matchHostUUIDName(ctx))
+	if err != nil {
+		return nil, err
+	}
+	return client.NewClient(host.IP, host.Port, host.ExternalToken), nil
 }
