@@ -1022,5 +1022,10 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			}
 		}
 	}
+	hostPointApiRoutes := engine.Group("/api/host_points")
+	{
+		hostPointApiRoutes.GET("/:uuid", pointHandler.GetPointByHost)
+		hostPointApiRoutes.PATCH("/write/:uuid", pointHandler.WritePointByHost)
+	}
 	return engine
 }

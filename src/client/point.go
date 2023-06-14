@@ -94,3 +94,15 @@ func (inst *FlowClient) GetPointWithParent(uuid string) (*interfaces.PointWithPa
 	}
 	return resp.Result().(*interfaces.PointWithParent), nil
 }
+
+func (inst *FlowClient) WritePoint(uuid string, body *model.PointWriter) (*model.Point, error) {
+	resp, err := nresty.FormatRestyResponse(inst.client.R().
+		SetBody(body).
+		SetResult(&model.Point{}).
+		SetPathParams(map[string]string{"uuid": uuid}).
+		Patch("/api/points/write/{uuid}"))
+	if err != nil {
+		return nil, err
+	}
+	return resp.Result().(*model.Point), nil
+}
