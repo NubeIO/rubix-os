@@ -188,7 +188,6 @@ func (a *PointAPI) WritePointByHost(ctx *gin.Context) {
 }
 
 func (a *PointAPI) resolveClient(ctx *gin.Context) (*client.FlowClient, error) {
-	matchHostUUIDName(ctx)
 	host, err := a.DB.ResolveHost(matchHostUUIDName(ctx))
 	if err != nil {
 		return nil, err
