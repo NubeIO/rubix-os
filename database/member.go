@@ -188,12 +188,26 @@ func (d *GormDatabase) GetMemberSidebars(username string) ([]*model.Location, er
 
 	for _, location := range locations {
 		location.Views = filterViewsByViewUUIDs(location.Views, viewUUIDs)
+		// Filter groups
+		var updatedGroups []*model.Group
 		for _, group := range location.Groups {
 			group.Views = filterViewsByViewUUIDs(group.Views, viewUUIDs)
+			// Filter hosts
+			var updatedHosts []*model.Host
 			for _, host := range group.Hosts {
 				host.Views = filterViewsByViewUUIDs(host.Views, viewUUIDs)
+				if len(host.Views) != 0 {
+					updatedHosts = append(updatedHosts, host)
+				}
+			}
+			// Update hosts
+			group.Hosts = updatedHosts
+			if len(group.Views) != 0 || len(group.Hosts) != 0 {
+				updatedGroups = append(updatedGroups, group)
 			}
 		}
+		// Update groups
+		location.Groups = updatedGroups
 	}
 	return locations, nil
 }
