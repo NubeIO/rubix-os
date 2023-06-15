@@ -2,14 +2,16 @@ package edgecli
 
 import (
 	"fmt"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/nresty"
 	"mime"
 	"os"
 )
 
-func (inst *Client) CreateSnapshot() ([]byte, string, error) {
+func (inst *Client) CreateSnapshot(body *interfaces.LocationGroupHostName) ([]byte, string, error) {
 	url := fmt.Sprintf("/api/snapshots/create")
 	resp, err := nresty.FormatRestyResponse(inst.Rest.R().
+		SetBody(body).
 		Post(url))
 	if err != nil {
 		return nil, "", err

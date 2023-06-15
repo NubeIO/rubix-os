@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/utils/boolean"
-	"github.com/NubeIO/rubix-os/utils/deviceinfo"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
@@ -33,7 +32,7 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 	}
 	fnc.SourceUUID = body.UUID
 	fnc.SyncUUID, _ = nuuid.MakeUUID()
-	deviceInfo, err := deviceinfo.GetDeviceInfo()
+	globalUUID, err := d.getGlobalUUID()
 	if err != nil {
 		return nil, err
 	}
@@ -50,12 +49,7 @@ func (d *GormDatabase) SyncFlowNetwork(body *model.FlowNetwork) (*model.FlowNetw
 			return nil, err
 		}
 	}
-	fnc.GlobalUUID = deviceInfo.GlobalUUID
-	fnc.ClientId = deviceInfo.ClientId
-	fnc.ClientName = deviceInfo.ClientName
-	fnc.SiteId = deviceInfo.SiteId
-	fnc.SiteName = deviceInfo.SiteName
-	fnc.DeviceId = deviceInfo.DeviceId
-	fnc.DeviceName = deviceInfo.DeviceName
+	fnc.GlobalUUID = globalUUID
+	// TODO: use location/group/host uuid and name
 	return &fnc, nil
 }

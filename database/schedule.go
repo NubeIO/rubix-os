@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/utils/boolean"
-	"github.com/NubeIO/rubix-os/utils/deviceinfo"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -91,11 +90,11 @@ func (d *GormDatabase) CreateScheduleTransaction(db *gorm.DB, body *model.Schedu
 	}
 	body.Schedule = validSchedule
 	if body.GlobalUUID == "" {
-		deviceInfo, err := deviceinfo.GetDeviceInfo()
+		globalUUID, err := d.getGlobalUUID()
 		if err != nil {
 			return nil, err
 		}
-		body.GlobalUUID = deviceInfo.GlobalUUID
+		body.GlobalUUID = globalUUID
 	}
 	if err = db.Create(&body).Error; err != nil {
 		return nil, err

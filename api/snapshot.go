@@ -44,26 +44,26 @@ func (a *SnapshotAPI) CreateSnapshot(c *gin.Context) {
 		return
 	}
 	createStatus = interfaces.Creating
-	deviceInfo, err := a.RubixRegistry.GetDeviceInfo()
+	body, err := getBodyLocationGroupHostName(c)
 	if err != nil {
 		log.Error(err)
 		createStatus = interfaces.CreateFailed
 		ResponseHandler(nil, err, c)
 		return
 	}
-	clientName := strings.Replace(deviceInfo.ClientName, "/", "", -1)
-	siteName := strings.Replace(deviceInfo.SiteName, "/", "", -1)
-	deviceName := strings.Replace(deviceInfo.DeviceName, "/", "", -1)
-	if clientName == "" || clientName == "-" {
-		clientName = "na"
+	locationName := strings.Replace(body.LocationName, "/", "", -1)
+	groupName := strings.Replace(body.GroupName, "/", "", -1)
+	hostName := strings.Replace(body.HostName, "/", "", -1)
+	if locationName == "" || locationName == "-" {
+		locationName = "na"
 	}
-	if siteName == "" || siteName == "-" {
-		siteName = "na"
+	if groupName == "" || groupName == "-" {
+		groupName = "na"
 	}
-	if deviceName == "" || deviceName == "-" {
-		deviceName = "na"
+	if hostName == "" || hostName == "-" {
+		hostName = "na"
 	}
-	filePrefix := strings.ReplaceAll(fmt.Sprintf("%s-%s-%s", clientName, siteName, deviceName), " ", "")
+	filePrefix := strings.ReplaceAll(fmt.Sprintf("%s-%s-%s", locationName, groupName, hostName), " ", "")
 	previousFiles, _ := filepath.Glob(path.Join(config.Get().GetAbsTempDir(), fmt.Sprintf("%s*", filePrefix)))
 	utils.DeleteFiles(previousFiles, config.Get().GetAbsTempDir())
 

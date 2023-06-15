@@ -26,3 +26,9 @@ func GetLocationSchema() *LocationSchema {
 	}
 	return m
 }
+
+type LocationGroupHostName struct {
+	LocationName string `json:"location_name"`
+	GroupName    string `json:"group_name"`
+	HostName     string `json:"host_name"`
+}

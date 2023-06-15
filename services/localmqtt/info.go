@@ -2,17 +2,12 @@ package localmqtt
 
 import (
 	"encoding/json"
-	"github.com/NubeIO/rubix-os/utils/deviceinfo"
-	log "github.com/sirupsen/logrus"
+	"github.com/NubeIO/rubix-registry-go/rubixregistry"
 )
 
 const fetchDeviceInfo = "rubix/platform/info/publish"
 
-func PublishInfo() {
-	deviceInfo, err := deviceinfo.GetDeviceInfo()
-	if err != nil {
-		log.Error(err)
-	}
+func PublishInfo(deviceInfo *rubixregistry.DeviceInfo) {
 	marshal, err := json.Marshal(deviceInfo)
 	if err != nil {
 		return

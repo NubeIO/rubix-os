@@ -10,7 +10,6 @@ import (
 	"github.com/NubeIO/rubix-os/interfaces/connection"
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/utils/boolean"
-	"github.com/NubeIO/rubix-os/utils/deviceinfo"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	log "github.com/sirupsen/logrus"
@@ -189,9 +188,9 @@ func (d *GormDatabase) createNetworksAutoMappings(fnName string, networks []*mod
 		return nil
 	}
 
-	deviceInfo, _ := deviceinfo.GetDeviceInfo()
+	globalUUID, _ := d.getGlobalUUID()
 	autoMapping := &interfaces.AutoMapping{
-		GlobalUUID:      deviceInfo.GlobalUUID,
+		GlobalUUID:      globalUUID,
 		FlowNetworkUUID: fn.UUID,
 		Level:           level,
 		Networks:        amNetworks,

@@ -7,6 +7,7 @@ import (
 	"github.com/NubeIO/rubix-os/migration"
 	"github.com/NubeIO/rubix-os/module/shared"
 	"github.com/NubeIO/rubix-os/src/cachestore"
+	"github.com/NubeIO/rubix-registry-go/rubixregistry"
 	"os"
 	"path/filepath"
 	"time"
@@ -58,8 +59,9 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 	}
 
 	busService := eventbus.NewService(eventbus.GetBus())
-	GlobalGormDatabase = &GormDatabase{DB: db, Bus: busService}
-	return &GormDatabase{DB: db, Bus: busService}, nil
+	rubixRegistry := rubixregistry.New()
+	GlobalGormDatabase = &GormDatabase{DB: db, Bus: busService, RubixRegistry: rubixRegistry}
+	return &GormDatabase{DB: db, Bus: busService, RubixRegistry: rubixRegistry}, nil
 }
 
 func createDirectoryIfSqlite(dialect, connection string) {
@@ -79,6 +81,7 @@ type GormDatabase struct {
 	Bus           eventbus.BusService
 	PluginManager *plugin.Manager
 	Modules       map[string]shared.Module
+	RubixRegistry *rubixregistry.RubixRegistry
 }
 
 // Close closes the gorm database connection.

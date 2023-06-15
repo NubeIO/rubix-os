@@ -9,7 +9,6 @@ import (
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/urls"
 	"github.com/NubeIO/rubix-os/utils/boolean"
-	"github.com/NubeIO/rubix-os/utils/deviceinfo"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"gorm.io/gorm"
 )
@@ -155,20 +154,20 @@ func (d *GormDatabase) syncAfterCreateUpdateStream(body *model.Stream) error {
 	} else if len(*flowNetworks) == 0 {
 		return nil
 	}
-	deviceInfo, err := deviceinfo.GetDeviceInfo()
+	globalUUID, err := d.getGlobalUUID()
 	if err != nil {
 		return err
 	}
 	for _, fn := range *flowNetworks {
-		_ = d.SyncStreamFunction(&fn, body, deviceInfo)
+		_ = d.SyncStreamFunction(globalUUID, &fn, body)
 	}
 	return nil
 }
 
-func (d *GormDatabase) SyncStreamFunction(fn *model.FlowNetwork, stream *model.Stream, deviceInfo *model.DeviceInfo) error {
+func (d *GormDatabase) SyncStreamFunction(globalUUID string, fn *model.FlowNetwork, stream *model.Stream) error {
 	cli := client.NewFlowClientCliFromFN(fn)
 	syncStreamBody := model.SyncStream{
-		GlobalUUID: deviceInfo.GlobalUUID,
+		GlobalUUID: globalUUID,
 		Stream:     stream,
 	}
 	_, err := cli.SyncStream(&syncStreamBody)

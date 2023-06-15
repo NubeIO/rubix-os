@@ -46,6 +46,19 @@ func (d *GormDatabase) GetLocationsByGroupAndHostUUIDs(groupUUIDs []*string, hos
 	return locationsModel, nil
 }
 
+func (d *GormDatabase) GetLocationGroupHostNamesByHostUUID(hostUUID string) (*interfaces.LocationGroupHostName, error) {
+	var locationGroupHostNameModel *interfaces.LocationGroupHostName
+	query := d.DB.Distinct("locations.name AS location_name,groups.name as group_name,hosts.name AS host_name").
+		Table("locations").
+		Joins("JOIN groups ON locations.uuid = groups.location_uuid").
+		Joins("JOIN hosts ON groups.uuid = hosts.group_uuid").
+		Where("hosts.uuid = ?", hostUUID)
+	if err := query.Scan(&locationGroupHostNameModel).Error; err != nil {
+		return nil, err
+	}
+	return locationGroupHostNameModel, nil
+}
+
 func (d *GormDatabase) CreateLocation(body *model.Location) (*model.Location, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Location)
 	if err := d.DB.Create(&body).Error; err != nil {
