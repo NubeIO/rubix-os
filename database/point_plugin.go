@@ -18,7 +18,7 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 		return nil, err
 	}
 	pluginName := network.PluginPath
-	if pluginName == "system" {
+	if pluginName == "system" || pluginName == "module-core-system" {
 		body.EnableWriteable = boolean.NewTrue()
 		point, err = d.CreatePoint(body)
 		if err != nil {
@@ -64,7 +64,7 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 		return nil, err
 	}
 	pluginName := network.PluginPath
-	if pluginName == "system" {
+	if pluginName == "system" || pluginName == "module-core-system" {
 		body.EnableWriteable = boolean.NewTrue()
 		point, err = d.UpdatePoint(uuid, body)
 		if err != nil {
@@ -102,7 +102,7 @@ func (d *GormDatabase) WritePointPlugin(uuid string, body *model.PointWriter) (p
 		return nil, err
 	}
 	pluginName := network.PluginPath
-	if pluginName == "system" {
+	if pluginName == "system" || pluginName == "module-core-system" {
 		point, _, _, _, err = d.PointWrite(uuid, body, nil, false)
 		if err != nil {
 			return nil, err
@@ -143,7 +143,7 @@ func (d *GormDatabase) DeletePointPlugin(uuid string) (ok bool, err error) {
 		return ok, err
 	}
 	pluginName := network.PluginPath
-	if pluginName == "system" {
+	if pluginName == "system" || pluginName == "module-core-system" {
 		ok, err = d.DeletePoint(uuid)
 		if err != nil {
 			return ok, err

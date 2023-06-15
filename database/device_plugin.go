@@ -23,7 +23,7 @@ func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Dev
 	}
 	pluginName := network.PluginPath
 
-	if pluginName == "system" {
+	if pluginName == "system" || pluginName == "module-core-system" {
 		device, err = d.CreateDevice(body)
 		if err != nil {
 			return nil, err
@@ -67,7 +67,7 @@ func (d *GormDatabase) UpdateDevicePlugin(uuid string, body *model.Device) (devi
 		return nil, err
 	}
 	pluginName := network.PluginPath
-	if pluginName == "system" {
+	if pluginName == "system" || pluginName == "module-core-system" {
 		device, err = d.UpdateDevice(uuid, body)
 		if err != nil {
 			return nil, err
@@ -108,7 +108,7 @@ func (d *GormDatabase) DeleteDevicePlugin(uuid string) (ok bool, err error) {
 		return false, err
 	}
 	pluginName := getNetwork.PluginPath
-	if pluginName == "system" {
+	if pluginName == "system" || pluginName == "module-core-system" {
 		ok, err = d.DeleteDevice(uuid)
 		if err != nil {
 			return ok, err
