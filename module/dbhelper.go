@@ -27,6 +27,8 @@ func (*dbHelper) GetWithoutParam(path, args string) ([]byte, error) {
 		out, err = database.GlobalGormDatabase.GetOneDeviceByArgs(apiArgs)
 	} else if path == "one_point_by_args" {
 		out, err = database.GlobalGormDatabase.GetOneDeviceByArgs(apiArgs)
+	} else if path == "schedules" {
+		out, err = database.GlobalGormDatabase.GetSchedules()
 	} else {
 		return nil, errors.New("not found")
 	}
@@ -163,6 +165,17 @@ func (*dbHelper) Patch(path, uuid string, body []byte) ([]byte, error) {
 			IsPresentValueChange: isPresentValueChange,
 			IsWriteValueChange:   isWriteValueChange,
 			IsPriorityChanged:    isPriorityChanged,
+		}
+	} else if path == "schedules" {
+		sch := model.Schedule{}
+		err = json.Unmarshal(body, &sch)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		out, err = database.GlobalGormDatabase.UpdateScheduleAllProps(uuid, &sch)
+		if err != nil {
+			return nil, err
 		}
 	} else {
 		return nil, errors.New("not found")

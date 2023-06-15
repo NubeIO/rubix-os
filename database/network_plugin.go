@@ -13,7 +13,7 @@ import (
 
 func (d *GormDatabase) CreateNetworkPlugin(body *model.Network) (network *model.Network, err error) {
 	pluginName := body.PluginPath
-	if pluginName == "system" {
+	if pluginName == "system" || pluginName == "module-core-system" {
 		network, err = d.CreateNetwork(body)
 		if err != nil {
 			return nil, err
@@ -53,7 +53,7 @@ func (d *GormDatabase) CreateNetworkPlugin(body *model.Network) (network *model.
 
 func (d *GormDatabase) UpdateNetworkPlugin(uuid string, body *model.Network) (network *model.Network, err error) {
 	pluginName := body.PluginPath
-	if pluginName == "system" {
+	if pluginName == "system" || pluginName == "module-core-system" {
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func (d *GormDatabase) DeleteNetworkPlugin(uuid string) (ok bool, err error) {
 		return false, err
 	}
 	pluginName := network.PluginPath
-	if pluginName == "system" {
+	if pluginName == "system" || pluginName == "module-core-system" {
 		ok, err = d.DeleteNetwork(uuid)
 		if err != nil {
 			return ok, err
