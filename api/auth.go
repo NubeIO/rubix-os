@@ -10,7 +10,7 @@ import (
 
 // The AuthDatabase interface for encapsulating database access.
 type AuthDatabase interface {
-	GetMemberSidebars(username string) ([]*model.Location, error)
+	GetMemberSidebars(username string, includeWithoutViews bool) ([]*model.Location, error)
 }
 
 type AuthAPI struct {
@@ -34,7 +34,7 @@ func (j *AuthAPI) HandleMemberAuth() gin.HandlerFunc {
 		username := auth.GetAuthorizedUsername(c.Request)
 		if username != "" {
 			hostUUID, hostName := matchHostUUIDName(c)
-			locations, _ := j.DB.GetMemberSidebars(username)
+			locations, _ := j.DB.GetMemberSidebars(username, true)
 			for _, location := range locations {
 				for _, group := range location.Groups {
 					for _, host := range group.Hosts {
