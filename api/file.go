@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/lib-files/fileutils"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v3"
@@ -75,7 +74,7 @@ func (a *FileAPI) CreateFile(c *gin.Context) {
 		return
 	}
 	_, err := fileutils.CreateFile(file, os.FileMode(a.FileMode))
-	ResponseHandler(model.Message{Message: fmt.Sprintf("created file: %s", file)}, err, c)
+	ResponseHandler(interfaces.Message{Message: fmt.Sprintf("created file: %s", file)}, err, c)
 }
 
 func (a *FileAPI) CopyFile(c *gin.Context) {
@@ -86,7 +85,7 @@ func (a *FileAPI) CopyFile(c *gin.Context) {
 		return
 	}
 	err := fileutils.Copy(from, to)
-	ResponseHandler(model.Message{Message: "copied successfully"}, err, c)
+	ResponseHandler(interfaces.Message{Message: "copied successfully"}, err, c)
 }
 
 func (a *FileAPI) RenameFile(c *gin.Context) {
@@ -97,7 +96,7 @@ func (a *FileAPI) RenameFile(c *gin.Context) {
 		return
 	}
 	err := os.Rename(oldPath, newPath)
-	ResponseHandler(model.Message{Message: "renamed successfully"}, err, c)
+	ResponseHandler(interfaces.Message{Message: "renamed successfully"}, err, c)
 }
 
 func (a *FileAPI) MoveFile(c *gin.Context) {
@@ -112,7 +111,7 @@ func (a *FileAPI) MoveFile(c *gin.Context) {
 		return
 	}
 	err := os.Rename(from, to)
-	ResponseHandler(model.Message{Message: "moved successfully"}, err, c)
+	ResponseHandler(interfaces.Message{Message: "moved successfully"}, err, c)
 }
 
 func (a *FileAPI) DownloadFile(c *gin.Context) {
@@ -186,7 +185,7 @@ func (a *FileAPI) WriteFile(c *gin.Context) {
 		return
 	}
 	err = fileutils.WriteFile(file, m.Data, fs.FileMode(a.FileMode))
-	ResponseHandler(model.Message{Message: fmt.Sprintf("wrote the file: %s", file)}, err, c)
+	ResponseHandler(interfaces.Message{Message: fmt.Sprintf("wrote the file: %s", file)}, err, c)
 }
 
 func (a *FileAPI) DeleteFile(c *gin.Context) {
@@ -196,7 +195,7 @@ func (a *FileAPI) DeleteFile(c *gin.Context) {
 		return
 	}
 	err := fileutils.Rm(file)
-	ResponseHandler(model.Message{Message: fmt.Sprintf("deleted file: %s", file)}, err, c)
+	ResponseHandler(interfaces.Message{Message: fmt.Sprintf("deleted file: %s", file)}, err, c)
 }
 
 func (a *FileAPI) DeleteAllFiles(c *gin.Context) {
@@ -206,7 +205,7 @@ func (a *FileAPI) DeleteAllFiles(c *gin.Context) {
 		return
 	}
 	err := fileutils.RemoveAllFiles(filePath)
-	ResponseHandler(model.Message{Message: fmt.Sprintf("deleted path: %s", filePath)}, err, c)
+	ResponseHandler(interfaces.Message{Message: fmt.Sprintf("deleted path: %s", filePath)}, err, c)
 }
 
 func TimeTrack(start time.Time) (out string) {
@@ -234,7 +233,7 @@ func (a *FileAPI) WriteStringFile(c *gin.Context) {
 		return
 	}
 	err = fileutils.WriteFile(m.FilePath, m.BodyAsString, fs.FileMode(a.FileMode))
-	ResponseHandler(model.Message{Message: fmt.Sprintf("wrote the file: %s", m.FilePath)}, err, c)
+	ResponseHandler(interfaces.Message{Message: fmt.Sprintf("wrote the file: %s", m.FilePath)}, err, c)
 }
 
 func (a *FileAPI) WriteFileYml(c *gin.Context) {
@@ -254,7 +253,7 @@ func (a *FileAPI) WriteFileYml(c *gin.Context) {
 		return
 	}
 	err = ioutil.WriteFile(m.FilePath, data, fs.FileMode(a.FileMode))
-	ResponseHandler(model.Message{Message: fmt.Sprintf("wrote file: %s ok", m.FilePath)}, err, c)
+	ResponseHandler(interfaces.Message{Message: fmt.Sprintf("wrote file: %s ok", m.FilePath)}, err, c)
 }
 
 func (a *FileAPI) WriteFileJson(c *gin.Context) {
@@ -274,5 +273,5 @@ func (a *FileAPI) WriteFileJson(c *gin.Context) {
 		return
 	}
 	err = ioutil.WriteFile(m.FilePath, data, fs.FileMode(a.FileMode))
-	ResponseHandler(model.Message{Message: fmt.Sprintf("wrote file:%s ok", m.FilePath)}, err, c)
+	ResponseHandler(interfaces.Message{Message: fmt.Sprintf("wrote file:%s ok", m.FilePath)}, err, c)
 }

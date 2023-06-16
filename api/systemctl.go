@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
 	"github.com/NubeIO/lib-systemctl-go/systemctl/properties"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
@@ -15,14 +14,14 @@ type SystemctlAPI struct {
 func (a *SystemctlAPI) SystemCtlEnable(c *gin.Context) {
 	unit := c.Query("unit")
 	err := a.SystemCtl.Enable(unit)
-	message := model.Message{Message: "enabled successfully"}
+	message := interfaces.Message{Message: "enabled successfully"}
 	ResponseHandler(message, err, c)
 }
 
 func (a *SystemctlAPI) SystemCtlDisable(c *gin.Context) {
 	unit := c.Query("unit")
 	err := a.SystemCtl.Disable(unit)
-	message := model.Message{Message: "disabled successfully"}
+	message := interfaces.Message{Message: "disabled successfully"}
 	ResponseHandler(message, err, c)
 }
 
@@ -37,7 +36,7 @@ func (a *SystemctlAPI) SystemCtlShow(c *gin.Context) {
 func (a *SystemctlAPI) SystemCtlStart(c *gin.Context) {
 	unit := c.Query("unit")
 	err := a.SystemCtl.Start(unit)
-	message := model.Message{Message: "started successfully"}
+	message := interfaces.Message{Message: "started successfully"}
 	ResponseHandler(message, err, c)
 }
 
@@ -57,34 +56,34 @@ func (a *SystemctlAPI) SystemCtlStop(c *gin.Context) {
 
 func (a *SystemctlAPI) SystemCtlResetFailed(c *gin.Context) {
 	err := a.SystemCtl.RestartFailed()
-	message := model.Message{Message: "reset-failed command executed successfully"}
+	message := interfaces.Message{Message: "reset-failed command executed successfully"}
 	ResponseHandler(message, err, c)
 }
 
 func (a *SystemctlAPI) SystemCtlDaemonReload(c *gin.Context) {
 	err := a.SystemCtl.DaemonReload()
-	message := model.Message{Message: "daemon-reload command executed successfully"}
+	message := interfaces.Message{Message: "daemon-reload command executed successfully"}
 	ResponseHandler(message, err, c)
 }
 
 func (a *SystemctlAPI) SystemCtlRestart(c *gin.Context) {
 	unit := c.Query("unit")
 	err := a.SystemCtl.Restart(unit)
-	message := model.Message{Message: "restarted successfully"}
+	message := interfaces.Message{Message: "restarted successfully"}
 	ResponseHandler(message, err, c)
 }
 
 func (a *SystemctlAPI) SystemCtlMask(c *gin.Context) {
 	unit := c.Query("unit")
 	err := a.SystemCtl.Mask(unit)
-	message := model.Message{Message: "masked successfully"}
+	message := interfaces.Message{Message: "masked successfully"}
 	ResponseHandler(message, err, c)
 }
 
 func (a *SystemctlAPI) SystemCtlUnmask(c *gin.Context) {
 	unit := c.Query("unit")
 	err := a.SystemCtl.Unmask(unit)
-	message := model.Message{Message: "unmasked successfully"}
+	message := interfaces.Message{Message: "unmasked successfully"}
 	ResponseHandler(message, err, c)
 }
 

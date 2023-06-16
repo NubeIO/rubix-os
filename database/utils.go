@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/NubeIO/rubix-os/utils/structs"
 	"gorm.io/datatypes"
@@ -138,8 +139,8 @@ func (d *GormDatabase) deleteResponseBuilder(query *gorm.DB) (bool, error) {
 	}
 }
 
-func (d *GormDatabase) deleteResponse(query *gorm.DB) (*model.Message, error) {
-	msg := &model.Message{
+func (d *GormDatabase) deleteResponse(query *gorm.DB) (*interfaces.Message, error) {
+	msg := &interfaces.Message{
 		Message: fmt.Sprintf("no record found, deleted count: %d", 0),
 	}
 	if query.Error != nil {

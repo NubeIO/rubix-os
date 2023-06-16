@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/NubeIO/lib-files/fileutils"
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/config"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/src/cli/bioscli"
@@ -263,7 +262,7 @@ func (a *SnapshotAPI) RestoreSnapshot(c *gin.Context) {
 		a.enableAndRestartServices(services)
 	}
 	log.Info("snapshot is restored")
-	message := model.Message{Message: "snapshot is restored successfully"}
+	message := interfaces.Message{Message: "snapshot is restored successfully"}
 	restoreStatus = interfaces.Restored
 	ResponseHandler(message, err, c)
 }

@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
@@ -29,7 +30,7 @@ func (d *GormDatabase) UpdateSnapshotCreateLog(uuid string, body *model.Snapshot
 	return snapshotCreateLog, nil
 }
 
-func (d *GormDatabase) DeleteSnapshotCreateLog(uuid string) (*model.Message, error) {
+func (d *GormDatabase) DeleteSnapshotCreateLog(uuid string) (*interfaces.Message, error) {
 	query := d.DB.Where("uuid = ?", uuid).Delete(&model.SnapshotCreateLog{})
 	return d.deleteResponse(query)
 }

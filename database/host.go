@@ -90,13 +90,13 @@ func (d *GormDatabase) UpdateHost(uuid string, body *model.Host) (*model.Host, e
 	return m, nil
 }
 
-func (d *GormDatabase) DeleteHost(uuid string) (*model.Message, error) {
+func (d *GormDatabase) DeleteHost(uuid string) (*interfaces.Message, error) {
 	var m *model.Host
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&m)
 	return d.deleteResponse(query)
 }
 
-func (d *GormDatabase) DropHosts() (*model.Message, error) {
+func (d *GormDatabase) DropHosts() (*interfaces.Message, error) {
 	var m *model.Host
 	query := d.DB.Where("1 = 1").Delete(&m)
 	return d.deleteResponse(query)

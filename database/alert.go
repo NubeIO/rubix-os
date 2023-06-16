@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/services/alerts"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/NubeIO/rubix-os/utils/ttime"
@@ -146,13 +147,13 @@ func (d *GormDatabase) UpdateAlertStatus(uuid string, status string) (alert *mod
 	return alert, query.Error
 }
 
-func (d *GormDatabase) DeleteAlert(uuid string) (*model.Message, error) {
+func (d *GormDatabase) DeleteAlert(uuid string) (*interfaces.Message, error) {
 	alertModel := new(model.Alert)
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&alertModel)
 	return d.deleteResponse(query)
 }
 
-func (d *GormDatabase) DropAlerts() (*model.Message, error) {
+func (d *GormDatabase) DropAlerts() (*interfaces.Message, error) {
 	var alertModel *model.Alert
 	query := d.DB.Where("1 = 1").Delete(&alertModel)
 	return d.deleteResponse(query)

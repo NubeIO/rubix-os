@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
@@ -9,7 +10,7 @@ type SnapshotCreteLogDatabase interface {
 	GetSnapshotCreateLogs(hostUUID string) ([]*model.SnapshotCreateLog, error)
 	CreateSnapshotCreateLog(body *model.SnapshotCreateLog) (*model.SnapshotCreateLog, error)
 	UpdateSnapshotCreateLog(uuid string, body *model.SnapshotCreateLog) (*model.SnapshotCreateLog, error)
-	DeleteSnapshotCreateLog(uuid string) (*model.Message, error)
+	DeleteSnapshotCreateLog(uuid string) (*interfaces.Message, error)
 
 	ResolveHost(uuid string, name string) (*model.Host, error)
 }

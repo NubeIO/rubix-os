@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/lib-files/fileutils"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 	"os"
@@ -28,5 +27,5 @@ func (inst *DirApi) CreateDir(c *gin.Context) {
 		return
 	}
 	err := os.MkdirAll(path, os.FileMode(inst.FileMode))
-	ResponseHandler(model.Message{Message: fmt.Sprintf("created directory: %s", path)}, err, c)
+	ResponseHandler(interfaces.Message{Message: fmt.Sprintf("created directory: %s", path)}, err, c)
 }

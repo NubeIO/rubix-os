@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,5 +26,5 @@ func (a *CloneEdgeApi) CloneEdge(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	ResponseHandler(model.Message{Message: "cloned edge successfully"}, nil, ctx)
+	ResponseHandler(interfaces.Message{Message: "cloned edge successfully"}, nil, ctx)
 }

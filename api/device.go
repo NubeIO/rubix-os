@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
@@ -102,5 +103,5 @@ func (a *DeviceAPI) CreateDeviceMetaTags(ctx *gin.Context) {
 func (a *DeviceAPI) SyncDevicePoints(ctx *gin.Context) {
 	deviceUUID := resolveID(ctx)
 	err := a.DB.SyncDevicePoints(deviceUUID)
-	ResponseHandler(model.Message{Message: "synced successfully"}, err, ctx)
+	ResponseHandler(interfaces.Message{Message: "synced successfully"}, err, ctx)
 }

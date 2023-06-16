@@ -3,7 +3,7 @@ package api
 import (
 	"errors"
 	"github.com/NubeIO/lib-date/datelib"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/services/system"
 	"github.com/NubeIO/rubix-os/utils"
 	"github.com/gin-gonic/gin"
@@ -128,5 +128,5 @@ func (a *SystemAPI) DeleteRebootHostJob(c *gin.Context) {
 		ResponseHandler(nil, err, c)
 		return
 	}
-	ResponseHandler(model.Message{Message: "deleted system reboot job successfully"}, nil, c)
+	ResponseHandler(interfaces.Message{Message: "deleted system reboot job successfully"}, nil, c)
 }
