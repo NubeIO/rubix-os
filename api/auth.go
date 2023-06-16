@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 )
 
 // The AuthDatabase interface for encapsulating database access.
@@ -31,6 +32,13 @@ func (j *AuthAPI) HandleAuth() gin.HandlerFunc {
 
 func (j *AuthAPI) HandleMemberAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		authorization := c.Request.Header.Get("Authorization")
+		if strings.HasPrefix(authorization, "Internal") || strings.HasPrefix(authorization, "External") {
+			if auth.Authorize(c.Request) {
+				c.Next()
+				return
+			}
+		}
 		username := auth.GetAuthorizedUsername(c.Request)
 		if username != "" {
 			hostUUID, hostName := matchHostUUIDName(c)
