@@ -24,7 +24,7 @@ type MemberDatabase interface {
 	DeleteMember(uuid string) (bool, error)
 	DeleteMemberByUsername(username string) (bool, error)
 	ChangeMemberPassword(uuid string, password string) (bool, error)
-	GetMemberSidebars(username string) ([]*model.Location, error)
+	GetMemberSidebars(username string, includeWithoutViews bool) ([]*model.Location, error)
 }
 
 type MemberAPI struct {
@@ -233,6 +233,6 @@ func (a *MemberAPI) GetMemberSidebars(ctx *gin.Context) {
 		ResponseHandler(nil, invalidMemberTokenError, ctx)
 		return
 	}
-	q, err := a.DB.GetMemberSidebars(username)
+	q, err := a.DB.GetMemberSidebars(username, false)
 	ResponseHandler(q, err, ctx)
 }

@@ -35,7 +35,7 @@ func (d *GormDatabase) GetLocationsByUUIDs(uuids []*string) ([]*model.Location, 
 func (d *GormDatabase) GetLocationsByGroupAndHostUUIDs(groupUUIDs []*string, hostUUIDs []*string) ([]*model.Location,
 	error) {
 	var locationsModel []*model.Location
-	query := d.DB.Distinct("locations.*").
+	query := d.DB.Preload("Views").Distinct("locations.*").
 		Joins("JOIN groups ON locations.uuid = groups.location_uuid").
 		Joins("JOIN hosts ON groups.uuid = hosts.group_uuid").
 		Where("groups.uuid IN ?", groupUUIDs).Or("hosts.uuid IN ?", hostUUIDs)

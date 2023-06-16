@@ -33,11 +33,13 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
 
-	authHandler := api.AuthAPI{}
+	authHandler := api.AuthAPI{DB: db}
 	handleAuth := func(c *gin.Context) { c.Next() }
 	if *conf.Auth {
 		handleAuth = authHandler.HandleAuth()
 	}
+	handleMemberAuth := authHandler.HandleMemberAuth()
+
 	apiRoutesTemp := engine.Group("/api", handleAuth) // TODO: remove this one and use the same one
 	// http://localhost:1660/api/plugins/api/system/schema/json/device
 	pluginManager, err := plugin.NewManager(db, conf.GetAbsPluginsDir(), apiRoutesTemp.Group("/plugins/api"))
@@ -1022,7 +1024,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			}
 		}
 	}
-	hostPointApiRoutes := engine.Group("/api/host_points")
+	hostPointApiRoutes := engine.Group("/api/host_points", handleMemberAuth)
 	{
 		hostPointApiRoutes.GET("/:uuid", pointHandler.GetPointByHost)
 		hostPointApiRoutes.PATCH("/write/:uuid", pointHandler.WritePointByHost)

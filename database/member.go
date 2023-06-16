@@ -128,7 +128,7 @@ func (d *GormDatabase) ChangeMemberPassword(uuid string, password string) (bool,
 	return true, nil
 }
 
-func (d *GormDatabase) GetMemberSidebars(username string) ([]*model.Location, error) {
+func (d *GormDatabase) GetMemberSidebars(username string, includeWithoutViews bool) ([]*model.Location, error) {
 	views, err := d.GetViewsByMemberUsername(username)
 	if err != nil {
 		return nil, err
@@ -188,12 +188,26 @@ func (d *GormDatabase) GetMemberSidebars(username string) ([]*model.Location, er
 
 	for _, location := range locations {
 		location.Views = filterViewsByViewUUIDs(location.Views, viewUUIDs)
+		// Filter groups
+		var updatedGroups []*model.Group
 		for _, group := range location.Groups {
 			group.Views = filterViewsByViewUUIDs(group.Views, viewUUIDs)
+			// Filter hosts
+			var updatedHosts []*model.Host
 			for _, host := range group.Hosts {
 				host.Views = filterViewsByViewUUIDs(host.Views, viewUUIDs)
+				if includeWithoutViews || len(host.Views) != 0 {
+					updatedHosts = append(updatedHosts, host)
+				}
+			}
+			// Update hosts
+			group.Hosts = updatedHosts
+			if includeWithoutViews || len(group.Views) != 0 || len(group.Hosts) != 0 {
+				updatedGroups = append(updatedGroups, group)
 			}
 		}
+		// Update groups
+		location.Groups = updatedGroups
 	}
 	return locations, nil
 }

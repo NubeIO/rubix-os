@@ -38,7 +38,7 @@ func (d *GormDatabase) GetGroupsByUUIDs(uuids []*string) ([]*model.Group, error)
 func (d *GormDatabase) GetGroupsByHostUUIDs(hostUUIDs []*string) ([]*model.Group, error) {
 	var groupsModel []*model.Group
 	query := d.DB
-	if err := query.Distinct("groups.*").
+	if err := query.Preload("Views").Distinct("groups.*").
 		Joins("JOIN hosts ON groups.uuid = hosts.group_uuid").
 		Where("hosts.uuid IN ?", hostUUIDs).
 		Find(&groupsModel).Error; err != nil {
