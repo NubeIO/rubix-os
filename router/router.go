@@ -630,10 +630,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 
 		deviceInfoRoutes := apiRoutes.Group("/system")
 		{
-			deviceInfoRoutes.GET("/device_info", deviceInfoHandler.GetDeviceInfo)
-
 			deviceInfoRoutes.GET("/device", deviceInfoHandler.GetDeviceInfo)
-			deviceInfoRoutes.PATCH("/device", deviceInfoHandler.UpdateDeviceInfo)
 			deviceInfoRoutes.POST("/scanner", systemHandler.RunScanner)
 			deviceInfoRoutes.GET("/network_interfaces", systemHandler.GetNetworkInterfaces)
 			deviceInfoRoutes.POST("/reboot", systemHandler.RebootHost)

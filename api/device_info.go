@@ -18,14 +18,3 @@ func (a *DeviceInfoAPI) GetDeviceInfo(c *gin.Context) {
 	deviceInfo, err := a.RubixRegistry.GetDeviceInfo()
 	ResponseHandler(deviceInfo, err, c)
 }
-
-func (a *DeviceInfoAPI) UpdateDeviceInfo(c *gin.Context) {
-	var deviceInfo *rubixregistry.DeviceInfo
-	err := c.ShouldBindJSON(&deviceInfo)
-	if err != nil {
-		ResponseHandler(nil, err, c)
-		return
-	}
-	response, err := a.RubixRegistry.UpdateDeviceInfo(*deviceInfo)
-	ResponseHandler(response, err, c)
-}
