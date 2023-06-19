@@ -8,11 +8,11 @@ import (
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
 	"github.com/NubeIO/rubix-os/config"
 	"github.com/NubeIO/rubix-os/interfaces"
+	"github.com/NubeIO/rubix-os/rubixregistry"
 	"github.com/NubeIO/rubix-os/src/cli/bioscli"
 	"github.com/NubeIO/rubix-os/src/cli/constants"
 	"github.com/NubeIO/rubix-os/utils"
 	"github.com/NubeIO/rubix-os/utils/namings"
-	"github.com/NubeIO/rubix-registry-go/rubixregistry"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -203,12 +203,12 @@ func (a *SnapshotAPI) RestoreSnapshot(c *gin.Context) {
 			return
 		}
 	}
-	rubixRegistryFile := path.Join(unzippedFolderPath, a.RubixRegistry.RubixRegistryDeviceInfoFile)
-	rubixRegistryFileExist := false
-	if _, err = os.Stat(rubixRegistryFile); !errors.Is(err, os.ErrNotExist) {
-		rubixRegistryFileExist = true
+	globalUUIDFile := path.Join(unzippedFolderPath, a.RubixRegistry.GlobalUUIDFile)
+	globalUUIDFileExist := false
+	if _, err = os.Stat(globalUUIDFile); !errors.Is(err, os.ErrNotExist) {
+		globalUUIDFileExist = true
 	}
-	if rubixRegistryFileExist {
+	if globalUUIDFileExist {
 		deviceInfo, err := a.RubixRegistry.GetDeviceInfo()
 		if err != nil {
 			log.Error(err)
@@ -216,7 +216,7 @@ func (a *SnapshotAPI) RestoreSnapshot(c *gin.Context) {
 			ResponseHandler(nil, err, c)
 			return
 		}
-		err = a.retainGlobalUUID(deviceInfo.GlobalUUID, rubixRegistryFile)
+		err = a.retainGlobalUUID(deviceInfo.GlobalUUID, globalUUIDFile)
 		if err != nil {
 			log.Error(err)
 			restoreStatus = interfaces.RestoreFailed

@@ -6,8 +6,8 @@ import (
 	"github.com/NubeIO/rubix-os/eventbus"
 	"github.com/NubeIO/rubix-os/migration"
 	"github.com/NubeIO/rubix-os/module/shared"
+	"github.com/NubeIO/rubix-os/rubixregistry"
 	"github.com/NubeIO/rubix-os/src/cachestore"
-	"github.com/NubeIO/rubix-registry-go/rubixregistry"
 	"os"
 	"path/filepath"
 	"time"
@@ -27,7 +27,7 @@ var mkdirAll = os.MkdirAll
 var GlobalGormDatabase *GormDatabase
 
 // New creates a new wrapper for the gorm database framework.
-func New(dialect, connection, logLevel string) (*GormDatabase, error) {
+func New(dialect, connection, logLevel string, registry *rubixregistry.RubixRegistry) (*GormDatabase, error) {
 	createDirectoryIfSqlite(dialect, connection)
 	_connection := fmt.Sprintf("%s?_foreign_keys=on", connection)
 	db, err := gorm.Open(sqlite.Open(_connection), &gorm.Config{
@@ -59,9 +59,8 @@ func New(dialect, connection, logLevel string) (*GormDatabase, error) {
 	}
 
 	busService := eventbus.NewService(eventbus.GetBus())
-	rubixRegistry := rubixregistry.New()
-	GlobalGormDatabase = &GormDatabase{DB: db, Bus: busService, RubixRegistry: rubixRegistry}
-	return &GormDatabase{DB: db, Bus: busService, RubixRegistry: rubixRegistry}, nil
+	GlobalGormDatabase = &GormDatabase{DB: db, Bus: busService, RubixRegistry: registry}
+	return &GormDatabase{DB: db, Bus: busService, RubixRegistry: registry}, nil
 }
 
 func createDirectoryIfSqlite(dialect, connection string) {

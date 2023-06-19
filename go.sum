@@ -40,8 +40,6 @@ github.com/NubeIO/nubeio-rubix-lib-models-go v1.7.1 h1:CxRn7eQglPjdbGjSrwWbV8CCW
 github.com/NubeIO/nubeio-rubix-lib-models-go v1.7.1/go.mod h1:J0Xy/dX/f/xIhEnW6ZhkE2LiyuRk2H9gCb0Uk+2SSSk=
 github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.9 h1:gAAbgcy62F7IdUt/djxCVvAF1ILMc8liJ/4hJl8Ld+w=
 github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.9/go.mod h1:MU13rBQBD1xc/n2aRvNyCr8HZ5NNTsPhiZSUFhIgrT4=
-github.com/NubeIO/rubix-registry-go v1.0.0 h1:EOklfvV3NP+zF6DmkRO4OmRttTMdN26LZSOEH35hhd0=
-github.com/NubeIO/rubix-registry-go v1.0.0/go.mod h1:nz/USWqKNI5Gp6hTNW5V8/Md284fo4ii88gMnqQ7Y2E=
 github.com/PaesslerAG/gval v1.1.1 h1:4d7pprU9876+m3rc08X33UjGip8oV1kkm8Gh5GBuTss=
 github.com/PaesslerAG/gval v1.1.1/go.mod h1:Fa8gfkCmUsELXgayr8sfL/sw+VzCVoa03dcOcR/if2w=
 github.com/PaesslerAG/jsonpath v0.1.0 h1:gADYeifvlqK3R3i2cR5B4DGgxLXIPb3TRTH1mGi0jPI=

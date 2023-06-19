@@ -2,7 +2,7 @@ package localmqtt
 
 import (
 	"encoding/json"
-	"github.com/NubeIO/rubix-registry-go/rubixregistry"
+	"github.com/NubeIO/rubix-os/rubixregistry"
 )
 
 const fetchDeviceInfo = "rubix/platform/info/publish"

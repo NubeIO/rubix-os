@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-registry-go/rubixregistry"
+	"github.com/NubeIO/rubix-os/rubixregistry"
 	"github.com/gin-gonic/gin"
 )
 

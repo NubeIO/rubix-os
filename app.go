@@ -4,6 +4,7 @@ import (
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
 	"github.com/NubeIO/rubix-os/mqttclient"
+	"github.com/NubeIO/rubix-os/rubixregistry"
 	"github.com/NubeIO/rubix-os/services/localmqtt"
 	"github.com/NubeIO/rubix-os/services/system"
 	"github.com/NubeIO/rubix-os/utils"
@@ -120,6 +121,10 @@ func main() {
 	if err := os.MkdirAll(conf.GetAbsSnapShotDir(), 0755); err != nil {
 		panic(err)
 	}
+	registry := rubixregistry.New()
+	if err := registry.CreateGlobalUUIDIfDoesNotExist(); err != nil {
+		panic(err)
+	}
 	internaltoken.CreateInternalTokenIfDoesNotExist()
 
 	mqttBroker := "tcp://" + conf.MQTT.Address + ":" + strconv.Itoa(conf.MQTT.Port)
@@ -131,7 +136,7 @@ func main() {
 	eventbus.Init()
 
 	connection := path.Join(conf.GetAbsDataDir(), conf.Database.Connection)
-	db, err = database.New(conf.Database.Dialect, connection, conf.Database.LogLevel)
+	db, err = database.New(conf.Database.Dialect, connection, conf.Database.LogLevel, registry)
 	if err != nil {
 		panic(err)
 	}
@@ -145,7 +150,7 @@ func main() {
 
 	intHandler(db)
 	scheduler, systemCtl, system_ := setupCron()
-	engine := router.Create(db, conf, scheduler, systemCtl, system_)
+	engine := router.Create(db, conf, scheduler, systemCtl, system_, registry)
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)
 	initFlushBuffers()

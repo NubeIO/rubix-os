@@ -39,7 +39,6 @@ type Configuration struct {
 			ModulesDir        string `default:"modules"`
 			UploadedImagesDir string `default:"images"`
 		}
-		DeviceInfoFile string `default:"/data/rubix-registry/device_info.json"`
 	}
 	Prod         bool  `default:"false"`
 	Auth         *bool `default:"true"`
@@ -85,7 +84,7 @@ func Get() *Configuration {
 func CreateApp() *Configuration {
 	config = new(Configuration)
 	config = config.Parse()
-	err := configor.New(&configor.Config{EnvironmentPrefix: "FLOW"}).Load(config, path.Join(config.GetAbsConfigDir(), "config.yml"))
+	err := configor.New(&configor.Config{EnvironmentPrefix: "ROS"}).Load(config, path.Join(config.GetAbsConfigDir(), "config.yml"))
 	if err != nil {
 		panic(err)
 	}
