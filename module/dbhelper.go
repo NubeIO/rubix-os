@@ -42,7 +42,7 @@ func (*dbHelper) Get(path, uuid, args string) ([]byte, error) {
 	if path == "networks" {
 		out, err = database.GlobalGormDatabase.GetNetwork(uuid, apiArgs)
 	} else if path == "devices" {
-		out, err = database.GlobalGormDatabase.GetNetwork(uuid, apiArgs)
+		out, err = database.GlobalGormDatabase.GetDevice(uuid, apiArgs)
 	} else if path == "points" {
 		out, err = database.GlobalGormDatabase.GetPoint(uuid, apiArgs)
 	} else if path == "networks_by_plugin_name" {
