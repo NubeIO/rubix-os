@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/NubeIO/lib-schema/systemschema"
 	"github.com/NubeIO/rubix-os/api"
-	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/plugin/nube/system/smodel"
 	"net/http"
 
@@ -58,14 +57,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	})
 
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
-		fns, err := inst.db.GetFlowNetworks(api.Args{})
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		}
-		networkSchema := systemschema.GetNetworkSchema()
-		networkSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
-		ctx.JSON(http.StatusOK, networkSchema)
+		ctx.JSON(http.StatusOK, systemschema.GetNetworkSchema())
 	})
 	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, systemschema.GetDeviceSchema())
