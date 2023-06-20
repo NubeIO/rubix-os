@@ -25,7 +25,7 @@ type MemberDatabase interface {
 	UpdateMember(uuid string, body *model.Member) (*model.Member, error)
 	DeleteMember(uuid string) (bool, error)
 	DeleteMemberByUsername(username string) (bool, error)
-	ChangeMemberPassword(uuid string, password string) (bool, error)
+	ChangeMemberPassword(uuid string, password string) (*interfaces.Message, error)
 	GetMemberSidebars(username string, includeWithoutViews bool) ([]*model.Location, error)
 }
 
@@ -61,6 +61,10 @@ func (a *MemberAPI) Login(ctx *gin.Context) {
 	body, _ := getBodyUser(ctx)
 	member, _ := a.DB.GetMemberByUsername(body.Username)
 	if member != nil && member.Username == body.Username && security.CheckPasswordHash(member.Password, body.Password) {
+		if *member.State != string(model.Verified) {
+			ctx.JSON(http.StatusForbidden, interfaces.Message{Message: "member is not verified"})
+			return
+		}
 		token, err := security.EncodeJwtToken(member.Username, constants.MemberRole)
 		if err != nil {
 			ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
@@ -154,6 +158,17 @@ func (a *MemberAPI) UpdateMemberByUUID(ctx *gin.Context) {
 	ResponseHandler(q, nil, ctx)
 }
 
+func (a *MemberAPI) ChangeMemberPassword(ctx *gin.Context) {
+	uuid := resolveID(ctx)
+	body, _ := getBodyChangePassword(ctx)
+	q, err := a.DB.ChangeMemberPassword(uuid, body.NewPassword)
+	if err != nil {
+		ResponseHandler(nil, err, ctx)
+		return
+	}
+	ResponseHandler(q, nil, ctx)
+}
+
 func (a *MemberAPI) GetMember(ctx *gin.Context) {
 	username, err := getAuthorizedUsername(ctx.Request)
 	if err != nil {
@@ -218,12 +233,12 @@ func (a *MemberAPI) ChangePassword(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized("invalid username or password"), ctx)
 		return
 	}
-	_, err = a.DB.ChangeMemberPassword(member.UUID, body.NewPassword)
+	q, err := a.DB.ChangeMemberPassword(member.UUID, body.NewPassword)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	ResponseHandler(interfaces.Message{Message: "your password has been changed successfully"}, err, ctx)
+	ResponseHandler(q, err, ctx)
 }
 
 func (a *MemberAPI) RefreshToken(ctx *gin.Context) {

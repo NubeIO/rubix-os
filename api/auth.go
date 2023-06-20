@@ -3,9 +3,8 @@ package api
 import (
 	"errors"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/auth"
-	"github.com/NubeIO/nubeio-rubix-lib-auth-go/constants"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/utils"
+	"github.com/NubeIO/rubix-os/constants"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -19,10 +18,10 @@ type AuthAPI struct {
 	DB AuthDatabase
 }
 
-func (j *AuthAPI) authorizeMember(c *gin.Context) bool {
+func (j *AuthAPI) authorizeMember(c *gin.Context) (int, error) {
 	username, _ := auth.GetAuthorizedUsername(c.Request)
 	if username == "" {
-		return false
+		return http.StatusUnauthorized, invalidMemberTokenError
 	}
 	hostUUID, hostName := matchHostUUIDName(c)
 	locations, _ := j.DB.GetMemberSidebars(username, true)
@@ -30,15 +29,15 @@ func (j *AuthAPI) authorizeMember(c *gin.Context) bool {
 		for _, group := range location.Groups {
 			for _, host := range group.Hosts {
 				if host.UUID == hostUUID || host.Name == hostName {
-					return true
+					return 0, nil
 				}
 			}
 		}
 	}
-	return false
+	return http.StatusForbidden, errors.New("forbidden access for the member")
 }
 
-func (j *AuthAPI) HandleAuth(roles ...string) gin.HandlerFunc {
+func (j *AuthAPI) HandleAuth(hostLevel bool, roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if authorized := auth.AuthorizeInternal(c.Request); authorized {
 			c.Next()
@@ -48,16 +47,15 @@ func (j *AuthAPI) HandleAuth(roles ...string) gin.HandlerFunc {
 			c.Next()
 			return
 		}
-		if authorized, err := auth.AuthorizeRoles(c.Request, roles...); authorized {
-			if utils.Contains(roles, constants.UserRole) {
-				c.Next()
-				return
-			} else {
-				if j.authorizeMember(c) {
-					c.Next()
+		if authorized, role, err := auth.AuthorizeRoles(c.Request, roles...); authorized {
+			if hostLevel && *role == constants.MemberRole {
+				if statusCode, err := j.authorizeMember(c); err != nil {
+					c.AbortWithError(statusCode, err)
 					return
 				}
 			}
+			c.Next()
+			return
 		} else if err != nil {
 			c.AbortWithError(http.StatusUnauthorized, err)
 			return
