@@ -148,6 +148,9 @@ func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point, ch
 	if body.PollPriority == "" {
 		body.PollPriority = model.PRIORITY_NORMAL
 	}
+	if body.HistoryEnable == nil {
+		body.HistoryEnable = boolean.NewTrue()
+	}
 	if err := db.Create(&body).Error; err != nil {
 		return nil, err
 	}
@@ -351,8 +354,8 @@ func (d *GormDatabase) updatePointValue(
 	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 
 	if isChange {
-		if boolean.IsTrue(config.Get().PointHistory.Enable) && boolean.IsTrue(pointModel.HistoryEnable) &&
-			checkHistoryCovType(string(pointModel.HistoryType)) {
+		if boolean.IsTrue(config.Get().PointHistory.Enable) && checkHistoryCovType(string(pointModel.HistoryType)) &&
+			d.CheckHistoryEnable(pointModel.UUID) {
 			pointHistory := &model.PointHistory{
 				PointUUID: pointModel.UUID,
 				Value:     pointModel.PresentValue,
@@ -478,14 +481,38 @@ func (d *GormDatabase) GetPointWithParent(uuid string) (*interfaces.PointWithPar
 
 func (d *GormDatabase) GetPointsForCreateInterval() ([]*interfaces.PointHistoryInterval, error) {
 	var pointIntervalHistory []*interfaces.PointHistoryInterval
-	query := fmt.Sprintf("SELECT p.uuid, p.history_interval, ph.timestamp AS timestamp, p.present_value "+
-		"FROM points p "+
-		"LEFT JOIN (SELECT point_uuid, MAX(timestamp) AS timestamp FROM point_histories GROUP BY point_uuid) ph "+
-		"ON p.uuid = ph.point_uuid "+
-		"WHERE p.history_enable AND p.history_type != '%s' AND p.history_interval > %d",
-		model.HistoryTypeCov, 0)
-	if err := d.DB.Raw(query).Scan(&pointIntervalHistory).Error; err != nil {
+	if err := d.DB.Table("points").
+		Select("points.uuid, points.history_interval, point_histories.timestamp AS timestamp, "+
+			"points.present_value").
+		Joins("JOIN devices ON points.device_uuid = devices.uuid").
+		Joins("JOIN networks ON devices.network_uuid = networks.uuid").
+		Joins("LEFT JOIN (SELECT point_uuid, MAX(timestamp) AS timestamp "+
+			"FROM point_histories "+
+			"GROUP BY point_uuid) point_histories "+
+			"ON points.uuid = point_histories.point_uuid").
+		Where("points.history_enable").
+		Where("devices.history_enable").
+		Where("networks.history_enable").
+		Where("points.history_interval > ?", 0).
+		Where(fmt.Sprintf("points.history_type != '%s'", model.HistoryTypeCov)). // points.history_type != "COV" is invalid
+		Scan(&pointIntervalHistory).Error; err != nil {
 		return nil, err
 	}
 	return pointIntervalHistory, nil
+}
+
+func (d *GormDatabase) CheckHistoryEnable(uuid string) bool {
+	var count int64
+	if err := d.DB.Table("points").
+		Select("points.uuid").
+		Joins("JOIN devices ON points.device_uuid = devices.uuid").
+		Joins("JOIN networks ON devices.network_uuid = networks.uuid").
+		Where("points.uuid = ?", uuid).
+		Where("points.history_enable").
+		Where("devices.history_enable").
+		Where("networks.history_enable").
+		Count(&count).Error; err != nil {
+		return false
+	}
+	return count > 0
 }
