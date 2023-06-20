@@ -3,9 +3,11 @@ package router
 import (
 	"github.com/NubeDev/location"
 	"github.com/NubeIO/lib-systemctl-go/systemctl"
+	authconstants "github.com/NubeIO/nubeio-rubix-lib-auth-go/constants"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/auth"
 	"github.com/NubeIO/rubix-os/config"
+	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/database"
 	"github.com/NubeIO/rubix-os/eventbus"
 	"github.com/NubeIO/rubix-os/global"
@@ -36,9 +38,10 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	authHandler := api.AuthAPI{DB: db}
 	handleAuth := func(c *gin.Context) { c.Next() }
 	if *conf.Auth {
-		handleAuth = authHandler.HandleAuth()
+		handleAuth = authHandler.HandleAuth(false, authconstants.UserRole)
 	}
-	handleMemberAuth := authHandler.HandleMemberAuth()
+	handleAuthWithMember := authHandler.HandleAuth(false, authconstants.UserRole, constants.MemberRole)
+	handleAuthWithMemberHostLevel := authHandler.HandleAuth(true, authconstants.UserRole, constants.MemberRole)
 
 	apiRoutesTemp := engine.Group("/api", handleAuth) // TODO: remove this one and use the same one
 	// http://localhost:1660/api/plugins/api/system/schema/json/device
@@ -694,6 +697,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			memberRoutes.GET("/:uuid", memberHandler.GetMemberByUUID)
 			memberRoutes.DELETE("/:uuid", memberHandler.DeleteMemberByUUID)
 			memberRoutes.PATCH("/:uuid", memberHandler.UpdateMemberByUUID)
+			memberRoutes.POST("/:uuid/change_password", memberHandler.ChangeMemberPassword)
 			memberRoutes.GET("/username/:username", memberHandler.GetMemberByUsername)
 			memberRoutes.POST("/verify/:username", memberHandler.VerifyMember)
 		}
@@ -757,7 +761,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				networkingInterfaceRoutes.POST("/exists", networkingHandler.DHCPPortExists)
 				networkingInterfaceRoutes.POST("/auto", networkingHandler.DHCPSetAsAuto)
 				networkingInterfaceRoutes.POST("/static", networkingHandler.DHCPSetStaticIP)
-				networkingInterfaceRoutes.POST("/reset", networkingHandler.InterfaceUpDown) //
+				networkingInterfaceRoutes.POST("/reset", networkingHandler.InterfaceUpDown)
 				networkingInterfaceRoutes.POST("/pp", networkingHandler.InterfaceUp)
 				networkingInterfaceRoutes.POST("/down", networkingHandler.InterfaceDown)
 			}
@@ -954,17 +958,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				}
 			}
 
-			viewSettingRoutes := serverApiRoutes.Group("/view-settings")
-			{
-				viewSettingRoutes.GET("", viewSettingHandler.GetViewSetting)
-				viewSettingRoutes.POST("", viewSettingHandler.CreateViewSetting)
-				viewSettingRoutes.DELETE("", viewSettingHandler.DeleteViewSetting)
-			}
-
 			viewRoutes := serverApiRoutes.Group("/views")
 			{
-				viewRoutes.GET("", viewHandler.GetViews)
-				viewRoutes.GET("/:uuid", viewHandler.GetView)
 				viewRoutes.POST("", viewHandler.CreateView)
 				viewRoutes.PATCH("/:uuid", viewHandler.UpdateView)
 				viewRoutes.DELETE("/:uuid", viewHandler.DeleteView)
@@ -997,7 +992,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			alertRoutes := serverApiRoutes.Group("/alerts")
 			{
 				alertRoutes.GET("/schema", alertHandler.AlertsSchema)
-				alertRoutes.GET("", alertHandler.GetAlerts)
 				alertRoutes.POST("", alertHandler.CreateAlert)
 				alertRoutes.GET("/:uuid", alertHandler.GetAlert)
 				alertRoutes.GET("/host/:uuid", alertHandler.GetAlertsByHost)
@@ -1024,10 +1018,33 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			}
 		}
 	}
-	hostPointApiRoutes := engine.Group("/api/host_points", handleMemberAuth)
+
+	authWithMember := engine.Group("/api", handleAuthWithMember)
 	{
-		hostPointApiRoutes.GET("/:uuid", pointHandler.GetPointByHost)
-		hostPointApiRoutes.PATCH("/write/:uuid", pointHandler.WritePointByHost)
+		viewSettingRoutes := authWithMember.Group("/view-settings")
+		{
+			viewSettingRoutes.GET("", viewSettingHandler.GetViewSetting)
+			viewSettingRoutes.PUT("", viewSettingHandler.UpsertSetting)
+			viewSettingRoutes.DELETE("", viewSettingHandler.DeleteViewSetting)
+		}
+
+		viewRoutes := authWithMember.Group("/views")
+		{
+			viewRoutes.GET("", viewHandler.GetViews)
+			viewRoutes.GET("/:uuid", viewHandler.GetView)
+		}
+
+		alertRoutes := authWithMember.Group("/alerts")
+		{
+			alertRoutes.GET("", alertHandler.GetAlerts)
+		}
 	}
+
+	authWithMemberHostLevel := engine.Group("/api/host_points", handleAuthWithMemberHostLevel)
+	{
+		authWithMemberHostLevel.GET("/:uuid", pointHandler.GetPointByHost)
+		authWithMemberHostLevel.PATCH("/write/:uuid", pointHandler.WritePointByHost)
+	}
+
 	return engine
 }

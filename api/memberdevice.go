@@ -2,8 +2,8 @@ package api
 
 import (
 	"errors"
-	"github.com/NubeIO/nubeio-rubix-lib-auth-go/auth"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/nerrors"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/gin-gonic/gin"
 )
@@ -24,9 +24,9 @@ type MemberDeviceAPI struct {
 }
 
 func (a *MemberDeviceAPI) GetMemberDevices(ctx *gin.Context) {
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
 	member, err := a.DB.GetMemberByUsername(username)
@@ -39,9 +39,9 @@ func (a *MemberDeviceAPI) GetMemberDevices(ctx *gin.Context) {
 }
 
 func (a *MemberDeviceAPI) GetMemberDevice(ctx *gin.Context) {
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
 	member, err := a.DB.GetMemberByUsername(username)
@@ -55,9 +55,9 @@ func (a *MemberDeviceAPI) GetMemberDevice(ctx *gin.Context) {
 }
 
 func (a *MemberDeviceAPI) CreateMemberDevice(ctx *gin.Context) {
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
 	member, err := a.DB.GetMemberByUsername(username)
@@ -78,9 +78,9 @@ func (a *MemberDeviceAPI) CreateMemberDevice(ctx *gin.Context) {
 }
 
 func (a *MemberDeviceAPI) UpdateMemberDevice(ctx *gin.Context) {
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
 	member, err := a.DB.GetMemberByUsername(username)
@@ -101,9 +101,9 @@ func (a *MemberDeviceAPI) UpdateMemberDevice(ctx *gin.Context) {
 }
 
 func (a *MemberDeviceAPI) DeleteMemberDevice(ctx *gin.Context) {
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
 	member, err := a.DB.GetMemberByUsername(username)

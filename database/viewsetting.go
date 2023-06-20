@@ -13,7 +13,7 @@ func (d *GormDatabase) GetViewSetting() (*model.ViewSetting, error) {
 	return viewSettingModel, nil
 }
 
-func (d *GormDatabase) CreateViewSetting(body *model.ViewSetting) (*model.ViewSetting, error) {
+func (d *GormDatabase) UpsertSetting(body *model.ViewSetting) (*model.ViewSetting, error) {
 	viewSetting, _ := d.GetViewSetting()
 	if viewSetting != nil {
 		if err := d.DB.Model(&viewSetting).Updates(body).Error; err != nil {

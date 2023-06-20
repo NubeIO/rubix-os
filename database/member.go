@@ -4,6 +4,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/security"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
@@ -92,6 +93,7 @@ func (d *GormDatabase) UpdateMember(uuid string, body *model.Member) (*model.Mem
 	if query.Error != nil {
 		return nil, query.Error
 	}
+	body.Password = memberModel.Password
 	query = d.DB.Model(&memberModel).Updates(body)
 	if query.Error != nil {
 		return nil, query.Error
@@ -111,21 +113,21 @@ func (d *GormDatabase) DeleteMemberByUsername(username string) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) ChangeMemberPassword(uuid string, password string) (bool, error) {
+func (d *GormDatabase) ChangeMemberPassword(uuid string, password string) (*interfaces.Message, error) {
 	var memberModel *model.Member
 	query := d.DB.Where("uuid = ?", uuid).First(&memberModel)
 	if query.Error != nil {
-		return false, query.Error
+		return nil, query.Error
 	}
 	hashedPassword, err := security.GeneratePasswordHash(password)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	query = d.DB.Model(&memberModel).Update("password", hashedPassword)
 	if query.Error != nil {
-		return false, query.Error
+		return nil, query.Error
 	}
-	return true, nil
+	return &interfaces.Message{Message: "your password has been changed successfully"}, nil
 }
 
 func (d *GormDatabase) GetMemberSidebars(username string, includeWithoutViews bool) ([]*model.Location, error) {
