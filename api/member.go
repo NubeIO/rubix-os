@@ -5,11 +5,13 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/auth"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/security"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/nerrors"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 var invalidMemberTokenError = nerrors.NewErrUnauthorized("invalid member token")
@@ -31,6 +33,17 @@ type MemberAPI struct {
 	DB MemberDatabase
 }
 
+func getAuthorizedUsername(request *http.Request) (string, error) {
+	username, err := auth.GetAuthorizedUsername(request)
+	if err != nil {
+		return "", nerrors.NewErrUnauthorized(err.Error())
+	}
+	if username == "" {
+		return "", invalidMemberTokenError
+	}
+	return username, nil
+}
+
 func (a *MemberAPI) CreateMember(ctx *gin.Context) {
 	body, _ := getBodyMember(ctx)
 	_, err := govalidator.ValidateStruct(body)
@@ -48,7 +61,7 @@ func (a *MemberAPI) Login(ctx *gin.Context) {
 	body, _ := getBodyUser(ctx)
 	member, _ := a.DB.GetMemberByUsername(body.Username)
 	if member != nil && member.Username == body.Username && security.CheckPasswordHash(member.Password, body.Password) {
-		token, err := security.EncodeJwtToken(member.Username)
+		token, err := security.EncodeJwtToken(member.Username, constants.MemberRole)
 		if err != nil {
 			ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 			return
@@ -142,9 +155,9 @@ func (a *MemberAPI) UpdateMemberByUUID(ctx *gin.Context) {
 }
 
 func (a *MemberAPI) GetMember(ctx *gin.Context) {
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
 	q, err := a.DB.GetMemberByUsername(username)
@@ -155,9 +168,9 @@ func (a *MemberAPI) GetMember(ctx *gin.Context) {
 }
 
 func (a *MemberAPI) UpdateMember(ctx *gin.Context) {
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
 	member, err := a.DB.GetMemberByUsername(username)
@@ -176,9 +189,9 @@ func (a *MemberAPI) UpdateMember(ctx *gin.Context) {
 }
 
 func (a *MemberAPI) DeleteMember(ctx *gin.Context) {
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
 	q, err := a.DB.DeleteMemberByUsername(username)
@@ -191,9 +204,9 @@ func (a *MemberAPI) ChangePassword(ctx *gin.Context) {
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 	}
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
 	member, err := a.DB.GetMemberByUsername(username)
@@ -214,12 +227,12 @@ func (a *MemberAPI) ChangePassword(ctx *gin.Context) {
 }
 
 func (a *MemberAPI) RefreshToken(ctx *gin.Context) {
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	token, err := security.EncodeJwtToken(username)
+	token, err := security.EncodeJwtToken(username, constants.MemberRole)
 	if err != nil {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
@@ -228,9 +241,9 @@ func (a *MemberAPI) RefreshToken(ctx *gin.Context) {
 }
 
 func (a *MemberAPI) GetMemberSidebars(ctx *gin.Context) {
-	username := auth.GetAuthorizedUsername(ctx.Request)
-	if username == "" {
-		ResponseHandler(nil, invalidMemberTokenError, ctx)
+	username, err := getAuthorizedUsername(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
 	q, err := a.DB.GetMemberSidebars(username, false)

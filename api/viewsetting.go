@@ -7,7 +7,7 @@ import (
 
 type ViewSettingDatabase interface {
 	GetViewSetting() (*model.ViewSetting, error)
-	CreateViewSetting(body *model.ViewSetting) (*model.ViewSetting, error)
+	UpsertSetting(body *model.ViewSetting) (*model.ViewSetting, error)
 	DeleteViewSetting() (bool, error)
 }
 
@@ -20,9 +20,9 @@ func (a *ViewSettingAPI) GetViewSetting(ctx *gin.Context) {
 	ResponseHandler(q, err, ctx)
 }
 
-func (a *ViewSettingAPI) CreateViewSetting(ctx *gin.Context) {
+func (a *ViewSettingAPI) UpsertSetting(ctx *gin.Context) {
 	body, _ := getBodyViewSetting(ctx)
-	q, err := a.DB.CreateViewSetting(body)
+	q, err := a.DB.UpsertSetting(body)
 	ResponseHandler(q, err, ctx)
 }
 
