@@ -2,7 +2,6 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,8 +15,6 @@ type ScheduleDatabase interface {
 	UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error)
 	ScheduleWrite(uuid string, body *model.ScheduleData, forceWrite bool) error
 	DeleteSchedule(uuid string) (bool, error)
-	SyncSchedules() error
-	SyncSchedule(uuid string) error
 }
 
 type ScheduleAPI struct {
@@ -76,15 +73,4 @@ func (a *ScheduleAPI) DeleteSchedule(ctx *gin.Context) {
 	uuid := resolveID(ctx)
 	q, err := a.DB.DeleteSchedule(uuid)
 	ResponseHandler(q, err, ctx)
-}
-
-func (a *ScheduleAPI) SyncSchedules(ctx *gin.Context) {
-	err := a.DB.SyncSchedules()
-	ResponseHandler(interfaces.Message{Message: "synced successfully"}, err, ctx)
-}
-
-func (a *ScheduleAPI) SyncSchedule(ctx *gin.Context) {
-	uuid := resolveID(ctx)
-	err := a.DB.SyncSchedule(uuid)
-	ResponseHandler(interfaces.Message{Message: "synced successfully"}, err, ctx)
 }

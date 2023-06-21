@@ -1,10 +1,8 @@
 package database
 
 import (
-	"errors"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
-	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"gorm.io/gorm"
 )
@@ -58,9 +56,6 @@ func (d *GormDatabase) DeleteWriterClone(uuid string) (bool, error) {
 	wc, err := d.GetWriterClone(uuid)
 	if err != nil {
 		return false, err
-	}
-	if boolean.IsTrue(wc.CreatedFromAutoMapping) {
-		return false, errors.New("can't delete auto-mapped writer clone")
 	}
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&wc)
 	return d.deleteResponseBuilder(query)

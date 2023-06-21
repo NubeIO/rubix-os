@@ -8,7 +8,6 @@ import (
 	"github.com/NubeIO/rubix-os/interfaces/connection"
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/urls"
-	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"gorm.io/gorm"
 )
@@ -61,9 +60,6 @@ func (d *GormDatabase) DeleteStreamClone(uuid string) (bool, error) {
 	streamCloneModel, err := d.GetStreamClone(uuid, api.Args{})
 	if err != nil {
 		return false, err
-	}
-	if boolean.IsTrue(streamCloneModel.CreatedFromAutoMapping) {
-		return false, errors.New("can't delete auto-mapped stream clone")
 	}
 	query := d.DB.Delete(&streamCloneModel)
 	return d.deleteResponseBuilder(query)

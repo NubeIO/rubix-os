@@ -103,9 +103,6 @@ func (d *GormDatabase) CreatePointTransaction(db *gorm.DB, body *model.Point, ch
 	if query.Error != nil {
 		return nil, fmt.Errorf("no such parent device with uuid %s", body.DeviceUUID)
 	}
-	if boolean.IsTrue(device.CreatedFromAutoMapping) && checkAm {
-		return nil, errors.New("can't create a point for the auto-mapped device")
-	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Point)
 	body.Name = name
 	if body.Decimal == nil {
@@ -192,9 +189,6 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 	pointModel, err := d.GetPoint(uuid, api.Args{WithPriority: true})
 	if err != nil {
 		return nil, err
-	}
-	if boolean.IsTrue(pointModel.CreatedFromAutoMapping) {
-		return nil, errors.New("can't update auto-mapped point")
 	}
 	existingName, existingAddrID := d.pointNameExists(body)
 	if existingAddrID && boolean.IsTrue(body.IsBitwise) && body.BitwiseIndex != nil && *body.BitwiseIndex >= 0 {

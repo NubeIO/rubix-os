@@ -8,7 +8,6 @@ import (
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -171,15 +170,13 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	_ = json.Unmarshal(body.Schedule, &scheduleData)
 	_ = d.ScheduleWrite(uuid, scheduleData, false)
 
-	// restrict to update it for mapping, we only sync values for the mapped values
-	if boolean.IsFalse(scheduleModel.CreatedFromAutoMapping) {
-		query = d.DB.Model(&scheduleModel).Select("*").Omit("IsActive", "ActiveWeekly", "ActiveException", "ActiveEvent", "Payload", "PeriodStart", "PeriodStop", "NextStart", "NextStop", "PeriodStartString", "PeriodStopString", "NextStartString", "NextStopString", "CreatedAt").Updates(&body)
-		// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
-		if query.Error != nil {
-			return nil, query.Error
-		}
-		d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name)
+	query = d.DB.Model(&scheduleModel).Select("*").Omit("IsActive", "ActiveWeekly", "ActiveException", "ActiveEvent", "Payload", "PeriodStart", "PeriodStop", "NextStart", "NextStop", "PeriodStartString", "PeriodStopString", "NextStartString", "NextStopString", "CreatedAt").Updates(&body)
+	// query = d.DB.Model(&scheduleModel).Updates(body)  // This line doesn't update properties to 0 (zero values).  Example is NextStart and NextStop
+	if query.Error != nil {
+		return nil, query.Error
 	}
+	d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name)
+
 	return scheduleModel, nil
 }
 
@@ -270,52 +267,6 @@ func (d *GormDatabase) DeleteSchedule(uuid string) (bool, error) {
 	}
 	query := d.DB.Delete(&schedule)
 	return d.deleteResponseBuilder(query)
-}
-
-func (d *GormDatabase) SyncSchedule(uuid string) error {
-	schedule, err := d.GetSchedule(uuid)
-	if err != nil {
-		return err
-	}
-	schedules := append([]*model.Schedule{}, schedule)
-	return d.syncSchedules(schedules)
-}
-
-func (d *GormDatabase) SyncSchedules() error {
-	schedules, err := d.GetSchedules()
-	if err != nil {
-		return err
-	}
-	return d.syncSchedules(schedules)
-}
-
-func (d *GormDatabase) syncSchedules(schedules []*model.Schedule) error {
-	var firstErr error
-	uniqueAutoMappingFlowNetworkNames := GetUniqueAutoMappingScheduleFlowNetworkNames(schedules)
-	for _, fnName := range uniqueAutoMappingFlowNetworkNames {
-		err := d.CreateAutoMappingsSchedules(fnName, schedules)
-		if err != nil {
-			log.Error("Auto mapping error: ", err)
-		}
-		if firstErr == nil {
-			firstErr = err
-		}
-	}
-	return firstErr
-}
-
-func GetUniqueAutoMappingScheduleFlowNetworkNames(schedules []*model.Schedule) []string {
-	uniqueAutoMappingFlowNetworkNamesMap := make(map[string]struct{})
-	var uniqueAutoMappingFlowNetworkNames []string
-
-	for _, schedule := range schedules {
-		if _, ok := uniqueAutoMappingFlowNetworkNamesMap[schedule.AutoMappingFlowNetworkName]; !ok {
-			uniqueAutoMappingFlowNetworkNamesMap[schedule.AutoMappingFlowNetworkName] = struct{}{}
-			uniqueAutoMappingFlowNetworkNames = append(uniqueAutoMappingFlowNetworkNames, schedule.AutoMappingFlowNetworkName)
-		}
-	}
-
-	return uniqueAutoMappingFlowNetworkNames
 }
 
 func (d *GormDatabase) UpdateScheduleConnectionErrors(uuid string, schedule *model.Schedule) error {

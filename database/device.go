@@ -1,11 +1,9 @@
 package database
 
 import (
-	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
-	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"gorm.io/gorm"
@@ -39,9 +37,6 @@ func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device, 
 	if query.Error != nil {
 		return nil, fmt.Errorf("no such parent network with uuid %s", body.NetworkUUID)
 	}
-	if boolean.IsTrue(network.CreatedFromAutoMapping) && checkAm {
-		return nil, errors.New("can't create a device for the auto-mapped network")
-	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Device)
 	body.Name = name
 	body.ThingClass = model.ThingClass.Device
@@ -67,9 +62,6 @@ func (d *GormDatabase) UpdateDeviceTransaction(db *gorm.DB, uuid string, body *m
 	query := db.Where("uuid = ?", uuid).First(&deviceModel)
 	if query.Error != nil {
 		return nil, query.Error
-	}
-	if boolean.IsTrue(deviceModel.CreatedFromAutoMapping) && checkAm {
-		return nil, errors.New("can't update auto-mapped device")
 	}
 	if err := updateTagsTransaction(db, &deviceModel, body.Tags); err != nil {
 		return nil, err
@@ -126,19 +118,4 @@ func (d *GormDatabase) DeleteOneDeviceByArgs(args api.Args) (bool, error) {
 	var deviceModel *model.Device
 	query := d.buildDeviceQuery(args).Delete(&deviceModel)
 	return d.deleteResponseBuilder(query)
-}
-
-func (d *GormDatabase) SyncDevicePoints(uuid string) error {
-	device, err := d.GetDevice(uuid, api.Args{WithPoints: true, WithPriority: true, WithTags: true, WithMetaTags: true})
-	if err != nil {
-		return err
-	}
-	devices := make([]*model.Device, 0)
-	devices = append(devices, device)
-
-	network, _ := d.GetNetwork(device.NetworkUUID, api.Args{WithTags: true, WithMetaTags: true})
-	network.Devices = devices // doing this for just to sync one device points
-	networks := make([]*model.Network, 0)
-	networks = append(networks, network)
-	return d.CreateNetworksAutoMappings(network.AutoMappingFlowNetworkName, networks, interfaces.Point)
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
-	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/plugin/compat"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
@@ -118,9 +117,6 @@ func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if boolean.IsTrue(networkModel.CreatedFromAutoMapping) && checkAm {
-		return nil, errors.New("can't update auto-mapped network")
-	}
 	if err := updateTagsTransaction(db, &networkModel, body.Tags); err != nil {
 		return nil, err
 	}
@@ -183,46 +179,6 @@ func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	}
 	info := d.PluginManager.PluginInfo(pluginConf.ModulePath)
 	return info
-}
-
-func (d *GormDatabase) SyncNetworks() error {
-	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true, WithPriority: true, WithTags: true, WithMetaTags: true})
-	var firstErr error
-	if err != nil {
-		return err
-	}
-	uniqueAutoMappingFlowNetworkNames := GetUniqueAutoMappingFlowNetworkNames(networks)
-	for _, fnName := range uniqueAutoMappingFlowNetworkNames {
-		err = d.CreateNetworksAutoMappings(fnName, networks, interfaces.Network)
-		if err != nil {
-			log.Error("Auto mapping error: ", err)
-		}
-	}
-	return firstErr
-}
-
-func (d *GormDatabase) SyncNetworkDevices(uuid string) error {
-	network, err := d.GetNetwork(uuid, api.Args{WithDevices: true, WithPoints: true, WithPriority: true, WithTags: true, WithMetaTags: true})
-	if err != nil {
-		return err
-	}
-	networks := make([]*model.Network, 0)
-	networks = append(networks, network)
-	return d.CreateNetworksAutoMappings(network.AutoMappingFlowNetworkName, networks, interfaces.Device)
-}
-
-func GetUniqueAutoMappingFlowNetworkNames(networks []*model.Network) []string {
-	uniqueAutoMappingFlowNetworkNamesMap := make(map[string]struct{})
-	var uniqueAutoMappingFlowNetworkNames []string
-
-	for _, network := range networks {
-		if _, ok := uniqueAutoMappingFlowNetworkNamesMap[network.AutoMappingFlowNetworkName]; !ok {
-			uniqueAutoMappingFlowNetworkNamesMap[network.AutoMappingFlowNetworkName] = struct{}{}
-			uniqueAutoMappingFlowNetworkNames = append(uniqueAutoMappingFlowNetworkNames, network.AutoMappingFlowNetworkName)
-		}
-	}
-
-	return uniqueAutoMappingFlowNetworkNames
 }
 
 func (d *GormDatabase) CreateBulkNetworksTransaction(db *gorm.DB, networks []*model.Network) (bool, error) {

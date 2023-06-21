@@ -9,7 +9,6 @@ import (
 	"github.com/NubeIO/rubix-os/interfaces/connection"
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/urls"
-	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"gorm.io/gorm"
@@ -55,9 +54,6 @@ func (d *GormDatabase) CreateConsumer(body *model.Consumer) (*model.Consumer, er
 	if err != nil {
 		return nil, fmt.Errorf("no such parent stream clone with uuid %s", body.StreamCloneUUID)
 	}
-	if boolean.IsTrue(streamClone.CreatedFromAutoMapping) {
-		return nil, errors.New("can't create a consumer for the auto-mapped stream clone")
-	}
 	flowNetworkCloneUUID := streamClone.FlowNetworkCloneUUID
 	fnc, err := d.GetFlowNetworkClone(flowNetworkCloneUUID, api.Args{})
 	if err != nil {
@@ -91,9 +87,6 @@ func (d *GormDatabase) DeleteConsumer(uuid string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if boolean.IsTrue(consumerModel.CreatedFromAutoMapping) {
-		return false, errors.New("can't delete auto-mapped consumer")
-	}
 	query := d.DB.Delete(&consumerModel)
 	return d.deleteResponseBuilder(query)
 }
@@ -103,9 +96,6 @@ func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer, checkAm
 	if err := d.DB.Where("uuid = ?", uuid).First(&consumerModel).Error; err != nil {
 		return nil, err
 	}
-	if boolean.IsTrue(consumerModel.CreatedFromAutoMapping) && checkAm {
-		return nil, errors.New("can't update auto-mapped consumer")
-	}
 	if err := d.updateTags(&consumerModel, body.Tags); err != nil {
 		return nil, err
 	}
@@ -113,7 +103,6 @@ func (d *GormDatabase) UpdateConsumer(uuid string, body *model.Consumer, checkAm
 		return nil, err
 	}
 	return consumerModel, nil
-
 }
 
 func (d *GormDatabase) DeleteConsumers(args api.Args) (bool, error) {

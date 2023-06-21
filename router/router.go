@@ -144,12 +144,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	syncWriterHandler := api.SyncWriterAPI{
 		DB: db,
 	}
-	autoMappingHandler := api.AutoMappingAPI{
-		DB: db,
-	}
-	autoMappingScheduleHandler := api.AutoMappingScheduleAPI{
-		DB: db,
-	}
 	syncProducerHandler := api.SyncProducerAPI{
 		DB: db,
 	}
@@ -481,8 +475,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			networkRoutes.DELETE("/one/args", networkHandler.DeleteOneNetworkByArgs)
 			networkRoutes.DELETE("/name/:name", networkHandler.DeleteNetworkByName)
 			networkRoutes.PUT("/meta_tags/uuid/:uuid", networkHandler.CreateNetworkMetaTags)
-			networkRoutes.GET("/sync", networkHandler.SyncNetworks)
-			networkRoutes.GET("/:uuid/sync/devices", networkHandler.SyncNetworkDevices)
 		}
 
 		deviceRoutes := apiRoutes.Group("/devices")
@@ -497,7 +489,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			deviceRoutes.DELETE("/one/args", deviceHandler.DeleteOneDeviceByArgs)
 			deviceRoutes.DELETE("/name/:network_name/:device_name", deviceHandler.DeleteDeviceByName)
 			deviceRoutes.PUT("/meta_tags/uuid/:uuid", deviceHandler.CreateDeviceMetaTags)
-			deviceRoutes.GET("/:uuid/sync/points", deviceHandler.SyncDevicePoints)
 		}
 
 		pointRoutes := apiRoutes.Group("/points")
@@ -609,8 +600,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			schRoutes.PATCH("/:uuid", schHandler.UpdateSchedule)
 			schRoutes.PATCH("/write/:uuid", schHandler.ScheduleWrite)
 			schRoutes.DELETE("/:uuid", schHandler.DeleteSchedule)
-			schRoutes.GET("/sync", schHandler.SyncSchedules)
-			schRoutes.GET("/sync/:uuid", schHandler.SyncSchedule)
 		}
 
 		thingRoutes := apiRoutes.Group("/things")
@@ -676,16 +665,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			tokenRoutes.PUT("/:uuid/block", tokenHandler.BlockToken)
 			tokenRoutes.PUT("/:uuid/regenerate", tokenHandler.RegenerateToken)
 			tokenRoutes.DELETE("/:uuid", tokenHandler.DeleteToken)
-		}
-
-		autoMappingRoutes := apiRoutes.Group("/auto_mappings")
-		{
-			autoMappingRoutes.POST("", autoMappingHandler.CreateAutoMapping)
-		}
-
-		scheduleAutoMappingRoutes := apiRoutes.Group("/auto_mapping_schedules") // RE
-		{
-			scheduleAutoMappingRoutes.POST("", autoMappingScheduleHandler.CreateAutoMappingSchedule)
 		}
 
 		memberRoutes := apiRoutes.Group("/members")
