@@ -21,7 +21,7 @@ type DeviceSchema struct {
 }
 type Segmentation struct {
 	Type     string   `json:"type" default:"string"`
-	Title    string   `json:"title" default:"device segmentation"`
+	Title    string   `json:"title" default:"Device Segmentation"`
 	Options  []string `json:"enum" default:"[]"`
 	EnumName []string `json:"enumNames" default:"[]"`
 	Default  string   `json:"default" default:"no_segmentation"`
@@ -29,7 +29,7 @@ type Segmentation struct {
 
 type MaxADPU struct {
 	Type     string   `json:"type" default:"number"`
-	Title    string   `json:"title" default:"device max-adpu"`
+	Title    string   `json:"title" default:"Device Max-ADPU"`
 	Options  []int    `json:"enum" default:"[]"`
 	EnumName []string `json:"enumNames" default:"[]"`
 	Default  int      `json:"default" default:"1476"`

@@ -2,13 +2,13 @@ package schema
 
 type UUID struct {
 	Type     string `json:"type" default:"string"`
-	Title    string `json:"title" default:"uuid"`
+	Title    string `json:"title" default:"UUID"`
 	ReadOnly bool   `json:"readOnly" default:"true"`
 }
 
 type AddressUUID struct {
 	Type     string `json:"type" default:"string"`
-	Title    string `json:"title" default:"address uuid"`
+	Title    string `json:"title" default:"Address UUID"`
 	Min      int    `json:"minLength" default:"1"`
 	Max      int    `json:"maxLength" default:"100"`
 	Default  string `json:"default" default:""`
@@ -17,7 +17,7 @@ type AddressUUID struct {
 
 type Name struct {
 	Type     string `json:"type" default:"string"`
-	Title    string `json:"title" default:"name"`
+	Title    string `json:"title" default:"Name"`
 	Min      int    `json:"minLength" default:"2"`
 	Max      int    `json:"maxLength" default:"200"`
 	ReadOnly bool   `json:"readOnly" default:"false"`
@@ -25,7 +25,7 @@ type Name struct {
 
 type Model struct {
 	Type     string   `json:"type" default:"string"`
-	Title    string   `json:"title" default:"model"`
+	Title    string   `json:"title" default:"Model"`
 	Options  []string `json:"enum" default:"[]"`
 	EnumName []string `json:"enumNames" default:"[]"`
 	Default  string   `json:"default" default:""`
@@ -34,7 +34,7 @@ type Model struct {
 
 type Username struct {
 	Type     string `json:"type" default:"string"`
-	Title    string `json:"title" default:"username"`
+	Title    string `json:"title" default:"Username"`
 	Min      int    `json:"minLength" default:"2"`
 	Max      int    `json:"maxLength" default:"50"`
 	Default  string `json:"default" default:"admin"`
@@ -43,13 +43,13 @@ type Username struct {
 
 type Password struct {
 	Type     string `json:"type" default:"string"`
-	Title    string `json:"title" default:"password"`
+	Title    string `json:"title" default:"Password"`
 	ReadOnly bool   `json:"readOnly" default:"false"`
 }
 
 type Token struct {
 	Type     string `json:"type" default:"string"`
-	Title    string `json:"title" default:"token"`
+	Title    string `json:"title" default:"Token"`
 	Min      int    `json:"minLength" default:"0"`
 	Max      int    `json:"maxLength" default:"200"`
 	ReadOnly bool   `json:"readOnly" default:"false"`
@@ -57,33 +57,33 @@ type Token struct {
 
 type Description struct {
 	Type  string `json:"type" default:"string"`
-	Title string `json:"title" default:"description"`
+	Title string `json:"title" default:"Description"`
 }
 
 type Enable struct {
 	Type     string `json:"type" default:"boolean"`
-	Title    string `json:"title" default:"enable"`
+	Title    string `json:"title" default:"Enable"`
 	Default  bool   `json:"default" default:"true"`
 	ReadOnly bool   `json:"readOnly" default:"false"`
 }
 
 type HistoryEnable struct {
 	Type     string `json:"type" default:"boolean"`
-	Title    string `json:"title" default:"history enable"`
+	Title    string `json:"title" default:"History Enable"`
 	Default  bool   `json:"default" default:"false"`
 	ReadOnly bool   `json:"readOnly" default:"false"`
 }
 
 type HistoryEnableDefaultTrue struct {
 	Type     string `json:"type" default:"boolean"`
-	Title    string `json:"title" default:"history enable"`
+	Title    string `json:"title" default:"History Enable"`
 	Default  bool   `json:"default" default:"true"`
 	ReadOnly bool   `json:"readOnly" default:"false"`
 }
 
 type Product struct {
 	Type     string   `json:"type" default:"string"`
-	Title    string   `json:"title" default:"product"`
+	Title    string   `json:"title" default:"Product"`
 	Options  []string `json:"enum" default:"[\"RubixCompute\",\"RubixCompute5\",\"RubixComputeIO\",\"Edge28\",\"Nuc\",\"Server\"]"`
 	EnumName []string `json:"enumNames" default:"[\"RubixCompute\",\"RubixCompute5\",\"RubixComputeIO\",\"Edge28\",\"Nuc\",\"Server\"]"`
 	Help     string   `json:"help" default:"a nube product type or a general linux server"`
@@ -92,7 +92,7 @@ type Product struct {
 
 type Interface struct {
 	Type     string   `json:"type" default:"string"`
-	Title    string   `json:"title" default:"network interface"`
+	Title    string   `json:"title" default:"Network Interface"`
 	Options  []string `json:"enum" default:"[]"`
 	Default  string   `json:"default" default:"eth0"`
 	Help     string   `json:"help" default:"host network interface card, eg eth0"`
@@ -101,7 +101,7 @@ type Interface struct {
 
 type Netmask struct {
 	Type     string `json:"type" default:"string"`
-	Title    string `json:"title" default:"netmask"`
+	Title    string `json:"title" default:"Netmask"`
 	Default  string `json:"default" default:"255.255.255.0"`
 	Help     string `json:"help" default:"ip netmask address eg, 255.255.255.0"`
 	ReadOnly bool   `json:"readOnly" default:"false"`
@@ -109,7 +109,7 @@ type Netmask struct {
 
 type SubNetMask struct {
 	Type     string `json:"type" default:"number"`
-	Title    string `json:"title" default:"subnet mask"`
+	Title    string `json:"title" default:"Subnet Mask"`
 	Min      int    `json:"minLength" default:"8"`
 	Max      int    `json:"maxLength" default:"30"`
 	Default  int    `json:"default" default:"24"`
@@ -118,7 +118,7 @@ type SubNetMask struct {
 
 type Gateway struct {
 	Type     string `json:"type" default:"string"`
-	Title    string `json:"title" default:"gateway"`
+	Title    string `json:"title" default:"Gateway"`
 	Help     string `json:"help" default:"ip gateway address eg, 192.168.15.1"`
 	ReadOnly bool   `json:"readOnly" default:"false"`
 	Default  string `json:"default" default:"192.168.15.1"`
@@ -126,13 +126,13 @@ type Gateway struct {
 
 type HTTPS struct {
 	Type     string `json:"type" default:"boolean"`
-	Title    string `json:"title" default:"enable https"`
+	Title    string `json:"title" default:"Enable HTTPS"`
 	ReadOnly bool   `json:"readOnly" default:"false"`
 }
 
 type Port struct {
 	Type     string `json:"type" default:"number"`
-	Title    string `json:"title" default:"port"`
+	Title    string `json:"title" default:"Port"`
 	Min      int    `json:"minLength" default:"2"`
 	Max      int    `json:"maxLength" default:"65535"`
 	Default  int    `json:"default" default:"1660"`
@@ -142,36 +142,16 @@ type Port struct {
 
 type PluginName struct {
 	Type     string `json:"type" default:"string"`
-	Title    string `json:"title" default:"plugin"`
+	Title    string `json:"title" default:"Plugin"`
 	ReadOnly bool   `json:"readOnly" default:"true"`
-}
-
-type AutoMappingNetworksSelection struct {
-	Type     string   `json:"type" default:"string"`
-	Title    string   `json:"title" default:"auto mapping"`
-	Options  []string `json:"enum" default:"[\"disable\",\"self-mapping\",\"bacnet\"]"`
-	EnumName []string `json:"enumNames" default:"[\"disable\",\"self-mapping\",\"bacnet\"]"`
-	Default  string   `json:"default" default:"disable"`
-}
-
-type AutoMappingFlowNetworkUUID struct {
-	Type  string `json:"type" default:"string"`
-	Title string `json:"title" default:"auto mapping uuid"`
-	Min   int    `json:"minLength" default:"0"`
-	Max   int    `json:"maxLength" default:"80"`
-}
-
-type AutoMappingEnableHistories struct {
-	Type  string `json:"type" default:"boolean"`
-	Title string `json:"title" default:"auto mapping enable histories"`
 }
 
 type OptionOneOf struct {
 	Const string `json:"const"`
-	Title string `json:"title"`
+	Title string `json:"Title"`
 }
 
 type OptionOneOfInt struct {
 	Const int    `json:"const"`
-	Title string `json:"title"`
+	Title string `json:"Title"`
 }

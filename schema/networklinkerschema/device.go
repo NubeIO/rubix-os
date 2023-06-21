@@ -7,7 +7,7 @@ type DeviceSchema struct {
 	Name        schema.Name   `json:"name"`
 	AddressUUID struct {
 		Type    string               `json:"type" default:"string"`
-		Title   string               `json:"title" default:"address_uuid"`
+		Title   string               `json:"title" default:"Address UUID"`
 		Options []schema.OptionOneOf `json:"oneOf"`
 		Help    string               `json:"help" default:"address_uuid"`
 	} `json:"address_uuid"`

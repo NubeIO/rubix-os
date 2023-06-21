@@ -9,7 +9,7 @@ type ObjectId struct {
 
 type ObjectType struct {
 	Type     string   `json:"type" default:"string"`
-	Title    string   `json:"title" default:"object type"`
+	Title    string   `json:"title" default:"Object Type"`
 	Options  []string `json:"enum" default:"[\"analog_input\",\"analog_value\",\"analog_output\",\"binary_input\",\"binary_value\",\"binary_output\",\"multi_state_input\",\"multi_state_value\",\"multi_state_output\"]"`
 	EnumName []string `json:"enumNames" default:"[\"Analog Input (AI)\",\"Analog Value (AV)\",\"Analog Output (AO)\",\"Binary Input (BI)\",\"Binary value (BV)\",\"Binary Output (BO)\",\"Multi State Input (MSI)\",\"Multi State Value (MSV)\",\"Multi State Output (MSO)\"]"`
 	Default  string   `json:"default" default:"analog_value"`

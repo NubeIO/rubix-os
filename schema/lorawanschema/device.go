@@ -9,7 +9,7 @@ type DeviceSchema struct {
 	Enable        schema.Enable      `json:"enable"`
 	SkipFCntCheck struct {
 		Type     string `json:"type" default:"boolean"`
-		Title    string `json:"title" default:"Disable frame-counter validation"`
+		Title    string `json:"title" default:"Disable Frame-Counter Validation"`
 		Default  bool   `json:"default" default:"true"`
 		ReadOnly bool   `json:"readOnly" default:"false"`
 	} `json:"zero_mode"`
@@ -37,7 +37,7 @@ type DeviceSchema struct {
 	} `json:"model"`
 	AppKey struct {
 		Type     string `json:"type" default:"string"`
-		Title    string `json:"title" default:"Application key"`
+		Title    string `json:"title" default:"Application Key"`
 		Min      int    `json:"minLength" default:"32"`
 		Max      int    `json:"maxLength" default:"32"`
 		Default  string `json:"default" default:""`

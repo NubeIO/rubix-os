@@ -7,21 +7,6 @@ import (
 
 var nets = networking.New()
 
-type AutoMappingFlowNetworkUUID struct {
-	Type     string   `json:"type" default:"string"`
-	Title    string   `json:"title" default:"select flow network for mapping"`
-	Options  []string `json:"enum" default:"[]"`
-	EnumName []string `json:"enumNames" default:"[]"`
-}
-
-type AutoMappingNetworksSelection struct {
-	Type     string   `json:"type" default:"string"`
-	Title    string   `json:"title" default:"enable mapping"`
-	Options  []string `json:"enum" default:"[\"disable\",\"self-mapping\",\"bacnet\"]"`
-	EnumName []string `json:"enumNames" default:"[\"disable\",\"self-mapping\",\"bacnet\"]"`
-	Default  string   `json:"default" default:"disable"`
-}
-
 type NetworkSchema struct {
 	UUID          schema.UUID          `json:"uuid"`
 	Name          schema.Name          `json:"name"`
