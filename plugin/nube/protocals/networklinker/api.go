@@ -6,8 +6,8 @@ import (
 	"net/http/httputil"
 	"strings"
 
-	"github.com/NubeIO/lib-schema/networklinkerschema"
-	"github.com/NubeIO/lib-schema/schema"
+	"github.com/NubeIO/rubix-os/schema/networklinkerschema"
+	"github.com/NubeIO/rubix-os/schema/schema"
 
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"

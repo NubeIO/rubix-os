@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/NubeIO/lib-schema/edge28schema"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/edge28/edgemodel"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/edge28/edgerest"
+	"github.com/NubeIO/rubix-os/schema/edge28schema"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"net/http"

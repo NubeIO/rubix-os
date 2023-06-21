@@ -1,6 +1,6 @@
 package interfaces
 
-import "github.com/NubeIO/lib-schema/schema"
+import "github.com/NubeIO/rubix-os/schema/schema"
 
 type LocationProperties struct {
 	Name        schema.Name        `json:"name"`

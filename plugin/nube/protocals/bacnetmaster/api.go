@@ -3,11 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/lib-schema/masterschema"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/bacnetmaster/master"
+	"github.com/NubeIO/rubix-os/schema/masterschema"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"

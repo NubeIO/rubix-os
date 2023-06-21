@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/NubeIO/lib-schema/rubixioschema"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/rubixio/rubixiomodel"
+	"github.com/NubeIO/rubix-os/schema/rubixioschema"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

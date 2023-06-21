@@ -3,12 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	modbschema "github.com/NubeIO/lib-schema/modbuschema"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/modbus/mbmodel"
+	modbschema "github.com/NubeIO/rubix-os/schema/modbuschema"
 	"github.com/NubeIO/rubix-os/utils/array"
 	"github.com/gin-gonic/gin"
 	"net/http"

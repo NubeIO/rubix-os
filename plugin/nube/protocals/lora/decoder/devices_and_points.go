@@ -3,8 +3,8 @@ package decoder
 import (
 	"strings"
 
-	"github.com/NubeIO/lib-schema/loraschema"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/schema/loraschema"
 )
 
 type LoRaDeviceDescription struct {

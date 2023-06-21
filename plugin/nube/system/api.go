@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/NubeIO/lib-schema/systemschema"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin/nube/system/smodel"
+	"github.com/NubeIO/rubix-os/schema/systemschema"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

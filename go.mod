@@ -5,7 +5,7 @@ module github.com/NubeIO/rubix-os
 // replace github.com/NubeIO/lib-schema => /Users/raibnod/Enviro/lib-schema
 // replace github.com/NubeIO/nubeio-rubix-lib-auth-go => /Users/raibnod/Enviro/nubeio-rubix-lib-auth-go
 // replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/marc/Documents/Nube/Development/Models/nubeio-rubix-lib-models-go
-// replace github.com/NubeIO/nubeio-rubix-lib-models-go => /Users/raibnod/Enviro/nubeio-rubix-lib-models-go
+replace github.com/NubeIO/nubeio-rubix-lib-models-go => /Users/raibnod/Enviro/nubeio-rubix-lib-models-go
 // replace github.com/NubeIO/lib-schema => /home/marc/Documents/Nube/Development/Lib-Schema/lib-schema
 
 require (
@@ -53,7 +53,6 @@ require (
 	github.com/NubeIO/lib-dhcpd v0.0.2
 	github.com/NubeIO/lib-files v1.0.0
 	github.com/NubeIO/lib-networking v0.1.0
-	github.com/NubeIO/lib-schema v0.2.15
 	github.com/NubeIO/lib-system v0.0.1
 	github.com/NubeIO/lib-systemctl-go v0.3.1
 	github.com/NubeIO/lib-ufw v0.0.3

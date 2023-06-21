@@ -3,9 +3,9 @@ package decoder
 import (
 	"strconv"
 
-	"github.com/NubeIO/lib-schema/loraschema"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nube/thermistor"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/schema/loraschema"
 )
 
 const MEDeviceName = "MicroEdge"

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/NubeIO/lib-schema/bacnetschema"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/bacnetserver/bserver"
+	"github.com/NubeIO/rubix-os/schema/bacnetschema"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
