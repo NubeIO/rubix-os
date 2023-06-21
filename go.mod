@@ -2,17 +2,15 @@ module github.com/NubeIO/rubix-os
 
 // replace github.com/NubeDev/bacnet => /home/aidan/code/go/nube/bacnet
 // replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/aidan/code/go/nube/lib/nubeio-rubix-lib-models-go
-// replace github.com/NubeIO/lib-schema => /Users/raibnod/Enviro/lib-schema
 // replace github.com/NubeIO/nubeio-rubix-lib-auth-go => /Users/raibnod/Enviro/nubeio-rubix-lib-auth-go
 // replace github.com/NubeIO/nubeio-rubix-lib-models-go => /home/marc/Documents/Nube/Development/Models/nubeio-rubix-lib-models-go
 // replace github.com/NubeIO/nubeio-rubix-lib-models-go => /Users/raibnod/Enviro/nubeio-rubix-lib-models-go
-// replace github.com/NubeIO/lib-schema => /home/marc/Documents/Nube/Development/Lib-Schema/lib-schema
 
 require (
 	github.com/NubeDev/location v0.0.2
 	github.com/NubeIO/configor v0.0.3
 	github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7
-	github.com/NubeIO/nubeio-rubix-lib-models-go v1.7.1
+	github.com/NubeIO/nubeio-rubix-lib-models-go v1.7.2
 	github.com/asaskevich/govalidator v0.0.0-20210307081110-f21760c49a8d
 	github.com/eclipse/paho.mqtt.golang v1.3.5
 	github.com/gin-contrib/cors v1.3.1
