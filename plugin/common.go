@@ -6,14 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetFlowNetworkNames(fns []*model.FlowNetwork) []string {
-	fnsNames := make([]string, 0)
-	for _, fn := range fns {
-		fnsNames = append(fnsNames, fn.Name)
-	}
-	return fnsNames
-}
-
 const (
 	NetworksURL    = "/networks"
 	DevicesURL     = "/devices"

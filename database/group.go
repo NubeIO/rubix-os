@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/src/cli/cligetter"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"sync"
@@ -63,12 +64,12 @@ func (d *GormDatabase) UpdateGroup(uuid string, body *model.Group) (*model.Group
 	return groupModel, nil
 }
 
-func (d *GormDatabase) DeleteGroup(uuid string) (*model.Message, error) {
+func (d *GormDatabase) DeleteGroup(uuid string) (*interfaces.Message, error) {
 	query := d.DB.Where("uuid = ?", uuid).Delete(&model.Group{})
 	return d.deleteResponse(query)
 }
 
-func (d *GormDatabase) DropGroups() (*model.Message, error) {
+func (d *GormDatabase) DropGroups() (*interfaces.Message, error) {
 	query := d.DB.Where("1 = 1").Delete(&model.Location{})
 	return d.deleteResponse(query)
 }

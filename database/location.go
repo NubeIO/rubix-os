@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
@@ -61,12 +62,12 @@ func (d *GormDatabase) UpdateLocation(uuid string, body *model.Location) (*model
 	return locationModel, nil
 }
 
-func (d *GormDatabase) DeleteLocation(uuid string) (*model.Message, error) {
+func (d *GormDatabase) DeleteLocation(uuid string) (*interfaces.Message, error) {
 	query := d.DB.Where("uuid = ?", uuid).Delete(&model.Location{})
 	return d.deleteResponse(query)
 }
 
-func (d *GormDatabase) DropLocations() (*model.Message, error) {
+func (d *GormDatabase) DropLocations() (*interfaces.Message, error) {
 	query := d.DB.Where("1 = 1").Delete(&model.Location{})
 	return d.deleteResponse(query)
 }

@@ -45,6 +45,9 @@ func (d *GormDatabase) CreateDeviceTransaction(db *gorm.DB, body *model.Device, 
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Device)
 	body.Name = name
 	body.ThingClass = model.ThingClass.Device
+	if body.HistoryEnable == nil {
+		body.HistoryEnable = boolean.NewTrue()
+	}
 	if err := db.Create(&body).Error; err != nil {
 		return nil, err
 	}

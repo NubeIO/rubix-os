@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NubeIO/lib-schema/lorawanschema"
-	"github.com/NubeIO/lib-schema/schema"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/lorawan/csrest"
+	"github.com/NubeIO/rubix-os/schema/lorawanschema"
+	"github.com/NubeIO/rubix-os/schema/schema"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	log "github.com/sirupsen/logrus"
 )

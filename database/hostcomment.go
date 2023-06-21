@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
@@ -22,7 +23,7 @@ func (d *GormDatabase) UpdateHostComment(uuid string, body *model.HostComment) (
 	return hostModel, nil
 }
 
-func (d *GormDatabase) DeleteHostComment(uuid string) (*model.Message, error) {
+func (d *GormDatabase) DeleteHostComment(uuid string) (*interfaces.Message, error) {
 	var hostModel *model.HostComment
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&hostModel)
 	return d.deleteResponse(query)

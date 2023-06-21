@@ -3,11 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/lib-schema/masterschema"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/bacnetmaster/master"
+	"github.com/NubeIO/rubix-os/schema/masterschema"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -131,14 +131,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, master.GetPointSchema())
 	})
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
-		fns, err := inst.db.GetFlowNetworks(api.Args{})
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		}
-		networkSchema := masterschema.GetNetworkSchema()
-		networkSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
-		ctx.JSON(http.StatusOK, networkSchema)
+		ctx.JSON(http.StatusOK, masterschema.GetNetworkSchema())
 	})
 	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, masterschema.GetDeviceSchema())

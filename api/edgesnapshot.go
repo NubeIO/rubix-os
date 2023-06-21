@@ -21,8 +21,8 @@ type EdgeSnapshotDatabase interface {
 	GetSnapshotLog() ([]*model.SnapshotLog, error)
 	CreateSnapshotLog(body *model.SnapshotLog) (*model.SnapshotLog, error)
 	UpdateSnapshotLog(file string, body *model.SnapshotLog) (*model.SnapshotLog, error)
-	DeleteSnapshotLog(file string) (*model.Message, error)
-	DeleteSnapshotLogs(files []string) (*model.Message, error)
+	DeleteSnapshotLog(file string) (*interfaces.Message, error)
+	DeleteSnapshotLogs(files []string) (*interfaces.Message, error)
 
 	CreateSnapshotCreateLog(body *model.SnapshotCreateLog) (*model.SnapshotCreateLog, error)
 	UpdateSnapshotCreateLog(uuid string, body *model.SnapshotCreateLog) (*model.SnapshotCreateLog, error)

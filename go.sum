@@ -25,8 +25,6 @@ github.com/NubeIO/lib-files v1.0.0 h1:OZjBDXkXKGmI4SzciMnKa9Ko2mUCTbVrc3BCe1s6rw
 github.com/NubeIO/lib-files v1.0.0/go.mod h1:xi4mqMscDl6319i10LFowq5QvwChJLjqHCIJGkGa4RI=
 github.com/NubeIO/lib-networking v0.1.0 h1:XhhG8lTGjsULgcI8ZuJ/R3xyXIQlVQ3Tspig/7f0ce8=
 github.com/NubeIO/lib-networking v0.1.0/go.mod h1:WVj1zTKJ4qYijtzNvu7N5w8+cXFlCjy+HxjnIvSFgNA=
-github.com/NubeIO/lib-schema v0.2.15 h1:be2+nLVI3+9GzvJ+IrJu5KlVuWyAE1ajj4HiTQ5IO9E=
-github.com/NubeIO/lib-schema v0.2.15/go.mod h1:TGKDA6IIWHDwr5Aabawj6FF7NXUWXqu4ozWfph/hIjw=
 github.com/NubeIO/lib-system v0.0.1 h1:4fbHusnifJHv6KU1gH4/CKY/NzqqehkoXwzGcsVtoUs=
 github.com/NubeIO/lib-system v0.0.1/go.mod h1:6WxjOSs9NDjXMF2TAITmHrNwQeo8IPPBz3E1frb0stI=
 github.com/NubeIO/lib-systemctl-go v0.3.1 h1:IzmkzMX0kyxT9cjgLq0B7KZwrlPdiCLoSEJvGRngpA8=
@@ -38,8 +36,8 @@ github.com/NubeIO/nubeio-rubix-lib-auth-go v1.3.0/go.mod h1:5dAKp8Ut9uNzXKUkyX19
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7 h1:QKgcOjDkVujyAXWK+OysVFnQKzpZx335vGPG95UNXuI=
 github.com/NubeIO/nubeio-rubix-lib-helpers-go v0.2.7/go.mod h1:oLI6n9wuko0KIEzrLc8saOquiQvtMUUBrUjXf0TLDVQ=
 github.com/NubeIO/nubeio-rubix-lib-models-go v1.0.4/go.mod h1:A1BPuc3UpE1EF3ugdf+8QIIKTT8s3eK+pfUcheJX2JM=
-github.com/NubeIO/nubeio-rubix-lib-models-go v1.7.0 h1:kSbsDRaZ+r8MvcREAWKq0NLpwmIsSTiN3i2iALju7eM=
-github.com/NubeIO/nubeio-rubix-lib-models-go v1.7.0/go.mod h1:J0Xy/dX/f/xIhEnW6ZhkE2LiyuRk2H9gCb0Uk+2SSSk=
+github.com/NubeIO/nubeio-rubix-lib-models-go v1.7.1 h1:CxRn7eQglPjdbGjSrwWbV8CCWbYTf1YRHZ4AR0xCPOY=
+github.com/NubeIO/nubeio-rubix-lib-models-go v1.7.1/go.mod h1:J0Xy/dX/f/xIhEnW6ZhkE2LiyuRk2H9gCb0Uk+2SSSk=
 github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.9 h1:gAAbgcy62F7IdUt/djxCVvAF1ILMc8liJ/4hJl8Ld+w=
 github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.9/go.mod h1:MU13rBQBD1xc/n2aRvNyCr8HZ5NNTsPhiZSUFhIgrT4=
 github.com/NubeIO/rubix-registry-go v1.0.0 h1:EOklfvV3NP+zF6DmkRO4OmRttTMdN26LZSOEH35hhd0=

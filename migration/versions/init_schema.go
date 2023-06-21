@@ -5,7 +5,6 @@ import "github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 func GetInitInterfaces() []interface{} {
 	return []interface{}{
 		&model.Alert{},
-		&model.Message{},
 		&model.PluginConf{},
 		&model.Network{},
 		&model.Device{},

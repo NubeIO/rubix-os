@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/eventbus"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/gin-gonic/gin"
 	"strconv"
@@ -129,11 +130,11 @@ func (a *NetworksAPI) CreateNetworkMetaTags(ctx *gin.Context) {
 
 func (a *NetworksAPI) SyncNetworks(ctx *gin.Context) {
 	err := a.DB.SyncNetworks()
-	ResponseHandler(model.Message{Message: "synced successfully"}, err, ctx)
+	ResponseHandler(interfaces.Message{Message: "synced successfully"}, err, ctx)
 }
 
 func (a *NetworksAPI) SyncNetworkDevices(ctx *gin.Context) {
 	networkUUID := resolveID(ctx)
 	err := a.DB.SyncNetworkDevices(networkUUID)
-	ResponseHandler(model.Message{Message: "synced successfully"}, err, ctx)
+	ResponseHandler(interfaces.Message{Message: "synced successfully"}, err, ctx)
 }

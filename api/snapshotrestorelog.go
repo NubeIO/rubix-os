@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
@@ -9,7 +10,7 @@ type SnapshotRestoreLogDatabase interface {
 	GetSnapshotRestoreLogs(hostUUID string) ([]*model.SnapshotRestoreLog, error)
 	CreateSnapshotRestoreLog(body *model.SnapshotRestoreLog) (*model.SnapshotRestoreLog, error)
 	UpdateSnapshotRestoreLog(uuid string, body *model.SnapshotRestoreLog) (*model.SnapshotRestoreLog, error)
-	DeleteSnapshotRestoreLog(uuid string) (*model.Message, error)
+	DeleteSnapshotRestoreLog(uuid string) (*interfaces.Message, error)
 
 	ResolveHost(uuid string, name string) (*model.Host, error)
 }

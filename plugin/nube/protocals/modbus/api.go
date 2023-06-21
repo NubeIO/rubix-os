@@ -3,12 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	modbschema "github.com/NubeIO/lib-schema/modbuschema"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uurl"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/modbus/mbmodel"
+	modbschema "github.com/NubeIO/rubix-os/schema/modbuschema"
 	"github.com/NubeIO/rubix-os/utils/array"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -218,14 +218,7 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ctx.JSON(http.StatusOK, mbmodel.GetPointSchema())
 	})
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
-		fns, err := inst.db.GetFlowNetworks(api.Args{})
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		}
-		networkSchema := modbschema.GetNetworkSchema()
-		networkSchema.AutoMappingFlowNetworkName.Options = plugin.GetFlowNetworkNames(fns)
-		ctx.JSON(http.StatusOK, networkSchema)
+		ctx.JSON(http.StatusOK, modbschema.GetNetworkSchema())
 	})
 	mux.GET(jsonSchemaDevice, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, modbschema.GetDeviceSchema())

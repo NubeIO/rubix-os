@@ -95,6 +95,9 @@ func (d *GormDatabase) CreateNetworkTransaction(db *gorm.DB, body *model.Network
 	} else {
 		return nil, errors.New("provide a plugin name ie: system, lora, modbus, lorawan, bacnet")
 	}
+	if body.HistoryEnable == nil {
+		body.HistoryEnable = boolean.NewFalse()
+	}
 	if err = db.Create(&body).Error; err != nil {
 		return nil, err
 	}

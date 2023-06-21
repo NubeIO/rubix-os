@@ -2,13 +2,14 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
 type HostCommentDatabase interface {
 	CreateHostComment(body *model.HostComment) (*model.HostComment, error)
 	UpdateHostComment(uuid string, body *model.HostComment) (*model.HostComment, error)
-	DeleteHostComment(uuid string) (*model.Message, error)
+	DeleteHostComment(uuid string) (*interfaces.Message, error)
 }
 
 type HostCommentAPI struct {

@@ -50,6 +50,7 @@ func (d *GormDatabase) setNetworkModelClone(hostUUID, globalUUID, networkUUID, p
 	network.IsClone = boolean.NewTrue()
 	network.PluginPath = pluginName
 	network.PluginConfId = pluginConfId
+	network.HistoryEnable = boolean.NewFalse()
 	for _, metaTag := range network.MetaTags {
 		metaTag.NetworkUUID = network.UUID
 	}
@@ -59,6 +60,7 @@ func (d *GormDatabase) setDeviceModelClone(networkUUID string, deviceUUID string
 	device.NetworkUUID = networkUUID
 	device.SourceUUID = nstring.New(deviceUUID)
 	device.UUID = nuuid.MakeTopicUUID(model.ThingClass.Device)
+	device.HistoryEnable = boolean.NewFalse()
 	for _, metaTag := range device.MetaTags {
 		metaTag.DeviceUUID = device.UUID
 	}

@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,8 +23,8 @@ type AlertDatabase interface {
 	GetAlertByField(field string, value string) (*model.Alert, error)
 	CreateAlert(body *model.Alert) (*model.Alert, error)
 	UpdateAlertStatus(uuid string, status string) (alert *model.Alert, err error)
-	DeleteAlert(uuid string) (*model.Message, error)
-	DropAlerts() (*model.Message, error)
+	DeleteAlert(uuid string) (*interfaces.Message, error)
+	DropAlerts() (*interfaces.Message, error)
 }
 type AlertAPI struct {
 	DB AlertDatabase
