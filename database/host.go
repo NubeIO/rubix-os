@@ -108,7 +108,7 @@ func (d *GormDatabase) ConfigureOpenVPN(uuid string) (*interfaces.Message, error
 		return nil, errors.New(fmt.Sprintf("no host was found with uuid: %s", uuid))
 	}
 	cli := cligetter.GetEdgeClient(&host)
-	globalUUID, _, pingable, isValidToken := cli.Ping()
+	globalUUID, pingable, isValidToken := cli.Ping()
 	if pingable == false {
 		return nil, errors.New("make it accessible at first")
 	}

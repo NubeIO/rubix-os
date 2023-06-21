@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/interfaces"
-	"github.com/NubeIO/rubix-os/utils/deviceinfo"
 	log "github.com/sirupsen/logrus"
 	"strings"
 )
@@ -84,18 +83,6 @@ func ifEmpty(in string) string {
 }
 
 func MakeTopic(parts []string) string {
-	deviceInfo, _ := deviceinfo.GetDeviceInfo()
-	clientId := deviceInfo.ClientId
-	clientName := deviceInfo.ClientName
-	siteId := deviceInfo.SiteId
-	siteName := deviceInfo.SiteName
-	deviceId := deviceInfo.DeviceId
-	deviceName := deviceInfo.DeviceName
-	prefixTopic := []string{ifEmpty(clientId), ifEmpty(clientName), ifEmpty(siteId), ifEmpty(siteName),
-		ifEmpty(deviceId), ifEmpty(deviceName)}
-
-	if localMqtt.GlobalBroadcast {
-		return strings.Join(append(prefixTopic, parts...), separator)
-	}
+	// TODO: if localMqtt.GlobalBroadcast -> use location/group/host uuid and name
 	return strings.Join(append(parts), separator)
 }

@@ -259,6 +259,11 @@ func getBodyCreateSnapshot(ctx *gin.Context) (dto *interfaces.CreateSnapshot, er
 	return dto, err
 }
 
+func getBodyLocationGroupHostName(ctx *gin.Context) (dto *interfaces.LocationGroupHostName, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func getBodySnapshotCreateLog(ctx *gin.Context) (dto *model.SnapshotCreateLog, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err

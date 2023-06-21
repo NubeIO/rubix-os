@@ -10,7 +10,6 @@ import (
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/urls"
 	"github.com/NubeIO/rubix-os/utils/boolean"
-	"github.com/NubeIO/rubix-os/utils/deviceinfo"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	log "github.com/sirupsen/logrus"
@@ -234,7 +233,7 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = nuuid.MakeUUID()
 	isMasterSlave := boolean.IsTrue(body.IsMasterSlave)
-	deviceInfo, err := deviceinfo.GetDeviceInfo()
+	globalUUID, err := d.getGlobalUUID()
 	if err != nil {
 		return false, nil, false, nil, err
 	}
@@ -250,7 +249,7 @@ func (d *GormDatabase) editFlowNetworkBody(body *model.FlowNetwork) (bool, *clie
 	if err != nil {
 		return false, nil, false, nil, err
 	} else {
-		if deviceInfo.GlobalUUID == remoteDeviceInfo.GlobalUUID {
+		if globalUUID == remoteDeviceInfo.GlobalUUID {
 			body.IsRemote = boolean.NewFalse()
 			if !isMasterSlave {
 				d.resetHostAndCredential(body)
@@ -303,17 +302,12 @@ func (d *GormDatabase) afterCreateUpdateFlowNetwork(body *model.FlowNetwork, isM
 }
 
 func (d *GormDatabase) syncAndEditFlowNetwork(cli *client.FlowClient, body *model.FlowNetwork, bodyToSync *model.FlowNetwork) error {
-	deviceInfo, err := deviceinfo.GetDeviceInfo()
+	globalUUID, err := d.getGlobalUUID()
 	if err != nil {
 		return err
 	}
-	bodyToSync.GlobalUUID = deviceInfo.GlobalUUID
-	bodyToSync.ClientId = deviceInfo.ClientId
-	bodyToSync.ClientName = deviceInfo.ClientName
-	bodyToSync.SiteId = deviceInfo.SiteId
-	bodyToSync.SiteName = deviceInfo.SiteName
-	bodyToSync.DeviceId = deviceInfo.DeviceId
-	bodyToSync.DeviceName = deviceInfo.DeviceName
+	bodyToSync.GlobalUUID = globalUUID
+	// TODO: use location/group/host uuid and name
 	res, err := cli.SyncFlowNetwork(bodyToSync)
 	if err != nil {
 		return err
@@ -333,12 +327,12 @@ func (d *GormDatabase) updateStreamsOnFlowNetwork(fn *model.FlowNetwork, streams
 	if err := d.DB.Model(&fn).Association("Streams").Replace(streams); err != nil {
 		return nil, err
 	}
-	deviceInfo, err := deviceinfo.GetDeviceInfo()
+	globalUUID, err := d.getGlobalUUID()
 	if err != nil {
 		return nil, err
 	}
 	for _, stream := range fn.Streams {
-		_ = d.SyncStreamFunction(fn, stream, deviceInfo)
+		_ = d.SyncStreamFunction(globalUUID, fn, stream)
 	}
 	return fn, nil
 }

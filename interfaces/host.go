@@ -3,14 +3,15 @@ package interfaces
 import "github.com/NubeIO/rubix-os/schema/schema"
 
 type HostProperties struct {
-	Name          schema.Name        `json:"name"`
-	Enable        schema.Enable      `json:"enable"`
-	Description   schema.Description `json:"description"`
-	IP            schema.Host        `json:"ip"`
-	BiosPort      schema.Port        `json:"bios_port"`
-	Port          schema.Port        `json:"port"`
-	HTTPS         schema.HTTPS       `json:"https"`
-	ExternalToken schema.Token       `json:"external_token"`
+	Name          schema.Name          `json:"name"`
+	Enable        schema.Enable        `json:"enable"`
+	Description   schema.Description   `json:"description"`
+	DeviceType    schema.DeviceType    `json:"device_type"`
+	IP            schema.Host          `json:"ip"`
+	BiosPort      schema.Port          `json:"bios_port"`
+	Port          schema.Port          `json:"port"`
+	HTTPS         schema.HTTPS         `json:"https"`
+	ExternalToken schema.ExternalToken `json:"external_token"`
 }
 
 func GetHostProperties() *HostProperties {
@@ -22,7 +23,6 @@ func GetHostProperties() *HostProperties {
 	m.BiosPort.ReadOnly = false
 	m.Port.Default = 1660
 	m.Port.ReadOnly = false
-	m.ExternalToken.Title = "external token"
 	schema.Set(m)
 	return m
 }

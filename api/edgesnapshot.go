@@ -31,6 +31,7 @@ type EdgeSnapshotDatabase interface {
 	UpdateSnapshotRestoreLog(uuid string, body *model.SnapshotRestoreLog) (*model.SnapshotRestoreLog, error)
 
 	ResolveHost(uuid string, name string) (*model.Host, error)
+	GetLocationGroupHostNamesByHostUUID(hostUUID string) (*interfaces.LocationGroupHostName, error)
 }
 type EdgeSnapshotApi struct {
 	DB       EdgeSnapshotDatabase
@@ -97,6 +98,7 @@ func (a *EdgeSnapshotApi) CreateSnapshot(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
+	names, _ := a.DB.GetLocationGroupHostNamesByHostUUID(host.UUID)
 	createLog, err := a.DB.CreateSnapshotCreateLog(&model.SnapshotCreateLog{UUID: "", HostUUID: host.UUID, Msg: "",
 		Status: model.Creating, Description: body.Description, CreatedAt: time.Now()})
 	if err != nil {
@@ -105,7 +107,7 @@ func (a *EdgeSnapshotApi) CreateSnapshot(ctx *gin.Context) {
 	}
 	go func() {
 		cli := cligetter.GetEdgeClient(host)
-		snapshot, filename, err := cli.CreateSnapshot()
+		snapshot, filename, err := cli.CreateSnapshot(names)
 		if err == nil {
 			err = os.WriteFile(path.Join(config.Get().GetAbsSnapShotDir(), filename), snapshot,
 				os.FileMode(a.FileMode))

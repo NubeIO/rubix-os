@@ -235,3 +235,11 @@ func contains(slice []string, value string) bool {
 	}
 	return false
 }
+
+func (d *GormDatabase) getGlobalUUID() (string, error) {
+	deviceInfo, err := d.RubixRegistry.GetDeviceInfo()
+	if err != nil {
+		return "", err
+	}
+	return deviceInfo.GlobalUUID, nil
+}

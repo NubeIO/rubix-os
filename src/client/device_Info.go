@@ -8,7 +8,7 @@ import (
 func (inst *FlowClient) DeviceInfo() (*model.DeviceInfo, error) {
 	resp, err := nresty.FormatRestyResponse(inst.client.R().
 		SetResult(&model.DeviceInfo{}).
-		Get("/api/system/device_info"))
+		Get("/api/system/device"))
 	if err != nil {
 		return nil, err
 	}

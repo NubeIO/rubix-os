@@ -55,6 +55,14 @@ type Token struct {
 	ReadOnly bool   `json:"readOnly" default:"false"`
 }
 
+type ExternalToken struct {
+	Type     string `json:"type" default:"string"`
+	Title    string `json:"title" default:"External Token"`
+	Min      int    `json:"minLength" default:"0"`
+	Max      int    `json:"maxLength" default:"200"`
+	ReadOnly bool   `json:"readOnly" default:"false"`
+}
+
 type Description struct {
 	Type  string `json:"type" default:"string"`
 	Title string `json:"title" default:"Description"`
@@ -154,4 +162,11 @@ type OptionOneOf struct {
 type OptionOneOfInt struct {
 	Const int    `json:"const"`
 	Title string `json:"Title"`
+}
+
+type DeviceType struct {
+	Type    string   `json:"type" default:"string"`
+	Title   string   `json:"title" default:"Device Type"`
+	Options []string `json:"enum" default:"[\"cloud\",\"edge-28\",\"rubix-compute\",\"rubix-compute-vpn\",\"rubix-compute-lorawan\",\"rubix-compute-lorawan-vpn\",\"rubix-compute-io\"]"`
+	Default string   `json:"default" default:"rubix-compute"`
 }

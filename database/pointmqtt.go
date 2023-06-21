@@ -143,8 +143,12 @@ func (d *GormDatabase) RePublishSelectedPointsCovListener() {
 }
 
 func (d *GormDatabase) PublishDeviceInfo() {
+	deviceInfo, err := d.RubixRegistry.GetDeviceInfo()
+	if err != nil {
+		return
+	}
 	callback := func(client mqtt.Client, message mqtt.Message) {
-		localmqtt.PublishInfo()
+		localmqtt.PublishInfo(deviceInfo)
 	}
 	topic := fetchDeviceInfo
 	mqttClient := localmqtt.GetLocalMqtt().Client

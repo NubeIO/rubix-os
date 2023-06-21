@@ -16,9 +16,9 @@ import (
 	"github.com/NubeIO/rubix-os/module"
 	"github.com/NubeIO/rubix-os/nerrors"
 	"github.com/NubeIO/rubix-os/plugin"
+	"github.com/NubeIO/rubix-os/rubixregistry"
 	"github.com/NubeIO/rubix-os/services/appstore"
 	"github.com/NubeIO/rubix-os/services/system"
-	"github.com/NubeIO/rubix-registry-go/rubixregistry"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-co-op/gocron"
@@ -26,7 +26,7 @@ import (
 )
 
 func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *gocron.Scheduler,
-	systemCtl *systemctl.SystemCtl, system_ *system.System) *gin.Engine {
+	systemCtl *systemctl.SystemCtl, system_ *system.System, registry *rubixregistry.RubixRegistry) *gin.Engine {
 	engine := gin.New()
 	engine.Use(logger.GinMiddlewareLogger(), gin.Recovery(), nerrors.Handler(), location.Default())
 	engine.NoRoute(nerrors.NotFoundHandler())
@@ -130,7 +130,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	}
 
 	deviceInfoHandler := api.DeviceInfoAPI{
-		RubixRegistry: rubixregistry.New(),
+		RubixRegistry: registry,
 	}
 	writerHandler := api.WriterAPI{
 		DB: db,
@@ -178,7 +178,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	snapshotHandler := api.SnapshotAPI{
 		SystemCtl:     systemCtl,
 		FileMode:      0755,
-		RubixRegistry: rubixregistry.New(),
+		RubixRegistry: registry,
 	}
 	restartJobHandler := api.RestartJobApi{
 		SystemCtl: systemCtl,
@@ -630,10 +630,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 
 		deviceInfoRoutes := apiRoutes.Group("/system")
 		{
-			deviceInfoRoutes.GET("/device_info", deviceInfoHandler.GetDeviceInfo)
-
 			deviceInfoRoutes.GET("/device", deviceInfoHandler.GetDeviceInfo)
-			deviceInfoRoutes.PATCH("/device", deviceInfoHandler.UpdateDeviceInfo)
 			deviceInfoRoutes.POST("/scanner", systemHandler.RunScanner)
 			deviceInfoRoutes.GET("/network_interfaces", systemHandler.GetNetworkInterfaces)
 			deviceInfoRoutes.POST("/reboot", systemHandler.RebootHost)

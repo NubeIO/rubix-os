@@ -87,12 +87,9 @@ func (d *GormDatabase) UpdateHostsStatus(uuid string) (*model.Group, error) {
 		cli := cligetter.GetEdgeClientFastTimeout(host)
 		go func(h *model.Host) {
 			defer wg.Done()
-			globalUUID, deviceType, pingable, isValidToken := cli.Ping()
+			globalUUID, pingable, isValidToken := cli.Ping()
 			if globalUUID != nil {
 				h.GlobalUUID = *globalUUID
-			}
-			if deviceType != nil {
-				h.DeviceType = *deviceType
 			}
 			h.IsOnline = &pingable
 			h.IsValidToken = &isValidToken
