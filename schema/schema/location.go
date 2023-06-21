@@ -53,5 +53,5 @@ type Timezone struct {
 	Type    string   `json:"type" default:"string"`
 	Title   string   `json:"title" default:"Timezone"`
 	Options []string `json:"enum"`
-	Default string   `json:"default" default:"Africa/Abidjan"`
+	Default string   `json:"default" default:"Australia/Sydney"`
 }
