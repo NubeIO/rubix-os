@@ -114,15 +114,6 @@ func (d *GormDatabase) buildStreamQuery(args api.Args) *gorm.DB {
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
 	}
-	if args.AutoMappingNetworkUUID != nil {
-		query = query.Where("auto_mapping_network_uuid = ?", *args.AutoMappingNetworkUUID)
-	}
-	if args.AutoMappingDeviceUUID != nil {
-		query = query.Where("auto_mapping_device_uuid = ?", *args.AutoMappingDeviceUUID)
-	}
-	if args.AutoMappingScheduleUUID != nil {
-		query = query.Where("auto_mapping_schedule_uuid = ?", *args.AutoMappingScheduleUUID)
-	}
 	if args.Enable != nil {
 		if *args.Enable {
 			query = query.Where("enable IS TRUE")
@@ -238,9 +229,6 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 			Having("COUNT(network_uuid) = ?", len(keyValues))
 		query = query.Where("uuid IN (?)", subQuery)
 	}
-	if args.AutoMappingUUID != nil {
-		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
-	}
 	if args.GlobalUUID != nil {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
 	}
@@ -275,12 +263,6 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	}
 	if args.NetworkUUID != nil {
 		query = query.Where("network_uuid = ?", args.NetworkUUID)
-	}
-	if args.AutoMappingEnable != nil {
-		query = query.Where("auto_mapping_enable = ?", args.AutoMappingEnable)
-	}
-	if args.AutoMappingUUID != nil {
-		query = query.Where("auto_mapping_uuid = ?", args.AutoMappingUUID)
 	}
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
@@ -318,9 +300,6 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	}
 	if args.DeviceUUID != nil {
 		query = query.Where("device_uuid = ?", *args.DeviceUUID)
-	}
-	if args.AutoMappingUUID != nil {
-		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
 	}
 	if args.WithMetaTags {
 		query = query.Preload("MetaTags")
@@ -366,9 +345,6 @@ func (d *GormDatabase) buildWriterCloneQuery(args api.Args) *gorm.DB {
 	}
 	if args.SourceUUID != nil {
 		query = query.Where("source_uuid = ?", *args.SourceUUID)
-	}
-	if args.CreatedFromAutoMapping != nil {
-		query = query.Where("created_from_auto_mapping = ?", *args.CreatedFromAutoMapping)
 	}
 	return query
 }
@@ -442,9 +418,6 @@ func (d *GormDatabase) buildScheduleQuery(args api.Args) *gorm.DB {
 	}
 	if args.GlobalUUID != nil {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
-	}
-	if args.AutoMappingUUID != nil {
-		query = query.Where("auto_mapping_uuid = ?", *args.AutoMappingUUID)
 	}
 	return query
 }
