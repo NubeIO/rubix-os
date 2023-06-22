@@ -7,7 +7,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
-	"github.com/NubeIO/rubix-os/plugin/nube/protocals/modbus/mbmodel"
 	modbschema "github.com/NubeIO/rubix-os/schema/modbuschema"
 	"github.com/NubeIO/rubix-os/utils/array"
 	"github.com/gin-gonic/gin"
@@ -15,11 +14,7 @@ import (
 )
 
 const (
-	help              = "/help"
 	listSerial        = "/list/serial"
-	schemaNetwork     = "/schema/network"
-	schemaDevice      = "/schema/device"
-	schemaPoint       = "/schema/point"
 	jsonSchemaNetwork = "/schema/json/network"
 	jsonSchemaDevice  = "/schema/json/device"
 	jsonSchemaPoint   = "/schema/json/point"
@@ -206,16 +201,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, stats)
 			return
 		}
-	})
-
-	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, mbmodel.GetNetworkSchema())
-	})
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, mbmodel.GetDeviceSchema())
-	})
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, mbmodel.GetPointSchema())
 	})
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, modbschema.GetNetworkSchema())

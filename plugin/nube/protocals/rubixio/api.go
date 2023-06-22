@@ -3,16 +3,12 @@ package main
 import (
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
-	"github.com/NubeIO/rubix-os/plugin/nube/protocals/rubixio/rubixiomodel"
 	"github.com/NubeIO/rubix-os/schema/rubixioschema"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 const (
-	schemaNetwork     = "/schema/network"
-	schemaDevice      = "/schema/device"
-	schemaPoint       = "/schema/point"
 	jsonSchemaNetwork = "/schema/json/network"
 	jsonSchemaDevice  = "/schema/json/device"
 	jsonSchemaPoint   = "/schema/json/point"
@@ -70,16 +66,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		body, _ := plugin.GetBODYPoint(ctx)
 		ok, err := inst.deletePoint(body)
 		api.ResponseHandler(ok, err, ctx)
-	})
-
-	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, rubixiomodel.GetNetworkSchema())
-	})
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, rubixiomodel.GetDeviceSchema())
-	})
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, rubixiomodel.GetPointSchema())
 	})
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, rubixioschema.GetNetworkSchema())

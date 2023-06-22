@@ -3,10 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeDev/bacnet"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
-	"github.com/NubeIO/rubix-os/plugin/nube/protocals/bacnetmaster/master"
 	"github.com/NubeIO/rubix-os/schema/masterschema"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -14,9 +14,6 @@ import (
 )
 
 const (
-	schemaNetwork     = "/schema/network"
-	schemaDevice      = "/schema/device"
-	schemaPoint       = "/schema/point"
 	jsonSchemaNetwork = "/schema/json/network"
 	jsonSchemaDevice  = "/schema/json/device"
 	jsonSchemaPoint   = "/schema/json/point"
@@ -85,9 +82,8 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ok, err := inst.deletePoint(body)
 		api.ResponseHandler(ok, err, ctx)
 	})
-
 	mux.POST(whois+"/:uuid", func(ctx *gin.Context) {
-		body, _ := master.BodyWhoIs(ctx)
+		body, _ := BodyWhoIs(ctx)
 		uuid := resolveID(ctx)
 		addDevices := ctx.Query("add_devices")
 		add, _ := strconv.ParseBool(addDevices)
@@ -108,7 +104,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		resp, err := inst.devicePoints(uuid, add, writeable)
 		api.ResponseHandler(resp, err, ctx)
 	})
-
 	mux.GET("/polling/stats/network/:name", func(ctx *gin.Context) {
 		networkName := ctx.Param("name")
 		stats, err := inst.getPollingStats(networkName)
@@ -119,16 +114,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 			ctx.JSON(http.StatusOK, stats)
 			return
 		}
-	})
-
-	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, master.GetNetworkSchema())
-	})
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, master.GetDeviceSchema())
-	})
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, master.GetPointSchema())
 	})
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, masterschema.GetNetworkSchema())
@@ -153,4 +138,9 @@ func (inst *Instance) getPollingStats(networkName string) (result *model.PollQue
 		return result, nil
 	}
 	return nil, errors.New(fmt.Sprintf("couldn't find network %s for polling statistics", networkName))
+}
+
+func BodyWhoIs(ctx *gin.Context) (dto *bacnet.WhoIsOpts, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
 }
