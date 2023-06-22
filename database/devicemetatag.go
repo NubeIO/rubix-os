@@ -2,12 +2,12 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"strings"
 )
 
-func CreateDeviceMetaTagsTransaction(tx *gorm.DB, deviceUUID string, body []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error) {
+func (d *GormDatabase) CreateDeviceMetaTags(deviceUUID string, body []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error) {
+	tx := d.DB.Begin()
 	var keys []string
 	for _, b := range body {
 		var count int64
@@ -21,28 +21,21 @@ func CreateDeviceMetaTagsTransaction(tx *gorm.DB, deviceUUID string, body []*mod
 	notIn := strings.Join(keys, ",")
 	if err := tx.Where("device_uuid = ?", deviceUUID).Where("key not in (?)", notIn).
 		Delete(&model.DeviceMetaTag{}).Error; err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 	if len(body) > 0 {
 		if err := tx.Clauses(clause.OnConflict{UpdateAll: true}).Create(body).Error; err != nil {
+			tx.Rollback()
 			return nil, err
 		}
 	}
 	if err := tx.Where("device_uuid = ?", deviceUUID).Find(&body).Error; err != nil {
-		return nil, err
-	}
-	return body, nil
-}
-
-func (d *GormDatabase) CreateDeviceMetaTags(deviceUUID string, body []*model.DeviceMetaTag) ([]*model.DeviceMetaTag, error) {
-	tx := d.DB.Begin()
-	mt, err := CreateDeviceMetaTagsTransaction(tx, deviceUUID, body)
-	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 	tx.Commit()
-	return mt, nil
+	return body, nil
 }
 
 func (d *GormDatabase) GetDeviceMetaTags() ([]*model.DeviceMetaTag, error) {

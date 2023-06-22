@@ -136,9 +136,6 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
 		args.FlowNetworkUUID = value
 	}
-	if value, ok := ctx.GetQuery(aType.AutoMappingUUID); ok {
-		args.AutoMappingUUID = &value
-	}
 	if value, ok := ctx.GetQuery(aType.MetaTags); ok {
 		args.MetaTags = &value
 	}

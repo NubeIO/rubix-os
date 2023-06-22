@@ -8,13 +8,12 @@ import (
 	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/NubeIO/rubix-os/utils/integer"
 	"github.com/NubeIO/rubix-os/utils/priorityarray"
-	"gorm.io/gorm"
 	"strings"
 )
 
 // updatePriority it updates priority array of point model
 // it attaches the point model fields values for updating it on its parent function
-func updatePriorityTransaction(db *gorm.DB, pointModel *model.Point, priority *map[string]*float64) (
+func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64) (
 	*model.Point, *map[string]*float64, *float64, *float64, bool) {
 	isPriorityChanged := false
 	var presentValue *float64
@@ -43,7 +42,7 @@ func updatePriorityTransaction(db *gorm.DB, pointModel *model.Point, priority *m
 		pointModel.Priority.P14 = nil
 		pointModel.Priority.P15 = nil
 		pointModel.Priority.P16 = nil
-		db.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&pointModel.Priority)
+		d.DB.Model(&model.Priority{}).Where("point_uuid = ?", pointModel.UUID).Updates(&pointModel.Priority)
 	}
 
 	if priority != nil {
@@ -70,7 +69,7 @@ func updatePriorityTransaction(db *gorm.DB, pointModel *model.Point, priority *m
 			}
 		}
 		priorityMapToPatch_ := priorityMapToPatch(priorityMap)
-		db.Model(&pointModel.Priority).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMapToPatch_)
+		d.DB.Model(&pointModel.Priority).Where("point_uuid = ?", pointModel.UUID).Updates(&priorityMapToPatch_)
 	}
 	if !presentValueFromPriority {
 		// presentValue will be OriginalValue if PointPriorityArrayMode is PriorityArrayToWriteValue or
@@ -78,11 +77,6 @@ func updatePriorityTransaction(db *gorm.DB, pointModel *model.Point, priority *m
 		presentValue = pointModel.OriginalValue
 	}
 	return pointModel, priorityMap, presentValue, writeValue, isPriorityChanged
-}
-
-func (d *GormDatabase) updatePriority(pointModel *model.Point, priority *map[string]*float64) (
-	*model.Point, *map[string]*float64, *float64, *float64, bool) {
-	return updatePriorityTransaction(d.DB, pointModel, priority)
 }
 
 func priorityMapToPatch(priorityMap *map[string]*float64) map[string]interface{} {

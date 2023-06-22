@@ -1,12 +1,9 @@
 package database
 
 import (
-	"errors"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
-	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
-	"gorm.io/gorm"
 )
 
 type WriterClone struct {
@@ -32,17 +29,13 @@ func (d *GormDatabase) GetWriterClone(uuid string) (*model.WriterClone, error) {
 	return wcm, nil
 }
 
-func (d *GormDatabase) GetOneWriterCloneByArgsTransaction(db *gorm.DB, args api.Args) (*model.WriterClone, error) {
+func (d *GormDatabase) GetOneWriterCloneByArgs(args api.Args) (*model.WriterClone, error) {
 	var wcm *model.WriterClone
-	query := buildWriterCloneQueryTransaction(db, args)
+	query := d.buildWriterCloneQuery(args)
 	if err := query.First(&wcm).Error; err != nil {
 		return nil, err
 	}
 	return wcm, nil
-}
-
-func (d *GormDatabase) GetOneWriterCloneByArgs(args api.Args) (*model.WriterClone, error) {
-	return d.GetOneWriterCloneByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) CreateWriterClone(body *model.WriterClone) (*model.WriterClone, error) {
@@ -58,9 +51,6 @@ func (d *GormDatabase) DeleteWriterClone(uuid string) (bool, error) {
 	wc, err := d.GetWriterClone(uuid)
 	if err != nil {
 		return false, err
-	}
-	if boolean.IsTrue(wc.CreatedFromAutoMapping) {
-		return false, errors.New("can't delete auto-mapped writer clone")
 	}
 	query := d.DB.Where("uuid = ? ", uuid).Delete(&wc)
 	return d.deleteResponseBuilder(query)
