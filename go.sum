@@ -17,6 +17,8 @@ github.com/NubeDev/modbus v0.0.2 h1:XdKbkLg3paHHrUL8sOEv+l6lxtnmzOqAigNVIQN+u+0=
 github.com/NubeDev/modbus v0.0.2/go.mod h1:EiDujV5KTuh1/HSSiwX/+SW6rZBW0wec8RcdkpiNGII=
 github.com/NubeIO/configor v0.0.3 h1:VyfZexLZ2cvKftGqLLUg4Ym7N5gVWHU2cWheVQZGNGE=
 github.com/NubeIO/configor v0.0.3/go.mod h1:HGAnJTAwAntKAi5EGMQUQHWE4o4fMYKyByWXXqFJUTA=
+github.com/NubeIO/flow-framework v0.14.2 h1:mAyHfs88LMTly1jnSIirb5p4qLJYD7DC8Kfh09sy1v0=
+github.com/NubeIO/flow-framework v0.14.2/go.mod h1:5r3WdQR7batm6mxGvo778s3ITgEfWZ7RnmHLTJrHUEY=
 github.com/NubeIO/lib-date v0.0.6 h1:88Ki7UIOvDEKyd3vKJ7r4fiUeX25Q5iyMO5d0125wrA=
 github.com/NubeIO/lib-date v0.0.6/go.mod h1:VvpSwdwcVCaOgTN+Ad96nHBkFDWTt3VekG933QCtGtc=
 github.com/NubeIO/lib-dhcpd v0.0.2 h1:DC2qcVi3tsRkYlmmlTiZTvsHdFI9/HqSohVj131Pl4I=
@@ -25,6 +27,8 @@ github.com/NubeIO/lib-files v1.0.0 h1:OZjBDXkXKGmI4SzciMnKa9Ko2mUCTbVrc3BCe1s6rw
 github.com/NubeIO/lib-files v1.0.0/go.mod h1:xi4mqMscDl6319i10LFowq5QvwChJLjqHCIJGkGa4RI=
 github.com/NubeIO/lib-networking v0.1.0 h1:XhhG8lTGjsULgcI8ZuJ/R3xyXIQlVQ3Tspig/7f0ce8=
 github.com/NubeIO/lib-networking v0.1.0/go.mod h1:WVj1zTKJ4qYijtzNvu7N5w8+cXFlCjy+HxjnIvSFgNA=
+github.com/NubeIO/lib-schema v0.2.16 h1:4giIOlgvuKrIHX9u/vfbQTsHxAsaBUCMa5nmCoGVE4c=
+github.com/NubeIO/lib-schema v0.2.16/go.mod h1:TGKDA6IIWHDwr5Aabawj6FF7NXUWXqu4ozWfph/hIjw=
 github.com/NubeIO/lib-system v0.0.1 h1:4fbHusnifJHv6KU1gH4/CKY/NzqqehkoXwzGcsVtoUs=
 github.com/NubeIO/lib-system v0.0.1/go.mod h1:6WxjOSs9NDjXMF2TAITmHrNwQeo8IPPBz3E1frb0stI=
 github.com/NubeIO/lib-systemctl-go v0.3.1 h1:IzmkzMX0kyxT9cjgLq0B7KZwrlPdiCLoSEJvGRngpA8=

@@ -47,6 +47,7 @@ require (
 
 require (
 	github.com/NubeDev/bacnet v0.1.9
+	github.com/NubeIO/flow-framework v0.14.2
 	github.com/NubeIO/lib-date v0.0.6
 	github.com/NubeIO/lib-dhcpd v0.0.2
 	github.com/NubeIO/lib-files v1.0.0
@@ -66,6 +67,8 @@ require (
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
+
+require github.com/NubeIO/lib-schema v0.2.16 // indirect
 
 require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
