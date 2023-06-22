@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
-	"github.com/NubeIO/rubix-os/plugin/nube/protocals/edge28/edgemodel"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/edge28/edgerest"
 	"github.com/NubeIO/rubix-os/schema/edge28schema"
 	"github.com/gin-gonic/gin"
@@ -17,9 +16,6 @@ func bodyWizard(ctx *gin.Context) (dto wizard, err error) {
 }
 
 const (
-	schemaNetwork     = "/schema/network"
-	schemaDevice      = "/schema/device"
-	schemaPoint       = "/schema/point"
 	jsonSchemaNetwork = "/schema/json/network"
 	jsonSchemaDevice  = "/schema/json/device"
 	jsonSchemaPoint   = "/schema/json/point"
@@ -151,16 +147,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		} else {
 			ctx.JSON(http.StatusOK, p)
 		}
-	})
-
-	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, edgemodel.GetNetworkSchema())
-	})
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, edgemodel.GetDeviceSchema())
-	})
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, edgemodel.GetPointSchema())
 	})
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, edge28schema.GetNetworkSchema())

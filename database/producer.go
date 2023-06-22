@@ -2,7 +2,6 @@ package database
 
 import (
 	"errors"
-	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
@@ -14,7 +13,6 @@ import (
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 type Producer struct {
@@ -39,27 +37,16 @@ func (d *GormDatabase) GetProducer(uuid string, args api.Args) (*model.Producer,
 	return producerModel, nil
 }
 
-func (d *GormDatabase) GetOneProducerByArgsTransaction(db *gorm.DB, args api.Args) (*model.Producer, error) {
+func (d *GormDatabase) GetOneProducerByArgs(args api.Args) (*model.Producer, error) {
 	var producerModel *model.Producer
-	query := buildProducerQueryTransaction(db, args)
+	query := d.buildProducerQuery(args)
 	if err := query.First(&producerModel).Error; err != nil {
 		return nil, err
 	}
 	return producerModel, nil
 }
 
-func (d *GormDatabase) GetOneProducerByArgs(args api.Args) (*model.Producer, error) {
-	return d.GetOneProducerByArgsTransaction(d.DB, args)
-}
-
 func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, error) {
-	stream, err := d.GetStream(body.StreamUUID, api.Args{})
-	if err != nil {
-		return nil, fmt.Errorf("no such parent stream with uuid %s", body.StreamUUID)
-	}
-	if boolean.IsTrue(stream.CreatedFromAutoMapping) {
-		return nil, errors.New("can't create a producer for the auto-mapped stream")
-	}
 	if body.ProducerThingUUID == "" {
 		return nil, errors.New("please pass in a producer_thing_uuid i.e. uuid of that class")
 	}
@@ -88,7 +75,7 @@ func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, er
 	body.Name = nameIsNil(body.Name)
 	body.SyncUUID, _ = nuuid.MakeUUID()
 	body.ProducerThingName = nameIsNil(producerThingName)
-	if err = d.DB.Create(&body).Error; err != nil {
+	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
 	return body, nil
@@ -98,9 +85,6 @@ func (d *GormDatabase) UpdateProducer(uuid string, body *model.Producer, checkAu
 	var producerModel *model.Producer
 	if err := d.DB.Where("uuid = ?", uuid).First(&producerModel).Error; err != nil {
 		return nil, err
-	}
-	if boolean.IsTrue(producerModel.CreatedFromAutoMapping) && checkAutoMap {
-		return nil, errors.New("can't update auto-mapped producer")
 	}
 	if err := d.updateTags(&producerModel, body.Tags); err != nil {
 		return nil, err
@@ -143,9 +127,6 @@ func (d *GormDatabase) DeleteProducer(uuid string) (bool, error) {
 	producer, err := d.GetProducer(uuid, api.Args{})
 	if err != nil {
 		return false, err
-	}
-	if boolean.IsTrue(producer.CreatedFromAutoMapping) {
-		return false, errors.New("can't delete auto-mapped producer")
 	}
 	stream, _ := d.GetStream(producer.StreamUUID, api.Args{WithFlowNetworks: true})
 	aType := api.ArgsType

@@ -6,7 +6,6 @@ import (
 
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
-	"github.com/NubeIO/rubix-os/plugin/nube/protocals/lorawan/csmodel"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/lorawan/csrest"
 	"github.com/NubeIO/rubix-os/schema/lorawanschema"
 	"github.com/gin-gonic/gin"
@@ -48,17 +47,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 		ok, err := inst.db.DeletePoint(body.UUID)
 		api.ResponseHandler(ok, err, ctx)
 	})
-
-	mux.GET(plugin.SchemaLegacyNetwork, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, csmodel.GetNetworkSchema())
-	})
-	mux.GET(plugin.SchemaLegacyDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, csmodel.GetDeviceSchema())
-	})
-	mux.GET(plugin.SchemaLegacyPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, csmodel.GetPointSchema())
-	})
-
 	mux.GET(plugin.JsonSchemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, lorawanschema.GetNetworkSchema())
 	})

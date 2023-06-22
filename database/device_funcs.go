@@ -6,7 +6,6 @@ import (
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/integer"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -33,17 +32,13 @@ func (d *GormDatabase) GetDeviceByPointUUID(pntUUID string) (*model.Device, erro
 	return device, nil
 }
 
-func (d *GormDatabase) GetOneDeviceByArgsTransaction(db *gorm.DB, args api.Args) (*model.Device, error) {
+func (d *GormDatabase) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
 	var deviceModel *model.Device
-	query := buildDeviceQueryTransaction(db, args)
+	query := d.buildDeviceQuery(args)
 	if err := query.First(&deviceModel).Error; err != nil {
 		return nil, err
 	}
 	return deviceModel, nil
-}
-
-func (d *GormDatabase) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
-	return d.GetOneDeviceByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) GetDeviceByName(networkName string, deviceName string, args api.Args) (*model.Device, error) {

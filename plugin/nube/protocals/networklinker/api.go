@@ -12,18 +12,12 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
-	"github.com/NubeIO/rubix-os/plugin/defaults"
-	"github.com/NubeIO/rubix-os/plugin/nube/protocals/networklinker/linkmodel"
 	"github.com/NubeIO/rubix-os/utils/helpers"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )
 
 const (
-	schemaNetwork = "/schema/network"
-	schemaDevice  = "/schema/device"
-	schemaPoint   = "/schema/point"
-
 	jsonSchemaNetwork = "/schema/json/network"
 	jsonSchemaDevice  = "/schema/json/device"
 	jsonSchemaPoint   = "/schema/json/point"
@@ -66,28 +60,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.PATCH(plugin.PointsWriteURL, func(ctx *gin.Context) {
 		inst.handlePointWriteProxy(ctx)
 	})
-
-	mux.GET(schemaNetwork, func(ctx *gin.Context) {
-		fns, err := inst.db.GetFlowNetworks(api.Args{})
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, err)
-			return
-		}
-		fnsNames := make([]string, 0)
-		for _, fn := range fns {
-			fnsNames = append(fnsNames, fn.Name)
-		}
-		networkSchema := inst.GetNetworkSchemaOLD()
-		networkSchema.AutoMappingFlowNetworkName.Options = fnsNames
-		ctx.JSON(http.StatusOK, networkSchema)
-	})
-	mux.GET(schemaDevice, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, inst.GetDeviceSchemaOLD())
-	})
-	mux.GET(schemaPoint, func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, inst.GetPointSchemaOLD())
-	})
-
 	mux.GET(jsonSchemaNetwork, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, networklinkerschema.GetNetworkSchema())
 	})
@@ -99,32 +71,6 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	mux.GET(jsonSchemaPoint, func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, networklinkerschema.GetPointSchema())
 	})
-}
-
-func (inst *Instance) GetNetworkSchemaOLD() *linkmodel.SchemaNetwork {
-	netSchema := &linkmodel.SchemaNetwork{}
-	defaults.Set(netSchema)
-	options := inst.GetNetworkAddressUuidOption()
-	for i := range options {
-		netSchema.AddressUUID.Options = append(netSchema.AddressUUID.Options, options[i].Const)
-	}
-	return netSchema
-}
-
-func (inst *Instance) GetDeviceSchemaOLD() *linkmodel.SchemaDevice {
-	devSchema := &linkmodel.SchemaDevice{}
-	defaults.Set(devSchema)
-	options := inst.GetDeviceAddressUuidOptions()
-	for i := range options {
-		devSchema.AddressUUID.Options = append(devSchema.AddressUUID.Options, options[i].Const)
-	}
-	return devSchema
-}
-
-func (inst *Instance) GetPointSchemaOLD() *linkmodel.SchemaPoint {
-	point := &linkmodel.SchemaPoint{}
-	defaults.Set(point)
-	return point
 }
 
 func (inst *Instance) GetNetworkAddressUuidOption() []schema.OptionOneOf {

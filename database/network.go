@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
-	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/plugin/compat"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
@@ -14,17 +13,13 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func (d *GormDatabase) GetNetworksTransaction(db *gorm.DB, args api.Args) ([]*model.Network, error) {
+func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
 	var networksModel []*model.Network
-	query := buildNetworkQueryTransaction(db, args)
+	query := d.buildNetworkQuery(args)
 	if err := query.Find(&networksModel).Error; err != nil {
 		return nil, err
 	}
 	return networksModel, nil
-}
-
-func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
-	return d.GetNetworksTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, error) {
@@ -36,17 +31,13 @@ func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, e
 	return networkModel, nil
 }
 
-func (d *GormDatabase) GetOneNetworkByArgsTransaction(db *gorm.DB, args api.Args) (*model.Network, error) {
+func (d *GormDatabase) GetOneNetworkByArgs(args api.Args) (*model.Network, error) {
 	var networkModel *model.Network
-	query := buildNetworkQueryTransaction(db, args)
+	query := d.buildNetworkQuery(args)
 	if err := query.First(&networkModel).Error; err != nil {
 		return nil, err
 	}
 	return networkModel, nil
-}
-
-func (d *GormDatabase) GetOneNetworkByArgs(args api.Args) (*model.Network, error) {
-	return d.GetOneNetworkByArgsTransaction(d.DB, args)
 }
 
 // GetNetworkByField returns the network for the given field ie name or nil.
@@ -68,7 +59,7 @@ func (d *GormDatabase) GetNetworkByField(field string, value string, withDevices
 	}
 }
 
-func (d *GormDatabase) CreateNetworkTransaction(db *gorm.DB, body *model.Network) (*model.Network, error) {
+func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
 	name, err := validateName(body.Name)
 	if err != nil {
 		return nil, err
@@ -83,7 +74,7 @@ func (d *GormDatabase) CreateNetworkTransaction(db *gorm.DB, body *model.Network
 	body.TransportType = transport
 	if body.PluginPath != "" || body.PluginConfId != "" {
 		if body.PluginConfId == "" {
-			plugin, err := d.GetPluginByPathTransaction(db, body.PluginPath)
+			plugin, err := d.GetPluginByPath(body.PluginPath)
 			if err != nil {
 				return nil, errors.New("failed to find a valid plugin")
 			}
@@ -98,42 +89,31 @@ func (d *GormDatabase) CreateNetworkTransaction(db *gorm.DB, body *model.Network
 	if body.HistoryEnable == nil {
 		body.HistoryEnable = boolean.NewFalse()
 	}
-	if err = db.Create(&body).Error; err != nil {
+	if err = d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
 	return body, nil
 }
 
-func (d *GormDatabase) CreateNetwork(body *model.Network) (*model.Network, error) {
-	return d.CreateNetworkTransaction(d.DB, body)
-}
-
-func (d *GormDatabase) UpdateNetworkTransaction(db *gorm.DB, uuid string, body *model.Network, checkAm bool) (*model.Network, error) {
+func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
 	name, err := validateName(body.Name)
 	if err != nil {
 		return nil, err
 	}
 	var networkModel *model.Network
-	query := db.Where("uuid = ?", uuid).First(&networkModel)
+	query := d.DB.Where("uuid = ?", uuid).First(&networkModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	if boolean.IsTrue(networkModel.CreatedFromAutoMapping) && checkAm {
-		return nil, errors.New("can't update auto-mapped network")
-	}
-	if err := updateTagsTransaction(db, &networkModel, body.Tags); err != nil {
+	if err := d.updateTags(&networkModel, body.Tags); err != nil {
 		return nil, err
 	}
 	body.Name = name
-	query = db.Model(&networkModel).Select("*").Updates(&body)
+	query = d.DB.Model(&networkModel).Select("*").Updates(&body)
 	if query.Error != nil {
 		return nil, query.Error
 	}
 	return networkModel, nil
-}
-
-func (d *GormDatabase) UpdateNetwork(uuid string, body *model.Network) (*model.Network, error) {
-	return d.UpdateNetworkTransaction(d.DB, uuid, body, true)
 }
 
 // UpdateNetworkErrors will only update the CommonFault properties of the network, all other properties won't be updated.
@@ -144,18 +124,6 @@ func (d *GormDatabase) UpdateNetworkErrors(uuid string, body *model.Network) err
 		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
 		Updates(&body).
 		Error
-}
-
-func UpdateNetworkConnectionErrorsTransaction(db *gorm.DB, uuid string, network *model.Network) error {
-	return db.Model(&model.Network{}).
-		Where("uuid = ?", uuid).
-		Select("Connection", "ConnectionMessage").
-		Updates(&network).
-		Error
-}
-
-func (d *GormDatabase) UpdateNetworkConnectionErrors(uuid string, network *model.Network) error {
-	return UpdateNetworkConnectionErrorsTransaction(d.DB, uuid, network)
 }
 
 func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
@@ -183,46 +151,6 @@ func (d *GormDatabase) getPluginConf(body *model.Network) compat.Info {
 	}
 	info := d.PluginManager.PluginInfo(pluginConf.ModulePath)
 	return info
-}
-
-func (d *GormDatabase) SyncNetworks() error {
-	networks, err := d.GetNetworks(api.Args{WithDevices: true, WithPoints: true, WithPriority: true, WithTags: true, WithMetaTags: true})
-	var firstErr error
-	if err != nil {
-		return err
-	}
-	uniqueAutoMappingFlowNetworkNames := GetUniqueAutoMappingFlowNetworkNames(networks)
-	for _, fnName := range uniqueAutoMappingFlowNetworkNames {
-		err = d.CreateNetworksAutoMappings(fnName, networks, interfaces.Network)
-		if err != nil {
-			log.Error("Auto mapping error: ", err)
-		}
-	}
-	return firstErr
-}
-
-func (d *GormDatabase) SyncNetworkDevices(uuid string) error {
-	network, err := d.GetNetwork(uuid, api.Args{WithDevices: true, WithPoints: true, WithPriority: true, WithTags: true, WithMetaTags: true})
-	if err != nil {
-		return err
-	}
-	networks := make([]*model.Network, 0)
-	networks = append(networks, network)
-	return d.CreateNetworksAutoMappings(network.AutoMappingFlowNetworkName, networks, interfaces.Device)
-}
-
-func GetUniqueAutoMappingFlowNetworkNames(networks []*model.Network) []string {
-	uniqueAutoMappingFlowNetworkNamesMap := make(map[string]struct{})
-	var uniqueAutoMappingFlowNetworkNames []string
-
-	for _, network := range networks {
-		if _, ok := uniqueAutoMappingFlowNetworkNamesMap[network.AutoMappingFlowNetworkName]; !ok {
-			uniqueAutoMappingFlowNetworkNamesMap[network.AutoMappingFlowNetworkName] = struct{}{}
-			uniqueAutoMappingFlowNetworkNames = append(uniqueAutoMappingFlowNetworkNames, network.AutoMappingFlowNetworkName)
-		}
-	}
-
-	return uniqueAutoMappingFlowNetworkNames
 }
 
 func (d *GormDatabase) CreateBulkNetworksTransaction(db *gorm.DB, networks []*model.Network) (bool, error) {

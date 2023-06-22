@@ -13,7 +13,6 @@ import (
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 type Writer struct {
@@ -30,13 +29,6 @@ func (d *GormDatabase) GetWriters(args api.Args) ([]*model.Writer, error) {
 }
 
 func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
-	consumer, err := d.GetConsumer(body.ConsumerUUID, api.Args{})
-	if err != nil {
-		return nil, fmt.Errorf("no such parent consumer with uuid %s", body.ConsumerUUID)
-	}
-	if boolean.IsTrue(consumer.CreatedFromAutoMapping) {
-		return nil, errors.New("can't create a writer for the auto-mapped consumer")
-	}
 	name := ""
 	switch body.WriterThingClass {
 	case model.ThingClass.Point:
@@ -63,7 +55,7 @@ func (d *GormDatabase) CreateWriter(body *model.Writer) (*model.Writer, error) {
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	err = d.syncAfterCreateUpdateWriter(body)
+	err := d.syncAfterCreateUpdateWriter(body)
 	if err != nil {
 		return nil, err
 	}
@@ -105,17 +97,13 @@ func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer
 	return writerModel, nil
 }
 
-func GetOneWriterByArgsTransaction(db *gorm.DB, args api.Args) (*model.Writer, error) {
+func (d *GormDatabase) GetOneWriterByArgs(args api.Args) (*model.Writer, error) {
 	var writerModel *model.Writer
-	query := buildWriterQueryTransaction(db, args)
+	query := d.buildWriterQuery(args)
 	if err := query.First(&writerModel).Error; err != nil {
 		return nil, err
 	}
 	return writerModel, nil
-}
-
-func (d *GormDatabase) GetOneWriterByArgs(args api.Args) (*model.Writer, error) {
-	return GetOneWriterByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
@@ -123,9 +111,6 @@ func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {
 	writer, err := d.GetWriter(uuid)
 	if err != nil {
 		return false, err
-	}
-	if boolean.IsTrue(writer.CreatedFromAutoMapping) {
-		return false, errors.New("can't delete auto-mapped writer")
 	}
 	consumer, _ := d.GetConsumer(writer.ConsumerUUID, api.Args{})
 	streamClone, _ := d.GetStreamClone(consumer.StreamCloneUUID, api.Args{})
@@ -142,9 +127,6 @@ func (d *GormDatabase) UpdateWriter(uuid string, body *model.Writer, checkAm boo
 	query := d.DB.Where("uuid = ?", uuid).First(&writerModel)
 	if query.Error != nil {
 		return nil, query.Error
-	}
-	if boolean.IsTrue(writerModel.CreatedFromAutoMapping) && checkAm {
-		return nil, errors.New("can't update auto-mapped writer")
 	}
 	body.DataStore = nil
 	query = d.DB.Model(&writerModel).Updates(body)
