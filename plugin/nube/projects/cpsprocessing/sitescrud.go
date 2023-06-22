@@ -98,8 +98,8 @@ func (inst *Instance) GetSiteByName(c *gin.Context) {
 	siteName := site.Name
 	inst.cpsDebugMsg("GetSiteByName() siteName: ", siteName)
 	if siteName == "" {
-		inst.cpsErrorMsg("GetSiteByName() error: site name is required in body")
-		c.JSON(http.StatusBadRequest, gin.H{"error": "site name is required in body"})
+		inst.cpsErrorMsg("GetSiteByName() error: site 'name' is required in body")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "site 'name' is required in body"})
 		return
 	}
 
@@ -111,7 +111,44 @@ func (inst *Instance) GetSiteByName(c *gin.Context) {
 
 	err = postgresSetting.postgresConnectionInstance.db.Where("name = ?", siteName).First(&site).Error
 	if err != nil {
-		inst.cpsErrorMsg("GetSiteByName() db.First(&site, name) error: ", err)
+		inst.cpsErrorMsg("GetSiteByName() db.Where(name = ?, siteName).First(&site) error: ", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Site not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, site)
+}
+
+// GetSiteByAddress retrieves a site entry by its address
+func (inst *Instance) GetSiteByAddress(c *gin.Context) {
+
+	var site Site
+	var err error
+
+	err = c.ShouldBindJSON(&site)
+	if err != nil {
+		inst.cpsErrorMsg("GetSiteByName() ShouldBindJSON() error: ", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	siteAddress := site.Address
+	inst.cpsDebugMsg("GetSiteByName() siteAddress: ", siteAddress)
+	if siteAddress == "" {
+		inst.cpsErrorMsg("GetSiteByName() error: site 'address' is required in body")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "site 'address' is required in body"})
+		return
+	}
+
+	_, err = inst.initializePostgresDBConnection()
+	if err != nil {
+		inst.cpsErrorMsg("GetSiteByName() initializePostgresDBConnection() error: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	err = postgresSetting.postgresConnectionInstance.db.Where("address = ?", siteAddress).First(&site).Error
+	if err != nil {
+		inst.cpsErrorMsg("GetSiteByName() db.Where(address = ?, siteAddress).First(&site) error: ", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Site not found"})
 		return
 	}
