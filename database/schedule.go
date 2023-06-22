@@ -8,8 +8,6 @@ import (
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
-	"strings"
 )
 
 func (d *GormDatabase) GetSchedules() ([]*model.Schedule, error) {
@@ -52,33 +50,25 @@ func (d *GormDatabase) GetScheduleResult(uuid string) (*model.Schedule, error) {
 	return scheduleModel, nil
 }
 
-func (d *GormDatabase) GetSchedulesByArgsTransaction(db *gorm.DB, args api.Args) ([]*model.Schedule, error) {
+func (d *GormDatabase) GetSchedulesByArgs(args api.Args) ([]*model.Schedule, error) {
 	var scheduleModel []*model.Schedule
-	query := d.buildScheduleQueryTransaction(db, args)
+	query := d.buildScheduleQuery(args)
 	if err := query.Find(&scheduleModel).Error; err != nil {
 		return nil, err
 	}
 	return scheduleModel, nil
 }
 
-func (d *GormDatabase) GetSchedulesByArgs(args api.Args) ([]*model.Schedule, error) {
-	return d.GetSchedulesByArgsTransaction(d.DB, args)
-}
-
-func (d *GormDatabase) GetOneScheduleByArgsTransaction(db *gorm.DB, args api.Args) (*model.Schedule, error) {
+func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, error) {
 	var scheduleModel *model.Schedule
-	query := d.buildScheduleQueryTransaction(db, args)
+	query := d.buildScheduleQuery(args)
 	if err := query.First(&scheduleModel).Error; err != nil {
 		return nil, err
 	}
 	return scheduleModel, nil
 }
 
-func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, error) {
-	return d.GetOneScheduleByArgsTransaction(d.DB, args)
-}
-
-func (d *GormDatabase) CreateScheduleTransaction(db *gorm.DB, body *model.Schedule) (*model.Schedule, error) {
+func (d *GormDatabase) CreateSchedule(body *model.Schedule) (*model.Schedule, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Schedule)
 	body.Name = nameIsNil(body.Name)
 	body.ThingClass = model.ThingClass.Schedule
@@ -95,14 +85,10 @@ func (d *GormDatabase) CreateScheduleTransaction(db *gorm.DB, body *model.Schedu
 		}
 		body.GlobalUUID = globalUUID
 	}
-	if err = db.Create(&body).Error; err != nil {
+	if err = d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
 	return body, nil
-}
-
-func (d *GormDatabase) CreateSchedule(body *model.Schedule) (*model.Schedule, error) {
-	return d.CreateScheduleTransaction(d.DB, body)
 }
 
 func (d *GormDatabase) validateSchedule(schedule *model.Schedule) ([]byte, error) {
@@ -119,20 +105,6 @@ func (d *GormDatabase) validateSchedule(schedule *model.Schedule) ([]byte, error
 		return nil, err
 	}
 	return validSchedule, nil
-}
-
-func (d *GormDatabase) UpdateScheduleTransactionForAutoMapping(db *gorm.DB, uuid string, body *model.Schedule) (*model.Schedule, error) {
-	validSchedule, err := d.validateSchedule(body)
-	if err != nil {
-		return nil, err
-	}
-	scheduleModel := model.Schedule{CommonUUID: model.CommonUUID{UUID: uuid}}
-	body.Name = strings.TrimSpace(body.Name)
-	body.Schedule = validSchedule
-	if err := db.Model(&scheduleModel).Select("*").Updates(&body).Error; err != nil {
-		return nil, err
-	}
-	return &scheduleModel, nil
 }
 
 func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error) {
@@ -267,16 +239,4 @@ func (d *GormDatabase) DeleteSchedule(uuid string) (bool, error) {
 	}
 	query := d.DB.Delete(&schedule)
 	return d.deleteResponseBuilder(query)
-}
-
-func (d *GormDatabase) UpdateScheduleConnectionErrors(uuid string, schedule *model.Schedule) error {
-	return UpdateScheduleConnectionErrorsTransaction(d.DB, uuid, schedule)
-}
-
-func UpdateScheduleConnectionErrorsTransaction(db *gorm.DB, uuid string, schedule *model.Schedule) error {
-	return db.Model(&model.Schedule{}).
-		Where("uuid = ?", uuid).
-		Select("Connection", "ConnectionMessage").
-		Updates(&schedule).
-		Error
 }

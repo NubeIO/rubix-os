@@ -13,7 +13,6 @@ import (
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	log "github.com/sirupsen/logrus"
-	"gorm.io/gorm"
 )
 
 type Producer struct {
@@ -38,17 +37,13 @@ func (d *GormDatabase) GetProducer(uuid string, args api.Args) (*model.Producer,
 	return producerModel, nil
 }
 
-func (d *GormDatabase) GetOneProducerByArgsTransaction(db *gorm.DB, args api.Args) (*model.Producer, error) {
+func (d *GormDatabase) GetOneProducerByArgs(args api.Args) (*model.Producer, error) {
 	var producerModel *model.Producer
-	query := buildProducerQueryTransaction(db, args)
+	query := d.buildProducerQuery(args)
 	if err := query.First(&producerModel).Error; err != nil {
 		return nil, err
 	}
 	return producerModel, nil
-}
-
-func (d *GormDatabase) GetOneProducerByArgs(args api.Args) (*model.Producer, error) {
-	return d.GetOneProducerByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) CreateProducer(body *model.Producer) (*model.Producer, error) {

@@ -9,7 +9,6 @@ import (
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/urls"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
-	"gorm.io/gorm"
 )
 
 func (d *GormDatabase) GetStreams(args api.Args) ([]*model.Stream, error) {
@@ -41,17 +40,13 @@ func (d *GormDatabase) GetStreamByArgs(args api.Args) ([]*model.Stream, error) {
 	return streamsModel, nil
 }
 
-func GetOneStreamByArgsTransaction(db *gorm.DB, args api.Args) (*model.Stream, error) {
+func (d *GormDatabase) GetOneStreamByArgs(args api.Args) (*model.Stream, error) {
 	var streamModel *model.Stream
-	query := buildStreamQueryTransaction(db, args)
+	query := d.buildStreamQuery(args)
 	if err := query.First(&streamModel).Error; err != nil {
 		return nil, err
 	}
 	return streamModel, nil
-}
-
-func (d *GormDatabase) GetOneStreamByArgs(args api.Args) (*model.Stream, error) {
-	return GetOneStreamByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) CreateStream(body *model.Stream) (*model.Stream, error) {

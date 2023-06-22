@@ -4,7 +4,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
-	"gorm.io/gorm"
 )
 
 type WriterClone struct {
@@ -30,17 +29,13 @@ func (d *GormDatabase) GetWriterClone(uuid string) (*model.WriterClone, error) {
 	return wcm, nil
 }
 
-func (d *GormDatabase) GetOneWriterCloneByArgsTransaction(db *gorm.DB, args api.Args) (*model.WriterClone, error) {
+func (d *GormDatabase) GetOneWriterCloneByArgs(args api.Args) (*model.WriterClone, error) {
 	var wcm *model.WriterClone
-	query := buildWriterCloneQueryTransaction(db, args)
+	query := d.buildWriterCloneQuery(args)
 	if err := query.First(&wcm).Error; err != nil {
 		return nil, err
 	}
 	return wcm, nil
-}
-
-func (d *GormDatabase) GetOneWriterCloneByArgs(args api.Args) (*model.WriterClone, error) {
-	return d.GetOneWriterCloneByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) CreateWriterClone(body *model.WriterClone) (*model.WriterClone, error) {

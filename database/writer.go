@@ -13,7 +13,6 @@ import (
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 type Writer struct {
@@ -98,17 +97,13 @@ func (d *GormDatabase) GetWriterByThing(producerThingUUID string) (*model.Writer
 	return writerModel, nil
 }
 
-func GetOneWriterByArgsTransaction(db *gorm.DB, args api.Args) (*model.Writer, error) {
+func (d *GormDatabase) GetOneWriterByArgs(args api.Args) (*model.Writer, error) {
 	var writerModel *model.Writer
-	query := buildWriterQueryTransaction(db, args)
+	query := d.buildWriterQuery(args)
 	if err := query.First(&writerModel).Error; err != nil {
 		return nil, err
 	}
 	return writerModel, nil
-}
-
-func (d *GormDatabase) GetOneWriterByArgs(args api.Args) (*model.Writer, error) {
-	return GetOneWriterByArgsTransaction(d.DB, args)
 }
 
 func (d *GormDatabase) DeleteWriter(uuid string) (bool, error) {

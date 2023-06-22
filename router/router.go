@@ -105,9 +105,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	flowNetwork := api.FlowNetworksAPI{
 		DB: db,
 	}
-	mapping := api.MappingAPI{
-		DB: db,
-	}
 	flowNetworkCloneHandler := api.FlowNetworkClonesAPI{
 		DB: db,
 	}
@@ -394,11 +391,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			streamRoutes.PATCH("/:uuid", streamHandler.UpdateStream)
 			streamRoutes.DELETE("/:uuid", streamHandler.DeleteStream)
 			streamRoutes.GET("/:uuid/sync/producers", streamHandler.SyncStreamProducers)
-		}
-
-		mappingRoutes := apiRoutes.Group("/mapping")
-		{
-			mappingRoutes.POST("/points", mapping.CreatePointMapping)
 		}
 
 		remoteRoutes := apiRoutes.Group("/remote")
