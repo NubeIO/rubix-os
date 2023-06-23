@@ -2,6 +2,7 @@ package shared
 
 import (
 	"context"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/module/proto"
 	"github.com/hashicorp/go-plugin"
 	"google.golang.org/grpc"
@@ -20,6 +21,9 @@ type DBHelper interface {
 	Put(path, uuid string, body []byte) ([]byte, error)
 	Patch(path, uuid string, body []byte) ([]byte, error)
 	Delete(path, uuid string) ([]byte, error)
+	SetErrorsForAll(path, uuid, message, messageLevel, messageCode string, doPoints bool) error
+	ClearErrorsForAll(path, uuid string, doPoints bool) error
+	WizardNewNetworkDevicePoint(plugin string, net *model.Network, dev *model.Device, pnt *model.Point) (bool, error)
 }
 
 type Info struct {

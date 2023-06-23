@@ -45,6 +45,11 @@ func (*dbHelper) Get(path, uuid, args string) ([]byte, error) {
 		out, err = database.GlobalGormDatabase.GetPoint(uuid, apiArgs)
 	} else if path == "networks_by_plugin_name" {
 		out, err = database.GlobalGormDatabase.GetNetworksByPluginName(uuid, apiArgs)
+	} else if path == "network_by_name" {
+		name := uuid
+		out, err = database.GlobalGormDatabase.GetNetworkByName(name, apiArgs)
+	} else if path == "plugin_by_path" {
+		out, err = database.GlobalGormDatabase.GetPluginByPath(uuid)
 	} else {
 		return nil, errors.New("not found")
 	}
@@ -194,6 +199,51 @@ func (*dbHelper) Delete(path, uuid string) ([]byte, error) {
 		return nil, errors.New("not found")
 	}
 	return marshal(err, out)
+}
+
+func (*dbHelper) SetErrorsForAll(path, uuid, message, messageLevel, messageCode string, doPoints bool) error {
+	var err error
+	if path == "devices_on_network" {
+		err = database.GlobalGormDatabase.SetErrorsForAllDevicesOnNetwork(
+			uuid,
+			message,
+			messageLevel,
+			messageCode,
+			doPoints,
+		)
+	} else if path == "points_on_device" {
+		err = database.GlobalGormDatabase.SetErrorsForAllPointsOnDevice(
+			uuid,
+			message,
+			messageLevel,
+			messageCode,
+		)
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (*dbHelper) ClearErrorsForAll(path, uuid string, doPoints bool) error {
+	var err error
+	if path == "devices_on_network" {
+		err = database.GlobalGormDatabase.ClearErrorsForAllDevicesOnNetwork(uuid, doPoints)
+	} else if path == "points_on_device" {
+		err = database.GlobalGormDatabase.ClearErrorsForAllPointsOnDevice(uuid)
+	}
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (*dbHelper) WizardNewNetworkDevicePoint(plugin string, net *model.Network, dev *model.Device, pnt *model.Point) (bool, error) {
+	_, err := database.GlobalGormDatabase.WizardNewNetworkDevicePoint(plugin, net, dev, pnt)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func marshal(err error, out interface{}) ([]byte, error) {
