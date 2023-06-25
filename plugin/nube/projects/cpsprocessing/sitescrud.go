@@ -59,6 +59,28 @@ func (inst *Instance) CreateSite(c *gin.Context) {
 	c.JSON(http.StatusCreated, site)
 }
 
+// GetAllSites retrieves all sites
+func (inst *Instance) GetAllSites(c *gin.Context) {
+
+	var sites []Site
+	var err error
+
+	_, err = inst.initializePostgresDBConnection()
+	if err != nil {
+		inst.cpsErrorMsg("GetAllSites() initializePostgresDBConnection() error: ", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	err = postgresSetting.postgresConnectionInstance.db.Find(&sites).Error
+	if err != nil {
+		inst.cpsErrorMsg("GetAllSites() db.Find(&sites) error: ", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Site not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, sites)
+}
+
 // GetSite retrieves a site entry by site_ref
 func (inst *Instance) GetSite(c *gin.Context) {
 	siteRef := c.Param("site_ref")
@@ -123,37 +145,38 @@ func (inst *Instance) GetSiteByName(c *gin.Context) {
 func (inst *Instance) GetSiteByAddress(c *gin.Context) {
 
 	var site Site
+	var sitesResult []Site
 	var err error
 
 	err = c.ShouldBindJSON(&site)
 	if err != nil {
-		inst.cpsErrorMsg("GetSiteByName() ShouldBindJSON() error: ", err)
+		inst.cpsErrorMsg("GetSiteByAddress() ShouldBindJSON() error: ", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	siteAddress := site.Address
-	inst.cpsDebugMsg("GetSiteByName() siteAddress: ", siteAddress)
+	inst.cpsDebugMsg("GetSiteByAddress() siteAddress: ", siteAddress)
 	if siteAddress == "" {
-		inst.cpsErrorMsg("GetSiteByName() error: site 'address' is required in body")
+		inst.cpsErrorMsg("GetSiteByAddress() error: site 'address' is required in body")
 		c.JSON(http.StatusBadRequest, gin.H{"error": "site 'address' is required in body"})
 		return
 	}
 
 	_, err = inst.initializePostgresDBConnection()
 	if err != nil {
-		inst.cpsErrorMsg("GetSiteByName() initializePostgresDBConnection() error: ", err)
+		inst.cpsErrorMsg("GetSiteByAddress() initializePostgresDBConnection() error: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	err = postgresSetting.postgresConnectionInstance.db.Where("address = ?", siteAddress).First(&site).Error
+	err = postgresSetting.postgresConnectionInstance.db.Where("address = ?", siteAddress).Find(&sitesResult).Error
 	if err != nil {
-		inst.cpsErrorMsg("GetSiteByName() db.Where(address = ?, siteAddress).First(&site) error: ", err)
+		inst.cpsErrorMsg("GetSiteByAddress() db.Where(address = ?, siteAddress).First(&site) error: ", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Site not found"})
 		return
 	}
 
-	c.JSON(http.StatusOK, site)
+	c.JSON(http.StatusOK, sitesResult)
 }
 
 // UpdateSite updates a site entry
