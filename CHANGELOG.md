@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## [v0.0.4](https://github.com/NubeIO/rubix-os/tree/v0.0.4) (2023-06-25)
+
+- Remove auto-mapping & unused transaction codes
+- Add plugin cpsprocessing
+
 ## [v0.0.3](https://github.com/NubeIO/rubix-os/tree/v0.0.3) (2023-06-21)
 
 - Improvements: role base auth and auth error message
