@@ -140,6 +140,9 @@ for i in "$@"; do
   mapmodbus)
     buildPlugin "mapmodbus" plugin/nube/protocals/mapmodbus
     ;;
+  cpsprocessing)
+    buildPlugin "cpsprocessing" plugin/nube/projects/cpsprocessing
+    ;;
   esac
 done
 
