@@ -15,6 +15,7 @@ func (inst *Instance) Enable() error {
 	inst.fault = false
 	inst.running = false
 	inst.setUUID()
+	inst.initializePostgresSetting()
 	// start periodic functions
 	cron = gocron.NewScheduler(time.UTC)
 	// cron.SetMaxConcurrentJobs(2, gocron.RescheduleMode)

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/flow-framework/utils/nstring"
+	"github.com/NubeIO/rubix-os/utils/nstring"
 	log "github.com/sirupsen/logrus"
 )
 

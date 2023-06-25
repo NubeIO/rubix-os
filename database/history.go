@@ -4,6 +4,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm/clause"
+	"time"
 )
 
 // GetHistoriesForSync returns all histories after id.
@@ -25,6 +26,16 @@ func (d *GormDatabase) GetHistoriesForPostgresSync(lastSyncId int) ([]*model.His
 	var historiesModel []*model.History
 	query := d.DB.Where("history_id > (?)", lastSyncId)
 	query.Order("history_id ASC").Find(&historiesModel)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	return historiesModel, nil
+}
+
+// GetHistoriesByHostUUID fetches histories based on a given HostUUID and startTime
+func (d *GormDatabase) GetHistoriesByHostUUID(hostUUID string, startTime, endTime time.Time) ([]*model.History, error) {
+	var historiesModel []*model.History
+	query := d.DB.Where("host_uuid = ? AND timestamp > ? AND timestamp <= ?", hostUUID, startTime, endTime).Find(&historiesModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}

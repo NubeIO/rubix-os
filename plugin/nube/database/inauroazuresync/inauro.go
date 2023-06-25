@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
-	"github.com/NubeIO/flow-framework/api"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
 	"strconv"
 	"time"
 )

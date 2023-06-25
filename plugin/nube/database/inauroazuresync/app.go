@@ -6,12 +6,64 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/src/client"
+	"github.com/NubeIO/rubix-os/utils/float"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
 func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 	log.Info("azure sensor history sync has been called...")
+
+	_, err := inst.initializePostgresDBConnection()
+	if err != nil {
+		inst.inauroazuresyncErrorMsg(err)
+		return false, err
+	}
+
+	hosts, err := inst.db.GetHosts()
+	if err != nil {
+		return false, err
+	}
+	var histories []*model.History
+
+	// TODO: add startTime from module storage
+
+	for _, host := range hosts {
+		cloneEdge := true
+		hisLog, err := inst.db.GetHistoryLogByHostUUID(host.UUID)
+		if err != nil {
+			continue
+		}
+		cli := client.NewClient(host.IP, host.Port, host.ExternalToken)
+		pHistories, err := cli.GetPointHistoriesForSync(hisLog.LastSyncID, hisLog.Timestamp)
+		if err != nil {
+			continue
+		}
+		for k, h := range *pHistories {
+			if cloneEdge {
+				point, _ := inst.db.GetOnePointByArgs(api.Args{SourceUUID: nstring.New(h.PointUUID)})
+				if point == nil {
+					err = inst.db.CloneEdge(host)
+					cloneEdge = err != nil
+				}
+			}
+			history := model.History{
+				ID:        h.ID,
+				PointUUID: h.PointUUID,
+				HostUUID:  host.UUID,
+				Value:     h.Value,
+				Timestamp: h.Timestamp,
+			}
+			histories = append(histories, &history)
+			if k == len(*pHistories)-1 { // Update History Log
+				hisLog.HostUUID = host.UUID
+				hisLog.LastSyncID = h.ID
+				hisLog.Timestamp = h.Timestamp
+				historyLogs = append(historyLogs, hisLog)
+			}
+		}
+	}
 
 	// TODO: replace this history fetching logic to get histories on a per-gateway basis.
 	// TODO: Last sync will need to be stored on a per-gateway basis. This will likely be done with the module JSON storage.
@@ -30,8 +82,8 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 	sampleHistory1 := model.History{
 		HistoryID: 1,
 		ID:        1,
-		UUID:      "pnt_592b0dc2ba8d4434",
-		Value:     111,
+		PointUUID: "pnt_592b0dc2ba8d4434",
+		Value:     float.New(111),
 		Timestamp: time.Now().Add(-1 * time.Hour),
 	}
 	histories = append(histories, &sampleHistory1)
@@ -39,8 +91,8 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 	sampleHistory2 := model.History{
 		HistoryID: 2,
 		ID:        2,
-		UUID:      "pnt_76003bbae99846a3",
-		Value:     222,
+		PointUUID: "pnt_76003bbae99846a3",
+		Value:     float.New(222),
 		Timestamp: time.Now().Add(-1 * time.Hour).Add(1 * time.Second),
 	}
 	histories = append(histories, &sampleHistory2)
@@ -48,8 +100,8 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 	sampleHistory3 := model.History{
 		HistoryID: 3,
 		ID:        3,
-		UUID:      "pnt_592b0dc2ba8d4434",
-		Value:     333,
+		PointUUID: "pnt_592b0dc2ba8d4434",
+		Value:     float.New(333),
 		Timestamp: time.Now().Add(-30 * time.Minute),
 	}
 	histories = append(histories, &sampleHistory3)
@@ -95,7 +147,7 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 		lastHistory := histories[len(histories)-1]
 		lastDeliveredHistoryLog := &model.HistoryPostgresLog{
 			ID:        lastHistory.ID,
-			UUID:      lastHistory.UUID,
+			PointUUID: lastHistory.PointUUID,
 			Value:     lastHistory.Value,
 			Timestamp: lastHistory.Timestamp,
 		}
@@ -115,6 +167,12 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 
 func (inst *Instance) syncAzureGatewayPayloads() (bool, error) {
 	log.Info("azure gateway payload sync has been called...")
+
+	_, err := inst.initializePostgresDBConnection()
+	if err != nil {
+		inst.inauroazuresyncErrorMsg(err)
+		return false, err
+	}
 
 	// TODO: replace this history fetching logic to get the last history for each sensor during the last 15 minutes, grouped by gateway(host).
 	// next get the sensor histories for the current gateway payload period (last 15 mins, or as set by config)

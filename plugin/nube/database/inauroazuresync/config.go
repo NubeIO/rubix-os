@@ -26,18 +26,36 @@ type GatewayDetails struct {
 	NetworkType    string `json:"network_type"`
 }
 
+type Postgres struct {
+	Host     string `yaml:"host"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	DbName   string `yaml:"db_name"`
+	Port     int    `yaml:"port"`
+	SslMode  string `yaml:"ssl_mode"`
+}
+
 type Job struct {
 	SensorHistorySyncFrequency  string `yaml:"sensor_history_sync_frequency"`
 	GatewayPayloadSyncFrequency string `yaml:"gateway_payload_sync_frequency"`
 }
 
 type Config struct {
-	Azure    Azure  `yaml:"azure"`
-	Job      Job    `yaml:"job"`
-	LogLevel string `yaml:"log_level"`
+	Azure    Azure    `yaml:"azure"`
+	Postgres Postgres `yaml:"postgres"`
+	Job      Job      `yaml:"job"`
+	LogLevel string   `yaml:"log_level"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
+	postgres := Postgres{
+		Host:     "localhost",
+		Port:     5432,
+		DbName:   "db_ff",
+		User:     "postgres",
+		Password: "password",
+		SslMode:  "disable",
+	}
 	azure := Azure{
 		HostName: "",
 		GatewayDetails: map[string]GatewayDetails{
@@ -56,6 +74,7 @@ func (inst *Instance) DefaultConfig() interface{} {
 		GatewayPayloadSyncFrequency: "10m",
 	}
 	return &Config{
+		Postgres: postgres,
 		Azure:    azure,
 		Job:      job,
 		LogLevel: "ERROR", // DEBUG or ERROR
