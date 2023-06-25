@@ -49,6 +49,25 @@ message DeleteRequest {
   string uuid = 2;
 }
 
+message SetErrorsForAllRequest {
+  string path = 1;
+  string uuid = 2;
+  string message = 3;
+  string messageLevel = 4;
+  string messageCode = 5;
+  bool doPoints = 6;
+}
+
+message ClearErrorsForAllRequest {
+  string path = 1;
+  string uuid = 2;
+  bool doPoints = 3;
+}
+
+message WizardNewNetworkDevicePointRequest {
+  string plugin = 1;
+}
+
 message Response {
   bytes r = 1;
 }
