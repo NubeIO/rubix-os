@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/NubeIO/flow-framework/plugin/nube/protocals/modbus/mbmodel"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin"
-	"github.com/NubeIO/rubix-os/plugin/nube/protocals/modbus/mbmodel"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

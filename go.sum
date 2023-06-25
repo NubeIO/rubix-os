@@ -27,8 +27,6 @@ github.com/NubeIO/lib-files v1.0.0 h1:OZjBDXkXKGmI4SzciMnKa9Ko2mUCTbVrc3BCe1s6rw
 github.com/NubeIO/lib-files v1.0.0/go.mod h1:xi4mqMscDl6319i10LFowq5QvwChJLjqHCIJGkGa4RI=
 github.com/NubeIO/lib-networking v0.1.0 h1:XhhG8lTGjsULgcI8ZuJ/R3xyXIQlVQ3Tspig/7f0ce8=
 github.com/NubeIO/lib-networking v0.1.0/go.mod h1:WVj1zTKJ4qYijtzNvu7N5w8+cXFlCjy+HxjnIvSFgNA=
-github.com/NubeIO/lib-schema v0.2.16 h1:4giIOlgvuKrIHX9u/vfbQTsHxAsaBUCMa5nmCoGVE4c=
-github.com/NubeIO/lib-schema v0.2.16/go.mod h1:TGKDA6IIWHDwr5Aabawj6FF7NXUWXqu4ozWfph/hIjw=
 github.com/NubeIO/lib-system v0.0.1 h1:4fbHusnifJHv6KU1gH4/CKY/NzqqehkoXwzGcsVtoUs=
 github.com/NubeIO/lib-system v0.0.1/go.mod h1:6WxjOSs9NDjXMF2TAITmHrNwQeo8IPPBz3E1frb0stI=
 github.com/NubeIO/lib-systemctl-go v0.3.1 h1:IzmkzMX0kyxT9cjgLq0B7KZwrlPdiCLoSEJvGRngpA8=
