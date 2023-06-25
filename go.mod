@@ -56,6 +56,7 @@ require (
 	github.com/NubeIO/lib-systemctl-go v0.3.1
 	github.com/NubeIO/lib-ufw v0.0.3
 	github.com/NubeIO/nubeio-rubix-lib-auth-go v1.3.0
+	github.com/NubeIO/nubeio-rubix-lib-models-go-legacy v1.7.0
 	github.com/amenzhinsky/iothub v0.9.0
 	github.com/go-gota/gota v0.12.0
 	github.com/iancoleman/strcase v0.2.0

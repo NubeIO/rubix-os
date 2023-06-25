@@ -143,6 +143,9 @@ for i in "$@"; do
   inauroazuresync)
     buildPlugin "inauroazuresync" plugin/nube/database/inauroazuresync
     ;;
+  cpsprocessing)
+    buildPlugin "cpsprocessing" plugin/nube/projects/cpsprocessing
+    ;;
   esac
 done
 
