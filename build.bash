@@ -98,12 +98,6 @@ for i in "$@"; do
   history)
     buildPlugin "history" plugin/nube/database/history
     ;;
-  influx)
-    buildPlugin "influx" plugin/nube/database/influx
-    ;;
-  edgeinflux)
-    buildPlugin "edgeinflux" plugin/nube/database/edgeinflux
-    ;;
   edgeazure)
     buildPlugin "edgeazure" plugin/nube/database/edgeazure
     ;;

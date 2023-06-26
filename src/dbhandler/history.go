@@ -4,10 +4,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 )
 
-func (h *Handler) GetHistoriesForSync(lastSyncId int) ([]*model.History, error) {
-	return getDb().GetHistoriesForSync(lastSyncId)
-}
-
 func (h *Handler) GetHistoriesForPostgresSync(lastSyncId int) ([]*model.History, error) {
 	return getDb().GetHistoriesForPostgresSync(lastSyncId)
 }

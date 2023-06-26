@@ -7,8 +7,6 @@ import (
 )
 
 type Marshaller interface {
-	GetFlowNetworks(args string) ([]*model.FlowNetwork, error)
-
 	GetNetwork(uuid, args string) (*model.Network, error)
 	GetDevice(uuid, args string) (*model.Device, error)
 	GetPoint(uuid, args string) (*model.Point, error)
@@ -44,19 +42,6 @@ type Marshaller interface {
 
 type GRPCMarshaller struct {
 	DbHelper DBHelper
-}
-
-func (g *GRPCMarshaller) GetFlowNetworks(args string) ([]*model.FlowNetwork, error) {
-	res, err := g.DbHelper.GetWithoutParam("flow_networks", args)
-	if err != nil {
-		return nil, err
-	}
-	var fns []*model.FlowNetwork
-	err = json.Unmarshal(res, &fns)
-	if err != nil {
-		return nil, err
-	}
-	return fns, nil
 }
 
 func (g *GRPCMarshaller) GetNetwork(uuid, args string) (*model.Network, error) {

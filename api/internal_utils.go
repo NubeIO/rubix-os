@@ -19,11 +19,6 @@ func getBODYScheduleData(ctx *gin.Context) (dto *model.ScheduleData, err error) 
 	return dto, err
 }
 
-func getBODYFlowNetwork(ctx *gin.Context) (dto *model.FlowNetwork, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
 func getMapBody(ctx *gin.Context) (dto *map[string]interface{}, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
@@ -35,41 +30,6 @@ func getBODYNetwork(ctx *gin.Context) (dto *model.Network, err error) {
 }
 
 func getBODYDevice(ctx *gin.Context) (dto *model.Device, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBODYProducer(ctx *gin.Context) (dto *model.Producer, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBodySyncProducer(ctx *gin.Context) (dto *interfaces.SyncProducer, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBODYConsumer(ctx *gin.Context) (dto *model.Consumer, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBODYWriter(ctx *gin.Context) (dto *model.Writer, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBodySyncWriter(ctx *gin.Context) (dto *model.SyncWriter, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBodySyncCOV(ctx *gin.Context) (dto *model.SyncCOV, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBodySyncWriterAction(ctx *gin.Context) (dto *model.SyncWriterAction, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -89,42 +49,7 @@ func getBODYIntegration(ctx *gin.Context) (dto *model.Integration, err error) {
 	return dto, err
 }
 
-func getBODYWriterBody(ctx *gin.Context) (dto *model.WriterBody, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBODYWriterBulk(ctx *gin.Context) (dto []*model.WriterBulkBody, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBODYWriterClone(ctx *gin.Context) (dto *model.WriterClone, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBODYStream(ctx *gin.Context) (dto *model.Stream, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBodySyncStream(ctx *gin.Context) (dto *model.SyncStream, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBODYCommandGroup(ctx *gin.Context) (dto *model.CommandGroup, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
 func getBODYJobs(ctx *gin.Context) (dto *model.Job, err error) {
-	err = ctx.ShouldBindJSON(&dto)
-	return dto, err
-}
-
-func getBODYPointMapping(ctx *gin.Context) (dto *model.PointMapping, err error) {
 	err = ctx.ShouldBindJSON(&dto)
 	return dto, err
 }
@@ -327,16 +252,8 @@ func resolveID(ctx *gin.Context) string {
 	return ctx.Param("uuid")
 }
 
-func resolveWriterUUID(ctx *gin.Context) string {
-	return ctx.Param("writer_uuid")
-}
-
 func resolveSourceUUID(ctx *gin.Context) string {
 	return ctx.Param("source_uuid")
-}
-
-func resolveWriterThingClass(ctx *gin.Context) string {
-	return ctx.Param("writer_thing_class")
 }
 
 func resolvePointUUID(ctx *gin.Context) string {
@@ -377,22 +294,6 @@ func resolveDeviceName(ctx *gin.Context) string {
 
 func resolvePointName(ctx *gin.Context) string {
 	return ctx.Param("point_name")
-}
-
-func resolveFlowNetworkCloneName(ctx *gin.Context) string {
-	return ctx.Param("flow_network_clone_name")
-}
-
-func resolveStreamCloneName(ctx *gin.Context) string {
-	return ctx.Param("stream_clone_name")
-}
-
-func resolveConsumerName(ctx *gin.Context) string {
-	return ctx.Param("consumer_name")
-}
-
-func resolveWriterThingName(ctx *gin.Context) string {
-	return ctx.Param("writer_thing_name")
 }
 
 func toBool(value string) (bool, error) {

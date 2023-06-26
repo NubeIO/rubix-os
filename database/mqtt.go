@@ -11,12 +11,12 @@ type MqttConnection struct {
 
 // GetMqttConnectionsList get all of them
 func (d *GormDatabase) GetMqttConnectionsList() ([]*model.MqttConnection, error) {
-	var producersModel []*model.MqttConnection
-	query := d.DB.Find(&producersModel)
+	var mqttConnectionsModel []*model.MqttConnection
+	query := d.DB.Find(&mqttConnectionsModel)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	return producersModel, nil
+	return mqttConnectionsModel, nil
 }
 
 // CreateMqttConnection make it

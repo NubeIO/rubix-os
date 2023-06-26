@@ -22,14 +22,6 @@ func AutoMigrate(db *gorm.DB) error {
 		err := db.Migrator().DropIndex(&model.Device{}, "name_network_composite_index")
 		log.Error(err)
 	}
-	if db.Migrator().HasIndex(&model.FlowNetwork{}, "ip_port_composite_index") {
-		err := db.Migrator().DropIndex(&model.FlowNetwork{}, "ip_port_composite_index")
-		log.Error(err)
-	}
-	if db.Migrator().HasIndex(&model.FlowNetworkClone{}, "ip_port_clone_composite_index") {
-		err := db.Migrator().DropIndex(&model.FlowNetworkClone{}, "ip_port_clone_composite_index")
-		log.Error(err)
-	}
 	if db.Migrator().HasIndex(&model.History{}, "id_uuid_value_timestamp_composite_index") {
 		err := db.Migrator().DropIndex(&model.History{}, "id_uuid_value_timestamp_composite_index")
 		log.Error(err)

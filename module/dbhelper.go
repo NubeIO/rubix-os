@@ -21,8 +21,6 @@ func (*dbHelper) GetWithoutParam(path, args string) ([]byte, error) {
 		out, err = database.GlobalGormDatabase.GetDevices(apiArgs)
 	} else if path == "points" {
 		out, err = database.GlobalGormDatabase.GetPoints(apiArgs)
-	} else if path == "flow_networks" {
-		out, err = database.GlobalGormDatabase.GetFlowNetworks(apiArgs)
 	} else if path == "one_device_by_args" {
 		out, err = database.GlobalGormDatabase.GetOneDeviceByArgs(apiArgs)
 	} else if path == "one_point_by_args" {
@@ -156,7 +154,7 @@ func (*dbHelper) Patch(path, uuid string, body []byte) ([]byte, error) {
 			log.Error(err)
 			return nil, err
 		}
-		point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := database.GlobalGormDatabase.PointWrite(uuid, &pw, nil, false)
+		point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := database.GlobalGormDatabase.PointWrite(uuid, &pw, false)
 		if err != nil {
 			return nil, err
 		}
