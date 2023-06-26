@@ -125,9 +125,9 @@ func (d *GormDatabase) DeleteDeviceByName(networkName string, deviceName string,
 func (d *GormDatabase) GetDevicesTagsForPostgresSync() ([]*interfaces.DeviceTagForPostgresSync, error) {
 	var deviceTagsForPostgresModel []*interfaces.DeviceTagForPostgresSync
 	query := d.DB.Table("devices_tags").
-		Select("devices.source_uuid AS device_uuid, devices_tags.tag_tag AS tag").
-		Joins("INNER JOIN devices ON devices.uuid = devices_tags.device_uuid").
-		Where("IFNULL(devices.source_uuid,'') != ''").
+		Select("points.device_uuid AS device_uuid, devices_tags.tag_tag AS tag").
+		Joins("INNER JOIN points ON points.device_uuid = devices_tags.device_uuid").
+		Where("IFNULL(points.device_uuid,'') != ''").
 		Scan(&deviceTagsForPostgresModel)
 	if query.Error != nil {
 		return nil, query.Error

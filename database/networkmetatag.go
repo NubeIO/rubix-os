@@ -49,9 +49,9 @@ func (d *GormDatabase) GetNetworkMetaTags() ([]*model.NetworkMetaTag, error) {
 func (d *GormDatabase) GetNetworksMetaTagsForPostgresSync() ([]*model.NetworkMetaTag, error) {
 	var networkMetaTagsModel []*model.NetworkMetaTag
 	query := d.DB.Table("network_meta_tags").
-		Select("networks.source_uuid AS network_uuid, network_meta_tags.key, network_meta_tags.value").
-		Joins("INNER JOIN networks ON networks.uuid = network_meta_tags.network_uuid").
-		Where("IFNULL(networks.source_uuid,'') != ''").
+		Select("points.network_uuid AS network_uuid, network_meta_tags.key, network_meta_tags.value").
+		Joins("INNER JOIN points ON points.network_uuid = network_meta_tags.network_uuid").
+		Where("IFNULL(points.network_uuid,'') != ''").
 		Scan(&networkMetaTagsModel)
 	if query.Error != nil {
 		return nil, query.Error

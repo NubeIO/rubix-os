@@ -168,9 +168,9 @@ func (d *GormDatabase) GetPublishPointList() ([]*interfaces.PublishPointList, er
 func (d *GormDatabase) GetNetworksTagsForPostgresSync() ([]*interfaces.NetworkTagForPostgresSync, error) {
 	var networkTagsForPostgresModel []*interfaces.NetworkTagForPostgresSync
 	query := d.DB.Table("networks_tags").
-		Select("networks.source_uuid AS network_uuid, networks_tags.tag_tag AS tag").
-		Joins("INNER JOIN networks ON networks.uuid = networks_tags.network_uuid").
-		Where("IFNULL(networks.source_uuid,'') != ''").
+		Select("points.network_uuid AS network_uuid, networks_tags.tag_tag AS tag").
+		Joins("INNER JOIN points ON points.network_uuid = networks_tags.network_uuid").
+		Where("IFNULL(points.network_uuid,'') != ''").
 		Scan(&networkTagsForPostgresModel)
 	if query.Error != nil {
 		return nil, query.Error

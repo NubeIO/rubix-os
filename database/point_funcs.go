@@ -111,9 +111,9 @@ func (d *GormDatabase) GetPointsForPostgresSync() ([]*interfaces.PointForPostgre
 func (d *GormDatabase) GetPointsTagsForPostgresSync() ([]*interfaces.PointTagForPostgresSync, error) {
 	var pointTagsForPostgresModel []*interfaces.PointTagForPostgresSync
 	query := d.DB.Table("points_tags").
-		Select("points.source_uuid AS point_uuid, points_tags.tag_tag AS tag").
+		Select("points.uuid AS point_uuid, points_tags.tag_tag AS tag").
 		Joins("INNER JOIN points ON points.uuid = points_tags.point_uuid").
-		Where("IFNULL(points.source_uuid,'') != ''").
+		Where("IFNULL(points.uuid,'') != ''").
 		Scan(&pointTagsForPostgresModel)
 	if query.Error != nil {
 		return nil, query.Error
