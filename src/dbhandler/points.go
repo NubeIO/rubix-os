@@ -1,19 +1,10 @@
 package dbhandler
 
 import (
-	"encoding/json"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/interfaces"
 )
-
-func (h *Handler) GetPoints(args api.Args) ([]*model.Point, error) {
-	q, err := getDb().GetPoints(args)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
-}
 
 func (h *Handler) GetPointsByDeviceUUID(deviceUUID string, args api.Args) ([]*model.Point, error) {
 	args.DeviceUUID = &deviceUUID
@@ -45,13 +36,6 @@ func (h *Handler) CreatePoint(body *model.Point, updatePoint bool) (
 		}
 	}
 	return pnt, nil
-}
-
-func createPointDeepCopy(point model.Point) model.Point {
-	var outputPoint model.Point
-	out, _ := json.Marshal(point)
-	_ = json.Unmarshal(out, &outputPoint)
-	return outputPoint
 }
 
 func (h *Handler) UpdatePoint(uuid string, body *model.Point) (*model.Point, error) {
