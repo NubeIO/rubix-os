@@ -39,7 +39,6 @@ require (
 	github.com/NubeIO/nubeio-rubix-lib-rest-go v1.0.9
 	github.com/PaesslerAG/gval v1.1.1
 	github.com/grid-x/modbus v0.0.0-20220829110112-006eee73392e
-	github.com/influxdata/influxdb-client-go/v2 v2.5.1
 	github.com/martinlindhe/unit v0.0.0-20210313160520-19b60e03648d
 	golang.org/x/sys v0.6.0
 	gorm.io/driver/postgres v1.3.1
@@ -72,7 +71,6 @@ require (
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/creack/goselect v0.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/deepmap/oapi-codegen v1.8.2 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.13.0 // indirect
@@ -84,7 +82,6 @@ require (
 	github.com/grid-x/serial v0.0.0-20211107191517-583c7356b3aa // indirect
 	github.com/hashicorp/go-hclog v0.14.1
 	github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb // indirect
-	github.com/influxdata/line-protocol v0.0.0-20200327222509-2487e7298839 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.11.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

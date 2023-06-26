@@ -6,20 +6,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// GetHistoriesForSync returns all histories after id.
-// We order by `uuid` i.e. `point_uuid`, so all similar data comes on same block which helps to reduce data query
-// for fetching the data from points, devices, networks etc.
-// TODO: only used in influx db, remove this when influx plugin gets removed
-func (d *GormDatabase) GetHistoriesForSync(lastSyncId int) ([]*model.History, error) {
-	var historiesModel []*model.History
-	query := d.DB.Where("id > (?)", lastSyncId)
-	query.Order("uuid ASC").Find(&historiesModel)
-	if query.Error != nil {
-		return nil, query.Error
-	}
-	return historiesModel, nil
-}
-
 // GetHistoriesForPostgresSync returns all histories after history_id ordered by history_id.
 func (d *GormDatabase) GetHistoriesForPostgresSync(lastSyncId int) ([]*model.History, error) {
 	var historiesModel []*model.History
