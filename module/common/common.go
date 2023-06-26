@@ -11,14 +11,6 @@ const (
 	PointsWriteURL = "points/write"
 )
 
-func GetFlowNetworkNames(fns []*model.FlowNetwork) []string {
-	fnsNames := make([]string, 0)
-	for _, fn := range fns {
-		fnsNames = append(fnsNames, fn.Name)
-	}
-	return fnsNames
-}
-
 type PointWriteResponse struct {
 	Point                model.Point `json:"point"`
 	IsPresentValueChange bool        `json:"is_present_value_change"`

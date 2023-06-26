@@ -6,14 +6,6 @@ import (
 	"github.com/NubeIO/rubix-os/interfaces"
 )
 
-func (h *Handler) GetDevices(args api.Args) ([]*model.Device, error) {
-	q, err := getDb().GetDevices(args)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
-}
-
 func (h *Handler) GetDevice(uuid string, args api.Args) (*model.Device, error) {
 	q, err := getDb().GetDevice(uuid, args)
 	if err != nil {

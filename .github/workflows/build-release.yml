@@ -113,12 +113,6 @@ jobs:
           cd ../../../../plugin/nube/protocals/rubixpointsync
           go build -buildmode=plugin -o rubixpointsync-amd64.so *.go  && cp rubixpointsync-amd64.so ../../../../
           
-          cd ../../../../plugin/nube/database/influx
-          go build -buildmode=plugin -o influx-amd64.so *.go  && cp influx-amd64.so ../../../../
-          
-          cd ../../../../plugin/nube/database/edgeinflux
-          go build -buildmode=plugin -o edgeinflux-amd64.so *.go  && cp edgeinflux-amd64.so ../../../../
-          
           cd ../../../../plugin/nube/database/history
           go build -buildmode=plugin -o history-amd64.so *.go  && cp history-amd64.so ../../../../
           
@@ -130,10 +124,10 @@ jobs:
           
           cd ../../../../plugin/nube/projects/cpsprocessing
           go build -buildmode=plugin -o cpsprocessing-amd64.so *.go  && cp cpsprocessing-amd64.so ../../../../
-          
+
 #          cd ../../../../plugin/nube/protocals/mapmodbus
 #          go build -buildmode=plugin -o mapmodbus-amd64.so *.go  && cp mapmodbus-amd64.so ../../../../
-          
+
 #          cd ../../../../plugin/nube/protocals/maplora
 #          go build -buildmode=plugin -o maplora-amd64.so *.go  && cp maplora-amd64.so ../../../../
 
@@ -170,13 +164,7 @@ jobs:
           
           cd ../../../../plugin/nube/protocals/rubixpointsync
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o rubixpointsync-armv7.so *.go  && cp rubixpointsync-armv7.so ../../../../
-          
-          cd ../../../../plugin/nube/database/influx
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o influx-armv7.so *.go  && cp influx-armv7.so ../../../../
-          
-          cd ../../../../plugin/nube/database/edgeinflux
-          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o edgeinflux-armv7.so *.go  && cp edgeinflux-armv7.so ../../../../
-          
+    
           cd ../../../../plugin/nube/database/history
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o history-armv7.so *.go  && cp history-armv7.so ../../../../
           
@@ -245,16 +233,6 @@ jobs:
           artifact=rubixpointsync-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./rubixpointsync-armv7.so
           
-          artifact=influx-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./influx-amd64.so
-          artifact=influx-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./influx-armv7.so
-          
-          artifact=edgeinflux-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
-          zip -r /tmp/zip/$artifact.zip ./edgeinflux-amd64.so
-          artifact=edgeinflux-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
-          zip -r /tmp/zip/$artifact.zip ./edgeinflux-armv7.so
-          
           artifact=history-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
           zip -r /tmp/zip/$artifact.zip ./history-amd64.so
           artifact=history-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
@@ -274,12 +252,12 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./cpsprocessing-amd64.so
           artifact=cpsprocessing-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./cpsprocessing-armv7.so
-          
+
 #          artifact=mapmodbus-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
 #          zip -r /tmp/zip/$artifact.zip ./mapmodbus-amd64.so
 #          artifact=mapmodbus-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
 #          zip -r /tmp/zip/$artifact.zip ./mapmodbus-armv7.so
-          
+
 #          artifact=maplora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
 #          zip -r /tmp/zip/$artifact.zip ./maplora-amd64.so
 #          artifact=maplora-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7

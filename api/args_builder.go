@@ -1,129 +1,8 @@
 package api
 
 import (
-	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/gin-gonic/gin"
 )
-
-func buildFlowNetworkArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.WithStreams, _ = toBool(ctx.DefaultQuery(aType.WithStreams, aDefault.WithStreams))
-	args.WithProducers, _ = toBool(ctx.DefaultQuery(aType.WithProducers, aDefault.WithProducers))
-	args.WithCommandGroups, _ = toBool(ctx.DefaultQuery(aType.WithCommandGroups, aDefault.WithCommandGroups))
-	args.WithWriterClones, _ = toBool(ctx.DefaultQuery(aType.WithWriterClones, aDefault.WithWriterClones))
-	args.IsMetadata, _ = toBool(ctx.DefaultQuery(aType.IsMetadata, aDefault.IsMetadata))
-	if val, exists := ctx.Get(aType.IsRemote); exists {
-		args.IsRemote = boolean.New(val.(bool))
-	}
-	if value, ok := ctx.GetQuery(aType.PluginName); ok {
-		args.PluginName = value
-	}
-	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
-		args.FlowNetworkUUID = value
-	}
-	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
-		args.GlobalUUID = &value
-	}
-	if value, ok := ctx.GetQuery(aType.ClientId); ok {
-		args.ClientId = &value
-	}
-	if value, ok := ctx.GetQuery(aType.SiteId); ok {
-		args.SiteId = &value
-	}
-	if value, ok := ctx.GetQuery(aType.DeviceId); ok {
-		args.DeviceId = &value
-	}
-	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
-		args.SourceUUID = &value
-	}
-	return args
-}
-
-func buildFlowNetworkCloneArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.WithStreamClones, _ = toBool(ctx.DefaultQuery(aType.WithStreamClones, aDefault.WithStreamClones))
-	args.WithConsumers, _ = toBool(ctx.DefaultQuery(aType.WithConsumers, aDefault.WithConsumers))
-	args.WithWriters, _ = toBool(ctx.DefaultQuery(aType.WithWriters, aDefault.WithWriters))
-	args.IsMetadata, _ = toBool(ctx.DefaultQuery(aType.IsMetadata, aDefault.IsMetadata))
-	if value, ok := ctx.GetQuery(aType.GlobalUUID); ok {
-		args.GlobalUUID = &value
-	}
-	if value, ok := ctx.GetQuery(aType.ClientId); ok {
-		args.ClientId = &value
-	}
-	if value, ok := ctx.GetQuery(aType.SiteId); ok {
-		args.SiteId = &value
-	}
-	if value, ok := ctx.GetQuery(aType.DeviceId); ok {
-		args.DeviceId = &value
-	}
-	return args
-}
-
-func buildStreamArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.WithFlowNetworks, _ = toBool(ctx.DefaultQuery(aType.WithFlowNetworks, aDefault.WithFlowNetworks))
-	args.WithProducers, _ = toBool(ctx.DefaultQuery(aType.WithProducers, aDefault.WithProducers))
-	args.WithCommandGroups, _ = toBool(ctx.DefaultQuery(aType.WithCommandGroups, aDefault.WithCommandGroups))
-	args.WithWriterClones, _ = toBool(ctx.DefaultQuery(aType.WithWriterClones, aDefault.WithWriterClones))
-	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
-	return args
-}
-
-func buildStreamCloneArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.WithConsumers, _ = toBool(ctx.DefaultQuery(aType.WithConsumers, aDefault.WithConsumers))
-	args.WithWriters, _ = toBool(ctx.DefaultQuery(aType.WithWriters, aDefault.WithWriters))
-	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
-	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
-		args.SourceUUID = &value
-	}
-	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
-		args.FlowNetworkUUID = value
-	}
-	if value, ok := ctx.GetQuery(aType.FlowNetworkCloneUUID); ok {
-		args.FlowNetworkCloneUUID = &value
-	}
-	return args
-}
-
-func buildConsumerArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.WithWriters, _ = toBool(ctx.DefaultQuery(aType.WithWriters, aDefault.WithWriters))
-	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
-	if value, ok := ctx.GetQuery(aType.ProducerUUID); ok {
-		args.ProducerUUID = &value
-	}
-	return args
-}
-
-func buildProducerArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
-	args.WithWriterClones, _ = toBool(ctx.DefaultQuery(aType.WithWriterClones, aDefault.WithWriterClones))
-	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
-	if value, ok := ctx.GetQuery(aType.StreamUUID); ok {
-		args.StreamUUID = &value
-	}
-	if value, ok := ctx.GetQuery(aType.Name); ok {
-		args.Name = &value
-	}
-	if value, ok := ctx.GetQuery(aType.ProducerThingUUID); ok {
-		args.ProducerThingUUID = &value
-	}
-	return args
-}
 
 func buildNetworkArgs(ctx *gin.Context) Args {
 	var args Args
@@ -133,9 +12,6 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	args.WithMetaTags, _ = toBool(ctx.DefaultQuery(aType.WithMetaTags, aDefault.WithMetaTags))
-	if value, ok := ctx.GetQuery(aType.FlowNetworkUUID); ok {
-		args.FlowNetworkUUID = value
-	}
 	if value, ok := ctx.GetQuery(aType.MetaTags); ok {
 		args.MetaTags = &value
 	}
@@ -185,36 +61,6 @@ func buildPointArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildWriterArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	if value, ok := ctx.GetQuery(aType.ConsumerUUID); ok {
-		args.ConsumerUUID = &value
-	}
-	if value, ok := ctx.GetQuery(aType.WriterThingClass); ok {
-		args.WriterThingClass = &value
-	}
-	if value, ok := ctx.GetQuery(aType.WriterThingUUID); ok {
-		args.WriterThingUUID = &value
-	}
-	return args
-}
-
-func buildWriterCloneArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	if value, ok := ctx.GetQuery(aType.ProducerUUID); ok {
-		args.ProducerUUID = &value
-	}
-	if value, ok := ctx.GetQuery(aType.WriterThingClass); ok {
-		args.WriterThingClass = &value
-	}
-	if value, ok := ctx.GetQuery(aType.SourceUUID); ok {
-		args.SourceUUID = &value
-	}
-	return args
-}
-
 func buildPluginArgs(ctx *gin.Context) Args {
 	var args Args
 	var aType = ArgsType
@@ -230,9 +76,6 @@ func buildTagArgs(ctx *gin.Context) Args {
 	args.Networks, _ = toBool(ctx.DefaultQuery(aType.WithNetworks, aDefault.WithNetworks))
 	args.WithDevices, _ = toBool(ctx.DefaultQuery(aType.WithDevices, aDefault.WithDevices))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
-	args.WithStreams, _ = toBool(ctx.DefaultQuery(aType.WithStreams, aDefault.WithStreams))
-	args.WithProducers, _ = toBool(ctx.DefaultQuery(aType.WithProducers, aDefault.WithProducers))
-	args.WithConsumers, _ = toBool(ctx.DefaultQuery(aType.WithConsumers, aDefault.WithConsumers))
 	return args
 }
 
