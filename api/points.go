@@ -14,7 +14,7 @@ type PointDatabase interface {
 	GetPoint(uuid string, args Args) (*model.Point, error)
 	CreatePoint(body *model.Point) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point) (*model.Point, error)
-	PointWrite(uuid string, body *model.PointWriter, currentWriterUUID *string, forceWrite bool) (*model.Point, bool, bool, bool, error)
+	PointWrite(uuid string, body *model.PointWriter, forceWrite bool) (*model.Point, bool, bool, bool, error)
 	GetOnePointByArgs(args Args) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
 	GetPointByName(networkName, deviceName, pointName string, args Args) (*model.Point, error)

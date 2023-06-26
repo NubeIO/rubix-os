@@ -7,7 +7,7 @@ import (
 )
 
 // GetHistoriesForSync returns all histories after id.
-// We order by `uuid` i.e. `producer_uuid`, so all similar data comes on same block which helps to reduce data query
+// We order by `uuid` i.e. `point_uuid`, so all similar data comes on same block which helps to reduce data query
 // for fetching the data from points, devices, networks etc.
 // TODO: only used in influx db, remove this when influx plugin gets removed
 func (d *GormDatabase) GetHistoriesForSync(lastSyncId int) ([]*model.History, error) {

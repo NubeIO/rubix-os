@@ -32,7 +32,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	engine.NoRoute(nerrors.NotFoundHandler())
 	eventBus := eventbus.NewService(eventbus.GetBus())
 	global.Installer = installer.New(&installer.Installer{})
-	proxyHandler := api.Proxy{DB: db}
 	healthHandler := api.HealthAPI{DB: db}
 
 	authHandler := api.AuthAPI{DB: db}
@@ -81,33 +80,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	jobHandler := api.JobAPI{
 		DB: db,
 	}
-	streamHandler := api.StreamAPI{
-		DB: db,
-	}
-	remoteHandler := api.RemoteAPI{
-		DB: db,
-	}
-	streamCloneHandler := api.StreamCloneAPI{
-		DB: db,
-	}
-	producerHandler := api.ProducerAPI{
-		DB: db,
-	}
-	consumerHandler := api.ConsumersAPI{
-		DB: db,
-	}
-	writerCloneHandler := api.WriterCloneAPI{
-		DB: db,
-	}
-	rubixCommandGroup := api.CommandGroupAPI{
-		DB: db,
-	}
-	flowNetwork := api.FlowNetworksAPI{
-		DB: db,
-	}
-	flowNetworkCloneHandler := api.FlowNetworkClonesAPI{
-		DB: db,
-	}
 	dbGroup := api.DatabaseAPI{
 		DB: db,
 	}
@@ -128,21 +100,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 
 	deviceInfoHandler := api.DeviceInfoAPI{
 		RubixRegistry: registry,
-	}
-	writerHandler := api.WriterAPI{
-		DB: db,
-	}
-	syncFlowNetworkHandler := api.SyncFlowNetworkAPI{
-		DB: db,
-	}
-	syncStreamHandler := api.SyncStreamAPI{
-		DB: db,
-	}
-	syncWriterHandler := api.SyncWriterAPI{
-		DB: db,
-	}
-	syncProducerHandler := api.SyncProducerAPI{
-		DB: db,
 	}
 	systemctlHandler := api.SystemctlAPI{
 		SystemCtl: systemCtl,
@@ -315,24 +272,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	}
 	apiRoutes := engine.Group("/api", handleAuth)
 	{
-		fnProxy := apiRoutes.Group("/fn")
-		{
-			fnProxy.GET("/*any", proxyHandler.GetProxy(true))
-			fnProxy.POST("/*any", proxyHandler.PostProxy(true))
-			fnProxy.PUT("/*any", proxyHandler.PutProxy(true))
-			fnProxy.PATCH("/*any", proxyHandler.PatchProxy(true))
-			fnProxy.DELETE("/*any", proxyHandler.DeleteProxy(true))
-		}
-
-		fncProxy := apiRoutes.Group("/fnc")
-		{
-			fncProxy.GET("/*any", proxyHandler.GetProxy(false))
-			fncProxy.POST("/*any", proxyHandler.PostProxy(false))
-			fncProxy.PUT("/*any", proxyHandler.PutProxy(false))
-			fncProxy.PATCH("/*any", proxyHandler.PatchProxy(false))
-			fncProxy.DELETE("/*any", proxyHandler.DeleteProxy(false))
-		}
-
 		requireClientsGroupRoutes := apiRoutes.Group("")
 		{
 			plugins := requireClientsGroupRoutes.Group("/plugins")
@@ -356,102 +295,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			pointHistoryRoutes.POST("/point_uuids", pointHistoryHandler.GetPointHistoriesByPointUUIDs)
 			pointHistoryRoutes.GET("/sync", pointHistoryHandler.GetPointHistoriesForSync)
 			pointHistoryRoutes.DELETE("/:point_uuid", pointHistoryHandler.DeletePointHistoriesByPointUUID)
-		}
-
-		flowNetworkRoutes := apiRoutes.Group("/flow_networks")
-		{
-			flowNetworkRoutes.GET("", flowNetwork.GetFlowNetworks)
-			flowNetworkRoutes.POST("", flowNetwork.CreateFlowNetwork)
-			flowNetworkRoutes.GET("/:uuid", flowNetwork.GetFlowNetwork)
-			flowNetworkRoutes.PATCH("/:uuid", flowNetwork.UpdateFlowNetwork)
-			flowNetworkRoutes.DELETE("/:uuid", flowNetwork.DeleteFlowNetwork)
-			flowNetworkRoutes.GET("/one/args", flowNetwork.GetOneFlowNetworkByArgs)
-			flowNetworkRoutes.GET("/refresh_connections", flowNetwork.RefreshFlowNetworksConnections)
-			flowNetworkRoutes.GET("/sync", flowNetwork.SyncFlowNetworks)
-			flowNetworkRoutes.GET("/:uuid/sync/streams", flowNetwork.SyncFlowNetworkStreams)
-		}
-
-		flowNetworkCloneRoutes := apiRoutes.Group("/flow_network_clones")
-		{
-			flowNetworkCloneRoutes.GET("", flowNetworkCloneHandler.GetFlowNetworkClones)
-			flowNetworkCloneRoutes.GET("/:uuid", flowNetworkCloneHandler.GetFlowNetworkClone)
-			flowNetworkCloneRoutes.DELETE("/:uuid", flowNetworkCloneHandler.DeleteFlowNetworkClone)
-			flowNetworkCloneRoutes.GET("/one/args", flowNetworkCloneHandler.GetOneFlowNetworkCloneByArgs)
-			flowNetworkCloneRoutes.DELETE("/one/args", flowNetworkCloneHandler.DeleteOneFlowNetworkCloneByArgs)
-			flowNetworkCloneRoutes.GET("/refresh_connections", flowNetworkCloneHandler.RefreshFlowNetworkClonesConnections)
-			flowNetworkCloneRoutes.GET("/sync", flowNetworkCloneHandler.SyncFlowNetworkClones)
-			flowNetworkCloneRoutes.GET("/:uuid/sync/stream_clones", flowNetworkCloneHandler.SyncFlowNetworkCloneStreamClones)
-		}
-
-		streamRoutes := apiRoutes.Group("/streams")
-		{
-			streamRoutes.GET("", streamHandler.GetStreams)
-			streamRoutes.POST("", streamHandler.CreateStream)
-			streamRoutes.GET("/:uuid", streamHandler.GetStream)
-			streamRoutes.PATCH("/:uuid", streamHandler.UpdateStream)
-			streamRoutes.DELETE("/:uuid", streamHandler.DeleteStream)
-			streamRoutes.GET("/:uuid/sync/producers", streamHandler.SyncStreamProducers)
-		}
-
-		remoteRoutes := apiRoutes.Group("/remote")
-		{
-			remoteRoutes.GET("/flow_network_clones", remoteHandler.RemoteGetFlowNetworkClones)
-			remoteRoutes.GET("/flow_network_clones/:uuid", remoteHandler.RemoteGetFlowNetworkClone)
-			remoteRoutes.DELETE("/flow_network_clones", remoteHandler.RemoteDeleteFlowNetworkClone)
-
-			remoteRoutes.GET("/networks", remoteHandler.RemoteGetNetworks)
-			remoteRoutes.GET("/networks/:uuid", remoteHandler.RemoteGetNetwork)
-			remoteRoutes.POST("/networks", remoteHandler.RemoteCreateNetwork)
-			remoteRoutes.PATCH("/networks/:uuid", remoteHandler.RemoteEditNetwork)
-			remoteRoutes.DELETE("/networks", remoteHandler.RemoteDeleteNetwork)
-
-			remoteRoutes.GET("/devices", remoteHandler.RemoteGetDevices)
-			remoteRoutes.GET("/devices/:uuid", remoteHandler.RemoteGetDevice)
-			remoteRoutes.POST("/devices", remoteHandler.RemoteCreateDevice)
-			remoteRoutes.PATCH("/devices/:uuid", remoteHandler.RemoteEditDevice)
-			remoteRoutes.DELETE("/devices", remoteHandler.RemoteDeleteDevice)
-
-			remoteRoutes.GET("/points", remoteHandler.RemoteGetPoints)
-			remoteRoutes.GET("/points/:uuid", remoteHandler.RemoteGetPoint)
-			remoteRoutes.POST("/points", remoteHandler.RemoteCreatePoint)
-			remoteRoutes.PATCH("/points/:uuid", remoteHandler.RemoteEditPoint)
-			remoteRoutes.DELETE("/points", remoteHandler.RemoteDeletePoint)
-
-			remoteRoutes.GET("/streams", remoteHandler.RemoteGetStreams)
-			remoteRoutes.GET("/streams/:uuid", remoteHandler.RemoteGetStream)
-			remoteRoutes.POST("/streams", remoteHandler.RemoteCreateStream)
-			remoteRoutes.PATCH("/streams/:uuid", remoteHandler.RemoteEditStream)
-			remoteRoutes.DELETE("/streams", remoteHandler.RemoteDeleteStream)
-
-			remoteRoutes.GET("/stream_clones", remoteHandler.RemoteGetStreamClones)
-			remoteRoutes.DELETE("/stream_clones", remoteHandler.RemoteDeleteStreamClone)
-
-			remoteRoutes.GET("/producers", remoteHandler.RemoteGetProducers)
-			remoteRoutes.GET("/producers/:uuid", remoteHandler.RemoteGetProducer)
-			remoteRoutes.POST("/producers", remoteHandler.RemoteCreateProducer)
-			remoteRoutes.PATCH("/producers/:uuid", remoteHandler.RemoteEditProducer)
-			remoteRoutes.DELETE("/producers", remoteHandler.RemoteDeleteProducer)
-
-			remoteRoutes.GET("/consumers", remoteHandler.RemoteGetConsumers)
-			remoteRoutes.GET("/consumers/:uuid", remoteHandler.RemoteGetConsumer)
-			remoteRoutes.POST("/consumers", remoteHandler.RemoteCreateConsumer)
-			remoteRoutes.PATCH("/consumers/:uuid", remoteHandler.RemoteEditConsumer)
-			remoteRoutes.DELETE("/consumers", remoteHandler.RemoteDeleteConsumer)
-
-			remoteRoutes.GET("/writers", remoteHandler.RemoteGetWriters)
-			remoteRoutes.GET("/writers/:uuid", remoteHandler.RemoteGetWriter)
-			remoteRoutes.POST("/writers", remoteHandler.RemoteCreateWriter)
-			remoteRoutes.PATCH("/writers/:uuid", remoteHandler.RemoteEditWriter)
-			remoteRoutes.DELETE("/writers", remoteHandler.RemoteDeleteWriter)
-		}
-
-		streamCloneRoutes := apiRoutes.Group("/stream_clones")
-		{
-			streamCloneRoutes.GET("", streamCloneHandler.GetStreamClones)
-			streamCloneRoutes.GET("/:uuid", streamCloneHandler.GetStreamClone)
-			streamCloneRoutes.DELETE("/:uuid", streamCloneHandler.DeleteStreamClone)
-			streamCloneRoutes.DELETE("/one/args", streamCloneHandler.DeleteOneStreamCloneByArgs)
-			streamCloneRoutes.GET("/:uuid/sync/consumers", streamCloneHandler.SyncStreamCloneConsumers)
 		}
 
 		networkRoutes := apiRoutes.Group("/networks")
@@ -502,56 +345,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			pointRoutes.PATCH("/name/:network_name/:device_name/:point_name", pointHandler.PointWriteByName)
 			pointRoutes.PUT("/meta_tags/uuid/:uuid", pointHandler.CreatePointMetaTags)
 			pointRoutes.GET("/with_parent/:uuid", pointHandler.GetPointWithParent)
-		}
-
-		commandRoutes := apiRoutes.Group("/commands")
-		{
-			commandRoutes.GET("", rubixCommandGroup.GetCommandGroups)
-			commandRoutes.POST("", rubixCommandGroup.CreateCommandGroup)
-			commandRoutes.GET("/:uuid", rubixCommandGroup.GetCommandGroup)
-			commandRoutes.PATCH("/:uuid", rubixCommandGroup.UpdateCommandGroup)
-			commandRoutes.DELETE("/:uuid", rubixCommandGroup.DeleteCommandGroup)
-		}
-
-		producerRoutes := apiRoutes.Group("/producers")
-		{
-			producerRoutes.GET("", producerHandler.GetProducers)
-			producerRoutes.POST("", producerHandler.CreateProducer)
-			producerRoutes.GET("/:uuid", producerHandler.GetProducer)
-			producerRoutes.PATCH("/:uuid", producerHandler.UpdateProducer)
-			producerRoutes.DELETE("/:uuid", producerHandler.DeleteProducer)
-			producerRoutes.GET("/one/args", producerHandler.GetOneProducerByArgs)
-			producerRoutes.GET("/:uuid/sync/writer_clones", producerHandler.SyncProducerWriterClones)
-
-			producerWriterCloneRoutes := producerRoutes.Group("/writer_clones")
-			{
-				producerWriterCloneRoutes.GET("", writerCloneHandler.GetWriterClones)
-				producerWriterCloneRoutes.POST("", writerCloneHandler.CreateWriterClone)
-				producerWriterCloneRoutes.GET("/:uuid", writerCloneHandler.GetWriterClone)
-				producerWriterCloneRoutes.DELETE("/:uuid", writerCloneHandler.DeleteWriterClone)
-				producerWriterCloneRoutes.DELETE("/one/args", writerCloneHandler.DeleteOneWriterCloneByArgs)
-			}
-		}
-
-		consumerRoutes := apiRoutes.Group("/consumers")
-		{
-			consumerRoutes.GET("", consumerHandler.GetConsumers)
-			consumerRoutes.POST("", consumerHandler.CreateConsumer)
-			consumerRoutes.GET("/:uuid", consumerHandler.GetConsumer)
-			consumerRoutes.PATCH("/:uuid", consumerHandler.UpdateConsumer)
-			consumerRoutes.DELETE("/:uuid", consumerHandler.DeleteConsumer)
-			consumerRoutes.DELETE("", consumerHandler.DeleteConsumers)
-			consumerRoutes.GET("/:uuid/sync/writers", consumerHandler.SyncConsumerWriters)
-
-			consumerWriterRoutes := consumerRoutes.Group("/writers")
-			{
-				consumerWriterRoutes.GET("", writerHandler.GetWriters)
-				consumerWriterRoutes.POST("", writerHandler.CreateWriter)
-				consumerWriterRoutes.GET("/:uuid", writerHandler.GetWriter)
-				consumerWriterRoutes.GET("/name/:flow_network_clone_name/:stream_clone_name/:consumer_name/:writer_thing_name", writerHandler.GetWriterByName)
-				consumerWriterRoutes.PATCH("/:uuid", writerHandler.UpdateWriter)
-				consumerWriterRoutes.DELETE("/:uuid", writerHandler.DeleteWriter)
-			}
 		}
 
 		jobRoutes := apiRoutes.Group("/jobs")
@@ -627,20 +420,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			deviceInfoRoutes.GET("/swap", systemHandler.GetSwap)
 			deviceInfoRoutes.GET("/disc", systemHandler.DiscUsage)
 			deviceInfoRoutes.GET("/disc/pretty", systemHandler.DiscUsagePretty)
-		}
-
-		apiRoutes.POST("/writers/action/:uuid", writerHandler.WriterAction)
-		apiRoutes.POST("/writers/action/bulk", writerHandler.WriterBulkAction)
-
-		syncRoutes := apiRoutes.Group("/sync")
-		{
-			syncRoutes.POST("/flow_network", syncFlowNetworkHandler.SyncFlowNetwork)
-			syncRoutes.POST("/stream", syncStreamHandler.SyncStream)
-			syncRoutes.POST("/writer", syncWriterHandler.SyncWriter)
-			syncRoutes.POST("/cov/:writer_uuid", syncWriterHandler.SyncCOV) // clone ---> source side
-			syncRoutes.POST("/writer/write/:source_uuid", syncWriterHandler.SyncWriterWriteAction)
-			syncRoutes.GET("/writer/read/:source_uuid", syncWriterHandler.SyncWriterReadAction)
-			syncRoutes.POST("/producer", syncProducerHandler.SyncProducer)
 		}
 
 		userRoutes := apiRoutes.Group("/users")
