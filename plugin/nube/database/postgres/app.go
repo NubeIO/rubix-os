@@ -35,15 +35,61 @@ func (inst *Instance) syncPostgres() (bool, error) {
 		}
 	}
 	lastSyncId, err := inst.db.GetHistoryPostgresLogLastSyncHistoryId()
+	// _, err := inst.db.GetHistoryPostgresLogLastSyncHistoryId()
 	if err != nil {
 		log.Warn(err)
 		return false, err
 	}
+
 	histories, err := inst.db.GetHistoriesForPostgresSync(lastSyncId)
 	if err != nil {
 		log.Warn(err)
 		return false, err
 	}
+
+	/*
+		var histories []*model.History
+		// Open the CSV file
+		filePath := "/home/marc/Documents/Nube/CPS/Development/Data_Processing/Example_Sensor_Data/Door_Sensor_Data_Example_Upload_3.csv"
+		file, err := os.Open(filePath)
+		if err != nil {
+			log.Fatalf("Failed to open CSV file: %v", err)
+		}
+		defer file.Close()
+		// Read and process the CSV data
+		reader := csv.NewReader(file)
+		reader.FieldsPerRecord = 5
+		first := true
+		for {
+			if first {
+				first = false
+				continue
+			}
+			record, err := reader.Read()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				log.Printf("Failed to read CSV record: %v", err)
+				continue
+			}
+			log.Printf("record: %+v", record)
+
+			// Parse CSV record and create a History instance
+			history := model.History{}
+			history.ID, _ = strconv.Atoi(record[0])
+			history.PointUUID = record[1]
+			history.HostUUID = record[2]
+			value, _ := strconv.ParseFloat(record[3], 64)
+			history.Value = &value
+			timestamp, _ := time.Parse(time.RFC3339, record[4])
+			history.Timestamp = timestamp
+
+			histories = append(histories, &history)
+		}
+
+	*/
+
 	if len(histories) > 0 {
 		if err = inst.createPointsBulk(); err != nil {
 			log.Error(err)
