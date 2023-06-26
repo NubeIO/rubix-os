@@ -24,7 +24,6 @@ func MakeTopicUUID(attribute string) string {
 	sch := "sch" // schedule
 	ing := "ing" // integration
 
-	stl := "stl" // list of flow network gateway
 	alt := "alt" // alerts
 	rub := "rbx" // rubix uuid
 	rxg := "rxg" // rubix global uuid
@@ -54,8 +53,6 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", dev, divider, u)
 	case model.ThingClass.Point:
 		return fmt.Sprintf("%s%s%s", pnt, divider, u)
-	case model.CommonNaming.StreamList:
-		return fmt.Sprintf("%s%s%s", stl, divider, u)
 	case model.CommonNaming.Job:
 		return fmt.Sprintf("%s%s%s", job, divider, u)
 	case model.CommonNaming.Schedule:

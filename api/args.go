@@ -106,7 +106,7 @@ var ArgsType = struct {
 	Search:            "search",
 	AskRefresh:        "ask_refresh",
 	AskResponse:       "ask_response",
-	Write:             "write",      // consumer to write a value
+	Write:             "write",
 	ThingType:         "thing_type", // the type of thing like a point
 	UUID:              "uuid",
 	WriteHistory:      "write_history",
