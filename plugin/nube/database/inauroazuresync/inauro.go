@@ -161,23 +161,24 @@ func (inst *Instance) packageHistoriesToInauroPayloads(hostUUID string, historie
 		}
 
 		// TODO: get the device by point UUID + host UUID (request added function/api)
-		dev := GetDeviceByHostUUIDPointUUID(hostUUID, history.PointUUID)
+		// dev := GetDeviceByHostUUIDPointUUID(hostUUID, history.PointUUID)
+		dev := model.Device{}
 
 		timestamp := history.Timestamp.Truncate(time.Second)
 
-		_, sensorExists := historiesByDevice[hostUUID][dev.UUID]
+		_, sensorExists := historiesByDevice[dev.UUID]
 		if !sensorExists {
 			historiesByDevice[dev.UUID] = InauroPackagedSensorHistoriesByTimestamp{}
 		}
 
 		timestampExists, mapTimestamp := SimilarTimestampExistsInSensorHistoryMap(timestamp, historiesByDevice[dev.UUID])
 		if !timestampExists {
-			sensorID, err := inst.GetSensorIDFromDeviceDescription(dev) // TODO: update to get SensorID from meta tags
+			sensorID, err := inst.GetSensorIDFromDeviceDescription(&dev) // TODO: update to get SensorID from meta tags
 			if err != nil {
 				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() GetSensorIDFromDeviceDescription() uuid: ", dev.UUID, "    err: ", err)
 				continue
 			}
-			dataRate, err := inst.GetDataRateFromDevice(dev)
+			dataRate, err := inst.GetDataRateFromDevice(&dev)
 			if err != nil {
 				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() GetDataRateFromDevice() err: ", err)
 			}
