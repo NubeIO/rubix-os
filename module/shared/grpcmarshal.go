@@ -45,7 +45,7 @@ type Marshaller interface {
 	ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool) error
 	SetErrorsForAllPointsOnDevice(deviceUUID, message, messageLevel, messageCode string) error
 	ClearErrorsForAllPointsOnDevice(deviceUUID string) error
-	WizardNewNetworkDevicePoint(plugin string, net *model.Network, dev *model.Device, pnt *model.Point) (bool, error)
+	WizardNewNetworkDevicePoint(plugin string, network *model.Network, device *model.Device, point *model.Point) (bool, error)
 	DeviceNameExistsInNetwork(deviceName, networkUUID string) (*model.Device, bool)
 }
 
@@ -415,7 +415,19 @@ func (g *GRPCMarshaller) ClearErrorsForAllPointsOnDevice(deviceUUID string) erro
 	return nil
 }
 
-func (g *GRPCMarshaller) WizardNewNetworkDevicePoint(plugin string, net *model.Network, dev *model.Device, pnt *model.Point) (bool, error) {
+func (g *GRPCMarshaller) WizardNewNetworkDevicePoint(plugin string, network *model.Network, device *model.Device, point *model.Point) (bool, error) {
+	net, err := json.Marshal(network)
+	if err != nil {
+		return false, err
+	}
+	dev, err := json.Marshal(device)
+	if err != nil {
+		return false, err
+	}
+	pnt, err := json.Marshal(point)
+	if err != nil {
+		return false, err
+	}
 	chk, err := g.DbHelper.WizardNewNetworkDevicePoint(plugin, net, dev, pnt)
 	return chk, err
 }

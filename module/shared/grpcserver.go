@@ -2,7 +2,6 @@ package shared
 
 import (
 	"context"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/module/proto"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
@@ -229,16 +228,16 @@ func (m *GRPCDBHelperClient) ClearErrorsForAll(path, uuid string, doPoints bool)
 	return nil
 }
 
-func (m *GRPCDBHelperClient) WizardNewNetworkDevicePoint(plugin string, net *model.Network, dev *model.Device, pnt *model.Point) (bool, error) {
+func (m *GRPCDBHelperClient) WizardNewNetworkDevicePoint(plugin string, network, device, point []byte) (bool, error) {
 	_, err := m.client.WizardNewNetworkDevicePoint(context.Background(), &proto.WizardNewNetworkDevicePointRequest{
-		Plugin: plugin,
-		Net:    net,
-		Dev:    dev,
-		Pnt:    pnt,
+		Plugin:  plugin,
+		Network: network,
+		Device:  device,
+		Point:   point,
 	})
 	if err != nil {
 		hclog.Default().Info("WizardNewNetworkDevicePoint", err)
 		return false, err
 	}
-	return true, err
+	return true, nil
 }
