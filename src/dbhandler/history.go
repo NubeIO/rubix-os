@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-func (h *Handler) GetHistoriesForSync(lastSyncId int) ([]*model.History, error) {
-	return getDb().GetHistoriesForSync(lastSyncId)
-}
-
 func (h *Handler) GetHistoriesForPostgresSync(lastSyncId int) ([]*model.History, error) {
 	return getDb().GetHistoriesForPostgresSync(lastSyncId)
 }

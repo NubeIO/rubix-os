@@ -8,10 +8,8 @@ const (
 	JobsAll     = "job.*"
 	NetworksAll = "network.*"
 	PluginsAll  = "plugin.*"
-	StreamsAll  = "stream.*"
 	ScheduleAll = "schedule.*"
 	NodesAll    = "node.*"
-	ProducerAll = "producer.*"
 	MQTTAll     = "MQTT.*"
 
 	MQTTCreated = "MQTT.created"
@@ -30,13 +28,6 @@ const (
 	PluginsCreated = "plugin.created"
 	PluginsUpdated = "plugin.updated"
 	PluginsDeleted = "plugin.deleted"
-
-	ProducerCreated = "producer.created"
-	ProducerUpdated = "producer.updated"
-	ProducerEvent   = "producer.event"
-
-	StreamsCreated = "stream.created"
-	StreamsUpdated = "stream.updated"
 
 	Network        = "network"
 	NetworkCreated = "network.created"
@@ -64,7 +55,6 @@ func BusTopics() []string {
 		DevicesAll,
 		PointsAll,
 		PluginsAll,
-		StreamsAll,
 		NodesAll,
 		MQTTAll,
 		JobTrigger,
@@ -79,8 +69,6 @@ func BusTopics() []string {
 		PluginsCreated,
 		PluginsUpdated,
 		PluginsDeleted,
-		StreamsCreated,
-		StreamsUpdated,
 		Network,
 		NetworkCreated,
 		NetworkUpdated,
@@ -93,10 +81,6 @@ func BusTopics() []string {
 		NodeEvent,
 		NodeEventIn,
 		NodeEventOut,
-		ProducerAll,
-		ProducerCreated,
-		ProducerUpdated,
-		ProducerEvent,
 		MQTTCreated,
 		MQTTUpdated,
 	}

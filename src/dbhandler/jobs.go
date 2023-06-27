@@ -20,10 +20,6 @@ func (h *Handler) GetJob(uuid string) (*model.Job, error) {
 	return q, nil
 }
 
-func (h *Handler) GetJobsByPluginConfigId(pcId string) ([]*model.Job, error) {
-	return getDb().GetJobsByPluginConfigId(pcId)
-}
-
 func (h *Handler) CreateJob(body *model.Job) (*model.Job, error) {
 	return getDb().CreateJob(body)
 }

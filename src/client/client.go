@@ -7,7 +7,6 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/config"
 	"github.com/NubeIO/rubix-os/nresty"
-	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/go-resty/resty/v2"
 	"net"
 	"net/http"
@@ -85,30 +84,6 @@ func NewLocalClient() *FlowClient {
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient
 	return flowClient
-}
-
-func NewFlowClientCliFromFN(fn *model.FlowNetwork) *FlowClient {
-	if boolean.IsTrue(fn.IsMasterSlave) {
-		return newSlaveToMasterCallSession()
-	} else {
-		if boolean.IsTrue(fn.IsRemote) {
-			return newSessionWithToken(*fn.FlowIP, *fn.FlowPort, *fn.FlowToken)
-		} else {
-			return NewLocalClient()
-		}
-	}
-}
-
-func NewFlowClientCliFromFNC(fnc *model.FlowNetworkClone) *FlowClient {
-	if boolean.IsTrue(fnc.IsMasterSlave) {
-		return NewMasterToSlaveSession(fnc.GlobalUUID)
-	} else {
-		if boolean.IsTrue(fnc.IsRemote) {
-			return newSessionWithToken(*fnc.FlowIP, *fnc.FlowPort, *fnc.FlowToken)
-		} else {
-			return NewLocalClient()
-		}
-	}
 }
 
 func newSessionWithToken(ip string, port int, token string) *FlowClient {

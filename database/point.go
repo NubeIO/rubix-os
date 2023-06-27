@@ -188,15 +188,14 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 	pointWriter := &model.PointWriter{
 		Priority: &priorityMap,
 	}
-	pnt, _, _, _, err := d.updatePointValue(pointModel, pointWriter, nil, false)
+	pnt, _, _, _, err := d.updatePointValue(pointModel, pointWriter, false)
 	if publishPointList {
 		go d.PublishPointsList("")
 	}
-	d.UpdateProducerByProducerThingUUID(pointModel.UUID, pointModel.Name)
 	return pnt, err
 }
 
-func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, currentWriterUUID *string, forceWrite bool) (
+func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, forceWrite bool) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
@@ -209,12 +208,11 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, currentW
 		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
 	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err :=
-		d.updatePointValue(pointModel, body, currentWriterUUID, forceWrite)
+		d.updatePointValue(pointModel, body, forceWrite)
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
-func (d *GormDatabase) updatePointValue(
-	pointModel *model.Point, pointWriter *model.PointWriter, currentWriterUUID *string, forceWrite bool) (
+func (d *GormDatabase) updatePointValue(pointModel *model.Point, pointWriter *model.PointWriter, forceWrite bool) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	priority := pointWriter.Priority
 	if pointModel.PointPriorityArrayMode == "" {
@@ -284,15 +282,6 @@ func (d *GormDatabase) updatePointValue(
 				return nil, false, false, false, err
 			}
 		}
-
-		err = d.ProducersPointWrite(pointModel.UUID, priority, pointModel.PresentValue, currentWriterUUID)
-		if err != nil {
-			return nil, false, false, false, err
-		}
-		d.ConsumersPointWrite(pointModel.UUID, priority)
-		d.DB.Model(&model.Writer{}).
-			Where("writer_thing_uuid = ?", pointModel.UUID).
-			Update("present_value", pointModel.PresentValue)
 	}
 	if isPresentValueChange {
 		err = d.PublishPointCov(pointModel.UUID)

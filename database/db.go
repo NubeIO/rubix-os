@@ -8,21 +8,9 @@ import (
 
 // SyncTopics sync all the topics
 func (d *GormDatabase) SyncTopics() {
-	g, err := d.GetStreams(api.Args{})
-	for _, obj := range g {
-		d.Bus.RegisterTopicParent(model.CommonNaming.Stream, obj.UUID)
-	}
 	s, err := d.GetPlugins()
 	for _, obj := range s {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Plugin, obj.UUID)
-	}
-	sub, err := d.GetProducers(api.Args{})
-	for _, obj := range sub {
-		d.Bus.RegisterTopicParent(model.CommonNaming.Producer, obj.UUID)
-	}
-	rip, err := d.GetConsumers(api.Args{})
-	for _, obj := range rip {
-		d.Bus.RegisterTopicParent(model.CommonNaming.Consumer, obj.UUID)
 	}
 	j, err := d.GetJobs()
 	for _, obj := range j {

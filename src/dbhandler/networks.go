@@ -43,14 +43,6 @@ func (h *Handler) GetNetworkByPlugin(pluginUUID string, args api.Args) (*model.N
 	return q, nil
 }
 
-func (h *Handler) GetNetworkByPluginName(pluginUUID string, args api.Args) (*model.Network, error) {
-	q, err := getDb().GetNetworkByPluginName(pluginUUID, args)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
-}
-
 func (h *Handler) GetNetworksByPluginName(pluginUUID string, args api.Args) ([]*model.Network, error) {
 	q, err := getDb().GetNetworksByPluginName(pluginUUID, args)
 	if err != nil {
@@ -85,14 +77,6 @@ func (h *Handler) GetNetworkByDeviceUUID(uuid string, args api.Args) (*model.Net
 
 func (h *Handler) GetNetworkByName(name string, args api.Args) (*model.Network, error) {
 	q, err := getDb().GetNetworkByName(name, args)
-	if err != nil {
-		return nil, err
-	}
-	return q, nil
-}
-
-func (h *Handler) GetNetworkByField(field string, value string, withDevices bool) (*model.Network, error) {
-	q, err := getDb().GetNetworkByField(field, value, withDevices)
 	if err != nil {
 		return nil, err
 	}

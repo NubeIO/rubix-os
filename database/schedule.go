@@ -147,7 +147,6 @@ func (d *GormDatabase) UpdateSchedule(uuid string, body *model.Schedule) (*model
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name)
 
 	return scheduleModel, nil
 }
@@ -183,7 +182,6 @@ func (d *GormDatabase) UpdateScheduleAllProps(uuid string, body *model.Schedule)
 	if query.Error != nil {
 		return nil, query.Error
 	}
-	d.UpdateProducerByProducerThingUUID(scheduleModel.UUID, scheduleModel.Name)
 	return scheduleModel, nil
 }
 
@@ -211,31 +209,14 @@ func (d *GormDatabase) ScheduleWrite(uuid string, body *model.ScheduleData, forc
 		if err != nil {
 			return err
 		}
-		d.ConsumersScheduleWrite(uuid, body)
-		err = d.ProducersScheduleWrite(uuid, body)
-		if err != nil {
-			return err
-		}
 	}
-	return d.ProducersScheduleWrite(uuid, body)
+	return nil
 }
 
 func (d *GormDatabase) DeleteSchedule(uuid string) (bool, error) {
 	schedule, err := d.GetSchedule(uuid)
 	if err != nil {
 		return false, err
-	}
-	producers, _ := d.GetProducers(api.Args{ProducerThingUUID: &schedule.UUID})
-	if producers != nil {
-		for _, producer := range producers {
-			_, _ = d.DeleteProducer(producer.UUID)
-		}
-	}
-	writers, _ := d.GetWriters(api.Args{WriterThingUUID: &schedule.UUID})
-	if writers != nil {
-		for _, writer := range writers {
-			_, _ = d.DeleteWriter(writer.UUID)
-		}
 	}
 	query := d.DB.Delete(&schedule)
 	return d.deleteResponseBuilder(query)
