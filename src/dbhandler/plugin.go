@@ -19,3 +19,7 @@ func (h *Handler) GetPlugin(uuid string) (*model.PluginConf, error) {
 	}
 	return q, nil
 }
+
+func (h *Handler) UpdatePluginConfStorage(path string, data []byte) error {
+	return getDb().UpdatePluginConfStorage(path, data)
+}
