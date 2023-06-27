@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/utils/float"
 	"strconv"
 	"time"
 )
@@ -41,7 +42,8 @@ type InauroPackagedSensorHistoriesByGateway map[string]InauroPackagedSensorHisto
 
 type InauroMultipleGatewayHistoryPayloads map[string]InauroHistoryArrayPayload // grouped histories by host/gateway
 
-func (inst *Instance) packageHistoriesToInauroPayloads(histories []*model.History) (bulkHistoryPayloadsByGateway InauroMultipleGatewayHistoryPayloads, err error) {
+// packageHistoriesToInauroPayloadsByGateway this function takes histories, packages them by similar timestamps and splits them into grouped inauro history payload arrays (mapped by gateway/host).
+func (inst *Instance) packageHistoriesToInauroPayloadsByGateway(histories []*model.History) (bulkHistoryPayloadsByGateway InauroMultipleGatewayHistoryPayloads, err error) {
 	if len(histories) <= 0 {
 		return nil, errors.New("histories are empty")
 	}
@@ -52,11 +54,11 @@ func (inst *Instance) packageHistoriesToInauroPayloads(histories []*model.Histor
 
 	for _, history := range histories {
 		// TODO: point shouldn't be required, only device (for sensorID)
-		pnt, pntExists := pointData[history.UUID]
+		pnt, pntExists := pointData[history.PointUUID]
 		if !pntExists {
-			pnt, err = inst.db.GetPoint(history.UUID, api.Args{}) // needed to get device UUID
+			pnt, err = inst.db.GetPoint(history.PointUUID, api.Args{}) // needed to get device UUID
 			if err != nil {
-				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() GetPoint() uuid: ", history.UUID, "    err: ", err)
+				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloadsByGateway() GetPoint() uuid: ", history.PointUUID, "    err: ", err)
 				continue
 			}
 			pointData[pnt.UUID] = pnt // store for later to save DB calls
@@ -68,14 +70,14 @@ func (inst *Instance) packageHistoriesToInauroPayloads(histories []*model.Histor
 		if !devExists {
 			dev, err = inst.db.GetDevice(pnt.DeviceUUID, api.Args{WithPoints: true}) // needed for azure values stored on Device Description
 			if err != nil {
-				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() GetDevice() uuid: ", pnt.DeviceUUID, "    err: ", err)
+				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloadsByGateway() GetDevice() uuid: ", pnt.DeviceUUID, "    err: ", err)
 				continue
 			}
 			deviceData[dev.UUID] = dev // store for later to save DB calls
 		}
 
 		// TODO: HostUUID will be available on the new history model.
-		hostUUID := "host_xxxxxxxxxx"
+		hostUUID := history.HostUUID
 		_, hostExists := historiesByGateway[hostUUID]
 		if !hostExists {
 			historiesByGateway[hostUUID] = InauroPackagedSensorHistoriesByDevice{} // store for later to save DB calls
@@ -90,17 +92,17 @@ func (inst *Instance) packageHistoriesToInauroPayloads(histories []*model.Histor
 
 		timestampExists, mapTimestamp := SimilarTimestampExistsInSensorHistoryMap(timestamp, historiesByGateway[hostUUID][pnt.DeviceUUID])
 		if !timestampExists {
-			sensorID, err := inst.GetSensorIDFromDeviceDescription(dev)
+			sensorID, err := inst.GetSensorIDFromDeviceDescription(dev) // TODO: update to get SensorID from meta tags
 			if err != nil {
-				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() GetSensorIDFromDeviceDescription() uuid: ", dev.UUID, "    err: ", err)
+				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloadsByGateway() GetSensorIDFromDeviceDescription() uuid: ", dev.UUID, "    err: ", err)
 				continue
 			}
 			dataRate, err := inst.GetDataRateFromDevice(dev)
 			if err != nil {
-				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() GetDataRateFromDevice() err: ", err)
+				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloadsByGateway() GetDataRateFromDevice() err: ", err)
 			}
 
-			_, _, azureDeviceID, _, err := inst.getAzureDetailsFromConfigByHostUUID(hostUUID) //  TODO: add hostID variable
+			_, _, azureDeviceID, _, err := inst.getAzureDetailsFromConfigByHostUUID(hostUUID)
 			historiesByGateway[hostUUID][pnt.DeviceUUID][mapTimestamp] = InauroSensorPayload{
 				TimestampUTC:   mapTimestamp.UTC().Format(time.RFC3339), // .Format(time.RFC3339)
 				GatewayID:      azureDeviceID,
@@ -112,7 +114,7 @@ func (inst *Instance) packageHistoriesToInauroPayloads(histories []*model.Histor
 
 		// add this measurement to the sensor payload
 		sensorPayload := historiesByGateway[hostUUID][pnt.DeviceUUID][mapTimestamp]
-		sensorPayload.Points[pnt.Name] = history.Value
+		sensorPayload.Points[pnt.Name] = float.NonNil(history.Value)
 		historiesByGateway[hostUUID][pnt.DeviceUUID][mapTimestamp] = sensorPayload
 	}
 
@@ -131,6 +133,80 @@ func (inst *Instance) packageHistoriesToInauroPayloads(histories []*model.Histor
 	}
 
 	return bulkInauroHistoryPayloadByGateway, nil
+}
+
+// packageHistoriesToInauroPayloads this function takes histories and packages them by sensor and similar timestamps, then formats them for export to Azure as an array of azure histories.
+func (inst *Instance) packageHistoriesToInauroPayloads(hostUUID string, histories []*model.History) (bulkHistoryPayloadsArray InauroHistoryArrayPayload, err error) {
+	if len(histories) <= 0 {
+		return nil, errors.New("histories are empty")
+	}
+
+	historiesByDevice := InauroPackagedSensorHistoriesByDevice{}
+	pointData := make(map[string]*model.Point)
+
+	for _, history := range histories {
+		if history.HostUUID != hostUUID {
+			inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() history.HostUUID != hostUUID")
+			continue
+		}
+
+		pnt, pntExists := pointData[history.PointUUID]
+		if !pntExists {
+			pnt, err = inst.db.GetPoint(history.PointUUID, api.Args{}) // TODO: Replace with get point by pointUUID and hostUUID (request added function/api)
+			if err != nil {
+				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() GetPoint() uuid: ", history.PointUUID, "    err: ", err)
+				continue
+			}
+			pointData[pnt.UUID] = pnt // store for later to save DB calls
+		}
+
+		// TODO: get the device by point UUID + host UUID (request added function/api)
+		dev := GetDeviceByHostUUIDPointUUID(hostUUID, history.PointUUID)
+
+		timestamp := history.Timestamp.Truncate(time.Second)
+
+		_, sensorExists := historiesByDevice[hostUUID][dev.UUID]
+		if !sensorExists {
+			historiesByDevice[dev.UUID] = InauroPackagedSensorHistoriesByTimestamp{}
+		}
+
+		timestampExists, mapTimestamp := SimilarTimestampExistsInSensorHistoryMap(timestamp, historiesByDevice[dev.UUID])
+		if !timestampExists {
+			sensorID, err := inst.GetSensorIDFromDeviceDescription(dev) // TODO: update to get SensorID from meta tags
+			if err != nil {
+				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() GetSensorIDFromDeviceDescription() uuid: ", dev.UUID, "    err: ", err)
+				continue
+			}
+			dataRate, err := inst.GetDataRateFromDevice(dev)
+			if err != nil {
+				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() GetDataRateFromDevice() err: ", err)
+			}
+
+			_, _, azureDeviceID, _, err := inst.getAzureDetailsFromConfigByHostUUID(hostUUID)
+			historiesByDevice[dev.UUID][mapTimestamp] = InauroSensorPayload{
+				TimestampUTC:   mapTimestamp.UTC().Format(time.RFC3339), // .Format(time.RFC3339)
+				GatewayID:      azureDeviceID,
+				DataRate:       strconv.Itoa(int(dataRate)),
+				NubeSensorUUID: sensorID,
+				Points:         make(MeasurementPayloadMap),
+			}
+		}
+
+		// add this measurement to the sensor payload
+		sensorPayload := historiesByDevice[dev.UUID][mapTimestamp]
+		sensorPayload.Points[pnt.Name] = float.NonNil(history.Value)
+		historiesByDevice[pnt.DeviceUUID][mapTimestamp] = sensorPayload
+	}
+
+	// now reformat the history data to be an array of inaruo formatted histories
+	bulkHistoryPayloadsArray = InauroHistoryArrayPayload{}
+	for _, device := range historiesByDevice {
+		for _, inauroHistory := range device {
+			bulkHistoryPayloadsArray = append(bulkHistoryPayloadsArray, inauroHistory)
+		}
+	}
+
+	return bulkHistoryPayloadsArray, nil
 }
 
 func HostExistsOnHistoriesByGatewayMap(gatewayHostUUID string, historiesByGatewayHost InauroPackagedSensorHistoriesByGateway) bool {
