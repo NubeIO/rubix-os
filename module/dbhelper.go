@@ -238,8 +238,27 @@ func (*dbHelper) ClearErrorsForAll(path, uuid string, doPoints bool) error {
 	return nil
 }
 
-func (*dbHelper) WizardNewNetworkDevicePoint(plugin string, net *model.Network, dev *model.Device, pnt *model.Point) (bool, error) {
-	_, err := database.GlobalGormDatabase.WizardNewNetworkDevicePoint(plugin, net, dev, pnt)
+func (*dbHelper) WizardNewNetworkDevicePoint(plugin string, net, dev, pnt []byte) (bool, error) {
+	var err error
+	network := model.Network{}
+	err = json.Unmarshal(net, &network)
+	if err != nil {
+		log.Error(err)
+		return false, err
+	}
+	device := model.Device{}
+	err = json.Unmarshal(dev, &device)
+	if err != nil {
+		log.Error(err)
+		return false, err
+	}
+	point := model.Point{}
+	err = json.Unmarshal(pnt, &point)
+	if err != nil {
+		log.Error(err)
+		return false, err
+	}
+	_, err = database.GlobalGormDatabase.WizardNewNetworkDevicePoint(plugin, &network, &device, &point)
 	if err != nil {
 		return false, err
 	}
