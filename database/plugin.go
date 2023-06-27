@@ -48,3 +48,13 @@ func (d *GormDatabase) GetPlugin(id string) (*model.PluginConf, error) {
 func (d *GormDatabase) UpdatePluginConf(p *model.PluginConf) error {
 	return d.DB.Save(p).Error
 }
+
+func (d *GormDatabase) UpdatePluginConfStorage(path string, data []byte) error {
+	var plugin *model.PluginConf
+	query := d.DB.Where("module_path = ? ", path).First(&plugin)
+	if query.Error != nil {
+		return query.Error
+	}
+	plugin.Storage = data
+	return d.DB.Model(&plugin).Updates(&plugin).Error
+}
