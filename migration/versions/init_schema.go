@@ -40,5 +40,8 @@ func GetInitInterfaces() []interface{} {
 		&model.Team{},
 		&model.TeamView{},
 		&model.PointHistory{},
+		&model.Ticket{},
+		&model.TicketComment{},
+		&model.TicketTeam{},
 	}
 }

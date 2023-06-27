@@ -244,6 +244,31 @@ func getBodyTeam(ctx *gin.Context) (dto *model.Team, err error) {
 	return dto, err
 }
 
+func getBodyTicket(ctx *gin.Context) (dto *model.Ticket, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyTicketPriority(ctx *gin.Context) (dto *interfaces.TicketPriority, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyTicketStatus(ctx *gin.Context) (dto *interfaces.TicketStatus, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyTicketTeams(ctx *gin.Context) (dto []*string, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
+func getBodyTicketComment(ctx *gin.Context) (dto *model.TicketComment, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func resolveGlobalUUID(ctx *gin.Context) string {
 	return ctx.Param("global_uuid")
 }
