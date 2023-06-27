@@ -95,7 +95,7 @@ func (inst *Instance) GetSite(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	err = postgresSetting.postgresConnectionInstance.db.First(&site, siteRef).Error
+	err = postgresSetting.postgresConnectionInstance.db.Where("site_ref = ?", siteRef).First(&site, siteRef).Error
 	if err != nil {
 		inst.cpsErrorMsg("GetSite() db.First(&site, siteRef) error: ", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Site not found"})

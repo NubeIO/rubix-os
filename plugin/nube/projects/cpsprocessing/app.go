@@ -14,10 +14,21 @@ func (inst *Instance) CPSProcessing() {
 	periodStart, _ := time.Parse(time.RFC3339, "2023-06-19T07:55:00Z")
 	periodEnd, _ := time.Parse(time.RFC3339, "2023-06-19T10:00:00Z")
 
-	// TODO: get site thresholds from system network then put them into a dataframe
-	dfSiteThresholds := dataframe.ReadCSV(strings.NewReader(csvSiteThresholds))
-	// fmt.Println("dfSiteThresholds")
-	// fmt.Println(dfSiteThresholds)
+	// TODO: get site thresholds from thresholds table in pg database
+	siteRef := "cps_b49e0c73919c47ef"
+	var thresholds Threshold
+	err := postgresSetting.postgresConnectionInstance.db.Last(&thresholds, "site_ref = ?", siteRef).Error
+	if err != nil {
+		inst.cpsErrorMsg("CPSProcessing() db.Last(&thresholds, \"site_ref = ?\", siteRef) error: ", err)
+	}
+	// fmt.Println("thresholds")
+	// fmt.Println(thresholds)
+	var thresholdsSlice []Threshold
+	thresholdsSlice = append(thresholdsSlice, thresholds)
+	dfSiteThresholds := dataframe.LoadStructs(thresholdsSlice)
+	// dfSiteThresholds := dataframe.ReadCSV(strings.NewReader(csvSiteThresholds))
+	fmt.Println("dfSiteThresholds")
+	fmt.Println(dfSiteThresholds)
 
 	// TODO: pull data for each sensor for the given time range.  Do the below functions for each sensor
 

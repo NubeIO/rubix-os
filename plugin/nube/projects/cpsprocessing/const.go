@@ -70,6 +70,8 @@ const (
 	lowShowerAvailabilityOverdueColName ProcessedDataColumnName = "lowShowerAvailabilityOverdue"
 )
 
+// NOTE: the thresholds struct would also need to be updated if these column names are changed.
+
 type ThresholdColumnName string
 
 const (
