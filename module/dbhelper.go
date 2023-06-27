@@ -50,6 +50,8 @@ func (*dbHelper) Get(path, uuid, args string) ([]byte, error) {
 		out, err = database.GlobalGormDatabase.GetNetworkByName(name, apiArgs)
 	} else if path == "plugin_by_path" {
 		out, err = database.GlobalGormDatabase.GetPluginByPath(uuid)
+	} else if path == "plugin_by_id" {
+		out, err = database.GlobalGormDatabase.GetPlugin(uuid)
 	} else {
 		return nil, errors.New("not found")
 	}

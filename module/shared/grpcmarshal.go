@@ -40,6 +40,7 @@ type Marshaller interface {
 	GetSchedules() ([]*model.Schedule, error)
 	UpdateScheduleAllProps(uuid string, body *model.Schedule) (*model.Schedule, error)
 
+	GetPlugin(pluginUUID, args string) (*model.PluginConf, error)
 	GetPluginByPath(name, args string) (*model.PluginConf, error)
 	SetErrorsForAllDevicesOnNetwork(networkUUID, message, messageLevel, messageCode string, doPoints bool) error
 	ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool) error
@@ -368,6 +369,19 @@ func (g *GRPCMarshaller) UpdateScheduleAllProps(uuid string, body *model.Schedul
 		return nil, err
 	}
 	return schedule, nil
+}
+
+func (g *GRPCMarshaller) GetPlugin(pluginUUID, args string) (*model.PluginConf, error) {
+	res, err := g.DbHelper.Get("plugin_by_id", pluginUUID, args)
+	if err != nil {
+		return nil, err
+	}
+	var pluginConf *model.PluginConf
+	err = json.Unmarshal(res, &pluginConf)
+	if err != nil {
+		return nil, err
+	}
+	return pluginConf, nil
 }
 
 func (g *GRPCMarshaller) GetPluginByPath(name, args string) (*model.PluginConf, error) {
