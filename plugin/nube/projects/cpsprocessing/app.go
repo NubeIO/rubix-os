@@ -14,6 +14,7 @@ func (inst *Instance) CPSProcessing() {
 	periodStart, _ := time.Parse(time.RFC3339, "2023-06-19T07:55:00Z")
 	periodEnd, _ := time.Parse(time.RFC3339, "2023-06-19T10:00:00Z")
 
+	// TODO: get site thresholds from system network then put them into a dataframe
 	dfSiteThresholds := dataframe.ReadCSV(strings.NewReader(csvSiteThresholds))
 	// fmt.Println("dfSiteThresholds")
 	// fmt.Println(dfSiteThresholds)

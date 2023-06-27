@@ -4,29 +4,30 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uuid"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"net/http"
 	"time"
 )
 
 type Site struct {
-	// gorm.Model
-	CreatedAt             time.Time `json:"created_at"`
-	UpdatedAt             time.Time `json:"updated_at"`
-	SiteRef               string    `json:"site_ref" gorm:"type:varchar(255);unique;primaryKey"`
-	Name                  string    `json:"name" gorm:"type:varchar(255);unique"`
-	Address               string    `json:"address"`
-	State                 string    `json:"state"`
-	Region                uint8     `json:"region"`
-	Operation             string    `json:"operation"`
-	AssetOwner            string    `json:"asset_owner"`
-	ManagingAgent         string    `json:"managing_agent"`
-	BuildingType          string    `json:"building_type"`
-	BuildingGrade         uint8     `json:"building_grade"`
-	ContractStartDate     string    `json:"contract_start_date"`
-	ContractEndDate       string    `json:"contract_end_date"`
-	ContractTimeRemaining *float64  `json:"contract_time_remaining,omitempty"`
-	ContractFlag          *uint8    `json:"contract_flag,omitempty"`
-	IsCurrentFlag         *uint8    `json:"contract_flag,omitempty"`
+	CreatedAt             time.Time      `json:"created_at"`
+	UpdatedAt             time.Time      `json:"updated_at"`
+	DeletedAt             gorm.DeletedAt `json:"deleted_at" gorm:"index"`
+	SiteRef               string         `json:"site_ref" gorm:"type:varchar(255);unique;primaryKey"`
+	Name                  string         `json:"name" gorm:"type:varchar(255);unique"`
+	Address               string         `json:"address"`
+	State                 string         `json:"state"`
+	Region                uint8          `json:"region"`
+	Operation             string         `json:"operation"`
+	AssetOwner            string         `json:"asset_owner"`
+	ManagingAgent         string         `json:"managing_agent"`
+	BuildingType          string         `json:"building_type"`
+	BuildingGrade         uint8          `json:"building_grade"`
+	ContractStartDate     string         `json:"contract_start_date"`
+	ContractEndDate       string         `json:"contract_end_date"`
+	ContractTimeRemaining *float64       `json:"contract_time_remaining,omitempty"`
+	ContractFlag          *uint8         `json:"contract_flag,omitempty"`
+	IsCurrentFlag         *uint8         `json:"contract_flag,omitempty"`
 }
 
 // CreateSite creates a new site entry

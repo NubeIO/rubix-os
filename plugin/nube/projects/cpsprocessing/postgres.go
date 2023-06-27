@@ -75,6 +75,7 @@ func (ps *PostgresSetting) New() error {
 func autoMigrate(db *gorm.DB) error {
 	interfaces := []interface{}{
 		Site{},
+		Threshold{},
 	}
 
 	for _, s := range interfaces {

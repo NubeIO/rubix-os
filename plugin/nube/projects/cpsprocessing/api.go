@@ -15,4 +15,9 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 	sites.POST("/address", inst.GetSiteByAddress)
 	sites.PATCH("/:id", inst.UpdateSite)
 	sites.DELETE("/:id", inst.DeleteSite)
+
+	thresholds := mux.Group("/thresholds")
+
+	thresholds.POST("", inst.CreateThreshold)
+	thresholds.GET("/:id", inst.GetLastThresholdBySiteRef)
 }
