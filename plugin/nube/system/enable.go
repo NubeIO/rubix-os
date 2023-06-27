@@ -11,6 +11,10 @@ import (
 var cron *gocron.Scheduler
 
 func (inst *Instance) Enable() error {
+	_ = inst.db.UpdatePluginConfStorage("system", []byte("test"))
+	conf, err := inst.db.GetPluginByPath("system")
+	log.Info("storage content is this>>> ", string(conf.Storage))
+
 	log.Info("SYSTEM Plugin Enable()")
 	inst.enabled = true
 	inst.setUUID()
