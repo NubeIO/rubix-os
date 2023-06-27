@@ -186,3 +186,18 @@ func (m *GRPCDBHelperServer) Delete(ctx context.Context, req *proto.DeleteReques
 	}
 	return &proto.Response{R: r}, err
 }
+
+func (m *GRPCDBHelperServer) SetErrorsForAll(ctx context.Context, request *proto.SetErrorsForAllRequest) (*proto.Empty, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (m *GRPCDBHelperServer) ClearErrorsForAll(ctx context.Context, request *proto.ClearErrorsForAllRequest) (*proto.Empty, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (m *GRPCDBHelperServer) WizardNewNetworkDevicePoint(ctx context.Context, request *proto.WizardNewNetworkDevicePointRequest) (*proto.BoolResponse, error) {
+	// TODO implement me
+	panic("implement me")
+}

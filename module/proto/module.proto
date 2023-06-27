@@ -3,6 +3,9 @@
 
 syntax = "proto3";
 package proto;
+
+import "google/protobuf/timestamp.proto";
+
 option go_package = "github.com/NubeIO/rubix-os/module/proto";
 
 message InitRequest {
@@ -64,8 +67,259 @@ message ClearErrorsForAllRequest {
   bool doPoints = 3;
 }
 
+message CommonFault {
+  bool InFault = 1;
+  string MessageLevel = 2;
+  string MessageCode = 3;
+  string Message = 4;
+  google.protobuf.Timestamp LastOk = 5;
+  google.protobuf.Timestamp LastFail = 6;
+}
+
+message CommonCreated {
+  google.protobuf.Timestamp CreatedAt = 1;
+  google.protobuf.Timestamp UpdatedAt = 2;
+}
+
+message CommonIP {
+  string Host = 1;
+  int32 Port = 2;
+}
+
+message CommonDevice {
+  string Manufacture = 1;
+  string Model = 2;
+  int32 AddressId = 3;
+  bool ZeroMode = 4;
+  google.protobuf.Timestamp PollDelayPointsMS = 5;
+  string AddressUUID = 6;
+  CommonIP CommonIP = 7;
+}
+
+message Priority {
+  string PointUUID = 1;
+  double P1 = 2;
+  double P2 = 3;
+  double P3 = 4;
+  double P4 = 5;
+  double P5 = 6;
+  double P6 = 7;
+  double P7 = 8;
+  double P8 = 9;
+  double P9 = 10;
+  double P10 = 11;
+  double P11 = 12;
+  double P12 = 13;
+  double P13 = 14;
+  double P14 = 15;
+  double P15 = 16;
+  double P16 = 17;
+}
+
+message Tag {
+  string Tag = 1;
+  repeated Network Networks = 2;
+  repeated Device Devices = 3;
+  repeated Point Points = 4;
+}
+
+message HistoryConfig {
+  bool HistoryEnable = 1;
+  string HistoryType = 2;
+  int32 HistoryInterval = 3;
+  double HistoryCOVThreshold = 4;
+}
+
+message PointMetaTag {
+  string PointUUID = 1;
+  string Key = 2;
+  string Value = 3;
+}
+
+message PointHistory {
+  int32 ID = 1;
+  string PointUUID = 2;
+  double Value = 3;
+  google.protobuf.Timestamp Timestamp = 4;
+}
+
+message DeviceMetaTag {
+  string DeviceUUID = 1;
+  string Key = 2;
+  string Value = 3;
+}
+
+message NetworkMetaTag {
+  string NetworkUUID = 1;
+  string Key = 2;
+  string Value = 3;
+}
+
+message CommonSourceUUID {
+  string SourceUUID = 1;
+}
+
+message CommonHistoryEnable {
+  bool HistoryEnable = 1;
+}
+
+message Point {
+  string UUID = 1;
+  string Name = 2;
+  string Description = 3;
+  bool Enable = 4;
+  CommonCreated CommonCreated = 5;
+  string ThingClass = 6;
+  string ThingRef = 7;
+  string ThingType = 8;
+  CommonFault CommonFault = 9;
+  double PresentValue = 10;
+  double OriginalValue = 11;
+  double WriteValue = 12;
+  double WriteValueOriginal = 13;
+  int32 CurrentPriority = 14;
+  int32 WritePriority = 15;
+  bool IsOutput = 16;
+  bool IsTypeBool = 17;
+  bool InSync = 18;
+  double Fallback = 19;
+  string DeviceUUID = 20;
+  bool EnableWriteable = 21;
+  string MathOnPresentValue = 22;
+  string MathOnWriteValue = 23;
+  double COV = 24;
+  string ObjectType = 25;
+  int32 ObjectId = 26;
+  string DataType = 27;
+  bool IsBitwise = 28;
+  int32 BitwiseIndex = 29;
+  string ObjectEncoding = 30;
+  string IoNumber = 31;
+  string IoType = 32;
+  int32 AddressID = 33;
+  int32 AddressLength = 34;
+  string AddressUUID = 35;
+  bool NextAvailableAddress = 36;
+  uint32 Decimal = 37;
+  double MultiplicationFactor = 38;
+  bool ScaleEnable = 39;
+  double ScaleInMin = 40;
+  double ScaleInMax = 41;
+  double ScaleOutMin = 42;
+  double ScaleOutMax = 43;
+  double Offset = 44;
+  string UnitType = 45;
+  string Unit = 46;
+  string UnitTo = 47;
+  Priority Priority = 48;
+  repeated Tag Tags = 49;
+  bool ValueUpdatedFlag = 50;
+  string PointPriorityArrayMode = 51;
+  string WriteMode = 52;
+  bool WritePollRequired = 53;
+  bool ReadPollRequired = 54;
+  string PollPriority = 55;
+  string PollRate = 56;
+  bool BACnetWriteToPV = 57;
+  HistoryConfig HistoryConfig = 58;
+  repeated PointMetaTag MetaTags = 59;
+  string Connection = 60;
+  string ConnectionMessage = 61;
+  repeated PointHistory PointHistories = 62;
+  CommonSourceUUID CommonSourceUUID = 63;
+}
+
+message Device {
+  string UUID = 1;
+  string Name = 2;
+  string Description = 3;
+  bool Enable = 4;
+  CommonFault CommonFault = 5;
+  CommonCreated CommonCreated = 6;
+  string ThingClass = 7;
+  string ThingRef = 8;
+  string ThingType = 9;
+  CommonDevice CommonDevice = 10;
+  int32 DeviceMac = 11;
+  int32 DeviceObjectId = 12;
+  int32 NetworkNumber = 13;
+  int32 MaxADPU = 14;
+  string Segmentation = 15;
+  int32 DeviceMask = 16;
+  bool TypeSerial = 17;
+  string TransportType = 18;
+  bool SupportsRpm = 19;
+  bool SupportsWpm = 20;
+  string NetworkUUID = 21;
+  int32 NumberOfDevicesPermitted = 22;
+  repeated Point Points = 23;
+  repeated Tag Tags = 24;
+  double FastPollRate = 25;
+  double NormalPollRate = 26;
+  double SlowPollRate = 27;
+  int32 DeviceTimeout = 28;
+  repeated DeviceMetaTag MetaTags = 29;
+  string Connection = 30;
+  string ConnectionMessage = 31;
+  string SourceUUID = 32;
+  bool HistoryEnable = 33;
+}
+
+message Network {
+  string UUID = 1;
+  string Name = 2;
+  string Description = 3;
+  bool Enable = 4;
+  CommonFault CommonFault = 5;
+  CommonCreated CommonCreated = 6;
+  string Manufacture = 7;
+  string Model = 8;
+  bool WriteableNetwork = 9;
+  string ThingClass = 10;
+  string ThingRef = 11;
+  string ThingType = 12;
+  string TransportType = 13;
+  string PluginConfId = 14;
+  string PluginPath = 15;
+  int32 NumberOfNetworksPermitted = 16;
+  string NetworkInterface = 17;
+  string IP = 18;
+  int32 Port = 19;
+  int32 NetworkMask = 20;
+  string AddressID = 21;
+  string AddressUUID = 22;
+  string SerialPort = 23;
+  uint32 SerialBaudRate = 24;
+  uint32 SerialStopBits = 25;
+  string SerialParity = 26;
+  uint32 SerialDataBits = 27;
+  int32 SerialTimeout = 28;
+  bool SerialConnected = 29;
+  string Host = 30;
+  repeated Device Devices = 31;
+  repeated Tag Tags = 32;
+  double MaxPollRate = 33;
+  repeated NetworkMetaTag MetaTags = 34;
+  bool HasPollingStatistics = 35;
+  string GlobalUUID = 36;
+  string Connections = 37;
+  string ConnectionMessage = 38;
+  CommonSourceUUID CommonSourceUUID = 39;
+  string SourcePluginName = 40;
+  bool IsClone = 41;
+  string HostUUID = 42;
+  CommonHistoryEnable CommonHistoryEnable = 43;
+}
+
 message WizardNewNetworkDevicePointRequest {
   string plugin = 1;
+  Network net = 2;
+  Device dev = 3;
+  Point pnt = 4;
+}
+
+message BoolResponse {
+  bool r = 1;
 }
 
 message Response {
@@ -104,4 +358,7 @@ service DBHelper {
   rpc Put(PutRequest) returns (Response);
   rpc Patch(PatchRequest) returns (Response);
   rpc Delete(DeleteRequest) returns (Response);
+  rpc SetErrorsForAll(SetErrorsForAllRequest) returns (Empty);
+  rpc ClearErrorsForAll(ClearErrorsForAllRequest) returns (Empty);
+  rpc WizardNewNetworkDevicePoint(WizardNewNetworkDevicePointRequest) returns (BoolResponse);
 }
