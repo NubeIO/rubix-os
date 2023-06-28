@@ -14,15 +14,6 @@ import (
 func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 	log.Info("azure sensor history sync has been called...")
 
-	// TODO: I don't think this is neccesary.  Should only be using the local db, not the timescale pg db
-	/*
-		_, err := inst.initializePostgresDBConnection()
-		if err != nil {
-			inst.inauroazuresyncErrorMsg(err)
-			return false, err
-		}
-	*/
-
 	hosts, err := inst.db.GetHosts()
 	if err != nil {
 		return false, err
@@ -57,7 +48,7 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 		lastSyncTime, ok := pluginStorage.LastSyncByGateway[host.UUID]
 		if !ok {
 			inst.inauroazuresyncErrorMsg("syncAzureSensorHistories() host last sync time not found.  Host: ", host.UUID)
-			lastSyncTime = time.Now().Add(-time.Hour)
+			lastSyncTime = time.Now().Add(-12 * time.Hour)
 			pluginStorage.LastSyncByGateway[host.UUID] = lastSyncTime
 		}
 		inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureSensorHistories() lastSyncTime: %v", lastSyncTime))
@@ -69,6 +60,10 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 			inst.inauroazuresyncErrorMsg(fmt.Sprintf("syncAzureSensorHistories() GetHistoriesByHostUUID() error: %v", err))
 			inst.inauroazuresyncErrorMsg(err)
 			return false, err
+		}
+		inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureSensorHistories() GetHistoriesByHostUUID(): %v", len(histories)))
+		for _, history := range histories {
+			inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureSensorHistories() GetHistoriesByHostUUID() history: %+v", history))
 		}
 
 		// TODO: Delete these sample test histories
