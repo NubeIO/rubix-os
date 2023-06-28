@@ -49,6 +49,8 @@ type Args struct {
 	MetaTags          *string
 	MemberUUID        *string
 	ShowCloneNetworks bool
+	PointSourceUUID   *string
+	HostUUID          *string
 }
 
 var ArgsType = struct {
@@ -98,6 +100,8 @@ var ArgsType = struct {
 	WithMetaTags      string
 	MetaTags          string
 	ShowCloneNetworks string
+	PointSourceUUID   string
+	HostUUID          string
 }{
 	Sort:              "sort",
 	Order:             "order",
@@ -145,6 +149,8 @@ var ArgsType = struct {
 	WithMetaTags:      "with_meta_tags",
 	MetaTags:          "meta_tags",
 	ShowCloneNetworks: "show_clone_networks",
+	PointSourceUUID:   "point_source_uuid",
+	HostUUID:          "host_uuid",
 }
 
 var ArgsDefault = struct {

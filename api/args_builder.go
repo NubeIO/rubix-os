@@ -16,6 +16,12 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 		args.MetaTags = &value
 	}
 	args.ShowCloneNetworks, _ = toBool(ctx.DefaultQuery(aType.ShowCloneNetworks, aDefault.ShowCloneNetworks))
+	if value, ok := ctx.GetQuery(aType.PointSourceUUID); ok {
+		args.PointSourceUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.HostUUID); ok {
+		args.HostUUID = &value
+	}
 	return args
 }
 
@@ -32,6 +38,12 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	}
 	if value, ok := ctx.GetQuery(aType.MetaTags); ok {
 		args.MetaTags = &value
+	}
+	if value, ok := ctx.GetQuery(aType.PointSourceUUID); ok {
+		args.PointSourceUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.HostUUID); ok {
+		args.HostUUID = &value
 	}
 	return args
 }
@@ -57,6 +69,12 @@ func buildPointArgs(ctx *gin.Context) Args {
 	}
 	if value, ok := ctx.GetQuery(aType.MetaTags); ok {
 		args.MetaTags = &value
+	}
+	if value, ok := ctx.GetQuery(aType.PointSourceUUID); ok {
+		args.PointSourceUUID = &value
+	}
+	if value, ok := ctx.GetQuery(aType.HostUUID); ok {
+		args.HostUUID = &value
 	}
 	return args
 }
