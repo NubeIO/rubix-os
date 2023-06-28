@@ -38,6 +38,16 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 		inst.inauroazuresyncErrorMsg("Enable() getPluginConfStorage() err:", err)
 	}
 	inst.inauroazuresyncDebugMsg(fmt.Sprintf("Enable() pluginStorage: %+v", pluginStorage))
+	if pluginStorage == nil {
+		newPluginStorage := PluginConfStorage{}
+		newPluginStorage.LastSyncByGateway = make(map[string]time.Time)
+		/*
+			for _, host := range hosts {
+				newPluginStorage.LastSyncByGateway[host.UUID] = time.Now().Add(-time.Hour)
+			}
+		*/
+		pluginStorage = &newPluginStorage
+	}
 
 	now := time.Now()
 	var histories []*model.History
@@ -47,6 +57,8 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 		lastSyncTime, ok := pluginStorage.LastSyncByGateway[host.UUID]
 		if !ok {
 			inst.inauroazuresyncErrorMsg("syncAzureSensorHistories() host last sync time not found.  Host: ", host.UUID)
+			lastSyncTime = time.Now().Add(-time.Hour)
+			pluginStorage.LastSyncByGateway[host.UUID] = lastSyncTime
 		}
 		inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureSensorHistories() lastSyncTime: %v", lastSyncTime))
 
@@ -90,8 +102,9 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 		inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureSensorHistories() history count: %+v", len(histories)))
 
 		if len(histories) > 0 {
-			bulkInauroHistoryPayloadsArray, _ := inst.packageHistoriesToInauroPayloads(host.UUID, histories)
+			bulkInauroHistoryPayloadsArray, latestHistoryTime, _ := inst.packageHistoriesToInauroPayloads(host.UUID, histories)
 			inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureSensorHistories() packageHistoriesToInauroPayloads() bulkInauroHistoryPayloadsArray: %+v", bulkInauroHistoryPayloadsArray))
+			inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureSensorHistories() packageHistoriesToInauroPayloads() latestHistoryTime: %+v", latestHistoryTime))
 
 			byteData, err := json.Marshal(bulkInauroHistoryPayloadsArray)
 			if err != nil {
@@ -114,30 +127,17 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 			azureClient.Close()
 			if err != nil {
 				inst.inauroazuresyncErrorMsg("syncAzureSensorHistories() azureClient.Close() error:", err)
-			}
-			inst.inauroazuresyncDebugMsg("syncAzureSensorHistories()  azureClient.Close() CLOSED")
-
-			// TODO: figure out how to implement this on a per gateway basis.  Need to re-sync old histories if they fail to send to a specific gateway.
-			// TODO: probably use the Module JSON DB Storage to log the last sync'd history for each gateway
-			// if the push was successful save the `now` time to the host in JSON storage.
-			lastHistory := histories[len(histories)-1]
-			lastDeliveredHistoryLog := &model.HistoryPostgresLog{
-				ID:        lastHistory.ID,
-				PointUUID: lastHistory.PointUUID,
-				Value:     lastHistory.Value,
-				Timestamp: lastHistory.Timestamp,
+			} else {
+				inst.inauroazuresyncDebugMsg("syncAzureSensorHistories()  azureClient.Close() CLOSED")
+				pluginStorage.LastSyncByGateway[host.UUID] = latestHistoryTime
 			}
 
-			// TODO: Last sync will need to be stored on a per-gateway basis. This will likely be done with the module JSON storage.
-			_, _ = inst.db.UpdateHistoryPostgresLog(lastDeliveredHistoryLog)
-			if err != nil {
-				inst.inauroazuresyncErrorMsg("syncAzureSensorHistories() UpdateHistoryPostgresLog err:", err)
-				return false, err
-			}
 			inst.inauroazuresyncDebugMsg(fmt.Sprintf("azure iot hub: Stored %v new sensor records", len(histories)))
 
-			// TODO: Last sync will need to be stored on a per-gateway basis. This will likely be done with the module JSON storage.
-			// inst.setPluginConfStorage(&storeStruct)
+			// TODO: figure out how to implement this on a per gateway basis.  Need to re-sync old histories if they fail to send to a specific gateway.
+
+			// If the Azure push was successful save the latest history time to the host in JSON storage.
+			inst.setPluginConfStorage(pluginStorage)
 
 		} else {
 			inst.inauroazuresyncDebugMsg("azure iot hub: Nothing to store, no new sensor records")

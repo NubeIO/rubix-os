@@ -136,9 +136,9 @@ func (inst *Instance) packageHistoriesToInauroPayloadsByGateway(histories []*mod
 }
 
 // packageHistoriesToInauroPayloads this function takes histories and packages them by sensor and similar timestamps, then formats them for export to Azure as an array of azure histories.
-func (inst *Instance) packageHistoriesToInauroPayloads(hostUUID string, histories []*model.History) (bulkHistoryPayloadsArray InauroHistoryArrayPayload, err error) {
+func (inst *Instance) packageHistoriesToInauroPayloads(hostUUID string, histories []*model.History) (bulkHistoryPayloadsArray InauroHistoryArrayPayload, latestHistoryTime time.Time, err error) {
 	if len(histories) <= 0 {
-		return nil, errors.New("histories are empty")
+		return nil, time.Time{}, errors.New("histories are empty")
 	}
 
 	historiesByDevice := InauroPackagedSensorHistoriesByDevice{}
@@ -148,6 +148,11 @@ func (inst *Instance) packageHistoriesToInauroPayloads(hostUUID string, historie
 		if history.HostUUID != hostUUID {
 			inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() history.HostUUID != hostUUID")
 			continue
+		}
+
+		// save the latest history timestamp (per gateway) to be saved to plugin storage
+		if history.Timestamp.After(latestHistoryTime) {
+			latestHistoryTime = history.Timestamp
 		}
 
 		pnt, pntExists := pointData[history.PointUUID]
@@ -207,7 +212,7 @@ func (inst *Instance) packageHistoriesToInauroPayloads(hostUUID string, historie
 		}
 	}
 
-	return bulkHistoryPayloadsArray, nil
+	return bulkHistoryPayloadsArray, latestHistoryTime, nil
 }
 
 func HostExistsOnHistoriesByGatewayMap(gatewayHostUUID string, historiesByGatewayHost InauroPackagedSensorHistoriesByGateway) bool {
