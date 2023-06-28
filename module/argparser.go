@@ -1,10 +1,20 @@
 package module
 
 import (
+	"encoding/json"
 	"github.com/NubeIO/rubix-os/api"
 	"strconv"
 	"strings"
 )
+
+func SerializeArgs(args api.Args) (string, error) {
+	argsData, err := json.Marshal(args)
+	if err != nil {
+		return "", err
+	}
+	argsString := string(argsData)
+	return argsString, nil
+}
 
 func parseArgs(args string) api.Args {
 	apiArgs := api.Args{}

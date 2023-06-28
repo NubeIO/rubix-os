@@ -3,7 +3,10 @@ package shared
 import (
 	"encoding/json"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/module"
 	"github.com/NubeIO/rubix-os/module/common"
+	log "github.com/sirupsen/logrus"
 )
 
 type Marshaller interface {
@@ -14,7 +17,7 @@ type Marshaller interface {
 	GetNetworksByPluginName(pluginName, args string) ([]*model.Network, error)
 	GetNetworkByName(networkName, args string) (*model.Network, error)
 
-	GetOneNetworkByArgs(args string) (*model.Network, error)
+	GetOneNetworkByArgs(args api.Args) (*model.Network, error)
 	GetOneDeviceByArgs(args string) (*model.Device, error)
 	GetOnePointByArgs(args string) (*model.Point, error)
 
@@ -119,8 +122,13 @@ func (g *GRPCMarshaller) GetNetworkByName(networkName, args string) (*model.Netw
 	return network, nil
 }
 
-func (g *GRPCMarshaller) GetOneNetworkByArgs(args string) (*model.Network, error) {
-	res, err := g.DbHelper.GetWithoutParam("one_network_by_args", args)
+func (g *GRPCMarshaller) GetOneNetworkByArgs(args api.Args) (*model.Network, error) {
+	serializedArgs, err := module.SerializeArgs(args)
+	if err != nil {
+		return nil, err
+	}
+	log.Infof(">>>>>>>>>>Arguments: %s", serializedArgs)
+	res, err := g.DbHelper.GetWithoutParam("one_network_by_args", serializedArgs)
 	if err != nil {
 		return nil, err
 	}
