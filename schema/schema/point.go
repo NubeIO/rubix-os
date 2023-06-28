@@ -134,3 +134,9 @@ type HistoryInterval struct {
 	Title   string `json:"title" default:"History Interval"`
 	Default *int   `json:"default" default:"15"`
 }
+
+type HistoryCOVThreshold struct {
+	Type    string   `json:"type" default:"number"`
+	Title   string   `json:"title" default:"History COV Threshold"`
+	Default *float64 `json:"default" default:"0.01"`
+}
