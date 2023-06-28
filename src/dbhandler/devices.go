@@ -83,3 +83,7 @@ func (h *Handler) ClearErrorsForAllPointsOnDevice(networkUUID string) error {
 func (h *Handler) GetDevicesTagsForPostgresSync() ([]*interfaces.DeviceTagForPostgresSync, error) {
 	return getDb().GetDevicesTagsForPostgresSync()
 }
+
+func (h *Handler) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
+	return getDb().GetOneDeviceByArgs(args)
+}
