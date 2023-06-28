@@ -138,6 +138,7 @@ func (d *GormDatabase) CreatePoint(body *model.Point) (*model.Point, error) {
 	if body.HistoryEnable == nil {
 		body.HistoryEnable = boolean.NewTrue()
 	}
+	body.HistoryCOVThreshold = defaultHistoryCOVThreshold(body.HistoryCOVThreshold)
 	if err := d.DB.Create(&body).Error; err != nil {
 		return nil, err
 	}
@@ -188,14 +189,14 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 	pointWriter := &model.PointWriter{
 		Priority: &priorityMap,
 	}
-	pnt, _, _, _, err := d.updatePointValue(pointModel, pointWriter, false)
+	pnt, _, _, _, err := d.updatePointValue(pointModel, pointWriter)
 	if publishPointList {
 		go d.PublishPointsList("")
 	}
 	return pnt, err
 }
 
-func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, forceWrite bool) (
+func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	var pointModel *model.Point
 	query := d.DB.Where("uuid = ?", uuid).Preload("Priority").First(&pointModel)
@@ -208,11 +209,11 @@ func (d *GormDatabase) PointWrite(uuid string, body *model.PointWriter, forceWri
 		pointModel.ValueUpdatedFlag = boolean.NewTrue()
 	}
 	point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err :=
-		d.updatePointValue(pointModel, body, forceWrite)
+		d.updatePointValue(pointModel, body)
 	return point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err
 }
 
-func (d *GormDatabase) updatePointValue(pointModel *model.Point, pointWriter *model.PointWriter, forceWrite bool) (
+func (d *GormDatabase) updatePointValue(pointModel *model.Point, pointWriter *model.PointWriter) (
 	returnPoint *model.Point, isPresentValueChange, isWriteValueChange, isPriorityChanged bool, err error) {
 	priority := pointWriter.Priority
 	if pointModel.PointPriorityArrayMode == "" {
@@ -258,8 +259,8 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, pointWriter *mo
 	// Examples are: modbus, edge28 plugins
 	// So for such cases, to trigger that value we do this comparison
 	isWriteValueChange = !float.ComparePtrValues(pointModel.WriteValue, writeValue)
-	isChange := isPresentValueChange || isWriteValueChange || isPriorityChanged || forceWrite
-
+	cov, _ := nmath.Cov(float.NonNil(presentValue), float.NonNil(pointModel.PresentValue),
+		*defaultHistoryCOVThreshold(pointModel.HistoryCOVThreshold))
 	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
 	// but PresentValue should not change
 	if !presentValueTransformFault {
@@ -268,19 +269,17 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, pointWriter *mo
 	pointModel.WriteValue = writeValue
 	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 
-	if isChange {
-		if boolean.IsTrue(config.Get().PointHistory.Enable) && checkHistoryCovType(string(pointModel.HistoryType)) &&
-			d.CheckHistoryEnable(pointModel.UUID) {
-			pointHistory := &model.PointHistory{
-				PointUUID: pointModel.UUID,
-				Value:     pointModel.PresentValue,
-				Timestamp: time.Now().UTC(),
-			}
-			_, err = d.CreatePointHistory(pointHistory)
-			if err != nil {
-				log.Errorf("point: issue on write history for point: %v\n", err)
-				return nil, false, false, false, err
-			}
+	if cov && boolean.IsTrue(config.Get().PointHistory.Enable) && checkHistoryCovType(string(pointModel.HistoryType)) &&
+		d.CheckHistoryEnable(pointModel.UUID) {
+		pointHistory := &model.PointHistory{
+			PointUUID: pointModel.UUID,
+			Value:     pointModel.PresentValue,
+			Timestamp: time.Now().UTC(),
+		}
+		_, err = d.CreatePointHistory(pointHistory)
+		if err != nil {
+			log.Errorf("point: issue on write history for point: %v\n", err)
+			return nil, false, false, false, err
 		}
 	}
 	if isPresentValueChange {

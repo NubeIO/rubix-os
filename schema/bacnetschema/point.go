@@ -31,9 +31,10 @@ type PointSchema struct {
 	Decimal  schema.Decimal  `json:"decimal"`
 	Fallback schema.Fallback `json:"fallback"`
 
-	HistoryEnable   schema.HistoryEnableDefaultTrue `json:"history_enable"`
-	HistoryType     schema.HistoryType              `json:"history_type"`
-	HistoryInterval schema.HistoryInterval          `json:"history_interval"`
+	HistoryEnable       schema.HistoryEnableDefaultTrue `json:"history_enable"`
+	HistoryType         schema.HistoryType              `json:"history_type"`
+	HistoryInterval     schema.HistoryInterval          `json:"history_interval"`
+	HistoryCOVThreshold schema.HistoryCOVThreshold      `json:"history_cov_threshold"`
 }
 
 func GetPointSchema() *PointSchema {

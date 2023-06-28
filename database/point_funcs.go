@@ -89,6 +89,13 @@ func priorityMapToPatch(priorityMap *map[string]*float64) map[string]interface{}
 	return priorityMapToPatch_
 }
 
+func defaultHistoryCOVThreshold(b *float64) *float64 {
+	if b == nil {
+		return float.New(0.01)
+	}
+	return b
+}
+
 func (d *GormDatabase) GetPointsForPostgresSync() ([]*interfaces.PointForPostgresSync, error) {
 	var pointsForPostgresModel []*interfaces.PointForPostgresSync
 	query := d.DB.Table("points").

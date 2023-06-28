@@ -43,6 +43,19 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 	if args.GlobalUUID != nil {
 		query = query.Where("global_uuid = ?", *args.GlobalUUID)
 	}
+	if args.PointSourceUUID != nil || args.HostUUID != nil {
+		subQuery := d.DB.Table("networks").Select("networks.uuid").
+			Joins("JOIN devices ON devices.network_uuid = networks.uuid").
+			Joins("JOIN points ON points.device_uuid = devices.uuid")
+		if args.PointSourceUUID != nil {
+			subQuery = subQuery.Where("points.source_uuid = ?", *args.PointSourceUUID)
+		}
+		if args.HostUUID != nil {
+			subQuery = subQuery.Where("networks.host_uuid = ?", *args.HostUUID)
+		}
+		query = query.Where("uuid IN (?)", subQuery)
+		args.ShowCloneNetworks = true
+	}
 	if !args.ShowCloneNetworks {
 		query = query.Where("is_clone IS NOT TRUE") // to support older data where is_clone gets default NULL
 	}
@@ -86,6 +99,18 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 			Having("COUNT(device_uuid) = ?", len(keyValues))
 		query = query.Where("uuid IN (?)", subQuery)
 	}
+	if args.PointSourceUUID != nil || args.HostUUID != nil {
+		subQuery := d.DB.Table("networks").Select("devices.uuid").
+			Joins("JOIN devices ON devices.network_uuid = networks.uuid").
+			Joins("JOIN points ON points.device_uuid = devices.uuid")
+		if args.PointSourceUUID != nil {
+			subQuery = subQuery.Where("points.source_uuid = ?", *args.PointSourceUUID)
+		}
+		if args.HostUUID != nil {
+			subQuery = subQuery.Where("networks.host_uuid = ?", *args.HostUUID)
+		}
+		query = query.Where("uuid IN (?)", subQuery)
+	}
 	return query
 }
 
@@ -124,6 +149,18 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 			Where("(key, value) IN ?", keyValues).
 			Group("point_uuid").
 			Having("COUNT(point_uuid) = ?", len(keyValues))
+		query = query.Where("uuid IN (?)", subQuery)
+	}
+	if args.PointSourceUUID != nil || args.HostUUID != nil {
+		subQuery := d.DB.Table("networks").Select("points.uuid").
+			Joins("JOIN devices ON devices.network_uuid = networks.uuid").
+			Joins("JOIN points ON points.device_uuid = devices.uuid")
+		if args.PointSourceUUID != nil {
+			subQuery = subQuery.Where("points.source_uuid = ?", *args.PointSourceUUID)
+		}
+		if args.HostUUID != nil {
+			subQuery = subQuery.Where("networks.host_uuid = ?", *args.HostUUID)
+		}
 		query = query.Where("uuid IN (?)", subQuery)
 	}
 	return query

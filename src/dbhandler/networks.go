@@ -110,3 +110,7 @@ func (h *Handler) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints
 func (h *Handler) GetNetworksTagsForPostgresSync() ([]*interfaces.NetworkTagForPostgresSync, error) {
 	return getDb().GetNetworksTagsForPostgresSync()
 }
+
+func (h *Handler) GetOneNetworkByArgs(args api.Args) (*model.Network, error) {
+	return getDb().GetOneNetworkByArgs(args)
+}
