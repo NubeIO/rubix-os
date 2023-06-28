@@ -154,7 +154,7 @@ func (*dbHelper) Patch(path, uuid string, body []byte) ([]byte, error) {
 			log.Error(err)
 			return nil, err
 		}
-		point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := database.GlobalGormDatabase.PointWrite(uuid, &pw, false)
+		point, isPresentValueChange, isWriteValueChange, isPriorityChanged, err := database.GlobalGormDatabase.PointWrite(uuid, &pw)
 		if err != nil {
 			return nil, err
 		}
