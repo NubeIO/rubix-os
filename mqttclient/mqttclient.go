@@ -3,13 +3,14 @@ package mqttclient
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/rubix-os/utils/boolean"
-	"github.com/NubeIO/rubix-os/utils/nuuid"
-	"github.com/eclipse/paho.mqtt.golang"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/NubeIO/rubix-os/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/nuuid"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	log "github.com/sirupsen/logrus"
 )
 
 type topicLog struct {
@@ -108,9 +109,9 @@ func (c *Client) Publish(topic string, qos QOS, retain bool, payload string) {
 }
 
 func (c *Client) FlushMqttPublishBuffers() {
-	log.Debug("Flush mqtt publish buffers has is been called...")
+	log.Trace("Flushing mqtt publish buffers...")
 	if len(c.mqttPublishBuffers) == 0 {
-		log.Debug("MQTT publish buffers not found")
+		log.Trace("MQTT publish buffers empty")
 		return
 	}
 	c.mqttPublishBuffersMutex.Lock()
@@ -123,7 +124,7 @@ func (c *Client) FlushMqttPublishBuffers() {
 			wg.Add(1)
 			go func(record *MqttPublishBuffer) {
 				defer wg.Done()
-				log.Debugf("Publishing topic: %s", record.Topic)
+				log.Tracef("Publishing topic: %s", record.Topic)
 				token := c.client.Publish(record.Topic, byte(record.Qos), record.Retain, record.Payload)
 				if token.Error() != nil {
 					log.Errorf("MQTT issue on publishing, topic: %s, error: %s", record.Topic, token.Error())
@@ -133,7 +134,7 @@ func (c *Client) FlushMqttPublishBuffers() {
 		}
 		wg.Wait()
 	}
-	log.Debug("Finished MQTT publish buffers process")
+	log.Trace("Finished MQTT publish buffers process")
 }
 
 // NewClient creates an mqttClient client
