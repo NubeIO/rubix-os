@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/utils/boolean"
@@ -72,11 +73,19 @@ func (d *GormDatabase) UpdateDevice(uuid string, body *model.Device) (*model.Dev
 // UpdateDeviceErrors will only update the CommonFault properties of the device, all other properties won't be updated
 // Does not update `LastOk`
 func (d *GormDatabase) UpdateDeviceErrors(uuid string, body *model.Device) error {
-	return d.DB.Model(&body).
-		Where("uuid = ?", uuid).
-		Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
-		Updates(&body).
-		Error
+	if body.InFault {
+		return d.DB.Model(&body).
+			Where("uuid = ?", uuid).
+			Select("InFault", "MessageLevel", "MessageCode", "Message", "LastFail", "InSync").
+			Updates(&body).
+			Error
+	} else {
+		return d.DB.Model(&body).
+			Where("uuid = ?", uuid).
+			Select("InFault", "MessageLevel", "MessageCode", "Message", "LastOk", "InSync").
+			Updates(&body).
+			Error
+	}
 }
 
 func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
