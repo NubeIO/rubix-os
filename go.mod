@@ -46,7 +46,6 @@ require (
 
 require (
 	github.com/NubeDev/bacnet v0.1.9
-	github.com/NubeIO/flow-framework v0.14.2
 	github.com/NubeIO/lib-date v0.0.6
 	github.com/NubeIO/lib-dhcpd v0.0.2
 	github.com/NubeIO/lib-files v1.0.0
