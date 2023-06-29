@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	log "github.com/sirupsen/logrus"
 	"go.bug.st/serial"
 )
@@ -26,7 +26,7 @@ var Port serial.Port
 
 func (inst *Instance) SerialOpen() (SerialSetting, error) {
 	s := SerialSetting{}
-	var arg api.Args
+	var arg args.Args
 	net, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, arg)
 	if err != nil {
 		return s, err

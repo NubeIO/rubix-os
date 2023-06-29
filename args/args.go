@@ -1,4 +1,4 @@
-package api
+package args
 
 type Args struct {
 	Enable                         *bool

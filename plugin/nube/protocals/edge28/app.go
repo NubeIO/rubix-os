@@ -6,7 +6,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"time"
@@ -190,7 +190,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	}
 
 	// TODO: add code to check through priority array and limit the values by IoType.
-	pnt, err := inst.db.GetPoint(pntUUID, api.Args{})
+	pnt, err := inst.db.GetPoint(pntUUID, args.Args{})
 	if err == nil {
 		body.Priority = limitPriorityArrayByEdge28Type(pnt.IoType, body)
 	}

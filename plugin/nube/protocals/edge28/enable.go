@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 )
 
 func (inst *Instance) Enable() error {
@@ -11,7 +11,7 @@ func (inst *Instance) Enable() error {
 	inst.fault = false
 	inst.pluginName = name
 	inst.setUUID()
-	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
+	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{})
 	if nets != nil {
 		inst.networks = nets
 	} else if err != nil {

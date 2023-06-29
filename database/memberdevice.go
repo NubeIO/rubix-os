@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
@@ -15,7 +15,7 @@ func (d *GormDatabase) GetMemberDevicesByMemberUUID(memberUUID string) ([]*model
 	return memberDevicesModel, nil
 }
 
-func (d *GormDatabase) GetMemberDevicesByArgs(args api.Args) ([]*model.MemberDevice, error) {
+func (d *GormDatabase) GetMemberDevicesByArgs(args args.Args) ([]*model.MemberDevice, error) {
 	var memberDevicesModel []*model.MemberDevice
 	query := d.buildMemberDeviceQuery(args)
 	if err := query.Find(&memberDevicesModel).Error; err != nil {
@@ -24,7 +24,7 @@ func (d *GormDatabase) GetMemberDevicesByArgs(args api.Args) ([]*model.MemberDev
 	return memberDevicesModel, nil
 }
 
-func (d *GormDatabase) GetOneMemberDeviceByArgs(args api.Args) (*model.MemberDevice, error) {
+func (d *GormDatabase) GetOneMemberDeviceByArgs(args args.Args) (*model.MemberDevice, error) {
 	var memberDeviceModel *model.MemberDevice
 	query := d.buildMemberDeviceQuery(args)
 	if err := query.First(&memberDeviceModel).Error; err != nil {
@@ -61,7 +61,7 @@ func (d *GormDatabase) UpdateMemberDevice(uuid string, body *model.MemberDevice)
 	return memberDeviceModel, nil
 }
 
-func (d *GormDatabase) DeleteMemberDevicesByArgs(args api.Args) (bool, error) {
+func (d *GormDatabase) DeleteMemberDevicesByArgs(args args.Args) (bool, error) {
 	query := d.buildMemberDeviceQuery(args)
 	query = query.Delete(&model.MemberDevice{})
 	return d.deleteResponseBuilder(query)

@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/NubeIO/rubix-os/args"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/lorawan/csrest"
 	"github.com/NubeIO/rubix-os/schema/lorawanschema"
 	"github.com/NubeIO/rubix-os/schema/schema"
@@ -53,7 +53,7 @@ func (inst *Instance) syncChirpstackDevices() {
 
 func (inst *Instance) syncAddMissingDevices(csDevices []*csrest.DevicesResult) {
 	for _, csDev := range csDevices {
-		currDev, _ := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
+		currDev, _ := inst.db.GetDeviceByArgs(args.Args{AddressUUID: &csDev.DevEUI})
 		if currDev == nil {
 			_, err := inst.addMissingDeviceResult(csDev)
 			if err != nil {
@@ -93,7 +93,7 @@ func (inst *Instance) addMissingDeviceSingle(csDev *csrest.DeviceSingle) (*model
 }
 
 func (inst *Instance) syncRemoveOldDevices(csDevices []*csrest.DevicesResult) {
-	currNetwork, err := inst.db.GetNetwork(inst.networkUUID, api.Args{WithDevices: true})
+	currNetwork, err := inst.db.GetNetwork(inst.networkUUID, args.Args{WithDevices: true})
 	if err != nil || currNetwork == nil {
 		return
 	}
@@ -117,7 +117,7 @@ func (inst *Instance) syncRemoveOldDevices(csDevices []*csrest.DevicesResult) {
 
 func (inst *Instance) syncUpdateDevices(csDevices []*csrest.DevicesResult) {
 	for _, csDev := range csDevices {
-		currDev, err := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &csDev.DevEUI})
+		currDev, err := inst.db.GetDeviceByArgs(args.Args{AddressUUID: &csDev.DevEUI})
 		if err != nil || currDev == nil {
 			log.Error("lorawan: get device: ", err)
 			continue

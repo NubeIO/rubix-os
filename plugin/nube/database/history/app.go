@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	log "github.com/sirupsen/logrus"
@@ -30,7 +30,7 @@ func (inst *Instance) syncHistory() (bool, error) {
 		}
 		for k, h := range *pHistories {
 			if cloneEdge {
-				point, _ := inst.db.GetOnePointByArgs(api.Args{SourceUUID: nstring.New(h.PointUUID)})
+				point, _ := inst.db.GetOnePointByArgs(args.Args{SourceUUID: nstring.New(h.PointUUID)})
 				if point == nil {
 					err = inst.db.CloneEdge(host)
 					cloneEdge = err != nil

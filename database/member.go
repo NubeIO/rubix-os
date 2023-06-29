@@ -3,13 +3,13 @@ package database
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/security"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	parentArgs "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
-func (d *GormDatabase) GetMembers(args api.Args) ([]*model.Member, error) {
+func (d *GormDatabase) GetMembers(args parentArgs.Args) ([]*model.Member, error) {
 	var membersModel []*model.Member
 	query := d.buildMemberQuery(args)
 	query.Find(&membersModel)
@@ -19,7 +19,7 @@ func (d *GormDatabase) GetMembers(args api.Args) ([]*model.Member, error) {
 	return membersModel, nil
 }
 
-func (d *GormDatabase) GetMember(uuid string, args api.Args) (*model.Member, error) {
+func (d *GormDatabase) GetMember(uuid string, args parentArgs.Args) (*model.Member, error) {
 	var memberModel *model.Member
 	query := d.buildMemberQuery(args)
 	query = query.Where("uuid = ? ", uuid).First(&memberModel)
@@ -29,7 +29,7 @@ func (d *GormDatabase) GetMember(uuid string, args api.Args) (*model.Member, err
 	return memberModel, nil
 }
 
-func (d *GormDatabase) GetMemberByUsername(username string, args api.Args) (*model.Member, error) {
+func (d *GormDatabase) GetMemberByUsername(username string, args parentArgs.Args) (*model.Member, error) {
 	var memberModel *model.Member
 	query := d.buildMemberQuery(args)
 	query = query.Where("username = ? ", username).First(&memberModel)
@@ -39,7 +39,7 @@ func (d *GormDatabase) GetMemberByUsername(username string, args api.Args) (*mod
 	return memberModel, nil
 }
 
-func (d *GormDatabase) GetMemberByEmail(email string, args api.Args) (*model.Member, error) {
+func (d *GormDatabase) GetMemberByEmail(email string, args parentArgs.Args) (*model.Member, error) {
 	var memberModel *model.Member
 	query := d.buildMemberQuery(args)
 	query = query.Where("email = ? ", email).First(&memberModel)
@@ -49,7 +49,7 @@ func (d *GormDatabase) GetMemberByEmail(email string, args api.Args) (*model.Mem
 	return memberModel, nil
 }
 
-func (d *GormDatabase) GetMembersByUUIDs(uuids []*string, args api.Args) ([]*model.Member, error) {
+func (d *GormDatabase) GetMembersByUUIDs(uuids []*string, args parentArgs.Args) ([]*model.Member, error) {
 	var membersModel []*model.Member
 	query := d.buildMemberQuery(args)
 	if err := query.Where("uuid IN ?", uuids).Find(&membersModel).Error; err != nil {
@@ -137,7 +137,7 @@ func (d *GormDatabase) GetMemberSidebars(username string, includeWithoutViews bo
 	}
 	viewUUIDs, locationsUUIDs, groupUUIDs, hostUUIDs := getViewsUUIDs(views)
 
-	locations, _ := d.GetLocationsByUUIDs(locationsUUIDs, api.Args{WithGroups: true, WithHosts: true, WithViews: true})
+	locations, _ := d.GetLocationsByUUIDs(locationsUUIDs, parentArgs.Args{WithGroups: true, WithHosts: true, WithViews: true})
 
 	// Remove groupUUIDs and hostUUIDs that are already covered by locations
 	for _, location := range locations {
@@ -153,7 +153,7 @@ func (d *GormDatabase) GetMemberSidebars(username string, includeWithoutViews bo
 	if locations != nil {
 		locations = append(locations, groupLocations...)
 	}
-	groups, _ := d.GetGroupsByUUIDs(groupUUIDs, api.Args{WithViews: true, WithHosts: true})
+	groups, _ := d.GetGroupsByUUIDs(groupUUIDs, parentArgs.Args{WithViews: true, WithHosts: true})
 	if groups != nil {
 		// Remove hostUUIDs that are already covered by groups
 		for _, group := range groups {
@@ -163,12 +163,12 @@ func (d *GormDatabase) GetMemberSidebars(username string, includeWithoutViews bo
 		}
 	}
 
-	hostGroups, _ := d.GetGroupsByHostUUIDs(hostUUIDs, api.Args{WithViews: true})
+	hostGroups, _ := d.GetGroupsByHostUUIDs(hostUUIDs, parentArgs.Args{WithViews: true})
 	if hostGroups != nil {
 		groups = append(groups, hostGroups...)
 	}
 
-	hosts, _ := d.GetHostsByUUIDs(hostUUIDs, api.Args{WithTags: true, WithComments: true, WithViews: true})
+	hosts, _ := d.GetHostsByUUIDs(hostUUIDs, parentArgs.Args{WithTags: true, WithComments: true, WithViews: true})
 	if hosts != nil {
 		// Update the relationships between hosts and groups, and groups and locations
 		for _, host := range hosts {

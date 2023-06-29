@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/NubeIO/rubix-os/utils/integer"
@@ -32,7 +32,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 		}
 	}
 	body.NumberOfNetworksPermitted = integer.New(1)
-	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
+	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, args.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		inst.bacnetDebugMsg("addDevice(): nil device object")
 		return nil, errors.New("empty device body, no device created")
 	}
-	network, err := inst.db.GetNetwork(body.NetworkUUID, api.Args{WithDevices: true})
+	network, err := inst.db.GetNetwork(body.NetworkUUID, args.Args{WithDevices: true})
 	if err != nil {
 		return nil, err
 	}
@@ -311,7 +311,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 	}
 
 	if boolean.IsTrue(point.Enable) {
-		dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
+		dev, err := inst.db.GetDevice(point.DeviceUUID, args.Args{})
 		if err != nil {
 			inst.bacnetErrorMsg("BACnetServerPolling(): Device not found")
 			return point, nil
@@ -341,7 +341,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 }
 
 func (inst *Instance) updatePointName(body *model.Point) error {
-	device, err := inst.db.GetDevice(body.DeviceUUID, api.Args{})
+	device, err := inst.db.GetDevice(body.DeviceUUID, args.Args{})
 	if err != nil {
 		return err
 	}
@@ -350,7 +350,7 @@ func (inst *Instance) updatePointName(body *model.Point) error {
 
 // initPointsNames on start update all the point names
 func (inst *Instance) initPointsNames() error {
-	net, err := inst.db.GetNetwork(inst.networkUUID, api.Args{WithDevices: true, WithPoints: true})
+	net, err := inst.db.GetNetwork(inst.networkUUID, args.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		inst.bacnetErrorMsg(fmt.Sprintf("write-all-point-names: network-UUID%s  err:%s", inst.networkUUID, err.Error()))
 		return err
@@ -463,5 +463,5 @@ func (inst *Instance) networkUpdateErr(network *model.Network, message string, m
 }
 
 func (inst *Instance) getNetworks() ([]*model.Network, error) {
-	return inst.db.GetNetworks(api.Args{})
+	return inst.db.GetNetworks(args.Args{})
 }

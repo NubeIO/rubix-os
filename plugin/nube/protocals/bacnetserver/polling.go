@@ -7,7 +7,7 @@ import (
 	"github.com/NubeDev/bacnet/btypes/priority"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/src/poller"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
@@ -45,7 +45,7 @@ func (inst *Instance) BACnetServerPolling() error {
 			inst.bacnetErrorMsg("-----------------------------------------")
 		}
 		var err error
-		nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{WithDevices: true})
+		nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{WithDevices: true})
 		if len(nets) == 0 {
 			time.Sleep(5 * time.Second)
 			inst.bacnetDebugMsg("NO NETWORKS FOUND")
@@ -66,7 +66,7 @@ func (inst *Instance) BACnetServerPolling() error {
 					}
 					for _, dev := range net.Devices { // DEVICES
 						time.Sleep(devDelay) // DELAY between devices
-						dev, err = inst.db.GetDevice(dev.UUID, api.Args{WithPoints: true})
+						dev, err = inst.db.GetDevice(dev.UUID, args.Args{WithPoints: true})
 						if err != nil {
 							inst.bacnetErrorMsg("BACnetServerPolling(): Device not found")
 							continue
@@ -126,7 +126,7 @@ func (inst *Instance) BACnetServerPolling() error {
 }
 
 func (inst *Instance) SyncFFPointWithBACnetServerPoint(pnt *model.Point, devUUID, netUUID string, forceWrite bool) (*model.Point, error) {
-	pnt, err := inst.db.GetPoint(pnt.UUID, api.Args{WithPriority: true})
+	pnt, err := inst.db.GetPoint(pnt.UUID, args.Args{WithPriority: true})
 	if err != nil {
 		inst.bacnetErrorMsg("SyncFFPointWithBACnetServerPoint(): Point not found")
 		return nil, errors.New("SyncFFPointWithBACnetServerPoint(): Point not found")

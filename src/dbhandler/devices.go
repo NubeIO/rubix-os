@@ -2,11 +2,11 @@ package dbhandler
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 )
 
-func (h *Handler) GetDevice(uuid string, args api.Args) (*model.Device, error) {
+func (h *Handler) GetDevice(uuid string, args args.Args) (*model.Device, error) {
 	q, err := getDb().GetDevice(uuid, args)
 	if err != nil {
 		return nil, err
@@ -14,12 +14,12 @@ func (h *Handler) GetDevice(uuid string, args api.Args) (*model.Device, error) {
 	return q, nil
 }
 
-func (h *Handler) GetDeviceByArgs(args api.Args) (*model.Device, error) {
+func (h *Handler) GetDeviceByArgs(args args.Args) (*model.Device, error) {
 	return getDb().GetOneDeviceByArgs(args)
 }
 
 func (h *Handler) DeviceNameExistsInNetwork(deviceName, networkUUID string) (device *model.Device, existing bool) {
-	network, err := getDb().GetNetwork(networkUUID, api.Args{WithDevices: true})
+	network, err := getDb().GetNetwork(networkUUID, args.Args{WithDevices: true})
 	if err != nil {
 		return nil, false
 	}

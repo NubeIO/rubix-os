@@ -3,13 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/NubeIO/rubix-os/args"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/lorawan/csrest"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -89,7 +89,7 @@ func (inst *Instance) handleMqttError(body mqtt.Message) {
 }
 
 func (inst *Instance) checkAndAddValidCSDeviceFromEvent(devEUI string, withPoints bool) (*model.Device, error) {
-	currDev, err := inst.db.GetDeviceByArgs(api.Args{AddressUUID: &devEUI, WithPoints: withPoints})
+	currDev, err := inst.db.GetDeviceByArgs(args.Args{AddressUUID: &devEUI, WithPoints: withPoints})
 	if err != nil {
 		var csDev *csrest.DeviceSingle
 		csDev, err = inst.chirpStack.GetDevice(devEUI)

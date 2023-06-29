@@ -2,11 +2,11 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 )
 
 func (d *GormDatabase) deviceNameExists(dev *model.Device, body *model.Device) bool {
-	var arg api.Args
+	var arg args.Args
 	arg.WithDevices = true
 	device, err := d.GetNetwork(dev.NetworkUUID, arg)
 	if err != nil {

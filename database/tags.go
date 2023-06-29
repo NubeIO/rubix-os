@@ -2,10 +2,10 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 )
 
-func (d *GormDatabase) GetTags(args api.Args) ([]*model.Tag, error) {
+func (d *GormDatabase) GetTags(args args.Args) ([]*model.Tag, error) {
 	var tagsModel []*model.Tag
 	query := d.buildTagQuery(args)
 	query.Find(&tagsModel)
@@ -15,7 +15,7 @@ func (d *GormDatabase) GetTags(args api.Args) ([]*model.Tag, error) {
 	return tagsModel, nil
 }
 
-func (d *GormDatabase) GetTag(tag string, args api.Args) (*model.Tag, error) {
+func (d *GormDatabase) GetTag(tag string, args args.Args) (*model.Tag, error) {
 	var tagModel *model.Tag
 	query := d.buildTagQuery(args)
 	query = query.Where("tag = ? ", tag).First(&tagModel)

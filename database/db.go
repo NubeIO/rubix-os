@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -16,15 +16,15 @@ func (d *GormDatabase) SyncTopics() {
 	for _, obj := range j {
 		d.Bus.RegisterTopicParent(model.CommonNaming.Job, obj.UUID)
 	}
-	n, err := d.GetNetworks(api.Args{})
+	n, err := d.GetNetworks(args.Args{})
 	for _, obj := range n {
 		d.Bus.RegisterTopicParent(model.ThingClass.Network, obj.UUID)
 	}
-	de, err := d.GetDevices(api.Args{})
+	de, err := d.GetDevices(args.Args{})
 	for _, obj := range de {
 		d.Bus.RegisterTopicParent(model.ThingClass.Network, obj.UUID)
 	}
-	p, err := d.GetPoints(api.Args{})
+	p, err := d.GetPoints(args.Args{})
 	for _, obj := range p {
 		d.Bus.RegisterTopicParent(model.ThingClass.Point, obj.UUID)
 	}

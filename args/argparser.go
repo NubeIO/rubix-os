@@ -1,13 +1,12 @@
-package module
+package args
 
 import (
 	"encoding/json"
-	"github.com/NubeIO/rubix-os/api"
 	"strconv"
 	"strings"
 )
 
-func SerializeArgs(args api.Args) (string, error) {
+func (a Args) SerializeArgs(args Args) (string, error) {
 	argsData, err := json.Marshal(args)
 	if err != nil {
 		return "", err
@@ -16,8 +15,17 @@ func SerializeArgs(args api.Args) (string, error) {
 	return argsString, nil
 }
 
-func parseArgs(args string) api.Args {
-	apiArgs := api.Args{}
+func DeserializeArgs(args string) (*Args, error) {
+	var deserializedArgs *Args
+	err := json.Unmarshal([]byte(args), &deserializedArgs)
+	if err != nil {
+		return nil, err
+	}
+	return deserializedArgs, nil
+}
+
+func ParseArgs(args string) Args {
+	apiArgs := Args{}
 	argsParts := strings.Split(args, "&&")
 	for _, arg := range argsParts {
 		argParts := strings.Split(arg, "=")

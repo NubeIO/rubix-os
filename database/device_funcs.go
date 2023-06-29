@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/integer"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +11,7 @@ import (
 
 // GetDeviceByPoint get a device by point object
 func (d *GormDatabase) GetDeviceByPoint(point *model.Point) (*model.Device, error) {
-	device, err := d.GetDevice(point.DeviceUUID, api.Args{})
+	device, err := d.GetDevice(point.DeviceUUID, args.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -20,19 +20,19 @@ func (d *GormDatabase) GetDeviceByPoint(point *model.Point) (*model.Device, erro
 
 // GetDeviceByPointUUID get a device by its pointUUID
 func (d *GormDatabase) GetDeviceByPointUUID(pntUUID string) (*model.Device, error) {
-	point, err := d.GetPoint(pntUUID, api.Args{})
+	point, err := d.GetPoint(pntUUID, args.Args{})
 	if err != nil || point == nil {
 		return nil, err
 	}
 
-	device, err := d.GetDevice(point.DeviceUUID, api.Args{})
+	device, err := d.GetDevice(point.DeviceUUID, args.Args{})
 	if err != nil {
 		return nil, err
 	}
 	return device, nil
 }
 
-func (d *GormDatabase) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
+func (d *GormDatabase) GetOneDeviceByArgs(args args.Args) (*model.Device, error) {
 	var deviceModel *model.Device
 	query := d.buildDeviceQuery(args)
 	if err := query.First(&deviceModel).Error; err != nil {
@@ -41,7 +41,7 @@ func (d *GormDatabase) GetOneDeviceByArgs(args api.Args) (*model.Device, error) 
 	return deviceModel, nil
 }
 
-func (d *GormDatabase) GetDeviceByName(networkName string, deviceName string, args api.Args) (*model.Device, error) {
+func (d *GormDatabase) GetDeviceByName(networkName string, deviceName string, args args.Args) (*model.Device, error) {
 	var deviceModel *model.Device
 	query := d.buildDeviceQuery(args)
 	if err := query.Joins("JOIN networks ON devices.network_uuid = networks.uuid").
@@ -53,7 +53,7 @@ func (d *GormDatabase) GetDeviceByName(networkName string, deviceName string, ar
 }
 
 func (d *GormDatabase) deviceNameExistsInNetwork(deviceName, networkUUID string) (device *model.Device, existing bool) {
-	network, err := d.GetNetwork(networkUUID, api.Args{WithDevices: true})
+	network, err := d.GetNetwork(networkUUID, args.Args{WithDevices: true})
 	if err != nil {
 		return nil, false
 	}
@@ -72,7 +72,7 @@ func (d *GormDatabase) deviceNameExistsInNetwork(deviceName, networkUUID string)
 // messageLevel = model.MessageLevel
 // messageCode = model.CommonFaultCode
 func (d *GormDatabase) SetErrorsForAllPointsOnDevice(deviceUUID string, message string, messageLevel string, messageCode string) error {
-	device, err := d.GetDevice(deviceUUID, api.Args{WithPoints: true})
+	device, err := d.GetDevice(deviceUUID, args.Args{WithPoints: true})
 	if device != nil && err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (d *GormDatabase) SetErrorsForAllPointsOnDevice(deviceUUID string, message 
 
 // ClearErrorsForAllPointsOnDevice clears the fault/error properties of all points for a specific device
 func (d *GormDatabase) ClearErrorsForAllPointsOnDevice(deviceUUID string) error {
-	device, err := d.GetDevice(deviceUUID, api.Args{WithPoints: true})
+	device, err := d.GetDevice(deviceUUID, args.Args{WithPoints: true})
 	if device != nil && err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (d *GormDatabase) ClearErrorsForAllPointsOnDevice(deviceUUID string) error 
 	return nil
 }
 
-func (d *GormDatabase) DeleteDeviceByName(networkName string, deviceName string, args api.Args) (bool, error) {
+func (d *GormDatabase) DeleteDeviceByName(networkName string, deviceName string, args args.Args) (bool, error) {
 	var deviceModel *model.Device
 	query := d.buildDeviceQuery(args)
 	if err := query.Joins("JOIN networks ON devices.network_uuid = networks.uuid").

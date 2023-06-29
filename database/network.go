@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/plugin/compat"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
+func (d *GormDatabase) GetNetworks(args args.Args) ([]*model.Network, error) {
 	var networksModel []*model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.Find(&networksModel).Error; err != nil {
@@ -22,7 +22,7 @@ func (d *GormDatabase) GetNetworks(args api.Args) ([]*model.Network, error) {
 	return networksModel, nil
 }
 
-func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, error) {
+func (d *GormDatabase) GetNetwork(uuid string, args args.Args) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&networkModel).Error; err != nil {
@@ -31,7 +31,7 @@ func (d *GormDatabase) GetNetwork(uuid string, args api.Args) (*model.Network, e
 	return networkModel, nil
 }
 
-func (d *GormDatabase) GetOneNetworkByArgs(args api.Args) (*model.Network, error) {
+func (d *GormDatabase) GetOneNetworkByArgs(args args.Args) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.First(&networkModel).Error; err != nil {
@@ -132,7 +132,7 @@ func (d *GormDatabase) DeleteNetwork(uuid string) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) DeleteOneNetworkByArgs(args api.Args) (bool, error) {
+func (d *GormDatabase) DeleteOneNetworkByArgs(args args.Args) (bool, error) {
 	var networkModel *model.Network
 	query := d.buildNetworkQuery(args).Delete(&networkModel)
 	return d.deleteResponseBuilder(query)

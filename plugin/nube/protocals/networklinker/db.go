@@ -3,12 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/rubix-os/args"
 	"strings"
 
 	"golang.org/x/exp/slices"
 
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 )
 
@@ -17,8 +17,8 @@ func (inst *Instance) createNetwork(body *model.Network) (*model.Network, error)
 		body.Name = strings.Replace(body.AddressUUID, INTERNAL_SEPARATOR, UI_SEPARATOR, 1)
 	}
 	netUUIDs := strings.Split(body.AddressUUID, INTERNAL_SEPARATOR)
-	net1, _ := inst.db.GetNetwork(netUUIDs[0], api.Args{WithDevices: true})
-	net2, _ := inst.db.GetNetwork(netUUIDs[1], api.Args{WithDevices: true})
+	net1, _ := inst.db.GetNetwork(netUUIDs[0], args.Args{WithDevices: true})
+	net2, _ := inst.db.GetNetwork(netUUIDs[1], args.Args{WithDevices: true})
 	if inst.networkIsWriter(net1) && inst.networkIsWriter(net2) {
 		return nil, errors.New("both networks cannot be \"writers\"")
 	}
@@ -45,10 +45,10 @@ func (inst *Instance) createNetwork(body *model.Network) (*model.Network, error)
 
 func (inst *Instance) createDevice(body *model.Device, dev1 *model.Device, dev2 *model.Device, net1 *model.Network, net2 *model.Network) (*model.Device, error) {
 	if net1 == nil || net2 == nil {
-		linkNet, _ := inst.db.GetNetwork(body.NetworkUUID, api.Args{})
+		linkNet, _ := inst.db.GetNetwork(body.NetworkUUID, args.Args{})
 		netUUIDs := strings.Split(linkNet.AddressUUID, INTERNAL_SEPARATOR)
-		net1, _ = inst.db.GetNetwork(netUUIDs[0], api.Args{WithDevices: true})
-		net2, _ = inst.db.GetNetwork(netUUIDs[1], api.Args{WithDevices: true})
+		net1, _ = inst.db.GetNetwork(netUUIDs[0], args.Args{WithDevices: true})
+		net2, _ = inst.db.GetNetwork(netUUIDs[1], args.Args{WithDevices: true})
 	}
 	if dev1 == nil || dev2 == nil {
 		devUUIDs := strings.Split(*body.AddressUUID, INTERNAL_SEPARATOR)
@@ -79,21 +79,22 @@ func (inst *Instance) createDevice(body *model.Device, dev1 *model.Device, dev2 
 }
 
 // Add points to link device for any points from dev1 and dev2.
-//  Match points via name, else add as singlular point
-//  Checks for any missing points
+//
+//	Match points via name, else add as singlular point
+//	Checks for any missing points
 func (inst *Instance) syncDevicePoints(devLink *model.Device, dev1 *model.Device, dev2 *model.Device, net1 *model.Network, net2 *model.Network) error {
 	devUUIDs := strings.Split(*devLink.AddressUUID, INTERNAL_SEPARATOR)
 	if dev1 == nil {
-		dev1, _ = inst.db.GetDevice(devUUIDs[0], api.Args{})
+		dev1, _ = inst.db.GetDevice(devUUIDs[0], args.Args{})
 	}
 	if dev2 == nil {
-		dev2, _ = inst.db.GetDevice(devUUIDs[1], api.Args{})
+		dev2, _ = inst.db.GetDevice(devUUIDs[1], args.Args{})
 	}
 	if net1 == nil {
-		net1, _ = inst.db.GetNetwork(dev1.NetworkUUID, api.Args{})
+		net1, _ = inst.db.GetNetwork(dev1.NetworkUUID, args.Args{})
 	}
 	if net2 == nil {
-		net2, _ = inst.db.GetNetwork(dev2.NetworkUUID, api.Args{})
+		net2, _ = inst.db.GetNetwork(dev2.NetworkUUID, args.Args{})
 	}
 
 	existingLinkedPointUUIDs := make([][]string, len(devLink.Points))
@@ -101,8 +102,8 @@ func (inst *Instance) syncDevicePoints(devLink *model.Device, dev1 *model.Device
 		existingLinkedPointUUIDs[i] = strings.Split(*point.AddressUUID, INTERNAL_SEPARATOR)
 	}
 
-	points1, _ := inst.db.GetPointsByDeviceUUID(dev1.UUID, api.Args{})
-	points2, _ := inst.db.GetPointsByDeviceUUID(dev2.UUID, api.Args{})
+	points1, _ := inst.db.GetPointsByDeviceUUID(dev1.UUID, args.Args{})
+	points2, _ := inst.db.GetPointsByDeviceUUID(dev2.UUID, args.Args{})
 
 	pointsFound2 := make([]bool, len(points2))
 	for i := range pointsFound2 {
@@ -190,7 +191,7 @@ func (inst *Instance) syncPoint(point *model.Point, net1 *model.Network, net2 *m
 }
 
 func (inst *Instance) syncPointSelected(point *model.Point, linkedUUID string) *model.Point {
-	origPoint, _ := inst.db.GetPoint(linkedUUID, api.Args{WithPriority: true})
+	origPoint, _ := inst.db.GetPoint(linkedUUID, args.Args{WithPriority: true})
 	if origPoint.PresentValue == nil || (point.PresentValue != nil && (*point.PresentValue == *origPoint.PresentValue)) {
 		return point
 	}
@@ -208,22 +209,22 @@ func (inst *Instance) networkIsWriter(net *model.Network) bool {
 }
 
 func (inst *Instance) getWriterNetworkAndPoint(linkPointUUID string) (network *model.Network, pointUUID *string) {
-	linkPoint, _ := inst.db.GetPoint(linkPointUUID, api.Args{})
+	linkPoint, _ := inst.db.GetPoint(linkPointUUID, args.Args{})
 	pointUUIDs := strings.Split(*linkPoint.AddressUUID, INTERNAL_SEPARATOR)
-	network, _ = inst.db.GetNetworkByDeviceUUID(linkPoint.DeviceUUID, api.Args{})
+	network, _ = inst.db.GetNetworkByDeviceUUID(linkPoint.DeviceUUID, args.Args{})
 	netUUIDs := strings.Split(network.AddressUUID, INTERNAL_SEPARATOR)
-	network1, _ := inst.db.GetNetwork(netUUIDs[0], api.Args{})
+	network1, _ := inst.db.GetNetwork(netUUIDs[0], args.Args{})
 	var newNet *model.Network = nil
 
 	if len(pointUUIDs) == 1 {
 		pointUUID = &pointUUIDs[0]
-		point, _ := inst.db.GetPoint(*pointUUID, api.Args{})
-		newNet, _ = inst.db.GetNetworkByDeviceUUID(point.DeviceUUID, api.Args{})
+		point, _ := inst.db.GetPoint(*pointUUID, args.Args{})
+		newNet, _ = inst.db.GetNetworkByDeviceUUID(point.DeviceUUID, args.Args{})
 	} else if inst.networkIsWriter(network1) {
 		pointUUID = &pointUUIDs[0]
 		newNet = network1
 	} else {
-		network2, _ := inst.db.GetNetwork(netUUIDs[1], api.Args{})
+		network2, _ := inst.db.GetNetwork(netUUIDs[1], args.Args{})
 		pointUUID = &pointUUIDs[1]
 		newNet = network2
 	}

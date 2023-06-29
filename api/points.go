@@ -2,25 +2,26 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/gin-gonic/gin"
 )
 
 type PointDatabase interface {
-	GetPoints(args Args) ([]*model.Point, error)
+	GetPoints(args args.Args) ([]*model.Point, error)
 	GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point, error)
 	GetPointsBulkUUIs() ([]string, error)
-	GetPoint(uuid string, args Args) (*model.Point, error)
+	GetPoint(uuid string, args args.Args) (*model.Point, error)
 	CreatePoint(body *model.Point) (*model.Point, error)
 	UpdatePoint(uuid string, body *model.Point) (*model.Point, error)
 	PointWrite(uuid string, body *model.PointWriter) (*model.Point, bool, bool, bool, error)
-	GetOnePointByArgs(args Args) (*model.Point, error)
+	GetOnePointByArgs(args args.Args) (*model.Point, error)
 	DeletePoint(uuid string) (bool, error)
-	GetPointByName(networkName, deviceName, pointName string, args Args) (*model.Point, error)
+	GetPointByName(networkName, deviceName, pointName string, args args.Args) (*model.Point, error)
 	PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter) (*model.Point, error)
-	DeleteOnePointByArgs(args Args) (bool, error)
-	DeletePointByName(networkName, deviceName, pointName string, args Args) (bool, error)
+	DeleteOnePointByArgs(args args.Args) (bool, error)
+	DeletePointByName(networkName, deviceName, pointName string, args args.Args) (bool, error)
 	GetPointWithParent(uuid string) (*interfaces.PointWithParent, error)
 
 	CreatePointPlugin(body *model.Point) (*model.Point, error)
