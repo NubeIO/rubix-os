@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/api"
@@ -49,10 +50,25 @@ func (inst *Instance) handleMqttUplink(body mqtt.Message) {
 	if !ok {
 		return
 	}
+	uplink := 0.0
+	adr := 0.0
+	if payload.ConfirmedUplink {
+		uplink = 1.0
+	}
+	if payload.TxInfo.ADR {
+		adr = 1.0
+	}
 	inst.updateOrCreatePoint("rssi", float64(payload.RxInfo[0].Rssi), currDev)
 	inst.updateOrCreatePoint("snr", float64(payload.RxInfo[0].LoRaSNR), currDev)
+	inst.updateOrCreatePoint("data-rate", float64(payload.TxInfo.DataRate), currDev)
+	inst.updateOrCreatePoint("frame-count", float64(payload.FCount), currDev)
+	inst.updateOrCreatePoint("frame-port", float64(payload.FPort), currDev)
+	inst.updateOrCreatePoint("confirmed-uplink", float64(uplink), currDev)
+	inst.updateOrCreatePoint("adr", float64(adr), currDev)
 	currDev.InFault = false
 	currDev.Message = ""
+	currDev.LastOk = time.Now()
+	inst.db.UpdateDeviceErrors(currDev.UUID, currDev)
 }
 
 // handleMqttError handle CS MQTT event error
@@ -68,6 +84,7 @@ func (inst *Instance) handleMqttError(body mqtt.Message) {
 	}
 	currDev.InFault = true
 	currDev.Message = fmt.Sprintf("%s: %s", payload.Type, payload.Error)
+	currDev.LastFail = time.Now()
 	inst.db.UpdateDeviceErrors(currDev.UUID, currDev)
 }
 
@@ -114,6 +131,7 @@ func (inst *Instance) parseUplinkData(data *map[string]interface{}, device *mode
 		case map[string]interface{}:
 			dataInternal := v.(map[string]interface{})
 			inst.parseUplinkData(&dataInternal, device)
+			continue
 		case string:
 			str := reflect.ValueOf(v).String()
 			value, err = strconv.ParseFloat(str, 64)
