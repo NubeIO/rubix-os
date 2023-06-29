@@ -20,8 +20,28 @@ func (inst *Instance) Enable() error {
 	cron = gocron.NewScheduler(time.UTC)
 	// cron.SetMaxConcurrentJobs(2, gocron.RescheduleMode)
 	cron.SetMaxConcurrentJobs(1, gocron.WaitMode)
-	_, _ = cron.Every(inst.config.Job.GatewayPayloadSyncFrequency).Tag("GatewayPayloadSync").Do(inst.syncAzureGatewayPayloads)
-	// _, _ = cron.Every(inst.config.Job.SensorHistorySyncFrequency).Tag("SensorHistorySync").Do(inst.syncAzureSensorHistories)
+
+	sensorFreqDuration, err := time.ParseDuration(inst.config.Job.SensorHistorySyncFrequency)
+	if err == nil {
+		_, _ = cron.Every(sensorFreqDuration).Tag("SensorHistorySync").Do(inst.syncAzureSensorHistories)
+	} else if inst.config.Job.SensorHistorySyncFrequency == "" {
+		inst.inauroazuresyncErrorMsg(`SENSOR PAYLOAD DISABLED.  Plugin/Module config 'sensor_history_sync_frequency' = ""`)
+	} else {
+		inst.inauroazuresyncErrorMsg(fmt.Sprintf("Invalid `sensor_history_sync_frequency` in plugin/module config.  Default frequency is used '%v'.", defaultSensorHistorySyncFrequency))
+		_, _ = cron.Every(defaultSensorHistorySyncFrequency).Tag("SensorHistorySync").Do(inst.syncAzureSensorHistories)
+	}
+
+	gatewayFreqDuration, err := time.ParseDuration(inst.config.Job.GatewayPayloadSyncFrequency)
+	if err == nil {
+		_, _ = cron.Every(gatewayFreqDuration).Tag("GatewayPayloadSync").Do(inst.syncAzureGatewayPayloads)
+	} else if inst.config.Job.GatewayPayloadSyncFrequency == "" {
+		inst.inauroazuresyncErrorMsg(`GATEWAY PAYLOAD DISABLED.  Plugin/Module config 'gateway_payload_sync_frequency' = ""`)
+	} else {
+		inst.inauroazuresyncErrorMsg(fmt.Sprintf("Invalid `gateway_payload_sync_frequency` in plugin/module config.  Default frequency is used '%v'.", defaultGatewayPayloadSyncFrequency))
+		_, _ = cron.Every(defaultGatewayPayloadSyncFrequency).Tag("GatewayPayloadSync").Do(inst.syncAzureGatewayPayloads)
+	}
+
+	cron.RunAll()
 	cron.StartAsync()
 	inst.running = true
 	log.Info(fmt.Sprintf("%s enabled", name))

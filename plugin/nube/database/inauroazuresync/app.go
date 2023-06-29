@@ -7,12 +7,11 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/src/cli/cligetter"
-	log "github.com/sirupsen/logrus"
 	"time"
 )
 
 func (inst *Instance) syncAzureSensorHistories() (bool, error) {
-	log.Info("azure sensor history sync has been called...")
+	inst.inauroazuresyncDebugMsg("azure sensor history sync has been called...")
 
 	hosts, err := inst.db.GetHosts()
 	if err != nil {
@@ -113,7 +112,7 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 }
 
 func (inst *Instance) syncAzureGatewayPayloads() (bool, error) {
-	log.Info("azure gateway payload sync has been called...")
+	inst.inauroazuresyncDebugMsg("azure gateway payload sync has been called...")
 
 	hosts, err := inst.db.GetHosts()
 	if err != nil {
@@ -163,7 +162,25 @@ func (inst *Instance) syncAzureGatewayPayloads() (bool, error) {
 			}
 			gatewayPayload.Ping = pingable
 
-			inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureGatewayPayloads() gatewayPayload: %+v", gatewayPayload))
+			networkingInfo, err := cli.GetNetworking()
+			if err != nil {
+				inst.inauroazuresyncErrorMsg("syncAzureGatewayPayloads() cli.GetNetworking() gateway: ", gatewayDetails.AzureDeviceId, "  error:", err)
+			}
+
+			networkingPayloadInfo := make([]InauroGatewayNetworking, 0)
+			for i, netInfo := range networkingInfo {
+				inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureGatewayPayloads() i: %v, netInfo: %+v", i, netInfo))
+				// if strings.HasPrefix(netInfo.Interface, "eth") {
+				if netInfo.Interface == "eth0" || netInfo.Interface == "eth1" {
+					networkingPayloadInfo = append(networkingPayloadInfo, InauroGatewayNetworking{
+						Interface: netInfo.Interface,
+						IP:        netInfo.IP,
+						MAC:       netInfo.MacAddress,
+					})
+				}
+			}
+			gatewayPayload.Networking = networkingPayloadInfo
+			inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureGatewayPayloads() networkingPayloadInfo: %+v", networkingPayloadInfo))
 
 			byteData, err := json.Marshal(gatewayPayload)
 			if err != nil {

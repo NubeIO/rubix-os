@@ -37,8 +37,8 @@ type Postgres struct {
 }
 
 type Job struct {
-	SensorHistorySyncFrequency  string `yaml:"sensor_history_sync_frequency"`
-	GatewayPayloadSyncFrequency string `yaml:"gateway_payload_sync_frequency"`
+	SensorHistorySyncFrequency  string `yaml:"sensor_history_sync_frequency"`  // if set to "" this will disable the Sensor Payloads
+	GatewayPayloadSyncFrequency string `yaml:"gateway_payload_sync_frequency"` // if set to "" this will disable the Gateway Payloads
 }
 
 type Config struct {
@@ -62,8 +62,8 @@ func (inst *Instance) DefaultConfig() interface{} {
 		},
 	}
 	job := Job{
-		SensorHistorySyncFrequency:  "5m",
-		GatewayPayloadSyncFrequency: "15m",
+		SensorHistorySyncFrequency:  defaultSensorHistorySyncFrequency,
+		GatewayPayloadSyncFrequency: defaultGatewayPayloadSyncFrequency,
 	}
 	return &Config{
 		Azure:    azure,

@@ -11,17 +11,22 @@ import (
 
 type InauroGatewaySensorTrackingList []string // all sensor ids that have pushed since the last gateway payload
 
-// TODO: add in network adapter properties that we can get from the edge/host via API call.
-
 type InauroGatewayPayload struct {
-	TimestampUTC string `json:"timestampUTC"`
-	GatewayID    string `json:"gatewayID"`
-	GatewayICCID string `json:"gatewayICCID"`
-	GatewayIMEI  string `json:"gatewayIMEI"`
-	Latitude     string `json:"latitude"`
-	Longitude    string `json:"longitude"`
-	Network      string `json:"network"`
-	Ping         bool   `json:"ping"`
+	TimestampUTC string                    `json:"timestampUTC"`
+	GatewayID    string                    `json:"gatewayID"`
+	GatewayICCID string                    `json:"gatewayICCID"`
+	GatewayIMEI  string                    `json:"gatewayIMEI"`
+	Latitude     string                    `json:"latitude"`
+	Longitude    string                    `json:"longitude"`
+	Network      string                    `json:"network"`
+	Ping         bool                      `json:"ping"`
+	Networking   []InauroGatewayNetworking `json:"networking"`
+}
+
+type InauroGatewayNetworking struct {
+	Interface string `json:"interface"`
+	IP        string `json:"ip"`
+	MAC       string `json:"mac"`
 }
 
 type MeasurementPayloadMap map[string]float64
