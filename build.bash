@@ -134,6 +134,9 @@ for i in "$@"; do
   mapmodbus)
     buildPlugin "mapmodbus" plugin/nube/protocals/mapmodbus
     ;;
+  inauroazuresync)
+    buildPlugin "inauroazuresync" plugin/nube/database/inauroazuresync
+    ;;
   cpsprocessing)
     buildPlugin "cpsprocessing" plugin/nube/projects/cpsprocessing
     ;;
