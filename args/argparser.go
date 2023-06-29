@@ -16,12 +16,15 @@ func (a Args) SerializeArgs(args Args) (string, error) {
 }
 
 func DeserializeArgs(args string) (*Args, error) {
-	var deserializedArgs *Args
+	deserializedArgs := Args{}
+	if len(args) == 0 {
+		return &deserializedArgs, nil
+	}
 	err := json.Unmarshal([]byte(args), &deserializedArgs)
 	if err != nil {
 		return nil, err
 	}
-	return deserializedArgs, nil
+	return &deserializedArgs, nil
 }
 
 func ParseArgs(args string) Args {
