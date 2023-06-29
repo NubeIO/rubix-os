@@ -20,10 +20,11 @@ type Azure struct {
 type GatewayDetails struct {
 	AzureDeviceId  string `json:"azure_device_id"`
 	AzureDeviceKey string `json:"azure_device_key"`
+	RouterIMEI     string `json:"router_imei"`
 	SIMICCID       string `json:"sim_iccid"`
 	Latitude       string `json:"latitude"`
 	Longitude      string `json:"longitude"`
-	NetworkType    string `json:"network_type"`
+	NetworkType    string `json:"network_type"` // TODO: look into replacing with automatic update from host/edge network info
 }
 
 type Postgres struct {
@@ -62,7 +63,7 @@ func (inst *Instance) DefaultConfig() interface{} {
 	}
 	job := Job{
 		SensorHistorySyncFrequency:  "5m",
-		GatewayPayloadSyncFrequency: "10m",
+		GatewayPayloadSyncFrequency: "15m",
 	}
 	return &Config{
 		Azure:    azure,

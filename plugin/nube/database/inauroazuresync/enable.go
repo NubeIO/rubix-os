@@ -15,6 +15,7 @@ func (inst *Instance) Enable() error {
 	inst.fault = false
 	inst.running = false
 	inst.setUUID()
+	// inst.clearPluginConfStorage()  // this may cause the system to re-send previously sent histories
 	// start periodic functions
 	cron = gocron.NewScheduler(time.UTC)
 	// cron.SetMaxConcurrentJobs(2, gocron.RescheduleMode)

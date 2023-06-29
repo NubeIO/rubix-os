@@ -34,3 +34,11 @@ func (inst *Instance) setPluginConfStorage(storeStruct *PluginConfStorage) error
 	}
 	return nil
 }
+
+func (inst *Instance) clearPluginConfStorage() error {
+	err := inst.db.UpdatePluginConfStorage(name, make([]byte, 0))
+	if err != nil {
+		return err
+	}
+	return nil
+}

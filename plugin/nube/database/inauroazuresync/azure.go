@@ -6,7 +6,6 @@ import (
 	iotmqtt "github.com/amenzhinsky/iothub/iotdevice/transport/mqtt"
 )
 
-// TODO: add host/gateway argument to get correct azure details
 func (inst *Instance) newAzureMQTTClientByHostUUID(hostUUID string) (*iotdevice.Client, error) {
 	// USE MQTT FROM https://github.com/amenzhinsky/iothub LIBRARY
 	inst.inauroazuresyncDebugMsg("newAzureMQTTClientByHostUUID() hostUUID: ", hostUUID)
