@@ -152,7 +152,7 @@ func (inst *Instance) syncAzureGatewayPayloads() (bool, error) {
 			}
 
 			// ping check on the gateway/host
-			cli := cligetter.GetEdgeClient(host)
+			cli := cligetter.GetEdgeClientFastTimeout(host)
 			globalUUID, pingable, isValidToken := cli.Ping()
 			inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureGatewayPayloads() cli.Ping() globalUUID %v, pingable %v, isValidToken %v", globalUUID, pingable, isValidToken))
 			if pingable == false {
