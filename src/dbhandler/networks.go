@@ -111,6 +111,6 @@ func (h *Handler) GetNetworksTagsForPostgresSync() ([]*interfaces.NetworkTagForP
 	return getDb().GetNetworksTagsForPostgresSync()
 }
 
-func (h *Handler) GetOneNetworkByArgs(args api.Args) (*model.Network, error) {
+func (h *Handler) GetOneNetworkByArgs(args args.Args) (*model.Network, error) {
 	return getDb().GetOneNetworkByArgs(args)
 }

@@ -95,7 +95,7 @@ func (a *PointAPI) DeletePoint(ctx *gin.Context) {
 
 func (a *PointAPI) GetPointByNameArgs(ctx *gin.Context) {
 	networkName, deviceName, pointName := networkDevicePointNames(ctx)
-	q, err := a.DB.GetPointByName(networkName, deviceName, pointName, Args{})
+	q, err := a.DB.GetPointByName(networkName, deviceName, pointName, args.Args{})
 	ResponseHandler(q, err, ctx)
 }
 
@@ -125,8 +125,8 @@ func (a *PointAPI) PointWriteByName(ctx *gin.Context) {
 }
 
 func networkDevicePointNames(ctx *gin.Context) (networkName, deviceName, pointName string) {
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+	var aType = args.ArgsType
+	var aDefault = args.ArgsDefault
 	networkName = ctx.DefaultQuery(aType.NetworkName, aDefault.NetworkName)
 	deviceName = ctx.DefaultQuery(aType.DeviceName, aDefault.DeviceName)
 	pointName = ctx.DefaultQuery(aType.PointName, aDefault.PointName)

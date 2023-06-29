@@ -84,6 +84,6 @@ func (h *Handler) GetDevicesTagsForPostgresSync() ([]*interfaces.DeviceTagForPos
 	return getDb().GetDevicesTagsForPostgresSync()
 }
 
-func (h *Handler) GetOneDeviceByArgs(args api.Args) (*model.Device, error) {
+func (h *Handler) GetOneDeviceByArgs(args args.Args) (*model.Device, error) {
 	return getDb().GetOneDeviceByArgs(args)
 }
