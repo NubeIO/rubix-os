@@ -15,11 +15,11 @@ func (inst *Instance) Enable() error {
 	inst.pluginName = name
 	inst.setUUID()
 	inst.initializePostgresSetting()
-	/*_, err := inst.initializePostgresDBConnection()
+	_, err := inst.initializePostgresDBConnection()
 	if err != nil {
 		inst.cpsErrorMsg("Enable() initializePostgresDBConnection() error: ", err)
 	}
-	*/
+
 	cron = gocron.NewScheduler(time.Local)
 	// cron.SetMaxConcurrentJobs(2, gocron.RescheduleMode)
 	cron.SetMaxConcurrentJobs(1, gocron.WaitMode)
