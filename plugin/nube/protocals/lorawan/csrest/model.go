@@ -121,8 +121,14 @@ type MQTTUplink struct {
 		Rssi    int     `json:"rssi"`
 		LoRaSNR float64 `json:"loRaSNR"`
 	} `json:"rxInfo"`
-	FPort  int                    `json:"fPort"`
-	Object map[string]interface{} `json:"object"`
+	TxInfo struct {
+		ADR      bool `json:"adr"`
+		DataRate int  `json:"dr"`
+	} `json:"txInfo"`
+	FCount          int                    `json:"fCnt"`
+	FPort           int                    `json:"fPort"`
+	ConfirmedUplink bool                   `json:"confirmedUplink"`
+	Object          map[string]interface{} `json:"object"`
 }
 
 type MQTTError struct {
