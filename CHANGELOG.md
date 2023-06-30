@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## [v0.0.5](https://github.com/NubeIO/rubix-os/tree/v0.0.5) (2023-06-30)
+
+- Add plugin inauroazuresync
+- Remove flow network related code
+- Add plugin config storage
+- Adds host_uuid and point_uuid args to networks, devices, & points DB calls
+- Modify history COV (store value on every push at COV = 0)
+- Add networking edge cli function
+- Updates on cpsprocessing plugin
+- Updates on lorawan plugin
+
 ## [v0.0.4](https://github.com/NubeIO/rubix-os/tree/v0.0.4) (2023-06-25)
 
 - Remove auto-mapping & unused transaction codes
