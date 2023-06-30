@@ -12,6 +12,7 @@ type Marshaller interface {
 	GetPoint(uuid, args string) (*model.Point, error)
 
 	GetNetworksByPluginName(pluginName, args string) ([]*model.Network, error)
+	GetNetworkByName(networkName, args string) (*model.Network, error)
 
 	GetOneNetworkByArgs(args string) (*model.Network, error)
 	GetOneDeviceByArgs(args string) (*model.Device, error)
@@ -38,6 +39,14 @@ type Marshaller interface {
 
 	GetSchedules() ([]*model.Schedule, error)
 	UpdateScheduleAllProps(uuid string, body *model.Schedule) (*model.Schedule, error)
+
+	GetPluginByPath(name, args string) (*model.PluginConf, error)
+	SetErrorsForAllDevicesOnNetwork(networkUUID, message, messageLevel, messageCode string, doPoints bool) error
+	ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool) error
+	SetErrorsForAllPointsOnDevice(deviceUUID, message, messageLevel, messageCode string) error
+	ClearErrorsForAllPointsOnDevice(deviceUUID string) error
+	WizardNewNetworkDevicePoint(plugin string, network *model.Network, device *model.Device, point *model.Point) (bool, error)
+	DeviceNameExistsInNetwork(deviceName, networkUUID string) (*model.Device, bool)
 }
 
 type GRPCMarshaller struct {
@@ -94,6 +103,19 @@ func (g *GRPCMarshaller) GetNetworksByPluginName(pluginName, args string) ([]*mo
 		return nil, err
 	}
 	return networks, nil
+}
+
+func (g *GRPCMarshaller) GetNetworkByName(networkName, args string) (*model.Network, error) {
+	res, err := g.DbHelper.Get("network_by_name", networkName, args)
+	if err != nil {
+		return nil, err
+	}
+	var network *model.Network
+	err = json.Unmarshal(res, &network)
+	if err != nil {
+		return nil, err
+	}
+	return network, nil
 }
 
 func (g *GRPCMarshaller) GetOneNetworkByArgs(args string) (*model.Network, error) {
@@ -346,4 +368,79 @@ func (g *GRPCMarshaller) UpdateScheduleAllProps(uuid string, body *model.Schedul
 		return nil, err
 	}
 	return schedule, nil
+}
+
+func (g *GRPCMarshaller) GetPluginByPath(name, args string) (*model.PluginConf, error) {
+	res, err := g.DbHelper.Get("plugin_by_path", name, args)
+	if err != nil {
+		return nil, err
+	}
+	var pluginConf *model.PluginConf
+	err = json.Unmarshal(res, &pluginConf)
+	if err != nil {
+		return nil, err
+	}
+	return pluginConf, nil
+}
+
+func (g *GRPCMarshaller) SetErrorsForAllDevicesOnNetwork(networkUUID, message, messageLevel, messageCode string, doPoints bool) error {
+	err := g.DbHelper.SetErrorsForAll("devices_on_network", networkUUID, message, messageLevel, messageCode, doPoints)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *GRPCMarshaller) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool) error {
+	err := g.DbHelper.ClearErrorsForAll("devices_on_network", networkUUID, doPoints)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *GRPCMarshaller) SetErrorsForAllPointsOnDevice(deviceUUID, message, messageLevel, messageCode string) error {
+	err := g.DbHelper.SetErrorsForAll("points_on_device", deviceUUID, message, messageLevel, messageCode, false)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *GRPCMarshaller) ClearErrorsForAllPointsOnDevice(deviceUUID string) error {
+	err := g.DbHelper.ClearErrorsForAll("points_on_device", deviceUUID, false)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *GRPCMarshaller) WizardNewNetworkDevicePoint(plugin string, network *model.Network, device *model.Device, point *model.Point) (bool, error) {
+	net, err := json.Marshal(network)
+	if err != nil {
+		return false, err
+	}
+	dev, err := json.Marshal(device)
+	if err != nil {
+		return false, err
+	}
+	pnt, err := json.Marshal(point)
+	if err != nil {
+		return false, err
+	}
+	chk, err := g.DbHelper.WizardNewNetworkDevicePoint(plugin, net, dev, pnt)
+	return chk, err
+}
+
+func (g *GRPCMarshaller) DeviceNameExistsInNetwork(deviceName, networkUUID string) (*model.Device, bool) {
+	network, err := g.GetNetwork(networkUUID, "")
+	if err != nil {
+		return nil, false
+	}
+	for _, dev := range network.Devices {
+		if dev.Name == deviceName {
+			return dev, true
+		}
+	}
+	return nil, false
 }

@@ -3,6 +3,7 @@
 
 syntax = "proto3";
 package proto;
+
 option go_package = "github.com/NubeIO/rubix-os/module/proto";
 
 message InitRequest {
@@ -49,6 +50,32 @@ message DeleteRequest {
   string uuid = 2;
 }
 
+message SetErrorsForAllRequest {
+  string path = 1;
+  string uuid = 2;
+  string message = 3;
+  string messageLevel = 4;
+  string messageCode = 5;
+  bool doPoints = 6;
+}
+
+message ClearErrorsForAllRequest {
+  string path = 1;
+  string uuid = 2;
+  bool doPoints = 3;
+}
+
+message WizardNewNetworkDevicePointRequest {
+  string plugin = 1;
+  bytes network = 2;
+  bytes device = 3;
+  bytes point = 4;
+}
+
+message BoolResponse {
+  bool r = 1;
+}
+
 message Response {
   bytes r = 1;
 }
@@ -85,4 +112,7 @@ service DBHelper {
   rpc Put(PutRequest) returns (Response);
   rpc Patch(PatchRequest) returns (Response);
   rpc Delete(DeleteRequest) returns (Response);
+  rpc SetErrorsForAll(SetErrorsForAllRequest) returns (Empty);
+  rpc ClearErrorsForAll(ClearErrorsForAllRequest) returns (Empty);
+  rpc WizardNewNetworkDevicePoint(WizardNewNetworkDevicePointRequest) returns (BoolResponse);
 }

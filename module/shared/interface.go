@@ -20,6 +20,9 @@ type DBHelper interface {
 	Put(path, uuid string, body []byte) ([]byte, error)
 	Patch(path, uuid string, body []byte) ([]byte, error)
 	Delete(path, uuid string) ([]byte, error)
+	SetErrorsForAll(path, uuid, message, messageLevel, messageCode string, doPoints bool) error
+	ClearErrorsForAll(path, uuid string, doPoints bool) error
+	WizardNewNetworkDevicePoint(plugin string, network, device, point []byte) (bool, error)
 }
 
 type Info struct {
