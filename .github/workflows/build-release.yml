@@ -124,6 +124,9 @@ jobs:
           
           cd ../../../../plugin/nube/projects/cpsprocessing
           go build -buildmode=plugin -o cpsprocessing-amd64.so *.go  && cp cpsprocessing-amd64.so ../../../../
+          
+          cd ../../../../plugin/nube/database/inauroazuresync
+          go build -buildmode=plugin -o inauroazuresync-amd64.so *.go  && cp inauroazuresync-amd64.so ../../../../
 
 #          cd ../../../../plugin/nube/protocals/mapmodbus
 #          go build -buildmode=plugin -o mapmodbus-amd64.so *.go  && cp mapmodbus-amd64.so ../../../../
@@ -176,6 +179,9 @@ jobs:
 
           cd ../../../../plugin/nube/projects/cpsprocessing
           env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o cpsprocessing-armv7.so *.go  && cp cpsprocessing-armv7.so ../../../../
+
+          cd ../../../../plugin/nube/database/inauroazuresync
+          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o inauroazuresync-armv7.so *.go  && cp inauroazuresync-armv7.so ../../../../
 
 #          cd ../../../../plugin/nube/protocals/mapmodbus
 #          env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc  CXX=arm-linux-gnueabihf-g++ go build -buildmode=plugin -o mapmodbus-armv7.so *.go  && cp mapmodbus-armv7.so ../../../../
@@ -252,6 +258,11 @@ jobs:
           zip -r /tmp/zip/$artifact.zip ./cpsprocessing-amd64.so
           artifact=cpsprocessing-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
           zip -r /tmp/zip/$artifact.zip ./cpsprocessing-armv7.so
+          
+          artifact=inauroazuresync-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
+          zip -r /tmp/zip/$artifact.zip ./inauroazuresync-amd64.so
+          artifact=inauroazuresync-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.armv7
+          zip -r /tmp/zip/$artifact.zip ./inauroazuresync-armv7.so
 
 #          artifact=mapmodbus-${{ needs.context.outputs.version }}-${{ needs.context.outputs.shortCommitId }}.amd64
 #          zip -r /tmp/zip/$artifact.zip ./mapmodbus-amd64.so
