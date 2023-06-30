@@ -259,7 +259,7 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, pointWriter *mo
 	// Examples are: modbus, edge28 plugins
 	// So for such cases, to trigger that value we do this comparison
 	isWriteValueChange = !float.ComparePtrValues(pointModel.WriteValue, writeValue)
-	cov, _ := nmath.Cov(float.NonNil(presentValue), float.NonNil(pointModel.PresentValue),
+	cov, _ := nmath.Cov(float.NonNil(presentValue), float.NonNil(pointModel.LastHistoryValue),
 		*defaultHistoryCOVThreshold(pointModel.HistoryCOVThreshold))
 	// If the present value transformations have resulted in an error, DB needs to be updated with the errors,
 	// but PresentValue should not change
@@ -267,7 +267,6 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, pointWriter *mo
 		pointModel.PresentValue = presentValue
 	}
 	pointModel.WriteValue = writeValue
-	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
 
 	if cov && boolean.IsTrue(config.Get().PointHistory.Enable) && checkHistoryCovType(string(pointModel.HistoryType)) &&
 		d.CheckHistoryEnable(pointModel.UUID) {
@@ -281,7 +280,11 @@ func (d *GormDatabase) updatePointValue(pointModel *model.Point, pointWriter *mo
 			log.Errorf("point: issue on write history for point: %v\n", err)
 			return nil, false, false, false, err
 		}
+		pointModel.LastHistoryValue = pointModel.PresentValue
 	}
+
+	_ = d.DB.Model(&pointModel).Select("*").Updates(&pointModel)
+
 	if isPresentValueChange {
 		err = d.PublishPointCov(pointModel.UUID)
 	}
