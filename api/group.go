@@ -7,8 +7,8 @@ import (
 )
 
 type GroupDatabase interface {
-	GetGroups() ([]*model.Group, error)
-	GetGroup(uuid string) (*model.Group, error)
+	GetGroups(args Args) ([]*model.Group, error)
+	GetGroup(uuid string, args Args) (*model.Group, error)
 	CreateGroup(body *model.Group) (*model.Group, error)
 	UpdateGroup(uuid string, body *model.Group) (*model.Group, error)
 	DeleteGroup(uuid string) (*interfaces.Message, error)
@@ -26,13 +26,15 @@ func (a *GroupAPI) GetGroupSchema(ctx *gin.Context) {
 }
 
 func (a *GroupAPI) GetGroups(ctx *gin.Context) {
-	q, err := a.DB.GetGroups()
+	args := buildGroupArgs(ctx)
+	q, err := a.DB.GetGroups(args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (a *GroupAPI) GetGroup(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetGroup(uuid)
+	args := buildGroupArgs(ctx)
+	q, err := a.DB.GetGroup(uuid, args)
 	ResponseHandler(q, err, ctx)
 }
 

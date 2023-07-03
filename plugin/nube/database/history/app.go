@@ -11,7 +11,7 @@ import (
 
 func (inst *Instance) syncHistory() (bool, error) {
 	log.Info("History sync has is been called...")
-	hosts, err := inst.db.GetHosts()
+	hosts, err := inst.db.GetHosts(api.Args{})
 	if err != nil {
 		return false, err
 	}

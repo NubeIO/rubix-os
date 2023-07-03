@@ -17,10 +17,10 @@ import (
 var invalidMemberTokenError = nerrors.NewErrUnauthorized("invalid member token")
 
 type MemberDatabase interface {
-	GetMembers() ([]*model.Member, error)
-	GetMember(uuid string) (*model.Member, error)
-	GetMemberByUsername(username string) (*model.Member, error)
-	GetMemberByEmail(email string) (*model.Member, error)
+	GetMembers(args Args) ([]*model.Member, error)
+	GetMember(uuid string, args Args) (*model.Member, error)
+	GetMemberByUsername(username string, args Args) (*model.Member, error)
+	GetMemberByEmail(email string, args Args) (*model.Member, error)
 	CreateMember(body *model.Member) (*model.Member, error)
 	UpdateMember(uuid string, body *model.Member) (*model.Member, error)
 	DeleteMember(uuid string) (bool, error)
@@ -59,7 +59,7 @@ func (a *MemberAPI) CreateMember(ctx *gin.Context) {
 
 func (a *MemberAPI) Login(ctx *gin.Context) {
 	body, _ := getBodyUser(ctx)
-	member, _ := a.DB.GetMemberByUsername(body.Username)
+	member, _ := a.DB.GetMemberByUsername(body.Username, Args{})
 	if member != nil && member.Username == body.Username && security.CheckPasswordHash(member.Password, body.Password) {
 		if *member.State != string(model.Verified) {
 			ctx.JSON(http.StatusForbidden, interfaces.Message{Message: "member is not verified"})
@@ -78,7 +78,7 @@ func (a *MemberAPI) Login(ctx *gin.Context) {
 
 func (a *MemberAPI) CheckEmail(ctx *gin.Context) {
 	email := resolveEmail(ctx)
-	q, _ := a.DB.GetMemberByEmail(email)
+	q, _ := a.DB.GetMemberByEmail(email, Args{})
 	message := "email already exists"
 	if q == nil {
 		message = "email does not exists"
@@ -88,7 +88,7 @@ func (a *MemberAPI) CheckEmail(ctx *gin.Context) {
 
 func (a *MemberAPI) CheckUsername(ctx *gin.Context) {
 	username := resolveUsername(ctx)
-	q, _ := a.DB.GetMemberByUsername(username)
+	q, _ := a.DB.GetMemberByUsername(username, Args{})
 	message := "username already exists"
 	if q == nil {
 		message = "username does not exists"
@@ -97,7 +97,8 @@ func (a *MemberAPI) CheckUsername(ctx *gin.Context) {
 }
 
 func (a *MemberAPI) GetMembers(ctx *gin.Context) {
-	q, err := a.DB.GetMembers()
+	args := buildMemberArgs(ctx)
+	q, err := a.DB.GetMembers(args)
 	for _, m := range q {
 		m.MaskPassword()
 	}
@@ -106,7 +107,8 @@ func (a *MemberAPI) GetMembers(ctx *gin.Context) {
 
 func (a *MemberAPI) GetMemberByUUID(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetMember(uuid)
+	args := buildMemberArgs(ctx)
+	q, err := a.DB.GetMember(uuid, args)
 	if q != nil {
 		q.MaskPassword()
 	}
@@ -121,7 +123,8 @@ func (a *MemberAPI) DeleteMemberByUUID(ctx *gin.Context) {
 
 func (a *MemberAPI) GetMemberByUsername(ctx *gin.Context) {
 	username := resolveUsername(ctx)
-	q, err := a.DB.GetMemberByUsername(username)
+	args := buildMemberArgs(ctx)
+	q, err := a.DB.GetMemberByUsername(username, args)
 	if q != nil {
 		q.MaskPassword()
 	}
@@ -130,7 +133,7 @@ func (a *MemberAPI) GetMemberByUsername(ctx *gin.Context) {
 
 func (a *MemberAPI) VerifyMember(ctx *gin.Context) {
 	username := resolveUsername(ctx)
-	member, err := a.DB.GetMemberByUsername(username)
+	member, err := a.DB.GetMemberByUsername(username, Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -175,7 +178,8 @@ func (a *MemberAPI) GetMember(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	q, err := a.DB.GetMemberByUsername(username)
+	args := buildMemberArgs(ctx)
+	q, err := a.DB.GetMemberByUsername(username, args)
 	if q != nil {
 		q.MaskPassword()
 	}
@@ -188,7 +192,7 @@ func (a *MemberAPI) UpdateMember(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	member, err := a.DB.GetMemberByUsername(username)
+	member, err := a.DB.GetMemberByUsername(username, Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -224,7 +228,7 @@ func (a *MemberAPI) ChangePassword(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	member, err := a.DB.GetMemberByUsername(username)
+	member, err := a.DB.GetMemberByUsername(username, Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return

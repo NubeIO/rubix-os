@@ -7,8 +7,8 @@ import (
 )
 
 type HostDatabase interface {
-	GetHosts(withOpenVpn bool) ([]*model.Host, error)
-	GetHost(uuid string) (*model.Host, error)
+	GetHosts(withOpenVpn bool, args Args) ([]*model.Host, error)
+	GetHost(uuid string, args Args) (*model.Host, error)
 	CreateHost(body *model.Host) (*model.Host, error)
 	UpdateHost(uuid string, body *model.Host) (*model.Host, error)
 	DeleteHost(uuid string) (*interfaces.Message, error)
@@ -26,13 +26,15 @@ func (a *HostAPI) GetHostSchema(ctx *gin.Context) {
 }
 
 func (a *HostAPI) GetHosts(ctx *gin.Context) {
-	q, err := a.DB.GetHosts(true)
+	args := buildHostArgs(ctx)
+	q, err := a.DB.GetHosts(true, args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (a *HostAPI) GetHost(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetHost(uuid)
+	args := buildHostArgs(ctx)
+	q, err := a.DB.GetHost(uuid, args)
 	ResponseHandler(q, err, ctx)
 }
 

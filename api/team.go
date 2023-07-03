@@ -6,8 +6,8 @@ import (
 )
 
 type TeamDatabase interface {
-	GetTeams() ([]*model.Team, error)
-	GetTeam(uuid string) (*model.Team, error)
+	GetTeams(args Args) ([]*model.Team, error)
+	GetTeam(uuid string, args Args) (*model.Team, error)
 	CreateTeam(body *model.Team) (*model.Team, error)
 	UpdateTeam(uuid string, body *model.Team) (*model.Team, error)
 	UpdateTeamMembers(uuid string, body []*string) ([]*model.Member, error)
@@ -21,13 +21,15 @@ type TeamAPI struct {
 }
 
 func (a *TeamAPI) GetTeams(ctx *gin.Context) {
-	q, err := a.DB.GetTeams()
+	args := buildTeamArgs(ctx)
+	q, err := a.DB.GetTeams(args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (a *TeamAPI) GetTeam(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetTeam(uuid)
+	args := buildTeamArgs(ctx)
+	q, err := a.DB.GetTeam(uuid, args)
 	ResponseHandler(q, err, ctx)
 }
 

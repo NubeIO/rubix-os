@@ -2,23 +2,24 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"sync"
 )
 
-func (d *GormDatabase) GetViewTemplateWidgets() ([]*model.ViewTemplateWidget, error) {
+func (d *GormDatabase) GetViewTemplateWidgets(args api.Args) ([]*model.ViewTemplateWidget, error) {
 	var viewTemplateWidgetsModel []*model.ViewTemplateWidget
-	query := d.buildViewTemplateWidgetQuery()
+	query := d.buildViewTemplateWidgetQuery(args)
 	if err := query.Find(&viewTemplateWidgetsModel).Error; err != nil {
 		return nil, err
 	}
 	return viewTemplateWidgetsModel, nil
 }
 
-func (d *GormDatabase) GetViewTemplateWidget(uuid string) (*model.ViewTemplateWidget, error) {
+func (d *GormDatabase) GetViewTemplateWidget(uuid string, args api.Args) (*model.ViewTemplateWidget, error) {
 	var viewTemplateWidgetModel *model.ViewTemplateWidget
-	query := d.buildViewTemplateWidgetQuery()
+	query := d.buildViewTemplateWidgetQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&viewTemplateWidgetModel).Error; err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func (d *GormDatabase) DeleteViewTemplateWidget(uuid string) (bool, error) {
 }
 
 func (d *GormDatabase) syncAfterUpdateViewTemplateWidget(uuid string) {
-	viewTemplateWidget, err := d.GetViewTemplateWidget(uuid)
+	viewTemplateWidget, err := d.GetViewTemplateWidget(uuid, api.Args{WithViewTemplateWidgetPointers: true})
 	if err != nil {
 		return
 	}

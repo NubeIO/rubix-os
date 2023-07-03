@@ -11,9 +11,9 @@ import (
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
-func (d *GormDatabase) GetHost(uuid string) (*model.Host, error) {
+func (d *GormDatabase) GetHost(uuid string, args api.Args) (*model.Host, error) {
 	hostModel := model.Host{}
-	query := d.buildHostQuery(api.Args{})
+	query := d.buildHostQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&hostModel).Error; err != nil {
 		return nil, errors.New(fmt.Sprintf("no host was found with uuid: %s", uuid))
 	}
@@ -29,7 +29,7 @@ func (d *GormDatabase) GetHostByName(name string) (*model.Host, error) {
 	return &hostModel, nil
 }
 
-func (d *GormDatabase) GetHosts(withOpenVPN bool) ([]*model.Host, error) {
+func (d *GormDatabase) GetHosts(withOpenVPN bool, args api.Args) ([]*model.Host, error) {
 	var hostsModel []*model.Host
 	query := d.buildHostQuery(api.Args{})
 	if err := query.Find(&hostsModel).Error; err != nil {
@@ -41,8 +41,8 @@ func (d *GormDatabase) GetHosts(withOpenVPN bool) ([]*model.Host, error) {
 	return hostsModel, nil
 }
 
-func (d *GormDatabase) GetFirstHost() (*model.Host, error) {
-	hostsModel, err := d.GetHosts(false)
+func (d *GormDatabase) GetFirstHost(args api.Args) (*model.Host, error) {
+	hostsModel, err := d.GetHosts(false, args)
 	if err != nil {
 		return nil, err
 	}
@@ -52,9 +52,9 @@ func (d *GormDatabase) GetFirstHost() (*model.Host, error) {
 	return nil, err
 }
 
-func (d *GormDatabase) GetHostsByUUIDs(uuids []*string) ([]*model.Host, error) {
+func (d *GormDatabase) GetHostsByUUIDs(uuids []*string, args api.Args) ([]*model.Host, error) {
 	var groupsModel []*model.Host
-	query := d.buildHostQuery(api.Args{})
+	query := d.buildHostQuery(args)
 	if err := query.Where("uuid IN ?", uuids).Find(&groupsModel).Error; err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (d *GormDatabase) ResolveHost(uuid string, name string) (*model.Host, error
 		return nil, errors.New("host-uuid and host-name both can not be empty")
 	}
 	if uuid != "" {
-		host, _ := d.GetHost(uuid)
+		host, _ := d.GetHost(uuid, api.Args{})
 		if host != nil {
 			return host, nil
 		}
@@ -155,7 +155,7 @@ func (d *GormDatabase) ResolveHost(uuid string, name string) (*model.Host, error
 	var hostNames []string
 	var hostUUIDs []string
 	var count int
-	hosts, err := d.GetHosts(false)
+	hosts, err := d.GetHosts(false, api.Args{})
 	if err != nil {
 		return nil, err
 	}

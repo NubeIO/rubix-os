@@ -16,7 +16,7 @@ type MemberDeviceDatabase interface {
 	UpdateMemberDevice(uuid string, body *model.MemberDevice) (*model.MemberDevice, error)
 	DeleteMemberDevicesByArgs(args Args) (bool, error)
 
-	GetMemberByUsername(username string) (*model.Member, error)
+	GetMemberByUsername(username string, args Args) (*model.Member, error)
 }
 
 type MemberDeviceAPI struct {
@@ -29,7 +29,7 @@ func (a *MemberDeviceAPI) GetMemberDevices(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	member, err := a.DB.GetMemberByUsername(username)
+	member, err := a.DB.GetMemberByUsername(username, Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -44,7 +44,7 @@ func (a *MemberDeviceAPI) GetMemberDevice(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	member, err := a.DB.GetMemberByUsername(username)
+	member, err := a.DB.GetMemberByUsername(username, Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -60,7 +60,7 @@ func (a *MemberDeviceAPI) CreateMemberDevice(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	member, err := a.DB.GetMemberByUsername(username)
+	member, err := a.DB.GetMemberByUsername(username, Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -83,7 +83,7 @@ func (a *MemberDeviceAPI) UpdateMemberDevice(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	member, err := a.DB.GetMemberByUsername(username)
+	member, err := a.DB.GetMemberByUsername(username, Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -106,7 +106,7 @@ func (a *MemberDeviceAPI) DeleteMemberDevice(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	member, err := a.DB.GetMemberByUsername(username)
+	member, err := a.DB.GetMemberByUsername(username, Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
