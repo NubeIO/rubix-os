@@ -233,14 +233,16 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 		}
 	})
 
-	engine.Use(cors.New(auth.CorsConfig(conf)))
 	apiProxyWiresRoutes := engine.Group("/wires", handleAuth)
 	apiProxyWiresRoutes.Any("/*proxyPath", wiresProxyHandler.WiresProxy) // EDGE-WIRES PROXY
 	apiProxyChirpRoutes := engine.Group("/chirp", handleAuth)
 	apiProxyChirpRoutes.Any("/*proxyPath", chirpProxyHandler.ChirpProxy) // CHIRP-STACK PROXY
 	apiProxyHostRoutes := engine.Group("/proxy", handleAuth)
+	apiProxyHostRoutes.Use(auth.HostProxyOptions())
 	apiProxyHostRoutes.Any("/*proxyPath", hostProxyHandler.HostProxy)
 
+	engine.Use(cors.New(auth.CorsConfig()))
+	engine.OPTIONS("/api/*any")
 	appApiRoutes := engine.Group("/api/apps")
 	{
 		memberRoutes := appApiRoutes.Group("/members")

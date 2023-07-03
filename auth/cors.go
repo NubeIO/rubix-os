@@ -1,62 +1,43 @@
 package auth
 
 import (
-	"regexp"
-	"strings"
+	"github.com/gin-gonic/gin"
+	"net/http"
 	"time"
 
-	"github.com/NubeIO/rubix-os/config"
 	"github.com/gin-contrib/cors"
 )
 
 // CorsConfig generates a config to use in gin cors middleware based on server configuration.
-func CorsConfig(conf *config.Configuration) cors.Config {
+func CorsConfig() cors.Config {
 	corsConf := cors.Config{
 		MaxAge:                 12 * time.Hour,
 		AllowBrowserExtensions: true,
 	}
-	if !conf.Prod {
-		corsConf.AllowAllOrigins = true
-		corsConf.AllowMethods = []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS", "PUT"}
-		corsConf.AllowHeaders = []string{
-			"X-FLOW-Key", "Authorization", "Content-Type", "Upgrade", "Origin",
-			"Connection", "Accept-Encoding", "Accept-Language", "Host", "Referer", "User-Agent", "Accept",
-			"Access-Control-Allow-Origin", "Access-Control-Allow-Headers",
-		}
-	} else {
-		compiledOrigins := compileAllowedCORSOrigins(conf.Server.Cors.AllowOrigins)
-		corsConf.AllowMethods = conf.Server.Cors.AllowMethods
-		corsConf.AllowHeaders = conf.Server.Cors.AllowHeaders
-		corsConf.AllowOriginFunc = func(origin string) bool {
-			for _, compiledOrigin := range compiledOrigins {
-				if compiledOrigin.Match([]byte(strings.ToLower(origin))) {
-					return true
-				}
-			}
-			return false
-		}
-		if allowedOrigin := headerIgnoreCase(conf, "access-control-allow-origin"); allowedOrigin != "" && len(compiledOrigins) == 0 {
-			corsConf.AllowOrigins = append(corsConf.AllowOrigins, allowedOrigin)
-		}
+	corsConf.AllowAllOrigins = true
+	corsConf.AllowMethods = []string{"GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"}
+	corsConf.AllowHeaders = []string{
+		"X-ROS-Key", "Authorization", "Content-Type", "Upgrade", "Origin",
+		"Connection", "Accept-Encoding", "Accept-Language", "Host", "Referer", "User-Agent", "Accept",
+		"Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Host-Uuid",
 	}
-
 	return corsConf
 }
 
-func headerIgnoreCase(conf *config.Configuration, search string) string {
-	for key, value := range conf.Server.ResponseHeaders {
-		if strings.ToLower(key) == search {
-			return value
+func HostProxyOptions() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		if c.Request.Method == http.MethodOptions {
+			// Set the necessary headers to allow all requests
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Methods", "GET, POST, PATCH, PUT, DELETE, OPTIONS")
+			c.Header("Access-Control-Allow-Headers",
+				"X-ROS-Key, Authorization, Content-Type, Upgrade, Origin, "+
+					"Connection, Accept-Encoding, Accept-Language, Host, Referer, User-Agent, Accept, "+
+					"Access-Control-Allow-Origin, Access-Control-Allow-Headers, host-uuid, Host-Uuid")
+			c.Header("Access-Control-Max-Age", "43200") // 12 hours
+			c.AbortWithStatus(http.StatusOK)
+			return
 		}
+		c.Next()
 	}
-	return ""
-}
-
-func compileAllowedCORSOrigins(allowedOrigins []string) []*regexp.Regexp {
-	var compiledAllowedOrigins []*regexp.Regexp
-	for _, origin := range allowedOrigins {
-		compiledAllowedOrigins = append(compiledAllowedOrigins, regexp.MustCompile(origin))
-	}
-
-	return compiledAllowedOrigins
 }
