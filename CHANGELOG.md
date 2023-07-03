@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.0.7](https://github.com/NubeIO/rubix-os/tree/v0.0.7) (2023-07-03)
+
+- Fix: cors issue in auth true
+
 ## [v0.0.6](https://github.com/NubeIO/rubix-os/tree/v0.0.6) (2023-07-03)
 
 - Fix: cors-related issue
