@@ -43,6 +43,8 @@ func MakeTopicUUID(attribute string) string {
 	vtw := "vtw" // view template widget uuid
 	vtp := "vtp" // view template widget pointer uuid
 	tem := "tem" // team uuid
+	tkt := "tkt" // ticket uuid
+	tkc := "tkc" // ticket comment uuid
 
 	switch attribute {
 	case model.CommonNaming.Plugin:
@@ -97,6 +99,10 @@ func MakeTopicUUID(attribute string) string {
 		return fmt.Sprintf("%s%s%s", vtp, divider, u)
 	case model.CommonNaming.Team:
 		return fmt.Sprintf("%s%s%s", tem, divider, u)
+	case model.CommonNaming.Ticket:
+		return fmt.Sprintf("%s%s%s", tkt, divider, u)
+	case model.CommonNaming.TicketComment:
+		return fmt.Sprintf("%s%s%s", tkc, divider, u)
 	}
 	return u
 }

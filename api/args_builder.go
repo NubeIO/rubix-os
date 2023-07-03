@@ -204,3 +204,12 @@ func buildViewTemplateArgs(ctx *gin.Context) Args {
 		aDefault.WithViewTemplateWidgetPointers))
 	return args
 }
+
+func buildTicketArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithTeams, _ = toBool(ctx.DefaultQuery(aType.WithTeams, aDefault.WithTeams))
+	args.WithComments, _ = toBool(ctx.DefaultQuery(aType.WithComments, aDefault.WithComments))
+	return args
+}

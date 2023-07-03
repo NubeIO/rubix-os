@@ -212,6 +212,12 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	cloudEdgeCloneHandler := api.CloneEdgeApi{
 		DB: db,
 	}
+	ticketHandler := api.TicketAPI{
+		DB: db,
+	}
+	ticketCommentHandler := api.TicketCommentAPI{
+		DB: db,
+	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
 
@@ -765,6 +771,14 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 			{
 				edgeCloneRoutes.GET("", cloudEdgeCloneHandler.CloneEdge)
 			}
+
+			ticketRoutes := serverApiRoutes.Group("/tickets")
+			{
+				ticketRoutes.POST("", ticketHandler.CreateTicket)
+				ticketRoutes.PATCH("/:uuid", ticketHandler.UpdateTicket)
+				ticketRoutes.DELETE("/:uuid", ticketHandler.DeleteTicket)
+				ticketRoutes.PUT("/:uuid/teams", ticketHandler.UpdateTicketTeams)
+			}
 		}
 	}
 
@@ -786,6 +800,22 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 		alertRoutes := authWithMember.Group("/alerts")
 		{
 			alertRoutes.GET("", alertHandler.GetAlerts)
+		}
+
+		ticketRoutes := authWithMember.Group("/tickets")
+		{
+			ticketRoutes.GET("", ticketHandler.GetTickets)
+			ticketRoutes.GET("/:uuid", ticketHandler.GetTicket)
+			ticketRoutes.PUT("/:uuid/priority", ticketHandler.UpdateTicketPriority)
+			ticketRoutes.PUT("/:uuid/status", ticketHandler.UpdateTicketStatus)
+
+			ticketCommentRoutes := ticketRoutes.Group("/comments")
+			{
+				ticketCommentRoutes.POST("", ticketCommentHandler.CreateTicketComment)
+				ticketCommentRoutes.GET("/:uuid", ticketCommentHandler.GetTicketComment)
+				ticketCommentRoutes.PATCH("/:uuid", ticketCommentHandler.UpdateTicketComment)
+				ticketCommentRoutes.DELETE("/:uuid", ticketCommentHandler.DeleteTicketComment)
+			}
 		}
 	}
 
