@@ -777,7 +777,6 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				ticketRoutes.POST("", ticketHandler.CreateTicket)
 				ticketRoutes.PATCH("/:uuid", ticketHandler.UpdateTicket)
 				ticketRoutes.DELETE("/:uuid", ticketHandler.DeleteTicket)
-				ticketRoutes.DELETE("/drop", ticketHandler.DropTickets)
 				ticketRoutes.PUT("/:uuid/teams", ticketHandler.UpdateTicketTeams)
 			}
 		}
@@ -812,8 +811,8 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 
 			ticketCommentRoutes := ticketRoutes.Group("/comments")
 			{
-				ticketCommentRoutes.GET("/:uuid", ticketCommentHandler.GetTicketComment)
 				ticketCommentRoutes.POST("", ticketCommentHandler.CreateTicketComment)
+				ticketCommentRoutes.GET("/:uuid", ticketCommentHandler.GetTicketComment)
 				ticketCommentRoutes.PATCH("/:uuid", ticketCommentHandler.UpdateTicketComment)
 				ticketCommentRoutes.DELETE("/:uuid", ticketCommentHandler.DeleteTicketComment)
 			}

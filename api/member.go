@@ -47,16 +47,16 @@ func getAuthorizedUsername(request *http.Request) (string, error) {
 }
 
 func getAuthorizedOrDefaultUsername(request *http.Request) (string, error) {
-	username, _ := getAuthorizedUsername(request)
-	if username != "" {
-		return username, nil
-	}
 	if auth.AuthorizeInternal(request) || auth.AuthorizeExternal(request) {
 		usr, err := user.GetUser()
 		if err != nil {
 			return "", err
 		}
 		return usr.Username, nil
+	}
+	username, _ := getAuthorizedUsername(request)
+	if username != "" {
+		return username, nil
 	}
 	return "", invalidTokenError
 }

@@ -341,6 +341,13 @@ func (d *GormDatabase) buildViewTemplateWidgetQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildTicketQuery() *gorm.DB {
-	return d.DB.Preload("Comments").Preload("Teams")
+func (d *GormDatabase) buildTicketQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.WithComments {
+		query = query.Preload("Comments")
+	}
+	if args.WithTeams {
+		query = query.Preload("Teams")
+	}
+	return query
 }

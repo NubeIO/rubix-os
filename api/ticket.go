@@ -2,20 +2,20 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/nerrors"
 	"github.com/gin-gonic/gin"
 )
 
 type TicketDatabase interface {
-	GetTickets() ([]*model.Ticket, error)
-	GetTicket(uuid string) (*model.Ticket, error)
+	GetTickets(args Args) ([]*model.Ticket, error)
+	GetTicket(uuid string, args Args) (*model.Ticket, error)
 	CreateTicket(body *model.Ticket) (*model.Ticket, error)
 	UpdateTicket(uuid string, body *model.Ticket) (*model.Ticket, error)
 	UpdateTicketPriority(uuid string, priority string) (bool, error)
 	UpdateTicketStatus(uuid string, status string) (bool, error)
 	UpdateTicketTeams(ticketUUID string, teamUUIDs []*string) ([]*model.TicketTeam, error)
 	DeleteTicket(uuid string) (bool, error)
-	DropTickets() (bool, error)
 }
 
 type TicketAPI struct {
@@ -23,13 +23,15 @@ type TicketAPI struct {
 }
 
 func (a *TicketAPI) GetTickets(ctx *gin.Context) {
-	q, err := a.DB.GetTickets()
+	args := buildTicketArgs(ctx)
+	q, err := a.DB.GetTickets(args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (a *TicketAPI) GetTicket(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetTicket(uuid)
+	args := buildTicketArgs(ctx)
+	q, err := a.DB.GetTicket(uuid, args)
 	ResponseHandler(q, err, ctx)
 }
 
@@ -85,11 +87,10 @@ func (a *TicketAPI) UpdateTicketTeams(ctx *gin.Context) {
 
 func (a *TicketAPI) DeleteTicket(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.DeleteTicket(uuid)
-	ResponseHandler(q, err, ctx)
-}
-
-func (a *TicketAPI) DropTickets(ctx *gin.Context) {
-	q, err := a.DB.DropTickets()
-	ResponseHandler(q, err, ctx)
+	_, err := a.DB.DeleteTicket(uuid)
+	if err != nil {
+		ResponseHandler(nil, err, ctx)
+		return
+	}
+	ResponseHandler(interfaces.Message{Message: "ticket deleted successfully"}, err, ctx)
 }
