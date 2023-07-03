@@ -9,9 +9,9 @@ import (
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
-func (d *GormDatabase) GetMembers() ([]*model.Member, error) {
+func (d *GormDatabase) GetMembers(args api.Args) ([]*model.Member, error) {
 	var membersModel []*model.Member
-	query := d.buildMemberQuery(api.Args{})
+	query := d.buildMemberQuery(args)
 	query.Find(&membersModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -19,9 +19,9 @@ func (d *GormDatabase) GetMembers() ([]*model.Member, error) {
 	return membersModel, nil
 }
 
-func (d *GormDatabase) GetMember(uuid string) (*model.Member, error) {
+func (d *GormDatabase) GetMember(uuid string, args api.Args) (*model.Member, error) {
 	var memberModel *model.Member
-	query := d.buildMemberQuery(api.Args{})
+	query := d.buildMemberQuery(args)
 	query = query.Where("uuid = ? ", uuid).First(&memberModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -29,9 +29,9 @@ func (d *GormDatabase) GetMember(uuid string) (*model.Member, error) {
 	return memberModel, nil
 }
 
-func (d *GormDatabase) GetMemberByUsername(username string) (*model.Member, error) {
+func (d *GormDatabase) GetMemberByUsername(username string, args api.Args) (*model.Member, error) {
 	var memberModel *model.Member
-	query := d.buildMemberQuery(api.Args{})
+	query := d.buildMemberQuery(args)
 	query = query.Where("username = ? ", username).First(&memberModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -39,9 +39,9 @@ func (d *GormDatabase) GetMemberByUsername(username string) (*model.Member, erro
 	return memberModel, nil
 }
 
-func (d *GormDatabase) GetMemberByEmail(email string) (*model.Member, error) {
+func (d *GormDatabase) GetMemberByEmail(email string, args api.Args) (*model.Member, error) {
 	var memberModel *model.Member
-	query := d.buildMemberQuery(api.Args{})
+	query := d.buildMemberQuery(args)
 	query = query.Where("email = ? ", email).First(&memberModel)
 	if query.Error != nil {
 		return nil, query.Error
@@ -49,9 +49,9 @@ func (d *GormDatabase) GetMemberByEmail(email string) (*model.Member, error) {
 	return memberModel, nil
 }
 
-func (d *GormDatabase) GetMembersByUUIDs(uuids []*string) ([]*model.Member, error) {
+func (d *GormDatabase) GetMembersByUUIDs(uuids []*string, args api.Args) ([]*model.Member, error) {
 	var membersModel []*model.Member
-	query := d.buildMemberQuery(api.Args{})
+	query := d.buildMemberQuery(args)
 	if err := query.Where("uuid IN ?", uuids).Find(&membersModel).Error; err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (d *GormDatabase) GetMemberSidebars(username string, includeWithoutViews bo
 	}
 	viewUUIDs, locationsUUIDs, groupUUIDs, hostUUIDs := getViewsUUIDs(views)
 
-	locations, _ := d.GetLocationsByUUIDs(locationsUUIDs)
+	locations, _ := d.GetLocationsByUUIDs(locationsUUIDs, api.Args{WithGroups: true, WithHosts: true, WithViews: true})
 
 	// Remove groupUUIDs and hostUUIDs that are already covered by locations
 	for _, location := range locations {
@@ -153,7 +153,7 @@ func (d *GormDatabase) GetMemberSidebars(username string, includeWithoutViews bo
 	if locations != nil {
 		locations = append(locations, groupLocations...)
 	}
-	groups, _ := d.GetGroupsByUUIDs(groupUUIDs)
+	groups, _ := d.GetGroupsByUUIDs(groupUUIDs, api.Args{WithViews: true, WithHosts: true})
 	if groups != nil {
 		// Remove hostUUIDs that are already covered by groups
 		for _, group := range groups {
@@ -163,12 +163,12 @@ func (d *GormDatabase) GetMemberSidebars(username string, includeWithoutViews bo
 		}
 	}
 
-	hostGroups, _ := d.GetGroupsByHostUUIDs(hostUUIDs)
+	hostGroups, _ := d.GetGroupsByHostUUIDs(hostUUIDs, api.Args{WithViews: true})
 	if hostGroups != nil {
 		groups = append(groups, hostGroups...)
 	}
 
-	hosts, _ := d.GetHostsByUUIDs(hostUUIDs)
+	hosts, _ := d.GetHostsByUUIDs(hostUUIDs, api.Args{WithTags: true, WithComments: true, WithViews: true})
 	if hosts != nil {
 		// Update the relationships between hosts and groups, and groups and locations
 		for _, host := range hosts {

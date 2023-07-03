@@ -2,31 +2,32 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
-func (d *GormDatabase) GetLocations() ([]*model.Location, error) {
+func (d *GormDatabase) GetLocations(args api.Args) ([]*model.Location, error) {
 	var locationsModel []*model.Location
-	query := d.buildLocationQuery()
+	query := d.buildLocationQuery(args)
 	if err := query.Find(&locationsModel).Error; err != nil {
 		return nil, err
 	}
 	return locationsModel, nil
 }
 
-func (d *GormDatabase) GetLocation(uuid string) (*model.Location, error) {
+func (d *GormDatabase) GetLocation(uuid string, args api.Args) (*model.Location, error) {
 	var locationModel *model.Location
-	query := d.buildLocationQuery()
+	query := d.buildLocationQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&locationModel).Error; err != nil {
 		return nil, err
 	}
 	return locationModel, nil
 }
 
-func (d *GormDatabase) GetLocationsByUUIDs(uuids []*string) ([]*model.Location, error) {
+func (d *GormDatabase) GetLocationsByUUIDs(uuids []*string, args api.Args) ([]*model.Location, error) {
 	var locationsModel []*model.Location
-	query := d.buildLocationQuery()
+	query := d.buildLocationQuery(args)
 	if err := query.Where("uuid IN ?", uuids).Find(&locationsModel).Error; err != nil {
 		return nil, err
 	}
@@ -36,7 +37,8 @@ func (d *GormDatabase) GetLocationsByUUIDs(uuids []*string) ([]*model.Location, 
 func (d *GormDatabase) GetLocationsByGroupAndHostUUIDs(groupUUIDs []*string, hostUUIDs []*string) ([]*model.Location,
 	error) {
 	var locationsModel []*model.Location
-	query := d.DB.Preload("Views").Distinct("locations.*").
+	query := d.buildGroupQuery(api.Args{WithViews: true})
+	query = query.Distinct("locations.*").
 		Joins("JOIN groups ON locations.uuid = groups.location_uuid").
 		Joins("JOIN hosts ON groups.uuid = hosts.group_uuid").
 		Where("groups.uuid IN ?", groupUUIDs).Or("hosts.uuid IN ?", hostUUIDs)

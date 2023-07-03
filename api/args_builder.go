@@ -135,3 +135,72 @@ func buildScheduleArgs(ctx *gin.Context) Args {
 	}
 	return args
 }
+
+func buildTeamArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithMembers, _ = toBool(ctx.DefaultQuery(aType.WithMembers, aDefault.WithMembers))
+	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
+	return args
+}
+
+func buildLocationArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
+	args.WithGroups, _ = toBool(ctx.DefaultQuery(aType.WithGroups, aDefault.WithGroups))
+	args.WithHosts, _ = toBool(ctx.DefaultQuery(aType.WithHosts, aDefault.WithHosts))
+	return args
+}
+
+func buildGroupArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
+	args.WithHosts, _ = toBool(ctx.DefaultQuery(aType.WithHosts, aDefault.WithHosts))
+	return args
+}
+
+func buildHostArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
+	args.WithComments, _ = toBool(ctx.DefaultQuery(aType.WithComments, aDefault.WithComments))
+	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
+	if value, ok := ctx.GetQuery(aType.Name); ok {
+		args.Name = &value
+	}
+	return args
+}
+
+func buildMemberArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithMemberDevices, _ = toBool(ctx.DefaultQuery(aType.WithMemberDevices, aDefault.WithMemberDevices))
+	args.WithTeams, _ = toBool(ctx.DefaultQuery(aType.WithTeams, aDefault.WithTeams))
+	return args
+}
+
+func buildViewArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithWidgets, _ = toBool(ctx.DefaultQuery(aType.WithWidgets, aDefault.WithWidgets))
+	return args
+}
+
+func buildViewTemplateArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithViewTemplateWidgets, _ = toBool(ctx.DefaultQuery(aType.WithViewTemplateWidgets,
+		aDefault.WithViewTemplateWidgets))
+	args.WithViewTemplateWidgetPointers, _ = toBool(ctx.DefaultQuery(aType.WithViewTemplateWidgetPointers,
+		aDefault.WithViewTemplateWidgetPointers))
+	return args
+}

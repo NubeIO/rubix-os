@@ -6,8 +6,8 @@ import (
 )
 
 type ViewTemplateDatabase interface {
-	GetViewTemplates() ([]*model.ViewTemplate, error)
-	GetViewTemplate(uuid string) (*model.ViewTemplate, error)
+	GetViewTemplates(args Args) ([]*model.ViewTemplate, error)
+	GetViewTemplate(uuid string, args Args) (*model.ViewTemplate, error)
 	CreateViewTemplate(body *model.ViewTemplate) (*model.ViewTemplate, error)
 	UpdateViewTemplate(uuid string, body *model.ViewTemplate) (*model.ViewTemplate, error)
 	DeleteViewTemplate(uuid string) (bool, error)
@@ -18,13 +18,15 @@ type ViewTemplateAPI struct {
 }
 
 func (a *ViewTemplateAPI) GetViewTemplates(ctx *gin.Context) {
-	q, err := a.DB.GetViewTemplates()
+	args := buildViewTemplateArgs(ctx)
+	q, err := a.DB.GetViewTemplates(args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (a *ViewTemplateAPI) GetViewTemplate(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetViewTemplate(uuid)
+	args := buildViewTemplateArgs(ctx)
+	q, err := a.DB.GetViewTemplate(uuid, args)
 	ResponseHandler(q, err, ctx)
 }
 

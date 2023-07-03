@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/services/alerts"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
@@ -55,7 +56,7 @@ func (d *GormDatabase) CreateAlert(body *model.Alert) (*model.Alert, error) {
 	var err error
 	hostUUID := body.HostUUID
 	if hostUUID == "" {
-		host, err := d.GetFirstHost()
+		host, err := d.GetFirstHost(api.Args{})
 		if err != nil {
 			return nil, err
 		}
@@ -64,7 +65,7 @@ func (d *GormDatabase) CreateAlert(body *model.Alert) (*model.Alert, error) {
 		}
 		return nil, errors.New(" no host has been added, please add one")
 	}
-	host, err := d.GetHost(hostUUID)
+	host, err := d.GetHost(hostUUID, api.Args{})
 	if host == nil {
 		return nil, errors.New(fmt.Sprintf("host with uuid:%s was not found", hostUUID))
 	}

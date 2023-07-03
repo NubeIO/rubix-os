@@ -6,8 +6,8 @@ import (
 )
 
 type ViewDatabase interface {
-	GetViews() ([]*model.View, error)
-	GetView(uuid string) (*model.View, error)
+	GetViews(args Args) ([]*model.View, error)
+	GetView(uuid string, args Args) (*model.View, error)
 	CreateView(body *model.View) (*model.View, error)
 	UpdateView(uuid string, body *model.View) (*model.View, error)
 	DeleteView(uuid string) (bool, error)
@@ -21,13 +21,15 @@ type ViewAPI struct {
 }
 
 func (a *ViewAPI) GetViews(ctx *gin.Context) {
-	q, err := a.DB.GetViews()
+	args := buildViewArgs(ctx)
+	q, err := a.DB.GetViews(args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (a *ViewAPI) GetView(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetView(uuid)
+	args := buildViewArgs(ctx)
+	q, err := a.DB.GetView(uuid, args)
 	ResponseHandler(q, err, ctx)
 }
 

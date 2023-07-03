@@ -230,16 +230,51 @@ func (d *GormDatabase) buildScheduleQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildLocationQuery() *gorm.DB {
-	return d.DB.Preload("Views").Preload("Groups.Views").Preload("Groups.Hosts.Views")
+func (d *GormDatabase) buildLocationQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.WithViews {
+		query = query.Preload("Views")
+	}
+	if args.WithGroups {
+		query = query.Preload("Groups")
+		if args.WithViews {
+			query = query.Preload("Groups.Views")
+		}
+		if args.WithHosts {
+			query = query.Preload("Groups.Hosts")
+			if args.WithViews {
+				query = query.Preload("Groups.Hosts.Views")
+			}
+		}
+	}
+	return query
 }
 
-func (d *GormDatabase) buildGroupQuery() *gorm.DB {
-	return d.DB.Preload("Views").Preload("Hosts.Views")
+func (d *GormDatabase) buildGroupQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.WithViews {
+		query = query.Preload("Views")
+	}
+	if args.WithHosts {
+		query = query.Preload("Hosts")
+		if args.WithViews {
+			query = query.Preload("Hosts.Views")
+		}
+	}
+	return query
 }
 
 func (d *GormDatabase) buildHostQuery(args api.Args) *gorm.DB {
-	query := d.DB.Preload("Comments").Preload("Tags").Preload("Views")
+	query := d.DB
+	if args.WithTags {
+		query = query.Preload("Tags")
+	}
+	if args.WithComments {
+		query = query.Preload("Comments")
+	}
+	if args.WithViews {
+		query = query.Preload("Views")
+	}
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
 	}
@@ -247,9 +282,12 @@ func (d *GormDatabase) buildHostQuery(args api.Args) *gorm.DB {
 }
 
 func (d *GormDatabase) buildMemberQuery(args api.Args) *gorm.DB {
-	query := d.DB.Preload("MemberDevices")
-	if args.Name != nil {
-		query = query.Where("name = ?", *args.Name)
+	query := d.DB
+	if args.WithMemberDevices {
+		query = query.Preload("MemberDevices")
+	}
+	if args.WithTeams {
+		query = query.Preload("Teams")
 	}
 	return query
 }
@@ -265,18 +303,40 @@ func (d *GormDatabase) buildMemberDeviceQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildTeamQuery() *gorm.DB {
-	return d.DB.Preload("Members").Preload("Views")
+func (d *GormDatabase) buildTeamQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.WithMembers {
+		query = query.Preload("Members")
+	}
+	if args.WithViews {
+		query = query.Preload("Views")
+	}
+	return query
 }
 
-func (d *GormDatabase) buildViewQuery() *gorm.DB {
-	return d.DB.Preload("Widgets")
+func (d *GormDatabase) buildViewQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.WithWidgets {
+		query = query.Preload("Widgets")
+	}
+	return query
 }
 
-func (d *GormDatabase) buildViewTemplateQuery() *gorm.DB {
-	return d.DB.Preload("ViewTemplateWidgets.ViewTemplateWidgetPointers")
+func (d *GormDatabase) buildViewTemplateQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.WithViewTemplateWidgets {
+		query = query.Preload("ViewTemplateWidgets")
+		if args.WithViewTemplateWidgetPointers {
+			query = query.Preload("ViewTemplateWidgets.ViewTemplateWidgetPointers")
+		}
+	}
+	return query
 }
 
-func (d *GormDatabase) buildViewTemplateWidgetQuery() *gorm.DB {
-	return d.DB.Preload("ViewTemplateWidgetPointers")
+func (d *GormDatabase) buildViewTemplateWidgetQuery(args api.Args) *gorm.DB {
+	query := d.DB
+	if args.WithViewTemplateWidgetPointers {
+		query = query.Preload("ViewTemplateWidgetPointers")
+	}
+	return query
 }

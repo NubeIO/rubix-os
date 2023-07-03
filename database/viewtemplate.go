@@ -2,21 +2,22 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
-func (d *GormDatabase) GetViewTemplates() ([]*model.ViewTemplate, error) {
+func (d *GormDatabase) GetViewTemplates(args api.Args) ([]*model.ViewTemplate, error) {
 	var viewTemplatesModel []*model.ViewTemplate
-	query := d.buildViewTemplateQuery()
+	query := d.buildViewTemplateQuery(args)
 	if err := query.Find(&viewTemplatesModel).Error; err != nil {
 		return nil, err
 	}
 	return viewTemplatesModel, nil
 }
 
-func (d *GormDatabase) GetViewTemplate(uuid string) (*model.ViewTemplate, error) {
+func (d *GormDatabase) GetViewTemplate(uuid string, args api.Args) (*model.ViewTemplate, error) {
 	var viewTemplateModel *model.ViewTemplate
-	query := d.buildViewTemplateQuery()
+	query := d.buildViewTemplateQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&viewTemplateModel).Error; err != nil {
 		return nil, err
 	}

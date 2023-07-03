@@ -7,8 +7,8 @@ import (
 )
 
 type LocationDatabase interface {
-	GetLocations() ([]*model.Location, error)
-	GetLocation(uuid string) (*model.Location, error)
+	GetLocations(args Args) ([]*model.Location, error)
+	GetLocation(uuid string, args Args) (*model.Location, error)
 	CreateLocation(body *model.Location) (*model.Location, error)
 	UpdateLocation(uuid string, body *model.Location) (*model.Location, error)
 	DeleteLocation(uuid string) (*interfaces.Message, error)
@@ -25,13 +25,15 @@ func (a *LocationAPI) GetLocationSchema(ctx *gin.Context) {
 }
 
 func (a *LocationAPI) GetLocations(ctx *gin.Context) {
-	q, err := a.DB.GetLocations()
+	args := buildLocationArgs(ctx)
+	q, err := a.DB.GetLocations(args)
 	ResponseHandler(q, err, ctx)
 }
 
 func (a *LocationAPI) GetLocation(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetLocation(uuid)
+	args := buildLocationArgs(ctx)
+	q, err := a.DB.GetLocation(uuid, args)
 	ResponseHandler(q, err, ctx)
 }
 
