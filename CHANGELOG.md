@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.0.6](https://github.com/NubeIO/rubix-os/tree/v0.0.6) (2023-07-03)
+
+- Fix: cors-related issue
+- Add preload args for teams, locations, groups, hosts, members, views, view templates, and view template widgets
+- Add ticket, ticket comment, and ticket team API endpoints
+
 ## [v0.0.5](https://github.com/NubeIO/rubix-os/tree/v0.0.5) (2023-06-30)
 
 - Add plugin inauroazuresync
