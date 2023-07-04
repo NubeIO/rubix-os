@@ -2,13 +2,14 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	parentArgs "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
 type GroupDatabase interface {
-	GetGroups(args Args) ([]*model.Group, error)
-	GetGroup(uuid string, args Args) (*model.Group, error)
+	GetGroups(args parentArgs.Args) ([]*model.Group, error)
+	GetGroup(uuid string, args parentArgs.Args) (*model.Group, error)
 	CreateGroup(body *model.Group) (*model.Group, error)
 	UpdateGroup(uuid string, body *model.Group) (*model.Group, error)
 	DeleteGroup(uuid string) (*interfaces.Message, error)

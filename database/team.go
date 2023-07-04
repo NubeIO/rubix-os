@@ -2,11 +2,11 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	parentArgs "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
-func (d *GormDatabase) GetTeams(args api.Args) ([]*model.Team, error) {
+func (d *GormDatabase) GetTeams(args parentArgs.Args) ([]*model.Team, error) {
 	var teamsModel []*model.Team
 	query := d.buildTeamQuery(args)
 	if err := query.Find(&teamsModel).Error; err != nil {
@@ -15,7 +15,7 @@ func (d *GormDatabase) GetTeams(args api.Args) ([]*model.Team, error) {
 	return teamsModel, nil
 }
 
-func (d *GormDatabase) GetTeamsByUUIDs(uuids []*string, args api.Args) ([]*model.Team, error) {
+func (d *GormDatabase) GetTeamsByUUIDs(uuids []*string, args parentArgs.Args) ([]*model.Team, error) {
 	var teamsModel []*model.Team
 	query := d.buildTeamQuery(args)
 	if err := query.Where("uuid IN ?", uuids).Find(&teamsModel).Error; err != nil {
@@ -24,7 +24,7 @@ func (d *GormDatabase) GetTeamsByUUIDs(uuids []*string, args api.Args) ([]*model
 	return teamsModel, nil
 }
 
-func (d *GormDatabase) GetTeam(uuid string, args api.Args) (*model.Team, error) {
+func (d *GormDatabase) GetTeam(uuid string, args parentArgs.Args) (*model.Team, error) {
 	var teamModel *model.Team
 	query := d.buildTeamQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&teamModel).Error; err != nil {
@@ -51,11 +51,11 @@ func (d *GormDatabase) UpdateTeam(uuid string, body *model.Team) (*model.Team, e
 }
 
 func (d *GormDatabase) UpdateTeamMembers(uuid string, body []*string) ([]*model.Member, error) {
-	team, err := d.GetTeam(uuid, api.Args{})
+	team, err := d.GetTeam(uuid, parentArgs.Args{})
 	if err != nil {
 		return nil, err
 	}
-	members, _ := d.GetMembersByUUIDs(body, api.Args{})
+	members, _ := d.GetMembersByUUIDs(body, parentArgs.Args{})
 	if err := d.updateMembers(&team, members); err != nil {
 		return nil, err
 	}

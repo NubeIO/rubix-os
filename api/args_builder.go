@@ -137,38 +137,38 @@ func buildScheduleArgs(ctx *gin.Context) parentArgs.Args {
 	return args
 }
 
-func buildTeamArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildTeamArgs(ctx *gin.Context) parentArgs.Args {
+	var args parentArgs.Args
+	var aType = parentArgs.ArgsType
+	var aDefault = parentArgs.ArgsDefault
 	args.WithMembers, _ = toBool(ctx.DefaultQuery(aType.WithMembers, aDefault.WithMembers))
 	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
 	return args
 }
 
-func buildLocationArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildLocationArgs(ctx *gin.Context) parentArgs.Args {
+	var args parentArgs.Args
+	var aType = parentArgs.ArgsType
+	var aDefault = parentArgs.ArgsDefault
 	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
 	args.WithGroups, _ = toBool(ctx.DefaultQuery(aType.WithGroups, aDefault.WithGroups))
 	args.WithHosts, _ = toBool(ctx.DefaultQuery(aType.WithHosts, aDefault.WithHosts))
 	return args
 }
 
-func buildGroupArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildGroupArgs(ctx *gin.Context) parentArgs.Args {
+	var args parentArgs.Args
+	var aType = parentArgs.ArgsType
+	var aDefault = parentArgs.ArgsDefault
 	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
 	args.WithHosts, _ = toBool(ctx.DefaultQuery(aType.WithHosts, aDefault.WithHosts))
 	return args
 }
 
-func buildHostArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildHostArgs(ctx *gin.Context) parentArgs.Args {
+	var args parentArgs.Args
+	var aType = parentArgs.ArgsType
+	var aDefault = parentArgs.ArgsDefault
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	args.WithComments, _ = toBool(ctx.DefaultQuery(aType.WithComments, aDefault.WithComments))
 	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
@@ -178,27 +178,27 @@ func buildHostArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildMemberArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildMemberArgs(ctx *gin.Context) parentArgs.Args {
+	var args parentArgs.Args
+	var aType = parentArgs.ArgsType
+	var aDefault = parentArgs.ArgsDefault
 	args.WithMemberDevices, _ = toBool(ctx.DefaultQuery(aType.WithMemberDevices, aDefault.WithMemberDevices))
 	args.WithTeams, _ = toBool(ctx.DefaultQuery(aType.WithTeams, aDefault.WithTeams))
 	return args
 }
 
-func buildViewArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildViewArgs(ctx *gin.Context) parentArgs.Args {
+	var args parentArgs.Args
+	var aType = parentArgs.ArgsType
+	var aDefault = parentArgs.ArgsDefault
 	args.WithWidgets, _ = toBool(ctx.DefaultQuery(aType.WithWidgets, aDefault.WithWidgets))
 	return args
 }
 
-func buildViewTemplateArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildViewTemplateArgs(ctx *gin.Context) parentArgs.Args {
+	var args parentArgs.Args
+	var aType = parentArgs.ArgsType
+	var aDefault = parentArgs.ArgsDefault
 	args.WithViewTemplateWidgets, _ = toBool(ctx.DefaultQuery(aType.WithViewTemplateWidgets,
 		aDefault.WithViewTemplateWidgets))
 	args.WithViewTemplateWidgetPointers, _ = toBool(ctx.DefaultQuery(aType.WithViewTemplateWidgetPointers,
@@ -206,10 +206,10 @@ func buildViewTemplateArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildTicketArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildTicketArgs(ctx *gin.Context) parentArgs.Args {
+	var args parentArgs.Args
+	var aType = parentArgs.ArgsType
+	var aDefault = parentArgs.ArgsDefault
 	args.WithTeams, _ = toBool(ctx.DefaultQuery(aType.WithTeams, aDefault.WithTeams))
 	args.WithComments, _ = toBool(ctx.DefaultQuery(aType.WithComments, aDefault.WithComments))
 	return args

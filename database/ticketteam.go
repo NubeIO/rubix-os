@@ -2,12 +2,12 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	parentArgs "github.com/NubeIO/rubix-os/args"
 	"gorm.io/gorm/clause"
 )
 
 func (d *GormDatabase) UpdateTicketTeams(ticketUUID string, teamUUIDs []*string) ([]*model.TicketTeam, error) {
-	teams, _ := d.GetTeamsByUUIDs(teamUUIDs, api.Args{})
+	teams, _ := d.GetTeamsByUUIDs(teamUUIDs, parentArgs.Args{})
 	var notInUUIDs []string
 	var body []*model.TicketTeam
 	for _, team := range teams {

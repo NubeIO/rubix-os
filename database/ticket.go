@@ -3,7 +3,7 @@ package database
 import (
 	"errors"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	parentArgs "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
@@ -37,7 +37,7 @@ func checkTicketPriority(priority model.TicketPriority) error {
 	return errors.New("invalid ticket priority, try LOW, MEDIUM, HIGH, CRITICAL")
 }
 
-func (d *GormDatabase) GetTickets(args api.Args) ([]*model.Ticket, error) {
+func (d *GormDatabase) GetTickets(args parentArgs.Args) ([]*model.Ticket, error) {
 	var ticketsModel []*model.Ticket
 	query := d.buildTicketQuery(args)
 	if err := query.Find(&ticketsModel).Error; err != nil {
@@ -46,7 +46,7 @@ func (d *GormDatabase) GetTickets(args api.Args) ([]*model.Ticket, error) {
 	return ticketsModel, nil
 }
 
-func (d *GormDatabase) GetTicket(uuid string, args api.Args) (*model.Ticket, error) {
+func (d *GormDatabase) GetTicket(uuid string, args parentArgs.Args) (*model.Ticket, error) {
 	var ticketModel *model.Ticket
 	query := d.buildTicketQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&ticketModel).Error; err != nil {

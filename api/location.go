@@ -2,13 +2,14 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	parentArgs "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
 type LocationDatabase interface {
-	GetLocations(args Args) ([]*model.Location, error)
-	GetLocation(uuid string, args Args) (*model.Location, error)
+	GetLocations(args parentArgs.Args) ([]*model.Location, error)
+	GetLocation(uuid string, args parentArgs.Args) (*model.Location, error)
 	CreateLocation(body *model.Location) (*model.Location, error)
 	UpdateLocation(uuid string, body *model.Location) (*model.Location, error)
 	DeleteLocation(uuid string) (*interfaces.Message, error)
