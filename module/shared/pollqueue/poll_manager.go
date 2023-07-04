@@ -4,6 +4,7 @@ import (
 	"container/heap"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	parentArgs "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/module/shared"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
@@ -126,9 +127,9 @@ func (pm *NetworkPollManager) EmptyQueue() {
 }
 
 func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { // This is triggered by a user who wants to update the device poll times for standby points
-	// var arg api.Args
-	// arg.WithPoints = true
-	dev, err := pm.Marshaller.GetDevice(devUUID, "with_points=true")
+	var arg parentArgs.Args
+	arg.WithPoints = true
+	dev, err := pm.Marshaller.GetDevice(devUUID, arg)
 	if dev == nil || err != nil {
 		pm.pollQueueErrorMsg("ReAddDevicePoints(): cannot find device ", devUUID)
 		return
@@ -176,11 +177,11 @@ func NewPollManager(conf *Config, marshaller shared.Marshaller, ffNetworkUUID, f
 }
 
 func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUID string) time.Duration {
-	// var arg api.Args
+	var arg parentArgs.Args
 	var duration time.Duration
 
 	if pm.Marshaller != nil {
-		device, err := pm.Marshaller.GetDevice(deviceUUID, "")
+		device, err := pm.Marshaller.GetDevice(deviceUUID, arg)
 		if err != nil {
 			pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.GetPollRateDuration(): couldn't find device %s", deviceUUID))
 			return 30 * time.Second
@@ -244,7 +245,8 @@ func (pm *NetworkPollManager) PollingFinished(pp *PollingPoint, pollStartTime ti
 
 func (pm *NetworkPollManager) PollQueueErrorChecking() {
 	pm.pollQueueDebugMsg("NetworkPollManager.PollQueueErrorChecking")
-	net, err := pm.Marshaller.GetNetwork(pm.FFNetworkUUID, "with_devices=true&&with_points=true") // api.Args{WithDevices: true, WithPoints: true}
+
+	net, err := pm.Marshaller.GetNetwork(pm.FFNetworkUUID, parentArgs.Args{WithDevices: true, WithPoints: true}) // api.Args{WithDevices: true, WithPoints: true}
 	if net == nil || err != nil {
 		pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Network Not Found")
 		return
