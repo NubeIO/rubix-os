@@ -2,6 +2,7 @@ package pollqueue
 
 import (
 	"fmt"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"time"
 	// log "github.com/sirupsen/logrus"
@@ -36,8 +37,8 @@ func (pm *NetworkPollManager) StartQueueUnloader() {
 
 	refreshRate := 100 * time.Millisecond // Default MaxPollRate
 	if pm.Marshaller != nil {
-		// var netArg api.Args
-		net, err := pm.Marshaller.GetNetwork(pm.FFNetworkUUID, "")
+		var netArg argspkg.Args
+		net, err := pm.Marshaller.GetNetwork(pm.FFNetworkUUID, netArg)
 		if err != nil {
 			pm.pollQueueDebugMsg(fmt.Sprintf("NetworkPollManager.StartQueueUnloader(): couldn't find network %s", pm.FFNetworkUUID))
 			return
