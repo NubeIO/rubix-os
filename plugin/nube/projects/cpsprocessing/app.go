@@ -1,7 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
+	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/go-gota/gota/dataframe"
 	"os"
 	"strings"
@@ -100,4 +104,276 @@ func (inst *Instance) CPSProcessing() {
 	}
 	defer ResultFile.Close()
 	OverdueResultDF.WriteCSV(ResultFile)
+}
+
+// THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
+func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
+	inst.cpsDebugMsg("addNetwork(): ", body.Name)
+
+	body.HistoryEnable = boolean.NewFalse()
+
+	network, err = inst.db.CreateNetwork(body)
+	if network == nil || err != nil {
+		inst.cpsErrorMsg("addNetwork(): failed to create cps network: ", body.Name)
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors.New("failed to create cps network")
+	}
+	return network, err
+}
+
+func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
+	if body == nil {
+		inst.cpsDebugMsg("addDevice(): nil device object")
+		return nil, errors.New("empty device body, no device created")
+	}
+	inst.cpsDebugMsg("addDevice(): ", body.Name)
+
+	body.HistoryEnable = boolean.NewFalse()
+
+	device, err = inst.db.CreateDevice(body)
+	if device == nil || err != nil {
+		inst.cpsDebugMsg("addDevice(): failed to create cps device: ", body.Name)
+		return nil, errors.New("failed to create cps device")
+	}
+
+	// Automatically create door sensor processed data points
+	createThesePoints := make([]model.Point, 0)
+	occupancyPoint := model.Point{
+		Name: string(cubicleOccupancyColName),
+	}
+	createThesePoints = append(createThesePoints, occupancyPoint)
+
+	totalUsesPoint := model.Point{
+		Name: string(totalUsesColName),
+	}
+	createThesePoints = append(createThesePoints, totalUsesPoint)
+
+	currentUsesPoint := model.Point{
+		Name: string(currentUsesColName),
+	}
+	createThesePoints = append(createThesePoints, currentUsesPoint)
+
+	fifteenMinUsesPoint := model.Point{
+		Name: string(fifteenMinRollupUsesColName),
+	}
+	createThesePoints = append(createThesePoints, fifteenMinUsesPoint)
+
+	pendingStatusPoint := model.Point{
+		Name: string(pendingStatusColName),
+	}
+	createThesePoints = append(createThesePoints, pendingStatusPoint)
+
+	overdueStatusPoint := model.Point{
+		Name: string(overdueStatusColName),
+	}
+	createThesePoints = append(createThesePoints, overdueStatusPoint)
+
+	toPendingPoint := model.Point{
+		Name: string(toPendingColName),
+	}
+	createThesePoints = append(createThesePoints, toPendingPoint)
+
+	toCleanPoint := model.Point{
+		Name: string(toCleanColName),
+	}
+	createThesePoints = append(createThesePoints, toCleanPoint)
+
+	toOverduePoint := model.Point{
+		Name: string(toOverdueColName),
+	}
+	createThesePoints = append(createThesePoints, toOverduePoint)
+
+	cleaningTimePoint := model.Point{
+		Name: string(cleaningTimeColName),
+	}
+	createThesePoints = append(createThesePoints, cleaningTimePoint)
+
+	for _, point := range createThesePoints {
+		point.DeviceUUID = device.UUID
+		point.MetaTags = make([]*model.PointMetaTag, 0)
+
+		descriptionSplit := strings.Split(device.Description, "-")
+		level := descriptionSplit[0]
+		gender := strings.ToLower(descriptionSplit[1])
+		location := descriptionSplit[2]
+
+		metaTag1 := model.PointMetaTag{Key: "assetFunc", Value: "managedCubicle"}
+		point.MetaTags = append(point.MetaTags, &metaTag1)
+		metaTag2 := model.PointMetaTag{Key: "doorType", Value: "toilet"}
+		point.MetaTags = append(point.MetaTags, &metaTag2)
+		metaTag3 := model.PointMetaTag{Key: "enableCleaningTracking", Value: "true"}
+		point.MetaTags = append(point.MetaTags, &metaTag3)
+		metaTag4 := model.PointMetaTag{Key: "enableUseCounting", Value: "true"}
+		point.MetaTags = append(point.MetaTags, &metaTag4)
+		metaTag5 := model.PointMetaTag{Key: "floorRef", Value: level}
+		point.MetaTags = append(point.MetaTags, &metaTag5)
+		metaTag6 := model.PointMetaTag{Key: "genderRef", Value: gender}
+		point.MetaTags = append(point.MetaTags, &metaTag6)
+		metaTag7 := model.PointMetaTag{Key: "isEOT", Value: "false"}
+		point.MetaTags = append(point.MetaTags, &metaTag7)
+		metaTag8 := model.PointMetaTag{Key: "locationRef", Value: location}
+		point.MetaTags = append(point.MetaTags, &metaTag8)
+		metaTag9 := model.PointMetaTag{Key: "measurementRefs", Value: "door_position"}
+		point.MetaTags = append(point.MetaTags, &metaTag9)
+		metaTag10 := model.PointMetaTag{Key: "normalPosition", Value: "NO"}
+		point.MetaTags = append(point.MetaTags, &metaTag10)
+		metaTag11 := model.PointMetaTag{Key: "siteRef", Value: "cps_b49e0c73919c47ef"}
+		point.MetaTags = append(point.MetaTags, &metaTag11)
+		metaTag12 := model.PointMetaTag{Key: "assetUUID", Value: point.Name}
+		point.MetaTags = append(point.MetaTags, &metaTag12)
+		metaTag13 := model.PointMetaTag{Key: "normalPosition", Value: "NO"}
+		point.MetaTags = append(point.MetaTags, &metaTag13)
+		metaTag14 := model.PointMetaTag{Key: "normalPosition", Value: "NO"}
+		point.MetaTags = append(point.MetaTags, &metaTag14)
+		metaTag15 := model.PointMetaTag{Key: "normalPosition", Value: "NO"}
+		point.MetaTags = append(point.MetaTags, &metaTag15)
+
+		inst.addPoint(&point)
+	}
+
+	return device, nil
+}
+
+func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
+	if body == nil {
+		inst.cpsDebugMsg("addPoint(): nil point object")
+		return nil, errors.New("empty point body, no point created")
+	}
+	inst.cpsDebugMsg("addPoint(): ", body.Name)
+
+	body.HistoryEnable = boolean.NewFalse()
+
+	point, err = inst.db.CreatePoint(body, true)
+	if point == nil || err != nil {
+		inst.cpsDebugMsg("addPoint(): failed to create cps point: ", body.Name)
+		return nil, err
+	}
+	// inst.cpsDebugMsg(fmt.Sprintf("addPoint(): %+v\n", point))
+	return point, nil
+}
+
+func (inst *Instance) updateNetwork(body *model.Network) (network *model.Network, err error) {
+	inst.cpsDebugMsg("updateNetwork(): ", body.UUID)
+	if body == nil {
+		inst.cpsDebugMsg("updateNetwork():  nil network object")
+		return
+	}
+
+	if boolean.IsFalse(body.Enable) {
+		body.CommonFault.InFault = true
+		body.CommonFault.MessageLevel = model.MessageLevel.Fail
+		body.CommonFault.MessageCode = model.CommonFaultCode.PointError
+		body.CommonFault.Message = "network disabled"
+		body.CommonFault.LastFail = time.Now().UTC()
+	} else {
+		body.CommonFault.InFault = false
+		body.CommonFault.MessageLevel = model.MessageLevel.Info
+		body.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		body.CommonFault.Message = ""
+		body.CommonFault.LastOk = time.Now().UTC()
+	}
+
+	network, err = inst.db.UpdateNetwork(body.UUID, body)
+	if err != nil || network == nil {
+		return nil, err
+	}
+
+	return network, nil
+}
+
+func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, err error) {
+	inst.cpsDebugMsg("updateDevice(): ", body.UUID)
+	if body == nil {
+		inst.cpsDebugMsg("updateDevice(): nil device object")
+		return
+	}
+
+	if boolean.IsFalse(body.Enable) {
+		body.CommonFault.InFault = true
+		body.CommonFault.MessageLevel = model.MessageLevel.Warning
+		body.CommonFault.MessageCode = model.CommonFaultCode.DeviceError
+		body.CommonFault.Message = "device disabled"
+		body.CommonFault.LastFail = time.Now().UTC()
+	} else {
+		body.CommonFault.InFault = false
+		body.CommonFault.MessageLevel = model.MessageLevel.Info
+		body.CommonFault.MessageCode = model.CommonFaultCode.Ok
+		body.CommonFault.Message = ""
+		body.CommonFault.LastOk = time.Now().UTC()
+	}
+
+	device, err = inst.db.UpdateDevice(body.UUID, body)
+	if err != nil {
+		return nil, err
+	}
+	return device, nil
+}
+
+func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err error) {
+	inst.cpsDebugMsg("updatePoint(): ", body.UUID)
+	if body == nil {
+		inst.cpsDebugMsg("updatePoint(): nil point object")
+		return
+	}
+
+	if boolean.IsFalse(body.Enable) {
+		body.CommonFault.InFault = true
+		body.CommonFault.MessageLevel = model.MessageLevel.Fail
+		body.CommonFault.MessageCode = model.CommonFaultCode.PointError
+		body.CommonFault.Message = "point disabled"
+		body.CommonFault.LastFail = time.Now().UTC()
+	}
+	body.CommonFault.InFault = false
+	body.CommonFault.MessageLevel = model.MessageLevel.Info
+	body.CommonFault.MessageCode = model.CommonFaultCode.PointWriteOk
+	body.CommonFault.Message = fmt.Sprintf("last-updated: %s", utilstime.TimeStamp())
+	body.CommonFault.LastOk = time.Now().UTC()
+	point, err = inst.db.UpdatePoint(body.UUID, body)
+	if err != nil || point == nil {
+		inst.cpsErrorMsg("updatePoint(): bad response from UpdatePoint() err:", err)
+		return nil, err
+	}
+	return point, nil
+}
+
+func (inst *Instance) deleteNetwork(body *model.Network) (ok bool, err error) {
+	inst.cpsDebugMsg("deleteNetwork(): ", body.UUID)
+	if body == nil {
+		inst.cpsDebugMsg("deleteNetwork(): nil network object")
+		return
+	}
+
+	ok, err = inst.db.DeleteNetwork(body.UUID)
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
+}
+
+func (inst *Instance) deleteDevice(body *model.Device) (ok bool, err error) {
+	inst.cpsDebugMsg("deleteDevice(): ", body.UUID)
+	if body == nil {
+		inst.cpsDebugMsg("deleteDevice(): nil device object")
+		return
+	}
+	ok, err = inst.db.DeleteDevice(body.UUID)
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
+}
+
+func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
+	inst.cpsDebugMsg("deletePoint(): ", body.UUID)
+	if body == nil {
+		inst.cpsDebugMsg("deletePoint(): nil point object")
+		return
+	}
+	ok, err = inst.db.DeletePoint(body.UUID)
+	if err != nil {
+		return false, err
+	}
+	return ok, nil
 }
