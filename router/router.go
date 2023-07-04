@@ -251,7 +251,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	apiProxyHostRoutesAuth.Any("/*proxyPath", hostProxyHandler.HostProxy)
 
 	engine.Use(cors.New(auth.CorsConfig()))
-	engine.OPTIONS("/api/*any")
+	engine.Use(auth.HostProxyOptions())
 	appApiRoutes := engine.Group("/api/apps")
 	{
 		memberRoutes := appApiRoutes.Group("/members")
