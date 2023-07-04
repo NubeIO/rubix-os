@@ -95,7 +95,7 @@ func (inst *Instance) GetSite(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	err = postgresSetting.postgresConnectionInstance.db.Where("site_ref = ?", siteRef).First(&site, siteRef).Error
+	err = postgresSetting.postgresConnectionInstance.db.First(&site, "site_ref = ?", siteRef).Error
 	if err != nil {
 		inst.cpsErrorMsg("GetSite() db.First(&site, siteRef) error: ", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Site not found"})
@@ -193,6 +193,11 @@ func (inst *Instance) UpdateSite(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	if site.SiteRef != "site_ref" {
+		inst.cpsErrorMsg("UpdateSite() attempt to modify site_ref is not permitted")
+		c.JSON(http.StatusNotFound, gin.H{"error": "modifying site_ref is not permitted"})
+		return
+	}
 
 	_, err = inst.initializePostgresDBConnection()
 	if err != nil {
@@ -200,9 +205,9 @@ func (inst *Instance) UpdateSite(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	err = postgresSetting.postgresConnectionInstance.db.First(&existingSite, siteRef).Error
+	err = postgresSetting.postgresConnectionInstance.db.First(&existingSite, "site_ref = ?", siteRef).Error
 	if err != nil {
-		inst.cpsErrorMsg("UpdateSite() db.First(&existingSite, siteRef) error: ", err)
+		inst.cpsErrorMsg("UpdateSite() db.First(&existingSite, \"site_ref = ?\", siteRef) error: ", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Site not found"})
 		return
 	}
@@ -215,9 +220,9 @@ func (inst *Instance) UpdateSite(c *gin.Context) {
 	}
 
 	// Retrieve the updated site from the database
-	err = postgresSetting.postgresConnectionInstance.db.First(&site, siteRef).Error
+	err = postgresSetting.postgresConnectionInstance.db.First(&site, "site_ref = ?", siteRef).Error
 	if err != nil {
-		inst.cpsErrorMsg("UpdateSite() db.First(&site, siteRef) error: ", err)
+		inst.cpsErrorMsg("UpdateSite() db.First(&site, \"site_ref = ?\", siteRef) error: ", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -238,9 +243,9 @@ func (inst *Instance) DeleteSite(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	err = postgresSetting.postgresConnectionInstance.db.First(&site, siteRef).Error
+	err = postgresSetting.postgresConnectionInstance.db.First(&site, "site_ref = ?", siteRef).Error
 	if err != nil {
-		inst.cpsErrorMsg("DeleteSite() db.First(&site, siteRef) error: ", err)
+		inst.cpsErrorMsg("DeleteSite() db.First(&site, \"site_ref = ?\", siteRef) error: ", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "Site not found"})
 		return
 	}
