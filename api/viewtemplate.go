@@ -2,12 +2,13 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/gin-gonic/gin"
 )
 
 type ViewTemplateDatabase interface {
-	GetViewTemplates(args Args) ([]*model.ViewTemplate, error)
-	GetViewTemplate(uuid string, args Args) (*model.ViewTemplate, error)
+	GetViewTemplates(args args.Args) ([]*model.ViewTemplate, error)
+	GetViewTemplate(uuid string, args args.Args) (*model.ViewTemplate, error)
 	CreateViewTemplate(body *model.ViewTemplate) (*model.ViewTemplate, error)
 	UpdateViewTemplate(uuid string, body *model.ViewTemplate) (*model.ViewTemplate, error)
 	DeleteViewTemplate(uuid string) (bool, error)

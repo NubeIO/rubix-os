@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	parentArgs "github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/database"
 	"github.com/NubeIO/rubix-os/module/common"
 	log "github.com/sirupsen/logrus"
@@ -15,7 +15,7 @@ type dbHelper struct{}
 func (*dbHelper) GetWithoutParam(path, args string) ([]byte, error) {
 	var out interface{}
 	var err error
-	apiArgs, err := parentArgs.DeserializeArgs(args)
+	apiArgs, err := argspkg.DeserializeArgs(args)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (*dbHelper) GetWithoutParam(path, args string) ([]byte, error) {
 func (*dbHelper) Get(path, uuid, args string) ([]byte, error) {
 	var out interface{}
 	var err error
-	apiArgs, err := parentArgs.DeserializeArgs(args)
+	apiArgs, err := argspkg.DeserializeArgs(args)
 	if err != nil {
 		return nil, err
 	}
