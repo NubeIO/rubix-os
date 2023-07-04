@@ -20,7 +20,7 @@ const pluginType = "project"
 const allowConfigWrite = false
 const isNetwork = true
 const maxAllowedNetworks = 1
-const networkType = "galvintmv"
+const networkType = "cpsprocessing"
 const transportType = "ip" // serial, ip
 
 // Instance is plugin instance
