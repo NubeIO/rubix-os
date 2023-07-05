@@ -1,66 +1,66 @@
 package args
 
 type Args struct {
-	Enable                         *bool
-	Sort                           string
-	Order                          string
-	Offset                         string
-	Limit                          string
-	Search                         string
-	AskRefresh                     string
-	AskResponse                    string
-	Write                          string
-	ThingType                      string
-	UUID                           *string
-	WriteHistory                   string
-	Field                          string
-	Value                          string
-	CompactPayload                 string
-	CompactWithName                string
-	Name                           *string
-	AddToParent                    string
-	GlobalUUID                     *string
-	ClientId                       *string
-	SiteId                         *string
-	DeviceId                       *string
-	SourceUUID                     *string
-	ByPluginName                   bool
-	TimestampGt                    *string
-	TimestampLt                    *string
-	Networks                       bool
-	WithDevices                    bool
-	WithPoints                     bool
-	WithPriority                   bool
-	WithTags                       bool
-	PluginName                     string
-	NetworkName                    *string
-	DeviceName                     *string
-	PointName                      *string
-	AddressUUID                    *string
-	AddressID                      *string
-	ObjectType                     *string
-	IoNumber                       *string
-	IdGt                           *string
-	IsRemote                       *bool
-	IsMetadata                     bool
-	NetworkUUID                    *string
-	DeviceUUID                     *string
-	WithMetaTags                   bool
-	MetaTags                       *string
-	MemberUUID                     *string
-	ShowCloneNetworks              bool
-	PointSourceUUID                *string
-	HostUUID                       *string
-	WithMembers                    bool
-	WithMemberDevices              bool
-	WithTeams                      bool
-	WithViews                      bool
-	WithGroups                     bool
-	WithHosts                      bool
-	WithComments                   bool
-	WithWidgets                    bool
-	WithViewTemplateWidgets        bool
-	WithViewTemplateWidgetPointers bool
+	Enable                         *bool   `json:"enable,omitempty"`
+	Sort                           string  `json:"sort,omitempty"`
+	Order                          string  `json:"order,omitempty"`
+	Offset                         string  `json:"offset,omitempty"`
+	Limit                          string  `json:"limit,omitempty"`
+	Search                         string  `json:"search,omitempty"`
+	AskRefresh                     string  `json:"ask_refresh,omitempty"`
+	AskResponse                    string  `json:"ask_response,omitempty"`
+	Write                          string  `json:"write,omitempty"`
+	ThingType                      string  `json:"thing_type,omitempty"`
+	UUID                           *string `json:"uuid,omitempty"`
+	WriteHistory                   string  `json:"write_history,omitempty"`
+	Field                          string  `json:"field,omitempty"`
+	Value                          string  `json:"value,omitempty"`
+	CompactPayload                 string  `json:"compact_payload,omitempty"`
+	CompactWithName                string  `json:"compact_with_name,omitempty"`
+	Name                           *string `json:"name,omitempty"`
+	AddToParent                    string  `json:"add_to_parent,omitempty"`
+	GlobalUUID                     *string `json:"global_uuid,omitempty"`
+	ClientId                       *string `json:"client_id,omitempty"`
+	SiteId                         *string `json:"site_id,omitempty"`
+	DeviceId                       *string `json:"device_id,omitempty"`
+	SourceUUID                     *string `json:"source_uuid,omitempty"`
+	ByPluginName                   bool    `json:"by_plugin_name,omitempty"`
+	TimestampGt                    *string `json:"timestamp_gt,omitempty"`
+	TimestampLt                    *string `json:"timestamp_lt,omitempty"`
+	Networks                       bool    `json:"networks,omitempty"`
+	WithDevices                    bool    `json:"with_devices,omitempty"`
+	WithPoints                     bool    `json:"with_points,omitempty"`
+	WithPriority                   bool    `json:"with_priority,omitempty"`
+	WithTags                       bool    `json:"with_tags,omitempty"`
+	PluginName                     string  `json:"plugin_name,omitempty"`
+	NetworkName                    *string `json:"network_name,omitempty"`
+	DeviceName                     *string `json:"device_name,omitempty"`
+	PointName                      *string `json:"point_name,omitempty"`
+	AddressUUID                    *string `json:"address_uuid,omitempty"`
+	AddressID                      *string `json:"address_id,omitempty"`
+	ObjectType                     *string `json:"object_type,omitempty"`
+	IoNumber                       *string `json:"io_number,omitempty"`
+	IdGt                           *string `json:"id_gt,omitempty"`
+	IsRemote                       *bool   `json:"is_remote,omitempty"`
+	IsMetadata                     bool    `json:"is_metadata,omitempty"`
+	NetworkUUID                    *string `json:"network_uuid,omitempty"`
+	DeviceUUID                     *string `json:"device_uuid,omitempty"`
+	WithMetaTags                   bool    `json:"with_meta_tags,omitempty"`
+	MetaTags                       *string `json:"meta_tags,omitempty"`
+	MemberUUID                     *string `json:"member_uuid,omitempty"`
+	ShowCloneNetworks              bool    `json:"show_clone_networks,omitempty"`
+	PointSourceUUID                *string `json:"point_source_uuid,omitempty"`
+	HostUUID                       *string `json:"host_uuid,omitempty"`
+	WithMembers                    bool    `json:"with_members,omitempty"`
+	WithMemberDevices              bool    `json:"with_member_devices,omitempty"`
+	WithTeams                      bool    `json:"with_teams,omitempty"`
+	WithViews                      bool    `json:"with_views,omitempty"`
+	WithGroups                     bool    `json:"with_groups,omitempty"`
+	WithHosts                      bool    `json:"with_hosts,omitempty"`
+	WithComments                   bool    `json:"with_comments,omitempty"`
+	WithWidgets                    bool    `json:"with_widgets,omitempty"`
+	WithViewTemplateWidgets        bool    `json:"with_view_template_widgets,omitempty"`
+	WithViewTemplateWidgetPointers bool    `json:"with_view_template_widget_pointers,omitempty"`
 }
 
 var ArgsType = struct {
