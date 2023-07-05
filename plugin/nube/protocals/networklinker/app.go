@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"strings"
 	"time"
 
@@ -26,11 +26,11 @@ func (inst *Instance) syncPointsLoopTEMPORARY(ctx context.Context) {
 }
 
 func (inst *Instance) syncPointValues() {
-	networks, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{WithDevices: true, WithPoints: true})
+	networks, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{WithDevices: true, WithPoints: true})
 	index := 0
 	for _, net := range networks {
 		netUUIDs := strings.Split(net.AddressUUID, INTERNAL_SEPARATOR)
-		network1, _ := inst.db.GetNetwork(netUUIDs[0], args.Args{})
+		network1, _ := inst.db.GetNetwork(netUUIDs[0], argspkg.Args{})
 		if !inst.networkIsWriter(network1) {
 			index = 0
 		} else {
@@ -50,7 +50,7 @@ func (inst *Instance) syncPointValues() {
 }
 
 func (inst *Instance) syncNetworkDevicePoints() {
-	networks, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{WithDevices: true, WithPoints: true})
+	networks, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{WithDevices: true, WithPoints: true})
 	for _, net := range networks {
 		for _, dev := range net.Devices {
 			inst.syncDevicePoints(dev, nil, nil, nil, nil)

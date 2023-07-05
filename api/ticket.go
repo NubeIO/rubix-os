@@ -2,15 +2,15 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/nerrors"
 	"github.com/gin-gonic/gin"
 )
 
 type TicketDatabase interface {
-	GetTickets(args args.Args) ([]*model.Ticket, error)
-	GetTicket(uuid string, args args.Args) (*model.Ticket, error)
+	GetTickets(args argspkg.Args) ([]*model.Ticket, error)
+	GetTicket(uuid string, args argspkg.Args) (*model.Ticket, error)
 	CreateTicket(body *model.Ticket) (*model.Ticket, error)
 	UpdateTicket(uuid string, body *model.Ticket) (*model.Ticket, error)
 	UpdateTicketPriority(uuid string, priority string) (bool, error)

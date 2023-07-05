@@ -2,13 +2,13 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/gin-gonic/gin"
 )
 
 type ViewDatabase interface {
-	GetViews(args args.Args) ([]*model.View, error)
-	GetView(uuid string, args args.Args) (*model.View, error)
+	GetViews(args argspkg.Args) ([]*model.View, error)
+	GetView(uuid string, args argspkg.Args) (*model.View, error)
 	CreateView(body *model.View) (*model.View, error)
 	UpdateView(uuid string, body *model.View) (*model.View, error)
 	DeleteView(uuid string) (bool, error)

@@ -12,7 +12,7 @@ import (
 	"github.com/NubeIO/lib-networking/networking"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/uuid"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/NubeIO/rubix-os/utils/integer"
@@ -28,7 +28,7 @@ import (
 
 func (inst *Instance) bacnetNetworkInit() {
 	log.Infof("bacnet-master bacnetNetworkInit enable network plg-uuid: %s", inst.pluginUUID)
-	networks, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{WithDevices: true})
+	networks, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{WithDevices: true})
 	if err != nil {
 		log.Errorln("bacnet-master bacnetNetworkInit err:", err.Error())
 		return
@@ -115,7 +115,7 @@ func (inst *Instance) bacnetStoreDevice(dev *model.Device) error {
 
 	net, _ := inst.getBacnetStoreNetwork(dev.NetworkUUID)
 	if net == nil {
-		getNetwork, err := inst.db.GetNetwork(dev.NetworkUUID, args.Args{})
+		getNetwork, err := inst.db.GetNetwork(dev.NetworkUUID, argspkg.Args{})
 		if getNetwork == nil {
 			return errors.New("failed to find network to init bacnet network")
 		}
@@ -762,7 +762,7 @@ func (inst *Instance) whoIs(networkUUID string, opts *bacnet.WhoIsOpts, addDevic
 }
 
 func (inst *Instance) devicePoints(deviceUUID string, addPoints, writeablePoints bool) (resp []*model.Point, err error) {
-	getNetwork, err := inst.db.GetNetworkByDeviceUUID(deviceUUID, args.Args{})
+	getNetwork, err := inst.db.GetNetworkByDeviceUUID(deviceUUID, argspkg.Args{})
 	if err != nil {
 		return nil, err
 	}

@@ -4,7 +4,7 @@ import (
 	"container/heap"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/src/dbhandler"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
@@ -127,7 +127,7 @@ func (pm *NetworkPollManager) EmptyQueue() {
 }
 
 func (pm *NetworkPollManager) ReAddDevicePoints(devUUID string) { // This is triggered by a user who wants to update the device poll times for standby points
-	var arg args.Args
+	var arg argspkg.Args
 	arg.WithPoints = true
 	dev, err := pm.DBHandlerRef.GetDevice(devUUID, arg)
 	if dev == nil || err != nil {
@@ -177,7 +177,7 @@ func NewPollManager(conf *Config, dbHandler *dbhandler.Handler, ffNetworkUUID, f
 }
 
 func (pm *NetworkPollManager) GetPollRateDuration(rate model.PollRate, deviceUUID string) time.Duration {
-	var arg args.Args
+	var arg argspkg.Args
 	var duration time.Duration
 
 	if pm.DBHandlerRef != nil {
@@ -245,7 +245,7 @@ func (pm *NetworkPollManager) PollingFinished(pp *PollingPoint, pollStartTime ti
 
 func (pm *NetworkPollManager) PollQueueErrorChecking() {
 	pm.pollQueueDebugMsg("NetworkPollManager.PollQueueErrorChecking")
-	net, err := pm.DBHandlerRef.GetNetwork(pm.FFNetworkUUID, args.Args{WithDevices: true, WithPoints: true})
+	net, err := pm.DBHandlerRef.GetNetwork(pm.FFNetworkUUID, argspkg.Args{WithDevices: true, WithPoints: true})
 	if net == nil || err != nil {
 		pm.pollQueueErrorMsg("NetworkPollManager.PollQueueErrorChecking: Network Not Found")
 		return

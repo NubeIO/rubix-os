@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 
 	"github.com/NubeIO/rubix-os/utils/integer"
 
@@ -14,7 +14,7 @@ import (
 )
 
 func (inst *Instance) getNetwork() (network *model.Network, err error) {
-	net, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{})
+	net, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{})
 	if len(net) == 0 {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (inst *Instance) getNetwork() (network *model.Network, err error) {
 }
 
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{})
+	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{})
 	if err != nil {
 		return nil, err
 	}

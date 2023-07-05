@@ -2,14 +2,14 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
 // GetNetworkByPluginName returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworkByPluginName(name string, args args.Args) (*model.Network, error) {
+func (d *GormDatabase) GetNetworkByPluginName(name string, args argspkg.Args) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.Where("plugin_path = ? ", name).First(&networkModel).Error; err != nil {
@@ -19,7 +19,7 @@ func (d *GormDatabase) GetNetworkByPluginName(name string, args args.Args) (*mod
 }
 
 // GetNetworksByPluginName returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworksByPluginName(name string, args args.Args) ([]*model.Network, error) {
+func (d *GormDatabase) GetNetworksByPluginName(name string, args argspkg.Args) ([]*model.Network, error) {
 	var networksModel []*model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.Where("plugin_path = ? ", name).Find(&networksModel).Error; err != nil {
@@ -29,7 +29,7 @@ func (d *GormDatabase) GetNetworksByPluginName(name string, args args.Args) ([]*
 }
 
 // GetNetworkByPlugin returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, args args.Args) (*model.Network, error) {
+func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, args argspkg.Args) (*model.Network, error) {
 	var networkModel *model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.Where("plugin_conf_id = ? ", pluginUUID).First(&networkModel).Error; err != nil {
@@ -39,7 +39,7 @@ func (d *GormDatabase) GetNetworkByPlugin(pluginUUID string, args args.Args) (*m
 }
 
 // GetNetworksByPlugin returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworksByPlugin(pluginUUID string, args args.Args) ([]*model.Network, error) {
+func (d *GormDatabase) GetNetworksByPlugin(pluginUUID string, args argspkg.Args) ([]*model.Network, error) {
 	var networksModel []*model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.Where("plugin_conf_id = ? ", pluginUUID).Find(&networksModel).Error; err != nil {
@@ -49,7 +49,7 @@ func (d *GormDatabase) GetNetworksByPlugin(pluginUUID string, args args.Args) ([
 }
 
 // GetNetworkByName returns the network for the given id or nil.
-func (d *GormDatabase) GetNetworkByName(name string, args args.Args) (*model.Network, error) {
+func (d *GormDatabase) GetNetworkByName(name string, args argspkg.Args) (*model.Network, error) {
 	var networksModel *model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.Where("name = ? ", name).First(&networksModel).Error; err != nil {
@@ -59,7 +59,7 @@ func (d *GormDatabase) GetNetworkByName(name string, args args.Args) (*model.Net
 }
 
 // GetNetworkByPoint returns a network by passing in the pointUUID.
-func (d *GormDatabase) GetNetworkByPoint(point *model.Point, args args.Args) (network *model.Network, err error) {
+func (d *GormDatabase) GetNetworkByPoint(point *model.Point, args argspkg.Args) (network *model.Network, err error) {
 	device, err := d.GetDeviceByPoint(point)
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func (d *GormDatabase) GetNetworkByPoint(point *model.Point, args args.Args) (ne
 }
 
 // GetNetworkByPointUUID returns a network by passing in the pointUUID.
-func (d *GormDatabase) GetNetworkByPointUUID(pntUUID string, args args.Args) (network *model.Network, err error) {
+func (d *GormDatabase) GetNetworkByPointUUID(pntUUID string, args argspkg.Args) (network *model.Network, err error) {
 	device, err := d.GetDeviceByPointUUID(pntUUID)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (d *GormDatabase) GetNetworkByPointUUID(pntUUID string, args args.Args) (ne
 }
 
 // GetNetworkByDeviceUUID returns a network by passing in the device UUID.
-func (d *GormDatabase) GetNetworkByDeviceUUID(devUUID string, args args.Args) (network *model.Network, err error) {
+func (d *GormDatabase) GetNetworkByDeviceUUID(devUUID string, args argspkg.Args) (network *model.Network, err error) {
 	device, err := d.GetDevice(devUUID, args)
 	if err != nil {
 		return nil, err
@@ -97,7 +97,7 @@ func (d *GormDatabase) GetNetworkByDeviceUUID(devUUID string, args args.Args) (n
 // messageLevel = model.MessageLevel
 // messageCode = model.CommonFaultCode
 func (d *GormDatabase) SetErrorsForAllDevicesOnNetwork(networkUUID string, message string, messageLevel string, messageCode string, doPoints bool) error {
-	network, err := d.GetNetwork(networkUUID, args.Args{WithDevices: true, WithPoints: doPoints})
+	network, err := d.GetNetwork(networkUUID, argspkg.Args{WithDevices: true, WithPoints: doPoints})
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func (d *GormDatabase) SetErrorsForAllDevicesOnNetwork(networkUUID string, messa
 
 // ClearErrorsForAllDevicesOnNetwork clears the fault/error properties of all devices for a specific network. Optional to clear the points of each device also.
 func (d *GormDatabase) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool) error {
-	network, err := d.GetNetwork(networkUUID, args.Args{WithDevices: true, WithPoints: doPoints})
+	network, err := d.GetNetwork(networkUUID, argspkg.Args{WithDevices: true, WithPoints: doPoints})
 	if network != nil && err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func (d *GormDatabase) ClearErrorsForAllDevicesOnNetwork(networkUUID string, doP
 	return nil
 }
 
-func (d *GormDatabase) DeleteNetworkByName(name string, args args.Args) (bool, error) {
+func (d *GormDatabase) DeleteNetworkByName(name string, args argspkg.Args) (bool, error) {
 	var networksModel *model.Network
 	query := d.buildNetworkQuery(args)
 	if err := query.Where("name = ? ", name).First(&networksModel).Error; err != nil {

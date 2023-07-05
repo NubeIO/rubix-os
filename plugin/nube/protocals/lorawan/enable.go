@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/lorawan/csrest"
 	log "github.com/sirupsen/logrus"
@@ -47,7 +47,7 @@ func (inst *Instance) setupLorawanPlugin() error {
 }
 
 func (inst *Instance) getOrMakeLorawanNetwork() error {
-	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, args.Args{})
+	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, argspkg.Args{})
 	if err != nil {
 		q, err = inst.createNetwork()
 		if err != nil {

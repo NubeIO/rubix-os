@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/maplora/legacylorarest"
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/utils/boolean"
@@ -23,7 +23,7 @@ func (inst *Instance) mapLoRa(forceAddToExistingFFNetwork bool) error {
 		return errors.New("no legacy lora network found")
 	}
 
-	nets, err := inst.db.GetNetworksByPluginName("lora", args.Args{WithDevices: true, WithPoints: true})
+	nets, err := inst.db.GetNetworksByPluginName("lora", argspkg.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err
 	}

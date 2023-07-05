@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
-func (d *GormDatabase) GetDevices(args args.Args) ([]*model.Device, error) {
+func (d *GormDatabase) GetDevices(args argspkg.Args) ([]*model.Device, error) {
 	var devicesModel []*model.Device
 	query := d.buildDeviceQuery(args)
 	if err := query.Find(&devicesModel).Error; err != nil {
@@ -18,7 +18,7 @@ func (d *GormDatabase) GetDevices(args args.Args) ([]*model.Device, error) {
 	return devicesModel, nil
 }
 
-func (d *GormDatabase) GetDevice(uuid string, args args.Args) (*model.Device, error) {
+func (d *GormDatabase) GetDevice(uuid string, args argspkg.Args) (*model.Device, error) {
 	var deviceModel *model.Device
 	query := d.buildDeviceQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&deviceModel).Error; err != nil {
@@ -94,7 +94,7 @@ func (d *GormDatabase) DeleteDevice(uuid string) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) DeleteOneDeviceByArgs(args args.Args) (bool, error) {
+func (d *GormDatabase) DeleteOneDeviceByArgs(args argspkg.Args) (bool, error) {
 	var deviceModel *model.Device
 	query := d.buildDeviceQuery(args).Delete(&deviceModel)
 	return d.deleteResponseBuilder(query)

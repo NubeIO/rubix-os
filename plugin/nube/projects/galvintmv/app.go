@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/plugin/nube/projects/galvintmv/chirpstackrest"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
@@ -311,7 +311,7 @@ func (inst *Instance) checkComissioningPoints() error {
 	// CREATE/UPDATE THE FLOW TEMPERATURE MODBUS POINTS (set them all disabled)
 	inst.tmvDebugMsg("checkComissioningPoints() CREATE/UPDATE THE FLOW TEMPERATURE MODBUS POINTS (set them all disabled)")
 
-	nets, err := inst.db.GetNetworksByPluginName("modbus", args.Args{WithDevices: true, WithPoints: true})
+	nets, err := inst.db.GetNetworksByPluginName("modbus", argspkg.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err
 	}
@@ -435,7 +435,7 @@ func (inst *Instance) checkComissioningPoints() error {
 func (inst *Instance) DisableCommissioningPoints() error {
 	inst.tmvDebugMsg("DISABLE COMMISSIONING MODE: SET THE FLOW_TEMPERATURE MODBUS POINTS BACK TO NORMAL (disabled)")
 
-	nets, err := inst.db.GetNetworksByPluginName("modbus", args.Args{WithDevices: true, WithPoints: true})
+	nets, err := inst.db.GetNetworksByPluginName("modbus", argspkg.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err
 	}
@@ -460,7 +460,7 @@ func (inst *Instance) DisableCommissioningPoints() error {
 
 func (inst *Instance) updatePointNames() error {
 	inst.tmvDebugMsg("updatePointNames()")
-	nets, err := inst.db.GetNetworksByPluginName("lorawan", args.Args{WithDevices: true, WithPoints: true})
+	nets, err := inst.db.GetNetworksByPluginName("lorawan", argspkg.Args{WithDevices: true, WithPoints: true})
 	// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err
@@ -568,7 +568,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 		return errors.New("createModbusNetworkDevicesAndPoints() cannot get modbus network")
 	}
 
-	nets, err := inst.db.GetNetworksByPluginName("lorawan", args.Args{WithDevices: true, WithPoints: true})
+	nets, err := inst.db.GetNetworksByPluginName("lorawan", argspkg.Args{WithDevices: true, WithPoints: true})
 	// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err
@@ -1109,7 +1109,7 @@ func (inst *Instance) createModbusNetworkDevicesAndPoints() error {
 func (inst *Instance) createModbusNetworkIfItNeeded(reqNetName string) (*model.Network, error) {
 	inst.tmvDebugMsg("createModbusNetworkIfItNeeded(): reqNetName")
 
-	modbusNetworks, err := inst.db.GetNetworksByPluginName("modbus", args.Args{WithDevices: true, WithPoints: true})
+	modbusNetworks, err := inst.db.GetNetworksByPluginName("modbus", argspkg.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return nil, err
 	}
@@ -1189,7 +1189,7 @@ func (inst *Instance) createAndActivateChirpstackDevices() error {
 
 func (inst *Instance) updateIOModuleRTC() error {
 	inst.tmvDebugMsg("updateIOModuleRTC()")
-	nets, err := inst.db.GetNetworksByPluginName("modbus", args.Args{WithDevices: true, WithPoints: true})
+	nets, err := inst.db.GetNetworksByPluginName("modbus", argspkg.Args{WithDevices: true, WithPoints: true})
 	// nets, err := inst.db.GetNetworksByPluginName("system", api.Args{WithDevices: true, WithPoints: true})
 	if err != nil {
 		return err

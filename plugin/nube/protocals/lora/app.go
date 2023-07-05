@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"reflect"
 	"strings"
 	"sync"
@@ -25,7 +25,7 @@ import (
 )
 
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, args.Args{})
+	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, argspkg.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
 	*body.AddressUUID = strings.ToUpper(*body.AddressUUID)
-	device, _ = inst.db.GetDeviceByArgs(args.Args{AddressUUID: body.AddressUUID})
+	device, _ = inst.db.GetDeviceByArgs(argspkg.Args{AddressUUID: body.AddressUUID})
 	if device != nil {
 		errMsg := fmt.Sprintf("loraraw: the lora ID (address_uuid) must be unique: %s", nils.StringIsNil(body.AddressUUID))
 		log.Errorf(errMsg)
@@ -188,7 +188,7 @@ func (inst *Instance) handleSerialPayload(data string) {
 	}
 	deviceId := commonData.ID
 	if deviceId != "" {
-		dev, err := inst.db.GetDeviceByArgs(args.Args{AddressUUID: nils.NewString(deviceId)})
+		dev, err := inst.db.GetDeviceByArgs(argspkg.Args{AddressUUID: nils.NewString(deviceId)})
 		if err != nil {
 			errMsg := fmt.Sprintf("lora-raw: issue on failed to find device: %v id: %s\n", err.Error(), deviceId)
 			log.Errorf(errMsg)
@@ -208,7 +208,7 @@ func (inst *Instance) handleSerialPayload(data string) {
 }
 
 func (inst *Instance) getDeviceByLoRaAddress(address string) *model.Device {
-	device, err := inst.db.GetDeviceByArgs(args.Args{AddressUUID: &address})
+	device, err := inst.db.GetDeviceByArgs(argspkg.Args{AddressUUID: &address})
 	if err != nil {
 		return nil
 	}
@@ -218,7 +218,7 @@ func (inst *Instance) getDeviceByLoRaAddress(address string) *model.Device {
 // TODO: need better way to add/update CommonValues points instead of adding/updating the rssi point manually in each func
 // addDevicePoints add all points related to a device
 func (inst *Instance) addDevicePoints(deviceBody *model.Device) error {
-	network, err := inst.db.GetNetwork(deviceBody.NetworkUUID, args.Args{})
+	network, err := inst.db.GetNetwork(deviceBody.NetworkUUID, argspkg.Args{})
 	if err != nil {
 		log.Errorln("loraraw: addDevicePoints(), get network", err)
 		return err
@@ -311,7 +311,7 @@ func (inst *Instance) setNewPointFields(deviceBody *model.Device, pointBody *mod
 
 // updateDevicePointsAddress by its lora id and type as in temp or lux
 func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
-	dev, err := inst.db.GetDevice(body.UUID, args.Args{WithPoints: true})
+	dev, err := inst.db.GetDevice(body.UUID, argspkg.Args{WithPoints: true})
 	if err != nil {
 		return err
 	}
@@ -330,7 +330,7 @@ func (inst *Instance) updateDevicePointsAddress(body *model.Device) error {
 // TODO: update to make more efficient for updating just the value (incl fault etc.)
 func (inst *Instance) updatePointValue(body *model.Point, value float64, device *model.Device) error {
 	// TODO: fix this so don't need to request the point for the UUID before hand
-	pnt, err := inst.db.GetOnePointByArgs(args.Args{AddressUUID: body.AddressUUID, IoNumber: &body.IoNumber})
+	pnt, err := inst.db.GetOnePointByArgs(argspkg.Args{AddressUUID: body.AddressUUID, IoNumber: &body.IoNumber})
 	if err != nil {
 		log.Errorf("loraraw: issue on failed to find point: %v name: %s IO-ID:%s\n", err, body.AddressUUID, body.IoNumber)
 		return err

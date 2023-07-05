@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"net/http"
 	"net/http/httputil"
 	"strings"
@@ -76,12 +76,12 @@ func (inst *Instance) RegisterWebhook(basePath string, mux *gin.RouterGroup) {
 
 func (inst *Instance) GetNetworkAddressUuidOption() []schema.OptionOneOf {
 	var options []schema.OptionOneOf
-	currNets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{})
+	currNets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{})
 	currNetIDs := make([][]string, len(currNets))
 	for i, currNw := range currNets {
 		currNetIDs[i] = strings.Split(currNw.AddressUUID, INTERNAL_SEPARATOR)
 	}
-	nets, _ := inst.db.GetNetworks(args.Args{})
+	nets, _ := inst.db.GetNetworks(argspkg.Args{})
 	inner := 1
 	for _, n := range nets {
 		isWriter := inst.networkIsWriter(n)
@@ -117,11 +117,11 @@ func (inst *Instance) GetNetworkAddressUuidOption() []schema.OptionOneOf {
 
 func (inst *Instance) GetDeviceAddressUuidOptions() []schema.OptionOneOf {
 	var options []schema.OptionOneOf
-	nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{})
+	nets, _ := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{})
 	for i := range nets {
 		netSplit := strings.Split(nets[i].AddressUUID, INTERNAL_SEPARATOR)
-		net1, _ := inst.db.GetNetwork(netSplit[0], args.Args{WithDevices: true})
-		net2, _ := inst.db.GetNetwork(netSplit[1], args.Args{WithDevices: true})
+		net1, _ := inst.db.GetNetwork(netSplit[0], argspkg.Args{WithDevices: true})
+		net2, _ := inst.db.GetNetwork(netSplit[1], argspkg.Args{WithDevices: true})
 		for i := range net1.Devices {
 			for j := range net2.Devices {
 				options = append(options, schema.OptionOneOf{
@@ -154,7 +154,7 @@ func (inst *Instance) handlePointWriteProxy(ctx *gin.Context) {
 	}
 	proxy.ModifyResponse = func(resp *http.Response) error {
 		if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-			p, _ := inst.db.GetPoint(uuid, args.Args{})
+			p, _ := inst.db.GetPoint(uuid, argspkg.Args{})
 			inst.syncPointSelected(p, *newPointUUID)
 		}
 		return nil

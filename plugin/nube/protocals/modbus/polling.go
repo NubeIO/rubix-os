@@ -7,7 +7,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/modbus/smod"
 	"github.com/NubeIO/rubix-os/services/pollqueue"
 	"github.com/NubeIO/rubix-os/src/poller"
@@ -48,7 +48,7 @@ func (inst *Instance) ModbusPolling() error {
 		counter++
 		// fmt.Println("\n \n")
 		inst.modbusDebugMsg("LOOP COUNT: ", counter)
-		var netArg args.Args
+		var netArg argspkg.Args
 		/*
 			nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, netArg)
 			if err != nil {
@@ -102,7 +102,7 @@ func (inst *Instance) ModbusPolling() error {
 			netPollMan.PrintPollQueuePointUUIDs()
 			netPollMan.PrintPollingPointDebugInfo(pp)
 
-			var devArg args.Args
+			var devArg argspkg.Args
 			dev, err := inst.db.GetDevice(pp.FFDeviceUUID, devArg)
 			if dev == nil || err != nil {
 				inst.modbusErrorMsg("could not find deviceID:", pp.FFDeviceUUID)
@@ -122,7 +122,7 @@ func (inst *Instance) ModbusPolling() error {
 				continue
 			}
 
-			pnt, err := inst.db.GetPoint(pp.FFPointUUID, args.Args{WithPriority: true})
+			pnt, err := inst.db.GetPoint(pp.FFPointUUID, argspkg.Args{WithPriority: true})
 			if pnt == nil || err != nil {
 				inst.modbusErrorMsg("could not find pointID: ", pp.FFPointUUID)
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.DELAYED_RETRY, callback)

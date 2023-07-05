@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 )
 
 func (inst *Instance) Enable() error {
@@ -12,7 +12,7 @@ func (inst *Instance) Enable() error {
 	inst.pluginName = name
 	inst.setUUID()
 	inst.BusServ()
-	net, _ := inst.db.GetNetworkByPlugin(inst.pluginUUID, args.Args{})
+	net, _ := inst.db.GetNetworkByPlugin(inst.pluginUUID, argspkg.Args{})
 	if net != nil {
 		inst.networkUUID = net.UUID
 	}

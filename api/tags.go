@@ -2,13 +2,13 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/gin-gonic/gin"
 )
 
 type TagDatabase interface {
-	GetTags(args args.Args) ([]*model.Tag, error)
-	GetTag(tag string, args args.Args) (*model.Tag, error)
+	GetTags(args argspkg.Args) ([]*model.Tag, error)
+	GetTag(tag string, args argspkg.Args) (*model.Tag, error)
 	CreateTag(body *model.Tag) (*model.Tag, error)
 	DeleteTag(tag string) (bool, error)
 }

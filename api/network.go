@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/eventbus"
 	"github.com/NubeIO/rubix-os/plugin"
 	"github.com/gin-gonic/gin"
@@ -10,16 +10,16 @@ import (
 )
 
 type NetworkDatabase interface {
-	GetNetworkByName(name string, args args.Args) (*model.Network, error)
-	GetNetworkByPluginName(name string, args args.Args) (*model.Network, error)
-	GetNetworksByPluginName(name string, args args.Args) ([]*model.Network, error)
-	GetNetworks(args args.Args) ([]*model.Network, error)
-	GetNetwork(uuid string, args args.Args) (*model.Network, error)
+	GetNetworkByName(name string, args argspkg.Args) (*model.Network, error)
+	GetNetworkByPluginName(name string, args argspkg.Args) (*model.Network, error)
+	GetNetworksByPluginName(name string, args argspkg.Args) ([]*model.Network, error)
+	GetNetworks(args argspkg.Args) ([]*model.Network, error)
+	GetNetwork(uuid string, args argspkg.Args) (*model.Network, error)
 	CreateNetwork(network *model.Network) (*model.Network, error)
 	UpdateNetwork(uuid string, body *model.Network) (*model.Network, error)
 	DeleteNetwork(uuid string) (bool, error)
-	DeleteOneNetworkByArgs(args args.Args) (bool, error)
-	DeleteNetworkByName(name string, args args.Args) (bool, error)
+	DeleteOneNetworkByArgs(args argspkg.Args) (bool, error)
+	DeleteNetworkByName(name string, args argspkg.Args) (bool, error)
 
 	CreateNetworkPlugin(network *model.Network) (*model.Network, error)
 	UpdateNetworkPlugin(uuid string, body *model.Network) (*model.Network, error)

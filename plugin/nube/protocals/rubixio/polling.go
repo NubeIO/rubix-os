@@ -6,7 +6,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/nubeio-rubix-lib-rest-go/pkg/nube/rubixio"
 	"github.com/NubeIO/nubeio-rubix-lib-rest-go/pkg/rest"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/src/poller"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	log "github.com/sirupsen/logrus"
@@ -210,7 +210,7 @@ func (inst *Instance) polling(p polling) error {
 	}
 	var counter float64
 	f := func() (bool, error) {
-		nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{WithDevices: true})
+		nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{WithDevices: true})
 		if err != nil {
 			return false, err
 		}
@@ -228,7 +228,7 @@ func (inst *Instance) polling(p polling) error {
 				for _, dev := range net.Devices { // DEVICES
 					dNet := p.delayNetworks
 					time.Sleep(dNet)
-					device, err := inst.db.GetDevice(dev.UUID, args.Args{WithPoints: true}) // This is here so that it gets the most current device points (otherwise they may have changed)
+					device, err := inst.db.GetDevice(dev.UUID, argspkg.Args{WithPoints: true}) // This is here so that it gets the most current device points (otherwise they may have changed)
 					if device == nil || err != nil {
 						continue
 					}

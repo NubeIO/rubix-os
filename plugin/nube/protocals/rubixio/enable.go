@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	log "github.com/sirupsen/logrus"
 )
 
 func (inst *Instance) Enable() error {
 	inst.enabled = true
 	inst.setUUID()
-	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, args.Args{})
+	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, argspkg.Args{})
 	if q != nil {
 		inst.networkUUID = q.UUID
 	}

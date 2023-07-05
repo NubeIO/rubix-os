@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/plugin/nube/protocals/edge28/edgerest"
 	"github.com/NubeIO/rubix-os/src/poller"
 	"github.com/NubeIO/rubix-os/utils/boolean"
@@ -35,7 +35,7 @@ func (inst *Instance) Edge28Polling() error {
 	poll = poller.New()
 	var counter = 0
 
-	var arg args.Args
+	var arg argspkg.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
 
@@ -75,7 +75,7 @@ func (inst *Instance) Edge28Polling() error {
 					getDI, err = rest.GetDIs()
 
 					for _, point := range dev.Points { // POINTS
-						pnt, err := inst.db.GetPoint(point.UUID, args.Args{WithPriority: true})
+						pnt, err := inst.db.GetPoint(point.UUID, argspkg.Args{WithPriority: true})
 						if err != nil {
 							inst.edge28ErrorMsg("cannot find point")
 							continue

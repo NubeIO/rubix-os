@@ -3,7 +3,7 @@ package database
 import (
 	"encoding/json"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/module/common"
 	"github.com/NubeIO/rubix-os/src/client"
@@ -91,7 +91,7 @@ func (d *GormDatabase) UpdateNetworkPlugin(uuid string, body *model.Network) (ne
 }
 
 func (d *GormDatabase) DeleteNetworkPlugin(uuid string) (ok bool, err error) {
-	network, err := d.GetNetwork(uuid, args.Args{})
+	network, err := d.GetNetwork(uuid, argspkg.Args{})
 	if err != nil {
 		return false, err
 	}

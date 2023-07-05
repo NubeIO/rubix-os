@@ -2,7 +2,7 @@ package dbhandler
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 )
 
@@ -27,7 +27,7 @@ func (h *Handler) UpdateNetwork(uuid string, body *model.Network) (*model.Networ
 	return getDb().UpdateNetwork(uuid, body)
 }
 
-func (h *Handler) GetNetwork(uuid string, args args.Args) (*model.Network, error) {
+func (h *Handler) GetNetwork(uuid string, args argspkg.Args) (*model.Network, error) {
 	q, err := getDb().GetNetwork(uuid, args)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (h *Handler) GetNetwork(uuid string, args args.Args) (*model.Network, error
 	return q, nil
 }
 
-func (h *Handler) GetNetworkByPlugin(pluginUUID string, args args.Args) (*model.Network, error) {
+func (h *Handler) GetNetworkByPlugin(pluginUUID string, args argspkg.Args) (*model.Network, error) {
 	q, err := getDb().GetNetworkByPlugin(pluginUUID, args)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (h *Handler) GetNetworkByPlugin(pluginUUID string, args args.Args) (*model.
 	return q, nil
 }
 
-func (h *Handler) GetNetworksByPluginName(pluginUUID string, args args.Args) ([]*model.Network, error) {
+func (h *Handler) GetNetworksByPluginName(pluginUUID string, args argspkg.Args) ([]*model.Network, error) {
 	q, err := getDb().GetNetworksByPluginName(pluginUUID, args)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (h *Handler) GetNetworksByPluginName(pluginUUID string, args args.Args) ([]
 	return q, nil
 }
 
-func (h *Handler) GetNetworksByPlugin(pluginUUID string, args args.Args) ([]*model.Network, error) {
+func (h *Handler) GetNetworksByPlugin(pluginUUID string, args argspkg.Args) ([]*model.Network, error) {
 	q, err := getDb().GetNetworksByPlugin(pluginUUID, args)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (h *Handler) GetNetworksByPlugin(pluginUUID string, args args.Args) ([]*mod
 	return q, nil
 }
 
-func (h *Handler) GetNetworks(args args.Args) ([]*model.Network, error) {
+func (h *Handler) GetNetworks(args argspkg.Args) ([]*model.Network, error) {
 	q, err := getDb().GetNetworks(args)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (h *Handler) GetNetworks(args args.Args) ([]*model.Network, error) {
 	return q, nil
 }
 
-func (h *Handler) GetNetworkByDeviceUUID(uuid string, args args.Args) (*model.Network, error) {
+func (h *Handler) GetNetworkByDeviceUUID(uuid string, args argspkg.Args) (*model.Network, error) {
 	q, err := getDb().GetNetworkByDeviceUUID(uuid, args)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (h *Handler) GetNetworkByDeviceUUID(uuid string, args args.Args) (*model.Ne
 	return q, nil
 }
 
-func (h *Handler) GetNetworkByName(name string, args args.Args) (*model.Network, error) {
+func (h *Handler) GetNetworkByName(name string, args argspkg.Args) (*model.Network, error) {
 	q, err := getDb().GetNetworkByName(name, args)
 	if err != nil {
 		return nil, err
@@ -111,6 +111,6 @@ func (h *Handler) GetNetworksTagsForPostgresSync() ([]*interfaces.NetworkTagForP
 	return getDb().GetNetworksTagsForPostgresSync()
 }
 
-func (h *Handler) GetOneNetworkByArgs(args args.Args) (*model.Network, error) {
+func (h *Handler) GetOneNetworkByArgs(args argspkg.Args) (*model.Network, error) {
 	return getDb().GetOneNetworkByArgs(args)
 }

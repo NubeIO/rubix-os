@@ -3,21 +3,21 @@ package shared
 import (
 	"encoding/json"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/module/common"
 )
 
 type Marshaller interface {
-	GetNetwork(uuid string, args args.Args) (*model.Network, error)
-	GetDevice(uuid string, args args.Args) (*model.Device, error)
-	GetPoint(uuid string, args args.Args) (*model.Point, error)
+	GetNetwork(uuid string, args argspkg.Args) (*model.Network, error)
+	GetDevice(uuid string, args argspkg.Args) (*model.Device, error)
+	GetPoint(uuid string, args argspkg.Args) (*model.Point, error)
 
-	GetNetworksByPluginName(pluginName string, args args.Args) ([]*model.Network, error)
-	GetNetworkByName(pluginName string, args args.Args) (*model.Network, error)
+	GetNetworksByPluginName(pluginName string, args argspkg.Args) ([]*model.Network, error)
+	GetNetworkByName(pluginName string, args argspkg.Args) (*model.Network, error)
 
-	GetOneNetworkByArgs(args args.Args) (*model.Network, error)
-	GetOneDeviceByArgs(args args.Args) (*model.Device, error)
-	GetOnePointByArgs(args args.Args) (*model.Point, error)
+	GetOneNetworkByArgs(args argspkg.Args) (*model.Network, error)
+	GetOneDeviceByArgs(args argspkg.Args) (*model.Device, error)
+	GetOnePointByArgs(args argspkg.Args) (*model.Point, error)
 
 	CreateNetwork(body *model.Network) (*model.Network, error)
 	CreateDevice(body *model.Device) (*model.Device, error)
@@ -41,8 +41,8 @@ type Marshaller interface {
 	GetSchedules() ([]*model.Schedule, error)
 	UpdateScheduleAllProps(uuid string, body *model.Schedule) (*model.Schedule, error)
 
-	GetPlugin(pluginUUID string, args args.Args) (*model.PluginConf, error)
-	GetPluginByPath(name string, args args.Args) (*model.PluginConf, error)
+	GetPlugin(pluginUUID string, args argspkg.Args) (*model.PluginConf, error)
+	GetPluginByPath(name string, args argspkg.Args) (*model.PluginConf, error)
 	SetErrorsForAllDevicesOnNetwork(networkUUID, message, messageLevel, messageCode string, doPoints bool) error
 	ClearErrorsForAllDevicesOnNetwork(networkUUID string, doPoints bool) error
 	SetErrorsForAllPointsOnDevice(deviceUUID, message, messageLevel, messageCode string) error
@@ -55,7 +55,7 @@ type GRPCMarshaller struct {
 	DbHelper DBHelper
 }
 
-func (g *GRPCMarshaller) GetNetwork(uuid string, args args.Args) (*model.Network, error) {
+func (g *GRPCMarshaller) GetNetwork(uuid string, args argspkg.Args) (*model.Network, error) {
 	serializedArgs, err := args.SerializeArgs(args)
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func (g *GRPCMarshaller) GetNetwork(uuid string, args args.Args) (*model.Network
 	return network, nil
 }
 
-func (g *GRPCMarshaller) GetDevice(uuid string, args args.Args) (*model.Device, error) {
+func (g *GRPCMarshaller) GetDevice(uuid string, args argspkg.Args) (*model.Device, error) {
 	serializedArgs, err := args.SerializeArgs(args)
 	if err != nil {
 		return nil, err
@@ -89,7 +89,7 @@ func (g *GRPCMarshaller) GetDevice(uuid string, args args.Args) (*model.Device, 
 	return device, nil
 }
 
-func (g *GRPCMarshaller) GetPoint(uuid string, args args.Args) (*model.Point, error) {
+func (g *GRPCMarshaller) GetPoint(uuid string, args argspkg.Args) (*model.Point, error) {
 	serializedArgs, err := args.SerializeArgs(args)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (g *GRPCMarshaller) GetPoint(uuid string, args args.Args) (*model.Point, er
 	return point, nil
 }
 
-func (g *GRPCMarshaller) GetNetworksByPluginName(pluginName string, args args.Args) ([]*model.Network, error) {
+func (g *GRPCMarshaller) GetNetworksByPluginName(pluginName string, args argspkg.Args) ([]*model.Network, error) {
 	serializedArgs, err := args.SerializeArgs(args)
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ func (g *GRPCMarshaller) GetNetworksByPluginName(pluginName string, args args.Ar
 	return networks, nil
 }
 
-func (g *GRPCMarshaller) GetNetworkByName(networkName string, args args.Args) (*model.Network, error) {
+func (g *GRPCMarshaller) GetNetworkByName(networkName string, args argspkg.Args) (*model.Network, error) {
 	serializedArgs, err := args.SerializeArgs(args)
 	if err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func (g *GRPCMarshaller) GetNetworkByName(networkName string, args args.Args) (*
 	return network, nil
 }
 
-func (g *GRPCMarshaller) GetOneNetworkByArgs(args args.Args) (*model.Network, error) {
+func (g *GRPCMarshaller) GetOneNetworkByArgs(args argspkg.Args) (*model.Network, error) {
 	serializedArgs, err := args.SerializeArgs(args)
 	if err != nil {
 		return nil, err
@@ -157,7 +157,7 @@ func (g *GRPCMarshaller) GetOneNetworkByArgs(args args.Args) (*model.Network, er
 	return network, nil
 }
 
-func (g *GRPCMarshaller) GetOneDeviceByArgs(args args.Args) (*model.Device, error) {
+func (g *GRPCMarshaller) GetOneDeviceByArgs(args argspkg.Args) (*model.Device, error) {
 	serializedArgs, err := args.SerializeArgs(args)
 	if err != nil {
 		return nil, err
@@ -174,7 +174,7 @@ func (g *GRPCMarshaller) GetOneDeviceByArgs(args args.Args) (*model.Device, erro
 	return device, nil
 }
 
-func (g *GRPCMarshaller) GetOnePointByArgs(args args.Args) (*model.Point, error) {
+func (g *GRPCMarshaller) GetOnePointByArgs(args argspkg.Args) (*model.Point, error) {
 	serializedArgs, err := args.SerializeArgs(args)
 	if err != nil {
 		return nil, err
@@ -404,7 +404,7 @@ func (g *GRPCMarshaller) UpdateScheduleAllProps(uuid string, body *model.Schedul
 	return schedule, nil
 }
 
-func (g *GRPCMarshaller) GetPlugin(pluginUUID string, args args.Args) (*model.PluginConf, error) {
+func (g *GRPCMarshaller) GetPlugin(pluginUUID string, args argspkg.Args) (*model.PluginConf, error) {
 	serializedArgs, err := args.SerializeArgs(args)
 	if err != nil {
 		return nil, err
@@ -421,7 +421,7 @@ func (g *GRPCMarshaller) GetPlugin(pluginUUID string, args args.Args) (*model.Pl
 	return pluginConf, nil
 }
 
-func (g *GRPCMarshaller) GetPluginByPath(name string, args args.Args) (*model.PluginConf, error) {
+func (g *GRPCMarshaller) GetPluginByPath(name string, args argspkg.Args) (*model.PluginConf, error) {
 	serializedArgs, err := args.SerializeArgs(args)
 	if err != nil {
 		return nil, err
@@ -488,7 +488,7 @@ func (g *GRPCMarshaller) WizardNewNetworkDevicePoint(plugin string, network *mod
 }
 
 func (g *GRPCMarshaller) DeviceNameExistsInNetwork(deviceName, networkUUID string) (*model.Device, bool) {
-	network, err := g.GetNetwork(networkUUID, args.Args{})
+	network, err := g.GetNetwork(networkUUID, argspkg.Args{})
 	if err != nil {
 		return nil, false
 	}

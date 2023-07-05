@@ -2,11 +2,11 @@ package dbhandler
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 )
 
-func (h *Handler) GetPointsByDeviceUUID(deviceUUID string, args args.Args) ([]*model.Point, error) {
+func (h *Handler) GetPointsByDeviceUUID(deviceUUID string, args argspkg.Args) ([]*model.Point, error) {
 	args.DeviceUUID = &deviceUUID
 	q, err := getDb().GetPoints(args)
 	if err != nil {
@@ -15,7 +15,7 @@ func (h *Handler) GetPointsByDeviceUUID(deviceUUID string, args args.Args) ([]*m
 	return q, nil
 }
 
-func (h *Handler) GetPoint(uuid string, args args.Args) (*model.Point, error) {
+func (h *Handler) GetPoint(uuid string, args argspkg.Args) (*model.Point, error) {
 	q, err := getDb().GetPoint(uuid, args)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (h *Handler) UpdatePointSuccess(uuid string, body *model.Point) error {
 	return getDb().UpdatePointSuccess(uuid, body)
 }
 
-func (h *Handler) GetOnePointByArgs(args args.Args) (*model.Point, error) {
+func (h *Handler) GetOnePointByArgs(args argspkg.Args) (*model.Point, error) {
 	return getDb().GetOnePointByArgs(args)
 }
 

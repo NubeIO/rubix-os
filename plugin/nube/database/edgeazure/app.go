@@ -6,7 +6,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/amenzhinsky/iothub/iotdevice"
 	"time"
 
@@ -132,7 +132,7 @@ func (inst *Instance) GetHistoryValues(requiredNetworksArray []string) ([]*Histo
 	nowTimestamp := time.Now()
 	var historyArray []*History
 	for _, reqNet := range requiredNetworksArray {
-		net, err := inst.db.GetNetworkByName(reqNet, args.Args{WithDevices: true, WithPoints: true})
+		net, err := inst.db.GetNetworkByName(reqNet, argspkg.Args{WithDevices: true, WithPoints: true})
 		if err != nil || net == nil || net.Devices == nil {
 			inst.edgeazureErrorMsg("GetHistoryValues() issue getting network: ", reqNet)
 			continue
@@ -144,7 +144,7 @@ func (inst *Instance) GetHistoryValues(requiredNetworksArray []string) ([]*Histo
 				continue
 			}
 			for _, pnt := range dev.Points {
-				point, err := inst.db.GetPoint(pnt.UUID, args.Args{WithTags: true})
+				point, err := inst.db.GetPoint(pnt.UUID, argspkg.Args{WithTags: true})
 				if point == nil || err != nil {
 					inst.edgeazureErrorMsg("GetHistoryValues() Point is nil: ", pnt.Name, pnt.UUID)
 					continue

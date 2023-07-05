@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/services/pollqueue"
 	"github.com/NubeIO/rubix-os/utils/float"
 )
@@ -13,7 +13,7 @@ func (inst *Instance) Enable() error {
 	inst.pluginName = name
 	inst.setUUID()
 
-	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, args.Args{})
+	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{})
 	if nets != nil {
 		inst.networks = nets
 	} else if err != nil {

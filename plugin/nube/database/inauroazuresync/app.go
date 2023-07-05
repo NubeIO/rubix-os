@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/src/cli/cligetter"
 	"time"
 )
@@ -14,7 +14,7 @@ import (
 func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 	inst.inauroazuresyncDebugMsg("azure sensor history sync has been called...")
 
-	hosts, err := inst.db.GetHosts(args.Args{})
+	hosts, err := inst.db.GetHosts(argspkg.Args{})
 	if err != nil {
 		return false, err
 	}
@@ -115,7 +115,7 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 func (inst *Instance) syncAzureGatewayPayloads() (bool, error) {
 	inst.inauroazuresyncDebugMsg("azure gateway payload sync has been called...")
 
-	hosts, err := inst.db.GetHosts(args.Args{})
+	hosts, err := inst.db.GetHosts(argspkg.Args{})
 	if err != nil {
 		return false, err
 	}

@@ -3,7 +3,7 @@ package database
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/config"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/services/localmqtt"
@@ -164,7 +164,7 @@ func (d *GormDatabase) PublishDeviceInfo() {
 
 func (d *GormDatabase) PublishPoint(details *interfaces.MqttPoint) {
 	if details.PointUUID != "" {
-		point, err := d.GetPoint(details.PointUUID, args.Args{WithPriority: true})
+		point, err := d.GetPoint(details.PointUUID, argspkg.Args{WithPriority: true})
 		if err != nil {
 			log.Errorf("PublishPoint error: %s", err)
 			return
@@ -174,7 +174,7 @@ func (d *GormDatabase) PublishPoint(details *interfaces.MqttPoint) {
 		if details == nil {
 			return
 		}
-		point, err := d.GetPointByName(details.NetworkName, details.DeviceName, details.PointName, args.Args{})
+		point, err := d.GetPointByName(details.NetworkName, details.DeviceName, details.PointName, argspkg.Args{})
 		if err != nil {
 			log.Errorf("Error on finding point: %s", err)
 			return
@@ -199,7 +199,7 @@ func (d *GormDatabase) RePublishPointsCov() {
 	if boolean.IsFalse(config.Get().MQTT.PublishPointList) {
 		return
 	}
-	networks, err := d.GetNetworks(args.Args{WithDevices: true, WithPoints: true, WithPriority: true})
+	networks, err := d.GetNetworks(argspkg.Args{WithDevices: true, WithPoints: true, WithPriority: true})
 	if err != nil {
 		log.Error("RePublishPointsCov error:", err)
 		return
@@ -247,7 +247,7 @@ func (d *GormDatabase) RePublishSelectedPointsCov(selectedPoints *[]interfaces.M
 	}
 	*/
 
-	networks, err := d.GetNetworks(args.Args{WithDevices: true, WithPoints: true, WithPriority: true})
+	networks, err := d.GetNetworks(argspkg.Args{WithDevices: true, WithPoints: true, WithPriority: true})
 	if err != nil {
 		log.Error("RePublishSelectedPointsCov() error:", err)
 		return
@@ -270,15 +270,15 @@ func (d *GormDatabase) PublishPointCov(uuid string) error {
 	if boolean.IsFalse(config.Get().MQTT.Enable) || boolean.IsFalse(config.Get().MQTT.PublishPointCOV) {
 		return nil
 	}
-	point, err := d.GetPoint(uuid, args.Args{WithPriority: true})
+	point, err := d.GetPoint(uuid, argspkg.Args{WithPriority: true})
 	if err != nil {
 		return err
 	}
-	device, err := d.GetDevice(point.DeviceUUID, args.Args{})
+	device, err := d.GetDevice(point.DeviceUUID, argspkg.Args{})
 	if err != nil {
 		return err
 	}
-	network, err := d.GetNetwork(device.NetworkUUID, args.Args{})
+	network, err := d.GetNetwork(device.NetworkUUID, argspkg.Args{})
 	if err != nil {
 		return err
 	}

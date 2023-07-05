@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	parentArgs "github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"time"
 )
@@ -20,7 +20,7 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	pm.pollQueueDebugMsg("RebuildPollingQueue()")
 	wasRunning := pm.PluginQueueUnloader != nil
 	pm.EmptyQueue()
-	var arg parentArgs.Args
+	var arg argspkg.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
 	net, err := pm.Marshaller.GetNetwork(pm.FFNetworkUUID, arg)
@@ -76,7 +76,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		pm.PollCompleteStatsUpdate(pp, pollTimeSecs) // This will update the relevant PollManager statistics.
 	}
 
-	point, err := pm.Marshaller.GetPoint(pp.FFPointUUID, parentArgs.Args{WithPriority: true})
+	point, err := pm.Marshaller.GetPoint(pp.FFPointUUID, argspkg.Args{WithPriority: true})
 	if point == nil || err != nil {
 		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s", pp.FFPointUUID)
 		return
@@ -515,7 +515,7 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 
 	f := func() {
 		pm.pollQueueDebugMsg("Polling Lockout Timer Expired! Polling Priority: %d,  Polling Network: %s", priority, pm.FFNetworkUUID)
-		var arg parentArgs.Args
+		var arg argspkg.Args
 		plugin, err := pm.Marshaller.GetPlugin(pm.FFPluginUUID, arg)
 		switch priority {
 		case model.PRIORITY_ASAP:

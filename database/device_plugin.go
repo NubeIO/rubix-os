@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/module/common"
 	"github.com/NubeIO/rubix-os/src/client"
@@ -15,7 +15,7 @@ import (
 )
 
 func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Device, err error) {
-	network, err := d.GetNetwork(body.NetworkUUID, args.Args{})
+	network, err := d.GetNetwork(body.NetworkUUID, argspkg.Args{})
 	if network == nil {
 		errMsg := fmt.Sprintf("model.device failed to find a network with uuid:%s", body.NetworkUUID)
 		log.Errorf(errMsg)
@@ -62,7 +62,7 @@ func (d *GormDatabase) CreateDevicePlugin(body *model.Device) (device *model.Dev
 }
 
 func (d *GormDatabase) UpdateDevicePlugin(uuid string, body *model.Device) (device *model.Device, err error) {
-	network, err := d.GetNetwork(body.NetworkUUID, args.Args{})
+	network, err := d.GetNetwork(body.NetworkUUID, argspkg.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -99,11 +99,11 @@ func (d *GormDatabase) UpdateDevicePlugin(uuid string, body *model.Device) (devi
 }
 
 func (d *GormDatabase) DeleteDevicePlugin(uuid string) (ok bool, err error) {
-	device, err := d.GetDevice(uuid, args.Args{})
+	device, err := d.GetDevice(uuid, argspkg.Args{})
 	if err != nil {
 		return false, err
 	}
-	getNetwork, err := d.GetNetwork(device.NetworkUUID, args.Args{})
+	getNetwork, err := d.GetNetwork(device.NetworkUUID, argspkg.Args{})
 	if err != nil {
 		return false, err
 	}

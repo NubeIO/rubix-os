@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/NubeIO/rubix-os/args"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"reflect"
 	"strconv"
 	"strings"
@@ -89,7 +89,7 @@ func (inst *Instance) handleMqttError(body mqtt.Message) {
 }
 
 func (inst *Instance) checkAndAddValidCSDeviceFromEvent(devEUI string, withPoints bool) (*model.Device, error) {
-	currDev, err := inst.db.GetDeviceByArgs(args.Args{AddressUUID: &devEUI, WithPoints: withPoints})
+	currDev, err := inst.db.GetDeviceByArgs(argspkg.Args{AddressUUID: &devEUI, WithPoints: withPoints})
 	if err != nil {
 		var csDev *csrest.DeviceSingle
 		csDev, err = inst.chirpStack.GetDevice(devEUI)
