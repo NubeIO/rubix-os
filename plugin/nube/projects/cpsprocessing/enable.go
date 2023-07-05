@@ -19,6 +19,12 @@ func (inst *Instance) Enable() error {
 	if err != nil {
 		inst.cpsErrorMsg("Enable() initializePostgresDBConnection() error: ", err)
 	}
+	if inst.config.Job.SyncPointsWithDB {
+		_, err = inst.syncNetDevPntsAndTags()
+		if err != nil {
+			inst.cpsErrorMsg("Enable() syncNetDevPntsAndTags() error: ", err)
+		}
+	}
 
 	cron = gocron.NewScheduler(time.Local)
 	// cron.SetMaxConcurrentJobs(2, gocron.RescheduleMode)

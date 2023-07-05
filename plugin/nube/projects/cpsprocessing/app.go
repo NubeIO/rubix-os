@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/utils/boolean"
+	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/go-gota/gota/dataframe"
 	"os"
 	"strings"
@@ -110,7 +112,7 @@ func (inst *Instance) CPSProcessing() {
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
 	inst.cpsDebugMsg("addNetwork(): ", body.Name)
 
-	body.HistoryEnable = boolean.NewFalse()
+	body.HistoryEnable = boolean.NewTrue()
 
 	network, err = inst.db.CreateNetwork(body)
 	if network == nil || err != nil {
@@ -130,12 +132,20 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	}
 	inst.cpsDebugMsg("addDevice(): ", body.Name)
 
-	body.HistoryEnable = boolean.NewFalse()
+	if body.Name == "Cleaning Resets" {
+		body.HistoryEnable = boolean.NewTrue()
+	} else {
+		body.HistoryEnable = boolean.NewFalse()
+	}
 
 	device, err = inst.db.CreateDevice(body)
 	if device == nil || err != nil {
 		inst.cpsDebugMsg("addDevice(): failed to create cps device: ", body.Name)
 		return nil, errors.New("failed to create cps device")
+	}
+
+	if device.Name == "Cleaning Resets" || device.Name == "Availability" {
+		return device, nil
 	}
 
 	// Automatically create door sensor processed data points
@@ -190,14 +200,18 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	}
 	createThesePoints = append(createThesePoints, cleaningTimePoint)
 
+	devNameSplit := strings.Split(device.Name, "-")
+	if len(devNameSplit) < 3 {
+		inst.cpsErrorMsg("addDevice(): device name should be of the form Level-Gender-Location")
+		return device, nil
+	}
+	level := devNameSplit[0]
+	gender := strings.ToLower(devNameSplit[1])
+	location := devNameSplit[2]
+
 	for _, point := range createThesePoints {
 		point.DeviceUUID = device.UUID
 		point.MetaTags = make([]*model.PointMetaTag, 0)
-
-		descriptionSplit := strings.Split(device.Description, "-")
-		level := descriptionSplit[0]
-		gender := strings.ToLower(descriptionSplit[1])
-		location := descriptionSplit[2]
 
 		metaTag1 := model.PointMetaTag{Key: "assetFunc", Value: "managedCubicle"}
 		point.MetaTags = append(point.MetaTags, &metaTag1)
@@ -221,14 +235,12 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		point.MetaTags = append(point.MetaTags, &metaTag10)
 		metaTag11 := model.PointMetaTag{Key: "siteRef", Value: "cps_b49e0c73919c47ef"}
 		point.MetaTags = append(point.MetaTags, &metaTag11)
-		metaTag12 := model.PointMetaTag{Key: "assetUUID", Value: point.Name}
+		metaTag12 := model.PointMetaTag{Key: "assetRef", Value: device.Description}
 		point.MetaTags = append(point.MetaTags, &metaTag12)
-		metaTag13 := model.PointMetaTag{Key: "normalPosition", Value: "NO"}
+		metaTag13 := model.PointMetaTag{Key: "resetID", Value: "rst_1"}
 		point.MetaTags = append(point.MetaTags, &metaTag13)
-		metaTag14 := model.PointMetaTag{Key: "normalPosition", Value: "NO"}
+		metaTag14 := model.PointMetaTag{Key: "availabilityID", Value: "avl_1"}
 		point.MetaTags = append(point.MetaTags, &metaTag14)
-		metaTag15 := model.PointMetaTag{Key: "normalPosition", Value: "NO"}
-		point.MetaTags = append(point.MetaTags, &metaTag15)
 
 		inst.addPoint(&point)
 	}
@@ -237,13 +249,25 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 }
 
 func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error) {
-	if body == nil {
+	if body == nil || body.DeviceUUID == "" {
 		inst.cpsDebugMsg("addPoint(): nil point object")
 		return nil, errors.New("empty point body, no point created")
 	}
 	inst.cpsDebugMsg("addPoint(): ", body.Name)
 
-	body.HistoryEnable = boolean.NewFalse()
+	device, err := inst.db.GetDevice(body.DeviceUUID, api.Args{})
+	if device == nil || err != nil {
+		inst.cpsDebugMsg("addPoint(): failed to find device", body.DeviceUUID)
+		return nil, err
+	}
+
+	if device.Name == "Cleaning Resets" {
+		body.HistoryEnable = boolean.NewTrue()
+		body.HistoryType = model.HistoryTypeCov
+		body.HistoryCOVThreshold = float.New(0.1)
+	} else {
+		body.HistoryEnable = boolean.NewFalse()
+	}
 
 	point, err = inst.db.CreatePoint(body, true)
 	if point == nil || err != nil {

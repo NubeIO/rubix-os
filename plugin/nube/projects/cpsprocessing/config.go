@@ -16,7 +16,8 @@ type Postgres struct {
 }
 
 type Job struct {
-	Frequency string `yaml:"frequency"`
+	Frequency        string `yaml:"frequency"`
+	SyncPointsWithDB bool   `yaml:"sync_points_with_db"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
@@ -29,7 +30,8 @@ func (inst *Instance) DefaultConfig() interface{} {
 		SslMode:  "disable",
 	}
 	job := Job{
-		Frequency: "1m",
+		Frequency:        "1m",
+		SyncPointsWithDB: false,
 	}
 
 	return &Config{

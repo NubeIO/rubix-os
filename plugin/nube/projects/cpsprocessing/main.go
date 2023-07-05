@@ -13,13 +13,13 @@ const name = "cpsprocessing" // must be unique across all plugins
 const description = "cps data processing plugin"
 const author = "md"
 const webSite = "https://www.github.com/NubeIO"
-const protocolType = "history"
+const protocolType = "processing"
 const DefaultExpiration = cache.DefaultExpiration
 
 const pluginType = "project"
-const allowConfigWrite = false
+const allowConfigWrite = true
 const isNetwork = true
-const maxAllowedNetworks = 1
+const maxAllowedNetworks = 100
 const networkType = "cpsprocessing"
 const transportType = "ip" // serial, ip
 
