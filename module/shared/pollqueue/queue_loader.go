@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"time"
 )
@@ -19,10 +20,10 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	pm.pollQueueDebugMsg("RebuildPollingQueue()")
 	wasRunning := pm.PluginQueueUnloader != nil
 	pm.EmptyQueue()
-	// var arg api.Args
-	// arg.WithDevices = true
-	// arg.WithPoints = true
-	net, err := pm.Marshaller.GetNetwork(pm.FFNetworkUUID, "with_devices=true&&with_points=true")
+	var arg argspkg.Args
+	arg.WithDevices = true
+	arg.WithPoints = true
+	net, err := pm.Marshaller.GetNetwork(pm.FFNetworkUUID, arg)
 	if err != nil || net.Devices == nil || len(net.Devices) == 0 {
 		pm.pollQueueDebugMsg("RebuildPollingQueue() couldn't find any devices for the network %s", pm.FFNetworkUUID)
 		return errors.New(fmt.Sprintf("NetworkPollManager.RebuildPollingQueue: couldn't find any devices for the network %s", pm.FFNetworkUUID))
@@ -75,7 +76,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		pm.PollCompleteStatsUpdate(pp, pollTimeSecs) // This will update the relevant PollManager statistics.
 	}
 
-	point, err := pm.Marshaller.GetPoint(pp.FFPointUUID, "with_priority=true") // api.Args{WithPriority: true}
+	point, err := pm.Marshaller.GetPoint(pp.FFPointUUID, argspkg.Args{WithPriority: true})
 	if point == nil || err != nil {
 		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s", pp.FFPointUUID)
 		return
@@ -514,7 +515,8 @@ func (pm *NetworkPollManager) MakeLockupTimerFunc(priority model.PollPriority) *
 
 	f := func() {
 		pm.pollQueueDebugMsg("Polling Lockout Timer Expired! Polling Priority: %d,  Polling Network: %s", priority, pm.FFNetworkUUID)
-		plugin, err := pm.Marshaller.GetPlugin(pm.FFPluginUUID, "")
+		var arg argspkg.Args
+		plugin, err := pm.Marshaller.GetPlugin(pm.FFPluginUUID, arg)
 		switch priority {
 		case model.PRIORITY_ASAP:
 			pm.ASAPPriorityLockupAlert = true

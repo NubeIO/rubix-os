@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"time"
 )
@@ -20,7 +20,7 @@ func (pm *NetworkPollManager) RebuildPollingQueue() error {
 	pm.pollQueueDebugMsg("RebuildPollingQueue()")
 	wasRunning := pm.PluginQueueUnloader != nil
 	pm.EmptyQueue()
-	var arg api.Args
+	var arg argspkg.Args
 	arg.WithDevices = true
 	arg.WithPoints = true
 	net, err := pm.DBHandlerRef.GetNetwork(pm.FFNetworkUUID, arg)
@@ -76,7 +76,7 @@ func (pm *NetworkPollManager) PollingPointCompleteNotification(pp *PollingPoint,
 		pm.PollCompleteStatsUpdate(pp, pollTimeSecs) // This will update the relevant PollManager statistics.
 	}
 
-	point, err := pm.DBHandlerRef.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
+	point, err := pm.DBHandlerRef.GetPoint(pp.FFPointUUID, argspkg.Args{WithPriority: true})
 	if point == nil || err != nil {
 		pm.pollQueueErrorMsg("NetworkPollManager.PollingPointCompleteNotification(): couldn't find point %s", pp.FFPointUUID)
 		return

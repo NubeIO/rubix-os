@@ -1,13 +1,14 @@
 package api
 
 import (
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/gin-gonic/gin"
 )
 
-func buildNetworkArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildNetworkArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithDevices, _ = toBool(ctx.DefaultQuery(aType.WithDevices, aDefault.WithDevices))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
@@ -25,10 +26,10 @@ func buildNetworkArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildDeviceArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildDeviceArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithPriority, _ = toBool(ctx.DefaultQuery(aType.WithPriority, aDefault.WithPriority))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
@@ -48,10 +49,10 @@ func buildDeviceArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildPointArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildPointArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithPriority, _ = toBool(ctx.DefaultQuery(aType.WithPriority, aDefault.WithPriority))
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	args.WithMetaTags, _ = toBool(ctx.DefaultQuery(aType.WithMetaTags, aDefault.WithMetaTags))
@@ -79,27 +80,27 @@ func buildPointArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildPluginArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildPluginArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.ByPluginName, _ = toBool(ctx.DefaultQuery(aType.ByPluginName, aDefault.PluginName))
 	return args
 }
 
-func buildTagArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildTagArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.Networks, _ = toBool(ctx.DefaultQuery(aType.WithNetworks, aDefault.WithNetworks))
 	args.WithDevices, _ = toBool(ctx.DefaultQuery(aType.WithDevices, aDefault.WithDevices))
 	args.WithPoints, _ = toBool(ctx.DefaultQuery(aType.WithPoints, aDefault.WithPoints))
 	return args
 }
 
-func buildPointHistoryArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
+func buildPointHistoryArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
 	if value, ok := ctx.GetQuery(aType.IdGt); ok {
 		args.IdGt = &value
 	}
@@ -127,47 +128,47 @@ func buildPointHistorySyncArgs(ctx *gin.Context) (string, string) {
 	return id, timeStamp
 }
 
-func buildScheduleArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
+func buildScheduleArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
 	if value, ok := ctx.GetQuery(aType.Name); ok {
 		args.Name = &value
 	}
 	return args
 }
 
-func buildTeamArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildTeamArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithMembers, _ = toBool(ctx.DefaultQuery(aType.WithMembers, aDefault.WithMembers))
 	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
 	return args
 }
 
-func buildLocationArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildLocationArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
 	args.WithGroups, _ = toBool(ctx.DefaultQuery(aType.WithGroups, aDefault.WithGroups))
 	args.WithHosts, _ = toBool(ctx.DefaultQuery(aType.WithHosts, aDefault.WithHosts))
 	return args
 }
 
-func buildGroupArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildGroupArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
 	args.WithHosts, _ = toBool(ctx.DefaultQuery(aType.WithHosts, aDefault.WithHosts))
 	return args
 }
 
-func buildHostArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildHostArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithTags, _ = toBool(ctx.DefaultQuery(aType.WithTags, aDefault.WithTags))
 	args.WithComments, _ = toBool(ctx.DefaultQuery(aType.WithComments, aDefault.WithComments))
 	args.WithViews, _ = toBool(ctx.DefaultQuery(aType.WithViews, aDefault.WithViews))
@@ -177,27 +178,27 @@ func buildHostArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildMemberArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildMemberArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithMemberDevices, _ = toBool(ctx.DefaultQuery(aType.WithMemberDevices, aDefault.WithMemberDevices))
 	args.WithTeams, _ = toBool(ctx.DefaultQuery(aType.WithTeams, aDefault.WithTeams))
 	return args
 }
 
-func buildViewArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildViewArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithWidgets, _ = toBool(ctx.DefaultQuery(aType.WithWidgets, aDefault.WithWidgets))
 	return args
 }
 
-func buildViewTemplateArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildViewTemplateArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithViewTemplateWidgets, _ = toBool(ctx.DefaultQuery(aType.WithViewTemplateWidgets,
 		aDefault.WithViewTemplateWidgets))
 	args.WithViewTemplateWidgetPointers, _ = toBool(ctx.DefaultQuery(aType.WithViewTemplateWidgetPointers,
@@ -205,10 +206,10 @@ func buildViewTemplateArgs(ctx *gin.Context) Args {
 	return args
 }
 
-func buildTicketArgs(ctx *gin.Context) Args {
-	var args Args
-	var aType = ArgsType
-	var aDefault = ArgsDefault
+func buildTicketArgs(ctx *gin.Context) argspkg.Args {
+	var args argspkg.Args
+	var aType = argspkg.ArgsType
+	var aDefault = argspkg.ArgsDefault
 	args.WithTeams, _ = toBool(ctx.DefaultQuery(aType.WithTeams, aDefault.WithTeams))
 	args.WithComments, _ = toBool(ctx.DefaultQuery(aType.WithComments, aDefault.WithComments))
 	return args

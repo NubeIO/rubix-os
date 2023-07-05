@@ -2,12 +2,12 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
-func (d *GormDatabase) GetLocations(args api.Args) ([]*model.Location, error) {
+func (d *GormDatabase) GetLocations(args argspkg.Args) ([]*model.Location, error) {
 	var locationsModel []*model.Location
 	query := d.buildLocationQuery(args)
 	if err := query.Find(&locationsModel).Error; err != nil {
@@ -16,7 +16,7 @@ func (d *GormDatabase) GetLocations(args api.Args) ([]*model.Location, error) {
 	return locationsModel, nil
 }
 
-func (d *GormDatabase) GetLocation(uuid string, args api.Args) (*model.Location, error) {
+func (d *GormDatabase) GetLocation(uuid string, args argspkg.Args) (*model.Location, error) {
 	var locationModel *model.Location
 	query := d.buildLocationQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&locationModel).Error; err != nil {
@@ -25,7 +25,7 @@ func (d *GormDatabase) GetLocation(uuid string, args api.Args) (*model.Location,
 	return locationModel, nil
 }
 
-func (d *GormDatabase) GetLocationsByUUIDs(uuids []*string, args api.Args) ([]*model.Location, error) {
+func (d *GormDatabase) GetLocationsByUUIDs(uuids []*string, args argspkg.Args) ([]*model.Location, error) {
 	var locationsModel []*model.Location
 	query := d.buildLocationQuery(args)
 	if err := query.Where("uuid IN ?", uuids).Find(&locationsModel).Error; err != nil {
@@ -37,7 +37,7 @@ func (d *GormDatabase) GetLocationsByUUIDs(uuids []*string, args api.Args) ([]*m
 func (d *GormDatabase) GetLocationsByGroupAndHostUUIDs(groupUUIDs []*string, hostUUIDs []*string) ([]*model.Location,
 	error) {
 	var locationsModel []*model.Location
-	query := d.buildGroupQuery(api.Args{WithViews: true})
+	query := d.buildGroupQuery(argspkg.Args{WithViews: true})
 	query = query.Distinct("locations.*").
 		Joins("JOIN groups ON locations.uuid = groups.location_uuid").
 		Joins("JOIN hosts ON groups.uuid = hosts.group_uuid").

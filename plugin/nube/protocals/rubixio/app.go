@@ -6,13 +6,13 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, api.Args{})
+	nets, err := inst.db.GetNetworksByPluginName(body.PluginPath, argspkg.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, e
 }
 
 func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err error) {
-	network, err := inst.db.GetNetwork(body.NetworkUUID, api.Args{WithDevices: true})
+	network, err := inst.db.GetNetwork(body.NetworkUUID, argspkg.Args{WithDevices: true})
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		return point, err
 	}
 	if writeValueChange {
-		device, err := inst.db.GetDevice(point.DeviceUUID, api.Args{WithPoints: true})
+		device, err := inst.db.GetDevice(point.DeviceUUID, argspkg.Args{WithPoints: true})
 		if device == nil || err != nil {
 			return point, err
 		}

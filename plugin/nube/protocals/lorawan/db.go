@@ -3,18 +3,18 @@ package main
 import (
 	"errors"
 	"fmt"
+	argspkg "github.com/NubeIO/rubix-os/args"
 
 	"github.com/NubeIO/rubix-os/utils/integer"
 
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	log "github.com/sirupsen/logrus"
 )
 
 func (inst *Instance) getNetwork() (network *model.Network, err error) {
-	net, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
+	net, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{})
 	if len(net) == 0 {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func (inst *Instance) getNetwork() (network *model.Network, err error) {
 }
 
 func (inst *Instance) addNetwork(body *model.Network) (network *model.Network, err error) {
-	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
+	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{})
 	if err != nil {
 		return nil, err
 	}

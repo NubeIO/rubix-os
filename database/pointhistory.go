@@ -2,13 +2,13 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm/clause"
 )
 
-func (d *GormDatabase) GetPointHistories(args api.Args) ([]*model.PointHistory, error) {
+func (d *GormDatabase) GetPointHistories(args argspkg.Args) ([]*model.PointHistory, error) {
 	var historiesModel []*model.PointHistory
 	query := d.buildPointHistoryQuery(args)
 	query.Find(&historiesModel)
@@ -18,7 +18,7 @@ func (d *GormDatabase) GetPointHistories(args api.Args) ([]*model.PointHistory, 
 	return historiesModel, nil
 }
 
-func (d *GormDatabase) GetPointHistoriesByPointUUID(pUuid string, args api.Args) ([]*model.PointHistory, int64, error) {
+func (d *GormDatabase) GetPointHistoriesByPointUUID(pUuid string, args argspkg.Args) ([]*model.PointHistory, int64, error) {
 	var count int64
 	var historiesModel []*model.PointHistory
 	query := d.buildPointHistoryQuery(args)
@@ -37,7 +37,7 @@ func (d *GormDatabase) GetLatestPointHistoryByPointUUID(pUuid string) (*model.Po
 	return historyModel, nil
 }
 
-func (d *GormDatabase) GetPointHistoriesByPointUUIDs(pointUUIDs []string, args api.Args) ([]*model.PointHistory, error) {
+func (d *GormDatabase) GetPointHistoriesByPointUUIDs(pointUUIDs []string, args argspkg.Args) ([]*model.PointHistory, error) {
 	var historiesModel []*model.PointHistory
 	query := d.buildPointHistoryQuery(args)
 	if err := query.Where("point_uuid IN ?", pointUUIDs).Order("point_uuid").
@@ -57,7 +57,7 @@ func (d *GormDatabase) GetPointHistoriesForSync(id string, timeStamp string) ([]
 	if len(pointHistoriesModel) == 0 {
 		id = "0"
 	}
-	pointHistories, err := d.GetPointHistories(api.Args{IdGt: nstring.New(id)})
+	pointHistories, err := d.GetPointHistories(argspkg.Args{IdGt: nstring.New(id)})
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (d *GormDatabase) CreateBulkPointHistory(histories []*model.PointHistory) (
 	return true, nil
 }
 
-func (d *GormDatabase) DeletePointHistoriesByPointUUID(pUuid string, args api.Args) (bool, error) {
+func (d *GormDatabase) DeletePointHistoriesByPointUUID(pUuid string, args argspkg.Args) (bool, error) {
 	var historyModel *model.PointHistory
 	query := d.buildPointHistoryQuery(args)
 	query = query.Where("point_uuid = ? ", pUuid).Delete(&historyModel)

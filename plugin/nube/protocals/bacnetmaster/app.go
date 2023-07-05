@@ -7,7 +7,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/services/pollqueue"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
@@ -133,7 +133,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	inst.bacnetDebugMsg(fmt.Sprintf("addPoint(): %+v\n", point))
 
-	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
+	dev, err := inst.db.GetDevice(point.DeviceUUID, argspkg.Args{})
 	if err != nil || dev == nil {
 		inst.bacnetDebugMsg("addPoint(): bad response from GetDevice()")
 		return nil, err
@@ -260,7 +260,7 @@ func (inst *Instance) updateDevice(body *model.Device) (device *model.Device, er
 	}
 
 	if boolean.IsTrue(device.Enable) { // If Enabled we need to GetDevice so we get Points
-		device, err = inst.db.GetDevice(device.UUID, api.Args{WithPoints: true})
+		device, err = inst.db.GetDevice(device.UUID, argspkg.Args{WithPoints: true})
 		if err != nil || device == nil {
 			return nil, err
 		}
@@ -364,7 +364,7 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 		return nil, err
 	}
 	// err = inst.updatePointName(body)  //TODO: Does this need to be added (from BACnet Server)
-	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
+	dev, err := inst.db.GetDevice(point.DeviceUUID, argspkg.Args{})
 	if err != nil || dev == nil {
 		inst.bacnetErrorMsg("updatePoint(): bad response from GetDevice()")
 		return nil, err
@@ -428,7 +428,7 @@ func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point
 		return nil, err
 	}
 
-	dev, err := inst.db.GetDevice(point.DeviceUUID, api.Args{})
+	dev, err := inst.db.GetDevice(point.DeviceUUID, argspkg.Args{})
 	if err != nil || dev == nil {
 		inst.bacnetDebugMsg("writePoint(): bad response from GetDevice()")
 		return nil, err
@@ -576,7 +576,7 @@ func (inst *Instance) deletePoint(body *model.Point) (ok bool, err error) {
 		return
 	}
 
-	dev, err := inst.db.GetDevice(body.DeviceUUID, api.Args{})
+	dev, err := inst.db.GetDevice(body.DeviceUUID, argspkg.Args{})
 	if err != nil || dev == nil {
 		inst.bacnetDebugMsg("addPoint(): bad response from GetDevice()")
 		return false, err
@@ -664,5 +664,5 @@ func (inst *Instance) networkUpdateErr(network *model.Network, message string, m
 }
 
 func (inst *Instance) getNetworks() ([]*model.Network, error) {
-	return inst.db.GetNetworks(api.Args{})
+	return inst.db.GetNetworks(argspkg.Args{})
 }

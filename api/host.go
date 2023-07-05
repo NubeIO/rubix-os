@@ -2,13 +2,14 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
 
 type HostDatabase interface {
-	GetHosts(withOpenVpn bool, args Args) ([]*model.Host, error)
-	GetHost(uuid string, args Args) (*model.Host, error)
+	GetHosts(withOpenVpn bool, args argspkg.Args) ([]*model.Host, error)
+	GetHost(uuid string, args argspkg.Args) (*model.Host, error)
 	CreateHost(body *model.Host) (*model.Host, error)
 	UpdateHost(uuid string, body *model.Host) (*model.Host, error)
 	DeleteHost(uuid string) (*interfaces.Message, error)

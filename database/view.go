@@ -3,13 +3,13 @@ package database
 import (
 	"errors"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/src/client"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"sync"
 )
 
-func (d *GormDatabase) GetViews(args api.Args) ([]*model.View, error) {
+func (d *GormDatabase) GetViews(args argspkg.Args) ([]*model.View, error) {
 	var viewsModel []*model.View
 	query := d.buildViewQuery(args)
 	if err := query.Find(&viewsModel).Error; err != nil {
@@ -18,7 +18,7 @@ func (d *GormDatabase) GetViews(args api.Args) ([]*model.View, error) {
 	return viewsModel, nil
 }
 
-func (d *GormDatabase) GetView(uuid string, args api.Args) (*model.View, error) {
+func (d *GormDatabase) GetView(uuid string, args argspkg.Args) (*model.View, error) {
 	var viewModel *model.View
 	query := d.buildViewQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&viewModel).Error; err != nil {
@@ -27,7 +27,7 @@ func (d *GormDatabase) GetView(uuid string, args api.Args) (*model.View, error) 
 	return viewModel, nil
 }
 
-func (d *GormDatabase) GetViewsByUUIDs(uuids []*string, args api.Args) ([]*model.View, error) {
+func (d *GormDatabase) GetViewsByUUIDs(uuids []*string, args argspkg.Args) ([]*model.View, error) {
 	var viewsModel []*model.View
 	query := d.buildViewQuery(args)
 	if err := query.Where("uuid IN ?", uuids).Find(&viewsModel).Error; err != nil {
@@ -145,7 +145,7 @@ func (d *GormDatabase) GenerateViewTemplate(uuid string, name string) (bool, err
 
 func (d *GormDatabase) AssignViewTemplate(uuid string, viewTemplateUUID string, hostUUID string) (bool, error) {
 	viewTemplate, err := d.GetViewTemplate(viewTemplateUUID,
-		api.Args{WithViewTemplateWidgets: true, WithViewTemplateWidgetPointers: true})
+		argspkg.Args{WithViewTemplateWidgets: true, WithViewTemplateWidgetPointers: true})
 	if err != nil {
 		return false, err
 	}

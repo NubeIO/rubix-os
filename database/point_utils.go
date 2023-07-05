@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/src/units"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
@@ -14,7 +14,7 @@ import (
 )
 
 func (d *GormDatabase) pointNameExists(body *model.Point) (nameExist, addressIDExist bool) {
-	var arg api.Args
+	var arg argspkg.Args
 	arg.WithPoints = true
 	device, err := d.GetDevice(body.DeviceUUID, arg)
 	if err != nil {
@@ -50,7 +50,7 @@ func (d *GormDatabase) pointNameExists(body *model.Point) (nameExist, addressIDE
 }
 
 func (d *GormDatabase) pointNameExistsInDevice(pointName, deviceUUID string) (existing bool) {
-	device, err := d.GetDevice(deviceUUID, api.Args{WithPoints: true})
+	device, err := d.GetDevice(deviceUUID, argspkg.Args{WithPoints: true})
 	if err != nil {
 		return false
 	}

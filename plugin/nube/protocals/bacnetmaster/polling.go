@@ -7,7 +7,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/services/pollqueue"
 	"github.com/NubeIO/rubix-os/src/poller"
 	"github.com/NubeIO/rubix-os/utils/boolean"
@@ -59,7 +59,7 @@ func (inst *Instance) BACnetMasterPolling() error {
 			inst.initBacStore()
 		}
 
-		var netArg api.Args
+		var netArg argspkg.Args
 		/*
 			nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, netArg)
 			if err != nil {
@@ -113,7 +113,7 @@ func (inst *Instance) BACnetMasterPolling() error {
 			netPollMan.PrintPollQueuePointUUIDs()
 			netPollMan.PrintPollingPointDebugInfo(pp)
 
-			var devArg api.Args
+			var devArg argspkg.Args
 			dev, err := inst.db.GetDevice(pp.FFDeviceUUID, devArg)
 			if dev == nil || err != nil {
 				inst.bacnetErrorMsg("could not find deviceID:", pp.FFDeviceUUID)
@@ -135,7 +135,7 @@ func (inst *Instance) BACnetMasterPolling() error {
 				}
 			*/
 
-			pnt, err := inst.db.GetPoint(pp.FFPointUUID, api.Args{WithPriority: true})
+			pnt, err := inst.db.GetPoint(pp.FFPointUUID, argspkg.Args{WithPriority: true})
 			if pnt == nil || err != nil {
 				inst.bacnetErrorMsg("could not find pointID: ", pp.FFPointUUID)
 				netPollMan.PollingFinished(pp, pollStartTime, false, false, false, true, pollqueue.DELAYED_RETRY, callback)
