@@ -13,6 +13,7 @@ import (
 
 func (h *Notification) InitAlertNotification(frequency int) {
 	h.cron = gocron.NewScheduler(time.UTC)
+	h.cron.SetMaxConcurrentJobs(1, gocron.RescheduleMode)
 	_, _ = h.cron.Every(frequency).Tag("AlertNotification").Do(h.sendAlertNotification)
 	h.cron.StartAsync()
 }

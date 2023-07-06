@@ -786,7 +786,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				ticketRoutes.PUT("/:uuid/teams", ticketHandler.UpdateTicketTeams)
 			}
 
-			fcmServerRoutes := serverApiRoutes.Group("fcm-servers")
+			fcmServerRoutes := serverApiRoutes.Group("fcm-server")
 			{
 				fcmServerRoutes.GET("", fcmServerHandler.GetFcmServer)
 				fcmServerRoutes.PUT("", fcmServerHandler.UpsertFcmServer)

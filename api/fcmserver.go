@@ -33,5 +33,5 @@ func (a *FcmServerAPI) UpsertFcmServer(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
-	ResponseHandler(interfaces.Message{Message: "fcm server has been saved successfully"}, nil, ctx)
+	ResponseHandler(interfaces.Message{Message: "FCM server has been saved successfully"}, nil, ctx)
 }
