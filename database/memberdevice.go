@@ -3,7 +3,6 @@ package database
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	argspkg "github.com/NubeIO/rubix-os/args"
-	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/src/cli/cligetter"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
@@ -92,7 +91,7 @@ func (d *GormDatabase) SendNotificationByMemberUUID(memberUUID string, data map[
 					errorMsg := results[0].(map[string]interface{})["error"].(string)
 					if errorMsg == "InvalidRegistration" || errorMsg == "NotRegistered" {
 						log.Warnf(">>>>>>>>>>>>>>> Removing device: %s from list!", *memberDevice.DeviceName)
-						_, _ = d.DeleteMemberDevicesByArgs(api.Args{DeviceId: nstring.New(memberDevice.DeviceID)})
+						_, _ = d.DeleteMemberDevicesByArgs(argspkg.Args{DeviceId: nstring.New(memberDevice.DeviceID)})
 					}
 				}
 			}

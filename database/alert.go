@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (d *GormDatabase) GetAlert(uuid string, args api.Args) (*model.Alert, error) {
+func (d *GormDatabase) GetAlert(uuid string, args argspkg.Args) (*model.Alert, error) {
 	alertModel := new(model.Alert)
 	query := d.buildAlertQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&alertModel).Error; err != nil {
@@ -22,7 +22,7 @@ func (d *GormDatabase) GetAlert(uuid string, args api.Args) (*model.Alert, error
 	return alertModel, nil
 }
 
-func (d *GormDatabase) GetAlerts(args api.Args) ([]*model.Alert, error) {
+func (d *GormDatabase) GetAlerts(args argspkg.Args) ([]*model.Alert, error) {
 	var alertsModel []*model.Alert
 	query := d.buildAlertQuery(args)
 	if err := query.Find(&alertsModel).Error; err != nil {
@@ -31,7 +31,7 @@ func (d *GormDatabase) GetAlerts(args api.Args) ([]*model.Alert, error) {
 	return alertsModel, nil
 }
 
-func (d *GormDatabase) GetAlertsByHost(hostUUID string, args api.Args) ([]*model.Alert, error) {
+func (d *GormDatabase) GetAlertsByHost(hostUUID string, args argspkg.Args) ([]*model.Alert, error) {
 	var alertModel []*model.Alert
 	alert, err := d.GetAlerts(args)
 	for _, a := range alert {

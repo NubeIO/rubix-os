@@ -2,7 +2,6 @@ package database
 
 import (
 	argspkg "github.com/NubeIO/rubix-os/args"
-	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"gorm.io/gorm"
 	"strings"

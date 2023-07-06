@@ -1,4 +1,4 @@
-package api
+package args
 
 type Args struct {
 	Enable                         *bool
@@ -125,6 +125,9 @@ var ArgsType = struct {
 	WithWidgets                    string
 	WithViewTemplateWidgets        string
 	WithViewTemplateWidgetPointers string
+	WithTickets                    string
+	Target                         string
+	Notified                       string
 }{
 	Sort:                           "sort",
 	Order:                          "order",

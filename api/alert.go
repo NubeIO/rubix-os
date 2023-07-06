@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
@@ -17,9 +18,9 @@ func getAlertStatus(ctx *gin.Context) (status string, err error) {
 }
 
 type AlertDatabase interface {
-	GetAlert(uuid string, args Args) (*model.Alert, error)
-	GetAlerts(args Args) ([]*model.Alert, error)
-	GetAlertsByHost(hostUUID string, args Args) ([]*model.Alert, error)
+	GetAlert(uuid string, args argspkg.Args) (*model.Alert, error)
+	GetAlerts(args argspkg.Args) ([]*model.Alert, error)
+	GetAlertsByHost(hostUUID string, args argspkg.Args) ([]*model.Alert, error)
 	GetAlertByField(field string, value string) (*model.Alert, error)
 	CreateAlert(body *model.Alert) (*model.Alert, error)
 	UpdateAlertStatus(uuid string, status string) (alert *model.Alert, err error)

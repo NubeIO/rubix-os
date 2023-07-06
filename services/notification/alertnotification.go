@@ -2,7 +2,7 @@ package notification
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/go-co-op/gocron"
@@ -19,7 +19,7 @@ func (h *Notification) InitAlertNotification(frequency int) {
 
 func (h *Notification) sendAlertNotification() {
 	log.Info("Send alert notification has is been called...")
-	alerts, err := h.DB.GetAlerts(api.Args{Target: nstring.New("mobile"), Notified: boolean.NewFalse()})
+	alerts, err := h.DB.GetAlerts(argspkg.Args{Target: nstring.New("mobile"), Notified: boolean.NewFalse()})
 	if err != nil {
 		return
 	}
