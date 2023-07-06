@@ -2,6 +2,7 @@ package database
 
 import (
 	argspkg "github.com/NubeIO/rubix-os/args"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -348,5 +349,24 @@ func (d *GormDatabase) buildTicketQuery(args argspkg.Args) *gorm.DB {
 	if args.WithTeams {
 		query = query.Preload("Teams")
 	}
+	return query
+}
+
+func (d *GormDatabase) buildAlertQuery(args argspkg.Args) *gorm.DB {
+	query := d.DB
+	if args.WithTickets {
+		query = query.Preload("Tickets")
+	}
+	if args.Target != nil {
+		query = query.Where("target = ?", *args.Target)
+	}
+	if args.Notified != nil {
+		if boolean.IsTrue(args.Notified) {
+			query = query.Where("notified IS TRUE")
+		} else {
+			query = query.Where("notified IS NOT TRUE")
+		}
+	}
+
 	return query
 }

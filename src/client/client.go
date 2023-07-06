@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/internaltoken"
-	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/config"
 	"github.com/NubeIO/rubix-os/nresty"
 	"github.com/go-resty/resty/v2"
@@ -34,32 +33,6 @@ func dialTimeout(_ context.Context, network, addr string) (net.Conn, error) {
 
 var transport = http.Transport{
 	DialContext: dialTimeout,
-}
-
-func GetFlowToken(ip string, port int, username string, password string) (*string, error) {
-	flowClient := getNewFlowClientCli(ip, port)
-	token, err := flowClient.Login(&model.LoginBody{Username: username, Password: password})
-	if err != nil {
-		return nil, err
-	}
-	return &token.AccessToken, nil
-}
-
-func getNewFlowClientCli(ip string, port int) *FlowClient {
-	mutex.Lock()
-	defer mutex.Unlock()
-	url := fmt.Sprintf("%s://%s:%d", getSchema(port), ip, port)
-	flowClient, found := flowClients[url]
-	if !found {
-		client := resty.New()
-		client.SetDebug(false)
-		client.SetBaseURL(url)
-		client.SetError(&nresty.Error{})
-		client.SetTransport(&transport)
-		flowClient = &FlowClient{client: client}
-		flowClients[url] = flowClient
-	}
-	return flowClient
 }
 
 func NewClient(ip string, port int, token string) *FlowClient {
@@ -100,46 +73,6 @@ func newSessionWithToken(ip string, port int, token string) *FlowClient {
 	client.SetBaseURL(url)
 	client.SetError(&nresty.Error{})
 	client.SetHeader("Authorization", token)
-	client.SetTransport(&transport)
-	flowClient := &FlowClient{client: client}
-	flowClients[url] = flowClient
-	return flowClient
-}
-
-func NewMasterToSlaveSession(globalUUID string) *FlowClient {
-	mutex.Lock()
-	defer mutex.Unlock()
-	conf := config.Get()
-	url := fmt.Sprintf("http://%s:%d/slave/%s/ff", "0.0.0.0", conf.Server.RSPort, globalUUID)
-	if flowClient, found := flowClients[url]; found {
-		flowClient.client.SetHeader("Authorization", internaltoken.GetInternalToken(true))
-		return flowClient
-	}
-	client := resty.New()
-	client.SetDebug(false)
-	client.SetBaseURL(url)
-	client.SetError(&nresty.Error{})
-	client.SetHeader("Authorization", internaltoken.GetInternalToken(true))
-	client.SetTransport(&transport)
-	flowClient := &FlowClient{client: client}
-	flowClients[url] = flowClient
-	return flowClient
-}
-
-func newSlaveToMasterCallSession() *FlowClient {
-	mutex.Lock()
-	defer mutex.Unlock()
-	conf := config.Get()
-	url := fmt.Sprintf("http://%s:%d/master/ff", "0.0.0.0", conf.Server.RSPort)
-	if flowClient, found := flowClients[url]; found {
-		flowClient.client.SetHeader("Authorization", internaltoken.GetInternalToken(true))
-		return flowClient
-	}
-	client := resty.New()
-	client.SetDebug(false)
-	client.SetBaseURL(url)
-	client.SetError(&nresty.Error{})
-	client.SetHeader("Authorization", internaltoken.GetInternalToken(true))
 	client.SetTransport(&transport)
 	flowClient := &FlowClient{client: client}
 	flowClients[url] = flowClient

@@ -9,31 +9,12 @@ server:
   responseheaders: # response headers are added to every response (default: none)
   #    X-Custom-Header: "custom value"
 
-  stream:
-    pingperiodseconds: 45 # the interval in which websocket pings will be sent. Only change this value if you know what you are doing.
-    allowedorigins: # allowed origins for websocket connections (same origin is always allowed)
-    #      - ".+.example.com"
-    #      - "otherdomain.com"
-
-  cors: # Sets cors headers only when needed and provides support for multiple allowed origins. Overrides Access-Control-* Headers in response headers.
-    alloworigins:
-    #      - ".+.example.com"
-    #      - "otherdomain.com"
-    allowmethods:
-    #      - "GET"
-    #      - "POST"
-    allowheaders:
-    #      - "Authorization"
-    #      - "content-type"
-
 database: # for database see (configure database section)
   dialect: sqlite3
   connection: data.db
   loglevel: "DEBUG" # options are: INFO, WARN, ERROR, SILENT (needs to be greater than or equal to global loglevel)
 
 loglevel: "INFO" # options are: DEBUG, INFO, WARN, ERROR
-
-auth: true
 
 pointhistory:
   enable: true
@@ -62,3 +43,8 @@ mqtt:
   publishschedulecov: true
   publishwchedulelist: false
   schedulewritelistener: true
+
+notification:
+  enable: false
+  frequency: "1m"
+  resendduration: "1h"

@@ -4,6 +4,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/src/cli/edgebioscli"
 	"github.com/NubeIO/rubix-os/src/cli/edgecli"
+	"github.com/NubeIO/rubix-os/src/cli/fcmservercli"
 	"github.com/NubeIO/rubix-os/src/cli/openvpncli"
 )
 
@@ -42,4 +43,10 @@ func GetEdgeBiosClient(host *model.Host) *edgebioscli.BiosClient {
 
 func GetOpenVPNClient() (*openvpncli.OpenVPNClient, error) {
 	return openvpncli.Get()
+}
+
+func GetFcmServerClient(key string) *fcmservercli.FcmServerClient {
+	return fcmservercli.New(&fcmservercli.FcmServerClient{
+		Key: key,
+	})
 }

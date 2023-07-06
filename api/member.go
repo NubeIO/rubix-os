@@ -30,6 +30,9 @@ type MemberDatabase interface {
 	DeleteMemberByUsername(username string) (bool, error)
 	ChangeMemberPassword(uuid string, password string) (*interfaces.Message, error)
 	GetMemberSidebars(username string, includeWithoutViews bool) ([]*model.Location, error)
+
+	GetFcmServerKey() string
+	SendNotificationByMemberUUID(memberUUID string, data map[string]interface{})
 }
 
 type MemberAPI struct {
@@ -162,6 +165,18 @@ func (a *MemberAPI) VerifyMember(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
+
+	data := map[string]interface{}{
+		"to": "",
+		"notification": map[string]string{
+			"title": "NubeIO Member Status",
+			"body":  "Member is verified by Admin!",
+		},
+		"content_available": false,
+		"priority":          "high",
+	}
+	a.DB.SendNotificationByMemberUUID(member.UUID, data)
+
 	ResponseHandler(interfaces.Message{Message: "member has been verified successfully"}, nil, ctx)
 }
 

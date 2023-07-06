@@ -43,5 +43,6 @@ func GetInitInterfaces() []interface{} {
 		&model.Ticket{},
 		&model.TicketComment{},
 		&model.TicketTeam{},
+		&model.FcmServer{},
 	}
 }
