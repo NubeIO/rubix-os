@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/NubeIO/configor"
 	"path"
+	"time"
 )
 
 type Configuration struct {
@@ -62,9 +63,9 @@ type Configuration struct {
 		ScheduleWriteListener *bool  `default:"true"`
 	}
 	Notification struct {
-		Enable         *bool `default:"false"`
-		Frequency      int   `default:"60"`
-		ResendDuration int   `default:"1"`
+		Enable         *bool         `default:"false"`
+		Frequency      time.Duration `default:"1m"`
+		ResendDuration time.Duration `default:"1h"`
 	}
 }
 

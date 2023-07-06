@@ -46,5 +46,5 @@ mqtt:
 
 notification:
   enable: false
-  frequency: 60
-  resendduration: 1
+  frequency: "1m"
+  resendduration: "1h"

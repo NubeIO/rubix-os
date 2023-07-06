@@ -10,16 +10,16 @@ import (
 	"time"
 )
 
-func (h *Notification) InitAlertNotification(frequency, resendDuration int) {
+func (h *Notification) InitAlertNotification(frequency, resendDuration time.Duration) {
 	h.cron = gocron.NewScheduler(time.UTC)
 	h.cron.SetMaxConcurrentJobs(1, gocron.RescheduleMode)
 	_, _ = h.cron.Every(frequency).Tag("AlertNotification").Do(h.sendAlertNotification, resendDuration)
 	h.cron.StartAsync()
 }
 
-func (h *Notification) sendAlertNotification(resendDuration int) {
+func (h *Notification) sendAlertNotification(resendDuration time.Duration) {
 	log.Info("Send alert notification has is been called...")
-	notifiedAtLt := time.Now().UTC().Add(-time.Hour * time.Duration(resendDuration)).Format(time.RFC3339Nano)
+	notifiedAtLt := time.Now().UTC().Add(-resendDuration).Format(time.RFC3339Nano)
 	alerts, err := h.DB.GetAlertsForNotification(notifiedAtLt)
 	if err != nil {
 		return
