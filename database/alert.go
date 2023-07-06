@@ -6,33 +6,34 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
-	"github.com/NubeIO/rubix-os/services/alerts"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/NubeIO/rubix-os/utils/ttime"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-func (d *GormDatabase) GetAlert(uuid string) (*model.Alert, error) {
+func (d *GormDatabase) GetAlert(uuid string, args api.Args) (*model.Alert, error) {
 	alertModel := new(model.Alert)
-	if err := d.DB.Where("uuid = ? ", uuid).First(&alertModel).Error; err != nil {
+	query := d.buildAlertQuery(args)
+	if err := query.Where("uuid = ? ", uuid).First(&alertModel).Error; err != nil {
 		log.Errorf("GetAlert error: %v", err)
 		return nil, err
 	}
 	return alertModel, nil
 }
 
-func (d *GormDatabase) GetAlerts() ([]*model.Alert, error) {
+func (d *GormDatabase) GetAlerts(args api.Args) ([]*model.Alert, error) {
 	var alertsModel []*model.Alert
-	if err := d.DB.Find(&alertsModel).Error; err != nil {
+	query := d.buildAlertQuery(args)
+	if err := query.Find(&alertsModel).Error; err != nil {
 		return nil, err
 	}
 	return alertsModel, nil
 }
 
-func (d *GormDatabase) GetAlertsByHost(hostUUID string) ([]*model.Alert, error) {
+func (d *GormDatabase) GetAlertsByHost(hostUUID string, args api.Args) ([]*model.Alert, error) {
 	var alertModel []*model.Alert
-	alert, err := d.GetAlerts()
+	alert, err := d.GetAlerts(args)
 	for _, a := range alert {
 		if a.HostUUID == hostUUID {
 			alertModel = append(alertModel, a)
@@ -70,23 +71,30 @@ func (d *GormDatabase) CreateAlert(body *model.Alert) (*model.Alert, error) {
 		return nil, errors.New(fmt.Sprintf("host with uuid:%s was not found", hostUUID))
 	}
 	if body.Status == "" {
-		body.Status = string(alerts.Active)
+		body.Status = string(model.AlertStatusActive)
 	} else {
-		if err = alerts.CheckStatus(body.Status); err != nil {
+		if err = checkAlertStatus(body.Status); err != nil {
 			return nil, err
 		}
 	}
-	if err = alerts.CheckAlertType(body.Type); err != nil {
+	if err = checkAlertType(body.Type); err != nil {
 		return nil, err
 	}
-	if err = alerts.CheckSeverity(body.Severity); err != nil {
+	if err = checkAlertSeverity(body.Severity); err != nil {
 		return nil, err
 	}
-	if err = alerts.CheckEntityType(body.EntityType); err != nil {
+	if err = checkAlertEntityType(body.EntityType); err != nil {
 		return nil, err
 	}
-	if body.Message == "" {
-		body.Message = alerts.AlertTypeMessage(body.Message)
+	if body.Target == "" {
+		body.Target = string(model.AlertTargetNone)
+	} else {
+		if err = checkAlertTarget(body.Target); err != nil {
+			return nil, err
+		}
+	}
+	if body.Title == "" {
+		body.Title = alertTypeTitle(body.Title)
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Alert)
 	t := ttime.Now()
@@ -100,10 +108,10 @@ func (d *GormDatabase) CreateAlert(body *model.Alert) (*model.Alert, error) {
 
 func (d *GormDatabase) UpdateAlertStatus(uuid string, status string) (alert *model.Alert, err error) {
 	var query *gorm.DB
-	if err = alerts.CheckStatus(status); err != nil {
+	if err = checkAlertStatus(status); err != nil {
 		return nil, err
 	}
-	if alerts.CheckStatusClosed(status) { // Move alert to alertClosed table
+	if checkAlertStatusClosed(status) { // Move alert to alertClosed table
 		alertModel := model.Alert{}
 		query = d.DB.Where("uuid = ?", uuid).First(&alertModel)
 		if query.Error != nil {
@@ -146,6 +154,10 @@ func (d *GormDatabase) UpdateAlertStatus(uuid string, status string) (alert *mod
 	t := ttime.Now()
 	alert.LastUpdated = &t
 	return alert, query.Error
+}
+
+func (d *GormDatabase) UpdateAlertsNotified(uuids []*string, notified *bool) {
+	d.DB.Model(model.Alert{}).Where("uuid IN ?", uuids).Update("notified", notified)
 }
 
 func (d *GormDatabase) DeleteAlert(uuid string) (*interfaces.Message, error) {

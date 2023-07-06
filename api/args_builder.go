@@ -214,3 +214,14 @@ func buildTicketArgs(ctx *gin.Context) argspkg.Args {
 	args.WithComments, _ = toBool(ctx.DefaultQuery(aType.WithComments, aDefault.WithComments))
 	return args
 }
+
+func buildAlertArgs(ctx *gin.Context) Args {
+	var args Args
+	var aType = ArgsType
+	var aDefault = ArgsDefault
+	args.WithTickets, _ = toBool(ctx.DefaultQuery(aType.WithTickets, aDefault.WithTickets))
+	if value, ok := ctx.GetQuery(aType.Target); ok {
+		args.Target = &value
+	}
+	return args
+}

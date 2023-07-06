@@ -73,6 +73,10 @@ type Configuration struct {
 		PublishScheduleList   *bool  `default:"false"`
 		ScheduleWriteListener *bool  `default:"true"`
 	}
+	Notification struct {
+		Enable    *bool `default:"true"`
+		Frequency int   `default:"600"`
+	}
 }
 
 var config *Configuration = nil

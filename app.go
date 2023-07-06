@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/rubix-os/mqttclient"
 	"github.com/NubeIO/rubix-os/rubixregistry"
 	"github.com/NubeIO/rubix-os/services/localmqtt"
+	"github.com/NubeIO/rubix-os/services/notification"
 	"github.com/NubeIO/rubix-os/services/system"
 	"github.com/NubeIO/rubix-os/utils"
 	"github.com/NubeIO/rubix-os/utils/boolean"
@@ -53,6 +54,14 @@ func initHistorySchedulers(db *database.GormDatabase, conf *config.Configuration
 	}
 	if *conf.PointHistory.Enable && *conf.PointHistory.IntervalHistoryCreator.Enable {
 		h.InitIntervalHistoryCreator(conf.PointHistory.IntervalHistoryCreator.Frequency)
+	}
+}
+
+func initNotificationSchedulers(db *database.GormDatabase, conf *config.Configuration) {
+	h := new(notification.Notification)
+	h.DB = db
+	if boolean.IsTrue(conf.Notification.Enable) {
+		h.InitAlertNotification(conf.Notification.Frequency)
 	}
 }
 
@@ -153,6 +162,7 @@ func main() {
 	engine := router.Create(db, conf, scheduler, systemCtl, system_, registry)
 	eventbus.RegisterMQTTBus(false)
 	initHistorySchedulers(db, conf)
+	initNotificationSchedulers(db, conf)
 	initFlushBuffers()
 
 	runner.Run(engine, conf)
