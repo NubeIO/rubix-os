@@ -2,7 +2,6 @@ package notification
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/go-co-op/gocron"
@@ -11,16 +10,17 @@ import (
 	"time"
 )
 
-func (h *Notification) InitAlertNotification(frequency int) {
+func (h *Notification) InitAlertNotification(frequency, resendDuration int) {
 	h.cron = gocron.NewScheduler(time.UTC)
 	h.cron.SetMaxConcurrentJobs(1, gocron.RescheduleMode)
-	_, _ = h.cron.Every(frequency).Tag("AlertNotification").Do(h.sendAlertNotification)
+	_, _ = h.cron.Every(frequency).Tag("AlertNotification").Do(h.sendAlertNotification, resendDuration)
 	h.cron.StartAsync()
 }
 
-func (h *Notification) sendAlertNotification() {
+func (h *Notification) sendAlertNotification(resendDuration int) {
 	log.Info("Send alert notification has is been called...")
-	alerts, err := h.DB.GetAlerts(argspkg.Args{Target: nstring.New("mobile"), Notified: boolean.NewFalse()})
+	notifiedAtLt := time.Now().UTC().Add(-time.Hour * time.Duration(resendDuration)).Format(time.RFC3339Nano)
+	alerts, err := h.DB.GetAlertsForNotification(notifiedAtLt)
 	if err != nil {
 		return
 	}

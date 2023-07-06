@@ -7,9 +7,9 @@ import (
 	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
-	"github.com/NubeIO/rubix-os/utils/ttime"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"time"
 )
 
 func (d *GormDatabase) GetAlert(uuid string, args argspkg.Args) (*model.Alert, error) {
@@ -51,6 +51,15 @@ func (d *GormDatabase) GetAlertByField(field string, value string) (*model.Alert
 		return nil, query.Error
 	}
 	return alertModel, nil
+}
+
+func (d *GormDatabase) GetAlertsForNotification(notifiedAtLt string) ([]*model.Alert, error) {
+	var alertsModel []*model.Alert
+	if err := d.DB.Where("target = ? AND (notified is FALSE OR notified_at < datetime(?))",
+		model.AlertTargetMobile, notifiedAtLt).Find(&alertsModel).Error; err != nil {
+		return nil, err
+	}
+	return alertsModel, nil
 }
 
 func (d *GormDatabase) CreateAlert(body *model.Alert) (*model.Alert, error) {
@@ -97,7 +106,7 @@ func (d *GormDatabase) CreateAlert(body *model.Alert) (*model.Alert, error) {
 		body.Title = alertTypeTitle(body.Title)
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Alert)
-	t := ttime.Now()
+	t := time.Now().UTC()
 	body.CreatedAt = &t
 	body.LastUpdated = &t
 	if err := d.DB.Create(&body).Error; err != nil {
@@ -151,13 +160,14 @@ func (d *GormDatabase) UpdateAlertStatus(uuid string, status string) (alert *mod
 			}
 		}
 	}
-	t := ttime.Now()
+	t := time.Now().UTC()
 	alert.LastUpdated = &t
 	return alert, query.Error
 }
 
 func (d *GormDatabase) UpdateAlertsNotified(uuids []*string, notified *bool) {
-	d.DB.Model(model.Alert{}).Where("uuid IN ?", uuids).Update("notified", notified)
+	updates := map[string]interface{}{"notified": notified, "notified_at": time.Now().UTC()}
+	d.DB.Model(model.Alert{}).Where("uuid IN ?", uuids).Updates(updates)
 }
 
 func (d *GormDatabase) DeleteAlert(uuid string) (*interfaces.Message, error) {

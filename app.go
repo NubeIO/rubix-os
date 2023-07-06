@@ -61,7 +61,7 @@ func initNotificationSchedulers(db *database.GormDatabase, conf *config.Configur
 	h := new(notification.Notification)
 	h.DB = db
 	if boolean.IsTrue(conf.Notification.Enable) {
-		h.InitAlertNotification(conf.Notification.Frequency)
+		h.InitAlertNotification(conf.Notification.Frequency, conf.Notification.ResendDuration)
 	}
 }
 

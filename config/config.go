@@ -62,8 +62,9 @@ type Configuration struct {
 		ScheduleWriteListener *bool  `default:"true"`
 	}
 	Notification struct {
-		Enable    *bool `default:"false"`
-		Frequency int   `default:"60"`
+		Enable         *bool `default:"false"`
+		Frequency      int   `default:"60"`
+		ResendDuration int   `default:"1"`
 	}
 }
 
