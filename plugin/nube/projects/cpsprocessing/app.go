@@ -9,7 +9,6 @@ import (
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/go-gota/gota/dataframe"
-	"os"
 	"strings"
 	"time"
 )
@@ -17,95 +16,357 @@ import (
 func (inst *Instance) CPSProcessing() {
 	inst.cpsDebugMsg("CPSProcessing()")
 
-	periodStart, _ := time.Parse(time.RFC3339, "2023-06-19T07:55:00Z")
-	periodEnd, _ := time.Parse(time.RFC3339, "2023-06-19T10:00:00Z")
+	periodStart, _ := time.Parse(time.RFC3339, "2023-06-25T07:50:00Z")
+	periodEnd, _ := time.Parse(time.RFC3339, "2023-06-25T14:00:00Z")
 
-	// TODO: get site thresholds from thresholds table in pg database
-	siteRef := "cps_b49e0c73919c47ef"
-	var thresholds Threshold
-	err := postgresSetting.postgresConnectionInstance.db.Last(&thresholds, "site_ref = ?", siteRef).Error
+	// get site thresholds from thresholds table in pg database
+	var allSiteThresholds []Threshold
+	err := postgresSetting.postgresConnectionInstance.db.Raw(`
+			SELECT DISTINCT ON (site_ref) *
+			FROM thresholds
+			ORDER BY site_ref, updated_at DESC
+		`).
+		Scan(&allSiteThresholds).Error
 	if err != nil {
-		inst.cpsErrorMsg("CPSProcessing() db.Last(&thresholds, \"site_ref = ?\", siteRef) error: ", err)
+		inst.cpsErrorMsg("CPSProcessing() allSiteThresholds error: ", err)
 	}
-	// fmt.Println("thresholds")
-	// fmt.Println(thresholds)
-	var thresholdsSlice []Threshold
-	thresholdsSlice = append(thresholdsSlice, thresholds)
-	dfSiteThresholds := dataframe.LoadStructs(thresholdsSlice)
+	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() allSiteThresholds: %+v", allSiteThresholds))
+	// TODO: just for debug
+	dfAllSiteThresholds := dataframe.LoadStructs(allSiteThresholds)
 	// dfSiteThresholds := dataframe.ReadCSV(strings.NewReader(csvSiteThresholds))
-	fmt.Println("dfSiteThresholds")
-	fmt.Println(dfSiteThresholds)
+	fmt.Println("dfAllSiteThresholds")
+	fmt.Println(dfAllSiteThresholds)
 
-	// TODO: pull data for each sensor for the given time range.  Do the below functions for each sensor
+	// get a list of point UUIDs for door sensors
+	var doorPointUUIDs []string
+	_ = postgresSetting.postgresConnectionInstance.db.Table("point_meta_tags").
+		Select("point_uuid").
+		Where("key = ? AND value IN ?", "assetFunc", []string{string(managedCubicleDoorSensorAssetFunctionTagValue), string(managedFacilityEntranceDoorSensorAssetFunctionTagValue), string(usageCountDoorSensorAssetFunctionTagValue)}).
+		Find(&doorPointUUIDs)
 
-	// get raw sensor data for time range
-	dfRawDoor := dataframe.ReadCSV(strings.NewReader(csvRawDoor))
-	// fmt.Println("dfRawDoor")
-	// fmt.Println(dfRawDoor)
+	// doorPointUUIDs = []string{"pnt_3dc020ef688e4ae1", "pnt_d6a078410aae48c1", "pnt_75610d0f08ab41b2"} // TODO: just for testing
+	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() doorPointUUIDs: %+v", doorPointUUIDs))
 
-	// get last stored processed data values
-	dfLastProcessedDoor := dataframe.ReadCSV(strings.NewReader(csvLastProNODoor))
-	fmt.Println("dfLastProcessedDoor")
-	fmt.Println(dfLastProcessedDoor)
-
-	// TODO: need to get last totalUses at the time when the last 15MinRollup value was stored (prior to the processing time range)
-	// get last totalUses at the time when the last 15MinRollup value was stored (prior to the processing time range)
-	dfLastTotalUsesAt15Min := dataframe.ReadCSV(strings.NewReader(csvLastTotalUsesAt15Min))
-	fmt.Println("dfLastTotalUsesAt15Min")
-	fmt.Println(dfLastTotalUsesAt15Min)
-
-	dfResets := dataframe.ReadCSV(strings.NewReader(csvRawResets))
-	// fmt.Println("dfResets")
-	// fmt.Println(dfResets)
-
-	dfDailyResets, err := inst.MakeDailyResetsDF(periodStart, periodEnd, dfSiteThresholds)
+	// get the required meta tags grouped by point_uuid and host uuid
+	var doorPointsAndTags []DoorProcessingPoint
+	err = postgresSetting.postgresConnectionInstance.db.Raw(`
+			SELECT
+			p.uuid AS point_uuid,
+			p.name,
+			p.host_uuid,
+			MAX(CASE WHEN m.key = 'siteRef' THEN m.value END) AS site_ref,
+			MAX(CASE WHEN m.key = 'assetRef' THEN m.value END) AS asset_ref,
+			MAX(CASE WHEN m.key = 'assetFunc' THEN m.value END) AS asset_func,
+			MAX(CASE WHEN m.key = 'floorRef' THEN m.value END) AS floor_ref,
+			MAX(CASE WHEN m.key = 'genderRef' THEN m.value END) AS gender_ref,
+			MAX(CASE WHEN m.key = 'locationRef' THEN m.value END) AS location_ref,
+			MAX(CASE WHEN m.key = 'pointFunction' THEN m.value END) AS point_function,
+			MAX(CASE WHEN m.key = 'measurementRef' THEN m.value END) AS measurement_ref,
+			MAX(CASE WHEN m.key = 'doorType' THEN m.value END) AS door_type,
+			MAX(CASE WHEN m.key = 'normalPosition' THEN m.value END) AS normal_position,
+			MAX(CASE WHEN m.key = 'enableCleaningTracking' THEN m.value END) AS enable_cleaning_cracking,
+			MAX(CASE WHEN m.key = 'enableUseCounting' THEN m.value END) AS enable_use_counting,
+			MAX(CASE WHEN m.key = 'isEOT' THEN m.value END) AS is_eot,
+			MAX(CASE WHEN m.key = 'availabilityID' THEN m.value END) AS availability_id,
+			MAX(CASE WHEN m.key = 'resetID' THEN m.value END) AS reset_id
+		FROM
+			points AS p
+		JOIN
+			point_meta_tags AS m ON p.uuid = m.point_uuid
+		WHERE
+			p.uuid IN (?)
+		GROUP BY
+			p.uuid, p.host_uuid
+		`, doorPointUUIDs).
+		Find(&doorPointsAndTags).Error
 	if err != nil {
-		inst.cpsErrorMsg("MakeDailyResetsDF() error: ", err)
-		return
+		inst.cpsErrorMsg("CPSProcessing() doorPointsAndTags error: ", err)
 	}
-	fmt.Println("dfDailyResets")
-	fmt.Println(dfDailyResets)
+	// -- dataframe implementation --
+	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() doorPointsAndTags: %+v", doorPointsAndTags))
+	// TODO: just for debug
+	dfDoorPointsAndTags := dataframe.LoadStructs(doorPointsAndTags)
+	fmt.Println("dfDoorPointsAndTags")
+	fmt.Println(dfDoorPointsAndTags)
 
-	// join daily reset timestamps with the manual resets
-	dfAllResets := dfResets.Concat(*dfDailyResets)
-	dfAllResets = dfAllResets.Arrange(dataframe.Sort(string(timestampColName)))
-	fmt.Println("dfAllResets")
-	fmt.Println(dfAllResets)
+	// get reset points and histories
+	var resetPointUUIDs []string
+	_ = postgresSetting.postgresConnectionInstance.db.Table("point_meta_tags").
+		Select("point_uuid").
+		Where("(key = ? AND value = ?)", "pointFunction", string(doorResetPointFunctionTagValue)).
+		Find(&resetPointUUIDs)
 
-	lastToPending := "2023-06-19T07:42:00Z"
-	lastToClean := "2023-06-17T07:15:00Z"
+	// resetPointUUIDs = []string{"", "", ""} // TODO: just for testing
+	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() resetPointUUIDs: %+v", resetPointUUIDs))
 
-	// Normally OPEN Door Usage Count and Occupancy DF
-	DoorResultDF, err := inst.CalculateDoorUses(facilityToilet, normallyOpen, dfRawDoor, dfLastProcessedDoor, dfAllResets, dfSiteThresholds, lastToPending)
+	// get the required reset point meta tags grouped by point_uuid and host uuid
+	var doorResetPointsAndTags []DoorResetPoint
+	err = postgresSetting.postgresConnectionInstance.db.Raw(`
+			SELECT
+				p.uuid AS point_uuid,
+				p.name,
+				p.host_uuid,
+				MAX(CASE WHEN m.key = 'siteRef' THEN m.value END) AS site_ref,
+				MAX(CASE WHEN m.key = 'pointFunction' THEN m.value END) AS point_function,
+				MAX(CASE WHEN m.key = 'measurementRef' THEN m.value END) AS measurement_ref,
+				MAX(CASE WHEN m.key = 'isEOT' THEN m.value END) AS is_eot,
+				MAX(CASE WHEN m.key = 'resetID' THEN m.value END) AS reset_id
+			FROM
+				points AS p
+			JOIN
+				point_meta_tags AS m ON p.uuid = m.point_uuid
+			WHERE
+				p.uuid IN (?)
+			GROUP BY
+				p.uuid, p.host_uuid
+				`, resetPointUUIDs).
+		Find(&doorResetPointsAndTags).Error
 	if err != nil {
-		inst.cpsErrorMsg("CalculateDoorUses() error: ", err)
-		return
+		inst.cpsErrorMsg("CPSProcessing() doorResetPointsAndTags error: ", err)
 	}
-	fmt.Println("DoorResultDF")
-	fmt.Println(DoorResultDF)
+	// -- dataframe implementation --
+	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() doorResetPointsAndTags: %+v", doorResetPointsAndTags))
+	// TODO: just for debug
+	dfDoorResetPointsAndTags := dataframe.LoadStructs(doorResetPointsAndTags)
+	fmt.Println("dfDoorResetPointsAndTags")
+	fmt.Println(dfDoorResetPointsAndTags)
 
-	RollupResultDF, err := inst.Calculate15MinUsageRollup(periodStart, periodEnd, *DoorResultDF, dfLastTotalUsesAt15Min)
-	if err != nil {
-		inst.cpsErrorMsg("Calculate15MinUsageRollup() error: ", err)
-		return
-	}
-	fmt.Println("RollupResultDF")
-	fmt.Println(RollupResultDF)
+	// do processing steps for each site
+	for _, siteThresholds := range allSiteThresholds {
+		siteRef := siteThresholds.SiteRef
+		inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() siteRef: %+v", siteRef))
 
-	OverdueResultDF, err := inst.CalculateOverdueCubicles(facilityToilet, periodStart, periodEnd, *DoorResultDF, dfLastProcessedDoor, dfSiteThresholds, lastToPending, lastToClean)
-	if err != nil {
-		inst.cpsErrorMsg("CalculateOverdueCubicles() error: ", err)
-		return
-	}
-	fmt.Println("OverdueResultDF")
-	fmt.Println(OverdueResultDF)
+		// get the points for this site
+		thisSiteDoorPointsAndTags := make([]DoorProcessingPoint, 0)
+		for _, point := range doorPointsAndTags {
+			if point.SiteRef == siteRef {
+				thisSiteDoorPointsAndTags = append(thisSiteDoorPointsAndTags, point)
+			}
+		}
+		// -- dataframe implementation --
+		// dfThisSitePointsAndTags := dfDoorPointsAndTags.Filter(dataframe.F{Colname: "site_ref", Comparator: series.Eq, Comparando: siteRef})
+		// TODO: just for debug
+		dfThisSiteDoorPointsAndTags := dataframe.LoadStructs(thisSiteDoorPointsAndTags)
+		fmt.Println("dfThisSiteDoorPointsAndTags")
+		fmt.Println(dfThisSiteDoorPointsAndTags)
 
-	ResultFile, err := os.Create("/home/marc/Documents/Nube/CPS/Development/Data_Processing/1_Results.csv")
-	if err != nil {
-		inst.cpsErrorMsg(err)
+		// get the raw door sensor points for this site (meta-tag = pointFunction: "sensor")
+		thisSiteDoorSensorPointsAndTags := make([]DoorProcessingPoint, 0)
+		for _, point := range doorPointsAndTags {
+			if point.PointFunction == string(rawDoorSensorPointFunctionTagValue) && point.MeasurementRef == string(doorSensorMeasurementRefTagValue) {
+				thisSiteDoorSensorPointsAndTags = append(thisSiteDoorSensorPointsAndTags, point)
+			}
+		}
+		// -- dataframe implementation --
+		// dfThisSiteSensorPointsAndTags := dfThisSitePointsAndTags.Filter(dataframe.F{Colname: pointFunctionTag, Comparator: series.Eq, Comparando: rawDoorSensorPointFunctionTagValue})
+		// TODO: just for debug
+		dfThisSiteDoorSensorPointsAndTags := dataframe.LoadStructs(thisSiteDoorSensorPointsAndTags)
+		fmt.Println("dfThisSiteDoorSensorPointsAndTags")
+		fmt.Println(dfThisSiteDoorSensorPointsAndTags)
+
+		// iterate through the raw points, push histories (to points that exist), and update the relevant point values (for app)
+		for _, doorSensorPoint := range thisSiteDoorSensorPointsAndTags {
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() point: %+v, uuid: %v, host: %v", doorSensorPoint.Name, doorSensorPoint.UUID, doorSensorPoint.HostUUID))
+
+			if doorSensorPoint.AssetRef == "" {
+				inst.cpsErrorMsg(fmt.Sprintf("CPSProcessing() no assetRef tag on point: %v - %v", doorSensorPoint.Name, doorSensorPoint.UUID))
+				continue
+			}
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() assetRef: %+v", doorSensorPoint.AssetRef))
+
+			// collect the processed data points for this asset
+			thisAssetProcessedDataPoints := make([]DoorProcessingPoint, 0)
+			for _, p := range thisSiteDoorPointsAndTags {
+				if p.AssetRef == doorSensorPoint.AssetRef && p.PointFunction == string(processedDataPointFunctionTagValue) {
+					thisAssetProcessedDataPoints = append(thisAssetProcessedDataPoints, p)
+				}
+			}
+			if len(thisAssetProcessedDataPoints) <= 0 {
+				inst.cpsErrorMsg(fmt.Sprintf("CPSProcessing() no processed data points for asset: (%v) %v - %v - %v", doorSensorPoint.AssetRef, doorSensorPoint.FloorRef, doorSensorPoint.GenderRef, doorSensorPoint.LocationRef))
+				continue
+			}
+			// TODO: just for debug
+			dfThisAssetProcessedDataPoints := dataframe.LoadStructs(thisAssetProcessedDataPoints)
+			fmt.Println("dfThisAssetProcessedDataPoints")
+			fmt.Println(dfThisAssetProcessedDataPoints)
+
+			// first verify that the point has all the required information and calculations should actually be done
+			processedDataPointUUIDs := make([]string, 0)
+			var cubicleOccupancyPoint, totalUsesPoint, currentUsesPoint, fifteenMinUsesPoint *DoorProcessingPoint
+			// , pendingStatusPoint, overdueStatusPoint, toPendingPoint, toCleanPoint, toOverduePoint, cleaningTimePoint *DoorProcessingPoint
+			for _, pdp := range thisAssetProcessedDataPoints {
+				switch pdp.Name {
+				case string(cubicleOccupancyColName):
+					cubicleOccupancyPoint = &pdp
+				case string(totalUsesColName):
+					totalUsesPoint = &pdp
+				case string(currentUsesColName):
+					currentUsesPoint = &pdp
+				case string(fifteenMinRollupUsesColName):
+					fifteenMinUsesPoint = &pdp
+					/*
+						case string(pendingStatusColName):
+							pendingStatusPoint = &pdp
+						case string(overdueStatusColName):
+							overdueStatusPoint = &pdp
+						case string(toPendingColName):
+							toPendingPoint = &pdp
+						case string(toCleanColName):
+							toCleanPoint = &pdp
+						case string(toOverdueColName):
+							toOverduePoint = &pdp
+						case string(cleaningTimeColName):
+							cleaningTimePoint = &pdp
+					*/
+				}
+				// add point_uuid to the list of the processed data point uuids
+				processedDataPointUUIDs = append(processedDataPointUUIDs, pdp.UUID)
+			}
+			// first verify the points exist for `usageCount` processing
+			if cubicleOccupancyPoint == nil || totalUsesPoint == nil || currentUsesPoint == nil || fifteenMinUsesPoint == nil {
+				inst.cpsErrorMsg(fmt.Sprintf("CPSProcessing() missing `usageCount` proccessed data point for asset: (%v) %v - %v - %v", doorSensorPoint.AssetRef, doorSensorPoint.FloorRef, doorSensorPoint.GenderRef, doorSensorPoint.LocationRef))
+				continue
+			}
+
+			// pull data for sensor for the given time range
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() periodStart: %+v", periodStart))
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() periodEnd: %+v", periodEnd))
+
+			var rawSensorData []History
+			err = postgresSetting.postgresConnectionInstance.db.Model(&model.History{}).Where("point_uuid = ? AND host_uuid = ? AND (timestamp AT TIME ZONE 'UTC' BETWEEN ? AND ?)", doorSensorPoint.UUID, doorSensorPoint.HostUUID, periodStart, periodEnd).Scan(&rawSensorData).Error
+			if err != nil {
+				inst.cpsErrorMsg("CPSProcessing() rawSensorData error: ", err)
+			}
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() rawSensorData: %+v", rawSensorData))
+			// dfRawDoor := dataframe.ReadCSV(strings.NewReader(csvRawDoor))
+			dfRawDoor := dataframe.LoadStructs(rawSensorData)
+			fmt.Println("dfRawDoor")
+			fmt.Println(dfRawDoor)
+
+			// get last stored processed data values
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() hostUUID: %+v", doorSensorPoint.HostUUID))
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() processedDataPointUUIDs: %+v", processedDataPointUUIDs))
+			var lastProcessedDataHistories []History
+			err = postgresSetting.postgresConnectionInstance.db.Raw(`
+					SELECT DISTINCT ON (point_uuid, host_uuid) *
+					FROM histories
+					WHERE host_uuid = ? AND point_uuid IN (?) AND timestamp AT TIME ZONE 'UTC' < ?
+					ORDER BY point_uuid, host_uuid, timestamp DESC
+				`, doorSensorPoint.HostUUID, processedDataPointUUIDs, periodEnd).
+				Scan(&lastProcessedDataHistories).Error
+			if err != nil {
+				inst.cpsErrorMsg("CPSProcessing() lastProcessedData error: ", err)
+			}
+			/*
+				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() lastProcessedData SQL: %+v", postgresSetting.postgresConnectionInstance.db.ToSQL(func(tx *gorm.DB) *gorm.DB {
+					return tx.Raw(`
+						SELECT DISTINCT ON (point_uuid, host_uuid) *
+						FROM histories
+						WHERE host_uuid = ? AND point_uuid IN (?) AND timestamp AT TIME ZONE 'UTC' < ?
+						ORDER BY point_uuid, host_uuid, timestamp DESC
+					`, doorSensorPoint.HostUUID, processedDataPointUUIDs, periodEnd).
+						Scan(&lastProcessedDataHistories)
+				})))
+			*/
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() lastProcessedDataHistories: %+v", lastProcessedDataHistories))
+			// dfLastProcessedDoor := dataframe.ReadCSV(strings.NewReader(csvLastProNODoor))
+			dfLastProcessedDataHistories := dataframe.LoadStructs(lastProcessedDataHistories)
+			fmt.Println("dfLastProcessedDataHistories")
+			fmt.Println(dfLastProcessedDataHistories)
+
+			// var lastProcessedData LastProcessedData
+			if len(lastProcessedDataHistories) > 0 {
+				dfJoinedLastProcessedValuesAndPoints := dfThisAssetProcessedDataPoints.OuterJoin(dfLastProcessedDataHistories, "point_uuid", "host_uuid")
+				fmt.Println("dfJoinedLastProcessedValuesAndPoints")
+				fmt.Println(dfJoinedLastProcessedValuesAndPoints)
+				// for _, hist := range lastProcessedDataHistories {
+			} else {
+				dfJoinedLastProcessedValuesAndPoints := dfThisAssetProcessedDataPoints
+				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() lastProcessedDataHistories error: no last values were found, using zero values for processing"))
+				fmt.Println("dfJoinedLastProcessedValuesAndPoints")
+				fmt.Println(dfJoinedLastProcessedValuesAndPoints)
+			}
+
+			// TODO: get only the reset point and histories associated with this asset
+			// get reset point and histories applicable to this asset/point
+			thisAssetResetDataPoints := make([]DoorResetPoint, 0)
+			for _, rp := range doorResetPointsAndTags {
+				if rp.ResetID == doorSensorPoint.ResetID {
+					thisAssetResetDataPoints = append(thisAssetResetDataPoints, rp)
+				}
+			}
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() thisAssetResetDataPoints: %+v", thisAssetResetDataPoints))
+			// -- dataframe implementation --
+			// TODO: just for debug
+			dfThisAssetResetDataPoints := dataframe.LoadStructs(thisAssetResetDataPoints)
+			fmt.Println("dfThisAssetResetDataPoints")
+			fmt.Println(dfThisAssetResetDataPoints)
+
+			/*
+				// TODO: need to get last totalUses at the time when the last 15MinRollup value was stored (prior to the processing time range)
+				// get last totalUses at the time when the last 15MinRollup value was stored (prior to the processing time range)
+				dfLastTotalUsesAt15Min := dataframe.ReadCSV(strings.NewReader(csvLastTotalUsesAt15Min))
+				fmt.Println("dfLastTotalUsesAt15Min")
+				fmt.Println(dfLastTotalUsesAt15Min)
+
+				dfResets := dataframe.ReadCSV(strings.NewReader(csvRawResets))
+				// fmt.Println("dfResets")
+				// fmt.Println(dfResets)
+
+				dfDailyResets, err := inst.MakeDailyResetsDF(periodStart, periodEnd, dfSiteThresholds)
+				if err != nil {
+					inst.cpsErrorMsg("MakeDailyResetsDF() error: ", err)
+					return
+				}
+				fmt.Println("dfDailyResets")
+				fmt.Println(dfDailyResets)
+
+				// join daily reset timestamps with the manual resets
+				dfAllResets := dfResets.Concat(*dfDailyResets)
+				dfAllResets = dfAllResets.Arrange(dataframe.Sort(string(timestampColName)))
+				fmt.Println("dfAllResets")
+				fmt.Println(dfAllResets)
+
+				lastToPending := "2023-06-19T07:42:00Z"
+				lastToClean := "2023-06-17T07:15:00Z"
+
+				// Normally OPEN Door Usage Count and Occupancy DF
+				DoorResultDF, err := inst.CalculateDoorUses(facilityToilet, normallyOpen, dfRawDoor, dfLastProcessedDoor, dfAllResets, dfSiteThresholds, lastToPending)
+				if err != nil {
+					inst.cpsErrorMsg("CalculateDoorUses() error: ", err)
+					return
+				}
+				fmt.Println("DoorResultDF")
+				fmt.Println(DoorResultDF)
+
+				RollupResultDF, err := inst.Calculate15MinUsageRollup(periodStart, periodEnd, *DoorResultDF, dfLastTotalUsesAt15Min)
+				if err != nil {
+					inst.cpsErrorMsg("Calculate15MinUsageRollup() error: ", err)
+					return
+				}
+				fmt.Println("RollupResultDF")
+				fmt.Println(RollupResultDF)
+
+				OverdueResultDF, err := inst.CalculateOverdueCubicles(facilityToilet, periodStart, periodEnd, *DoorResultDF, dfLastProcessedDoor, dfSiteThresholds, lastToPending, lastToClean)
+				if err != nil {
+					inst.cpsErrorMsg("CalculateOverdueCubicles() error: ", err)
+					return
+				}
+				fmt.Println("OverdueResultDF")
+				fmt.Println(OverdueResultDF)
+			*/
+		}
 	}
-	defer ResultFile.Close()
-	OverdueResultDF.WriteCSV(ResultFile)
+
+	/*
+		ResultFile, err := os.Create("/home/marc/Documents/Nube/CPS/Development/Data_Processing/1_Results.csv")
+		if err != nil {
+			inst.cpsErrorMsg(err)
+		}
+		defer ResultFile.Close()
+		OverdueResultDF.WriteCSV(ResultFile)
+
+	*/
 }
 
 // THE FOLLOWING GROUP OF FUNCTIONS ARE THE PLUGIN RESPONSES TO API CALLS FOR PLUGIN POINT, DEVICE, NETWORK (CRUD)
@@ -229,7 +490,7 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		point.MetaTags = append(point.MetaTags, &metaTag7)
 		metaTag8 := model.PointMetaTag{Key: "locationRef", Value: location}
 		point.MetaTags = append(point.MetaTags, &metaTag8)
-		metaTag9 := model.PointMetaTag{Key: "measurementRefs", Value: "door_position"}
+		metaTag9 := model.PointMetaTag{Key: "measurementRef", Value: "door_position"}
 		point.MetaTags = append(point.MetaTags, &metaTag9)
 		metaTag10 := model.PointMetaTag{Key: "normalPosition", Value: "NO"}
 		point.MetaTags = append(point.MetaTags, &metaTag10)

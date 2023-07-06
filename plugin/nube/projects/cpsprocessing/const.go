@@ -6,6 +6,22 @@ const closed = 1
 const vacant = 0
 const occupied = 1
 
+type PointTags string
+
+const (
+	pointFunctionTag                                       PointTags = "pointFunction"
+	rawDoorSensorPointFunctionTagValue                     PointTags = "sensor"
+	processedDataPointFunctionTagValue                     PointTags = "processedData"
+	doorResetPointFunctionTagValue                         PointTags = "doorReset"
+	measurementRefTag                                      PointTags = "measurementRef"
+	doorSensorMeasurementRefTagValue                       PointTags = "door_position"
+	assetRefTag                                            PointTags = "assetRef"
+	assetFuncTag                                           PointTags = "assetFunc"
+	managedCubicleDoorSensorAssetFunctionTagValue          PointTags = "managedCubicle"
+	managedFacilityEntranceDoorSensorAssetFunctionTagValue PointTags = "managedFacilityEntrance"
+	usageCountDoorSensorAssetFunctionTagValue              PointTags = "usageCount"
+)
+
 type DoorState int
 
 const (
