@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## [v0.0.8](https://github.com/NubeIO/rubix-os/tree/v0.0.8) (2023-07-06)
+
+- Fix: router issue after cors
+- Accepting args itself for GRPC communication instead of string
+- Add FCM server API endpoints & implementation of the notification system
+
 ## [v0.0.7](https://github.com/NubeIO/rubix-os/tree/v0.0.7) (2023-07-03)
 
 - Fix: cors issue in auth true
