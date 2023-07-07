@@ -74,10 +74,12 @@ message WizardNewNetworkDevicePointRequest {
 
 message BoolResponse {
   bool r = 1;
+  bytes e = 2;
 }
 
 message Response {
   bytes r = 1;
+  bytes e = 2;
 }
 
 message InfoResponse {
@@ -90,6 +92,10 @@ message InfoResponse {
 
 message UrlPrefixResponse {
   string r = 1;
+}
+
+message ErrorResponse {
+  bytes e = 1;
 }
 
 service Module {
@@ -112,7 +118,7 @@ service DBHelper {
   rpc Put(PutRequest) returns (Response);
   rpc Patch(PatchRequest) returns (Response);
   rpc Delete(DeleteRequest) returns (Response);
-  rpc SetErrorsForAll(SetErrorsForAllRequest) returns (Empty);
-  rpc ClearErrorsForAll(ClearErrorsForAllRequest) returns (Empty);
+  rpc SetErrorsForAll(SetErrorsForAllRequest) returns (ErrorResponse);
+  rpc ClearErrorsForAll(ClearErrorsForAllRequest) returns (ErrorResponse);
   rpc WizardNewNetworkDevicePoint(WizardNewNetworkDevicePointRequest) returns (BoolResponse);
 }

@@ -2,8 +2,8 @@ package shared
 
 import (
 	"context"
+	"errors"
 	"github.com/NubeIO/rubix-os/module/proto"
-	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
 )
@@ -130,8 +130,13 @@ func (m *GRPCDBHelperClient) GetWithoutParam(path, args string) ([]byte, error) 
 		Args: args,
 	})
 	if err != nil {
-		hclog.Default().Info("GetList", err)
+		log.Error("GetList: ", err)
 		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		log.Error("GetList: ", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
@@ -143,8 +148,13 @@ func (m *GRPCDBHelperClient) Get(path, uuid, args string) ([]byte, error) {
 		Args: args,
 	})
 	if err != nil {
-		hclog.Default().Info("Get", err)
+		log.Error("Get: ", err)
 		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		log.Error("Get: ", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
@@ -155,8 +165,13 @@ func (m *GRPCDBHelperClient) Post(path string, body []byte) ([]byte, error) {
 		Body: body,
 	})
 	if err != nil {
-		hclog.Default().Info("Post", err)
+		log.Error("Post: ", err)
 		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		log.Error("Post: ", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
@@ -168,8 +183,13 @@ func (m *GRPCDBHelperClient) Put(path, uuid string, body []byte) ([]byte, error)
 		Body: body,
 	})
 	if err != nil {
-		hclog.Default().Info("Put", err)
+		log.Error("Put: ", err)
 		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		log.Error("Put: ", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
@@ -181,8 +201,13 @@ func (m *GRPCDBHelperClient) Patch(path, uuid string, body []byte) ([]byte, erro
 		Body: body,
 	})
 	if err != nil {
-		hclog.Default().Info("Patch", err)
+		log.Error("Patch: ", err)
 		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		log.Error("Patch: ", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
@@ -193,14 +218,19 @@ func (m *GRPCDBHelperClient) Delete(path, uuid string) ([]byte, error) {
 		Uuid: uuid,
 	})
 	if err != nil {
-		hclog.Default().Info("Delete", err)
+		log.Error("Delete: ", err)
 		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		log.Error("Delete: ", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
 
 func (m *GRPCDBHelperClient) SetErrorsForAll(path, uuid, message, messageLevel, messageCode string, doPoints bool) error {
-	_, err := m.client.SetErrorsForAll(context.Background(), &proto.SetErrorsForAllRequest{
+	resp, err := m.client.SetErrorsForAll(context.Background(), &proto.SetErrorsForAllRequest{
 		Path:         path,
 		Uuid:         uuid,
 		Message:      message,
@@ -209,35 +239,50 @@ func (m *GRPCDBHelperClient) SetErrorsForAll(path, uuid, message, messageLevel, 
 		DoPoints:     doPoints,
 	})
 	if err != nil {
-		hclog.Default().Info("SetErrorsForAll", err)
+		log.Error("SetErrorsForAll: ", err)
 		return err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		log.Error("SetErrorsForAll: ", errStr)
+		return errors.New(errStr)
 	}
 	return nil
 }
 
 func (m *GRPCDBHelperClient) ClearErrorsForAll(path, uuid string, doPoints bool) error {
-	_, err := m.client.ClearErrorsForAll(context.Background(), &proto.ClearErrorsForAllRequest{
+	resp, err := m.client.ClearErrorsForAll(context.Background(), &proto.ClearErrorsForAllRequest{
 		Path:     path,
 		Uuid:     uuid,
 		DoPoints: doPoints,
 	})
 	if err != nil {
-		hclog.Default().Info("ClearErrorsForAll", err)
+		log.Error("ClearErrorsForAll: ", err)
 		return err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		log.Error("ClearErrorsForAll: ", errStr)
+		return errors.New(errStr)
 	}
 	return nil
 }
 
 func (m *GRPCDBHelperClient) WizardNewNetworkDevicePoint(plugin string, network, device, point []byte) (bool, error) {
-	_, err := m.client.WizardNewNetworkDevicePoint(context.Background(), &proto.WizardNewNetworkDevicePointRequest{
+	resp, err := m.client.WizardNewNetworkDevicePoint(context.Background(), &proto.WizardNewNetworkDevicePointRequest{
 		Plugin:  plugin,
 		Network: network,
 		Device:  device,
 		Point:   point,
 	})
 	if err != nil {
-		hclog.Default().Info("WizardNewNetworkDevicePoint", err)
+		log.Error("WizardNewNetworkDevicePoint: ", err)
 		return false, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		log.Error("WizardNewNetworkDevicePoint: ", errStr)
+		return false, errors.New(errStr)
 	}
 	return true, nil
 }

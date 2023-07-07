@@ -142,52 +142,52 @@ type GRPCDBHelperServer struct {
 func (m *GRPCDBHelperServer) GetWithoutParam(ctx context.Context, req *proto.GetWithoutParamRequest) (resp *proto.Response, err error) {
 	r, err := m.Impl.GetWithoutParam(req.Path, req.Args)
 	if err != nil {
-		return nil, err
+		return &proto.Response{R: nil, E: []byte(err.Error())}, nil
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r, E: nil}, nil
 }
 
 func (m *GRPCDBHelperServer) Get(ctx context.Context, req *proto.GetRequest) (resp *proto.Response, err error) {
 	r, err := m.Impl.Get(req.Path, req.Uuid, req.Args)
 	if err != nil {
-		return nil, err
+		return &proto.Response{R: nil, E: []byte(err.Error())}, nil
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r, E: nil}, nil
 }
 
 func (m *GRPCDBHelperServer) Post(ctx context.Context, req *proto.PostRequest) (resp *proto.Response, err error) {
 	r, err := m.Impl.Post(req.Path, req.Body)
 	if err != nil {
-		return nil, err
+		return &proto.Response{R: nil, E: []byte(err.Error())}, nil
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r, E: nil}, nil
 }
 
 func (m *GRPCDBHelperServer) Put(ctx context.Context, req *proto.PutRequest) (resp *proto.Response, err error) {
 	r, err := m.Impl.Put(req.Path, req.Uuid, req.Body)
 	if err != nil {
-		return nil, err
+		return &proto.Response{R: nil, E: []byte(err.Error())}, nil
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r, E: nil}, nil
 }
 
 func (m *GRPCDBHelperServer) Patch(ctx context.Context, req *proto.PatchRequest) (resp *proto.Response, err error) {
 	r, err := m.Impl.Patch(req.Path, req.Uuid, req.Body)
 	if err != nil {
-		return nil, err
+		return &proto.Response{R: nil, E: []byte(err.Error())}, nil
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r, E: nil}, nil
 }
 
 func (m *GRPCDBHelperServer) Delete(ctx context.Context, req *proto.DeleteRequest) (resp *proto.Response, err error) {
 	r, err := m.Impl.Delete(req.Path, req.Uuid)
 	if err != nil {
-		return nil, err
+		return &proto.Response{R: nil, E: []byte(err.Error())}, nil
 	}
-	return &proto.Response{R: r}, err
+	return &proto.Response{R: r, E: nil}, nil
 }
 
-func (m *GRPCDBHelperServer) SetErrorsForAll(ctx context.Context, request *proto.SetErrorsForAllRequest) (*proto.Empty, error) {
+func (m *GRPCDBHelperServer) SetErrorsForAll(ctx context.Context, request *proto.SetErrorsForAllRequest) (*proto.ErrorResponse, error) {
 	err := m.Impl.SetErrorsForAll(
 		request.Path,
 		request.Uuid,
@@ -197,23 +197,23 @@ func (m *GRPCDBHelperServer) SetErrorsForAll(ctx context.Context, request *proto
 		request.DoPoints,
 	)
 	if err != nil {
-		return nil, err
+		return &proto.ErrorResponse{E: []byte(err.Error())}, nil
 	}
-	return &proto.Empty{}, err
+	return &proto.ErrorResponse{E: nil}, nil
 }
 
-func (m *GRPCDBHelperServer) ClearErrorsForAll(ctx context.Context, request *proto.ClearErrorsForAllRequest) (*proto.Empty, error) {
+func (m *GRPCDBHelperServer) ClearErrorsForAll(ctx context.Context, request *proto.ClearErrorsForAllRequest) (*proto.ErrorResponse, error) {
 	err := m.Impl.ClearErrorsForAll(request.Path, request.Uuid, request.DoPoints)
 	if err != nil {
-		return nil, err
+		return &proto.ErrorResponse{E: []byte(err.Error())}, nil
 	}
-	return &proto.Empty{}, err
+	return &proto.ErrorResponse{E: nil}, nil
 }
 
 func (m *GRPCDBHelperServer) WizardNewNetworkDevicePoint(ctx context.Context, request *proto.WizardNewNetworkDevicePointRequest) (*proto.BoolResponse, error) {
 	_, err := m.Impl.WizardNewNetworkDevicePoint(request.Plugin, request.Network, request.Device, request.Point)
 	if err != nil {
-		return &proto.BoolResponse{R: false}, err
+		return &proto.BoolResponse{R: false, E: []byte(err.Error())}, nil
 	}
-	return &proto.BoolResponse{R: true}, nil
+	return &proto.BoolResponse{R: true, E: nil}, nil
 }
