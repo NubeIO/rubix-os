@@ -41,9 +41,14 @@ func (h *Notification) sendAlertNotification(resendDuration time.Duration) {
 				"priority":          "high",
 			}
 			members, _ := h.DB.GetMembersByHostUUID(alert.HostUUID)
+			uniqueDevices := map[string]string{}
 			for _, member := range members {
-				h.DB.SendNotificationByMemberUUID(member.UUID, data)
+				memberDevices, _ := h.DB.GetMemberDevicesByMemberUUID(member.UUID)
+				for _, memberDevice := range memberDevices {
+					uniqueDevices[memberDevice.DeviceID] = *memberDevice.DeviceName
+				}
 			}
+			h.DB.SendNotificationByMemberUUID(uniqueDevices, data)
 		}(alert)
 	}
 	wg.Wait()

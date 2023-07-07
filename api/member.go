@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/security"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	argspkg "github.com/NubeIO/rubix-os/args"
@@ -27,7 +28,8 @@ type MemberDatabase interface {
 	GetMemberSidebars(username string, includeWithoutViews bool) ([]*model.Location, error)
 
 	GetFcmServerKey() string
-	SendNotificationByMemberUUID(memberUUID string, data map[string]interface{})
+	SendNotificationByMemberUUID(uniqueDevices map[string]string, data map[string]interface{})
+	GetMemberDevicesByMemberUUID(memberUUID string) ([]*model.MemberDevice, error)
 }
 
 type MemberAPI struct {
@@ -139,13 +141,17 @@ func (a *MemberAPI) VerifyMember(ctx *gin.Context) {
 		"to": "",
 		"notification": map[string]string{
 			"title": "NubeIO Member Status",
-			"body":  "Member is verified by Admin!",
+			"body":  fmt.Sprintf("Member '%s' is verified by Admin!", member.Username),
 		},
 		"content_available": false,
 		"priority":          "high",
 	}
-	a.DB.SendNotificationByMemberUUID(member.UUID, data)
-
+	uniqueDevices := map[string]string{}
+	memberDevices, _ := a.DB.GetMemberDevicesByMemberUUID(member.UUID)
+	for _, memberDevice := range memberDevices {
+		uniqueDevices[memberDevice.DeviceID] = *memberDevice.DeviceName
+	}
+	a.DB.SendNotificationByMemberUUID(uniqueDevices, data)
 	ResponseHandler(interfaces.Message{Message: "member has been verified successfully"}, nil, ctx)
 }
 

@@ -70,18 +70,17 @@ func (d *GormDatabase) DeleteMemberDevicesByArgs(args argspkg.Args) (bool, error
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) SendNotificationByMemberUUID(memberUUID string, data map[string]interface{}) {
+func (d *GormDatabase) SendNotificationByMemberUUID(uniqueDevices map[string]string, data map[string]interface{}) {
 	key := d.GetFcmServerKey()
 	cli := cligetter.GetFcmServerClient(key)
-	memberDevices, _ := d.GetMemberDevicesByMemberUUID(memberUUID)
 	wg := &sync.WaitGroup{}
-	for _, memberDevice := range memberDevices {
+	for deviceId, deviceName := range uniqueDevices {
 		wg.Add(1)
-		go func(memberDevice *model.MemberDevice, data map[string]interface{}) {
+		go func(deviceId, deviceName string, data map[string]interface{}) {
 			defer wg.Done()
-			log.Infof(">>>>>>>>>>>> Sending data to device: %s", *memberDevice.DeviceName)
+			log.Infof(">>>>>>>>>>>> Sending data to device: %s", deviceName)
 			if data["to"] != nil {
-				data["to"] = nstring.New(memberDevice.DeviceID)
+				data["to"] = nstring.New(deviceId)
 			}
 			content := cli.SendNotification(data)
 			if len(content) > 0 {
@@ -90,12 +89,12 @@ func (d *GormDatabase) SendNotificationByMemberUUID(memberUUID string, data map[
 				if failure == 1 && len(results) > 0 {
 					errorMsg := results[0].(map[string]interface{})["error"].(string)
 					if errorMsg == "InvalidRegistration" || errorMsg == "NotRegistered" {
-						log.Warnf(">>>>>>>>>>>>>>> Removing device: %s from list!", *memberDevice.DeviceName)
-						_, _ = d.DeleteMemberDevicesByArgs(argspkg.Args{DeviceId: nstring.New(memberDevice.DeviceID)})
+						log.Warnf(">>>>>>>>>>>>>>> Removing device: %s from list!", deviceName)
+						_, _ = d.DeleteMemberDevicesByArgs(argspkg.Args{DeviceId: nstring.New(deviceId)})
 					}
 				}
 			}
-		}(memberDevice, data)
+		}(deviceId, deviceName, data)
 	}
 	wg.Wait()
 }
