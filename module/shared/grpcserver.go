@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
-	"google.golang.org/grpc/status"
 )
 
 // Here is the RPC server that RPCClient talks to, conforming to
@@ -132,9 +131,13 @@ func (m *GRPCDBHelperClient) GetWithoutParam(path, args string) ([]byte, error) 
 		Args: args,
 	})
 	if err != nil {
-		st := status.Convert(err)
-		hclog.Default().Info("GetList", st.Message())
-		return nil, errors.New(st.Message())
+		hclog.Default().Info("GetList rpc", err)
+		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		hclog.Default().Info("GetList", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
@@ -146,9 +149,13 @@ func (m *GRPCDBHelperClient) Get(path, uuid, args string) ([]byte, error) {
 		Args: args,
 	})
 	if err != nil {
-		st := status.Convert(err)
-		hclog.Default().Info("Get", st.Message())
-		return nil, errors.New(st.Message())
+		hclog.Default().Info("Get rpc", err)
+		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		hclog.Default().Info("Get", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
@@ -159,9 +166,13 @@ func (m *GRPCDBHelperClient) Post(path string, body []byte) ([]byte, error) {
 		Body: body,
 	})
 	if err != nil {
-		st := status.Convert(err)
-		hclog.Default().Info("Post", st.Message())
-		return nil, errors.New(st.Message())
+		hclog.Default().Info("Post rpc", err)
+		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		hclog.Default().Info("Post", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
@@ -173,9 +184,13 @@ func (m *GRPCDBHelperClient) Put(path, uuid string, body []byte) ([]byte, error)
 		Body: body,
 	})
 	if err != nil {
-		st := status.Convert(err)
-		hclog.Default().Info("Put", st.Message())
-		return nil, errors.New(st.Message())
+		hclog.Default().Info("Put rpc", err)
+		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		hclog.Default().Info("Put", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
@@ -187,9 +202,13 @@ func (m *GRPCDBHelperClient) Patch(path, uuid string, body []byte) ([]byte, erro
 		Body: body,
 	})
 	if err != nil {
-		st := status.Convert(err)
-		hclog.Default().Info("Patch", st.Message())
-		return nil, errors.New(st.Message())
+		hclog.Default().Info("Patch rpc", err)
+		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		hclog.Default().Info("Patch", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
@@ -200,15 +219,19 @@ func (m *GRPCDBHelperClient) Delete(path, uuid string) ([]byte, error) {
 		Uuid: uuid,
 	})
 	if err != nil {
-		st := status.Convert(err)
-		hclog.Default().Info("Delete", st.Message())
-		return nil, errors.New(st.Message())
+		hclog.Default().Info("Delete rpc", err)
+		return nil, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		hclog.Default().Info("Delete", errStr)
+		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
 }
 
 func (m *GRPCDBHelperClient) SetErrorsForAll(path, uuid, message, messageLevel, messageCode string, doPoints bool) error {
-	_, err := m.client.SetErrorsForAll(context.Background(), &proto.SetErrorsForAllRequest{
+	resp, err := m.client.SetErrorsForAll(context.Background(), &proto.SetErrorsForAllRequest{
 		Path:         path,
 		Uuid:         uuid,
 		Message:      message,
@@ -217,38 +240,50 @@ func (m *GRPCDBHelperClient) SetErrorsForAll(path, uuid, message, messageLevel, 
 		DoPoints:     doPoints,
 	})
 	if err != nil {
-		st := status.Convert(err)
-		hclog.Default().Info("SetErrorsForAll", st.Message())
-		return errors.New(st.Message())
+		hclog.Default().Info("SetErrorsForAll rpc", err)
+		return err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		hclog.Default().Info("SetErrorsForAll", errStr)
+		return errors.New(errStr)
 	}
 	return nil
 }
 
 func (m *GRPCDBHelperClient) ClearErrorsForAll(path, uuid string, doPoints bool) error {
-	_, err := m.client.ClearErrorsForAll(context.Background(), &proto.ClearErrorsForAllRequest{
+	resp, err := m.client.ClearErrorsForAll(context.Background(), &proto.ClearErrorsForAllRequest{
 		Path:     path,
 		Uuid:     uuid,
 		DoPoints: doPoints,
 	})
 	if err != nil {
-		st := status.Convert(err)
-		hclog.Default().Info("ClearErrorsForAll", st.Message())
-		return errors.New(st.Message())
+		hclog.Default().Info("ClearErrorsForAll rpc", err)
+		return err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		hclog.Default().Info("ClearErrorsForAll", errStr)
+		return errors.New(errStr)
 	}
 	return nil
 }
 
 func (m *GRPCDBHelperClient) WizardNewNetworkDevicePoint(plugin string, network, device, point []byte) (bool, error) {
-	_, err := m.client.WizardNewNetworkDevicePoint(context.Background(), &proto.WizardNewNetworkDevicePointRequest{
+	resp, err := m.client.WizardNewNetworkDevicePoint(context.Background(), &proto.WizardNewNetworkDevicePointRequest{
 		Plugin:  plugin,
 		Network: network,
 		Device:  device,
 		Point:   point,
 	})
 	if err != nil {
-		st := status.Convert(err)
-		hclog.Default().Info("WizardNewNetworkDevicePoint", st.Message())
-		return false, errors.New(st.Message())
+		hclog.Default().Info("WizardNewNetworkDevicePoint rpc", err)
+		return false, err
+	}
+	if resp.E != nil {
+		errStr := string(resp.E)
+		hclog.Default().Info("WizardNewNetworkDevicePoint", errStr)
+		return false, errors.New(errStr)
 	}
 	return true, nil
 }
