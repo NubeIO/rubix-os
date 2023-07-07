@@ -33,13 +33,20 @@ func (d *GormDatabase) GetAlerts(args argspkg.Args) ([]*model.Alert, error) {
 
 func (d *GormDatabase) GetAlertsByHost(hostUUID string, args argspkg.Args) ([]*model.Alert, error) {
 	var alertModel []*model.Alert
-	alert, err := d.GetAlerts(args)
-	for _, a := range alert {
-		if a.HostUUID == hostUUID {
-			alertModel = append(alertModel, a)
-		}
+	query := d.buildAlertQuery(args)
+	if err := query.Where("host_uuid = ? ", hostUUID).Find(&alertModel).Error; err != nil {
+		return nil, err
 	}
-	return alertModel, err
+	return alertModel, nil
+}
+
+func (d *GormDatabase) GetAlertsByHostUUIDs(hostUUIDs []*string, args argspkg.Args) ([]*model.Alert, error) {
+	var alertModel []*model.Alert
+	query := d.buildAlertQuery(args)
+	if err := query.Where("host_uuid in ? ", hostUUIDs).Find(&alertModel).Error; err != nil {
+		return nil, err
+	}
+	return alertModel, nil
 }
 
 // GetAlertByField returns the object for the given field ie name or nil.

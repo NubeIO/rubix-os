@@ -60,13 +60,19 @@ func (d *GormDatabase) GetMembersByUUIDs(uuids []*string, args argspkg.Args) ([]
 
 func (d *GormDatabase) GetMembersByHostUUID(hostUUID string) ([]*model.Member, error) {
 	var membersModel []*model.Member
+	group, err := d.GetGroupByHostUUID(hostUUID, argspkg.Args{})
+	if err != nil {
+		return nil, err
+	}
 	query := d.DB.Distinct("members.*").
 		Table("members").
 		Joins("JOIN team_members ON team_members.member_uuid = members.uuid").
 		Joins("JOIN teams ON teams.uuid = team_members.team_uuid").
 		Joins("JOIN team_views ON team_views.team_uuid = teams.uuid").
 		Joins("JOIN views ON views.uuid = team_views.view_uuid").
-		Where("views.host_uuid = ?", hostUUID)
+		Where("views.host_uuid = ?", hostUUID).
+		Or("views.group_uuid = ?", group.UUID).
+		Or("views.location_uuid = ?", group.LocationUUID)
 	if err := query.Scan(&membersModel).Error; err != nil {
 		return nil, err
 	}
@@ -227,6 +233,30 @@ func (d *GormDatabase) GetMemberSidebars(username string, includeWithoutViews bo
 		location.Groups = updatedGroups
 	}
 	return locations, nil
+}
+
+func (d *GormDatabase) GetMemberHostUUIDs(username string) []*string {
+	views, err := d.GetViewsByMemberUsername(username)
+	if err != nil {
+		return nil
+	}
+	_, locationsUUIDs, groupUUIDs, hostUUIDs := getViewsUUIDs(views)
+	locations, _ := d.GetLocationsByUUIDs(locationsUUIDs, argspkg.Args{WithGroups: true, WithHosts: true})
+	for _, location := range locations {
+		for _, group := range location.Groups {
+			groupUUIDs = filterOutItem(groupUUIDs, nstring.New(group.UUID))
+			for _, host := range group.Hosts {
+				hostUUIDs = append(hostUUIDs, nstring.New(host.UUID))
+			}
+		}
+	}
+	groups, _ := d.GetGroupsByUUIDs(groupUUIDs, argspkg.Args{WithViews: true, WithHosts: true})
+	for _, group := range groups {
+		for _, host := range group.Hosts {
+			hostUUIDs = append(hostUUIDs, nstring.New(host.UUID))
+		}
+	}
+	return hostUUIDs
 }
 
 func getViewsUUIDs(views []*model.View) (viewUUIDs []string, locationsUUIDs []*string, groupUUIDs []*string,

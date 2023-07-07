@@ -2,9 +2,7 @@ package api
 
 import (
 	"errors"
-	"github.com/NubeIO/nubeio-rubix-lib-auth-go/auth"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/security"
-	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/constants"
@@ -15,9 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
-
-var invalidMemberTokenError = nerrors.NewErrUnauthorized("invalid member token")
-var invalidTokenError = nerrors.NewErrUnauthorized("invalid token")
 
 type MemberDatabase interface {
 	GetMembers(args argspkg.Args) ([]*model.Member, error)
@@ -37,32 +32,6 @@ type MemberDatabase interface {
 
 type MemberAPI struct {
 	DB MemberDatabase
-}
-
-func getAuthorizedUsername(request *http.Request) (string, error) {
-	username, err := auth.GetAuthorizedUsername(request)
-	if err != nil {
-		return "", nerrors.NewErrUnauthorized(err.Error())
-	}
-	if username == "" {
-		return "", invalidMemberTokenError
-	}
-	return username, nil
-}
-
-func getAuthorizedOrDefaultUsername(request *http.Request) (string, error) {
-	if auth.AuthorizeInternal(request) || auth.AuthorizeExternal(request) {
-		usr, err := user.GetUser()
-		if err != nil {
-			return "", err
-		}
-		return usr.Username, nil
-	}
-	username, _ := getAuthorizedUsername(request)
-	if username != "" {
-		return username, nil
-	}
-	return "", invalidTokenError
 }
 
 func (a *MemberAPI) CreateMember(ctx *gin.Context) {
