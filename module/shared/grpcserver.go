@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"github.com/NubeIO/rubix-os/module/proto"
-	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
 )
@@ -131,12 +130,12 @@ func (m *GRPCDBHelperClient) GetWithoutParam(path, args string) ([]byte, error) 
 		Args: args,
 	})
 	if err != nil {
-		hclog.Default().Info("GetList rpc", err)
+		log.Debug("GetList: ", err)
 		return nil, err
 	}
 	if resp.E != nil {
 		errStr := string(resp.E)
-		hclog.Default().Info("GetList", errStr)
+		log.Debug("GetList: ", errStr)
 		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
@@ -149,12 +148,12 @@ func (m *GRPCDBHelperClient) Get(path, uuid, args string) ([]byte, error) {
 		Args: args,
 	})
 	if err != nil {
-		hclog.Default().Info("Get rpc", err)
+		log.Debug("Get: ", err)
 		return nil, err
 	}
 	if resp.E != nil {
 		errStr := string(resp.E)
-		hclog.Default().Info("Get", errStr)
+		log.Debug("Get: ", errStr)
 		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
@@ -166,12 +165,12 @@ func (m *GRPCDBHelperClient) Post(path string, body []byte) ([]byte, error) {
 		Body: body,
 	})
 	if err != nil {
-		hclog.Default().Info("Post rpc", err)
+		log.Debug("Post: ", err)
 		return nil, err
 	}
 	if resp.E != nil {
 		errStr := string(resp.E)
-		hclog.Default().Info("Post", errStr)
+		log.Debug("Post: ", errStr)
 		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
@@ -184,12 +183,12 @@ func (m *GRPCDBHelperClient) Put(path, uuid string, body []byte) ([]byte, error)
 		Body: body,
 	})
 	if err != nil {
-		hclog.Default().Info("Put rpc", err)
+		log.Debug("Put: ", err)
 		return nil, err
 	}
 	if resp.E != nil {
 		errStr := string(resp.E)
-		hclog.Default().Info("Put", errStr)
+		log.Debug("Put: ", errStr)
 		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
@@ -202,12 +201,12 @@ func (m *GRPCDBHelperClient) Patch(path, uuid string, body []byte) ([]byte, erro
 		Body: body,
 	})
 	if err != nil {
-		hclog.Default().Info("Patch rpc", err)
+		log.Debug("Patch: ", err)
 		return nil, err
 	}
 	if resp.E != nil {
 		errStr := string(resp.E)
-		hclog.Default().Info("Patch", errStr)
+		log.Debug("Patch: ", errStr)
 		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
@@ -219,12 +218,12 @@ func (m *GRPCDBHelperClient) Delete(path, uuid string) ([]byte, error) {
 		Uuid: uuid,
 	})
 	if err != nil {
-		hclog.Default().Info("Delete rpc", err)
+		log.Debug("Delete: ", err)
 		return nil, err
 	}
 	if resp.E != nil {
 		errStr := string(resp.E)
-		hclog.Default().Info("Delete", errStr)
+		log.Debug("Delete: ", errStr)
 		return nil, errors.New(errStr)
 	}
 	return resp.R, nil
@@ -240,12 +239,12 @@ func (m *GRPCDBHelperClient) SetErrorsForAll(path, uuid, message, messageLevel, 
 		DoPoints:     doPoints,
 	})
 	if err != nil {
-		hclog.Default().Info("SetErrorsForAll rpc", err)
+		log.Debug("SetErrorsForAll: ", err)
 		return err
 	}
 	if resp.E != nil {
 		errStr := string(resp.E)
-		hclog.Default().Info("SetErrorsForAll", errStr)
+		log.Debug("SetErrorsForAll: ", errStr)
 		return errors.New(errStr)
 	}
 	return nil
@@ -258,12 +257,12 @@ func (m *GRPCDBHelperClient) ClearErrorsForAll(path, uuid string, doPoints bool)
 		DoPoints: doPoints,
 	})
 	if err != nil {
-		hclog.Default().Info("ClearErrorsForAll rpc", err)
+		log.Debug("ClearErrorsForAll: ", err)
 		return err
 	}
 	if resp.E != nil {
 		errStr := string(resp.E)
-		hclog.Default().Info("ClearErrorsForAll", errStr)
+		log.Debug("ClearErrorsForAll: ", errStr)
 		return errors.New(errStr)
 	}
 	return nil
@@ -277,12 +276,12 @@ func (m *GRPCDBHelperClient) WizardNewNetworkDevicePoint(plugin string, network,
 		Point:   point,
 	})
 	if err != nil {
-		hclog.Default().Info("WizardNewNetworkDevicePoint rpc", err)
+		log.Debug("WizardNewNetworkDevicePoint: ", err)
 		return false, err
 	}
 	if resp.E != nil {
 		errStr := string(resp.E)
-		hclog.Default().Info("WizardNewNetworkDevicePoint", errStr)
+		log.Debug("WizardNewNetworkDevicePoint: ", errStr)
 		return false, errors.New(errStr)
 	}
 	return true, nil
