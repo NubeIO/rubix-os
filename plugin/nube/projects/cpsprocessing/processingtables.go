@@ -55,18 +55,31 @@ type DoorResetPoint struct {
 }
 
 type History struct {
-	ID        int     `json:"id" gorm:"primary_key"`
-	PointUUID string  `json:"point_uuid" gorm:"primary_key"`
-	HostUUID  string  `json:"host_uuid" gorm:"primary_key"`
-	Value     float64 `json:"value"`
-	Timestamp string  `json:"timestamp" gorm:"column:timestamp;type:timestamp"`
+	ID        int     `json:"id" dataframe:"id" gorm:"primary_key"`
+	PointUUID string  `json:"point_uuid" dataframe:"point_uuid" gorm:"primary_key"`
+	HostUUID  string  `json:"host_uuid" dataframe:"host_uuid" gorm:"primary_key"`
+	Value     float64 `json:"value" dataframe:"value"`
+	Timestamp string  `json:"timestamp" dataframe:"timestamp" gorm:"column:timestamp;type:timestamp"`
 }
 
 type LastProcessedData struct {
-	DoorPosition     int `json:"door_position" dataframe:"door_position"`
-	CubicleOccupancy int `json:"cubicleOccupancy" dataframe:"cubicleOccupancy"`
-	TotalUses        int `json:"totalUses" dataframe:"totalUses"`
-	CurrentUses      int `json:"currentUses" dataframe:"currentUses"`
-	PendingStatus    int `json:"pendingStatus" dataframe:"pendingStatus"`
-	OverdueStatus    int `json:"overdueStatus" dataframe:"overdueStatus"`
+	DoorPosition           int `json:"door_position" dataframe:"door_position"`
+	CubicleOccupancy       int `json:"cubicleOccupancy" dataframe:"cubicleOccupancy"`
+	TotalUses              int `json:"totalUses" dataframe:"totalUses"`
+	CurrentUses            int `json:"currentUses" dataframe:"currentUses"`
+	PendingStatus          int `json:"pendingStatus" dataframe:"pendingStatus"`
+	OverdueStatus          int `json:"overdueStatus" dataframe:"overdueStatus"`
+	LastToPendingTimestamp string
+}
+
+type DoorInfo struct {
+	IsEOT                  bool   `json:"is_eot" dataframe:"is_eot"`
+	DoorTypeTag            string `json:"doorType" dataframe:"doorType"`
+	NormalPosition         DoorNormalPosition
+	DoorTypeID             DoorType
+	EnableCleaningTracking bool
+	EnableUseCounting      bool
+	AssetFunction          string
+	AvailabilityID         string
+	ResetID                string
 }

@@ -20,13 +20,33 @@ const (
 	managedCubicleDoorSensorAssetFunctionTagValue          PointTags = "managedCubicle"
 	managedFacilityEntranceDoorSensorAssetFunctionTagValue PointTags = "managedFacilityEntrance"
 	usageCountDoorSensorAssetFunctionTagValue              PointTags = "usageCount"
+	doorTypeTag                                            PointTags = "doorType"
+	toiletDoorTypeTagValue                                 PointTags = "toilet"
+	showerDoorTypeTagValue                                 PointTags = "shower"
+	ddaDoorTypeTagValue                                    PointTags = "dda"
+	entranceDoorTypeTagValue                               PointTags = "entrance"
+	doorDoorTypeTagValue                                   PointTags = "door"
+	normalPositionTag                                      PointTags = "normalPosition"
+	normallyOpenNormalPositionTagValue                     PointTags = "NO"
+	normallyClosedNormalPositionTagValue                   PointTags = "NC"
+	enableCleaningTrackingTag                              PointTags = "enableCleaningTracking"
+	enabledEnableCleaningTrackingTagValue                  PointTags = "true"
+	disabledEnableCleaningTrackingTagValue                 PointTags = "false"
+	enableUseCountingTag                                   PointTags = "enableUseCounting"
+	enabledEnableUseCountingTagValue                       PointTags = "true"
+	disabledEnableUseCountingTagValue                      PointTags = "false"
+	isEOTTag                                               PointTags = "isEOT"
+	EOTisEOTTagValue                                       PointTags = "true"
+	notEOTisEOTTagValue                                    PointTags = "false"
+	availabilityIDTag                                      PointTags = "availabilityID"
+	resetIDTag                                             PointTags = "resetID"
 )
 
-type DoorState int
+type DoorNormalPosition int
 
 const (
-	normallyOpen   DoorState = 0
-	normallyClosed DoorState = 1
+	normallyOpen   DoorNormalPosition = 0
+	normallyClosed DoorNormalPosition = 1
 )
 
 type DoorType int
@@ -35,10 +55,12 @@ const (
 	facilityEntrance DoorType = iota
 	facilityToilet
 	facilityDDA
+	facilityDoor
 	eotEntrance
 	eotToilet
 	eotShower
 	eotDDA
+	eotDoor
 )
 
 type RawDataColumnName string

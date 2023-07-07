@@ -1,15 +1,6 @@
 package main
 
-import (
-	"errors"
-	"fmt"
-	"github.com/go-gota/gota/dataframe"
-	"github.com/go-gota/gota/series"
-	"strconv"
-	"strings"
-	"time"
-)
-
+/*
 // MakeDailyResetsDF creates a DF of daily reset triggers for the given time period.
 func (inst *Instance) MakeDailyResetsDF(start, end time.Time, thresholdsDF dataframe.DataFrame) (*dataframe.DataFrame, error) {
 	// Extract the allAreaResetTime from thresholdsDF
@@ -56,14 +47,9 @@ func (inst *Instance) MakeDailyResetsDF(start, end time.Time, thresholdsDF dataf
 // TODO: add door type and use thresholds lookup.  Probably pass in thresholds DF as it is per site, not per sensor
 
 // CalculateDoorUses calculates the totalUses, currentUses, cubicleOccupancy, pendingStatus, toClean, toPending of a door position sensors. doorPosDF must have door position.  lastValuesDF must have the last value for door position, occupancy, totalUses, currentUses, pendingStatus, and applicable use thresholds.
-func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastProcessedValuesAndPoints, resetsDF, thresholdsDF dataframe.DataFrame, pointLastProcessedData *LastProcessedData, pointDoorInfo *DoorInfo) (*dataframe.DataFrame, error) {
-	var err error
-
-	joinedDF := dfRawDoorSensorHistories.OuterJoin(resetsDF, string(timestampColName))
+func (inst *Instance) CalculateDoorUses(doorType DoorType, normalDoorPosition DoorState, doorPosDF, lastValuesDF, resetsDF, thresholdsDF dataframe.DataFrame, lastToPendingTs string) (*dataframe.DataFrame, error) {
+	joinedDF := doorPosDF.OuterJoin(resetsDF, string(timestampColName))
 	joinedDF = joinedDF.Arrange(dataframe.Sort(string(timestampColName)))
-
-	fmt.Println("CalculateDoorUses() joinedDF")
-	fmt.Println(joinedDF)
 
 	// Extract the timestamp column as a series
 	timestampSeries := joinedDF.Col(string(timestampColName))
@@ -74,44 +60,29 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 	// Extract the reset column as a series
 	resetSeries := joinedDF.Col(string(areaResetColName))
 
-	// get the use threshold from the site thresholds df
-	useThreshold := 10
-	switch pointDoorInfo.DoorTypeID {
-	case facilityEntrance:
-		useThreshold, err = thresholdsDF.Col(string(facilityEntranceUseThresholdColName)).Elem(0).Int()
-		if err != nil {
-			return nil, err
-		}
-	case facilityToilet:
-		useThreshold, err = thresholdsDF.Col(string(facilityToiletUseThresholdColName)).Elem(0).Int()
-		if err != nil {
-			return nil, err
-		}
-	case facilityDDA:
-		useThreshold, err = thresholdsDF.Col(string(facilityDDAUseThresholdColName)).Elem(0).Int()
-		if err != nil {
-			return nil, err
-		}
-	case eotEntrance:
-		useThreshold, err = thresholdsDF.Col(string(eotEntranceUseThresholdColName)).Elem(0).Int()
-		if err != nil {
-			return nil, err
-		}
-	case eotToilet:
-		useThreshold, err = thresholdsDF.Col(string(eotToiletUseThresholdColName)).Elem(0).Int()
-		if err != nil {
-			return nil, err
-		}
-	case eotShower:
-		useThreshold, err = thresholdsDF.Col(string(eotShowerUseThresholdColName)).Elem(0).Int()
-		if err != nil {
-			return nil, err
-		}
-	case eotDDA:
-		useThreshold, err = thresholdsDF.Col(string(eotDDAUseThresholdColName)).Elem(0).Int()
-		if err != nil {
-			return nil, err
-		}
+	lastTotalUseCount, err := lastValuesDF.Col(string(totalUsesColName)).Elem(0).Int()
+	if err != nil {
+		return nil, err
+	}
+	lastCurrentUseCount, err := lastValuesDF.Col(string(currentUsesColName)).Elem(0).Int()
+	if err != nil {
+		return nil, err
+	}
+	lastPosition, err := lastValuesDF.Col(string(doorPositionColName)).Elem(0).Int()
+	if err != nil {
+		return nil, err
+	}
+	occupancy, err := lastValuesDF.Col(string(cubicleOccupancyColName)).Elem(0).Int()
+	if err != nil {
+		return nil, err
+	}
+	lastPendingStatus, err := lastValuesDF.Col(string(pendingStatusColName)).Elem(0).Int()
+	if err != nil {
+		return nil, err
+	}
+	facilityToiletUseThreshold, err := thresholdsDF.Col(string(facilityToiletUseThresholdColName)).Elem(0).Int()
+	if err != nil {
+		return nil, err
 	}
 
 	totalUsesArray := make([]int, 0)
@@ -122,14 +93,8 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 	toPendingArray := make([]int, 0)
 	cleaningTimeArray := make([]string, 0)
 
-	lastToPending, _ := time.Parse(time.RFC3339, pointLastProcessedData.LastToPendingTimestamp)
+	lastToPending, _ := time.Parse(time.RFC3339, lastToPendingTs)
 	inst.cpsDebugMsg("CalculateDoorUses() lastToPending: ", lastToPending)
-
-	lastPendingStatus := pointLastProcessedData.PendingStatus
-	lastCurrentUseCount := pointLastProcessedData.CurrentUses
-	lastTotalUseCount := pointLastProcessedData.TotalUses
-	occupancy := pointLastProcessedData.CubicleOccupancy
-	lastPosition := pointLastProcessedData.DoorPosition
 
 	for i, v := range doorPositionSeries.Records() {
 		entryTime, _ := time.Parse(time.RFC3339, timestampSeries.Elem(i).String())
@@ -169,7 +134,7 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 		}
 
 		doorState, _ := strconv.Atoi(v)
-		if pointDoorInfo.NormalPosition == normallyOpen {
+		if normalDoorPosition == normallyOpen {
 			if doorState == open && lastPosition == closed {
 				lastTotalUseCount++
 				lastCurrentUseCount++
@@ -179,7 +144,7 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 			} else {
 				occupancy = occupied
 			}
-		} else if pointDoorInfo.NormalPosition == normallyClosed {
+		} else if normalDoorPosition == normallyClosed {
 			if doorState == closed && lastPosition == open && occupancy == vacant {
 				occupancy = occupied
 			} else if doorState == closed && lastPosition == open && occupancy == occupied {
@@ -190,7 +155,7 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 		}
 
 		lastPosition = doorState
-		if lastCurrentUseCount >= useThreshold {
+		if lastCurrentUseCount >= facilityToiletUseThreshold {
 			if lastPendingStatus == 0 {
 				toPending = 1
 				lastToPending = entryTime
@@ -429,3 +394,4 @@ func (inst *Instance) CalculateOverdueCubicles(doorType DoorType, start, end tim
 	resultDF = resultDF.Arrange(dataframe.Sort(string(timestampColName)))
 	return &resultDF, nil
 }
+*/

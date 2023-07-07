@@ -136,6 +136,13 @@ func (inst *Instance) CPSProcessing() {
 		siteRef := siteThresholds.SiteRef
 		inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() siteRef: %+v", siteRef))
 
+		// this site thresholds as a dataframe
+		siteThresholdsToDF := make([]Threshold, 0)
+		siteThresholdsToDF = append(siteThresholdsToDF, siteThresholds)
+		dfSiteThresholds := dataframe.LoadStructs(siteThresholdsToDF)
+		fmt.Println("dfSiteThresholds")
+		fmt.Println(dfSiteThresholds)
+
 		// get the points for this site
 		thisSiteDoorPointsAndTags := make([]DoorProcessingPoint, 0)
 		for _, point := range doorPointsAndTags {
@@ -167,6 +174,7 @@ func (inst *Instance) CPSProcessing() {
 		// iterate through the raw points, push histories (to points that exist), and update the relevant point values (for app)
 		for _, doorSensorPoint := range thisSiteDoorSensorPointsAndTags {
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() point: %+v, uuid: %v, host: %v", doorSensorPoint.Name, doorSensorPoint.UUID, doorSensorPoint.HostUUID))
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() doorSensorPoint: %+v", doorSensorPoint))
 
 			if doorSensorPoint.AssetRef == "" {
 				inst.cpsErrorMsg(fmt.Sprintf("CPSProcessing() no assetRef tag on point: %v - %v", doorSensorPoint.Name, doorSensorPoint.UUID))
@@ -190,7 +198,7 @@ func (inst *Instance) CPSProcessing() {
 			fmt.Println("dfThisAssetProcessedDataPoints")
 			fmt.Println(dfThisAssetProcessedDataPoints)
 
-			// first verify that the point has all the required information and calculations should actually be done
+			// verify that the point has all the required information and calculations should actually be done
 			processedDataPointUUIDs := make([]string, 0)
 			var cubicleOccupancyPoint, totalUsesPoint, currentUsesPoint, fifteenMinUsesPoint *DoorProcessingPoint
 			// , pendingStatusPoint, overdueStatusPoint, toPendingPoint, toCleanPoint, toOverduePoint, cleaningTimePoint *DoorProcessingPoint
@@ -232,16 +240,16 @@ func (inst *Instance) CPSProcessing() {
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() periodStart: %+v", periodStart))
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() periodEnd: %+v", periodEnd))
 
-			var rawSensorData []History
-			err = postgresSetting.postgresConnectionInstance.db.Model(&model.History{}).Where("point_uuid = ? AND host_uuid = ? AND (timestamp AT TIME ZONE 'UTC' BETWEEN ? AND ?)", doorSensorPoint.UUID, doorSensorPoint.HostUUID, periodStart, periodEnd).Scan(&rawSensorData).Error
+			var rawDoorSensorHistories []History
+			err = postgresSetting.postgresConnectionInstance.db.Model(&model.History{}).Where("point_uuid = ? AND host_uuid = ? AND (timestamp AT TIME ZONE 'UTC' BETWEEN ? AND ?)", doorSensorPoint.UUID, doorSensorPoint.HostUUID, periodStart, periodEnd).Scan(&rawDoorSensorHistories).Error
 			if err != nil {
 				inst.cpsErrorMsg("CPSProcessing() rawSensorData error: ", err)
 			}
-			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() rawSensorData: %+v", rawSensorData))
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() rawSensorData: %+v", rawDoorSensorHistories))
 			// dfRawDoor := dataframe.ReadCSV(strings.NewReader(csvRawDoor))
-			dfRawDoor := dataframe.LoadStructs(rawSensorData)
-			fmt.Println("dfRawDoor")
-			fmt.Println(dfRawDoor)
+			dfRawDoorSensorHistories := dataframe.LoadStructs(rawDoorSensorHistories)
+			fmt.Println("dfRawDoorSensorHistories")
+			fmt.Println(dfRawDoorSensorHistories)
 
 			// get last stored processed data values
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() hostUUID: %+v", doorSensorPoint.HostUUID))
@@ -274,33 +282,88 @@ func (inst *Instance) CPSProcessing() {
 			fmt.Println("dfLastProcessedDataHistories")
 			fmt.Println(dfLastProcessedDataHistories)
 
+			// join the last values with the processed data points
 			// var lastProcessedData LastProcessedData
+			var dfJoinedLastProcessedValuesAndPoints dataframe.DataFrame
 			if len(lastProcessedDataHistories) > 0 {
-				dfJoinedLastProcessedValuesAndPoints := dfThisAssetProcessedDataPoints.OuterJoin(dfLastProcessedDataHistories, "point_uuid", "host_uuid")
+				dfJoinedLastProcessedValuesAndPoints = dfThisAssetProcessedDataPoints.OuterJoin(dfLastProcessedDataHistories, "point_uuid", "host_uuid")
 				fmt.Println("dfJoinedLastProcessedValuesAndPoints")
 				fmt.Println(dfJoinedLastProcessedValuesAndPoints)
 				// for _, hist := range lastProcessedDataHistories {
 			} else {
-				dfJoinedLastProcessedValuesAndPoints := dfThisAssetProcessedDataPoints
+				dfJoinedLastProcessedValuesAndPoints = dfThisAssetProcessedDataPoints
 				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() lastProcessedDataHistories error: no last values were found, using zero values for processing"))
 				fmt.Println("dfJoinedLastProcessedValuesAndPoints")
 				fmt.Println(dfJoinedLastProcessedValuesAndPoints)
 			}
 
-			// TODO: get only the reset point and histories associated with this asset
 			// get reset point and histories applicable to this asset/point
-			thisAssetResetDataPoints := make([]DoorResetPoint, 0)
+			thisAssetResetDataPoints := make([]DoorResetPoint, 0) // TODO: consider the case where the point has been deleted and re-added (so there would be multiple points that match)
 			for _, rp := range doorResetPointsAndTags {
 				if rp.ResetID == doorSensorPoint.ResetID {
 					thisAssetResetDataPoints = append(thisAssetResetDataPoints, rp)
 				}
 			}
+			var thisAssetResetDataPoint DoorResetPoint
+			thisAssetResetDataPoint = thisAssetResetDataPoints[0]
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() thisAssetResetDataPoints: %+v", thisAssetResetDataPoints))
 			// -- dataframe implementation --
 			// TODO: just for debug
 			dfThisAssetResetDataPoints := dataframe.LoadStructs(thisAssetResetDataPoints)
 			fmt.Println("dfThisAssetResetDataPoints")
 			fmt.Println(dfThisAssetResetDataPoints)
+
+			// get the history logs for the reset point for the calculation period
+			var resetHistoryData []History
+			err = postgresSetting.postgresConnectionInstance.db.Model(&model.History{}).Where("point_uuid = ? AND host_uuid = ? AND (timestamp AT TIME ZONE 'UTC' BETWEEN ? AND ?)", thisAssetResetDataPoint.UUID, thisAssetResetDataPoint.HostUUID, periodStart, periodEnd).Scan(&resetHistoryData).Error
+			if err != nil {
+				inst.cpsErrorMsg("CPSProcessing() resetHistoryData error: ", err)
+			}
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() resetHistoryData: %+v", resetHistoryData))
+			// dfRawDoor := dataframe.ReadCSV(strings.NewReader(csvRawDoor))
+			dfResetHistoryData := dataframe.LoadStructs(resetHistoryData)
+			fmt.Println("dfResetHistoryData")
+			fmt.Println(dfResetHistoryData)
+
+			// create a dataframe of the daily reset times
+			dfDailyResets, err := inst.MakeDailyResetsDF(periodStart, periodEnd, dfSiteThresholds)
+			if err != nil {
+				inst.cpsErrorMsg("MakeDailyResetsDF() error: ", err)
+				return
+			}
+			fmt.Println("dfDailyResets")
+			fmt.Println(dfDailyResets)
+
+			// join daily reset timestamps with the manual resets
+			var dfAllResets dataframe.DataFrame
+			if len(resetHistoryData) > 0 {
+				if dfDailyResets.Nrow() > 0 {
+					dfAllResets = dfResetHistoryData.Concat(*dfDailyResets)
+					dfAllResets = dfAllResets.Arrange(dataframe.Sort(string(timestampColName)))
+				} else {
+					dfAllResets = dfResetHistoryData
+				}
+			} else if dfDailyResets.Nrow() > 0 {
+				dfAllResets = *dfDailyResets
+			}
+			fmt.Println("dfAllResets")
+			fmt.Println(dfAllResets)
+
+			// extract the last processed data values and the door type info from the point tags and values
+			pointLastProcessedData, pointDoorInfo, err := GetLastProcessedDataAndDoorType(&dfJoinedLastProcessedValuesAndPoints, &doorSensorPoint)
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointLastProcessedData: %+v", pointLastProcessedData))
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointDoorInfo: %+v", pointDoorInfo))
+
+			// TODO: need to get the last door position and add it to the lastProcessedData
+
+			// now do the door usage calculations
+			DoorResultDF, err := inst.CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastProcessedValuesAndPoints, dfAllResets, dfSiteThresholds, pointLastProcessedData, pointDoorInfo)
+			if err != nil {
+				inst.cpsErrorMsg("CalculateDoorUses() error: ", err)
+				return
+			}
+			fmt.Println("DoorResultDF")
+			fmt.Println(DoorResultDF)
 
 			/*
 				// TODO: need to get last totalUses at the time when the last 15MinRollup value was stored (prior to the processing time range)
