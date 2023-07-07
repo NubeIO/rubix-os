@@ -229,6 +229,30 @@ func (d *GormDatabase) GetMemberSidebars(username string, includeWithoutViews bo
 	return locations, nil
 }
 
+func (d *GormDatabase) GetMemberHostUUIDs(username string) []*string {
+	views, err := d.GetViewsByMemberUsername(username)
+	if err != nil {
+		return nil
+	}
+	_, locationsUUIDs, groupUUIDs, hostUUIDs := getViewsUUIDs(views)
+	locations, _ := d.GetLocationsByUUIDs(locationsUUIDs, argspkg.Args{WithGroups: true, WithHosts: true})
+	for _, location := range locations {
+		for _, group := range location.Groups {
+			groupUUIDs = filterOutItem(groupUUIDs, nstring.New(group.UUID))
+			for _, host := range group.Hosts {
+				hostUUIDs = append(hostUUIDs, nstring.New(host.UUID))
+			}
+		}
+	}
+	groups, _ := d.GetGroupsByUUIDs(groupUUIDs, argspkg.Args{WithViews: true, WithHosts: true})
+	for _, group := range groups {
+		for _, host := range group.Hosts {
+			hostUUIDs = append(hostUUIDs, nstring.New(host.UUID))
+		}
+	}
+	return hostUUIDs
+}
+
 func getViewsUUIDs(views []*model.View) (viewUUIDs []string, locationsUUIDs []*string, groupUUIDs []*string,
 	hostUUIDs []*string) {
 	for _, view := range views {
