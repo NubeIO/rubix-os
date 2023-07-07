@@ -28,11 +28,13 @@ func New(cli *FcmServerClient) *FcmServerClient {
 	}
 	cli.BaseUrl = "https://fcm.googleapis.com/fcm"
 	if fcmServerClient, found := clients[cli.BaseUrl]; found {
+		fcmServerClient.client.SetHeader("Content-Type", "application/json")
 		fcmServerClient.client.SetHeader("Authorization", composeKey(cli.Key))
 		return fcmServerClient
 	}
 	client := resty.New()
 	client.SetBaseURL(cli.BaseUrl)
+	client.SetHeader("Content-Type", "application/json")
 	client.SetHeader("Authorization", composeKey(cli.Key))
 	cli.client = client
 	clients[cli.BaseUrl] = cli
