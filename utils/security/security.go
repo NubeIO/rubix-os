@@ -1,11 +1,24 @@
 package security
 
-func EncryptDecrypt(plainText string) string {
+import (
+	"encoding/base64"
+)
+
+func Encrypt(plainText string) string {
 	key := byte(64)
-	cipherText := ""
+	result := make([]byte, len(plainText))
 	for i := 0; i < len(plainText); i++ {
-		// XOR each character with the key
-		cipherText += string(plainText[i] ^ key)
+		result[i] = plainText[i] ^ key
 	}
-	return cipherText
+	return base64.StdEncoding.EncodeToString(result)
+}
+
+func Decrypt(plainText string) string {
+	decodeString, _ := base64.StdEncoding.DecodeString(plainText)
+	key := byte(64)
+	result := make([]byte, len(decodeString))
+	for i := 0; i < len(decodeString); i++ {
+		result[i] = decodeString[i] ^ key
+	}
+	return string(result)
 }

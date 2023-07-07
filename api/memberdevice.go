@@ -11,7 +11,7 @@ import (
 
 type MemberDeviceDatabase interface {
 	GetMemberDevicesByMemberUUID(memberUUID string) ([]*model.MemberDevice, error)
-	GetMemberDeviceByArgs(args argspkg.Args) (*model.MemberDevice, error)
+	GetMemberDevicesByArgs(args argspkg.Args) ([]*model.MemberDevice, error)
 	GetOneMemberDeviceByArgs(args argspkg.Args) (*model.MemberDevice, error)
 	CreateMemberDevice(body *model.MemberDevice) (*model.MemberDevice, error)
 	UpdateMemberDevice(uuid string, body *model.MemberDevice) (*model.MemberDevice, error)
@@ -51,7 +51,7 @@ func (a *MemberDeviceAPI) GetMemberDevice(ctx *gin.Context) {
 		return
 	}
 	deviceId := resolveDeviceId(ctx)
-	q, err := a.DB.GetMemberDeviceByArgs(argspkg.Args{DeviceId: nstring.New(deviceId), MemberUUID: nstring.New(member.UUID)})
+	q, err := a.DB.GetMemberDevicesByArgs(argspkg.Args{DeviceId: nstring.New(deviceId), MemberUUID: nstring.New(member.UUID)})
 	ResponseHandler(q, err, ctx)
 }
 
