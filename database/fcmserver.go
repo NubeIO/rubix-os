@@ -11,7 +11,7 @@ func (d *GormDatabase) GetFcmServer() (*model.FcmServer, error) {
 	if err := d.DB.First(&fcmServerModel).Error; err != nil {
 		return nil, err
 	}
-	fcmServerModel.Key = security.EncryptDecrypt(fcmServerModel.Key)
+	fcmServerModel.Key = security.Decrypt(fcmServerModel.Key)
 	return fcmServerModel, nil
 }
 
@@ -24,7 +24,7 @@ func (d *GormDatabase) GetFcmServerKey() string {
 }
 
 func (d *GormDatabase) UpsertFcmServer(body *model.FcmServer) (*model.FcmServer, error) {
-	body.Key = security.EncryptDecrypt(body.Key)
+	body.Key = security.Encrypt(body.Key)
 	fcmServerModel, _ := d.GetFcmServer()
 	if fcmServerModel != nil {
 		if err := d.DB.Model(&fcmServerModel).Updates(body).Error; err != nil {
