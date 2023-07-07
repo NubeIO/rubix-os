@@ -49,6 +49,18 @@ func (d *GormDatabase) GetGroupsByHostUUIDs(hostUUIDs []*string, args argspkg.Ar
 	return groupsModel, nil
 }
 
+func (d *GormDatabase) GetGroupByHostUUID(hostUUID string, args argspkg.Args) (*model.Group, error) {
+	var groupModel *model.Group
+	query := d.buildGroupQuery(args)
+	if err := query.Distinct("groups.*").
+		Joins("JOIN hosts ON groups.uuid = hosts.group_uuid").
+		Where("hosts.uuid = ?", hostUUID).
+		First(&groupModel).Error; err != nil {
+		return nil, err
+	}
+	return groupModel, nil
+}
+
 func (d *GormDatabase) CreateGroup(body *model.Group) (*model.Group, error) {
 	body.UUID = nuuid.MakeTopicUUID(model.CommonNaming.Group)
 	if err := d.DB.Create(&body).Error; err != nil {

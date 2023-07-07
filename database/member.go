@@ -60,13 +60,19 @@ func (d *GormDatabase) GetMembersByUUIDs(uuids []*string, args argspkg.Args) ([]
 
 func (d *GormDatabase) GetMembersByHostUUID(hostUUID string) ([]*model.Member, error) {
 	var membersModel []*model.Member
+	group, err := d.GetGroupByHostUUID(hostUUID, argspkg.Args{})
+	if err != nil {
+		return nil, err
+	}
 	query := d.DB.Distinct("members.*").
 		Table("members").
 		Joins("JOIN team_members ON team_members.member_uuid = members.uuid").
 		Joins("JOIN teams ON teams.uuid = team_members.team_uuid").
 		Joins("JOIN team_views ON team_views.team_uuid = teams.uuid").
 		Joins("JOIN views ON views.uuid = team_views.view_uuid").
-		Where("views.host_uuid = ?", hostUUID)
+		Where("views.host_uuid = ?", hostUUID).
+		Or("views.group_uuid = ?", group.UUID).
+		Or("views.location_uuid = ?", group.LocationUUID)
 	if err := query.Scan(&membersModel).Error; err != nil {
 		return nil, err
 	}
