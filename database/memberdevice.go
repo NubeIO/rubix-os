@@ -85,9 +85,9 @@ func (d *GormDatabase) SendNotificationByMemberUUID(memberUUID string, data map[
 			}
 			content := cli.SendNotification(data)
 			if len(content) > 0 {
-				failure := content["failure"].(bool)
+				failure := content["failure"].(float64)
 				results := content["results"].([]interface{})
-				if failure && len(results) > 0 {
+				if failure == 1 && len(results) > 0 {
 					errorMsg := results[0].(map[string]interface{})["error"].(string)
 					if errorMsg == "InvalidRegistration" || errorMsg == "NotRegistered" {
 						log.Warnf(">>>>>>>>>>>>>>> Removing device: %s from list!", *memberDevice.DeviceName)
