@@ -18,10 +18,10 @@ func (d *GormDatabase) GetMemberDevicesByMemberUUID(memberUUID string) ([]*model
 	return memberDevicesModel, nil
 }
 
-func (d *GormDatabase) GetMemberDeviceByArgs(args argspkg.Args) (*model.MemberDevice, error) {
-	var memberDevicesModel *model.MemberDevice
+func (d *GormDatabase) GetMemberDevicesByArgs(args argspkg.Args) ([]*model.MemberDevice, error) {
+	var memberDevicesModel []*model.MemberDevice
 	query := d.buildMemberDeviceQuery(args)
-	if err := query.First(&memberDevicesModel).Error; err != nil {
+	if err := query.Find(&memberDevicesModel).Error; err != nil {
 		return nil, err
 	}
 	return memberDevicesModel, nil
