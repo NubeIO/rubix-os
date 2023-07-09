@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-gota/gota/dataframe"
 	"github.com/go-gota/gota/series"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -39,7 +40,8 @@ func (inst *Instance) MakeDailyResetsDF(start, end time.Time, thresholdsDF dataf
 
 	// Iterate from the start date until the end date, adding 24 hours each iteration
 	for date := start; date.Before(end); date = date.Add(24 * time.Hour) {
-		dateTimestamp := date.UTC().Format(time.RFC3339)
+		dateTimestamp := date.Format(time.RFC3339)
+		// dateTimestamp := date.UTC().Format(time.RFC3339)
 		timestampsArray = append(timestampsArray, dateTimestamp)
 		areaResetArray = append(areaResetArray, 1)
 	}
@@ -61,15 +63,26 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 
 	joinedDF := dfRawDoorSensorHistories.OuterJoin(resetsDF, string(timestampColName))
 	joinedDF = joinedDF.Arrange(dataframe.Sort(string(timestampColName)))
+	joinedDF = joinedDF.Rename(string(doorPositionColName), "value")
 
 	fmt.Println("CalculateDoorUses() joinedDF")
 	fmt.Println(joinedDF)
+
+	// TODO: DELETE ME (just for debug)
+	ResultFile, err := os.Create(fmt.Sprintf("/home/marc/Documents/Nube/CPS/Development/Data_Processing/6_joinedDF.csv"))
+	if err != nil {
+		inst.cpsErrorMsg(err)
+	}
+	defer ResultFile.Close()
+	joinedDF.WriteCSV(ResultFile)
 
 	// Extract the timestamp column as a series
 	timestampSeries := joinedDF.Col(string(timestampColName))
 
 	// Extract the door position column as a series
 	doorPositionSeries := joinedDF.Col(string(doorPositionColName))
+
+	inst.cpsDebugMsg("CalculateDoorUses() doorPositionSeries.Type: ", doorPositionSeries.Type())
 
 	// Extract the reset column as a series
 	resetSeries := joinedDF.Col(string(areaResetColName))
@@ -113,6 +126,7 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 			return nil, err
 		}
 	}
+	inst.cpsDebugMsg("CalculateDoorUses() useThreshold: ", useThreshold)
 
 	totalUsesArray := make([]int, 0)
 	currentUsesArray := make([]int, 0)
@@ -124,12 +138,18 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 
 	lastToPending, _ := time.Parse(time.RFC3339, pointLastProcessedData.LastToPendingTimestamp)
 	inst.cpsDebugMsg("CalculateDoorUses() lastToPending: ", lastToPending)
+	invalidLastToPending := false
+	if pointLastProcessedData.LastToPendingTimestamp == "" || lastToPending.After(time.Now()) {
+		invalidLastToPending = true
+	}
 
 	lastPendingStatus := pointLastProcessedData.PendingStatus
 	lastCurrentUseCount := pointLastProcessedData.CurrentUses
 	lastTotalUseCount := pointLastProcessedData.TotalUses
 	occupancy := pointLastProcessedData.CubicleOccupancy
 	lastPosition := pointLastProcessedData.DoorPosition
+
+	inst.cpsDebugMsg("CalculateDoorUses() pointDoorInfo.NormalPosition == normallyOpen: ", pointDoorInfo.NormalPosition == normallyOpen)
 
 	for i, v := range doorPositionSeries.Records() {
 		entryTime, _ := time.Parse(time.RFC3339, timestampSeries.Elem(i).String())
@@ -139,36 +159,46 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 		toClean := 0
 		cleaningTime := ""
 
-		if v == "NaN" { // no door data, could be a reset, or bad data
-			if resetVal, _ := resetSeries.Elem(i).Int(); resetVal == 1 { // This is a reset row.
-				if lastPendingStatus == 1 {
-					toClean = 1
-					cleaningTime = entryTime.Sub(lastToPending).String()
-					inst.cpsDebugMsg("CalculateDoorUses() cleaningTime: ", cleaningTime)
-					// lastToClean = entryTime
-				}
-				lastCurrentUseCount = 0
-				lastPendingStatus = 0
-				totalUsesArray = append(totalUsesArray, lastTotalUseCount)
-				occupancyArray = append(occupancyArray, occupancy)
-				currentUsesArray = append(currentUsesArray, lastCurrentUseCount)
-				pendingStatusArray = append(pendingStatusArray, lastPendingStatus)
-				toCleanArray = append(toCleanArray, toClean)
-				toPendingArray = append(toPendingArray, toPending)
-				cleaningTimeArray = append(cleaningTimeArray, cleaningTime)
-			} else {
-				totalUsesArray = append(totalUsesArray, lastTotalUseCount)
-				occupancyArray = append(occupancyArray, occupancy)
-				currentUsesArray = append(currentUsesArray, lastCurrentUseCount)
-				pendingStatusArray = append(pendingStatusArray, lastPendingStatus)
-				toCleanArray = append(toCleanArray, toClean)
-				toPendingArray = append(toPendingArray, toPending)
-				cleaningTimeArray = append(cleaningTimeArray, cleaningTime)
+		if resetVal, _ := resetSeries.Elem(i).Int(); resetVal == 1 { // This is a reset row.
+			inst.cpsDebugMsg("CalculateDoorUses() RESET ROW")
+			if lastPendingStatus == 1 && !invalidLastToPending {
+				toClean = 1
+				cleaningTime = entryTime.Sub(lastToPending).String()
+				inst.cpsDebugMsg("CalculateDoorUses() cleaningTime: ", cleaningTime)
+				// lastToClean = entryTime
 			}
+			lastCurrentUseCount = 0
+			lastPendingStatus = 0
+
+			if v == "NaN" { // this pushes series values if there is no data in the door position column
+				totalUsesArray = append(totalUsesArray, lastTotalUseCount)
+				occupancyArray = append(occupancyArray, occupancy)
+				currentUsesArray = append(currentUsesArray, lastCurrentUseCount)
+				pendingStatusArray = append(pendingStatusArray, lastPendingStatus)
+				toCleanArray = append(toCleanArray, toClean)
+				toPendingArray = append(toPendingArray, toPending)
+				cleaningTimeArray = append(cleaningTimeArray, cleaningTime)
+				continue
+			}
+		}
+
+		if v == "NaN" { // no door data, could be a reset, or bad data
+			// still need to push values to the series arrays
+			totalUsesArray = append(totalUsesArray, lastTotalUseCount)
+			occupancyArray = append(occupancyArray, occupancy)
+			currentUsesArray = append(currentUsesArray, lastCurrentUseCount)
+			pendingStatusArray = append(pendingStatusArray, lastPendingStatus)
+			toCleanArray = append(toCleanArray, toClean)
+			toPendingArray = append(toPendingArray, toPending)
+			cleaningTimeArray = append(cleaningTimeArray, cleaningTime)
 			continue
 		}
 
-		doorState, _ := strconv.Atoi(v)
+		doorStateFloat, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			inst.cpsDebugMsg("CalculateDoorUses() doorStateFloat, err := strconv.ParseFloat(v, 64) error: ", err)
+		}
+		doorState := int(doorStateFloat)
 		if pointDoorInfo.NormalPosition == normallyOpen {
 			if doorState == open && lastPosition == closed {
 				lastTotalUseCount++
@@ -194,6 +224,7 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 			if lastPendingStatus == 0 {
 				toPending = 1
 				lastToPending = entryTime
+				invalidLastToPending = false
 			}
 			lastPendingStatus = 1
 		}
@@ -221,7 +252,7 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastPr
 }
 
 // Calculate15MinUsageRollup creates a DF that adds timestamps at 0, 15, 30, 45 which rollup the sensor usage counts by 15 min periods.
-func (inst *Instance) Calculate15MinUsageRollup(start, end time.Time, processedDoorDataDF, dfLastTotalUsesAt15Min dataframe.DataFrame) (*dataframe.DataFrame, error) {
+func (inst *Instance) Calculate15MinUsageRollup(start, end time.Time, dfUsageCalculationResults, dfJoinedLastProcessedValuesAndPoints dataframe.DataFrame) (*dataframe.DataFrame, error) {
 
 	last15MinRollupTotalUseCount, err := dfLastTotalUsesAt15Min.Col(string(totalUsesColName)).Elem(0).Int() // this should be the totalUses at the time when the last 15Min rollup was taken (prior to the processing period start).
 	if err != nil {

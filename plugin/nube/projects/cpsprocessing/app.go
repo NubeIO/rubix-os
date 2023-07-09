@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/go-gota/gota/dataframe"
+	"os"
 	"strings"
 	"time"
 )
@@ -17,7 +18,7 @@ func (inst *Instance) CPSProcessing() {
 	inst.cpsDebugMsg("CPSProcessing()")
 
 	periodStart, _ := time.Parse(time.RFC3339, "2023-06-25T07:50:00Z")
-	periodEnd, _ := time.Parse(time.RFC3339, "2023-06-25T14:00:00Z")
+	periodEnd, _ := time.Parse(time.RFC3339, "2023-06-26T14:00:00Z")
 
 	// get site thresholds from thresholds table in pg database
 	var allSiteThresholds []Threshold
@@ -132,6 +133,7 @@ func (inst *Instance) CPSProcessing() {
 	fmt.Println(dfDoorResetPointsAndTags)
 
 	// do processing steps for each site
+	// TODO: allow for only processing select sites based on tags
 	for _, siteThresholds := range allSiteThresholds {
 		siteRef := siteThresholds.SiteRef
 		inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() siteRef: %+v", siteRef))
@@ -158,6 +160,7 @@ func (inst *Instance) CPSProcessing() {
 		fmt.Println(dfThisSiteDoorPointsAndTags)
 
 		// get the raw door sensor points for this site (meta-tag = pointFunction: "sensor")
+		// TODO: allow for only processing select assets based on tags
 		thisSiteDoorSensorPointsAndTags := make([]DoorProcessingPoint, 0)
 		for _, point := range doorPointsAndTags {
 			if point.PointFunction == string(rawDoorSensorPointFunctionTagValue) && point.MeasurementRef == string(doorSensorMeasurementRefTagValue) {
@@ -172,7 +175,7 @@ func (inst *Instance) CPSProcessing() {
 		fmt.Println(dfThisSiteDoorSensorPointsAndTags)
 
 		// iterate through the raw points, push histories (to points that exist), and update the relevant point values (for app)
-		for _, doorSensorPoint := range thisSiteDoorSensorPointsAndTags {
+		for i, doorSensorPoint := range thisSiteDoorSensorPointsAndTags {
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() point: %+v, uuid: %v, host: %v", doorSensorPoint.Name, doorSensorPoint.UUID, doorSensorPoint.HostUUID))
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() doorSensorPoint: %+v", doorSensorPoint))
 
@@ -193,6 +196,8 @@ func (inst *Instance) CPSProcessing() {
 				inst.cpsErrorMsg(fmt.Sprintf("CPSProcessing() no processed data points for asset: (%v) %v - %v - %v", doorSensorPoint.AssetRef, doorSensorPoint.FloorRef, doorSensorPoint.GenderRef, doorSensorPoint.LocationRef))
 				continue
 			}
+			// add in the current sensor point, because we need to get the last door position value along with the last value of the rest of the processed data points
+			thisAssetProcessedDataPoints = append(thisAssetProcessedDataPoints, doorSensorPoint)
 			// TODO: just for debug
 			dfThisAssetProcessedDataPoints := dataframe.LoadStructs(thisAssetProcessedDataPoints)
 			fmt.Println("dfThisAssetProcessedDataPoints")
@@ -255,6 +260,7 @@ func (inst *Instance) CPSProcessing() {
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() hostUUID: %+v", doorSensorPoint.HostUUID))
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() processedDataPointUUIDs: %+v", processedDataPointUUIDs))
 			var lastProcessedDataHistories []History
+			// TODO: ensure that this query gets the LAST value from each processed history point
 			err = postgresSetting.postgresConnectionInstance.db.Raw(`
 					SELECT DISTINCT ON (point_uuid, host_uuid) *
 					FROM histories
@@ -265,16 +271,16 @@ func (inst *Instance) CPSProcessing() {
 			if err != nil {
 				inst.cpsErrorMsg("CPSProcessing() lastProcessedData error: ", err)
 			}
-			/*
-				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() lastProcessedData SQL: %+v", postgresSetting.postgresConnectionInstance.db.ToSQL(func(tx *gorm.DB) *gorm.DB {
-					return tx.Raw(`
-						SELECT DISTINCT ON (point_uuid, host_uuid) *
-						FROM histories
-						WHERE host_uuid = ? AND point_uuid IN (?) AND timestamp AT TIME ZONE 'UTC' < ?
-						ORDER BY point_uuid, host_uuid, timestamp DESC
-					`, doorSensorPoint.HostUUID, processedDataPointUUIDs, periodEnd).
-						Scan(&lastProcessedDataHistories)
-				})))
+			/*  // for viewing the resulting SQL (DEBUG)
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() lastProcessedData SQL: %+v", postgresSetting.postgresConnectionInstance.db.ToSQL(func(tx *gorm.DB) *gorm.DB {
+				return tx.Raw(`
+					SELECT DISTINCT ON (point_uuid, host_uuid) *
+					FROM histories
+					WHERE host_uuid = ? AND point_uuid IN (?) AND timestamp AT TIME ZONE 'UTC' < ?
+					ORDER BY point_uuid, host_uuid, timestamp DESC
+				`, doorSensorPoint.HostUUID, processedDataPointUUIDs, periodEnd).
+					Scan(&lastProcessedDataHistories)
+			})))
 			*/
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() lastProcessedDataHistories: %+v", lastProcessedDataHistories))
 			// dfLastProcessedDoor := dataframe.ReadCSV(strings.NewReader(csvLastProNODoor))
@@ -287,25 +293,33 @@ func (inst *Instance) CPSProcessing() {
 			var dfJoinedLastProcessedValuesAndPoints dataframe.DataFrame
 			if len(lastProcessedDataHistories) > 0 {
 				dfJoinedLastProcessedValuesAndPoints = dfThisAssetProcessedDataPoints.OuterJoin(dfLastProcessedDataHistories, "point_uuid", "host_uuid")
-				fmt.Println("dfJoinedLastProcessedValuesAndPoints")
-				fmt.Println(dfJoinedLastProcessedValuesAndPoints)
 				// for _, hist := range lastProcessedDataHistories {
 			} else {
 				dfJoinedLastProcessedValuesAndPoints = dfThisAssetProcessedDataPoints
 				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() lastProcessedDataHistories error: no last values were found, using zero values for processing"))
-				fmt.Println("dfJoinedLastProcessedValuesAndPoints")
-				fmt.Println(dfJoinedLastProcessedValuesAndPoints)
+			}
+			fmt.Println("dfJoinedLastProcessedValuesAndPoints")
+			fmt.Println(dfJoinedLastProcessedValuesAndPoints)
+
+			// TODO: DELETE ME (just for debug)
+			if i == 0 {
+				ResultFile, err := os.Create("/home/marc/Documents/Nube/CPS/Development/Data_Processing/5_dfJoinedLastProcessedValuesAndPoints.csv")
+				if err != nil {
+					inst.cpsErrorMsg(err)
+				}
+				defer ResultFile.Close()
+				dfJoinedLastProcessedValuesAndPoints.WriteCSV(ResultFile)
 			}
 
 			// get reset point and histories applicable to this asset/point
-			thisAssetResetDataPoints := make([]DoorResetPoint, 0) // TODO: consider the case where the point has been deleted and re-added (so there would be multiple points that match)
+			thisAssetResetDataPoints := make([]DoorResetPoint, 0)
 			for _, rp := range doorResetPointsAndTags {
 				if rp.ResetID == doorSensorPoint.ResetID {
 					thisAssetResetDataPoints = append(thisAssetResetDataPoints, rp)
 				}
 			}
 			var thisAssetResetDataPoint DoorResetPoint
-			thisAssetResetDataPoint = thisAssetResetDataPoints[0]
+			thisAssetResetDataPoint = thisAssetResetDataPoints[0] // TODO: consider the case where the point has been deleted and re-added (so there would be multiple points that match)
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() thisAssetResetDataPoints: %+v", thisAssetResetDataPoints))
 			// -- dataframe implementation --
 			// TODO: just for debug
@@ -350,20 +364,43 @@ func (inst *Instance) CPSProcessing() {
 			fmt.Println(dfAllResets)
 
 			// extract the last processed data values and the door type info from the point tags and values
-			pointLastProcessedData, pointDoorInfo, err := GetLastProcessedDataAndDoorType(&dfJoinedLastProcessedValuesAndPoints, &doorSensorPoint)
+			pointLastProcessedData, pointDoorInfo, err := inst.GetLastProcessedDataAndDoorType(&dfJoinedLastProcessedValuesAndPoints, &doorSensorPoint)
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointLastProcessedData: %+v", pointLastProcessedData))
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointDoorInfo: %+v", pointDoorInfo))
 
-			// TODO: need to get the last door position and add it to the lastProcessedData
-
 			// now do the door usage calculations
-			DoorResultDF, err := inst.CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastProcessedValuesAndPoints, dfAllResets, dfSiteThresholds, pointLastProcessedData, pointDoorInfo)
+			dfDoorResults, err := inst.CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastProcessedValuesAndPoints, dfAllResets, dfSiteThresholds, pointLastProcessedData, pointDoorInfo)
 			if err != nil {
 				inst.cpsErrorMsg("CalculateDoorUses() error: ", err)
 				return
 			}
-			fmt.Println("DoorResultDF")
-			fmt.Println(DoorResultDF)
+			fmt.Println("dfDoorResults")
+			fmt.Println(dfDoorResults)
+
+			// TODO: DELETE ME (just for debug)
+			ResultFile, err := os.Create(fmt.Sprintf("/home/marc/Documents/Nube/CPS/Development/Data_Processing/7_DoorResultDF.csv"))
+			if err != nil {
+				inst.cpsErrorMsg(err)
+			}
+			defer ResultFile.Close()
+			dfDoorResults.WriteCSV(ResultFile)
+
+			// now calculate the 15 minute usage rollup
+			dfDoorResults15Min, err := inst.Calculate15MinUsageRollup(periodStart, periodEnd, *dfDoorResults, dfJoinedLastProcessedValuesAndPoints)
+			if err != nil {
+				inst.cpsErrorMsg("CalculateDoorUses() error: ", err)
+				return
+			}
+			fmt.Println("dfDoorResults15Min")
+			fmt.Println(dfDoorResults15Min)
+
+			// TODO: DELETE ME (just for debug)
+			ResultFile2, err := os.Create(fmt.Sprintf("/home/marc/Documents/Nube/CPS/Development/Data_Processing/8_dfDoorResults15Min.csv"))
+			if err != nil {
+				inst.cpsErrorMsg(err)
+			}
+			defer ResultFile2.Close()
+			dfDoorResults15Min.WriteCSV(ResultFile2)
 
 			/*
 				// TODO: need to get last totalUses at the time when the last 15MinRollup value was stored (prior to the processing time range)

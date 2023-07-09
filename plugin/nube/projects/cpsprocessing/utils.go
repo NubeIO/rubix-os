@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"github.com/go-gota/gota/dataframe"
-	"strconv"
 	"time"
 )
 
@@ -27,96 +26,47 @@ func GetOverdueDelay(doorType DoorType, thresholdsDF dataframe.DataFrame) (time.
 }
 
 // GetLastProcessedDataAndDoorType gets the last processed data values and door info from the tags and history values
-func GetLastProcessedDataAndDoorType(dfJoinedLastProcessedValuesAndPoints *dataframe.DataFrame, doorSensorPoint *DoorProcessingPoint) (pointLastProcessedData *LastProcessedData, pointDoorInfo *DoorInfo, err error) {
+func (inst *Instance) GetLastProcessedDataAndDoorType(dfJoinedLastProcessedValuesAndPoints *dataframe.DataFrame, doorSensorPoint *DoorProcessingPoint) (pointLastProcessedData *LastProcessedData, pointDoorInfo *DoorInfo, err error) {
 	pointDoorInfo = &DoorInfo{}
 	pointLastProcessedData = &LastProcessedData{}
-	var lastOccupancy, lastPendingStatus, lastOverdueStatus, lastCurrentUseCount, lastTotalUseCount int
 
 	// convert the dataframe to a map and iterate through the rows to pick out the applicable values
 	lastValuesAndPointsMap := dfJoinedLastProcessedValuesAndPoints.Maps()
 	ok := false
 	for _, row := range lastValuesAndPointsMap {
-
 		switch row["name"].(string) {
-		/*  // TODO: get the door info from the doorSensorPoint instead.
-		case string(doorTypeTag):
-			_, ok = row["value"]
+		case string(doorPositionColName):
+			_, ok = row["value"].(float64)
 			if ok {
-				pointDoorInfo.DoorTypeTag = row["value"].(string)
+				pointLastProcessedData.DoorPosition = int(row["value"].(float64))
 			}
-		case string(normalPositionTag):
-			_, ok = row["value"]
-			if ok {
-				doorNormalPositionString = row["value"].(string)
-				if doorNormalPositionString == string(normallyOpenNormalPositionTagValue) {
-					pointDoorInfo.NormalPosition = normallyOpen
-				} else if doorNormalPositionString == string(normallyClosedNormalPositionTagValue) {
-					pointDoorInfo.NormalPosition = normallyClosed
-				}
-			}
-		case string(assetFuncTag):
-			_, ok = row["value"]
-			if ok && row["value"].(string) == string(usageCountDoorSensorAssetFunctionTagValue) {
-				pointDoorInfo.AssetFunction = row["value"].(string)
-			}
-		case string(enableCleaningTrackingTag):
-			_, ok = row["value"]
-			if ok && row["value"].(string) == string(enabledEnableCleaningTrackingTagValue) {
-				pointDoorInfo.EnableCleaningTracking = true
-			}
-		case string(enableUseCountingTag):
-			_, ok = row["value"]
-			if ok && row["value"].(string) == string(enabledEnableUseCountingTagValue) {
-				pointDoorInfo.EnableUseCounting = true
-			}
-		case string(isEOTTag):
-			_, ok = row["value"]
-			if ok && row["value"].(string) == string(EOTisEOTTagValue) {
-				pointDoorInfo.IsEOT = true
-			}
-		case string(availabilityIDTag):
-			_, ok = row["value"]
-			if ok {
-				pointDoorInfo.AvailabilityID = row["value"].(string)
-			}
-		case string(resetIDTag):
-			_, ok = row["value"]
-			if ok {
-				pointDoorInfo.ResetID = row["value"].(string)
-			}
-		*/
 		case string(currentUsesColName):
-			_, ok = row["value"]
+			_, ok = row["value"].(float64)
 			if ok {
-				lastCurrentUseCount, _ = strconv.Atoi(row["value"].(string))
-				pointLastProcessedData.CurrentUses = lastCurrentUseCount
+				pointLastProcessedData.CurrentUses = int(row["value"].(float64))
 			}
 		case string(totalUsesColName):
-			_, ok = row["value"]
+			_, ok = row["value"].(float64)
 			if ok {
-				lastTotalUseCount, _ = strconv.Atoi(row["value"].(string))
-				pointLastProcessedData.TotalUses = lastTotalUseCount
+				pointLastProcessedData.TotalUses = int(row["value"].(float64))
 			}
 		case string(cubicleOccupancyColName):
-			_, ok = row["value"]
+			_, ok = row["value"].(float64)
 			if ok {
-				lastOccupancy, _ = strconv.Atoi(row["value"].(string))
-				pointLastProcessedData.CubicleOccupancy = lastOccupancy
+				pointLastProcessedData.CubicleOccupancy = int(row["value"].(float64))
 			}
 		case string(pendingStatusColName):
-			_, ok = row["value"]
+			_, ok = row["value"].(float64)
 			if ok {
-				lastPendingStatus, _ = strconv.Atoi(row["value"].(string))
-				pointLastProcessedData.PendingStatus = lastPendingStatus
+				pointLastProcessedData.PendingStatus = int(row["value"].(float64))
 			}
 		case string(overdueStatusColName):
-			_, ok = row["value"]
+			_, ok = row["value"].(float64)
 			if ok {
-				lastOverdueStatus, _ = strconv.Atoi(row["value"].(string))
-				pointLastProcessedData.OverdueStatus = lastOverdueStatus
+				pointLastProcessedData.OverdueStatus = int(row["value"].(float64))
 			}
 		case string(toPendingColName):
-			_, ok = row["timestamp"]
+			_, ok = row["timestamp"].(string)
 			if ok {
 				pointLastProcessedData.LastToPendingTimestamp = row["timestamp"].(string)
 			}
@@ -124,8 +74,9 @@ func GetLastProcessedDataAndDoorType(dfJoinedLastProcessedValuesAndPoints *dataf
 	}
 
 	// get the door type
-	if pointDoorInfo.IsEOT {
-		switch pointDoorInfo.DoorTypeTag {
+	if doorSensorPoint.IsEOT {
+		pointDoorInfo.IsEOT = true
+		switch doorSensorPoint.DoorType {
 		case string(entranceDoorTypeTagValue):
 			pointDoorInfo.DoorTypeID = eotEntrance
 		case string(toiletDoorTypeTagValue):
@@ -138,9 +89,11 @@ func GetLastProcessedDataAndDoorType(dfJoinedLastProcessedValuesAndPoints *dataf
 			pointDoorInfo.DoorTypeID = eotDoor
 		default:
 			err = errors.New("doorType tag not recognized")
+			inst.cpsErrorMsg("GetLastProcessedDataAndDoorType() error: ", err)
 		}
 	} else {
-		switch pointDoorInfo.DoorTypeTag {
+		pointDoorInfo.IsEOT = false
+		switch doorSensorPoint.DoorType {
 		case string(entranceDoorTypeTagValue):
 			pointDoorInfo.DoorTypeID = facilityEntrance
 		case string(toiletDoorTypeTagValue):
@@ -151,7 +104,47 @@ func GetLastProcessedDataAndDoorType(dfJoinedLastProcessedValuesAndPoints *dataf
 			pointDoorInfo.DoorTypeID = facilityDoor
 		default:
 			err = errors.New("doorType tag not recognized")
+			inst.cpsErrorMsg("GetLastProcessedDataAndDoorType() error: ", err)
 		}
 	}
+
+	if doorSensorPoint.NormalPosition == string(normallyOpenNormalPositionTagValue) {
+		pointDoorInfo.NormalPosition = normallyOpen
+	} else {
+		pointDoorInfo.NormalPosition = normallyClosed
+	}
+
+	if doorSensorPoint.EnableUseCounting == string(enabledEnableUseCountingTagValue) {
+		pointDoorInfo.EnableUseCounting = true
+	} else {
+		pointDoorInfo.EnableUseCounting = false
+	}
+
+	if doorSensorPoint.EnableCleaningTracking == string(enabledEnableCleaningTrackingTagValue) {
+		pointDoorInfo.EnableCleaningTracking = true
+	} else {
+		pointDoorInfo.EnableCleaningTracking = false
+	}
+
+	if doorSensorPoint.EnableCleaningTracking == string(enabledEnableCleaningTrackingTagValue) {
+		pointDoorInfo.EnableCleaningTracking = true
+	} else {
+		pointDoorInfo.EnableCleaningTracking = false
+	}
+
+	if doorSensorPoint.AssetFunc == string(usageCountDoorSensorAssetFunctionTagValue) {
+		pointDoorInfo.AssetFunction = string(usageCountDoorSensorAssetFunctionTagValue)
+	} else if doorSensorPoint.AssetFunc == string(managedCubicleDoorSensorAssetFunctionTagValue) {
+		pointDoorInfo.AssetFunction = string(managedCubicleDoorSensorAssetFunctionTagValue)
+	} else if doorSensorPoint.AssetFunc == string(managedFacilityEntranceDoorSensorAssetFunctionTagValue) {
+		pointDoorInfo.AssetFunction = string(managedFacilityEntranceDoorSensorAssetFunctionTagValue)
+	} else {
+		err = errors.New("assetFunc tag not recognized")
+		inst.cpsErrorMsg("GetLastProcessedDataAndDoorType() error: ", err)
+	}
+
+	pointDoorInfo.AvailabilityID = doorSensorPoint.AvailabilityID
+	pointDoorInfo.ResetID = doorSensorPoint.ResetID
+
 	return
 }
