@@ -9,6 +9,7 @@ import (
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/go-gota/gota/dataframe"
+	"gorm.io/gorm"
 	"os"
 	"strings"
 	"time"
@@ -18,7 +19,7 @@ func (inst *Instance) CPSProcessing() {
 	inst.cpsDebugMsg("CPSProcessing()")
 
 	periodStart, _ := time.Parse(time.RFC3339, "2023-06-25T07:50:00Z")
-	periodEnd, _ := time.Parse(time.RFC3339, "2023-06-26T14:00:00Z")
+	periodEnd, _ := time.Parse(time.RFC3339, "2023-06-25T14:00:00Z")
 
 	// get site thresholds from thresholds table in pg database
 	var allSiteThresholds []Threshold
@@ -145,6 +146,8 @@ func (inst *Instance) CPSProcessing() {
 		fmt.Println("dfSiteThresholds")
 		fmt.Println(dfSiteThresholds)
 
+		timeZone := dfSiteThresholds.Col(string(timeZoneColName)).Elem(0).String()
+
 		// get the points for this site
 		thisSiteDoorPointsAndTags := make([]DoorProcessingPoint, 0)
 		for _, point := range doorPointsAndTags {
@@ -205,38 +208,34 @@ func (inst *Instance) CPSProcessing() {
 
 			// verify that the point has all the required information and calculations should actually be done
 			processedDataPointUUIDs := make([]string, 0)
-			var cubicleOccupancyPoint, totalUsesPoint, currentUsesPoint, fifteenMinUsesPoint *DoorProcessingPoint
+			var cubicleOccupancyPoint, totalUsesPoint, currentUsesPoint DoorProcessingPoint
 			// , pendingStatusPoint, overdueStatusPoint, toPendingPoint, toCleanPoint, toOverduePoint, cleaningTimePoint *DoorProcessingPoint
 			for _, pdp := range thisAssetProcessedDataPoints {
 				switch pdp.Name {
 				case string(cubicleOccupancyColName):
-					cubicleOccupancyPoint = &pdp
+					cubicleOccupancyPoint = pdp
 				case string(totalUsesColName):
-					totalUsesPoint = &pdp
+					totalUsesPoint = pdp
 				case string(currentUsesColName):
-					currentUsesPoint = &pdp
-				case string(fifteenMinRollupUsesColName):
-					fifteenMinUsesPoint = &pdp
+					currentUsesPoint = pdp
 					/*
 						case string(pendingStatusColName):
-							pendingStatusPoint = &pdp
+							pendingStatusPoint = pdp
 						case string(overdueStatusColName):
-							overdueStatusPoint = &pdp
+							overdueStatusPoint = pdp
 						case string(toPendingColName):
-							toPendingPoint = &pdp
+							toPendingPoint = pdp
 						case string(toCleanColName):
-							toCleanPoint = &pdp
+							toCleanPoint = pdp
 						case string(toOverdueColName):
-							toOverduePoint = &pdp
-						case string(cleaningTimeColName):
-							cleaningTimePoint = &pdp
+							toOverduePoint = pdp
 					*/
 				}
 				// add point_uuid to the list of the processed data point uuids
 				processedDataPointUUIDs = append(processedDataPointUUIDs, pdp.UUID)
 			}
 			// first verify the points exist for `usageCount` processing
-			if cubicleOccupancyPoint == nil || totalUsesPoint == nil || currentUsesPoint == nil || fifteenMinUsesPoint == nil {
+			if cubicleOccupancyPoint == (DoorProcessingPoint{}) || totalUsesPoint == (DoorProcessingPoint{}) || currentUsesPoint == (DoorProcessingPoint{}) {
 				inst.cpsErrorMsg(fmt.Sprintf("CPSProcessing() missing `usageCount` proccessed data point for asset: (%v) %v - %v - %v", doorSensorPoint.AssetRef, doorSensorPoint.FloorRef, doorSensorPoint.GenderRef, doorSensorPoint.LocationRef))
 				continue
 			}
@@ -244,9 +243,15 @@ func (inst *Instance) CPSProcessing() {
 			// pull data for sensor for the given time range
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() periodStart: %+v", periodStart))
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() periodEnd: %+v", periodEnd))
+			// get the timestamp for the last 15 minute use rollup time prior to the current period
+			previous15MinIntervalTime := periodStart.Round(time.Minute * 15)
+			if previous15MinIntervalTime.After(periodStart) {
+				previous15MinIntervalTime = previous15MinIntervalTime.Add(-time.Minute * 15)
+			}
 
 			var rawDoorSensorHistories []History
-			err = postgresSetting.postgresConnectionInstance.db.Model(&model.History{}).Where("point_uuid = ? AND host_uuid = ? AND (timestamp AT TIME ZONE 'UTC' BETWEEN ? AND ?)", doorSensorPoint.UUID, doorSensorPoint.HostUUID, periodStart, periodEnd).Scan(&rawDoorSensorHistories).Error
+			err = postgresSetting.postgresConnectionInstance.db.Model(&model.History{}).Where("point_uuid = ? AND host_uuid = ? AND (timestamp AT TIME ZONE 'UTC' BETWEEN ? AND ?)", doorSensorPoint.UUID, doorSensorPoint.HostUUID, periodStart.UTC(), periodEnd.UTC()).Scan(&rawDoorSensorHistories).Error
+
 			if err != nil {
 				inst.cpsErrorMsg("CPSProcessing() rawSensorData error: ", err)
 			}
@@ -255,6 +260,14 @@ func (inst *Instance) CPSProcessing() {
 			dfRawDoorSensorHistories := dataframe.LoadStructs(rawDoorSensorHistories)
 			fmt.Println("dfRawDoorSensorHistories")
 			fmt.Println(dfRawDoorSensorHistories)
+
+			// TODO: DELETE ME (just for debug)
+			ResultFile4, err := os.Create(fmt.Sprintf("/home/marc/Documents/Nube/CPS/Development/Data_Processing/4_dfRawDoorSensorHistories.csv"))
+			if err != nil {
+				inst.cpsErrorMsg(err)
+			}
+			defer ResultFile4.Close()
+			dfRawDoorSensorHistories.WriteCSV(ResultFile4)
 
 			// get last stored processed data values
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() hostUUID: %+v", doorSensorPoint.HostUUID))
@@ -368,8 +381,10 @@ func (inst *Instance) CPSProcessing() {
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointLastProcessedData: %+v", pointLastProcessedData))
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointDoorInfo: %+v", pointDoorInfo))
 
+			// TODO: Consider changing all timestamps to be UTC strings (currently they return as local timestamp strings, and I can't figure out how to get them into UTC).
+
 			// now do the door usage calculations
-			dfDoorResults, err := inst.CalculateDoorUses(dfRawDoorSensorHistories, dfJoinedLastProcessedValuesAndPoints, dfAllResets, dfSiteThresholds, pointLastProcessedData, pointDoorInfo)
+			dfDoorResults, err := inst.CalculateDoorUses(dfRawDoorSensorHistories, dfAllResets, dfSiteThresholds, pointLastProcessedData, pointDoorInfo)
 			if err != nil {
 				inst.cpsErrorMsg("CalculateDoorUses() error: ", err)
 				return
@@ -385,8 +400,56 @@ func (inst *Instance) CPSProcessing() {
 			defer ResultFile.Close()
 			dfDoorResults.WriteCSV(ResultFile)
 
+			// first verify the points exist for `usageCount` processing
+			if totalUsesPoint == (DoorProcessingPoint{}) {
+				inst.cpsErrorMsg(fmt.Sprintf("CPSProcessing() missing `totalUsesPoint` proccessed data point for asset: (%v) %v - %v - %v", doorSensorPoint.AssetRef, doorSensorPoint.FloorRef, doorSensorPoint.GenderRef, doorSensorPoint.LocationRef))
+				continue
+			}
+
+			// get the totalUses value at the last 15 minute rollup time
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() previous15MinIntervalTime: %+v", previous15MinIntervalTime))
+
+			// get last stored processed data value
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() totalUsesPoint: %+v", totalUsesPoint))
+			var totalUsesHistoriesFor15MinCalc []History
+			err = postgresSetting.postgresConnectionInstance.db.Raw(`
+					SELECT DISTINCT ON (point_uuid, host_uuid) *
+					FROM histories
+					WHERE host_uuid = ? AND point_uuid = ? AND timestamp AT TIME ZONE 'UTC' = ?
+					ORDER BY point_uuid, host_uuid, timestamp DESC
+				`, totalUsesPoint.HostUUID, totalUsesPoint.UUID, previous15MinIntervalTime.UTC()).
+				Scan(&totalUsesHistoriesFor15MinCalc).Error
+			if err != nil {
+				inst.cpsErrorMsg("CPSProcessing() totalUsesHistoriesFor15MinCalc error: ", err)
+			}
+			// for viewing the resulting SQL (DEBUG)
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() totalUsesHistoriesFor15MinCalc SQL: %+v", postgresSetting.postgresConnectionInstance.db.ToSQL(func(tx *gorm.DB) *gorm.DB {
+				return tx.Raw(`
+					SELECT DISTINCT ON (point_uuid, host_uuid) *
+					FROM histories
+					WHERE host_uuid = ? AND point_uuid = ? AND timestamp AT TIME ZONE 'UTC' = ?
+					ORDER BY point_uuid, host_uuid, timestamp DESC
+				`, totalUsesPoint.HostUUID, totalUsesPoint.UUID, previous15MinIntervalTime.UTC()).
+					Scan(&totalUsesHistoriesFor15MinCalc)
+			})))
+
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() totalUsesHistoriesFor15MinCalc: %+v", totalUsesHistoriesFor15MinCalc))
+			// dfLastProcessedDoor := dataframe.ReadCSV(strings.NewReader(csvLastProNODoor))
+			dfTotalUsesHistoriesFor15MinCalc := dataframe.LoadStructs(totalUsesHistoriesFor15MinCalc)
+			fmt.Println("dfTotalUsesHistoriesFor15MinCalc")
+			fmt.Println(dfTotalUsesHistoriesFor15MinCalc)
+
+			totalUsesHistoryFor15MinCalc := History{}
+			validTotalUsesHistoryFor15MinCalc := false
+			if len(totalUsesHistoriesFor15MinCalc) == 1 {
+				totalUsesHistoryFor15MinCalc = totalUsesHistoriesFor15MinCalc[0]
+				validTotalUsesHistoryFor15MinCalc = true
+			} else {
+				inst.cpsErrorMsg(fmt.Sprintf("CPSProcessing() missing `totalUsesPoint` history data for the 15 min interval prior to the periodStart.  The first 15 minute usage value won't be calculated. Asset: (%v) %v - %v - %v", doorSensorPoint.AssetRef, doorSensorPoint.FloorRef, doorSensorPoint.GenderRef, doorSensorPoint.LocationRef))
+			}
+
 			// now calculate the 15 minute usage rollup
-			dfDoorResults15Min, err := inst.Calculate15MinUsageRollup(periodStart, periodEnd, *dfDoorResults, dfJoinedLastProcessedValuesAndPoints)
+			dfDoorResults15Min, err := inst.Calculate15MinUsageRollup(periodStart, periodEnd, *dfDoorResults, &totalUsesHistoryFor15MinCalc, validTotalUsesHistoryFor15MinCalc, timeZone)
 			if err != nil {
 				inst.cpsErrorMsg("CalculateDoorUses() error: ", err)
 				return
@@ -395,12 +458,29 @@ func (inst *Instance) CPSProcessing() {
 			fmt.Println(dfDoorResults15Min)
 
 			// TODO: DELETE ME (just for debug)
-			ResultFile2, err := os.Create(fmt.Sprintf("/home/marc/Documents/Nube/CPS/Development/Data_Processing/8_dfDoorResults15Min.csv"))
+			ResultFile3, err := os.Create(fmt.Sprintf("/home/marc/Documents/Nube/CPS/Development/Data_Processing/8_dfDoorResults15Min.csv"))
 			if err != nil {
 				inst.cpsErrorMsg(err)
 			}
-			defer ResultFile2.Close()
-			dfDoorResults15Min.WriteCSV(ResultFile2)
+			defer ResultFile3.Close()
+			dfDoorResults15Min.WriteCSV(ResultFile3)
+
+			// next calculate the overdue cubicles
+			dfOverdueResult, err := inst.CalculateOverdueCubicles(periodStart, periodEnd, *dfDoorResults15Min, dfSiteThresholds, pointLastProcessedData, pointDoorInfo)
+			if err != nil {
+				inst.cpsErrorMsg("CalculateOverdueCubicles() error: ", err)
+				return
+			}
+			fmt.Println("dfOverdueResult")
+			fmt.Println(dfOverdueResult)
+
+			// TODO: DELETE ME (just for debug)
+			ResultFile5, err := os.Create(fmt.Sprintf("/home/marc/Documents/Nube/CPS/Development/Data_Processing/9_dfOverdueResult.csv"))
+			if err != nil {
+				inst.cpsErrorMsg(err)
+			}
+			defer ResultFile5.Close()
+			dfOverdueResult.WriteCSV(ResultFile5)
 
 			/*
 				// TODO: need to get last totalUses at the time when the last 15MinRollup value was stored (prior to the processing time range)

@@ -70,6 +70,11 @@ func (inst *Instance) GetLastProcessedDataAndDoorType(dfJoinedLastProcessedValue
 			if ok {
 				pointLastProcessedData.LastToPendingTimestamp = row["timestamp"].(string)
 			}
+		case string(toCleanColName):
+			_, ok = row["timestamp"].(string)
+			if ok {
+				pointLastProcessedData.LastToCleanTimestamp = row["timestamp"].(string)
+			}
 		}
 	}
 

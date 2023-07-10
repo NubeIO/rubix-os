@@ -60,7 +60,7 @@ func (inst *Instance) initializePostgresDBConnection() (bool, error) {
 }
 
 func (ps *PostgresSetting) New() error {
-	dns := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s",
+	dns := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s TimeZone=UTC",
 		ps.Host, ps.User, ps.Password, ps.DbName, ps.Port, ps.SslMode)
 	ps.postgresConnectionInstance = &PostgresConnection{
 		db: nil,

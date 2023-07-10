@@ -59,7 +59,7 @@ type History struct {
 	PointUUID string  `json:"point_uuid" dataframe:"point_uuid" gorm:"primary_key"`
 	HostUUID  string  `json:"host_uuid" dataframe:"host_uuid" gorm:"primary_key"`
 	Value     float64 `json:"value" dataframe:"value"`
-	Timestamp string  `json:"timestamp" dataframe:"timestamp" gorm:"column:timestamp;type:timestamp"`
+	Timestamp string  `json:"timestamp" dataframe:"timestamp" gorm:"column:timestamp"`
 }
 
 type LastProcessedData struct {
@@ -70,6 +70,7 @@ type LastProcessedData struct {
 	PendingStatus          int `json:"pendingStatus" dataframe:"pendingStatus"`
 	OverdueStatus          int `json:"overdueStatus" dataframe:"overdueStatus"`
 	LastToPendingTimestamp string
+	LastToCleanTimestamp   string
 }
 
 type DoorInfo struct {
