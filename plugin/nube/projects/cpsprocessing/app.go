@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	"github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/go-gota/gota/dataframe"
@@ -664,7 +664,7 @@ func (inst *Instance) addPoint(body *model.Point) (point *model.Point, err error
 	}
 	inst.cpsDebugMsg("addPoint(): ", body.Name)
 
-	device, err := inst.db.GetDevice(body.DeviceUUID, api.Args{})
+	device, err := inst.db.GetDevice(body.DeviceUUID, args.Args{})
 	if device == nil || err != nil {
 		inst.cpsDebugMsg("addPoint(): failed to find device", body.DeviceUUID)
 		return nil, err
