@@ -2,14 +2,14 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/src/cli/cligetter"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"sync"
 )
 
-func (d *GormDatabase) GetGroups(args api.Args) ([]*model.Group, error) {
+func (d *GormDatabase) GetGroups(args argspkg.Args) ([]*model.Group, error) {
 	var groupsModel []*model.Group
 	query := d.buildGroupQuery(args)
 	if err := query.Find(&groupsModel).Error; err != nil {
@@ -18,7 +18,7 @@ func (d *GormDatabase) GetGroups(args api.Args) ([]*model.Group, error) {
 	return groupsModel, nil
 }
 
-func (d *GormDatabase) GetGroup(uuid string, args api.Args) (*model.Group, error) {
+func (d *GormDatabase) GetGroup(uuid string, args argspkg.Args) (*model.Group, error) {
 	var groupModel *model.Group
 	query := d.buildGroupQuery(args)
 	if err := query.Where("uuid = ?", uuid).First(&groupModel).Error; err != nil {
@@ -28,7 +28,7 @@ func (d *GormDatabase) GetGroup(uuid string, args api.Args) (*model.Group, error
 	return groupModel, nil
 }
 
-func (d *GormDatabase) GetGroupsByUUIDs(uuids []*string, args api.Args) ([]*model.Group, error) {
+func (d *GormDatabase) GetGroupsByUUIDs(uuids []*string, args argspkg.Args) ([]*model.Group, error) {
 	var groupsModel []*model.Group
 	query := d.buildGroupQuery(args)
 	if err := query.Where("uuid IN ?", uuids).Find(&groupsModel).Error; err != nil {
@@ -37,7 +37,7 @@ func (d *GormDatabase) GetGroupsByUUIDs(uuids []*string, args api.Args) ([]*mode
 	return groupsModel, nil
 }
 
-func (d *GormDatabase) GetGroupsByHostUUIDs(hostUUIDs []*string, args api.Args) ([]*model.Group, error) {
+func (d *GormDatabase) GetGroupsByHostUUIDs(hostUUIDs []*string, args argspkg.Args) ([]*model.Group, error) {
 	var groupsModel []*model.Group
 	query := d.buildGroupQuery(args)
 	if err := query.Distinct("groups.*").
@@ -47,6 +47,18 @@ func (d *GormDatabase) GetGroupsByHostUUIDs(hostUUIDs []*string, args api.Args) 
 		return nil, err
 	}
 	return groupsModel, nil
+}
+
+func (d *GormDatabase) GetGroupByHostUUID(hostUUID string, args argspkg.Args) (*model.Group, error) {
+	var groupModel *model.Group
+	query := d.buildGroupQuery(args)
+	if err := query.Distinct("groups.*").
+		Joins("JOIN hosts ON groups.uuid = hosts.group_uuid").
+		Where("hosts.uuid = ?", hostUUID).
+		First(&groupModel).Error; err != nil {
+		return nil, err
+	}
+	return groupModel, nil
 }
 
 func (d *GormDatabase) CreateGroup(body *model.Group) (*model.Group, error) {
@@ -77,7 +89,7 @@ func (d *GormDatabase) DropGroups() (*interfaces.Message, error) {
 
 func (d *GormDatabase) UpdateHostsStatus(uuid string) (*model.Group, error) {
 	groupModel := model.Group{}
-	query := d.buildGroupQuery(api.Args{WithHosts: true})
+	query := d.buildGroupQuery(argspkg.Args{WithHosts: true})
 	err := query.Where("uuid = ?", uuid).Find(&groupModel).Error
 	if err != nil {
 		return nil, err

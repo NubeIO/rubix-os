@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/services/pollqueue"
 	"github.com/NubeIO/rubix-os/utils/float"
 	log "github.com/sirupsen/logrus"
@@ -15,7 +15,7 @@ func (inst *Instance) Enable() error {
 	inst.pluginName = name
 	inst.setUUID()
 
-	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, api.Args{})
+	nets, err := inst.db.GetNetworksByPlugin(inst.pluginUUID, argspkg.Args{})
 	if err != nil {
 		inst.fault = true
 		inst.bacnetErrorMsg("enable plugin get networks: %v\n", err)

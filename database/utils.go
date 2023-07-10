@@ -223,3 +223,87 @@ func (d *GormDatabase) getGlobalUUID() (string, error) {
 	}
 	return deviceInfo.GlobalUUID, nil
 }
+
+func checkAlertStatus(s string) error {
+	switch model.AlertStatus(s) {
+	case model.AlertStatusActive:
+		return nil
+	case model.AlertStatusAcknowledged:
+		return nil
+	case model.AlertStatusClosed:
+		return nil
+	}
+	return errors.New("invalid alert status, try active, acknowledged, closed")
+}
+
+func checkAlertSeverity(s string) error {
+	switch model.AlertSeverity(s) {
+	case model.AlertSeverityCrucial:
+		return nil
+	case model.AlertSeverityMinor:
+		return nil
+	case model.AlertSeverityInfo:
+		return nil
+	case model.AlertSeverityWarning:
+		return nil
+	}
+	return errors.New("invalid alert status, try crucial, info, warning")
+}
+
+func checkAlertStatusClosed(s string) bool {
+	return model.AlertStatus(s) == model.AlertStatusClosed
+}
+
+func checkAlertEntityType(s string) error {
+	switch model.AlertEntityType(s) {
+	case model.AlertEntityTypeGateway:
+		return nil
+	case model.AlertEntityTypeNetwork:
+		return nil
+	case model.AlertEntityTypeDevice:
+		return nil
+	case model.AlertEntityTypePoint:
+		return nil
+	case model.AlertEntityTypeService:
+		return nil
+	}
+	return errors.New("invalid alert entity type, try gateway, network")
+}
+
+func checkAlertType(s string) error {
+	switch model.AlertType(s) {
+	case model.AlertTypePing:
+		return nil
+	case model.AlertTypeFault:
+		return nil
+	case model.AlertTypeThreshold:
+		return nil
+	case model.AlertTypeFlatLine:
+		return nil
+	}
+	return errors.New("invalid alert type, try ping, threshold, fault")
+}
+
+func alertTypeTitle(s string) string {
+	switch model.AlertType(s) {
+	case model.AlertTypePing:
+		return "Failed to ping the device"
+	case model.AlertTypeFault:
+		return "Fault"
+	case model.AlertTypeThreshold:
+		return "Out of range threshold"
+	case model.AlertTypeFlatLine:
+		return "Flat line"
+	}
+	return s
+}
+
+func checkAlertTarget(s string) error {
+	switch model.AlertTarget(s) {
+	case model.AlertTargetMobile:
+		return nil
+	case model.AlertTargetNone:
+		return nil
+	}
+	return errors.New("invalid alert target, try mobile, none")
+}

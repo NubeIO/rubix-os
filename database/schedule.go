@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"github.com/pkg/errors"
@@ -50,7 +50,7 @@ func (d *GormDatabase) GetScheduleResult(uuid string) (*model.Schedule, error) {
 	return scheduleModel, nil
 }
 
-func (d *GormDatabase) GetSchedulesByArgs(args api.Args) ([]*model.Schedule, error) {
+func (d *GormDatabase) GetSchedulesByArgs(args argspkg.Args) ([]*model.Schedule, error) {
 	var scheduleModel []*model.Schedule
 	query := d.buildScheduleQuery(args)
 	if err := query.Find(&scheduleModel).Error; err != nil {
@@ -59,7 +59,7 @@ func (d *GormDatabase) GetSchedulesByArgs(args api.Args) ([]*model.Schedule, err
 	return scheduleModel, nil
 }
 
-func (d *GormDatabase) GetOneScheduleByArgs(args api.Args) (*model.Schedule, error) {
+func (d *GormDatabase) GetOneScheduleByArgs(args argspkg.Args) (*model.Schedule, error) {
 	var scheduleModel *model.Schedule
 	query := d.buildScheduleQuery(args)
 	if err := query.First(&scheduleModel).Error; err != nil {

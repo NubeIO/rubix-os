@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/NubeIO/configor"
 	"path"
+	"time"
 )
 
 type Configuration struct {
@@ -11,26 +12,15 @@ type Configuration struct {
 		KeepAlivePeriodSeconds int
 		ListenAddr             string `default:"0.0.0.0"`
 		Port                   int
-		RSPort                 int `default:"1616"`
 		ResponseHeaders        map[string]string
-		Stream                 struct {
-			PingPeriodSeconds int `default:"45"`
-			AllowedOrigins    []string
-		}
-		Cors struct {
-			AllowOrigins []string
-			AllowMethods []string
-			AllowHeaders []string
-		}
 	}
 	Database struct {
 		Dialect    string `default:"sqlite3"`
 		Connection string `default:"data.db"`
 		LogLevel   string `default:"WARN"`
 	}
-	PassStrength int `default:"10"`
-	LogLevel     string
-	Location     struct {
+	LogLevel string
+	Location struct {
 		GlobalDir string `default:"./"`
 		ConfigDir string `default:"config"`
 		DataDir   string `default:"data"`
@@ -39,9 +29,9 @@ type Configuration struct {
 			ModulesDir        string `default:"modules"`
 			UploadedImagesDir string `default:"images"`
 		}
-	}
-	Prod         bool  `default:"false"`
-	Auth         *bool `default:"true"`
+	} // leave it as default; don't include in config.eg.yml
+	Prod         bool  `default:"false"` // set from commandline; don't include in config.eg.yml
+	Auth         *bool `default:"true"`  // set from commandline; don't include in config.eg.yml
 	PointHistory struct {
 		Enable  *bool `default:"true"`
 		Cleaner struct {
@@ -54,8 +44,7 @@ type Configuration struct {
 			Frequency int   `default:"10"`
 		}
 	}
-	SecretKey string
-	MQTT      struct {
+	MQTT struct {
 		Enable                *bool  `default:"true"`
 		Address               string `default:"localhost"`
 		Port                  int    `default:"1883"`
@@ -72,6 +61,11 @@ type Configuration struct {
 		PublishScheduleCOV    *bool  `default:"true"`
 		PublishScheduleList   *bool  `default:"false"`
 		ScheduleWriteListener *bool  `default:"true"`
+	}
+	Notification struct {
+		Enable         *bool         `default:"false"`
+		Frequency      time.Duration `default:"1m"`
+		ResendDuration time.Duration `default:"1h"`
 	}
 }
 

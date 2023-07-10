@@ -1,4 +1,4 @@
-package api
+package args
 
 type Args struct {
 	Enable                         *bool
@@ -61,6 +61,9 @@ type Args struct {
 	WithWidgets                    bool
 	WithViewTemplateWidgets        bool
 	WithViewTemplateWidgetPointers bool
+	WithTickets                    bool
+	Target                         *string
+	Notified                       *bool
 }
 
 var ArgsType = struct {
@@ -122,6 +125,9 @@ var ArgsType = struct {
 	WithWidgets                    string
 	WithViewTemplateWidgets        string
 	WithViewTemplateWidgetPointers string
+	WithTickets                    string
+	Target                         string
+	Notified                       string
 }{
 	Sort:                           "sort",
 	Order:                          "order",
@@ -181,6 +187,9 @@ var ArgsType = struct {
 	WithWidgets:                    "with_widgets",
 	WithViewTemplateWidgets:        "with_view_template_widgets",
 	WithViewTemplateWidgetPointers: "with_view_template_widget_pointers",
+	WithTickets:                    "with_tickets",
+	Target:                         "target",
+	Notified:                       "notified",
 }
 
 var ArgsDefault = struct {
@@ -223,6 +232,7 @@ var ArgsDefault = struct {
 	WithWidgets                    string
 	WithViewTemplateWidgets        string
 	WithViewTemplateWidgetPointers string
+	WithTickets                    string
 }{
 	Sort:                           "ID",
 	Order:                          "DESC", // ASC or DESC
@@ -263,4 +273,5 @@ var ArgsDefault = struct {
 	WithWidgets:                    "false",
 	WithViewTemplateWidgets:        "false",
 	WithViewTemplateWidgetPointers: "false",
+	WithTickets:                    "false",
 }

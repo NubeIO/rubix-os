@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/database"
 	"github.com/NubeIO/rubix-os/module/common"
 	log "github.com/sirupsen/logrus"
@@ -12,19 +13,22 @@ import (
 type dbHelper struct{}
 
 func (*dbHelper) GetWithoutParam(path, args string) ([]byte, error) {
-	apiArgs := parseArgs(args)
 	var out interface{}
 	var err error
+	apiArgs, err := argspkg.DeserializeArgs(args)
+	if err != nil {
+		return nil, err
+	}
 	if path == "networks" {
-		out, err = database.GlobalGormDatabase.GetNetworks(apiArgs)
+		out, err = database.GlobalGormDatabase.GetNetworks(*apiArgs)
 	} else if path == "devices" {
-		out, err = database.GlobalGormDatabase.GetDevices(apiArgs)
+		out, err = database.GlobalGormDatabase.GetDevices(*apiArgs)
 	} else if path == "points" {
-		out, err = database.GlobalGormDatabase.GetPoints(apiArgs)
+		out, err = database.GlobalGormDatabase.GetPoints(*apiArgs)
 	} else if path == "one_device_by_args" {
-		out, err = database.GlobalGormDatabase.GetOneDeviceByArgs(apiArgs)
+		out, err = database.GlobalGormDatabase.GetOneDeviceByArgs(*apiArgs)
 	} else if path == "one_point_by_args" {
-		out, err = database.GlobalGormDatabase.GetOneDeviceByArgs(apiArgs)
+		out, err = database.GlobalGormDatabase.GetOneDeviceByArgs(*apiArgs)
 	} else if path == "schedules" {
 		out, err = database.GlobalGormDatabase.GetSchedules()
 	} else {
@@ -34,20 +38,23 @@ func (*dbHelper) GetWithoutParam(path, args string) ([]byte, error) {
 }
 
 func (*dbHelper) Get(path, uuid, args string) ([]byte, error) {
-	apiArgs := parseArgs(args)
 	var out interface{}
 	var err error
+	apiArgs, err := argspkg.DeserializeArgs(args)
+	if err != nil {
+		return nil, err
+	}
 	if path == "networks" {
-		out, err = database.GlobalGormDatabase.GetNetwork(uuid, apiArgs)
+		out, err = database.GlobalGormDatabase.GetNetwork(uuid, *apiArgs)
 	} else if path == "devices" {
-		out, err = database.GlobalGormDatabase.GetDevice(uuid, apiArgs)
+		out, err = database.GlobalGormDatabase.GetDevice(uuid, *apiArgs)
 	} else if path == "points" {
-		out, err = database.GlobalGormDatabase.GetPoint(uuid, apiArgs)
+		out, err = database.GlobalGormDatabase.GetPoint(uuid, *apiArgs)
 	} else if path == "networks_by_plugin_name" {
-		out, err = database.GlobalGormDatabase.GetNetworksByPluginName(uuid, apiArgs)
+		out, err = database.GlobalGormDatabase.GetNetworksByPluginName(uuid, *apiArgs)
 	} else if path == "network_by_name" {
 		name := uuid
-		out, err = database.GlobalGormDatabase.GetNetworkByName(name, apiArgs)
+		out, err = database.GlobalGormDatabase.GetNetworkByName(name, *apiArgs)
 	} else if path == "plugin_by_path" {
 		out, err = database.GlobalGormDatabase.GetPluginByPath(uuid)
 	} else if path == "plugin_by_id" {

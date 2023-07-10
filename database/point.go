@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/config"
 	"github.com/NubeIO/rubix-os/interfaces"
 	log "github.com/sirupsen/logrus"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/nils"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/NubeIO/rubix-os/utils/integer"
@@ -19,7 +19,7 @@ import (
 	"github.com/NubeIO/rubix-os/utils/priorityarray"
 )
 
-func (d *GormDatabase) GetPoints(args api.Args) ([]*model.Point, error) {
+func (d *GormDatabase) GetPoints(args argspkg.Args) ([]*model.Point, error) {
 	var pointsModel []*model.Point
 	query := d.buildPointQuery(args)
 	if err := query.Find(&pointsModel).Error; err != nil {
@@ -38,7 +38,7 @@ func (d *GormDatabase) GetPointsBulkUUIs() ([]string, error) {
 
 func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point, error) {
 	var pointsModel []*model.Point
-	points, err := d.GetPoints(api.Args{WithPriority: true})
+	points, err := d.GetPoints(argspkg.Args{WithPriority: true})
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (d *GormDatabase) GetPointsBulk(bulkPoints []*model.Point) ([]*model.Point,
 	return pointsModel, nil
 }
 
-func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error) {
+func (d *GormDatabase) GetPoint(uuid string, args argspkg.Args) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)
 	if err := query.Where("uuid = ? ", uuid).First(&pointModel).Error; err != nil {
@@ -61,7 +61,7 @@ func (d *GormDatabase) GetPoint(uuid string, args api.Args) (*model.Point, error
 	return pointModel, nil
 }
 
-func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string, args api.Args) (*model.Point, error) {
+func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string, args argspkg.Args) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)
 	if err := query.Joins("JOIN devices ON points.device_uuid = devices.uuid").
@@ -74,7 +74,7 @@ func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string,
 	return pointModel, nil
 }
 
-func (d *GormDatabase) GetOnePointByArgs(args api.Args) (*model.Point, error) {
+func (d *GormDatabase) GetOnePointByArgs(args argspkg.Args) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)
 	if err := query.First(&pointModel).Error; err != nil {
@@ -155,7 +155,7 @@ func (d *GormDatabase) UpdatePoint(uuid string, body *model.Point) (*model.Point
 		return nil, err
 	}
 	body.Name = name
-	pointModel, err := d.GetPoint(uuid, api.Args{WithPriority: true})
+	pointModel, err := d.GetPoint(uuid, argspkg.Args{WithPriority: true})
 	if err != nil {
 		return nil, err
 	}
@@ -318,7 +318,7 @@ func (d *GormDatabase) DeletePoint(uuid string) (bool, error) {
 }
 
 func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName string, body *model.PointWriter) (*model.Point, error) {
-	point, err := d.GetPointByName(networkName, deviceName, pointName, api.Args{})
+	point, err := d.GetPointByName(networkName, deviceName, pointName, argspkg.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +329,7 @@ func (d *GormDatabase) PointWriteByName(networkName, deviceName, pointName strin
 	return point, nil
 }
 
-func (d *GormDatabase) DeleteOnePointByArgs(args api.Args) (bool, error) {
+func (d *GormDatabase) DeleteOnePointByArgs(args argspkg.Args) (bool, error) {
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)
 	if err := query.First(&pointModel).Error; err != nil {
@@ -339,7 +339,7 @@ func (d *GormDatabase) DeleteOnePointByArgs(args api.Args) (bool, error) {
 	return d.deleteResponseBuilder(query)
 }
 
-func (d *GormDatabase) DeletePointByName(networkName, deviceName, pointName string, args api.Args) (bool, error) {
+func (d *GormDatabase) DeletePointByName(networkName, deviceName, pointName string, args argspkg.Args) (bool, error) {
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)
 	if err := query.Joins("JOIN devices ON points.device_uuid = devices.uuid").

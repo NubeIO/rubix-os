@@ -2,6 +2,8 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	argspkg "github.com/NubeIO/rubix-os/args"
+	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/gin-gonic/gin"
 )
@@ -17,14 +19,17 @@ func getAlertStatus(ctx *gin.Context) (status string, err error) {
 }
 
 type AlertDatabase interface {
-	GetAlert(uuid string) (*model.Alert, error)
-	GetAlerts() ([]*model.Alert, error)
-	GetAlertsByHost(hostUUID string) ([]*model.Alert, error)
+	GetAlert(uuid string, args argspkg.Args) (*model.Alert, error)
+	GetAlerts(args argspkg.Args) ([]*model.Alert, error)
+	GetAlertsByHost(hostUUID string, args argspkg.Args) ([]*model.Alert, error)
+	GetAlertsByHostUUIDs(hostUUIDs []*string, args argspkg.Args) ([]*model.Alert, error)
 	GetAlertByField(field string, value string) (*model.Alert, error)
 	CreateAlert(body *model.Alert) (*model.Alert, error)
 	UpdateAlertStatus(uuid string, status string) (alert *model.Alert, err error)
 	DeleteAlert(uuid string) (*interfaces.Message, error)
 	DropAlerts() (*interfaces.Message, error)
+
+	GetMemberHostUUIDs(username string) []*string
 }
 type AlertAPI struct {
 	DB AlertDatabase
@@ -35,7 +40,8 @@ func (a *AlertAPI) AlertsSchema(ctx *gin.Context) {
 
 func (a *AlertAPI) GetAlert(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetAlert(uuid)
+	args := buildAlertArgs(ctx)
+	q, err := a.DB.GetAlert(uuid, args)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -45,7 +51,8 @@ func (a *AlertAPI) GetAlert(ctx *gin.Context) {
 
 func (a *AlertAPI) GetAlertsByHost(ctx *gin.Context) {
 	uuid := resolveID(ctx)
-	q, err := a.DB.GetAlertsByHost(uuid)
+	args := buildAlertArgs(ctx)
+	q, err := a.DB.GetAlertsByHost(uuid, args)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -54,7 +61,23 @@ func (a *AlertAPI) GetAlertsByHost(ctx *gin.Context) {
 }
 
 func (a *AlertAPI) GetAlerts(ctx *gin.Context) {
-	q, err := a.DB.GetAlerts()
+	role, err := getAuthorizedOrDefaultRole(ctx.Request)
+	if err != nil {
+		ResponseHandler(nil, err, ctx)
+	}
+	args := buildAlertArgs(ctx)
+	if role == constants.MemberRole {
+		username, _ := getAuthorizedUsername(ctx.Request)
+		hostUUIDs := a.DB.GetMemberHostUUIDs(username)
+		q, err := a.DB.GetAlertsByHostUUIDs(hostUUIDs, args)
+		if err != nil {
+			ResponseHandler(nil, err, ctx)
+			return
+		}
+		ResponseHandler(q, err, ctx)
+		return
+	}
+	q, err := a.DB.GetAlerts(args)
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return

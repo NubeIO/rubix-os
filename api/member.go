@@ -2,10 +2,10 @@ package api
 
 import (
 	"errors"
-	"github.com/NubeIO/nubeio-rubix-lib-auth-go/auth"
+	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-auth-go/security"
-	"github.com/NubeIO/nubeio-rubix-lib-auth-go/user"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/interfaces"
 	"github.com/NubeIO/rubix-os/nerrors"
@@ -15,50 +15,25 @@ import (
 	"net/http"
 )
 
-var invalidMemberTokenError = nerrors.NewErrUnauthorized("invalid member token")
-var invalidTokenError = nerrors.NewErrUnauthorized("invalid token")
-
 type MemberDatabase interface {
-	GetMembers(args Args) ([]*model.Member, error)
-	GetMember(uuid string, args Args) (*model.Member, error)
-	GetMemberByUsername(username string, args Args) (*model.Member, error)
-	GetMemberByEmail(email string, args Args) (*model.Member, error)
+	GetMembers(args argspkg.Args) ([]*model.Member, error)
+	GetMember(uuid string, args argspkg.Args) (*model.Member, error)
+	GetMemberByUsername(username string, args argspkg.Args) (*model.Member, error)
+	GetMemberByEmail(email string, args argspkg.Args) (*model.Member, error)
 	CreateMember(body *model.Member) (*model.Member, error)
 	UpdateMember(uuid string, body *model.Member) (*model.Member, error)
 	DeleteMember(uuid string) (bool, error)
 	DeleteMemberByUsername(username string) (bool, error)
 	ChangeMemberPassword(uuid string, password string) (*interfaces.Message, error)
 	GetMemberSidebars(username string, includeWithoutViews bool) ([]*model.Location, error)
+
+	GetFcmServerKey() string
+	SendNotificationByMemberUUID(uniqueDevices map[string]string, data map[string]interface{})
+	GetMemberDevicesByMemberUUID(memberUUID string) ([]*model.MemberDevice, error)
 }
 
 type MemberAPI struct {
 	DB MemberDatabase
-}
-
-func getAuthorizedUsername(request *http.Request) (string, error) {
-	username, err := auth.GetAuthorizedUsername(request)
-	if err != nil {
-		return "", nerrors.NewErrUnauthorized(err.Error())
-	}
-	if username == "" {
-		return "", invalidMemberTokenError
-	}
-	return username, nil
-}
-
-func getAuthorizedOrDefaultUsername(request *http.Request) (string, error) {
-	if auth.AuthorizeInternal(request) || auth.AuthorizeExternal(request) {
-		usr, err := user.GetUser()
-		if err != nil {
-			return "", err
-		}
-		return usr.Username, nil
-	}
-	username, _ := getAuthorizedUsername(request)
-	if username != "" {
-		return username, nil
-	}
-	return "", invalidTokenError
 }
 
 func (a *MemberAPI) CreateMember(ctx *gin.Context) {
@@ -76,7 +51,7 @@ func (a *MemberAPI) CreateMember(ctx *gin.Context) {
 
 func (a *MemberAPI) Login(ctx *gin.Context) {
 	body, _ := getBodyUser(ctx)
-	member, _ := a.DB.GetMemberByUsername(body.Username, Args{})
+	member, _ := a.DB.GetMemberByUsername(body.Username, argspkg.Args{})
 	if member != nil && member.Username == body.Username && security.CheckPasswordHash(member.Password, body.Password) {
 		if *member.State != string(model.Verified) {
 			ctx.JSON(http.StatusForbidden, interfaces.Message{Message: "member is not verified"})
@@ -95,7 +70,7 @@ func (a *MemberAPI) Login(ctx *gin.Context) {
 
 func (a *MemberAPI) CheckEmail(ctx *gin.Context) {
 	email := resolveEmail(ctx)
-	q, _ := a.DB.GetMemberByEmail(email, Args{})
+	q, _ := a.DB.GetMemberByEmail(email, argspkg.Args{})
 	message := "email already exists"
 	if q == nil {
 		message = "email does not exists"
@@ -105,7 +80,7 @@ func (a *MemberAPI) CheckEmail(ctx *gin.Context) {
 
 func (a *MemberAPI) CheckUsername(ctx *gin.Context) {
 	username := resolveUsername(ctx)
-	q, _ := a.DB.GetMemberByUsername(username, Args{})
+	q, _ := a.DB.GetMemberByUsername(username, argspkg.Args{})
 	message := "username already exists"
 	if q == nil {
 		message = "username does not exists"
@@ -150,7 +125,7 @@ func (a *MemberAPI) GetMemberByUsername(ctx *gin.Context) {
 
 func (a *MemberAPI) VerifyMember(ctx *gin.Context) {
 	username := resolveUsername(ctx)
-	member, err := a.DB.GetMemberByUsername(username, Args{})
+	member, err := a.DB.GetMemberByUsername(username, argspkg.Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -161,6 +136,22 @@ func (a *MemberAPI) VerifyMember(ctx *gin.Context) {
 		ResponseHandler(nil, err, ctx)
 		return
 	}
+
+	data := map[string]interface{}{
+		"to": "",
+		"notification": map[string]string{
+			"title": "NubeIO Member Status",
+			"body":  fmt.Sprintf("Member '%s' is verified by Admin!", member.Username),
+		},
+		"content_available": false,
+		"priority":          "high",
+	}
+	uniqueDevices := map[string]string{}
+	memberDevices, _ := a.DB.GetMemberDevicesByMemberUUID(member.UUID)
+	for _, memberDevice := range memberDevices {
+		uniqueDevices[memberDevice.DeviceID] = *memberDevice.DeviceName
+	}
+	a.DB.SendNotificationByMemberUUID(uniqueDevices, data)
 	ResponseHandler(interfaces.Message{Message: "member has been verified successfully"}, nil, ctx)
 }
 
@@ -209,7 +200,7 @@ func (a *MemberAPI) UpdateMember(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	member, err := a.DB.GetMemberByUsername(username, Args{})
+	member, err := a.DB.GetMemberByUsername(username, argspkg.Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return
@@ -245,7 +236,7 @@ func (a *MemberAPI) ChangePassword(ctx *gin.Context) {
 		ResponseHandler(nil, nerrors.NewErrUnauthorized(err.Error()), ctx)
 		return
 	}
-	member, err := a.DB.GetMemberByUsername(username, Args{})
+	member, err := a.DB.GetMemberByUsername(username, argspkg.Args{})
 	if err != nil {
 		ResponseHandler(nil, err, ctx)
 		return

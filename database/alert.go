@@ -4,41 +4,49 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/interfaces"
-	"github.com/NubeIO/rubix-os/services/alerts"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
-	"github.com/NubeIO/rubix-os/utils/ttime"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"time"
 )
 
-func (d *GormDatabase) GetAlert(uuid string) (*model.Alert, error) {
+func (d *GormDatabase) GetAlert(uuid string, args argspkg.Args) (*model.Alert, error) {
 	alertModel := new(model.Alert)
-	if err := d.DB.Where("uuid = ? ", uuid).First(&alertModel).Error; err != nil {
+	query := d.buildAlertQuery(args)
+	if err := query.Where("uuid = ? ", uuid).First(&alertModel).Error; err != nil {
 		log.Errorf("GetAlert error: %v", err)
 		return nil, err
 	}
 	return alertModel, nil
 }
 
-func (d *GormDatabase) GetAlerts() ([]*model.Alert, error) {
+func (d *GormDatabase) GetAlerts(args argspkg.Args) ([]*model.Alert, error) {
 	var alertsModel []*model.Alert
-	if err := d.DB.Find(&alertsModel).Error; err != nil {
+	query := d.buildAlertQuery(args)
+	if err := query.Find(&alertsModel).Error; err != nil {
 		return nil, err
 	}
 	return alertsModel, nil
 }
 
-func (d *GormDatabase) GetAlertsByHost(hostUUID string) ([]*model.Alert, error) {
+func (d *GormDatabase) GetAlertsByHost(hostUUID string, args argspkg.Args) ([]*model.Alert, error) {
 	var alertModel []*model.Alert
-	alert, err := d.GetAlerts()
-	for _, a := range alert {
-		if a.HostUUID == hostUUID {
-			alertModel = append(alertModel, a)
-		}
+	query := d.buildAlertQuery(args)
+	if err := query.Where("host_uuid = ? ", hostUUID).Find(&alertModel).Error; err != nil {
+		return nil, err
 	}
-	return alertModel, err
+	return alertModel, nil
+}
+
+func (d *GormDatabase) GetAlertsByHostUUIDs(hostUUIDs []*string, args argspkg.Args) ([]*model.Alert, error) {
+	var alertModel []*model.Alert
+	query := d.buildAlertQuery(args)
+	if err := query.Where("host_uuid in ? ", hostUUIDs).Find(&alertModel).Error; err != nil {
+		return nil, err
+	}
+	return alertModel, nil
 }
 
 // GetAlertByField returns the object for the given field ie name or nil.
@@ -52,11 +60,20 @@ func (d *GormDatabase) GetAlertByField(field string, value string) (*model.Alert
 	return alertModel, nil
 }
 
+func (d *GormDatabase) GetAlertsForNotification(notifiedAtLt string) ([]*model.Alert, error) {
+	var alertsModel []*model.Alert
+	if err := d.DB.Where("target = ? AND (notified is FALSE OR notified_at < datetime(?))",
+		model.AlertTargetMobile, notifiedAtLt).Find(&alertsModel).Error; err != nil {
+		return nil, err
+	}
+	return alertsModel, nil
+}
+
 func (d *GormDatabase) CreateAlert(body *model.Alert) (*model.Alert, error) {
 	var err error
 	hostUUID := body.HostUUID
 	if hostUUID == "" {
-		host, err := d.GetFirstHost(api.Args{})
+		host, err := d.GetFirstHost(argspkg.Args{})
 		if err != nil {
 			return nil, err
 		}
@@ -65,31 +82,38 @@ func (d *GormDatabase) CreateAlert(body *model.Alert) (*model.Alert, error) {
 		}
 		return nil, errors.New(" no host has been added, please add one")
 	}
-	host, err := d.GetHost(hostUUID, api.Args{})
+	host, err := d.GetHost(hostUUID, argspkg.Args{})
 	if host == nil {
 		return nil, errors.New(fmt.Sprintf("host with uuid:%s was not found", hostUUID))
 	}
 	if body.Status == "" {
-		body.Status = string(alerts.Active)
+		body.Status = string(model.AlertStatusActive)
 	} else {
-		if err = alerts.CheckStatus(body.Status); err != nil {
+		if err = checkAlertStatus(body.Status); err != nil {
 			return nil, err
 		}
 	}
-	if err = alerts.CheckAlertType(body.Type); err != nil {
+	if err = checkAlertType(body.Type); err != nil {
 		return nil, err
 	}
-	if err = alerts.CheckSeverity(body.Severity); err != nil {
+	if err = checkAlertSeverity(body.Severity); err != nil {
 		return nil, err
 	}
-	if err = alerts.CheckEntityType(body.EntityType); err != nil {
+	if err = checkAlertEntityType(body.EntityType); err != nil {
 		return nil, err
 	}
-	if body.Message == "" {
-		body.Message = alerts.AlertTypeMessage(body.Message)
+	if body.Target == "" {
+		body.Target = string(model.AlertTargetNone)
+	} else {
+		if err = checkAlertTarget(body.Target); err != nil {
+			return nil, err
+		}
+	}
+	if body.Title == "" {
+		body.Title = alertTypeTitle(body.Title)
 	}
 	body.UUID = nuuid.MakeTopicUUID(model.ThingClass.Alert)
-	t := ttime.Now()
+	t := time.Now().UTC()
 	body.CreatedAt = &t
 	body.LastUpdated = &t
 	if err := d.DB.Create(&body).Error; err != nil {
@@ -100,10 +124,10 @@ func (d *GormDatabase) CreateAlert(body *model.Alert) (*model.Alert, error) {
 
 func (d *GormDatabase) UpdateAlertStatus(uuid string, status string) (alert *model.Alert, err error) {
 	var query *gorm.DB
-	if err = alerts.CheckStatus(status); err != nil {
+	if err = checkAlertStatus(status); err != nil {
 		return nil, err
 	}
-	if alerts.CheckStatusClosed(status) { // Move alert to alertClosed table
+	if checkAlertStatusClosed(status) { // Move alert to alertClosed table
 		alertModel := model.Alert{}
 		query = d.DB.Where("uuid = ?", uuid).First(&alertModel)
 		if query.Error != nil {
@@ -143,9 +167,14 @@ func (d *GormDatabase) UpdateAlertStatus(uuid string, status string) (alert *mod
 			}
 		}
 	}
-	t := ttime.Now()
+	t := time.Now().UTC()
 	alert.LastUpdated = &t
 	return alert, query.Error
+}
+
+func (d *GormDatabase) UpdateAlertsNotified(uuids []*string, notified *bool) {
+	updates := map[string]interface{}{"notified": notified, "notified_at": time.Now().UTC()}
+	d.DB.Model(model.Alert{}).Where("uuid IN ?", uuids).Updates(updates)
 }
 
 func (d *GormDatabase) DeleteAlert(uuid string) (*interfaces.Message, error) {

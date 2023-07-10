@@ -269,6 +269,11 @@ func getBodyTicketComment(ctx *gin.Context) (dto *model.TicketComment, err error
 	return dto, err
 }
 
+func getBodyFcmServer(ctx *gin.Context) (dto *model.FcmServer, err error) {
+	err = ctx.ShouldBindJSON(&dto)
+	return dto, err
+}
+
 func resolveGlobalUUID(ctx *gin.Context) string {
 	return ctx.Param("global_uuid")
 }

@@ -464,8 +464,8 @@ type DBHelperClient interface {
 	Put(ctx context.Context, in *PutRequest, opts ...grpc.CallOption) (*Response, error)
 	Patch(ctx context.Context, in *PatchRequest, opts ...grpc.CallOption) (*Response, error)
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*Response, error)
-	SetErrorsForAll(ctx context.Context, in *SetErrorsForAllRequest, opts ...grpc.CallOption) (*Empty, error)
-	ClearErrorsForAll(ctx context.Context, in *ClearErrorsForAllRequest, opts ...grpc.CallOption) (*Empty, error)
+	SetErrorsForAll(ctx context.Context, in *SetErrorsForAllRequest, opts ...grpc.CallOption) (*ErrorResponse, error)
+	ClearErrorsForAll(ctx context.Context, in *ClearErrorsForAllRequest, opts ...grpc.CallOption) (*ErrorResponse, error)
 	WizardNewNetworkDevicePoint(ctx context.Context, in *WizardNewNetworkDevicePointRequest, opts ...grpc.CallOption) (*BoolResponse, error)
 }
 
@@ -531,8 +531,8 @@ func (c *dBHelperClient) Delete(ctx context.Context, in *DeleteRequest, opts ...
 	return out, nil
 }
 
-func (c *dBHelperClient) SetErrorsForAll(ctx context.Context, in *SetErrorsForAllRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *dBHelperClient) SetErrorsForAll(ctx context.Context, in *SetErrorsForAllRequest, opts ...grpc.CallOption) (*ErrorResponse, error) {
+	out := new(ErrorResponse)
 	err := c.cc.Invoke(ctx, DBHelper_SetErrorsForAll_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -540,8 +540,8 @@ func (c *dBHelperClient) SetErrorsForAll(ctx context.Context, in *SetErrorsForAl
 	return out, nil
 }
 
-func (c *dBHelperClient) ClearErrorsForAll(ctx context.Context, in *ClearErrorsForAllRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *dBHelperClient) ClearErrorsForAll(ctx context.Context, in *ClearErrorsForAllRequest, opts ...grpc.CallOption) (*ErrorResponse, error) {
+	out := new(ErrorResponse)
 	err := c.cc.Invoke(ctx, DBHelper_ClearErrorsForAll_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -568,8 +568,8 @@ type DBHelperServer interface {
 	Put(context.Context, *PutRequest) (*Response, error)
 	Patch(context.Context, *PatchRequest) (*Response, error)
 	Delete(context.Context, *DeleteRequest) (*Response, error)
-	SetErrorsForAll(context.Context, *SetErrorsForAllRequest) (*Empty, error)
-	ClearErrorsForAll(context.Context, *ClearErrorsForAllRequest) (*Empty, error)
+	SetErrorsForAll(context.Context, *SetErrorsForAllRequest) (*ErrorResponse, error)
+	ClearErrorsForAll(context.Context, *ClearErrorsForAllRequest) (*ErrorResponse, error)
 	WizardNewNetworkDevicePoint(context.Context, *WizardNewNetworkDevicePointRequest) (*BoolResponse, error)
 }
 
@@ -595,10 +595,10 @@ func (UnimplementedDBHelperServer) Patch(context.Context, *PatchRequest) (*Respo
 func (UnimplementedDBHelperServer) Delete(context.Context, *DeleteRequest) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
 }
-func (UnimplementedDBHelperServer) SetErrorsForAll(context.Context, *SetErrorsForAllRequest) (*Empty, error) {
+func (UnimplementedDBHelperServer) SetErrorsForAll(context.Context, *SetErrorsForAllRequest) (*ErrorResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetErrorsForAll not implemented")
 }
-func (UnimplementedDBHelperServer) ClearErrorsForAll(context.Context, *ClearErrorsForAllRequest) (*Empty, error) {
+func (UnimplementedDBHelperServer) ClearErrorsForAll(context.Context, *ClearErrorsForAllRequest) (*ErrorResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ClearErrorsForAll not implemented")
 }
 func (UnimplementedDBHelperServer) WizardNewNetworkDevicePoint(context.Context, *WizardNewNetworkDevicePointRequest) (*BoolResponse, error) {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"time"
 )
@@ -84,7 +84,7 @@ func (inst *Instance) packageHistoriesToInauroPayloads(hostUUID string, historie
 		if !pntExists {
 			// sensorIDMetaTag := sensorIDMetaTagKey
 			var dev *model.Device
-			dev, err = inst.db.GetOneDeviceByArgs(api.Args{PointSourceUUID: &history.PointUUID, HostUUID: &history.HostUUID, WithPoints: true, WithMetaTags: true})
+			dev, err = inst.db.GetOneDeviceByArgs(argspkg.Args{PointSourceUUID: &history.PointUUID, HostUUID: &history.HostUUID, WithPoints: true, WithMetaTags: true})
 			if err != nil {
 				inst.inauroazuresyncErrorMsg("packageHistoriesToInauroPayloads() GetOneDeviceByArgs() uuid: ", history.PointUUID, "  err: ", err)
 				continue

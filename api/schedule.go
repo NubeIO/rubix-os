@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,7 +11,7 @@ type ScheduleDatabase interface {
 	GetSchedule(uuid string) (*model.Schedule, error)
 	GetSchedulesResult() ([]*model.Schedule, error)
 	GetScheduleResult(uuid string) (*model.Schedule, error)
-	GetOneScheduleByArgs(Args) (*model.Schedule, error)
+	GetOneScheduleByArgs(argspkg.Args) (*model.Schedule, error)
 	CreateSchedule(body *model.Schedule) (*model.Schedule, error)
 	UpdateSchedule(uuid string, body *model.Schedule) (*model.Schedule, error)
 	ScheduleWrite(uuid string, body *model.ScheduleData, forceWrite bool) error

@@ -2,12 +2,12 @@ package database
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"gorm.io/gorm/clause"
 )
 
 func (d *GormDatabase) UpdateTeamViews(teamUUID string, viewUUIDs []*string) ([]*model.TeamView, error) {
-	views, _ := d.GetViewsByUUIDs(viewUUIDs, api.Args{})
+	views, _ := d.GetViewsByUUIDs(viewUUIDs, argspkg.Args{})
 	var notInUUIDs []string
 	var body []*model.TeamView
 	for _, view := range views {

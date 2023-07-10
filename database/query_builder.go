@@ -1,12 +1,13 @@
 package database
 
 import (
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
+	"github.com/NubeIO/rubix-os/utils/boolean"
 	"gorm.io/gorm"
 	"strings"
 )
 
-func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildNetworkQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithDevices {
 		query = query.Preload("Devices")
@@ -62,7 +63,7 @@ func (d *GormDatabase) buildNetworkQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildDeviceQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithPoints {
 		query = query.Preload("Points")
@@ -114,7 +115,7 @@ func (d *GormDatabase) buildDeviceQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildPointQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithPriority {
 		query = query.Preload("Priority")
@@ -166,7 +167,7 @@ func (d *GormDatabase) buildPointQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildTagQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.Networks {
 		query = query.Preload("Networks")
@@ -180,7 +181,7 @@ func (d *GormDatabase) buildTagQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildPointHistoryQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildPointHistoryQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.IdGt != nil {
 		query = query.Where("Id > ?", args.IdGt)
@@ -201,7 +202,7 @@ func (d *GormDatabase) buildPointHistoryQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildHistoryQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildHistoryQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.TimestampGt != nil {
 		query = query.Where("timestamp > datetime(?)", args.TimestampGt)
@@ -219,7 +220,7 @@ func (d *GormDatabase) buildHistoryQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildScheduleQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildScheduleQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.Name != nil {
 		query = query.Where("name = ?", *args.Name)
@@ -230,7 +231,7 @@ func (d *GormDatabase) buildScheduleQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildLocationQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildLocationQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithViews {
 		query = query.Preload("Views")
@@ -250,7 +251,7 @@ func (d *GormDatabase) buildLocationQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildGroupQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildGroupQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithViews {
 		query = query.Preload("Views")
@@ -264,7 +265,7 @@ func (d *GormDatabase) buildGroupQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildHostQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildHostQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithTags {
 		query = query.Preload("Tags")
@@ -281,7 +282,7 @@ func (d *GormDatabase) buildHostQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildMemberQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildMemberQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithMemberDevices {
 		query = query.Preload("MemberDevices")
@@ -292,7 +293,7 @@ func (d *GormDatabase) buildMemberQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildMemberDeviceQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildMemberDeviceQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.MemberUUID != nil {
 		query = query.Where("member_uuid", *args.MemberUUID)
@@ -303,7 +304,7 @@ func (d *GormDatabase) buildMemberDeviceQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildTeamQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildTeamQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithMembers {
 		query = query.Preload("Members")
@@ -314,7 +315,7 @@ func (d *GormDatabase) buildTeamQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildViewQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildViewQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithWidgets {
 		query = query.Preload("Widgets")
@@ -322,7 +323,7 @@ func (d *GormDatabase) buildViewQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildViewTemplateQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildViewTemplateQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithViewTemplateWidgets {
 		query = query.Preload("ViewTemplateWidgets")
@@ -332,8 +333,7 @@ func (d *GormDatabase) buildViewTemplateQuery(args api.Args) *gorm.DB {
 	}
 	return query
 }
-
-func (d *GormDatabase) buildViewTemplateWidgetQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildViewTemplateWidgetQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithViewTemplateWidgetPointers {
 		query = query.Preload("ViewTemplateWidgetPointers")
@@ -341,7 +341,7 @@ func (d *GormDatabase) buildViewTemplateWidgetQuery(args api.Args) *gorm.DB {
 	return query
 }
 
-func (d *GormDatabase) buildTicketQuery(args api.Args) *gorm.DB {
+func (d *GormDatabase) buildTicketQuery(args argspkg.Args) *gorm.DB {
 	query := d.DB
 	if args.WithComments {
 		query = query.Preload("Comments")
@@ -349,5 +349,24 @@ func (d *GormDatabase) buildTicketQuery(args api.Args) *gorm.DB {
 	if args.WithTeams {
 		query = query.Preload("Teams")
 	}
+	return query
+}
+
+func (d *GormDatabase) buildAlertQuery(args argspkg.Args) *gorm.DB {
+	query := d.DB
+	if args.WithTickets {
+		query = query.Preload("Tickets")
+	}
+	if args.Target != nil {
+		query = query.Where("target = ?", *args.Target)
+	}
+	if args.Notified != nil {
+		if boolean.IsTrue(args.Notified) {
+			query = query.Where("notified IS TRUE")
+		} else {
+			query = query.Where("notified IS NOT TRUE")
+		}
+	}
+
 	return query
 }

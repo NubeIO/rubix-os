@@ -2,19 +2,20 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/gin-gonic/gin"
 )
 
 type DeviceDatabase interface {
-	GetDevices(args Args) ([]*model.Device, error)
-	GetDevice(uuid string, args Args) (*model.Device, error)
-	GetOneDeviceByArgs(args Args) (*model.Device, error)
-	GetDeviceByName(networkName string, deviceName string, args Args) (*model.Device, error)
+	GetDevices(args argspkg.Args) ([]*model.Device, error)
+	GetDevice(uuid string, args argspkg.Args) (*model.Device, error)
+	GetOneDeviceByArgs(args argspkg.Args) (*model.Device, error)
+	GetDeviceByName(networkName string, deviceName string, args argspkg.Args) (*model.Device, error)
 	CreateDevice(body *model.Device) (*model.Device, error)
 	UpdateDevice(uuid string, body *model.Device) (*model.Device, error)
 	DeleteDevice(uuid string) (bool, error)
-	DeleteOneDeviceByArgs(args Args) (bool, error)
-	DeleteDeviceByName(networkName string, deviceName string, args Args) (bool, error)
+	DeleteOneDeviceByArgs(args argspkg.Args) (bool, error)
+	DeleteDeviceByName(networkName string, deviceName string, args argspkg.Args) (bool, error)
 
 	CreateDevicePlugin(body *model.Device) (*model.Device, error)
 	UpdateDevicePlugin(uuid string, body *model.Device) (*model.Device, error)

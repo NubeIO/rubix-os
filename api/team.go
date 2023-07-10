@@ -2,12 +2,13 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/gin-gonic/gin"
 )
 
 type TeamDatabase interface {
-	GetTeams(args Args) ([]*model.Team, error)
-	GetTeam(uuid string, args Args) (*model.Team, error)
+	GetTeams(args argspkg.Args) ([]*model.Team, error)
+	GetTeam(uuid string, args argspkg.Args) (*model.Team, error)
 	CreateTeam(body *model.Team) (*model.Team, error)
 	UpdateTeam(uuid string, body *model.Team) (*model.Team, error)
 	UpdateTeamMembers(uuid string, body []*string) ([]*model.Member, error)

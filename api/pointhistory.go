@@ -2,16 +2,17 @@ package api
 
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/gin-gonic/gin"
 )
 
 type PointHistoryDatabase interface {
-	GetPointHistories(args Args) ([]*model.PointHistory, error)
-	GetPointHistoriesByPointUUID(pUuid string, args Args) ([]*model.PointHistory, int64, error)
+	GetPointHistories(args argspkg.Args) ([]*model.PointHistory, error)
+	GetPointHistoriesByPointUUID(pUuid string, args argspkg.Args) ([]*model.PointHistory, int64, error)
 	GetLatestPointHistoryByPointUUID(pUuid string) (*model.PointHistory, error)
-	GetPointHistoriesByPointUUIDs(pointUUIDs []string, args Args) ([]*model.PointHistory, error)
+	GetPointHistoriesByPointUUIDs(pointUUIDs []string, args argspkg.Args) ([]*model.PointHistory, error)
 	GetPointHistoriesForSync(id string, timeStamp string) ([]*model.PointHistory, error)
-	DeletePointHistoriesByPointUUID(pUuid string, args Args) (bool, error)
+	DeletePointHistoriesByPointUUID(pUuid string, args argspkg.Args) (bool, error)
 }
 type PointHistoryAPI struct {
 	DB PointHistoryDatabase

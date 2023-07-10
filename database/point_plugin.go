@@ -3,7 +3,7 @@ package database
 import (
 	"encoding/json"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/constants"
 	"github.com/NubeIO/rubix-os/module/common"
 	"github.com/NubeIO/rubix-os/src/client"
@@ -13,7 +13,7 @@ import (
 )
 
 func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point, err error) {
-	network, err := d.GetNetworkByPoint(body, api.Args{})
+	network, err := d.GetNetworkByPoint(body, argspkg.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (d *GormDatabase) CreatePointPlugin(body *model.Point) (point *model.Point,
 }
 
 func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point *model.Point, err error) {
-	network, err := d.GetNetworkByPoint(body, api.Args{})
+	network, err := d.GetNetworkByPoint(body, argspkg.Args{})
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (d *GormDatabase) UpdatePointPlugin(uuid string, body *model.Point) (point 
 }
 
 func (d *GormDatabase) WritePointPlugin(uuid string, body *model.PointWriter) (point *model.Point, err error) {
-	network, err := d.GetNetworkByPointUUID(uuid, api.Args{})
+	network, err := d.GetNetworkByPointUUID(uuid, argspkg.Args{})
 	if err != nil || network == nil {
 		return nil, err
 	}
@@ -134,11 +134,11 @@ func (d *GormDatabase) WritePointPlugin(uuid string, body *model.PointWriter) (p
 }
 
 func (d *GormDatabase) DeletePointPlugin(uuid string) (ok bool, err error) {
-	point, err := d.GetPoint(uuid, api.Args{})
+	point, err := d.GetPoint(uuid, argspkg.Args{})
 	if err != nil {
 		return ok, err
 	}
-	network, err := d.GetNetworkByPoint(point, api.Args{})
+	network, err := d.GetNetworkByPoint(point, argspkg.Args{})
 	if err != nil {
 		return ok, err
 	}

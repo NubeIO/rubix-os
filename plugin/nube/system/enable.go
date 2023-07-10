@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/NubeIO/rubix-os/api"
+	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/go-co-op/gocron"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -14,7 +14,7 @@ func (inst *Instance) Enable() error {
 	log.Info("SYSTEM Plugin Enable()")
 	inst.enabled = true
 	inst.setUUID()
-	var arg api.Args
+	var arg argspkg.Args
 	q, err := inst.db.GetNetworkByPlugin(inst.pluginUUID, arg)
 	if q != nil {
 		inst.networkUUID = q.UUID
@@ -33,7 +33,7 @@ func (inst *Instance) Enable() error {
 	cron.StartAsync()
 
 	// TODO: this is added just to update the EnableWriteable property on legacy points.  It should be removed in future versions
-	networks, err := inst.db.GetNetworks(api.Args{WithDevices: true, WithPoints: true, WithPriority: true})
+	networks, err := inst.db.GetNetworks(argspkg.Args{WithDevices: true, WithPoints: true, WithPriority: true})
 	if err != nil {
 		log.Error("SYSTEM Enable() GetNetworks error:", err)
 		return nil

@@ -218,6 +218,9 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	ticketCommentHandler := api.TicketCommentAPI{
 		DB: db,
 	}
+	fcmServerHandler := api.FcmServerAPI{
+		DB: db,
+	}
 	userHandler := api.UserAPI{}
 	tokenHandler := api.TokenAPI{}
 
@@ -251,7 +254,7 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 	apiProxyHostRoutesAuth.Any("/*proxyPath", hostProxyHandler.HostProxy)
 
 	engine.Use(cors.New(auth.CorsConfig()))
-	engine.OPTIONS("/api/*any")
+	engine.Use(auth.HostProxyOptions())
 	appApiRoutes := engine.Group("/api/apps")
 	{
 		memberRoutes := appApiRoutes.Group("/members")
@@ -781,6 +784,12 @@ func Create(db *database.GormDatabase, conf *config.Configuration, scheduler *go
 				ticketRoutes.PATCH("/:uuid", ticketHandler.UpdateTicket)
 				ticketRoutes.DELETE("/:uuid", ticketHandler.DeleteTicket)
 				ticketRoutes.PUT("/:uuid/teams", ticketHandler.UpdateTicketTeams)
+			}
+
+			fcmServerRoutes := serverApiRoutes.Group("fcm-server")
+			{
+				fcmServerRoutes.GET("", fcmServerHandler.GetFcmServer)
+				fcmServerRoutes.PUT("", fcmServerHandler.UpsertFcmServer)
 			}
 		}
 	}
