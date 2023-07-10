@@ -360,3 +360,26 @@ func (ps PostgresSetting) DeleteDeletedPointTags(tags []*pgmodel.PointTag) error
 	return ps.postgresConnectionInstance.db.Where("(point_uuid,tag) NOT IN ?", notIn).
 		Delete(pgmodel.PointTag{}).Error
 }
+
+func (inst *Instance) SendHistoriesToPostgres(histories []*pgmodel.History) (bool, error) {
+	inst.cpsDebugMsg("SendHistoriesToPostgres()")
+	if postgresSetting.postgresConnectionInstance.db == nil {
+		err := postgresSetting.New()
+		if err != nil {
+			log.Warn(err)
+			return false, err
+		}
+	}
+
+	// TODO: deal with the last sync of processed data
+	if len(histories) > 0 {
+		if err := postgresSetting.WriteToPostgresDb(histories); err != nil {
+			inst.cpsErrorMsg("SendHistoriesToPostgres() error:", err)
+			return false, err
+		}
+		inst.cpsDebugMsg(fmt.Sprintf("SendHistoriesToPostgres(): Stored %v new records", len(histories)))
+	} else {
+		log.Info("postgres: Nothing to store, no new records")
+	}
+	return true, nil
+}

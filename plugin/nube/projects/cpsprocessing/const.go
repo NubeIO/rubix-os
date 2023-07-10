@@ -95,6 +95,7 @@ const (
 	toCleanColName                      ProcessedDataColumnName = "toClean"
 	toOverdueColName                    ProcessedDataColumnName = "toOverdue"
 	cleaningTimeColName                 ProcessedDataColumnName = "cleaningTime"
+	cleaningResetColName                ProcessedDataColumnName = "cleaningReset"
 	lowBatteryColName                   ProcessedDataColumnName = "lowBattery"
 	highTempColName                     ProcessedDataColumnName = "highTemp"
 	lowTempColName                      ProcessedDataColumnName = "lowTemp"

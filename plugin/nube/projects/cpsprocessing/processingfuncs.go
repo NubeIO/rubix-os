@@ -3,6 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/NubeIO/rubix-os/plugin/nube/database/postgres/pgmodel"
+	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/go-gota/gota/dataframe"
 	"github.com/go-gota/gota/series"
 	"os"
@@ -134,7 +136,8 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, resetsDF, thre
 	pendingStatusArray := make([]int, 0)
 	toCleanArray := make([]int, 0)
 	toPendingArray := make([]int, 0)
-	cleaningTimeArray := make([]string, 0)
+	// cleaningTimeArray := make([]string, 0)
+	cleaningTimeArray := make([]int, 0)
 
 	lastToPending, _ := time.Parse(time.RFC3339, pointLastProcessedData.LastToPendingTimestamp)
 	inst.cpsDebugMsg("CalculateDoorUses() lastToPending: ", lastToPending)
@@ -157,13 +160,15 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, resetsDF, thre
 
 		toPending := 0
 		toClean := 0
-		cleaningTime := ""
+		// cleaningTime := ""
+		cleaningTime := 0
 
 		if resetVal, _ := resetSeries.Elem(i).Int(); resetVal == 1 { // This is a reset row.
 			inst.cpsDebugMsg("CalculateDoorUses() RESET ROW")
 			if lastPendingStatus == 1 && !invalidLastToPending {
 				toClean = 1
-				cleaningTime = entryTime.Sub(lastToPending).String()
+				// cleaningTime = entryTime.Sub(lastToPending).String()
+				cleaningTime = int(entryTime.Sub(lastToPending).Seconds())
 				inst.cpsDebugMsg("CalculateDoorUses() cleaningTime: ", cleaningTime)
 				// lastToClean = entryTime
 			}
@@ -246,8 +251,10 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, resetsDF, thre
 	resultDF = resultDF.Mutate(series.New(pendingStatusArray, series.Int, string(pendingStatusColName)))
 	resultDF = resultDF.Mutate(series.New(toCleanArray, series.Int, string(toCleanColName)))
 	resultDF = resultDF.Mutate(series.New(toPendingArray, series.Int, string(toPendingColName)))
-	resultDF = resultDF.Mutate(series.New(cleaningTimeArray, series.String, string(cleaningTimeColName)))
+	// resultDF = resultDF.Mutate(series.New(cleaningTimeArray, series.String, string(cleaningTimeColName)))
+	resultDF = resultDF.Mutate(series.New(cleaningTimeArray, series.Int, string(cleaningTimeColName)))
 	resultDF = resultDF.Select([]string{string(timestampColName), string(doorPositionColName), string(cubicleOccupancyColName), string(totalUsesColName), string(currentUsesColName), string(pendingStatusColName), string(toCleanColName), string(toPendingColName), string(areaResetColName), string(cleaningTimeColName)})
+	resultDF = resultDF.Rename(string(cleaningResetColName), string(areaResetColName))
 	return &resultDF, nil
 }
 
@@ -472,4 +479,242 @@ func (inst *Instance) CalculateOverdueCubicles(start, end time.Time, dfUsageCalc
 	resultDF := dfUsageCalculationResults.OuterJoin(overdueDF, string(timestampColName))
 	resultDF = resultDF.Arrange(dataframe.Sort(string(timestampColName)))
 	return &resultDF, nil
+}
+
+// PackageProcessedHistories ingests processed data DF, and outputs histores to be sent to the CPS postgres database
+func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.DataFrame, thisAssetProcessedDataPoints []DoorProcessingPoint) ([]*pgmodel.History, error) {
+	processedHistories := make([]*pgmodel.History, 0)
+
+	// TODO: deal with history IDs for last sync
+
+	// Extract the timestamp column as a series
+	timestampSeries := dfProcessingResults.Col(string(timestampColName))
+	inst.cpsDebugMsg("PackageProcessedHistories() timestampSeries:")
+	inst.cpsDebugMsg(timestampSeries)
+
+	// loop through the processed results DF and make histories
+	for _, pdp := range thisAssetProcessedDataPoints {
+		switch pdp.Name {
+		case string(cubicleOccupancyColName):
+			occupancySeries := dfProcessingResults.Col(string(cubicleOccupancyColName))
+			for i, ts := range timestampSeries.Records() {
+				element := occupancySeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+
+		case string(totalUsesColName):
+			totalUsesSeries := dfProcessingResults.Col(string(totalUsesColName))
+			for i, ts := range timestampSeries.Records() {
+				element := totalUsesSeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+		case string(currentUsesColName):
+			currentUsesSeries := dfProcessingResults.Col(string(currentUsesColName))
+			lastVal := 0
+			for i, ts := range timestampSeries.Records() {
+				element := currentUsesSeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				if value == lastVal {
+					continue
+				}
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+		case string(pendingStatusColName):
+			pendingStatusSeries := dfProcessingResults.Col(string(pendingStatusColName))
+			lastVal := 0
+			for i, ts := range timestampSeries.Records() {
+				element := pendingStatusSeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				if value == lastVal {
+					continue
+				}
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+		case string(overdueStatusColName):
+			overdueStatusSeries := dfProcessingResults.Col(string(overdueStatusColName))
+			lastVal := 0
+			for i, ts := range timestampSeries.Records() {
+				element := overdueStatusSeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				if value == lastVal {
+					continue
+				}
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+		case string(toPendingColName):
+			toPendingSeries := dfProcessingResults.Col(string(toPendingColName))
+			for i, ts := range timestampSeries.Records() {
+				element := toPendingSeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				if value == 0 {
+					continue
+				}
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+		case string(toCleanColName):
+			toCleanSeries := dfProcessingResults.Col(string(toCleanColName))
+			for i, ts := range timestampSeries.Records() {
+				element := toCleanSeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				if value == 0 {
+					continue
+				}
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+		case string(toOverdueColName):
+			toOverdueSeries := dfProcessingResults.Col(string(toOverdueColName))
+			for i, ts := range timestampSeries.Records() {
+				element := toOverdueSeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				if value == 0 {
+					continue
+				}
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+
+		case string(cleaningResetColName):
+			cleaningResetSeries := dfProcessingResults.Col(string(cleaningResetColName))
+			for i, ts := range timestampSeries.Records() {
+				element := cleaningResetSeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				if value == 0 {
+					continue
+				}
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+
+		case string(cleaningTimeColName):
+			cleaningTimeSeries := dfProcessingResults.Col(string(cleaningTimeColName))
+			for i, ts := range timestampSeries.Records() {
+				element := cleaningTimeSeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				if value == 0 {
+					continue
+				}
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+
+		case string(fifteenMinRollupUsesColName):
+			fifteenMinRollupSeries := dfProcessingResults.Col(string(fifteenMinRollupUsesColName))
+			for i, ts := range timestampSeries.Records() {
+				element := fifteenMinRollupSeries.Elem(i)
+				if element.IsNA() {
+					continue
+				}
+				value, _ := element.Int()
+				timestamp, _ := time.Parse(time.RFC3339, ts)
+				newHist := pgmodel.History{
+					PointUUID: pdp.UUID,
+					HostUUID:  pdp.HostUUID,
+					Value:     float.New(float64(value)),
+					Timestamp: timestamp,
+				}
+				processedHistories = append(processedHistories, &newHist)
+			}
+		}
+	}
+
+	return processedHistories, nil
 }

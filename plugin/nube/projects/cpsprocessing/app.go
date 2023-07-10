@@ -482,59 +482,22 @@ func (inst *Instance) CPSProcessing() {
 			defer ResultFile5.Close()
 			dfOverdueResult.WriteCSV(ResultFile5)
 
-			/*
-				// TODO: need to get last totalUses at the time when the last 15MinRollup value was stored (prior to the processing time range)
-				// get last totalUses at the time when the last 15MinRollup value was stored (prior to the processing time range)
-				dfLastTotalUsesAt15Min := dataframe.ReadCSV(strings.NewReader(csvLastTotalUsesAt15Min))
-				fmt.Println("dfLastTotalUsesAt15Min")
-				fmt.Println(dfLastTotalUsesAt15Min)
+			// finally, push the data to histories
+			processedDataHistores, err := inst.PackageProcessedHistories(*dfOverdueResult, thisAssetProcessedDataPoints)
+			if err != nil {
+				inst.cpsErrorMsg("PackageProcessedHistories() error: ", err)
+				return
+			}
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() processedDataHistores: %+v", processedDataHistores))
+			for i, hist := range processedDataHistores {
+				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() processedDataHistores %v: %+v", i, *hist))
+			}
 
-				dfResets := dataframe.ReadCSV(strings.NewReader(csvRawResets))
-				// fmt.Println("dfResets")
-				// fmt.Println(dfResets)
-
-				dfDailyResets, err := inst.MakeDailyResetsDF(periodStart, periodEnd, dfSiteThresholds)
-				if err != nil {
-					inst.cpsErrorMsg("MakeDailyResetsDF() error: ", err)
-					return
-				}
-				fmt.Println("dfDailyResets")
-				fmt.Println(dfDailyResets)
-
-				// join daily reset timestamps with the manual resets
-				dfAllResets := dfResets.Concat(*dfDailyResets)
-				dfAllResets = dfAllResets.Arrange(dataframe.Sort(string(timestampColName)))
-				fmt.Println("dfAllResets")
-				fmt.Println(dfAllResets)
-
-				lastToPending := "2023-06-19T07:42:00Z"
-				lastToClean := "2023-06-17T07:15:00Z"
-
-				// Normally OPEN Door Usage Count and Occupancy DF
-				DoorResultDF, err := inst.CalculateDoorUses(facilityToilet, normallyOpen, dfRawDoor, dfLastProcessedDoor, dfAllResets, dfSiteThresholds, lastToPending)
-				if err != nil {
-					inst.cpsErrorMsg("CalculateDoorUses() error: ", err)
-					return
-				}
-				fmt.Println("DoorResultDF")
-				fmt.Println(DoorResultDF)
-
-				RollupResultDF, err := inst.Calculate15MinUsageRollup(periodStart, periodEnd, *DoorResultDF, dfLastTotalUsesAt15Min)
-				if err != nil {
-					inst.cpsErrorMsg("Calculate15MinUsageRollup() error: ", err)
-					return
-				}
-				fmt.Println("RollupResultDF")
-				fmt.Println(RollupResultDF)
-
-				OverdueResultDF, err := inst.CalculateOverdueCubicles(facilityToilet, periodStart, periodEnd, *DoorResultDF, dfLastProcessedDoor, dfSiteThresholds, lastToPending, lastToClean)
-				if err != nil {
-					inst.cpsErrorMsg("CalculateOverdueCubicles() error: ", err)
-					return
-				}
-				fmt.Println("OverdueResultDF")
-				fmt.Println(OverdueResultDF)
-			*/
+			_, err = inst.SendHistoriesToPostgres(processedDataHistores)
+			if err != nil {
+				inst.cpsErrorMsg("SendHistoriesToPostgres() error: ", err)
+				return
+			}
 		}
 	}
 
@@ -640,6 +603,11 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 		Name: string(cleaningTimeColName),
 	}
 	createThesePoints = append(createThesePoints, cleaningTimePoint)
+
+	cleaningResetPoint := model.Point{
+		Name: string(cleaningResetColName),
+	}
+	createThesePoints = append(createThesePoints, cleaningResetPoint)
 
 	devNameSplit := strings.Split(device.Name, "-")
 	if len(devNameSplit) < 3 {

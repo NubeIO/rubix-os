@@ -88,6 +88,7 @@ func (inst *Instance) syncPostgres() (bool, error) {
 
 			histories = append(histories, &history)
 		}
+
 	*/
 
 	if len(histories) > 0 {
