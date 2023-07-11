@@ -177,4 +177,6 @@ func onConnected() {
 	go db.PublishFetchPointListener()
 	go db.PublishPointWriteListener()
 	go db.RePublishSelectedPointsCovListener()
+
+	go db.SubscribeMqttTopics()
 }

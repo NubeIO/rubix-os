@@ -74,6 +74,19 @@ func (d *GormDatabase) GetPointByName(networkName, deviceName, pointName string,
 	return pointModel, nil
 }
 
+func (d *GormDatabase) GetPointByUUID(networkUUID, deviceUUID, pointUUID string, args argspkg.Args) (*model.Point, error) {
+	var pointModel *model.Point
+	query := d.buildPointQuery(args)
+	if err := query.Joins("JOIN devices ON points.device_uuid = devices.uuid").
+		Joins("JOIN networks ON devices.network_uuid = networks.uuid").
+		Where("networks.uuid = ?", networkUUID).Where("devices.uuid = ?", deviceUUID).
+		Where("points.uuid = ?", pointUUID).
+		First(&pointModel).Error; err != nil {
+		return nil, err
+	}
+	return pointModel, nil
+}
+
 func (d *GormDatabase) GetOnePointByArgs(args argspkg.Args) (*model.Point, error) {
 	var pointModel *model.Point
 	query := d.buildPointQuery(args)

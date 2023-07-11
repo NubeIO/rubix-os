@@ -2,6 +2,19 @@ package localmqtt
 
 import "github.com/NubeIO/rubix-os/mqttclient"
 
+const (
+	Separator              = "/"
+	MultiLevelWildcard     = "#"
+	PointValueTopic        = "rubix/points/value"
+	PointPublishTopic      = "rubix/platform/point/publish"
+	PointsPublishTopic     = "rubix/platform/points/publish"
+	CovTopic               = "cov"
+	AllTopic               = "all"
+	SchedulePublishTopic   = "rubix/platform/schedule/publish"
+	SchedulesPublishTopic  = "rubix/platform/schedules/publish"
+	DeviceInfoPublishTopic = "rubix/platform/info/publish"
+)
+
 type LocalMqtt struct {
 	Client                *mqttclient.Client
 	QOS                   mqttclient.QOS

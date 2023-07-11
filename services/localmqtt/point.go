@@ -9,15 +9,6 @@ import (
 	"strings"
 )
 
-const (
-	separator           = "/"
-	mqttTopic           = "rubix/points/value"
-	fetchPointsTopic    = "rubix/platform/points/publish"
-	fetchSchedulesTopic = "rubix/platform/schedules/publish"
-	mqttTopicCov        = "cov"
-	mqttTopicCovAll     = "all"
-)
-
 func PublishPoint(point *model.Point) {
 	if point == nil {
 		return
@@ -27,8 +18,7 @@ func PublishPoint(point *model.Point) {
 		log.Error(err)
 		return
 	}
-	topic := fmt.Sprintf("rubix/platform/point/publish")
-	localMqtt.Client.Publish(topic, localMqtt.QOS, localMqtt.Retain, string(payload))
+	localMqtt.Client.Publish(PointPublishTopic, localMqtt.QOS, localMqtt.Retain, string(payload))
 }
 
 func PublishPointsList(publishPointList []*interfaces.PublishPointList, topic string) {
@@ -42,7 +32,7 @@ func PublishPointsList(publishPointList []*interfaces.PublishPointList, topic st
 				publishPoint.DeviceName, publishPoint.PointName)})
 	}
 	if topic == "" {
-		topic = MakeTopic([]string{fetchPointsTopic})
+		topic = MakeTopic([]string{PointsPublishTopic})
 	}
 	payload, err := json.Marshal(pointPayload)
 	if err != nil {
@@ -65,7 +55,7 @@ func PublishPointCov(network *model.Network, device *model.Device, point *model.
 	networkName := strings.Trim(strings.Trim(network.Name, " "), "\t")
 	deviceName := strings.Trim(strings.Trim(device.Name, " "), "\t")
 	pointName := strings.Trim(strings.Trim(point.Name, " "), "\t")
-	topic := MakeTopic([]string{mqttTopic, mqttTopicCov, mqttTopicCovAll, network.PluginPath, network.UUID, networkName,
+	topic := MakeTopic([]string{PointValueTopic, CovTopic, AllTopic, network.PluginPath, network.UUID, networkName,
 		device.UUID, deviceName, point.UUID, pointName})
 	payload, err := json.Marshal(pointCovPayload)
 	if err != nil {
@@ -73,16 +63,4 @@ func PublishPointCov(network *model.Network, device *model.Device, point *model.
 		return
 	}
 	localMqtt.Client.Publish(topic, localMqtt.QOS, localMqtt.Retain, string(payload))
-}
-
-func ifEmpty(in string) string {
-	if in == "" {
-		return "na"
-	}
-	return in
-}
-
-func MakeTopic(parts []string) string {
-	// TODO: if localMqtt.GlobalBroadcast -> use location/group/host uuid and name
-	return strings.Join(append(parts), separator)
 }
