@@ -49,6 +49,12 @@ type Marshaller interface {
 	ClearErrorsForAllPointsOnDevice(deviceUUID string) error
 	WizardNewNetworkDevicePoint(plugin string, network *model.Network, device *model.Device, point *model.Point) (bool, error)
 	DeviceNameExistsInNetwork(deviceName, networkUUID string) (*model.Device, bool)
+
+	GetHosts(args argspkg.Args) ([]*model.Host, error)
+	GetHistoryLogByHostUUID(hostUUID string) (*model.HistoryLog, error)
+	CloneEdge(host *model.Host) error
+	CreateBulkHistory(histories []*model.History) (bool, error)
+	UpdateBulkHistoryLogs(logs []*model.HistoryLog) (bool, error)
 }
 
 type GRPCMarshaller struct {
@@ -498,4 +504,70 @@ func (g *GRPCMarshaller) DeviceNameExistsInNetwork(deviceName, networkUUID strin
 		}
 	}
 	return nil, false
+}
+
+func (g *GRPCMarshaller) GetHosts(args argspkg.Args) ([]*model.Host, error) {
+	serializedArgs, err := args.SerializeArgs(args)
+	if err != nil {
+		return nil, err
+	}
+	res, err := g.DbHelper.GetWithoutParam("hosts", serializedArgs)
+	if err != nil {
+		return nil, err
+	}
+	var hosts []*model.Host
+	err = json.Unmarshal(res, &hosts)
+	if err != nil {
+		return nil, err
+	}
+	return hosts, nil
+}
+
+func (g *GRPCMarshaller) GetHistoryLogByHostUUID(hostUUID string) (*model.HistoryLog, error) {
+	res, err := g.DbHelper.Get("history_log_by_id", hostUUID, "")
+	if err != nil {
+		return nil, err
+	}
+	var historyLog *model.HistoryLog
+	err = json.Unmarshal(res, &historyLog)
+	if err != nil {
+		return nil, err
+	}
+	return historyLog, nil
+}
+
+func (g *GRPCMarshaller) CloneEdge(host *model.Host) error {
+	hst, err := json.Marshal(host)
+	if err != nil {
+		return err
+	}
+	_, err = g.DbHelper.Post("clone_edge", hst)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *GRPCMarshaller) CreateBulkHistory(histories []*model.History) (bool, error) {
+	hist, err := json.Marshal(histories)
+	if err != nil {
+		return false, err
+	}
+	_, err = g.DbHelper.Post("bulk_history", hist)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (g *GRPCMarshaller) UpdateBulkHistoryLogs(logs []*model.HistoryLog) (bool, error) {
+	histLog, err := json.Marshal(logs)
+	if err != nil {
+		return false, err
+	}
+	_, err = g.DbHelper.Patch("bulk_history_logs", "", histLog)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
