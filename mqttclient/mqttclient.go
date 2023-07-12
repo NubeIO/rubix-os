@@ -94,6 +94,21 @@ func (c *Client) Subscribe(topic string, qos QOS, handler mqtt.MessageHandler) (
 	return nil
 }
 
+// SubscribeMultiple subscribe to multiple topic
+func (c *Client) SubscribeMultiple(filters map[string]byte, handler mqtt.MessageHandler) (err error) {
+	token := c.client.SubscribeMultiple(filters, handler)
+	if token.WaitTimeout(2*time.Second) == false {
+		return errors.New("subscribe timout")
+	}
+	if token.Error() != nil {
+		return token.Error()
+	}
+	for topic, _ := range filters {
+		c.consumers = append(c.consumers, consumer{topic, handler})
+	}
+	return nil
+}
+
 // Unsubscribe unsubscribes from a certain topic and errors if this fails.
 func (c *Client) Unsubscribe(topic string) error {
 	token := c.client.Unsubscribe(topic)

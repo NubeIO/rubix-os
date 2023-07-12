@@ -2,7 +2,6 @@ package localmqtt
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	log "github.com/sirupsen/logrus"
 )
@@ -16,8 +15,7 @@ func PublishSchedule(schedule *model.Schedule) {
 		log.Error(err)
 		return
 	}
-	topic := fmt.Sprintf("rubix/platform/schedule/publish")
-	localMqtt.Client.Publish(topic, localMqtt.QOS, localMqtt.Retain, string(payload))
+	localMqtt.Client.Publish(SchedulePublishTopic, localMqtt.QOS, localMqtt.Retain, string(payload))
 }
 
 func PublishSchedules(schedules []*model.Schedule, topic string) {
@@ -25,7 +23,7 @@ func PublishSchedules(schedules []*model.Schedule, topic string) {
 		return
 	}
 	if topic == "" {
-		topic = MakeTopic([]string{fetchSchedulesTopic})
+		topic = MakeTopic([]string{SchedulesPublishTopic})
 	}
 	payload, err := json.Marshal(schedules)
 	if err != nil {
