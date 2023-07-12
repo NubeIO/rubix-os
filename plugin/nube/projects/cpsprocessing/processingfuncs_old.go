@@ -30,7 +30,7 @@ func (inst *Instance) MakeDailyResetsDF(start, end time.Time, thresholdsDF dataf
 
 	// Iterate from the start date until the end date, adding 24 hours each iteration
 	for date := start; date.Before(end); date = date.Add(24 * time.Hour) {
-		dateTimestamp := date.UTC().Format(time.RFC3339)
+		dateTimestamp := date.UTC().Format(time.RFC3339Nano)
 		timestampsArray = append(timestampsArray, dateTimestamp)
 		areaResetArray = append(areaResetArray, 1)
 	}
@@ -93,11 +93,11 @@ func (inst *Instance) CalculateDoorUses(doorType DoorType, normalDoorPosition Do
 	toPendingArray := make([]int, 0)
 	cleaningTimeArray := make([]string, 0)
 
-	lastToPending, _ := time.Parse(time.RFC3339, lastToPendingTs)
+	lastToPending, _ := time.Parse(time.RFC3339Nano, lastToPendingTs)
 	inst.cpsDebugMsg("CalculateDoorUses() lastToPending: ", lastToPending)
 
 	for i, v := range doorPositionSeries.Records() {
-		entryTime, _ := time.Parse(time.RFC3339, timestampSeries.Elem(i).String())
+		entryTime, _ := time.Parse(time.RFC3339Nano, timestampSeries.Elem(i).String())
 		inst.cpsDebugMsg("CalculateDoorUses() entryTime: ", entryTime)
 
 		toPending := 0
@@ -193,7 +193,7 @@ func (inst *Instance) Calculate15MinUsageRollup(start, end time.Time, processedD
 		return nil, err
 	}
 	lastTotalUseCountTimestamp := dfLastTotalUsesAt15Min.Col(string(timestampColName)).Elem(0).String()
-	lastTotalUseCountTimestampTime, _ := time.Parse(time.RFC3339, lastTotalUseCountTimestamp)
+	lastTotalUseCountTimestampTime, _ := time.Parse(time.RFC3339Nano, lastTotalUseCountTimestamp)
 
 	// Create an empty slices to store the new timestamps
 	timestampsArray := make([]string, 0)
@@ -211,7 +211,7 @@ func (inst *Instance) Calculate15MinUsageRollup(start, end time.Time, processedD
 
 	// Iterate from the start date until the end date, adding 15 mins each iteration
 	for date := startRounded; date.Before(end); date = date.Add(time.Minute * 15) {
-		dateTimestamp := date.UTC().Format(time.RFC3339)
+		dateTimestamp := date.UTC().Format(time.RFC3339Nano)
 		timestampsArray = append(timestampsArray, dateTimestamp)
 	}
 	inst.cpsDebugMsg("Calculate15MinUsageRollup() timestampsArray: ", timestampsArray)
@@ -240,7 +240,7 @@ func (inst *Instance) Calculate15MinUsageRollup(start, end time.Time, processedD
 	resultTimestampsArray := make([]string, 0)
 	resultUsesRollupArray := make([]int, 0)
 	for i, v := range timestampSeries.Records() {
-		entryTime, _ := time.Parse(time.RFC3339, v)
+		entryTime, _ := time.Parse(time.RFC3339Nano, v)
 		inst.cpsDebugMsg("Calculate15MinUsageRollup() entryTime: ", entryTime)
 		if entryTime.Minute()%15 != 0 {
 			lastEntryTotalUses, _ = totalUseCountSeries.Elem(i).Int() // we will need the last totalUses count before each 15 min timestamp
@@ -257,7 +257,7 @@ func (inst *Instance) Calculate15MinUsageRollup(start, end time.Time, processedD
 			inst.cpsErrorMsg("Calculate15MinUsageRollup(): totalUses has decreased")
 			return nil, errors.New("totalUses has decreased")
 		}
-		resultTimestampsArray = append(resultTimestampsArray, entryTime.UTC().Format(time.RFC3339))
+		resultTimestampsArray = append(resultTimestampsArray, entryTime.UTC().Format(time.RFC3339Nano))
 		resultUsesRollupArray = append(resultUsesRollupArray, usageRollup)
 	}
 
@@ -276,8 +276,8 @@ func (inst *Instance) Calculate15MinUsageRollup(start, end time.Time, processedD
 
 // CalculateOverdueCubicles creates a DF that adds timestamps for overdueStatus and toOverdue
 func (inst *Instance) CalculateOverdueCubicles(doorType DoorType, start, end time.Time, processedDoorDataDF, lastValuesDF, thresholdsDF dataframe.DataFrame, lastToPendingTs, lastToCleanTs string) (*dataframe.DataFrame, error) {
-	lastToPending, _ := time.Parse(time.RFC3339, lastToPendingTs)
-	lastToClean, _ := time.Parse(time.RFC3339, lastToCleanTs)
+	lastToPending, _ := time.Parse(time.RFC3339Nano, lastToPendingTs)
+	lastToClean, _ := time.Parse(time.RFC3339Nano, lastToCleanTs)
 
 	cleaningOverdueAlertDelay, err := GetOverdueDelay(doorType, thresholdsDF)
 	if err != nil {
@@ -314,19 +314,19 @@ func (inst *Instance) CalculateOverdueCubicles(doorType DoorType, start, end tim
 
 	for i, v := range existingTimestampSeries.Records() {
 		entryTimestampSaved := false
-		entryTime, _ := time.Parse(time.RFC3339, v)
+		entryTime, _ := time.Parse(time.RFC3339Nano, v)
 		pendingStatus, _ := pendingStatusSeries.Elem(i).Int() // check the pending status of each entry
 		if overdueEventPending {                              // looking for an overdue event
 			if entryTime.Before(nextOverdueTime) && !pendingStatusNaNArray[i] && pendingStatus != 0 {
 				// not overdue yet, just push 0 values for existing timestamp
-				newTimestampsArray = append(newTimestampsArray, entryTime.UTC().Format(time.RFC3339))
+				newTimestampsArray = append(newTimestampsArray, entryTime.UTC().Format(time.RFC3339Nano))
 				toOverdueArray = append(toOverdueArray, 0)
 				overdueStatusArray = append(overdueStatusArray, 0)
 				pendingStatusArray = append(pendingStatusArray, 1)
 				entryTimestampSaved = true
 			} else if entryTime.After(nextOverdueTime) || entryTime.Equal(nextOverdueTime) && pendingStatus != 0 {
 				// overdue delay has expired, so create a new timestamp and toOverdue entry
-				newTimestampsArray = append(newTimestampsArray, nextOverdueTime.UTC().Format(time.RFC3339))
+				newTimestampsArray = append(newTimestampsArray, nextOverdueTime.UTC().Format(time.RFC3339Nano))
 				toOverdueArray = append(toOverdueArray, 1)
 				overdueStatusArray = append(overdueStatusArray, 1)
 				pendingStatusArray = append(pendingStatusArray, 1)
@@ -335,7 +335,7 @@ func (inst *Instance) CalculateOverdueCubicles(doorType DoorType, start, end tim
 				entryTimestampSaved = true
 				if !entryTime.Equal(nextOverdueTime) {
 					// also add data for the existing timestamp
-					newTimestampsArray = append(newTimestampsArray, entryTime.UTC().Format(time.RFC3339))
+					newTimestampsArray = append(newTimestampsArray, entryTime.UTC().Format(time.RFC3339Nano))
 					toOverdueArray = append(toOverdueArray, 0)
 					overdueStatusArray = append(overdueStatusArray, 1)
 					pendingStatusArray = append(pendingStatusArray, 1)
@@ -343,7 +343,7 @@ func (inst *Instance) CalculateOverdueCubicles(doorType DoorType, start, end tim
 			}
 		} else if overdueEventInProgress && pendingStatus != 0 {
 			// still overdue
-			newTimestampsArray = append(newTimestampsArray, entryTime.UTC().Format(time.RFC3339))
+			newTimestampsArray = append(newTimestampsArray, entryTime.UTC().Format(time.RFC3339Nano))
 			toOverdueArray = append(toOverdueArray, 0)
 			overdueStatusArray = append(overdueStatusArray, 1)
 			pendingStatusArray = append(pendingStatusArray, 1)
@@ -353,7 +353,7 @@ func (inst *Instance) CalculateOverdueCubicles(doorType DoorType, start, end tim
 			// has been reset/cleaned reset overdueStatus
 			overdueEventPending = false
 			overdueEventInProgress = false
-			newTimestampsArray = append(newTimestampsArray, entryTime.UTC().Format(time.RFC3339))
+			newTimestampsArray = append(newTimestampsArray, entryTime.UTC().Format(time.RFC3339Nano))
 			toOverdueArray = append(toOverdueArray, 0)
 			overdueStatusArray = append(overdueStatusArray, 0)
 			pendingStatusArray = append(pendingStatusArray, 0)
@@ -364,7 +364,7 @@ func (inst *Instance) CalculateOverdueCubicles(doorType DoorType, start, end tim
 			overdueEventPending = true
 			nextOverdueTime = entryTime.Add(cleaningOverdueAlertDelay)
 			overdueEventInProgress = false
-			newTimestampsArray = append(newTimestampsArray, entryTime.UTC().Format(time.RFC3339))
+			newTimestampsArray = append(newTimestampsArray, entryTime.UTC().Format(time.RFC3339Nano))
 			toOverdueArray = append(toOverdueArray, 0)
 			overdueStatusArray = append(overdueStatusArray, 0)
 			pendingStatusArray = append(pendingStatusArray, 1)
@@ -374,7 +374,7 @@ func (inst *Instance) CalculateOverdueCubicles(doorType DoorType, start, end tim
 
 	// check for overdue between the last existing record and the end of the period
 	if nextOverdueTime.Before(end) {
-		newTimestampsArray = append(newTimestampsArray, nextOverdueTime.UTC().Format(time.RFC3339))
+		newTimestampsArray = append(newTimestampsArray, nextOverdueTime.UTC().Format(time.RFC3339Nano))
 		toOverdueArray = append(toOverdueArray, 1)
 		overdueStatusArray = append(overdueStatusArray, 1)
 		pendingStatusArray = append(pendingStatusArray, 1)

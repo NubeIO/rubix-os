@@ -66,6 +66,8 @@ const (
 type RawDataColumnName string
 
 const (
+	pointUUIDColName    RawDataColumnName = "point_uuid"
+	hostUUIDColName     RawDataColumnName = "host_uuid"
 	timestampColName    RawDataColumnName = "timestamp"
 	doorPositionColName RawDataColumnName = "door"
 	areaResetColName    RawDataColumnName = "areaReset"

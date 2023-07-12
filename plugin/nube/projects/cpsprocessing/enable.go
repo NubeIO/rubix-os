@@ -26,13 +26,14 @@ func (inst *Instance) Enable() error {
 		}
 	}
 
-	inst.CPSProcessing()
+	// inst.CPSProcessing() // TODO: DELETE ME
 
-	cron = gocron.NewScheduler(time.Local)
+	cron = gocron.NewScheduler(time.UTC)
 	// cron.SetMaxConcurrentJobs(2, gocron.RescheduleMode)
 	cron.SetMaxConcurrentJobs(1, gocron.WaitMode)
-	// _, _ = cron.Every("30m").Tag("initializePostgresDBConnection").Do(inst.initializePostgresDBConnection)
-	// _, _ = cron.Every(inst.config.Job.Frequency).Tag("cpsProcessing").Do(inst.CPSProcessing)
+	_, _ = cron.Every("30m").Tag("initializePostgresDBConnection").Do(inst.initializePostgresDBConnection)
+	_, _ = cron.Every(inst.config.Job.Frequency).Tag("cpsProcessing").Do(inst.CPSProcessing)
+	cron.RunAll()
 	cron.StartAsync()
 	_, next := cron.NextRun()
 	inst.cpsDebugMsg("Next CRON job @ ", next.String())
