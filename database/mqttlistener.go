@@ -23,19 +23,12 @@ func (d *GormDatabase) SubscribeMqttTopics() {
 
 func (d *GormDatabase) checkAndClearPointCov(message mqtt.Message) {
 	topics := strings.Split(message.Topic(), "/")
-	if len(topics) < 6 {
+	if len(topics) < 2 {
 		return
 	}
-	pointName := topics[len(topics)-1]
 	pointUUID := topics[len(topics)-2]
-	deviceName := topics[len(topics)-3]
-	deviceUUID := topics[len(topics)-4]
-	networkName := topics[len(topics)-5]
-	networkUUID := topics[len(topics)-6]
-
-	pointByUUID, _ := d.GetPointByUUID(networkUUID, deviceUUID, pointUUID, argspkg.Args{})
-	pointByName, _ := d.GetPointByName(networkName, deviceName, pointName, argspkg.Args{})
-	if pointByUUID == nil || pointByName == nil {
+	point, _ := d.GetPoint(pointUUID, argspkg.Args{})
+	if point == nil {
 		topic := message.Topic()
 		log.Warnf("no point with topic: %s", topic)
 		log.Warnf("clearing topic: %s, having payload: %s", topic, message.Payload())
