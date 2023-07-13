@@ -92,9 +92,11 @@ func (inst *Instance) syncPostgres() (bool, error) {
 	*/
 
 	if len(histories) > 0 {
-		if err = inst.createPointsBulk(); err != nil {
-			log.Error(err)
-			return false, err
+		if !inst.config.Job.DisableTagSync {
+			if err = inst.createPointsBulk(); err != nil {
+				log.Error(err)
+				return false, err
+			}
 		}
 
 		var historiesModel []*pgmodel.History

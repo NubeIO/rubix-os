@@ -10,7 +10,8 @@ type Postgres struct {
 }
 
 type Job struct {
-	Frequency string `yaml:"frequency"`
+	Frequency      string `yaml:"frequency"`
+	DisableTagSync bool   `yaml:"disableTagSync"`
 }
 
 type Config struct {
@@ -28,7 +29,8 @@ func (inst *Instance) DefaultConfig() interface{} {
 		SslMode:  "disable",
 	}
 	job := Job{
-		Frequency: "1m",
+		Frequency:      "1m",
+		DisableTagSync: false,
 	}
 	return &Config{
 		Postgres: postgres,

@@ -6,6 +6,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-helpers-go/pkg/times/utilstime"
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/args"
+	"github.com/NubeIO/rubix-os/plugin/nube/database/postgres/pgmodel"
 	"github.com/NubeIO/rubix-os/utils/boolean"
 	"github.com/NubeIO/rubix-os/utils/float"
 	"github.com/go-gota/gota/dataframe"
@@ -238,7 +239,7 @@ func (inst *Instance) CPSProcessing() {
 			if !ok {
 				// use the default processing start time
 				// defaultStartTime, _ := time.Parse(time.RFC3339Nano, "2023-06-25T06:00:00Z")
-				defaultStartTime := time.Now().Add(-24 * time.Hour)
+				defaultStartTime := time.Now().Add(-48 * time.Hour)
 				pluginStorage.LastSyncByAssetRef[doorSensorPoint.AssetRef] = defaultStartTime
 				periodStart = defaultStartTime
 			}
@@ -251,6 +252,7 @@ func (inst *Instance) CPSProcessing() {
 			// collect the processed data points for this asset
 			thisAssetProcessedDataPoints := make([]DoorProcessingPoint, 0)
 			for _, p := range thisSiteDoorPointsAndTags {
+				// TODO: for system maintenance we may need to add in checks to see that the device/points are enabled.
 				if p.AssetRef == doorSensorPoint.AssetRef && p.PointFunction == string(processedDataPointFunctionTagValue) {
 					thisAssetProcessedDataPoints = append(thisAssetProcessedDataPoints, p)
 				}
@@ -276,8 +278,8 @@ func (inst *Instance) CPSProcessing() {
 
 			// verify that the point has all the required information and calculations should actually be done
 			processedDataPointUUIDs := make([]string, 0)
-			var cubicleOccupancyPoint, totalUsesPoint, currentUsesPoint DoorProcessingPoint
-			// , pendingStatusPoint, overdueStatusPoint, toPendingPoint, toCleanPoint, toOverduePoint, cleaningTimePoint *DoorProcessingPoint
+			var cubicleOccupancyPoint, totalUsesPoint, currentUsesPoint, pendingStatusPoint, overdueStatusPoint DoorProcessingPoint
+			// , toPendingPoint, toCleanPoint, toOverduePoint, cleaningTimePoint *DoorProcessingPoint
 			for _, pdp := range thisAssetProcessedDataPoints {
 				switch pdp.Name {
 				case string(cubicleOccupancyColName):
@@ -286,11 +288,11 @@ func (inst *Instance) CPSProcessing() {
 					totalUsesPoint = pdp
 				case string(currentUsesColName):
 					currentUsesPoint = pdp
+				case string(pendingStatusColName):
+					pendingStatusPoint = pdp
+				case string(overdueStatusColName):
+					overdueStatusPoint = pdp
 					/*
-						case string(pendingStatusColName):
-							pendingStatusPoint = pdp
-						case string(overdueStatusColName):
-							overdueStatusPoint = pdp
 						case string(toPendingColName):
 							toPendingPoint = pdp
 						case string(toCleanColName):
@@ -343,13 +345,13 @@ func (inst *Instance) CPSProcessing() {
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() hostUUID: %+v", doorSensorPoint.HostUUID))
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() processedDataPointUUIDs: %+v", processedDataPointUUIDs))
 			var lastProcessedDataHistories []History
-			// TODO: ensure that this query gets the LAST value from each processed history point
+			// TODO: ensure that this query gets the LAST value from EACH processed history point
 			err = postgresSetting.postgresConnectionInstance.db.Raw(`
-					SELECT DISTINCT ON (point_uuid, host_uuid) *
+					SELECT DISTINCT ON (point_uuid) *
 					FROM histories
 					WHERE host_uuid = ? AND point_uuid IN (?) AND timestamp AT TIME ZONE 'UTC' < ?
 					ORDER BY point_uuid, host_uuid, timestamp DESC
-				`, doorSensorPoint.HostUUID, processedDataPointUUIDs, periodEnd).
+				`, inst.config.CloudServerDetails.CloudHostUUID, processedDataPointUUIDs, periodStart.UTC().Format(time.RFC3339Nano)).
 				Scan(&lastProcessedDataHistories).Error
 			if err != nil {
 				inst.cpsErrorMsg("CPSProcessing() lastProcessedData error: ", err)
@@ -417,7 +419,7 @@ func (inst *Instance) CPSProcessing() {
 				// get the history logs for the reset points for the calculation period
 				for _, resetPoint := range thisAssetResetDataPoints {
 					var thisResetPointHistories []History
-					err = postgresSetting.postgresConnectionInstance.db.Model(&model.History{}).Where("point_uuid = ? AND host_uuid = ? AND (timestamp AT TIME ZONE 'UTC' BETWEEN ? AND ?)", resetPoint.UUID, resetPoint.HostUUID, periodStart, periodEnd).Scan(&thisResetPointHistories).Error
+					err = postgresSetting.postgresConnectionInstance.db.Model(&model.History{}).Where("point_uuid = ? AND host_uuid = ? AND (timestamp AT TIME ZONE 'UTC' BETWEEN ? AND ?)", resetPoint.UUID, resetPoint.HostUUID, periodStart.UTC().Format(time.RFC3339Nano), periodEnd.UTC().Format(time.RFC3339Nano)).Scan(&thisResetPointHistories).Error
 					if err != nil {
 						inst.cpsErrorMsg("CPSProcessing() resetHistoryData error: ", err)
 					}
@@ -431,6 +433,8 @@ func (inst *Instance) CPSProcessing() {
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() resetHistoryData: %+v", resetHistoryData))
 			// dfRawDoor := dataframe.ReadCSV(strings.NewReader(csvRawDoor))
 			dfResetHistoryData := dataframe.LoadStructs(resetHistoryData)
+			dfResetHistoryData = dfResetHistoryData.Rename(string(areaResetColName), "value")
+			dfResetHistoryData = dfResetHistoryData.Drop([]string{string(pointUUIDColName), string(hostUUIDColName), "id"})
 			fmt.Println("dfResetHistoryData")
 			fmt.Println(dfResetHistoryData)
 
@@ -466,6 +470,16 @@ func (inst *Instance) CPSProcessing() {
 			defer ResultFile8.Close()
 			dfAllResets.WriteCSV(ResultFile8)
 
+			// TODO: If there is an existing pending status, need to calculate the overdue time. If there is a new Overdue Status, and no resets, then post the overdue status and toOverdue
+			// TODO: If we implement resets points from the gateway (NFC Tags), we will need to amend the logic to delete the overdue status and re-process the period.
+
+			// extract the last processed data values and the door type info from the point tags and values
+			pointLastProcessedData, pointDoorInfo, err := inst.GetLastProcessedDataAndDoorType(&dfJoinedLastProcessedValuesAndPoints, &doorSensorPoint)
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointLastProcessedData: %+v", pointLastProcessedData))
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointDoorInfo: %+v", pointDoorInfo))
+
+			// TODO: If there is an existing Overdue Status, and there is a Reset, then we need to process. Consider that more data may come in from the gateway later. Just post Pending Status, Overdue Status, toClean, and Cleaning Time to 0.
+
 			newData := true // TODO: NEED TO PROCESS THE RESET IF THERE IS A PENDING STATUS, BUT NEED TO ALSO SEARCH THE SAME RAW DATA PERIOD IN CASE THE GATEWAY PUSHES DATA LATER
 			// if dfAllResets.Nrow() <= 0 && dfRawDoorSensorHistories.Nrow() <= 0 {
 			if dfRawDoorSensorHistories.Nrow() <= 0 {
@@ -473,12 +487,9 @@ func (inst *Instance) CPSProcessing() {
 				newData = false
 			}
 
-			if newData { // don't bother processing if there is no data, just save the new lastSync time
+			var latestPendingStatus, latestOverdueStatus *int
 
-				// extract the last processed data values and the door type info from the point tags and values
-				pointLastProcessedData, pointDoorInfo, err := inst.GetLastProcessedDataAndDoorType(&dfJoinedLastProcessedValuesAndPoints, &doorSensorPoint)
-				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointLastProcessedData: %+v", pointLastProcessedData))
-				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointDoorInfo: %+v", pointDoorInfo))
+			if newData { // don't bother processing if there is no data
 
 				// TODO: Consider changing all timestamps to be UTC strings (currently they return as local timestamp strings, and I can't figure out how to get them into UTC).
 
@@ -584,19 +595,20 @@ func (inst *Instance) CPSProcessing() {
 				dfOverdueResult.WriteCSV(ResultFile11)
 
 				// finally, push the data to histories
-				processedDataHistores, err := inst.PackageProcessedHistories(*dfOverdueResult, thisAssetProcessedDataPoints)
+				var processedDataHistories []*pgmodel.History
+				processedDataHistories, latestPendingStatus, latestOverdueStatus, err = inst.PackageProcessedHistories(*dfOverdueResult, thisAssetProcessedDataPoints)
 				// _, err = inst.PackageProcessedHistories(*dfOverdueResult, thisAssetProcessedDataPoints)
 				if err != nil {
 					inst.cpsErrorMsg("PackageProcessedHistories() error: ", err)
 					return
 				}
 
-				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() processedDataHistores: %+v", processedDataHistores))
-				for i, hist := range processedDataHistores {
+				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() processedDataHistores: %+v", processedDataHistories))
+				for i, hist := range processedDataHistories {
 					inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() processedDataHistores %v: %+v", i, *hist))
 				}
 
-				_, err = inst.SendHistoriesToPostgres(processedDataHistores)
+				_, err = inst.SendHistoriesToPostgres(processedDataHistories)
 				if err != nil {
 					inst.cpsErrorMsg("SendHistoriesToPostgres() error: ", err)
 					continue // DONT update last sync, it will be processed again on the next loop.
@@ -605,6 +617,37 @@ func (inst *Instance) CPSProcessing() {
 				// save the sync'd period to plugin/module storage
 				pluginStorage.LastSyncByAssetRef[doorSensorPoint.AssetRef] = periodEnd
 			}
+
+			// update pendingStatus, overdueStatus, so it can be seen in the APP
+			if newData {
+				// update the pendingStatus and overdueStatus points
+				if latestPendingStatus != nil && pointLastProcessedData.PendingStatus != *latestPendingStatus {
+					priority := map[string]*float64{
+						"_1": float.New(float64(*latestPendingStatus)),
+					}
+					writer := model.PointWriter{
+						Priority: &priority,
+					}
+					_, _, _, _, err = inst.db.PointWrite(pendingStatusPoint.UUID, &writer)
+					if err != nil {
+						inst.cpsErrorMsg("CPSProcessing() inst.db.PointWrite(pendingStatusPoint.UUID, &writer) error: ", err)
+					}
+				}
+
+				if latestOverdueStatus != nil && pointLastProcessedData.OverdueStatus != *latestOverdueStatus {
+					priority := map[string]*float64{
+						"_1": float.New(float64(*latestOverdueStatus)),
+					}
+					writer := model.PointWriter{
+						Priority: &priority,
+					}
+					_, _, _, _, err = inst.db.PointWrite(overdueStatusPoint.UUID, &writer)
+					if err != nil {
+						inst.cpsErrorMsg("CPSProcessing() inst.db.PointWrite(overdueStatusPoint.UUID, &writer) error: ", err)
+					}
+				}
+			}
+
 		}
 	}
 	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pluginStorage.LastSyncByAssetRef: %+v", pluginStorage.LastSyncByAssetRef))
@@ -668,57 +711,70 @@ func (inst *Instance) addDevice(body *model.Device) (device *model.Device, err e
 	// Automatically create door sensor processed data points
 	createThesePoints := make([]model.Point, 0)
 	occupancyPoint := model.Point{
-		Name: string(cubicleOccupancyColName),
+		Name:         string(cubicleOccupancyColName),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, occupancyPoint)
 
 	totalUsesPoint := model.Point{
-		Name: string(totalUsesColName),
+		Name:         string(totalUsesColName),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, totalUsesPoint)
 
 	currentUsesPoint := model.Point{
-		Name: string(currentUsesColName),
+		Name:         string(currentUsesColName),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, currentUsesPoint)
 
 	fifteenMinUsesPoint := model.Point{
-		Name: string(fifteenMinRollupUsesColName),
+		Name:         string(fifteenMinRollupUsesColName),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, fifteenMinUsesPoint)
 
 	pendingStatusPoint := model.Point{
-		Name: string(pendingStatusColName),
+		Name:         string(pendingStatusColName),
+		Fallback:     float.New(0),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, pendingStatusPoint)
 
 	overdueStatusPoint := model.Point{
-		Name: string(overdueStatusColName),
+		Name:         string(overdueStatusColName),
+		Fallback:     float.New(0),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, overdueStatusPoint)
 
 	toPendingPoint := model.Point{
-		Name: string(toPendingColName),
+		Name:         string(toPendingColName),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, toPendingPoint)
 
 	toCleanPoint := model.Point{
-		Name: string(toCleanColName),
+		Name:         string(toCleanColName),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, toCleanPoint)
 
 	toOverduePoint := model.Point{
-		Name: string(toOverdueColName),
+		Name:         string(toOverdueColName),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, toOverduePoint)
 
 	cleaningTimePoint := model.Point{
-		Name: string(cleaningTimeColName),
+		Name:         string(cleaningTimeColName),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, cleaningTimePoint)
 
 	cleaningResetPoint := model.Point{
-		Name: string(cleaningResetColName),
+		Name:         string(cleaningResetColName),
+		CommonEnable: model.CommonEnable{Enable: boolean.NewTrue()},
 	}
 	createThesePoints = append(createThesePoints, cleaningResetPoint)
 
@@ -879,6 +935,15 @@ func (inst *Instance) updatePoint(body *model.Point) (point *model.Point, err er
 	point, err = inst.db.UpdatePoint(body.UUID, body)
 	if err != nil || point == nil {
 		inst.cpsErrorMsg("updatePoint(): bad response from UpdatePoint() err:", err)
+		return nil, err
+	}
+	return point, nil
+}
+
+func (inst *Instance) writePoint(pntUUID string, body *model.PointWriter) (point *model.Point, err error) {
+	point, _, _, _, err = inst.db.PointWrite(pntUUID, body)
+	if err != nil {
+		inst.cpsErrorMsg("writePoint(): bad response from WritePoint(), ", err)
 		return nil, err
 	}
 	return point, nil

@@ -63,10 +63,10 @@ func (inst *Instance) CalculateDoorUses(dfRawDoorSensorHistories, resetsDF, thre
 
 	var joinedDF dataframe.DataFrame
 	if dfRawDoorSensorHistories.Nrow() > 0 && resetsDF.Nrow() > 0 { // if both input dataframes aren't empty combine them
+		dfRawDoorSensorHistories = dfRawDoorSensorHistories.Rename(string(doorPositionColName), "value")
+		dfRawDoorSensorHistories = dfRawDoorSensorHistories.Drop([]string{string(pointUUIDColName), string(hostUUIDColName), "id"})
 		joinedDF = dfRawDoorSensorHistories.OuterJoin(resetsDF, string(timestampColName))
 		joinedDF = joinedDF.Arrange(dataframe.Sort(string(timestampColName)))
-		joinedDF = joinedDF.Rename(string(doorPositionColName), "value")
-		joinedDF = joinedDF.Drop([]string{string(pointUUIDColName), string(hostUUIDColName)})
 	} else if resetsDF.Nrow() > 0 {
 		joinedDF = resetsDF.Arrange(dataframe.Sort(string(timestampColName)))
 	} else if dfRawDoorSensorHistories.Nrow() > 0 {
@@ -397,6 +397,7 @@ func (inst *Instance) CalculateOverdueCubicles(start, end time.Time, dfUsageCalc
 			overdueEventPending = true
 		}
 	}
+	// inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() CalculateOverdueCubicles() nextOverdueTime: %+v", nextOverdueTime))
 
 	// Extract the timestamp column as a series
 	existingTimestampSeries := dfUsageCalculationResults.Col(string(timestampColName))
@@ -414,13 +415,18 @@ func (inst *Instance) CalculateOverdueCubicles(start, end time.Time, dfUsageCalc
 
 	overdueEventInProgress := lastOverdueStatus != 0
 
+	lastPendingStatus := pointLastProcessedData.PendingStatus
 	for i, v := range existingTimestampSeries.Records() {
 		entryTimestampSaved := false
 		entryTime, _ := time.Parse(time.RFC3339Nano, v)
 		// inst.cpsDebugMsg("CalculateOverdueCubicles() entryTime: ", entryTime)
 		pendingStatus, _ := pendingStatusSeries.Elem(i).Int() // check the pending status of each entry
-		if overdueEventPending {                              // looking for an overdue event
-			if entryTime.Before(nextOverdueTime) && !pendingStatusNaNArray[i] && pendingStatus != 0 {
+		// account for the first row, and other NaN rows
+		if pendingStatusNaNArray[i] == true {
+			pendingStatus = lastPendingStatus
+		}
+		if overdueEventPending { // looking for an overdue event
+			if entryTime.Before(nextOverdueTime) && pendingStatus != 0 {
 				// not overdue yet, just push 0 values for existing timestamp
 				newTimestampsArray = append(newTimestampsArray, entryTime.Format(time.RFC3339Nano))
 				toOverdueArray = append(toOverdueArray, 0)
@@ -453,7 +459,7 @@ func (inst *Instance) CalculateOverdueCubicles(start, end time.Time, dfUsageCalc
 			entryTimestampSaved = true
 		}
 		if pendingStatus == 0 {
-			// has been reset/cleaned reset overdueStatus
+			// not pending, or has been reset/cleaned. reset overdueStatus.
 			overdueEventPending = false
 			overdueEventInProgress = false
 			newTimestampsArray = append(newTimestampsArray, entryTime.Format(time.RFC3339Nano))
@@ -473,6 +479,7 @@ func (inst *Instance) CalculateOverdueCubicles(start, end time.Time, dfUsageCalc
 			pendingStatusArray = append(pendingStatusArray, 1)
 			entryTimestampSaved = true
 		}
+		lastPendingStatus = pendingStatus
 	}
 
 	// check for overdue between the last existing record and the end of the period
@@ -499,8 +506,8 @@ func (inst *Instance) CalculateOverdueCubicles(start, end time.Time, dfUsageCalc
 }
 
 // PackageProcessedHistories ingests processed data DF, and outputs histores to be sent to the CPS postgres database
-func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.DataFrame, thisAssetProcessedDataPoints []DoorProcessingPoint) ([]*pgmodel.History, error) {
-	processedHistories := make([]*pgmodel.History, 0)
+func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.DataFrame, thisAssetProcessedDataPoints []DoorProcessingPoint) (processedHistories []*pgmodel.History, latestPendingStatus, latestOverdueStatus *int, err error) {
+	processedHistories = make([]*pgmodel.History, 0)
 
 	// TODO: deal with history IDs for last sync
 
@@ -578,6 +585,7 @@ func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.Da
 				continue
 			}
 			totalUsesSeries := dfProcessingResults.Col(string(totalUsesColName))
+			// TODO: could implement a last value check
 			for i, ts := range timestampSeries.Records() {
 				element := totalUsesSeries.Elem(i)
 				if element.IsNA() {
@@ -599,13 +607,14 @@ func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.Da
 			}
 			currentUsesSeries := dfProcessingResults.Col(string(currentUsesColName))
 			lastVal := 0
+			lastValSet := false
 			for i, ts := range timestampSeries.Records() {
 				element := currentUsesSeries.Elem(i)
 				if element.IsNA() {
 					continue
 				}
 				value, _ := element.Int()
-				if value == lastVal {
+				if lastValSet && value == lastVal {
 					continue
 				}
 				timestamp, _ := time.Parse(time.RFC3339Nano, ts)
@@ -616,6 +625,7 @@ func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.Da
 					Timestamp: timestamp,
 				}
 				processedHistories = append(processedHistories, &newHist)
+				lastVal = value
 			}
 		case string(pendingStatusColName):
 			if !pendingStatusColumnExists {
@@ -623,15 +633,17 @@ func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.Da
 			}
 			pendingStatusSeries := dfProcessingResults.Col(string(pendingStatusColName))
 			lastVal := 0
+			lastValSet := false
 			for i, ts := range timestampSeries.Records() {
 				element := pendingStatusSeries.Elem(i)
 				if element.IsNA() {
 					continue
 				}
 				value, _ := element.Int()
-				if value == lastVal {
+				if lastValSet && value == lastVal {
 					continue
 				}
+				latestPendingStatus = &value
 				timestamp, _ := time.Parse(time.RFC3339Nano, ts)
 				newHist := pgmodel.History{
 					PointUUID: pdp.UUID,
@@ -640,6 +652,7 @@ func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.Da
 					Timestamp: timestamp,
 				}
 				processedHistories = append(processedHistories, &newHist)
+				lastVal = value
 			}
 		case string(overdueStatusColName):
 			if !overdueStatusColumnExists {
@@ -647,15 +660,17 @@ func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.Da
 			}
 			overdueStatusSeries := dfProcessingResults.Col(string(overdueStatusColName))
 			lastVal := 0
+			lastValSet := false
 			for i, ts := range timestampSeries.Records() {
 				element := overdueStatusSeries.Elem(i)
 				if element.IsNA() {
 					continue
 				}
 				value, _ := element.Int()
-				if value == lastVal {
+				if lastValSet && value == lastVal {
 					continue
 				}
+				latestOverdueStatus = &value
 				timestamp, _ := time.Parse(time.RFC3339Nano, ts)
 				newHist := pgmodel.History{
 					PointUUID: pdp.UUID,
@@ -664,6 +679,7 @@ func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.Da
 					Timestamp: timestamp,
 				}
 				processedHistories = append(processedHistories, &newHist)
+				lastVal = value
 			}
 		case string(toPendingColName):
 			if !toPendingColumnExists {
@@ -806,5 +822,5 @@ func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.Da
 		}
 	}
 
-	return processedHistories, nil
+	return
 }
