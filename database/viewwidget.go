@@ -3,6 +3,7 @@ package database
 import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	"github.com/NubeIO/rubix-os/src/client"
+	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 )
 
@@ -39,7 +40,7 @@ func (d *GormDatabase) UpdateViewWidget(uuid string, body *model.ViewWidget) (*m
 	if err != nil {
 		return nil, err
 	}
-	if body.HostUUID != body.HostUUID || viewWidgetModel.PointUUID != viewWidgetModel.PointUUID {
+	if body.HostUUID != body.HostUUID || viewWidgetModel.ThingUUID != body.ThingUUID {
 		if err := d.mapBeforeCreateUpdateViewWidget(body); err != nil {
 			return nil, err
 		}
@@ -67,13 +68,28 @@ func (d *GormDatabase) mapBeforeCreateUpdateViewWidget(body *model.ViewWidget) e
 		return err
 	}
 	cli := client.NewClient(host.IP, host.Port, host.ExternalToken)
-	point, err := cli.GetPointWithParent(body.PointUUID)
-	if err != nil {
-		return err
+	switch body.ThingType {
+	case model.ThingType.Point:
+		point, err := cli.GetPointWithParent(body.ThingUUID)
+		if err != nil {
+			return err
+		}
+		body.ThingName = point.Name
+		body.DeviceName = nstring.New(point.DeviceName)
+		body.DeviceUUID = nstring.New(point.DeviceUUID)
+		body.NetworkName = nstring.New(point.NetworkName)
+	case model.ThingType.Schedule:
+		schedule, connectionErr, requestErr := cli.GetScheduleV2(body.ThingUUID)
+		if connectionErr != nil {
+			return connectionErr
+		}
+		if requestErr != nil {
+			return requestErr
+		}
+		body.ThingName = schedule.Name
+		body.DeviceName = nstring.New("")
+		body.DeviceUUID = nstring.New("")
+		body.NetworkName = nstring.New("")
 	}
-	body.NetworkName = point.NetworkName
-	body.DeviceName = point.DeviceName
-	body.PointName = point.Name
-	body.DeviceUUID = point.DeviceUUID
 	return nil
 }

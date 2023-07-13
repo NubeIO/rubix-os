@@ -5,6 +5,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/src/client"
+	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"sync"
 )
@@ -123,14 +124,15 @@ func (d *GormDatabase) GenerateViewTemplate(uuid string, name string) (bool, err
 				Config:           vWidget.Config,
 				NetworkName:      vWidget.NetworkName,
 				DeviceName:       vWidget.DeviceName,
-				PointName:        vWidget.PointName,
+				CommonThingType:  model.CommonThingType{ThingType: vWidget.ThingType},
+				CommonThingName:  model.CommonThingName{ThingName: vWidget.ThingName},
 				ViewTemplateWidgetPointers: []*model.ViewTemplateWidgetPointer{
 					{
-						CommonUUID: model.CommonUUID{UUID: nuuid.MakeTopicUUID(model.CommonNaming.ViewTemplateWidgetPointer)},
-						ViewUUID:   uuid,
-						HostUUID:   vWidget.HostUUID,
-						DeviceUUID: vWidget.DeviceUUID,
-						PointUUID:  vWidget.PointUUID,
+						CommonUUID:      model.CommonUUID{UUID: nuuid.MakeTopicUUID(model.CommonNaming.ViewTemplateWidgetPointer)},
+						ViewUUID:        uuid,
+						HostUUID:        vWidget.HostUUID,
+						CommonThingUUID: model.CommonThingUUID{ThingUUID: vWidget.ThingUUID},
+						DeviceUUID:      vWidget.DeviceUUID,
 					},
 				},
 			}
@@ -161,18 +163,35 @@ func (d *GormDatabase) AssignViewTemplate(uuid string, viewTemplateUUID string, 
 		wg.Add(1)
 		go func(vtWidget *model.ViewTemplateWidget) {
 			defer wg.Done()
-			point, err, err1 := cli.GetPointByName(vtWidget.NetworkName, vtWidget.DeviceName, vtWidget.PointName)
-			if err != nil || err1 != nil {
-				return
+			switch vtWidget.ThingType {
+			case model.ThingType.Point:
+				point, connectionErr, requestErr := cli.GetPointByName(*vtWidget.NetworkName, *vtWidget.DeviceName,
+					vtWidget.ThingName)
+				if connectionErr != nil || requestErr != nil {
+					return
+				}
+				viewTemplateWidgetPointer := &model.ViewTemplateWidgetPointer{
+					ViewTemplateWidgetUUID: vtWidget.UUID,
+					ViewUUID:               uuid,
+					HostUUID:               hostUUID,
+					CommonThingUUID:        model.CommonThingUUID{ThingUUID: point.UUID},
+					DeviceUUID:             nstring.New(point.DeviceUUID),
+				}
+				_, err = d.CreateViewTemplateWidgetPointer(viewTemplateWidgetPointer)
+			case model.ThingType.Schedule:
+				schedule, connectionErr, requestErr := cli.GetScheduleByNameV2(vtWidget.ThingName)
+				if connectionErr != nil || requestErr != nil {
+					return
+				}
+				viewTemplateWidgetPointer := &model.ViewTemplateWidgetPointer{
+					ViewTemplateWidgetUUID: vtWidget.UUID,
+					ViewUUID:               uuid,
+					HostUUID:               hostUUID,
+					CommonThingUUID:        model.CommonThingUUID{ThingUUID: schedule.UUID},
+					DeviceUUID:             nil,
+				}
+				_, err = d.CreateViewTemplateWidgetPointer(viewTemplateWidgetPointer)
 			}
-			viewTemplateWidgetPointer := &model.ViewTemplateWidgetPointer{
-				ViewTemplateWidgetUUID: vtWidget.UUID,
-				ViewUUID:               uuid,
-				HostUUID:               hostUUID,
-				DeviceUUID:             point.DeviceUUID,
-				PointUUID:              point.UUID,
-			}
-			_, err = d.CreateViewTemplateWidgetPointer(viewTemplateWidgetPointer)
 		}(viewTemplateWidget)
 	}
 	wg.Wait()

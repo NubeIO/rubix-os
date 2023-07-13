@@ -4,6 +4,7 @@ import (
 	"github.com/NubeIO/nubeio-rubix-lib-models-go/pkg/v1/model"
 	argspkg "github.com/NubeIO/rubix-os/args"
 	"github.com/NubeIO/rubix-os/src/client"
+	"github.com/NubeIO/rubix-os/utils/nstring"
 	"github.com/NubeIO/rubix-os/utils/nuuid"
 	"sync"
 )
@@ -41,8 +42,17 @@ func (d *GormDatabase) UpdateViewTemplateWidget(uuid string, body *model.ViewTem
 	if err := d.DB.Where("uuid = ?", uuid).First(&viewTemplateWidgetModel).Error; err != nil {
 		return nil, err
 	}
-	syncAfterUpdate := body.NetworkName != viewTemplateWidgetModel.NetworkName ||
-		body.DeviceName != viewTemplateWidgetModel.DeviceName || body.PointName != viewTemplateWidgetModel.PointName
+	syncAfterUpdate := false
+	if body.ThingType == "" {
+		body.ThingType = viewTemplateWidgetModel.ThingType
+	}
+	switch body.ThingType {
+	case model.ThingType.Point:
+		syncAfterUpdate = body.NetworkName != viewTemplateWidgetModel.NetworkName ||
+			body.DeviceName != viewTemplateWidgetModel.DeviceName || body.ThingName != viewTemplateWidgetModel.ThingName
+	case model.ThingType.Schedule:
+		syncAfterUpdate = body.ThingName != viewTemplateWidgetModel.ThingName
+	}
 	if body.Config != nil {
 		body.Config = marshalJson(body.Config)
 	}
@@ -75,13 +85,25 @@ func (d *GormDatabase) syncAfterUpdateViewTemplateWidget(uuid string) {
 				return
 			}
 			cli := client.NewClient(host.IP, host.Port, host.ExternalToken)
-			point, err, err1 := cli.GetPointByName(vtWidget.NetworkName, vtWidget.DeviceName, vtWidget.PointName)
-			if err != nil || err1 != nil {
-				return
+			switch vtWidget.ThingType {
+			case model.ThingType.Point:
+				point, connectionErr, requestErr := cli.GetPointByName(*vtWidget.NetworkName, *vtWidget.DeviceName,
+					vtWidget.ThingName)
+				if connectionErr != nil || requestErr != nil {
+					return
+				}
+				vtwPointer.DeviceUUID = nstring.New(point.DeviceUUID)
+				vtwPointer.ThingUUID = point.UUID
+				_, _ = d.UpdateViewTemplateWidgetPointer(vtwPointer.UUID, vtwPointer)
+			case model.ThingType.Schedule:
+				schedule, connectionErr, requestErr := cli.GetScheduleByNameV2(vtWidget.ThingName)
+				if connectionErr != nil || requestErr != nil {
+					return
+				}
+				vtwPointer.DeviceUUID = nil
+				vtwPointer.ThingUUID = schedule.UUID
+				_, _ = d.UpdateViewTemplateWidgetPointer(vtwPointer.UUID, vtwPointer)
 			}
-			vtwPointer.DeviceUUID = point.DeviceUUID
-			vtwPointer.PointUUID = point.UUID
-			_, _ = d.UpdateViewTemplateWidgetPointer(vtwPointer.UUID, vtwPointer)
 		}(viewTemplateWidget, viewTemplateWidgetPointer)
 	}
 	wg.Wait()
