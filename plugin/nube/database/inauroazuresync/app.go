@@ -69,7 +69,7 @@ func (inst *Instance) syncAzureSensorHistories() (bool, error) {
 			inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureSensorHistories() packageHistoriesToInauroPayloads() bulkInauroHistoryPayloadsArray: %+v", bulkInauroHistoryPayloadsArray))
 			inst.inauroazuresyncDebugMsg(fmt.Sprintf("syncAzureSensorHistories() packageHistoriesToInauroPayloads() latestHistoryTime: %+v", latestHistoryTime))
 
-			if len(histories) < 0 {
+			if len(bulkInauroHistoryPayloadsArray) < 0 {
 				inst.inauroazuresyncErrorMsg(fmt.Sprintf("syncAzureSensorHistories() no histories to store on hostUUID: %v. There were histories, so check for errors", host.UUID))
 				continue
 			}

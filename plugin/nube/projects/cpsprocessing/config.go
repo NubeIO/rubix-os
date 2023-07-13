@@ -1,9 +1,10 @@
 package main
 
 type Config struct {
-	Postgres Postgres `yaml:"postgres"`
-	Job      Job      `yaml:"job"`
-	LogLevel string   `yaml:"log_level"`
+	Postgres           Postgres           `yaml:"postgres"`
+	CloudServerDetails CloudServerDetails `yaml:"cloudServerDetails"`
+	Job                Job                `yaml:"job"`
+	LogLevel           string             `yaml:"log_level"`
 }
 
 type Postgres struct {
@@ -16,7 +17,12 @@ type Postgres struct {
 }
 
 type Job struct {
-	Frequency string `yaml:"frequency"`
+	Frequency        string `yaml:"frequency"`
+	SyncPointsWithDB bool   `yaml:"sync_points_with_db"`
+}
+
+type CloudServerDetails struct {
+	CloudHostUUID string `yaml:"cloudHostUUID"`
 }
 
 func (inst *Instance) DefaultConfig() interface{} {
@@ -28,14 +34,19 @@ func (inst *Instance) DefaultConfig() interface{} {
 		Password: "password",
 		SslMode:  "disable",
 	}
+	cloudServerDetails := CloudServerDetails{
+		CloudHostUUID: "hos_afccc787e32f411e",
+	}
 	job := Job{
-		Frequency: "1m",
+		Frequency:        "1m",
+		SyncPointsWithDB: false,
 	}
 
 	return &Config{
-		Postgres: postgres,
-		Job:      job,
-		LogLevel: "ERROR", // DEBUG or ERROR
+		Postgres:           postgres,
+		CloudServerDetails: cloudServerDetails,
+		Job:                job,
+		LogLevel:           "ERROR", // DEBUG or ERROR
 	}
 }
 

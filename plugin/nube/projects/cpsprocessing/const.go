@@ -6,11 +6,47 @@ const closed = 1
 const vacant = 0
 const occupied = 1
 
-type DoorState int
+type PointTags string
 
 const (
-	normallyOpen   DoorState = 0
-	normallyClosed DoorState = 1
+	pointFunctionTag                                       PointTags = "pointFunction"
+	rawDoorSensorPointFunctionTagValue                     PointTags = "sensor"
+	processedDataPointFunctionTagValue                     PointTags = "processedData"
+	doorResetPointFunctionTagValue                         PointTags = "doorReset"
+	measurementRefTag                                      PointTags = "measurementRef"
+	doorSensorMeasurementRefTagValue                       PointTags = "door_position"
+	assetRefTag                                            PointTags = "assetRef"
+	assetFuncTag                                           PointTags = "assetFunc"
+	managedCubicleDoorSensorAssetFunctionTagValue          PointTags = "managedCubicle"
+	managedFacilityEntranceDoorSensorAssetFunctionTagValue PointTags = "managedFacilityEntrance"
+	usageCountDoorSensorAssetFunctionTagValue              PointTags = "usageCount"
+	doorTypeTag                                            PointTags = "doorType"
+	toiletDoorTypeTagValue                                 PointTags = "toilet"
+	showerDoorTypeTagValue                                 PointTags = "shower"
+	ddaDoorTypeTagValue                                    PointTags = "dda"
+	entranceDoorTypeTagValue                               PointTags = "entrance"
+	doorDoorTypeTagValue                                   PointTags = "door"
+	normalPositionTag                                      PointTags = "normalPosition"
+	normallyOpenNormalPositionTagValue                     PointTags = "NO"
+	normallyClosedNormalPositionTagValue                   PointTags = "NC"
+	enableCleaningTrackingTag                              PointTags = "enableCleaningTracking"
+	enabledEnableCleaningTrackingTagValue                  PointTags = "true"
+	disabledEnableCleaningTrackingTagValue                 PointTags = "false"
+	enableUseCountingTag                                   PointTags = "enableUseCounting"
+	enabledEnableUseCountingTagValue                       PointTags = "true"
+	disabledEnableUseCountingTagValue                      PointTags = "false"
+	isEOTTag                                               PointTags = "isEOT"
+	EOTisEOTTagValue                                       PointTags = "true"
+	notEOTisEOTTagValue                                    PointTags = "false"
+	availabilityIDTag                                      PointTags = "availabilityID"
+	resetIDTag                                             PointTags = "resetID"
+)
+
+type DoorNormalPosition int
+
+const (
+	normallyOpen   DoorNormalPosition = 0
+	normallyClosed DoorNormalPosition = 1
 )
 
 type DoorType int
@@ -19,15 +55,19 @@ const (
 	facilityEntrance DoorType = iota
 	facilityToilet
 	facilityDDA
+	facilityDoor
 	eotEntrance
 	eotToilet
 	eotShower
 	eotDDA
+	eotDoor
 )
 
 type RawDataColumnName string
 
 const (
+	pointUUIDColName    RawDataColumnName = "point_uuid"
+	hostUUIDColName     RawDataColumnName = "host_uuid"
 	timestampColName    RawDataColumnName = "timestamp"
 	doorPositionColName RawDataColumnName = "door"
 	areaResetColName    RawDataColumnName = "areaReset"
@@ -57,6 +97,7 @@ const (
 	toCleanColName                      ProcessedDataColumnName = "toClean"
 	toOverdueColName                    ProcessedDataColumnName = "toOverdue"
 	cleaningTimeColName                 ProcessedDataColumnName = "cleaningTime"
+	cleaningResetColName                ProcessedDataColumnName = "cleaningReset"
 	lowBatteryColName                   ProcessedDataColumnName = "lowBattery"
 	highTempColName                     ProcessedDataColumnName = "highTemp"
 	lowTempColName                      ProcessedDataColumnName = "lowTemp"

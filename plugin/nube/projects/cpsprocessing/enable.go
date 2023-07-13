@@ -19,12 +19,21 @@ func (inst *Instance) Enable() error {
 	if err != nil {
 		inst.cpsErrorMsg("Enable() initializePostgresDBConnection() error: ", err)
 	}
+	if inst.config.Job.SyncPointsWithDB {
+		_, err = inst.syncNetDevPntsAndTags()
+		if err != nil {
+			inst.cpsErrorMsg("Enable() syncNetDevPntsAndTags() error: ", err)
+		}
+	}
 
-	cron = gocron.NewScheduler(time.Local)
+	// inst.CPSProcessing() // TODO: DELETE ME
+
+	cron = gocron.NewScheduler(time.UTC)
 	// cron.SetMaxConcurrentJobs(2, gocron.RescheduleMode)
 	cron.SetMaxConcurrentJobs(1, gocron.WaitMode)
 	_, _ = cron.Every("30m").Tag("initializePostgresDBConnection").Do(inst.initializePostgresDBConnection)
-	// _, _ = cron.Every(inst.config.Job.Frequency).Tag("cpsProcessing").Do(inst.CPSProcessing)
+	_, _ = cron.Every(inst.config.Job.Frequency).Tag("cpsProcessing").Do(inst.CPSProcessing)
+	cron.RunAll()
 	cron.StartAsync()
 	_, next := cron.NextRun()
 	inst.cpsDebugMsg("Next CRON job @ ", next.String())
