@@ -54,7 +54,7 @@ func (inst *Instance) CPSProcessing() {
 	var doorPointUUIDs []string
 	_ = postgresSetting.postgresConnectionInstance.db.Table("point_meta_tags").
 		Select("point_uuid").
-		Where("key = ? AND value IN ?", "assetFunc", []string{string(managedCubicleDoorSensorAssetFunctionTagValue), string(managedFacilityEntranceDoorSensorAssetFunctionTagValue), string(usageCountDoorSensorAssetFunctionTagValue)}).
+		Where("key = ? AND value IN ?", string(assetFuncTag), []string{string(managedCubicleDoorSensorAssetFunctionTagValue), string(managedFacilityEntranceDoorSensorAssetFunctionTagValue), string(usageCountDoorSensorAssetFunctionTagValue)}).
 		Find(&doorPointUUIDs)
 
 	// doorPointUUIDs = []string{"pnt_3dc020ef688e4ae1", "pnt_d6a078410aae48c1", "pnt_75610d0f08ab41b2"} // TODO: just for testing
@@ -160,6 +160,110 @@ func (inst *Instance) CPSProcessing() {
 	defer ResultFile2.Close()
 	dfDoorResetPointsAndTags.WriteCSV(ResultFile2)
 
+	// get a list of availability point UUIDs
+	var availabilityPointUUIDs []string
+	_ = postgresSetting.postgresConnectionInstance.db.Table("point_meta_tags").
+		Select("point_uuid").
+		Where("key = ? AND value = ?", string(measurementRefTag), string(availabilityMeasurementRefTag)).
+		Find(&availabilityPointUUIDs)
+
+	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() availabilityPointUUIDs: %+v", availabilityPointUUIDs))
+
+	// get the required meta tags grouped by point_uuid and host uuid
+	var availabilityPointsAndTags []DoorProcessingPoint
+	err = postgresSetting.postgresConnectionInstance.db.Raw(`
+		SELECT
+			p.uuid AS point_uuid,
+			p.name,
+			p.host_uuid,
+			MAX(CASE WHEN m.key = 'siteRef' THEN m.value END) AS site_ref,
+			MAX(CASE WHEN m.key = 'floorRef' THEN m.value END) AS floor_ref,
+			MAX(CASE WHEN m.key = 'genderRef' THEN m.value END) AS gender_ref,
+			MAX(CASE WHEN m.key = 'pointFunction' THEN m.value END) AS point_function,
+			MAX(CASE WHEN m.key = 'measurementRef' THEN m.value END) AS measurement_ref,
+			MAX(CASE WHEN m.key = 'doorType' THEN m.value END) AS door_type,
+			MAX(CASE WHEN m.key = 'isEOT' THEN m.value END) AS is_eot,
+			MAX(CASE WHEN m.key = 'availabilityID' THEN m.value END) AS availability_id
+		FROM
+			points AS p
+		JOIN
+			point_meta_tags AS m ON p.uuid = m.point_uuid
+		WHERE
+			p.uuid IN (?)
+		GROUP BY
+			p.uuid, p.host_uuid
+		`, availabilityPointUUIDs).
+		Find(&availabilityPointsAndTags).Error
+	if err != nil {
+		inst.cpsErrorMsg("CPSProcessing() availabilityPointsAndTags error: ", err)
+	}
+	// -- dataframe implementation --
+	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() availabilityPointsAndTags: %+v", availabilityPointsAndTags))
+	// TODO: just for debug
+	dfAvailabilityPointsAndTags := dataframe.LoadStructs(availabilityPointsAndTags)
+	fmt.Println("dfAvailabilityPointsAndTags")
+	fmt.Println(dfAvailabilityPointsAndTags)
+
+	// TODO: DELETE ME (just for debug)
+	ResultFile12, err := os.Create(fmt.Sprintf("/home/marc/Documents/Nube/CPS/Development/Data_Processing/12_dfAvailabilityPointsAndTags.csv"))
+	if err != nil {
+		inst.cpsErrorMsg(err)
+	}
+	defer ResultFile12.Close()
+	dfAvailabilityPointsAndTags.WriteCSV(ResultFile12)
+
+	// get a list of availability ALERT point UUIDs
+	var availabilityAlertPointUUIDs []string
+	_ = postgresSetting.postgresConnectionInstance.db.Table("point_meta_tags").
+		Select("point_uuid").
+		Where("key = ? AND value = ?", string(measurementRefTag), string(availabilityAlertMeasurementRefTag)).
+		Find(&availabilityAlertPointUUIDs)
+
+	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() availabilityPointUUIDs: %+v", availabilityAlertPointUUIDs))
+
+	// get the required meta tags grouped by point_uuid and host uuid
+	var availabilityAlertPointsAndTags []DoorProcessingPoint
+	err = postgresSetting.postgresConnectionInstance.db.Raw(`
+		SELECT
+			p.uuid AS point_uuid,
+			p.name,
+			p.host_uuid,
+			MAX(CASE WHEN m.key = 'siteRef' THEN m.value END) AS site_ref,
+			MAX(CASE WHEN m.key = 'floorRef' THEN m.value END) AS floor_ref,
+			MAX(CASE WHEN m.key = 'genderRef' THEN m.value END) AS gender_ref,
+			MAX(CASE WHEN m.key = 'pointFunction' THEN m.value END) AS point_function,
+			MAX(CASE WHEN m.key = 'measurementRef' THEN m.value END) AS measurement_ref,
+			MAX(CASE WHEN m.key = 'doorType' THEN m.value END) AS door_type,
+			MAX(CASE WHEN m.key = 'isEOT' THEN m.value END) AS is_eot,
+			MAX(CASE WHEN m.key = 'availabilityID' THEN m.value END) AS availability_id
+		FROM
+			points AS p
+		JOIN
+			point_meta_tags AS m ON p.uuid = m.point_uuid
+		WHERE
+			p.uuid IN (?)
+		GROUP BY
+			p.uuid, p.host_uuid
+		`, availabilityAlertPointUUIDs).
+		Find(&availabilityAlertPointsAndTags).Error
+	if err != nil {
+		inst.cpsErrorMsg("CPSProcessing() availabilityAlertPointsAndTags error: ", err)
+	}
+	// -- dataframe implementation --
+	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() availabilityAlertPointsAndTags: %+v", availabilityAlertPointsAndTags))
+	// TODO: just for debug
+	dfAvailabilityAlertPointsAndTags := dataframe.LoadStructs(availabilityAlertPointsAndTags)
+	fmt.Println("dfAvailabilityAlertPointsAndTags")
+	fmt.Println(dfAvailabilityAlertPointsAndTags)
+
+	// TODO: DELETE ME (just for debug)
+	ResultFile13, err := os.Create(fmt.Sprintf("/home/marc/Documents/Nube/CPS/Development/Data_Processing/13_dfAvailabilityAlertPointsAndTags.csv"))
+	if err != nil {
+		inst.cpsErrorMsg(err)
+	}
+	defer ResultFile13.Close()
+	dfAvailabilityAlertPointsAndTags.WriteCSV(ResultFile13)
+
 	// do processing steps for each site
 	// TODO: allow for only processing select sites based on tags
 	for s, siteThresholds := range allSiteThresholds {
@@ -219,6 +323,9 @@ func (inst *Instance) CPSProcessing() {
 		}
 		defer ResultFile4.Close()
 		dfThisSiteDoorSensorPointsAndTags.WriteCSV(ResultFile4)
+
+		// add storage for availability results
+		availabilityMap := make(map[string]Availability) // availability results stored by availabilityID
 
 		// iterate through the raw points, push histories (to points that exist), and update the relevant point values (for app)
 		for i, doorSensorPoint := range thisSiteDoorSensorPointsAndTags {
@@ -471,18 +578,42 @@ func (inst *Instance) CPSProcessing() {
 			dfAllResets.WriteCSV(ResultFile8)
 
 			// TODO: If there is an existing pending status, need to calculate the overdue time. If there is a new Overdue Status, and no resets, then post the overdue status and toOverdue
-			// TODO: If we implement resets points from the gateway (NFC Tags), we will need to amend the logic to delete the overdue status and re-process the period.
-
 			// extract the last processed data values and the door type info from the point tags and values
 			pointLastProcessedData, pointDoorInfo, err := inst.GetLastProcessedDataAndDoorType(&dfJoinedLastProcessedValuesAndPoints, &doorSensorPoint)
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointLastProcessedData: %+v", pointLastProcessedData))
 			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointDoorInfo: %+v", pointDoorInfo))
 
+			lastToPending, _ := time.Parse(time.RFC3339Nano, pointLastProcessedData.LastToPendingTimestamp)
+			lastToClean, _ := time.Parse(time.RFC3339Nano, pointLastProcessedData.LastToCleanTimestamp)
+
+			cleaningOverdueAlertDelay, err := GetOverdueDelay(pointDoorInfo.DoorTypeID, dfSiteThresholds)
+			if err != nil {
+				inst.cpsErrorMsg("GetOverdueDelay() error: ", err)
+			}
+
+			// Check if there is an overdue event from the last pending time
+			lastOverdueStatus := pointLastProcessedData.OverdueStatus
+			overdueEventPending := false
+			var nextOverdueTime time.Time
+			if pointLastProcessedData.LastToPendingTimestamp != "" {
+				nextOverdueTime = lastToPending.Add(cleaningOverdueAlertDelay)
+				if pointLastProcessedData.LastToCleanTimestamp != "" {
+					if lastToPending.After(lastToClean) && nextOverdueTime.After(periodStart) && nextOverdueTime.Before(periodEnd) { // checks that the cubicle is still pending, and that the overdue time would fall within the calculation time range
+						overdueEventPending = true
+					}
+				} else {
+					overdueEventPending = true
+				}
+			}
+			// inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() CalculateOverdueCubicles() nextOverdueTime: %+v", nextOverdueTime))
+
+			// TODO: If we implement resets points from the gateway (NFC Tags), we will need to amend the logic to delete the overdue status and re-process the period.
+
 			// TODO: If there is an existing Overdue Status, and there is a Reset, then we need to process. Consider that more data may come in from the gateway later. Just post Pending Status, Overdue Status, toClean, and Cleaning Time to 0.
 
 			newData := true // TODO: NEED TO PROCESS THE RESET IF THERE IS A PENDING STATUS, BUT NEED TO ALSO SEARCH THE SAME RAW DATA PERIOD IN CASE THE GATEWAY PUSHES DATA LATER
 			// if dfAllResets.Nrow() <= 0 && dfRawDoorSensorHistories.Nrow() <= 0 {
-			if dfRawDoorSensorHistories.Nrow() <= 0 {
+			if dfRawDoorSensorHistories.Nrow() <= 0 && !overdueEventPending {
 				inst.cpsDebugMsg("CPSProcessing() no new data to process")
 				newData = false
 			}
@@ -517,7 +648,7 @@ func (inst *Instance) CPSProcessing() {
 				}
 
 				// get the totalUses value at the last 15 minute rollup time
-				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() previous15MinIntervalTime: %+v", previous15MinIntervalTime))
+				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() previous15MinIntervalTime: %+v", previous15MinIntervalTime.UTC().Format(time.RFC3339Nano)))
 
 				// get last stored processed data value
 				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() totalUsesPoint: %+v", totalUsesPoint))
@@ -527,7 +658,7 @@ func (inst *Instance) CPSProcessing() {
 					FROM histories
 					WHERE host_uuid = ? AND point_uuid = ? AND timestamp AT TIME ZONE 'UTC' = ?
 					ORDER BY point_uuid, host_uuid, timestamp DESC
-				`, totalUsesPoint.HostUUID, totalUsesPoint.UUID, previous15MinIntervalTime.UTC()).
+				`, totalUsesPoint.HostUUID, totalUsesPoint.UUID, previous15MinIntervalTime.UTC().Format(time.RFC3339Nano)).
 					Scan(&totalUsesHistoriesFor15MinCalc).Error
 				if err != nil {
 					inst.cpsErrorMsg("CPSProcessing() totalUsesHistoriesFor15MinCalc error: ", err)
@@ -578,7 +709,7 @@ func (inst *Instance) CPSProcessing() {
 				dfDoorResults15Min.WriteCSV(ResultFile10)
 
 				// next calculate the overdue cubicles
-				dfOverdueResult, err := inst.CalculateOverdueCubicles(periodStart, periodEnd, *dfDoorResults15Min, dfSiteThresholds, pointLastProcessedData, pointDoorInfo)
+				dfOverdueResult, err := inst.CalculateOverdueCubicles(periodStart, periodEnd, nextOverdueTime, *dfDoorResults15Min, cleaningOverdueAlertDelay, pointLastProcessedData, lastOverdueStatus, overdueEventPending)
 				if err != nil {
 					inst.cpsErrorMsg("CalculateOverdueCubicles() error: ", err)
 					return
@@ -646,9 +777,82 @@ func (inst *Instance) CPSProcessing() {
 						inst.cpsErrorMsg("CPSProcessing() inst.db.PointWrite(overdueStatusPoint.UUID, &writer) error: ", err)
 					}
 				}
-			}
 
+				// update availability with the new values
+				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() latestPendingStatus: %+v", latestPendingStatus))
+				// TODO: for batch processing we will need to calculate availability at an interval
+				avail := 1
+				if latestPendingStatus != nil {
+					if *latestPendingStatus == 1 {
+						avail = 0
+					}
+				} else {
+					if pointLastProcessedData.PendingStatus == 1 {
+						avail = 0
+					}
+				}
+				availMapEntry, ok := availabilityMap[doorSensorPoint.AvailabilityID]
+				if !ok { // add a map entry if it doesn't exist
+					result := (avail / 1) * 100
+					availabilityMap[doorSensorPoint.AvailabilityID] = Availability{
+						Total:     avail,
+						Count:     1,
+						Result:    float64(result),
+						FloorRef:  doorSensorPoint.FloorRef,
+						GenderRef: doorSensorPoint.GenderRef,
+						DoorType:  doorSensorPoint.DoorType,
+						IsEOT:     doorSensorPoint.IsEOT,
+					}
+				} else {
+					result := ((availMapEntry.Total + avail) / (availMapEntry.Count + 1)) * 100
+					availabilityMap[doorSensorPoint.AvailabilityID] = Availability{
+						Total:  availMapEntry.Total + avail,
+						Count:  availMapEntry.Count + 1,
+						Result: float64(result),
+					}
+				}
+
+			} else {
+				// update availability map with the last known values
+				inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pointLastProcessedData: %+v", pointLastProcessedData))
+				availMapEntry, ok := availabilityMap[doorSensorPoint.AvailabilityID]
+				avail := 1
+				if pointLastProcessedData.PendingStatus == 1 {
+					avail = 0
+				}
+				if !ok { // add a map entry if it doesn't exist
+					result := (avail / 1) * 100
+					availabilityMap[doorSensorPoint.AvailabilityID] = Availability{
+						Total:     avail,
+						Count:     1,
+						Result:    float64(result),
+						FloorRef:  doorSensorPoint.FloorRef,
+						GenderRef: doorSensorPoint.GenderRef,
+						DoorType:  doorSensorPoint.DoorType,
+						IsEOT:     doorSensorPoint.IsEOT,
+					}
+				} else {
+					result := ((availMapEntry.Total + avail) / (availMapEntry.Count + 1)) * 100
+					availabilityMap[doorSensorPoint.AvailabilityID] = Availability{
+						Total:  availMapEntry.Total + avail,
+						Count:  availMapEntry.Count + 1,
+						Result: float64(result),
+					}
+				}
+			}
+			fmt.Println(fmt.Sprintf("CPSProcessing() availability ID: %v availabilityMap[doorSensorPoint.AvailabilityID]: %+v ", doorSensorPoint.AvailabilityID, availabilityMap[doorSensorPoint.AvailabilityID]))
 		}
+		// post availability data to database
+		availabilityHistories := inst.PackageAvailabilityHistories(availabilityMap, dfSiteThresholds, siteRef, availabilityPointsAndTags, availabilityAlertPointsAndTags)
+		for i, hist := range availabilityHistories {
+			inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() availabilityHistories %v: %+v", i, *hist))
+		}
+
+		_, err = inst.SendHistoriesToPostgres(availabilityHistories)
+		if err != nil {
+			inst.cpsErrorMsg("AVAILABILITY SendHistoriesToPostgres() error: ", err)
+		}
+
 	}
 	inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() pluginStorage.LastSyncByAssetRef: %+v", pluginStorage.LastSyncByAssetRef))
 	for i, entry := range pluginStorage.LastSyncByAssetRef {

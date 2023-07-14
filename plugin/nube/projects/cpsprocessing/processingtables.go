@@ -84,3 +84,14 @@ type DoorInfo struct {
 	AvailabilityID         string
 	ResetID                string
 }
+
+type Availability struct {
+	Total     int     `json:"total" dataframe:"total"`
+	Count     int     `json:"count" dataframe:"count"`
+	Result    float64 `json:"result" dataframe:"result"`
+	Alert     bool    `json:"alert" dataframe:"alert"`
+	FloorRef  string  `json:"floorRef" dataframe:"floorRef"`
+	GenderRef string  `json:"genderRef" dataframe:"genderRef"`
+	IsEOT     bool    `json:"isEOT" dataframe:"isEOT"`
+	DoorType  string  `json:"doorType" dataframe:"doorType"`
+}

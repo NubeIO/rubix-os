@@ -332,9 +332,12 @@ func (inst *Instance) Calculate15MinUsageRollup(start, end time.Time, dfUsageCal
 	lastEntryTotalUses := last15MinRollupTotalUseCount
 	totalUseNaNArray := totalUseCountSeries.IsNaN() // boolean slice indicating which values are NaN
 	resultTimestampsArray := make([]string, 0)
-	resultUsesRollupArray := make([]int, 0)
+	resultTotalUsesArray := make([]int, 0) // added
+	// resultUsesRollupArray := make([]int, 0)
+	resultUsesRollupSeries := series.New(1, series.Int, string(fifteenMinRollupUsesColName)).Empty()
 	for i, v := range timestampSeries.Records() {
 		entryTime, _ := time.Parse(time.RFC3339Nano, v)
+		resultTimestampsArray = append(resultTimestampsArray, entryTime.Format(time.RFC3339Nano)) // added
 		// inst.cpsDebugMsg("Calculate15MinUsageRollup() entryTime: ", entryTime)
 		if totalUseNaNArray[i] != true { // there is a totalUses count stored on this timestamp
 			lastEntryTotalUses, _ = totalUseCountSeries.Elem(i).Int()
@@ -343,29 +346,32 @@ func (inst *Instance) Calculate15MinUsageRollup(start, end time.Time, dfUsageCal
 				lastTotalUsesHistoryFound = true
 			}
 		}
+		resultTotalUsesArray = append(resultTotalUsesArray, lastEntryTotalUses) // added
 		if entryTime.Minute()%15 != 0 || entryTime.Second() != 0 {
+			// resultUsesRollupArray = append(resultUsesRollupArray, nil)
+			resultUsesRollupSeries.Append(nil)
 			continue
 		}
 
-		// inst.cpsDebugMsg("Calculate15MinUsageRollup() last15MinRollupTotalUseCount: ", last15MinRollupTotalUseCount)
-		// inst.cpsDebugMsg("Calculate15MinUsageRollup() lastEntryTotalUses: ", lastEntryTotalUses)
 		usageRollup := lastEntryTotalUses - last15MinRollupTotalUseCount
 		last15MinRollupTotalUseCount = lastEntryTotalUses
 		if usageRollup < 0 {
 			inst.cpsErrorMsg("Calculate15MinUsageRollup(): totalUses has decreased")
 			return nil, errors.New("totalUses has decreased")
 		}
-		resultTimestampsArray = append(resultTimestampsArray, entryTime.Format(time.RFC3339))
-		resultUsesRollupArray = append(resultUsesRollupArray, usageRollup)
+		resultUsesRollupSeries.Append(usageRollup)
 	}
 
 	// Convert the slice of timestamps to a series
 	usesRollupDF := dataframe.New(
 		series.New(resultTimestampsArray, series.String, string(timestampColName)),
-		series.New(resultUsesRollupArray, series.Int, string(fifteenMinRollupUsesColName)),
+		series.New(resultTotalUsesArray, series.Int, string(totalUsesColName)),
+		// series.New(resultUsesRollupArray, series.Int, string(fifteenMinRollupUsesColName)),
+		resultUsesRollupSeries,
 	)
 
 	// join the 15min usage rollup DF with existing DF.
+	joinedDF = joinedDF.Drop(string(totalUsesColName))
 	resultDF := joinedDF.OuterJoin(usesRollupDF, string(timestampColName))
 	resultDF = resultDF.Arrange(dataframe.Sort(string(timestampColName)))
 
@@ -373,31 +379,33 @@ func (inst *Instance) Calculate15MinUsageRollup(start, end time.Time, dfUsageCal
 }
 
 // CalculateOverdueCubicles creates a DF that adds timestamps for overdueStatus and toOverdue
-func (inst *Instance) CalculateOverdueCubicles(start, end time.Time, dfUsageCalculationResults, thresholdsDF dataframe.DataFrame, pointLastProcessedData *LastProcessedData, pointDoorInfo *DoorInfo) (*dataframe.DataFrame, error) {
-	lastToPending, _ := time.Parse(time.RFC3339Nano, pointLastProcessedData.LastToPendingTimestamp)
-	lastToClean, _ := time.Parse(time.RFC3339Nano, pointLastProcessedData.LastToCleanTimestamp)
+func (inst *Instance) CalculateOverdueCubicles(start, end, nextOverdueTime time.Time, dfUsageCalculationResults dataframe.DataFrame, cleaningOverdueAlertDelay time.Duration, pointLastProcessedData *LastProcessedData, lastOverdueStatus int, overdueEventPending bool) (*dataframe.DataFrame, error) {
+	/*
+		lastToPending, _ := time.Parse(time.RFC3339Nano, pointLastProcessedData.LastToPendingTimestamp)
+		lastToClean, _ := time.Parse(time.RFC3339Nano, pointLastProcessedData.LastToCleanTimestamp)
 
-	cleaningOverdueAlertDelay, err := GetOverdueDelay(pointDoorInfo.DoorTypeID, thresholdsDF)
-	if err != nil {
-		return nil, err
-	}
+		cleaningOverdueAlertDelay, err := GetOverdueDelay(pointDoorInfo.DoorTypeID, thresholdsDF)
+		if err != nil {
+			return nil, err
+		}
 
-	lastOverdueStatus := pointLastProcessedData.OverdueStatus
+		lastOverdueStatus := pointLastProcessedData.OverdueStatus
 
-	// Check if there is an overdue event from the last pending time
-	overdueEventPending := false
-	var nextOverdueTime time.Time
-	if pointLastProcessedData.LastToPendingTimestamp != "" {
-		nextOverdueTime = lastToPending.Add(cleaningOverdueAlertDelay)
-		if pointLastProcessedData.LastToCleanTimestamp != "" {
-			if lastToPending.After(lastToClean) && nextOverdueTime.After(start) && nextOverdueTime.Before(end) { // checks that the cubicle is still pending, and that the overdue time would fall within the calculation time range
+		// Check if there is an overdue event from the last pending time
+		overdueEventPending := false
+		var nextOverdueTime time.Time
+		if pointLastProcessedData.LastToPendingTimestamp != "" {
+			nextOverdueTime = lastToPending.Add(cleaningOverdueAlertDelay)
+			if pointLastProcessedData.LastToCleanTimestamp != "" {
+				if lastToPending.After(lastToClean) && nextOverdueTime.After(start) && nextOverdueTime.Before(end) { // checks that the cubicle is still pending, and that the overdue time would fall within the calculation time range
+					overdueEventPending = true
+				}
+			} else {
 				overdueEventPending = true
 			}
-		} else {
-			overdueEventPending = true
 		}
-	}
-	// inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() CalculateOverdueCubicles() nextOverdueTime: %+v", nextOverdueTime))
+		// inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() CalculateOverdueCubicles() nextOverdueTime: %+v", nextOverdueTime))
+	*/
 
 	// Extract the timestamp column as a series
 	existingTimestampSeries := dfUsageCalculationResults.Col(string(timestampColName))
@@ -822,5 +830,70 @@ func (inst *Instance) PackageProcessedHistories(dfProcessingResults dataframe.Da
 		}
 	}
 
+	return
+}
+
+// PackageAvailabilityHistories converts the availabiltiy maps to histories
+func (inst *Instance) PackageAvailabilityHistories(availabilityMap map[string]Availability, thresholdsDF dataframe.DataFrame, siteRef string, availabilityPointsAndTags, availabilityAlertPointsAndTags []DoorProcessingPoint) (availabilityHistories []*pgmodel.History) {
+	fmt.Println("PackageAvailabilityHistories() thresholdsDF siteRef: ", siteRef)
+	fmt.Println(thresholdsDF)
+
+	// get the availability thresholds from the site thresholds df
+	eotToiletAvailabilityThreshold, err := thresholdsDF.Col(string(eotLowToiletAvailabilityThresholdColName)).Elem(0).Int()
+	if err != nil {
+		inst.cpsErrorMsg("CPSProcessing() PackageAvailabilityHistories() eotToiletAvailabilityThreshold error: ", err)
+	}
+	eotLowShowerAvailabilityThreshold, err := thresholdsDF.Col(string(eotLowShowerAvailabilityThresholdColName)).Elem(0).Int()
+	if err != nil {
+		inst.cpsErrorMsg("CPSProcessing() PackageAvailabilityHistories() eotLowShowerAvailabilityThreshold error: ", err)
+	}
+	facilityToiletAvailabilityThreshold, err := thresholdsDF.Col(string(facilityLowToiletAvailabilityThresholdColName)).Elem(0).Int()
+	if err != nil {
+		inst.cpsErrorMsg("CPSProcessing() PackageAvailabilityHistories() facilityToiletAvailabilityThreshold error: ", err)
+	}
+
+	availabilityHistories = make([]*pgmodel.History, 0)
+	for i, avail := range availabilityMap {
+		inst.cpsDebugMsg(fmt.Sprintf("CPSProcessing() PackageAvailabilityHistories() i:%v avail: %+v", i, avail))
+
+		for _, availPoint := range availabilityPointsAndTags {
+			if availPoint.SiteRef == siteRef && availPoint.AvailabilityID == i {
+				newHist := pgmodel.History{
+					PointUUID: availPoint.UUID,
+					HostUUID:  inst.config.CloudServerDetails.CloudHostUUID,
+					Value:     float.New(avail.Result),
+					Timestamp: time.Now().UTC(),
+				}
+				availabilityHistories = append(availabilityHistories, &newHist)
+			}
+
+		}
+		for _, availAlertPoint := range availabilityAlertPointsAndTags {
+			if availAlertPoint.SiteRef == siteRef && availAlertPoint.AvailabilityID == i {
+				availThreshold := 80
+				if avail.IsEOT {
+					if avail.DoorType == string(toiletDoorTypeTagValue) {
+						availThreshold = eotToiletAvailabilityThreshold
+					} else if avail.DoorType == string(showerDoorTypeTagValue) {
+						availThreshold = eotLowShowerAvailabilityThreshold
+					}
+				} else {
+					availThreshold = facilityToiletAvailabilityThreshold
+				}
+				availAlert := avail.Result < float64(availThreshold)
+				availAlertFloat := float64(0)
+				if availAlert {
+					availAlertFloat = float64(1)
+				}
+				newHist := pgmodel.History{
+					PointUUID: availAlertPoint.UUID,
+					HostUUID:  inst.config.CloudServerDetails.CloudHostUUID,
+					Value:     float.New(availAlertFloat),
+					Timestamp: time.Now().UTC(),
+				}
+				availabilityHistories = append(availabilityHistories, &newHist)
+			}
+		}
+	}
 	return
 }

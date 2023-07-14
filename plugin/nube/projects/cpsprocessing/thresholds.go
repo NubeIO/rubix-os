@@ -11,40 +11,41 @@ import (
 
 type Threshold struct {
 	// gorm.Model
-	ID                                uint           `json:"id" gorm:"primarykey" dataframe:"-"`
-	CreatedAt                         time.Time      `json:"created_at" dataframe:"-"`
-	UpdatedAt                         time.Time      `json:"updated_at" dataframe:"-"`
-	DeletedAt                         gorm.DeletedAt `json:"deleted_at" gorm:"index" dataframe:"-"`
-	SiteRef                           string         `json:"site_ref" gorm:"type:varchar(255)" dataframe:"site_ref"`
-	Timezone                          string         `json:"timezone" dataframe:"timezone"`
-	OccupancyStartTime                string         `json:"occupancyStartTime" dataframe:"occupancyStartTime"`
-	OccupancyStopTime                 string         `json:"occupancyStopTime" dataframe:"occupancyStopTime"`
-	AllAreaResetTime                  string         `json:"allAreaResetTime" dataframe:"allAreaResetTime"`
-	FacilityCleaningOverdueAlertDelay int            `json:"facilityCleaningOverdueAlertDelay" dataframe:"facilityCleaningOverdueAlertDelay"`
-	EOTCleaningOverdueAlertDelay      int            `json:"eotCleaningOverdueAlertDelay" dataframe:"eotCleaningOverdueAlertDelay"`
-	FacilityToiletUseThreshold        int            `json:"facilityToiletUseThreshold" dataframe:"facilityToiletUseThreshold"`
-	FacilityEntranceUseThreshold      int            `json:"facilityEntranceUseThreshold" dataframe:"facilityEntranceUseThreshold"`
-	FacilityDDAUseThreshold           int            `json:"facilityDDAUseThreshold" dataframe:"facilityDDAUseThreshold"`
-	EOTToiletUseThreshold             int            `json:"eotToiletUseThreshold" dataframe:"eotToiletUseThreshold"`
-	EOTShowerUseThreshold             int            `json:"eotShowerUseThreshold" dataframe:"eotShowerUseThreshold"`
-	EOTEntranceUseThreshold           int            `json:"eotEntranceUseThreshold" dataframe:"eotEntranceUseThreshold"`
-	EOTDDAUseThreshold                int            `json:"eotDDAUseThreshold" dataframe:"eotDDAUseThreshold"`
-	LowBatteryAlertDelay              int            `json:"lowBatteryAlertDelay" dataframe:"lowBatteryAlertDelay"`
-	TemperatureAlertDelay             int            `json:"temperatureAlertDelay" dataframe:"temperatureAlertDelay"`
-	HumidityAlertDelay                int            `json:"humidityAlertDelay" dataframe:"humidityAlertDelay"`
-	CO2AlertDelay                     int            `json:"co2AlertDelay" dataframe:"co2AlertDelay"`
-	VOCAlertDelay                     int            `json:"vocAlertDelay" dataframe:"vocAlertDelay"`
-	SensorOfflineAlertDelay           int            `json:"sensorOfflineAlertDelay" dataframe:"sensorOfflineAlertDelay"`
-	GatewayOfflineAlertDelay          int            `json:"gatewayOfflineAlertDelay" dataframe:"gatewayOfflineAlertDelay"`
-	LowBatteryVoltageThreshold        float64        `json:"lowBatteryVoltageThreshold" dataframe:"lowBatteryVoltageThreshold"`
-	LowBatteryPercentThreshold        int            `json:"lowBatteryPercentThreshold" dataframe:"lowBatteryPercentThreshold"`
-	HighTemperatureAlertThreshold     float64        `json:"highTemperatureAlertThreshold" dataframe:"highTemperatureAlertThreshold"`
-	LowTemperatureAlertThreshold      float64        `json:"lowTemperatureAlertThreshold" dataframe:"lowTemperatureAlertThreshold"`
-	HighHumidityAlertThreshold        int            `json:"highHumidityAlertThreshold" dataframe:"highHumidityAlertThreshold"`
-	HighCo2AlertThreshold             int            `json:"highCo2AlertThreshold" dataframe:"highCo2AlertThreshold"`
-	HighVocAlertThreshold             int            `json:"highVocAlertThreshold" dataframe:"highVocAlertThreshold"`
-	LowShowerAvailabilityThreshold    int            `json:"lowShowerAvailabilityThreshold" dataframe:"lowShowerAvailabilityThreshold"`
-	LowToiletAvailabilityThreshold    int            `json:"lowToiletAvailabilityThreshold" dataframe:"lowToiletAvailabilityThreshold"`
+	ID                                     uint           `json:"id" gorm:"primarykey" dataframe:"-"`
+	CreatedAt                              time.Time      `json:"created_at" dataframe:"-"`
+	UpdatedAt                              time.Time      `json:"updated_at" dataframe:"-"`
+	DeletedAt                              gorm.DeletedAt `json:"deleted_at" gorm:"index" dataframe:"-"`
+	SiteRef                                string         `json:"site_ref" gorm:"type:varchar(255)" dataframe:"site_ref"`
+	Timezone                               string         `json:"timezone" dataframe:"timezone"`
+	OccupancyStartTime                     string         `json:"occupancyStartTime" dataframe:"occupancyStartTime"`
+	OccupancyStopTime                      string         `json:"occupancyStopTime" dataframe:"occupancyStopTime"`
+	AllAreaResetTime                       string         `json:"allAreaResetTime" dataframe:"allAreaResetTime"`
+	FacilityCleaningOverdueAlertDelay      int            `json:"facilityCleaningOverdueAlertDelay" dataframe:"facilityCleaningOverdueAlertDelay"`
+	EOTCleaningOverdueAlertDelay           int            `json:"eotCleaningOverdueAlertDelay" dataframe:"eotCleaningOverdueAlertDelay"`
+	FacilityToiletUseThreshold             int            `json:"facilityToiletUseThreshold" dataframe:"facilityToiletUseThreshold"`
+	FacilityEntranceUseThreshold           int            `json:"facilityEntranceUseThreshold" dataframe:"facilityEntranceUseThreshold"`
+	FacilityDDAUseThreshold                int            `json:"facilityDDAUseThreshold" dataframe:"facilityDDAUseThreshold"`
+	EOTToiletUseThreshold                  int            `json:"eotToiletUseThreshold" dataframe:"eotToiletUseThreshold"`
+	EOTShowerUseThreshold                  int            `json:"eotShowerUseThreshold" dataframe:"eotShowerUseThreshold"`
+	EOTEntranceUseThreshold                int            `json:"eotEntranceUseThreshold" dataframe:"eotEntranceUseThreshold"`
+	EOTDDAUseThreshold                     int            `json:"eotDDAUseThreshold" dataframe:"eotDDAUseThreshold"`
+	LowBatteryAlertDelay                   int            `json:"lowBatteryAlertDelay" dataframe:"lowBatteryAlertDelay"`
+	TemperatureAlertDelay                  int            `json:"temperatureAlertDelay" dataframe:"temperatureAlertDelay"`
+	HumidityAlertDelay                     int            `json:"humidityAlertDelay" dataframe:"humidityAlertDelay"`
+	CO2AlertDelay                          int            `json:"co2AlertDelay" dataframe:"co2AlertDelay"`
+	VOCAlertDelay                          int            `json:"vocAlertDelay" dataframe:"vocAlertDelay"`
+	SensorOfflineAlertDelay                int            `json:"sensorOfflineAlertDelay" dataframe:"sensorOfflineAlertDelay"`
+	GatewayOfflineAlertDelay               int            `json:"gatewayOfflineAlertDelay" dataframe:"gatewayOfflineAlertDelay"`
+	LowBatteryVoltageThreshold             float64        `json:"lowBatteryVoltageThreshold" dataframe:"lowBatteryVoltageThreshold"`
+	LowBatteryPercentThreshold             int            `json:"lowBatteryPercentThreshold" dataframe:"lowBatteryPercentThreshold"`
+	HighTemperatureAlertThreshold          float64        `json:"highTemperatureAlertThreshold" dataframe:"highTemperatureAlertThreshold"`
+	LowTemperatureAlertThreshold           float64        `json:"lowTemperatureAlertThreshold" dataframe:"lowTemperatureAlertThreshold"`
+	HighHumidityAlertThreshold             int            `json:"highHumidityAlertThreshold" dataframe:"highHumidityAlertThreshold"`
+	HighCo2AlertThreshold                  int            `json:"highCo2AlertThreshold" dataframe:"highCo2AlertThreshold"`
+	HighVocAlertThreshold                  int            `json:"highVocAlertThreshold" dataframe:"highVocAlertThreshold"`
+	EOTLowShowerAvailabilityThreshold      int            `json:"eotLowShowerAvailabilityThreshold" dataframe:"eotLowShowerAvailabilityThreshold"`
+	EOTLowToiletAvailabilityThreshold      int            `json:"eotLowToiletAvailabilityThreshold" dataframe:"eotLowToiletAvailabilityThreshold"`
+	FacilityLowToiletAvailabilityThreshold int            `json:"facilityLowToiletAvailabilityThreshold" dataframe:"facilityLowToiletAvailabilityThreshold"`
 }
 
 /*
@@ -77,8 +78,9 @@ type Threshold struct {
   "highHumidityAlertThreshold": 85,
   "highCo2AlertThreshold": 1500,
   "highVocAlertThreshold": 2500,
-  "lowShowerAvailabilityThreshold": 80,
-  "lowToiletAvailabilityThreshold": 80
+  "eotLowShowerAvailabilityThreshold": 80,
+  "eotlowToiletAvailabilityThreshold": 80,
+  "facilityLowToiletAvailabilityThreshold": 80,
 }
 */
 
