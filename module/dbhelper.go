@@ -31,6 +31,8 @@ func (*dbHelper) GetWithoutParam(path, args string) ([]byte, error) {
 		out, err = database.GlobalGormDatabase.GetOneDeviceByArgs(*apiArgs)
 	} else if path == "schedules" {
 		out, err = database.GlobalGormDatabase.GetSchedules()
+	} else if path == "hosts" {
+		out, err = database.GlobalGormDatabase.GetHosts(false, *apiArgs)
 	} else {
 		return nil, errors.New("not found")
 	}
@@ -59,6 +61,8 @@ func (*dbHelper) Get(path, uuid, args string) ([]byte, error) {
 		out, err = database.GlobalGormDatabase.GetPluginByPath(uuid)
 	} else if path == "plugin_by_id" {
 		out, err = database.GlobalGormDatabase.GetPlugin(uuid)
+	} else if path == "history_log_by_id" {
+		out, err = database.GlobalGormDatabase.GetHistoryLogByHostUUID(uuid)
 	} else {
 		return nil, errors.New("not found")
 	}
@@ -92,6 +96,22 @@ func (*dbHelper) Post(path string, body []byte) ([]byte, error) {
 			return nil, err
 		}
 		out, err = database.GlobalGormDatabase.CreatePoint(&point)
+	} else if path == "clone_edge" {
+		host := model.Host{}
+		err = json.Unmarshal(body, &host)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		err = database.GlobalGormDatabase.CloneEdge(&host)
+	} else if path == "bulk_history" {
+		var histories []*model.History // TODO: Check this
+		err = json.Unmarshal(body, &histories)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		out, err = database.GlobalGormDatabase.CreateBulkHistory(histories)
 	} else {
 		return nil, errors.New("not found")
 	}
@@ -189,6 +209,14 @@ func (*dbHelper) Patch(path, uuid string, body []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
+	} else if path == "bulk_history_logs" {
+		var historyLogs []*model.HistoryLog
+		err = json.Unmarshal(body, &historyLogs)
+		if err != nil {
+			log.Error(err)
+			return nil, err
+		}
+		out, err = database.GlobalGormDatabase.UpdateBulkHistoryLogs(historyLogs)
 	} else {
 		return nil, errors.New("not found")
 	}
